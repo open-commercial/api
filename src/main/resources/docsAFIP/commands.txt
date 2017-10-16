@@ -1,0 +1,22 @@
+# create from config file
+openssl req -new -config <filename of config file> -out <filename of csr>
+
+# read csr
+openssl req -text -noout -in <filename for csr>
+
+# read crt
+openssl x509 -text -noout -in <filename for crt>
+
+
+# Mensaje a encriptar. Crt. Key y destino
+# -in es tu mensaje el TRA.xml
+# -signer es el crt de afip
+# -inkey la llave privada
+# -out el archivo de destino
+# Ej: openssl smime -sign -in TRA.xml -signer empresa.crt -inkey empresa_private.key -out TRA.xml.cms -nodetach
+
+openssl smime -sign -in ${pathOutput} -signer ${pathSignedCrt} -inkey ${pathPrivateKey} -out ${cmsPath} -nodetach
+
+
+# Para generar el .p12 y agarrarlo desde el codigo java
+openssl pkcs12 -export -in empresa-testing.crt -inkey empresa_private.key -name "empresa" -out empresa.p12

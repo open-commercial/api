@@ -1,0 +1,48 @@
+package sic.modelo;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Entity
+@Table(name = "notadebito")
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class NotaDebito extends Nota implements Serializable {
+    
+    private Long pagoId;
+    
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "idNota")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(nullable = false)
+    private List<RenglonNotaDebito> renglonesNotaDebito;
+    
+    @Column(nullable = false)
+    private double montoNoGravado;
+
+    public NotaDebito() {}
+
+    public NotaDebito(long idNota, long serie, FacturaVenta facturaVenta, List<Pago> pagos, long nroNota, boolean eliminada,
+            TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa, Cliente cliente, Long pagoId,
+            Usuario usuario, String motivo, List<RenglonNotaDebito> renglones, double subTotalBruto,
+            double iva21Neto, double iva105Neto, double total, double montoNoGravado, long CAE, Date vencimientoCAE,
+            long numSerieAfip, long numFacturaAfip) {
+        
+        super(idNota, serie, facturaVenta, pagos, nroNota, eliminada, tipoDeComprobante, fecha, empresa, cliente, usuario,
+                motivo, subTotalBruto, iva21Neto, iva105Neto, total, CAE, vencimientoCAE, numSerieAfip, numFacturaAfip);
+        this.montoNoGravado = montoNoGravado;
+        this.renglonesNotaDebito = renglones;
+        this.pagoId = pagoId;
+    }
+
+}

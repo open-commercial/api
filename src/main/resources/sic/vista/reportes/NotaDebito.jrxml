@@ -1,0 +1,643 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.4.0.final using JasperReports Library version 6.4.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="FacturaVenta" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e47a212f-3954-4de9-aca2-5bd71a6098c5">
+	<property name="ireport.zoom" value="3.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="notaDebito" class="sic.modelo.NotaDebito"/>
+	<parameter name="serie" class="java.lang.Long"/>
+	<parameter name="logo" class="java.awt.Image"/>
+	<parameter name="preImpresa" class="java.lang.Boolean"/>
+	<parameter name="formasDePago" class="java.lang.String"/>
+	<parameter name="nroNota" class="java.lang.Long"/>
+	<field name="descripcion" class="java.lang.String"/>
+	<field name="monto" class="java.lang.Double"/>
+	<field name="importeNeto" class="java.lang.Double"/>
+	<field name="ivaPorcentaje" class="java.lang.Double"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="251" splitType="Stretch">
+			<textField pattern="#0000">
+				<reportElement x="459" y="15" width="43" height="15" uuid="6b61a93a-bc81-42c1-90de-30be6c6fd27b">
+					<property name="local_mesure_unitheight" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{serie} == null ? "" : $P{serie}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="360" y="30" width="99" height="15" uuid="77044937-fc7c-464e-9cb7-28123e5819dc">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="459" y="30" width="96" height="15" uuid="be69d158-2a80-42ef-b029-4cff6ade861a">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getFecha()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="100" width="555" height="15" uuid="48165e8f-802d-48ab-b527-f040ad65579a">
+					<property name="local_mesure_unitheight" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getEmpresa().getNombre()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="115" width="555" height="15" uuid="6fb6fe21-b26a-4f5f-8847-da585e165dae">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getEmpresa().getDireccion()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="145" width="555" height="15" uuid="3c596225-a4e6-4283-92e6-74a5552f2211">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getEmpresa().getCondicionIVA().getNombre()]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="175" width="555" height="1" uuid="bbd9e748-9b14-42c1-b03e-08e8289d6627"/>
+			</line>
+			<image>
+				<reportElement x="0" y="0" width="200" height="100" uuid="a3439a7b-148b-4af2-8d4b-612d8d0beb47">
+					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
+				</reportElement>
+				<imageExpression><![CDATA[$P{logo}]]></imageExpression>
+			</image>
+			<textField>
+				<reportElement x="459" y="45" width="96" height="15" uuid="4d472ca2-fe0a-4f11-b2c2-eaff1fd6d51e">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getEmpresa().getCuip()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="459" y="60" width="96" height="15" uuid="4630ada4-f911-45f3-bf8d-1026e289cc77">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getEmpresa().getIngresosBrutos()]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="459" y="75" width="96" height="15" uuid="71f82348-4ecf-4a46-9fcc-3681e588c04e">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getEmpresa().getFechaInicioActividad()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="130" width="279" height="15" uuid="81a6cfa3-8121-462d-93a4-c72dfceb31f6">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getEmpresa().getLocalidad()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="279" y="130" width="276" height="15" uuid="17a89659-8435-427a-8fc8-aa08625440aa">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getEmpresa().getLocalidad().getProvincia()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="160" width="279" height="15" uuid="0ac9e3dd-2252-49da-8d4a-ae5da578c748">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getEmpresa().getTelefono()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="279" y="160" width="276" height="15" uuid="ecc2a8ba-e539-458c-93ed-17ae5e7a70df">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getEmpresa().getEmail()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Transparent" x="360" y="15" width="99" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="442e3a2d-471d-4b31-8fae-035b876966d7">
+					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
+				</reportElement>
+				<box padding="0" topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single" lineSpacingSize="1.0" firstLineIndent="0" leftIndent="0" rightIndent="0" spacingBefore="0" spacingAfter="0" tabStopWidth="40"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{serie} == null ? "": "Nº de Comprobante:"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="250" y="0" width="36" height="30" uuid="e6a58b5a-ea5b-4de7-99e7-b470b9799cd7">
+					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="0">
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" rotation="None">
+					<font size="22" isBold="true" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ? "A" : 
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B") ? "B" : ""]]></textFieldExpression>
+			</textField>
+			<textField pattern="#00000000">
+				<reportElement x="510" y="15" width="45" height="15" uuid="a3046cbb-4b9c-4ffb-9c57-c20771497933">
+					<property name="local_mesure_unitheight" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{nroNota} == null ? "" : $P{nroNota}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="502" y="15" width="8" height="15" uuid="84f76759-6e59-496d-9cff-67ee0f5ad0c9">
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Justified">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{serie} == null ? "" : "-"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="176" width="50" height="15" uuid="c23ab30f-f1da-44d0-b751-12dab0ff3001">
+					<property name="local_mesure_unitheight" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nombre:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="50" y="176" width="505" height="15" uuid="a07a159d-b6fd-42bc-9024-8a31a442aa8a">
+					<property name="local_mesure_unitheight" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getCliente().getRazonSocial()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="191" width="50" height="15" uuid="07575dbb-0de5-4177-afb0-35b170670748">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="local_mesure_unitwidth" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Domicilio:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="50" y="191" width="505" height="15" uuid="9dc064b1-4bc1-4e5d-b6bb-ab49687c9e88">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getCliente().getDireccion()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="50" y="206" width="250" height="15" uuid="e0084cc3-1c80-4007-9e51-4ee7c9be1c7f">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getCliente().getLocalidad()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="300" y="206" width="255" height="15" uuid="174ed8dc-2ef0-4278-a184-5abcd73c3e36">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getCliente().getLocalidad().getProvincia()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="50" y="221" width="505" height="15" uuid="cb8691ce-a678-4cf1-a2c7-4938068372c4">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getCliente().getCondicionIVA().getNombre()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="221" width="50" height="15" uuid="f0b344fb-6370-43de-819b-3c1edd682fe1">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[I.V.A.:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="236" width="50" height="15" uuid="51a9dcb6-382b-4787-81c9-485fdbfc18e7">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CUIT:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="50" y="236" width="505" height="15" uuid="b25bf8b1-128a-4e0e-8b8b-3790a4aefb4a">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getCliente().getIdFiscal()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Transparent" x="360" y="45" width="99" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="9e7dfcda-5c8c-4987-88c2-2b820976c1bf">
+					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
+				</reportElement>
+				<box padding="0" topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single" lineSpacingSize="1.0" firstLineIndent="0" leftIndent="0" rightIndent="0" spacingBefore="0" spacingAfter="0" tabStopWidth="40"/>
+				</textElement>
+				<text><![CDATA[CUIT:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="360" y="60" width="99" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="b14c524c-faa9-4313-afa5-6d41ff2095b7">
+					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
+				</reportElement>
+				<box padding="0" topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single" lineSpacingSize="1.0" firstLineIndent="0" leftIndent="0" rightIndent="0" spacingBefore="0" spacingAfter="0" tabStopWidth="40"/>
+				</textElement>
+				<text><![CDATA[Ingresos Brutos:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="360" y="75" width="99" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="65b16deb-9ce0-4137-ad4c-53495b7cdeaa">
+					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
+				</reportElement>
+				<box padding="0" topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single" lineSpacingSize="1.0" firstLineIndent="0" leftIndent="0" rightIndent="0" spacingBefore="0" spacingAfter="0" tabStopWidth="40"/>
+				</textElement>
+				<text><![CDATA[Inicio Actividades:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="207" y="30" width="120" height="21" uuid="f2777b2b-54d0-453f-8666-1df07b7d56a0"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[NOTA DEBITO]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="21" splitType="Stretch">
+			<property name="local_mesure_unitheight" value="pixel"/>
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<staticText>
+				<reportElement x="0" y="2" width="360" height="16" uuid="01f242fd-85d5-4c4e-9b09-f1c09d95b55a">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="local_mesure_unitwidth" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descripción]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="490" y="2" width="65" height="16" uuid="b048b3d8-b91d-4375-88a9-cd62bd6ad32b">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Importe]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="1" width="555" height="1" uuid="9554feb6-2d03-455d-a9bb-071b6982915e"/>
+			</line>
+			<staticText>
+				<reportElement x="440" y="2" width="50" height="16" uuid="92d2b330-c0cf-4e16-8082-bc3659e31754">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[I.V.A. %]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="18" width="555" height="2" uuid="11ca4359-6606-44e0-bf65-0eb1f4a2a410"/>
+			</line>
+			<staticText>
+				<reportElement x="360" y="2" width="80" height="16" uuid="5880c49e-8d53-4e37-a088-fcf66a5f1cc5">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Monto]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="16" splitType="Stretch">
+			<textField pattern="">
+				<reportElement x="0" y="0" width="360" height="15" uuid="f2bfc27d-700e-40b7-a73b-6303c546d09a">
+					<property name="local_mesure_unitheight" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="local_mesure_unitwidth" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
+			</textField>
+			<textField pattern="¤ #,##0.00">
+				<reportElement x="490" y="0" width="65" height="15" uuid="e044f181-0b15-492c-bf20-af4d406e94db">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{importeNeto}]]></textFieldExpression>
+			</textField>
+			<textField pattern="">
+				<reportElement x="440" y="0" width="50" height="15" uuid="7a5d637a-a063-4bbe-a486-b313a3f62c77">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ivaPorcentaje}]]></textFieldExpression>
+			</textField>
+			<textField pattern="¤ #,##0.00">
+				<reportElement x="360" y="0" width="80" height="15" uuid="c7b87790-d932-4831-a827-5a9da47c5d43"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{monto}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="12">
+			<textField>
+				<reportElement x="0" y="0" width="40" height="12" uuid="a69e569e-a446-4825-94a3-84fdeaa7b6e4">
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="40" y="0" width="45" height="12" uuid="df309aaf-609f-4e7e-bd63-cbb9ac68a97e"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["de " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<lastPageFooter>
+		<band height="63">
+			<staticText>
+				<reportElement mode="Transparent" x="360" y="2" width="70" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="58dab7dd-4358-49e0-9370-59980720196a">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[SubTotal Bruto]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="360" y="17" width="70" height="15" uuid="b49e2275-7a64-44f7-851d-a775f929eaa4">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[I.V.A. (%)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="360" y="47" width="70" height="15" uuid="e2613d7b-2fc0-411e-9364-aa970da56b3c">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="430" y="17" width="37" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="e8ccdcbc-997d-474c-872c-b7c98b7c5d90">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+					<font size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[21]]></text>
+			</staticText>
+			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
+				<reportElement mode="Transparent" x="467" y="2" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="c6a75d5b-c210-44c6-8e4a-c725bf20381e">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getSubTotalBruto()]]></textFieldExpression>
+			</textField>
+			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
+				<reportElement mode="Transparent" x="467" y="17" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="e063a476-1e47-4947-9f7f-04ad07139b9e">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getIva21Neto()]]></textFieldExpression>
+			</textField>
+			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
+				<reportElement mode="Transparent" x="467" y="47" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="0287f0d5-94e6-4d59-ac75-cfff995614c1">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+					<font size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getTotal()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="2" width="50" height="15" uuid="43f39702-e0af-456b-bea4-3952f75b1aa5">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Motivo:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="50" y="2" width="280" height="34" uuid="7d4cd7c6-3ef8-449b-b63b-9d16f6eb9934"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getMotivo()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="20" y="36" width="80" height="15" uuid="9661ecd4-ae41-44b4-b5ab-501560541e44">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($P{notaDebito}.getCAE() == 0l)? "":$P{notaDebito}.getCAE()]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="180" y="36" width="70" height="15" uuid="c76bf386-4a1c-4295-9d8e-bbf0dcf2b951">
+					<property name="local_mesure_unitheight" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($P{notaDebito}.getVencimientoCAE() == null)?"":$P{notaDebito}.getVencimientoCAE()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="36" width="20" height="15" uuid="d5f954da-00dd-4d74-b2d1-436a48c8b1ec">
+					<property name="local_mesure_unitheight" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($P{notaDebito}.getCAE() == 0l)? "":"CAE:"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="100" y="36" width="80" height="15" uuid="2c838051-1ca0-4a7f-836c-c29ecd4a55ca">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($P{notaDebito}.getCAE() == 0l)? "":"Vencimiento CAE:"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="360" y="32" width="70" height="15" uuid="6608dece-0755-488c-8a8e-56e5d8ee7ef9">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[No Gravado]]></text>
+			</staticText>
+			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
+				<reportElement mode="Transparent" x="467" y="32" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="8453496a-c290-4eda-ad95-4b56351d4595">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getMontoNoGravado()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="51" width="40" height="12" uuid="d5e55495-b09b-4b6e-986b-662e63e6fcdb">
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="40" y="51" width="45" height="12" uuid="ec8a5163-0b1c-41df-a773-0dc0590e1bff"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["de " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</lastPageFooter>
+</jasperReport>

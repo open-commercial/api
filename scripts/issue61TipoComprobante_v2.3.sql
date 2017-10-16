@@ -1,0 +1,12 @@
+START TRANSACTION;
+SET SQL_SAFE_UPDATES=0;
+ALTER TABLE sic.factura ADD tipoComprobante VARCHAR(255);
+UPDATE sic.factura SET sic.factura.tipoComprobante = "FACTURA_A" where sic.factura.tipoFactura = 'A';
+UPDATE sic.factura SET sic.factura.tipoComprobante = "FACTURA_B" where sic.factura.tipoFactura = 'B';
+UPDATE sic.factura SET sic.factura.tipoComprobante = "FACTURA_C" where sic.factura.tipoFactura = 'C';
+UPDATE sic.factura SET sic.factura.tipoComprobante = "FACTURA_X" where sic.factura.tipoFactura = 'X';
+UPDATE sic.factura SET sic.factura.tipoComprobante = "FACTURA_Y" where sic.factura.tipoFactura = 'Y';
+ALTER TABLE sic.factura DROP COLUMN tipoFactura;
+SET SQL_SAFE_UPDATES=1;
+COMMIT;
+SELECT * FROM sic.factura;
