@@ -190,7 +190,8 @@ public class PagoServiceImpl implements IPagoService {
     @Override
     public double calcularTotalAdeudadoFacturas(List<Factura> facturas) {
         double total = 0.0;
-        total = facturas.stream().map(f -> f.getTotal() - this.getTotalPagosDeLaFactura(f.getId_Factura())).reduce(total, (accumulator, _item) -> accumulator + _item);
+        total = facturas.stream().map(f -> f.getTotal() - this.getTotalPagosDeLaFactura(f.getId_Factura()))
+                                 .reduce(total, (accumulator, item) -> accumulator + item);
         return total;
     }
     
