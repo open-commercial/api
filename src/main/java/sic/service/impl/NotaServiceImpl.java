@@ -409,10 +409,18 @@ public class NotaServiceImpl implements INotaService {
                     .getString("mensaje_nota_monto_no_gravado_no_valido"));
         }
         //iva21
-        double iva21 = notaDebito.getSubTotalBruto() * 0.21;
-        if (notaDebito.getIva21Neto() != iva21) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_nota_iva21_no_valido"));
+        double iva21 = 0.0;
+        if (!(notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X)) {
+            iva21 = notaDebito.getSubTotalBruto() * 0.21;
+            if (notaDebito.getIva21Neto() != iva21) {
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_nota_iva21_no_valido"));
+            }
+        } else {
+            if (notaDebito.getIva21Neto() != 0.0) {
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_nota_iva21_no_valido"));
+            }
         }
         //total
         double total = montoPago + iva21 + notaDebito.getSubTotalBruto();
