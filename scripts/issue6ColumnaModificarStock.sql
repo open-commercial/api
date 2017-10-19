@@ -1,0 +1,1 @@
+ALTER TABLE notacredito ADD modificaStock BIT(1);

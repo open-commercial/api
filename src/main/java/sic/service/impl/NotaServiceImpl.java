@@ -448,8 +448,9 @@ public class NotaServiceImpl implements INotaService {
             NotaCredito notaCredito = (NotaCredito) nota;
             notaCredito.setTipoComprobante(this.getTipoDeNotaCreditoSegunFactura(notaCredito.getFacturaVenta()));
             notaCredito.setNroNota(this.getSiguienteNumeroNotaCredito(idCliente, idEmpresa));
+            notaCredito.setModificaStock(modificarStock);
             if (modificarStock) {
-                this.actualizarStock(notaCredito.getRenglonesNotaCredito());
+                this.actualizarStock(notaCredito.getRenglonesNotaCredito(), TipoDeOperacion.ACTUALIZACION);
             }
             this.validarCalculosCredito(notaCredito);
             notaCredito = notaCreditoRepository.save(notaCredito);
@@ -561,12 +562,12 @@ public class NotaServiceImpl implements INotaService {
         return tipo;
     }
     
-    private void actualizarStock(List<RenglonNotaCredito> renglonesNotaCredito) {
+    private void actualizarStock(List<RenglonNotaCredito> renglonesNotaCredito, TipoDeOperacion tipoOperacion) {
         HashMap<Long, Double> idsYCantidades = new HashMap<>();
         renglonesNotaCredito.forEach(r -> {
             idsYCantidades.put(r.getIdProductoItem(), r.getCantidad());
         });
-        productoService.actualizarStock(idsYCantidades, TipoDeOperacion.ACTUALIZACION, Movimiento.VENTA);
+        productoService.actualizarStock(idsYCantidades, tipoOperacion, Movimiento.VENTA);
     }
 
     @Override
@@ -635,6 +636,12 @@ public class NotaServiceImpl implements INotaService {
                 if (!getPagosNota(idNota).isEmpty()) {
                     throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                             .getString("mensaje_no_se_puede_eliminar"));
+                }
+                if (nota instanceof NotaCredito) {
+                    NotaCredito nc = (NotaCredito) nota;
+                    if (nc.isModificaStock()) {
+                        this.actualizarStock(nc.getRenglonesNotaCredito(), TipoDeOperacion.ALTA);
+                    }
                 }
                 nota.setEliminada(true);
                 this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ELIMINACION);

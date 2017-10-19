@@ -19,6 +19,9 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class NotaCredito extends Nota implements Serializable {
     
+    @Column(nullable = false)
+    private boolean modificaStock;
+    
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "idNota")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

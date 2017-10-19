@@ -83,7 +83,7 @@ public abstract class Nota implements Serializable {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private FacturaVenta facturaVenta;
     
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "nota")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "notaDebito")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<Pago> pagos;
     
