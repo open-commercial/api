@@ -402,27 +402,28 @@ public class NotaServiceImpl implements INotaService {
     }
     
     private void validarCalculosDebito(NotaDebito notaDebito) {
-        //MontoNoGravado
+        // monto no gravado
         Double montoPago = pagoService.getPagoPorId(notaDebito.getPagoId()).getMonto();
         if (notaDebito.getMontoNoGravado() != montoPago) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_nota_monto_no_gravado_no_valido"));
         }
-        //iva21
-        double iva21 = 0.0;
-        if (!(notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X)) {
-            iva21 = notaDebito.getSubTotalBruto() * 0.21;
-            if (notaDebito.getIva21Neto() != iva21) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_nota_iva21_no_valido"));
-            }
-        } else {
-            if (notaDebito.getIva21Neto() != 0.0) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_nota_iva21_no_valido"));
-            }
+        // iva 21
+        double iva21 = 0;
+        switch (notaDebito.getTipoComprobante()) {
+            case NOTA_DEBITO_X:
+                if (notaDebito.getIva21Neto() != 0.0) throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_iva21_no_valido"));                
+                break;
+            case NOTA_DEBITO_A:
+            case NOTA_DEBITO_B:
+            case NOTA_CREDITO_X:
+            case NOTA_CREDITO_A:
+            case NOTA_CREDITO_B:            
+                iva21 = notaDebito.getSubTotalBruto() * 0.21;
+                if (notaDebito.getIva21Neto() != iva21) throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_iva21_no_valido"));                
+                break;
         }
-        //total
+        // total
         double total = montoPago + iva21 + notaDebito.getSubTotalBruto();
         if (notaDebito.getTotal() != total) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
