@@ -216,23 +216,29 @@ public class NotaServiceImpl implements INotaService {
         Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
         Cliente cliente = clienteService.getClientePorId(idCliente);
         if (empresa.getCondicionIVA().isDiscriminaIVA() && cliente.getCondicionIVA().isDiscriminaIVA()) {
-            TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
+            TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[6];
             tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_A;
             tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_X;
-            tiposPermitidos[2] = TipoDeComprobante.NOTA_DEBITO_A;
-            tiposPermitidos[3] = TipoDeComprobante.NOTA_DEBITO_X;
+            tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_P;
+            tiposPermitidos[3] = TipoDeComprobante.NOTA_DEBITO_A;
+            tiposPermitidos[4] = TipoDeComprobante.NOTA_DEBITO_X;
+            tiposPermitidos[5] = TipoDeComprobante.NOTA_DEBITO_P;
             return tiposPermitidos;
         } else if (empresa.getCondicionIVA().isDiscriminaIVA() && !cliente.getCondicionIVA().isDiscriminaIVA()) {
-            TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
+            TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[6];
             tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_B;
             tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_X;
-            tiposPermitidos[2] = TipoDeComprobante.NOTA_DEBITO_B;
-            tiposPermitidos[3] = TipoDeComprobante.NOTA_DEBITO_X;
+            tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_P;
+            tiposPermitidos[3] = TipoDeComprobante.NOTA_DEBITO_B;
+            tiposPermitidos[4] = TipoDeComprobante.NOTA_DEBITO_X;
+            tiposPermitidos[5] = TipoDeComprobante.NOTA_DEBITO_P;
             return tiposPermitidos;
         } else {
-            TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[2];
+            TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
             tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_X;
-            tiposPermitidos[1] = TipoDeComprobante.NOTA_DEBITO_X;
+            tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_P;
+            tiposPermitidos[2] = TipoDeComprobante.NOTA_DEBITO_X;
+            tiposPermitidos[3] = TipoDeComprobante.NOTA_DEBITO_P;
             return tiposPermitidos;
         }
     }
@@ -328,7 +334,8 @@ public class NotaServiceImpl implements INotaService {
         double iva21 = 0.0;
         double iva105 = 0.0;
         if (notaCredito.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_A
-                || notaCredito.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B) {
+                || notaCredito.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B
+                || notaCredito.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_P) {
             double[] ivaPorcentajes = new double[sizeRenglonesCredito];
             double[] ivaNetos = new double[sizeRenglonesCredito];
             double[] cantidades = new double[sizeRenglonesCredito];
@@ -416,11 +423,15 @@ public class NotaServiceImpl implements INotaService {
                 break;
             case NOTA_DEBITO_A:
             case NOTA_DEBITO_B:
+            case NOTA_DEBITO_P:
             case NOTA_CREDITO_X:
             case NOTA_CREDITO_A:
-            case NOTA_CREDITO_B:            
+            case NOTA_CREDITO_B:
+            case NOTA_CREDITO_P:
                 iva21 = notaDebito.getSubTotalBruto() * 0.21;
-                if (notaDebito.getIva21Neto() != iva21) throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_iva21_no_valido"));                
+                if (notaDebito.getIva21Neto() != iva21) {
+                    throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_iva21_no_valido"));
+                }
                 break;
         }
         // total
@@ -437,14 +448,14 @@ public class NotaServiceImpl implements INotaService {
         //Validacion temporal
         if (nota instanceof NotaCredito) {
             NotaCredito nc = (NotaCredito) nota;
-            if ((nc).getTipoComprobante() == TipoDeComprobante.FACTURA_Y || (nc).getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
+            if ((nc).getTipoComprobante() == null || (nc).getTipoComprobante() == TipoDeComprobante.FACTURA_Y) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_operacion_no_disponible"));
             }
         } else if (nota instanceof NotaDebito) {
             Pago pago = pagoService.getPagoPorId(idPago);
             if (pago.getFactura() != null) {
-                if (pago.getFactura().getTipoComprobante() == TipoDeComprobante.FACTURA_Y || pago.getFactura().getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
+                if (pago.getFactura().getTipoComprobante() == TipoDeComprobante.FACTURA_Y) {
                     throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                             .getString("mensaje_operacion_no_disponible"));
                 }
@@ -525,7 +536,7 @@ public class NotaServiceImpl implements INotaService {
                     tipo = TipoDeComprobante.NOTA_DEBITO_X;
                     break;
                 case PRESUPUESTO:
-                    tipo = TipoDeComprobante.NOTA_DEBITO_X;
+                    tipo = TipoDeComprobante.NOTA_DEBITO_P;
                     break;
             }
         } else if (pago.getNotaDebito() != null) {
@@ -547,6 +558,9 @@ public class NotaServiceImpl implements INotaService {
                 case NOTA_CREDITO_X:
                     tipo = TipoDeComprobante.FACTURA_X;
                     break;
+                case NOTA_CREDITO_P:
+                    tipo = TipoDeComprobante.PRESUPUESTO;
+                    break;
             }
         }
         return tipo;
@@ -565,7 +579,7 @@ public class NotaServiceImpl implements INotaService {
                 tipo = TipoDeComprobante.NOTA_CREDITO_X;
                 break;
             case PRESUPUESTO:
-                tipo = TipoDeComprobante.NOTA_CREDITO_X;
+                tipo = TipoDeComprobante.NOTA_CREDITO_P;
                 break;
         }
         return tipo;
@@ -599,7 +613,8 @@ public class NotaServiceImpl implements INotaService {
         ConfiguracionDelSistema cds = configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(nota.getEmpresa());
         params.put("preImpresa", cds.isUsarFacturaVentaPreImpresa());
         if (nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_B) || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_X) 
-                || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_B) || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_X)) {
+                || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_B) || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_X)
+                || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_P) || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_P)) {
             nota.setSubTotalBruto(nota.getTotal());
             nota.setIva105Neto(0);
             nota.setIva21Neto(0);
@@ -705,10 +720,10 @@ public class NotaServiceImpl implements INotaService {
                 renglonNota.setGananciaPorcentaje(renglonFactura.getGanancia_porcentaje());
                 renglonNota.setGananciaNeto(renglonNota.getPrecioUnitario() * (renglonNota.getGananciaPorcentaje() / 100));
                 renglonNota.setIvaPorcentaje(renglonFactura.getIva_porcentaje());
-                renglonNota.setIvaNeto((tipo == TipoDeComprobante.FACTURA_A || tipo == TipoDeComprobante.FACTURA_B) ? renglonFactura.getIva_neto() : 0);
+                renglonNota.setIvaNeto((tipo == TipoDeComprobante.FACTURA_A || tipo == TipoDeComprobante.FACTURA_B || tipo == TipoDeComprobante.PRESUPUESTO) ? renglonFactura.getIva_neto() : 0);
                 renglonNota.setImporte(renglonNota.getPrecioUnitario() * cantidad[i]);
                 renglonNota.setImporteBruto(renglonNota.getImporte() - (renglonNota.getDescuentoNeto() * cantidad[i]));
-                if (tipo == TipoDeComprobante.FACTURA_B) {
+                if (tipo == TipoDeComprobante.FACTURA_B || tipo == TipoDeComprobante.PRESUPUESTO) {
                     renglonNota.setImporteNeto(renglonNota.getImporteBruto());
                 } else {
                     renglonNota.setImporteNeto(renglonNota.getImporteBruto() + (renglonNota.getIvaNeto() * cantidad[i]));

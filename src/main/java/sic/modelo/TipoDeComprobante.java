@@ -26,10 +26,14 @@ public enum TipoDeComprobante {
     
     NOTA_CREDITO_X, 
     
+    NOTA_CREDITO_P, 
+    
     NOTA_DEBITO_A,
     
     NOTA_DEBITO_B,
     
-    NOTA_DEBITO_X;
+    NOTA_DEBITO_X,
+    
+    NOTA_DEBITO_P;
     
 }

@@ -42,7 +42,7 @@ public class NotaServiceImplTest {
                           .build();
         when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
         when(clienteService.getClientePorId(1L)).thenReturn(cliente);
-        TipoDeComprobante[] expResult = {TipoDeComprobante.NOTA_CREDITO_A, TipoDeComprobante.NOTA_CREDITO_X, TipoDeComprobante.NOTA_DEBITO_A, TipoDeComprobante.NOTA_DEBITO_X};
+        TipoDeComprobante[] expResult = {TipoDeComprobante.NOTA_CREDITO_A, TipoDeComprobante.NOTA_CREDITO_X, TipoDeComprobante.NOTA_CREDITO_P, TipoDeComprobante.NOTA_DEBITO_A, TipoDeComprobante.NOTA_DEBITO_X, TipoDeComprobante.NOTA_DEBITO_P};
         TipoDeComprobante[] result = notaServiceImpl.getTipoNota(1L, 1L);
         assertArrayEquals(expResult, result);
     }
@@ -60,7 +60,7 @@ public class NotaServiceImplTest {
         cliente.setCondicionIVA(condicionIVAqueDiscrimina);
         when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
         when(clienteService.getClientePorId(1L)).thenReturn(cliente);
-        TipoDeComprobante[] expResult = {TipoDeComprobante.NOTA_CREDITO_B, TipoDeComprobante.NOTA_CREDITO_X, TipoDeComprobante.NOTA_DEBITO_B, TipoDeComprobante.NOTA_DEBITO_X};
+        TipoDeComprobante[] expResult = {TipoDeComprobante.NOTA_CREDITO_B, TipoDeComprobante.NOTA_CREDITO_X, TipoDeComprobante.NOTA_CREDITO_P, TipoDeComprobante.NOTA_DEBITO_B, TipoDeComprobante.NOTA_DEBITO_X, TipoDeComprobante.NOTA_DEBITO_P};
         TipoDeComprobante[] result = notaServiceImpl.getTipoNota(1L, 1L);
         assertArrayEquals(expResult, result);
     }
@@ -78,7 +78,7 @@ public class NotaServiceImplTest {
         empresa.setCondicionIVA(condicionIVAqueDiscrimina);
         when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
         when(clienteService.getClientePorId(1L)).thenReturn(cliente);
-        TipoDeComprobante[] expResult = {TipoDeComprobante.NOTA_CREDITO_X, TipoDeComprobante.NOTA_DEBITO_X};
+        TipoDeComprobante[] expResult = {TipoDeComprobante.NOTA_CREDITO_X, TipoDeComprobante.NOTA_CREDITO_P, TipoDeComprobante.NOTA_DEBITO_X, TipoDeComprobante.NOTA_DEBITO_P};
         TipoDeComprobante[] result = notaServiceImpl.getTipoNota(1L, 1L);
         assertArrayEquals(expResult, result);
     }
@@ -96,7 +96,7 @@ public class NotaServiceImplTest {
         empresa.setCondicionIVA(condicionIVAqueDiscrimina);
         when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
         when(clienteService.getClientePorId(1L)).thenReturn(cliente);
-        TipoDeComprobante[] expResult = {TipoDeComprobante.NOTA_CREDITO_X, TipoDeComprobante.NOTA_DEBITO_X};
+        TipoDeComprobante[] expResult = {TipoDeComprobante.NOTA_CREDITO_X, TipoDeComprobante.NOTA_CREDITO_P, TipoDeComprobante.NOTA_DEBITO_X, TipoDeComprobante.NOTA_DEBITO_P};
         TipoDeComprobante[] result = notaServiceImpl.getTipoNota(1L, 1L);
         assertArrayEquals(expResult, result);
     }
