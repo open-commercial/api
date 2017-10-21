@@ -32,7 +32,7 @@ public interface PagoRepository extends PagingAndSortingRepository<Pago, Long> {
     
     List<Pago> findByNotaDebitoAndEliminado(Nota nota, boolean eliminado);
     
-    @Query("SELECT SUM(p.monto) FROM FacturaVenta fv INNER JOIN fv.pagos p WHERE fv.id_Factura = :idFactura AND p.eliminado = false")
+    @Query("SELECT SUM(p.monto) FROM Factura f INNER JOIN f.pagos p WHERE f.id_Factura = :idFactura AND p.eliminado = false")
     Double getTotalPagosDeFactura(@Param("idFactura") long idFactura);
     
     @Query("SELECT SUM(p.monto) FROM Pago p INNER JOIN p.notaDebito n WHERE n.idNota = :idNota AND p.eliminado = false")
