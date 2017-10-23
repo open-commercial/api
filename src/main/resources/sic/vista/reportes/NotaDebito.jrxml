@@ -55,8 +55,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
-$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B")
- || $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_C"))]]></printWhenExpression>
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="true"/>
@@ -67,8 +66,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B")
 				<reportElement x="0" y="115" width="555" height="15" uuid="6fb6fe21-b26a-4f5f-8847-da585e165dae">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
-$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B")
- || $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_C"))]]></printWhenExpression>
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -79,8 +77,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B")
 				<reportElement x="0" y="145" width="555" height="15" uuid="3c596225-a4e6-4283-92e6-74a5552f2211">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
-$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B")
- || $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_C"))]]></printWhenExpression>
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -134,8 +131,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				<reportElement x="0" y="130" width="279" height="15" uuid="81a6cfa3-8121-462d-93a4-c72dfceb31f6">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
-$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B")
- || $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_C"))]]></printWhenExpression>
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -146,8 +142,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B")
 				<reportElement x="279" y="130" width="276" height="15" uuid="17a89659-8435-427a-8fc8-aa08625440aa">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
-$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B")
- || $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_C"))]]></printWhenExpression>
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -158,8 +153,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B")
 				<reportElement x="0" y="160" width="279" height="15" uuid="0ac9e3dd-2252-49da-8d4a-ae5da578c748">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
-$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B")
- || $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_C"))]]></printWhenExpression>
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -170,8 +164,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B")
 				<reportElement x="279" y="160" width="276" height="15" uuid="ecc2a8ba-e539-458c-93ed-17ae5e7a70df">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
-$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B")
- || $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_C"))]]></printWhenExpression>
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -194,7 +187,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				<reportElement x="250" y="0" width="36" height="30" uuid="e6a58b5a-ea5b-4de7-99e7-b470b9799cd7">
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
 $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B")
- || $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_C"))]]></printWhenExpression>
+|| $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_PRESUPUESTO"))]]></printWhenExpression>
 				</reportElement>
 				<box leftPadding="0">
 					<pen lineWidth="1.0" lineStyle="Solid"/>
@@ -208,7 +201,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B")
 				</textElement>
 				<textFieldExpression><![CDATA[$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ? "A" : 
 $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B") ? "B" : 
-$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_P") ? "P" : ""]]></textFieldExpression>
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_PRESUPUESTO") ? "P" : ""]]></textFieldExpression>
 			</textField>
 			<textField pattern="#00000000">
 				<reportElement x="510" y="15" width="45" height="15" uuid="a3046cbb-4b9c-4ffb-9c57-c20771497933">
