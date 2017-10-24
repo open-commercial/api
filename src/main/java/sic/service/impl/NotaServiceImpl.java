@@ -447,7 +447,7 @@ public class NotaServiceImpl implements INotaService {
         //Validacion temporal
         if (nota instanceof NotaCredito) {
             NotaCredito nc = (NotaCredito) nota;
-            if (nc.getTipoComprobante() == TipoDeComprobante.FACTURA_Y) {
+            if (this.getTipoDeNotaCreditoSegunFactura(nc.getFacturaVenta()) == TipoDeComprobante.FACTURA_Y) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_operacion_no_disponible"));
             }
