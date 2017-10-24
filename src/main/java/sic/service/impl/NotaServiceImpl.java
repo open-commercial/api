@@ -740,9 +740,9 @@ public class NotaServiceImpl implements INotaService {
         if (idPago != null) {
             Pago pago = pagoService.getPagoPorId(idPago);
             renglonNota = new RenglonNotaDebito(); 
-            String descripcion = "Fecha Pago: " + (new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHA_HISPANO)).format(pago.getFecha()) + " Nº " + pago.getNroPago();
+            String descripcion = "Pago Nº " + pago.getNroPago() + " " + (new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHA_HISPANO)).format(pago.getFecha());
             if (pago.getNota() != null && pago.getNota().length() > 0) {
-                descripcion += "\nNota:" + pago.getNota();
+                descripcion += " " + pago.getNota();
             }
             renglonNota.setDescripcion(descripcion);
             renglonNota.setMonto(pago.getMonto());
