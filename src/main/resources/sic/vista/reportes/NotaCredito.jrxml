@@ -190,8 +190,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 			<textField>
 				<reportElement x="250" y="0" width="36" height="30" uuid="e6a58b5a-ea5b-4de7-99e7-b470b9799cd7">
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
-|| $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_PRESUPUESTO"))]]></printWhenExpression>
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
 				</reportElement>
 				<box leftPadding="0">
 					<pen lineWidth="1.0" lineStyle="Solid"/>
