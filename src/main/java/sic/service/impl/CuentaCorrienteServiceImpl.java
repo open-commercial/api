@@ -207,6 +207,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             if (n instanceof NotaCredito) {
                 rcc.setComprobante("NOTA CREDITO " + (n.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_A) ? "\"A\""
                         : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_B) ? "\"B\""
+                        : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO) ? "\"P\""
                         : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_X) ? "\"X\"" : "")
                         + " " + n.getSerie() + " - " + n.getNroNota());
                 rcc.setMonto(n.getTotal());
@@ -215,13 +216,14 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             if (n instanceof NotaDebito) {
                 rcc.setComprobante("NOTA DEBITO " + (n.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_A) ? "\"A\""
                         : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_B) ? "\"B\""
+                        : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO) ? "\"P\""
                         : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_X) ? "\"X\"" : "")
                         + " " + n.getSerie() + " - " + n.getNroNota());
                 rcc.setMonto(-n.getTotal());
                 Pago p = pagoService.getPagoPorId(((NotaDebito) n).getPagoId());
-                String descripcion = "Fecha Pago: " + (new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHA_HISPANO)).format(p.getFecha()) + " Nº " + p.getNroPago();
+                String descripcion = "Pago Nº " + p.getNroPago() + " " + (new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHA_HISPANO)).format(p.getFecha());
                 if (p.getNota() != null && p.getNota().length() > 0) {
-                    descripcion += " Nota:" + p.getNota();
+                    descripcion += " " + p.getNota();
                 }
                 rcc.setDescripcion(descripcion);
             }
