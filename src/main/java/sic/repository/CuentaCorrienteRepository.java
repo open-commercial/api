@@ -17,10 +17,10 @@ public interface CuentaCorrienteRepository extends PagingAndSortingRepository<Cu
       
       CuentaCorriente findByClienteAndEliminada(Cliente cliente, boolean eliminada);
       
-      @Query("SELECT r FROM CuentaCorriente cc INNER JOIN cc.renglones r WHERE cc.cliente.id_Cliente = :idCliente AND cc.eliminada = false AND r.eliminado = false AND r.fecha BETWEEN :desde AND :hasta ORDER BY r.fecha ASC")
-      Page<RenglonCuentaCorriente> getRenglonesCuentaCorrientePorClienteEntreFechas(@Param("idCliente") long idCliente, @Param("desde") Date desde, @Param("hasta") Date hasta, Pageable page);
+      @Query("SELECT r FROM CuentaCorriente cc INNER JOIN cc.renglones r WHERE cc.cliente.id_Cliente = :idCliente AND cc.eliminada = false AND r.eliminado = false ORDER BY r.fecha DESC")
+      Page<RenglonCuentaCorriente> getRenglonesCuentaCorrientePorCliente(@Param("idCliente") long idCliente, Pageable page);
     
-      @Query("SELECT SUM(r.monto) FROM CuentaCorriente cc INNER JOIN cc.renglones r WHERE cc.cliente.id_Cliente = :idCliente AND cc.eliminada = false AND r.eliminado = false AND r.fecha <= :hasta")
-      Double getSaldoCuentaCorriente(@Param("idCliente") long idCliente, @Param("hasta") Date hasta);
+      @Query("SELECT SUM(r.monto) FROM CuentaCorriente cc INNER JOIN cc.renglones r WHERE cc.cliente.id_Cliente = :idCliente AND cc.eliminada = false AND r.eliminado = false")
+      Double getSaldoCuentaCorriente(@Param("idCliente") long idCliente);
       
 }
