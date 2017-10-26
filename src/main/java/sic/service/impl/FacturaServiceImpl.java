@@ -407,8 +407,8 @@ public class FacturaServiceImpl implements IFacturaService {
             Factura factura = this.getFacturaPorId(idFactura);
             if (factura.getCAE() == 0L) {
                 factura.setEliminada(true);
-                this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) factura, TipoDeOperacion.ELIMINACION);
                 if (factura instanceof FacturaVenta) {
+                    this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) factura, TipoDeOperacion.ELIMINACION);
                     productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.VENTA);
                 } else if (factura instanceof FacturaCompra) {
                     productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.COMPRA);
