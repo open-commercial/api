@@ -69,7 +69,7 @@ import sic.repository.UsuarioRepository;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class FlujoCuentaCorrienteIntegrationTest {
+public class CuentaCorrienteIntegrationTest {
     
     @Autowired
     private UsuarioRepository usuarioRepository;

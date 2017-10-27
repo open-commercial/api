@@ -1,7 +1,6 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
