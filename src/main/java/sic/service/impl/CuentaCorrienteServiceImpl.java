@@ -123,7 +123,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     @Override
     public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Pageable pageable) {
         CuentaCorriente cc = this.getCuentaCorrientePorID(idCuentaCorriente);
-        Page<RenglonCuentaCorriente> renglonesCuentaCorriente = renglonCuentaCorrienteService.getRenglonesCuentaCorriente(idCuentaCorriente, pageable);
+        Page<RenglonCuentaCorriente> renglonesCuentaCorriente = cuentaCorrienteRepository.getRenglonesCuentaCorrientePorCliente(cc.getCliente().getId_Cliente(), pageable);
         if (!renglonesCuentaCorriente.getContent().isEmpty()) {
             double saldo = this.getSaldoCuentaCorriente(cc.getCliente().getId_Cliente());
             for (RenglonCuentaCorriente r : renglonesCuentaCorriente.getContent()) {
