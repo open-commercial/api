@@ -1,6 +1,5 @@
 package sic.service;
 
-import java.util.Date;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import sic.modelo.CuentaCorriente;
@@ -22,9 +21,9 @@ public interface ICuentaCorrienteService {
 
       void validarCuentaCorriente(CuentaCorriente cuentaCorriente);
   
-      double getSaldoCuentaCorriente(boolean limiteDerecho, Date hasta, long idCliente);
+      double getSaldoCuentaCorriente(long idCliente);
       
-      Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Date desde, Date hasta, Pageable pageable); 
+      Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Pageable pageable); 
       
       void asentarEnCuentaCorriente(FacturaVenta fv, TipoDeOperacion tipo);
       

@@ -69,7 +69,7 @@ import sic.repository.UsuarioRepository;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class FlujoCuentaCorrienteIntegrationTest {
+public class CuentaCorrienteIntegrationTest {
     
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -288,7 +288,6 @@ public class FlujoCuentaCorrienteIntegrationTest {
         facturaVentaB.setIva_21_neto(iva_21_netoFactura);        
         facturaVentaB.setTotal(total);        
         restTemplate.postForObject(apiPrefix + "/facturas/venta", facturaVentaB, FacturaVenta[].class);
-        assertEquals(0, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo?hasta=1451617200000", Double.class), 0);
         assertEquals(-5992.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         List<FacturaVenta> facturasRecuperadas = restTemplate
                 .exchange(apiPrefix + "/facturas/venta/busqueda/criteria?idEmpresa=1&tipoFactura=B&nroSerie=0&nroFactura=1", HttpMethod.GET, null,

@@ -1,6 +1,5 @@
 package sic.controller;
 
-import java.util.Calendar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -49,38 +48,15 @@ public class CuentaCorrienteController {
     
     @GetMapping("/cuentas-corrientes/clientes/{idCliente}/saldo")
     @ResponseStatus(HttpStatus.OK)
-    public double getSaldoCuentaCorriente(@PathVariable long idCliente,
-                                          @RequestParam(required = false) Long hasta,
-                                          @RequestParam(required = false) Boolean limiteDerecho) {
-        Calendar fechaHasta = Calendar.getInstance();
-        if (hasta != null) {         
-            fechaHasta.setTimeInMillis(hasta);
-        }
-        if (limiteDerecho == null) {
-            limiteDerecho = true;
-        }
-        return cuentaCorrienteService.getSaldoCuentaCorriente(limiteDerecho, fechaHasta.getTime(), idCliente);
+    public double getSaldoCuentaCorriente(@PathVariable long idCliente) {
+        return cuentaCorrienteService.getSaldoCuentaCorriente(idCliente);
     }
     
     @GetMapping("/cuentas-corrientes/{idCuentaCorriente}/renglones")
     @ResponseStatus(HttpStatus.OK)
     public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(@PathVariable long idCuentaCorriente,
                                                                     @RequestParam(required = false) Integer pagina,
-                                                                    @RequestParam(required = false) Integer tamanio,
-                                                                    @RequestParam(required = false) Long desde,
-                                                                    @RequestParam(required = false) Long hasta) {  
-        Calendar fechaDesde = Calendar.getInstance();
-        Calendar fechaHasta = Calendar.getInstance();
-        if ((desde != null) && (hasta != null)) {
-            fechaDesde.setTimeInMillis(desde);    
-            fechaHasta.setTimeInMillis(hasta);
-        }
-        fechaDesde.set(Calendar.HOUR_OF_DAY, 0);
-        fechaDesde.set(Calendar.MINUTE, 0);
-        fechaDesde.set(Calendar.SECOND, 0);
-        fechaHasta.set(Calendar.HOUR_OF_DAY, 23);
-        fechaHasta.set(Calendar.MINUTE, 59);
-        fechaHasta.set(Calendar.SECOND, 59);
+                                                                    @RequestParam(required = false) Integer tamanio) {  
         if (tamanio == null || tamanio <= 0) {
             tamanio = TAMANIO_PAGINA_DEFAULT;
         }
@@ -88,7 +64,7 @@ public class CuentaCorrienteController {
             pagina = 0;
         }
         Pageable pageable = new PageRequest(pagina, tamanio);
-        return cuentaCorrienteService.getRenglonesCuentaCorriente(idCuentaCorriente, fechaDesde.getTime(), fechaHasta.getTime(), pageable);
+        return cuentaCorrienteService.getRenglonesCuentaCorriente(idCuentaCorriente, pageable);
     }
     
 }

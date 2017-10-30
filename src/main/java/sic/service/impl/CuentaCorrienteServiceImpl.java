@@ -1,8 +1,5 @@
 package sic.service.impl;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
@@ -113,26 +110,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     }
 
     @Override
-    public double getSaldoCuentaCorriente(boolean limiteDerecho, Date hasta, long idCliente) {
-//        Cliente cliente = clienteService.getClientePorId(idCliente);
-//        CuentaCorriente cuentaCorriente = this.getCuentaCorrientePorCliente(cliente.getId_Cliente());
-        Calendar calendarHasta = new GregorianCalendar();
-        calendarHasta.setTime(hasta);
-        if (limiteDerecho == false) {
-            calendarHasta.add(Calendar.DAY_OF_MONTH, -1);
-            calendarHasta.set(Calendar.HOUR_OF_DAY, 23);
-            calendarHasta.set(Calendar.MINUTE, 59);
-            calendarHasta.set(Calendar.SECOND, 59);
-        } else {
-            calendarHasta.set(Calendar.HOUR_OF_DAY, 23);
-            calendarHasta.set(Calendar.MINUTE, 59);
-            calendarHasta.set(Calendar.SECOND, 59);
-        }
-//        double saldoFacturas = facturaService.getSaldoFacturasVentaSegunClienteYEmpresa(cliente.getEmpresa().getId_Empresa(), idCliente, calendarHasta.getTime());
-//        saldoFacturas -= pagoService.getSaldoPagosPorCliente(idCliente, calendarHasta.getTime());
-//        double saldoNotas = this.notaService.getSaldoNotas(calendarHasta.getTime(), cuentaCorriente.getCliente().getId_Cliente(), cuentaCorriente.getEmpresa().getId_Empresa());
-//        return saldoNotas - saldoFacturas;
-        Double saldo = cuentaCorrienteRepository.getSaldoCuentaCorriente(idCliente, calendarHasta.getTime());
+    public double getSaldoCuentaCorriente(long idCliente) {
+        Double saldo = cuentaCorrienteRepository.getSaldoCuentaCorriente(idCliente);
         return (saldo != null) ? saldo : 0.0;
     }
     
@@ -142,14 +121,14 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     }
     
     @Override
-    public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Date desde, Date hasta, Pageable pageable) {
+    public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Pageable pageable) {
         CuentaCorriente cc = this.getCuentaCorrientePorID(idCuentaCorriente);
-        Page<RenglonCuentaCorriente> renglonesCuentaCorriente = cuentaCorrienteRepository.getRenglonesCuentaCorrientePorClienteEntreFechas(cc.getCliente().getId_Cliente(), desde, hasta, pageable);
+        Page<RenglonCuentaCorriente> renglonesCuentaCorriente = cuentaCorrienteRepository.getRenglonesCuentaCorrientePorCliente(cc.getCliente().getId_Cliente(), pageable);
         if (!renglonesCuentaCorriente.getContent().isEmpty()) {
-            double saldo = this.getSaldoCuentaCorriente(false, renglonesCuentaCorriente.getContent().get(0).getFecha(), cc.getCliente().getId_Cliente());
+            double saldo = this.getSaldoCuentaCorriente(cc.getCliente().getId_Cliente());
             for (RenglonCuentaCorriente r : renglonesCuentaCorriente.getContent()) {
-                saldo += r.getMonto();
                 r.setSaldo(saldo);
+                saldo -= r.getMonto();
                 if (r.getTipoMovimiento() == TipoMovimiento.VENTA) {
                     r.setCAE(facturaService.getCAEById(r.getIdMovimiento()));
                 }
