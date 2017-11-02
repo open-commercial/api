@@ -167,8 +167,11 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setIdMovimiento(fv.getId_Factura());
             rcc.setMonto(-fv.getTotal());
             rcc.setTipoMovimiento(TipoMovimiento.VENTA);
-            this.getCuentaCorrientePorCliente(fv.getCliente().getId_Cliente()).getRenglones().add(rcc);
-            this.renglonCuentaCorrienteService.asentarRenglonCuentaCorriente(rcc);
+            CuentaCorriente cc = this.getCuentaCorrientePorCliente(fv.getCliente().getId_Cliente());
+            cc.getRenglones().add(rcc);
+            rcc.setCuentaCorriente(cc);
+            this.renglonCuentaCorrienteService.guardar(rcc);
+            this.cuentaCorrienteRepository.save(cc);
             LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
         }
         if (operacion == TipoDeOperacion.ELIMINACION) {
@@ -211,7 +214,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setIdMovimiento(n.getIdNota());
             rcc.setTipoMovimiento(this.getTipoMovimiento(n));
             this.getCuentaCorrientePorCliente(n.getCliente().getId_Cliente()).getRenglones().add(rcc);
-            this.renglonCuentaCorrienteService.asentarRenglonCuentaCorriente(rcc);
+            this.renglonCuentaCorrienteService.guardar(rcc);
             LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
         }
         if (operacion == TipoDeOperacion.ELIMINACION) {
@@ -238,7 +241,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             } else if (idCliente != null) {
                 this.getCuentaCorrientePorCliente(idCliente).getRenglones().add(rcc);
             }
-            this.renglonCuentaCorrienteService.asentarRenglonCuentaCorriente(rcc);
+            this.renglonCuentaCorrienteService.guardar(rcc);
             LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
         }
         if (operacion == TipoDeOperacion.ELIMINACION) {

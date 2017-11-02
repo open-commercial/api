@@ -1,7 +1,6 @@
 package sic.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
@@ -16,13 +15,12 @@ public class RenglonCuentaCorrienteServiceImpl implements IRenglonCuentaCorrient
     private final RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository;
     
     @Autowired
-    @Lazy
     public RenglonCuentaCorrienteServiceImpl(RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository) {
         this.renglonCuentaCorrienteRepository = renglonCuentaCorrienteRepository;
     }
     
     @Override
-    public RenglonCuentaCorriente asentarRenglonCuentaCorriente(RenglonCuentaCorriente renglonCuentaCorriente) {
+    public RenglonCuentaCorriente guardar(RenglonCuentaCorriente renglonCuentaCorriente) {
         return renglonCuentaCorrienteRepository.save(renglonCuentaCorriente);
     }
     

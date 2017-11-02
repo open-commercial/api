@@ -10,6 +10,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -17,13 +18,17 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "rengloncuentacorriente")
 @Data
-@NoArgsConstructor
+@EqualsAndHashCode(of = {"idRenglonCuentaCorriente"})
+@ToString(exclude = {"cuentaCorriente"})
 @AllArgsConstructor
+@NoArgsConstructor
 public class RenglonCuentaCorriente implements Serializable  {
     
     @Id
@@ -53,6 +58,10 @@ public class RenglonCuentaCorriente implements Serializable  {
 
     @Column(nullable = false)
     private double monto;
+    
+    @ManyToOne
+    @JoinColumn(name = "idCuentaCorriente", referencedColumnName = "idCuentaCorriente")
+    private CuentaCorriente cuentaCorriente;
     
     @OneToOne
     @JoinColumn(name = "id_Factura", referencedColumnName = "id_Factura")  

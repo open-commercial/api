@@ -7,7 +7,7 @@ import sic.modelo.RenglonCuentaCorriente;
 
 public interface IRenglonCuentaCorrienteService {
     
-    RenglonCuentaCorriente asentarRenglonCuentaCorriente(RenglonCuentaCorriente renglonCuentaCorriente);
+    RenglonCuentaCorriente guardar(RenglonCuentaCorriente renglonCuentaCorriente);
     
     RenglonCuentaCorriente getRenglonCuentaCorrienteDeFactura(FacturaVenta fv, boolean eliminado);
     
