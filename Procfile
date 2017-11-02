@@ -1,1 +1,1 @@
-web java -Dserver.port=$PORT -jar target/SIC-API-2.5.jar
+web java -Dserver.port=$PORT -jar target/SIC-API-2.5.3.jar
