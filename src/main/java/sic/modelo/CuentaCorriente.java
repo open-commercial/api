@@ -51,8 +51,7 @@ public class CuentaCorriente implements Serializable {
     @Transient
     private double saldo;
     
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "idCuentaCorriente")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "cuentaCorriente")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<RenglonCuentaCorriente> renglones;
 
