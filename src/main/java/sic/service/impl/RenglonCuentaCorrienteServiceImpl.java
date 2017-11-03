@@ -1,7 +1,10 @@
 package sic.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import sic.modelo.CuentaCorriente;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
 import sic.modelo.Pago;
@@ -37,6 +40,16 @@ public class RenglonCuentaCorrienteServiceImpl implements IRenglonCuentaCorrient
     @Override
     public RenglonCuentaCorriente getRenglonCuentaCorrienteDePago(Pago p, boolean eliminado) {
         return renglonCuentaCorrienteRepository.findByPagoAndEliminado(p, eliminado);
+    }
+    
+    @Override
+    public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(CuentaCorriente cuentaCorriente, boolean eliminado, Pageable page) {
+        return renglonCuentaCorrienteRepository.findAllByCuentaCorrienteAndEliminado(cuentaCorriente, eliminado, page);
+    }
+    
+    @Override
+    public Double getSaldoRenglonesCuentaCorrientePorCliente(long idCliente) {
+        return renglonCuentaCorrienteRepository.getSaldoRenglonesCuentaCorrientePorCliente(idCliente);
     }
     
 }

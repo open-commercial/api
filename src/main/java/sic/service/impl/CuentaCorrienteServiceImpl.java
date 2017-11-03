@@ -111,19 +111,21 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
     @Override
     public double getSaldoCuentaCorriente(long idCliente) {
-        Double saldo = cuentaCorrienteRepository.getSaldoCuentaCorriente(idCliente);
+        Double saldo = renglonCuentaCorrienteService.getSaldoRenglonesCuentaCorrientePorCliente(idCliente);
         return (saldo != null) ? saldo : 0.0;
     }
     
     @Override
     public CuentaCorriente getCuentaCorrientePorCliente(long idCliente) {
-        return cuentaCorrienteRepository.findByClienteAndEliminada(clienteService.getClientePorId(idCliente), false);
+        CuentaCorriente cc = cuentaCorrienteRepository.findByClienteAndEliminada(clienteService.getClientePorId(idCliente), false);
+        cc.setSaldo(this.getSaldoCuentaCorriente(idCliente));
+        return cc;
     }
     
     @Override
     public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Pageable pageable) {
         CuentaCorriente cc = this.getCuentaCorrientePorID(idCuentaCorriente);
-        Page<RenglonCuentaCorriente> renglonesCuentaCorriente = cuentaCorrienteRepository.getRenglonesCuentaCorrientePorCliente(cc.getCliente().getId_Cliente(), pageable);
+        Page<RenglonCuentaCorriente> renglonesCuentaCorriente = renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageable);
         if (!renglonesCuentaCorriente.getContent().isEmpty()) {
             double saldo = this.getSaldoCuentaCorriente(cc.getCliente().getId_Cliente());
             for (RenglonCuentaCorriente r : renglonesCuentaCorriente.getContent()) {
@@ -171,7 +173,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             cc.getRenglones().add(rcc);
             rcc.setCuentaCorriente(cc);
             this.renglonCuentaCorrienteService.guardar(rcc);
-            this.cuentaCorrienteRepository.save(cc);
             LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
         }
         if (operacion == TipoDeOperacion.ELIMINACION) {
@@ -213,7 +214,9 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setFecha(n.getFecha());
             rcc.setIdMovimiento(n.getIdNota());
             rcc.setTipoMovimiento(this.getTipoMovimiento(n));
-            this.getCuentaCorrientePorCliente(n.getCliente().getId_Cliente()).getRenglones().add(rcc);
+            CuentaCorriente cc = this.getCuentaCorrientePorCliente(n.getCliente().getId_Cliente());
+            cc.getRenglones().add(rcc);
+            rcc.setCuentaCorriente(cc);
             this.renglonCuentaCorrienteService.guardar(rcc);
             LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
         }
@@ -236,10 +239,15 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setIdMovimiento(p.getId_Pago());
             rcc.setMonto(p.getMonto());
             rcc.setTipoMovimiento(TipoMovimiento.PAGO);
+            CuentaCorriente cc;
             if (p.getFactura() instanceof FacturaVenta) {
-                this.getCuentaCorrientePorCliente(((FacturaVenta) p.getFactura()).getCliente().getId_Cliente()).getRenglones().add(rcc);
+                cc = this.getCuentaCorrientePorCliente(((FacturaVenta) p.getFactura()).getCliente().getId_Cliente());
+                cc.getRenglones().add(rcc);
+                rcc.setCuentaCorriente(cc);
             } else if (idCliente != null) {
-                this.getCuentaCorrientePorCliente(idCliente).getRenglones().add(rcc);
+                cc = this.getCuentaCorrientePorCliente(idCliente);
+                cc.getRenglones().add(rcc);
+                rcc.setCuentaCorriente(cc);
             }
             this.renglonCuentaCorrienteService.guardar(rcc);
             LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
