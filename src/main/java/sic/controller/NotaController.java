@@ -205,9 +205,9 @@ public class NotaController {
     
     @GetMapping("/notas/renglon/debito")
     @ResponseStatus(HttpStatus.OK) 
-    public List<RenglonNotaDebito> calcularRenglonNota(@RequestParam String descripcion,
-                                                       @RequestParam double monto,
-                                                       @RequestParam double ivaPorcentaje) {
+    public List<RenglonNotaDebito> calcularRenglonNotaDebito(@RequestParam String descripcion,
+                                                             @RequestParam double monto,
+                                                             @RequestParam double ivaPorcentaje) {
         return notaService.calcularRenglonDebito(null, monto, ivaPorcentaje);
     }
     
@@ -219,7 +219,7 @@ public class NotaController {
     
     @GetMapping("/notas/credito/descuento-neto")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularDescuento_neto(@RequestParam double subTotal,
+    public double calcularDescuentoNeto(@RequestParam double subTotal,
                                          @RequestParam double descuentoPorcentaje) {
         return notaService.calcularDecuentoNeto(subTotal, descuentoPorcentaje);
     }

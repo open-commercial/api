@@ -419,8 +419,6 @@ public class NotaServiceImpl implements INotaService {
         double iva21 = 0.0;
         switch (notaDebito.getTipoComprobante()) {
             case NOTA_DEBITO_X:
-                if (notaDebito.getIva21Neto() != 0.0) throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_iva21_no_valido"));                
-                break;
             case NOTA_DEBITO_A:
             case NOTA_DEBITO_B:
             case NOTA_DEBITO_PRESUPUESTO:
@@ -435,7 +433,7 @@ public class NotaServiceImpl implements INotaService {
                 break;
         }
         // total
-        if (notaDebito.getTotal() != montoPago + iva21 + notaDebito.getSubTotalBruto()) {
+        if (0.000000001 <= Math.abs(notaDebito.getTotal() - (montoPago + iva21 + notaDebito.getSubTotalBruto()))) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_nota_total_no_valido"));
         }
