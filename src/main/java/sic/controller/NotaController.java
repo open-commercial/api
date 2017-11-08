@@ -42,7 +42,8 @@ public class NotaController {
     private final int TAMANIO_PAGINA_DEFAULT = 100;
     
     @Autowired
-    public NotaController(INotaService notaService, IClienteService clienteService, IEmpresaService empresaService) {
+    public NotaController(INotaService notaService, IClienteService clienteService,
+            IEmpresaService empresaService) {
         this.notaService = notaService;
         this.clienteService = clienteService;
         this.empresaService = empresaService;
@@ -75,11 +76,11 @@ public class NotaController {
     @GetMapping("/notas/busqueda/criteria") 
     @ResponseStatus(HttpStatus.OK)
     public Page<Nota> buscarNotasPorClienteYEmpresa(@RequestParam(value = "desde", required = false) Long desde,
-                                                                    @RequestParam(value = "hasta", required = false) Long hasta,
-                                                                    @RequestParam Long idCliente, 
-                                                                    @RequestParam Long idEmpresa,
-                                                                    @RequestParam(required = false) Integer pagina,
-                                                                    @RequestParam(required = false) Integer tamanio) {
+                                                    @RequestParam(value = "hasta", required = false) Long hasta,
+                                                    @RequestParam Long idCliente, 
+                                                    @RequestParam Long idEmpresa,
+                                                    @RequestParam(required = false) Integer pagina,
+                                                    @RequestParam(required = false) Integer tamanio) {
         Calendar fechaDesde = Calendar.getInstance();
         Calendar fechaHasta = Calendar.getInstance();
         if (desde != null && hasta != null) {
