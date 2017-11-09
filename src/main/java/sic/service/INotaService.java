@@ -65,15 +65,17 @@ public interface INotaService {
 
     List<RenglonNotaDebito> calcularRenglonDebito(Long idPago, double monto, double ivaPorcentaje);
 
-    double calcularSubTotal(double[] importesBrutos);
+    double calcularSubTotalCredito(double[] importesBrutos);
 
-    double calcularDecuentoNeto(double subTotal, double descuentoPorcentaje);
+    double calcularDecuentoNetoCredito(double subTotal, double descuentoPorcentaje);
 
-    double calcularRecargoNeto(double subTotal, double recargoPorcentaje);
+    double calcularRecargoNetoCredito(double subTotal, double recargoPorcentaje);
 
-    double calcularSubTotalBruto(TipoDeComprobante tipoDeComprobante, double subTotal, double recargoNeto, double descuentoNeto, double iva105_neto, double iva21_neto);
+    double calcularSubTotalBrutoCredito(TipoDeComprobante tipoDeComprobante, double subTotal, double recargoNeto, double descuentoNeto, double iva105_neto, double iva21_neto);
 
-    double calcularIVANeto(TipoDeComprobante tipoDeComprobante, double[] cantidades, double[] ivaPorcentajeRenglones, double[] ivaNetoRenglones, double ivaPorcentaje, double descuentoPorcentaje, double recargoPorcentaje);
+    double calcularIVANetoCredito(TipoDeComprobante tipoDeComprobante, double[] cantidades, double[] ivaPorcentajeRenglones, double[] ivaNetoRenglones, double ivaPorcentaje, double descuentoPorcentaje, double recargoPorcentaje);
 
-    double calcularTotal(double subTotal_bruto, double iva105_neto, double iva21_neto);
+    double calcularTotalCredito(double subTotal_bruto, double iva105_neto, double iva21_neto);
+    
+    double calcularTotalDebito(double subTotal_bruto, double iva21_neto, double montoNoGravado);
 }
