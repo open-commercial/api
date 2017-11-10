@@ -1,6 +1,7 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
+import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
@@ -133,7 +134,7 @@ public class ClienteServiceImpl implements IClienteService {
         builder.and(qcliente.empresa.eq(criteria.getEmpresa()).and(qcliente.eliminado.eq(false)));        
         Page<Cliente> page = clienteRepository.findAll(builder, criteria.getPageable());
         page.getContent().forEach(c -> {
-            c.setSaldoCuentaCorriente(cuentaCorrienteService.getSaldoCuentaCorriente(c.getId_Cliente()));
+            c.setSaldoCuentaCorriente(cuentaCorrienteService.getSaldoCuentaCorriente(c.getId_Cliente(), (new Date())));
         });        
         return page;
     }

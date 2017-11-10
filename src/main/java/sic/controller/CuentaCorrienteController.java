@@ -1,5 +1,6 @@
 package sic.controller;
 
+import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -50,7 +51,7 @@ public class CuentaCorrienteController {
     @GetMapping("/cuentas-corrientes/clientes/{idCliente}/saldo")
     @ResponseStatus(HttpStatus.OK)
     public double getSaldoCuentaCorriente(@PathVariable long idCliente) {
-        return cuentaCorrienteService.getSaldoCuentaCorriente(idCliente);
+        return cuentaCorrienteService.getSaldoCuentaCorriente(idCliente, new Date());
     }
     
     @GetMapping("/cuentas-corrientes/{idCuentaCorriente}/renglones")

@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import java.util.Date;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
@@ -110,15 +111,15 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     }
 
     @Override
-    public double getSaldoCuentaCorriente(long idCliente) {
-        Double saldo = renglonCuentaCorrienteService.getSaldoRenglonesCuentaCorrientePorCliente(idCliente);
+    public double getSaldoCuentaCorriente(long idCliente, Date hasta) {
+        Double saldo = renglonCuentaCorrienteService.getSaldoRenglonesCuentaCorrientePorCliente(idCliente, hasta);
         return (saldo != null) ? saldo : 0.0;
     }
     
     @Override
     public CuentaCorriente getCuentaCorrientePorCliente(long idCliente) {
         CuentaCorriente cc = cuentaCorrienteRepository.findByClienteAndEliminada(clienteService.getClientePorId(idCliente), false);
-        cc.setSaldo(this.getSaldoCuentaCorriente(idCliente));
+        cc.setSaldo(this.getSaldoCuentaCorriente(idCliente, (new Date())));
         return cc;
     }
     
@@ -127,7 +128,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         CuentaCorriente cc = this.getCuentaCorrientePorID(idCuentaCorriente);
         Page<RenglonCuentaCorriente> renglonesCuentaCorriente = renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageable);
         if (!renglonesCuentaCorriente.getContent().isEmpty()) {
-            double saldo = this.getSaldoCuentaCorriente(cc.getCliente().getId_Cliente());
+            double saldo = this.getSaldoCuentaCorriente(cc.getCliente().getId_Cliente(), renglonesCuentaCorriente.getContent().get(0).getFecha());
             for (RenglonCuentaCorriente r : renglonesCuentaCorriente.getContent()) {
                 r.setSaldo(saldo);
                 saldo -= r.getMonto();
