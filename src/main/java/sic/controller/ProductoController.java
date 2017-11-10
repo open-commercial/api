@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import sic.modelo.BusquedaProductoCriteria;
+import sic.modelo.Empresa;
 import sic.modelo.Medida;
 import sic.modelo.Producto;
 import sic.modelo.Proveedor;
@@ -39,7 +40,7 @@ public class ProductoController {
     private final IRubroService rubroService;
     private final IProveedorService proveedorService;  
     private final IMedidaService medidaService;
-    private final int TAMANIO_PAGINA_DEFAULT = 100;
+    private final int TAMANIO_PAGINA_DEFAULT = 50;
     
     @Autowired
     public ProductoController(IProductoService productoService, IEmpresaService empresaService,
@@ -61,7 +62,7 @@ public class ProductoController {
     @GetMapping("/productos/busqueda")
     @ResponseStatus(HttpStatus.OK)
     public Producto getProductoPorCodigo(@RequestParam long idEmpresa,
-                                         @RequestParam String codigo) {        
+                                         @RequestParam String codigo) {
         return productoService.getProductoPorCodigo(codigo, empresaService.getEmpresaPorId(idEmpresa));
     }
     
@@ -104,13 +105,13 @@ public class ProductoController {
     @GetMapping("/productos/busqueda/criteria") 
     @ResponseStatus(HttpStatus.OK)
     public Page<Producto> buscarProductos(@RequestParam long idEmpresa,
-                                @RequestParam(required = false) String codigo,
-                                @RequestParam(required = false) String descripcion,
-                                @RequestParam(required = false) Long idRubro,
-                                @RequestParam(required = false) Long idProveedor,
-                                @RequestParam(required = false) boolean soloFantantes,
-                                @RequestParam(required = false) Integer pagina,
-                                @RequestParam(required = false) Integer tamanio) {
+                                          @RequestParam(required = false) String codigo,
+                                          @RequestParam(required = false) String descripcion,
+                                          @RequestParam(required = false) Long idRubro,
+                                          @RequestParam(required = false) Long idProveedor,
+                                          @RequestParam(required = false) boolean soloFantantes,
+                                          @RequestParam(required = false) Integer pagina,
+                                          @RequestParam(required = false) Integer tamanio) {
         Rubro rubro = null;
         if (idRubro != null) {
             rubro = rubroService.getRubroPorId(idRubro);
@@ -150,15 +151,31 @@ public class ProductoController {
     
     @PutMapping("/productos")
     @ResponseStatus(HttpStatus.OK)
-    public void actualizar(@RequestBody Producto producto) {
+    public void actualizar(@RequestBody Producto producto,
+                           @RequestParam long idMedida,
+                           @RequestParam long idRubro, 
+                           @RequestParam long idProveedor,
+                           @RequestParam long idEmpresa) {
         if (productoService.getProductoPorId(producto.getId_Producto()) != null) {
+            producto.setMedida(medidaService.getMedidaPorId(idMedida));
+            producto.setRubro(rubroService.getRubroPorId(idRubro));
+            producto.setProveedor(proveedorService.getProveedorPorId(idProveedor));
+            producto.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
             productoService.actualizar(producto);
         }
     }
     
     @PostMapping("/productos")
     @ResponseStatus(HttpStatus.CREATED)
-    public Producto guardar(@RequestBody Producto producto) {
+    public Producto guardar(@RequestBody Producto producto,
+                            @RequestParam long idMedida,
+                            @RequestParam long idRubro, 
+                            @RequestParam long idProveedor,
+                            @RequestParam long idEmpresa) {
+        producto.setMedida(medidaService.getMedidaPorId(idMedida));
+        producto.setRubro(rubroService.getRubroPorId(idRubro));
+        producto.setProveedor(proveedorService.getProveedorPorId(idProveedor));
+        producto.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
         return productoService.guardar(producto);
     }
     
@@ -234,6 +251,7 @@ public class ProductoController {
         if (idProveedor != null) {
             proveedor = proveedorService.getProveedorPorId(idProveedor);
         }
+        Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
         BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder()
                 .buscarPorCodigo((codigo != null))
                 .codigo(codigo)
@@ -243,7 +261,7 @@ public class ProductoController {
                 .rubro(rubro)
                 .buscarPorProveedor(proveedor != null)
                 .proveedor(proveedor)
-                .empresa(empresaService.getEmpresaPorId(idEmpresa))
+                .empresa(empresa)
                 .cantRegistros(0)
                 .listarSoloFaltantes(soloFantantes)
                 .pageable(null)
@@ -252,7 +270,7 @@ public class ProductoController {
         headers.setContentType(MediaType.APPLICATION_PDF);        
         headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        byte[] reportePDF = productoService.getReporteListaDePreciosPorEmpresa(productoService.buscarProductos(criteria).getContent(), idEmpresa);
+        byte[] reportePDF = productoService.getReporteListaDePreciosPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
     }
     

@@ -102,7 +102,7 @@ public class NotaServiceImplTest {
     }
     
     @Test
-    public void shloudCalcularTotalNotaCredito() {
+    public void shouldCalcularTotalNotaCredito() {
         RenglonNotaCredito renglon1 = new RenglonNotaCreditoBuilder().build();
         List<RenglonNotaCredito> renglones = new ArrayList<>();
         renglones.add(renglon1);

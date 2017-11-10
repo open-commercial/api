@@ -27,15 +27,11 @@ import sic.modelo.RenglonFactura;
 import sic.modelo.Movimiento;
 import sic.modelo.TipoDeComprobante;
 import sic.modelo.Usuario;
-import sic.repository.FacturaRepository;
 import sic.repository.FacturaVentaRepository;
 
 @RunWith(SpringRunner.class)
 public class FacturaServiceImplTest {
-    
-    @Mock
-    private FacturaRepository facturaRepository;    
-    
+       
     @Mock
     private FacturaVentaRepository facturaVentaRepository;  
     
@@ -414,7 +410,8 @@ public class FacturaServiceImplTest {
         Producto producto = new ProductoBuilder()
                             .withPrecioCosto(100)
                             .withPrecioVentaPublico(121)                            
-                            .withIva_porcentaje(21).build();
+                            .withIva_porcentaje(21)
+                            .build();
         double resultadoEsperado = 21;
         double resultadoObtenido = facturaService.calcularIVANetoRenglon(Movimiento.COMPRA, TipoDeComprobante.FACTURA_A, producto, 0.0);
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
@@ -425,7 +422,8 @@ public class FacturaServiceImplTest {
         Producto producto = new ProductoBuilder()
                             .withPrecioCosto(200)
                             .withPrecioVentaPublico(1000)                            
-                            .withIva_porcentaje(21).build();
+                            .withIva_porcentaje(21)
+                            .build();
         double resultadoEsperado = 42;
         double resultadoObtenido = facturaService.calcularIVANetoRenglon(Movimiento.COMPRA, TipoDeComprobante.FACTURA_B, producto, 0.0);
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
@@ -435,7 +433,8 @@ public class FacturaServiceImplTest {
     public void shouldCalcularIVANetoWhenVentaConFacturaA() {
         Producto producto = new ProductoBuilder()                            
                             .withPrecioVentaPublico(121)                            
-                            .withIva_porcentaje(21).build();
+                            .withIva_porcentaje(21)
+                            .build();
         double resultadoEsperado = 25.41;
         double resultadoObtenido = facturaService.calcularIVANetoRenglon(Movimiento.VENTA, TipoDeComprobante.FACTURA_A, producto, 0.0);
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
@@ -444,7 +443,8 @@ public class FacturaServiceImplTest {
     public void shouldCalcularIVANetoWhenVentaConFacturaB() {
         Producto producto = new ProductoBuilder()                            
                             .withPrecioVentaPublico(1000)                            
-                            .withIva_porcentaje(21).build();
+                            .withIva_porcentaje(21)
+                            .build();
         double resultadoEsperado = 210;
         double resultadoObtenido = facturaService.calcularIVANetoRenglon(Movimiento.VENTA, TipoDeComprobante.FACTURA_B, producto, 0.0);
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
@@ -456,7 +456,8 @@ public class FacturaServiceImplTest {
                             .withPrecioCosto(100)
                             .withPrecioVentaPublico(121)
                             .withImpuestoInterno_neto(0.0)
-                            .withIva_porcentaje(21).build();
+                            .withIva_porcentaje(21)
+                            .build();
         double resultadoEsperado = 121;
         double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_A, producto);
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
@@ -468,7 +469,8 @@ public class FacturaServiceImplTest {
                             .withPrecioCosto(100)
                             .withPrecioVentaPublico(121)
                             .withImpuestoInterno_neto(0.0)
-                            .withIva_porcentaje(21).build(); 
+                            .withIva_porcentaje(21)
+                            .build(); 
         double resultadoEsperado = 121;
         double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_X, producto);
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
@@ -480,7 +482,8 @@ public class FacturaServiceImplTest {
                             .withPrecioCosto(100)
                             .withPrecioVentaPublico(121)
                             .withImpuestoInterno_neto(0.0)
-                            .withIva_porcentaje(21).build(); 
+                            .withIva_porcentaje(21)
+                            .build(); 
         double resultadoEsperado = 100;
         double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_A, producto);
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
@@ -492,7 +495,8 @@ public class FacturaServiceImplTest {
                             .withPrecioCosto(100)
                             .withPrecioVentaPublico(121)
                             .withImpuestoInterno_neto(0.0)
-                            .withIva_porcentaje(21).build(); 
+                            .withIva_porcentaje(21)
+                            .build(); 
         double resultadoEsperado = 100;
         double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_X, producto);
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
@@ -504,7 +508,8 @@ public class FacturaServiceImplTest {
                             .withPrecioCosto(100)
                             .withPrecioVentaPublico(121)
                             .withImpuestoInterno_neto(0.0)
-                            .withIva_porcentaje(21).build(); 
+                            .withIva_porcentaje(21)
+                            .build(); 
         double resultadoEsperado = 121;
         double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_B, producto);
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
@@ -516,7 +521,8 @@ public class FacturaServiceImplTest {
                             .withPrecioCosto(100)
                             .withPrecioVentaPublico(121)
                             .withImpuestoInterno_neto(0.0)
-                            .withIva_porcentaje(21).build();  
+                            .withIva_porcentaje(21)
+                            .build();  
         double resultadoEsperado = 121;
         double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_C, producto);
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
@@ -528,7 +534,8 @@ public class FacturaServiceImplTest {
                             .withPrecioCosto(100)
                             .withPrecioVentaPublico(121)
                             .withImpuestoInterno_neto(0.0)
-                            .withIva_porcentaje(21).build();
+                            .withIva_porcentaje(21)
+                            .build();
         double resultadoEsperado = 121;
         double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_Y, producto);
         assertEquals(resultadoEsperado, resultadoObtenido, 0);

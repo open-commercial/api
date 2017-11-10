@@ -12,7 +12,6 @@ import sic.modelo.Cliente;
 import sic.modelo.Empresa;
 import sic.modelo.EstadoPedido;
 import sic.modelo.Factura;
-import sic.modelo.RenglonPedido;
 import sic.modelo.Usuario;
 
 @Data
@@ -31,7 +30,7 @@ public class PedidoDTO implements Serializable {
     private Cliente cliente;    
     private Usuario usuario;        
     private List<Factura> facturas;        
-    private List<RenglonPedido> renglones;
+    private List<RenglonPedidoDTO> renglones;
     private double totalEstimado;
     private double totalActual;
     private EstadoPedido estado;
