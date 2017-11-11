@@ -158,7 +158,9 @@ public class NotaServiceImpl implements INotaService {
         List<RenglonFactura> renglonesFactura = facturaService.getRenglonesDeLaFactura(idFactura);
         if (!listaCantidadesProductosUnificados.isEmpty()) {
             renglonesFactura.forEach(rf -> {
-                rf.setCantidad(rf.getCantidad() - listaCantidadesProductosUnificados.get(rf.getId_ProductoItem()));
+                if (listaCantidadesProductosUnificados.containsKey(rf.getId_ProductoItem())) {
+                    rf.setCantidad(rf.getCantidad() - listaCantidadesProductosUnificados.get(rf.getId_ProductoItem()));
+                }
             });
         }
         return renglonesFactura;
