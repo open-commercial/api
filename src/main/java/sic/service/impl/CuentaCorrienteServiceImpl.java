@@ -145,7 +145,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     
     private TipoMovimiento getTipoMovimiento(Nota nota) {
         if (nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_A) || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_B)
-                || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_X)) {
+                || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_Y) || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_X)) {
             return TipoMovimiento.CREDITO;
         } else {
             return TipoMovimiento.DEBITO;
@@ -192,6 +192,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                 rcc.setComprobante("NOTA CREDITO " + (n.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_A) ? "\"A\""
                         : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_B) ? "\"B\""
                         : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO) ? "\"P\""
+                        : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_Y) ? "\"Y\""
                         : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_X) ? "\"X\"" : "")
                         + " " + n.getSerie() + " - " + n.getNroNota());
                 rcc.setMonto(n.getTotal());
@@ -201,6 +202,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                 rcc.setComprobante("NOTA DEBITO " + (n.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_A) ? "\"A\""
                         : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_B) ? "\"B\""
                         : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO) ? "\"P\""
+                        : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_Y) ? "\"Y\""
                         : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_X) ? "\"X\"" : "")
                         + " " + n.getSerie() + " - " + n.getNroNota());
                 rcc.setMonto(-n.getTotal());
