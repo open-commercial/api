@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -48,8 +49,8 @@ public class RenglonCuentaCorrienteServiceImpl implements IRenglonCuentaCorrient
     }
     
     @Override
-    public Double getSaldoRenglonesCuentaCorrientePorCliente(long idCliente) {
-        return renglonCuentaCorrienteRepository.getSaldoRenglonesCuentaCorrientePorCliente(idCliente);
+    public Double getSaldoRenglonesCuentaCorrientePorCliente(long idCliente, Date hasta) {
+        return renglonCuentaCorrienteRepository.getSaldoRenglonesCuentaCorrientePorCliente(idCliente, hasta);
     }
     
 }

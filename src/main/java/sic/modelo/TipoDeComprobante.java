@@ -26,6 +26,8 @@ public enum TipoDeComprobante {
     
     NOTA_CREDITO_X, 
     
+    NOTA_CREDITO_Y,
+        
     NOTA_CREDITO_PRESUPUESTO, 
     
     NOTA_DEBITO_A,
@@ -33,6 +35,8 @@ public enum TipoDeComprobante {
     NOTA_DEBITO_B,
     
     NOTA_DEBITO_X,
+    
+    NOTA_DEBITO_Y,
     
     NOTA_DEBITO_PRESUPUESTO;
     

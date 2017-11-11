@@ -1,5 +1,6 @@
 package sic.service;
 
+import java.util.Date;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import sic.modelo.CuentaCorriente;
@@ -20,6 +21,6 @@ public interface IRenglonCuentaCorrienteService {
     
     Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(CuentaCorriente cuentaCorriente, boolean eliminado, Pageable page);
     
-    Double getSaldoRenglonesCuentaCorrientePorCliente(long idCuentaCorriente);
+    Double getSaldoRenglonesCuentaCorrientePorCliente(long idCuentaCorriente, Date hasta);
     
 }
