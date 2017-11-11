@@ -346,18 +346,18 @@ public class NotaServiceImpl implements INotaService {
                 importes[i] = r.getImporteBruto();
                 i++;
             }
-            subTotal = this.calcularSubTotal(importes);
+            subTotal = this.calcularSubTotalCredito(importes);
             if (notaCredito.getSubTotal() != subTotal) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_nota_sub_total_no_valido"));
             }
-            iva21 = this.calcularIVANeto(tipoDeComprobanteDeFacturaRelacionada, cantidades, ivaPorcentajes, ivaNetos,
+            iva21 = this.calcularIVANetoCredito(tipoDeComprobanteDeFacturaRelacionada, cantidades, ivaPorcentajes, ivaNetos,
                     21, notaCredito.getDescuentoPorcentaje(), notaCredito.getRecargoPorcentaje());
             if (notaCredito.getIva21Neto() != iva21) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_nota_iva21_no_valido"));
             }
-            iva105 = this.calcularIVANeto(tipoDeComprobanteDeFacturaRelacionada, cantidades, ivaPorcentajes, ivaNetos,
+            iva105 = this.calcularIVANetoCredito(tipoDeComprobanteDeFacturaRelacionada, cantidades, ivaPorcentajes, ivaNetos,
                     10.5, notaCredito.getDescuentoPorcentaje(), notaCredito.getRecargoPorcentaje());
             if (notaCredito.getIva105Neto() != iva105) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -368,7 +368,7 @@ public class NotaServiceImpl implements INotaService {
                 importes[i] = r.getImporteNeto();
                 i++;
             }
-            subTotal = this.calcularSubTotal(importes);
+            subTotal = this.calcularSubTotalCredito(importes);
             if (notaCredito.getSubTotal() != subTotal) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_nota_sub_total_no_valido"));
@@ -383,25 +383,25 @@ public class NotaServiceImpl implements INotaService {
             }
         }
         //DescuentoNeto
-        double descuentoNeto = this.calcularDecuentoNeto(subTotal, notaCredito.getDescuentoPorcentaje());
+        double descuentoNeto = this.calcularDecuentoNetoCredito(subTotal, notaCredito.getDescuentoPorcentaje());
         if (notaCredito.getDescuentoNeto() != descuentoNeto) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_nota_descuento_neto_no_valido"));
         }
         //RecargoNeto
-        double recargoNeto = this.calcularRecargoNeto(subTotal, notaCredito.getRecargoPorcentaje());
+        double recargoNeto = this.calcularRecargoNetoCredito(subTotal, notaCredito.getRecargoPorcentaje());
         if (notaCredito.getRecargoNeto() != recargoNeto) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_nota_recargo_neto_no_valido"));
         }
         //subTotalBruto
-        double subTotalBruto = this.calcularSubTotalBruto(tipoDeComprobanteDeFacturaRelacionada, subTotal, recargoNeto, descuentoNeto, iva105, iva21);
+        double subTotalBruto = this.calcularSubTotalBrutoCredito(tipoDeComprobanteDeFacturaRelacionada, subTotal, recargoNeto, descuentoNeto, iva105, iva21);
         if (notaCredito.getSubTotalBruto() != subTotalBruto) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_nota_sub_total_bruto_no_valido"));
         }
         //Total
-        double total = this.calcularTotal(subTotalBruto, iva105, iva21);
+        double total = this.calcularTotalCredito(subTotalBruto, iva105, iva21);
         if (notaCredito.getTotal() != total) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_nota_total_no_valido"));
@@ -419,8 +419,6 @@ public class NotaServiceImpl implements INotaService {
         double iva21 = 0.0;
         switch (notaDebito.getTipoComprobante()) {
             case NOTA_DEBITO_X:
-                if (notaDebito.getIva21Neto() != 0.0) throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_iva21_no_valido"));                
-                break;
             case NOTA_DEBITO_A:
             case NOTA_DEBITO_B:
             case NOTA_DEBITO_PRESUPUESTO:
@@ -435,7 +433,7 @@ public class NotaServiceImpl implements INotaService {
                 break;
         }
         // total
-        if (notaDebito.getTotal() != montoPago + iva21 + notaDebito.getSubTotalBruto()) {
+        if (notaDebito.getTotal() != this.calcularTotalDebito(notaDebito.getSubTotalBruto(), iva21, montoPago)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_nota_total_no_valido"));
         }
@@ -768,22 +766,22 @@ public class NotaServiceImpl implements INotaService {
     }
     
     @Override
-    public double calcularSubTotal(double[] importe) {
+    public double calcularSubTotalCredito(double[] importe) {
         return facturaService.calcularSubTotal(importe);
     }
     
     @Override
-    public double calcularDecuentoNeto(double subTotal, double descuentoPorcentaje) {
+    public double calcularDecuentoNetoCredito(double subTotal, double descuentoPorcentaje) {
         return facturaService.calcularDescuentoNeto(subTotal, descuentoPorcentaje);
     }
     
     @Override
-    public double calcularRecargoNeto(double subTotal, double recargoPorcentaje) {
+    public double calcularRecargoNetoCredito(double subTotal, double recargoPorcentaje) {
         return facturaService.calcularDescuentoNeto(subTotal, recargoPorcentaje);
     }
     
     @Override
-    public double calcularIVANeto(TipoDeComprobante tipoDeComprobante,
+    public double calcularIVANetoCredito(TipoDeComprobante tipoDeComprobante,
                                   double[] cantidades,
                                   double[] ivaPorcentajeRenglones,
                                   double[] ivaNetoRenglones,
@@ -794,7 +792,7 @@ public class NotaServiceImpl implements INotaService {
     }
     
     @Override
-    public double calcularSubTotalBruto(TipoDeComprobante tipoDeComprobante, double subTotal, double recargoNeto, double descuentoNeto, double iva105Neto, double iva21Neto) {         
+    public double calcularSubTotalBrutoCredito(TipoDeComprobante tipoDeComprobante, double subTotal, double recargoNeto, double descuentoNeto, double iva105Neto, double iva21Neto) {         
         double resultado = subTotal + recargoNeto - descuentoNeto;
         if (tipoDeComprobante == TipoDeComprobante.FACTURA_B || tipoDeComprobante == TipoDeComprobante.PRESUPUESTO) {
             resultado = resultado - (iva105Neto + iva21Neto);
@@ -802,8 +800,13 @@ public class NotaServiceImpl implements INotaService {
         return resultado;
     }
     @Override
-    public double calcularTotal(double subTotal_bruto, double iva105_neto, double iva21_neto) {
+    public double calcularTotalCredito(double subTotal_bruto, double iva105_neto, double iva21_neto) {
         return facturaService.calcularTotal(subTotal_bruto, iva105_neto, iva21_neto);
+    }
+    
+    @Override
+    public double calcularTotalDebito(double subTotal_bruto, double iva21_neto, double montoNoGravado) {
+        return subTotal_bruto + iva21_neto + montoNoGravado;
     }
 
 }
