@@ -5,8 +5,10 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import sic.modelo.Cliente;
 import sic.modelo.Empresa;
@@ -15,6 +17,8 @@ import sic.modelo.Factura;
 import sic.modelo.Usuario;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @ToString(exclude = {"facturas", "renglones"})
 @EqualsAndHashCode(of = {"nroPedido", "empresa"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Pedido", scope = PedidoDTO.class)

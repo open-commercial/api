@@ -50,7 +50,6 @@ import sic.modelo.NotaCredito;
 import sic.modelo.NotaDebito;
 import sic.modelo.Pago;
 import sic.modelo.Pais;
-import sic.modelo.Producto;
 import sic.modelo.Proveedor;
 import sic.modelo.Provincia;
 import sic.modelo.RenglonFactura;
@@ -64,6 +63,7 @@ import sic.modelo.Usuario;
 import sic.modelo.dto.FacturaVentaDTO;
 import sic.modelo.dto.NotaCreditoDTO;
 import sic.modelo.dto.NotaDebitoDTO;
+import sic.modelo.dto.ProductoDTO;
 import sic.repository.UsuarioRepository;
 
 @RunWith(SpringRunner.class)
@@ -168,7 +168,7 @@ public class CuentaCorrienteIntegrationTest {
         proveedor = restTemplate.postForObject(apiPrefix + "/proveedores", proveedor, Proveedor.class);
         Rubro rubro = new RubroBuilder().withEmpresa(empresa).build();
         rubro = restTemplate.postForObject(apiPrefix + "/rubros", rubro, Rubro.class);
-        Producto productoUno = new ProductoBuilder()
+        ProductoDTO productoUno = new ProductoBuilder()
                 .withCodigo("1")
                 .withDescripcion("uno")
                 .withCantidad(10)
@@ -177,12 +177,8 @@ public class CuentaCorrienteIntegrationTest {
                 .withIva_porcentaje(21.0)
                 .withIva_neto(210)
                 .withPrecioLista(1210)
-                .withEmpresa(empresa)
-                .withMedida(medida)
-                .withProveedor(proveedor)
-                .withRubro(rubro)
                 .build();
-        Producto productoDos = new ProductoBuilder()
+        ProductoDTO productoDos = new ProductoBuilder()
                 .withCodigo("2")
                 .withDescripcion("dos")
                 .withCantidad(6)                               
@@ -190,14 +186,14 @@ public class CuentaCorrienteIntegrationTest {
                 .withPrecioVentaPublico(1000)
                 .withIva_porcentaje(10.5)
                 .withIva_neto(105)
-                .withPrecioLista(1105)                
-                .withEmpresa(empresa)
-                .withMedida(medida)
-                .withProveedor(proveedor)
-                .withRubro(rubro)
-                .build();
-        productoUno = restTemplate.postForObject(apiPrefix + "/productos", productoUno, Producto.class);
-        productoDos = restTemplate.postForObject(apiPrefix + "/productos", productoDos, Producto.class);
+                .withPrecioLista(1105)
+                .build();       
+        productoUno = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
+                + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
+                productoUno, ProductoDTO.class);        
+        productoDos = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
+                + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
+                productoDos, ProductoDTO.class);       
         Assert.assertTrue(restTemplate.getForObject(apiPrefix + "/productos/" + productoUno.getId_Producto() + "/stock/disponibilidad?cantidad=10", Boolean.class));
         Assert.assertTrue(restTemplate.getForObject(apiPrefix + "/productos/" + productoDos.getId_Producto() + "/stock/disponibilidad?cantidad=6", Boolean.class));
         RenglonFactura renglonUno = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
