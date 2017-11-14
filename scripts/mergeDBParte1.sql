@@ -2,37 +2,37 @@ SET SQL_SAFE_UPDATES = 0;
 SET foreign_key_checks = 0;
 SET UNIQUE_CHECKS=0; 
 
-SET @idCajaInc = (SELECT max(id_Caja) FROM sic.caja);
-SET @idClienteInc = (SELECT max(id_Cliente) FROM sic.cliente);
-SET @idCondicionIvaInc = (SELECT max(id_CondicionIVA) FROM sic.condicioniva);
-SET @idConfiguraciionDelSistemaInc = (SELECT max(id_ConfiguracionDelSistema) FROM sic.configuraciondelsistema);
-SET @idCuentaCorrienteInc = (SELECT max(idCuentaCorriente) FROM sic.cuentacorriente);
-SET @idEmpresaInc = (SELECT max(id_Empresa) FROM sic.empresa);
-SET @idFacturaInc = (SELECT max(id_Factura) FROM sic.factura);
-SET @idFormaDePagoInc = (SELECT max(id_FormaDePago) FROM sic.formadepago);
-SET @idGastoInc = (SELECT max(id_Gasto) FROM sic.gasto);
-SET @idLocalidadInc = (SELECT max(id_Localidad) FROM sic.localidad);
-SET @idMedidaInc = (SELECT max(id_Medida) FROM sic.medida);
-SET @idNotaInc = (SELECT max(idNota) FROM sic.nota);
-SET @idPagoInc = (SELECT max(id_Pago) FROM sic.pago);
-SET @idPaisInc = (SELECT max(id_Pais) FROM sic.pais);
-SET @idPedidoInc = (SELECT max(id_Pedido) FROM sic.pedido);
-SET @idProductoInc = (SELECT max(id_Producto) FROM sic.producto);
-SET @idProveedorInc = (SELECT max(id_Proveedor) FROM sic.proveedor);
-SET @idPedidoInc = (SELECT max(id_Pedido) FROM sic.pedido);
-SET @idProductoInc = (SELECT max(id_Producto) FROM sic.producto);
-SET @idProveedorInc = (SELECT max(id_Proveedor) FROM sic.proveedor);
-SET @idProvinciaInc = (SELECT max(id_Provincia) FROM sic.provincia);
-SET @idRenglonCuentaCorrienteInc = (SELECT max(idRenglonCuentaCorriente) FROM sic.rengloncuentacorriente);
-SET @idRenglonFacturaInc = (SELECT max(id_RenglonFactura) FROM sic.renglonfactura);
-SET @idRenglonNotaCreditoInc = (SELECT max(idRenglonNotaCredito) FROM sic.renglonnotacredito);
-SET @idRenglonNotaDebitoInc = (SELECT max(idRenglonNotaDebito) FROM sic.renglonnotadebito);
-SET @idRenglonPedidoInc = (SELECT max(id_RenglonPedido) FROM sic.renglonpedido);
-SET @idRolInc = (SELECT max(id_Usuario) FROM sic.rol);
-SET @idRubroInc = (SELECT max(id_Rubro) FROM sic.rubro);
-SET @idTransportistaInc = (SELECT max(id_Transportista) FROM sic.transportista);
-SET @idUsuarioInc = (SELECT max(id_Usuario) FROM sic.usuario);
-SET @idUsuarioCierraInc = (SELECT max(id_UsuarioCierra) FROM sic.caja);
+SET @idCajaInc = 10000000;
+SET @idClienteInc = 10000000;
+SET @idCondicionIvaInc = 10000000;
+SET @idConfiguraciionDelSistemaInc = 10000000;
+SET @idCuentaCorrienteInc = 10000000;
+SET @idEmpresaInc = 10000000;
+SET @idFacturaInc = 10000000;
+SET @idFormaDePagoInc = 10000000;
+SET @idGastoInc = 10000000;
+SET @idLocalidadInc = 10000000;
+SET @idMedidaInc = 10000000;
+SET @idNotaInc = 10000000;
+SET @idPagoInc = 10000000;
+SET @idPaisInc = 10000000;
+SET @idPedidoInc = 10000000;
+SET @idProductoInc = 10000000;
+SET @idProveedorInc = 10000000;
+SET @idPedidoInc = 10000000;
+SET @idProductoInc = 10000000;
+SET @idProveedorInc = 10000000;
+SET @idProvinciaInc = 10000000;
+SET @idRenglonCuentaCorrienteInc = 10000000;
+SET @idRenglonFacturaInc = 10000000;
+SET @idRenglonNotaCreditoInc = 10000000;
+SET @idRenglonNotaDebitoInc = 10000000;
+SET @idRenglonPedidoInc = 10000000;
+SET @idRolInc = 10000000;
+SET @idRubroInc = 10000000;
+SET @idTransportistaInc = 10000000;
+SET @idUsuarioInc = 10000000;
+SET @idUsuarioCierraInc = 10000000;
 
 -- Empresa
 UPDATE   empresa
@@ -88,7 +88,7 @@ UPDATE   factura
 UPDATE   facturacompra
   SET facturacompra.id_Factura = facturacompra.id_Factura + @idFacturaInc;
 UPDATE   facturacompra
-  SET facturacompra.id_Proveedor = facturacompra.id_Proveedor + @idProveedorIna;
+  SET facturacompra.id_Proveedor = facturacompra.id_Proveedor + @idProveedorInc;
 -- Factura Venta
 UPDATE   facturaventa
   SET facturaventa.id_Cliente = facturaventa.id_Cliente + @idClienteInc;
@@ -129,7 +129,9 @@ UPDATE   nota
 UPDATE   nota
   SET nota.id_Factura = nota.id_Factura + @idFacturaInc;
 UPDATE   nota
-  SET nota.id_Usuario = nota.id_Usuario + @idNotaInc;
+  SET nota.id_Usuario = nota.id_Usuario + @idUsuarioInc;
+UPDATE   nota
+  SET nota.idNota = nota.idNota + @idNotaInc;
 -- NOTA CREDITO
 UPDATE   notacredito
   SET notacredito.idNota = notacredito.idNota + @idNotaInc;
@@ -192,7 +194,7 @@ UPDATE   rengloncuentacorriente
 UPDATE   rengloncuentacorriente
   SET rengloncuentacorriente.id_Factura = IF(rengloncuentacorriente.id_Factura = null, null, rengloncuentacorriente.id_Factura + @idFacturaInc);
 UPDATE   rengloncuentacorriente
-  SET rengloncuentacorriente.idMovimiento = rengloncuentacorriente.idMovimiento + @idMovimientoInc;  
+  SET rengloncuentacorriente.idMovimiento = rengloncuentacorriente.idMovimiento + 10000000;  
 UPDATE   rengloncuentacorriente
   SET rengloncuentacorriente.idNota = IF(rengloncuentacorriente.idNota = null, null, rengloncuentacorriente.idNota + @idNotaInc);
 UPDATE   rengloncuentacorriente
@@ -210,7 +212,7 @@ UPDATE   renglonfactura
 UPDATE   renglonnotacredito
   SET renglonnotacredito.idNota = renglonnotacredito.idNota + @idNotaInc;
 UPDATE   renglonnotacredito
-  SET renglonnotacredito.idProductoItem = renglonnotacredito.idProductoItem + @idProductoItem;  
+  SET renglonnotacredito.idProductoItem = renglonnotacredito.idProductoItem + 10000000;  
 UPDATE   renglonnotacredito
   SET renglonnotacredito.idRenglonNotaCredito = renglonnotacredito.idRenglonNotaCredito + @idRenglonNotaCreditoInc;
 -- RENGLON NOTA DEBITO
