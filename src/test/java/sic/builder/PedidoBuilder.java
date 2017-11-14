@@ -7,9 +7,9 @@ import sic.modelo.Cliente;
 import sic.modelo.Empresa;
 import sic.modelo.EstadoPedido;
 import sic.modelo.Factura;
-import sic.modelo.Pedido;
-import sic.modelo.RenglonPedido;
 import sic.modelo.Usuario;
+import sic.modelo.dto.PedidoDTO;
+import sic.modelo.dto.RenglonPedidoDTO;
 
 public class PedidoBuilder {
 
@@ -23,27 +23,28 @@ public class PedidoBuilder {
     private Cliente cliente = new ClienteBuilder().build();
     private Usuario usuario =  new UsuarioBuilder().build();
     private List<Factura> facturas;
-    private List<RenglonPedido> renglones;
+    private List<RenglonPedidoDTO> renglones;
     private double totalEstimado = 544.5;
     private double totalActual = 544.5;
     private EstadoPedido estado = EstadoPedido.ABIERTO;
 
-    public Pedido build() {
+    public PedidoDTO build() {
         if (renglones == null) {
-            RenglonPedido renglon1 = new RenglonPedidoBuilder().build();
-            RenglonPedido renglon2 = new RenglonPedidoBuilder()
+            RenglonPedidoDTO renglon1 = new RenglonPedidoBuilder().build();
+            RenglonPedidoDTO renglon2 = new RenglonPedidoBuilder()
                                             .withCantidad(1)
                                             .withIdRenglonPedido(90L)
-                                            .withProducto(new ProductoBuilder().withId_Producto(77L)
-                                            .withDescripcion("Pack 6 Vasos")
-                                            .withEmpresa(new EmpresaBuilder().build()).build())
+                                            .withProducto(new ProductoBuilder()
+                                                .withId_Producto(77L)
+                                                .withDescripcion("Pack 6 Vasos")
+                                                .build())
                                             .build();
-            List<RenglonPedido> renglonesPedido = new ArrayList<>();
+            List<RenglonPedidoDTO> renglonesPedido = new ArrayList<>();
             renglonesPedido.add(renglon1);
             renglonesPedido.add(renglon2);
             this.renglones = renglonesPedido;
         }
-        return new Pedido(id_Pedido, nroPedido, fecha, fechaVencimiento, observaciones, empresa,
+        return new PedidoDTO(id_Pedido, nroPedido, fecha, fechaVencimiento, observaciones, empresa,
                 eliminado, cliente, usuario, facturas, renglones, totalEstimado, totalActual, estado);
     }
 
@@ -97,7 +98,7 @@ public class PedidoBuilder {
         return this;
     }
 
-    public PedidoBuilder withRenglones(List<RenglonPedido> renglones) {
+    public PedidoBuilder withRenglones(List<RenglonPedidoDTO> renglones) {
         this.renglones = renglones;
         return this;
     }

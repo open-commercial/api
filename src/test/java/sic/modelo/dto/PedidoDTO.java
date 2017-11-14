@@ -5,17 +5,20 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import sic.modelo.Cliente;
 import sic.modelo.Empresa;
 import sic.modelo.EstadoPedido;
 import sic.modelo.Factura;
-import sic.modelo.RenglonPedido;
 import sic.modelo.Usuario;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @ToString(exclude = {"facturas", "renglones"})
 @EqualsAndHashCode(of = {"nroPedido", "empresa"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Pedido", scope = PedidoDTO.class)
@@ -31,7 +34,7 @@ public class PedidoDTO implements Serializable {
     private Cliente cliente;    
     private Usuario usuario;        
     private List<Factura> facturas;        
-    private List<RenglonPedido> renglones;
+    private List<RenglonPedidoDTO> renglones;
     private double totalEstimado;
     private double totalActual;
     private EstadoPedido estado;

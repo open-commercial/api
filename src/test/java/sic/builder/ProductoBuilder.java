@@ -1,11 +1,7 @@
 package sic.builder;
 
 import java.util.Date;
-import sic.modelo.Empresa;
-import sic.modelo.Medida;
-import sic.modelo.Producto;
-import sic.modelo.Proveedor;
-import sic.modelo.Rubro;
+import sic.modelo.dto.ProductoDTO;
 
 public class ProductoBuilder {
 
@@ -15,7 +11,7 @@ public class ProductoBuilder {
     private double cantidad = 10;
     private double cantMinima = 2;    
     private double ventaMinima = 0;
-    private Medida medida = new MedidaBuilder().build();
+    private String nombreMedida = "Unidad";
     private double precioCosto = 100;
     private double ganancia_porcentaje = 50;
     private double ganancia_neto = 50;
@@ -25,24 +21,24 @@ public class ProductoBuilder {
     private double impuestoInterno_porcentaje = 0;
     private double impuestoInterno_neto = 0;
     private double precioLista = 181.5;    
-    private Rubro rubro = new RubroBuilder().build();
+    private String nombreRubro = "Ferreteria";
     private boolean ilimitado = false;
     private Date fechaUltimaModificacion = new Date(1463540400000L); // 18-05-2016
     private String estanteria = "A";
     private String estante = "1";
-    private Proveedor proveedor = new ProveedorBuilder().build();
+    private String razonSocialProveedor = "Abrasol";
     private String nota = "Cumple con las normas ISO";
     private Date fechaAlta = new Date(1458010800000L); // 15-03-2016;
     private Date fechaVencimiento = new Date(1597892400000L); // 20-08-2020
-    private Empresa empresa = new EmpresaBuilder().build();
+    private String nombreEmpresa = "Globo De Oro";
     private boolean eliminado = false;
     
-    public Producto build() {
-        return new Producto(id_Producto, codigo, descripcion, cantidad, cantMinima, ventaMinima, medida,
+    public ProductoDTO build() {
+        return new ProductoDTO(id_Producto, codigo, descripcion, cantidad, cantMinima, ventaMinima, nombreMedida,
                 precioCosto, ganancia_porcentaje, ganancia_neto, precioVentaPublico,
                 iva_porcentaje, iva_neto, impuestoInterno_porcentaje, impuestoInterno_neto, precioLista,
-                rubro, ilimitado, fechaUltimaModificacion, estanteria, estante, proveedor, nota,
-                fechaAlta, fechaVencimiento, empresa, eliminado);
+                nombreRubro, ilimitado, fechaUltimaModificacion, estanteria, estante, razonSocialProveedor, nota,
+                fechaAlta, fechaVencimiento, nombreEmpresa, eliminado);
     }
     
     public ProductoBuilder withId_Producto(Long id_Producto) {
@@ -75,8 +71,8 @@ public class ProductoBuilder {
         return this;
     }
     
-    public ProductoBuilder withMedida(Medida medida) {
-        this.medida = medida;
+    public ProductoBuilder withNombreMedida(String nombreMedida) {
+        this.nombreMedida = nombreMedida;
         return this;
     }
     
@@ -125,8 +121,8 @@ public class ProductoBuilder {
         return this;
     }
     
-    public ProductoBuilder withRubro(Rubro rubro) {
-        this.rubro = rubro;
+    public ProductoBuilder withNombreRubro(String nombreRubro) {
+        this.nombreRubro = nombreRubro;
         return this;
     }
     
@@ -150,8 +146,8 @@ public class ProductoBuilder {
         return this;
     }
     
-    public ProductoBuilder withProveedor(Proveedor proveedor) {
-        this.proveedor = proveedor;
+    public ProductoBuilder withRazonSocialProveedor(String razonSocialProveedor) {
+        this.razonSocialProveedor = razonSocialProveedor;
         return this;
     }
     
@@ -170,8 +166,8 @@ public class ProductoBuilder {
         return this;
     }
     
-    public ProductoBuilder withEmpresa(Empresa empresa) {
-        this.empresa = empresa;
+    public ProductoBuilder withNombreEmpresa(String nombreEmpresa) {
+        this.nombreEmpresa = nombreEmpresa;
         return this;
     }
     
