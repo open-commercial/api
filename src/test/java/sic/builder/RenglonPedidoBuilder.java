@@ -1,19 +1,19 @@
 package sic.builder;
 
-import sic.modelo.Producto;
-import sic.modelo.RenglonPedido;
+import sic.modelo.dto.ProductoDTO;
+import sic.modelo.dto.RenglonPedidoDTO;
 
 public class RenglonPedidoBuilder {
     
     private long id_RenglonPedido = 0L;
-    private Producto producto = new ProductoBuilder().build();
+    private ProductoDTO producto = new ProductoBuilder().build();
     private double cantidad = 2;
     private double descuento_porcentaje = 0.0;
     private double descuento_neto = 0.0;
     private double subTotal = 363;
     
-    public RenglonPedido build() {
-        return new RenglonPedido(id_RenglonPedido, producto, cantidad, descuento_porcentaje, descuento_neto, subTotal);
+    public RenglonPedidoDTO build() {
+        return new RenglonPedidoDTO(id_RenglonPedido, producto, cantidad, descuento_porcentaje, descuento_neto, subTotal);
     }
     
     public RenglonPedidoBuilder withIdRenglonPedido(long idRenglonPedido) {
@@ -21,7 +21,7 @@ public class RenglonPedidoBuilder {
         return this;
     }
     
-    public RenglonPedidoBuilder withProducto(Producto producto) {
+    public RenglonPedidoBuilder withProducto(ProductoDTO producto) {
         this.producto = producto;
         return this;
     }

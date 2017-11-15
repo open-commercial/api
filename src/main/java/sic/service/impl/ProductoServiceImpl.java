@@ -6,9 +6,7 @@ import sic.modelo.BusquedaProductoCriteria;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +21,6 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,37 +34,22 @@ import sic.modelo.Producto;
 import sic.modelo.Proveedor;
 import sic.modelo.QProducto;
 import sic.modelo.Rubro;
-import sic.service.IEmpresaService;
 import sic.service.IProductoService;
 import sic.service.BusinessServiceException;
 import sic.service.ServiceException;
 import sic.modelo.TipoDeOperacion;
 import sic.util.Validator;
 import sic.repository.ProductoRepository;
-import sic.service.IMedidaService;
-import sic.service.IProveedorService;
-import sic.service.IRubroService;
 
 @Service
 public class ProductoServiceImpl implements IProductoService {
 
     private final ProductoRepository productoRepository;
-    private final IEmpresaService empresaService;
-    private final IProveedorService proveedorService;
-    private final IRubroService rubroService;
-    private final IMedidaService medidaService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    @Lazy
-    public ProductoServiceImpl(ProductoRepository productoRepository, IEmpresaService empresaService,
-                               IProveedorService proveedorService, IRubroService rubroService, 
-                               IMedidaService medidaService) {
+    public ProductoServiceImpl(ProductoRepository productoRepository) {
         this.productoRepository = productoRepository;
-        this.empresaService = empresaService;
-        this.proveedorService = proveedorService;
-        this.rubroService = rubroService;
-        this.medidaService = medidaService;
     }
 
     private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
@@ -308,7 +290,6 @@ public class ProductoServiceImpl implements IProductoService {
             boolean checkMedida, Medida medida,
             boolean checkRubro, Rubro rubro,
             boolean checkProveedor, Proveedor proveedor) {
-
         if (Validator.tieneDuplicados(idProducto)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_error_ids_duplicados"));
@@ -329,43 +310,26 @@ public class ProductoServiceImpl implements IProductoService {
         if (checkProveedor == true && proveedor == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_vacio_proveedor"));
-        }
-        if (checkPrecios == true) {
-            productos.forEach((producto) -> {
-                producto.setPrecioCosto(precioCosto);
-                producto.setGanancia_porcentaje(gananciaPorcentaje);
-                producto.setGanancia_neto(gananciaNeto);
-                producto.setPrecioVentaPublico(precioVentaPublico);
-                producto.setIva_porcentaje(IVAPorcentaje);
-                producto.setIva_neto(IVANeto);
-                producto.setImpuestoInterno_porcentaje(impuestoInternoPorcentaje);
-                producto.setImpuestoInterno_neto(impuestoInternoNeto);
-                producto.setPrecioLista(precioLista);
-            });
-        }
-        if (checkMedida == true) {
-            productos.stream().forEach((producto) -> {
-                producto.setMedida(medida);
-            });
-        }
-        if (checkRubro == true) {
-            productos.stream().forEach((producto) -> {
-                producto.setRubro(rubro);
-            });
-        }
-        if (checkProveedor == true) {
-            productos.stream().forEach((producto) -> {
-                producto.setProveedor(proveedor);
-            });
-        }
-        //modifica el campo fecha ultima modificacion
-        if (checkPrecios == true || checkMedida == true || checkRubro == true || checkProveedor == true) {
-            Calendar fechaHora = new GregorianCalendar();
-            Date fechaHoraActual = fechaHora.getTime();
-            productos.stream().forEach((producto) -> {
-                producto.setFechaUltimaModificacion(fechaHoraActual);
-            });
-        }
+        }        
+        productos.stream().forEach(p -> {
+            if (checkMedida == true) p.setMedida(medida);
+            if (checkRubro == true) p.setRubro(rubro);
+            if (checkProveedor == true) p.setProveedor(proveedor);           
+            if (checkPrecios == true) {            
+                p.setPrecioCosto(precioCosto);
+                p.setGanancia_porcentaje(gananciaPorcentaje);
+                p.setGanancia_neto(gananciaNeto);
+                p.setPrecioVentaPublico(precioVentaPublico);
+                p.setIva_porcentaje(IVAPorcentaje);
+                p.setIva_neto(IVANeto);
+                p.setImpuestoInterno_porcentaje(impuestoInternoPorcentaje);
+                p.setImpuestoInterno_neto(impuestoInternoNeto);
+                p.setPrecioLista(precioLista);            
+            }
+            if (checkPrecios == true || checkMedida == true || checkRubro == true || checkProveedor == true) {            
+                p.setFechaUltimaModificacion(new Date());                
+            }
+        });        
         productoRepository.save(productos);
         return productos;
     }
@@ -460,11 +424,10 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     @Override
-    public byte[] getReporteListaDePreciosPorEmpresa(List<Producto> productos, long idEmpresa) {
+    public byte[] getReporteListaDePreciosPorEmpresa(List<Producto> productos, Empresa empresa) {
         ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
         InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");        
         Map params = new HashMap();
-        Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
         params.put("empresa", empresa);
         if (!empresa.getLogo().isEmpty()) {
             try {
