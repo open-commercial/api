@@ -88,7 +88,7 @@ UPDATE   cuentacorriente
   WHERE cuentacorriente.id_Empresa > 10000000;
 -- CONFIGURACION DEL SISTEMA
 UPDATE   configuraciondelsistema
-  SET configuraciondelsistema.id_ConfiguracionDelSistema = configuraciondelsistema.id_ConfiguracionDelSistema - 10000000 + @idConfiguracionDelSistema
+  SET configuraciondelsistema.id_ConfiguracionDelSistema = configuraciondelsistema.id_ConfiguracionDelSistema - 10000000 + @idConfiguraciionDelSistemaInc
   WHERE configuraciondelsistema.id_ConfiguracionDelSistema > 10000000;  
 UPDATE   configuraciondelsistema
   SET configuraciondelsistema.id_Empresa = configuraciondelsistema.id_Empresa - 10000000 + @idEmpresaInc
@@ -160,6 +160,9 @@ UPDATE   medida
   WHERE medida.id_Medida > 10000000;
 -- NOTA
 UPDATE  nota
+  SET nota.idNota = nota.idNota- 10000000 + @idNotaInc
+  WHERE nota.idNota > 10000000;
+UPDATE  nota
   SET nota.id_Cliente = nota.id_Cliente - 10000000 + @idClienteInc
   WHERE nota.id_Cliente > 10000000;
 UPDATE   nota
@@ -169,7 +172,7 @@ UPDATE   nota
   SET nota.id_Factura = nota.id_Factura - 10000000 + @idFacturaInc
   WHERE nota.id_Factura > 10000000;
 UPDATE   nota
-  SET nota.id_Usuario = nota.id_Usuario - 10000000 + @idNotaInc
+  SET nota.id_Usuario = nota.id_Usuario - 10000000 + @idUsuarioInc
   WHERE nota.id_Usuario > 10000000;
 -- NOTA CREDITO
 UPDATE   notacredito
