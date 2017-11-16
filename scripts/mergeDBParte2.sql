@@ -1,6 +1,6 @@
 SET SQL_SAFE_UPDATES = 0;
 SET foreign_key_checks = 0;
-SET UNIQUE_CHECKS=0; 
+SET UNIQUE_CHECKS = 0; 
 
 SET @idCajaInc = (SELECT max(id_Caja) FROM sic.caja WHERE id_Caja < 10000000);
 SET @idClienteInc = (SELECT max(id_Cliente) FROM sic.cliente WHERE id_Cliente < 10000000);
@@ -334,5 +334,5 @@ UPDATE   usuario
   WHERE usuario.id_Usuario > 10000000;
 
 SET foreign_key_checks = 1;
-SET UNIQUE_CHECKS=1; 
+SET UNIQUE_CHECKS = 1; 
 SET SQL_SAFE_UPDATES = 1;
