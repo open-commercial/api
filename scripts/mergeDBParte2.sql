@@ -32,7 +32,6 @@ SET @idRolInc = (SELECT max(id_Usuario) FROM sic.rol WHERE id_Usuario < 10000000
 SET @idRubroInc = (SELECT max(id_Rubro) FROM sic.rubro WHERE id_Rubro < 10000000);
 SET @idTransportistaInc = (SELECT max(id_Transportista) FROM sic.transportista WHERE id_Transportista < 10000000);
 SET @idUsuarioInc = (SELECT max(id_Usuario) FROM sic.usuario WHERE id_Usuario < 10000000);
-SET @idUsuarioCierraInc = (SELECT max(id_UsuarioCierra) FROM sic.caja WHERE id_UsuarioCierra < 10000000);
 SET @idMovimientoInc = (SELECT max(idMovimiento) FROM sic.rengloncuentacorriente WHERE  idMovimiento < 10000000);
 SET @idProductoItemInc = (SELECT max(idProductoItem) FROM sic.renglonnotacredito WHERE  idProductoItem < 10000000);
 -- Empresa
@@ -56,7 +55,7 @@ UPDATE   caja
   SET caja.id_Usuario = caja.id_Usuario - 10000000 + @idUsuarioInc
   WHERE caja.id_Usuario > 10000000;
 UPDATE   caja
-  SET caja.id_UsuarioCierra = caja.id_UsuarioCierra - 10000000 + @idUsuarioCierraInc
+  SET caja.id_UsuarioCierra = caja.id_UsuarioCierra - 10000000 + @idUsuarioInc
   WHERE caja.id_UsuarioCierra > 10000000;
 -- Cliente  
 UPDATE   cliente

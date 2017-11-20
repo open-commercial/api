@@ -32,7 +32,6 @@ SET @idRolInc = 10000000;
 SET @idRubroInc = 10000000;
 SET @idTransportistaInc = 10000000;
 SET @idUsuarioInc = 10000000;
-SET @idUsuarioCierraInc = 10000000;
 
 -- Empresa
 UPDATE empresa SET empresa.id_Empresa = empresa.id_Empresa + @idEmpresaInc;
@@ -42,7 +41,7 @@ UPDATE empresa SET empresa.id_Localidad = empresa.id_Localidad + @idLocalidadInc
 UPDATE caja SET caja.id_Caja = caja.id_Caja + @idCajaInc;
 UPDATE caja SET caja.id_Empresa = caja.id_Empresa + @idEmpresaInc;
 UPDATE caja SET caja.id_Usuario = caja.id_Usuario + @idUsuarioInc;
-UPDATE caja SET caja.id_UsuarioCierra = caja.id_UsuarioCierra + @idUsuarioCierraInc;
+UPDATE caja SET caja.id_UsuarioCierra = caja.id_UsuarioCierra + @idUsuarioInc;
 -- Cliente  
 UPDATE cliente SET cliente.id_Cliente = cliente.id_Cliente + @idClienteInc;
 UPDATE cliente SET cliente.id_CondicionIVA = cliente.id_CondicionIVA + @idCondicionIVAInc;
