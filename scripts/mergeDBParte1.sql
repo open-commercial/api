@@ -5,7 +5,7 @@ SET UNIQUE_CHECKS = 0;
 SET @idCajaInc = 10000000;
 SET @idClienteInc = 10000000;
 SET @idCondicionIvaInc = 10000000;
-SET @idConfiguraciionDelSistemaInc = 10000000;
+SET @idConfiguracionDelSistemaInc = 10000000;
 SET @idCuentaCorrienteInc = 10000000;
 SET @idEmpresaInc = 10000000;
 SET @idFacturaInc = 10000000;
@@ -56,7 +56,7 @@ UPDATE cuentacorriente SET cuentacorriente.idCuentaCorriente = cuentacorriente.i
 UPDATE cuentacorriente SET cuentacorriente.id_Cliente = cuentacorriente.id_Cliente + @idClienteInc;
 UPDATE cuentacorriente SET cuentacorriente.id_Empresa = cuentacorriente.id_Empresa + @idEmpresaInc;
 -- CONFIGURACION DEL SISTEMA
-UPDATE configuraciondelsistema SET configuraciondelsistema.id_ConfiguracionDelSistema = configuraciondelsistema.id_ConfiguracionDelSistema + 1000000;  
+UPDATE configuraciondelsistema SET configuraciondelsistema.id_ConfiguracionDelSistema = configuraciondelsistema.id_ConfiguracionDelSistema + @idConfiguracionDelSistemaInc;  
 UPDATE configuraciondelsistema SET configuraciondelsistema.id_Empresa = configuraciondelsistema.id_Empresa + @idEmpresaInc; 
 -- FACTURA
 UPDATE factura SET factura.id_Factura = factura.id_Factura + @idFacturaInc;
