@@ -72,7 +72,7 @@ UPDATE   cuentacorriente
   SET cuentacorriente.id_Empresa = cuentacorriente.id_Empresa + @idEmpresaInc;
 -- CONFIGURACION DEL SISTEMA
 UPDATE   configuraciondelsistema
-  SET configuraciondelsistema.id_ConfiguracionDelSistema = configuraciondelsistema.id_ConfiguracionDelSistema + 1000000;  
+  SET configuraciondelsistema.id_ConfiguracionDelSistema = configuraciondelsistema.id_ConfiguracionDelSistema + @idConfiguraciionDelSistemaInc;  
 UPDATE   configuraciondelsistema
   SET configuraciondelsistema.id_Empresa = configuraciondelsistema.id_Empresa + @idEmpresaInc; 
 -- FACTURA

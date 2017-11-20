@@ -5,7 +5,7 @@ SET UNIQUE_CHECKS=0;
 SET @idCajaInc = (SELECT max(id_Caja) FROM sic.caja WHERE id_Caja < 10000000);
 SET @idClienteInc = (SELECT max(id_Cliente) FROM sic.cliente WHERE id_Cliente < 10000000);
 SET @idCondicionIvaInc = (SELECT max(id_CondicionIVA) FROM sic.condicioniva WHERE id_CondicionIVA < 10000000);
-SET @idConfiguraciionDelSistemaInc = (SELECT max(id_ConfiguracionDelSistema) FROM sic.configuraciondelsistema WHERE id_ConfiguracionDelSistema < 10000000);
+SET @idConfiguracionDelSistemaInc = (SELECT max(id_ConfiguracionDelSistema) FROM sic.configuraciondelsistema WHERE id_ConfiguracionDelSistema < 10000000);
 SET @idCuentaCorrienteInc = (SELECT max(idCuentaCorriente) FROM sic.cuentacorriente WHERE idCuentaCorriente < 10000000);
 SET @idEmpresaInc = (SELECT max(id_Empresa) FROM sic.empresa WHERE id_Empresa < 10000000);
 SET @idFacturaInc = (SELECT max(id_Factura) FROM sic.factura WHERE id_Factura < 10000000);
@@ -88,7 +88,7 @@ UPDATE   cuentacorriente
   WHERE cuentacorriente.id_Empresa > 10000000;
 -- CONFIGURACION DEL SISTEMA
 UPDATE   configuraciondelsistema
-  SET configuraciondelsistema.id_ConfiguracionDelSistema = configuraciondelsistema.id_ConfiguracionDelSistema - 10000000 + @idConfiguracionDelSistema
+  SET configuraciondelsistema.id_ConfiguracionDelSistema = configuraciondelsistema.id_ConfiguracionDelSistema - 10000000 + @idConfiguracionDelSistemaInc
   WHERE configuraciondelsistema.id_ConfiguracionDelSistema > 10000000;  
 UPDATE   configuraciondelsistema
   SET configuraciondelsistema.id_Empresa = configuraciondelsistema.id_Empresa - 10000000 + @idEmpresaInc
