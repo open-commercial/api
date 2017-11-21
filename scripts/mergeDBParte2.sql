@@ -32,7 +32,7 @@ SET @idRolInc = (SELECT max(id_Usuario) FROM sic.rol WHERE id_Usuario < 10000000
 SET @idRubroInc = (SELECT max(id_Rubro) FROM sic.rubro WHERE id_Rubro < 10000000);
 SET @idTransportistaInc = (SELECT max(id_Transportista) FROM sic.transportista WHERE id_Transportista < 10000000);
 SET @idUsuarioInc = (SELECT max(id_Usuario) FROM sic.usuario WHERE id_Usuario < 10000000);
-SET @idMovimientoInc = (SELECT max(idMovimiento) FROM sic.rengloncuentacorriente WHERE  idMovimiento < 10000000);
+-- SET @idMovimientoInc = (SELECT max(idMovimiento) FROM sic.rengloncuentacorriente WHERE  idMovimiento < 10000000);
 SET @idProductoItemInc = (SELECT max(idProductoItem) FROM sic.renglonnotacredito WHERE  idProductoItem < 10000000);
 -- Empresa
 UPDATE   empresa
@@ -259,10 +259,7 @@ UPDATE   rengloncuentacorriente
   WHERE rengloncuentacorriente.idCuentaCorriente > 10000000;
 UPDATE   rengloncuentacorriente
   SET rengloncuentacorriente.id_Factura = IF(rengloncuentacorriente.id_Factura = null, null, rengloncuentacorriente.id_Factura - 10000000 + @idFacturaInc)
-  WHERE rengloncuentacorriente.id_Factura > 10000000;
-UPDATE   rengloncuentacorriente
-  SET rengloncuentacorriente.idMovimiento = rengloncuentacorriente.idMovimiento - 10000000 + @idMovimientoInc
-  WHERE rengloncuentacorriente.idMovimiento > 10000000;  
+  WHERE rengloncuentacorriente.id_Factura > 10000000;   
 UPDATE   rengloncuentacorriente
   SET rengloncuentacorriente.idNota = IF(rengloncuentacorriente.idNota = null, null, rengloncuentacorriente.idNota - 10000000 + @idNotaInc)
   WHERE rengloncuentacorriente.idNota > 10000000;
@@ -272,6 +269,21 @@ UPDATE   rengloncuentacorriente
 UPDATE   rengloncuentacorriente
   SET rengloncuentacorriente.idRenglonCuentaCorriente = IF(rengloncuentacorriente.idRenglonCuentaCorriente = null, null, rengloncuentacorriente.idRenglonCuentaCorriente - 10000000 + @idRenglonCuentaCorrienteInc)
   WHERE rengloncuentacorriente.idRenglonCuentaCorriente > 10000000;
+UPDATE   rengloncuentacorriente
+  SET rengloncuentacorriente.idMovimiento = rengloncuentacorriente.idMovimiento - 10000000 + @idPagoInc
+  WHERE rengloncuentacorriente.idMovimiento > 10000000 AND rengloncuentacorriente.tipoMovimiento = "PAGO";  
+UPDATE   rengloncuentacorriente
+  SET rengloncuentacorriente.idMovimiento = rengloncuentacorriente.idMovimiento - 10000000 + @idGastoInc
+  WHERE rengloncuentacorriente.idMovimiento > 10000000 AND rengloncuentacorriente.tipoMovimiento = "GASTO";  
+UPDATE   rengloncuentacorriente
+  SET rengloncuentacorriente.idMovimiento = rengloncuentacorriente.idMovimiento - 10000000 + @idFacturaInc
+  WHERE rengloncuentacorriente.idMovimiento > 10000000 AND rengloncuentacorriente.tipoMovimiento = "VENTA";  
+UPDATE   rengloncuentacorriente
+  SET rengloncuentacorriente.idMovimiento = rengloncuentacorriente.idMovimiento - 10000000 + @idNotaInc
+  WHERE rengloncuentacorriente.idMovimiento > 10000000 AND rengloncuentacorriente.tipoMovimiento = "CREDITO";  
+UPDATE   rengloncuentacorriente
+  SET rengloncuentacorriente.idMovimiento = rengloncuentacorriente.idMovimiento - 10000000 + @idNotaInc
+  WHERE rengloncuentacorriente.idMovimiento > 10000000 AND rengloncuentacorriente.tipoMovimiento = "DEBITO";  
 -- RENGLON FACTURA
 UPDATE   renglonfactura 
   SET renglonfactura.id_Factura = renglonfactura.id_Factura - 10000000 + @idFacturaInc
