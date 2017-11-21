@@ -41,7 +41,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     private final INotaService notaService;
     private final IPagoService pagoService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-    private double saldo = 0;
+    private double saldoCC = 0;
     
     @Autowired
     @Lazy
@@ -112,8 +112,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     }
 
     @Override
-    public double getSaldoCuentaCorriente(long idCliente, Date hasta) {
-        Double saldo = renglonCuentaCorrienteService.getSaldoRenglonesCuentaCorrientePorCliente(idCliente, hasta);
+    public double getSaldoCuentaCorriente(long idCuentaCorriente, Date hasta) {
+        Double saldo = renglonCuentaCorrienteService.getSaldoCuentaCorriente(idCuentaCorriente, hasta);
         return (saldo != null) ? saldo : 0.0;
     }
     
@@ -128,24 +128,20 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Pageable pageable) {
         CuentaCorriente cc = this.getCuentaCorrientePorID(idCuentaCorriente);
         Page<RenglonCuentaCorriente> renglonesCuentaCorriente = renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageable);
-        if (!renglonesCuentaCorriente.getContent().isEmpty()) {       
+        if (!renglonesCuentaCorriente.getContent().isEmpty()) {
             if (pageable.getPageNumber() == 0) {
-                saldo = this.getSaldoCuentaCorriente(cc.getCliente().getId_Cliente(), renglonesCuentaCorriente.getContent().get(0).getFecha());
+                saldoCC = this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente(), renglonesCuentaCorriente.getContent().get(0).getFecha());
             }
-            renglonesCuentaCorriente.getContent().stream().map(r -> {
-                r.setSaldo(saldo);
-                return r;
-            }).map(r -> {
-                saldo -= r.getMonto();
-                return r;
-            }).map(r -> {
-                if (r.getTipoMovimiento() == TipoMovimiento.VENTA) {
-                    r.setCAE(facturaService.getCAEById(r.getIdMovimiento()));
+            for (RenglonCuentaCorriente rcc : renglonesCuentaCorriente) {
+                rcc.setSaldo(saldoCC);
+                saldoCC -= rcc.getMonto();
+                if (rcc.getTipoMovimiento() == TipoMovimiento.VENTA) {
+                    rcc.setCAE(facturaService.getCAEById(rcc.getIdMovimiento()));
                 }
-                return r;
-            }).filter(r -> (r.getTipoMovimiento() == TipoMovimiento.CREDITO || r.getTipoMovimiento() == TipoMovimiento.DEBITO)).forEachOrdered(r -> {
-                r.setCAE(notaService.getCAEById(r.getIdMovimiento()));
-            });
+                if (rcc.getTipoMovimiento() == TipoMovimiento.CREDITO || rcc.getTipoMovimiento() == TipoMovimiento.DEBITO) {
+                    rcc.setCAE(notaService.getCAEById(rcc.getIdMovimiento()));
+                }
+            }
         }
         return renglonesCuentaCorriente;
     }

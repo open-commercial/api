@@ -21,6 +21,6 @@ public interface IRenglonCuentaCorrienteService {
     
     Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(CuentaCorriente cuentaCorriente, boolean eliminado, Pageable page);
     
-    Double getSaldoRenglonesCuentaCorrientePorCliente(long idCuentaCorriente, Date hasta);
+    Double getSaldoCuentaCorriente(long idCuentaCorriente, Date hasta);
     
 }

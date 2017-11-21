@@ -13,16 +13,17 @@ import sic.modelo.Pago;
 import sic.modelo.RenglonCuentaCorriente;
 
 public interface RenglonCuentaCorrienteRepository extends PagingAndSortingRepository<RenglonCuentaCorriente, Long> {
-    
+
     RenglonCuentaCorriente findByFacturaAndEliminado(FacturaVenta fv, boolean eliminado);
-    
+
     RenglonCuentaCorriente findByNotaAndEliminado(Nota n, boolean eliminado);
-    
+
     RenglonCuentaCorriente findByPagoAndEliminado(Pago p, boolean eliminado);
-    
+
     Page<RenglonCuentaCorriente> findAllByCuentaCorrienteAndEliminado(CuentaCorriente cuentaCorriente, boolean eliminado, Pageable page);
-    
-    @Query("SELECT SUM(r.monto) FROM CuentaCorriente cc INNER JOIN cc.renglones r WHERE cc.cliente.id_Cliente = :idCliente AND cc.eliminada = false AND r.eliminado = false AND r.fecha <= :hasta")
-    Double getSaldoRenglonesCuentaCorrientePorCliente(@Param("idCliente") long idCliente, @Param("hasta") Date hasta);
-    
+
+    @Query("SELECT SUM(r.monto) FROM CuentaCorriente cc INNER JOIN cc.renglones r"
+            + " WHERE cc.idCuentaCorriente = :idCuentaCorriente AND cc.eliminada = false AND r.eliminado = false AND r.fecha <= :hasta")
+    Double getSaldoCuentaCorriente(@Param("idCuentaCorriente") long idCuentaCorriente, @Param("hasta") Date hasta);
+
 }

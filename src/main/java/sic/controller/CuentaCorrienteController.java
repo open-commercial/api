@@ -52,7 +52,7 @@ public class CuentaCorrienteController {
     @ResponseStatus(HttpStatus.OK)
     public double getSaldoCuentaCorriente(@PathVariable long idCliente) {
         Calendar fecha = Calendar.getInstance();
-        fecha.add(Calendar.MINUTE, 1);
+        fecha.add(Calendar.SECOND, 1);
         return cuentaCorrienteService.getSaldoCuentaCorriente(idCliente, fecha.getTime());
     }
     

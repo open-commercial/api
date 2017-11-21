@@ -22,7 +22,7 @@ public interface ICuentaCorrienteService {
 
       void validarCuentaCorriente(CuentaCorriente cuentaCorriente);
   
-      double getSaldoCuentaCorriente(long idCliente, Date hasta);
+      double getSaldoCuentaCorriente(long idCuentaCorriente, Date hasta);
       
       Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Pageable pageable); 
       

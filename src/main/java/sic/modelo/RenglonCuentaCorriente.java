@@ -29,7 +29,7 @@ import lombok.ToString;
 @ToString(exclude = {"cuentaCorriente"})
 @AllArgsConstructor
 @NoArgsConstructor
-public class RenglonCuentaCorriente implements Serializable  {
+public class RenglonCuentaCorriente implements Serializable {
     
     @Id
     @GeneratedValue
