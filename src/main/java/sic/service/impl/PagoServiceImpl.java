@@ -132,7 +132,7 @@ public class PagoServiceImpl implements IPagoService {
         pago = pagoRepository.save(pago);
         if (pago.getNotaDebito() != null && pago.getFactura() == null) {
             this.cuentaCorrienteService.asentarEnCuentaCorriente(pago, TipoDeOperacion.ALTA, pago.getNotaDebito().getCliente().getId_Cliente());
-        } else {
+        } else if (pago.getFactura() instanceof FacturaVenta) {
             this.cuentaCorrienteService.asentarEnCuentaCorriente(pago, TipoDeOperacion.ALTA, null);
         }
         if (pago.getFactura() != null && pago.getNotaDebito() == null) {
@@ -151,7 +151,9 @@ public class PagoServiceImpl implements IPagoService {
                     .getString("mensaje_no_se_puede_eliminar"));
         }
         pago.setEliminado(true);
-        this.cuentaCorrienteService.asentarEnCuentaCorriente(pago, TipoDeOperacion.ELIMINACION, null);
+        if (pago.getFactura() instanceof FacturaVenta) {
+            this.cuentaCorrienteService.asentarEnCuentaCorriente(pago, TipoDeOperacion.ELIMINACION, null);
+        }
         pagoRepository.save(pago);
         if (pago.getFactura() != null) {
             facturaService.actualizarFacturaEstadoPago(pago.getFactura());
