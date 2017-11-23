@@ -1,4 +1,17 @@
--- NOTA CREDITO
+-- FACTURAS
+USE sic;
+SELECT factura.fecha, factura.tipoComprobante, factura.numSerieAfip, factura.numFacturaAfip, factura.CAE,
+	cliente.idFiscal AS 'CUIT', cliente.razonSocial, cliente.nombreFantasia, condicioniva.nombre AS 'condicion', localidad.nombre AS 'localidad',
+    provincia.nombre AS 'provincia', factura.subTotal_bruto, factura.iva_105_neto, factura.iva_21_neto,
+    (100 * factura.iva_105_neto) / 10.5 AS 'base_imponible_105', ((100 * factura.iva_21_neto) / 21) AS 'base_imponible_21', factura.total
+FROM factura INNER JOIN facturaventa ON factura.id_Factura = facturaventa.id_Factura 
+	INNER JOIN cliente ON facturaventa.id_Cliente = cliente.id_Cliente INNER JOIN condicioniva ON cliente.id_CondicionIVA = condicioniva.id_CondicionIVA
+    INNER JOIN localidad ON cliente.id_Localidad = localidad.id_Localidad INNER JOIN provincia ON localidad.id_Provincia = provincia.id_Provincia
+WHERE (factura.tipoComprobante = 'FACTURA_A' OR factura.tipoComprobante = 'FACTURA_B')
+	AND (factura.fecha >= '2017-07-01 00:00:00' AND factura.fecha <= '2017-07-31 23:59:59')
+	AND factura.eliminada = 0
+ORDER BY factura.tipoComprobante, factura.fecha ASC;
+-- NOTAS CREDITO
 USE sic;
 SELECT nota.fecha, nota.tipoComprobante, nota.numSerieAfip, nota.numNotaAfip, nota.CAE,
 	cliente.idFiscal AS 'CUIT', cliente.razonSocial, cliente.nombreFantasia, condicioniva.nombre AS 'condicion', localidad.nombre AS 'localidad',
@@ -11,7 +24,7 @@ WHERE (nota.tipoComprobante = 'NOTA_CREDITO_A' OR nota.tipoComprobante = 'NOTA_C
 	AND (nota.fecha >= '2017-07-01 00:00:00' AND nota.fecha <= '2017-07-31 23:59:59')
 	AND nota.eliminada = 0
 ORDER BY nota.tipoComprobante, nota.fecha ASC;
--- NOTA DEBITO
+-- NOTAS DEBITO
 USE sic;
 SELECT nota.fecha, nota.tipoComprobante, nota.numSerieAfip, nota.numNotaAfip, nota.CAE,
 	cliente.idFiscal AS 'CUIT', cliente.razonSocial, cliente.nombreFantasia, condicioniva.nombre AS 'condicion', localidad.nombre AS 'localidad',
@@ -24,3 +37,4 @@ WHERE (nota.tipoComprobante = 'NOTA_DEBITO_A' OR nota.tipoComprobante = 'NOTA_DE
 	AND (nota.fecha >= '2017-07-01 00:00:00' AND nota.fecha <= '2017-07-31 23:59:59')
 	AND nota.eliminada = 0
 ORDER BY nota.tipoComprobante, nota.fecha ASC;
+
