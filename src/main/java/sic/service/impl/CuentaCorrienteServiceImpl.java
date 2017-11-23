@@ -112,15 +112,15 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     }
 
     @Override
-    public double getSaldoCuentaCorriente(long idCuentaCorriente, Date hasta) {
-        Double saldo = renglonCuentaCorrienteService.getSaldoCuentaCorriente(idCuentaCorriente, hasta);
+    public double getSaldoCuentaCorriente(long idCuentaCorriente) {
+        Double saldo = renglonCuentaCorrienteService.getSaldoCuentaCorriente(idCuentaCorriente);
         return (saldo != null) ? saldo : 0.0;
     }
     
     @Override
     public CuentaCorriente getCuentaCorrientePorCliente(long idCliente) {
         CuentaCorriente cc = cuentaCorrienteRepository.findByClienteAndEliminada(clienteService.getClientePorId(idCliente), false);
-        cc.setSaldo(this.getSaldoCuentaCorriente(idCliente, (new Date())));
+        cc.setSaldo(this.getSaldoCuentaCorriente(idCliente));
         return cc;
     }
     
@@ -129,7 +129,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         CuentaCorriente cc = this.getCuentaCorrientePorID(idCuentaCorriente);
         Page<RenglonCuentaCorriente> renglonesCuentaCorriente = renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageable);
         if (!renglonesCuentaCorriente.getContent().isEmpty()) {
-            Double saldoCC = this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente(), new Date());
+            Double saldoCC = this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente());
             int tamanioDePaginaAuxiliar = pageable.getPageNumber() * pageable.getPageSize();
             if (tamanioDePaginaAuxiliar != 0) {
                 Pageable pageableAuxiliar = new PageRequest(0, tamanioDePaginaAuxiliar, pageable.getSort());

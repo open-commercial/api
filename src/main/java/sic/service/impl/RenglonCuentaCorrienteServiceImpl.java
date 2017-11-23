@@ -49,8 +49,8 @@ public class RenglonCuentaCorrienteServiceImpl implements IRenglonCuentaCorrient
     }
     
     @Override
-    public Double getSaldoCuentaCorriente(long idCuentaCorriente, Date hasta) {
-        return renglonCuentaCorrienteRepository.getSaldoCuentaCorriente(idCuentaCorriente, hasta);
+    public Double getSaldoCuentaCorriente(long idCuentaCorriente) {
+        return renglonCuentaCorrienteRepository.getSaldoCuentaCorriente(idCuentaCorriente);
     }
     
 }
