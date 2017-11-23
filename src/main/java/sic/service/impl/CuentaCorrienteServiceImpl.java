@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +42,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     private final INotaService notaService;
     private final IPagoService pagoService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-    private double saldoCC = 0;
     
     @Autowired
     @Lazy
@@ -129,8 +129,16 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         CuentaCorriente cc = this.getCuentaCorrientePorID(idCuentaCorriente);
         Page<RenglonCuentaCorriente> renglonesCuentaCorriente = renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageable);
         if (!renglonesCuentaCorriente.getContent().isEmpty()) {
-            if (pageable.getPageNumber() == 0) {
-                saldoCC = this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente(), renglonesCuentaCorriente.getContent().get(0).getFecha());
+            Double saldoCC = this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente(), new Date());
+            int tamanioDePaginaAuxiliar = pageable.getPageNumber() * pageable.getPageSize();
+            if (tamanioDePaginaAuxiliar != 0) {
+                Pageable pageableAuxiliar = new PageRequest(0, tamanioDePaginaAuxiliar, pageable.getSort());
+                Page<RenglonCuentaCorriente> renglonesCuentaCorrienteAuxiliar = renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageableAuxiliar);
+                double saldoPaginaSuperiores = 0;
+                for (RenglonCuentaCorriente rcc : renglonesCuentaCorrienteAuxiliar) {
+                    saldoPaginaSuperiores += rcc.getMonto();
+                }
+                saldoCC = saldoCC - saldoPaginaSuperiores;
             }
             for (RenglonCuentaCorriente rcc : renglonesCuentaCorriente) {
                 rcc.setSaldo(saldoCC);
