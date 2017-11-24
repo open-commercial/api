@@ -51,8 +51,6 @@ public class CuentaCorrienteController {
     @GetMapping("/cuentas-corrientes/clientes/{idCliente}/saldo")
     @ResponseStatus(HttpStatus.OK)
     public double getSaldoCuentaCorriente(@PathVariable long idCliente) {
-        Calendar fecha = Calendar.getInstance();
-        fecha.add(Calendar.SECOND, 1);
         return cuentaCorrienteService.getSaldoCuentaCorriente(idCliente);
     }
     

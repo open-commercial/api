@@ -21,11 +21,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "cuentacorriente")
 @Data
 @EqualsAndHashCode(of = {"fechaApertura", "cliente", "empresa"})
+@ToString(exclude = {"renglones"})
 @AllArgsConstructor
 @NoArgsConstructor
 public class CuentaCorriente implements Serializable {
