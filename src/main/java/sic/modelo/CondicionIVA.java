@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "condicioniva")
@@ -17,6 +18,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombre"})
+@ToString
 public class CondicionIVA implements Serializable {
 
     @Id
@@ -29,14 +31,5 @@ public class CondicionIVA implements Serializable {
     private boolean discriminaIVA;
 
     private boolean eliminada;
-
-    @Override
-    public String toString() {
-        if (discriminaIVA) {
-            return nombre + " (discrimina IVA)";
-        } else {
-            return nombre + " (no discrimina IVA)";
-        }
-    }
 
 }

@@ -12,11 +12,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Table(name = "notacredito")
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = "renglonesNotaCredito")
 public class NotaCredito extends Nota implements Serializable {
     
     @Column(nullable = false)
@@ -51,7 +53,7 @@ public class NotaCredito extends Nota implements Serializable {
             double iva105Neto, double total, double montoNoGravado, long CAE, Date vencimientoCAE,
             long numSerieAfip, long numFacturaAfip) {
 
-        super(idNota, serie, facturaVenta, pagos, nroNota, eliminada, tipoDeComprobante, fecha, empresa, cliente, usuario, motivo,
+        super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, cliente, usuario, facturaVenta, pagos, motivo,
                 subTotalBruto, iva21Neto, iva105Neto, total, CAE, vencimientoCAE, numSerieAfip, numFacturaAfip);
         this.renglonesNotaCredito = renglones;
     }

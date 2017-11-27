@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.4.0.final using JasperReports Library version 6.4.1  -->
+<!-- Created with Jaspersoft Studio version 6.4.3.final using JasperReports Library version 6.4.3  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="FacturaVenta" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e47a212f-3954-4de9-aca2-5bd71a6098c5">
 	<property name="ireport.zoom" value="3.0"/>
 	<property name="ireport.x" value="0"/>
@@ -149,7 +149,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getEmpresa().getLocalidad()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getEmpresa().getLocalidad().getNombre()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="279" y="130" width="276" height="15" uuid="17a89659-8435-427a-8fc8-aa08625440aa">
@@ -161,7 +161,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getEmpresa().getLocalidad().getProvincia()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getEmpresa().getLocalidad().getProvincia().getNombre()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="160" width="279" height="15" uuid="0ac9e3dd-2252-49da-8d4a-ae5da578c748">
@@ -294,7 +294,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getCliente().getLocalidad()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getCliente().getLocalidad().getNombre()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="300" y="206" width="255" height="15" uuid="174ed8dc-2ef0-4278-a184-5abcd73c3e36">
@@ -303,7 +303,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getCliente().getLocalidad().getProvincia()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getCliente().getLocalidad().getProvincia().getNombre()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="50" y="221" width="505" height="15" uuid="cb8691ce-a678-4cf1-a2c7-4938068372c4">

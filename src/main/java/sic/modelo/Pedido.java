@@ -1,9 +1,7 @@
 package sic.modelo;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -20,16 +18,19 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Entity
 @Table(name = "pedido")
 @Data
-@ToString(exclude = {"facturas", "renglones"})
+@AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(of = {"nroPedido", "empresa"})
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Pedido", scope = Pedido.class)
+@ToString(exclude = {"facturas", "renglones"})
 public class Pedido implements Serializable {
 
     @Id
@@ -77,28 +78,5 @@ public class Pedido implements Serializable {
     
     @Enumerated(EnumType.STRING)
     private EstadoPedido estado;
-
-    public Pedido() {
-    }
-
-    public Pedido(long id_Pedido, long nroPedido, Date fecha, Date fechaVencimiento, 
-            String observaciones, Empresa empresa, boolean eliminado, Cliente cliente, 
-            Usuario usuario, List<Factura> facturas, List<RenglonPedido> renglones, 
-            double totalEstimado, double totalActual, EstadoPedido estado) {
-        this.id_Pedido = id_Pedido;
-        this.nroPedido = nroPedido;
-        this.fecha = fecha;
-        this.fechaVencimiento = fechaVencimiento;
-        this.observaciones = observaciones;
-        this.empresa = empresa;
-        this.eliminado = eliminado;
-        this.cliente = cliente;
-        this.usuario = usuario;
-        this.facturas = facturas;
-        this.renglones = renglones;
-        this.totalEstimado = totalEstimado;
-        this.totalActual = totalActual;
-        this.estado = estado;
-    }
 
 }

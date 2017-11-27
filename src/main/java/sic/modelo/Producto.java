@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "producto")
@@ -24,6 +25,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"descripcion", "empresa"})
+@ToString
 @JsonIgnoreProperties({"medida", "rubro", "proveedor", "empresa"})
 public class Producto implements Serializable {
 
@@ -111,11 +113,6 @@ public class Producto implements Serializable {
     @JsonGetter("nombreEmpresa")
     public String getNombreEmpresa() {
         return empresa.getNombre();
-    }
-    
-    @Override
-    public String toString() {
-        return descripcion;
     }
 
 }

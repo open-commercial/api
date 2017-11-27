@@ -26,10 +26,10 @@ import lombok.ToString;
 @Entity
 @Table(name = "cuentacorriente")
 @Data
-@EqualsAndHashCode(of = {"fechaApertura", "cliente", "empresa"})
-@ToString(exclude = {"renglones"})
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(of = {"fechaApertura", "cliente", "empresa"})
+@ToString(exclude = {"renglones"})
 public class CuentaCorriente implements Serializable {
     
     @Id

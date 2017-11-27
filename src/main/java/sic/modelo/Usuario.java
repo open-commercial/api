@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "usuario")
@@ -24,6 +25,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombre"})
+@ToString(exclude = "roles")
 public class Usuario implements Serializable {
 
     @Id
@@ -41,16 +43,11 @@ public class Usuario implements Serializable {
     private String token;
     
     @ElementCollection(targetClass = Rol.class)
-    @CollectionTable(name="rol",
-        joinColumns = @JoinColumn(name = "id_Usuario"))
+    @CollectionTable(name="rol", joinColumns = @JoinColumn(name = "id_Usuario"))
     @Enumerated(EnumType.STRING)
     @Column(name="nombre")
     private List<Rol> roles;
 
     private boolean eliminado;
-
-    @Override
-    public String toString() {
-        return nombre;
-    }
+    
 }

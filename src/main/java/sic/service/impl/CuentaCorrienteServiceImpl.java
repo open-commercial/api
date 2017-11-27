@@ -128,7 +128,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         CuentaCorriente cc = this.getCuentaCorrientePorID(idCuentaCorriente);
         Page<RenglonCuentaCorriente> renglonesCuentaCorriente = renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageable);
         if (!renglonesCuentaCorriente.getContent().isEmpty()) {
-            Double saldoCC = this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente());
+            double saldoCC = this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente());
             int tamanioDePaginaAuxiliar = pageable.getPageNumber() * pageable.getPageSize();
             if (tamanioDePaginaAuxiliar != 0) {
                 Pageable pageableAuxiliar = new PageRequest(0, tamanioDePaginaAuxiliar, pageable.getSort());

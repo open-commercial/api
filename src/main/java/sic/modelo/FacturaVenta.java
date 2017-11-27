@@ -9,11 +9,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Table(name = "facturaventa")
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class FacturaVenta extends Factura implements Serializable {
 
     @ManyToOne
@@ -33,6 +35,7 @@ public class FacturaVenta extends Factura implements Serializable {
             double descuento_porcentaje, double descuento_neto, double subTotal_neto, double iva_105_neto,
             double iva_21_neto, double impuestoInterno_neto, double total, String observaciones, boolean pagada,
             Empresa empresa, boolean eliminada, long CAE, Date vencimientoCAE, long numSerieAfip, long numFacturaAfip) {
+        
         super(id_Factura, fecha, tipoComprobante, numSerie, numFactura, fechaVencimiento, 
                 pedido, transportista, renglones, pagos, subTotal, recargo_porcentaje, 
                 recargo_neto, descuento_porcentaje, descuento_neto, subTotal_neto, 

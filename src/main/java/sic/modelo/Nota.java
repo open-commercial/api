@@ -25,14 +25,20 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "nota")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(of = {"fecha", "tipoComprobante", "serie", "nroNota", "empresa", "cliente"})
+@ToString(exclude = "pagos")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idNota", scope = Nota.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
@@ -110,34 +116,5 @@ public abstract class Nota implements Serializable {
     private long numSerieAfip;
 
     private long numNotaAfip;
-    
-    public Nota() {}
-    
-    public Nota(long idNota, long serie, FacturaVenta facturaVenta, List<Pago> pagos, long nroNota, boolean eliminada, TipoDeComprobante tipoComprobante,
-                Date fecha, Empresa empresa, Cliente cliente, Usuario usuario, String motivo,
-                double subTotalBruto, double iva21Neto, double iva105Neto, double total, 
-                long CAE, Date vencimientoCAE, long numSerieAfip, long numNotaAfip) {
         
-        this.facturaVenta = facturaVenta;
-        this.pagos = pagos;
-        this.idNota = idNota;
-        this.serie = serie;
-        this.nroNota = nroNota;
-        this.eliminada = eliminada;
-        this.tipoComprobante = tipoComprobante;
-        this.fecha = fecha;
-        this.empresa = empresa;
-        this.cliente = cliente;
-        this.usuario = usuario;        
-        this.motivo = motivo;
-        this.subTotalBruto = subTotalBruto;
-        this.iva21Neto = iva21Neto;
-        this.iva105Neto = iva105Neto;
-        this.total = total;
-        this.CAE = CAE;
-        this.vencimientoCAE = vencimientoCAE;
-        this.numSerieAfip = numSerieAfip;
-        this.numNotaAfip = numNotaAfip;
-    }
-    
 }

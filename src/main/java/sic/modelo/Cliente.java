@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "cliente")
@@ -25,6 +26,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"razonSocial", "idFiscal", "empresa"})
+@ToString
 public class Cliente implements Serializable {
 
     @Id
@@ -70,11 +72,11 @@ public class Cliente implements Serializable {
     @ManyToOne
     @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
     private Empresa empresa;
-    
+
     @ManyToOne
     @JoinColumn(name = "id_Usuario_Viajante", referencedColumnName = "id_Usuario")
     private Usuario viajante;
-    
+
     @OneToOne
     @JoinColumn(name = "id_Usuario_Credencial", referencedColumnName = "id_Usuario")
     private Usuario credencial;
@@ -82,12 +84,8 @@ public class Cliente implements Serializable {
     private boolean eliminado;
 
     private boolean predeterminado;
-    
+
     @Transient
     private Double saldoCuentaCorriente;
 
-    @Override
-    public String toString() {
-        return razonSocial;
-    }
 }

@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "empresa")
@@ -22,6 +23,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"nombre"})
+@ToString
 public class Empresa implements Serializable {
 
     @Id
@@ -61,10 +63,5 @@ public class Empresa implements Serializable {
     private String logo;
 
     private boolean eliminada;
-
-    @Override
-    public String toString() {
-        return nombre;
-    }
 
 }

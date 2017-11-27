@@ -1,7 +1,5 @@
 package sic.modelo;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
@@ -13,14 +11,19 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "pago")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(of = {"nroPago", "empresa"})
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Pago", scope = Pago.class)
+@ToString
 public class Pago implements Serializable {
 
     @Id
@@ -55,22 +58,5 @@ public class Pago implements Serializable {
     private Empresa empresa;
 
     private boolean eliminado;
-        
-    public Pago() {}
-
-    public Pago(Long id_Pago, long nroPago, FormaDePago formaDePago, Factura factura, NotaDebito notaDebito,
-            double monto, Date fecha, String nota, Empresa empresa, boolean eliminado) {
-        
-        this.id_Pago = id_Pago;
-        this.nroPago = nroPago;
-        this.formaDePago = formaDePago;
-        this.factura = factura;
-        this.notaDebito = notaDebito;
-        this.monto = monto;
-        this.fecha = fecha;
-        this.nota = nota;
-        this.empresa = empresa;
-        this.eliminado = eliminado;
-    }
 
 }

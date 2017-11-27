@@ -218,6 +218,7 @@ public class ProductoServiceImpl implements IProductoService {
     public void actualizar(Producto producto) {
         this.validarOperacion(TipoDeOperacion.ACTUALIZACION, producto);
         productoRepository.save(producto);
+        LOGGER.warn("El Producto " + producto + " se modificó correctamente.");
     }
 
     @Override
@@ -331,6 +332,7 @@ public class ProductoServiceImpl implements IProductoService {
             }
         });        
         productoRepository.save(productos);
+        LOGGER.warn("Los Productos " + productos + " se modificaron correctamente.");
         return productos;
     }
 
