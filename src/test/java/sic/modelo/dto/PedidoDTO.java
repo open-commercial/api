@@ -1,5 +1,7 @@
 package sic.modelo.dto;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -19,6 +21,7 @@ import sic.modelo.Usuario;
 @NoArgsConstructor
 @ToString(exclude = {"facturas", "renglones"})
 @EqualsAndHashCode(of = {"nroPedido", "empresa"})
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Pedido", scope = PedidoDTO.class)
 public class PedidoDTO implements Serializable {
     
     private long id_Pedido;
