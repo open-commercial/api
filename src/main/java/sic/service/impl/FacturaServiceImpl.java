@@ -440,15 +440,14 @@ public class FacturaServiceImpl implements IFacturaService {
             calFechaVencimiento.set(Calendar.HOUR, 0);
             calFechaVencimiento.set(Calendar.MINUTE, 0);
             calFechaVencimiento.set(Calendar.SECOND, 0);
-            calFechaVencimiento.set(Calendar.MILLISECOND, 0);
-            factura.setFechaVencimiento(calFechaVencimiento.getTime());            
+            calFechaVencimiento.set(Calendar.MILLISECOND, 0);          
             Calendar calFechaFactura = new GregorianCalendar();
             calFechaFactura.setTime(factura.getFecha());
             calFechaFactura.set(Calendar.HOUR, 0);
             calFechaFactura.set(Calendar.MINUTE, 0);
             calFechaFactura.set(Calendar.SECOND, 0);
             calFechaFactura.set(Calendar.MILLISECOND, 0);
-            if (Validator.compararFechas(factura.getFechaVencimiento(), calFechaFactura.getTime()) > 0) {
+            if (Validator.compararFechas(calFechaVencimiento.getTime(), calFechaFactura.getTime()) > 0) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_factura_fecha_invalida"));
             }
