@@ -120,4 +120,14 @@ public abstract class Factura implements Serializable {
 
     private long numFacturaAfip;
     
+    @JsonGetter("nombreTransportista")
+    public String getNombreTransportista() {
+        return transportista.getNombre();
+    }    
+    
+    @JsonGetter("nombreEmpresa")
+    public String getNombreEmpresa() {
+        return empresa.getNombre();
+    }
+    
 }

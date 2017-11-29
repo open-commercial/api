@@ -40,6 +40,7 @@ import sic.modelo.Movimiento;
 import sic.modelo.Proveedor;
 import sic.modelo.TipoDeComprobante;
 import sic.modelo.Usuario;
+import sic.service.ITransportistaService;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -51,18 +52,21 @@ public class FacturaController {
     private final IClienteService clienteService;
     private final IUsuarioService usuarioService;
     private final IPedidoService pedidoService;
+    private final ITransportistaService transportistaService;
     private final int TAMANIO_PAGINA_DEFAULT = 100;
     
     @Autowired
     public FacturaController(IFacturaService facturaService, IEmpresaService empresaService,
                              IProveedorService proveedorService, IClienteService clienteService,
-                             IUsuarioService usuarioService, IPedidoService pedidoService) {
+                             IUsuarioService usuarioService, IPedidoService pedidoService,
+                             ITransportistaService transportistaService) {
         this.facturaService = facturaService;
         this.empresaService = empresaService;
         this.proveedorService = proveedorService;
         this.clienteService = clienteService;
         this.usuarioService = usuarioService;
-        this.pedidoService = pedidoService;               
+        this.pedidoService = pedidoService;    
+        this.transportistaService = transportistaService;
     }
     
     @GetMapping("/facturas/{idFactura}")
@@ -74,8 +78,16 @@ public class FacturaController {
     @PostMapping("/facturas/venta")
     @ResponseStatus(HttpStatus.CREATED)
     public List<Factura> guardarFacturaVenta(@RequestBody FacturaVenta fv,
+                                             @RequestParam Long idEmpresa, 
+                                             @RequestParam Long idCliente,
+                                             @RequestParam Long idUsuario,
+                                             @RequestParam Long idTransportista,
                                              @RequestParam(required = false) int[] indices,
                                              @RequestParam(required = false) Long idPedido) {
+        fv.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+        fv.setCliente(clienteService.getClientePorId(idCliente));
+        fv.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
+        fv.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
         if (indices != null) {
             return facturaService.guardar(facturaService.dividirFactura((FacturaVenta) fv, indices), idPedido);
         } else {
@@ -87,7 +99,13 @@ public class FacturaController {
     
     @PostMapping("/facturas/compra")
     @ResponseStatus(HttpStatus.CREATED)
-    public List<Factura> guardarFacturaCompra(@RequestBody FacturaCompra fc) {
+    public List<Factura> guardarFacturaCompra(@RequestBody FacturaCompra fc,
+                                              @RequestParam Long idEmpresa,
+                                              @RequestParam Long idProveedor,
+                                              @RequestParam Long idTransportista) {
+            fc.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+            fc.setProveedor(proveedorService.getProveedorPorId(idProveedor));
+            fc.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
             List<Factura> facturas = new ArrayList<>();
             facturas.add(fc);
             return facturaService.guardar(facturas, null);         
