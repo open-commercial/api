@@ -269,10 +269,6 @@ public class CuentaCorrienteIntegrationTest {
                 + "&iva21Neto=" + iva_21_netoFactura, double.class);
         FacturaVentaDTO facturaVentaB = new FacturaVentaDTO();
         facturaVentaB.setTipoComprobante(TipoDeComprobante.FACTURA_B);
-        facturaVentaB.setCliente(cliente);
-        facturaVentaB.setEmpresa(empresa);
-        facturaVentaB.setTransportista(transportista);
-        facturaVentaB.setUsuario(restTemplate.getForObject(apiPrefix + "/usuarios/busqueda?nombre=test", Usuario.class));
         facturaVentaB.setRenglones(renglones);
         facturaVentaB.setSubTotal(subTotal);
         facturaVentaB.setRecargo_porcentaje(recargoPorcentaje);
@@ -283,7 +279,11 @@ public class CuentaCorrienteIntegrationTest {
         facturaVentaB.setIva_105_neto(iva_105_netoFactura);
         facturaVentaB.setIva_21_neto(iva_21_netoFactura);        
         facturaVentaB.setTotal(total);        
-        restTemplate.postForObject(apiPrefix + "/facturas/venta", facturaVentaB, FacturaVenta[].class);
+        restTemplate.postForObject(apiPrefix + "/facturas/venta?"
+                + "idCliente=" + cliente.getId_Cliente()
+                + "&idEmpresa=" + empresa.getId_Empresa()
+                + "&idUsuario=" + (restTemplate.getForObject(apiPrefix + "/usuarios/busqueda?nombre=test", Usuario.class)).getId_Usuario()
+                + "&idTransportista=" + transportista.getId_Transportista(), facturaVentaB, FacturaVenta[].class);
         assertEquals(-5992.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         List<FacturaVenta> facturasRecuperadas = restTemplate
                 .exchange(apiPrefix + "/facturas/venta/busqueda/criteria?idEmpresa=1&tipoFactura=B&nroSerie=0&nroFactura=1", HttpMethod.GET, null,
@@ -292,7 +292,6 @@ public class CuentaCorrienteIntegrationTest {
                 .getBody().getContent();
         Pago pago = new Pago();
         pago.setEmpresa(empresa);
-        pago.setFactura(facturasRecuperadas.get(0));
         pago.setFecha(new Date());
         pago.setFormaDePago(formaDePago);
         pago.setMonto(5992.5);
@@ -328,7 +327,6 @@ public class CuentaCorrienteIntegrationTest {
                 + "&cantidad=5&idRenglonFactura=1", RenglonNotaCredito[].class));
         NotaCreditoDTO notaCredito = new NotaCreditoDTO();
         notaCredito.setRenglonesNotaCredito(renglonesNotaCredito);
-        notaCredito.setFacturaVenta(facturasRecuperadas.get(0));
         notaCredito.setFecha(new Date());
         notaCredito.setSubTotal(restTemplate.getForObject(apiPrefix +"/notas/credito/sub-total?importe="
                 + renglonesNotaCredito.get(0).getImporteNeto(), Double.class));
