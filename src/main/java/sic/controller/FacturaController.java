@@ -87,11 +87,11 @@ public class FacturaController {
                                              @RequestParam Long idCliente,
                                              @RequestParam Long idUsuario,
                                              @RequestParam Long idTransportista,
-                                             @RequestParam(required = false) int[] idsFormaDePago,
+                                             @RequestParam(required = false) long[] idsFormaDePago,
                                              @RequestParam(required = false) int[] indices,
                                              @RequestParam(required = false) Long idPedido) {
         Empresa emp = empresaService.getEmpresaPorId(idEmpresa);
-        if (idsFormaDePago != null && fv.getPagos().size() == idsFormaDePago.length) {
+        if (idsFormaDePago != null) {
             int i = 0;
             for (Pago p : fv.getPagos()) {
                 p.setFormaDePago(formaDePagoService.getFormasDePagoPorId(idsFormaDePago[i]));
