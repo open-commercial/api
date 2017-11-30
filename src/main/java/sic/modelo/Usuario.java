@@ -24,7 +24,7 @@ import lombok.ToString;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"nombre"})
+@EqualsAndHashCode(of = {"username", "email"})
 @ToString(exclude = {"roles", "password"})
 public class Usuario implements Serializable {
 
@@ -51,6 +51,8 @@ public class Usuario implements Serializable {
     @Column(nullable = true)
     private String token;
 
+    private long passwordRecoveryKey;
+    
     @ElementCollection(targetClass = Rol.class)
     @CollectionTable(name="rol", joinColumns = @JoinColumn(name = "id_Usuario"))
     @Enumerated(EnumType.STRING)

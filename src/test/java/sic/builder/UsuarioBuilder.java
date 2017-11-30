@@ -15,12 +15,14 @@ public class UsuarioBuilder {
     private String apellido = "Targaryen";
     private String email = "daenerys@gmail.com";
     private String token = "yJhbGci1NiIsInR5cCI6IkpXVCJ9.eyJub21icmUiOiJjZWNpbGlvIn0.MCfaorSC7Wdc8rSW7BJizasfzsm";
+    private long passwordRecoveryKey = 0;
     private List<Rol> roles = new ArrayList<>(Arrays.asList(Rol.ADMINISTRADOR));
     private boolean habilitado = true;
     private boolean eliminado = false;
     
     public Usuario build() {
-        return new Usuario(id_Usuario, username, password, nombre, apellido, email, token, roles, habilitado, eliminado);
+        return new Usuario(id_Usuario, username, password, nombre, apellido, email,
+                token, passwordRecoveryKey, roles, habilitado, eliminado);
     }
     
     public UsuarioBuilder withId_Usuario(long idUsuario) {
@@ -55,6 +57,11 @@ public class UsuarioBuilder {
     
     public UsuarioBuilder withToken(String token) {
         this.token = token;
+        return this;
+    }
+    
+    public UsuarioBuilder withPasswordRecoveryKey(long passwordRecoveryKey) {
+        this.passwordRecoveryKey = passwordRecoveryKey;
         return this;
     }
     
