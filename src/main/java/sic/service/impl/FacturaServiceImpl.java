@@ -236,6 +236,11 @@ public class FacturaServiceImpl implements IFacturaService {
     }  
     
     @Override
+    public Factura getFacturaDelPago(long idPago) {
+        return facturaRepository.getFacturaDelPago(idPago);
+    }
+    
+    @Override
     public List<RenglonFactura> getRenglonesDeLaFacturaModificadosParaCredito(Long id_Factura) {
         return notaService.getRenglonesFacturaModificadosParaNotaCredito(id_Factura);
     }

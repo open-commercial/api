@@ -25,11 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
 import sic.modelo.BusquedaFacturaCompraCriteria;
 import sic.modelo.BusquedaFacturaVentaCriteria;
 import sic.modelo.Cliente;
+import sic.modelo.Empresa;
 import sic.modelo.Factura;
 import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
 import sic.modelo.RenglonFactura;
-import sic.service.BusinessServiceException;
 import sic.service.IClienteService;
 import sic.service.IEmpresaService;
 import sic.service.IFacturaService;
@@ -37,9 +37,12 @@ import sic.service.IPedidoService;
 import sic.service.IProveedorService;
 import sic.service.IUsuarioService;
 import sic.modelo.Movimiento;
+import sic.modelo.Pago;
 import sic.modelo.Proveedor;
 import sic.modelo.TipoDeComprobante;
 import sic.modelo.Usuario;
+import sic.service.BusinessServiceException;
+import sic.service.IFormaDePagoService;
 import sic.service.ITransportistaService;
 
 @RestController
@@ -52,6 +55,7 @@ public class FacturaController {
     private final IClienteService clienteService;
     private final IUsuarioService usuarioService;
     private final IPedidoService pedidoService;
+    private final IFormaDePagoService formaDePagoService;
     private final ITransportistaService transportistaService;
     private final int TAMANIO_PAGINA_DEFAULT = 100;
     
@@ -59,7 +63,7 @@ public class FacturaController {
     public FacturaController(IFacturaService facturaService, IEmpresaService empresaService,
                              IProveedorService proveedorService, IClienteService clienteService,
                              IUsuarioService usuarioService, IPedidoService pedidoService,
-                             ITransportistaService transportistaService) {
+                             ITransportistaService transportistaService, IFormaDePagoService formaDePagoService) {
         this.facturaService = facturaService;
         this.empresaService = empresaService;
         this.proveedorService = proveedorService;
@@ -67,6 +71,7 @@ public class FacturaController {
         this.usuarioService = usuarioService;
         this.pedidoService = pedidoService;    
         this.transportistaService = transportistaService;
+        this.formaDePagoService = formaDePagoService;
     }
     
     @GetMapping("/facturas/{idFactura}")
@@ -82,9 +87,20 @@ public class FacturaController {
                                              @RequestParam Long idCliente,
                                              @RequestParam Long idUsuario,
                                              @RequestParam Long idTransportista,
+                                             @RequestParam(required = false) int[] idsFormaDePago,
                                              @RequestParam(required = false) int[] indices,
                                              @RequestParam(required = false) Long idPedido) {
-        fv.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+        Empresa emp = empresaService.getEmpresaPorId(idEmpresa);
+        if (idsFormaDePago != null && fv.getPagos().size() == idsFormaDePago.length) {
+            int i = 0;
+            for (Pago p : fv.getPagos()) {
+                p.setFormaDePago(formaDePagoService.getFormasDePagoPorId(idsFormaDePago[i]));
+                p.setEmpresa(emp);
+                p.setFactura(fv);
+                i++;
+            }
+        }
+        fv.setEmpresa(emp);
         fv.setCliente(clienteService.getClientePorId(idCliente));
         fv.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
         fv.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
@@ -295,7 +311,13 @@ public class FacturaController {
     public List<RenglonFactura> getRenglonesPedidoParaFacturar(@PathVariable long idPedido,
                                                                @RequestParam TipoDeComprobante tipoDeComprobante) {
         return facturaService.convertirRenglonesPedidoARenglonesFactura(pedidoService.getPedidoPorId(idPedido), tipoDeComprobante);
-    }    
+    } 
+    @GetMapping("/facturas/pagos/{idPago}") 
+    @ResponseStatus(HttpStatus.OK)
+    public Factura getFacturaDelPago(@PathVariable long idPago) {
+        return facturaService.getFacturaDelPago(idPago);
+    }
+    
      
     @GetMapping("/facturas/validaciones-pago-multiple")
     @ResponseStatus(HttpStatus.OK)

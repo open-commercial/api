@@ -35,6 +35,8 @@ public interface IFacturaService {
 
     List<RenglonFactura> getRenglonesDeLaFactura(Long id_Factura);
     
+    Factura getFacturaDelPago(long idPago);
+    
     List<RenglonFactura> getRenglonesDeLaFacturaModificadosParaCredito(Long id_Factura);
     
     RenglonFactura getRenglonFactura(Long idRenglonFactura);

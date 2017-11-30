@@ -41,6 +41,7 @@ import sic.modelo.Cliente;
 import sic.modelo.CondicionIVA;
 import sic.modelo.Credencial;
 import sic.modelo.Empresa;
+import sic.modelo.Factura;
 import sic.modelo.FacturaVenta;
 import sic.modelo.FormaDePago;
 import sic.modelo.Localidad;
@@ -63,6 +64,7 @@ import sic.modelo.Usuario;
 import sic.modelo.dto.FacturaVentaDTO;
 import sic.modelo.dto.NotaCreditoDTO;
 import sic.modelo.dto.NotaDebitoDTO;
+import sic.modelo.dto.PagoDTO;
 import sic.modelo.dto.ProductoDTO;
 import sic.repository.UsuarioRepository;
 
@@ -290,12 +292,11 @@ public class CuentaCorrienteIntegrationTest {
                         new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {
                 })
                 .getBody().getContent();
-        Pago pago = new Pago();
-        pago.setEmpresa(empresa);
+        PagoDTO pago = new PagoDTO();
         pago.setFecha(new Date());
-        pago.setFormaDePago(formaDePago);
         pago.setMonto(5992.5);
-        pago = restTemplate.postForObject(apiPrefix + "/pagos/facturas/1", pago, Pago.class);
+        pago = restTemplate.postForObject(apiPrefix + "/pagos/facturas/1?idFormaDePago=" + formaDePago.getId_FormaDePago()
+                + "&idEmpresa=" + empresa.getId_Empresa(), pago, PagoDTO.class);
         assertEquals(0, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         NotaDebitoDTO notaDebito = new NotaDebitoDTO();
         notaDebito.setCliente(cliente);
@@ -314,13 +315,12 @@ public class CuentaCorrienteIntegrationTest {
         notaDebito.setFacturaVenta(null);
         NotaDebito nd = restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1/pago/1", notaDebito, NotaDebito.class);
         assertEquals(-6113.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
-        pago = new Pago();
-        pago.setEmpresa(empresa);
+        pago = new PagoDTO();
         pago.setNotaDebito(nd);
         pago.setFecha(new Date());
-        pago.setFormaDePago(formaDePago);
         pago.setMonto(6113.5);
-        restTemplate.postForObject(apiPrefix + "/pagos/notas/1", pago, Pago.class);
+        restTemplate.postForObject(apiPrefix + "/pagos/notas/1?idFormaDePago=" + formaDePago.getId_FormaDePago()
+                + "&idEmpresa=" + empresa.getId_Empresa(), pago, Pago.class);
         assertEquals(0, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         List<RenglonNotaCredito> renglonesNotaCredito = Arrays.asList(restTemplate.getForObject(apiPrefix + "/notas/renglon/credito/producto?"
                 + "tipoDeComprobante=" + facturasRecuperadas.get(0).getTipoComprobante().name()
