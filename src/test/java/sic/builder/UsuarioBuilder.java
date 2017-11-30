@@ -9,18 +9,32 @@ import sic.modelo.Usuario;
 public class UsuarioBuilder {
     
     private long id_Usuario = 0L;
-    private String nombre = "Daenerys Targaryen";
+    private String username = "daenta";
     private String password = "LaQueNoArde";
+    private String nombre = "Daenerys";
+    private String apellido = "Targaryen";
+    private String email = "daenerys@gmail.com";
     private String token = "yJhbGci1NiIsInR5cCI6IkpXVCJ9.eyJub21icmUiOiJjZWNpbGlvIn0.MCfaorSC7Wdc8rSW7BJizasfzsm";
     private List<Rol> roles = new ArrayList<>(Arrays.asList(Rol.ADMINISTRADOR));
+    private boolean habilitado = true;
     private boolean eliminado = false;
     
     public Usuario build() {
-        return new Usuario(id_Usuario, nombre, password, token, roles, eliminado);
+        return new Usuario(id_Usuario, username, password, nombre, apellido, email, token, roles, habilitado, eliminado);
     }
     
     public UsuarioBuilder withId_Usuario(long idUsuario) {
         this.id_Usuario = idUsuario;
+        return this;
+    }
+    
+    public UsuarioBuilder withUsername(String username) {
+        this.username = username;
+        return this;
+    }
+    
+    public UsuarioBuilder withPassword(String password) {
+        this.password = password;
         return this;
     }
     
@@ -29,8 +43,13 @@ public class UsuarioBuilder {
         return this;
     }
     
-    public UsuarioBuilder withPassword(String password) {
-        this.password = password;
+    public UsuarioBuilder withApellido(String apellido) {
+        this.apellido = apellido;
+        return this;
+    }
+    
+    public UsuarioBuilder withEmail(String email) {
+        this.email = email;
         return this;
     }
     
@@ -41,6 +60,11 @@ public class UsuarioBuilder {
     
     public UsuarioBuilder withRol(ArrayList<Rol> roles) {
         this.roles = roles;
+        return this;
+    }
+    
+    public UsuarioBuilder withHabilitado(boolean habilitado) {
+        this.habilitado = habilitado;
         return this;
     }
     
