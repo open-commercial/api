@@ -141,4 +141,10 @@ public class ClienteController {
     public void setClientePredeterminado(@PathVariable long idCliente) {
        clienteService.setClientePredeterminado(clienteService.getClientePorId(idCliente));       
     }
+    
+    @GetMapping("/clientes/pedidos/{idPedido}")
+    @ResponseStatus(HttpStatus.OK)
+    public void getClientePorIdPedido(@PathVariable long idPedido) {
+       clienteService.getClientePorIdPedido(idPedido);
+    }
 }

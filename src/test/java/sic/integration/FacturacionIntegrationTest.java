@@ -453,18 +453,14 @@ public class FacturacionIntegrationTest {
             importes[indice] = renglon.getSubTotal();            
             indice++;
         }       
-        PedidoDTO pedido = new PedidoDTO();
-        pedido.setCliente(cliente);
-        pedido.setEmpresa(empresa);        
+        PedidoDTO pedido = new PedidoDTO();    
         pedido.setRenglones(renglonesPedido);
-        pedido.setUsuario(restTemplate.getForObject(apiPrefix + "/usuarios/busqueda?nombre=test", Usuario.class));
         pedido.setTotalEstimado(restTemplate.getForObject(apiPrefix +"/facturas/subtotal?"
                         + "importe=" + Arrays.toString(importes).substring(1, Arrays.toString(importes).length() - 1), double.class));
         pedido.setObservaciones("Pedido Test");        
-        Pedido pedidoRecuperado = restTemplate.postForObject(apiPrefix + "/pedidos", pedido, Pedido.class);
-        assertEquals(pedido.getCliente(), pedidoRecuperado.getCliente());
-        assertEquals(pedido.getEmpresa(), pedidoRecuperado.getEmpresa());        
-        assertEquals(pedido.getUsuario(), pedidoRecuperado.getUsuario());
+        PedidoDTO pedidoRecuperado = restTemplate.postForObject(apiPrefix + "/pedidos?idEmpresa=" + empresa.getId_Empresa()
+                + "&idCliente=" + cliente.getId_Cliente()
+                + "&idUsuario=" + (restTemplate.getForObject(apiPrefix + "/usuarios/busqueda?nombre=test", Usuario.class)).getId_Usuario(), pedido, PedidoDTO.class);
         assertEquals(pedido.getTotalEstimado(), pedidoRecuperado.getTotalEstimado(), 0);
         assertEquals(pedido.getObservaciones(), pedidoRecuperado.getObservaciones());
         assertEquals(pedidoRecuperado.getEstado(), EstadoPedido.ABIERTO);
@@ -549,13 +545,13 @@ public class FacturacionIntegrationTest {
                 + "&idTransportista=" + transportista.getId_Transportista(), facturaVentaA, FacturaVenta[].class);
         List<FacturaVenta> facturasRecuperadas = restTemplate
                 .exchange(apiPrefix + "/facturas/venta/busqueda/criteria?"
-                        + "idEmpresa=" + pedidoRecuperado.getEmpresa().getId_Empresa()
+                        + "idEmpresa=" + empresa.getId_Empresa()
                         + "&nroPedido=" + pedidoRecuperado.getNroPedido(), HttpMethod.GET, null,
                         new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {
                 })
                 .getBody().getContent();       
         assertEquals(1, facturasRecuperadas.size(), 0);        
-        pedidoRecuperado = restTemplate.getForObject(apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), Pedido.class);
+        pedidoRecuperado = restTemplate.getForObject(apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
         assertEquals(EstadoPedido.ACTIVO, pedidoRecuperado.getEstado());
         renglonesDelPedido = restTemplate.getForObject(apiPrefix + "/pedidos/"+ pedidoRecuperado.getId_Pedido() +"/renglones", RenglonPedidoDTO[].class);
         assertEquals(renglones.get(0).getCantidad(), renglonesDelPedido[0].getCantidad(), 0);
@@ -630,7 +626,7 @@ public class FacturacionIntegrationTest {
                 + "&idUsuario=" + (restTemplate.getForObject(apiPrefix + "/usuarios/busqueda?nombre=test", Usuario.class)).getId_Usuario()
                 + "&idTransportista=" + transportista.getId_Transportista(), facturaVentaB, FacturaVenta[].class);
         facturasRecuperadas = restTemplate.exchange(apiPrefix + "/facturas/venta/busqueda/criteria?"
-                + "idEmpresa=" + pedidoRecuperado.getEmpresa().getId_Empresa()
+                + "idEmpresa=" + empresa.getId_Empresa()
                 + "&nroPedido=" + pedidoRecuperado.getNroPedido(), HttpMethod.GET, null,
                 new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {
         })
@@ -639,13 +635,13 @@ public class FacturacionIntegrationTest {
         assertEquals(renglones.get(0).getDescuento_porcentaje(), renglonesDelPedido[1].getDescuento_porcentaje(), 0);
         assertEquals(renglones.get(0).getDescuento_neto(), renglonesDelPedido[1].getDescuento_neto(), 0);    
         assertEquals(2, facturasRecuperadas.size(), 0);        
-        pedidoRecuperado = restTemplate.getForObject(apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), Pedido.class);
+        pedidoRecuperado = restTemplate.getForObject(apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
         assertEquals(EstadoPedido.CERRADO, pedidoRecuperado.getEstado());
         restTemplate.delete(apiPrefix + "/facturas?idFactura=" + facturasRecuperadas.get(0).getId_Factura());
-        pedidoRecuperado = restTemplate.getForObject(apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), Pedido.class);
+        pedidoRecuperado = restTemplate.getForObject(apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
         assertEquals(EstadoPedido.ACTIVO, pedidoRecuperado.getEstado());
         restTemplate.delete(apiPrefix + "/facturas?idFactura=" + facturasRecuperadas.get(1).getId_Factura());
-        pedidoRecuperado = restTemplate.getForObject(apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), Pedido.class);
+        pedidoRecuperado = restTemplate.getForObject(apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
         assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
     }
 

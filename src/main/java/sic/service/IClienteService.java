@@ -30,5 +30,7 @@ public interface IClienteService {
     void setClientePredeterminado(Cliente cliente);
 
     void validarOperacion(TipoDeOperacion operacion, Cliente cliente);
+    
+    Cliente getClientePorIdPedido(long idPedido);
 
 }

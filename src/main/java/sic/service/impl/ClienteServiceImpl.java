@@ -227,4 +227,10 @@ public class ClienteServiceImpl implements IClienteService {
         cliente.setEliminado(true);        
         clienteRepository.save(cliente);                   
     }
+    
+    @Override
+    public Cliente getClientePorIdPedido(long idPedido) {
+        return clienteRepository.findClienteByIdPedido(idPedido);
+    }
+    
 }

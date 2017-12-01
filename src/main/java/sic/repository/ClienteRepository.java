@@ -23,5 +23,8 @@ public interface ClienteRepository extends PagingAndSortingRepository<Cliente, L
 
       List<Cliente> findByRazonSocialContainingIgnoreCaseAndNombreFantasiaContainingIgnoreCaseAndIdFiscalContainingIgnoreCaseAndEmpresaAndEliminado
                     (String razonSocial, String nombreFantasia, String idFiscal, Empresa empresa, boolean eliminado);
+      
+      @Query("SELECT c FROM Pedido p INNER JOIN p.cliente c WHERE p.id_Pedido = :idPedido AND c.eliminado = false")
+      Cliente findClienteByIdPedido(@Param("idPedido") long idPedido);    
     
 }
