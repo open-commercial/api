@@ -361,21 +361,21 @@ public class FacturaController {
     
     @GetMapping("/facturas/descuento-neto")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularDescuento_neto(@RequestParam double subTotal,
+    public double calcularDescuentoNeto(@RequestParam double subTotal,
                                          @RequestParam double descuentoPorcentaje) {
         return facturaService.calcularDescuentoNeto(subTotal, descuentoPorcentaje);
     }
     
     @GetMapping("/facturas/recargo-neto")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularRecargo_neto(@RequestParam double subTotal,
+    public double calcularRecargoNeto(@RequestParam double subTotal,
                                        @RequestParam double recargoPorcentaje) {
         return facturaService.calcularRecargoNeto(subTotal, recargoPorcentaje);
     }
     
     @GetMapping("/facturas/subtotal-bruto")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularSubTotal_bruto(@RequestParam TipoDeComprobante tipoDeComprobante,
+    public double calcularSubTotalBruto(@RequestParam TipoDeComprobante tipoDeComprobante,
                                          @RequestParam double subTotal,
                                          @RequestParam double recargoNeto,
                                          @RequestParam double descuentoNeto,
@@ -387,7 +387,7 @@ public class FacturaController {
     
     @GetMapping("/facturas/impuesto-interno-neto")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularImpInterno_neto(@RequestParam TipoDeComprobante tipoDeComprobante,
+    public double calcularImpInternoNeto(@RequestParam TipoDeComprobante tipoDeComprobante,
                                           @RequestParam double descuentoPorcentaje,
                                           @RequestParam double recargoPorcentaje,
                                           @RequestParam double[] importe,
@@ -682,7 +682,7 @@ public class FacturaController {
     
     @GetMapping("/facturas/iva-neto")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularIVA_neto(@RequestParam TipoDeComprobante tipoDeComprobante,
+    public double calcularIVANeto(@RequestParam TipoDeComprobante tipoDeComprobante,
                                    @RequestParam double[] cantidades,
                                    @RequestParam double[] ivaPorcentajeRenglones,
                                    @RequestParam double[] ivaNetoRenglones,
