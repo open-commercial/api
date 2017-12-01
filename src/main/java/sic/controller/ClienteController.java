@@ -144,7 +144,7 @@ public class ClienteController {
     
     @GetMapping("/clientes/pedidos/{idPedido}")
     @ResponseStatus(HttpStatus.OK)
-    public void getClientePorIdPedido(@PathVariable long idPedido) {
-       clienteService.getClientePorIdPedido(idPedido);
+    public Cliente getClientePorIdPedido(@PathVariable long idPedido) {
+       return clienteService.getClientePorIdPedido(idPedido);
     }
 }
