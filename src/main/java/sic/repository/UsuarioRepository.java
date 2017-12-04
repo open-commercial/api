@@ -11,10 +11,10 @@ public interface UsuarioRepository extends PagingAndSortingRepository<Usuario, L
 
       @Query("SELECT u FROM Usuario u WHERE u.id_Usuario = :idUsuario AND u.eliminado = false") 
       Usuario findById(@Param("idUsuario") long idUsuario);
+      
+      Usuario findByUsernameOrEmailAndPasswordAndEliminado(String nombre, String email, String password, boolean eliminado);
     
       Usuario findByNombreAndEliminado(String nombre, boolean eliminado);
-
-      Usuario findByNombreAndPasswordAndEliminado(String nombre, String password ,boolean eliminado);
 
       List<Usuario> findAllByAndEliminadoOrderByNombreAsc(boolean eliminado);
       

@@ -33,13 +33,7 @@ public class UsuarioController {
     public Usuario getUsuarioPorId(@PathVariable long idUsuario) {
         return usuarioService.getUsuarioPorId(idUsuario);
     }
-    
-    @GetMapping("/usuarios/busqueda")
-    @ResponseStatus(HttpStatus.OK)
-    public Usuario getUsuarioPorNombre(@RequestParam String nombre) {
-        return usuarioService.getUsuarioPorNombre(nombre);
-    }
-    
+        
     @GetMapping("/usuarios")
     @ResponseStatus(HttpStatus.OK)
     public List<Usuario> getUsuarios() {

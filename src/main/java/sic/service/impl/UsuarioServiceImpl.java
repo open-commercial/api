@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.modelo.Credencial;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
 import sic.service.IUsuarioService;
@@ -37,17 +38,18 @@ public class UsuarioServiceImpl implements IUsuarioService {
         }
         return usuario;
     }
-    
+        
     @Override
-    public Usuario getUsuarioPorNombre(String nombre) {
-        Usuario usuario = usuarioRepository.findByNombreAndEliminado(nombre, false);
-//        if (usuario == null) {
-//            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-//                    .getString("mensaje_usuario_no_existente"));
-//        }
+    public Usuario autenticarUsuario(Credencial credencial) {
+        Usuario usuario = usuarioRepository.findByUsernameOrEmailAndPasswordAndEliminado(credencial.getUsername(),
+                credencial.getUsername(), Utilidades.encriptarConMD5(credencial.getPassword()), false);
+        if (usuario == null) {
+            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_usuario_no_existente"));
+        }
         return usuario;
     }
-    
+            
     @Override
     public List<Usuario> getUsuarios() {
         return usuarioRepository.findAllByAndEliminadoOrderByNombreAsc(false);
@@ -61,16 +63,6 @@ public class UsuarioServiceImpl implements IUsuarioService {
     @Override
     public List<Usuario> getUsuariosAdministradores() {
         return usuarioRepository.findAllByAndRolesAndEliminadoOrderByNombreAsc(Rol.ADMINISTRADOR, false);
-    }
-
-    @Override
-    public Usuario getUsuarioPorNombreContrasenia(String nombre, String contrasenia) {
-        Usuario usuario = usuarioRepository.findByNombreAndPasswordAndEliminado(nombre, contrasenia, false);
-        if (usuario == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_usuario_no_existente"));
-        }
-        return usuario;
     }
 
     private void validarOperacion(TipoDeOperacion operacion, Usuario usuario) {
@@ -88,8 +80,9 @@ public class UsuarioServiceImpl implements IUsuarioService {
                     .getString("mensaje_usuario_no_selecciono_rol"));
         }
         //Duplicados
-        //Nombre
-        Usuario usuarioDuplicado = this.getUsuarioPorNombre(usuario.getNombre());
+        // Username or email
+        Usuario usuarioDuplicado = usuarioRepository.findByUsernameOrEmailAndPasswordAndEliminado(usuario.getUsername(),
+                usuario.getUsername(), usuario.getPassword(), false);
         if (operacion.equals(TipoDeOperacion.ALTA) && usuarioDuplicado != null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_usuario_duplicado_nombre"));
