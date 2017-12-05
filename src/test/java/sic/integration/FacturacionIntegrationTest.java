@@ -57,7 +57,6 @@ import sic.modelo.dto.FacturaVentaDTO;
 import sic.repository.UsuarioRepository;
 import sic.builder.RenglonPedidoBuilder;
 import sic.modelo.EstadoPedido;
-import sic.modelo.Pedido;
 import sic.modelo.dto.PedidoDTO;
 import static org.junit.Assert.assertEquals;
 import org.springframework.core.ParameterizedTypeReference;

@@ -38,7 +38,7 @@ public class PagoController {
     private final IFormaDePagoService formaDePagoService;  
     private final IEmpresaService empresaService;
     private final INotaService notaService;
-    private final int TAMANIO_PAGINA_DEFAULT = 100;
+    private final int TAMANIO_PAGINA_DEFAULT = 50;
     
     @Autowired
     public PagoController(IPagoService pagoService, IFacturaService facturaService,

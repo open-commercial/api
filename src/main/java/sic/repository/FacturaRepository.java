@@ -17,7 +17,8 @@ public interface FacturaRepository<T extends Factura> extends PagingAndSortingRe
     @Query("SELECT f.total FROM Factura f WHERE f.id_Factura = :idFactura AND f.eliminada = false")
     Double getTotalById(@Param("idFactura") long idFactura);
     
-    Factura findByTipoComprobanteAndNumSerieAndNumFacturaAndEmpresaAndEliminada(TipoDeComprobante tipoComprobante, long serie, long num, Empresa empresa, boolean eliminada);
+    Factura findByTipoComprobanteAndNumSerieAndNumFacturaAndEmpresaAndEliminada(TipoDeComprobante tipoComprobante,
+            long serie, long num, Empresa empresa, boolean eliminada);
     
     List<Factura> findAllByPedidoAndEliminada(Pedido pedido, boolean eliminada);
     

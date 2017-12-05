@@ -40,7 +40,7 @@ public class PedidoController {
     private final IEmpresaService empresaService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
-    private final int TAMANIO_PAGINA_DEFAULT = 100;
+    private final int TAMANIO_PAGINA_DEFAULT = 50;
     
     @Autowired
     public PedidoController(IPedidoService pedidoService, IEmpresaService empresaService,

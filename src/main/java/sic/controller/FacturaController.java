@@ -57,7 +57,7 @@ public class FacturaController {
     private final IPedidoService pedidoService;
     private final IFormaDePagoService formaDePagoService;
     private final ITransportistaService transportistaService;
-    private final int TAMANIO_PAGINA_DEFAULT = 100;
+    private final int TAMANIO_PAGINA_DEFAULT = 50;
     
     @Autowired
     public FacturaController(IFacturaService facturaService, IEmpresaService empresaService,
@@ -312,13 +312,13 @@ public class FacturaController {
                                                                @RequestParam TipoDeComprobante tipoDeComprobante) {
         return facturaService.convertirRenglonesPedidoARenglonesFactura(pedidoService.getPedidoPorId(idPedido), tipoDeComprobante);
     } 
+    
     @GetMapping("/facturas/pagos/{idPago}") 
     @ResponseStatus(HttpStatus.OK)
     public Factura getFacturaDelPago(@PathVariable long idPago) {
         return facturaService.getFacturaDelPago(idPago);
     }
-    
-     
+         
     @GetMapping("/facturas/validaciones-pago-multiple")
     @ResponseStatus(HttpStatus.OK)
     public boolean validarFacturasParaPagoMultiple(@RequestParam long[] idFactura,
@@ -327,7 +327,6 @@ public class FacturaController {
         for (long id : idFactura) {
             facturas.add(facturaService.getFacturaPorId(id));
         }
-
         if (facturaService.validarFacturasParaPagoMultiple(facturas, movimiento)) {
             return true;
         } else if (!facturaService.validarClienteProveedorParaPagosMultiples(facturas, movimiento)) {              

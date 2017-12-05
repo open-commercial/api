@@ -3,11 +3,8 @@ package sic.builder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import sic.modelo.Cliente;
-import sic.modelo.Empresa;
 import sic.modelo.EstadoPedido;
 import sic.modelo.Factura;
-import sic.modelo.Usuario;
 import sic.modelo.dto.PedidoDTO;
 import sic.modelo.dto.RenglonPedidoDTO;
 
@@ -73,7 +70,7 @@ public class PedidoBuilder {
         return this;
     }
 
-    public PedidoBuilder withEmpresa(String nombreEmpresa) {
+    public PedidoBuilder withNombreEmpresa(String nombreEmpresa) {
         this.nombreEmpresa = nombreEmpresa;
         return this;
     }
@@ -83,12 +80,12 @@ public class PedidoBuilder {
         return this;
     }
 
-    public PedidoBuilder withCliente(String razonSocialCliente) {
+    public PedidoBuilder withRazonSocialCliente(String razonSocialCliente) {
         this.razonSocialCliente = razonSocialCliente;
         return this;
     }
 
-    public PedidoBuilder withUsuario(String nombreUsuario) {
+    public PedidoBuilder withNombreUsuario(String nombreUsuario) {
         this.nombreUsuario = nombreUsuario;
         return this;
     }

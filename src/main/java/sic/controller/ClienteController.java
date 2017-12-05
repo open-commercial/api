@@ -37,7 +37,7 @@ public class ClienteController {
     private final IPaisService paisService;
     private final IProvinciaService provinciaService;
     private final ILocalidadService localidadService;
-    private final int TAMANIO_PAGINA_DEFAULT = 100;
+    private final int TAMANIO_PAGINA_DEFAULT = 50;
     
     @Autowired
     public ClienteController(IClienteService clienteService, IEmpresaService empresaService,

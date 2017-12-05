@@ -13,11 +13,11 @@ public class PagoDTO {
     
     private Long id_Pago = 0L;    
     private long nroPago = 0;
-    private String nombreFormaDePago = "efectivo";
+    private String nombreFormaDePago = "Efectivo";
     private Nota notaDebito = null;
     private double monto = 100;
     private Date fecha = new Date();
-    private String nota = "pago dto";
+    private String nota = "Salda deuda anterior";
     private String nombreEmpresa = "Globo De Oro";
     private boolean eliminado = false;
     

@@ -9,17 +9,12 @@ import java.util.Date;
 import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import sic.builder.EmpresaBuilder;
-import sic.builder.TransportistaBuilder;
-import sic.modelo.Empresa;
 import sic.modelo.Pago;
-import sic.modelo.Pedido;
 import sic.modelo.RenglonFactura;
 import sic.modelo.TipoDeComprobante;
-import sic.modelo.Transportista;
 
 @Data
-@EqualsAndHashCode(of = {"fecha", "tipoComprobante", "numSerie", "numFactura", "empresa"})
+@EqualsAndHashCode(of = {"fecha", "tipoComprobante", "numSerie", "numFactura", "nombreEmpresa"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Factura", scope = FacturaDTO.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
