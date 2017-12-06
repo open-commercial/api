@@ -119,8 +119,8 @@ public class ClienteController {
     
     @GetMapping("/clientes/existe-predeterminado/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
-    public boolean getExisteClientePredeterminado(@PathVariable long idEmpresa) {
-        return clienteService.getExisteClientePredeterminado(empresaService.getEmpresaPorId(idEmpresa));
+    public boolean existeClientePredeterminado(@PathVariable long idEmpresa) {
+        return clienteService.existeClientePredeterminado(empresaService.getEmpresaPorId(idEmpresa));
     }
 
     @DeleteMapping("/clientes/{idCliente}")

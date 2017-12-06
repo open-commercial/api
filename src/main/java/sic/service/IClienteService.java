@@ -23,7 +23,7 @@ public interface IClienteService {
 
     Cliente getClientePredeterminado(Empresa empresa);
     
-    boolean getExisteClientePredeterminado(Empresa empresa);
+    boolean existeClientePredeterminado(Empresa empresa);
 
     List<Cliente> getClientes(Empresa empresa);
 

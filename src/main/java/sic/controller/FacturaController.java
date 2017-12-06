@@ -63,7 +63,8 @@ public class FacturaController {
     public FacturaController(IFacturaService facturaService, IEmpresaService empresaService,
                              IProveedorService proveedorService, IClienteService clienteService,
                              IUsuarioService usuarioService, IPedidoService pedidoService,
-                             ITransportistaService transportistaService, IFormaDePagoService formaDePagoService) {
+                             ITransportistaService transportistaService,
+                             IFormaDePagoService formaDePagoService) {
         this.facturaService = facturaService;
         this.empresaService = empresaService;
         this.proveedorService = proveedorService;
@@ -345,27 +346,7 @@ public class FacturaController {
                                           @RequestParam double descuentoPorcentaje) {
         return facturaService.calcularRenglon(tipoDeComprobante, movimiento, cantidad, idProducto, descuentoPorcentaje);
     }
-    
-    @GetMapping("/facturas/impuesto-interno-neto")
-    @ResponseStatus(HttpStatus.OK)
-    public double calcularImpInternoNeto(@RequestParam TipoDeComprobante tipoDeComprobante,
-                                          @RequestParam double descuentoPorcentaje,
-                                          @RequestParam double recargoPorcentaje,
-                                          @RequestParam double[] importe,
-                                          @RequestParam double[] impuestoPorcentaje) {
-        return facturaService.calcularImpInternoNeto(tipoDeComprobante, descuentoPorcentaje,
-                recargoPorcentaje, importe, impuestoPorcentaje);
-
-    }
-    
-    @GetMapping("/facturas/total")
-    @ResponseStatus(HttpStatus.OK)
-    public double calcularTotal(@RequestParam double subTotalBruto,                                
-                                @RequestParam double iva105Neto,
-                                @RequestParam double iva21Neto) {
-        return facturaService.calcularTotal(subTotalBruto, iva105Neto, iva21Neto);
-    }
-    
+        
     @GetMapping("/facturas/total-facturado-venta/criteria")
     @ResponseStatus(HttpStatus.OK)
     public double calcularTotalFacturadoVenta(@RequestParam Long idEmpresa,

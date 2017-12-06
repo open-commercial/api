@@ -71,7 +71,7 @@ public class ClienteServiceImpl implements IClienteService {
     }
     
     @Override
-    public boolean getExisteClientePredeterminado(Empresa empresa) {
+    public boolean existeClientePredeterminado(Empresa empresa) {
         return clienteRepository.existsByAndEmpresaAndPredeterminadoAndEliminado(empresa, true, false);
     }
 

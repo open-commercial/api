@@ -31,7 +31,7 @@ public class CajaController {
     private final ICajaService cajaService;    
     private final IEmpresaService empresaService;
     private final IUsuarioService usuarioService;
-    private final int TAMANIO_PAGINA_DEFAULT = 100;
+    private final int TAMANIO_PAGINA_DEFAULT = 50;
     
     @Autowired
     public CajaController(ICajaService cajaService, IEmpresaService empresaService,

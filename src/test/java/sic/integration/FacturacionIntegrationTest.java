@@ -426,7 +426,9 @@ public class FacturacionIntegrationTest {
         renglonesPedido.add(renglonPedidoUno);
         renglonesPedido.add(renglonPedidoDos);
         double subTotal = 0;
-        subTotal = renglonesPedido.stream().map((renglon) -> renglon.getSubTotal()).reduce(subTotal, (accumulator, _item) -> accumulator + _item);       
+        subTotal = renglonesPedido.stream()
+                                  .map(renglon -> renglon.getSubTotal())
+                                  .reduce(subTotal, (accumulator, item) -> accumulator + item);       
         PedidoDTO pedido = new PedidoDTO();    
         pedido.setRenglones(renglonesPedido);
         pedido.setTotalEstimado(subTotal);
@@ -540,8 +542,7 @@ public class FacturacionIntegrationTest {
                 + "idEmpresa=" + empresa.getId_Empresa()
                 + "&nroPedido=" + pedidoRecuperado.getNroPedido(), HttpMethod.GET, null,
                 new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {
-        })
-                .getBody().getContent();            
+        }).getBody().getContent();            
         assertEquals(renglones.get(0).getCantidad(), renglonesDelPedido[1].getCantidad(), 0);
         assertEquals(renglones.get(0).getDescuento_porcentaje(), renglonesDelPedido[1].getDescuento_porcentaje(), 0);
         assertEquals(renglones.get(0).getDescuento_neto(), renglonesDelPedido[1].getDescuento_neto(), 0);    
