@@ -117,7 +117,12 @@ public class ClienteController {
      return clienteService.getClientePredeterminado(empresaService.getEmpresaPorId(idEmpresa));
     }
     
-    
+    @GetMapping("/clientes/existe-predeterminado/empresas/{idEmpresa}")
+    @ResponseStatus(HttpStatus.OK)
+    public boolean getExisteClientePredeterminado(@PathVariable long idEmpresa) {
+        return clienteService.getExisteClientePredeterminado(empresaService.getEmpresaPorId(idEmpresa));
+    }
+
     @DeleteMapping("/clientes/{idCliente}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable long idCliente) {

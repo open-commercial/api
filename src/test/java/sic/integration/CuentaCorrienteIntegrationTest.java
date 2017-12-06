@@ -215,59 +215,38 @@ public class CuentaCorrienteIntegrationTest {
         renglones.add(renglonUno);
         renglones.add(renglonDos); 
         int size = renglones.size();
-        double[] importes = new double[size];
         double[] cantidades = new double[size];
         double[] ivaPorcentajeRenglones = new double[size];
         double[] ivaNetoRenglones = new double[size];
         int indice = 0;
+        double subTotal = 0;
         for (RenglonFactura renglon : renglones) {
-            importes[indice] = renglon.getImporte();
+            subTotal += renglon.getImporte();
             cantidades[indice] = renglon.getCantidad();
             ivaPorcentajeRenglones[indice] = renglon.getIva_porcentaje();
             ivaNetoRenglones[indice] = renglon.getIva_neto();
             indice++;
         }
-        double subTotal = restTemplate.getRestTemplate().getForObject(apiPrefix + "/facturas/subtotal?"
-                + "importe=" + Arrays.toString(importes).substring(1, Arrays.toString(importes).length() - 1),
-                double.class);
         double descuentoPorcentaje = 25;
         double recargoPorcentaje = 10;
-        double descuento_neto = restTemplate.getRestTemplate().getForObject(apiPrefix + "/facturas/descuento-neto?"
-                + "subTotal=" + subTotal
-                + "&descuentoPorcentaje=" + descuentoPorcentaje, double.class);
-        double recargo_neto = restTemplate.getRestTemplate().getForObject(apiPrefix + "/facturas/recargo-neto?"
-                + "subTotal=" + subTotal
-                + "&recargoPorcentaje=" + recargoPorcentaje, double.class);
-        double iva_105_netoFactura = restTemplate.getRestTemplate().getForObject(apiPrefix + "/facturas/iva-neto?"
-                + "tipoDeComprobante=" + TipoDeComprobante.FACTURA_B
-                + "&cantidades=" + Arrays.toString(cantidades).substring(1, Arrays.toString(cantidades).length() - 1)
-                + "&ivaPorcentajeRenglones=" + Arrays.toString(ivaPorcentajeRenglones).substring(1, Arrays.toString(ivaPorcentajeRenglones).length() - 1)
-                + "&ivaNetoRenglones=" + Arrays.toString(ivaNetoRenglones).substring(1, Arrays.toString(ivaNetoRenglones).length() - 1)
-                + "&ivaPorcentaje=10.5"
-                + "&descuentoPorcentaje=" + descuentoPorcentaje
-                + "&recargoPorcentaje=" + recargoPorcentaje,
-                double.class);
-        double iva_21_netoFactura = restTemplate.getRestTemplate().getForObject(apiPrefix + "/facturas/iva-neto?"
-                + "tipoDeComprobante=" + TipoDeComprobante.FACTURA_B
-                + "&cantidades=" + Arrays.toString(cantidades).substring(1, Arrays.toString(cantidades).length() - 1)
-                + "&ivaPorcentajeRenglones=" + Arrays.toString(ivaPorcentajeRenglones).substring(1, Arrays.toString(ivaPorcentajeRenglones).length() - 1)
-                + "&ivaNetoRenglones=" + Arrays.toString(ivaNetoRenglones).substring(1, Arrays.toString(ivaNetoRenglones).length() - 1)
-                + "&ivaPorcentaje=21"
-                + "&descuentoPorcentaje=" + descuentoPorcentaje
-                + "&recargoPorcentaje=" + recargoPorcentaje,
-                double.class);
-        double subTotalBruto = restTemplate.getRestTemplate().getForObject(apiPrefix + "/facturas/subtotal-bruto?"
-                + "tipoDeComprobante=" + TipoDeComprobante.FACTURA_B
-                + "&subTotal=" + subTotal
-                + "&recargoNeto=" + recargo_neto
-                + "&descuentoNeto=" + descuento_neto
-                + "&iva105Neto=" + iva_105_netoFactura
-                + "&iva21Neto=" + iva_21_netoFactura,
-                double.class);
-        double total = restTemplate.getRestTemplate().getForObject(apiPrefix + "/facturas/total?"
-                + "subTotalBruto=" + subTotalBruto
-                + "&iva105Neto=" + iva_105_netoFactura
-                + "&iva21Neto=" + iva_21_netoFactura, double.class);
+        double descuento_neto = (subTotal * descuentoPorcentaje) / 100;
+        double recargo_neto = (subTotal * recargoPorcentaje) / 100;
+        indice = cantidades.length;
+        double iva_105_netoFactura = 0;
+        double iva_21_netoFactura = 0;
+        for (int i = 0; i < indice; i++) {
+            if (ivaPorcentajeRenglones[i] == 10.5) {
+                iva_105_netoFactura += cantidades[i] * (ivaNetoRenglones[i]
+                        - (ivaNetoRenglones[i] * (descuentoPorcentaje / 100))
+                        + (ivaNetoRenglones[i] * (recargoPorcentaje / 100)));
+            } else if (ivaPorcentajeRenglones[i] == 21) {
+                iva_21_netoFactura += cantidades[i] * (ivaNetoRenglones[i]
+                        - (ivaNetoRenglones[i] * (descuentoPorcentaje / 100))
+                        + (ivaNetoRenglones[i] * (recargoPorcentaje / 100)));
+            }
+        }
+        double subTotalBruto = subTotal + recargo_neto - descuento_neto - (iva_105_netoFactura + iva_21_netoFactura);
+        double total = subTotalBruto + iva_105_netoFactura + iva_21_netoFactura;
         FacturaVentaDTO facturaVentaB = new FacturaVentaDTO();
         facturaVentaB.setTipoComprobante(TipoDeComprobante.FACTURA_B);
         facturaVentaB.setRenglones(renglones);

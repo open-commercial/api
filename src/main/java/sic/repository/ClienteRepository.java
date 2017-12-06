@@ -18,6 +18,8 @@ public interface ClienteRepository extends PagingAndSortingRepository<Cliente, L
       Cliente findByRazonSocialAndEmpresaAndEliminado(String razonSocial, Empresa empresa, boolean eliminado);
 
       Cliente findByAndEmpresaAndPredeterminadoAndEliminado(Empresa empresa, boolean predeterminado, boolean eliminado);
+      
+      boolean existsByAndEmpresaAndPredeterminadoAndEliminado(Empresa empresa, boolean predeterminado, boolean eliminado);
 
       List<Cliente> findAllByAndEmpresaAndEliminadoOrderByRazonSocialAsc(Empresa empresa, boolean eliminado);
 

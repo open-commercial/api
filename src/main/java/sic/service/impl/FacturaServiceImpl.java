@@ -1032,15 +1032,6 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     @Override
-    public double calcularVuelto(double importeAPagar, double importeAbonado) {
-        if (importeAbonado <= importeAPagar) {
-            return 0;
-        } else {
-            return importeAbonado - importeAPagar;
-        }
-    }
-
-    @Override
     public double calcularImporte(double cantidad, double precioUnitario, double descuento_neto) {
         return (precioUnitario - descuento_neto) * cantidad;
     }

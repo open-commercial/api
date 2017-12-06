@@ -289,12 +289,6 @@ public class FacturaController {
         return facturaService.getTiposFacturaSegunEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     }    
     
-    @GetMapping("/facturas/{idFactura}/tipo")
-    @ResponseStatus(HttpStatus.OK)
-    public TipoDeComprobante getTipoFactura(@PathVariable long idFactura) {
-        return facturaService.getFacturaPorId(idFactura).getTipoComprobante();
-    }
-    
     @GetMapping("/facturas/{idFactura}/reporte")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<byte[]> getReporteFacturaVenta(@PathVariable long idFactura) {        
@@ -350,38 +344,6 @@ public class FacturaController {
                                           @RequestParam double cantidad, 
                                           @RequestParam double descuentoPorcentaje) {
         return facturaService.calcularRenglon(tipoDeComprobante, movimiento, cantidad, idProducto, descuentoPorcentaje);
-    }
-    
-    @GetMapping("/facturas/subtotal")
-    @ResponseStatus(HttpStatus.OK)
-    public double calcularSubTotal(@RequestParam double[] importe) {
-        return facturaService.calcularSubTotal(importe);
-    }
-    
-    @GetMapping("/facturas/descuento-neto")
-    @ResponseStatus(HttpStatus.OK)
-    public double calcularDescuentoNeto(@RequestParam double subTotal,
-                                         @RequestParam double descuentoPorcentaje) {
-        return facturaService.calcularDescuentoNeto(subTotal, descuentoPorcentaje);
-    }
-    
-    @GetMapping("/facturas/recargo-neto")
-    @ResponseStatus(HttpStatus.OK)
-    public double calcularRecargoNeto(@RequestParam double subTotal,
-                                       @RequestParam double recargoPorcentaje) {
-        return facturaService.calcularRecargoNeto(subTotal, recargoPorcentaje);
-    }
-    
-    @GetMapping("/facturas/subtotal-bruto")
-    @ResponseStatus(HttpStatus.OK)
-    public double calcularSubTotalBruto(@RequestParam TipoDeComprobante tipoDeComprobante,
-                                         @RequestParam double subTotal,
-                                         @RequestParam double recargoNeto,
-                                         @RequestParam double descuentoNeto,
-                                         @RequestParam double iva105Neto,
-                                         @RequestParam double iva21Neto) {
-        return facturaService.calcularSubTotalBruto(tipoDeComprobante, subTotal,
-            recargoNeto, descuentoNeto, iva105Neto, iva21Neto);
     }
     
     @GetMapping("/facturas/impuesto-interno-neto")
@@ -677,26 +639,6 @@ public class FacturaController {
                                                  .cantRegistros(0)
                                                  .build();
         return facturaService.calcularGananciaTotal(criteria);
-    }
-    
-    @GetMapping("/facturas/iva-neto")
-    @ResponseStatus(HttpStatus.OK)
-    public double calcularIVANeto(@RequestParam TipoDeComprobante tipoDeComprobante,
-                                   @RequestParam double[] cantidades,
-                                   @RequestParam double[] ivaPorcentajeRenglones,
-                                   @RequestParam double[] ivaNetoRenglones,
-                                   @RequestParam double ivaPorcentaje,
-                                   @RequestParam double descuentoPorcentaje, 
-                                   @RequestParam double recargoPorcentaje) {
-        return facturaService.calcularIvaNetoFactura(tipoDeComprobante, cantidades, ivaPorcentajeRenglones,
-                ivaNetoRenglones, ivaPorcentaje, descuentoPorcentaje, recargoPorcentaje);
-    }
-    
-    @GetMapping("/facturas/calculo-vuelto")
-    @ResponseStatus(HttpStatus.OK)
-    public double calcularVuelto(@RequestParam double importeAPagar,
-                                 @RequestParam double importeAbonado) {
-        return facturaService.calcularVuelto(importeAPagar, importeAbonado);
     }
         
 }

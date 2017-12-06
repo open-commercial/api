@@ -127,16 +127,16 @@ public class CajaController {
         fechaDesde.add(Calendar.YEAR, -17); // Rango temporal hasta la implementacion de criteria builder
         Calendar fechaHasta = Calendar.getInstance();
         if (desde != null && hasta != null) {
-            fechaDesde.set(Calendar.HOUR, 0);
+            fechaDesde.setTimeInMillis(desde);
+            fechaDesde.set(Calendar.HOUR_OF_DAY, 0);
             fechaDesde.set(Calendar.MINUTE, 0);
             fechaDesde.set(Calendar.SECOND, 0);
             fechaDesde.set(Calendar.MILLISECOND, 0);
-            fechaDesde.setTimeInMillis(desde);
-            fechaHasta.set(Calendar.HOUR, 0);
-            fechaHasta.set(Calendar.MINUTE, 0);
-            fechaHasta.set(Calendar.SECOND, 0);
-            fechaHasta.set(Calendar.MILLISECOND, 0);
             fechaHasta.setTimeInMillis(hasta);
+            fechaHasta.set(Calendar.HOUR_OF_DAY, 23);
+            fechaHasta.set(Calendar.MINUTE, 59);
+            fechaHasta.set(Calendar.SECOND, 59);
+            fechaHasta.set(Calendar.MILLISECOND, 0);
         }
         return cajaService.getSaldoFinalCajas(idEmpresa, idUsuario, fechaDesde.getTime(), fechaHasta.getTime());
     }
@@ -150,16 +150,16 @@ public class CajaController {
         fechaDesde.add(Calendar.YEAR, -17); // Rango temporal hasta la implementacion de criteria builder
         Calendar fechaHasta = Calendar.getInstance();
         if (desde != null && hasta != null) {
-            fechaDesde.set(Calendar.HOUR, 0);
+            fechaDesde.setTimeInMillis(desde);
+            fechaDesde.set(Calendar.HOUR_OF_DAY, 0);
             fechaDesde.set(Calendar.MINUTE, 0);
             fechaDesde.set(Calendar.SECOND, 0);
             fechaDesde.set(Calendar.MILLISECOND, 0);
-            fechaDesde.setTimeInMillis(desde);
-            fechaHasta.set(Calendar.HOUR, 0);
-            fechaHasta.set(Calendar.MINUTE, 0);
-            fechaHasta.set(Calendar.SECOND, 0);
-            fechaHasta.set(Calendar.MILLISECOND, 0);
             fechaHasta.setTimeInMillis(hasta);
+            fechaHasta.set(Calendar.HOUR_OF_DAY, 23);
+            fechaHasta.set(Calendar.MINUTE, 59);
+            fechaHasta.set(Calendar.SECOND, 59);
+            fechaHasta.set(Calendar.MILLISECOND, 0);
         }
         return cajaService.getSaldoRealCajas(idEmpresa, idUsuario, fechaDesde.getTime(), fechaHasta.getTime());
     }

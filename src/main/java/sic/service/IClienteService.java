@@ -22,6 +22,8 @@ public interface IClienteService {
     Cliente getClientePorRazonSocial(String razonSocial, Empresa empresa);
 
     Cliente getClientePredeterminado(Empresa empresa);
+    
+    boolean getExisteClientePredeterminado(Empresa empresa);
 
     List<Cliente> getClientes(Empresa empresa);
 

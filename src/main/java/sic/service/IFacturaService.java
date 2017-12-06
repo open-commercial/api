@@ -99,8 +99,6 @@ public interface IFacturaService {
 
     long calcularNumeroFacturaVenta(TipoDeComprobante tipoDeComprobante, long serie, long idEmpresa);
 
-    double calcularVuelto(double importeAPagar, double importeAbonado);
-
     double calcularImporte(double cantidad, double precioUnitario, double descuento_neto);    
 
     byte[] getReporteFacturaVenta(Factura factura);
