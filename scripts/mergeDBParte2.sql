@@ -346,6 +346,34 @@ UPDATE   transportista
 UPDATE   usuario
   SET usuario.id_Usuario = usuario.id_Usuario - 10000000 + @idUsuarioInc
   WHERE usuario.id_Usuario > 10000000;
+  
+  ALTER TABLE sic.caja AUTO_INCREMENT = 0;
+ALTER TABLE sic.cliente AUTO_INCREMENT = 0;
+ALTER TABLE sic.condicioniva AUTO_INCREMENT = 0;
+ALTER TABLE sic.configuraciondelsistema AUTO_INCREMENT = 0;
+ALTER TABLE sic.cuentacorriente AUTO_INCREMENT = 0;
+ALTER TABLE sic.empresa AUTO_INCREMENT = 0;
+ALTER TABLE sic.factura AUTO_INCREMENT = 0;
+ALTER TABLE sic.formadepago AUTO_INCREMENT = 0;
+ALTER TABLE sic.gasto AUTO_INCREMENT = 0;
+ALTER TABLE sic.localidad AUTO_INCREMENT = 0;
+ALTER TABLE sic.medida AUTO_INCREMENT = 0;
+ALTER TABLE sic.nota AUTO_INCREMENT = 0;
+ALTER TABLE sic.pago AUTO_INCREMENT = 0;
+ALTER TABLE sic.pais AUTO_INCREMENT = 0;
+ALTER TABLE sic.pedido AUTO_INCREMENT = 0;
+ALTER TABLE sic.producto AUTO_INCREMENT = 0;
+ALTER TABLE sic.proveedor AUTO_INCREMENT = 0;
+ALTER TABLE sic.provincia AUTO_INCREMENT = 0;
+ALTER TABLE sic.rengloncuentacorriente AUTO_INCREMENT = 0;
+ALTER TABLE sic.renglonfactura AUTO_INCREMENT = 0;
+ALTER TABLE sic.renglonnotacredito AUTO_INCREMENT = 0;
+ALTER TABLE sic.renglonnotadebito AUTO_INCREMENT = 0;
+ALTER TABLE sic.renglonpedido AUTO_INCREMENT = 0;
+ALTER TABLE sic.rubro AUTO_INCREMENT = 0;
+ALTER TABLE sic.transportista AUTO_INCREMENT = 0;
+ALTER TABLE sic.usuario AUTO_INCREMENT = 0;
+
 
 SET foreign_key_checks = 1;
 SET UNIQUE_CHECKS = 1; 
