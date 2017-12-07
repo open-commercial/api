@@ -25,11 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
 import sic.modelo.BusquedaFacturaCompraCriteria;
 import sic.modelo.BusquedaFacturaVentaCriteria;
 import sic.modelo.Cliente;
+import sic.modelo.Empresa;
 import sic.modelo.Factura;
 import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
 import sic.modelo.RenglonFactura;
-import sic.service.BusinessServiceException;
 import sic.service.IClienteService;
 import sic.service.IEmpresaService;
 import sic.service.IFacturaService;
@@ -37,9 +37,13 @@ import sic.service.IPedidoService;
 import sic.service.IProveedorService;
 import sic.service.IUsuarioService;
 import sic.modelo.Movimiento;
+import sic.modelo.Pago;
 import sic.modelo.Proveedor;
 import sic.modelo.TipoDeComprobante;
 import sic.modelo.Usuario;
+import sic.service.BusinessServiceException;
+import sic.service.IFormaDePagoService;
+import sic.service.ITransportistaService;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -51,18 +55,24 @@ public class FacturaController {
     private final IClienteService clienteService;
     private final IUsuarioService usuarioService;
     private final IPedidoService pedidoService;
-    private final int TAMANIO_PAGINA_DEFAULT = 100;
+    private final IFormaDePagoService formaDePagoService;
+    private final ITransportistaService transportistaService;
+    private final int TAMANIO_PAGINA_DEFAULT = 50;
     
     @Autowired
     public FacturaController(IFacturaService facturaService, IEmpresaService empresaService,
                              IProveedorService proveedorService, IClienteService clienteService,
-                             IUsuarioService usuarioService, IPedidoService pedidoService) {
+                             IUsuarioService usuarioService, IPedidoService pedidoService,
+                             ITransportistaService transportistaService,
+                             IFormaDePagoService formaDePagoService) {
         this.facturaService = facturaService;
         this.empresaService = empresaService;
         this.proveedorService = proveedorService;
         this.clienteService = clienteService;
         this.usuarioService = usuarioService;
-        this.pedidoService = pedidoService;               
+        this.pedidoService = pedidoService;    
+        this.transportistaService = transportistaService;
+        this.formaDePagoService = formaDePagoService;
     }
     
     @GetMapping("/facturas/{idFactura}")
@@ -74,8 +84,27 @@ public class FacturaController {
     @PostMapping("/facturas/venta")
     @ResponseStatus(HttpStatus.CREATED)
     public List<Factura> guardarFacturaVenta(@RequestBody FacturaVenta fv,
+                                             @RequestParam Long idEmpresa, 
+                                             @RequestParam Long idCliente,
+                                             @RequestParam Long idUsuario,
+                                             @RequestParam Long idTransportista,
+                                             @RequestParam(required = false) long[] idsFormaDePago,
                                              @RequestParam(required = false) int[] indices,
                                              @RequestParam(required = false) Long idPedido) {
+        Empresa emp = empresaService.getEmpresaPorId(idEmpresa);
+        if (idsFormaDePago != null) {
+            int i = 0;
+            for (Pago p : fv.getPagos()) {
+                p.setFormaDePago(formaDePagoService.getFormasDePagoPorId(idsFormaDePago[i]));
+                p.setEmpresa(emp);
+                p.setFactura(fv);
+                i++;
+            }
+        }
+        fv.setEmpresa(emp);
+        fv.setCliente(clienteService.getClientePorId(idCliente));
+        fv.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
+        fv.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
         if (indices != null) {
             return facturaService.guardar(facturaService.dividirFactura((FacturaVenta) fv, indices), idPedido);
         } else {
@@ -87,7 +116,13 @@ public class FacturaController {
     
     @PostMapping("/facturas/compra")
     @ResponseStatus(HttpStatus.CREATED)
-    public List<Factura> guardarFacturaCompra(@RequestBody FacturaCompra fc) {
+    public List<Factura> guardarFacturaCompra(@RequestBody FacturaCompra fc,
+                                              @RequestParam Long idEmpresa,
+                                              @RequestParam Long idProveedor,
+                                              @RequestParam Long idTransportista) {
+            fc.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+            fc.setProveedor(proveedorService.getProveedorPorId(idProveedor));
+            fc.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
             List<Factura> facturas = new ArrayList<>();
             facturas.add(fc);
             return facturaService.guardar(facturas, null);         
@@ -255,12 +290,6 @@ public class FacturaController {
         return facturaService.getTiposFacturaSegunEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     }    
     
-    @GetMapping("/facturas/{idFactura}/tipo")
-    @ResponseStatus(HttpStatus.OK)
-    public TipoDeComprobante getTipoFactura(@PathVariable long idFactura) {
-        return facturaService.getFacturaPorId(idFactura).getTipoComprobante();
-    }
-    
     @GetMapping("/facturas/{idFactura}/reporte")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<byte[]> getReporteFacturaVenta(@PathVariable long idFactura) {        
@@ -277,8 +306,14 @@ public class FacturaController {
     public List<RenglonFactura> getRenglonesPedidoParaFacturar(@PathVariable long idPedido,
                                                                @RequestParam TipoDeComprobante tipoDeComprobante) {
         return facturaService.convertirRenglonesPedidoARenglonesFactura(pedidoService.getPedidoPorId(idPedido), tipoDeComprobante);
-    }    
-     
+    } 
+    
+    @GetMapping("/facturas/pagos/{idPago}") 
+    @ResponseStatus(HttpStatus.OK)
+    public Factura getFacturaDelPago(@PathVariable long idPago) {
+        return facturaService.getFacturaDelPago(idPago);
+    }
+         
     @GetMapping("/facturas/validaciones-pago-multiple")
     @ResponseStatus(HttpStatus.OK)
     public boolean validarFacturasParaPagoMultiple(@RequestParam long[] idFactura,
@@ -287,7 +322,6 @@ public class FacturaController {
         for (long id : idFactura) {
             facturas.add(facturaService.getFacturaPorId(id));
         }
-
         if (facturaService.validarFacturasParaPagoMultiple(facturas, movimiento)) {
             return true;
         } else if (!facturaService.validarClienteProveedorParaPagosMultiples(facturas, movimiento)) {              
@@ -312,59 +346,7 @@ public class FacturaController {
                                           @RequestParam double descuentoPorcentaje) {
         return facturaService.calcularRenglon(tipoDeComprobante, movimiento, cantidad, idProducto, descuentoPorcentaje);
     }
-    
-    @GetMapping("/facturas/subtotal")
-    @ResponseStatus(HttpStatus.OK)
-    public double calcularSubTotal(@RequestParam double[] importe) {
-        return facturaService.calcularSubTotal(importe);
-    }
-    
-    @GetMapping("/facturas/descuento-neto")
-    @ResponseStatus(HttpStatus.OK)
-    public double calcularDescuento_neto(@RequestParam double subTotal,
-                                         @RequestParam double descuentoPorcentaje) {
-        return facturaService.calcularDescuentoNeto(subTotal, descuentoPorcentaje);
-    }
-    
-    @GetMapping("/facturas/recargo-neto")
-    @ResponseStatus(HttpStatus.OK)
-    public double calcularRecargo_neto(@RequestParam double subTotal,
-                                       @RequestParam double recargoPorcentaje) {
-        return facturaService.calcularRecargoNeto(subTotal, recargoPorcentaje);
-    }
-    
-    @GetMapping("/facturas/subtotal-bruto")
-    @ResponseStatus(HttpStatus.OK)
-    public double calcularSubTotal_bruto(@RequestParam TipoDeComprobante tipoDeComprobante,
-                                         @RequestParam double subTotal,
-                                         @RequestParam double recargoNeto,
-                                         @RequestParam double descuentoNeto,
-                                         @RequestParam double iva105Neto,
-                                         @RequestParam double iva21Neto) {
-        return facturaService.calcularSubTotalBruto(tipoDeComprobante, subTotal,
-            recargoNeto, descuentoNeto, iva105Neto, iva21Neto);
-    }
-    
-    @GetMapping("/facturas/impuesto-interno-neto")
-    @ResponseStatus(HttpStatus.OK)
-    public double calcularImpInterno_neto(@RequestParam TipoDeComprobante tipoDeComprobante,
-                                          @RequestParam double descuentoPorcentaje,
-                                          @RequestParam double recargoPorcentaje,
-                                          @RequestParam double[] importe,
-                                          @RequestParam double[] impuestoPorcentaje) {
-        return facturaService.calcularImpInternoNeto(tipoDeComprobante, descuentoPorcentaje,
-                recargoPorcentaje, importe, impuestoPorcentaje);
-
-    }
-    
-    @GetMapping("/facturas/total")
-    @ResponseStatus(HttpStatus.OK)
-    public double calcularTotal(@RequestParam double subTotalBruto,                                
-                                @RequestParam double iva105Neto,
-                                @RequestParam double iva21Neto) {
-        return facturaService.calcularTotal(subTotalBruto, iva105Neto, iva21Neto);
-    }
-    
+        
     @GetMapping("/facturas/total-facturado-venta/criteria")
     @ResponseStatus(HttpStatus.OK)
     public double calcularTotalFacturadoVenta(@RequestParam Long idEmpresa,
@@ -638,26 +620,6 @@ public class FacturaController {
                                                  .cantRegistros(0)
                                                  .build();
         return facturaService.calcularGananciaTotal(criteria);
-    }
-    
-    @GetMapping("/facturas/iva-neto")
-    @ResponseStatus(HttpStatus.OK)
-    public double calcularIVA_neto(@RequestParam TipoDeComprobante tipoDeComprobante,
-                                   @RequestParam double[] cantidades,
-                                   @RequestParam double[] ivaPorcentajeRenglones,
-                                   @RequestParam double[] ivaNetoRenglones,
-                                   @RequestParam double ivaPorcentaje,
-                                   @RequestParam double descuentoPorcentaje, 
-                                   @RequestParam double recargoPorcentaje) {
-        return facturaService.calcularIvaNetoFactura(tipoDeComprobante, cantidades, ivaPorcentajeRenglones,
-                ivaNetoRenglones, ivaPorcentaje, descuentoPorcentaje, recargoPorcentaje);
-    }
-    
-    @GetMapping("/facturas/calculo-vuelto")
-    @ResponseStatus(HttpStatus.OK)
-    public double calcularVuelto(@RequestParam double importeAPagar,
-                                 @RequestParam double importeAbonado) {
-        return facturaService.calcularVuelto(importeAPagar, importeAbonado);
     }
         
 }

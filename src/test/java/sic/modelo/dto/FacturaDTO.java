@@ -9,17 +9,12 @@ import java.util.Date;
 import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import sic.builder.EmpresaBuilder;
-import sic.builder.TransportistaBuilder;
-import sic.modelo.Empresa;
 import sic.modelo.Pago;
-import sic.modelo.Pedido;
 import sic.modelo.RenglonFactura;
 import sic.modelo.TipoDeComprobante;
-import sic.modelo.Transportista;
 
 @Data
-@EqualsAndHashCode(of = {"fecha", "tipoComprobante", "numSerie", "numFactura", "empresa"})
+@EqualsAndHashCode(of = {"fecha", "tipoComprobante", "numSerie", "numFactura", "nombreEmpresa"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Factura", scope = FacturaDTO.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
@@ -34,8 +29,7 @@ public abstract class FacturaDTO implements Serializable {
     private long numSerie = 0;
     private long numFactura = 1;
     private Date fechaVencimiento = new Date();    
-    private Pedido pedido =  null;
-    private Transportista transportista = new TransportistaBuilder().build();
+    private String nombreTransportista = "Correo OCA";
     private List<RenglonFactura> renglones;
     private List<Pago> pagos;
     private double subTotal = 6500;
@@ -50,6 +44,6 @@ public abstract class FacturaDTO implements Serializable {
     private double total = 7865;
     private String observaciones = "Factura por Default";
     private boolean pagada = false;
-    private Empresa empresa = new EmpresaBuilder().build();
+    private String nombreEmpresa = "Globo Corporation";
     private boolean eliminada = false;
 }

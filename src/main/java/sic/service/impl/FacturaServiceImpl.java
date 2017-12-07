@@ -236,6 +236,11 @@ public class FacturaServiceImpl implements IFacturaService {
     }  
     
     @Override
+    public Factura getFacturaDelPago(long idPago) {
+        return facturaRepository.getFacturaDelPago(idPago);
+    }
+    
+    @Override
     public List<RenglonFactura> getRenglonesDeLaFacturaModificadosParaCredito(Long id_Factura) {
         return notaService.getRenglonesFacturaModificadosParaNotaCredito(id_Factura);
     }
@@ -1023,15 +1028,6 @@ public class FacturaServiceImpl implements IFacturaService {
             return 1; // No existe ninguna Factura anterior
         } else {
             return 1 + numeroFactura;
-        }
-    }
-
-    @Override
-    public double calcularVuelto(double importeAPagar, double importeAbonado) {
-        if (importeAbonado <= importeAPagar) {
-            return 0;
-        } else {
-            return importeAbonado - importeAPagar;
         }
     }
 

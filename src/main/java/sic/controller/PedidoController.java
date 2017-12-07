@@ -40,7 +40,7 @@ public class PedidoController {
     private final IEmpresaService empresaService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
-    private final int TAMANIO_PAGINA_DEFAULT = 100;
+    private final int TAMANIO_PAGINA_DEFAULT = 50;
     
     @Autowired
     public PedidoController(IPedidoService pedidoService, IEmpresaService empresaService,
@@ -78,7 +78,13 @@ public class PedidoController {
     
     @PostMapping("/pedidos")
     @ResponseStatus(HttpStatus.CREATED)
-    public Pedido guardar(@RequestBody Pedido pedido) {
+    public Pedido guardar(@RequestParam Long idEmpresa,
+                          @RequestParam Long idUsuario,
+                          @RequestParam Long idCliente,
+                          @RequestBody Pedido pedido) {
+        pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+        pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
+        pedido.setCliente(clienteService.getClientePorId(idCliente));
         return pedidoService.guardar(pedido);
     }
     

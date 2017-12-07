@@ -3,11 +3,8 @@ package sic.builder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import sic.modelo.Cliente;
-import sic.modelo.Empresa;
 import sic.modelo.EstadoPedido;
 import sic.modelo.Factura;
-import sic.modelo.Usuario;
 import sic.modelo.dto.PedidoDTO;
 import sic.modelo.dto.RenglonPedidoDTO;
 
@@ -18,10 +15,10 @@ public class PedidoBuilder {
     private Date fecha = new Date();
     private Date fechaVencimiento;
     private String observaciones = "Los precios se encuentran sujetos a modificaciones.";
-    private Empresa empresa = new EmpresaBuilder().build();
+    private String nombreEmpresa = "Globo Corporation";
     private boolean eliminado = false;
-    private Cliente cliente = new ClienteBuilder().build();
-    private Usuario usuario =  new UsuarioBuilder().build();
+    private String razonSocialCliente = "Construcciones S.A.";
+    private String nombreUsuario = "Daenerys Targaryen";
     private List<Factura> facturas;
     private List<RenglonPedidoDTO> renglones;
     private double totalEstimado = 544.5;
@@ -44,8 +41,8 @@ public class PedidoBuilder {
             renglonesPedido.add(renglon2);
             this.renglones = renglonesPedido;
         }
-        return new PedidoDTO(id_Pedido, nroPedido, fecha, fechaVencimiento, observaciones, empresa,
-                eliminado, cliente, usuario, facturas, renglones, totalEstimado, totalActual, estado);
+        return new PedidoDTO(id_Pedido, nroPedido, fecha, fechaVencimiento, observaciones, nombreEmpresa,
+                eliminado, razonSocialCliente, nombreUsuario, facturas, renglones, totalEstimado, totalActual, estado);
     }
 
     public PedidoBuilder withIdPedido(long idPedido) {
@@ -73,8 +70,8 @@ public class PedidoBuilder {
         return this;
     }
 
-    public PedidoBuilder withEmpresa(Empresa empresa) {
-        this.empresa = empresa;
+    public PedidoBuilder withNombreEmpresa(String nombreEmpresa) {
+        this.nombreEmpresa = nombreEmpresa;
         return this;
     }
 
@@ -83,13 +80,13 @@ public class PedidoBuilder {
         return this;
     }
 
-    public PedidoBuilder withCliente(Cliente cliente) {
-        this.cliente = cliente;
+    public PedidoBuilder withRazonSocialCliente(String razonSocialCliente) {
+        this.razonSocialCliente = razonSocialCliente;
         return this;
     }
 
-    public PedidoBuilder withUsuario(Usuario usuario) {
-        this.usuario = usuario;
+    public PedidoBuilder withNombreUsuario(String nombreUsuario) {
+        this.nombreUsuario = nombreUsuario;
         return this;
     }
 

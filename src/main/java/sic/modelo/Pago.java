@@ -1,5 +1,7 @@
 package sic.modelo;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
@@ -24,6 +26,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nroPago", "empresa"})
 @ToString
+@JsonIgnoreProperties({"factura", "empresa", "formaDePago"})
 public class Pago implements Serializable {
 
     @Id
@@ -58,5 +61,15 @@ public class Pago implements Serializable {
     private Empresa empresa;
 
     private boolean eliminado;
+    
+    @JsonGetter("nombreEmpresa")
+    public String getNombreEmpresa() {
+        return empresa.getNombre();
+    }
+    
+    @JsonGetter("nombreFormaDePago")
+    public String getNombreFormaDePago() {
+        return this.formaDePago.getNombre();
+    }
 
 }

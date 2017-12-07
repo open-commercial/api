@@ -69,6 +69,11 @@ public class ClienteServiceImpl implements IClienteService {
         }
         return cliente;                   
     }
+    
+    @Override
+    public boolean existeClientePredeterminado(Empresa empresa) {
+        return clienteRepository.existsByAndEmpresaAndPredeterminadoAndEliminado(empresa, true, false);
+    }
 
     /**
      * Establece el @cliente pasado como parametro como predeterminado. Antes de
@@ -227,4 +232,10 @@ public class ClienteServiceImpl implements IClienteService {
         cliente.setEliminado(true);        
         clienteRepository.save(cliente);                   
     }
+    
+    @Override
+    public Cliente getClientePorIdPedido(long idPedido) {
+        return clienteRepository.findClienteByIdPedido(idPedido);
+    }
+    
 }

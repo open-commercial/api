@@ -87,6 +87,7 @@ public abstract class Factura implements Serializable {
     private List<RenglonFactura> renglones;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "factura")
+    @JsonProperty(access = Access.WRITE_ONLY)
     private List<Pago> pagos;
 
     private double subTotal;
@@ -119,5 +120,15 @@ public abstract class Factura implements Serializable {
     private long numSerieAfip;
 
     private long numFacturaAfip;
+    
+    @JsonGetter("nombreTransportista")
+    public String getNombreTransportista() {
+        return transportista.getNombre();
+    }    
+    
+    @JsonGetter("nombreEmpresa")
+    public String getNombreEmpresa() {
+        return empresa.getNombre();
+    }
     
 }

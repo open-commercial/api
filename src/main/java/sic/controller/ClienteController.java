@@ -37,7 +37,7 @@ public class ClienteController {
     private final IPaisService paisService;
     private final IProvinciaService provinciaService;
     private final ILocalidadService localidadService;
-    private final int TAMANIO_PAGINA_DEFAULT = 100;
+    private final int TAMANIO_PAGINA_DEFAULT = 50;
     
     @Autowired
     public ClienteController(IClienteService clienteService, IEmpresaService empresaService,
@@ -117,7 +117,12 @@ public class ClienteController {
      return clienteService.getClientePredeterminado(empresaService.getEmpresaPorId(idEmpresa));
     }
     
-    
+    @GetMapping("/clientes/existe-predeterminado/empresas/{idEmpresa}")
+    @ResponseStatus(HttpStatus.OK)
+    public boolean existeClientePredeterminado(@PathVariable long idEmpresa) {
+        return clienteService.existeClientePredeterminado(empresaService.getEmpresaPorId(idEmpresa));
+    }
+
     @DeleteMapping("/clientes/{idCliente}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable long idCliente) {
@@ -140,5 +145,11 @@ public class ClienteController {
     @ResponseStatus(HttpStatus.OK)
     public void setClientePredeterminado(@PathVariable long idCliente) {
        clienteService.setClientePredeterminado(clienteService.getClientePorId(idCliente));       
+    }
+    
+    @GetMapping("/clientes/pedidos/{idPedido}")
+    @ResponseStatus(HttpStatus.OK)
+    public Cliente getClientePorIdPedido(@PathVariable long idPedido) {
+       return clienteService.getClientePorIdPedido(idPedido);
     }
 }

@@ -1,6 +1,8 @@
 package sic.modelo;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -34,6 +36,7 @@ import lombok.ToString;
 @EqualsAndHashCode(of = {"nroPedido", "empresa"})
 @ToString(exclude = {"facturas", "renglones"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Pedido", scope = Pedido.class)
+@JsonIgnoreProperties({"cliente", "usuario", "empresa"})
 public class Pedido implements Serializable {
 
     @Id
@@ -81,5 +84,20 @@ public class Pedido implements Serializable {
     
     @Enumerated(EnumType.STRING)
     private EstadoPedido estado;
+    
+    @JsonGetter("nombreEmpresa")
+    public String getNombreEmpresa() {
+        return empresa.getNombre();
+    }
+    
+    @JsonGetter("razonSocialCliente")
+    public String getRazonSocialCliente() {
+        return cliente.getRazonSocial();
+    }
+    
+    @JsonGetter("nombreUsuario")
+    public String getNombreUsuario() {
+        return usuario.getNombre();
+    }
 
 }
