@@ -18,7 +18,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@JsonIgnoreProperties({"cliente", "usuario", "empresa", "pedido"})
+@JsonIgnoreProperties({"cliente", "usuario", "empresa", "pedido", "transportista"})
 public class FacturaVenta extends Factura implements Serializable {
 
     @ManyToOne
