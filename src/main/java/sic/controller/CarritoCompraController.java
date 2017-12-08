@@ -50,8 +50,8 @@ public class CarritoCompraController {
     @GetMapping("/carrito-compra/usuarios/{idUsuario}")
     @ResponseStatus(HttpStatus.OK)
     public Page<ItemCarritoCompra> getAllItemsDelUsuario(@PathVariable long idUsuario,
-            @RequestParam(required = false) Integer pagina,
-            @RequestParam(required = false) Integer tamanio) {
+                                                         @RequestParam(required = false) Integer pagina,
+                                                         @RequestParam(required = false) Integer tamanio) {
         if (tamanio == null || tamanio <= 0) {
             tamanio = TAMANIO_PAGINA_DEFAULT;
         }
