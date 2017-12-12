@@ -65,7 +65,13 @@ public class PedidoController {
     
     @PutMapping("/pedidos")
     @ResponseStatus(HttpStatus.OK)
-    public void actualizar(@RequestBody Pedido pedido) {
+    public void actualizar(@RequestParam Long idEmpresa,
+                          @RequestParam Long idUsuario,
+                          @RequestParam Long idCliente,
+                          @RequestBody Pedido pedido) {
+        pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+        pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
+        pedido.setCliente(clienteService.getClientePorId(idCliente));
         //Las facturas se recuperan para evitar cambios no deseados. 
         pedido.setFacturas(pedidoService.getFacturasDelPedido(pedido.getId_Pedido()));
         //Si los renglones vienen null, recupera los renglones del pedido para actualizar
