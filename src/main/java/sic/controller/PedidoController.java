@@ -66,9 +66,9 @@ public class PedidoController {
     @PutMapping("/pedidos")
     @ResponseStatus(HttpStatus.OK)
     public void actualizar(@RequestParam Long idEmpresa,
-                          @RequestParam Long idUsuario,
-                          @RequestParam Long idCliente,
-                          @RequestBody Pedido pedido) {
+                           @RequestParam Long idUsuario,
+                           @RequestParam Long idCliente,
+                           @RequestBody Pedido pedido) {
         pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
         pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
         pedido.setCliente(clienteService.getClientePorId(idCliente));
