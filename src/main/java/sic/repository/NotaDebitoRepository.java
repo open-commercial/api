@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import sic.modelo.Cliente;
 import sic.modelo.Empresa;
 import sic.modelo.NotaDebito;
+import sic.modelo.TipoDeComprobante;
 
 public interface NotaDebitoRepository extends NotaRepository<NotaDebito> {
        
@@ -15,7 +16,7 @@ public interface NotaDebitoRepository extends NotaRepository<NotaDebito> {
     @Query("SELECT SUM(nd.total) FROM NotaDebito nd WHERE nd.empresa = :empresa AND nd.cliente = :cliente AND nd.eliminada = false AND nd.fecha <= :hasta")
     Double totalNotasDebito(@Param("hasta") Date hasta, @Param("cliente") Cliente cliente, @Param("empresa") Empresa empresa);
     
-    NotaDebito findTopByClienteAndEmpresaAndEliminadaOrderByNroNotaDesc(Cliente cliente, Empresa empresa, boolean eliminada);
+    NotaDebito findTopByEmpresaAndTipoComprobanteOrderByNroNotaDesc(Empresa empresa, TipoDeComprobante tipoComprobante);
     
     NotaDebito findByPagoIdAndEliminada(Long pagoId, boolean eliminada);
     

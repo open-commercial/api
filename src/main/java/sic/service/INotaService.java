@@ -41,9 +41,9 @@ public interface INotaService {
 
     List<Nota> getNotasPorClienteYEmpresa(Long idCliente, Long idEmpresa);
 
-    long getSiguienteNumeroNotaDebito(Long idCliente, Long idEmpresa);
+    long getSiguienteNumeroNotaDebito(Long idEmpresa, TipoDeComprobante tipoComprobante);
 
-    long getSiguienteNumeroNotaCredito(Long idCliente, Long idEmpresa);
+    long getSiguienteNumeroNotaCredito(Long idEmpresa, TipoDeComprobante tipoComprobante);
 
     double getSaldoNotas(Date hasta, Long idCliente, Long idEmpresa);
 

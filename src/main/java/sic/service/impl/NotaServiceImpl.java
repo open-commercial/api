@@ -189,18 +189,16 @@ public class NotaServiceImpl implements INotaService {
     }
 
     @Override
-    public long getSiguienteNumeroNotaDebito(Long idCliente, Long idEmpresa) {
+    public long getSiguienteNumeroNotaDebito(Long idEmpresa, TipoDeComprobante tipoDeComprobante) {
         Nota nota = notaDebitoRepository
-                .findTopByClienteAndEmpresaAndEliminadaOrderByNroNotaDesc(clienteService.getClientePorId(idCliente),
-                        empresaService.getEmpresaPorId(idEmpresa), false);
+                .findTopByEmpresaAndTipoComprobanteOrderByNroNotaDesc(empresaService.getEmpresaPorId(idEmpresa), tipoDeComprobante);
         return (nota == null) ? 1 : nota.getNroNota() + 1;
     }
     
     @Override
-    public long getSiguienteNumeroNotaCredito(Long idCliente, Long idEmpresa) {
+    public long getSiguienteNumeroNotaCredito(Long idEmpresa, TipoDeComprobante tipoDeComprobante) {
         Nota nota = notaCreditoRepository
-                .findTopByClienteAndEmpresaAndEliminadaOrderByNroNotaDesc(clienteService.getClientePorId(idCliente),
-                        empresaService.getEmpresaPorId(idEmpresa), false);
+                .findTopByEmpresaAndTipoComprobanteOrderByNroNotaDesc(empresaService.getEmpresaPorId(idEmpresa), tipoDeComprobante);
         return (nota == null) ? 1 : nota.getNroNota() + 1;
     }
 
@@ -451,7 +449,7 @@ public class NotaServiceImpl implements INotaService {
         if (nota instanceof NotaCredito) {
             NotaCredito notaCredito = (NotaCredito) nota;
             notaCredito.setTipoComprobante(this.getTipoDeNotaCreditoSegunFactura(notaCredito.getFacturaVenta()));
-            notaCredito.setNroNota(this.getSiguienteNumeroNotaCredito(idCliente, idEmpresa));
+            notaCredito.setNroNota(this.getSiguienteNumeroNotaCredito(idEmpresa, nota.getTipoComprobante()));
             notaCredito.setModificaStock(modificarStock);
             if (modificarStock) {
                 this.actualizarStock(notaCredito.getRenglonesNotaCredito(), TipoDeOperacion.ACTUALIZACION);
@@ -465,7 +463,7 @@ public class NotaServiceImpl implements INotaService {
             NotaDebito notaDebito = (NotaDebito) nota;
             Pago pago = pagoService.getPagoPorId(idPago);
             notaDebito.setTipoComprobante(this.getTipoDeNotaDebitoSegunPago(pago));
-            notaDebito.setNroNota(this.getSiguienteNumeroNotaDebito(idCliente, idEmpresa));
+            notaDebito.setNroNota(this.getSiguienteNumeroNotaDebito(idEmpresa, nota.getTipoComprobante()));
             notaDebito.setPagoId(pago.getId_Pago());
             this.validarCalculosDebito(notaDebito);
             notaDebito = notaDebitoRepository.save(notaDebito);
