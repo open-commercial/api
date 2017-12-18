@@ -1120,7 +1120,7 @@ public class FacturaServiceImpl implements IFacturaService {
             double cantidad, Long idProducto, double descuento_porcentaje) {
 
         Producto producto = productoService.getProductoPorId(idProducto);
-        if ((movimiento == Movimiento.VENTA || movimiento == Movimiento.PEDIDO) && cantidad < producto.getCantMinima()) {
+        if ((movimiento == Movimiento.VENTA || movimiento == Movimiento.PEDIDO) && cantidad < producto.getVentaMinima()) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_cantidad_menor_a_minima"));
         }
