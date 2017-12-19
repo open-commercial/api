@@ -5,6 +5,7 @@ import sic.modelo.Empresa;
 import sic.modelo.Factura;
 import sic.modelo.FormaDePago;
 import sic.modelo.Pago;
+import sic.modelo.Recibo;
 
 public class PagoBuilder {
 
@@ -15,11 +16,12 @@ public class PagoBuilder {
     private double monto = 100;
     private Date fecha = new Date();
     private String nota = "Pago por 100 pesos";
+    private Recibo recibo = new ReciboBuilder().build();
     private Empresa empresa = new EmpresaBuilder().build();
     private boolean eliminado = false; 
     
     public Pago build() {
-      return new Pago(id_Pago, nroPago, formaDePago, factura, null, monto, fecha, nota, empresa, eliminado);
+      return new Pago(id_Pago, nroPago, formaDePago, factura, null, recibo, monto, fecha, nota, empresa, eliminado);
     }
 
     public PagoBuilder withId_Pago(Long idPago) {
@@ -39,6 +41,11 @@ public class PagoBuilder {
     
     public PagoBuilder withFactura(Factura factura) {
         this.factura = factura;
+        return this;
+    }
+    
+    public PagoBuilder withRecibo(Recibo recibo) {
+        this.recibo = recibo;
         return this;
     }
 

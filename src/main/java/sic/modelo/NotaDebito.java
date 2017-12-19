@@ -8,6 +8,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Data;
@@ -31,6 +32,10 @@ public class NotaDebito extends Nota implements Serializable {
     
     @Column(nullable = false)
     private double montoNoGravado;
+    
+    @ManyToOne
+    @JoinColumn(name = "idRecibo", referencedColumnName = "idRecibo")
+    private Recibo recibo;
 
     public NotaDebito() {}
 
