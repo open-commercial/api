@@ -32,7 +32,8 @@ public class ClienteBuilder {
     public Cliente build() {
         return new Cliente(id_Cliente, razonSocial, nombreFantasia, direccion, condicionIVA,
                 idFiscal, email, telPrimario, telSecundario, localidad, contacto, fechaAlta,
-                empresa, viajante, credencial, eliminado, predeterminado, saldoCuentaCorriente, fechaUltimoMovimiento);
+                empresa, viajante, credencial, eliminado, predeterminado, saldoCuentaCorriente,
+                fechaUltimoMovimiento);
     }
     
     public ClienteBuilder withId_Cliente(long id_Cliente) {
@@ -122,6 +123,11 @@ public class ClienteBuilder {
     
     public ClienteBuilder whitSaldoCuentaCorriente(double saldoCuentaCorriente) {
         this.saldoCuentaCorriente = saldoCuentaCorriente;
+        return this;
+    }
+    
+    public ClienteBuilder withFechaUltimoMovimiento(Date fechaUltimoMovimiento) {
+        this.fechaUltimoMovimiento = fechaUltimoMovimiento;
         return this;
     }
 }
