@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import java.util.Date;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
@@ -119,7 +120,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     @Override
     public CuentaCorriente getCuentaCorrientePorCliente(long idCliente) {
         CuentaCorriente cc = cuentaCorrienteRepository.findByClienteAndEliminada(clienteService.getClientePorId(idCliente), false);
-        cc.setSaldo(this.getSaldoCuentaCorriente(idCliente));
+        cc.setSaldo(this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente()));
+        cc.setFechaUltimoMovimiento(this.getFechaUltimoMovimiento(cc.getIdCuentaCorriente()));
         return cc;
     }
     
@@ -270,6 +272,11 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setEliminado(true);
             LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
         }
+    }
+    
+    @Override
+    public Date getFechaUltimoMovimiento(long idCuentaCorriente) {
+        return renglonCuentaCorrienteService.getFechaUltimoMovimiento(idCuentaCorriente);
     }
 
 }
