@@ -1118,7 +1118,6 @@ public class FacturaServiceImpl implements IFacturaService {
     @Override
     public RenglonFactura calcularRenglon(TipoDeComprobante tipo, Movimiento movimiento,
             double cantidad, Long idProducto, double descuento_porcentaje) {
-
         Producto producto = productoService.getProductoPorId(idProducto);
         if ((movimiento == Movimiento.VENTA || movimiento == Movimiento.PEDIDO) && cantidad < producto.getVentaMinima()) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -1131,7 +1130,7 @@ public class FacturaServiceImpl implements IFacturaService {
         nuevoRenglon.setMedidaItem(producto.getMedida().getNombre());
         nuevoRenglon.setCantidad(cantidad);
         nuevoRenglon.setPrecioUnitario(this.calcularPrecioUnitario(movimiento, tipo, producto));
-        if(descuento_porcentaje > 100) {
+        if (descuento_porcentaje > 100) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_descuento_mayor_cien"));
         }
