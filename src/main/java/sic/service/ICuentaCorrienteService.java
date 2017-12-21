@@ -6,6 +6,7 @@ import sic.modelo.CuentaCorriente;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
 import sic.modelo.Pago;
+import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
 import sic.modelo.TipoDeOperacion;
 
@@ -30,5 +31,7 @@ public interface ICuentaCorrienteService {
       void asentarEnCuentaCorriente(Nota n, TipoDeOperacion tipo);
       
       void asentarEnCuentaCorriente(Pago p, TipoDeOperacion tipo, Long idCliente);
+      
+      void asentarEnCuentaCorriente(Recibo r, TipoDeOperacion tipo);
       
 }

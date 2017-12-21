@@ -9,6 +9,7 @@ import sic.modelo.CuentaCorriente;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
 import sic.modelo.Pago;
+import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
 
 public interface RenglonCuentaCorrienteRepository extends PagingAndSortingRepository<RenglonCuentaCorriente, Long> {
@@ -18,6 +19,8 @@ public interface RenglonCuentaCorrienteRepository extends PagingAndSortingReposi
     RenglonCuentaCorriente findByNotaAndEliminado(Nota n, boolean eliminado);
 
     RenglonCuentaCorriente findByPagoAndEliminado(Pago p, boolean eliminado);
+    
+    RenglonCuentaCorriente findByReciboAndEliminado(Recibo r, boolean eliminado);
 
     Page<RenglonCuentaCorriente> findAllByCuentaCorrienteAndEliminado(CuentaCorriente cuentaCorriente, boolean eliminado, Pageable page);
 

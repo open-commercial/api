@@ -6,6 +6,7 @@ import sic.modelo.CuentaCorriente;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
 import sic.modelo.Pago;
+import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
 
 public interface IRenglonCuentaCorrienteService {
@@ -17,6 +18,8 @@ public interface IRenglonCuentaCorrienteService {
     RenglonCuentaCorriente getRenglonCuentaCorrienteDeNota(Nota n, boolean eliminado);
     
     RenglonCuentaCorriente getRenglonCuentaCorrienteDePago(Pago p, boolean eliminado);
+    
+    RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(Recibo r, boolean eliminado);
     
     Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(CuentaCorriente cuentaCorriente, boolean eliminado, Pageable page);
     

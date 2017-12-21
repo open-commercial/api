@@ -8,6 +8,7 @@ import sic.modelo.CuentaCorriente;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
 import sic.modelo.Pago;
+import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
 import sic.repository.RenglonCuentaCorrienteRepository;
 import sic.service.IRenglonCuentaCorrienteService;
@@ -40,6 +41,11 @@ public class RenglonCuentaCorrienteServiceImpl implements IRenglonCuentaCorrient
     @Override
     public RenglonCuentaCorriente getRenglonCuentaCorrienteDePago(Pago p, boolean eliminado) {
         return renglonCuentaCorrienteRepository.findByPagoAndEliminado(p, eliminado);
+    }
+    
+    @Override
+    public RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(Recibo r, boolean eliminado) {
+        return renglonCuentaCorrienteRepository.findByReciboAndEliminado(r, eliminado);
     }
     
     @Override

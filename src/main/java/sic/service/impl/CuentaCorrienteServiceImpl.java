@@ -17,6 +17,7 @@ import sic.modelo.Nota;
 import sic.modelo.NotaCredito;
 import sic.modelo.NotaDebito;
 import sic.modelo.Pago;
+import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
 import sic.modelo.TipoDeComprobante;
 import sic.modelo.TipoDeOperacion;
@@ -269,6 +270,33 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             RenglonCuentaCorriente rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDePago(p, false);
             rcc.setEliminado(true);
             LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
+        }
+    }
+    
+    @Override
+    @Transactional
+    public void asentarEnCuentaCorriente(Recibo r, TipoDeOperacion operacion) {
+        RenglonCuentaCorriente rcc;
+        if (operacion == TipoDeOperacion.ALTA) {
+            rcc = new RenglonCuentaCorriente();
+            rcc.setRecibo(r);
+            rcc.setComprobante("RECIBO Nº " + r.getNroRecibo());
+            rcc.setDescripcion(r.getObservacion());
+            rcc.setFecha(r.getFecha());
+            rcc.setIdMovimiento(r.getIdRecibo());
+            rcc.setMonto(r.getMonto());
+            rcc.setTipoMovimiento(TipoMovimiento.RECIBO);
+            CuentaCorriente cc;
+            cc = this.getCuentaCorrientePorCliente(r.getCliente().getId_Cliente());
+            cc.getRenglones().add(rcc);
+            rcc.setCuentaCorriente(cc);
+            this.renglonCuentaCorrienteService.guardar(rcc);
+            LOGGER.warn("El renglon " + rcc + " se guardó correctamente.");
+            if (operacion == TipoDeOperacion.ELIMINACION) {
+                rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeRecibo(r, false);
+                rcc.setEliminado(true);
+                LOGGER.warn("El renglon " + rcc + " se eliminó correctamente.");
+            }
         }
     }
 

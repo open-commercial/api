@@ -17,9 +17,11 @@ import sic.modelo.FacturaVenta;
 import sic.modelo.FormaDePago;
 import sic.modelo.Pago;
 import sic.modelo.Recibo;
+import sic.modelo.TipoDeOperacion;
 import sic.modelo.Usuario;
 import sic.repository.ReciboRepository;
 import sic.service.BusinessServiceException;
+import sic.service.ICuentaCorrienteService;
 import sic.service.IFacturaService;
 import sic.service.IPagoService;
 import sic.service.IReciboService;
@@ -30,12 +32,15 @@ public class ReciboServiceImpl implements IReciboService {
     private final ReciboRepository reciboRepository;
     private final IFacturaService facturaService;
     private final IPagoService pagoService;
+    private final ICuentaCorrienteService cuentaCorrienteService;
     
     @Autowired
-    public ReciboServiceImpl(ReciboRepository reciboRepository, IFacturaService facturaService, IPagoService pagoService) {
+    public ReciboServiceImpl(ReciboRepository reciboRepository, IFacturaService facturaService, IPagoService pagoService,
+                             ICuentaCorrienteService cuentaCorrienteService) {
         this.reciboRepository = reciboRepository;
         this.facturaService = facturaService;
         this.pagoService = pagoService;
+        this.cuentaCorrienteService = cuentaCorrienteService;
     }
 
     @Override
@@ -67,10 +72,7 @@ public class ReciboServiceImpl implements IReciboService {
             }
         }
         recibo.setSaldoSobrante(monto);
-                //pedir de a 10 facturas a su service, pagarlas en la medida que los montos alcancen
-                // relacionar esos pagos con el recibo
-                //guardar el recibo, solo tiene que guardar los pagos.
-                //FIN
+        this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
         return recibo;
     }
     

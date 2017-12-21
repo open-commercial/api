@@ -5,6 +5,8 @@ public enum TipoMovimiento {
         
     PAGO,
     
+    RECIBO, 
+    
     GASTO, 
 
     VENTA,
