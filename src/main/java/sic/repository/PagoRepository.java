@@ -12,6 +12,7 @@ import sic.modelo.Factura;
 import sic.modelo.FormaDePago;
 import sic.modelo.Nota;
 import sic.modelo.Pago;
+import sic.modelo.Recibo;
 
 public interface PagoRepository extends PagingAndSortingRepository<Pago, Long> {
 
@@ -37,5 +38,7 @@ public interface PagoRepository extends PagingAndSortingRepository<Pago, Long> {
     
     @Query("SELECT SUM(p.monto) FROM Pago p INNER JOIN p.notaDebito n WHERE n.idNota = :idNota AND p.eliminado = false")
     Double getTotalPagosDeNota(@Param("idNota") long idNota);
+    
+    List<Pago> findAllByReciboAndEliminado(Recibo recibo, boolean eliminado);
     
 }

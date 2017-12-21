@@ -8,8 +8,8 @@ import sic.modelo.Factura;
 import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
 import sic.modelo.FormaDePago;
-import sic.modelo.NotaDebito;
 import sic.modelo.Pago;
+import sic.modelo.Recibo;
 
 public interface IPagoService {
     
@@ -32,6 +32,8 @@ public interface IPagoService {
     Double getTotalPagosDeNota(long idNota);
     
     Page<Pago> getPagosPorClienteEntreFechas(long idCliente, Date desde, Date hasta, Pageable page);
+    
+    List<Pago> getPagosRelacionadosAlRecibo(Recibo recibo);
     
     double calcularTotalPagos(List<Pago> pagos);
     

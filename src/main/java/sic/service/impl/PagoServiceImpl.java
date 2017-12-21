@@ -19,6 +19,7 @@ import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
 import sic.modelo.FormaDePago;
 import sic.modelo.Pago;
+import sic.modelo.Recibo;
 import sic.modelo.TipoDeOperacion;
 import sic.service.IFacturaService;
 import sic.service.IPagoService;
@@ -109,6 +110,11 @@ public class PagoServiceImpl implements IPagoService {
     @Override
     public Page<Pago> getPagosPorClienteEntreFechas(long idCliente, Date desde, Date hasta, Pageable page) {
         return pagoRepository.getPagosPorClienteEntreFechas(idCliente, desde, hasta, page);
+    }
+    
+    @Override
+    public List<Pago> getPagosRelacionadosAlRecibo(Recibo recibo) {
+        return this.pagoRepository.findAllByReciboAndEliminado(recibo, false);
     }
 
     @Override

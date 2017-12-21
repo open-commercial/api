@@ -4,6 +4,8 @@ import java.util.Date;
 import sic.modelo.Movimiento;
 import java.util.List;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import sic.modelo.BusquedaFacturaCompraCriteria;
 import sic.modelo.BusquedaFacturaVentaCriteria;
 import sic.modelo.Cliente;
@@ -44,6 +46,8 @@ public interface IFacturaService {
     Page<FacturaCompra> buscarFacturaCompra(BusquedaFacturaCompraCriteria criteria);
 
     Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria);
+    
+    Slice<FacturaVenta> getFacturasImpagas(Cliente cliente, Empresa empresa, Pageable pageable);
     
     List<Factura> guardar(List<Factura> facturas, Long idPedido);
 
