@@ -10,14 +10,11 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -47,15 +44,12 @@ import sic.modelo.FormaDePago;
 import sic.modelo.Localidad;
 import sic.modelo.Medida;
 import sic.modelo.Movimiento;
-import sic.modelo.NotaCredito;
 import sic.modelo.NotaDebito;
-import sic.modelo.Pago;
 import sic.modelo.Pais;
 import sic.modelo.Proveedor;
 import sic.modelo.Provincia;
 import sic.modelo.Recibo;
 import sic.modelo.RenglonFactura;
-import sic.modelo.RenglonNotaCredito;
 import sic.modelo.RenglonNotaDebito;
 import sic.modelo.Rol;
 import sic.modelo.Rubro;
@@ -63,9 +57,7 @@ import sic.modelo.TipoDeComprobante;
 import sic.modelo.Transportista;
 import sic.modelo.Usuario;
 import sic.modelo.dto.FacturaVentaDTO;
-import sic.modelo.dto.NotaCreditoDTO;
 import sic.modelo.dto.NotaDebitoDTO;
-import sic.modelo.dto.PagoDTO;
 import sic.modelo.dto.ProductoDTO;
 import sic.modelo.dto.ReciboDTO;
 import sic.repository.UsuarioRepository;
@@ -73,8 +65,8 @@ import sic.repository.UsuarioRepository;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class CuentaCorrienteIntegrationTest {
-    
+public class ReciboIntegrationTest {
+
     @Autowired
     private UsuarioRepository usuarioRepository;
 
@@ -82,9 +74,9 @@ public class CuentaCorrienteIntegrationTest {
     private TestRestTemplate restTemplate;
 
     private String token;
-    
+
     private final String apiPrefix = "/api/v1";
-   
+
     @Before
     public void setup() {
         String md5Test = "098f6bcd4621d373cade4e832627b4f6";
@@ -94,7 +86,7 @@ public class CuentaCorrienteIntegrationTest {
         interceptors.add((ClientHttpRequestInterceptor) (HttpRequest request, byte[] body, ClientHttpRequestExecution execution) -> {
             request.getHeaders().set("Authorization", "Bearer " + token);
             return execution.execute(request, body);
-        });        
+        });
         restTemplate.getRestTemplate().setInterceptors(interceptors);
         // ErrorHandler para RestTemplate        
         restTemplate.getRestTemplate().setErrorHandler(new ResponseErrorHandler() {
@@ -106,21 +98,21 @@ public class CuentaCorrienteIntegrationTest {
 
             @Override
             public void handleError(ClientHttpResponse response) throws IOException {
-                String mensaje = IOUtils.toString(response.getBody());                
+                String mensaje = IOUtils.toString(response.getBody());
                 throw new RestClientResponseException(mensaje, response.getRawStatusCode(),
                         response.getStatusText(), response.getHeaders(),
                         null, Charset.defaultCharset());
             }
         });
     }
-    
+
     @Test
-    public void testCuentaCorriente() {
+    public void testRecibo() {
         this.token = restTemplate.postForEntity(apiPrefix + "/login", new Credencial("test", "test"), String.class).getBody();
         Localidad localidad = new LocalidadBuilder().build();
         localidad.getProvincia().setPais(restTemplate.postForObject(apiPrefix + "/paises", localidad.getProvincia().getPais(), Pais.class));
         localidad.setProvincia(restTemplate.postForObject(apiPrefix + "/provincias", localidad.getProvincia(), Provincia.class));
-        CondicionIVA condicionIVA = new CondicionIVABuilder().build();          
+        CondicionIVA condicionIVA = new CondicionIVABuilder().build();
         Empresa empresa = new EmpresaBuilder()
                 .withLocalidad(restTemplate.postForObject(apiPrefix + "/localidades", localidad, Localidad.class))
                 .withCondicionIVA(restTemplate.postForObject(apiPrefix + "/condiciones-iva", condicionIVA, CondicionIVA.class))
@@ -132,7 +124,7 @@ public class CuentaCorrienteIntegrationTest {
                 .withPredeterminado(true)
                 .withNombre("Efectivo")
                 .build();
-        formaDePago = restTemplate.postForObject(apiPrefix + "/formas-de-pago", formaDePago, FormaDePago.class);
+        restTemplate.postForObject(apiPrefix + "/formas-de-pago", formaDePago, FormaDePago.class);
         Usuario credencial = new UsuarioBuilder()
                 .withId_Usuario(1)
                 .withEliminado(false)
@@ -185,38 +177,38 @@ public class CuentaCorrienteIntegrationTest {
         ProductoDTO productoDos = new ProductoBuilder()
                 .withCodigo("2")
                 .withDescripcion("dos")
-                .withCantidad(6)                               
+                .withCantidad(6)
                 .withVentaMinima(1)
                 .withPrecioVentaPublico(1000)
                 .withIva_porcentaje(10.5)
                 .withIva_neto(105)
                 .withPrecioLista(1105)
-                .build();       
+                .build();
         productoUno = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
                 + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
-                productoUno, ProductoDTO.class);        
+                productoUno, ProductoDTO.class);
         productoDos = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
                 + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
-                productoDos, ProductoDTO.class);       
+                productoDos, ProductoDTO.class);
         Assert.assertTrue(restTemplate.getForObject(apiPrefix + "/productos/" + productoUno.getId_Producto() + "/stock/disponibilidad?cantidad=10", Boolean.class));
         Assert.assertTrue(restTemplate.getForObject(apiPrefix + "/productos/" + productoDos.getId_Producto() + "/stock/disponibilidad?cantidad=6", Boolean.class));
         RenglonFactura renglonUno = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
                 + "idProducto=" + productoUno.getId_Producto()
                 + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_B
                 + "&movimiento=" + Movimiento.VENTA
-                + "&cantidad=5" 
+                + "&cantidad=5"
                 + "&descuentoPorcentaje=20",
                 RenglonFactura.class);
         RenglonFactura renglonDos = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
                 + "idProducto=" + productoDos.getId_Producto()
-                + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_B 
+                + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_B
                 + "&movimiento=" + Movimiento.VENTA
-                + "&cantidad=2" 
+                + "&cantidad=2"
                 + "&descuentoPorcentaje=0",
-                RenglonFactura.class);                
+                RenglonFactura.class);
         List<RenglonFactura> renglones = new ArrayList<>();
         renglones.add(renglonUno);
-        renglones.add(renglonDos); 
+        renglones.add(renglonDos);
         int size = renglones.size();
         double[] cantidades = new double[size];
         double[] ivaPorcentajeRenglones = new double[size];
@@ -260,94 +252,137 @@ public class CuentaCorrienteIntegrationTest {
         facturaVentaB.setDescuento_neto(descuento_neto);
         facturaVentaB.setSubTotal_bruto(subTotalBruto);
         facturaVentaB.setIva_105_neto(iva_105_netoFactura);
-        facturaVentaB.setIva_21_neto(iva_21_netoFactura);        
-        facturaVentaB.setTotal(total);        
+        facturaVentaB.setIva_21_neto(iva_21_netoFactura);
+        facturaVentaB.setTotal(total);
         restTemplate.postForObject(apiPrefix + "/facturas/venta?"
                 + "idCliente=" + cliente.getId_Cliente()
                 + "&idEmpresa=" + empresa.getId_Empresa()
                 + "&idUsuario=" + (restTemplate.getForObject(apiPrefix + "/usuarios/busqueda?nombre=test", Usuario.class)).getId_Usuario()
                 + "&idTransportista=" + transportista.getId_Transportista(), facturaVentaB, FacturaVenta[].class);
         assertEquals(-5992.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
-        List<FacturaVenta> facturasRecuperadas = restTemplate
-                .exchange(apiPrefix + "/facturas/venta/busqueda/criteria?idEmpresa=1&tipoFactura=B&nroSerie=0&nroFactura=1", HttpMethod.GET, null,
-                        new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {
-                })
-                .getBody().getContent();
-        PagoDTO pago = new PagoDTO();
-        pago.setFecha(new Date());
-        pago.setMonto(5992.5);
-        pago = restTemplate.postForObject(apiPrefix + "/pagos/facturas/1?idFormaDePago=" + formaDePago.getId_FormaDePago()
-                + "&idEmpresa=" + empresa.getId_Empresa(), pago, PagoDTO.class);
-        assertEquals(0, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
+        ProductoDTO productoTres = new ProductoBuilder()
+                .withCodigo("3")
+                .withDescripcion("tres")
+                .withCantidad(30)
+                .withVentaMinima(1)
+                .withPrecioVentaPublico(2000)
+                .withIva_porcentaje(21.0)
+                .withIva_neto(420)
+                .withPrecioLista(2420)
+                .build();
+        ProductoDTO productoCuatro = new ProductoBuilder()
+                .withCodigo("4")
+                .withDescripcion("cuatro")
+                .withCantidad(12)
+                .withVentaMinima(1)
+                .withPrecioVentaPublico(2000)
+                .withIva_porcentaje(10.5)
+                .withIva_neto(210)
+                .withPrecioLista(1210)
+                .build();
+        productoTres = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
+                + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
+                productoTres, ProductoDTO.class);
+        productoCuatro = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
+                + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
+                productoCuatro, ProductoDTO.class);
+        Assert.assertTrue(restTemplate.getForObject(apiPrefix + "/productos/" + productoTres.getId_Producto() + "/stock/disponibilidad?cantidad=10", Boolean.class));
+        Assert.assertTrue(restTemplate.getForObject(apiPrefix + "/productos/" + productoCuatro.getId_Producto() + "/stock/disponibilidad?cantidad=6", Boolean.class));
+        RenglonFactura renglonTres = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
+                + "idProducto=" + productoTres.getId_Producto()
+                + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_X
+                + "&movimiento=" + Movimiento.VENTA
+                + "&cantidad=5"
+                + "&descuentoPorcentaje=20",
+                RenglonFactura.class);
+        RenglonFactura renglonCuatro = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
+                + "idProducto=" + productoCuatro.getId_Producto()
+                + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_X
+                + "&movimiento=" + Movimiento.VENTA
+                + "&cantidad=2"
+                + "&descuentoPorcentaje=0",
+                RenglonFactura.class);
+        renglones = new ArrayList<>();
+        renglones.add(renglonTres);
+        renglones.add(renglonCuatro);
+        size = renglones.size();
+        cantidades = new double[size];
+        ivaPorcentajeRenglones = new double[size];
+        ivaNetoRenglones = new double[size];
+        indice = 0;
+        subTotal = 0;
+        for (RenglonFactura renglon : renglones) {
+            subTotal += renglon.getImporte();
+            cantidades[indice] = renglon.getCantidad();
+            ivaPorcentajeRenglones[indice] = renglon.getIva_porcentaje();
+            ivaNetoRenglones[indice] = renglon.getIva_neto();
+            indice++;
+        }
+        descuentoPorcentaje = 25;
+        recargoPorcentaje = 10;
+        descuento_neto = (subTotal * descuentoPorcentaje) / 100;
+        recargo_neto = (subTotal * recargoPorcentaje) / 100;
+        indice = cantidades.length;
+        iva_105_netoFactura = 0;
+        iva_21_netoFactura = 0;
+        for (int i = 0; i < indice; i++) {
+            if (ivaPorcentajeRenglones[i] == 10.5) {
+                iva_105_netoFactura += cantidades[i] * (ivaNetoRenglones[i]
+                        - (ivaNetoRenglones[i] * (descuentoPorcentaje / 100))
+                        + (ivaNetoRenglones[i] * (recargoPorcentaje / 100)));
+            } else if (ivaPorcentajeRenglones[i] == 21) {
+                iva_21_netoFactura += cantidades[i] * (ivaNetoRenglones[i]
+                        - (ivaNetoRenglones[i] * (descuentoPorcentaje / 100))
+                        + (ivaNetoRenglones[i] * (recargoPorcentaje / 100)));
+            }
+        }
+        subTotalBruto = subTotal + recargo_neto - descuento_neto - (iva_105_netoFactura + iva_21_netoFactura);
+        total = subTotalBruto + iva_105_netoFactura + iva_21_netoFactura;
+        FacturaVentaDTO facturaVentaX = new FacturaVentaDTO();
+        facturaVentaX.setTipoComprobante(TipoDeComprobante.FACTURA_X);
+        facturaVentaX.setRenglones(renglones);
+        facturaVentaX.setSubTotal(subTotal);
+        facturaVentaX.setRecargo_porcentaje(recargoPorcentaje);
+        facturaVentaX.setRecargo_neto(recargo_neto);
+        facturaVentaX.setDescuento_porcentaje(descuentoPorcentaje);
+        facturaVentaX.setDescuento_neto(descuento_neto);
+        facturaVentaX.setSubTotal_bruto(subTotalBruto);
+        facturaVentaX.setIva_105_neto(iva_105_netoFactura);
+        facturaVentaX.setIva_21_neto(iva_21_netoFactura);
+        facturaVentaX.setTotal(total);
+        restTemplate.postForObject(apiPrefix + "/facturas/venta?"
+                + "idCliente=" + cliente.getId_Cliente()
+                + "&idEmpresa=" + empresa.getId_Empresa()
+                + "&idUsuario=" + (restTemplate.getForObject(apiPrefix + "/usuarios/busqueda?nombre=test", Usuario.class)).getId_Usuario()
+                + "&idTransportista=" + transportista.getId_Transportista(), facturaVentaX, FacturaVenta[].class);
+        assertEquals(-16192.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
+        ReciboDTO r = new ReciboDTO();
+        restTemplate.postForObject(apiPrefix + "/recibos?"
+                + "idUsuario=1&idEmpresa=1&idCliente=1&idFormaDePago=1", r, Recibo.class);
+        assertEquals(-1192.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
+        r = new ReciboDTO();
+        r.setMonto(2192.5);
+        restTemplate.postForObject(apiPrefix + "/recibos?"
+                + "idUsuario=1&idEmpresa=1&idCliente=1&idFormaDePago=1", r, Recibo.class);
+        assertEquals(1000, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
+
         NotaDebitoDTO notaDebito = new NotaDebitoDTO();
         notaDebito.setPagoId(null);
         notaDebito.setCliente(cliente);
         notaDebito.setEmpresa(empresa);
         notaDebito.setFecha(new Date());
-        notaDebito.setPagoId(pago.getId_Pago());
-        List<RenglonNotaDebito> renglonesCalculados = Arrays.asList(restTemplate.getForObject(apiPrefix + "/notas/renglon/debito/pago/1?monto=100&ivaPorcentaje=21", RenglonNotaDebito[].class));
+        List<RenglonNotaDebito> renglonesCalculados = Arrays.asList(restTemplate.getForObject(apiPrefix + "/notas/renglon/debito/recibo/1?monto=1000&ivaPorcentaje=21", RenglonNotaDebito[].class));
         notaDebito.setRenglonesNotaDebito(renglonesCalculados);
         notaDebito.setIva105Neto(0);
-        notaDebito.setIva21Neto(21);
-        notaDebito.setMontoNoGravado(5992.5);
+        notaDebito.setIva21Neto(210);
+        notaDebito.setMontoNoGravado(15000);
         notaDebito.setMotivo("Test alta nota debito - Cheque rechazado");
-        notaDebito.setSubTotalBruto(100);
-        notaDebito.setTotal(6113.5);
+        notaDebito.setSubTotalBruto(1000);
+        notaDebito.setTotal(16210);
         notaDebito.setUsuario(credencial);
         notaDebito.setFacturaVenta(null);
-        NotaDebito nd = restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1?idPago=1", notaDebito, NotaDebito.class);
-        assertEquals(-6113.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
-        pago = new PagoDTO();
-        pago.setNotaDebito(nd);
-        pago.setFecha(new Date());
-        pago.setMonto(6113.5);
-        restTemplate.postForObject(apiPrefix + "/pagos/notas/1?idFormaDePago=" + formaDePago.getId_FormaDePago()
-                + "&idEmpresa=" + empresa.getId_Empresa(), pago, Pago.class);
-        assertEquals(0, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
-        List<RenglonNotaCredito> renglonesNotaCredito = Arrays.asList(restTemplate.getForObject(apiPrefix + "/notas/renglon/credito/producto?"
-                + "tipoDeComprobante=" + facturasRecuperadas.get(0).getTipoComprobante().name()
-                + "&cantidad=5&idRenglonFactura=1", RenglonNotaCredito[].class));
-        NotaCreditoDTO notaCredito = new NotaCreditoDTO();
-        notaCredito.setRenglonesNotaCredito(renglonesNotaCredito);
-        notaCredito.setFecha(new Date());
-        notaCredito.setSubTotal(restTemplate.getForObject(apiPrefix +"/notas/credito/sub-total?importe="
-                + renglonesNotaCredito.get(0).getImporteNeto(), Double.class));
-        notaCredito.setRecargoPorcentaje(facturasRecuperadas.get(0).getRecargo_porcentaje());
-        notaCredito.setRecargoNeto(restTemplate.getForObject(apiPrefix +"/notas/credito/recargo-neto?subTotal="
-                + notaCredito.getSubTotal() 
-                + "&recargoPorcentaje=" + notaCredito.getRecargoPorcentaje(), Double.class));
-        notaCredito.setDescuentoPorcentaje(facturasRecuperadas.get(0).getDescuento_porcentaje());
-        notaCredito.setDescuentoNeto(restTemplate.getForObject(apiPrefix +"/notas/credito/descuento-neto?subTotal="
-                + notaCredito.getSubTotal() 
-                + "&descuentoPorcentaje=" + notaCredito.getDescuentoPorcentaje(), Double.class));
-        notaCredito.setIva21Neto(restTemplate.getForObject(apiPrefix + "/notas/credito/iva-neto?"
-                + "tipoDeComprobante=" + facturasRecuperadas.get(0).getTipoComprobante().name()
-                + "&cantidades=" + renglonesNotaCredito.get(0).getCantidad()
-                + "&ivaPorcentajeRenglones=" + renglonesNotaCredito.get(0).getIvaPorcentaje()
-                + "&ivaNetoRenglones=" + renglonesNotaCredito.get(0).getIvaNeto()
-                + "&ivaPorcentaje=21"
-                + "&descuentoPorcentaje=" + facturasRecuperadas.get(0).getDescuento_porcentaje()
-                + "&recargoPorcentaje=" + facturasRecuperadas.get(0).getRecargo_porcentaje(), Double.class));
-        notaCredito.setIva105Neto(restTemplate.getForObject(apiPrefix + "/notas/credito/iva-neto?"
-                + "tipoDeComprobante=" + facturasRecuperadas.get(0).getTipoComprobante().name()
-                + "&cantidades=" + renglonesNotaCredito.get(0).getCantidad()
-                + "&ivaPorcentajeRenglones=" + renglonesNotaCredito.get(0).getIvaPorcentaje()
-                + "&ivaNetoRenglones=" + renglonesNotaCredito.get(0).getIvaNeto()
-                + "&ivaPorcentaje=10.5"
-                + "&descuentoPorcentaje=" + facturasRecuperadas.get(0).getDescuento_porcentaje()
-                + "&recargoPorcentaje=" + facturasRecuperadas.get(0).getRecargo_porcentaje(), Double.class));
-        notaCredito.setSubTotalBruto(restTemplate.getForObject(apiPrefix + "/notas/credito/sub-total-bruto?"
-                + "tipoDeComprobante=" + facturasRecuperadas.get(0).getTipoComprobante().name()
-                + "&subTotal=" + notaCredito.getSubTotal()
-                + "&recargoNeto=" + notaCredito.getRecargoNeto()
-                + "&descuentoNeto=" + notaCredito.getDescuentoNeto()
-                + "&iva21Neto=" + notaCredito.getIva21Neto()
-                + "&iva105Neto=" + notaCredito.getIva105Neto(), Double.class));
-        notaCredito.setTotal(restTemplate.getForObject(apiPrefix + "/notas/credito/total?subTotalBruto=" + notaCredito.getSubTotalBruto()
-                + "&iva21Neto=" + notaCredito.getIva21Neto()
-                + "&iva105Neto=" + notaCredito.getIva105Neto(), Double.class));
-        restTemplate.postForObject(apiPrefix + "/notas/credito/empresa/1/cliente/1/usuario/1/factura/1?modificarStock=false", notaCredito, NotaCredito.class);
-        assertEquals(4114, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);       
+        NotaDebito nd = restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1?idRecibo=1", notaDebito, NotaDebito.class);
+        assertEquals(-15210, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
     }
 
 }
