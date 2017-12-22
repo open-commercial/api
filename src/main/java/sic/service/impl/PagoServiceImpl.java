@@ -138,9 +138,10 @@ public class PagoServiceImpl implements IPagoService {
         pago = pagoRepository.save(pago);
         if (pago.getNotaDebito() != null && pago.getFactura() == null) {
             this.cuentaCorrienteService.asentarEnCuentaCorriente(pago, TipoDeOperacion.ALTA, pago.getNotaDebito().getCliente().getId_Cliente());
-        } else if (pago.getFactura() instanceof FacturaVenta) {
+        } else if (pago.getFactura() instanceof FacturaVenta && pago.getRecibo() == null) {
             this.cuentaCorrienteService.asentarEnCuentaCorriente(pago, TipoDeOperacion.ALTA, null);
         }
+        
         if (pago.getFactura() != null && pago.getNotaDebito() == null) {
             facturaService.actualizarFacturaEstadoPago(pago.getFactura());
         }

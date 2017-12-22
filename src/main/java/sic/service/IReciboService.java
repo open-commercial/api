@@ -27,6 +27,6 @@ public interface IReciboService {
     
     Page<Recibo> getByFechaBetweenAndClienteAndEmpresaAndEliminado(Date desde, Date hasta, Cliente cliente, Empresa empresa, boolean eliminado, Pageable page);
     
-    double pagarMultiplesFacturasConMontoRecibo(List<FacturaVenta> facturasVenta, Recibo recibo, double monto, FormaDePago formaDePago, String nota);
+    double pagarMultiplesFacturas(List<FacturaVenta> facturasVenta, Recibo recibo, double monto, FormaDePago formaDePago, String nota);
     
 }

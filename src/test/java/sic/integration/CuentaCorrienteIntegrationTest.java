@@ -291,7 +291,7 @@ public class CuentaCorrienteIntegrationTest {
         notaDebito.setTotal(6113.5);
         notaDebito.setUsuario(credencial);
         notaDebito.setFacturaVenta(null);
-        NotaDebito nd = restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1/pago/1", notaDebito, NotaDebito.class);
+        NotaDebito nd = restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1?idPago=1", notaDebito, NotaDebito.class);
         assertEquals(-6113.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         pago = new PagoDTO();
         pago.setNotaDebito(nd);

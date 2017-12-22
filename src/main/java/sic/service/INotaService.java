@@ -15,7 +15,7 @@ import sic.modelo.TipoDeComprobante;
 
 public interface INotaService {
 
-    Nota guardarNota(Nota nota, long idEmpresa, long idCliente, long idUsuario, Long idFactura, Long idPago, boolean modificarStock);
+    Nota guardarNota(Nota nota, long idEmpresa, long idCliente, long idUsuario, Long idFactura, Long idPago, Long idRecibo, boolean modificarStock);
 
     Nota autorizarNota(Nota nota);
     

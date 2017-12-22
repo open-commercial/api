@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import sic.modelo.Recibo;
 import sic.service.IClienteService;
 import sic.service.IEmpresaService;
+import sic.service.IFormaDePagoService;
 import sic.service.IReciboService;
 import sic.service.IUsuarioService;
 
@@ -25,14 +26,17 @@ public class ReciboController {
     private final IEmpresaService empresaService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
+    private final IFormaDePagoService formaDePagoService;
     
     @Autowired
     public ReciboController(IReciboService reciboService, IEmpresaService empresaService,
-                            IUsuarioService usuarioService, IClienteService clienteService) {
+                            IUsuarioService usuarioService, IClienteService clienteService,
+                            IFormaDePagoService formaDePagoService) {
         this.reciboService = reciboService;
         this.empresaService = empresaService;
         this.usuarioService = usuarioService;
         this.clienteService = clienteService;
+        this.formaDePagoService = formaDePagoService;
     }
     
     @GetMapping("/recibos/{idRecibo}")
@@ -46,10 +50,12 @@ public class ReciboController {
     public Recibo guardar(@RequestParam long idUsuario,
                           @RequestParam long idEmpresa,
                           @RequestParam long idCliente,
+                          @RequestParam long idFormaDePago,
                           @RequestBody Recibo recibo) {
         recibo.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
         recibo.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
         recibo.setCliente(clienteService.getClientePorId(idCliente));
+        recibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(idFormaDePago));
         return reciboService.guardar(recibo);
     }
     

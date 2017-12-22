@@ -54,6 +54,7 @@ import sic.service.IConfiguracionDelSistemaService;
 import sic.service.ICuentaCorrienteService;
 import sic.service.IPagoService;
 import sic.service.IProductoService;
+import sic.service.IReciboService;
 import sic.service.IUsuarioService;
 import sic.service.ServiceException;
 import sic.util.FormatterFechaHora;
@@ -71,6 +72,7 @@ public class NotaServiceImpl implements INotaService {
     private final IPagoService pagoService;
     private final IProductoService productoService;
     private final ICuentaCorrienteService cuentaCorrienteService;
+    private final IReciboService reciboService;
     private final IConfiguracionDelSistemaService configuracionDelSistemaService;
     private final IAfipService afipService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
@@ -81,7 +83,7 @@ public class NotaServiceImpl implements INotaService {
             NotaDebitoRepository notaDeDebitoRespository, IFacturaService facturaService,
             IClienteService clienteService, IUsuarioService usuarioService, IProductoService productoService,
             IEmpresaService empresaService, IPagoService pagoService, ICuentaCorrienteService cuentaCorrienteService,
-            IConfiguracionDelSistemaService cds, IAfipService afipService) {
+            IReciboService reciboService, IConfiguracionDelSistemaService cds, IAfipService afipService) {
         this.notaRepository = notaRepository;
         this.notaCreditoRepository = notaDeCreditoRepository;
         this.notaDebitoRepository = notaDeDebitoRespository;
@@ -92,6 +94,7 @@ public class NotaServiceImpl implements INotaService {
         this.pagoService = pagoService;
         this.productoService = productoService;
         this.cuentaCorrienteService = cuentaCorrienteService;
+        this.reciboService = reciboService;
         this.configuracionDelSistemaService = cds;
         this.afipService = afipService;
     }
@@ -443,7 +446,7 @@ public class NotaServiceImpl implements INotaService {
 
     @Override
     @Transactional
-    public Nota guardarNota(Nota nota, long idEmpresa, long idCliente, long idUsuario, Long idFactura, Long idPago, boolean modificarStock) {
+    public Nota guardarNota(Nota nota, long idEmpresa, long idCliente, long idUsuario, Long idFactura, Long idPago, Long idRecibo, boolean modificarStock) {
         this.validarNota(nota, idEmpresa, idCliente, idUsuario, idFactura);
         nota.setSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(nota.getEmpresa()).getNroPuntoDeVentaAfip());
         if (nota instanceof NotaCredito) {
@@ -461,10 +464,16 @@ public class NotaServiceImpl implements INotaService {
             return notaCredito;
         } else {
             NotaDebito notaDebito = (NotaDebito) nota;
-            Pago pago = pagoService.getPagoPorId(idPago);
-            notaDebito.setTipoComprobante(this.getTipoDeNotaDebitoSegunPago(pago));
+            if (idPago != null) {
+                Pago pago = pagoService.getPagoPorId(idPago);
+                notaDebito.setTipoComprobante(this.getTipoDeNotaDebitoSegunPago(pago));
+                notaDebito.setPagoId(pago.getId_Pago());
+            }
+            if (idRecibo != null) {
+                notaDebito.setRecibo(reciboService.getById(idRecibo));
+                notaDebito.setTipoComprobante(this.facturaService.getTipoFacturaVenta(notaDebito.getEmpresa(), notaDebito.getCliente())[0]);
+            }
             notaDebito.setNroNota(this.getSiguienteNumeroNotaDebito(idEmpresa, nota.getTipoComprobante()));
-            notaDebito.setPagoId(pago.getId_Pago());
             this.validarCalculosDebito(notaDebito);
             notaDebito = notaDebitoRepository.save(notaDebito);
             this.cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito, TipoDeOperacion.ALTA);
