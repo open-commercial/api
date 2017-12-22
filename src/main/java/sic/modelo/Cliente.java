@@ -87,5 +87,8 @@ public class Cliente implements Serializable {
 
     @Transient
     private Double saldoCuentaCorriente;
+    
+    @Transient 
+    private Date fechaUltimoMovimiento;
 
 }

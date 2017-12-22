@@ -1,5 +1,6 @@
 package sic.repository;
 
+import java.util.Date;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -27,5 +28,9 @@ public interface RenglonCuentaCorrienteRepository extends PagingAndSortingReposi
     @Query("SELECT SUM(r.monto) FROM CuentaCorriente cc INNER JOIN cc.renglones r"
             + " WHERE cc.idCuentaCorriente = :idCuentaCorriente AND cc.eliminada = false AND r.eliminado = false")
     Double getSaldoCuentaCorriente(@Param("idCuentaCorriente") long idCuentaCorriente);
+    
+    @Query("SELECT max(r.fecha) FROM CuentaCorriente cc INNER JOIN cc.renglones r"
+            + " WHERE cc.idCuentaCorriente = :idCuentaCorriente AND cc.eliminada = false AND r.eliminado = false")
+    Date getFechaUltimoMovimiento(@Param("idCuentaCorriente") long idCuentaCorriente);
 
 }
