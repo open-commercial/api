@@ -202,15 +202,15 @@ public class NotaController {
     public List<RenglonNotaDebito> calcularRenglonNotaDebitoPagos(@PathVariable long idPago, 
                                                                   @RequestParam double monto,
                                                                   @RequestParam double ivaPorcentaje) {
-        return notaService.calcularRenglonDebito(idPago, monto, ivaPorcentaje);
+        return notaService.calcularRenglonDebito(idPago, null, monto, ivaPorcentaje);
     }
     
-    @GetMapping("/notas/renglon/debito")
+    @GetMapping("/notas/renglon/debito/recibo/{idRecibo}")
     @ResponseStatus(HttpStatus.OK) 
-    public List<RenglonNotaDebito> calcularRenglonNotaDebito(@RequestParam String descripcion,
+    public List<RenglonNotaDebito> calcularRenglonNotaDebito(@PathVariable long idRecibo, 
                                                              @RequestParam double monto,
                                                              @RequestParam double ivaPorcentaje) {
-        return notaService.calcularRenglonDebito(null, monto, ivaPorcentaje);
+        return notaService.calcularRenglonDebito(null, idRecibo, monto, ivaPorcentaje);
     }
     
     @GetMapping("/notas/credito/sub-total")

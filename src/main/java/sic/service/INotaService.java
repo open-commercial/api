@@ -63,7 +63,7 @@ public interface INotaService {
 
     List<RenglonNotaCredito> calcularRenglonCredito(TipoDeComprobante tipo, double[] cantidad, long[] idRenglonFactura);
 
-    List<RenglonNotaDebito> calcularRenglonDebito(Long idPago, double monto, double ivaPorcentaje);
+    List<RenglonNotaDebito> calcularRenglonDebito(Long idPago, Long idRecibo, double monto, double ivaPorcentaje);
 
     double calcularSubTotalCredito(double[] importesBrutos);
 

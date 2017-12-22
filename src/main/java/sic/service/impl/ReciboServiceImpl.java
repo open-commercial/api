@@ -62,7 +62,7 @@ public class ReciboServiceImpl implements IReciboService {
         Pageable pageable = new PageRequest(i, 10, new Sort(Sort.Direction.ASC, "fecha").and(new Sort(Sort.Direction.DESC, "tipoComprobante")));
         Slice<FacturaVenta> facturasVenta = this.facturaService.getFacturasImpagas(recibo.getCliente(), recibo.getEmpresa(), pageable);
         while (facturasVenta.hasContent()) {
-            monto -= this.pagarMultiplesFacturas(facturasVenta.getContent(), recibo, monto, recibo.getFormaDePago(), recibo.getObservacion());
+            monto = this.pagarMultiplesFacturas(facturasVenta.getContent(), recibo, monto, recibo.getFormaDePago(), recibo.getObservacion());
             if (facturasVenta.hasNext()) {
                 i++;
                 pageable = new PageRequest(i, 10, new Sort(Sort.Direction.ASC, "fecha").and(new Sort(Sort.Direction.DESC, "tipoComprobante")));

@@ -217,11 +217,16 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                         : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_X) ? "\"X\"" : "")
                         + " " + n.getSerie() + " - " + n.getNroNota());
                 rcc.setMonto(-n.getTotal());
-                Pago p = pagoService.getPagoPorId(((NotaDebito) n).getPagoId());
-                String descripcion = "Pago Nº " + p.getNroPago() + " " + (new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHA_HISPANO)).format(p.getFecha());
-                if (p.getNota() != null && p.getNota().length() > 0) {
-                    descripcion += " " + p.getNota();
-                }
+                String descripcion = "";
+                if (((NotaDebito) n).getPagoId() != null) {
+                    Pago p = pagoService.getPagoPorId(((NotaDebito) n).getPagoId());
+                    descripcion = "Pago Nº " + p.getNroPago() + " " + (new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHA_HISPANO)).format(p.getFecha());
+                    if (p.getNota() != null && p.getNota().length() > 0) {
+                        descripcion += " " + p.getNota();
+                    }
+                } else if (((NotaDebito) n).getRecibo() != null) {
+                    descripcion = ((NotaDebito) n).getRecibo().getObservacion();
+                }           
                 rcc.setDescripcion(descripcion);
             }
             rcc.setNota(n); 

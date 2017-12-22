@@ -35,6 +35,7 @@ import sic.modelo.Nota;
 import sic.modelo.NotaCredito;
 import sic.modelo.NotaDebito;
 import sic.modelo.Pago;
+import sic.modelo.Recibo;
 import sic.modelo.RenglonFactura;
 import sic.modelo.RenglonNotaCredito;
 import sic.modelo.RenglonNotaDebito;
@@ -414,8 +415,13 @@ public class NotaServiceImpl implements INotaService {
     
     private void validarCalculosDebito(NotaDebito notaDebito) {
         // monto no gravado
-        Double montoPago = pagoService.getPagoPorId(notaDebito.getPagoId()).getMonto();
-        if (notaDebito.getMontoNoGravado() != montoPago) {
+        Double montoComprobante = 0.0;
+        if (notaDebito.getPagoId() != null) {
+            montoComprobante = pagoService.getPagoPorId(notaDebito.getPagoId()).getMonto();
+        } else if (notaDebito.getRecibo() != null) {
+            montoComprobante = notaDebito.getRecibo().getMonto();
+        }
+        if (notaDebito.getMontoNoGravado() != montoComprobante) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_nota_monto_no_gravado_no_valido"));
         }
@@ -438,7 +444,7 @@ public class NotaServiceImpl implements INotaService {
                 break;
         }
         // total
-        if (notaDebito.getTotal() != this.calcularTotalDebito(notaDebito.getSubTotalBruto(), iva21, montoPago)) {
+        if (notaDebito.getTotal() != this.calcularTotalDebito(notaDebito.getSubTotalBruto(), iva21, montoComprobante)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_nota_total_no_valido"));
         }
@@ -471,7 +477,8 @@ public class NotaServiceImpl implements INotaService {
             }
             if (idRecibo != null) {
                 notaDebito.setRecibo(reciboService.getById(idRecibo));
-                notaDebito.setTipoComprobante(this.facturaService.getTipoFacturaVenta(notaDebito.getEmpresa(), notaDebito.getCliente())[0]);
+                notaDebito.setTipoComprobante(
+                        this.getTipoDeNotaDebito(this.facturaService.getTipoFacturaVenta(notaDebito.getEmpresa(), notaDebito.getCliente())[0]));
             }
             notaDebito.setNroNota(this.getSiguienteNumeroNotaDebito(idEmpresa, nota.getTipoComprobante()));
             this.validarCalculosDebito(notaDebito);
@@ -512,25 +519,30 @@ public class NotaServiceImpl implements INotaService {
     private TipoDeComprobante getTipoDeNotaDebitoSegunPago(Pago pago) {
         TipoDeComprobante tipo = null;
         if (pago.getFactura() != null) {
-            switch (pago.getFactura().getTipoComprobante()) {
-                case FACTURA_A:
-                    tipo = TipoDeComprobante.NOTA_DEBITO_A;
-                    break;
-                case FACTURA_B:
-                    tipo = TipoDeComprobante.NOTA_DEBITO_B;
-                    break;
-                case FACTURA_X:
-                    tipo = TipoDeComprobante.NOTA_DEBITO_X;
-                    break;
-                case FACTURA_Y:
-                    tipo = TipoDeComprobante.NOTA_DEBITO_Y;
-                    break;
-                case PRESUPUESTO:
-                    tipo = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
-                    break;
-            }
+            tipo = this.getTipoDeNotaDebito(pago.getFactura().getTipoComprobante());
         } else if (pago.getNotaDebito() != null) {
             tipo = pago.getNotaDebito().getTipoComprobante();
+        }
+        return tipo;
+    }
+
+    private TipoDeComprobante getTipoDeNotaDebito(TipoDeComprobante tipo) {
+        switch (tipo) {
+            case FACTURA_A:
+                tipo = TipoDeComprobante.NOTA_DEBITO_A;
+                break;
+            case FACTURA_B:
+                tipo = TipoDeComprobante.NOTA_DEBITO_B;
+                break;
+            case FACTURA_X:
+                tipo = TipoDeComprobante.NOTA_DEBITO_X;
+                break;
+            case FACTURA_Y:
+                tipo = TipoDeComprobante.NOTA_DEBITO_Y;
+                break;
+            case PRESUPUESTO:
+                tipo = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
+                break;
         }
         return tipo;
     }
@@ -734,7 +746,7 @@ public class NotaServiceImpl implements INotaService {
     }
 
     @Override
-    public List<RenglonNotaDebito> calcularRenglonDebito(Long idPago, double monto, double ivaPorcentaje) {
+    public List<RenglonNotaDebito> calcularRenglonDebito(Long idPago, Long idRecibo, double monto, double ivaPorcentaje) {
         List<RenglonNotaDebito> renglonesNota = new ArrayList<>();
         RenglonNotaDebito renglonNota;
         if (idPago != null) {
@@ -746,6 +758,26 @@ public class NotaServiceImpl implements INotaService {
             }
             renglonNota.setDescripcion(descripcion);
             renglonNota.setMonto(pago.getMonto());
+            renglonNota.setImporteBruto(renglonNota.getMonto());
+            renglonNota.setIvaPorcentaje(0);
+            renglonNota.setIvaNeto(0);
+            renglonNota.setImporteNeto(this.calcularImporteRenglon(0, renglonNota.getImporteBruto(), 1));
+            renglonesNota.add(renglonNota);
+            renglonNota = new RenglonNotaDebito();
+            renglonNota.setDescripcion("Gasto Administrativo");
+            renglonNota.setMonto(monto);
+            renglonNota.setIvaPorcentaje(ivaPorcentaje);
+            renglonNota.setIvaNeto(monto * (ivaPorcentaje / 100));
+            renglonNota.setImporteBruto(monto);
+            renglonNota.setImporteNeto(this.calcularImporteRenglon(renglonNota.getIvaNeto(), renglonNota.getImporteBruto(), 1));
+            renglonesNota.add(renglonNota);
+        }
+        if (idRecibo != null) {
+            Recibo r = reciboService.getById(idRecibo);
+            renglonNota = new RenglonNotaDebito();
+            String descripcion = "Recibo Nº " + r.getNroRecibo() + " " + (new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHA_HISPANO)).format(r.getFecha());
+            renglonNota.setDescripcion(descripcion);
+            renglonNota.setMonto(r.getMonto());
             renglonNota.setImporteBruto(renglonNota.getMonto());
             renglonNota.setIvaPorcentaje(0);
             renglonNota.setIvaNeto(0);
