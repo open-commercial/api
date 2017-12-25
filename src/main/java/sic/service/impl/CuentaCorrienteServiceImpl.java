@@ -299,11 +299,11 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setCuentaCorriente(cc);
             this.renglonCuentaCorrienteService.guardar(rcc);
             LOGGER.warn("El renglon " + rcc + " se guardó correctamente.");
-            if (operacion == TipoDeOperacion.ELIMINACION) {
-                rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeRecibo(r, false);
-                rcc.setEliminado(true);
-                LOGGER.warn("El renglon " + rcc + " se eliminó correctamente.");
-            }
+        }
+        if (operacion == TipoDeOperacion.ELIMINACION) {
+            rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeRecibo(r, false);
+            rcc.setEliminado(true);
+            LOGGER.warn("El renglon " + rcc + " se eliminó correctamente.");
         }
     }
 

@@ -20,6 +20,8 @@ public interface ReciboRepository extends PagingAndSortingRepository<Recibo, Lon
     @Query("SELECT r.monto FROM Recibo r WHERE r.idRecibo= :idRecibo AND r.eliminado = false")
     Double getMontoById(@Param("idRecibo") long idRecibo);
     
+    Recibo findTopByEmpresaOrderByNroReciboDesc(Empresa empresa);
+    
     List<Recibo> findAllByClienteAndEmpresaAndEliminado(Cliente cliente, Empresa empresa, boolean eliminado);
     
     List<Recibo> findAllByUsuarioAndEmpresaAndEliminado(Usuario usuario, Empresa empresa, boolean eliminado);

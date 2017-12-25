@@ -22,6 +22,7 @@ import sic.modelo.Usuario;
 import sic.repository.ReciboRepository;
 import sic.service.BusinessServiceException;
 import sic.service.ICuentaCorrienteService;
+import sic.service.IEmpresaService;
 import sic.service.IFacturaService;
 import sic.service.IPagoService;
 import sic.service.IReciboService;
@@ -33,14 +34,16 @@ public class ReciboServiceImpl implements IReciboService {
     private final IFacturaService facturaService;
     private final IPagoService pagoService;
     private final ICuentaCorrienteService cuentaCorrienteService;
+    private final IEmpresaService empresaService;
     
     @Autowired
     public ReciboServiceImpl(ReciboRepository reciboRepository, IFacturaService facturaService, IPagoService pagoService,
-                             ICuentaCorrienteService cuentaCorrienteService) {
+                             ICuentaCorrienteService cuentaCorrienteService, IEmpresaService empresaService) {
         this.reciboRepository = reciboRepository;
         this.facturaService = facturaService;
         this.pagoService = pagoService;
         this.cuentaCorrienteService = cuentaCorrienteService;
+        this.empresaService = empresaService;
     }
 
     @Override
@@ -56,8 +59,11 @@ public class ReciboServiceImpl implements IReciboService {
     @Override 
     @Transactional
     public Recibo guardar(Recibo recibo) {
+        recibo.setNroRecibo(this.getSiguienteNumeroRecibo(recibo.getEmpresa().getId_Empresa()));
+        recibo.setFecha(new Date());
         double monto = recibo.getMonto();
         int i = 0;
+        this.validarRecibo(recibo);
         recibo = reciboRepository.save(recibo);
         Pageable pageable = new PageRequest(i, 10, new Sort(Sort.Direction.ASC, "fecha").and(new Sort(Sort.Direction.DESC, "tipoComprobante")));
         Slice<FacturaVenta> facturasVenta = this.facturaService.getFacturasImpagas(recibo.getCliente(), recibo.getEmpresa(), pageable);
@@ -76,6 +82,68 @@ public class ReciboServiceImpl implements IReciboService {
         return recibo;
     }
     
+    private void validarRecibo(Recibo recibo) {
+        //Requeridos
+        if (recibo.getMonto() <= 0) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_recibo_monto_igual_menor_cero"));
+        }
+        if (recibo.getSaldoSobrante() < 0) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_recibo_saldo_sobrante_menor_cero"));
+        }
+        if (recibo.getEmpresa() == null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_recibo_empresa_vacia"));
+        }
+        if (recibo.getCliente() == null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_recibo_cliente_vacio"));
+        }
+        if (recibo.getUsuario() == null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_recibo_usuario_vacio"));
+        }
+        if (recibo.getFormaDePago() == null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_recibo_forma_de_pago_vacia"));
+        }
+    }
+    
+    @Override
+    public long getSiguienteNumeroRecibo(long idEmpresa) {
+        Recibo recibo = reciboRepository.findTopByEmpresaOrderByNroReciboDesc(empresaService.getEmpresaPorId(idEmpresa));
+        if (recibo == null) {
+            return 1; // No existe ningun Recibo anterior
+        } else {
+            return 1 + recibo.getNroRecibo();
+        }
+    }
+    
+    @Override 
+    @Transactional
+    public Recibo guardarReciboDePago(Pago pago) { 
+        Recibo recibo = new Recibo();
+        if (pago.getFactura() != null && pago.getFactura() instanceof FacturaVenta) {
+            recibo.setCliente(((FacturaVenta) pago.getFactura()).getCliente());
+            recibo.setUsuario(((FacturaVenta) pago.getFactura()).getUsuario());
+        }
+        if (pago.getNotaDebito() != null) {
+            recibo.setCliente(pago.getNotaDebito().getCliente());
+            recibo.setUsuario(pago.getNotaDebito().getUsuario());
+        }
+        recibo.setEmpresa(pago.getEmpresa());
+        recibo.setFecha(pago.getFecha());
+        recibo.setFormaDePago(pago.getFormaDePago());
+        recibo.setMonto(pago.getMonto());
+        recibo.setNroRecibo(this.getSiguienteNumeroRecibo(pago.getEmpresa().getId_Empresa()));
+        recibo.setObservacion(pago.getNota());
+        recibo.setSaldoSobrante(0);
+        recibo = reciboRepository.save(recibo);
+        this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
+        return recibo;
+    }
+      
     @Override
     public double pagarMultiplesFacturas(List<FacturaVenta> facturasVenta, Recibo recibo, double monto, FormaDePago formaDePago, String nota) {
         for (FacturaVenta fv : facturasVenta) {

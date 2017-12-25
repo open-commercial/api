@@ -8,6 +8,7 @@ import sic.modelo.Cliente;
 import sic.modelo.Empresa;
 import sic.modelo.FacturaVenta;
 import sic.modelo.FormaDePago;
+import sic.modelo.Pago;
 import sic.modelo.Recibo;
 import sic.modelo.Usuario;
 
@@ -18,6 +19,10 @@ public interface IReciboService {
     Double getMontoById(long idRecibo);
     
     Recibo guardar(Recibo recibo);
+    
+    Recibo guardarReciboDePago(Pago pago);
+    
+    long getSiguienteNumeroRecibo(long idEmpresa);
     
     void eliminar(long idRecibo);
     

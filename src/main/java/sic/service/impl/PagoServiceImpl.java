@@ -29,6 +29,7 @@ import sic.service.ICuentaCorrienteService;
 import sic.service.IEmpresaService;
 import sic.service.IFormaDePagoService;
 import sic.service.INotaService;
+import sic.service.IReciboService;
 import sic.util.Utilidades;
 
 @Service
@@ -40,6 +41,7 @@ public class PagoServiceImpl implements IPagoService {
     private final IFormaDePagoService formaDePagoService;
     private final INotaService notaService;
     private final ICuentaCorrienteService cuentaCorrienteService;
+    private final IReciboService reciboService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Lazy
@@ -49,7 +51,8 @@ public class PagoServiceImpl implements IPagoService {
             IFormaDePagoService formaDePagoService,
             IFacturaService facturaService,
             INotaService notaService, 
-            ICuentaCorrienteService cuentaCorrienteService) {
+            ICuentaCorrienteService cuentaCorrienteService,
+            IReciboService reciboService) {
 
         this.empresaService = empresaService;
         this.formaDePagoService = formaDePagoService;
@@ -57,6 +60,7 @@ public class PagoServiceImpl implements IPagoService {
         this.facturaService = facturaService;
         this.notaService = notaService;
         this.cuentaCorrienteService = cuentaCorrienteService;
+        this.reciboService = reciboService;
     }
 
     @Override
@@ -136,12 +140,9 @@ public class PagoServiceImpl implements IPagoService {
         fechaPago.add(Calendar.SECOND, 1);
         pago.setFecha(fechaPago.getTime());
         pago = pagoRepository.save(pago);
-        if (pago.getNotaDebito() != null && pago.getFactura() == null) {
-            this.cuentaCorrienteService.asentarEnCuentaCorriente(pago, TipoDeOperacion.ALTA, pago.getNotaDebito().getCliente().getId_Cliente());
-        } else if (pago.getFactura() instanceof FacturaVenta && pago.getRecibo() == null) {
-            this.cuentaCorrienteService.asentarEnCuentaCorriente(pago, TipoDeOperacion.ALTA, null);
+        if (pago.getRecibo() == null) {
+            pago.setRecibo(reciboService.guardarReciboDePago(pago));
         }
-        
         if (pago.getFactura() != null && pago.getNotaDebito() == null) {
             facturaService.actualizarFacturaEstadoPago(pago.getFactura());
         }
