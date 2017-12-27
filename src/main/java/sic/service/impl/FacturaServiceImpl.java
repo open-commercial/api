@@ -236,6 +236,11 @@ public class FacturaServiceImpl implements IFacturaService {
     }  
     
     @Override
+    public Factura getFacturaDelPago(long idPago) {
+        return facturaRepository.getFacturaDelPago(idPago);
+    }
+    
+    @Override
     public List<RenglonFactura> getRenglonesDeLaFacturaModificadosParaCredito(Long id_Factura) {
         return notaService.getRenglonesFacturaModificadosParaNotaCredito(id_Factura);
     }
@@ -1027,15 +1032,6 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     @Override
-    public double calcularVuelto(double importeAPagar, double importeAbonado) {
-        if (importeAbonado <= importeAPagar) {
-            return 0;
-        } else {
-            return importeAbonado - importeAPagar;
-        }
-    }
-
-    @Override
     public double calcularImporte(double cantidad, double precioUnitario, double descuento_neto) {
         return (precioUnitario - descuento_neto) * cantidad;
     }
@@ -1122,8 +1118,11 @@ public class FacturaServiceImpl implements IFacturaService {
     @Override
     public RenglonFactura calcularRenglon(TipoDeComprobante tipo, Movimiento movimiento,
             double cantidad, Long idProducto, double descuento_porcentaje) {
-
         Producto producto = productoService.getProductoPorId(idProducto);
+        if ((movimiento == Movimiento.VENTA || movimiento == Movimiento.PEDIDO) && cantidad < producto.getVentaMinima()) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_producto_cantidad_menor_a_minima"));
+        }
         RenglonFactura nuevoRenglon = new RenglonFactura();
         nuevoRenglon.setId_ProductoItem(producto.getId_Producto());
         nuevoRenglon.setCodigoItem(producto.getCodigo());
@@ -1131,7 +1130,7 @@ public class FacturaServiceImpl implements IFacturaService {
         nuevoRenglon.setMedidaItem(producto.getMedida().getNombre());
         nuevoRenglon.setCantidad(cantidad);
         nuevoRenglon.setPrecioUnitario(this.calcularPrecioUnitario(movimiento, tipo, producto));
-        if(descuento_porcentaje > 100) {
+        if (descuento_porcentaje > 100) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_descuento_mayor_cien"));
         }

@@ -35,6 +35,8 @@ public interface IFacturaService {
 
     List<RenglonFactura> getRenglonesDeLaFactura(Long id_Factura);
     
+    Factura getFacturaDelPago(long idPago);
+    
     List<RenglonFactura> getRenglonesDeLaFacturaModificadosParaCredito(Long id_Factura);
     
     RenglonFactura getRenglonFactura(Long idRenglonFactura);
@@ -96,8 +98,6 @@ public interface IFacturaService {
     double calcularPrecioUnitario(Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto);
 
     long calcularNumeroFacturaVenta(TipoDeComprobante tipoDeComprobante, long serie, long idEmpresa);
-
-    double calcularVuelto(double importeAPagar, double importeAbonado);
 
     double calcularImporte(double cantidad, double precioUnitario, double descuento_neto);    
 

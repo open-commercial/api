@@ -1,5 +1,7 @@
 package sic.modelo;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -16,6 +18,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
+@JsonIgnoreProperties({"cliente", "usuario", "empresa", "pedido", "transportista"})
 public class FacturaVenta extends Factura implements Serializable {
 
     @ManyToOne
@@ -43,6 +46,16 @@ public class FacturaVenta extends Factura implements Serializable {
                 pagada, empresa, eliminada, CAE, vencimientoCAE, numSerieAfip, numFacturaAfip);
         this.cliente = cliente;
         this.usuario = usuario;
+    }
+    
+    @JsonGetter("razonSocialCliente")
+    public String getRazonSocialCliente() {
+        return cliente.getRazonSocial();
+    }    
+    
+    @JsonGetter("nombreUsuario")
+    public String getNombreUsuario() {
+        return usuario.getNombre();
     }
 
 }

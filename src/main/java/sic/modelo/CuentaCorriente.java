@@ -53,6 +53,9 @@ public class CuentaCorriente implements Serializable {
     @Transient
     private double saldo;
     
+    @Transient
+    private Date fechaUltimoMovimiento;
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "cuentaCorriente")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<RenglonCuentaCorriente> renglones;

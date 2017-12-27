@@ -22,6 +22,8 @@ public interface IClienteService {
     Cliente getClientePorRazonSocial(String razonSocial, Empresa empresa);
 
     Cliente getClientePredeterminado(Empresa empresa);
+    
+    boolean existeClientePredeterminado(Empresa empresa);
 
     List<Cliente> getClientes(Empresa empresa);
 
@@ -30,5 +32,7 @@ public interface IClienteService {
     void setClientePredeterminado(Cliente cliente);
 
     void validarOperacion(TipoDeOperacion operacion, Cliente cliente);
+    
+    Cliente getClientePorIdPedido(long idPedido);
 
 }

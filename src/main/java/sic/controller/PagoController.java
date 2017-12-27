@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import sic.modelo.Factura;
 import sic.modelo.NotaDebito;
 import sic.modelo.Pago;
+import sic.service.IEmpresaService;
 import sic.service.IFacturaService;
 import sic.service.IFormaDePagoService;
 import sic.service.INotaService;
@@ -35,16 +36,19 @@ public class PagoController {
     private final IPagoService pagoService;
     private final IFacturaService facturaService;
     private final IFormaDePagoService formaDePagoService;  
+    private final IEmpresaService empresaService;
     private final INotaService notaService;
-    private final int TAMANIO_PAGINA_DEFAULT = 100;
+    private final int TAMANIO_PAGINA_DEFAULT = 50;
     
     @Autowired
     public PagoController(IPagoService pagoService, IFacturaService facturaService,
-                          IFormaDePagoService formaDePago, INotaService notaService) {
+                          IFormaDePagoService formaDePago, INotaService notaService,
+                          IEmpresaService empresaService) {
         this.pagoService = pagoService;
         this.facturaService = facturaService;
         this.formaDePagoService = formaDePago;        
         this.notaService = notaService;
+        this.empresaService = empresaService;
     }
     
     @GetMapping("/pagos/{idPago}")
@@ -56,16 +60,24 @@ public class PagoController {
     @PostMapping("/pagos/facturas/{idFactura}")
     @ResponseStatus(HttpStatus.CREATED)
     public Pago guardarPagoDeFactura(@PathVariable long idFactura,
+                                     @RequestParam long idFormaDePago,
+                                     @RequestParam long idEmpresa,
                                      @RequestBody Pago pago) {
         pago.setFactura(facturaService.getFacturaPorId(idFactura));
+        pago.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+        pago.setFormaDePago(formaDePagoService.getFormasDePagoPorId(idFormaDePago));
         return pagoService.guardar(pago); 
     }
     
     @PostMapping("/pagos/notas/{idNota}")
     @ResponseStatus(HttpStatus.CREATED)
     public Pago guardarPagoDeNota(@PathVariable long idNota,
+                                  @RequestParam long idFormaDePago,
+                                  @RequestParam long idEmpresa,
                                   @RequestBody Pago pago) {
         pago.setNotaDebito((NotaDebito)notaService.getNotaPorId(idNota));
+        pago.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+        pago.setFormaDePago(formaDePagoService.getFormasDePagoPorId(idFormaDePago));
         return pagoService.guardar(pago); 
     }
     

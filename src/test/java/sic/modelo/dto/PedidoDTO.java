@@ -10,17 +10,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import sic.modelo.Cliente;
-import sic.modelo.Empresa;
 import sic.modelo.EstadoPedido;
 import sic.modelo.Factura;
-import sic.modelo.Usuario;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = {"facturas", "renglones"})
-@EqualsAndHashCode(of = {"nroPedido", "empresa"})
+@EqualsAndHashCode(of = {"nroPedido", "nombreEmpresa"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Pedido", scope = PedidoDTO.class)
 public class PedidoDTO implements Serializable {
     
@@ -29,10 +26,10 @@ public class PedidoDTO implements Serializable {
     private Date fecha;    
     private Date fechaVencimiento;    
     private String observaciones;    
-    private Empresa empresa;
+    private String nombreEmpresa;
     private boolean eliminado;    
-    private Cliente cliente;    
-    private Usuario usuario;        
+    private String razonSocialCliente;  
+    private String nombreUsuario;        
     private List<Factura> facturas;        
     private List<RenglonPedidoDTO> renglones;
     private double totalEstimado;

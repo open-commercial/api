@@ -1,5 +1,6 @@
 package sic.service;
 
+import java.util.Date;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import sic.modelo.CuentaCorriente;
@@ -30,5 +31,7 @@ public interface ICuentaCorrienteService {
       void asentarEnCuentaCorriente(Nota n, TipoDeOperacion tipo);
       
       void asentarEnCuentaCorriente(Pago p, TipoDeOperacion tipo, Long idCliente);
+      
+      Date getFechaUltimoMovimiento(long idCuentaCorriente);
       
 }

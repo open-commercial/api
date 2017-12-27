@@ -69,6 +69,11 @@ public class ClienteServiceImpl implements IClienteService {
         }
         return cliente;                   
     }
+    
+    @Override
+    public boolean existeClientePredeterminado(Empresa empresa) {
+        return clienteRepository.existsByAndEmpresaAndPredeterminadoAndEliminado(empresa, true, false);
+    }
 
     /**
      * Establece el @cliente pasado como parametro como predeterminado. Antes de
@@ -133,7 +138,9 @@ public class ClienteServiceImpl implements IClienteService {
         builder.and(qcliente.empresa.eq(criteria.getEmpresa()).and(qcliente.eliminado.eq(false)));        
         Page<Cliente> page = clienteRepository.findAll(builder, criteria.getPageable());
         page.getContent().forEach(c -> {
-            c.setSaldoCuentaCorriente(cuentaCorrienteService.getSaldoCuentaCorriente(c.getId_Cliente()));
+            CuentaCorriente cc = cuentaCorrienteService.getCuentaCorrientePorCliente(c.getId_Cliente());
+            c.setSaldoCuentaCorriente(cc.getSaldo());
+            c.setFechaUltimoMovimiento(cc.getFechaUltimoMovimiento());
         });        
         return page;
     }
@@ -227,4 +234,10 @@ public class ClienteServiceImpl implements IClienteService {
         cliente.setEliminado(true);        
         clienteRepository.save(cliente);                   
     }
+    
+    @Override
+    public Cliente getClientePorIdPedido(long idPedido) {
+        return clienteRepository.findClienteByIdPedido(idPedido);
+    }
+    
 }
