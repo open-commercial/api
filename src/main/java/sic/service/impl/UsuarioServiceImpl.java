@@ -42,7 +42,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
     @Override
     public Usuario autenticarUsuario(Credencial credencial) {
         Usuario usuario = usuarioRepository.findByUsernameOrEmailAndPasswordAndEliminado(credencial.getUsername(),
-                credencial.getUsername(), Utilidades.encriptarConMD5(credencial.getPassword()), false);
+                credencial.getUsername(), Utilidades.encriptarConMD5(credencial.getPassword()));
         if (usuario == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_usuario_no_existente"));
@@ -82,7 +82,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
         //Duplicados
         // Username or email
         Usuario usuarioDuplicado = usuarioRepository.findByUsernameOrEmailAndPasswordAndEliminado(usuario.getUsername(),
-                usuario.getUsername(), usuario.getPassword(), false);
+                usuario.getUsername(), usuario.getPassword());
         if (operacion.equals(TipoDeOperacion.ALTA) && usuarioDuplicado != null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_usuario_duplicado_nombre"));

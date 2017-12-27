@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import sic.controller.UnauthorizedException;
 import sic.modelo.Usuario;
+import sic.service.BusinessServiceException;
 import sic.service.IUsuarioService;
 
 public class JwtInterceptor extends HandlerInterceptorAdapter {
@@ -45,13 +46,14 @@ public class JwtInterceptor extends HandlerInterceptorAdapter {
         }        
         long idUsuario = (int) claims.get("idUsuario");
         Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
-        if (null == usuario || null == token) {
-            throw new UnauthorizedException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_error_token_vacio_invalido"));
-        } else if (!token.equalsIgnoreCase(usuario.getToken())) {
+        if (!token.equalsIgnoreCase(usuario.getToken())) {
             throw new UnauthorizedException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_error_token_invalido"));
-        }                
+        }               
+        if (usuario.isHabilitado() == false) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_usuario_no_habilitado"));
+        }
         return true;
     }
 }
