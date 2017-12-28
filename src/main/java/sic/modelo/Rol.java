@@ -2,9 +2,8 @@ package sic.modelo;
 
 public enum Rol {
     
-    ADMINISTRADOR,
-    
-    VENDEDOR,
-    
-    VIAJANTE;
+    ADMINISTRADOR,    
+    VENDEDOR,    
+    VIAJANTE,
+    CLIENTE;
 }
