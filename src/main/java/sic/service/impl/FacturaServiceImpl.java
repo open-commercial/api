@@ -389,7 +389,7 @@ public class FacturaServiceImpl implements IFacturaService {
                 facturasProcesadas.add(facturaGuardada);
                 LOGGER.warn("La Factura " + facturaGuardada + " se guardó correctamente.");
                 if (pagosFactura != null) {
-                    pagosFactura.forEach((p) -> {
+                    pagosFactura.forEach(p -> {
                         pagoService.guardar(p);
                     });
                     f.setPagos(pagosFactura);
@@ -1089,35 +1089,35 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     @Override
-    public List<RenglonFactura> convertirRenglonesPedidoARenglonesFactura(Pedido pedido, TipoDeComprobante tipoDeComprobante) {
+    public List<RenglonFactura> convertirRenglonesPedidoEnRenglonesFactura(Pedido pedido, TipoDeComprobante tipoDeComprobante) {
         List<RenglonFactura> renglonesRestantes = new ArrayList<>();
         HashMap<Long, RenglonFactura> renglonesDeFacturas = pedidoService.getRenglonesFacturadosDelPedido(pedido.getId_Pedido());
         List<Factura> facturasDePedido = this.getFacturasDelPedido(pedido.getId_Pedido());
         if (facturasDePedido != null) {
-            pedido.getRenglones().stream().forEach((renglon) -> {
-                if (renglonesDeFacturas.containsKey(renglon.getProducto().getId_Producto())) {
-                    if (renglon.getCantidad() > renglonesDeFacturas.get(renglon.getProducto().getId_Producto()).getCantidad()) {
+            pedido.getRenglones().stream().forEach(r -> {
+                if (renglonesDeFacturas.containsKey(r.getProducto().getId_Producto())) {
+                    if (r.getCantidad() > renglonesDeFacturas.get(r.getProducto().getId_Producto()).getCantidad()) {
                         renglonesRestantes.add(this.calcularRenglon(tipoDeComprobante,
-                                Movimiento.VENTA, renglon.getCantidad() - renglonesDeFacturas.get(renglon.getProducto().getId_Producto()).getCantidad(),
-                                renglon.getProducto().getId_Producto(), renglon.getDescuento_porcentaje()));
+                                Movimiento.VENTA, r.getCantidad() - renglonesDeFacturas.get(r.getProducto().getId_Producto()).getCantidad(),
+                                r.getProducto().getId_Producto(), r.getDescuento_porcentaje()));
                     }
                 } else {
                     renglonesRestantes.add(this.calcularRenglon(tipoDeComprobante, Movimiento.VENTA,
-                            renglon.getCantidad(), renglon.getProducto().getId_Producto(), renglon.getDescuento_porcentaje()));
+                            r.getCantidad(), r.getProducto().getId_Producto(), r.getDescuento_porcentaje()));
                 }
             });
         } else {
-            pedido.getRenglones().stream().forEach((renglon) -> {
+            pedido.getRenglones().stream().forEach(r -> {
                 renglonesRestantes.add(this.calcularRenglon(tipoDeComprobante, Movimiento.VENTA,
-                        renglon.getCantidad(), renglon.getProducto().getId_Producto(), renglon.getDescuento_porcentaje()));
+                        r.getCantidad(), r.getProducto().getId_Producto(), r.getDescuento_porcentaje()));
             });
         }
         return renglonesRestantes;
     }
 
     @Override
-    public RenglonFactura calcularRenglon(TipoDeComprobante tipo, Movimiento movimiento,
-            double cantidad, Long idProducto, double descuento_porcentaje) {
+    public RenglonFactura calcularRenglon(TipoDeComprobante tipoDeComprobante, Movimiento movimiento,
+            double cantidad, long idProducto, double descuentoPorcentaje) {
         Producto producto = productoService.getProductoPorId(idProducto);
         if ((movimiento == Movimiento.VENTA || movimiento == Movimiento.PEDIDO) && cantidad < producto.getVentaMinima()) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -1129,18 +1129,18 @@ public class FacturaServiceImpl implements IFacturaService {
         nuevoRenglon.setDescripcionItem(producto.getDescripcion());
         nuevoRenglon.setMedidaItem(producto.getMedida().getNombre());
         nuevoRenglon.setCantidad(cantidad);
-        nuevoRenglon.setPrecioUnitario(this.calcularPrecioUnitario(movimiento, tipo, producto));
-        if (descuento_porcentaje > 100) {
+        nuevoRenglon.setPrecioUnitario(this.calcularPrecioUnitario(movimiento, tipoDeComprobante, producto));
+        if (descuentoPorcentaje > 100) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_descuento_mayor_cien"));
         }
-        nuevoRenglon.setDescuento_porcentaje(descuento_porcentaje);
-        nuevoRenglon.setDescuento_neto(this.calcularDescuentoNeto(nuevoRenglon.getPrecioUnitario(), descuento_porcentaje));
+        nuevoRenglon.setDescuento_porcentaje(descuentoPorcentaje);
+        nuevoRenglon.setDescuento_neto(this.calcularDescuentoNeto(nuevoRenglon.getPrecioUnitario(), descuentoPorcentaje));
         nuevoRenglon.setIva_porcentaje(producto.getIva_porcentaje());
-        if (tipo.equals(TipoDeComprobante.FACTURA_Y)) {
+        if (tipoDeComprobante.equals(TipoDeComprobante.FACTURA_Y)) {
             nuevoRenglon.setIva_porcentaje(producto.getIva_porcentaje() / 2);
         }
-        nuevoRenglon.setIva_neto(this.calcularIVANetoRenglon(movimiento, tipo, producto, nuevoRenglon.getDescuento_porcentaje()));
+        nuevoRenglon.setIva_neto(this.calcularIVANetoRenglon(movimiento, tipoDeComprobante, producto, nuevoRenglon.getDescuento_porcentaje()));
         nuevoRenglon.setImpuesto_porcentaje(producto.getImpuestoInterno_porcentaje());
         nuevoRenglon.setImpuesto_neto(this.calcularImpInternoNeto(movimiento, producto, nuevoRenglon.getDescuento_neto()));
         nuevoRenglon.setGanancia_porcentaje(producto.getGanancia_porcentaje());

@@ -105,8 +105,8 @@ public interface IFacturaService {
 
     List<Factura> dividirFactura(FacturaVenta factura, int[] indices);
 
-    List<RenglonFactura> convertirRenglonesPedidoARenglonesFactura(Pedido pedido, TipoDeComprobante tipoDeComprobante);
+    List<RenglonFactura> convertirRenglonesPedidoEnRenglonesFactura(Pedido pedido, TipoDeComprobante tipoDeComprobante);
 
-    RenglonFactura calcularRenglon(TipoDeComprobante tipoDeComprobante, Movimiento movimiento, double cantidad, Long idProducto, double descuento_porcentaje);
+    RenglonFactura calcularRenglon(TipoDeComprobante tipoDeComprobante, Movimiento movimiento, double cantidad, long idProducto, double descuento_porcentaje);
 
 }
