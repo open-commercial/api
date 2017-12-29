@@ -33,7 +33,7 @@ public interface IPagoService {
     
     Page<Pago> getPagosPorClienteEntreFechas(long idCliente, Date desde, Date hasta, Pageable page);
     
-    List<Pago> getPagosRelacionadosAlRecibo(Recibo recibo);
+    List<Pago> getPagosRelacionadosAlRecibo(long idRecibo);
     
     double calcularTotalPagos(List<Pago> pagos);
     

@@ -3,6 +3,7 @@ package sic.repository;
 import java.util.Date;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -24,6 +25,15 @@ public interface RenglonCuentaCorrienteRepository extends PagingAndSortingReposi
     RenglonCuentaCorriente findByReciboAndEliminado(Recibo r, boolean eliminado);
 
     Page<RenglonCuentaCorriente> findAllByCuentaCorrienteAndEliminado(CuentaCorriente cuentaCorriente, boolean eliminado, Pageable page);
+    
+    @Query("SELECT r FROM CuentaCorriente cc INNER JOIN cc.renglones r"
+            + " WHERE cc.idCuentaCorriente = :idCuentaCorriente AND cc.eliminada = false AND r.eliminado = false "
+            + " AND (r.tipoDeComprobante = \'FACTURA_A\' OR r.tipoDeComprobante = \'FACTURA_B\' OR r.tipoDeComprobante = \'FACTURA_C\'"
+            + " OR r.tipoDeComprobante = \'FACTURA_X\' OR r.tipoDeComprobante = \'FACTURA_Y\' OR r.tipoDeComprobante = \'PRESUPUESTO\'"
+            + " OR r.tipoDeComprobante = \'NOTA_DEBITO_A\' OR r.tipoDeComprobante = \'NOTA_DEBITO_B\' OR r.tipoDeComprobante = \'NOTA_DEBITO_X\'"
+            + " OR r.tipoDeComprobante = \'NOTA_DEBITO_Y\' OR r.tipoDeComprobante = \'NOTA_DEBITO_PRESUPUESTO\')"
+            + " ORDER BY r.fecha ASC, r.tipoDeComprobante DESC")
+    Slice<RenglonCuentaCorriente> getRenglonesVentaYDebitoCuentaCorriente(@Param("idCuentaCorriente") long idCuentaCorriente, Pageable page);
 
     @Query("SELECT SUM(r.monto) FROM CuentaCorriente cc INNER JOIN cc.renglones r"
             + " WHERE cc.idCuentaCorriente = :idCuentaCorriente AND cc.eliminada = false AND r.eliminado = false")

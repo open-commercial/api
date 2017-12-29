@@ -10,7 +10,6 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +48,6 @@ import sic.modelo.Medida;
 import sic.modelo.Movimiento;
 import sic.modelo.NotaCredito;
 import sic.modelo.NotaDebito;
-import sic.modelo.Pago;
 import sic.modelo.Pais;
 import sic.modelo.Proveedor;
 import sic.modelo.Provincia;
@@ -65,7 +63,6 @@ import sic.modelo.Usuario;
 import sic.modelo.dto.FacturaVentaDTO;
 import sic.modelo.dto.NotaCreditoDTO;
 import sic.modelo.dto.NotaDebitoDTO;
-import sic.modelo.dto.PagoDTO;
 import sic.modelo.dto.ProductoDTO;
 import sic.modelo.dto.ReciboDTO;
 import sic.repository.UsuarioRepository;
@@ -273,18 +270,17 @@ public class CuentaCorrienteIntegrationTest {
                         new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {
                 })
                 .getBody().getContent();
-        PagoDTO pago = new PagoDTO();
-        pago.setFecha(new Date());
-        pago.setMonto(5992.5);
-        pago = restTemplate.postForObject(apiPrefix + "/pagos/facturas/1?idFormaDePago=" + formaDePago.getId_FormaDePago()
-                + "&idEmpresa=" + empresa.getId_Empresa(), pago, PagoDTO.class);
+        ReciboDTO r = new ReciboDTO();
+        r.setMonto(5992.5);
+        restTemplate.postForObject(apiPrefix + "/recibos?"
+                + "idUsuario=1&idEmpresa=1&idCliente=1&idFormaDePago=1", r, Recibo.class);
         assertEquals(0, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         NotaDebitoDTO notaDebito = new NotaDebitoDTO();
         notaDebito.setPagoId(null);
         notaDebito.setCliente(cliente);
         notaDebito.setEmpresa(empresa);
         notaDebito.setFecha(new Date());
-        notaDebito.setPagoId(pago.getId_Pago());
+//        notaDebito.setRecibo(r); Las notas de debito deben pagarse con los recibos también
         List<RenglonNotaDebito> renglonesCalculados = Arrays.asList(restTemplate.getForObject(apiPrefix + "/notas/renglon/debito/pago/1?monto=100&ivaPorcentaje=21", RenglonNotaDebito[].class));
         notaDebito.setRenglonesNotaDebito(renglonesCalculados);
         notaDebito.setIva105Neto(0);
@@ -297,12 +293,10 @@ public class CuentaCorrienteIntegrationTest {
         notaDebito.setFacturaVenta(null);
         NotaDebito nd = restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1?idPago=1", notaDebito, NotaDebito.class);
         assertEquals(-6113.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
-        pago = new PagoDTO();
-        pago.setNotaDebito(nd);
-        pago.setFecha(new Date());
-        pago.setMonto(6113.5);
-        restTemplate.postForObject(apiPrefix + "/pagos/notas/1?idFormaDePago=" + formaDePago.getId_FormaDePago()
-                + "&idEmpresa=" + empresa.getId_Empresa(), pago, Pago.class);
+        r = new ReciboDTO();
+        r.setMonto(6113.5);
+        restTemplate.postForObject(apiPrefix + "/recibos?"
+                + "idUsuario=1&idEmpresa=1&idCliente=1&idFormaDePago=" + formaDePago.getId_FormaDePago(), r, Recibo.class);
         assertEquals(0, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         List<RenglonNotaCredito> renglonesNotaCredito = Arrays.asList(restTemplate.getForObject(apiPrefix + "/notas/renglon/credito/producto?"
                 + "tipoDeComprobante=" + facturasRecuperadas.get(0).getTipoComprobante().name()

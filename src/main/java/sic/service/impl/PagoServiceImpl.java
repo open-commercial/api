@@ -19,8 +19,6 @@ import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
 import sic.modelo.FormaDePago;
 import sic.modelo.Pago;
-import sic.modelo.Recibo;
-import sic.modelo.TipoDeOperacion;
 import sic.service.IFacturaService;
 import sic.service.IPagoService;
 import sic.service.BusinessServiceException;
@@ -117,8 +115,8 @@ public class PagoServiceImpl implements IPagoService {
     }
     
     @Override
-    public List<Pago> getPagosRelacionadosAlRecibo(Recibo recibo) {
-        return this.pagoRepository.findAllByReciboAndEliminado(recibo, false);
+    public List<Pago> getPagosRelacionadosAlRecibo(long idRecibo) {
+        return this.pagoRepository.findAllByReciboAndEliminado(reciboService.getById(idRecibo), false);
     }
 
     @Override
@@ -159,9 +157,6 @@ public class PagoServiceImpl implements IPagoService {
                     .getString("mensaje_no_se_puede_eliminar"));
         }
         pago.setEliminado(true);
-        if (pago.getFactura() instanceof FacturaVenta) {
-            this.cuentaCorrienteService.asentarEnCuentaCorriente(pago, TipoDeOperacion.ELIMINACION, null);
-        }
         pagoRepository.save(pago);
         if (pago.getFactura() != null) {
             facturaService.actualizarFacturaEstadoPago(pago.getFactura());

@@ -10,6 +10,7 @@ import sic.modelo.FacturaVenta;
 import sic.modelo.FormaDePago;
 import sic.modelo.Pago;
 import sic.modelo.Recibo;
+import sic.modelo.RenglonCuentaCorriente;
 import sic.modelo.Usuario;
 
 public interface IReciboService {
@@ -20,9 +21,11 @@ public interface IReciboService {
     
     Recibo guardar(Recibo recibo);
     
+    Recibo actualizarMontoRecibo(long idRecibo, double monto);
+    
     Recibo guardarReciboDePago(Pago pago);
     
-    long getSiguienteNumeroRecibo(long idEmpresa);
+    long getSiguienteNumeroRecibo(long idEmpresa, long serie);
     
     void eliminar(long idRecibo);
     
@@ -32,6 +35,8 @@ public interface IReciboService {
     
     Page<Recibo> getByFechaBetweenAndClienteAndEmpresaAndEliminado(Date desde, Date hasta, Cliente cliente, Empresa empresa, boolean eliminado, Pageable page);
     
-    double pagarMultiplesFacturas(List<FacturaVenta> facturasVenta, Recibo recibo, double monto, FormaDePago formaDePago, String nota);
+    double pagarMultiplesComprobantes(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, double monto, FormaDePago formaDePago, String nota);
+    
+    List<Recibo> getRecibosConSaldoSobrante(long idEmpresa, long idCliente);
     
 }

@@ -22,7 +22,6 @@ import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
 import sic.modelo.TipoDeComprobante;
 import sic.modelo.TipoDeOperacion;
-import sic.modelo.TipoMovimiento;
 import sic.repository.CuentaCorrienteRepository;
 import sic.service.BusinessServiceException;
 import sic.service.IClienteService;
@@ -145,10 +144,16 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             for (RenglonCuentaCorriente rcc : renglonesCuentaCorriente) {
                 rcc.setSaldo(saldoCC);
                 saldoCC -= rcc.getMonto();
-                if (rcc.getTipoMovimiento() == TipoMovimiento.VENTA) {
+                if (rcc.getTipoDeComprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipoDeComprobante() == TipoDeComprobante.FACTURA_B
+                        || rcc.getTipoDeComprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipoDeComprobante() == TipoDeComprobante.FACTURA_X
+                        || rcc.getTipoDeComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoDeComprobante() == TipoDeComprobante.PRESUPUESTO) {
                     rcc.setCAE(facturaService.getCAEById(rcc.getIdMovimiento()));
                 }
-                if (rcc.getTipoMovimiento() == TipoMovimiento.CREDITO || rcc.getTipoMovimiento() == TipoMovimiento.DEBITO) {
+                if (rcc.getTipoDeComprobante() == TipoDeComprobante.NOTA_CREDITO_A || rcc.getTipoDeComprobante() == TipoDeComprobante.NOTA_CREDITO_B
+                        || rcc.getTipoDeComprobante() == TipoDeComprobante.NOTA_CREDITO_X || rcc.getTipoDeComprobante() == TipoDeComprobante.NOTA_CREDITO_Y
+                        || rcc.getTipoDeComprobante() == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO || rcc.getTipoDeComprobante() == TipoDeComprobante.NOTA_DEBITO_A
+                        || rcc.getTipoDeComprobante() == TipoDeComprobante.NOTA_DEBITO_B || rcc.getTipoDeComprobante() == TipoDeComprobante.NOTA_DEBITO_X
+                        || rcc.getTipoDeComprobante() == TipoDeComprobante.NOTA_DEBITO_Y || rcc.getTipoDeComprobante() == TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO) {
                     rcc.setCAE(notaService.getCAEById(rcc.getIdMovimiento()));
                 }
             }
@@ -156,33 +161,19 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         return renglonesCuentaCorriente;
     }
     
-    private TipoMovimiento getTipoMovimiento(Nota nota) {
-        if (nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_A) || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_B)
-                || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_Y) || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_X)) {
-            return TipoMovimiento.CREDITO;
-        } else {
-            return TipoMovimiento.DEBITO;
-        }
-    }
-    
     @Override
     @Transactional
     public void asentarEnCuentaCorriente(FacturaVenta fv, TipoDeOperacion operacion) {
         if (operacion == TipoDeOperacion.ALTA) {
             RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
-            rcc.setComprobante((fv.getTipoComprobante().equals(TipoDeComprobante.PRESUPUESTO) ? "PRESUPUESTO " : "FACTURA ")
-                    + (fv.getTipoComprobante().equals(TipoDeComprobante.FACTURA_A) ? "\"A\""
-                    : fv.getTipoComprobante().equals(TipoDeComprobante.FACTURA_B) ? "\"B\""
-                    : fv.getTipoComprobante().equals(TipoDeComprobante.FACTURA_C) ? "\"C\""
-                    : fv.getTipoComprobante().equals(TipoDeComprobante.FACTURA_X) ? "\"X\""
-                    : fv.getTipoComprobante().equals(TipoDeComprobante.FACTURA_Y) ? "\"Y\""
-                    : "") + " " + fv.getNumSerie() + " - " + fv.getNumFactura());
+            rcc.setTipoDeComprobante(fv.getTipoComprobante());
+            rcc.setSerie(fv.getNumSerie());
+            rcc.setNumero(fv.getNumFactura());
             rcc.setFactura(fv);
             rcc.setFecha(fv.getFecha());
             rcc.setFechaVencimiento(fv.getFechaVencimiento());
             rcc.setIdMovimiento(fv.getId_Factura());
             rcc.setMonto(-fv.getTotal());
-            rcc.setTipoMovimiento(TipoMovimiento.VENTA);
             CuentaCorriente cc = this.getCuentaCorrientePorCliente(fv.getCliente().getId_Cliente());
             cc.getRenglones().add(rcc);
             rcc.setCuentaCorriente(cc);
@@ -201,23 +192,14 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     public void asentarEnCuentaCorriente(Nota n, TipoDeOperacion operacion) {
         if (operacion == TipoDeOperacion.ALTA) {
             RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
+            rcc.setTipoDeComprobante(n.getTipoComprobante());
+            rcc.setSerie(n.getSerie());
+            rcc.setNumero(n.getNroNota());
             if (n instanceof NotaCredito) {
-                rcc.setComprobante("NOTA CREDITO " + (n.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_A) ? "\"A\""
-                        : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_B) ? "\"B\""
-                        : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO) ? "\"P\""
-                        : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_Y) ? "\"Y\""
-                        : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_X) ? "\"X\"" : "")
-                        + " " + n.getSerie() + " - " + n.getNroNota());
                 rcc.setMonto(n.getTotal());
                 rcc.setDescripcion(n.getMotivo()); // Descripción de los productos
             }
             if (n instanceof NotaDebito) {
-                rcc.setComprobante("NOTA DEBITO " + (n.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_A) ? "\"A\""
-                        : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_B) ? "\"B\""
-                        : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO) ? "\"P\""
-                        : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_Y) ? "\"Y\""
-                        : n.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_X) ? "\"X\"" : "")
-                        + " " + n.getSerie() + " - " + n.getNroNota());
                 rcc.setMonto(-n.getTotal());
                 String descripcion = "";
                 if (((NotaDebito) n).getPagoId() != null) {
@@ -234,7 +216,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setNota(n); 
             rcc.setFecha(n.getFecha());
             rcc.setIdMovimiento(n.getIdNota());
-            rcc.setTipoMovimiento(this.getTipoMovimiento(n));
             CuentaCorriente cc = this.getCuentaCorrientePorCliente(n.getCliente().getId_Cliente());
             cc.getRenglones().add(rcc);
             rcc.setCuentaCorriente(cc);
@@ -247,38 +228,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
         }
     }
-
-    @Override
-    @Transactional
-    public void asentarEnCuentaCorriente(Pago p, TipoDeOperacion operacion, Long idCliente) {
-        if (operacion == TipoDeOperacion.ALTA) {
-            RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
-            rcc.setPago(p);
-            rcc.setComprobante("PAGO Nº " + p.getNroPago());
-            rcc.setDescripcion(p.getNota());
-            rcc.setFecha(p.getFecha());
-            rcc.setIdMovimiento(p.getId_Pago());
-            rcc.setMonto(p.getMonto());
-            rcc.setTipoMovimiento(TipoMovimiento.PAGO);
-            CuentaCorriente cc;
-            if (p.getFactura() instanceof FacturaVenta) {
-                cc = this.getCuentaCorrientePorCliente(((FacturaVenta) p.getFactura()).getCliente().getId_Cliente());
-                cc.getRenglones().add(rcc);
-                rcc.setCuentaCorriente(cc);
-            } else if (idCliente != null) {
-                cc = this.getCuentaCorrientePorCliente(idCliente);
-                cc.getRenglones().add(rcc);
-                rcc.setCuentaCorriente(cc);
-            }
-            this.renglonCuentaCorrienteService.guardar(rcc);
-            LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
-        }
-        if (operacion == TipoDeOperacion.ELIMINACION) {
-            RenglonCuentaCorriente rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDePago(p, false);
-            rcc.setEliminado(true);
-            LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
-        }
-    }
     
     @Override
     @Transactional
@@ -287,12 +236,14 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         if (operacion == TipoDeOperacion.ALTA) {
             rcc = new RenglonCuentaCorriente();
             rcc.setRecibo(r);
-            rcc.setComprobante("RECIBO Nº " + r.getNroRecibo());
+            rcc.setTipoDeComprobante(TipoDeComprobante.RECIBO);
+            rcc.setSerie(r.getSerie());
+            rcc.setNumero(r.getNroRecibo());
             rcc.setDescripcion(r.getObservacion());
             rcc.setFecha(r.getFecha());
             rcc.setIdMovimiento(r.getIdRecibo());
             rcc.setMonto(r.getMonto());
-            rcc.setTipoMovimiento(TipoMovimiento.RECIBO);
+//            rcc.setTipoMovimiento(TipoMovimiento.RECIBO);
             CuentaCorriente cc;
             cc = this.getCuentaCorrientePorCliente(r.getCliente().getId_Cliente());
             cc.getRenglones().add(rcc);

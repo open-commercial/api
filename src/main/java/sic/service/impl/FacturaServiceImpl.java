@@ -48,6 +48,7 @@ import sic.service.IPagoService;
 import sic.service.IPedidoService;
 import sic.service.IProductoService;
 import sic.modelo.Movimiento;
+import sic.modelo.Recibo;
 import sic.modelo.TipoDeComprobante;
 import sic.service.BusinessServiceException;
 import sic.service.ServiceException;
@@ -61,6 +62,7 @@ import sic.repository.RenglonFacturaRepository;
 import sic.service.ICuentaCorrienteService;
 import sic.service.IAfipService;
 import sic.service.INotaService;
+import sic.service.IReciboService;
 
 @Service
 public class FacturaServiceImpl implements IFacturaService {
@@ -76,6 +78,7 @@ public class FacturaServiceImpl implements IFacturaService {
     private final INotaService notaService;
     private final ICuentaCorrienteService cuentaCorrienteService;
     private final IAfipService afipService;
+    private final IReciboService reciboService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
@@ -89,7 +92,8 @@ public class FacturaServiceImpl implements IFacturaService {
             IPedidoService pedidoService, IPagoService pagoService, 
             INotaService notaService,
             ICuentaCorrienteService cuentaCorrienteService,
-            IAfipService afipService) {
+            IAfipService afipService,
+            IReciboService reciboService) {
         this.facturaRepository = facturaRepository;
         this.facturaVentaRepository = facturaVentaRepository;
         this.facturaCompraRepository = facturaCompraRepository;
@@ -101,6 +105,7 @@ public class FacturaServiceImpl implements IFacturaService {
         this.notaService = notaService;
         this.cuentaCorrienteService = cuentaCorrienteService;
         this.afipService = afipService;
+        this.reciboService = reciboService;
     }
     
     @Override
@@ -326,11 +331,6 @@ public class FacturaServiceImpl implements IFacturaService {
         }
         return facturaVentaRepository.buscarFacturasVenta(criteria);
     }
-    
-    @Override
-    public Slice<FacturaVenta> getFacturasImpagas(Cliente cliente, Empresa empresa, Pageable pageable) {
-        return facturaVentaRepository.findByClienteAndEmpresaAndPagadaAndEliminada(cliente, empresa, false, false, pageable);
-    }
 
     private Factura procesarFactura(Factura factura) {
         factura.setEliminada(false);
@@ -402,6 +402,51 @@ public class FacturaServiceImpl implements IFacturaService {
                     f.setPagos(pagosFactura);
                 }
                 this.actualizarFacturaEstadoPago(facturaGuardada);
+                if (facturaGuardada.isPagada() == false && facturaGuardada instanceof FacturaVenta) {
+                    List<Recibo> recibos
+                            = reciboService.getRecibosConSaldoSobrante(facturaGuardada.getEmpresa().getId_Empresa(),
+                                    ((FacturaVenta) facturaGuardada).getCliente().getId_Cliente());
+                    List<Pago> pagos = new ArrayList<>();
+                    double saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
+                    for (Recibo r : recibos) {
+                        while (r.getSaldoSobrante() > 0) {
+                            if (saldoFactura < r.getSaldoSobrante()) {
+                                Pago nuevoPago = new Pago();
+                                nuevoPago.setMonto(saldoFactura);
+                                nuevoPago.setRecibo(r);
+                                nuevoPago.setFactura(facturaGuardada);
+                                nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
+                                nuevoPago.setFecha(new Date());
+                                nuevoPago.setFormaDePago(r.getFormaDePago());
+                                nuevoPago.setNota("Pago por recibo Nº " + r.getNroRecibo());
+                                pagoService.guardar(nuevoPago);
+                                pagos.add(nuevoPago);
+                                reciboService.actualizarMontoRecibo(r.getIdRecibo(), (r.getSaldoSobrante() - saldoFactura));
+                                this.actualizarFacturaEstadoPago(facturaGuardada);
+                                if (facturaGuardada.isPagada()) {
+                                    break;
+                                }
+                            } else if (saldoFactura >= r.getSaldoSobrante()) {
+                                Pago nuevoPago = new Pago();
+                                nuevoPago.setMonto(r.getSaldoSobrante());
+                                nuevoPago.setRecibo(r);
+                                nuevoPago.setFactura(facturaGuardada);
+                                nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
+                                nuevoPago.setFecha(new Date());
+                                nuevoPago.setFormaDePago(r.getFormaDePago());
+                                nuevoPago.setNota("Pago por recibo Nº " + r.getNroRecibo());
+                                pagoService.guardar(nuevoPago);
+                                pagos.add(nuevoPago);
+                                reciboService.actualizarMontoRecibo(r.getIdRecibo(), 0);
+                                this.actualizarFacturaEstadoPago(facturaGuardada);
+                                if (facturaGuardada.isPagada()) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    f.setPagos(pagos);
+                }
             }
         }
         return facturasProcesadas;

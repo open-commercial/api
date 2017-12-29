@@ -47,8 +47,6 @@ public interface IFacturaService {
 
     Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria);
     
-    Slice<FacturaVenta> getFacturasImpagas(Cliente cliente, Empresa empresa, Pageable pageable);
-    
     List<Factura> guardar(List<Factura> facturas, Long idPedido);
 
     void eliminar(long[] idFactura);

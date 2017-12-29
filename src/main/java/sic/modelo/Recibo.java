@@ -31,6 +31,8 @@ public class Recibo implements Serializable {
     @GeneratedValue
     private Long idRecibo;
     
+    private long serie;
+    
     private long nroRecibo;
     
     private boolean eliminado;

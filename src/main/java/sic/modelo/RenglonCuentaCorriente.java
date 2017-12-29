@@ -40,10 +40,11 @@ public class RenglonCuentaCorriente implements Serializable {
     
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private TipoMovimiento tipoMovimiento;
+    private TipoDeComprobante tipoDeComprobante;
     
-    @Column(nullable = false)
-    private String comprobante;
+    private long serie;
+    
+    private long numero;
     
     private String descripcion;
     

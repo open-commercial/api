@@ -57,36 +57,6 @@ public class PagoController {
         return pagoService.getPagoPorId(idPago);
     }
     
-    @PostMapping("/pagos/facturas/{idFactura}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Pago guardarPagoDeFactura(@PathVariable long idFactura,
-                                     @RequestParam long idFormaDePago,
-                                     @RequestParam long idEmpresa,
-                                     @RequestBody Pago pago) {
-        pago.setFactura(facturaService.getFacturaPorId(idFactura));
-        pago.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-        pago.setFormaDePago(formaDePagoService.getFormasDePagoPorId(idFormaDePago));
-        return pagoService.guardar(pago); 
-    }
-    
-    @PostMapping("/pagos/notas/{idNota}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Pago guardarPagoDeNota(@PathVariable long idNota,
-                                  @RequestParam long idFormaDePago,
-                                  @RequestParam long idEmpresa,
-                                  @RequestBody Pago pago) {
-        pago.setNotaDebito((NotaDebito)notaService.getNotaPorId(idNota));
-        pago.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-        pago.setFormaDePago(formaDePagoService.getFormasDePagoPorId(idFormaDePago));
-        return pagoService.guardar(pago); 
-    }
-    
-    @DeleteMapping("/pagos/{idPago}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminar(@PathVariable long idPago) {
-        pagoService.eliminar(idPago);
-    }
-    
     @GetMapping("/pagos/total")
     @ResponseStatus(HttpStatus.OK)
     public double calcularTotalPagos(@RequestParam long[] idPago) {
@@ -107,6 +77,12 @@ public class PagoController {
     @ResponseStatus(HttpStatus.OK)
     public List<Pago> getPagosDeLaNotaDebito(@PathVariable long idNota) {
         return notaService.getPagosNota(idNota);
+    }
+    
+    @GetMapping("/pagos/recibos/{idRecibo}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Pago> getPagosDeRecibo(@PathVariable long idRecibo) {
+        return pagoService.getPagosRelacionadosAlRecibo(idRecibo);
     }
     
     @GetMapping("/pagos/clientes/{idCliente}")

@@ -11,6 +11,7 @@ import sic.modelo.Usuario;
 public class ReciboBuilder {
     
     private Long idRecibo = 0L;
+    private long serie = 1L;
     private long nroRecibo = 1L;
     private boolean eliminado = false;
     private String observacion= "Recibo por contratar al GOLDEN ARMY";
@@ -23,11 +24,16 @@ public class ReciboBuilder {
     private double saldoSobrante = 200;
     
     public Recibo build() {
-      return new Recibo(idRecibo, nroRecibo, eliminado, observacion, formaDePago, empresa, cliente, usuario, fecha, monto, saldoSobrante);
+      return new Recibo(idRecibo, serie, nroRecibo, eliminado, observacion, formaDePago, empresa, cliente, usuario, fecha, monto, saldoSobrante);
     }
 
     public ReciboBuilder withidRecibo(Long idRecibo) {
         this.idRecibo = idRecibo;
+        return this;
+    }
+    
+    public ReciboBuilder withSerie(Long serie) {
+        this.nroRecibo = serie;
         return this;
     }
     
