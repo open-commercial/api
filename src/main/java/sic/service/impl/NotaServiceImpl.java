@@ -59,6 +59,7 @@ import sic.service.IReciboService;
 import sic.service.IUsuarioService;
 import sic.service.ServiceException;
 import sic.util.FormatterFechaHora;
+import sic.util.Utilidades;
 
 @Service
 public class NotaServiceImpl implements INotaService {
@@ -841,6 +842,19 @@ public class NotaServiceImpl implements INotaService {
     @Override
     public double calcularTotalDebito(double subTotal_bruto, double iva21_neto, double montoNoGravado) {
         return subTotal_bruto + iva21_neto + montoNoGravado;
+    }
+    
+    @Override
+    @Transactional
+    public Nota actualizarNotaDebitoEstadoPago(NotaDebito notaDebito) {
+        double totalFactura = Utilidades.round(notaDebito.getTotal(), 2);
+        double totalPagado = Utilidades.round(this.getTotalPagado(notaDebito.getIdNota()), 2);
+        if (totalPagado >= totalFactura) {
+            notaDebito.setPagado(true);
+        } else {
+            notaDebito.setPagado(false);
+        }
+        return notaDebito;
     }
 
 }

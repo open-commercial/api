@@ -78,4 +78,7 @@ public interface INotaService {
     double calcularTotalCredito(double subTotal_bruto, double iva105_neto, double iva21_neto);
     
     double calcularTotalDebito(double subTotal_bruto, double iva21_neto, double montoNoGravado);
+    
+    Nota actualizarNotaDebitoEstadoPago(NotaDebito notaDebito);
+    
 }

@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import sic.modelo.Cliente;
 import sic.modelo.Empresa;
-import sic.modelo.FacturaVenta;
 import sic.modelo.FormaDePago;
 import sic.modelo.Pago;
 import sic.modelo.Recibo;

@@ -36,6 +36,8 @@ public class NotaDebito extends Nota implements Serializable {
     @ManyToOne
     @JoinColumn(name = "idRecibo", referencedColumnName = "idRecibo")
     private Recibo recibo;
+    
+    private boolean pagado;
 
     public NotaDebito() {}
 
@@ -43,13 +45,15 @@ public class NotaDebito extends Nota implements Serializable {
             TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa, Cliente cliente, Long pagoId,
             Usuario usuario, String motivo, List<RenglonNotaDebito> renglones, double subTotalBruto,
             double iva21Neto, double iva105Neto, double total, double montoNoGravado, long CAE, Date vencimientoCAE,
-            long numSerieAfip, long numNotaAfip) {
+            long numSerieAfip, long numNotaAfip, Recibo recibo, boolean pagado) {
 
         super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, cliente, usuario,
                 facturaVenta, pagos, motivo, subTotalBruto, iva21Neto, iva105Neto, total, CAE, vencimientoCAE, numSerieAfip, numNotaAfip);
         this.montoNoGravado = montoNoGravado;
         this.renglonesNotaDebito = renglones;
         this.pagoId = pagoId;
+        this.recibo = recibo;
+        this.pagado = pagado;
     }
 
 }

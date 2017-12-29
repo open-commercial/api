@@ -243,7 +243,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setFecha(r.getFecha());
             rcc.setIdMovimiento(r.getIdRecibo());
             rcc.setMonto(r.getMonto());
-//            rcc.setTipoMovimiento(TipoMovimiento.RECIBO);
             CuentaCorriente cc;
             cc = this.getCuentaCorrientePorCliente(r.getCliente().getId_Cliente());
             cc.getRenglones().add(rcc);

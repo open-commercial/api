@@ -18,6 +18,7 @@ import sic.modelo.Factura;
 import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
 import sic.modelo.FormaDePago;
+import sic.modelo.NotaDebito;
 import sic.modelo.Pago;
 import sic.service.IFacturaService;
 import sic.service.IPagoService;
@@ -143,6 +144,8 @@ public class PagoServiceImpl implements IPagoService {
         }
         if (pago.getFactura() != null && pago.getNotaDebito() == null) {
             facturaService.actualizarFacturaEstadoPago(pago.getFactura());
+        } else if (pago.getFactura() == null && pago.getNotaDebito() != null) {
+            notaService.actualizarNotaDebitoEstadoPago((NotaDebito)pago.getNotaDebito());
         }
         LOGGER.warn("El Pago " + pago + " se guardó correctamente.");
         return pago;
