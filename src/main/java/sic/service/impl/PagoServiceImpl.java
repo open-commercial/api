@@ -133,15 +133,16 @@ public class PagoServiceImpl implements IPagoService {
     @Override
     @Transactional
     public Pago guardar(Pago pago) {
+        if (pago.getRecibo() == null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_pago_sin_recibo"));
+        }
         this.validarOperacion(pago);
         pago.setNroPago(this.getSiguienteNroPago(pago.getEmpresa().getId_Empresa()));
         Calendar fechaPago = Calendar.getInstance();
         fechaPago.add(Calendar.SECOND, 1);
         pago.setFecha(fechaPago.getTime());
         pago = pagoRepository.save(pago);
-        if (pago.getRecibo() == null) {
-            pago.setRecibo(reciboService.guardarReciboDePago(pago));
-        }
         if (pago.getFactura() != null && pago.getNotaDebito() == null) {
             facturaService.actualizarFacturaEstadoPago(pago.getFactura());
         } else if (pago.getFactura() == null && pago.getNotaDebito() != null) {

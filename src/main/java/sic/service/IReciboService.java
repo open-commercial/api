@@ -22,7 +22,7 @@ public interface IReciboService {
     
     Recibo actualizarMontoRecibo(long idRecibo, double monto);
     
-    Recibo guardarReciboDePago(Pago pago);
+    List<Recibo> construirRecibos(String observacion, long[] formaDePago, Empresa empresa, Cliente cliente, Usuario usuario, double[] monto, Date fecha);
     
     long getSiguienteNumeroRecibo(long idEmpresa, long serie);
     

@@ -1,6 +1,7 @@
 package sic.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -37,12 +38,11 @@ import sic.service.IPedidoService;
 import sic.service.IProveedorService;
 import sic.service.IUsuarioService;
 import sic.modelo.Movimiento;
-import sic.modelo.Pago;
 import sic.modelo.Proveedor;
 import sic.modelo.TipoDeComprobante;
 import sic.modelo.Usuario;
 import sic.service.BusinessServiceException;
-import sic.service.IFormaDePagoService;
+import sic.service.IReciboService;
 import sic.service.ITransportistaService;
 
 @RestController
@@ -55,16 +55,15 @@ public class FacturaController {
     private final IClienteService clienteService;
     private final IUsuarioService usuarioService;
     private final IPedidoService pedidoService;
-    private final IFormaDePagoService formaDePagoService;
     private final ITransportistaService transportistaService;
+    private final IReciboService reciboService;
     private final int TAMANIO_PAGINA_DEFAULT = 50;
     
     @Autowired
     public FacturaController(IFacturaService facturaService, IEmpresaService empresaService,
                              IProveedorService proveedorService, IClienteService clienteService,
                              IUsuarioService usuarioService, IPedidoService pedidoService,
-                             ITransportistaService transportistaService,
-                             IFormaDePagoService formaDePagoService) {
+                             ITransportistaService transportistaService, IReciboService reciboService) {
         this.facturaService = facturaService;
         this.empresaService = empresaService;
         this.proveedorService = proveedorService;
@@ -72,7 +71,7 @@ public class FacturaController {
         this.usuarioService = usuarioService;
         this.pedidoService = pedidoService;    
         this.transportistaService = transportistaService;
-        this.formaDePagoService = formaDePagoService;
+        this.reciboService = reciboService;
     }
     
     @GetMapping("/facturas/{idFactura}")
@@ -89,28 +88,23 @@ public class FacturaController {
                                              @RequestParam Long idUsuario,
                                              @RequestParam Long idTransportista,
                                              @RequestParam(required = false) long[] idsFormaDePago,
+                                             @RequestParam(required = false) double[] montos,
                                              @RequestParam(required = false) int[] indices,
                                              @RequestParam(required = false) Long idPedido) {
         Empresa emp = empresaService.getEmpresaPorId(idEmpresa);
-        if (idsFormaDePago != null) {
-            int i = 0;
-            for (Pago p : fv.getPagos()) {
-                p.setFormaDePago(formaDePagoService.getFormasDePagoPorId(idsFormaDePago[i]));
-                p.setEmpresa(emp);
-                p.setFactura(fv);
-                i++;
-            }
-        }
         fv.setEmpresa(emp);
         fv.setCliente(clienteService.getClientePorId(idCliente));
         fv.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
         fv.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
         if (indices != null) {
-            return facturaService.guardar(facturaService.dividirFactura((FacturaVenta) fv, indices), idPedido);
+            return facturaService.guardar(facturaService.dividirFactura((FacturaVenta) fv, indices), idPedido, 
+                    reciboService.construirRecibos("Recibo cliente: " + fv.getRazonSocialCliente(), idsFormaDePago, emp,
+                            fv.getCliente(), fv.getUsuario(), montos, fv.getFecha()));
         } else {
             List<Factura> facturas = new ArrayList<>();
             facturas.add(fv);
-            return facturaService.guardar(facturas, idPedido);         
+            return facturaService.guardar(facturas, idPedido, reciboService.construirRecibos("Recibo cliente: " + fv.getRazonSocialCliente(), idsFormaDePago, emp,
+                            fv.getCliente(), fv.getUsuario(), montos, fv.getFecha()));         
         }
     }   
     
@@ -125,7 +119,7 @@ public class FacturaController {
             fc.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
             List<Factura> facturas = new ArrayList<>();
             facturas.add(fc);
-            return facturaService.guardar(facturas, null);         
+            return facturaService.guardar(facturas, null, null);         
     }   
     
     @PostMapping("/facturas/{idFactura}/autorizacion")

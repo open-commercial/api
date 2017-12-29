@@ -4,8 +4,6 @@ import java.util.Date;
 import sic.modelo.Movimiento;
 import java.util.List;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import sic.modelo.BusquedaFacturaCompraCriteria;
 import sic.modelo.BusquedaFacturaVentaCriteria;
 import sic.modelo.Cliente;
@@ -16,6 +14,7 @@ import sic.modelo.FacturaVenta;
 import sic.modelo.Pedido;
 import sic.modelo.Producto;
 import sic.modelo.Proveedor;
+import sic.modelo.Recibo;
 import sic.modelo.RenglonFactura;
 import sic.modelo.TipoDeComprobante;
 
@@ -47,7 +46,7 @@ public interface IFacturaService {
 
     Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria);
     
-    List<Factura> guardar(List<Factura> facturas, Long idPedido);
+    List<Factura> guardar(List<Factura> facturas, Long idPedido, List<Recibo> recibos);
 
     void eliminar(long[] idFactura);
     

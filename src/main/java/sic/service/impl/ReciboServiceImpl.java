@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -29,6 +30,7 @@ import sic.service.IConfiguracionDelSistemaService;
 import sic.service.ICuentaCorrienteService;
 import sic.service.IEmpresaService;
 import sic.service.IFacturaService;
+import sic.service.IFormaDePagoService;
 import sic.service.INotaService;
 import sic.service.IPagoService;
 import sic.service.IReciboService;
@@ -45,13 +47,14 @@ public class ReciboServiceImpl implements IReciboService {
     private final IConfiguracionDelSistemaService cds;
     private final IRenglonCuentaCorrienteService renglonCuentaCorrienteService;
     private final INotaService notaService;
+    private final IFormaDePagoService formaDePagoService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
     public ReciboServiceImpl(ReciboRepository reciboRepository, IFacturaService facturaService, IPagoService pagoService,
                              ICuentaCorrienteService cuentaCorrienteService, IEmpresaService empresaService, 
                              IConfiguracionDelSistemaService cds, IRenglonCuentaCorrienteService renglonCuentaCorrienteService,
-                             INotaService notaService) {
+                             INotaService notaService, IFormaDePagoService formaDePagoService) {
         this.reciboRepository = reciboRepository;
         this.facturaService = facturaService;
         this.pagoService = pagoService;
@@ -60,6 +63,7 @@ public class ReciboServiceImpl implements IReciboService {
         this.cds = cds;
         this.renglonCuentaCorrienteService = renglonCuentaCorrienteService;
         this.notaService = notaService;
+        this.formaDePagoService = formaDePagoService;
     }
 
     @Override
@@ -152,28 +156,26 @@ public class ReciboServiceImpl implements IReciboService {
     }
     
     @Override 
-    @Transactional
-    public Recibo guardarReciboDePago(Pago pago) { 
-        Recibo recibo = new Recibo();
-        if (pago.getFactura() != null && pago.getFactura() instanceof FacturaVenta) {
-            recibo.setCliente(((FacturaVenta) pago.getFactura()).getCliente());
-            recibo.setUsuario(((FacturaVenta) pago.getFactura()).getUsuario());
+    public List<Recibo> construirRecibos(String observacion, long[] idsFormaDePago, Empresa empresa, Cliente cliente, Usuario usuario, double[] monto, Date fecha) { 
+        List<Recibo> recibos = new ArrayList<>();
+        int i = 0;
+        if (idsFormaDePago != null) {
+            for (long idFormaDePago : idsFormaDePago) {
+                Recibo recibo = new Recibo();
+                recibo.setCliente(cliente);
+                recibo.setUsuario(usuario);
+                recibo.setEmpresa(empresa);
+                recibo.setFecha(fecha);
+                recibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(idFormaDePago));
+                recibo.setMonto(monto[i]);
+                recibo.setSerie(cds.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
+                recibo.setNroRecibo(this.getSiguienteNumeroRecibo(empresa.getId_Empresa(), recibo.getSerie()));
+                recibo.setObservacion(observacion);
+                recibo.setSaldoSobrante(0);
+                i++;
+            }
         }
-        if (pago.getNotaDebito() != null) {
-            recibo.setCliente(pago.getNotaDebito().getCliente());
-            recibo.setUsuario(pago.getNotaDebito().getUsuario());
-        }
-        recibo.setEmpresa(pago.getEmpresa());
-        recibo.setFecha(pago.getFecha());
-        recibo.setFormaDePago(pago.getFormaDePago());
-        recibo.setMonto(pago.getMonto());
-        recibo.setSerie(cds.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
-        recibo.setNroRecibo(this.getSiguienteNumeroRecibo(pago.getEmpresa().getId_Empresa(), recibo.getSerie()));
-        recibo.setObservacion(pago.getNota());
-        recibo.setSaldoSobrante(0);
-        recibo = reciboRepository.save(recibo);
-        this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
-        return recibo;
+        return recibos;
     }
       
     @Override
