@@ -850,9 +850,9 @@ public class NotaServiceImpl implements INotaService {
         double totalFactura = Utilidades.round(notaDebito.getTotal(), 2);
         double totalPagado = Utilidades.round(this.getTotalPagado(notaDebito.getIdNota()), 2);
         if (totalPagado >= totalFactura) {
-            notaDebito.setPagado(true);
+            notaDebito.setPagada(true);
         } else {
-            notaDebito.setPagado(false);
+            notaDebito.setPagada(false);
         }
         return notaDebito;
     }

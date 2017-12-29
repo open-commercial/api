@@ -210,7 +210,7 @@ public class ReciboServiceImpl implements IReciboService {
                         || rcc.getTipoDeComprobante() == TipoDeComprobante.NOTA_DEBITO_Y || rcc.getTipoDeComprobante() == TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO) {
                     NotaDebito nd = (NotaDebito) notaService.getNotaPorId(rcc.getIdMovimiento());
                     nd.setPagos(this.notaService.getPagosNota(nd.getIdNota()));
-                    if (pagoService.getSaldoAPagarNotaDebito(nd.getIdNota()) != 0) {
+                    if (nd.isPagada() == false) {
                         Pago nuevoPago = new Pago();
                         nuevoPago.setFormaDePago(formaDePago);
                         nuevoPago.setNotaDebito(nd);

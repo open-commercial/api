@@ -37,7 +37,7 @@ public class NotaDebito extends Nota implements Serializable {
     @JoinColumn(name = "idRecibo", referencedColumnName = "idRecibo")
     private Recibo recibo;
     
-    private boolean pagado;
+    private boolean pagada;
 
     public NotaDebito() {}
 
@@ -53,7 +53,7 @@ public class NotaDebito extends Nota implements Serializable {
         this.renglonesNotaDebito = renglones;
         this.pagoId = pagoId;
         this.recibo = recibo;
-        this.pagado = pagado;
+        this.pagada = pagado;
     }
 
 }
