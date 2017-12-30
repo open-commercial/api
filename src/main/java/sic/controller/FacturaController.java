@@ -350,7 +350,7 @@ public class FacturaController {
                                           @RequestParam Movimiento movimiento,
                                           @RequestParam double cantidad, 
                                           @RequestParam double descuentoPorcentaje) {
-        return facturaService.calcularRenglon(tipoDeComprobante, movimiento, cantidad, idProducto, descuentoPorcentaje);
+        return facturaService.calcularRenglon(tipoDeComprobante, movimiento, cantidad, idProducto, descuentoPorcentaje, false);
     }
         
     @GetMapping("/facturas/total-facturado-venta/criteria")

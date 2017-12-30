@@ -130,16 +130,14 @@ public class PedidoServiceImpl implements IPedidoService {
     }
 
     @Override
-    public Pedido actualizarEstadoPedido(Pedido pedido, List<Factura> facturas) {
-        facturas.stream().forEach(f -> {
-            pedido.setEstado(EstadoPedido.ACTIVO);
-            if (this.getFacturasDelPedido(pedido.getId_Pedido()).isEmpty()) {
-                pedido.setEstado(EstadoPedido.ABIERTO);
-            }
-            if (facturaService.convertirRenglonesPedidoEnRenglonesFactura(pedido, f.getTipoComprobante()).isEmpty()) {
-                pedido.setEstado(EstadoPedido.CERRADO);
-            }
-        });
+    public Pedido actualizarEstadoPedido(Pedido pedido) {
+        pedido.setEstado(EstadoPedido.ACTIVO);
+        if (this.getFacturasDelPedido(pedido.getId_Pedido()).isEmpty()) {
+            pedido.setEstado(EstadoPedido.ABIERTO);
+        }
+        if (facturaService.pedidoTotalmenteFacturado(pedido)) {
+            pedido.setEstado(EstadoPedido.CERRADO);
+        }
         return pedido;
     }
 
@@ -270,7 +268,7 @@ public class PedidoServiceImpl implements IPedidoService {
         this.getFacturasDelPedido(nroPedido).stream().forEach(f -> {
             f.getRenglones().stream().forEach(r -> {
                 renglonesDeFacturas.add(facturaService.calcularRenglon(f.getTipoComprobante(),
-                        Movimiento.VENTA, r.getCantidad(),r.getId_ProductoItem(), r.getDescuento_porcentaje()));
+                        Movimiento.VENTA, r.getCantidad(),r.getId_ProductoItem(), r.getDescuento_porcentaje(), false));
             });      
         });
         HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
