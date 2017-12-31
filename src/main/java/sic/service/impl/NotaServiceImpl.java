@@ -484,7 +484,47 @@ public class NotaServiceImpl implements INotaService {
             notaDebito.setNroNota(this.getSiguienteNumeroNotaDebito(idEmpresa, nota.getTipoComprobante()));
             this.validarCalculosDebito(notaDebito);
             notaDebito = notaDebitoRepository.save(notaDebito);
-            this.cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito, TipoDeOperacion.ALTA);
+            cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito, TipoDeOperacion.ALTA);
+            List<Recibo> recibos = reciboService.getRecibosConSaldoSobrante(idEmpresa, idCliente);
+            List<Pago> pagos = new ArrayList<>();
+            double saldoFactura = pagoService.getSaldoAPagarNotaDebito(notaDebito.getIdNota());
+            for (Recibo r : recibos) {
+                while (r.getSaldoSobrante() > 0) {
+                    if (saldoFactura < r.getSaldoSobrante()) {
+                        Pago nuevoPago = new Pago();
+                        nuevoPago.setMonto(saldoFactura);
+                        nuevoPago.setRecibo(r);
+                        nuevoPago.setNotaDebito(notaDebito);
+                        nuevoPago.setEmpresa(notaDebito.getEmpresa());
+                        nuevoPago.setFecha(new Date());
+                        nuevoPago.setFormaDePago(r.getFormaDePago());
+                        nuevoPago.setNota("Pago por recibo Nº " + r.getNroRecibo());
+                        pagoService.guardar(nuevoPago);
+                        pagos.add(nuevoPago);
+                        reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoFactura));
+                        actualizarNotaDebitoEstadoPago(notaDebito);
+                        if (notaDebito.isPagada()) {
+                            break;
+                        }
+                    } else if (saldoFactura >= r.getSaldoSobrante()) {
+                        Pago nuevoPago = new Pago();
+                        nuevoPago.setMonto(r.getSaldoSobrante());
+                        nuevoPago.setRecibo(r);
+                        nuevoPago.setNotaDebito(notaDebito);
+                        nuevoPago.setEmpresa(notaDebito.getEmpresa());
+                        nuevoPago.setFecha(new Date());
+                        nuevoPago.setFormaDePago(r.getFormaDePago());
+                        nuevoPago.setNota("Pago por recibo Nº " + r.getNroRecibo());
+                        pagoService.guardar(nuevoPago);
+                        pagos.add(nuevoPago);
+                        reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);
+                        actualizarNotaDebitoEstadoPago(notaDebito);
+                        if (notaDebito.isPagada()) {
+                            break;
+                        }
+                    }
+                }
+            }
             LOGGER.warn("La Nota " + notaDebito + " se guardó correctamente.");
             return notaDebito;
         }
@@ -666,9 +706,11 @@ public class NotaServiceImpl implements INotaService {
         for (long idNota : idsNota) {
             Nota nota = this.getNotaPorId(idNota);
             if (nota != null && nota.getCAE() == 0l) {
-                if (!getPagosNota(idNota).isEmpty()) {
-                    throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                            .getString("mensaje_no_se_puede_eliminar"));
+                List<Pago> pagos = getPagosNota(idNota);
+                if (!pagos.isEmpty() && nota instanceof NotaDebito) {
+                    pagos.forEach(pago -> {
+                        pagoService.eliminar(pago.getId_Pago());
+                    });
                 }
                 if (nota instanceof NotaCredito) {
                     NotaCredito nc = (NotaCredito) nota;

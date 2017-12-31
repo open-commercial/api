@@ -156,10 +156,7 @@ public class PagoServiceImpl implements IPagoService {
     @Transactional
     public void eliminar(long idPago) {
         Pago pago = this.getPagoPorId(idPago);
-        if (notaService.getNotaDebitoPorPago(idPago) != null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_no_se_puede_eliminar"));
-        }
+        pago.getRecibo().setMonto(pago.getMonto());
         pago.setEliminado(true);
         pagoRepository.save(pago);
         if (pago.getFactura() != null) {

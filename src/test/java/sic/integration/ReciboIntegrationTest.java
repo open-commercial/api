@@ -48,7 +48,6 @@ import sic.modelo.NotaDebito;
 import sic.modelo.Pais;
 import sic.modelo.Proveedor;
 import sic.modelo.Provincia;
-import sic.modelo.Recibo;
 import sic.modelo.RenglonFactura;
 import sic.modelo.RenglonNotaDebito;
 import sic.modelo.Rol;
@@ -358,12 +357,12 @@ public class ReciboIntegrationTest {
         assertEquals(-16192.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         ReciboDTO r = new ReciboDTO();
         restTemplate.postForObject(apiPrefix + "/recibos?"
-                + "idUsuario=1&idEmpresa=1&idCliente=1&idFormaDePago=1", r, Recibo.class);
+                + "idUsuario=1&idEmpresa=1&idCliente=1&idFormaDePago=1", r, ReciboDTO.class);
         assertEquals(-1192.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         r = new ReciboDTO();
         r.setMonto(2192.5);
         restTemplate.postForObject(apiPrefix + "/recibos?"
-                + "idUsuario=1&idEmpresa=1&idCliente=1&idFormaDePago=1", r, Recibo.class);
+                + "idUsuario=1&idEmpresa=1&idCliente=1&idFormaDePago=1", r, ReciboDTO.class);
         assertEquals(1000, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
 
         NotaDebitoDTO notaDebito = new NotaDebitoDTO();
@@ -381,8 +380,15 @@ public class ReciboIntegrationTest {
         notaDebito.setTotal(16210);
         notaDebito.setUsuario(credencial);
         notaDebito.setFacturaVenta(null);
-        NotaDebito nd = restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1?idRecibo=1", notaDebito, NotaDebito.class);
+        restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1?idRecibo=1", notaDebito, NotaDebito.class);
         assertEquals(-15210, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
+        FacturaVentaDTO facturaXRecuperada = restTemplate.getForObject(apiPrefix + "/facturas/2", FacturaVentaDTO.class);
+        assertEquals(TipoDeComprobante.FACTURA_X, facturaXRecuperada.getTipoComprobante());
+        assertEquals(true, facturaXRecuperada.isPagada());
+        ReciboDTO reciboUno = restTemplate.getForObject(apiPrefix + "/recibos/1", ReciboDTO.class);
+        assertEquals(0, reciboUno.getSaldoSobrante(), 0);
+        ReciboDTO reciboDos = restTemplate.getForObject(apiPrefix + "/recibos/2", ReciboDTO.class);
+        assertEquals(0, reciboDos.getSaldoSobrante(), 0);        
     }
 
 }

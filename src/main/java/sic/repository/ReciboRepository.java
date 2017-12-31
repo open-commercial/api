@@ -31,6 +31,6 @@ public interface ReciboRepository extends PagingAndSortingRepository<Recibo, Lon
     @Query("SELECT r FROM Recibo r "
             + "WHERE r.empresa.id_Empresa= :idEmpresa AND r.cliente.id_Cliente= :idCliente AND r.eliminado = false AND r.saldoSobrante > 0 "
             + "ORDER BY r.fecha ASC")
-    List<Recibo> getRecibosConMontoSobrante(@Param("idEmpresa") long idEmpresa, @Param("idCliente") long idCliente);
+    List<Recibo> getRecibosConSaldoSobrante(@Param("idEmpresa") long idEmpresa, @Param("idCliente") long idCliente);
     
 }

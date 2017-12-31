@@ -407,7 +407,7 @@ public class FacturaServiceImpl implements IFacturaService {
                                 nuevoPago.setNota("Pago por recibo Nº " + r.getNroRecibo());
                                 pagoService.guardar(nuevoPago);
                                 pagos.add(nuevoPago);
-                                reciboService.actualizarMontoRecibo(r.getIdRecibo(), (r.getSaldoSobrante() - saldoFactura));
+                                reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoFactura));
                                 this.actualizarFacturaEstadoPago(facturaGuardada);
                                 if (facturaGuardada.isPagada()) {
                                     break;
@@ -423,7 +423,7 @@ public class FacturaServiceImpl implements IFacturaService {
                                 nuevoPago.setNota("Pago por recibo Nº " + r.getNroRecibo());
                                 pagoService.guardar(nuevoPago);
                                 pagos.add(nuevoPago);
-                                reciboService.actualizarMontoRecibo(r.getIdRecibo(), 0);
+                                reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);
                                 this.actualizarFacturaEstadoPago(facturaGuardada);
                                 if (facturaGuardada.isPagada()) {
                                     break;
@@ -442,9 +442,11 @@ public class FacturaServiceImpl implements IFacturaService {
     @Transactional
     public void eliminar(long[] idsFactura) {
         for (long idFactura : idsFactura) {
-            if (!pagoService.getPagosDeLaFactura(idFactura).isEmpty()) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_no_se_puede_eliminar"));
+            List<Pago> pagos = pagoService.getPagosDeLaFactura(idFactura);
+            if (!pagos.isEmpty()) {
+                pagos.forEach(pago -> {
+                    pagoService.eliminar(pago.getId_Pago());
+                });
             }
             Factura factura = this.getFacturaPorId(idFactura);
             if (factura.getCAE() == 0L) {

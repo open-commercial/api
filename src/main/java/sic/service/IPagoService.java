@@ -9,7 +9,6 @@ import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
 import sic.modelo.FormaDePago;
 import sic.modelo.Pago;
-import sic.modelo.Recibo;
 
 public interface IPagoService {
     

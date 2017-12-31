@@ -111,9 +111,9 @@ public class ReciboServiceImpl implements IReciboService {
     
     @Override
     @Transactional
-    public Recibo actualizarMontoRecibo(long idRecibo, double monto) {
+    public Recibo actualizarSaldoSobrante(long idRecibo, double saldoSobrante) {
         Recibo r = reciboRepository.findById(idRecibo);
-        r.setMonto(monto);
+        r.setSaldoSobrante(saldoSobrante);
         return reciboRepository.save(r);
     }
 
@@ -266,7 +266,7 @@ public class ReciboServiceImpl implements IReciboService {
     
     @Override
     public List<Recibo> getRecibosConSaldoSobrante(long idEmpresa, long idCliente) {
-        return reciboRepository.getRecibosConMontoSobrante(idEmpresa, idCliente);
+        return reciboRepository.getRecibosConSaldoSobrante(idEmpresa, idCliente);
     }
 
 }

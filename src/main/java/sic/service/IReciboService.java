@@ -7,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import sic.modelo.Cliente;
 import sic.modelo.Empresa;
 import sic.modelo.FormaDePago;
-import sic.modelo.Pago;
 import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
 import sic.modelo.Usuario;
@@ -20,7 +19,7 @@ public interface IReciboService {
     
     Recibo guardar(Recibo recibo);
     
-    Recibo actualizarMontoRecibo(long idRecibo, double monto);
+    Recibo actualizarSaldoSobrante(long idRecibo, double monto);
     
     List<Recibo> construirRecibos(String observacion, long[] formaDePago, Empresa empresa, Cliente cliente, Usuario usuario, double[] monto, Date fecha);
     
