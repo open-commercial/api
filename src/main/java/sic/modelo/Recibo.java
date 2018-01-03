@@ -17,13 +17,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "recibo")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = {"nroRecibo", "empresa", "fecha"})
+@ToString
+@EqualsAndHashCode(of = {"numSerie", "numRecibo", "empresa", "fecha"})
 @JsonIgnoreProperties({"formaDePago", "empresa", "cliente", "usuario"})
 public class Recibo implements Serializable {
     
@@ -31,14 +33,18 @@ public class Recibo implements Serializable {
     @GeneratedValue
     private Long idRecibo;
     
-    private long serie;
+    private long numSerie;
     
-    private long nroRecibo;
+    private long numRecibo;
+    
+    @Column(nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date fecha;
     
     private boolean eliminado;
     
     @Column(nullable = false)
-    private String observacion;
+    private String concepto;
     
     @ManyToOne
     @JoinColumn(name = "id_FormaDePago", referencedColumnName = "id_FormaDePago")
@@ -55,10 +61,6 @@ public class Recibo implements Serializable {
     @ManyToOne
     @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
     private Usuario usuario;
-    
-    @Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fecha;
     
     private double monto;
     

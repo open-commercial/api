@@ -36,8 +36,8 @@ public abstract class NotaDTO implements Serializable {
     private long serie = 0;
     private long nroNota = 1;    
     private boolean eliminada = false;
-    private TipoDeComprobante tipoComprobante = TipoDeComprobante.NOTA_CREDITO_A;
-    private Date fecha = new Date();
+    private TipoDeComprobante tipoComprobante;
+    private Date fecha;
     private Empresa empresa = new EmpresaBuilder().build();
     private Cliente cliente = new ClienteBuilder().build();
     private Usuario usuario = new UsuarioBuilder().build();

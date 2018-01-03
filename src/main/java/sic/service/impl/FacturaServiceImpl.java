@@ -404,7 +404,7 @@ public class FacturaServiceImpl implements IFacturaService {
                                 nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
                                 nuevoPago.setFecha(new Date());
                                 nuevoPago.setFormaDePago(r.getFormaDePago());
-                                nuevoPago.setNota("Pago por recibo Nº " + r.getNroRecibo());
+                                nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
                                 pagoService.guardar(nuevoPago);
                                 pagos.add(nuevoPago);
                                 reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoFactura));
@@ -420,7 +420,7 @@ public class FacturaServiceImpl implements IFacturaService {
                                 nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
                                 nuevoPago.setFecha(new Date());
                                 nuevoPago.setFormaDePago(r.getFormaDePago());
-                                nuevoPago.setNota("Pago por recibo Nº " + r.getNroRecibo());
+                                nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
                                 pagoService.guardar(nuevoPago);
                                 pagos.add(nuevoPago);
                                 reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);

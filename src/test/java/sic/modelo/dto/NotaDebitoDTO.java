@@ -11,7 +11,6 @@ import sic.modelo.RenglonNotaDebito;
 @EqualsAndHashCode(callSuper = true)
 public class NotaDebitoDTO extends NotaDTO implements Serializable {
     
-    private Long pagoId = 0L;
     private List<RenglonNotaDebito> renglonesNotaDebito;
     private double montoNoGravado;
     private Recibo recibo;

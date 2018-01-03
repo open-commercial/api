@@ -121,11 +121,6 @@ public class NotaServiceImpl implements INotaService {
     public FacturaVenta getFacturaNota(Long idNota) {
         return this.getNotaPorId(idNota).getFacturaVenta();
     }
-      
-    @Override
-    public NotaDebito getNotaDebitoPorPago(Long idPago) {
-        return this.notaDebitoRepository.findByPagoIdAndEliminada(idPago, false);
-    }
     
     @Override
     public List<Pago> getPagosNota(Long idNota) {
@@ -259,7 +254,7 @@ public class NotaServiceImpl implements INotaService {
     }
 
     private void validarNota(Nota nota, long idEmpresa, long idCliente, long idUsuario, Long idFactura) {
-        if (idFactura != null) {
+        if (idFactura != null && nota instanceof NotaCredito) {
             Factura f = facturaService.getFacturaPorId(idFactura);
             if (f instanceof FacturaVenta) {
                 nota.setFacturaVenta((FacturaVenta) f);
@@ -310,6 +305,8 @@ public class NotaServiceImpl implements INotaService {
                             .getString("mensaje_nota_empresa_incorrecta"));
                 }
             }
+        } else if (nota.getFecha() == null) {
+            nota.setFecha(new Date());
         }
         if (nota.getMotivo() == null || nota.getMotivo().isEmpty()) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -417,9 +414,7 @@ public class NotaServiceImpl implements INotaService {
     private void validarCalculosDebito(NotaDebito notaDebito) {
         // monto no gravado
         Double montoComprobante = 0.0;
-        if (notaDebito.getPagoId() != null) {
-            montoComprobante = pagoService.getPagoPorId(notaDebito.getPagoId()).getMonto();
-        } else if (notaDebito.getRecibo() != null) {
+        if (notaDebito.getRecibo() != null) {
             montoComprobante = notaDebito.getRecibo().getMonto();
         }
         if (notaDebito.getMontoNoGravado() != montoComprobante) {
@@ -453,8 +448,7 @@ public class NotaServiceImpl implements INotaService {
 
     @Override
     @Transactional
-    public Nota guardarNota(Nota nota, long idEmpresa, long idCliente, long idUsuario,
-            Long idFactura, Long idPago, Long idRecibo, boolean modificarStock) {
+    public Nota guardarNota(Nota nota, long idEmpresa, long idCliente, long idUsuario, Long idRecibo, Long idFactura, boolean modificarStock) {
         this.validarNota(nota, idEmpresa, idCliente, idUsuario, idFactura);
         nota.setSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(nota.getEmpresa()).getNroPuntoDeVentaAfip());
         if (nota instanceof NotaCredito) {
@@ -472,11 +466,6 @@ public class NotaServiceImpl implements INotaService {
             return notaCredito;
         } else {
             NotaDebito notaDebito = (NotaDebito) nota;
-            if (idPago != null) {
-                Pago pago = pagoService.getPagoPorId(idPago);
-                notaDebito.setTipoComprobante(this.getTipoDeNotaDebitoSegunPago(pago));
-                notaDebito.setPagoId(pago.getId_Pago());
-            }
             if (idRecibo != null) {
                 notaDebito.setRecibo(reciboService.getById(idRecibo));
                 notaDebito.setTipoComprobante(
@@ -499,7 +488,7 @@ public class NotaServiceImpl implements INotaService {
                         nuevoPago.setEmpresa(notaDebito.getEmpresa());
                         nuevoPago.setFecha(new Date());
                         nuevoPago.setFormaDePago(r.getFormaDePago());
-                        nuevoPago.setNota("Pago por recibo Nº " + r.getNroRecibo());
+                        nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
                         pagoService.guardar(nuevoPago);
                         pagos.add(nuevoPago);
                         reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoFactura));
@@ -515,7 +504,7 @@ public class NotaServiceImpl implements INotaService {
                         nuevoPago.setEmpresa(notaDebito.getEmpresa());
                         nuevoPago.setFecha(new Date());
                         nuevoPago.setFormaDePago(r.getFormaDePago());
-                        nuevoPago.setNota("Pago por recibo Nº " + r.getNroRecibo());
+                        nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
                         pagoService.guardar(nuevoPago);
                         pagos.add(nuevoPago);
                         reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);
@@ -556,16 +545,6 @@ public class NotaServiceImpl implements INotaService {
         nota.setNumSerieAfip(comprobante.getNumSerieAfip());
         nota.setNumNotaAfip(comprobante.getNumFacturaAfip());
         return nota;
-    }
-    
-    private TipoDeComprobante getTipoDeNotaDebitoSegunPago(Pago pago) {
-        TipoDeComprobante tipo = null;
-        if (pago.getFactura() != null) {
-            tipo = this.getTipoDeNotaDebito(pago.getFactura().getTipoComprobante());
-        } else if (pago.getNotaDebito() != null) {
-            tipo = pago.getNotaDebito().getTipoComprobante();
-        }
-        return tipo;
     }
 
     private TipoDeComprobante getTipoDeNotaDebito(TipoDeComprobante tipo) {
@@ -790,52 +769,27 @@ public class NotaServiceImpl implements INotaService {
     }
 
     @Override
-    public List<RenglonNotaDebito> calcularRenglonDebito(Long idPago, Long idRecibo, double monto, double ivaPorcentaje) {
+    public List<RenglonNotaDebito> calcularRenglonDebito(long idRecibo, double monto, double ivaPorcentaje) {
         List<RenglonNotaDebito> renglonesNota = new ArrayList<>();
         RenglonNotaDebito renglonNota;
-        if (idPago != null) {
-            Pago pago = pagoService.getPagoPorId(idPago);
-            renglonNota = new RenglonNotaDebito(); 
-            String descripcion = "Pago Nº " + pago.getNroPago() + " " + (new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHA_HISPANO)).format(pago.getFecha());
-            if (pago.getNota() != null && pago.getNota().length() > 0) {
-                descripcion += " " + pago.getNota();
-            }
-            renglonNota.setDescripcion(descripcion);
-            renglonNota.setMonto(pago.getMonto());
-            renglonNota.setImporteBruto(renglonNota.getMonto());
-            renglonNota.setIvaPorcentaje(0);
-            renglonNota.setIvaNeto(0);
-            renglonNota.setImporteNeto(this.calcularImporteRenglon(0, renglonNota.getImporteBruto(), 1));
-            renglonesNota.add(renglonNota);
-            renglonNota = new RenglonNotaDebito();
-            renglonNota.setDescripcion("Gasto Administrativo");
-            renglonNota.setMonto(monto);
-            renglonNota.setIvaPorcentaje(ivaPorcentaje);
-            renglonNota.setIvaNeto(monto * (ivaPorcentaje / 100));
-            renglonNota.setImporteBruto(monto);
-            renglonNota.setImporteNeto(this.calcularImporteRenglon(renglonNota.getIvaNeto(), renglonNota.getImporteBruto(), 1));
-            renglonesNota.add(renglonNota);
-        }
-        if (idRecibo != null) {
-            Recibo r = reciboService.getById(idRecibo);
-            renglonNota = new RenglonNotaDebito();
-            String descripcion = "Recibo Nº " + r.getNroRecibo() + " " + (new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHA_HISPANO)).format(r.getFecha());
-            renglonNota.setDescripcion(descripcion);
-            renglonNota.setMonto(r.getMonto());
-            renglonNota.setImporteBruto(renglonNota.getMonto());
-            renglonNota.setIvaPorcentaje(0);
-            renglonNota.setIvaNeto(0);
-            renglonNota.setImporteNeto(this.calcularImporteRenglon(0, renglonNota.getImporteBruto(), 1));
-            renglonesNota.add(renglonNota);
-            renglonNota = new RenglonNotaDebito();
-            renglonNota.setDescripcion("Gasto Administrativo");
-            renglonNota.setMonto(monto);
-            renglonNota.setIvaPorcentaje(ivaPorcentaje);
-            renglonNota.setIvaNeto(monto * (ivaPorcentaje / 100));
-            renglonNota.setImporteBruto(monto);
-            renglonNota.setImporteNeto(this.calcularImporteRenglon(renglonNota.getIvaNeto(), renglonNota.getImporteBruto(), 1));
-            renglonesNota.add(renglonNota);
-        }
+        Recibo r = reciboService.getById(idRecibo);
+        renglonNota = new RenglonNotaDebito();
+        String descripcion = "Recibo Nº " + r.getNumRecibo() + " " + (new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHA_HISPANO)).format(r.getFecha());
+        renglonNota.setDescripcion(descripcion);
+        renglonNota.setMonto(r.getMonto());
+        renglonNota.setImporteBruto(renglonNota.getMonto());
+        renglonNota.setIvaPorcentaje(0);
+        renglonNota.setIvaNeto(0);
+        renglonNota.setImporteNeto(this.calcularImporteRenglon(0, renglonNota.getImporteBruto(), 1));
+        renglonesNota.add(renglonNota);
+        renglonNota = new RenglonNotaDebito();
+        renglonNota.setDescripcion("Gasto Administrativo");
+        renglonNota.setMonto(monto);
+        renglonNota.setIvaPorcentaje(ivaPorcentaje);
+        renglonNota.setIvaNeto(monto * (ivaPorcentaje / 100));
+        renglonNota.setImporteBruto(monto);
+        renglonNota.setImporteNeto(this.calcularImporteRenglon(renglonNota.getIvaNeto(), renglonNota.getImporteBruto(), 1));
+        renglonesNota.add(renglonNota);
         return renglonesNota;
     }
 

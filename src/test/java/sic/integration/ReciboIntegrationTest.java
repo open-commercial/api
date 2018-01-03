@@ -366,7 +366,6 @@ public class ReciboIntegrationTest {
         assertEquals(1000, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
 
         NotaDebitoDTO notaDebito = new NotaDebitoDTO();
-        notaDebito.setPagoId(null);
         notaDebito.setCliente(cliente);
         notaDebito.setEmpresa(empresa);
         notaDebito.setFecha(new Date());
@@ -380,7 +379,7 @@ public class ReciboIntegrationTest {
         notaDebito.setTotal(16210);
         notaDebito.setUsuario(credencial);
         notaDebito.setFacturaVenta(null);
-        restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1?idRecibo=1", notaDebito, NotaDebito.class);
+        restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1/recibo/1", notaDebito, NotaDebito.class);
         assertEquals(-15210, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         FacturaVentaDTO facturaXRecuperada = restTemplate.getForObject(apiPrefix + "/facturas/2", FacturaVentaDTO.class);
         assertEquals(TipoDeComprobante.FACTURA_X, facturaXRecuperada.getTipoComprobante());

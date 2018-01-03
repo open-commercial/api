@@ -15,7 +15,7 @@ import sic.modelo.TipoDeComprobante;
 
 public interface INotaService {
 
-    Nota guardarNota(Nota nota, long idEmpresa, long idCliente, long idUsuario, Long idFactura, Long idPago, Long idRecibo, boolean modificarStock);
+    Nota guardarNota(Nota nota, long idEmpresa, long idCliente, long idUsuario, Long idRecibo, Long idFactura, boolean modificarStock);
 
     Nota autorizarNota(Nota nota);
     
@@ -28,8 +28,6 @@ public interface INotaService {
     Double getTotalById(Long idNota);
     
     FacturaVenta getFacturaNota(Long idNota);
-
-    NotaDebito getNotaDebitoPorPago(Long idPago);
     
     List<Pago> getPagosNota(Long idNota);
     
@@ -63,7 +61,7 @@ public interface INotaService {
 
     List<RenglonNotaCredito> calcularRenglonCredito(TipoDeComprobante tipo, double[] cantidad, long[] idRenglonFactura);
 
-    List<RenglonNotaDebito> calcularRenglonDebito(Long idPago, Long idRecibo, double monto, double ivaPorcentaje);
+    List<RenglonNotaDebito> calcularRenglonDebito(long idRecibo, double monto, double ivaPorcentaje);
 
     double calcularSubTotalCredito(double[] importesBrutos);
 

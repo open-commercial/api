@@ -79,8 +79,8 @@ public class ReciboServiceImpl implements IReciboService {
     @Override 
     @Transactional
     public Recibo guardar(Recibo recibo) {
-        recibo.setSerie(cds.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
-        recibo.setNroRecibo(this.getSiguienteNumeroRecibo(recibo.getEmpresa().getId_Empresa(), cds.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip()));
+        recibo.setNumSerie(cds.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
+        recibo.setNumRecibo(this.getSiguienteNumeroRecibo(recibo.getEmpresa().getId_Empresa(), cds.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip()));
         recibo.setFecha(new Date());
         double monto = recibo.getMonto();
         int i = 0;
@@ -92,7 +92,7 @@ public class ReciboServiceImpl implements IReciboService {
                         .getRenglonesVentaYDebitoCuentaCorriente(
                                 this.cuentaCorrienteService.getCuentaCorrientePorCliente(recibo.getCliente().getId_Cliente()).getIdCuentaCorriente(), pageable);
         while (renglonesCC.hasContent()) {
-            monto = this.pagarMultiplesComprobantes(renglonesCC.getContent(), recibo, monto, recibo.getFormaDePago(), recibo.getObservacion());
+            monto = this.pagarMultiplesComprobantes(renglonesCC.getContent(), recibo, monto, recibo.getFormaDePago(), recibo.getConcepto());
             if (renglonesCC.hasNext()) {
                 i++;
                 pageable = new PageRequest(i, 10);
@@ -147,16 +147,16 @@ public class ReciboServiceImpl implements IReciboService {
     
     @Override
     public long getSiguienteNumeroRecibo(long idEmpresa, long serie) {
-        Recibo recibo = reciboRepository.findTopByEmpresaAndSerieOrderByNroReciboDesc(empresaService.getEmpresaPorId(idEmpresa), serie);
+        Recibo recibo = reciboRepository.findTopByEmpresaAndNumSerieOrderByNumReciboDesc(empresaService.getEmpresaPorId(idEmpresa), serie);
         if (recibo == null) {
             return 1; // No existe ningun Recibo anterior
         } else {
-            return 1 + recibo.getNroRecibo();
+            return 1 + recibo.getNumRecibo();
         }
     }
     
     @Override 
-    public List<Recibo> construirRecibos(String observacion, long[] idsFormaDePago, Empresa empresa, Cliente cliente, Usuario usuario, double[] monto, Date fecha) { 
+    public List<Recibo> construirRecibos(String concepto, long[] idsFormaDePago, Empresa empresa, Cliente cliente, Usuario usuario, double[] monto, Date fecha) { 
         List<Recibo> recibos = new ArrayList<>();
         int i = 0;
         if (idsFormaDePago != null) {
@@ -168,10 +168,11 @@ public class ReciboServiceImpl implements IReciboService {
                 recibo.setFecha(fecha);
                 recibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(idFormaDePago));
                 recibo.setMonto(monto[i]);
-                recibo.setSerie(cds.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
-                recibo.setNroRecibo(this.getSiguienteNumeroRecibo(empresa.getId_Empresa(), recibo.getSerie()));
-                recibo.setObservacion(observacion);
+                recibo.setNumSerie(cds.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
+                recibo.setNumRecibo(this.getSiguienteNumeroRecibo(empresa.getId_Empresa(), recibo.getNumSerie()));
+                recibo.setConcepto(concepto);
                 recibo.setSaldoSobrante(0);
+                recibos.add(recibo);
                 i++;
             }
         }

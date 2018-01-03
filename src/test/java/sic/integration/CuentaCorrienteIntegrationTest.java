@@ -276,12 +276,9 @@ public class CuentaCorrienteIntegrationTest {
                 + "idUsuario=1&idEmpresa=1&idCliente=1&idFormaDePago=1", r, Recibo.class);
         assertEquals(0, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         NotaDebitoDTO notaDebito = new NotaDebitoDTO();
-        notaDebito.setPagoId(null);
         notaDebito.setCliente(cliente);
         notaDebito.setEmpresa(empresa);
-        notaDebito.setFecha(new Date());
-//        notaDebito.setRecibo(r); Las notas de debito deben pagarse con los recibos también
-        List<RenglonNotaDebito> renglonesCalculados = Arrays.asList(restTemplate.getForObject(apiPrefix + "/notas/renglon/debito/pago/1?monto=100&ivaPorcentaje=21", RenglonNotaDebito[].class));
+        List<RenglonNotaDebito> renglonesCalculados = Arrays.asList(restTemplate.getForObject(apiPrefix + "/notas/renglon/debito/recibo/1?monto=100&ivaPorcentaje=21", RenglonNotaDebito[].class));
         notaDebito.setRenglonesNotaDebito(renglonesCalculados);
         notaDebito.setIva105Neto(0);
         notaDebito.setIva21Neto(21);
@@ -291,7 +288,7 @@ public class CuentaCorrienteIntegrationTest {
         notaDebito.setTotal(6113.5);
         notaDebito.setUsuario(credencial);
         notaDebito.setFacturaVenta(null);
-        NotaDebito nd = restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1?idPago=1", notaDebito, NotaDebito.class);
+        NotaDebito nd = restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1/recibo/1", notaDebito, NotaDebito.class);
         assertEquals(-6113.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         r = new ReciboDTO();
         r.setMonto(6113.5);
@@ -303,7 +300,6 @@ public class CuentaCorrienteIntegrationTest {
                 + "&cantidad=5&idRenglonFactura=1", RenglonNotaCredito[].class));
         NotaCreditoDTO notaCredito = new NotaCreditoDTO();
         notaCredito.setRenglonesNotaCredito(renglonesNotaCredito);
-        notaCredito.setFecha(new Date());
         notaCredito.setSubTotal(restTemplate.getForObject(apiPrefix +"/notas/credito/sub-total?importe="
                 + renglonesNotaCredito.get(0).getImporteNeto(), Double.class));
         notaCredito.setRecargoPorcentaje(facturasRecuperadas.get(0).getRecargo_porcentaje());

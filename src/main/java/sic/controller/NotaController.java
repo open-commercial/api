@@ -61,12 +61,6 @@ public class NotaController {
         return notaService.getFacturaNota(idNota);
     }
     
-    @GetMapping("/notas/debito/{idPago}")
-    @ResponseStatus(HttpStatus.OK)
-    public NotaDebito getPagoNotaDebito(@PathVariable long idPago) {
-        return notaService.getNotaDebitoPorPago(idPago);
-    }
-    
     @GetMapping("/notas/cliente/{idCliente}/empresa/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
     public List<Nota> getNotasPorClienteYEmpresa(Long idEmpresa, Long idCliente) {
@@ -143,19 +137,17 @@ public class NotaController {
                                    @PathVariable long idUsuario,
                                    @PathVariable long idFactura, 
                                    @RequestParam boolean modificarStock) {
-        return notaService.guardarNota(nota, idEmpresa, idCliente, idUsuario, idFactura, null, null, modificarStock);
+        return notaService.guardarNota(nota, idEmpresa, idCliente, idUsuario, null, idFactura, modificarStock);
     }
     
-    @PostMapping("/notas/debito/empresa/{idEmpresa}/cliente/{idCliente}/usuario/{idUsuario}")
+    @PostMapping("/notas/debito/empresa/{idEmpresa}/cliente/{idCliente}/usuario/{idUsuario}/recibo/{idRecibo}")
     @ResponseStatus(HttpStatus.CREATED)
     public Nota guardarNotaDebito(@RequestBody NotaDebito nota,
                                   @PathVariable long idEmpresa,
                                   @PathVariable long idCliente,
                                   @PathVariable long idUsuario,
-                                  @RequestParam(required = false) Long idPago,
-                                  @RequestParam(required = false) Long idRecibo,
-                                  @RequestParam(required = false) Long idFactura) {
-        return notaService.guardarNota(nota, idEmpresa, idCliente, idUsuario, idFactura, idPago, idRecibo, false);
+                                  @PathVariable long idRecibo) {
+        return notaService.guardarNota(nota, idEmpresa, idCliente, idUsuario, idRecibo, null, false);
     }
 
     @GetMapping("/notas/{idNota}/reporte")
@@ -196,21 +188,13 @@ public class NotaController {
                                                                        @RequestParam long[] idRenglonFactura) {
         return notaService.calcularRenglonCredito(tipoDeComprobante, cantidad, idRenglonFactura);
     }
-  
-    @GetMapping("/notas/renglon/debito/pago/{idPago}")
-    @ResponseStatus(HttpStatus.OK) 
-    public List<RenglonNotaDebito> calcularRenglonNotaDebitoPagos(@PathVariable long idPago, 
-                                                                  @RequestParam double monto,
-                                                                  @RequestParam double ivaPorcentaje) {
-        return notaService.calcularRenglonDebito(idPago, null, monto, ivaPorcentaje);
-    }
     
     @GetMapping("/notas/renglon/debito/recibo/{idRecibo}")
     @ResponseStatus(HttpStatus.OK) 
     public List<RenglonNotaDebito> calcularRenglonNotaDebito(@PathVariable long idRecibo, 
                                                              @RequestParam double monto,
                                                              @RequestParam double ivaPorcentaje) {
-        return notaService.calcularRenglonDebito(null, idRecibo, monto, ivaPorcentaje);
+        return notaService.calcularRenglonDebito(idRecibo, monto, ivaPorcentaje);
     }
     
     @GetMapping("/notas/credito/sub-total")

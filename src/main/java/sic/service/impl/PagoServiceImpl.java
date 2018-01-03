@@ -133,10 +133,6 @@ public class PagoServiceImpl implements IPagoService {
     @Override
     @Transactional
     public Pago guardar(Pago pago) {
-        if (pago.getRecibo() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_pago_sin_recibo"));
-        }
         this.validarOperacion(pago);
         pago.setNroPago(this.getSiguienteNroPago(pago.getEmpresa().getId_Empresa()));
         Calendar fechaPago = Calendar.getInstance();
@@ -242,6 +238,10 @@ public class PagoServiceImpl implements IPagoService {
     @Override
     public void validarOperacion(Pago pago) {
         //Requeridos
+        if (pago.getRecibo() == null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_pago_sin_recibo"));
+        }
         if (pago.getMonto() <= 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_pago_mayorQueCero_monto"));

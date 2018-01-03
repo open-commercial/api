@@ -10,9 +10,10 @@ import lombok.NoArgsConstructor;
 public class ReciboDTO {
     
     private Long idRecibo = 0L;    
+    private long serie = 1L;   
     private long nroRecibo = 1L;
     private boolean eliminado = false;
-    private String observacion = "Recibo Test";
+    private String concepto = "Recibo Test";
     private String nombreFormaDePago = "Efectivo";
     private String nombreEmpresa = "Globo De Oro";
     private String razonSocialCliente = "Construcciones S.A.";
