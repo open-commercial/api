@@ -769,29 +769,27 @@ public class NotaServiceImpl implements INotaService {
     }
 
     @Override
-    public List<RenglonNotaDebito> calcularRenglonDebito(Long idRecibo, double monto, double ivaPorcentaje) {
+    public List<RenglonNotaDebito> calcularRenglonDebito(long idRecibo, double monto, double ivaPorcentaje) {
         List<RenglonNotaDebito> renglonesNota = new ArrayList<>();
         RenglonNotaDebito renglonNota;
-        if (idRecibo != null) {
-            Recibo r = reciboService.getById(idRecibo);
-            renglonNota = new RenglonNotaDebito();
-            String descripcion = "Recibo Nº " + r.getNumRecibo() + " " + (new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHA_HISPANO)).format(r.getFecha());
-            renglonNota.setDescripcion(descripcion);
-            renglonNota.setMonto(r.getMonto());
-            renglonNota.setImporteBruto(renglonNota.getMonto());
-            renglonNota.setIvaPorcentaje(0);
-            renglonNota.setIvaNeto(0);
-            renglonNota.setImporteNeto(this.calcularImporteRenglon(0, renglonNota.getImporteBruto(), 1));
-            renglonesNota.add(renglonNota);
-            renglonNota = new RenglonNotaDebito();
-            renglonNota.setDescripcion("Gasto Administrativo");
-            renglonNota.setMonto(monto);
-            renglonNota.setIvaPorcentaje(ivaPorcentaje);
-            renglonNota.setIvaNeto(monto * (ivaPorcentaje / 100));
-            renglonNota.setImporteBruto(monto);
-            renglonNota.setImporteNeto(this.calcularImporteRenglon(renglonNota.getIvaNeto(), renglonNota.getImporteBruto(), 1));
-            renglonesNota.add(renglonNota);
-        }
+        Recibo r = reciboService.getById(idRecibo);
+        renglonNota = new RenglonNotaDebito();
+        String descripcion = "Recibo Nº " + r.getNumRecibo() + " " + (new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHA_HISPANO)).format(r.getFecha());
+        renglonNota.setDescripcion(descripcion);
+        renglonNota.setMonto(r.getMonto());
+        renglonNota.setImporteBruto(renglonNota.getMonto());
+        renglonNota.setIvaPorcentaje(0);
+        renglonNota.setIvaNeto(0);
+        renglonNota.setImporteNeto(this.calcularImporteRenglon(0, renglonNota.getImporteBruto(), 1));
+        renglonesNota.add(renglonNota);
+        renglonNota = new RenglonNotaDebito();
+        renglonNota.setDescripcion("Gasto Administrativo");
+        renglonNota.setMonto(monto);
+        renglonNota.setIvaPorcentaje(ivaPorcentaje);
+        renglonNota.setIvaNeto(monto * (ivaPorcentaje / 100));
+        renglonNota.setImporteBruto(monto);
+        renglonNota.setImporteNeto(this.calcularImporteRenglon(renglonNota.getIvaNeto(), renglonNota.getImporteBruto(), 1));
+        renglonesNota.add(renglonNota);
         return renglonesNota;
     }
 
