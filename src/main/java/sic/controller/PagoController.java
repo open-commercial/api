@@ -31,8 +31,7 @@ public class PagoController {
     
     private final IPagoService pagoService;
     private final IFacturaService facturaService;
-    private final IFormaDePagoService formaDePagoService;  
-    private final IEmpresaService empresaService;
+    private final IFormaDePagoService formaDePagoService;
     private final INotaService notaService;
     private final int TAMANIO_PAGINA_DEFAULT = 50;
     
@@ -44,7 +43,6 @@ public class PagoController {
         this.facturaService = facturaService;
         this.formaDePagoService = formaDePago;        
         this.notaService = notaService;
-        this.empresaService = empresaService;
     }
     
     @GetMapping("/pagos/{idPago}")

@@ -453,7 +453,8 @@ public class NotaServiceImpl implements INotaService {
 
     @Override
     @Transactional
-    public Nota guardarNota(Nota nota, long idEmpresa, long idCliente, long idUsuario, Long idFactura, Long idPago, Long idRecibo, boolean modificarStock) {
+    public Nota guardarNota(Nota nota, long idEmpresa, long idCliente, long idUsuario,
+            Long idFactura, Long idPago, Long idRecibo, boolean modificarStock) {
         this.validarNota(nota, idEmpresa, idCliente, idUsuario, idFactura);
         nota.setSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(nota.getEmpresa()).getNroPuntoDeVentaAfip());
         if (nota instanceof NotaCredito) {
@@ -858,24 +859,21 @@ public class NotaServiceImpl implements INotaService {
     }
     
     @Override
-    public double calcularIVANetoCredito(TipoDeComprobante tipoDeComprobante,
-                                  double[] cantidades,
-                                  double[] ivaPorcentajeRenglones,
-                                  double[] ivaNetoRenglones,
-                                  double ivaPorcentaje,
-                                  double descuentoPorcentaje, 
-                                  double recargoPorcentaje) {
+    public double calcularIVANetoCredito(TipoDeComprobante tipoDeComprobante, double[] cantidades, double[] ivaPorcentajeRenglones,
+            double[] ivaNetoRenglones, double ivaPorcentaje, double descuentoPorcentaje, double recargoPorcentaje) {
         return facturaService.calcularIvaNetoFactura(tipoDeComprobante, cantidades, ivaPorcentajeRenglones, ivaNetoRenglones, ivaPorcentaje, descuentoPorcentaje, recargoPorcentaje);
     }
     
     @Override
-    public double calcularSubTotalBrutoCredito(TipoDeComprobante tipoDeComprobante, double subTotal, double recargoNeto, double descuentoNeto, double iva105Neto, double iva21Neto) {         
+    public double calcularSubTotalBrutoCredito(TipoDeComprobante tipoDeComprobante, double subTotal, double recargoNeto,
+            double descuentoNeto, double iva105Neto, double iva21Neto) {         
         double resultado = subTotal + recargoNeto - descuentoNeto;
         if (tipoDeComprobante == TipoDeComprobante.FACTURA_B || tipoDeComprobante == TipoDeComprobante.PRESUPUESTO) {
             resultado = resultado - (iva105Neto + iva21Neto);
         }
         return resultado;
     }
+    
     @Override
     public double calcularTotalCredito(double subTotal_bruto, double iva105_neto, double iva21_neto) {
         return facturaService.calcularTotal(subTotal_bruto, iva105_neto, iva21_neto);
