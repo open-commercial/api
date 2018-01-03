@@ -21,9 +21,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true, exclude = "renglonesNotaDebito")
 public class NotaDebito extends Nota implements Serializable {
-    
-    private Long pagoId;
-    
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "idNota")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -42,7 +40,7 @@ public class NotaDebito extends Nota implements Serializable {
     public NotaDebito() {}
 
     public NotaDebito(long idNota, long serie, FacturaVenta facturaVenta, List<Pago> pagos, long nroNota, boolean eliminada,
-            TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa, Cliente cliente, Long pagoId,
+            TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa, Cliente cliente,
             Usuario usuario, String motivo, List<RenglonNotaDebito> renglones, double subTotalBruto,
             double iva21Neto, double iva105Neto, double total, double montoNoGravado, long CAE, Date vencimientoCAE,
             long numSerieAfip, long numNotaAfip, Recibo recibo, boolean pagado) {
@@ -51,7 +49,6 @@ public class NotaDebito extends Nota implements Serializable {
                 facturaVenta, pagos, motivo, subTotalBruto, iva21Neto, iva105Neto, total, CAE, vencimientoCAE, numSerieAfip, numNotaAfip);
         this.montoNoGravado = montoNoGravado;
         this.renglonesNotaDebito = renglones;
-        this.pagoId = pagoId;
         this.recibo = recibo;
         this.pagada = pagado;
     }

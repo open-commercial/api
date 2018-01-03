@@ -14,7 +14,7 @@ public class ReciboBuilder {
     private long serie = 1L;
     private long nroRecibo = 1L;
     private boolean eliminado = false;
-    private String observacion= "Recibo por contratar al GOLDEN ARMY";
+    private String concepto= "Recibo por contratar al GOLDEN ARMY";
     private FormaDePago formaDePago = new FormaDePagoBuilder().build();
     private Empresa empresa = new EmpresaBuilder().build();
     private Cliente cliente = new ClienteBuilder().build();
@@ -24,7 +24,7 @@ public class ReciboBuilder {
     private double saldoSobrante = 200;
     
     public Recibo build() {
-      return new Recibo(idRecibo, serie, nroRecibo, eliminado, observacion, formaDePago, empresa, cliente, usuario, fecha, monto, saldoSobrante);
+      return new Recibo(idRecibo, serie, nroRecibo, fecha, eliminado, concepto, formaDePago, empresa, cliente, usuario, monto, saldoSobrante);
     }
 
     public ReciboBuilder withidRecibo(Long idRecibo) {
@@ -47,8 +47,8 @@ public class ReciboBuilder {
         return this;
     }
     
-    public ReciboBuilder withObservacion(String observacion) {
-        this.observacion = observacion;
+    public ReciboBuilder withConcepto(String concepto) {
+        this.concepto = concepto;
         return this;
     }
     
