@@ -304,7 +304,7 @@ public class FacturaController {
     @ResponseStatus(HttpStatus.OK)
     public List<RenglonFactura> getRenglonesPedidoParaFacturar(@PathVariable long idPedido,
                                                                @RequestParam TipoDeComprobante tipoDeComprobante) {
-        return facturaService.convertirRenglonesPedidoARenglonesFactura(pedidoService.getPedidoPorId(idPedido), tipoDeComprobante);
+        return facturaService.convertirRenglonesPedidoEnRenglonesFactura(pedidoService.getPedidoPorId(idPedido), tipoDeComprobante);
     } 
     
     @GetMapping("/facturas/pagos/{idPago}") 
@@ -343,7 +343,7 @@ public class FacturaController {
                                           @RequestParam Movimiento movimiento,
                                           @RequestParam double cantidad, 
                                           @RequestParam double descuentoPorcentaje) {
-        return facturaService.calcularRenglon(tipoDeComprobante, movimiento, cantidad, idProducto, descuentoPorcentaje);
+        return facturaService.calcularRenglon(tipoDeComprobante, movimiento, cantidad, idProducto, descuentoPorcentaje, false);
     }
         
     @GetMapping("/facturas/total-facturado-venta/criteria")

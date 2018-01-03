@@ -477,6 +477,7 @@ public class NotaServiceImpl implements INotaService {
             cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito, TipoDeOperacion.ALTA);
             List<Recibo> recibos = reciboService.getRecibosConSaldoSobrante(idEmpresa, idCliente);
             double saldoFactura = pagoService.getSaldoAPagarNotaDebito(notaDebito.getIdNota());
+            List<Pago> pagos = new ArrayList<>();
             for (Recibo r : recibos) {
                 while (r.getSaldoSobrante() > 0) {
                     if (saldoFactura < r.getSaldoSobrante()) {
@@ -489,6 +490,7 @@ public class NotaServiceImpl implements INotaService {
                         nuevoPago.setFormaDePago(r.getFormaDePago());
                         nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
                         pagoService.guardar(nuevoPago);
+                        pagos.add(nuevoPago);
                         reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoFactura));
                         actualizarNotaDebitoEstadoPago(notaDebito);
                         if (notaDebito.isPagada()) {
@@ -504,6 +506,7 @@ public class NotaServiceImpl implements INotaService {
                         nuevoPago.setFormaDePago(r.getFormaDePago());
                         nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
                         pagoService.guardar(nuevoPago);
+                        pagos.add(nuevoPago);
                         reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);
                         actualizarNotaDebitoEstadoPago(notaDebito);
                         if (notaDebito.isPagada()) {
@@ -512,6 +515,7 @@ public class NotaServiceImpl implements INotaService {
                     }
                 }
             }
+            notaDebito.setPagos(pagos);
             LOGGER.warn("La Nota " + notaDebito + " se guardó correctamente.");
             return notaDebito;
         }
