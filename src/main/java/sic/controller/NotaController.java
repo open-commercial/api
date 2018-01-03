@@ -39,7 +39,7 @@ public class NotaController {
     private final INotaService notaService;
     private final IClienteService clienteService;
     private final IEmpresaService empresaService;
-    private final int TAMANIO_PAGINA_DEFAULT = 100;
+    private final int TAMANIO_PAGINA_DEFAULT = 50;
     
     @Autowired
     public NotaController(INotaService notaService, IClienteService clienteService,

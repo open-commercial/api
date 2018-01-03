@@ -1,7 +1,6 @@
 package sic.controller;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -91,19 +90,19 @@ public class FacturaController {
                                              @RequestParam(required = false) double[] montos,
                                              @RequestParam(required = false) int[] indices,
                                              @RequestParam(required = false) Long idPedido) {
-        Empresa emp = empresaService.getEmpresaPorId(idEmpresa);
-        fv.setEmpresa(emp);
+        Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
+        fv.setEmpresa(empresa);
         fv.setCliente(clienteService.getClientePorId(idCliente));
         fv.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
         fv.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
         if (indices != null) {
             return facturaService.guardar(facturaService.dividirFactura((FacturaVenta) fv, indices), idPedido, 
-                    reciboService.construirRecibos("Recibo cliente: " + fv.getRazonSocialCliente(), idsFormaDePago, emp,
+                    reciboService.construirRecibos("Recibo cliente: " + fv.getRazonSocialCliente(), idsFormaDePago, empresa,
                             fv.getCliente(), fv.getUsuario(), montos, fv.getFecha()));
         } else {
             List<Factura> facturas = new ArrayList<>();
             facturas.add(fv);
-            return facturaService.guardar(facturas, idPedido, reciboService.construirRecibos("Recibo cliente: " + fv.getRazonSocialCliente(), idsFormaDePago, emp,
+            return facturaService.guardar(facturas, idPedido, reciboService.construirRecibos("Recibo cliente: " + fv.getRazonSocialCliente(), idsFormaDePago, empresa,
                             fv.getCliente(), fv.getUsuario(), montos, fv.getFecha()));         
         }
     }   
