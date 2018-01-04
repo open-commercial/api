@@ -7,7 +7,6 @@ import org.springframework.data.domain.Slice;
 import sic.modelo.CuentaCorriente;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
-import sic.modelo.Pago;
 import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
 
@@ -18,8 +17,6 @@ public interface IRenglonCuentaCorrienteService {
     RenglonCuentaCorriente getRenglonCuentaCorrienteDeFactura(FacturaVenta fv, boolean eliminado);
     
     RenglonCuentaCorriente getRenglonCuentaCorrienteDeNota(Nota n, boolean eliminado);
-    
-    RenglonCuentaCorriente getRenglonCuentaCorrienteDePago(Pago p, boolean eliminado);
     
     RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(Recibo r, boolean eliminado);
     

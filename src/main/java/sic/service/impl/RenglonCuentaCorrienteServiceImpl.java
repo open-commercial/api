@@ -41,11 +41,6 @@ public class RenglonCuentaCorrienteServiceImpl implements IRenglonCuentaCorrient
     }
 
     @Override
-    public RenglonCuentaCorriente getRenglonCuentaCorrienteDePago(Pago p, boolean eliminado) {
-        return renglonCuentaCorrienteRepository.findByPagoAndEliminado(p, eliminado);
-    }
-
-    @Override
     public RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(Recibo r, boolean eliminado) {
         return renglonCuentaCorrienteRepository.findByReciboAndEliminado(r, eliminado);
     }

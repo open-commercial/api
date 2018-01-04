@@ -183,9 +183,9 @@ public class ReciboServiceImpl implements IReciboService {
     public double pagarMultiplesComprobantes(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, double monto, FormaDePago formaDePago, String nota) {
         for (RenglonCuentaCorriente rcc : renglonesCC) {
             if (monto > 0.0) {
-                if (rcc.getTipoDeComprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipoDeComprobante() == TipoDeComprobante.FACTURA_B
-                        || rcc.getTipoDeComprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipoDeComprobante() == TipoDeComprobante.FACTURA_X
-                        || rcc.getTipoDeComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoDeComprobante() == TipoDeComprobante.PRESUPUESTO) {
+                if (rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_B
+                        || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_X
+                        || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
                     FacturaVenta fv = (FacturaVenta) facturaService.getFacturaPorId(rcc.getIdMovimiento());
                     if (fv.isPagada() == false) {
                         fv.setPagos(this.pagoService.getPagosDeLaFactura(fv.getId_Factura()));
@@ -208,9 +208,9 @@ public class ReciboServiceImpl implements IReciboService {
                         nuevoPago.setRecibo(recibo);
                         this.pagoService.guardar(nuevoPago);
                     }
-                } else if (rcc.getTipoDeComprobante() == TipoDeComprobante.NOTA_DEBITO_A
-                        || rcc.getTipoDeComprobante() == TipoDeComprobante.NOTA_DEBITO_B || rcc.getTipoDeComprobante() == TipoDeComprobante.NOTA_DEBITO_X
-                        || rcc.getTipoDeComprobante() == TipoDeComprobante.NOTA_DEBITO_Y || rcc.getTipoDeComprobante() == TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO) {
+                } else if (rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_A
+                        || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_B || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X
+                        || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_Y || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO) {
                     NotaDebito nd = (NotaDebito) notaService.getNotaPorId(rcc.getIdMovimiento());
                     nd.setPagos(this.notaService.getPagosNota(nd.getIdNota()));
                     if (nd.isPagada() == false) {

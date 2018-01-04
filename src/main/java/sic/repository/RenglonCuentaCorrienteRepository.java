@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 import sic.modelo.CuentaCorriente;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
-import sic.modelo.Pago;
 import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
 
@@ -19,8 +18,6 @@ public interface RenglonCuentaCorrienteRepository extends PagingAndSortingReposi
     RenglonCuentaCorriente findByFacturaAndEliminado(FacturaVenta fv, boolean eliminado);
 
     RenglonCuentaCorriente findByNotaAndEliminado(Nota n, boolean eliminado);
-
-    RenglonCuentaCorriente findByPagoAndEliminado(Pago p, boolean eliminado);
     
     RenglonCuentaCorriente findByReciboAndEliminado(Recibo r, boolean eliminado);
 
@@ -28,11 +25,11 @@ public interface RenglonCuentaCorrienteRepository extends PagingAndSortingReposi
     
     @Query("SELECT r FROM CuentaCorriente cc INNER JOIN cc.renglones r"
             + " WHERE cc.idCuentaCorriente = :idCuentaCorriente AND cc.eliminada = false AND r.eliminado = false "
-            + " AND (r.tipoDeComprobante = \'FACTURA_A\' OR r.tipoDeComprobante = \'FACTURA_B\' OR r.tipoDeComprobante = \'FACTURA_C\'"
-            + " OR r.tipoDeComprobante = \'FACTURA_X\' OR r.tipoDeComprobante = \'FACTURA_Y\' OR r.tipoDeComprobante = \'PRESUPUESTO\'"
-            + " OR r.tipoDeComprobante = \'NOTA_DEBITO_A\' OR r.tipoDeComprobante = \'NOTA_DEBITO_B\' OR r.tipoDeComprobante = \'NOTA_DEBITO_X\'"
-            + " OR r.tipoDeComprobante = \'NOTA_DEBITO_Y\' OR r.tipoDeComprobante = \'NOTA_DEBITO_PRESUPUESTO\')"
-            + " ORDER BY r.fecha ASC, r.tipoDeComprobante DESC")
+            + " AND (r.tipoComprobante = \'FACTURA_A\' OR r.tipoComprobante = \'FACTURA_B\' OR r.tipoComprobante = \'FACTURA_C\'"
+            + " OR r.tipoComprobante = \'FACTURA_X\' OR r.tipoComprobante = \'FACTURA_Y\' OR r.tipoComprobante = \'PRESUPUESTO\'"
+            + " OR r.tipoComprobante = \'NOTA_DEBITO_A\' OR r.tipoComprobante = \'NOTA_DEBITO_B\' OR r.tipoComprobante = \'NOTA_DEBITO_X\'"
+            + " OR r.tipoComprobante = \'NOTA_DEBITO_Y\' OR r.tipoComprobante = \'NOTA_DEBITO_PRESUPUESTO\')"
+            + " ORDER BY r.fecha ASC, r.tipoComprobante DESC")
     Slice<RenglonCuentaCorriente> getRenglonesVentaYDebitoCuentaCorriente(@Param("idCuentaCorriente") long idCuentaCorriente, Pageable page);
 
     @Query("SELECT SUM(r.monto) FROM CuentaCorriente cc INNER JOIN cc.renglones r"

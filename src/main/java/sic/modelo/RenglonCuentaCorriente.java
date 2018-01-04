@@ -40,7 +40,7 @@ public class RenglonCuentaCorriente implements Serializable {
     
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private TipoDeComprobante tipoDeComprobante;
+    private TipoDeComprobante tipoComprobante;
     
     private long serie;
     
@@ -68,11 +68,6 @@ public class RenglonCuentaCorriente implements Serializable {
     @JoinColumn(name = "id_Factura", referencedColumnName = "id_Factura")  
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Factura factura;
-  
-    @OneToOne
-    @JoinColumn(name = "id_Pago", referencedColumnName = "id_Pago")  
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Pago pago;
     
     @OneToOne
     @JoinColumn(name = "idNota", referencedColumnName = "idNota")  
