@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `sic` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci */;
-USE `sic`;
 -- MySQL dump 10.13  Distrib 5.7.20, for Linux (x86_64)
 --
 -- Host: 127.0.0.1    Database: sic
@@ -665,7 +663,7 @@ CREATE TABLE `rengloncuentacorriente` (
   `monto` double NOT NULL,
   `numero` bigint(20) NOT NULL,
   `serie` bigint(20) NOT NULL,
-  `tipoDeComprobante` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `tipoComprobante` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `idCuentaCorriente` bigint(20) DEFAULT NULL,
   `id_Factura` bigint(20) DEFAULT NULL,
   `idNota` bigint(20) DEFAULT NULL,
@@ -872,4 +870,4 @@ CREATE TABLE `usuario` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-01-04  7:43:06
+-- Dump completed on 2018-01-04 16:13:16
