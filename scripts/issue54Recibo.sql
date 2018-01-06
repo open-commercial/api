@@ -13,7 +13,7 @@ SET UNIQUE_CHECKS = 0;
 UPDATE pago SET idRecibo = id_Pago;
 
 INSERT INTO recibo
-SELECT id_Pago, CONCAT("Recibo por pago Nº: ", nroPago), eliminado, fecha, monto, nroPago, 2, 0, id_Cliente, id_Empresa, id_FormaDePago, id_Usuario
+SELECT id_Pago, CONCAT("Recibo por pago Nº: ", nroPago), eliminado, fecha, monto, nroPago, (CASE WHEN id_Empresa = 1 THEN 2 ELSE 0 END), 0, id_Cliente, id_Empresa, id_FormaDePago, id_Usuario
 FROM pago inner join facturaventa where pago.id_Factura = facturaventa.id_Factura;
 
 
