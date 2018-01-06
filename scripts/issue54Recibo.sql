@@ -9,9 +9,6 @@ TRUNCATE rengloncuentacorriente;
 SET SQL_SAFE_UPDATES = 0;
 SET foreign_key_checks = 0;
 SET UNIQUE_CHECKS = 0; 
-SET SQL_SAFE_UPDATES = 0;
-SET foreign_key_checks = 0;
-SET UNIQUE_CHECKS = 0; 
 
 UPDATE pago SET idRecibo = id_Pago;
 
