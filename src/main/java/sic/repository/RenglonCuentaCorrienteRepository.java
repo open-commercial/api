@@ -25,11 +25,11 @@ public interface RenglonCuentaCorrienteRepository extends PagingAndSortingReposi
     
     @Query("SELECT r FROM CuentaCorriente cc INNER JOIN cc.renglones r"
             + " WHERE cc.idCuentaCorriente = :idCuentaCorriente AND cc.eliminada = false AND r.eliminado = false "
-            + " AND (r.tipoComprobante = \'FACTURA_A\' OR r.tipoComprobante = \'FACTURA_B\' OR r.tipoComprobante = \'FACTURA_C\'"
-            + " OR r.tipoComprobante = \'FACTURA_X\' OR r.tipoComprobante = \'FACTURA_Y\' OR r.tipoComprobante = \'PRESUPUESTO\'"
-            + " OR r.tipoComprobante = \'NOTA_DEBITO_A\' OR r.tipoComprobante = \'NOTA_DEBITO_B\' OR r.tipoComprobante = \'NOTA_DEBITO_X\'"
-            + " OR r.tipoComprobante = \'NOTA_DEBITO_Y\' OR r.tipoComprobante = \'NOTA_DEBITO_PRESUPUESTO\')"
-            + " ORDER BY r.fecha, r.tipoComprobante ASC")
+            + " AND (r.tipo_comprobante = \'FACTURA_A\' OR r.tipo_comprobante = \'FACTURA_B\' OR r.tipo_comprobante = \'FACTURA_C\'"
+            + " OR r.tipo_comprobante = \'FACTURA_X\' OR r.tipo_comprobante = \'FACTURA_Y\' OR r.tipo_comprobante = \'PRESUPUESTO\'"
+            + " OR r.tipo_comprobante = \'NOTA_DEBITO_A\' OR r.tipo_comprobante = \'NOTA_DEBITO_B\' OR r.tipo_comprobante = \'NOTA_DEBITO_X\'"
+            + " OR r.tipo_comprobante = \'NOTA_DEBITO_Y\' OR r.tipo_comprobante = \'NOTA_DEBITO_PRESUPUESTO\')"
+            + " ORDER BY r.fecha, r.tipo_comprobante ASC")
     Slice<RenglonCuentaCorriente> getRenglonesVentaYDebitoCuentaCorriente(@Param("idCuentaCorriente") long idCuentaCorriente, Pageable page);
 
     @Query("SELECT SUM(r.monto) FROM CuentaCorriente cc INNER JOIN cc.renglones r"

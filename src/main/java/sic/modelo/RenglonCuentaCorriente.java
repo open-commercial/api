@@ -21,6 +21,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.Formula;
 
 @Entity
 @Table(name = "rengloncuentacorriente")
@@ -40,7 +41,19 @@ public class RenglonCuentaCorriente implements Serializable {
     
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private TipoDeComprobante tipoComprobante;
+    private TipoDeComprobante tipo_comprobante;
+    
+    //Formula de hibernate no coloca en la consulta el mismo alias para los campos, que SpringData.
+    @Formula(value = "CASE tipo_comprobante"
+            + " WHEN 'FACTURA_Y' THEN 1"
+            + " WHEN 'NOTA_DEBITO_Y' THEN 2"
+            + " WHEN 'FACTURA_X' THEN 3"
+            + " WHEN 'NOTA_DEBITO_X' THEN 4"
+            + " WHEN 'PRESUPUESTO' THEN 5"
+            + " WHEN 'NOTA_DEBITO_PRESUPUESTO' THEN 6"
+            + " ELSE 10"
+            + " END")
+    private int prioridadPago;
     
     private long serie;
     
