@@ -1,10 +1,10 @@
 -- SOBRE LA DB CON EL DUMP DE PROD
--- ALTER TABLE notacredito MODIFY modificaStock bit(1) AFTER descuentoPorcentaje; 
--- ALTER TABLE notadebito CHANGE column pagoId idRecibo BIGINT(20) NOT NULL AFTER idNota;
--- ALTER TABLE notadebito ADD pagada bit(1) DEFAULT false after montoNoGravado; 
--- ALTER TABLE pago ADD idRecibo BIGINT(20) AFTER idNota;
--- TRUNCATE rengloncuentacorriente;
--- 
+ALTER TABLE notacredito MODIFY modificaStock bit(1) AFTER descuentoPorcentaje; 
+ALTER TABLE notadebito CHANGE column pagoId idRecibo BIGINT(20) NOT NULL AFTER idNota;
+ALTER TABLE notadebito ADD pagada bit(1) DEFAULT false after montoNoGravado; 
+ALTER TABLE pago ADD idRecibo BIGINT(20) AFTER idNota;
+TRUNCATE rengloncuentacorriente;
+ 
 -- SOBRE LA NUEVA ESTRUCTURA CON LOS DATOS
 SET SQL_SAFE_UPDATES = 0;
 SET foreign_key_checks = 0;
