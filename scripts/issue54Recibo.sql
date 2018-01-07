@@ -1,20 +1,25 @@
 -- SOBRE LA DB CON EL DUMP DE PROD
-ALTER TABLE notacredito MODIFY modificaStock bit(1) AFTER descuentoPorcentaje; 
-ALTER TABLE notadebito CHANGE column pagoId idRecibo BIGINT(20) NOT NULL AFTER idNota;
-ALTER TABLE notadebito ADD pagada bit(1) DEFAULT false after montoNoGravado; 
-ALTER TABLE pago ADD idRecibo BIGINT(20) AFTER idNota;
-TRUNCATE rengloncuentacorriente;
-
+-- ALTER TABLE notacredito MODIFY modificaStock bit(1) AFTER descuentoPorcentaje; 
+-- ALTER TABLE notadebito CHANGE column pagoId idRecibo BIGINT(20) NOT NULL AFTER idNota;
+-- ALTER TABLE notadebito ADD pagada bit(1) DEFAULT false after montoNoGravado; 
+-- ALTER TABLE pago ADD idRecibo BIGINT(20) AFTER idNota;
+-- TRUNCATE rengloncuentacorriente;
+-- 
 -- SOBRE LA NUEVA ESTRUCTURA CON LOS DATOS
 SET SQL_SAFE_UPDATES = 0;
 SET foreign_key_checks = 0;
 SET UNIQUE_CHECKS = 0; 
 
-UPDATE pago SET idRecibo = id_Pago;
+UPDATE pago inner join facturaventa on pago.id_Factura = facturaventa.id_Factura SET idRecibo = id_Pago;
+UPDATE pago inner join notadebito on pago.idNota = notadebito.idNota SET notadebito.idRecibo = id_Pago;
 
-INSERT INTO recibo
-SELECT id_Pago, CONCAT("Recibo por pago Nº: ", nroPago), eliminado, fecha, monto, nroPago, (CASE WHEN id_Empresa = 1 THEN 2 ELSE 0 END), 0, id_Cliente, id_Empresa, id_FormaDePago, id_Usuario
-FROM pago inner join facturaventa where pago.id_Factura = facturaventa.id_Factura;
+INSERT INTO recibo (idRecibo, concepto, eliminado, fecha, monto, numRecibo, numSerie, saldoSobrante, id_Cliente, id_Empresa, id_FormaDePago, id_Usuario)
+SELECT pago.id_Pago, CONCAT("Recibo por pago Nº: ", nroPago), eliminado, fecha, monto, nroPago, (CASE WHEN id_Empresa = 1 THEN 2 ELSE 0 END), 0, id_Cliente, id_Empresa, id_FormaDePago, id_Usuario
+FROM pago inner join facturaventa on pago.id_Factura = facturaventa.id_Factura;
+
+INSERT INTO recibo (idRecibo, concepto, eliminado, fecha, monto, numRecibo, numSerie, saldoSobrante, id_Cliente, id_Empresa, id_FormaDePago, id_Usuario)
+SELECT pago.id_Pago, CONCAT("Recibo por pago Nº: ", nroPago), eliminado, pago.fecha, pago.monto, nroPago, (CASE WHEN pago.id_Empresa = 1 THEN 2 ELSE 0 END), 0, id_Cliente, pago.id_Empresa, id_FormaDePago, id_Usuario
+FROM pago inner join nota on pago.idNota = nota.idNota;
 
 
 SET SQL_SAFE_UPDATES = 1;
