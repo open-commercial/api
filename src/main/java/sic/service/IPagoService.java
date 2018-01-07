@@ -44,7 +44,7 @@ public interface IPagoService {
     
     double getSaldoPagosPorCliente(long idCliente, Date hasta);
             
-    void pagarMultiplesFacturas(List<Factura> facturas, double monto, FormaDePago formaDePago, String nota);
+    void pagarMultiplesFacturasCompra(List<Factura> facturas, double monto, FormaDePago formaDePago, String nota);
     
     void validarOperacion(Pago pago);     
 

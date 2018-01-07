@@ -21,6 +21,8 @@ import sic.modelo.TipoDeComprobante;
 public interface IFacturaService {
     
     Factura getFacturaPorId(Long id_Factura);
+    
+    FacturaCompra getFacturaCompraPorId(Long idFactura);
 
     Long getCAEById(long idFactura);
     

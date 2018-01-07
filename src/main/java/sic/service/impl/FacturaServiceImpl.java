@@ -26,8 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Cliente;
@@ -112,6 +110,16 @@ public class FacturaServiceImpl implements IFacturaService {
     @Override
     public Factura getFacturaPorId(Long idFactura) {
         Factura factura = facturaRepository.findById(idFactura);
+        if (factura == null) {
+            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_factura_eliminada"));
+        }
+        return factura;
+    }
+    
+    @Override
+    public FacturaCompra getFacturaCompraPorId(Long idFactura) {
+        FacturaCompra factura = facturaCompraRepository.findById(idFactura);
         if (factura == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_eliminada"));

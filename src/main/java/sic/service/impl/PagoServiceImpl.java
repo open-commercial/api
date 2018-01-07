@@ -154,13 +154,12 @@ public class PagoServiceImpl implements IPagoService {
         Pago pago = this.getPagoPorId(idPago);
         pago.getRecibo().setMonto(pago.getMonto());
         pago.setEliminado(true);
-        pagoRepository.save(pago);
-        if (pago.getFactura() != null) {
-            facturaService.actualizarFacturaEstadoPago(pago.getFactura());
+        if (pago.getFactura() instanceof FacturaCompra) {
+            pagoRepository.save(pago);
         }
         LOGGER.warn("El Pago " + pago + " se eliminó correctamente.");
     }
-    
+
     @Override
     public double calcularTotalPagos(List<Pago> pagos) {
         double total = 0.0;
@@ -205,7 +204,7 @@ public class PagoServiceImpl implements IPagoService {
 
     @Override
     @Transactional
-    public void pagarMultiplesFacturas(List<Factura> facturas, double monto, FormaDePago formaDePago, String nota) {
+    public void pagarMultiplesFacturasCompra(List<Factura> facturas, double monto, FormaDePago formaDePago, String nota) {
         if (monto <= this.calcularTotalAdeudadoFacturas(facturas)) {
             List<Factura> facturasOrdenadas = facturaService.ordenarFacturasPorFechaAsc(facturas);
             for (Factura factura : facturasOrdenadas) {
