@@ -31,6 +31,7 @@ import sic.modelo.TipoDeComprobante;
 import sic.service.IClienteService;
 import sic.service.IEmpresaService;
 import sic.service.INotaService;
+import sic.service.IReciboService;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -39,14 +40,16 @@ public class NotaController {
     private final INotaService notaService;
     private final IClienteService clienteService;
     private final IEmpresaService empresaService;
+    private final IReciboService reciboService;
     private final int TAMANIO_PAGINA_DEFAULT = 50;
     
     @Autowired
     public NotaController(INotaService notaService, IClienteService clienteService,
-            IEmpresaService empresaService) {
+            IEmpresaService empresaService, IReciboService reciboService) {
         this.notaService = notaService;
         this.clienteService = clienteService;
         this.empresaService = empresaService;
+        this.reciboService = reciboService;
     }
     
     @GetMapping("/notas/{idNota}")
@@ -59,6 +62,12 @@ public class NotaController {
     @ResponseStatus(HttpStatus.OK)
     public FacturaVenta getFacturaNota(@PathVariable long idNota) {
         return notaService.getFacturaNota(idNota);
+    }
+    
+    @GetMapping("/notas/debito/recibo/{idRecibo}/existe")
+    @ResponseStatus(HttpStatus.OK)
+    public boolean existeNotaDebitoRecibo(@PathVariable long idRecibo) {
+        return notaService.existeNotaDebitoPorRecibo(reciboService.getById(idRecibo));
     }
     
     @GetMapping("/notas/cliente/{idCliente}/empresa/{idEmpresa}")

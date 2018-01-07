@@ -8,6 +8,7 @@ import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
 import sic.modelo.NotaDebito;
 import sic.modelo.Pago;
+import sic.modelo.Recibo;
 import sic.modelo.RenglonFactura;
 import sic.modelo.RenglonNotaCredito;
 import sic.modelo.RenglonNotaDebito;
@@ -30,6 +31,8 @@ public interface INotaService {
     FacturaVenta getFacturaNota(Long idNota);
     
     List<Pago> getPagosNota(Long idNota);
+    
+    boolean existeNotaDebitoPorRecibo(Recibo recibo);
     
     double getTotalPagado(Long idNota);
 

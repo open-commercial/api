@@ -128,6 +128,11 @@ public class NotaServiceImpl implements INotaService {
     }
     
     @Override
+    public boolean existeNotaDebitoPorRecibo(Recibo recibo) {
+        return notaDebitoRepository.existsByReciboAndEliminada(recibo, true);
+    }
+    
+    @Override
     public double getTotalPagado(Long idNota) {
         double pagado = 0;
         List<Pago> pagos = this.getPagosNota(idNota);
@@ -146,14 +151,14 @@ public class NotaServiceImpl implements INotaService {
     public List<RenglonFactura> getRenglonesFacturaModificadosParaNotaCredito(long idFactura) {
         HashMap<Long, Double> listaCantidadesProductosUnificados = new HashMap<>();
         this.getNotasPorFactura(idFactura).forEach(n -> {
-            for (RenglonNotaCredito rnc : ((NotaCredito) n).getRenglonesNotaCredito()) {
+            ((NotaCredito) n).getRenglonesNotaCredito().forEach((rnc) -> {
                 if (listaCantidadesProductosUnificados.containsKey(rnc.getIdProductoItem())) {
                     listaCantidadesProductosUnificados.put(rnc.getIdProductoItem(),
                             listaCantidadesProductosUnificados.get(rnc.getIdProductoItem()) + rnc.getCantidad());
                 } else {
                     listaCantidadesProductosUnificados.put(rnc.getIdProductoItem(), rnc.getCantidad());
                 }
-            }
+            });
         });
         List<RenglonFactura> renglonesFactura = facturaService.getRenglonesDeLaFactura(idFactura);
         if (!listaCantidadesProductosUnificados.isEmpty()) {

@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import sic.modelo.CuentaCorriente;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
-import sic.modelo.Pago;
 import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
 import sic.modelo.TipoDeOperacion;
