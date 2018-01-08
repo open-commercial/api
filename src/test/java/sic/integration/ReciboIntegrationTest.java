@@ -359,6 +359,7 @@ public class ReciboIntegrationTest {
         restTemplate.postForObject(apiPrefix + "/recibos?"
                 + "idUsuario=1&idEmpresa=1&idCliente=1&idFormaDePago=1", r, ReciboDTO.class);
         assertEquals(-1192.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
+        restTemplate.getForObject(apiPrefix + "/recibos/1/reporte", byte[].class); 
         r = new ReciboDTO();
         r.setMonto(2192.5);
         restTemplate.postForObject(apiPrefix + "/recibos?"
