@@ -1,7 +1,10 @@
 package sic.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -63,6 +66,17 @@ public class ReciboController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable long idRecibo) {
         reciboService.eliminar(idRecibo);
+    }
+    
+    @GetMapping("/recibos/{idRecibo}/reporte")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<byte[]> getReporteRecibo(@PathVariable long idRecibo) {        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);        
+        headers.add("content-disposition", "inline; filename=Recibo.pdf");
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+        byte[] reportePDF = reciboService.getReporteRecibo(reciboService.getById(idRecibo));
+        return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
     }
     
 }

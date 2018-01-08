@@ -37,4 +37,6 @@ public interface IReciboService {
     
     List<Recibo> getRecibosConSaldoSobrante(long idEmpresa, long idCliente);
     
+    byte[] getReporteRecibo(Recibo recibo);
+    
 }

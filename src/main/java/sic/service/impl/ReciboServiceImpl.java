@@ -1,9 +1,19 @@
 package sic.service.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +24,13 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Cliente;
+import sic.modelo.ConfiguracionDelSistema;
 import sic.modelo.Empresa;
 import sic.modelo.FacturaVenta;
 import sic.modelo.FormaDePago;
 import sic.modelo.NotaDebito;
 import sic.modelo.Pago;
+import static sic.modelo.QFactura.factura;
 import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
 import sic.modelo.TipoDeComprobante;
@@ -35,6 +47,7 @@ import sic.service.INotaService;
 import sic.service.IPagoService;
 import sic.service.IReciboService;
 import sic.service.IRenglonCuentaCorrienteService;
+import sic.service.ServiceException;
 
 @Service
 public class ReciboServiceImpl implements IReciboService {
@@ -44,7 +57,7 @@ public class ReciboServiceImpl implements IReciboService {
     private final IPagoService pagoService;
     private final ICuentaCorrienteService cuentaCorrienteService;
     private final IEmpresaService empresaService;
-    private final IConfiguracionDelSistemaService cds;
+    private final IConfiguracionDelSistemaService configuracionDelSistemaService;
     private final IRenglonCuentaCorrienteService renglonCuentaCorrienteService;
     private final INotaService notaService;
     private final IFormaDePagoService formaDePagoService;
@@ -60,7 +73,7 @@ public class ReciboServiceImpl implements IReciboService {
         this.pagoService = pagoService;
         this.cuentaCorrienteService = cuentaCorrienteService;
         this.empresaService = empresaService;
-        this.cds = cds;
+        this.configuracionDelSistemaService = cds;
         this.renglonCuentaCorrienteService = renglonCuentaCorrienteService;
         this.notaService = notaService;
         this.formaDePagoService = formaDePagoService;
@@ -79,8 +92,8 @@ public class ReciboServiceImpl implements IReciboService {
     @Override 
     @Transactional
     public Recibo guardar(Recibo recibo) {
-        recibo.setNumSerie(cds.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
-        recibo.setNumRecibo(this.getSiguienteNumeroRecibo(recibo.getEmpresa().getId_Empresa(), cds.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip()));
+        recibo.setNumSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
+        recibo.setNumRecibo(this.getSiguienteNumeroRecibo(recibo.getEmpresa().getId_Empresa(), configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip()));
         recibo.setFecha(new Date());
         double monto = recibo.getMonto();
         int i = 0;
@@ -168,7 +181,7 @@ public class ReciboServiceImpl implements IReciboService {
                 recibo.setFecha(fecha);
                 recibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(idFormaDePago));
                 recibo.setMonto(monto[i]);
-                recibo.setNumSerie(cds.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
+                recibo.setNumSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
                 recibo.setNumRecibo(this.getSiguienteNumeroRecibo(empresa.getId_Empresa(), recibo.getNumSerie()));
                 recibo.setConcepto(concepto);
                 recibo.setSaldoSobrante(0);
@@ -268,6 +281,35 @@ public class ReciboServiceImpl implements IReciboService {
     @Override
     public List<Recibo> getRecibosConSaldoSobrante(long idEmpresa, long idCliente) {
         return reciboRepository.getRecibosConSaldoSobrante(idEmpresa, idCliente);
+    }
+    
+    @Override
+    public byte[] getReporteRecibo(Recibo recibo) {
+        ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
+        InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Recibo.jasper");
+        Map params = new HashMap();
+        ConfiguracionDelSistema cds = this.configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa());
+        params.put("preImpresa", cds.isUsarFacturaVentaPreImpresa());
+        params.put("formasDePago", recibo.getFormaDePago().getNombre());
+        params.put("recibo", recibo);
+        params.put("nroSerie", recibo.getNumSerie());
+        params.put("nroFactura", recibo.getNumRecibo());
+        if (!recibo.getEmpresa().getLogo().isEmpty()) {
+            try {
+                params.put("logo", new ImageIcon(ImageIO.read(new URL(recibo.getEmpresa().getLogo()))).getImage());
+            } catch (IOException ex) {
+                LOGGER.error(ex.getMessage());
+                throw new ServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_empresa_404_logo"), ex);
+            }
+        }
+        try {
+            return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(isFileReport, params));
+        } catch (JRException ex) {
+            LOGGER.error(ex.getMessage());
+            throw new ServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_error_reporte"), ex);
+        }
     }
 
 }
