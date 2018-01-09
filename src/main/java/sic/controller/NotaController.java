@@ -76,6 +76,12 @@ public class NotaController {
         return notaService.getNotasPorClienteYEmpresa(idEmpresa, idCliente);
     }
     
+    @GetMapping("/notas/pagos/{idPago}")
+    @ResponseStatus(HttpStatus.OK)
+    public Nota getNotaDelPago(@PathVariable long idPago) {
+        return notaService.getNotaDelPago(idPago);
+    }
+    
     @GetMapping("/notas/busqueda/criteria") 
     @ResponseStatus(HttpStatus.OK)
     public Page<Nota> buscarNotasPorClienteYEmpresa(@RequestParam(value = "desde", required = false) Long desde,
@@ -215,45 +221,45 @@ public class NotaController {
     @GetMapping("/notas/credito/descuento-neto")
     @ResponseStatus(HttpStatus.OK)
     public double calcularDescuentoNetoCredito(@RequestParam double subTotal,
-                                         @RequestParam double descuentoPorcentaje) {
+                                               @RequestParam double descuentoPorcentaje) {
         return notaService.calcularDecuentoNetoCredito(subTotal, descuentoPorcentaje);
     }
     
     @GetMapping("/notas/credito/recargo-neto")
     @ResponseStatus(HttpStatus.OK)
     public double calcularRecargoNetoCredito(@RequestParam double subTotal,
-                                      @RequestParam double recargoPorcentaje) {
+                                             @RequestParam double recargoPorcentaje) {
         return notaService.calcularRecargoNetoCredito(subTotal, recargoPorcentaje);
     }
     
     @GetMapping("/notas/credito/iva-neto")
     @ResponseStatus(HttpStatus.OK)
     public double calcularIVANetoCredito(@RequestParam TipoDeComprobante tipoDeComprobante,
-                                  @RequestParam double[] cantidades,
-                                  @RequestParam double[] ivaPorcentajeRenglones,
-                                  @RequestParam double[] ivaNetoRenglones,
-                                  @RequestParam double ivaPorcentaje,
-                                  @RequestParam double descuentoPorcentaje, 
-                                  @RequestParam double recargoPorcentaje){
+                                         @RequestParam double[] cantidades,
+                                         @RequestParam double[] ivaPorcentajeRenglones,
+                                         @RequestParam double[] ivaNetoRenglones,
+                                         @RequestParam double ivaPorcentaje,
+                                         @RequestParam double descuentoPorcentaje, 
+                                         @RequestParam double recargoPorcentaje){
         return notaService.calcularIVANetoCredito(tipoDeComprobante, cantidades, ivaPorcentajeRenglones, ivaNetoRenglones, ivaPorcentaje, descuentoPorcentaje, recargoPorcentaje);
     }  
     
     @GetMapping("/notas/credito/sub-total-bruto")
     @ResponseStatus(HttpStatus.OK)
     public double calcularSubTotalBrutoCredito(TipoDeComprobante tipoDeComprobante, 
-                                        double subTotal, 
-                                        double recargoNeto, 
-                                        double descuentoNeto,
-                                        double iva105Neto,
-                                        double iva21Neto) {
+                                               double subTotal, 
+                                               double recargoNeto, 
+                                               double descuentoNeto,
+                                               double iva105Neto,
+                                               double iva21Neto) {
         return notaService.calcularSubTotalBrutoCredito(tipoDeComprobante, subTotal, recargoNeto, descuentoNeto, iva105Neto, iva21Neto);
     }
     
     @GetMapping("/notas/credito/total")
     @ResponseStatus(HttpStatus.OK)
     public double calcularTotalCredito(@RequestParam double subTotalBruto,                                
-                                @RequestParam double iva105Neto,
-                                @RequestParam double iva21Neto) {
+                                       @RequestParam double iva105Neto,
+                                       @RequestParam double iva21Neto) {
         return notaService.calcularTotalCredito(subTotalBruto, iva105Neto, iva21Neto);
     }
     

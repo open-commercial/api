@@ -121,6 +121,11 @@ public class NotaServiceImpl implements INotaService {
     public FacturaVenta getFacturaNota(Long idNota) {
         return this.getNotaPorId(idNota).getFacturaVenta();
     }
+        
+    @Override
+    public Nota getNotaDelPago(long idPago) {
+        return notaRepository.getNotaDelPago(idPago);
+    }
     
     @Override
     public List<Pago> getPagosNota(Long idNota) {

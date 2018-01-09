@@ -30,6 +30,8 @@ public interface INotaService {
     
     FacturaVenta getFacturaNota(Long idNota);
     
+    Nota getNotaDelPago(long idPago);
+    
     List<Pago> getPagosNota(Long idNota);
     
     boolean existeNotaDebitoPorRecibo(Recibo recibo);
@@ -80,6 +82,6 @@ public interface INotaService {
     
     double calcularTotalDebito(double subTotal_bruto, double iva21_neto, double montoNoGravado);
     
-    Nota actualizarNotaDebitoEstadoPago(NotaDebito notaDebito);
+    Nota actualizarNotaDebitoEstadoPago(NotaDebito notaDebito);   
     
 }

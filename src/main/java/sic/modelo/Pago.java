@@ -26,7 +26,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nroPago", "empresa"})
 @ToString
-@JsonIgnoreProperties({"factura", "empresa", "formaDePago", "recibo"})
+@JsonIgnoreProperties({"factura", "notaDebito","empresa", "formaDePago", "recibo"})
 public class Pago implements Serializable {
 
     @Id
