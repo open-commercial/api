@@ -51,4 +51,7 @@ public interface IPagoService {
     Pago guardar(Pago pago);
 
     void eliminar(long idPago);
+    
+    void eliminarPagoDeCompra(long idPago);
+    
 }

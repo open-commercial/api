@@ -98,12 +98,12 @@ public class FacturaController {
         if (indices != null) {
             return facturaService.guardar(facturaService.dividirFactura((FacturaVenta) fv, indices), idPedido, 
                     reciboService.construirRecibos(idsFormaDePago, empresa,
-                            fv.getCliente(), fv.getUsuario(), montos, fv.getFecha()));
+                            fv.getCliente(), fv.getUsuario(), montos, fv.getTotal(), fv.getFecha()));
         } else {
             List<Factura> facturas = new ArrayList<>();
             facturas.add(fv);
             return facturaService.guardar(facturas, idPedido, reciboService.construirRecibos(idsFormaDePago, empresa,
-                            fv.getCliente(), fv.getUsuario(), montos, fv.getFecha()));         
+                            fv.getCliente(), fv.getUsuario(), montos, fv.getTotal(), fv.getFecha()));         
         }
     }   
     

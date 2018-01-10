@@ -6,11 +6,11 @@
 	<property name="ireport.y" value="0"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
 	<parameter name="recibo" class="sic.modelo.Recibo"/>
-	<parameter name="nroSerie" class="java.lang.Long"/>
+	<parameter name="numSerie" class="java.lang.Long"/>
 	<parameter name="logo" class="java.awt.Image"/>
 	<parameter name="preImpresa" class="java.lang.Boolean"/>
 	<parameter name="formasDePago" class="java.lang.String"/>
-	<parameter name="nroRecibo" class="java.lang.Long"/>
+	<parameter name="numRecibo" class="java.lang.Long"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -25,7 +25,7 @@
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{nroSerie} == null ? "" : $P{nroSerie}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{numSerie} == null ? "" : $P{numSerie}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="360" y="30" width="99" height="15" uuid="77044937-fc7c-464e-9cb7-28123e5819dc">
@@ -164,7 +164,7 @@
 					<font size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single" lineSpacingSize="1.0" firstLineIndent="0" leftIndent="0" rightIndent="0" spacingBefore="0" spacingAfter="0" tabStopWidth="40"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{nroSerie} == null ? "": "Nº de Comprobante:"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{numSerie} == null ? "": "Nº de Comprobante:"]]></textFieldExpression>
 			</textField>
 			<textField pattern="#00000000">
 				<reportElement x="510" y="15" width="45" height="15" uuid="a3046cbb-4b9c-4ffb-9c57-c20771497933">
@@ -176,7 +176,7 @@
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{nroRecibo} == null ? "" : $P{nroRecibo}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{numRecibo} == null ? "" : $P{numRecibo}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="502" y="15" width="8" height="15" uuid="84f76759-6e59-496d-9cff-67ee0f5ad0c9">
@@ -187,7 +187,7 @@
 				<textElement textAlignment="Right" verticalAlignment="Justified">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{nroSerie} == null ? "" : "-"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{numSerie} == null ? "" : "-"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="176" width="50" height="15" uuid="c23ab30f-f1da-44d0-b751-12dab0ff3001">

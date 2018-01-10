@@ -162,8 +162,8 @@ public class PagoController {
     
     @DeleteMapping("/pagos/{idPago}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminar(@PathVariable long idPago) {
-        pagoService.eliminar(idPago);
+    public void eliminarPagoCompra(@PathVariable long idPago) {
+        pagoService.eliminarPagoDeCompra(idPago);
     }
     
     @PutMapping("/pagos/multiples-facturas-compras")

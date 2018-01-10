@@ -168,10 +168,18 @@ public class ReciboServiceImpl implements IReciboService {
     }
     
     @Override 
-    public List<Recibo> construirRecibos(long[] idsFormaDePago, Empresa empresa, Cliente cliente, Usuario usuario, double[] monto, Date fecha) { 
+    public List<Recibo> construirRecibos(long[] idsFormaDePago, Empresa empresa, Cliente cliente, Usuario usuario, double[] montos, double totalFactura, Date fecha) { 
         List<Recibo> recibos = new ArrayList<>();
         int i = 0;
-        if (idsFormaDePago != null) {
+        if (idsFormaDePago != null && montos != null && idsFormaDePago.length == montos.length) {
+            double totalMontos = 0.0;
+            for (double monto : montos) {
+                totalMontos += monto;
+            }
+            if (totalMontos > totalFactura || totalMontos < 0) {
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_pagos_superan_total_factura"));
+            }
             for (long idFormaDePago : idsFormaDePago) {
                 Recibo recibo = new Recibo();
                 recibo.setCliente(cliente);
@@ -180,7 +188,7 @@ public class ReciboServiceImpl implements IReciboService {
                 recibo.setFecha(fecha);
                 FormaDePago fp = formaDePagoService.getFormasDePagoPorId(idFormaDePago);
                 recibo.setFormaDePago(fp);
-                recibo.setMonto(monto[i]);
+                recibo.setMonto(montos[i]);
                 recibo.setNumSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
                 recibo.setNumRecibo(this.getSiguienteNumeroRecibo(empresa.getId_Empresa(), recibo.getNumSerie()));
                 recibo.setConcepto("Forma de Pago: " + fp.getNombre());

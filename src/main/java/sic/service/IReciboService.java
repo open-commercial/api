@@ -21,7 +21,7 @@ public interface IReciboService {
     
     Recibo actualizarSaldoSobrante(long idRecibo, double monto);
     
-    List<Recibo> construirRecibos(long[] formaDePago, Empresa empresa, Cliente cliente, Usuario usuario, double[] monto, Date fecha);
+    List<Recibo> construirRecibos(long[] formaDePago, Empresa empresa, Cliente cliente, Usuario usuario, double[] monto, double totalFactura, Date fecha);
     
     long getSiguienteNumeroRecibo(long idEmpresa, long serie);
     

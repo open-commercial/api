@@ -25,7 +25,6 @@ import sic.service.IFacturaService;
 import sic.service.IPagoService;
 import sic.service.BusinessServiceException;
 import sic.repository.PagoRepository;
-import sic.service.ICuentaCorrienteService;
 import sic.service.IEmpresaService;
 import sic.service.IFormaDePagoService;
 import sic.service.INotaService;
@@ -150,12 +149,20 @@ public class PagoServiceImpl implements IPagoService {
     @Transactional
     public void eliminar(long idPago) {
         Pago pago = this.getPagoPorId(idPago);
-        pago.getRecibo().setMonto(pago.getMonto());
         pago.setEliminado(true);
-        if (pago.getFactura() instanceof FacturaCompra) {
-            pagoRepository.save(pago);
-        }
+        facturaService.actualizarFacturaEstadoPago(pago.getFactura());
+        pagoRepository.save(pago);
         LOGGER.warn("El Pago " + pago + " se eliminó correctamente.");
+    }
+
+    @Override
+    public void eliminarPagoDeCompra(long idPago) {
+        if (facturaService.getFacturaDelPago(idPago) instanceof FacturaCompra) {
+            eliminar(idPago);
+        } else {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_pago_no_factura_compra"));
+        }
     }
 
     @Override
