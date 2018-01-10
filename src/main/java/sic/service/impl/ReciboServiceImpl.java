@@ -200,14 +200,15 @@ public class ReciboServiceImpl implements IReciboService {
                         || rcc.getTipo_comprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipo_comprobante() == TipoDeComprobante.FACTURA_X
                         || rcc.getTipo_comprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipo_comprobante() == TipoDeComprobante.PRESUPUESTO) {
                     FacturaVenta fv = (FacturaVenta) facturaService.getFacturaPorId(rcc.getIdMovimiento());
-                    if (fv.isPagada() == false) {
+                    double credito = notaService.calcularTotaCreditoPorFactura(fv);
+                    if (fv.isPagada() == false && fv.getTotal() > credito) {
                         fv.setPagos(this.pagoService.getPagosDeLaFactura(fv.getId_Factura()));
                         Pago nuevoPago = new Pago();
                         nuevoPago.setFormaDePago(formaDePago);
                         nuevoPago.setFactura(fv);
                         nuevoPago.setEmpresa(fv.getEmpresa());
                         nuevoPago.setNota(nota);
-                        double saldoAPagar = this.pagoService.getSaldoAPagarFactura(fv.getId_Factura());
+                        double saldoAPagar = this.pagoService.getSaldoAPagarFactura(fv.getId_Factura()) - credito;
                         if (saldoAPagar <= monto) {
                             monto = monto - saldoAPagar;
                             // Se utiliza round por un problema de presicion de la maquina ej: 828.65 - 614.0 = 214.64999...

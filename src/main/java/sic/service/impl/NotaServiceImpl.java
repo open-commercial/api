@@ -848,7 +848,13 @@ public class NotaServiceImpl implements INotaService {
     public double calcularTotalDebito(double subTotal_bruto, double iva21_neto, double montoNoGravado) {
         return subTotal_bruto + iva21_neto + montoNoGravado;
     }
-    
+
+    @Override
+    public double calcularTotaCreditoPorFactura(FacturaVenta facturaVenta) {
+        Double credito = notaCreditoRepository.totalNotasCreditoPorFactura(facturaVenta);
+        return (credito == null) ? 0.0 : credito;
+    }
+
     @Override
     @Transactional
     public Nota actualizarNotaDebitoEstadoPago(NotaDebito notaDebito) {
