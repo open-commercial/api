@@ -388,7 +388,8 @@ public class ReciboIntegrationTest {
         ReciboDTO reciboUno = restTemplate.getForObject(apiPrefix + "/recibos/1", ReciboDTO.class);
         assertEquals(0, reciboUno.getSaldoSobrante(), 0);
         ReciboDTO reciboDos = restTemplate.getForObject(apiPrefix + "/recibos/2", ReciboDTO.class);
-        assertEquals(0, reciboDos.getSaldoSobrante(), 0);        
+        assertEquals(0, reciboDos.getSaldoSobrante(), 0);  
+        restTemplate.delete(apiPrefix + "/recibos/1");
     }
 
 }

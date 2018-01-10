@@ -30,7 +30,6 @@ import sic.modelo.FacturaVenta;
 import sic.modelo.FormaDePago;
 import sic.modelo.NotaDebito;
 import sic.modelo.Pago;
-import static sic.modelo.QFactura.factura;
 import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
 import sic.modelo.TipoDeComprobante;
@@ -169,7 +168,7 @@ public class ReciboServiceImpl implements IReciboService {
     }
     
     @Override 
-    public List<Recibo> construirRecibos(String concepto, long[] idsFormaDePago, Empresa empresa, Cliente cliente, Usuario usuario, double[] monto, Date fecha) { 
+    public List<Recibo> construirRecibos(long[] idsFormaDePago, Empresa empresa, Cliente cliente, Usuario usuario, double[] monto, Date fecha) { 
         List<Recibo> recibos = new ArrayList<>();
         int i = 0;
         if (idsFormaDePago != null) {
@@ -179,11 +178,12 @@ public class ReciboServiceImpl implements IReciboService {
                 recibo.setUsuario(usuario);
                 recibo.setEmpresa(empresa);
                 recibo.setFecha(fecha);
-                recibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(idFormaDePago));
+                FormaDePago fp = formaDePagoService.getFormasDePagoPorId(idFormaDePago);
+                recibo.setFormaDePago(fp);
                 recibo.setMonto(monto[i]);
                 recibo.setNumSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
                 recibo.setNumRecibo(this.getSiguienteNumeroRecibo(empresa.getId_Empresa(), recibo.getNumSerie()));
-                recibo.setConcepto(concepto);
+                recibo.setConcepto("Forma de Pago: " + fp.getNombre());
                 recibo.setSaldoSobrante(0);
                 recibos.add(recibo);
                 i++;

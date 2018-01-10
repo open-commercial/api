@@ -97,12 +97,12 @@ public class FacturaController {
         fv.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
         if (indices != null) {
             return facturaService.guardar(facturaService.dividirFactura((FacturaVenta) fv, indices), idPedido, 
-                    reciboService.construirRecibos("Recibo cliente: " + fv.getRazonSocialCliente(), idsFormaDePago, empresa,
+                    reciboService.construirRecibos(idsFormaDePago, empresa,
                             fv.getCliente(), fv.getUsuario(), montos, fv.getFecha()));
         } else {
             List<Factura> facturas = new ArrayList<>();
             facturas.add(fv);
-            return facturaService.guardar(facturas, idPedido, reciboService.construirRecibos("Recibo cliente: " + fv.getRazonSocialCliente(), idsFormaDePago, empresa,
+            return facturaService.guardar(facturas, idPedido, reciboService.construirRecibos(idsFormaDePago, empresa,
                             fv.getCliente(), fv.getUsuario(), montos, fv.getFecha()));         
         }
     }   

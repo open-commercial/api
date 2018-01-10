@@ -20,5 +20,5 @@ public interface NotaDebitoRepository extends NotaRepository<NotaDebito> {
     NotaDebito findTopByEmpresaAndTipoComprobanteOrderByNroNotaDesc(Empresa empresa, TipoDeComprobante tipoComprobante);
     
     boolean existsByReciboAndEliminada(Recibo recibo, boolean eliminada);
-    
+
 }
