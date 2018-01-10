@@ -260,6 +260,7 @@ public class ReciboServiceImpl implements IReciboService {
         });
         Recibo r = reciboRepository.findById(idRecibo);
         r.setEliminado(true);
+        this.cuentaCorrienteService.asentarEnCuentaCorriente(r, TipoDeOperacion.ELIMINACION);
         reciboRepository.save(r);
         LOGGER.warn("El Recibo " + r + " se eliminó correctamente.");
     }
@@ -293,8 +294,8 @@ public class ReciboServiceImpl implements IReciboService {
         params.put("preImpresa", cds.isUsarFacturaVentaPreImpresa());
         params.put("formasDePago", recibo.getFormaDePago().getNombre());
         params.put("recibo", recibo);
-        params.put("nroSerie", recibo.getNumSerie());
-        params.put("nroFactura", recibo.getNumRecibo());
+        params.put("numSerie", recibo.getNumSerie());
+        params.put("numRecibo", recibo.getNumRecibo());
         if (!recibo.getEmpresa().getLogo().isEmpty()) {
             try {
                 params.put("logo", new ImageIcon(ImageIO.read(new URL(recibo.getEmpresa().getLogo()))).getImage());

@@ -2,6 +2,7 @@ package sic.service.impl;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -39,7 +40,6 @@ public class PagoServiceImpl implements IPagoService {
     private final IEmpresaService empresaService;
     private final IFormaDePagoService formaDePagoService;
     private final INotaService notaService;
-    private final ICuentaCorrienteService cuentaCorrienteService;
     private final IReciboService reciboService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
@@ -50,7 +50,6 @@ public class PagoServiceImpl implements IPagoService {
             IFormaDePagoService formaDePagoService,
             IFacturaService facturaService,
             INotaService notaService, 
-            ICuentaCorrienteService cuentaCorrienteService,
             IReciboService reciboService) {
 
         this.empresaService = empresaService;
@@ -58,7 +57,6 @@ public class PagoServiceImpl implements IPagoService {
         this.pagoRepository = pagoRepository;
         this.facturaService = facturaService;
         this.notaService = notaService;
-        this.cuentaCorrienteService = cuentaCorrienteService;
         this.reciboService = reciboService;
     }
 
@@ -205,6 +203,13 @@ public class PagoServiceImpl implements IPagoService {
     @Override
     @Transactional
     public void pagarMultiplesFacturasCompra(List<Factura> facturas, double monto, FormaDePago formaDePago, String nota) {
+        Collections.sort(facturas, (Factura f1, Factura f2) -> {
+            if (f1.getTipoComprobante() == f2.getTipoComprobante()) {
+                return f1.getFecha().compareTo(f2.getFecha());
+            } else {
+                return f2.getTipoComprobante().compareTo(f1.getTipoComprobante());
+            }
+        });
         if (monto <= this.calcularTotalAdeudadoFacturas(facturas)) {
             List<Factura> facturasOrdenadas = facturaService.ordenarFacturasPorFechaAsc(facturas);
             for (Factura factura : facturasOrdenadas) {
@@ -237,10 +242,6 @@ public class PagoServiceImpl implements IPagoService {
     @Override
     public void validarOperacion(Pago pago) {
         //Requeridos
-        if (pago.getRecibo() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_pago_sin_recibo"));
-        }
         if (pago.getMonto() <= 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_pago_mayorQueCero_monto"));

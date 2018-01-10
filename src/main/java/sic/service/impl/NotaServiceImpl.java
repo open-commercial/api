@@ -214,7 +214,7 @@ public class NotaServiceImpl implements INotaService {
 
     @Override
     public double getSaldoNotas(Date hasta, Long idCliente, Long IdEmpresa) {
-        Double totalCredito = notaCreditoRepository.totalNotasCredito(hasta, clienteService.getClientePorId(idCliente), empresaService.getEmpresaPorId(IdEmpresa));
+        Double totalCredito = notaCreditoRepository.getTotalNotasCredito(hasta, clienteService.getClientePorId(idCliente), empresaService.getEmpresaPorId(IdEmpresa));
         Double totalDebito = notaDebitoRepository.totalNotasDebito(hasta, clienteService.getClientePorId(idCliente), empresaService.getEmpresaPorId(IdEmpresa));
         totalCredito = (totalCredito == null ? 0 : totalCredito);
         totalDebito  = (totalDebito == null ? 0 : totalDebito);
@@ -851,7 +851,7 @@ public class NotaServiceImpl implements INotaService {
 
     @Override
     public double calcularTotaCreditoPorFactura(FacturaVenta facturaVenta) {
-        Double credito = notaCreditoRepository.totalNotasCreditoPorFactura(facturaVenta);
+        Double credito = notaCreditoRepository.getTotalNotasCreditoPorFactura(facturaVenta);
         return (credito == null) ? 0.0 : credito;
     }
 

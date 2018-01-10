@@ -317,7 +317,7 @@
 				<text><![CDATA[Inicio Actividades:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="200" y="0" width="75" height="30" uuid="86d701de-05ba-4846-9d64-c9fde55e038d">
+				<reportElement x="210" y="0" width="75" height="30" uuid="86d701de-05ba-4846-9d64-c9fde55e038d">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
