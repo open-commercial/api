@@ -145,7 +145,7 @@ public class PagoController {
                                                   @RequestParam long hasta) {
         Date fechaDesde = new Date(desde);
         Date fechaHasta = new Date(hasta);
-        return pagoService.getPagosEntreFechasYFormaDePago(idEmpresa, idFormaDePago, fechaDesde, fechaHasta);
+        return pagoService.getPagosCompraEntreFechasYFormaDePago(idEmpresa, idFormaDePago, fechaDesde, fechaHasta);
     }
     
     @PostMapping("/pagos/facturas-compra/{idFactura}")

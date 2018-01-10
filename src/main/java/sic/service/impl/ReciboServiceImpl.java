@@ -289,6 +289,11 @@ public class ReciboServiceImpl implements IReciboService {
     }
     
     @Override
+    public List<Recibo> getByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(Date desde, Date hasta, FormaDePago formaDePago, Empresa empresa) {
+        return reciboRepository.findAllByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(desde, hasta, formaDePago, empresa, false);
+    }
+    
+    @Override
     public List<Recibo> getRecibosConSaldoSobrante(long idEmpresa, long idCliente) {
         return reciboRepository.getRecibosConSaldoSobrante(idEmpresa, idCliente);
     }

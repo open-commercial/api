@@ -102,9 +102,8 @@ public class PagoServiceImpl implements IPagoService {
     }
 
     @Override
-    public List<Pago> getPagosEntreFechasYFormaDePago(long id_Empresa, long id_FormaDePago, Date desde, Date hasta) {
-        return pagoRepository.findByFechaBetweenAndEmpresaAndFormaDePagoAndEliminado(desde, hasta, 
-                empresaService.getEmpresaPorId(id_Empresa), formaDePagoService.getFormasDePagoPorId(id_FormaDePago), false);
+    public List<Pago> getPagosCompraEntreFechasYFormaDePago(long id_Empresa, long id_FormaDePago, Date desde, Date hasta) {
+        return pagoRepository.getPagosComprasPorClienteEntreFechas(id_Empresa, id_FormaDePago, desde, hasta);
     }
     
     @Override

@@ -24,7 +24,7 @@ public interface IPagoService {
     
     long getSiguienteNroPago(Long idEmpresa);
 
-    List<Pago> getPagosEntreFechasYFormaDePago(long id_Empresa, long id_FormaDePago, Date desde, Date hasta);
+    List<Pago> getPagosCompraEntreFechasYFormaDePago(long id_Empresa, long id_FormaDePago, Date desde, Date hasta);
     
     List<Pago> getPagosDeNotas(long idNota);
     

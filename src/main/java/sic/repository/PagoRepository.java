@@ -9,7 +9,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.Empresa;
 import sic.modelo.Factura;
-import sic.modelo.FormaDePago;
 import sic.modelo.Nota;
 import sic.modelo.Pago;
 import sic.modelo.Recibo;
@@ -21,10 +20,11 @@ public interface PagoRepository extends PagingAndSortingRepository<Pago, Long> {
     
     List<Pago> findByFacturaAndEliminado(Factura factura, boolean eliminado);
 
-    List<Pago> findByFechaBetweenAndEmpresaAndFormaDePagoAndEliminado(Date desde, Date hasta, Empresa empresa, FormaDePago formaDePago, boolean eliminado);
-
     @Query("SELECT p FROM FacturaVenta fv INNER JOIN fv.pagos p WHERE fv.cliente.id_Cliente = :idCliente AND p.eliminado = false AND p.fecha BETWEEN :desde AND :hasta")
     Page<Pago> getPagosPorClienteEntreFechas(@Param("idCliente") long idCliente, @Param("desde") Date desde, @Param("hasta") Date hasta, Pageable page);
+    
+    @Query("SELECT p FROM FacturaCompra fp INNER JOIN fp.pagos p WHERE p.formaDePago.id_FormaDePago = :idFormaDePago AND p.empresa.id_Empresa = :idEmpresa AND p.eliminado = false AND p.fecha BETWEEN :desde AND :hasta")
+    List<Pago> getPagosComprasPorClienteEntreFechas(@Param("idEmpresa") long idEmpresa, @Param("idFormaDePago") long idFormaDePago, @Param("desde") Date desde, @Param("hasta") Date hasta);
     
     Pago findTopByEmpresaOrderByNroPagoDesc(Empresa empresa);
     

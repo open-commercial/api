@@ -1,5 +1,7 @@
 package sic.controller;
 
+import java.util.Date;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -66,6 +68,17 @@ public class ReciboController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable long idRecibo) {
         reciboService.eliminar(idRecibo);
+    }
+    
+    @GetMapping("/recibos/busqueda")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Recibo> getPagosPorCajaYFormaDePago(@RequestParam long idEmpresa,
+                                                    @RequestParam long idFormaDePago,
+                                                    @RequestParam long desde,
+                                                    @RequestParam long hasta) {
+        Date fechaDesde = new Date(desde);
+        Date fechaHasta = new Date(hasta);
+        return reciboService.getByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(fechaDesde, fechaHasta, formaDePagoService.getFormasDePagoPorId(idFormaDePago), empresaService.getEmpresaPorId(idEmpresa));
     }
     
     @GetMapping("/recibos/{idRecibo}/reporte")

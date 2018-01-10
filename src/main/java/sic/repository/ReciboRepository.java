@@ -9,6 +9,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.Cliente;
 import sic.modelo.Empresa;
+import sic.modelo.FormaDePago;
 import sic.modelo.Recibo;
 import sic.modelo.Usuario;
 
@@ -27,6 +28,8 @@ public interface ReciboRepository extends PagingAndSortingRepository<Recibo, Lon
     List<Recibo> findAllByUsuarioAndEmpresaAndEliminado(Usuario usuario, Empresa empresa, boolean eliminado);
     
     Page<Recibo> findAllByFechaBetweenAndClienteAndEmpresaAndEliminado(Date desde, Date hasta, Cliente cliente, Empresa empresa, boolean eliminado, Pageable page);
+    
+    List<Recibo> findAllByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(Date desde, Date hasta, FormaDePago formaDePago, Empresa empresa, boolean eliminado);
     
     @Query("SELECT r FROM Recibo r "
             + "WHERE r.empresa.id_Empresa= :idEmpresa AND r.cliente.id_Cliente= :idCliente AND r.eliminado = false AND r.saldoSobrante > 0 "
