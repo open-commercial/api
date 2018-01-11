@@ -300,11 +300,11 @@ public class ReciboServiceImpl implements IReciboService {
     
     @Override
     public byte[] getReporteRecibo(Recibo recibo) {
+        recibo.getCliente().setSaldoCuentaCorriente(cuentaCorrienteService.getCuentaCorrientePorCliente(recibo.getCliente().getId_Cliente()).getSaldo());
         ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
         InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Recibo.jasper");
         Map params = new HashMap();
         ConfiguracionDelSistema cds = this.configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa());
-        params.put("preImpresa", cds.isUsarFacturaVentaPreImpresa());
         params.put("formasDePago", recibo.getFormaDePago().getNombre());
         params.put("recibo", recibo);
         params.put("numSerie", recibo.getNumSerie());

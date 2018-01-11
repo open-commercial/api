@@ -486,41 +486,43 @@ public class NotaServiceImpl implements INotaService {
             notaDebito = notaDebitoRepository.save(notaDebito);
             cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito, TipoDeOperacion.ALTA);
             List<Recibo> recibos = reciboService.getRecibosConSaldoSobrante(idEmpresa, idCliente);
-            double saldoFactura = pagoService.getSaldoAPagarNotaDebito(notaDebito.getIdNota());
+            double saldoNotaDebito = pagoService.getSaldoAPagarNotaDebito(notaDebito.getIdNota());
             List<Pago> pagos = new ArrayList<>();
             for (Recibo r : recibos) {
-                while (r.getSaldoSobrante() > 0) {
-                    if (saldoFactura < r.getSaldoSobrante()) {
-                        Pago nuevoPago = new Pago();
-                        nuevoPago.setMonto(saldoFactura);
-                        nuevoPago.setRecibo(r);
-                        nuevoPago.setNotaDebito(notaDebito);
-                        nuevoPago.setEmpresa(notaDebito.getEmpresa());
-                        nuevoPago.setFecha(new Date());
-                        nuevoPago.setFormaDePago(r.getFormaDePago());
-                        nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
-                        pagoService.guardar(nuevoPago);
-                        pagos.add(nuevoPago);
-                        reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoFactura));
-                        actualizarNotaDebitoEstadoPago(notaDebito);
-                        if (notaDebito.isPagada()) {
-                            break;
-                        }
-                    } else if (saldoFactura >= r.getSaldoSobrante()) {
-                        Pago nuevoPago = new Pago();
-                        nuevoPago.setMonto(r.getSaldoSobrante());
-                        nuevoPago.setRecibo(r);
-                        nuevoPago.setNotaDebito(notaDebito);
-                        nuevoPago.setEmpresa(notaDebito.getEmpresa());
-                        nuevoPago.setFecha(new Date());
-                        nuevoPago.setFormaDePago(r.getFormaDePago());
-                        nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
-                        pagoService.guardar(nuevoPago);
-                        pagos.add(nuevoPago);
-                        reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);
-                        actualizarNotaDebitoEstadoPago(notaDebito);
-                        if (notaDebito.isPagada()) {
-                            break;
+                if (r.equals(notaDebito.getRecibo()) == false) {
+                    while (r.getSaldoSobrante() > 0) {
+                        if (saldoNotaDebito < r.getSaldoSobrante()) {
+                            Pago nuevoPago = new Pago();
+                            nuevoPago.setMonto(saldoNotaDebito);
+                            nuevoPago.setRecibo(r);
+                            nuevoPago.setNotaDebito(notaDebito);
+                            nuevoPago.setEmpresa(notaDebito.getEmpresa());
+                            nuevoPago.setFecha(new Date());
+                            nuevoPago.setFormaDePago(r.getFormaDePago());
+                            nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
+                            pagoService.guardar(nuevoPago);
+                            pagos.add(nuevoPago);
+                            reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoNotaDebito));
+                            actualizarNotaDebitoEstadoPago(notaDebito);
+                            if (notaDebito.isPagada()) {
+                                break;
+                            }
+                        } else if (saldoNotaDebito >= r.getSaldoSobrante()) {
+                            Pago nuevoPago = new Pago();
+                            nuevoPago.setMonto(r.getSaldoSobrante());
+                            nuevoPago.setRecibo(r);
+                            nuevoPago.setNotaDebito(notaDebito);
+                            nuevoPago.setEmpresa(notaDebito.getEmpresa());
+                            nuevoPago.setFecha(new Date());
+                            nuevoPago.setFormaDePago(r.getFormaDePago());
+                            nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
+                            pagoService.guardar(nuevoPago);
+                            pagos.add(nuevoPago);
+                            reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);
+                            actualizarNotaDebitoEstadoPago(notaDebito);
+                            if (notaDebito.isPagada()) {
+                                break;
+                            }
                         }
                     }
                 }
