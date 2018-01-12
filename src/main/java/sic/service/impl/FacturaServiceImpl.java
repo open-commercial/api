@@ -417,10 +417,6 @@ public class FacturaServiceImpl implements IFacturaService {
                                 pagoService.guardar(nuevoPago);
                                 pagos.add(nuevoPago);
                                 reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoFactura));
-                                this.actualizarFacturaEstadoPago(facturaGuardada);
-                                if (facturaGuardada.isPagada()) {
-                                    break;
-                                }
                             } else if (saldoFactura >= r.getSaldoSobrante()) {
                                 Pago nuevoPago = new Pago();
                                 nuevoPago.setMonto(r.getSaldoSobrante());
@@ -433,11 +429,14 @@ public class FacturaServiceImpl implements IFacturaService {
                                 pagoService.guardar(nuevoPago);
                                 pagos.add(nuevoPago);
                                 reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);
-                                this.actualizarFacturaEstadoPago(facturaGuardada);
-                                if (facturaGuardada.isPagada()) {
-                                    break;
-                                }
                             }
+                            saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
+                            if (facturaGuardada.isPagada()) {
+                                break;
+                            }
+                        }
+                        if (facturaGuardada.isPagada()) {
+                            break;
                         }
                     }
                     f.setPagos(pagos);
