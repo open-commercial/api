@@ -430,10 +430,10 @@ public class FacturaServiceImpl implements IFacturaService {
                                 pagos.add(nuevoPago);
                                 reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);
                             }
-                            saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
                             if (facturaGuardada.isPagada()) {
                                 break;
                             }
+                            saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
                         }
                         if (facturaGuardada.isPagada()) {
                             break;

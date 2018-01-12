@@ -504,9 +504,6 @@ public class NotaServiceImpl implements INotaService {
                             pagos.add(nuevoPago);
                             reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoNotaDebito));
                             actualizarNotaDebitoEstadoPago(notaDebito);
-                            if (notaDebito.isPagada()) {
-                                break;
-                            }
                         } else if (saldoNotaDebito >= r.getSaldoSobrante()) {
                             Pago nuevoPago = new Pago();
                             nuevoPago.setMonto(r.getSaldoSobrante());
@@ -520,11 +517,15 @@ public class NotaServiceImpl implements INotaService {
                             pagos.add(nuevoPago);
                             reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);
                             actualizarNotaDebitoEstadoPago(notaDebito);
-                            if (notaDebito.isPagada()) {
-                                break;
-                            }
                         }
+                        if (notaDebito.isPagada()) {
+                            break;
+                        }
+                        saldoNotaDebito = pagoService.getSaldoAPagarNotaDebito(notaDebito.getIdNota());
                     }
+                }
+                if (notaDebito.isPagada()) {
+                    break;
                 }
             }
             notaDebito.setPagos(pagos);

@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.modelo.AjusteCuentaCorriente;
 import sic.modelo.CuentaCorriente;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
@@ -27,7 +28,6 @@ import sic.service.IClienteService;
 import sic.service.ICuentaCorrienteService;
 import sic.service.IFacturaService;
 import sic.service.INotaService;
-import sic.service.IPagoService;
 import sic.service.IRenglonCuentaCorrienteService;
 
 @Service
@@ -38,20 +38,18 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     private final IRenglonCuentaCorrienteService renglonCuentaCorrienteService;
     private final IFacturaService facturaService;
     private final INotaService notaService;
-    private final IPagoService pagoService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
     @Lazy
     public CuentaCorrienteServiceImpl(CuentaCorrienteRepository cuentaCorrienteRepository, IClienteService clienteService,
                 IRenglonCuentaCorrienteService renglonCuentaCorrienteService, IFacturaService facturaService,
-                INotaService notaService, IPagoService pagoService) {
+                INotaService notaService) {
                 this.cuentaCorrienteRepository = cuentaCorrienteRepository;
                 this.clienteService = clienteService;
                 this.renglonCuentaCorrienteService = renglonCuentaCorrienteService;
                 this.facturaService = facturaService;
                 this.notaService = notaService;
-                this.pagoService = pagoService;
     }
 
     @Override
@@ -195,7 +193,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setNumero(n.getNroNota());
             if (n instanceof NotaCredito) {
                 rcc.setMonto(n.getTotal());
-                rcc.setDescripcion(n.getMotivo()); // Descripción de los productos
+                rcc.setDescripcion(n.getMotivo()); 
             }
             if (n instanceof NotaDebito) {
                 rcc.setMonto(-n.getTotal());
@@ -216,6 +214,32 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         }
         if (operacion == TipoDeOperacion.ELIMINACION) {
             RenglonCuentaCorriente rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeNota(n, false);
+            rcc.setEliminado(true);
+            LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
+        }
+    }
+    
+    @Override
+    @Transactional
+    public void asentarEnCuentaCorriente(AjusteCuentaCorriente ajusteCC, TipoDeOperacion operacion) {
+        if (operacion == TipoDeOperacion.ALTA) {
+            RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
+            rcc.setTipo_comprobante(ajusteCC.getTipoComprobante());
+            rcc.setSerie(ajusteCC.getNumSerie());
+            rcc.setNumero(ajusteCC.getNumAjuste());
+            rcc.setMonto(-((NotaDebito) ajusteCC.getNotaDebito()).getRecibo().getSaldoSobrante());
+            rcc.setDescripcion(ajusteCC.getConcepto()); 
+            rcc.setAjusteCuentaCorriente(ajusteCC); 
+            rcc.setFecha(ajusteCC.getFecha());
+            rcc.setIdMovimiento(ajusteCC.getIdAjusteCuentaCorriente());
+            CuentaCorriente cc = this.getCuentaCorrientePorCliente(ajusteCC.getCliente().getId_Cliente());
+            cc.getRenglones().add(rcc);
+            rcc.setCuentaCorriente(cc);
+            this.renglonCuentaCorrienteService.guardar(rcc);
+            LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
+        }
+        if (operacion == TipoDeOperacion.ELIMINACION) {
+            RenglonCuentaCorriente rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeAjusteCuentaCorriente(ajusteCC, false);
             rcc.setEliminado(true);
             LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
         }
