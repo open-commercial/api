@@ -149,7 +149,12 @@ public class PagoServiceImpl implements IPagoService {
     public void eliminar(long idPago) {
         Pago pago = this.getPagoPorId(idPago);
         pago.setEliminado(true);
-        facturaService.actualizarFacturaEstadoPago(pago.getFactura());
+        if (pago.getFactura() != null) {
+            facturaService.actualizarFacturaEstadoPago(pago.getFactura());
+        }
+        if (pago.getNotaDebito() != null) {
+            notaService.actualizarNotaDebitoEstadoPago((NotaDebito) pago.getNotaDebito());
+        }
         pagoRepository.save(pago);
         LOGGER.warn("El Pago " + pago + " se eliminó correctamente.");
     }
