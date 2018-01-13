@@ -26,7 +26,6 @@ import sic.service.IPagoService;
 import sic.service.BusinessServiceException;
 import sic.repository.PagoRepository;
 import sic.service.IEmpresaService;
-import sic.service.IFormaDePagoService;
 import sic.service.INotaService;
 import sic.service.IReciboService;
 import sic.util.Utilidades;
@@ -36,8 +35,7 @@ public class PagoServiceImpl implements IPagoService {
 
     private final PagoRepository pagoRepository;
     private final IFacturaService facturaService;
-    private final IEmpresaService empresaService;
-    private final IFormaDePagoService formaDePagoService;
+    private final IEmpresaService empresaService;    
     private final INotaService notaService;
     private final IReciboService reciboService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
@@ -45,14 +43,11 @@ public class PagoServiceImpl implements IPagoService {
     @Lazy
     @Autowired
     public PagoServiceImpl(PagoRepository pagoRepository,
-            IEmpresaService empresaService,
-            IFormaDePagoService formaDePagoService,
+            IEmpresaService empresaService,            
             IFacturaService facturaService,
             INotaService notaService, 
             IReciboService reciboService) {
-
-        this.empresaService = empresaService;
-        this.formaDePagoService = formaDePagoService;
+        this.empresaService = empresaService;        
         this.pagoRepository = pagoRepository;
         this.facturaService = facturaService;
         this.notaService = notaService;
