@@ -6,10 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import sic.modelo.AjusteCuentaCorriente;
 import sic.modelo.CuentaCorriente;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
-import sic.modelo.Pago;
 import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
 import sic.repository.RenglonCuentaCorrienteRepository;
@@ -43,6 +43,11 @@ public class RenglonCuentaCorrienteServiceImpl implements IRenglonCuentaCorrient
     @Override
     public RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(Recibo r, boolean eliminado) {
         return renglonCuentaCorrienteRepository.findByReciboAndEliminado(r, eliminado);
+    }
+    
+    @Override
+    public RenglonCuentaCorriente getRenglonCuentaCorrienteDeAjusteCuentaCorriente(AjusteCuentaCorriente ajusteCC, boolean eliminado) {
+        return renglonCuentaCorrienteRepository.findByAjusteCuentaCorrienteAndEliminado(ajusteCC, eliminado);
     }
 
     @Override

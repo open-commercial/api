@@ -7,6 +7,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import sic.modelo.AjusteCuentaCorriente;
 import sic.modelo.CuentaCorriente;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
@@ -20,6 +21,8 @@ public interface RenglonCuentaCorrienteRepository extends PagingAndSortingReposi
     RenglonCuentaCorriente findByNotaAndEliminado(Nota n, boolean eliminado);
     
     RenglonCuentaCorriente findByReciboAndEliminado(Recibo r, boolean eliminado);
+    
+    RenglonCuentaCorriente findByAjusteCuentaCorrienteAndEliminado(AjusteCuentaCorriente ajusteCC, boolean eliminado);
 
     Page<RenglonCuentaCorriente> findAllByCuentaCorrienteAndEliminado(CuentaCorriente cuentaCorriente, boolean eliminado, Pageable page);
     
