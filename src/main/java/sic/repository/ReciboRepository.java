@@ -17,6 +17,9 @@ public interface ReciboRepository extends PagingAndSortingRepository<Recibo, Lon
     
     @Query("SELECT r FROM Recibo r WHERE r.idRecibo= :idRecibo AND r.eliminado = false")
     Recibo findById(@Param("idRecibo") long idRecibo);
+
+    @Query("SELECT r FROM Pago p INNER JOIN p.recibo r WHERE p.id_Pago = :idPago AND r.eliminado = false")
+    Recibo getReciboDelPago(@Param("idPago") long idPago);
     
     @Query("SELECT r.monto FROM Recibo r WHERE r.idRecibo= :idRecibo AND r.eliminado = false")
     Double getMontoById(@Param("idRecibo") long idRecibo);

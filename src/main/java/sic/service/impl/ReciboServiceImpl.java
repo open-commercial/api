@@ -24,7 +24,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Cliente;
-import sic.modelo.ConfiguracionDelSistema;
 import sic.modelo.Empresa;
 import sic.modelo.FacturaVenta;
 import sic.modelo.FormaDePago;
@@ -83,6 +82,11 @@ public class ReciboServiceImpl implements IReciboService {
         return reciboRepository.findById(idRecibo);
     }
 
+    @Override
+    public Recibo getReciboDelPago(long idPago) {
+        return reciboRepository.getReciboDelPago(idPago);
+    }
+    
     @Override
     public Double getMontoById(long idRecibo) {
         return reciboRepository.getMontoById(idRecibo);
@@ -322,5 +326,5 @@ public class ReciboServiceImpl implements IReciboService {
                     .getString("mensaje_error_reporte"), ex);
         }
     }
-
+  
 }

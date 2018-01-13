@@ -15,6 +15,8 @@ public interface IReciboService {
     
     Recibo getById(long idRecibo);
     
+    Recibo getReciboDelPago(long idPago);
+    
     Double getMontoById(long idRecibo);
     
     Recibo guardar(Recibo recibo);
@@ -39,6 +41,6 @@ public interface IReciboService {
     
     List<Recibo> getRecibosConSaldoSobrante(long idEmpresa, long idCliente);
     
-    byte[] getReporteRecibo(Recibo recibo);
+    byte[] getReporteRecibo(Recibo recibo);    
     
 }
