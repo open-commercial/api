@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.modelo.AjusteCuentaCorriente;
 import sic.modelo.BusquedaNotaCriteria;
 import sic.modelo.Cliente;
 import sic.modelo.ComprobanteAFIP;
@@ -51,6 +52,7 @@ import sic.repository.NotaCreditoRepository;
 import sic.repository.NotaDebitoRepository;
 import sic.repository.NotaRepository;
 import sic.service.IAfipService;
+import sic.service.IAjusteCuentaCorrienteService;
 import sic.service.IConfiguracionDelSistemaService;
 import sic.service.ICuentaCorrienteService;
 import sic.service.IPagoService;
@@ -75,6 +77,7 @@ public class NotaServiceImpl implements INotaService {
     private final IProductoService productoService;
     private final ICuentaCorrienteService cuentaCorrienteService;
     private final IReciboService reciboService;
+    private final IAjusteCuentaCorrienteService ajusteCuentaCorrienteService;
     private final IConfiguracionDelSistemaService configuracionDelSistemaService;
     private final IAfipService afipService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
@@ -85,7 +88,8 @@ public class NotaServiceImpl implements INotaService {
             NotaDebitoRepository notaDeDebitoRespository, IFacturaService facturaService,
             IClienteService clienteService, IUsuarioService usuarioService, IProductoService productoService,
             IEmpresaService empresaService, IPagoService pagoService, ICuentaCorrienteService cuentaCorrienteService,
-            IReciboService reciboService, IConfiguracionDelSistemaService cds, IAfipService afipService) {
+            IReciboService reciboService, IConfiguracionDelSistemaService cds, IAfipService afipService,
+            IAjusteCuentaCorrienteService ajusteCuentaCorrienteService) {
         this.notaRepository = notaRepository;
         this.notaCreditoRepository = notaDeCreditoRepository;
         this.notaDebitoRepository = notaDeDebitoRespository;
@@ -97,6 +101,7 @@ public class NotaServiceImpl implements INotaService {
         this.productoService = productoService;
         this.cuentaCorrienteService = cuentaCorrienteService;
         this.reciboService = reciboService;
+        this.ajusteCuentaCorrienteService = ajusteCuentaCorrienteService;
         this.configuracionDelSistemaService = cds;
         this.afipService = afipService;
     }
@@ -134,7 +139,7 @@ public class NotaServiceImpl implements INotaService {
     
     @Override
     public boolean existeNotaDebitoPorRecibo(Recibo recibo) {
-        return notaDebitoRepository.existsByReciboAndEliminada(recibo, true);
+        return notaDebitoRepository.existsByReciboAndEliminada(recibo, false);
     }
     
     @Override
@@ -475,63 +480,89 @@ public class NotaServiceImpl implements INotaService {
             LOGGER.warn("La Nota " + notaCredito + " se guardó correctamente.");
             return notaCredito;
         } else {
-            NotaDebito notaDebito = (NotaDebito) nota;
-            if (idRecibo != null) {
-                notaDebito.setRecibo(reciboService.getById(idRecibo));
-                notaDebito.setTipoComprobante(
-                        this.getTipoDeNotaDebito(this.facturaService.getTipoFacturaVenta(notaDebito.getEmpresa(), notaDebito.getCliente())[0]));
-            }
-            notaDebito.setNroNota(this.getSiguienteNumeroNotaDebito(idEmpresa, nota.getTipoComprobante()));
-            this.validarCalculosDebito(notaDebito);
-            notaDebito = notaDebitoRepository.save(notaDebito);
-            cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito, TipoDeOperacion.ALTA);
-            List<Recibo> recibos = reciboService.getRecibosConSaldoSobrante(idEmpresa, idCliente);
-            double saldoNotaDebito = pagoService.getSaldoAPagarNotaDebito(notaDebito.getIdNota());
-            List<Pago> pagos = new ArrayList<>();
-            for (Recibo r : recibos) {
-                if (r.equals(notaDebito.getRecibo()) == false) {
-                    while (r.getSaldoSobrante() > 0) {
-                        if (saldoNotaDebito < r.getSaldoSobrante()) {
-                            Pago nuevoPago = new Pago();
-                            nuevoPago.setMonto(saldoNotaDebito);
-                            nuevoPago.setRecibo(r);
-                            nuevoPago.setNotaDebito(notaDebito);
-                            nuevoPago.setEmpresa(notaDebito.getEmpresa());
-                            nuevoPago.setFecha(new Date());
-                            nuevoPago.setFormaDePago(r.getFormaDePago());
-                            nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
-                            pagoService.guardar(nuevoPago);
-                            pagos.add(nuevoPago);
-                            reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoNotaDebito));
-                            actualizarNotaDebitoEstadoPago(notaDebito);
-                        } else if (saldoNotaDebito >= r.getSaldoSobrante()) {
-                            Pago nuevoPago = new Pago();
-                            nuevoPago.setMonto(r.getSaldoSobrante());
-                            nuevoPago.setRecibo(r);
-                            nuevoPago.setNotaDebito(notaDebito);
-                            nuevoPago.setEmpresa(notaDebito.getEmpresa());
-                            nuevoPago.setFecha(new Date());
-                            nuevoPago.setFormaDePago(r.getFormaDePago());
-                            nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
-                            pagoService.guardar(nuevoPago);
-                            pagos.add(nuevoPago);
-                            reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);
-                            actualizarNotaDebitoEstadoPago(notaDebito);
-                        }
-                        if (notaDebito.isPagada()) {
-                            break;
-                        }
-                        saldoNotaDebito = pagoService.getSaldoAPagarNotaDebito(notaDebito.getIdNota());
-                    }
-                }
-                if (notaDebito.isPagada()) {
-                    break;
-                }
-            }
-            notaDebito.setPagos(pagos);
-            LOGGER.warn("La Nota " + notaDebito + " se guardó correctamente.");
-            return notaDebito;
+            return this.guardarNotaDebito((NotaDebito) nota, idRecibo, idEmpresa, idCliente);
         }
+    }
+
+    private NotaDebito guardarNotaDebito(NotaDebito notaDebito, long idRecibo, long idEmpresa, long idCliente) {
+        notaDebito.setRecibo(reciboService.getById(idRecibo));
+        notaDebito.setTipoComprobante(
+        this.getTipoDeNotaDebito(this.facturaService.getTipoFacturaVenta(notaDebito.getEmpresa(), notaDebito.getCliente())[0]));
+        notaDebito.setNroNota(this.getSiguienteNumeroNotaDebito(idEmpresa, notaDebito.getTipoComprobante()));
+        this.validarCalculosDebito(notaDebito);
+        notaDebito = notaDebitoRepository.save(notaDebito);
+        cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito, TipoDeOperacion.ALTA);
+        if (notaDebito.getRecibo().getSaldoSobrante() > 0) {
+            this.crearYGuardarAjusteCuentaCorriente(notaDebito);
+        }
+        List<Recibo> recibos = reciboService.getRecibosConSaldoSobrante(idEmpresa, idCliente);
+        double saldoNotaDebito = pagoService.getSaldoAPagarNotaDebito(notaDebito.getIdNota());
+        List<Pago> pagos = new ArrayList<>();
+        for (Recibo r : recibos) {
+            if (r.equals(notaDebito.getRecibo()) == false) {
+                while (r.getSaldoSobrante() > 0) {
+                    if (saldoNotaDebito < r.getSaldoSobrante()) {
+                        Pago nuevoPago = new Pago();
+                        nuevoPago.setMonto(saldoNotaDebito);
+                        nuevoPago.setRecibo(r);
+                        nuevoPago.setNotaDebito(notaDebito);
+                        nuevoPago.setEmpresa(notaDebito.getEmpresa());
+                        nuevoPago.setFecha(new Date());
+                        nuevoPago.setFormaDePago(r.getFormaDePago());
+                        nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
+                        pagoService.guardar(nuevoPago);
+                        pagos.add(nuevoPago);
+                        reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoNotaDebito));
+                        actualizarNotaDebitoEstadoPago(notaDebito);
+                    } else if (saldoNotaDebito >= r.getSaldoSobrante()) {
+                        Pago nuevoPago = new Pago();
+                        nuevoPago.setMonto(r.getSaldoSobrante());
+                        nuevoPago.setRecibo(r);
+                        nuevoPago.setNotaDebito(notaDebito);
+                        nuevoPago.setEmpresa(notaDebito.getEmpresa());
+                        nuevoPago.setFecha(new Date());
+                        nuevoPago.setFormaDePago(r.getFormaDePago());
+                        nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
+                        pagoService.guardar(nuevoPago);
+                        pagos.add(nuevoPago);
+                        reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);
+                        actualizarNotaDebitoEstadoPago(notaDebito);
+                    }
+                    if (notaDebito.isPagada()) {
+                        break;
+                    }
+                    saldoNotaDebito = pagoService.getSaldoAPagarNotaDebito(notaDebito.getIdNota());
+                }
+            }
+            if (notaDebito.isPagada()) {
+                break;
+            }
+        }
+        notaDebito.setPagos(pagos);
+        LOGGER.warn("La Nota " + notaDebito + " se guardó correctamente.");
+        return notaDebito;
+    }
+
+    private void crearYGuardarAjusteCuentaCorriente(NotaDebito notaDebito) {
+        AjusteCuentaCorriente ajusteCC = new AjusteCuentaCorriente();
+        ajusteCC.setCliente(notaDebito.getCliente());
+        ajusteCC.setConcepto("Ajuste Nota Debito "
+                + ((notaDebito.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_A)) ? "\"A\""
+                : (notaDebito.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_B)) ? "\"B\""
+                : (notaDebito.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO)) ? "\"PRESUPUESTO\""
+                : (notaDebito.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_X)) ? "\"X\""
+                : (notaDebito.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_Y)) ? "\"Y\"" : "")
+                + " " + notaDebito.getSerie() + " - " + notaDebito.getNroNota());
+        ajusteCC.setEmpresa(notaDebito.getEmpresa());
+        ajusteCC.setFecha(notaDebito.getFecha());
+        ajusteCC.setMonto(-notaDebito.getRecibo().getSaldoSobrante());
+        ajusteCC.setNotaDebito(notaDebito);
+        ajusteCC.setNumSerie(notaDebito.getSerie());
+        ajusteCC.setNumAjuste(ajusteCuentaCorrienteService.getSiguienteNumeroAjuste(notaDebito.getEmpresa().getId_Empresa(), ajusteCC.getNumSerie()));
+        ajusteCC.setTipoComprobante(TipoDeComprobante.AJUSTE);
+        ajusteCC.setUsuario(notaDebito.getUsuario());
+        ajusteCuentaCorrienteService.guardar(ajusteCC);
+        cuentaCorrienteService.asentarEnCuentaCorriente(ajusteCC, TipoDeOperacion.ALTA);
     }
 
     @Override
@@ -711,6 +742,10 @@ public class NotaServiceImpl implements INotaService {
                     if (nc.isModificaStock()) {
                         this.actualizarStock(nc.getRenglonesNotaCredito(), TipoDeOperacion.ALTA);
                     }
+                } else if (nota instanceof NotaDebito) {
+                    AjusteCuentaCorriente ajusteCC = ajusteCuentaCorrienteService.findByNotaDebito(nota);                    
+                    this.cuentaCorrienteService.asentarEnCuentaCorriente(ajusteCuentaCorrienteService.findByNotaDebito(nota), TipoDeOperacion.ELIMINACION);
+                    ajusteCuentaCorrienteService.eliminar(ajusteCC.getIdAjusteCuentaCorriente());
                 }
                 nota.setEliminada(true);
                 this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ELIMINACION);

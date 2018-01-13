@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.7.20, for Linux (x86_64)
 --
--- Host: localhost    Database: ykcojs0liv7ir9od
+-- Host: 127.0.0.1    Database: sic
 -- ------------------------------------------------------
 -- Server version	5.7.20-0ubuntu0.17.10.1
 
@@ -14,6 +14,38 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `ajustenotacredito`
+--
+
+DROP TABLE IF EXISTS `ajustenotacredito`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ajustenotacredito` (
+  `idAjusteCuentaCorriente` bigint(20) NOT NULL AUTO_INCREMENT,
+  `concepto` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `eliminado` bit(1) NOT NULL,
+  `fecha` datetime NOT NULL,
+  `monto` double NOT NULL,
+  `numAjuste` bigint(20) NOT NULL,
+  `numSerie` bigint(20) NOT NULL,
+  `tipoComprobante` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `id_Cliente` bigint(20) DEFAULT NULL,
+  `id_Empresa` bigint(20) DEFAULT NULL,
+  `idNota` bigint(20) DEFAULT NULL,
+  `id_Usuario` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`idAjusteCuentaCorriente`),
+  KEY `FKnrm5vrwhmsjwrm9ci73hgx155` (`id_Cliente`),
+  KEY `FK9jjafha0m59se0gxtl02irk7` (`id_Empresa`),
+  KEY `FKeoxnsiv79b3iijp24lr1s5te1` (`idNota`),
+  KEY `FK2xgs0tq24c0ageaxasyth61sy` (`id_Usuario`),
+  CONSTRAINT `FK2xgs0tq24c0ageaxasyth61sy` FOREIGN KEY (`id_Usuario`) REFERENCES `usuario` (`id_Usuario`),
+  CONSTRAINT `FK9jjafha0m59se0gxtl02irk7` FOREIGN KEY (`id_Empresa`) REFERENCES `empresa` (`id_Empresa`),
+  CONSTRAINT `FKeoxnsiv79b3iijp24lr1s5te1` FOREIGN KEY (`idNota`) REFERENCES `nota` (`idNota`),
+  CONSTRAINT `FKnrm5vrwhmsjwrm9ci73hgx155` FOREIGN KEY (`id_Cliente`) REFERENCES `cliente` (`id_Cliente`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `caja`
@@ -664,15 +696,18 @@ CREATE TABLE `rengloncuentacorriente` (
   `numero` bigint(20) NOT NULL,
   `serie` bigint(20) NOT NULL,
   `tipo_comprobante` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `idAjusteCuentaCorriente` bigint(20) DEFAULT NULL,
   `idCuentaCorriente` bigint(20) DEFAULT NULL,
   `id_Factura` bigint(20) DEFAULT NULL,
   `idNota` bigint(20) DEFAULT NULL,
   `idRecibo` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`idRenglonCuentaCorriente`),
+  KEY `FK6k0qf4lps7rnnyp7pfbmo2lgo` (`idAjusteCuentaCorriente`),
   KEY `FK9o2j89cigpiqo83vfc38hlmj7` (`idCuentaCorriente`),
   KEY `FKkw1g401txuln3k21xs8q7ypbq` (`id_Factura`),
   KEY `FKse5m5s33xj59pg8xyxatxn4jc` (`idNota`),
   KEY `FKnc57ol526tmqxysywvfys8pxx` (`idRecibo`),
+  CONSTRAINT `FK6k0qf4lps7rnnyp7pfbmo2lgo` FOREIGN KEY (`idAjusteCuentaCorriente`) REFERENCES `ajustenotacredito` (`idAjusteCuentaCorriente`),
   CONSTRAINT `FK9o2j89cigpiqo83vfc38hlmj7` FOREIGN KEY (`idCuentaCorriente`) REFERENCES `cuentacorriente` (`idCuentaCorriente`),
   CONSTRAINT `FKkw1g401txuln3k21xs8q7ypbq` FOREIGN KEY (`id_Factura`) REFERENCES `factura` (`id_Factura`),
   CONSTRAINT `FKnc57ol526tmqxysywvfys8pxx` FOREIGN KEY (`idRecibo`) REFERENCES `recibo` (`idRecibo`),
@@ -870,4 +905,4 @@ CREATE TABLE `usuario` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-01-06 18:54:36
+-- Dump completed on 2018-01-13 11:45:25

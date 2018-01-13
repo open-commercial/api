@@ -16,7 +16,7 @@ public interface IAjusteCuentaCorrienteService {
     
     Page<AjusteCuentaCorriente> getAllByFechaBetweenAndClienteAndEmpresaAndEliminado(Date desde, Date hasta, Cliente cliente, Empresa empresa, Pageable page);
     
-    AjusteCuentaCorriente findByNotaDebitoAndEliminado(Nota notaDebito);
+    AjusteCuentaCorriente findByNotaDebito(Nota notaDebito);
     
     Double getMontoById(long idRecibo);
     

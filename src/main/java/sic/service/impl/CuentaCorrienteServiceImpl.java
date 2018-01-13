@@ -227,7 +227,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setTipo_comprobante(ajusteCC.getTipoComprobante());
             rcc.setSerie(ajusteCC.getNumSerie());
             rcc.setNumero(ajusteCC.getNumAjuste());
-            rcc.setMonto(-((NotaDebito) ajusteCC.getNotaDebito()).getRecibo().getSaldoSobrante());
+            rcc.setMonto(ajusteCC.getMonto());
             rcc.setDescripcion(ajusteCC.getConcepto()); 
             rcc.setAjusteCuentaCorriente(ajusteCC); 
             rcc.setFecha(ajusteCC.getFecha());

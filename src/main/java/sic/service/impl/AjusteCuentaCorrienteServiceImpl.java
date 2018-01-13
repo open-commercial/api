@@ -41,7 +41,7 @@ public class AjusteCuentaCorrienteServiceImpl implements IAjusteCuentaCorrienteS
     }
 
     @Override
-    public AjusteCuentaCorriente findByNotaDebitoAndEliminado(Nota notaDebito) {
+    public AjusteCuentaCorriente findByNotaDebito(Nota notaDebito) {
         return ajusteCuentaCorrienteRepository.findByNotaDebitoAndEliminado(notaDebito, false);
     }
 
