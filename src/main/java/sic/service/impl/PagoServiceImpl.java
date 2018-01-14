@@ -21,6 +21,7 @@ import sic.modelo.FacturaVenta;
 import sic.modelo.FormaDePago;
 import sic.modelo.NotaDebito;
 import sic.modelo.Pago;
+import sic.modelo.Recibo;
 import sic.service.IFacturaService;
 import sic.service.IPagoService;
 import sic.service.BusinessServiceException;
@@ -150,6 +151,7 @@ public class PagoServiceImpl implements IPagoService {
         if (pago.getNotaDebito() != null) {
             notaService.actualizarNotaDebitoEstadoPago((NotaDebito) pago.getNotaDebito());
         }
+        pago.getRecibo().setSaldoSobrante(pago.getMonto() + pago.getRecibo().getSaldoSobrante());
         pagoRepository.save(pago);
         LOGGER.warn("El Pago " + pago + " se eliminó correctamente.");
     }

@@ -32,7 +32,7 @@ public interface RenglonCuentaCorrienteRepository extends PagingAndSortingReposi
             + " OR r.tipo_comprobante = \'FACTURA_X\' OR r.tipo_comprobante = \'FACTURA_Y\' OR r.tipo_comprobante = \'PRESUPUESTO\'"
             + " OR r.tipo_comprobante = \'NOTA_DEBITO_A\' OR r.tipo_comprobante = \'NOTA_DEBITO_B\' OR r.tipo_comprobante = \'NOTA_DEBITO_X\'"
             + " OR r.tipo_comprobante = \'NOTA_DEBITO_Y\' OR r.tipo_comprobante = \'NOTA_DEBITO_PRESUPUESTO\')"
-            + " ORDER BY r.fecha, r.tipo_comprobante ASC")
+            + " ORDER BY r.fecha, r.prioridadPago ASC")
     Slice<RenglonCuentaCorriente> getRenglonesVentaYDebitoCuentaCorriente(@Param("idCuentaCorriente") long idCuentaCorriente, Pageable page);
 
     @Query("SELECT SUM(r.monto) FROM CuentaCorriente cc INNER JOIN cc.renglones r"

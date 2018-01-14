@@ -267,14 +267,19 @@ public class ReciboServiceImpl implements IReciboService {
    
     @Override
     public void eliminar(long idRecibo) {
-        this.pagoService.getPagosRelacionadosAlRecibo(idRecibo).forEach((p) -> {
-            pagoService.eliminar(p.getId_Pago());
-        });
         Recibo r = reciboRepository.findById(idRecibo);
-        r.setEliminado(true);
-        this.cuentaCorrienteService.asentarEnCuentaCorriente(r, TipoDeOperacion.ELIMINACION);
-        reciboRepository.save(r);
-        LOGGER.warn("El Recibo " + r + " se eliminó correctamente.");
+        if (pagoService.getPagosRelacionadosAlRecibo(idRecibo).isEmpty() && (notaService.existeNotaDebitoPorRecibo(r) == false)) {
+            //pagos.forEach((p) -> {
+            //    pagoService.eliminar(p.getId_Pago());
+            //});           
+            r.setEliminado(true);
+            this.cuentaCorrienteService.asentarEnCuentaCorriente(r, TipoDeOperacion.ELIMINACION);
+            reciboRepository.save(r);
+            LOGGER.warn("El Recibo " + r + " se eliminó correctamente.");
+        } else {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_no_se_puede_eliminar"));
+        }
     }
 
     @Override

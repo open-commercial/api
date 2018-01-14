@@ -731,26 +731,30 @@ public class NotaServiceImpl implements INotaService {
         for (long idNota : idsNota) {
             Nota nota = this.getNotaPorId(idNota);
             if (nota != null && nota.getCAE() == 0l) {
-                List<Pago> pagos = getPagosNota(idNota);
-                if (!pagos.isEmpty() && nota instanceof NotaDebito) {
-                    pagos.forEach(pago -> {
-                        pagoService.eliminar(pago.getId_Pago());
-                    });
-                }
-                if (nota instanceof NotaCredito) {
-                    NotaCredito nc = (NotaCredito) nota;
-                    if (nc.isModificaStock()) {
-                        this.actualizarStock(nc.getRenglonesNotaCredito(), TipoDeOperacion.ALTA);
+                if (getPagosNota(idNota).isEmpty()) {
+                    //if (nota instanceof NotaDebito) {
+                    //    pagos.forEach(pago -> {
+                    //        pagoService.eliminar(pago.getId_Pago());
+                    //    });
+                    //}
+                    if (nota instanceof NotaCredito) {
+                        NotaCredito nc = (NotaCredito) nota;
+                        if (nc.isModificaStock()) {
+                            this.actualizarStock(nc.getRenglonesNotaCredito(), TipoDeOperacion.ALTA);
+                        }
+                    } else if (nota instanceof NotaDebito) {
+                        AjusteCuentaCorriente ajusteCC = ajusteCuentaCorrienteService.findByNotaDebito(nota);
+                        this.cuentaCorrienteService.asentarEnCuentaCorriente(ajusteCuentaCorrienteService.findByNotaDebito(nota), TipoDeOperacion.ELIMINACION);
+                        ajusteCuentaCorrienteService.eliminar(ajusteCC.getIdAjusteCuentaCorriente());
                     }
-                } else if (nota instanceof NotaDebito) {
-                    AjusteCuentaCorriente ajusteCC = ajusteCuentaCorrienteService.findByNotaDebito(nota);                    
-                    this.cuentaCorrienteService.asentarEnCuentaCorriente(ajusteCuentaCorrienteService.findByNotaDebito(nota), TipoDeOperacion.ELIMINACION);
-                    ajusteCuentaCorrienteService.eliminar(ajusteCC.getIdAjusteCuentaCorriente());
+                    nota.setEliminada(true);
+                    this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ELIMINACION);
+                    notaRepository.save(nota);
+                    LOGGER.warn("La Nota " + nota + " se eliminó correctamente.");
+                } else {
+                    throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                            .getString("mensaje_no_se_puede_eliminar"));
                 }
-                nota.setEliminada(true);
-                this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ELIMINACION);
-                notaRepository.save(nota);
-                LOGGER.warn("La Nota " + nota + " se eliminó correctamente.");
             } else {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_eliminar_factura_aprobada"));

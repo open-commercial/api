@@ -450,31 +450,33 @@ public class FacturaServiceImpl implements IFacturaService {
     @Transactional
     public void eliminar(long[] idsFactura) {
         for (long idFactura : idsFactura) {
-            List<Pago> pagos = pagoService.getPagosDeLaFactura(idFactura);
-            if (!pagos.isEmpty()) {
-                pagos.forEach(pago -> {
-                    pagoService.eliminar(pago.getId_Pago());
-                });
-            }
-            Factura factura = this.getFacturaPorId(idFactura);
-            if (factura.getCAE() == 0L) {
-                factura.setEliminada(true);
-                if (factura instanceof FacturaVenta) {
-                    this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) factura, TipoDeOperacion.ELIMINACION);
-                    productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.VENTA);
-                } else if (factura instanceof FacturaCompra) {
-                    productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.COMPRA);
-                }
-                if (factura.getPedido() != null) {
-                    pedidoService.actualizarEstadoPedido(factura.getPedido());
+            if (pagoService.getPagosDeLaFactura(idFactura).isEmpty()) {
+                //pagos.forEach(pago -> {
+                //    pagoService.eliminar(pago.getId_Pago());
+                //});
+                Factura factura = this.getFacturaPorId(idFactura);
+                if (factura.getCAE() == 0L) {
+                    factura.setEliminada(true);
+                    if (factura instanceof FacturaVenta) {
+                        this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) factura, TipoDeOperacion.ELIMINACION);
+                        productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.VENTA);
+                    } else if (factura instanceof FacturaCompra) {
+                        productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.COMPRA);
+                    }
+                    if (factura.getPedido() != null) {
+                        pedidoService.actualizarEstadoPedido(factura.getPedido());
+                    }
+                } else {
+                    throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                            .getString("mensaje_eliminar_factura_aprobada"));
                 }
             } else {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_eliminar_factura_aprobada"));
+                        .getString("mensaje_no_se_puede_eliminar"));
             }
-        }  
+        }
     }
-    
+
     private HashMap<Long, Double> getIdsProductosYCantidades(Factura factura) {
         HashMap<Long, Double> idsYCantidades = new HashMap<>();
         factura.getRenglones().forEach(r -> {
