@@ -268,10 +268,10 @@ public class ReciboServiceImpl implements IReciboService {
     @Override
     public void eliminar(long idRecibo) {
         Recibo r = reciboRepository.findById(idRecibo);
-        if (pagoService.getPagosRelacionadosAlRecibo(idRecibo).isEmpty() && (notaService.existeNotaDebitoPorRecibo(r) == false)) {
-            //pagos.forEach((p) -> {
-            //    pagoService.eliminar(p.getId_Pago());
-            //});           
+        if (notaService.existeNotaDebitoPorRecibo(r) == false) {
+            pagoService.getPagosRelacionadosAlRecibo(idRecibo).forEach((p) -> {
+                pagoService.eliminar(p.getId_Pago());
+            });           
             r.setEliminado(true);
             this.cuentaCorrienteService.asentarEnCuentaCorriente(r, TipoDeOperacion.ELIMINACION);
             reciboRepository.save(r);
