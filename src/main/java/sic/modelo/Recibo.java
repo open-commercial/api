@@ -79,17 +79,17 @@ public class Recibo implements Serializable {
     public String getNombreEmpresa() {
         return empresa.getNombre();
     }
-    
+
     @JsonGetter("razonSocialCliente")
     public String getRazonSocialCliente() {
-        return cliente.getRazonSocial();
+        return (cliente != null) ? cliente.getRazonSocial() : "";
     }
-    
+
     @JsonGetter("razonSocialProveedor")
     public String getRazonSocialProveedor() {
-        return proveedor.getRazonSocial();
+        return (proveedor != null) ? proveedor.getRazonSocial() : "";
     }
-    
+
     @JsonGetter("nombreUsuario")
     public String getNombreUsuario() {
         return usuario.getNombre();
