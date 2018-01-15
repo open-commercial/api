@@ -361,7 +361,7 @@ public class ReciboIntegrationTest {
         facturaVentaX = restTemplate.getForObject(apiPrefix + "/facturas/2", FacturaVentaDTO.class);
         assertEquals(10200, facturaVentaX.getTotal(), 0);
         ReciboDTO r = new ReciboDTO();
-        restTemplate.postForObject(apiPrefix + "/recibos?"
+        restTemplate.postForObject(apiPrefix + "/recibos/clientes?"
                 + "idUsuario=1&idEmpresa=1&idCliente=1&idFormaDePago=1", r, ReciboDTO.class);
         assertEquals(-1192.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         restTemplate.getForObject(apiPrefix + "/recibos/1/reporte", byte[].class); 
@@ -373,7 +373,7 @@ public class ReciboIntegrationTest {
         assertTrue(facturaVentaB.isPagada());
         r = new ReciboDTO();
         r.setMonto(2192.5);
-        restTemplate.postForObject(apiPrefix + "/recibos?"
+        restTemplate.postForObject(apiPrefix + "/recibos/clientes?"
                 + "idUsuario=1&idEmpresa=1&idCliente=1&idFormaDePago=1", r, ReciboDTO.class);
         assertEquals(1000, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         facturaVentaX = restTemplate.getForObject(apiPrefix + "/facturas/2", FacturaVentaDTO.class);

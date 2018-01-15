@@ -18,7 +18,7 @@ public interface NotaCreditoRepository extends NotaRepository<NotaCredito> {
     Double getTotalNotasCredito(@Param("hasta") Date hasta, @Param("cliente") Cliente cliente, @Param("empresa") Empresa empresa);
     
     @Query("SELECT SUM(nc.total) FROM NotaCredito nc WHERE nc.facturaVenta = :facturaVenta AND nc.eliminada = false")
-    Double getTotalNotasCreditoPorFactura(@Param("facturaVenta") FacturaVenta facturaVenta);
+    Double getTotalNotasCreditoPorFacturaVenta(@Param("facturaVenta") FacturaVenta facturaVenta);
     
     NotaCredito findTopByEmpresaAndTipoComprobanteOrderByNroNotaDesc(Empresa empresa, TipoDeComprobante tipoComprobante);
     

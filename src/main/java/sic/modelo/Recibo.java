@@ -59,6 +59,10 @@ public class Recibo implements Serializable {
     private Cliente cliente;
     
     @ManyToOne
+    @JoinColumn(name = "id_Proveedor", referencedColumnName = "id_Proveedor")
+    private Proveedor proveedor;
+    
+    @ManyToOne
     @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
     private Usuario usuario;
     
@@ -79,6 +83,11 @@ public class Recibo implements Serializable {
     @JsonGetter("razonSocialCliente")
     public String getRazonSocialCliente() {
         return cliente.getRazonSocial();
+    }
+    
+    @JsonGetter("razonSocialProveedor")
+    public String getRazonSocialProveedor() {
+        return proveedor.getRazonSocial();
     }
     
     @JsonGetter("nombreUsuario")

@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Cliente;
 import sic.modelo.Empresa;
+import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
 import sic.modelo.FormaDePago;
 import sic.modelo.NotaDebito;
@@ -103,20 +104,35 @@ public class ReciboServiceImpl implements IReciboService {
         this.validarRecibo(recibo);
         recibo = reciboRepository.save(recibo);
         Pageable pageable = new PageRequest(i, 10);
-        Slice<RenglonCuentaCorriente> renglonesCC =
-                this.renglonCuentaCorrienteService
-                        .getRenglonesVentaYDebitoCuentaCorriente(
-                                this.cuentaCorrienteService.getCuentaCorrientePorCliente(recibo.getCliente().getId_Cliente()).getIdCuentaCorriente(), pageable);
-        while (renglonesCC.hasContent()) {
-            monto = this.pagarMultiplesComprobantes(renglonesCC.getContent(), recibo, monto, recibo.getFormaDePago(), recibo.getConcepto());
-            if (renglonesCC.hasNext()) {
-                i++;
-                pageable = new PageRequest(i, 10);
-                renglonesCC = this.renglonCuentaCorrienteService
-                        .getRenglonesVentaYDebitoCuentaCorriente(
-                                this.cuentaCorrienteService.getCuentaCorrientePorCliente(recibo.getCliente().getId_Cliente()).getIdCuentaCorriente(), pageable);
-            } else {
-                break;
+        if (recibo.getCliente() != null) {
+            Slice<RenglonCuentaCorriente> renglonesCC
+                    = this.renglonCuentaCorrienteService
+                            .getRenglonesVentaYDebitoCuentaCorriente(
+                                    this.cuentaCorrienteService.getCuentaCorrientePorCliente(recibo.getCliente().getId_Cliente()).getIdCuentaCorriente(), pageable);
+            while (renglonesCC.hasContent()) {
+                monto = this.pagarMultiplesComprobantesCliente(renglonesCC.getContent(), recibo, monto, recibo.getFormaDePago(), recibo.getConcepto());
+                if (renglonesCC.hasNext()) {
+                    i++;
+                    pageable = new PageRequest(i, 10);
+                    renglonesCC = this.renglonCuentaCorrienteService
+                            .getRenglonesVentaYDebitoCuentaCorriente(
+                                    this.cuentaCorrienteService.getCuentaCorrientePorCliente(recibo.getCliente().getId_Cliente()).getIdCuentaCorriente(), pageable);
+                } else {
+                    break;
+                }
+            }
+        } else if (recibo.getProveedor() != null) {
+            Slice<FacturaCompra> facturasCompra
+                    = this.facturaService.getFacturasCompraProveedor(recibo.getProveedor().getId_Proveedor(), pageable);
+            while (facturasCompra.hasContent()) {
+                monto = this.pagarMultiplesComprobantesProveedor(facturasCompra.getContent(), recibo, monto, recibo.getFormaDePago(), recibo.getConcepto());
+                if (facturasCompra.hasNext()) {
+                    i++;
+                    pageable = new PageRequest(i, 10);
+                    facturasCompra = this.facturaService.getFacturasCompraProveedor(recibo.getProveedor().getId_Proveedor(), pageable);
+                } else {
+                    break;
+                }
             }
         }
         recibo.setSaldoSobrante(monto);
@@ -147,9 +163,13 @@ public class ReciboServiceImpl implements IReciboService {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_recibo_empresa_vacia"));
         }
-        if (recibo.getCliente() == null) {
+        if (recibo.getCliente() == null && recibo.getProveedor() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_recibo_cliente_vacio"));
+                    .getString("mensaje_recibo_cliente_proveedor_vacio"));
+        }
+        if (recibo.getCliente() != null && recibo.getProveedor() != null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_recibo_cliente_proveedor_simultaneos"));
         }
         if (recibo.getUsuario() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -205,14 +225,14 @@ public class ReciboServiceImpl implements IReciboService {
     }
       
     @Override
-    public double pagarMultiplesComprobantes(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, double monto, FormaDePago formaDePago, String nota) {
+    public double pagarMultiplesComprobantesCliente(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, double monto, FormaDePago formaDePago, String nota) {
         for (RenglonCuentaCorriente rcc : renglonesCC) {
             if (monto > 0.0) {
                 if (rcc.getTipo_comprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipo_comprobante() == TipoDeComprobante.FACTURA_B
                         || rcc.getTipo_comprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipo_comprobante() == TipoDeComprobante.FACTURA_X
                         || rcc.getTipo_comprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipo_comprobante() == TipoDeComprobante.PRESUPUESTO) {
                     FacturaVenta fv = (FacturaVenta) facturaService.getFacturaPorId(rcc.getIdMovimiento());
-                    double credito = notaService.calcularTotaCreditoPorFactura(fv);
+                    double credito = notaService.calcularTotaCreditoPorFacturaVenta(fv);
                     if (fv.isPagada() == false && fv.getTotal() > credito) {
                         fv.setPagos(this.pagoService.getPagosDeLaFactura(fv.getId_Factura()));
                         Pago nuevoPago = new Pago();
@@ -259,6 +279,36 @@ public class ReciboServiceImpl implements IReciboService {
                         nuevoPago.setRecibo(recibo);
                         this.pagoService.guardar(nuevoPago);
                     }
+                }
+            }
+        }
+        return monto;
+    }
+    
+    @Override
+    public double pagarMultiplesComprobantesProveedor(List<FacturaCompra> facturas, Recibo recibo, double monto, FormaDePago formaDePago, String nota) {
+        for (FacturaCompra facturaCompra : facturas) {
+            if (monto > 0.0) {
+                if (facturaCompra.isPagada() == false) {
+                    facturaCompra.setPagos(this.pagoService.getPagosDeLaFactura(facturaCompra.getId_Factura()));
+                    Pago nuevoPago = new Pago();
+                    nuevoPago.setFormaDePago(formaDePago);
+                    nuevoPago.setFactura(facturaCompra);
+                    nuevoPago.setEmpresa(facturaCompra.getEmpresa());
+                    nuevoPago.setNota(nota);
+                    double saldoAPagar = this.pagoService.getSaldoAPagarFactura(facturaCompra.getId_Factura());
+                    if (saldoAPagar <= monto) {
+                        monto = monto - saldoAPagar;
+                        // Se utiliza round por un problema de presicion de la maquina ej: 828.65 - 614.0 = 214.64999...
+                        monto = Math.round(monto * 100.0) / 100.0;
+                        nuevoPago.setMonto(saldoAPagar);
+                    } else {
+                        nuevoPago.setMonto(monto);
+                        monto = 0.0;
+                    }
+                    nuevoPago.setFactura(facturaCompra);
+                    nuevoPago.setRecibo(recibo);
+                    this.pagoService.guardar(nuevoPago);
                 }
             }
         }

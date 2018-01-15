@@ -892,8 +892,8 @@ public class NotaServiceImpl implements INotaService {
     }
 
     @Override
-    public double calcularTotaCreditoPorFactura(FacturaVenta facturaVenta) {
-        Double credito = notaCreditoRepository.getTotalNotasCreditoPorFactura(facturaVenta);
+    public double calcularTotaCreditoPorFacturaVenta(FacturaVenta facturaVenta) {
+        Double credito = notaCreditoRepository.getTotalNotasCreditoPorFacturaVenta(facturaVenta);
         return (credito == null) ? 0.0 : credito;
     }
 

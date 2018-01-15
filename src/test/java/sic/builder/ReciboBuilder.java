@@ -4,6 +4,7 @@ import java.util.Date;
 import sic.modelo.Cliente;
 import sic.modelo.Empresa;
 import sic.modelo.FormaDePago;
+import sic.modelo.Proveedor;
 import sic.modelo.Recibo;
 import sic.modelo.Usuario;
 
@@ -19,12 +20,13 @@ public class ReciboBuilder {
     private Empresa empresa = new EmpresaBuilder().build();
     private Cliente cliente = new ClienteBuilder().build();
     private Usuario usuario = new UsuarioBuilder().build();
+    private Proveedor proveedor = null;
     private Date fecha = new Date();    
     private double monto = 1000;  
     private double saldoSobrante = 200;
     
     public Recibo build() {
-      return new Recibo(idRecibo, serie, nroRecibo, fecha, eliminado, concepto, formaDePago, empresa, cliente, usuario, monto, saldoSobrante);
+      return new Recibo(idRecibo, serie, nroRecibo, fecha, eliminado, concepto, formaDePago, empresa, cliente, proveedor, usuario, monto, saldoSobrante);
     }
 
     public ReciboBuilder withidRecibo(Long idRecibo) {
@@ -62,8 +64,13 @@ public class ReciboBuilder {
         return this;
     }
     
-    public ReciboBuilder withClientes(Cliente cliente) {
+    public ReciboBuilder withCliente(Cliente cliente) {
         this.cliente = cliente;
+        return this;
+    }
+    
+    public ReciboBuilder withProveedor(Proveedor proveedor) {
+        this.proveedor = proveedor;
         return this;
     }
     

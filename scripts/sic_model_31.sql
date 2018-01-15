@@ -665,16 +665,19 @@ CREATE TABLE `recibo` (
   `id_Cliente` bigint(20) DEFAULT NULL,
   `id_Empresa` bigint(20) DEFAULT NULL,
   `id_FormaDePago` bigint(20) DEFAULT NULL,
+  `id_Proveedor` bigint(20) DEFAULT NULL,
   `id_Usuario` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`idRecibo`),
   KEY `FKg0ktcrcla69by0fw5jov45bqa` (`id_Cliente`),
   KEY `FKn3pouxafigal4oo25r16sp5au` (`id_Empresa`),
   KEY `FKfluiumc3d4nc4swosx8isd279` (`id_FormaDePago`),
+  KEY `FKsbq4xq9oehrhje6f5m418qgdq` (`id_Proveedor`),
   KEY `FK7xcubmytbr5c4xcdooqok230s` (`id_Usuario`),
   CONSTRAINT `FK7xcubmytbr5c4xcdooqok230s` FOREIGN KEY (`id_Usuario`) REFERENCES `usuario` (`id_Usuario`),
   CONSTRAINT `FKfluiumc3d4nc4swosx8isd279` FOREIGN KEY (`id_FormaDePago`) REFERENCES `formadepago` (`id_FormaDePago`),
   CONSTRAINT `FKg0ktcrcla69by0fw5jov45bqa` FOREIGN KEY (`id_Cliente`) REFERENCES `cliente` (`id_Cliente`),
-  CONSTRAINT `FKn3pouxafigal4oo25r16sp5au` FOREIGN KEY (`id_Empresa`) REFERENCES `empresa` (`id_Empresa`)
+  CONSTRAINT `FKn3pouxafigal4oo25r16sp5au` FOREIGN KEY (`id_Empresa`) REFERENCES `empresa` (`id_Empresa`),
+  CONSTRAINT `FKsbq4xq9oehrhje6f5m418qgdq` FOREIGN KEY (`id_Proveedor`) REFERENCES `proveedor` (`id_Proveedor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -905,4 +908,4 @@ CREATE TABLE `usuario` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-01-13 11:45:25
+-- Dump completed on 2018-01-15  4:04:49

@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import sic.modelo.Cliente;
 import sic.modelo.Empresa;
+import sic.modelo.FacturaCompra;
 import sic.modelo.FormaDePago;
 import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
@@ -37,7 +38,9 @@ public interface IReciboService {
     
     List<Recibo> getByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(Date desde, Date hasta, FormaDePago formaDePago, Empresa empresa);
     
-    double pagarMultiplesComprobantes(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, double monto, FormaDePago formaDePago, String nota);
+    double pagarMultiplesComprobantesCliente(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, double monto, FormaDePago formaDePago, String nota);
+    
+    double pagarMultiplesComprobantesProveedor(List<FacturaCompra> facturas, Recibo recibo, double monto, FormaDePago formaDePago, String nota);
     
     List<Recibo> getRecibosConSaldoSobrante(long idEmpresa, long idCliente);
     

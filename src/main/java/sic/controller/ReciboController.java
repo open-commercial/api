@@ -20,6 +20,7 @@ import sic.modelo.Recibo;
 import sic.service.IClienteService;
 import sic.service.IEmpresaService;
 import sic.service.IFormaDePagoService;
+import sic.service.IProveedorService;
 import sic.service.IReciboService;
 import sic.service.IUsuarioService;
 
@@ -31,17 +32,19 @@ public class ReciboController {
     private final IEmpresaService empresaService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
+    private final IProveedorService proveedorService;
     private final IFormaDePagoService formaDePagoService;
     
     @Autowired
     public ReciboController(IReciboService reciboService, IEmpresaService empresaService,
                             IUsuarioService usuarioService, IClienteService clienteService,
-                            IFormaDePagoService formaDePagoService) {
+                            IProveedorService proveedorService, IFormaDePagoService formaDePagoService) {
         this.reciboService = reciboService;
         this.empresaService = empresaService;
         this.usuarioService = usuarioService;
         this.clienteService = clienteService;
         this.formaDePagoService = formaDePagoService;
+        this.proveedorService = proveedorService;
     }
     
     @GetMapping("/recibos/{idRecibo}")
@@ -56,16 +59,30 @@ public class ReciboController {
         return reciboService.getReciboDelPago(idPago);
     }
     
-    @PostMapping("/recibos")
+    @PostMapping("/recibos/clientes")
     @ResponseStatus(HttpStatus.CREATED)
-    public Recibo guardar(@RequestParam long idUsuario,
+    public Recibo guardarReciboCliente(@RequestParam long idUsuario,
+                                       @RequestParam long idEmpresa,
+                                       @RequestParam long idCliente,
+                                       @RequestParam long idFormaDePago,
+                                       @RequestBody Recibo recibo) {
+        recibo.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+        recibo.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
+        recibo.setCliente(clienteService.getClientePorId(idCliente));
+        recibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(idFormaDePago));
+        return reciboService.guardar(recibo);
+    }
+    
+    @PostMapping("/recibos/proveedores")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Recibo guardarReciboProveedor(@RequestParam long idUsuario,
                           @RequestParam long idEmpresa,
-                          @RequestParam long idCliente,
+                          @RequestParam long idProveedor,
                           @RequestParam long idFormaDePago,
                           @RequestBody Recibo recibo) {
         recibo.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
         recibo.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-        recibo.setCliente(clienteService.getClientePorId(idCliente));
+        recibo.setProveedor(proveedorService.getProveedorPorId(idProveedor));
         recibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(idFormaDePago));
         return reciboService.guardar(recibo);
     }

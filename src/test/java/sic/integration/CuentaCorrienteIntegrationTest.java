@@ -271,7 +271,7 @@ public class CuentaCorrienteIntegrationTest {
                 .getBody().getContent();
         ReciboDTO r = new ReciboDTO();
         r.setMonto(5992.5);
-        restTemplate.postForObject(apiPrefix + "/recibos?"
+        restTemplate.postForObject(apiPrefix + "/recibos/clientes?"
                 + "idUsuario=1&idEmpresa=1&idCliente=1&idFormaDePago=1", r, Recibo.class);
         assertEquals(0, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         NotaDebitoDTO notaDebito = new NotaDebitoDTO();
@@ -291,7 +291,7 @@ public class CuentaCorrienteIntegrationTest {
         assertEquals(-6113.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         r = new ReciboDTO();
         r.setMonto(6113.5);
-        restTemplate.postForObject(apiPrefix + "/recibos?"
+        restTemplate.postForObject(apiPrefix + "/recibos/clientes?"
                 + "idUsuario=1&idEmpresa=1&idCliente=1&idFormaDePago=" + formaDePago.getId_FormaDePago(), r, Recibo.class);
         assertEquals(0, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         List<RenglonNotaCredito> renglonesNotaCredito = Arrays.asList(restTemplate.getForObject(apiPrefix + "/notas/renglon/credito/producto?"

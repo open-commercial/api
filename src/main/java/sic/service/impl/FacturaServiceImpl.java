@@ -26,6 +26,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Cliente;
@@ -339,6 +342,11 @@ public class FacturaServiceImpl implements IFacturaService {
                     .getString("mensaje_factura_viajante_vacio"));
         }
         return facturaVentaRepository.buscarFacturasVenta(criteria);
+    }
+    
+    @Override
+    public Slice<FacturaCompra> getFacturasCompraProveedor(@Param("id_Proveedor") long id_Proveedor, Pageable page) {
+        return facturaCompraRepository.getFacturasCompraProveedor(id_Proveedor, page);
     }
 
     private Factura procesarFactura(Factura factura) {
