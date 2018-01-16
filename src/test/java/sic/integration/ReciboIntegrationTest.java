@@ -363,21 +363,21 @@ public class ReciboIntegrationTest {
         restTemplate.postForObject(apiPrefix + "/recibos/clientes?"
                 + "idUsuario=1&idEmpresa=1&idCliente=1&idFormaDePago=1", r, ReciboDTO.class);
         assertEquals(-1192.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
-        restTemplate.getForObject(apiPrefix + "/recibos/1/reporte", byte[].class); 
+        restTemplate.getForObject(apiPrefix + "/recibos/1/reporte", byte[].class);
         facturaVentaX = restTemplate.getForObject(apiPrefix + "/facturas/2", FacturaVentaDTO.class);
         assertEquals(TipoDeComprobante.FACTURA_X, facturaVentaX.getTipoComprobante());
-        assertFalse(facturaVentaX.isPagada());
+        assertTrue("La fv X se encuentra pagada", facturaVentaX.isPagada());
         facturaVentaB = restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaVentaDTO.class);
         assertEquals(TipoDeComprobante.FACTURA_B, facturaVentaB.getTipoComprobante());
-        assertTrue(facturaVentaB.isPagada());
+        assertFalse("La fv B se encuentra impagada", facturaVentaB.isPagada());
         r = new ReciboDTO();
         r.setMonto(2192.5);
         restTemplate.postForObject(apiPrefix + "/recibos/clientes?"
                 + "idUsuario=1&idEmpresa=1&idCliente=1&idFormaDePago=1", r, ReciboDTO.class);
         assertEquals(1000, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
-        facturaVentaX = restTemplate.getForObject(apiPrefix + "/facturas/2", FacturaVentaDTO.class);
-        assertEquals(TipoDeComprobante.FACTURA_X, facturaVentaX.getTipoComprobante());
-        assertTrue(facturaVentaX.isPagada());
+        facturaVentaB = restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaVentaDTO.class);
+        assertEquals(TipoDeComprobante.FACTURA_B, facturaVentaB.getTipoComprobante());
+        assertTrue("La fv B se encuentra pagada", facturaVentaB.isPagada());
         NotaDebitoDTO notaDebito = new NotaDebitoDTO();
         notaDebito.setCliente(cliente);
         notaDebito.setEmpresa(empresa);

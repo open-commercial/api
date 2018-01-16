@@ -136,11 +136,13 @@ public class ReciboServiceImpl implements IReciboService {
             }
         }
         recibo.setSaldoSobrante(monto);
-        this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
+        if (recibo.getCliente() != null && recibo.getProveedor() == null) {
+            this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
+        }
         LOGGER.warn("El Recibo " + recibo + " se guardó correctamente.");
         return recibo;
     }
-    
+
     @Override
     @Transactional
     public Recibo actualizarSaldoSobrante(long idRecibo, double saldoSobrante) {

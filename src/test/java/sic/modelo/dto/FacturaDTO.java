@@ -24,11 +24,11 @@ import sic.modelo.TipoDeComprobante;
 public abstract class FacturaDTO implements Serializable {
     
     private long id_Factura = 0L;
-    private Date fecha = new Date();
+    private Date fecha;
     private TipoDeComprobante tipoComprobante = TipoDeComprobante.FACTURA_A;
     private long numSerie = 0;
     private long numFactura = 1;
-    private Date fechaVencimiento = new Date();    
+    private Date fechaVencimiento;    
     private String nombreTransportista = "Correo OCA";
     private List<RenglonFactura> renglones;
     private List<Pago> pagos;

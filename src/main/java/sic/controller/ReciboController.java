@@ -76,10 +76,10 @@ public class ReciboController {
     @PostMapping("/recibos/proveedores")
     @ResponseStatus(HttpStatus.CREATED)
     public Recibo guardarReciboProveedor(@RequestParam long idUsuario,
-                          @RequestParam long idEmpresa,
-                          @RequestParam long idProveedor,
-                          @RequestParam long idFormaDePago,
-                          @RequestBody Recibo recibo) {
+                                         @RequestParam long idEmpresa,
+                                         @RequestParam long idProveedor,
+                                         @RequestParam long idFormaDePago,
+                                         @RequestBody Recibo recibo) {
         recibo.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
         recibo.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
         recibo.setProveedor(proveedorService.getProveedorPorId(idProveedor));
