@@ -107,7 +107,7 @@ public class ReciboServiceImpl implements IReciboService {
         if (recibo.getCliente() != null) {
             Slice<RenglonCuentaCorriente> renglonesCC
                     = this.renglonCuentaCorrienteService
-                            .getRenglonesVentaYDebitoCuentaCorriente(
+                            .getRenglonesFacturasYNotaDebitoCuentaCorriente(
                                     this.cuentaCorrienteService.getCuentaCorrientePorCliente(recibo.getCliente().getId_Cliente()).getIdCuentaCorriente(), pageable);
             while (renglonesCC.hasContent()) {
                 monto = this.pagarMultiplesComprobantesCliente(renglonesCC.getContent(), recibo, monto, recibo.getFormaDePago(), recibo.getConcepto());
@@ -115,21 +115,25 @@ public class ReciboServiceImpl implements IReciboService {
                     i++;
                     pageable = new PageRequest(i, 10);
                     renglonesCC = this.renglonCuentaCorrienteService
-                            .getRenglonesVentaYDebitoCuentaCorriente(
+                            .getRenglonesFacturasYNotaDebitoCuentaCorriente(
                                     this.cuentaCorrienteService.getCuentaCorrientePorCliente(recibo.getCliente().getId_Cliente()).getIdCuentaCorriente(), pageable);
                 } else {
                     break;
                 }
             }
         } else if (recibo.getProveedor() != null) {
-            Slice<FacturaCompra> facturasCompra
-                    = this.facturaService.getFacturasCompraProveedor(recibo.getProveedor().getId_Proveedor(), pageable);
-            while (facturasCompra.hasContent()) {
-                monto = this.pagarMultiplesComprobantesProveedor(facturasCompra.getContent(), recibo, monto, recibo.getFormaDePago(), recibo.getConcepto());
-                if (facturasCompra.hasNext()) {
+            Slice<RenglonCuentaCorriente> renglonesCC
+                    = this.renglonCuentaCorrienteService
+                            .getRenglonesFacturasYNotaDebitoCuentaCorriente(
+                                    this.cuentaCorrienteService.getCuentaCorrientePorProveedor(recibo.getProveedor().getId_Proveedor()).getIdCuentaCorriente(), pageable);
+            while (renglonesCC.hasContent()) {
+                monto = this.pagarMultiplesComprobantesProveedor(renglonesCC.getContent(), recibo, monto, recibo.getFormaDePago(), recibo.getConcepto());
+                if (renglonesCC.hasNext()) {
                     i++;
                     pageable = new PageRequest(i, 10);
-                    facturasCompra = this.facturaService.getFacturasCompraProveedor(recibo.getProveedor().getId_Proveedor(), pageable);
+                    renglonesCC = this.renglonCuentaCorrienteService
+                            .getRenglonesFacturasYNotaDebitoCuentaCorriente(
+                                    this.cuentaCorrienteService.getCuentaCorrientePorProveedor(recibo.getProveedor().getId_Proveedor()).getIdCuentaCorriente(), pageable);
                 } else {
                     break;
                 }
@@ -228,9 +232,9 @@ public class ReciboServiceImpl implements IReciboService {
     public double pagarMultiplesComprobantesCliente(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, double monto, FormaDePago formaDePago, String nota) {
         for (RenglonCuentaCorriente rcc : renglonesCC) {
             if (monto > 0.0) {
-                if (rcc.getTipo_comprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipo_comprobante() == TipoDeComprobante.FACTURA_B
-                        || rcc.getTipo_comprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipo_comprobante() == TipoDeComprobante.FACTURA_X
-                        || rcc.getTipo_comprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipo_comprobante() == TipoDeComprobante.PRESUPUESTO) {
+                if (rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_B
+                        || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_X
+                        || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
                     FacturaVenta fv = (FacturaVenta) facturaService.getFacturaPorId(rcc.getIdMovimiento());
                     double credito = notaService.calcularTotaCreditoPorFacturaVenta(fv);
                     if (fv.isPagada() == false && fv.getTotal() > credito) {
@@ -254,9 +258,9 @@ public class ReciboServiceImpl implements IReciboService {
                         nuevoPago.setRecibo(recibo);
                         this.pagoService.guardar(nuevoPago);
                     }
-                } else if (rcc.getTipo_comprobante() == TipoDeComprobante.NOTA_DEBITO_A
-                        || rcc.getTipo_comprobante() == TipoDeComprobante.NOTA_DEBITO_B || rcc.getTipo_comprobante() == TipoDeComprobante.NOTA_DEBITO_X
-                        || rcc.getTipo_comprobante() == TipoDeComprobante.NOTA_DEBITO_Y || rcc.getTipo_comprobante() == TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO) {
+                } else if (rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_A
+                        || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_B || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X
+                        || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_Y || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO) {
                     NotaDebito nd = (NotaDebito) notaService.getNotaPorId(rcc.getIdMovimiento());
                     nd.setPagos(this.notaService.getPagosNota(nd.getIdNota()));
                     if (nd.isPagada() == false) {
@@ -286,29 +290,34 @@ public class ReciboServiceImpl implements IReciboService {
     }
     
     @Override
-    public double pagarMultiplesComprobantesProveedor(List<FacturaCompra> facturas, Recibo recibo, double monto, FormaDePago formaDePago, String nota) {
-        for (FacturaCompra facturaCompra : facturas) {
+    public double pagarMultiplesComprobantesProveedor(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, double monto, FormaDePago formaDePago, String nota) {
+        for (RenglonCuentaCorriente rcc : renglonesCC) {
             if (monto > 0.0) {
-                if (facturaCompra.isPagada() == false) {
-                    facturaCompra.setPagos(this.pagoService.getPagosDeLaFactura(facturaCompra.getId_Factura()));
-                    Pago nuevoPago = new Pago();
-                    nuevoPago.setFormaDePago(formaDePago);
-                    nuevoPago.setFactura(facturaCompra);
-                    nuevoPago.setEmpresa(facturaCompra.getEmpresa());
-                    nuevoPago.setNota(nota);
-                    double saldoAPagar = this.pagoService.getSaldoAPagarFactura(facturaCompra.getId_Factura());
-                    if (saldoAPagar <= monto) {
-                        monto = monto - saldoAPagar;
-                        // Se utiliza round por un problema de presicion de la maquina ej: 828.65 - 614.0 = 214.64999...
-                        monto = Math.round(monto * 100.0) / 100.0;
-                        nuevoPago.setMonto(saldoAPagar);
-                    } else {
-                        nuevoPago.setMonto(monto);
-                        monto = 0.0;
+                if (rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_B
+                        || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_X
+                        || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
+                    FacturaCompra fc = (FacturaCompra) facturaService.getFacturaPorId(rcc.getIdMovimiento());
+                    if (fc.isPagada() == false) {
+                        fc.setPagos(this.pagoService.getPagosDeLaFactura(fc.getId_Factura()));
+                        Pago nuevoPago = new Pago();
+                        nuevoPago.setFormaDePago(formaDePago);
+                        nuevoPago.setFactura(fc);
+                        nuevoPago.setEmpresa(fc.getEmpresa());
+                        nuevoPago.setNota(nota);
+                        double saldoAPagar = this.pagoService.getSaldoAPagarFactura(fc.getId_Factura());
+                        if (saldoAPagar <= monto) {
+                            monto = monto - saldoAPagar;
+                            // Se utiliza round por un problema de presicion de la maquina ej: 828.65 - 614.0 = 214.64999...
+                            monto = Math.round(monto * 100.0) / 100.0;
+                            nuevoPago.setMonto(saldoAPagar);
+                        } else {
+                            nuevoPago.setMonto(monto);
+                            monto = 0.0;
+                        }
+                        nuevoPago.setFactura(fc);
+                        nuevoPago.setRecibo(recibo);
+                        this.pagoService.guardar(nuevoPago);
                     }
-                    nuevoPago.setFactura(facturaCompra);
-                    nuevoPago.setRecibo(recibo);
-                    this.pagoService.guardar(nuevoPago);
                 }
             }
         }

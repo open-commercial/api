@@ -366,10 +366,10 @@ public class ReciboIntegrationTest {
         restTemplate.getForObject(apiPrefix + "/recibos/1/reporte", byte[].class);
         facturaVentaX = restTemplate.getForObject(apiPrefix + "/facturas/2", FacturaVentaDTO.class);
         assertEquals(TipoDeComprobante.FACTURA_X, facturaVentaX.getTipoComprobante());
-        assertTrue("La fv X se encuentra pagada", facturaVentaX.isPagada());
+        assertTrue("La fv X se encuentra impaga", facturaVentaX.isPagada());
         facturaVentaB = restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaVentaDTO.class);
         assertEquals(TipoDeComprobante.FACTURA_B, facturaVentaB.getTipoComprobante());
-        assertFalse("La fv B se encuentra impagada", facturaVentaB.isPagada());
+        assertFalse("La fv B se encuentra pagada", facturaVentaB.isPagada());
         r = new ReciboDTO();
         r.setMonto(2192.5);
         restTemplate.postForObject(apiPrefix + "/recibos/clientes?"
@@ -377,7 +377,7 @@ public class ReciboIntegrationTest {
         assertEquals(1000, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         facturaVentaB = restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaVentaDTO.class);
         assertEquals(TipoDeComprobante.FACTURA_B, facturaVentaB.getTipoComprobante());
-        assertTrue("La fv B se encuentra pagada", facturaVentaB.isPagada());
+        assertTrue("La fv B se encuentra impaga", facturaVentaB.isPagada());
         NotaDebitoDTO notaDebito = new NotaDebitoDTO();
         notaDebito.setCliente(cliente);
         notaDebito.setEmpresa(empresa);

@@ -56,7 +56,7 @@ public class RenglonCuentaCorrienteServiceImpl implements IRenglonCuentaCorrient
     }
 
     @Override
-    public Slice<RenglonCuentaCorriente> getRenglonesVentaYDebitoCuentaCorriente(long idCuentaCorriente, Pageable page) {
+    public Slice<RenglonCuentaCorriente> getRenglonesFacturasYNotaDebitoCuentaCorriente(long idCuentaCorriente, Pageable page) {
         return renglonCuentaCorrienteRepository.getRenglonesFacturasYNotaDebitoCuentaCorriente(idCuentaCorriente, page);
     }
 

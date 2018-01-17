@@ -39,9 +39,9 @@ public class RenglonCuentaCorriente implements Serializable {
     @Column(nullable = false)
     private Long idMovimiento;
     
-    @Column(nullable = false)
+    @Column(nullable = false, name = "tipo_comprobante")
     @Enumerated(EnumType.STRING)
-    private TipoDeComprobante tipo_comprobante;
+    private TipoDeComprobante tipoComprobante;
     
     //Formula de hibernate no coloca en la consulta el mismo alias para los campos, que SpringData.
     @Formula(value = "CASE tipo_comprobante"
