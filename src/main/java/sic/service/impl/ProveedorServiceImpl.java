@@ -86,14 +86,14 @@ public class ProveedorServiceImpl implements IProveedorService {
         if (criteria.isBuscaPorPais() == true) {
             builder.and(qproveedor.localidad.provincia.pais.eq(criteria.getPais()));
         }
-        List<Proveedor> list = new ArrayList<>();
-        proveedorRepository.findAll(builder, new Sort(Sort.Direction.ASC, "razonSocial")).iterator().forEachRemaining(list::add);
-        list.forEach(proveedor -> {
-            CuentaCorriente cc = cuentaCorrienteService.getCuentaCorrientePorProveedor(proveedor.getId_Proveedor());
-            proveedor.setSaldoCuentaCorriente(cc.getSaldo());
-            proveedor.setFechaUltimoMovimiento(cc.getFechaUltimoMovimiento());
+        List<Proveedor> proveedores = new ArrayList<>();
+        proveedorRepository.findAll(builder, new Sort(Sort.Direction.ASC, "razonSocial")).iterator().forEachRemaining(proveedores::add);
+        proveedores.forEach(p -> {
+            CuentaCorriente cc = cuentaCorrienteService.getCuentaCorrientePorProveedor(p.getId_Proveedor());
+            p.setSaldoCuentaCorriente(cc.getSaldo());
+            p.setFechaUltimoMovimiento(cc.getFechaUltimoMovimiento());
         });
-        return list;
+        return proveedores;
     }
     
     private BooleanBuilder buildPredicadoRazonSocial(String razonSocial, QProveedor qproveedor) {

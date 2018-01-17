@@ -200,8 +200,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     
     @Override
     @Transactional
-    public void asentarEnCuentaCorriente(FacturaVenta fv, TipoDeOperacion operacion) {
-        if (operacion == TipoDeOperacion.ALTA) {
+    public void asentarEnCuentaCorriente(FacturaVenta fv, TipoDeOperacion tipo) {
+        if (tipo == TipoDeOperacion.ALTA) {
             RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
             rcc.setTipo_comprobante(fv.getTipoComprobante());
             rcc.setSerie(fv.getNumSerie());
@@ -217,7 +217,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             this.renglonCuentaCorrienteService.guardar(rcc);
             LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
         }
-        if (operacion == TipoDeOperacion.ELIMINACION) {
+        if (tipo == TipoDeOperacion.ELIMINACION) {
             RenglonCuentaCorriente rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeFactura(fv, false);
             rcc.setEliminado(true);
             LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
@@ -226,8 +226,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     
     @Override
     @Transactional
-    public void asentarEnCuentaCorriente(FacturaCompra fc, TipoDeOperacion operacion) {
-        if (operacion == TipoDeOperacion.ALTA) {
+    public void asentarEnCuentaCorriente(FacturaCompra fc, TipoDeOperacion tipo) {
+        if (tipo == TipoDeOperacion.ALTA) {
             RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
             rcc.setTipo_comprobante(fc.getTipoComprobante());
             rcc.setSerie(fc.getNumSerie());
@@ -243,7 +243,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             this.renglonCuentaCorrienteService.guardar(rcc);
             LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
         }
-        if (operacion == TipoDeOperacion.ELIMINACION) {
+        if (tipo == TipoDeOperacion.ELIMINACION) {
             RenglonCuentaCorriente rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeFactura(fc, false);
             rcc.setEliminado(true);
             LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
@@ -252,8 +252,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
     @Override
     @Transactional
-    public void asentarEnCuentaCorriente(Nota n, TipoDeOperacion operacion) {
-        if (operacion == TipoDeOperacion.ALTA) {
+    public void asentarEnCuentaCorriente(Nota n, TipoDeOperacion tipo) {
+        if (tipo == TipoDeOperacion.ALTA) {
             RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
             rcc.setTipo_comprobante(n.getTipoComprobante());
             rcc.setSerie(n.getSerie());
@@ -279,7 +279,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             this.renglonCuentaCorrienteService.guardar(rcc);
             LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
         }
-        if (operacion == TipoDeOperacion.ELIMINACION) {
+        if (tipo == TipoDeOperacion.ELIMINACION) {
             RenglonCuentaCorriente rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeNota(n, false);
             rcc.setEliminado(true);
             LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
@@ -288,8 +288,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     
     @Override
     @Transactional
-    public void asentarEnCuentaCorriente(AjusteCuentaCorriente ajusteCC, TipoDeOperacion operacion) {
-        if (operacion == TipoDeOperacion.ALTA) {
+    public void asentarEnCuentaCorriente(AjusteCuentaCorriente ajusteCC, TipoDeOperacion tipo) {
+        if (tipo == TipoDeOperacion.ALTA) {
             RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
             rcc.setTipo_comprobante(ajusteCC.getTipoComprobante());
             rcc.setSerie(ajusteCC.getNumSerie());
@@ -305,7 +305,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             this.renglonCuentaCorrienteService.guardar(rcc);
             LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
         }
-        if (operacion == TipoDeOperacion.ELIMINACION) {
+        if (tipo == TipoDeOperacion.ELIMINACION) {
             RenglonCuentaCorriente rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeAjusteCuentaCorriente(ajusteCC, false);
             rcc.setEliminado(true);
             LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
@@ -314,9 +314,9 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     
     @Override
     @Transactional
-    public void asentarEnCuentaCorriente(Recibo r, TipoDeOperacion operacion) {
+    public void asentarEnCuentaCorriente(Recibo r, TipoDeOperacion tipo) {
         RenglonCuentaCorriente rcc;
-        if (operacion == TipoDeOperacion.ALTA) {
+        if (tipo == TipoDeOperacion.ALTA) {
             rcc = new RenglonCuentaCorriente();
             rcc.setRecibo(r);
             rcc.setTipo_comprobante(TipoDeComprobante.RECIBO);
@@ -342,7 +342,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             this.renglonCuentaCorrienteService.guardar(rcc);
             LOGGER.warn("El renglon " + rcc + " se guardó correctamente.");
         }
-        if (operacion == TipoDeOperacion.ELIMINACION) {
+        if (tipo == TipoDeOperacion.ELIMINACION) {
             rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeRecibo(r, false);
             rcc.setEliminado(true);
             LOGGER.warn("El renglon " + rcc + " se eliminó correctamente.");

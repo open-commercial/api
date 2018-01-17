@@ -36,7 +36,7 @@ public interface ICuentaCorrienteService {
       
       void asentarEnCuentaCorriente(FacturaVenta fv, TipoDeOperacion tipo);
       
-      void asentarEnCuentaCorriente(FacturaCompra fc, TipoDeOperacion operacion);
+      void asentarEnCuentaCorriente(FacturaCompra fc, TipoDeOperacion tipo);
       
       void asentarEnCuentaCorriente(Nota n, TipoDeOperacion tipo);
 
