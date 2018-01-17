@@ -18,7 +18,7 @@ import sic.modelo.TipoDeComprobante;
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Factura", scope = FacturaDTO.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
-//   @JsonSubTypes.Type(value = FacturaCompra.class),
+   @JsonSubTypes.Type(value = FacturaCompraDTO.class, name = "FacturaCompra"),
    @JsonSubTypes.Type(value = FacturaVentaDTO.class, name = "FacturaVenta"),    
 })
 public abstract class FacturaDTO implements Serializable {

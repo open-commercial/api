@@ -13,28 +13,39 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.AjusteCuentaCorriente;
+import sic.modelo.Cliente;
 import sic.modelo.CuentaCorriente;
+import sic.modelo.CuentaCorrienteCliente;
+import sic.modelo.CuentaCorrienteProveedor;
+import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
 import sic.modelo.NotaCredito;
 import sic.modelo.NotaDebito;
+import sic.modelo.Proveedor;
 import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
 import sic.modelo.TipoDeComprobante;
 import sic.modelo.TipoDeOperacion;
+import sic.repository.CuentaCorrienteClienteRepository;
+import sic.repository.CuentaCorrienteProveedorRepository;
 import sic.repository.CuentaCorrienteRepository;
 import sic.service.BusinessServiceException;
 import sic.service.IClienteService;
 import sic.service.ICuentaCorrienteService;
 import sic.service.IFacturaService;
 import sic.service.INotaService;
+import sic.service.IProveedorService;
 import sic.service.IRenglonCuentaCorrienteService;
 
 @Service
 public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     
     private final CuentaCorrienteRepository cuentaCorrienteRepository;
+    private final CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository;
+    private final CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository;
     private final IClienteService clienteService;
+    private final IProveedorService proveedorService;
     private final IRenglonCuentaCorrienteService renglonCuentaCorrienteService;
     private final IFacturaService facturaService;
     private final INotaService notaService;
@@ -42,11 +53,15 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     
     @Autowired
     @Lazy
-    public CuentaCorrienteServiceImpl(CuentaCorrienteRepository cuentaCorrienteRepository, IClienteService clienteService,
+    public CuentaCorrienteServiceImpl(CuentaCorrienteRepository cuentaCorrienteRepository, CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository,
+                CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository, IClienteService clienteService, IProveedorService proveedorService,
                 IRenglonCuentaCorrienteService renglonCuentaCorrienteService, IFacturaService facturaService,
                 INotaService notaService) {
                 this.cuentaCorrienteRepository = cuentaCorrienteRepository;
+                this.cuentaCorrienteClienteRepository = cuentaCorrienteClienteRepository;
+                this.cuentaCorrienteProveedorRepository = cuentaCorrienteProveedorRepository;
                 this.clienteService = clienteService;
+                this.proveedorService = proveedorService;
                 this.renglonCuentaCorrienteService = renglonCuentaCorrienteService;
                 this.facturaService = facturaService;
                 this.notaService = notaService;
@@ -65,7 +80,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
     @Override
     public CuentaCorriente getCuentaCorrientePorID(Long idCuentaCorriente) {
-        CuentaCorriente cuentaCorriente = cuentaCorrienteRepository.findOne(idCuentaCorriente);
+        CuentaCorriente cuentaCorriente = cuentaCorrienteRepository.findById(idCuentaCorriente);
         if (cuentaCorriente == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_cuenta_corriente_no_existente"));
@@ -74,12 +89,21 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     }
 
     @Override
-    public CuentaCorriente guardar(CuentaCorriente cuentaCorriente) {
-        cuentaCorriente.setFechaApertura(cuentaCorriente.getCliente().getFechaAlta());
-        this.validarCuentaCorriente(cuentaCorriente);
-        cuentaCorriente = cuentaCorrienteRepository.save(cuentaCorriente);
-        LOGGER.warn("La Cuenta Corriente " + cuentaCorriente + " se guardó correctamente." );
-        return cuentaCorriente;
+    public CuentaCorrienteCliente guardarCuentaCorrienteCliente(CuentaCorrienteCliente cuentaCorrienteCliente) {
+        cuentaCorrienteCliente.setFechaApertura(cuentaCorrienteCliente.getCliente().getFechaAlta());
+        this.validarCuentaCorriente(cuentaCorrienteCliente);
+        cuentaCorrienteCliente = cuentaCorrienteClienteRepository.save(cuentaCorrienteCliente);
+        LOGGER.warn("La Cuenta Corriente Cliente " + cuentaCorrienteCliente + " se guardó correctamente." );
+        return cuentaCorrienteCliente;
+    }
+    
+    @Override
+    public CuentaCorrienteProveedor guardarCuentaCorrienteProveedor(CuentaCorrienteProveedor cuentaCorrienteProveedor) {
+        cuentaCorrienteProveedor.setFechaApertura(new Date());
+        this.validarCuentaCorriente(cuentaCorrienteProveedor);
+        cuentaCorrienteProveedor = cuentaCorrienteProveedorRepository.save(cuentaCorrienteProveedor);
+        LOGGER.warn("La Cuenta Corriente Proveedor " + cuentaCorrienteProveedor + " se guardó correctamente." );
+        return cuentaCorrienteProveedor;
     }
 
     @Override
@@ -94,9 +118,16 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_caja_empresa_vacia"));
         }
-        if (cuentaCorriente.getCliente() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_cliente_vacio"));
+        if (cuentaCorriente instanceof CuentaCorrienteCliente) {
+            if (((CuentaCorrienteCliente) cuentaCorriente).getCliente() == null) {
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_cliente_vacio"));
+            }
+        } else if (cuentaCorriente instanceof CuentaCorrienteProveedor) {
+            if (((CuentaCorrienteProveedor) cuentaCorriente).getProveedor() == null) {
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_proveedor_vacio"));
+            }
         }
         //Duplicados        
         if (cuentaCorriente.getIdCuentaCorriente() != null) {
@@ -114,8 +145,18 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     }
     
     @Override
-    public CuentaCorriente getCuentaCorrientePorCliente(long idCliente) {
-        CuentaCorriente cc = cuentaCorrienteRepository.findByClienteAndEliminada(clienteService.getClientePorId(idCliente), false);
+    public CuentaCorrienteCliente getCuentaCorrientePorCliente(long idCliente) {
+        Cliente cliente = clienteService.getClientePorId(idCliente);
+        CuentaCorrienteCliente cc = cuentaCorrienteClienteRepository.findByClienteAndEmpresaAndEliminada(cliente, cliente.getEmpresa(), false);
+        cc.setSaldo(this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente()));
+        cc.setFechaUltimoMovimiento(this.getFechaUltimoMovimiento(cc.getIdCuentaCorriente()));
+        return cc;
+    }
+    
+    @Override
+    public CuentaCorrienteProveedor getCuentaCorrientePorProveedor(long idProveedor) {
+        Proveedor proveedor = proveedorService.getProveedorPorId(idProveedor);
+        CuentaCorrienteProveedor cc = cuentaCorrienteProveedorRepository.findByProveedorAndEmpresaAndEliminada(proveedor, proveedor.getEmpresa(), false);
         cc.setSaldo(this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente()));
         cc.setFechaUltimoMovimiento(this.getFechaUltimoMovimiento(cc.getIdCuentaCorriente()));
         return cc;
@@ -178,6 +219,32 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         }
         if (operacion == TipoDeOperacion.ELIMINACION) {
             RenglonCuentaCorriente rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeFactura(fv, false);
+            rcc.setEliminado(true);
+            LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
+        }
+    }
+    
+    @Override
+    @Transactional
+    public void asentarEnCuentaCorriente(FacturaCompra fc, TipoDeOperacion operacion) {
+        if (operacion == TipoDeOperacion.ALTA) {
+            RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
+            rcc.setTipo_comprobante(fc.getTipoComprobante());
+            rcc.setSerie(fc.getNumSerie());
+            rcc.setNumero(fc.getNumFactura());
+            rcc.setFactura(fc);
+            rcc.setFecha(fc.getFecha());
+            rcc.setFechaVencimiento(fc.getFechaVencimiento());
+            rcc.setIdMovimiento(fc.getId_Factura());
+            rcc.setMonto(-fc.getTotal());
+            CuentaCorriente cc = this.getCuentaCorrientePorProveedor(fc.getProveedor().getId_Proveedor());
+            cc.getRenglones().add(rcc);
+            rcc.setCuentaCorriente(cc);
+            this.renglonCuentaCorrienteService.guardar(rcc);
+            LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
+        }
+        if (operacion == TipoDeOperacion.ELIMINACION) {
+            RenglonCuentaCorriente rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeFactura(fc, false);
             rcc.setEliminado(true);
             LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
         }
@@ -259,8 +326,17 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setFecha(r.getFecha());
             rcc.setIdMovimiento(r.getIdRecibo());
             rcc.setMonto(r.getMonto());
-            CuentaCorriente cc;
-            cc = this.getCuentaCorrientePorCliente(r.getCliente().getId_Cliente());
+            CuentaCorriente cc = null;
+            if (r.getCliente() != null) {
+                cc = this.getCuentaCorrientePorCliente(r.getCliente().getId_Cliente());
+            } else if (r.getProveedor() != null) {
+                cc = this.getCuentaCorrientePorProveedor(r.getProveedor().getId_Proveedor());
+            }
+            if (null == cc) {
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_cuenta_corriente_no_existente"));
+
+            }
             cc.getRenglones().add(rcc);
             rcc.setCuentaCorriente(cc);
             this.renglonCuentaCorrienteService.guardar(rcc);

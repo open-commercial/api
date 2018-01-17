@@ -8,7 +8,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import sic.modelo.AjusteCuentaCorriente;
 import sic.modelo.CuentaCorriente;
-import sic.modelo.FacturaVenta;
+import sic.modelo.Factura;
 import sic.modelo.Nota;
 import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
@@ -31,8 +31,8 @@ public class RenglonCuentaCorrienteServiceImpl implements IRenglonCuentaCorrient
     }
 
     @Override
-    public RenglonCuentaCorriente getRenglonCuentaCorrienteDeFactura(FacturaVenta fv, boolean eliminado) {
-        return renglonCuentaCorrienteRepository.findByFacturaAndEliminado(fv, eliminado);
+    public RenglonCuentaCorriente getRenglonCuentaCorrienteDeFactura(Factura f, boolean eliminado) {
+        return renglonCuentaCorrienteRepository.findByFacturaAndEliminado(f, eliminado);
     }
 
     @Override

@@ -47,10 +47,22 @@ public class CuentaCorrienteController {
         return cuentaCorrienteService.getCuentaCorrientePorCliente(idCliente);
     }
     
+    @GetMapping("/cuentas-corrientes/proveedor/{idProveedor}")
+    @ResponseStatus(HttpStatus.OK)
+    public CuentaCorriente getCuentaCorrientePorProveedor(@PathVariable Long idProveedor) {
+        return cuentaCorrienteService.getCuentaCorrientePorProveedor(cuentaCorrienteService.getCuentaCorrientePorProveedor(idProveedor).getIdCuentaCorriente());
+    }
+    
     @GetMapping("/cuentas-corrientes/clientes/{idCliente}/saldo")
     @ResponseStatus(HttpStatus.OK)
-    public double getSaldoCuentaCorriente(@PathVariable long idCliente) {
-        return cuentaCorrienteService.getSaldoCuentaCorriente(idCliente);
+    public double getSaldoCuentaCorrienteCliente(@PathVariable long idCliente) {       
+        return cuentaCorrienteService.getSaldoCuentaCorriente(cuentaCorrienteService.getCuentaCorrientePorCliente(idCliente).getIdCuentaCorriente());
+    }
+    
+    @GetMapping("/cuentas-corrientes/proveedores/{idProveedor}/saldo")
+    @ResponseStatus(HttpStatus.OK)
+    public double getSaldoCuentaCorrienteProveedor(@PathVariable long idProveedor) {       
+        return cuentaCorrienteService.getSaldoCuentaCorriente(cuentaCorrienteService.getCuentaCorrientePorProveedor(idProveedor).getIdCuentaCorriente());
     }
     
     @GetMapping("/cuentas-corrientes/{idCuentaCorriente}/renglones")

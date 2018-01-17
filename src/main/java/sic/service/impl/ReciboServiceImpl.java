@@ -136,9 +136,7 @@ public class ReciboServiceImpl implements IReciboService {
             }
         }
         recibo.setSaldoSobrante(monto);
-        if (recibo.getCliente() != null && recibo.getProveedor() == null) {
-            this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
-        }
+        this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
         LOGGER.warn("El Recibo " + recibo + " se guardó correctamente.");
         return recibo;
     }

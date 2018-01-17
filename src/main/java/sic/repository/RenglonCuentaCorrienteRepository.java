@@ -9,14 +9,14 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.AjusteCuentaCorriente;
 import sic.modelo.CuentaCorriente;
-import sic.modelo.FacturaVenta;
+import sic.modelo.Factura;
 import sic.modelo.Nota;
 import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
 
 public interface RenglonCuentaCorrienteRepository extends PagingAndSortingRepository<RenglonCuentaCorriente, Long> {
 
-    RenglonCuentaCorriente findByFacturaAndEliminado(FacturaVenta fv, boolean eliminado);
+    RenglonCuentaCorriente findByFacturaAndEliminado(Factura f, boolean eliminado);
 
     RenglonCuentaCorriente findByNotaAndEliminado(Nota n, boolean eliminado);
     

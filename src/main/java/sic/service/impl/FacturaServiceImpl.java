@@ -403,6 +403,7 @@ public class FacturaServiceImpl implements IFacturaService {
                     this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) facturaGuardada, TipoDeOperacion.ALTA);
                 } else if (f instanceof FacturaCompra) {
                     facturaGuardada = facturaCompraRepository.save((FacturaCompra) this.procesarFactura(f));
+                    this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaCompra)facturaGuardada, TipoDeOperacion.ALTA);
                 }
                 facturasProcesadas.add(facturaGuardada);
                 LOGGER.warn("La Factura " + facturaGuardada + " se guardó correctamente.");

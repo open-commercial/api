@@ -1,5 +1,6 @@
 package sic.builder;
 
+import java.util.Date;
 import sic.modelo.CondicionIVA;
 import sic.modelo.Empresa;
 import sic.modelo.Localidad;
@@ -21,10 +22,12 @@ public class ProveedorBuilder {
     private Localidad localidad = new LocalidadBuilder().build();
     private Empresa empresa = new EmpresaBuilder().build();
     private boolean eliminado = false;
+    private double saldoCuentaCorriente = 0;
+    private Date fechaUltimoMovimiento = null;
     
     public Proveedor build() {
         return new Proveedor(id_Proveedor, codigo, razonSocial, direccion, condicionIVA, idFiscal,
-                telPrimario, telSecundario, contacto, email, web, localidad, empresa, eliminado);
+                telPrimario, telSecundario, contacto, email, web, localidad, empresa, eliminado, saldoCuentaCorriente, fechaUltimoMovimiento);
     }
     
     public ProveedorBuilder withId_Proveedor(long id_Proveedor) {
@@ -94,6 +97,16 @@ public class ProveedorBuilder {
     
     public ProveedorBuilder withEliminado(boolean eliminado) {
         this.eliminado = eliminado;
+        return this;
+    }
+    
+    public ProveedorBuilder withSaldoCuentaCorriente(double saldoCuentaCorriente) {
+        this.saldoCuentaCorriente = saldoCuentaCorriente;
+        return this;
+    }
+    
+    public ProveedorBuilder withFechaUltimoMovimiento(Date fechaUltimoMovimiento) {
+        this.fechaUltimoMovimiento = fechaUltimoMovimiento;
         return this;
     }
 }
