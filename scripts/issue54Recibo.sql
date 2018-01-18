@@ -1,9 +1,18 @@
 -- SOBRE LA DB CON EL DUMP DE PROD
+SET SQL_SAFE_UPDATES = 0;
+SET foreign_key_checks = 0;
+SET UNIQUE_CHECKS = 0; 
+
 ALTER TABLE notacredito MODIFY modificaStock bit(1) AFTER descuentoPorcentaje; 
 ALTER TABLE notadebito CHANGE column pagoId idRecibo BIGINT(20) NOT NULL AFTER idNota;
 ALTER TABLE notadebito ADD pagada bit(1) DEFAULT false after montoNoGravado; 
 ALTER TABLE pago ADD idRecibo BIGINT(20) AFTER idNota;
 TRUNCATE rengloncuentacorriente;
+
+TRUNCATE cuentacorriente;
+SET SQL_SAFE_UPDATES = 1;
+SET foreign_key_checks = 1;
+SET UNIQUE_CHECKS = 1; 
  
 -- SOBRE LA NUEVA ESTRUCTURA CON LOS DATOS
 SET SQL_SAFE_UPDATES = 0;
@@ -15,11 +24,11 @@ UPDATE pago inner join facturacompra on pago.id_Factura = facturacompra.id_Factu
 UPDATE pago inner join notadebito on pago.idNota = notadebito.idNota SET notadebito.idRecibo = id_Pago;
 
 INSERT INTO recibo (idRecibo, concepto, eliminado, fecha, monto, numRecibo, numSerie, saldoSobrante, id_Cliente, id_Empresa, id_FormaDePago, id_Usuario)
-SELECT pago.id_Pago, CONCAT("Recibo por pago Nº: ", nroPago), eliminado, fecha, monto, nroPago, (CASE WHEN id_Empresa = 1 THEN 2 ELSE 0 END), 0, id_Cliente, id_Empresa, id_FormaDePago, id_Usuario
+SELECT pago.id_Pago, CONCAT("Recibo por pago Nº: ", nroPago), eliminado, fecha, pago.monto, nroPago, (CASE WHEN id_Empresa = 1 THEN 2 ELSE 0 END), 0, id_Cliente, id_Empresa, id_FormaDePago, id_Usuario
 FROM pago inner join facturaventa on pago.id_Factura = facturaventa.id_Factura;
 
 INSERT INTO recibo (idRecibo, concepto, eliminado, fecha, monto, numRecibo, numSerie, saldoSobrante, id_Proveedor, id_Empresa, id_FormaDePago)
-SELECT pago.id_Pago, CONCAT("Recibo por pago Nº: ", nroPago), eliminado, fecha, monto, nroPago, (CASE WHEN id_Empresa = 1 THEN 2 ELSE 0 END), 0, id_Proveedor, id_Empresa, id_FormaDePago
+SELECT pago.id_Pago, CONCAT("Recibo por pago Nº: ", nroPago), eliminado, fecha, pago.monto, nroPago, (CASE WHEN id_Empresa = 1 THEN 2 ELSE 0 END), 0, id_Proveedor, id_Empresa, id_FormaDePago
 FROM pago inner join facturacompra on pago.id_Factura = facturacompra.id_Factura;
 
 INSERT INTO recibo (idRecibo, concepto, eliminado, fecha, monto, numRecibo, numSerie, saldoSobrante, id_Cliente, id_Empresa, id_FormaDePago, id_Usuario)
@@ -31,19 +40,78 @@ SET SQL_SAFE_UPDATES = 1;
 SET foreign_key_checks = 1;
 SET UNIQUE_CHECKS = 1; 
 
+
+-- CC
+
+SET SQL_SAFE_UPDATES = 0;
+SET AUTOCOMMIT = 0;
+SET foreign_key_checks = 0;
+SET UNIQUE_CHECKS = 0; 
+
+set @i := 0;
+
+INSERT INTO cuentacorriente (idCuentaCorriente, eliminada , fechaApertura, id_Empresa)
+SELECT (@i:=@i+1), eliminado, fechaAlta, id_Empresa 
+FROM cliente order by cliente.id_Cliente asc;
+-- 
+set @j := 0;
+
+INSERT INTO cuentacorrientecliente (idCuentaCorriente, id_Cliente)
+SELECT (@j := @j+1), id_Cliente
+FROM cliente order by cliente.id_Cliente asc;
+
+set @k := (SELECT max(idCuentaCorriente) FROM cuentacorriente);
+set @m := (SELECT max(idCuentaCorriente) FROM cuentacorriente);
+
+INSERT INTO cuentacorriente (idCuentaCorriente, eliminada , fechaApertura, id_Empresa)
+SELECT (@k:=@k+1), eliminado, NOW(), id_Empresa 
+FROM proveedor order by proveedor.id_Proveedor asc;
+-- 
+INSERT INTO cuentacorrienteproveedor (idCuentaCorriente, id_Proveedor)
+SELECT (@m := @m+1), id_Proveedor
+FROM proveedor order by proveedor.id_Proveedor asc;
+-- --
+ 
+SET SQL_SAFE_UPDATES = 1;
+SET AUTOCOMMIT = 1;
+SET foreign_key_checks = 1;
+SET UNIQUE_CHECKS = 1;
+
+
+-- RenglonesCC
 -- RenglonesCC
 START TRANSACTION;
 SET SQL_SAFE_UPDATES=0;
 
+-- FACTURAS VENTA
 INSERT INTO rengloncuentacorriente (eliminado, fecha, fechaVencimiento, idMovimiento, monto, numero, serie, tipo_comprobante, idCuentaCorriente, id_Factura)
-SELECT factura.eliminada, fecha, fechaVencimiento, factura.id_Factura, -total, numFactura, numSerie, tipoComprobante, facturaventa.id_Cliente, factura.id_Factura
+SELECT factura.eliminada, fecha, fechaVencimiento, factura.id_Factura, -total, numFactura, numSerie, tipoComprobante, cuentacorrientecliente.idCuentaCorriente, factura.id_Factura
 FROM 
 factura inner join facturaventa on factura.id_Factura = facturaventa.id_Factura
-inner join cuentacorriente on facturaventa.id_Cliente = cuentacorriente.id_Cliente;
--- Recibos 
+inner join cliente on cliente.id_Cliente = facturaventa.id_Cliente
+inner join cuentacorrientecliente on cuentacorrientecliente.id_Cliente = facturaventa.id_Cliente;
+-- FACTURAS COMPRA
+INSERT INTO rengloncuentacorriente (eliminado, fecha, fechaVencimiento, idMovimiento, monto, numero, serie, tipo_comprobante, idCuentaCorriente, id_Factura)
+SELECT factura.eliminada, fecha, fechaVencimiento, factura.id_Factura, -total, numFactura, numSerie, tipoComprobante, cuentacorrienteproveedor.idCuentaCorriente, factura.id_Factura
+FROM 
+factura inner join facturacompra on factura.id_Factura = facturacompra.id_Factura
+inner join proveedor on proveedor.id_Proveedor = facturacompra.id_Proveedor
+inner join cuentacorrienteproveedor on cuentacorrienteproveedor.id_Proveedor = facturacompra.id_Proveedor;
+
+-- Recibos CLIENTE
 INSERT INTO rengloncuentacorriente (descripcion, eliminado, fecha, idMovimiento, monto, numero, serie, tipo_comprobante, idCuentaCorriente, idRecibo)
-SELECT  concepto, eliminado, fecha, idRecibo, monto, numRecibo, numSerie, "RECIBO", id_Cliente, idRecibo
-FROM recibo;
+SELECT  concepto, recibo.eliminado, fecha, idRecibo, monto, numRecibo, numSerie, "RECIBO", cuentacorrientecliente.idCuentaCorriente, idRecibo
+from 
+recibo inner join cliente on recibo.id_Cliente = cliente.id_Cliente
+inner join cuentacorrientecliente on cliente.id_Cliente = cuentacorrientecliente.id_Cliente;
+
+-- Recibos PROVEEDOR
+INSERT INTO rengloncuentacorriente (descripcion, eliminado, fecha, idMovimiento, monto, numero, serie, tipo_comprobante, idCuentaCorriente, idRecibo)
+SELECT  concepto, recibo.eliminado, fecha, idRecibo, monto, numRecibo, numSerie, "RECIBO", cuentacorrienteproveedor.idCuentaCorriente, idRecibo
+from 
+recibo inner join proveedor on recibo.id_Proveedor = proveedor.id_Proveedor
+inner join cuentacorrienteproveedor on proveedor.id_Proveedor = cuentacorrienteproveedor.id_Proveedor;
+
 -- Nota
 INSERT INTO rengloncuentacorriente (descripcion, eliminado, fecha, idMovimiento, monto, numero, serie, tipo_comprobante, idCuentaCorriente, idNota)
 SELECT motivo, eliminada, fecha, idNota, 

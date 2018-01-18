@@ -168,13 +168,44 @@ CREATE TABLE `cuentacorriente` (
   `idCuentaCorriente` bigint(20) NOT NULL AUTO_INCREMENT,
   `eliminada` bit(1) NOT NULL,
   `fechaApertura` datetime NOT NULL,
-  `id_Cliente` bigint(20) DEFAULT NULL,
   `id_Empresa` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`idCuentaCorriente`),
-  KEY `FKghqoqiw1gkix7b69qeinsfacm` (`id_Cliente`),
   KEY `FKs7jnro4dgqdaexbg57371xkr2` (`id_Empresa`),
-  CONSTRAINT `FKghqoqiw1gkix7b69qeinsfacm` FOREIGN KEY (`id_Cliente`) REFERENCES `cliente` (`id_Cliente`),
   CONSTRAINT `FKs7jnro4dgqdaexbg57371xkr2` FOREIGN KEY (`id_Empresa`) REFERENCES `empresa` (`id_Empresa`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `cuentacorrientecliente`
+--
+
+DROP TABLE IF EXISTS `cuentacorrientecliente`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `cuentacorrientecliente` (
+  `idCuentaCorriente` bigint(20) NOT NULL,
+  `id_Cliente` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`idCuentaCorriente`),
+  KEY `FKd22urpjy2kegalnkrlyxm12qj` (`id_Cliente`),
+  CONSTRAINT `FK1a9mncn9lp8prvon5vg1p77q1` FOREIGN KEY (`idCuentaCorriente`) REFERENCES `cuentacorriente` (`idCuentaCorriente`),
+  CONSTRAINT `FKd22urpjy2kegalnkrlyxm12qj` FOREIGN KEY (`id_Cliente`) REFERENCES `cliente` (`id_Cliente`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `cuentacorrienteproveedor`
+--
+
+DROP TABLE IF EXISTS `cuentacorrienteproveedor`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `cuentacorrienteproveedor` (
+  `idCuentaCorriente` bigint(20) NOT NULL,
+  `id_Proveedor` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`idCuentaCorriente`),
+  KEY `FK4fj6mk1bmlbd9k160kwjap5xd` (`id_Proveedor`),
+  CONSTRAINT `FK1etk6qygtsymfy2d1tv06mh8t` FOREIGN KEY (`idCuentaCorriente`) REFERENCES `cuentacorriente` (`idCuentaCorriente`),
+  CONSTRAINT `FK4fj6mk1bmlbd9k160kwjap5xd` FOREIGN KEY (`id_Proveedor`) REFERENCES `proveedor` (`id_Proveedor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -908,4 +939,4 @@ CREATE TABLE `usuario` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-01-15  4:04:49
+-- Dump completed on 2018-01-17 18:26:52
