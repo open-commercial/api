@@ -50,7 +50,7 @@ public class CuentaCorrienteController {
     @GetMapping("/cuentas-corrientes/proveedores/{idProveedor}")
     @ResponseStatus(HttpStatus.OK)
     public CuentaCorriente getCuentaCorrientePorProveedor(@PathVariable Long idProveedor) {
-        return cuentaCorrienteService.getCuentaCorrientePorProveedor(cuentaCorrienteService.getCuentaCorrientePorProveedor(idProveedor).getIdCuentaCorriente());
+        return cuentaCorrienteService.getCuentaCorrientePorProveedor(idProveedor);
     }
     
     @GetMapping("/cuentas-corrientes/clientes/{idCliente}/saldo")

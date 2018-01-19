@@ -79,20 +79,19 @@ SET UNIQUE_CHECKS = 1;
 
 
 -- RenglonesCC
--- RenglonesCC
 START TRANSACTION;
 SET SQL_SAFE_UPDATES=0;
 
 -- FACTURAS VENTA
 INSERT INTO rengloncuentacorriente (eliminado, fecha, fechaVencimiento, idMovimiento, monto, numero, serie, tipo_comprobante, idCuentaCorriente, id_Factura)
-SELECT factura.eliminada, fecha, fechaVencimiento, factura.id_Factura, -total, numFactura, numSerie, tipoComprobante, cuentacorrientecliente.idCuentaCorriente, factura.id_Factura
+SELECT factura.eliminada, fecha, fechaVencimiento, factura.id_Factura, -total, numFactura, numSerie, factura.tipoComprobante, cuentacorrientecliente.idCuentaCorriente, factura.id_Factura
 FROM 
 factura inner join facturaventa on factura.id_Factura = facturaventa.id_Factura
 inner join cliente on cliente.id_Cliente = facturaventa.id_Cliente
 inner join cuentacorrientecliente on cuentacorrientecliente.id_Cliente = facturaventa.id_Cliente;
 -- FACTURAS COMPRA
 INSERT INTO rengloncuentacorriente (eliminado, fecha, fechaVencimiento, idMovimiento, monto, numero, serie, tipo_comprobante, idCuentaCorriente, id_Factura)
-SELECT factura.eliminada, fecha, fechaVencimiento, factura.id_Factura, -total, numFactura, numSerie, tipoComprobante, cuentacorrienteproveedor.idCuentaCorriente, factura.id_Factura
+SELECT factura.eliminada, fecha, fechaVencimiento, factura.id_Factura, -total, numFactura, numSerie, factura.tipoComprobante, cuentacorrienteproveedor.idCuentaCorriente, factura.id_Factura
 FROM 
 factura inner join facturacompra on factura.id_Factura = facturacompra.id_Factura
 inner join proveedor on proveedor.id_Proveedor = facturacompra.id_Proveedor

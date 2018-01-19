@@ -92,7 +92,7 @@ public class Recibo implements Serializable {
 
     @JsonGetter("nombreUsuario")
     public String getNombreUsuario() {
-        return usuario.getNombre();
+        return (usuario != null) ? usuario.getNombre() : "";
     }
     
 }
