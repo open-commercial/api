@@ -271,6 +271,16 @@ public class PagoServiceImpl implements IPagoService {
                         .getString("mensaje_pago_mayorADeuda_monto"));
             }
         }
+        if(pago.getNotaDebito() != null) {
+            if (((NotaDebito)pago.getNotaDebito()).isPagada() == true) {
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_nota_debito_pagada"));
+            }
+            if (Utilidades.round(pago.getMonto(), 2) > Utilidades.round(this.getSaldoAPagarNotaDebito(pago.getNotaDebito().getIdNota()), 2)) {
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_pago_mayorADeuda_monto"));
+            }
+        }
     }
 
 }
