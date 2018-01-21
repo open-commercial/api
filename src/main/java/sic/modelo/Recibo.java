@@ -28,53 +28,53 @@ import lombok.ToString;
 @EqualsAndHashCode(of = {"numSerie", "numRecibo", "empresa", "fecha"})
 @JsonIgnoreProperties({"formaDePago", "empresa", "cliente", "usuario"})
 public class Recibo implements Serializable {
-    
+
     @Id
     @GeneratedValue
     private Long idRecibo;
-    
+
     private long numSerie;
-    
+
     private long numRecibo;
-    
+
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date fecha;
-    
+
     private boolean eliminado;
-    
+
     @Column(nullable = false)
     private String concepto;
-    
+
     @ManyToOne
     @JoinColumn(name = "id_FormaDePago", referencedColumnName = "id_FormaDePago")
     private FormaDePago formaDePago;
-    
+
     @ManyToOne
-    @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")    
+    @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
     private Empresa empresa;
-    
+
     @ManyToOne
     @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
     private Cliente cliente;
-    
+
     @ManyToOne
     @JoinColumn(name = "id_Proveedor", referencedColumnName = "id_Proveedor")
     private Proveedor proveedor;
-    
+
     @ManyToOne
     @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
     private Usuario usuario;
-    
+
     private double monto;
-    
+
     private double saldoSobrante;
-    
+
     @JsonGetter("formaDePago")
     public String getNombreFormaDePago() {
         return formaDePago.getNombre();
     }
-    
+
     @JsonGetter("nombreEmpresa")
     public String getNombreEmpresa() {
         return empresa.getNombre();
@@ -89,10 +89,10 @@ public class Recibo implements Serializable {
     public String getRazonSocialProveedor() {
         return (proveedor != null) ? proveedor.getRazonSocial() : "";
     }
-
-    @JsonGetter("nombreUsuario")
-    public String getNombreUsuario() {
-        return (usuario != null) ? usuario.getNombre() : "";
-    }
     
+       @JsonGetter("nombreUsuario")
+    public String getNombreUsuario() {
+        return usuario.getNombre();
+    }
+
 }

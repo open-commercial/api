@@ -6,10 +6,29 @@ SET UNIQUE_CHECKS = 0;
 ALTER TABLE notacredito MODIFY modificaStock bit(1) AFTER descuentoPorcentaje; 
 ALTER TABLE notadebito CHANGE column pagoId idRecibo BIGINT(20) NOT NULL AFTER idNota;
 ALTER TABLE notadebito ADD pagada bit(1) DEFAULT false after montoNoGravado; 
+
+Delete p.* 
+from pago p inner join facturacompra fc on p.id_Factura = fc.id_Factura
+inner join factura f on fc.id_Factura = f.id_Factura 
+where f.pagada = true;
+
+-- DELETE p.* 
+-- FROM pago p INNER JOIN facturacompra f on p.id_Factura = f.id_Factura
+-- WHERE p.eliminado = true;
+
+INSERT INTO pago(eliminado, fecha, monto, nota, nroPago, id_Empresa, id_FormaDePago, idNota)
+select eliminada, factura.fecha, factura.total, factura.observaciones, 0, factura.id_Empresa, 10, null
+from factura inner join facturacompra on factura.id_Factura = facturacompra.id_Factura;
+
+SET SQL_SAFE_UPDATES = 0;
+set @i = (SELECT max(pago.nroPago) FROM pago);
+update pago set pago.nroPago=(@i:=@i+1) where pago.nroPago = 0;
+
+
 ALTER TABLE pago ADD idRecibo BIGINT(20) AFTER idNota;
 TRUNCATE rengloncuentacorriente;
-
 TRUNCATE cuentacorriente;
+
 SET SQL_SAFE_UPDATES = 1;
 SET foreign_key_checks = 1;
 SET UNIQUE_CHECKS = 1; 
@@ -27,8 +46,12 @@ INSERT INTO recibo (idRecibo, concepto, eliminado, fecha, monto, numRecibo, numS
 SELECT pago.id_Pago, CONCAT("Recibo por pago Nº: ", nroPago), eliminado, fecha, pago.monto, nroPago, (CASE WHEN id_Empresa = 1 THEN 2 ELSE 0 END), 0, id_Cliente, id_Empresa, id_FormaDePago, id_Usuario
 FROM pago inner join facturaventa on pago.id_Factura = facturaventa.id_Factura;
 
-INSERT INTO recibo (idRecibo, concepto, eliminado, fecha, monto, numRecibo, numSerie, saldoSobrante, id_Proveedor, id_Empresa, id_FormaDePago)
-SELECT pago.id_Pago, CONCAT("Recibo por pago Nº: ", nroPago), eliminado, fecha, pago.monto, nroPago, (CASE WHEN id_Empresa = 1 THEN 2 ELSE 0 END), 0, id_Proveedor, id_Empresa, id_FormaDePago
+-- Con usuario para el backfill
+insert into usuario(id_Usuario, eliminado, nombre, password) 
+values (31, true, "backfillCC", "697416b772e7e3780507ab813ebaae7a");
+
+INSERT INTO recibo (idRecibo, concepto, eliminado, fecha, monto, numRecibo, numSerie, saldoSobrante, id_Proveedor, id_Empresa, id_FormaDePago, id_Usuario)
+SELECT pago.id_Pago, CONCAT("Recibo por pago Nº: ", nroPago), eliminado, fecha, pago.monto, nroPago, (CASE WHEN id_Empresa = 1 THEN 2 ELSE 0 END), 0, id_Proveedor, id_Empresa, id_FormaDePago, 31
 FROM pago inner join facturacompra on pago.id_Factura = facturacompra.id_Factura;
 
 INSERT INTO recibo (idRecibo, concepto, eliminado, fecha, monto, numRecibo, numSerie, saldoSobrante, id_Cliente, id_Empresa, id_FormaDePago, id_Usuario)
