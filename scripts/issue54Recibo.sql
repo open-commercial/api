@@ -16,8 +16,8 @@ where f.pagada = true;
 -- FROM pago p INNER JOIN facturacompra f on p.id_Factura = f.id_Factura
 -- WHERE p.eliminado = true;
 
-INSERT INTO pago(eliminado, fecha, monto, nota, nroPago, id_Empresa, id_FormaDePago, idNota)
-select eliminada, factura.fecha, factura.total, factura.observaciones, 0, factura.id_Empresa, 10, null
+INSERT INTO pago(eliminado, fecha, monto, nota, nroPago, id_Empresa, id_Factura, id_FormaDePago, idNota)
+select eliminada, factura.fecha, factura.total, factura.observaciones, 0, factura.id_Empresa, factura.id_Factura, 10, null
 from factura inner join facturacompra on factura.id_Factura = facturacompra.id_Factura;
 
 SET SQL_SAFE_UPDATES = 0;
