@@ -18,7 +18,8 @@ where f.pagada = true;
 
 INSERT INTO pago(eliminado, fecha, monto, nota, nroPago, id_Empresa, id_Factura, id_FormaDePago, idNota)
 select eliminada, factura.fecha, factura.total, factura.observaciones, 0, factura.id_Empresa, factura.id_Factura, 10, null
-from factura inner join facturacompra on factura.id_Factura = facturacompra.id_Factura;
+from factura inner join facturacompra on factura.id_Factura = facturacompra.id_Factura
+where factura.pagada = true;
 
 SET SQL_SAFE_UPDATES = 0;
 set @i = (SELECT max(pago.nroPago) FROM pago);
@@ -87,7 +88,7 @@ set @k := (SELECT max(idCuentaCorriente) FROM cuentacorriente);
 set @m := (SELECT max(idCuentaCorriente) FROM cuentacorriente);
 
 INSERT INTO cuentacorriente (idCuentaCorriente, eliminada , fechaApertura, id_Empresa)
-SELECT (@k:=@k+1), eliminado, NOW(), id_Empresa 
+SELECT (@k := @k+1), eliminado, NOW(), id_Empresa 
 FROM proveedor order by proveedor.id_Proveedor asc;
 -- 
 INSERT INTO cuentacorrienteproveedor (idCuentaCorriente, id_Proveedor)
@@ -110,41 +111,38 @@ INSERT INTO rengloncuentacorriente (eliminado, fecha, fechaVencimiento, idMovimi
 SELECT factura.eliminada, fecha, fechaVencimiento, factura.id_Factura, -total, numFactura, numSerie, factura.tipoComprobante, cuentacorrientecliente.idCuentaCorriente, factura.id_Factura
 FROM 
 factura inner join facturaventa on factura.id_Factura = facturaventa.id_Factura
-inner join cliente on cliente.id_Cliente = facturaventa.id_Cliente
 inner join cuentacorrientecliente on cuentacorrientecliente.id_Cliente = facturaventa.id_Cliente;
 -- FACTURAS COMPRA
 INSERT INTO rengloncuentacorriente (eliminado, fecha, fechaVencimiento, idMovimiento, monto, numero, serie, tipo_comprobante, idCuentaCorriente, id_Factura)
 SELECT factura.eliminada, fecha, fechaVencimiento, factura.id_Factura, -total, numFactura, numSerie, factura.tipoComprobante, cuentacorrienteproveedor.idCuentaCorriente, factura.id_Factura
 FROM 
 factura inner join facturacompra on factura.id_Factura = facturacompra.id_Factura
-inner join proveedor on proveedor.id_Proveedor = facturacompra.id_Proveedor
 inner join cuentacorrienteproveedor on cuentacorrienteproveedor.id_Proveedor = facturacompra.id_Proveedor;
 
 -- Recibos CLIENTE
 INSERT INTO rengloncuentacorriente (descripcion, eliminado, fecha, idMovimiento, monto, numero, serie, tipo_comprobante, idCuentaCorriente, idRecibo)
 SELECT  concepto, recibo.eliminado, fecha, idRecibo, monto, numRecibo, numSerie, "RECIBO", cuentacorrientecliente.idCuentaCorriente, idRecibo
 from 
-recibo inner join cliente on recibo.id_Cliente = cliente.id_Cliente
-inner join cuentacorrientecliente on cliente.id_Cliente = cuentacorrientecliente.id_Cliente;
+recibo inner join cuentacorrientecliente on recibo.id_Cliente = cuentacorrientecliente.id_Cliente;
 
 -- Recibos PROVEEDOR
 INSERT INTO rengloncuentacorriente (descripcion, eliminado, fecha, idMovimiento, monto, numero, serie, tipo_comprobante, idCuentaCorriente, idRecibo)
 SELECT  concepto, recibo.eliminado, fecha, idRecibo, monto, numRecibo, numSerie, "RECIBO", cuentacorrienteproveedor.idCuentaCorriente, idRecibo
 from 
-recibo inner join proveedor on recibo.id_Proveedor = proveedor.id_Proveedor
-inner join cuentacorrienteproveedor on proveedor.id_Proveedor = cuentacorrienteproveedor.id_Proveedor;
+recibo inner join cuentacorrienteproveedor on recibo.id_Proveedor = cuentacorrienteproveedor.id_Proveedor;
 
 -- Nota
-INSERT INTO rengloncuentacorriente (descripcion, eliminado, fecha, idMovimiento, monto, numero, serie, tipo_comprobante, idCuentaCorriente, idNota)
-SELECT motivo, eliminada, fecha, idNota, 
+INSERT INTO rengloncuentacorriente (descripcion, eliminado, fecha, fechaVencimiento, idMovimiento, monto, numero, serie, tipo_comprobante, idAjusteCuentaCorriente, idCuentaCorriente,
+id_Factura, idNota, idRecibo)
+SELECT motivo, eliminada, fecha, fecha, idNota, 
 (CASE WHEN (tipoComprobante = "NOTA_CREDITO_A" OR tipoComprobante = "NOTA_CREDITO_B"
 OR tipoComprobante = "NOTA_CREDITO_X" OR tipoComprobante = "NOTA_CREDITO_Y"
 OR tipoComprobante = "NOTA_CREDITO_PRESUPUESTO") 
 THEN total
 ELSE -total
 END), 
-nroNota, serie, tipoComprobante, id_Cliente, idNota
-from nota;
+nroNota, serie, tipoComprobante, null, cuentacorrientecliente.idCuentaCorriente, null, idNota, null
+from nota inner join cuentacorrientecliente on cuentacorrientecliente.id_Cliente = nota.id_Cliente;
 
 SET SQL_SAFE_UPDATES=1;
 COMMIT;
