@@ -366,8 +366,41 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     @Override
-    public boolean existeStockDisponible(long idProducto, double cantidad) {
-        return (this.getProductoPorId(idProducto).getCantidad() >= cantidad) || this.getProductoPorId(idProducto).isIlimitado();
+    public Map<Double, Producto> getProductosSinStockDisponible(long[] idProducto, double[] cantidad) {
+        Map productos = new HashMap();
+        int longitudIds = idProducto.length;
+        int longitudCantidades = cantidad.length;
+        if (longitudIds == longitudCantidades) {
+            for (int i = 0; i < longitudIds; i++) {
+                Producto p = this.getProductoPorId(idProducto[i]);
+                if (p.isIlimitado() == false && p.getCantidad() < cantidad[i]) {
+                    productos.put(cantidad[i], p);
+                }
+            }
+        } else {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_error_logitudes_arrays"));
+        }
+        return productos;
+    }
+    
+    @Override
+    public Map<Double, Producto> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, double[] cantidad) {
+        Map productos = new HashMap();
+        int longitudIds = idProducto.length;
+        int longitudCantidades = cantidad.length;
+        if (longitudIds == longitudCantidades) {
+            for (int i = 0; i < longitudIds; i++) {
+                Producto p = this.getProductoPorId(idProducto[i]);
+                if (p.getVentaMinima() > cantidad[i]) {
+                    productos.put(cantidad[i], p);
+                }
+            }
+        } else {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_error_logitudes_arrays"));
+        }
+        return productos;
     }
 
     @Override
@@ -449,4 +482,5 @@ public class ProductoServiceImpl implements IProductoService {
                     .getString("mensaje_error_reporte"), ex);
         }
     }
+    
 }

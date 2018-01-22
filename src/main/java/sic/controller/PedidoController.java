@@ -53,7 +53,7 @@ public class PedidoController {
     
     @GetMapping("/pedidos/{idPedido}")
     @ResponseStatus(HttpStatus.OK)
-    public Pedido getPedido(@PathVariable long idPedido) {
+    public Pedido getPedidoPorId(@PathVariable long idPedido) {
         return pedidoService.getPedidoPorId(idPedido);
     }
     
