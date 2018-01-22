@@ -20,9 +20,9 @@ public interface ICuentaCorrienteService {
 
       CuentaCorriente getCuentaCorrientePorID(Long idCuentaCorriente);
       
-      CuentaCorriente getCuentaCorrientePorCliente(long idCliente);
+      CuentaCorrienteCliente getCuentaCorrientePorCliente(long idCliente);
       
-      CuentaCorriente getCuentaCorrientePorProveedor(long idProveedor);
+      CuentaCorrienteProveedor getCuentaCorrientePorProveedor(long idProveedor);
 
       CuentaCorrienteCliente guardarCuentaCorrienteCliente(CuentaCorrienteCliente cuentaCorrienteCliente);
       
