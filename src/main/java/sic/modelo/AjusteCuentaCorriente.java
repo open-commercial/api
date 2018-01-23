@@ -21,7 +21,7 @@ import lombok.ToString;
 
 
 @Entity
-@Table(name = "ajustenotacredito")
+@Table(name = "ajustecuentacorriente")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
