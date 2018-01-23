@@ -219,7 +219,7 @@ public class ReciboServiceImpl implements IReciboService {
                 recibo.setMonto(montos[i]);
                 recibo.setNumSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
                 recibo.setNumRecibo(this.getSiguienteNumeroRecibo(empresa.getId_Empresa(), recibo.getNumSerie()));
-                recibo.setConcepto("");
+                recibo.setConcepto("Recibo Cliente: " + cliente.getNombreFantasia());
                 recibo.setSaldoSobrante(0);
                 recibos.add(recibo);
                 i++;
@@ -368,11 +368,15 @@ public class ReciboServiceImpl implements IReciboService {
     
     @Override
     public byte[] getReporteRecibo(Recibo recibo) {
+        if (recibo.getProveedor() != null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_recibo_reporte_proveedor"));
+        }
         recibo.getCliente().setSaldoCuentaCorriente(cuentaCorrienteService.getCuentaCorrientePorCliente(recibo.getCliente().getId_Cliente()).getSaldo());
         ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
         InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Recibo.jasper");
-        Map params = new HashMap();        
-        params.put("recibo", recibo);        
+        Map params = new HashMap();
+        params.put("recibo", recibo);
         if (!recibo.getEmpresa().getLogo().isEmpty()) {
             try {
                 params.put("logo", new ImageIcon(ImageIO.read(new URL(recibo.getEmpresa().getLogo()))).getImage());

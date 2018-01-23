@@ -12,10 +12,6 @@ from pago p inner join facturacompra fc on p.id_Factura = fc.id_Factura
 inner join factura f on fc.id_Factura = f.id_Factura 
 where f.pagada = true;
 
--- DELETE p.* 
--- FROM pago p INNER JOIN facturacompra f on p.id_Factura = f.id_Factura
--- WHERE p.eliminado = true;
-
 INSERT INTO pago(eliminado, fecha, monto, nota, nroPago, id_Empresa, id_Factura, id_FormaDePago, idNota)
 select eliminada, factura.fecha, factura.total, factura.observaciones, 0, factura.id_Empresa, factura.id_Factura, 10, null
 from factura inner join facturacompra on factura.id_Factura = facturacompra.id_Factura
