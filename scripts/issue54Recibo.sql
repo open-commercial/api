@@ -40,7 +40,7 @@ UPDATE pago inner join facturacompra on pago.id_Factura = facturacompra.id_Factu
 UPDATE pago inner join notadebito on pago.idNota = notadebito.idNota SET notadebito.idRecibo = id_Pago;
 
 INSERT INTO recibo (idRecibo, concepto, eliminado, fecha, monto, numRecibo, numSerie, saldoSobrante, id_Cliente, id_Empresa, id_FormaDePago, id_Usuario)
-SELECT pago.id_Pago, CONCAT("Recibo por pago Nº: ", nroPago), eliminado, fecha, pago.monto, nroPago, (CASE WHEN id_Empresa = 1 THEN 2 ELSE 0 END), 0, id_Cliente, id_Empresa, id_FormaDePago, id_Usuario
+SELECT pago.id_Pago, "", eliminado, fecha, pago.monto, nroPago, (CASE WHEN id_Empresa = 1 THEN 2 ELSE 0 END), 0, id_Cliente, id_Empresa, id_FormaDePago, id_Usuario
 FROM pago inner join facturaventa on pago.id_Factura = facturaventa.id_Factura;
 
 -- Con usuario para el backfill
@@ -50,11 +50,11 @@ values (@idUsuario + 1, true, "backfillCC", "697416b772e7e3780507ab813ebaae7a");
 set @idUsuarioAltaRecibosCompra = (SELECT max(usuario.id_Usuario) FROM usuario);
 
 INSERT INTO recibo (idRecibo, concepto, eliminado, fecha, monto, numRecibo, numSerie, saldoSobrante, id_Proveedor, id_Empresa, id_FormaDePago, id_Usuario)
-SELECT pago.id_Pago, CONCAT("Recibo por pago Nº: ", nroPago), eliminado, fecha, pago.monto, nroPago, (CASE WHEN id_Empresa = 1 THEN 2 ELSE 0 END), 0, id_Proveedor, id_Empresa, id_FormaDePago, @idUsuarioAltaRecibosCompra
+SELECT pago.id_Pago, "", eliminado, fecha, pago.monto, nroPago, (CASE WHEN id_Empresa = 1 THEN 2 ELSE 0 END), 0, id_Proveedor, id_Empresa, id_FormaDePago, @idUsuarioAltaRecibosCompra
 FROM pago inner join facturacompra on pago.id_Factura = facturacompra.id_Factura;
 
 INSERT INTO recibo (idRecibo, concepto, eliminado, fecha, monto, numRecibo, numSerie, saldoSobrante, id_Cliente, id_Empresa, id_FormaDePago, id_Usuario)
-SELECT pago.id_Pago, CONCAT("Recibo por pago Nº: ", nroPago), eliminado, pago.fecha, pago.monto, nroPago, (CASE WHEN pago.id_Empresa = 1 THEN 2 ELSE 0 END), 0, id_Cliente, pago.id_Empresa, id_FormaDePago, id_Usuario
+SELECT pago.id_Pago, "", eliminado, pago.fecha, pago.monto, nroPago, (CASE WHEN pago.id_Empresa = 1 THEN 2 ELSE 0 END), 0, id_Cliente, pago.id_Empresa, id_FormaDePago, id_Usuario
 FROM pago inner join nota on pago.idNota = nota.idNota;
 
 

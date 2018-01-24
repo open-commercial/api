@@ -219,7 +219,7 @@ public class ReciboServiceImpl implements IReciboService {
                 recibo.setMonto(montos[i]);
                 recibo.setNumSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
                 recibo.setNumRecibo(this.getSiguienteNumeroRecibo(empresa.getId_Empresa(), recibo.getNumSerie()));
-                recibo.setConcepto("Recibo Cliente: " + cliente.getNombreFantasia());
+                recibo.setConcepto("Cancelación parcial o total de su deuda.");
                 recibo.setSaldoSobrante(0);
                 recibos.add(recibo);
                 i++;
