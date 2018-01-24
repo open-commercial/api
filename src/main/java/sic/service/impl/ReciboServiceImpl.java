@@ -362,8 +362,13 @@ public class ReciboServiceImpl implements IReciboService {
     }
     
     @Override
-    public List<Recibo> getRecibosConSaldoSobrante(long idEmpresa, long idCliente) {
-        return reciboRepository.getRecibosConSaldoSobrante(idEmpresa, idCliente);
+    public List<Recibo> getRecibosConSaldoSobranteCliente(long idEmpresa, long idCliente) {
+        return reciboRepository.getRecibosConSaldoSobranteCliente(idEmpresa, idCliente);
+    }
+    
+    @Override
+    public List<Recibo> getRecibosConSaldoSobranteProveedor(long idEmpresa, long idProveedor) {
+        return reciboRepository.getRecibosConSaldoSobranteProveedor(idEmpresa, idProveedor);
     }
     
     @Override

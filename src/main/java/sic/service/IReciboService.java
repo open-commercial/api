@@ -41,7 +41,9 @@ public interface IReciboService {
     
     double pagarMultiplesComprobantesProveedor(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, double monto, FormaDePago formaDePago, String nota);
     
-    List<Recibo> getRecibosConSaldoSobrante(long idEmpresa, long idCliente);
+    List<Recibo> getRecibosConSaldoSobranteCliente(long idEmpresa, long idCliente);
+    
+    List<Recibo> getRecibosConSaldoSobranteProveedor(long idEmpresa, long idProveedor);
     
     byte[] getReporteRecibo(Recibo recibo);    
     
