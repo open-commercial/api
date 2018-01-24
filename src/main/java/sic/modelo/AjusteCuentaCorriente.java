@@ -1,5 +1,6 @@
 package sic.modelo;
 
+import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,7 +20,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-
 @Entity
 @Table(name = "ajustecuentacorriente")
 @Data
@@ -27,8 +27,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"numAjuste", "numSerie", "empresa"})
 @ToString
-public class AjusteCuentaCorriente {
-    
+public class AjusteCuentaCorriente implements Serializable {
     
     @Id
     @GeneratedValue

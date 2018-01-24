@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.7.20, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.21, for Linux (x86_64)
 --
--- Host: 127.0.0.1    Database: sic
+-- Host: localhost    Database: ykcojs0liv7ir9od
 -- ------------------------------------------------------
--- Server version	5.7.20-0ubuntu0.17.10.1
+-- Server version	5.7.21-0ubuntu0.17.10.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,13 +16,13 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `ajustenotacredito`
+-- Table structure for table `ajustecuentacorriente`
 --
 
-DROP TABLE IF EXISTS `ajustenotacredito`;
+DROP TABLE IF EXISTS `ajustecuentacorriente`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `ajustenotacredito` (
+CREATE TABLE `ajustecuentacorriente` (
   `idAjusteCuentaCorriente` bigint(20) NOT NULL AUTO_INCREMENT,
   `concepto` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `eliminado` bit(1) NOT NULL,
@@ -36,14 +36,14 @@ CREATE TABLE `ajustenotacredito` (
   `idNota` bigint(20) DEFAULT NULL,
   `id_Usuario` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`idAjusteCuentaCorriente`),
-  KEY `FKnrm5vrwhmsjwrm9ci73hgx155` (`id_Cliente`),
-  KEY `FK9jjafha0m59se0gxtl02irk7` (`id_Empresa`),
-  KEY `FKeoxnsiv79b3iijp24lr1s5te1` (`idNota`),
-  KEY `FK2xgs0tq24c0ageaxasyth61sy` (`id_Usuario`),
-  CONSTRAINT `FK2xgs0tq24c0ageaxasyth61sy` FOREIGN KEY (`id_Usuario`) REFERENCES `usuario` (`id_Usuario`),
-  CONSTRAINT `FK9jjafha0m59se0gxtl02irk7` FOREIGN KEY (`id_Empresa`) REFERENCES `empresa` (`id_Empresa`),
-  CONSTRAINT `FKeoxnsiv79b3iijp24lr1s5te1` FOREIGN KEY (`idNota`) REFERENCES `nota` (`idNota`),
-  CONSTRAINT `FKnrm5vrwhmsjwrm9ci73hgx155` FOREIGN KEY (`id_Cliente`) REFERENCES `cliente` (`id_Cliente`)
+  KEY `FK6gc72l66cdxqqmtgjoddl4hu9` (`id_Cliente`),
+  KEY `FKcpkcqutlifglu02k26e14f6x4` (`id_Empresa`),
+  KEY `FK255ox9p10hhld6dmwm3am0ci3` (`idNota`),
+  KEY `FKoaf9kt56ttip7h98p40g9v6ex` (`id_Usuario`),
+  CONSTRAINT `FK255ox9p10hhld6dmwm3am0ci3` FOREIGN KEY (`idNota`) REFERENCES `nota` (`idNota`),
+  CONSTRAINT `FK6gc72l66cdxqqmtgjoddl4hu9` FOREIGN KEY (`id_Cliente`) REFERENCES `cliente` (`id_Cliente`),
+  CONSTRAINT `FKcpkcqutlifglu02k26e14f6x4` FOREIGN KEY (`id_Empresa`) REFERENCES `empresa` (`id_Empresa`),
+  CONSTRAINT `FKoaf9kt56ttip7h98p40g9v6ex` FOREIGN KEY (`id_Usuario`) REFERENCES `usuario` (`id_Usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -736,12 +736,12 @@ CREATE TABLE `rengloncuentacorriente` (
   `idNota` bigint(20) DEFAULT NULL,
   `idRecibo` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`idRenglonCuentaCorriente`),
-  KEY `FK6k0qf4lps7rnnyp7pfbmo2lgo` (`idAjusteCuentaCorriente`),
+  KEY `FK6daj9kxda0gxirn6k7e49uh04` (`idAjusteCuentaCorriente`),
   KEY `FK9o2j89cigpiqo83vfc38hlmj7` (`idCuentaCorriente`),
   KEY `FKkw1g401txuln3k21xs8q7ypbq` (`id_Factura`),
   KEY `FKse5m5s33xj59pg8xyxatxn4jc` (`idNota`),
   KEY `FKnc57ol526tmqxysywvfys8pxx` (`idRecibo`),
-  CONSTRAINT `FK6k0qf4lps7rnnyp7pfbmo2lgo` FOREIGN KEY (`idAjusteCuentaCorriente`) REFERENCES `ajustenotacredito` (`idAjusteCuentaCorriente`),
+  CONSTRAINT `FK6daj9kxda0gxirn6k7e49uh04` FOREIGN KEY (`idAjusteCuentaCorriente`) REFERENCES `ajustecuentacorriente` (`idAjusteCuentaCorriente`),
   CONSTRAINT `FK9o2j89cigpiqo83vfc38hlmj7` FOREIGN KEY (`idCuentaCorriente`) REFERENCES `cuentacorriente` (`idCuentaCorriente`),
   CONSTRAINT `FKkw1g401txuln3k21xs8q7ypbq` FOREIGN KEY (`id_Factura`) REFERENCES `factura` (`id_Factura`),
   CONSTRAINT `FKnc57ol526tmqxysywvfys8pxx` FOREIGN KEY (`idRecibo`) REFERENCES `recibo` (`idRecibo`),
@@ -939,4 +939,4 @@ CREATE TABLE `usuario` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-01-17 18:26:52
+-- Dump completed on 2018-01-23 19:28:47
