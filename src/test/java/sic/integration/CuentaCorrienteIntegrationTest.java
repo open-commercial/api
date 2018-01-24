@@ -361,7 +361,7 @@ public class CuentaCorrienteIntegrationTest {
                 .withPredeterminado(true)
                 .withNombre("Efectivo")
                 .build();
-        formaDePago = restTemplate.postForObject(apiPrefix + "/formas-de-pago", formaDePago, FormaDePago.class);
+        restTemplate.postForObject(apiPrefix + "/formas-de-pago", formaDePago, FormaDePago.class);
         Usuario credencial = new UsuarioBuilder()
                 .withId_Usuario(1)
                 .withEliminado(false)
@@ -506,7 +506,7 @@ public class CuentaCorrienteIntegrationTest {
                         new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompraDTO>>() {
                 })
                 .getBody().getContent();
-        assertTrue("La factura se encuentra impagada", facturasRecuperadas.get(0).isPagada());
+        assertTrue("La factura se encuentra impaga", facturasRecuperadas.get(0).isPagada());
         assertEquals(0, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/proveedores/1/saldo", Double.class), 0);
         restTemplate.delete(apiPrefix + "/recibos/1");
         facturasRecuperadas = restTemplate
@@ -536,7 +536,7 @@ public class CuentaCorrienteIntegrationTest {
                         new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompraDTO>>() {
                 })
                 .getBody().getContent();
-        assertTrue("La factura se encuentra impagada", facturasRecuperadas.get(0).isPagada());
+        assertTrue("La factura se encuentra impaga", facturasRecuperadas.get(0).isPagada());
         assertEquals(1000, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/proveedores/1/saldo", Double.class), 0);
     }
 

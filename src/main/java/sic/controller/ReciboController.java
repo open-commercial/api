@@ -95,7 +95,7 @@ public class ReciboController {
     
     @GetMapping("/recibos/busqueda")
     @ResponseStatus(HttpStatus.OK)
-    public List<Recibo> getPagosPorCajaYFormaDePago(@RequestParam long idEmpresa,
+    public List<Recibo> getRecibosPorCajaYFormaDePago(@RequestParam long idEmpresa,
                                                     @RequestParam long idFormaDePago,
                                                     @RequestParam long desde,
                                                     @RequestParam long hasta) {

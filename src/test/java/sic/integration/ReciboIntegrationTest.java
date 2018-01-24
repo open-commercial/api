@@ -394,6 +394,12 @@ public class ReciboIntegrationTest {
         notaDebito.setFacturaVenta(null);
         restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1/recibo/2", notaDebito, NotaDebito.class);
         assertEquals(-3402.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
+        assertEquals(0, restTemplate.getForObject(apiPrefix + "/recibos/1", ReciboDTO.class).getSaldoSobrante(), 0);
+        assertEquals(1000, restTemplate.getForObject(apiPrefix + "/recibos/2", ReciboDTO.class).getSaldoSobrante(), 0);
+        restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
+        assertEquals(2590, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
+        assertEquals(4800, restTemplate.getForObject(apiPrefix + "/recibos/1", ReciboDTO.class).getSaldoSobrante(), 0);
+        assertEquals(2192.5, restTemplate.getForObject(apiPrefix + "/recibos/2", ReciboDTO.class).getSaldoSobrante(), 0);
     }
 
 }
