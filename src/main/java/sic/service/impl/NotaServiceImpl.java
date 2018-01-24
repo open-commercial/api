@@ -495,7 +495,7 @@ public class NotaServiceImpl implements INotaService {
         if (notaDebito.getRecibo().getSaldoSobrante() > 0) {
             this.crearYGuardarAjusteCuentaCorriente(notaDebito);
         }
-        List<Recibo> recibos = reciboService.getRecibosConSaldoSobrante(idEmpresa, idCliente);
+        List<Recibo> recibos = reciboService.getRecibosConSaldoSobranteCliente(idEmpresa, idCliente);
         double saldoNotaDebito = pagoService.getSaldoAPagarNotaDebito(notaDebito.getIdNota());
         List<Pago> pagos = new ArrayList<>();
         for (Recibo r : recibos) {

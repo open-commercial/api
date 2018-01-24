@@ -343,7 +343,7 @@ public class FacturaServiceImpl implements IFacturaService {
         }
         return facturaVentaRepository.buscarFacturasVenta(criteria);
     }
-    
+
     @Override
     public Slice<FacturaCompra> getFacturasCompraProveedor(@Param("id_Proveedor") long id_Proveedor, Pageable page) {
         return facturaCompraRepository.getFacturasCompraProveedor(id_Proveedor, page);
@@ -403,56 +403,106 @@ public class FacturaServiceImpl implements IFacturaService {
                     this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) facturaGuardada, TipoDeOperacion.ALTA);
                 } else if (f instanceof FacturaCompra) {
                     facturaGuardada = facturaCompraRepository.save((FacturaCompra) this.procesarFactura(f));
-                    this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaCompra)facturaGuardada, TipoDeOperacion.ALTA);
+                    this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaCompra) facturaGuardada, TipoDeOperacion.ALTA);
                 }
                 facturasProcesadas.add(facturaGuardada);
                 LOGGER.warn("La Factura " + facturaGuardada + " se guardó correctamente.");
                 if (facturaGuardada instanceof FacturaVenta) {
-                    recibos = reciboService.getRecibosConSaldoSobrante(facturaGuardada.getEmpresa().getId_Empresa(),
-                            ((FacturaVenta) facturaGuardada).getCliente().getId_Cliente());
-                    List<Pago> pagos = new ArrayList<>();
-                    double saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
-                    for (Recibo r : recibos) {
-                        while (r.getSaldoSobrante() > 0) {
-                            if (saldoFactura < r.getSaldoSobrante()) {
-                                Pago nuevoPago = new Pago();
-                                nuevoPago.setMonto(saldoFactura);
-                                nuevoPago.setRecibo(r);
-                                nuevoPago.setFactura(facturaGuardada);
-                                nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
-                                nuevoPago.setFecha(new Date());
-                                nuevoPago.setFormaDePago(r.getFormaDePago());
-                                nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
-                                pagoService.guardar(nuevoPago);
-                                pagos.add(nuevoPago);
-                                reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoFactura));
-                            } else if (saldoFactura >= r.getSaldoSobrante()) {
-                                Pago nuevoPago = new Pago();
-                                nuevoPago.setMonto(r.getSaldoSobrante());
-                                nuevoPago.setRecibo(r);
-                                nuevoPago.setFactura(facturaGuardada);
-                                nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
-                                nuevoPago.setFecha(new Date());
-                                nuevoPago.setFormaDePago(r.getFormaDePago());
-                                nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
-                                pagoService.guardar(nuevoPago);
-                                pagos.add(nuevoPago);
-                                reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);
-                            }
-                            if (facturaGuardada.isPagada()) {
-                                break;
-                            }
-                            saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
-                        }
-                        if (facturaGuardada.isPagada()) {
-                            break;
-                        }
-                    }
-                    f.setPagos(pagos);
+                    this.pagarFacturaConRecibosSobrantesCliente(recibos, facturaGuardada);
+                } else if (f instanceof FacturaCompra) {
+                    this.pagarFacturaConRecibosSobrantesProveedor(recibos, facturaGuardada);
                 }
             }
         }
         return facturasProcesadas;
+    }
+
+    private void pagarFacturaConRecibosSobrantesCliente(List<Recibo> recibos, Factura facturaGuardada) {
+        recibos = reciboService.getRecibosConSaldoSobranteCliente(facturaGuardada.getEmpresa().getId_Empresa(),
+                ((FacturaVenta) facturaGuardada).getCliente().getId_Cliente());
+        List<Pago> pagos = new ArrayList<>();
+        double saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
+        for (Recibo r : recibos) {
+            while (r.getSaldoSobrante() > 0) {
+                if (saldoFactura < r.getSaldoSobrante()) {
+                    Pago nuevoPago = new Pago();
+                    nuevoPago.setMonto(saldoFactura);
+                    nuevoPago.setRecibo(r);
+                    nuevoPago.setFactura(facturaGuardada);
+                    nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
+                    nuevoPago.setFecha(new Date());
+                    nuevoPago.setFormaDePago(r.getFormaDePago());
+                    nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
+                    pagoService.guardar(nuevoPago);
+                    pagos.add(nuevoPago);
+                    reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoFactura));
+                } else if (saldoFactura >= r.getSaldoSobrante()) {
+                    Pago nuevoPago = new Pago();
+                    nuevoPago.setMonto(r.getSaldoSobrante());
+                    nuevoPago.setRecibo(r);
+                    nuevoPago.setFactura(facturaGuardada);
+                    nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
+                    nuevoPago.setFecha(new Date());
+                    nuevoPago.setFormaDePago(r.getFormaDePago());
+                    nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
+                    pagoService.guardar(nuevoPago);
+                    pagos.add(nuevoPago);
+                    reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);
+                }
+                if (facturaGuardada.isPagada()) {
+                    break;
+                }
+                saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
+            }
+            if (facturaGuardada.isPagada()) {
+                break;
+            }
+        }
+        facturaGuardada.setPagos(pagos);
+    }
+    
+    private void pagarFacturaConRecibosSobrantesProveedor(List<Recibo> recibos, Factura facturaGuardada) {
+        recibos = reciboService.getRecibosConSaldoSobranteProveedor(facturaGuardada.getEmpresa().getId_Empresa(),
+                ((FacturaCompra) facturaGuardada).getProveedor().getId_Proveedor());
+        List<Pago> pagos = new ArrayList<>();
+        double saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
+        for (Recibo r : recibos) {
+            while (r.getSaldoSobrante() > 0) {
+                if (saldoFactura < r.getSaldoSobrante()) {
+                    Pago nuevoPago = new Pago();
+                    nuevoPago.setMonto(saldoFactura);
+                    nuevoPago.setRecibo(r);
+                    nuevoPago.setFactura(facturaGuardada);
+                    nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
+                    nuevoPago.setFecha(new Date());
+                    nuevoPago.setFormaDePago(r.getFormaDePago());
+                    nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
+                    pagoService.guardar(nuevoPago);
+                    pagos.add(nuevoPago);
+                    reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoFactura));
+                } else if (saldoFactura >= r.getSaldoSobrante()) {
+                    Pago nuevoPago = new Pago();
+                    nuevoPago.setMonto(r.getSaldoSobrante());
+                    nuevoPago.setRecibo(r);
+                    nuevoPago.setFactura(facturaGuardada);
+                    nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
+                    nuevoPago.setFecha(new Date());
+                    nuevoPago.setFormaDePago(r.getFormaDePago());
+                    nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
+                    pagoService.guardar(nuevoPago);
+                    pagos.add(nuevoPago);
+                    reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);
+                }
+                if (facturaGuardada.isPagada()) {
+                    break;
+                }
+                saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
+            }
+            if (facturaGuardada.isPagada()) {
+                break;
+            }
+        }
+        facturaGuardada.setPagos(pagos);
     }
     
     @Override

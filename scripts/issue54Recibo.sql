@@ -10,12 +10,12 @@ ALTER TABLE notadebito ADD pagada bit(1) DEFAULT false after montoNoGravado;
 Delete p.* 
 from pago p inner join facturacompra fc on p.id_Factura = fc.id_Factura
 inner join factura f on fc.id_Factura = f.id_Factura 
-where f.pagada = true;
+where f.pagada = true and DATE(f.fecha) <= '2016-12-31';
 
 INSERT INTO pago(eliminado, fecha, monto, nota, nroPago, id_Empresa, id_Factura, id_FormaDePago, idNota)
 select eliminada, factura.fecha, factura.total, factura.observaciones, 0, factura.id_Empresa, factura.id_Factura, 10, null
 from factura inner join facturacompra on factura.id_Factura = facturacompra.id_Factura
-where factura.pagada = true;
+where factura.pagada = true and DATE(factura.fecha) <= '2016-12-31';
 
 SET SQL_SAFE_UPDATES = 0;
 set @i = (SELECT max(pago.nroPago) FROM pago);
@@ -44,11 +44,13 @@ SELECT pago.id_Pago, CONCAT("Recibo por pago Nº: ", nroPago), eliminado, fecha,
 FROM pago inner join facturaventa on pago.id_Factura = facturaventa.id_Factura;
 
 -- Con usuario para el backfill
+set @idUsuario = (SELECT max(usuario.id_Usuario) FROM usuario);
 insert into usuario(id_Usuario, eliminado, nombre, password) 
-values (31, true, "backfillCC", "697416b772e7e3780507ab813ebaae7a");
+values (@idUsuario + 1, true, "backfillCC", "697416b772e7e3780507ab813ebaae7a");
+set @idUsuarioAltaRecibosCompra = (SELECT max(usuario.id_Usuario) FROM usuario);
 
 INSERT INTO recibo (idRecibo, concepto, eliminado, fecha, monto, numRecibo, numSerie, saldoSobrante, id_Proveedor, id_Empresa, id_FormaDePago, id_Usuario)
-SELECT pago.id_Pago, CONCAT("Recibo por pago Nº: ", nroPago), eliminado, fecha, pago.monto, nroPago, (CASE WHEN id_Empresa = 1 THEN 2 ELSE 0 END), 0, id_Proveedor, id_Empresa, id_FormaDePago, 31
+SELECT pago.id_Pago, CONCAT("Recibo por pago Nº: ", nroPago), eliminado, fecha, pago.monto, nroPago, (CASE WHEN id_Empresa = 1 THEN 2 ELSE 0 END), 0, id_Proveedor, id_Empresa, id_FormaDePago, @idUsuarioAltaRecibosCompra
 FROM pago inner join facturacompra on pago.id_Factura = facturacompra.id_Factura;
 
 INSERT INTO recibo (idRecibo, concepto, eliminado, fecha, monto, numRecibo, numSerie, saldoSobrante, id_Cliente, id_Empresa, id_FormaDePago, id_Usuario)

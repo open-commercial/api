@@ -28,7 +28,7 @@ import lombok.ToString;
 @EqualsAndHashCode(of = {"numAjuste", "numSerie", "empresa"})
 @ToString
 public class AjusteCuentaCorriente implements Serializable {
-    
+
     @Id
     @GeneratedValue
     private long idAjusteCuentaCorriente;

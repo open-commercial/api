@@ -98,7 +98,7 @@ public class RenglonCuentaCorriente implements Serializable {
     private AjusteCuentaCorriente ajusteCuentaCorriente;
     
     @Transient
-    private long CAE;
+    private Long CAE;
     
     @Transient
     private double saldo;
