@@ -1239,11 +1239,11 @@ public class FacturaServiceImpl implements IFacturaService {
     public RenglonFactura calcularRenglon(TipoDeComprobante tipoDeComprobante, Movimiento movimiento,
             double cantidad, long idProducto, double descuentoPorcentaje, boolean dividiendoRenglonFactura) {
         Producto producto = productoService.getProductoPorId(idProducto);
-        if (dividiendoRenglonFactura == false && cantidad < producto.getVentaMinima()
+        /*if (dividiendoRenglonFactura == false && cantidad < producto.getVentaMinima()
                 && (movimiento == Movimiento.VENTA || movimiento == Movimiento.PEDIDO)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_cantidad_menor_a_minima"));
-        }
+        }*/
         RenglonFactura nuevoRenglon = new RenglonFactura();
         nuevoRenglon.setId_ProductoItem(producto.getId_Producto());
         nuevoRenglon.setCodigoItem(producto.getCodigo());
