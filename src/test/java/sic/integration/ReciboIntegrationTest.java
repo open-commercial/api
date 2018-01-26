@@ -383,6 +383,7 @@ public class ReciboIntegrationTest {
         assertEquals(TipoDeComprobante.FACTURA_B, facturaVentaB.getTipoComprobante());
         assertTrue("La fv B se encuentra impaga", facturaVentaB.isPagada());
         NotaDebitoDTO notaDebito = new NotaDebitoDTO();
+        notaDebito.setCAE(0L);
         notaDebito.setCliente(cliente);
         notaDebito.setEmpresa(empresa);
         notaDebito.setFecha(new Date());
@@ -404,6 +405,8 @@ public class ReciboIntegrationTest {
         assertEquals(2590, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         assertEquals(4800, restTemplate.getForObject(apiPrefix + "/recibos/1", ReciboDTO.class).getSaldoSobrante(), 0);
         assertEquals(2192.5, restTemplate.getForObject(apiPrefix + "/recibos/2", ReciboDTO.class).getSaldoSobrante(), 0);
+        restTemplate.delete(apiPrefix + "/notas?idsNota=1");
+        assertEquals(6992.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
     }
 
 }

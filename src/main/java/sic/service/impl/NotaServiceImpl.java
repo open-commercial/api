@@ -749,8 +749,10 @@ public class NotaServiceImpl implements INotaService {
                         }
                     } else if (nota instanceof NotaDebito) {
                         AjusteCuentaCorriente ajusteCC = ajusteCuentaCorrienteService.findByNotaDebito(nota);
-                        this.cuentaCorrienteService.asentarEnCuentaCorriente(ajusteCuentaCorrienteService.findByNotaDebito(nota), TipoDeOperacion.ELIMINACION);
-                        ajusteCuentaCorrienteService.eliminar(ajusteCC.getIdAjusteCuentaCorriente());
+                        if (ajusteCC != null) {
+                            this.cuentaCorrienteService.asentarEnCuentaCorriente(ajusteCuentaCorrienteService.findByNotaDebito(nota), TipoDeOperacion.ELIMINACION);
+                            ajusteCuentaCorrienteService.eliminar(ajusteCC.getIdAjusteCuentaCorriente());
+                        }
                     }
                     nota.setEliminada(true);
                     this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ELIMINACION);
@@ -762,7 +764,7 @@ public class NotaServiceImpl implements INotaService {
                 }
             } else {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_eliminar_factura_aprobada"));
+                        .getString("mensaje_eliminar_nota_aprobada"));
             }
         }
     }
