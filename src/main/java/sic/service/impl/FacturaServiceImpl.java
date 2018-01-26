@@ -432,7 +432,7 @@ public class FacturaServiceImpl implements IFacturaService {
                     nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
                     nuevoPago.setFecha(new Date());
                     nuevoPago.setFormaDePago(r.getFormaDePago());
-                    nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
+                    nuevoPago.setNota("");
                     pagoService.guardar(nuevoPago);
                     pagos.add(nuevoPago);
                     reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoFactura));
@@ -444,7 +444,7 @@ public class FacturaServiceImpl implements IFacturaService {
                     nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
                     nuevoPago.setFecha(new Date());
                     nuevoPago.setFormaDePago(r.getFormaDePago());
-                    nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
+                    nuevoPago.setNota("");
                     pagoService.guardar(nuevoPago);
                     pagos.add(nuevoPago);
                     reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);
@@ -476,7 +476,7 @@ public class FacturaServiceImpl implements IFacturaService {
                     nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
                     nuevoPago.setFecha(new Date());
                     nuevoPago.setFormaDePago(r.getFormaDePago());
-                    nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
+                    nuevoPago.setNota("");
                     pagoService.guardar(nuevoPago);
                     pagos.add(nuevoPago);
                     reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoFactura));
@@ -488,7 +488,7 @@ public class FacturaServiceImpl implements IFacturaService {
                     nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
                     nuevoPago.setFecha(new Date());
                     nuevoPago.setFormaDePago(r.getFormaDePago());
-                    nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
+                    nuevoPago.setNota("");
                     pagoService.guardar(nuevoPago);
                     pagos.add(nuevoPago);
                     reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);

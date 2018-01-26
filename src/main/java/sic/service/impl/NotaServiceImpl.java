@@ -514,7 +514,7 @@ public class NotaServiceImpl implements INotaService {
                         nuevoPago.setEmpresa(notaDebito.getEmpresa());
                         nuevoPago.setFecha(new Date());
                         nuevoPago.setFormaDePago(r.getFormaDePago());
-                        nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
+                        nuevoPago.setNota("");
                         pagoService.guardar(nuevoPago);
                         pagos.add(nuevoPago);
                         reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoNotaDebito));
@@ -527,7 +527,7 @@ public class NotaServiceImpl implements INotaService {
                         nuevoPago.setEmpresa(notaDebito.getEmpresa());
                         nuevoPago.setFecha(new Date());
                         nuevoPago.setFormaDePago(r.getFormaDePago());
-                        nuevoPago.setNota("Pago por recibo Nº " + r.getNumRecibo());
+                        nuevoPago.setNota("");
                         pagoService.guardar(nuevoPago);
                         pagos.add(nuevoPago);
                         reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);
