@@ -509,21 +509,25 @@ public class FacturaServiceImpl implements IFacturaService {
     @Transactional
     public void eliminar(long[] idsFactura) {
         for (long idFactura : idsFactura) {
-            List<Pago> pagos = pagoService.getPagosDeLaFactura(idFactura);
-            if (!pagos.isEmpty()) {
-                pagos.forEach(pago -> {
-                    pagoService.eliminar(pago.getId_Pago());
-                });
-            }
             Factura factura = this.getFacturaPorId(idFactura);
             if (factura.getCAE() == 0L) {
-                factura.setEliminada(true);
                 if (factura instanceof FacturaVenta) {
+                    if (notaService.existsByFacturaVentaAndEliminada((FacturaVenta) factura)) {
+                        throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                                .getString("mensaje_no_se_puede_eliminar"));
+                    }
                     this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) factura, TipoDeOperacion.ELIMINACION);
                     productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.VENTA);
                 } else if (factura instanceof FacturaCompra) {
                     productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.COMPRA);
                 }
+                List<Pago> pagos = pagoService.getPagosDeLaFactura(idFactura);
+                if (!pagos.isEmpty()) {
+                    pagos.forEach(pago -> {
+                        pagoService.eliminar(pago.getId_Pago());
+                    });
+                }
+                factura.setEliminada(true);
                 if (factura.getPedido() != null) {
                     pedidoService.actualizarEstadoPedido(factura.getPedido());
                 }

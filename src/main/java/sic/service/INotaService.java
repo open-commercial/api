@@ -36,6 +36,8 @@ public interface INotaService {
     
     boolean existeNotaDebitoPorRecibo(Recibo recibo);
     
+    boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta);
+    
     double getTotalPagado(Long idNota);
 
     List<Nota> getNotasPorFactura(Long idFactura);

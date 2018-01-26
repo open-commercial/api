@@ -143,6 +143,11 @@ public class NotaServiceImpl implements INotaService {
     }
     
     @Override
+    public boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta) {
+        return notaRepository.existsByFacturaVentaAndEliminada(facturaVenta, false);
+    }
+    
+    @Override
     public double getTotalPagado(Long idNota) {
         double pagado = 0;
         List<Pago> pagos = this.getPagosNota(idNota);
