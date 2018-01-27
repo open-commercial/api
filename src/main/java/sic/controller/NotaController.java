@@ -31,6 +31,7 @@ import sic.modelo.TipoDeComprobante;
 import sic.service.IClienteService;
 import sic.service.IEmpresaService;
 import sic.service.INotaService;
+import sic.service.IReciboService;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -39,14 +40,16 @@ public class NotaController {
     private final INotaService notaService;
     private final IClienteService clienteService;
     private final IEmpresaService empresaService;
-    private final int TAMANIO_PAGINA_DEFAULT = 100;
+    private final IReciboService reciboService;
+    private final int TAMANIO_PAGINA_DEFAULT = 50;
     
     @Autowired
     public NotaController(INotaService notaService, IClienteService clienteService,
-            IEmpresaService empresaService) {
+            IEmpresaService empresaService, IReciboService reciboService) {
         this.notaService = notaService;
         this.clienteService = clienteService;
         this.empresaService = empresaService;
+        this.reciboService = reciboService;
     }
     
     @GetMapping("/notas/{idNota}")
@@ -61,16 +64,22 @@ public class NotaController {
         return notaService.getFacturaNota(idNota);
     }
     
-    @GetMapping("/notas/debito/{idPago}")
+    @GetMapping("/notas/debito/recibo/{idRecibo}/existe")
     @ResponseStatus(HttpStatus.OK)
-    public NotaDebito getPagoNotaDebito(@PathVariable long idPago) {
-        return notaService.getNotaDebitoPorPago(idPago);
+    public boolean existeNotaDebitoRecibo(@PathVariable long idRecibo) {
+        return notaService.existeNotaDebitoPorRecibo(reciboService.getById(idRecibo));
     }
     
     @GetMapping("/notas/cliente/{idCliente}/empresa/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
     public List<Nota> getNotasPorClienteYEmpresa(Long idEmpresa, Long idCliente) {
         return notaService.getNotasPorClienteYEmpresa(idEmpresa, idCliente);
+    }
+    
+    @GetMapping("/notas/pagos/{idPago}")
+    @ResponseStatus(HttpStatus.OK)
+    public Nota getNotaDelPago(@PathVariable long idPago) {
+        return notaService.getNotaDelPago(idPago);
     }
     
     @GetMapping("/notas/busqueda/criteria") 
@@ -143,18 +152,17 @@ public class NotaController {
                                    @PathVariable long idUsuario,
                                    @PathVariable long idFactura, 
                                    @RequestParam boolean modificarStock) {
-        return notaService.guardarNota(nota, idEmpresa, idCliente, idUsuario, idFactura, null, modificarStock);
+        return notaService.guardarNota(nota, idEmpresa, idCliente, idUsuario, null, idFactura, modificarStock);
     }
     
-    @PostMapping("/notas/debito/empresa/{idEmpresa}/cliente/{idCliente}/usuario/{idUsuario}/pago/{idPago}")
+    @PostMapping("/notas/debito/empresa/{idEmpresa}/cliente/{idCliente}/usuario/{idUsuario}/recibo/{idRecibo}")
     @ResponseStatus(HttpStatus.CREATED)
     public Nota guardarNotaDebito(@RequestBody NotaDebito nota,
                                   @PathVariable long idEmpresa,
                                   @PathVariable long idCliente,
                                   @PathVariable long idUsuario,
-                                  @PathVariable long idPago,
-                                  @RequestParam(required = false) Long idFactura) {
-        return notaService.guardarNota(nota, idEmpresa, idCliente, idUsuario, idFactura, idPago, false);
+                                  @PathVariable long idRecibo) {
+        return notaService.guardarNota(nota, idEmpresa, idCliente, idUsuario, idRecibo, null, false);
     }
 
     @GetMapping("/notas/{idNota}/reporte")
@@ -195,21 +203,13 @@ public class NotaController {
                                                                        @RequestParam long[] idRenglonFactura) {
         return notaService.calcularRenglonCredito(tipoDeComprobante, cantidad, idRenglonFactura);
     }
-  
-    @GetMapping("/notas/renglon/debito/pago/{idPago}")
-    @ResponseStatus(HttpStatus.OK) 
-    public List<RenglonNotaDebito> calcularRenglonNotaDebitoPagos(@PathVariable long idPago, 
-                                                                  @RequestParam double monto,
-                                                                  @RequestParam double ivaPorcentaje) {
-        return notaService.calcularRenglonDebito(idPago, monto, ivaPorcentaje);
-    }
     
-    @GetMapping("/notas/renglon/debito")
+    @GetMapping("/notas/renglon/debito/recibo/{idRecibo}")
     @ResponseStatus(HttpStatus.OK) 
-    public List<RenglonNotaDebito> calcularRenglonNotaDebito(@RequestParam String descripcion,
+    public List<RenglonNotaDebito> calcularRenglonNotaDebito(@PathVariable long idRecibo, 
                                                              @RequestParam double monto,
                                                              @RequestParam double ivaPorcentaje) {
-        return notaService.calcularRenglonDebito(null, monto, ivaPorcentaje);
+        return notaService.calcularRenglonDebito(idRecibo, monto, ivaPorcentaje);
     }
     
     @GetMapping("/notas/credito/sub-total")
@@ -221,45 +221,45 @@ public class NotaController {
     @GetMapping("/notas/credito/descuento-neto")
     @ResponseStatus(HttpStatus.OK)
     public double calcularDescuentoNetoCredito(@RequestParam double subTotal,
-                                         @RequestParam double descuentoPorcentaje) {
+                                               @RequestParam double descuentoPorcentaje) {
         return notaService.calcularDecuentoNetoCredito(subTotal, descuentoPorcentaje);
     }
     
     @GetMapping("/notas/credito/recargo-neto")
     @ResponseStatus(HttpStatus.OK)
     public double calcularRecargoNetoCredito(@RequestParam double subTotal,
-                                      @RequestParam double recargoPorcentaje) {
+                                             @RequestParam double recargoPorcentaje) {
         return notaService.calcularRecargoNetoCredito(subTotal, recargoPorcentaje);
     }
     
     @GetMapping("/notas/credito/iva-neto")
     @ResponseStatus(HttpStatus.OK)
     public double calcularIVANetoCredito(@RequestParam TipoDeComprobante tipoDeComprobante,
-                                  @RequestParam double[] cantidades,
-                                  @RequestParam double[] ivaPorcentajeRenglones,
-                                  @RequestParam double[] ivaNetoRenglones,
-                                  @RequestParam double ivaPorcentaje,
-                                  @RequestParam double descuentoPorcentaje, 
-                                  @RequestParam double recargoPorcentaje){
+                                         @RequestParam double[] cantidades,
+                                         @RequestParam double[] ivaPorcentajeRenglones,
+                                         @RequestParam double[] ivaNetoRenglones,
+                                         @RequestParam double ivaPorcentaje,
+                                         @RequestParam double descuentoPorcentaje, 
+                                         @RequestParam double recargoPorcentaje){
         return notaService.calcularIVANetoCredito(tipoDeComprobante, cantidades, ivaPorcentajeRenglones, ivaNetoRenglones, ivaPorcentaje, descuentoPorcentaje, recargoPorcentaje);
     }  
     
     @GetMapping("/notas/credito/sub-total-bruto")
     @ResponseStatus(HttpStatus.OK)
     public double calcularSubTotalBrutoCredito(TipoDeComprobante tipoDeComprobante, 
-                                        double subTotal, 
-                                        double recargoNeto, 
-                                        double descuentoNeto,
-                                        double iva105Neto,
-                                        double iva21Neto) {
+                                               double subTotal, 
+                                               double recargoNeto, 
+                                               double descuentoNeto,
+                                               double iva105Neto,
+                                               double iva21Neto) {
         return notaService.calcularSubTotalBrutoCredito(tipoDeComprobante, subTotal, recargoNeto, descuentoNeto, iva105Neto, iva21Neto);
     }
     
     @GetMapping("/notas/credito/total")
     @ResponseStatus(HttpStatus.OK)
     public double calcularTotalCredito(@RequestParam double subTotalBruto,                                
-                                @RequestParam double iva105Neto,
-                                @RequestParam double iva21Neto) {
+                                       @RequestParam double iva105Neto,
+                                       @RequestParam double iva21Neto) {
         return notaService.calcularTotalCredito(subTotalBruto, iva105Neto, iva21Neto);
     }
     

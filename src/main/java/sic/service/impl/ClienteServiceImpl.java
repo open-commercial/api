@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.BusquedaClienteCriteria;
 import sic.modelo.Cliente;
 import sic.modelo.CuentaCorriente;
+import sic.modelo.CuentaCorrienteCliente;
 import sic.modelo.Empresa;
 import sic.modelo.QCliente;
 import sic.service.IClienteService;
@@ -207,11 +208,11 @@ public class ClienteServiceImpl implements IClienteService {
     public Cliente guardar(Cliente cliente) {        
         this.validarOperacion(TipoDeOperacion.ALTA, cliente);
         cliente = clienteRepository.save(cliente);  
-        CuentaCorriente cuentaCorrienteCliente = new CuentaCorriente();
+        CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
         cuentaCorrienteCliente.setCliente(cliente);
         cuentaCorrienteCliente.setEmpresa(cliente.getEmpresa());
         cuentaCorrienteCliente.setFechaApertura(cliente.getFechaAlta());
-        cuentaCorrienteService.guardar(cuentaCorrienteCliente);
+        cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);
         LOGGER.warn("El Cliente " + cliente + " se guardó correctamente." );
         return cliente;
     }

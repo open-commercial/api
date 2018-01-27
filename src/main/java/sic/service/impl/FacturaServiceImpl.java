@@ -26,6 +26,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Cliente;
@@ -46,6 +49,7 @@ import sic.service.IPagoService;
 import sic.service.IPedidoService;
 import sic.service.IProductoService;
 import sic.modelo.Movimiento;
+import sic.modelo.Recibo;
 import sic.modelo.RenglonPedido;
 import sic.modelo.TipoDeComprobante;
 import sic.service.BusinessServiceException;
@@ -60,6 +64,7 @@ import sic.repository.RenglonFacturaRepository;
 import sic.service.ICuentaCorrienteService;
 import sic.service.IAfipService;
 import sic.service.INotaService;
+import sic.service.IReciboService;
 
 @Service
 public class FacturaServiceImpl implements IFacturaService {
@@ -75,6 +80,7 @@ public class FacturaServiceImpl implements IFacturaService {
     private final INotaService notaService;
     private final ICuentaCorrienteService cuentaCorrienteService;
     private final IAfipService afipService;
+    private final IReciboService reciboService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
@@ -88,7 +94,8 @@ public class FacturaServiceImpl implements IFacturaService {
             IPedidoService pedidoService, IPagoService pagoService, 
             INotaService notaService,
             ICuentaCorrienteService cuentaCorrienteService,
-            IAfipService afipService) {
+            IAfipService afipService,
+            IReciboService reciboService) {
         this.facturaRepository = facturaRepository;
         this.facturaVentaRepository = facturaVentaRepository;
         this.facturaCompraRepository = facturaCompraRepository;
@@ -100,11 +107,22 @@ public class FacturaServiceImpl implements IFacturaService {
         this.notaService = notaService;
         this.cuentaCorrienteService = cuentaCorrienteService;
         this.afipService = afipService;
+        this.reciboService = reciboService;
     }
     
     @Override
     public Factura getFacturaPorId(Long idFactura) {
         Factura factura = facturaRepository.findById(idFactura);
+        if (factura == null) {
+            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_factura_eliminada"));
+        }
+        return factura;
+    }
+    
+    @Override
+    public FacturaCompra getFacturaCompraPorId(Long idFactura) {
+        FacturaCompra factura = facturaCompraRepository.findById(idFactura);
         if (factura == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_eliminada"));
@@ -326,6 +344,11 @@ public class FacturaServiceImpl implements IFacturaService {
         return facturaVentaRepository.buscarFacturasVenta(criteria);
     }
 
+    @Override
+    public Slice<FacturaCompra> getFacturasCompraProveedor(@Param("id_Proveedor") long id_Proveedor, Pageable page) {
+        return facturaCompraRepository.getFacturasCompraProveedor(id_Proveedor, page);
+    }
+
     private Factura procesarFactura(Factura factura) {
         factura.setEliminada(false);
         if (factura instanceof FacturaVenta) {
@@ -335,13 +358,18 @@ public class FacturaServiceImpl implements IFacturaService {
             factura.setNumFactura(this.calcularNumeroFacturaVenta(factura.getTipoComprobante(),
                     factura.getNumSerie(), factura.getEmpresa().getId_Empresa()));
         }
-        this.validarFactura(factura);    
+        this.validarFactura(factura);
         return factura;
     }
-    
+
     @Override
     @Transactional
-    public List<Factura> guardar(List<Factura> facturas, Long idPedido) {
+    public List<Factura> guardar(List<Factura> facturas, Long idPedido, List<Recibo> recibos) {
+        if (recibos != null) {
+            recibos.forEach(r -> {
+                reciboService.guardar(r);
+            });
+        }
         List<Factura> facturasProcesadas = new ArrayList<>();
         facturas.forEach(f -> {
             if (f instanceof FacturaVenta) {
@@ -356,68 +384,150 @@ public class FacturaServiceImpl implements IFacturaService {
                 f.setPedido(pedido);
             });
             for (Factura f : facturas) {
-                List<Pago> pagosFactura = f.getPagos();
-                f.setPagos(null);
                 Factura facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFactura(f));
                 this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) facturaGuardada, TipoDeOperacion.ALTA);
                 facturasProcesadas.add(facturaGuardada);
-                if (pagosFactura != null) {
-                    pagosFactura.forEach(p -> {
-                        pagoService.guardar(p);
-                    });
-                    f.setPagos(pagosFactura);
-                }
             }
             pedido.setFacturas(facturasProcesadas);
             pedidoService.actualizar(pedido);
             facturasProcesadas.stream().forEach(f -> {
-                this.actualizarFacturaEstadoPago(f);
                 LOGGER.warn("La Factura " + f + " se guardó correctamente.");
             });
             pedidoService.actualizarEstadoPedido(pedido);
         } else {
             facturasProcesadas = new ArrayList<>();
             for (Factura f : facturas) {
-                List<Pago> pagosFactura = f.getPagos();
-                f.setPagos(null);
                 Factura facturaGuardada = null;
                 if (f instanceof FacturaVenta) {
                     facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFactura(f));
                     this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) facturaGuardada, TipoDeOperacion.ALTA);
                 } else if (f instanceof FacturaCompra) {
                     facturaGuardada = facturaCompraRepository.save((FacturaCompra) this.procesarFactura(f));
+                    this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaCompra) facturaGuardada, TipoDeOperacion.ALTA);
                 }
                 facturasProcesadas.add(facturaGuardada);
                 LOGGER.warn("La Factura " + facturaGuardada + " se guardó correctamente.");
-                if (pagosFactura != null) {
-                    pagosFactura.forEach(p -> {
-                        pagoService.guardar(p);
-                    });
-                    f.setPagos(pagosFactura);
+                if (facturaGuardada instanceof FacturaVenta) {
+                    this.pagarFacturaConRecibosSobrantesCliente(recibos, facturaGuardada);
+                } else if (f instanceof FacturaCompra) {
+                    this.pagarFacturaConRecibosSobrantesProveedor(recibos, facturaGuardada);
                 }
-                this.actualizarFacturaEstadoPago(facturaGuardada);
             }
         }
         return facturasProcesadas;
+    }
+
+    private void pagarFacturaConRecibosSobrantesCliente(List<Recibo> recibos, Factura facturaGuardada) {
+        recibos = reciboService.getRecibosConSaldoSobranteCliente(facturaGuardada.getEmpresa().getId_Empresa(),
+                ((FacturaVenta) facturaGuardada).getCliente().getId_Cliente());
+        List<Pago> pagos = new ArrayList<>();
+        double saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
+        for (Recibo r : recibos) {
+            while (r.getSaldoSobrante() > 0) {
+                if (saldoFactura < r.getSaldoSobrante()) {
+                    Pago nuevoPago = new Pago();
+                    nuevoPago.setMonto(saldoFactura);
+                    nuevoPago.setRecibo(r);
+                    nuevoPago.setFactura(facturaGuardada);
+                    nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
+                    nuevoPago.setFecha(new Date());
+                    nuevoPago.setFormaDePago(r.getFormaDePago());
+                    nuevoPago.setNota("");
+                    pagoService.guardar(nuevoPago);
+                    pagos.add(nuevoPago);
+                    reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoFactura));
+                } else if (saldoFactura >= r.getSaldoSobrante()) {
+                    Pago nuevoPago = new Pago();
+                    nuevoPago.setMonto(r.getSaldoSobrante());
+                    nuevoPago.setRecibo(r);
+                    nuevoPago.setFactura(facturaGuardada);
+                    nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
+                    nuevoPago.setFecha(new Date());
+                    nuevoPago.setFormaDePago(r.getFormaDePago());
+                    nuevoPago.setNota("");
+                    pagoService.guardar(nuevoPago);
+                    pagos.add(nuevoPago);
+                    reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);
+                }
+                if (facturaGuardada.isPagada()) {
+                    break;
+                }
+                saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
+            }
+            if (facturaGuardada.isPagada()) {
+                break;
+            }
+        }
+        facturaGuardada.setPagos(pagos);
+    }
+    
+    private void pagarFacturaConRecibosSobrantesProveedor(List<Recibo> recibos, Factura facturaGuardada) {
+        recibos = reciboService.getRecibosConSaldoSobranteProveedor(facturaGuardada.getEmpresa().getId_Empresa(),
+                ((FacturaCompra) facturaGuardada).getProveedor().getId_Proveedor());
+        List<Pago> pagos = new ArrayList<>();
+        double saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
+        for (Recibo r : recibos) {
+            while (r.getSaldoSobrante() > 0) {
+                if (saldoFactura < r.getSaldoSobrante()) {
+                    Pago nuevoPago = new Pago();
+                    nuevoPago.setMonto(saldoFactura);
+                    nuevoPago.setRecibo(r);
+                    nuevoPago.setFactura(facturaGuardada);
+                    nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
+                    nuevoPago.setFecha(new Date());
+                    nuevoPago.setFormaDePago(r.getFormaDePago());
+                    nuevoPago.setNota("");
+                    pagoService.guardar(nuevoPago);
+                    pagos.add(nuevoPago);
+                    reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoFactura));
+                } else if (saldoFactura >= r.getSaldoSobrante()) {
+                    Pago nuevoPago = new Pago();
+                    nuevoPago.setMonto(r.getSaldoSobrante());
+                    nuevoPago.setRecibo(r);
+                    nuevoPago.setFactura(facturaGuardada);
+                    nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
+                    nuevoPago.setFecha(new Date());
+                    nuevoPago.setFormaDePago(r.getFormaDePago());
+                    nuevoPago.setNota("");
+                    pagoService.guardar(nuevoPago);
+                    pagos.add(nuevoPago);
+                    reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);
+                }
+                if (facturaGuardada.isPagada()) {
+                    break;
+                }
+                saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
+            }
+            if (facturaGuardada.isPagada()) {
+                break;
+            }
+        }
+        facturaGuardada.setPagos(pagos);
     }
     
     @Override
     @Transactional
     public void eliminar(long[] idsFactura) {
         for (long idFactura : idsFactura) {
-            if (!pagoService.getPagosDeLaFactura(idFactura).isEmpty()) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_no_se_puede_eliminar"));
-            }
             Factura factura = this.getFacturaPorId(idFactura);
             if (factura.getCAE() == 0L) {
-                factura.setEliminada(true);
                 if (factura instanceof FacturaVenta) {
+                    if (notaService.existsByFacturaVentaAndEliminada((FacturaVenta) factura)) {
+                        throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                                .getString("mensaje_no_se_puede_eliminar"));
+                    }
                     this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) factura, TipoDeOperacion.ELIMINACION);
                     productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.VENTA);
                 } else if (factura instanceof FacturaCompra) {
                     productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.COMPRA);
                 }
+                List<Pago> pagos = pagoService.getPagosDeLaFactura(idFactura);
+                if (!pagos.isEmpty()) {
+                    pagos.forEach(pago -> {
+                        pagoService.eliminar(pago.getId_Pago());
+                    });
+                }
+                factura.setEliminada(true);
                 if (factura.getPedido() != null) {
                     pedidoService.actualizarEstadoPedido(factura.getPedido());
                 }
@@ -425,9 +535,9 @@ public class FacturaServiceImpl implements IFacturaService {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_eliminar_factura_aprobada"));
             }
-        }  
+        }
     }
-    
+
     private HashMap<Long, Double> getIdsProductosYCantidades(Factura factura) {
         HashMap<Long, Double> idsYCantidades = new HashMap<>();
         factura.getRenglones().forEach(r -> {

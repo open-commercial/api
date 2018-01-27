@@ -20,6 +20,10 @@ public enum TipoDeComprobante {
     
     PRESUPUESTO,
     
+    RECIBO,
+    
+    AJUSTE,
+    
     NOTA_CREDITO_A,
     
     NOTA_CREDITO_B,

@@ -84,6 +84,7 @@ public abstract class Nota implements Serializable {
     @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
     private Usuario usuario;
     
+    //Mover este atributo a notaCredito, y solo FACTURA
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "id_Factura")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
