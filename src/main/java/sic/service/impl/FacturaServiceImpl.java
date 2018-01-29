@@ -365,11 +365,6 @@ public class FacturaServiceImpl implements IFacturaService {
     @Override
     @Transactional
     public List<Factura> guardar(List<Factura> facturas, Long idPedido, List<Recibo> recibos) {
-        if (recibos != null) {
-            recibos.forEach(r -> {
-                reciboService.guardar(r);
-            });
-        }
         List<Factura> facturasProcesadas = new ArrayList<>();
         facturas.forEach(f -> {
             if (f instanceof FacturaVenta) {
@@ -407,13 +402,18 @@ public class FacturaServiceImpl implements IFacturaService {
                 }
                 facturasProcesadas.add(facturaGuardada);
                 LOGGER.warn("La Factura " + facturaGuardada + " se guardó correctamente.");
-                if (facturaGuardada instanceof FacturaVenta) {
+                if (recibos != null) {
+                    recibos.forEach(r -> {
+                        reciboService.guardar(r);
+                    });
+                } else if (facturaGuardada instanceof FacturaVenta) {
                     this.pagarFacturaConRecibosSobrantesCliente(recibos, facturaGuardada);
                 } else if (f instanceof FacturaCompra) {
                     this.pagarFacturaConRecibosSobrantesProveedor(recibos, facturaGuardada);
                 }
             }
         }
+
         return facturasProcesadas;
     }
 
