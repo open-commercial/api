@@ -408,7 +408,7 @@ public class FacturaServiceImpl implements IFacturaService {
         }
         return facturasProcesadas;
     }
-    
+
     private void procesarRecibosYPagarFacturas(List<Recibo> recibos, Factura facturaGuardada) {
         if (recibos != null) {
             recibos.forEach(r -> {
@@ -420,14 +420,14 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     private void pagarFacturaConRecibosSobrantes(Factura facturaGuardada) {
-        List <Recibo> recibos = new ArrayList<>();
-        if(facturaGuardada instanceof FacturaVenta) {
+        List<Recibo> recibos = new ArrayList<>();
+        if (facturaGuardada instanceof FacturaVenta) {
             recibos = reciboService.getRecibosConSaldoSobranteCliente(facturaGuardada.getEmpresa().getId_Empresa(),
-                ((FacturaVenta) facturaGuardada).getCliente().getId_Cliente());
+                    ((FacturaVenta) facturaGuardada).getCliente().getId_Cliente());
         } else if (facturaGuardada instanceof FacturaCompra) {
             recibos = reciboService.getRecibosConSaldoSobranteProveedor(facturaGuardada.getEmpresa().getId_Empresa(),
-                ((FacturaCompra) facturaGuardada).getProveedor().getId_Proveedor());
-        }     
+                    ((FacturaCompra) facturaGuardada).getProveedor().getId_Proveedor());
+        }
         List<Pago> pagos = new ArrayList<>();
         double saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
         for (Recibo r : recibos) {
