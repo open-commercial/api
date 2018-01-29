@@ -60,6 +60,7 @@ import sic.builder.RenglonPedidoBuilder;
 import sic.modelo.EstadoPedido;
 import sic.modelo.dto.PedidoDTO;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import sic.modelo.Producto;
@@ -336,7 +337,7 @@ public class FacturacionIntegrationTest {
                 .withPredeterminado(true)
                 .withNombre("Efectivo")
                 .build();
-        restTemplate.postForObject(apiPrefix + "/formas-de-pago", formaDePago, FormaDePago.class);
+        formaDePago = restTemplate.postForObject(apiPrefix + "/formas-de-pago", formaDePago, FormaDePago.class);
         Usuario credencial = new UsuarioBuilder()
                 .withId_Usuario(1)
                 .withEliminado(false)
@@ -482,6 +483,8 @@ public class FacturacionIntegrationTest {
         facturaVentaA.setTotal(total);
         facturaVentaA.setFecha(new Date());
         restTemplate.postForObject(apiPrefix + "/facturas/venta?idPedido=" + pedidoRecuperado.getId_Pedido()
+                + "&idsFormaDePago=" + formaDePago.getId_FormaDePago()
+                + "&montos=" + total
                 + "&idCliente=" + cliente.getId_Cliente()
                 + "&idEmpresa=" + empresa.getId_Empresa()
                 + "&idUsuario=" + (restTemplate.getForObject(apiPrefix + "/usuarios/busqueda?nombre=test", Usuario.class)).getId_Usuario()
@@ -493,7 +496,8 @@ public class FacturacionIntegrationTest {
                         new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {
                 })
                 .getBody().getContent();       
-        assertEquals(1, facturasRecuperadas.size(), 0);        
+        assertEquals(1, facturasRecuperadas.size(), 0);  
+        assertTrue("La factura se encuentra impaga", facturasRecuperadas.get(0).isPagada());
         pedidoRecuperado = restTemplate.getForObject(apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
         assertEquals(EstadoPedido.ACTIVO, pedidoRecuperado.getEstado());
         renglonesDelPedido = restTemplate.getForObject(apiPrefix + "/pedidos/"+ pedidoRecuperado.getId_Pedido() +"/renglones", RenglonPedidoDTO[].class);

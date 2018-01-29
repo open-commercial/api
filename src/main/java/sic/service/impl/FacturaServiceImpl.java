@@ -382,6 +382,7 @@ public class FacturaServiceImpl implements IFacturaService {
                 Factura facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFactura(f));
                 this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) facturaGuardada, TipoDeOperacion.ALTA);
                 facturasProcesadas.add(facturaGuardada);
+                this.procesarRecibosYPagarFacturas(recibos, facturaGuardada);
             }
             pedido.setFacturas(facturasProcesadas);
             pedidoService.actualizar(pedido);
@@ -402,18 +403,22 @@ public class FacturaServiceImpl implements IFacturaService {
                 }
                 facturasProcesadas.add(facturaGuardada);
                 LOGGER.warn("La Factura " + facturaGuardada + " se guardó correctamente.");
-                if (recibos != null) {
-                    recibos.forEach(r -> {
-                        reciboService.guardar(r);
-                    });
-                } else if (facturaGuardada instanceof FacturaVenta) {
-                    this.pagarFacturaConRecibosSobrantesCliente(recibos, facturaGuardada);
-                } else if (facturaGuardada instanceof FacturaCompra) {
-                    this.pagarFacturaConRecibosSobrantesProveedor(recibos, facturaGuardada);
-                }
+                this.procesarRecibosYPagarFacturas(recibos, facturaGuardada);
             }
         }
         return facturasProcesadas;
+    }
+    
+    private void procesarRecibosYPagarFacturas(List<Recibo> recibos, Factura facturaGuardada) {
+        if (recibos != null) {
+            recibos.forEach(r -> {
+                reciboService.guardar(r);
+            });
+        } else if (facturaGuardada instanceof FacturaVenta) {
+            this.pagarFacturaConRecibosSobrantesCliente(recibos, facturaGuardada);
+        } else if (facturaGuardada instanceof FacturaCompra) {
+            this.pagarFacturaConRecibosSobrantesProveedor(recibos, facturaGuardada);
+        }
     }
 
     private void pagarFacturaConRecibosSobrantesCliente(List<Recibo> recibos, Factura facturaGuardada) {
