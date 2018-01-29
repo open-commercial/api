@@ -416,7 +416,6 @@ public class FacturaServiceImpl implements IFacturaService {
                 }
             }
         }
-
         return facturasProcesadas;
     }
 
