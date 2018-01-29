@@ -1,1 +1,1 @@
-web java -Dserver.port=$PORT -jar target/SIC-API-31.jar
+web java -Dserver.port=$PORT -jar target/SIC-API-32.jar
