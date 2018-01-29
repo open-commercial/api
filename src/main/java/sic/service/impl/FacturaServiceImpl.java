@@ -395,8 +395,10 @@ public class FacturaServiceImpl implements IFacturaService {
                 Factura facturaGuardada = null;
                 if (f instanceof FacturaVenta) {
                     facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFactura(f));
+                    this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) facturaGuardada, TipoDeOperacion.ALTA);
                 } else if (f instanceof FacturaCompra) {
                     facturaGuardada = facturaCompraRepository.save((FacturaCompra) this.procesarFactura(f));
+                    this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaCompra) facturaGuardada, TipoDeOperacion.ALTA);
                 }
                 facturasProcesadas.add(facturaGuardada);
                 LOGGER.warn("La Factura " + facturaGuardada + " se guardó correctamente.");
@@ -408,11 +410,6 @@ public class FacturaServiceImpl implements IFacturaService {
                     this.pagarFacturaConRecibosSobrantesCliente(recibos, facturaGuardada);
                 } else if (facturaGuardada instanceof FacturaCompra) {
                     this.pagarFacturaConRecibosSobrantesProveedor(recibos, facturaGuardada);
-                }
-                if (facturaGuardada instanceof FacturaVenta) {
-                    this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) facturaGuardada, TipoDeOperacion.ALTA);
-                } else if (facturaGuardada instanceof FacturaCompra) {
-                    this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaCompra) facturaGuardada, TipoDeOperacion.ALTA);
                 }
             }
         }
