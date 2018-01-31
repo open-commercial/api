@@ -1,5 +1,6 @@
 package sic.controller;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -102,7 +103,7 @@ public class PagoController {
     
     @GetMapping("/pagos/facturas/{idFactura}/saldo")
     @ResponseStatus(HttpStatus.OK)
-    public double getSaldoAPagarFacturas(@PathVariable long idFactura) {
+    public BigDecimal getSaldoAPagarFacturas(@PathVariable long idFactura) {
         return pagoService.getSaldoAPagarFactura(idFactura);
     }
     
@@ -114,7 +115,7 @@ public class PagoController {
     
     @GetMapping("/pagos/notas/{idNota}/saldo")
     @ResponseStatus(HttpStatus.OK)
-    public double getSaldoAPagarNotas(@PathVariable long idNota) {
+    public BigDecimal getSaldoAPagarNotas(@PathVariable long idNota) {
         return pagoService.getSaldoAPagarNotaDebito(idNota);
     }
     

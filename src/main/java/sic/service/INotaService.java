@@ -1,5 +1,6 @@
 package sic.service;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -26,7 +27,7 @@ public interface INotaService {
     
     Long getCAEById(Long idNota);
     
-    Double getTotalById(Long idNota);
+    BigDecimal getTotalById(Long idNota);
     
     FacturaVenta getFacturaNota(Long idNota);
     
@@ -84,7 +85,7 @@ public interface INotaService {
     
     double calcularTotalDebito(double subTotal_bruto, double iva21_neto, double montoNoGravado);
     
-    double calcularTotaCreditoPorFacturaVenta(FacturaVenta facturaVenta);
+    BigDecimal calcularTotaCreditoPorFacturaVenta(FacturaVenta facturaVenta);
     
     Nota actualizarNotaDebitoEstadoPago(NotaDebito notaDebito);   
     

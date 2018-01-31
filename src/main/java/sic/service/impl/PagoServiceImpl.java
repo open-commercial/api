@@ -1,5 +1,7 @@
 package sic.service.impl;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -81,19 +83,19 @@ public class PagoServiceImpl implements IPagoService {
     }
     
     @Override
-    public Double getTotalPagosDeNota(long idNota) {
-        Double total = pagoRepository.getTotalPagosDeNota(idNota);
-        return (total != null) ? total : 0.0;
+    public BigDecimal getTotalPagosDeNota(long idNota) {
+        BigDecimal total = pagoRepository.getTotalPagosDeNota(idNota);
+        return (total != null) ? total : BigDecimal.ZERO;
     }
 
     @Override
-    public double getSaldoAPagarFactura(long idFactura) {
-        return facturaService.getTotalById(idFactura) - this.getTotalPagosDeLaFactura(idFactura);
+    public BigDecimal getSaldoAPagarFactura(long idFactura) {
+        return (new BigDecimal(facturaService.getTotalById(idFactura)).subtract(new BigDecimal(this.getTotalPagosDeLaFactura(idFactura))));
     }
     
     @Override
-    public double getSaldoAPagarNotaDebito(long idNota) {
-        return notaService.getTotalById(idNota) - this.getTotalPagosDeNota(idNota);
+    public BigDecimal getSaldoAPagarNotaDebito(long idNota) {
+        return notaService.getTotalById(idNota).subtract(this.getTotalPagosDeNota(idNota));
     }
 
     @Override
@@ -180,24 +182,25 @@ public class PagoServiceImpl implements IPagoService {
     }
 
     @Override
-    public double calcularTotalAdeudadoFacturasVenta(List<FacturaVenta> facturasVenta) {
+    public BigDecimal calcularTotalAdeudadoFacturasVenta(List<FacturaVenta> facturasVenta) {
         List<Factura> facturas = new ArrayList<>();
         facturas.addAll(facturasVenta);
         return this.calcularTotalAdeudadoFacturas(facturas);
     }
 
     @Override
-    public double calcularTotalAdeudadoFacturasCompra(List<FacturaCompra> facturasCompra) {
+    public BigDecimal calcularTotalAdeudadoFacturasCompra(List<FacturaCompra> facturasCompra) {
         List<Factura> facturas = new ArrayList<>();
         facturas.addAll(facturasCompra);
         return this.calcularTotalAdeudadoFacturas(facturas);
     }
 
     @Override
-    public double calcularTotalAdeudadoFacturas(List<Factura> facturas) {
-        double total = 0.0;
-        total = facturas.stream().map(f -> f.getTotal() - this.getTotalPagosDeLaFactura(f.getId_Factura()))
-                                 .reduce(total, (accumulator, item) -> accumulator + item);
+    public BigDecimal calcularTotalAdeudadoFacturas(List<Factura> facturas) {
+        BigDecimal total = BigDecimal.ZERO;
+        facturas.forEach((f) -> {
+            total.add(new BigDecimal(this.getTotalPagosDeLaFactura(f.getId_Factura())));
+        });
         return total;
     }
     
@@ -209,7 +212,7 @@ public class PagoServiceImpl implements IPagoService {
 
     @Override
     @Transactional
-    public void pagarMultiplesFacturasCompra(List<Factura> facturas, double monto, FormaDePago formaDePago, String nota) {
+    public void pagarMultiplesFacturasCompra(List<Factura> facturas, BigDecimal monto, FormaDePago formaDePago, String nota) {
         Collections.sort(facturas, (Factura f1, Factura f2) -> {
             if (f1.getTipoComprobante() == f2.getTipoComprobante()) {
                 return f1.getFecha().compareTo(f2.getFecha());
@@ -217,25 +220,25 @@ public class PagoServiceImpl implements IPagoService {
                 return f2.getTipoComprobante().compareTo(f1.getTipoComprobante());
             }
         });
-        if (monto <= this.calcularTotalAdeudadoFacturas(facturas)) {
+        if (this.calcularTotalAdeudadoFacturas(facturas).compareTo(monto) > -1) {
             List<Factura> facturasOrdenadas = facturaService.ordenarFacturasPorFechaAsc(facturas);
             for (Factura factura : facturasOrdenadas) {
-                if (monto > 0.0) {
+                if (monto.compareTo(BigDecimal.ZERO) > 0) {
                     factura.setPagos(this.getPagosDeLaFactura(factura.getId_Factura()));
                     Pago nuevoPago = new Pago();
                     nuevoPago.setFormaDePago(formaDePago);
                     nuevoPago.setFactura(factura);
                     nuevoPago.setEmpresa(factura.getEmpresa());
                     nuevoPago.setNota(nota);
-                    double saldoAPagar = this.getSaldoAPagarFactura(factura.getId_Factura());
-                    if (saldoAPagar <= monto) {
-                        monto = monto - saldoAPagar;
-                        // Se utiliza round por un problema de presicion de la maquina ej: 828.65 - 614.0 = 214.64999...
-                        monto = Math.round(monto * 100.0) / 100.0;
-                        nuevoPago.setMonto(saldoAPagar);
+                    BigDecimal saldoAPagar = this.getSaldoAPagarFactura(factura.getId_Factura());
+                    if (saldoAPagar.compareTo(monto) < 1) {
+                        monto = monto.subtract(saldoAPagar);
+//                        // Se utiliza round por un problema de presicion de la maquina ej: 828.65 - 614.0 = 214.64999...
+//                        monto = Math.round(monto * 100.0) / 100.0;
+                        nuevoPago.setMonto(saldoAPagar.doubleValue());
                     } else {
-                        nuevoPago.setMonto(monto);
-                        monto = 0.0;
+                        nuevoPago.setMonto(monto.doubleValue());
+                        monto = BigDecimal.ZERO;
                     }
                     this.guardar(nuevoPago);
                 }
@@ -266,7 +269,9 @@ public class PagoServiceImpl implements IPagoService {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_factura_pagada"));
             }
-            if (Utilidades.round(pago.getMonto(), 2) > Utilidades.round(this.getSaldoAPagarFactura(pago.getFactura().getId_Factura()), 2)) {
+            BigDecimal saldoAPagar = this.getSaldoAPagarFactura(pago.getFactura().getId_Factura());
+            saldoAPagar.setScale(2, RoundingMode.DOWN);
+            if (Utilidades.round(pago.getMonto(), 2) > saldoAPagar.doubleValue()) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_pago_mayorADeuda_monto"));
             }
@@ -276,7 +281,9 @@ public class PagoServiceImpl implements IPagoService {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_nota_debito_pagada"));
             }
-            if (Utilidades.round(pago.getMonto(), 2) > Utilidades.round(this.getSaldoAPagarNotaDebito(pago.getNotaDebito().getIdNota()), 2)) {
+            BigDecimal saldoAPagar = this.getSaldoAPagarNotaDebito(pago.getNotaDebito().getIdNota());
+            saldoAPagar.setScale(2, RoundingMode.DOWN);
+            if (Utilidades.round(pago.getMonto(), 2) > saldoAPagar.doubleValue()) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_pago_mayorADeuda_monto"));
             }

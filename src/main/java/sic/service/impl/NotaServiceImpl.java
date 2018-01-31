@@ -2,6 +2,7 @@ package sic.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -117,9 +118,9 @@ public class NotaServiceImpl implements INotaService {
     }
     
     @Override
-    public Double getTotalById(Long idNota) { 
-        Double total = notaRepository.getTotalById(idNota);
-        return (total != null) ? total : 0.0;
+    public BigDecimal getTotalById(Long idNota) { 
+        BigDecimal total = notaRepository.getTotalById(idNota);
+        return (total != null) ? total : BigDecimal.ZERO;
     }
 
     @Override
@@ -501,14 +502,15 @@ public class NotaServiceImpl implements INotaService {
             this.crearYGuardarAjusteCuentaCorriente(notaDebito);
         }
         List<Recibo> recibos = reciboService.getRecibosConSaldoSobranteCliente(idEmpresa, idCliente);
-        double saldoNotaDebito = pagoService.getSaldoAPagarNotaDebito(notaDebito.getIdNota());
+        BigDecimal saldoNotaDebito = pagoService.getSaldoAPagarNotaDebito(notaDebito.getIdNota());
         List<Pago> pagos = new ArrayList<>();
         for (Recibo r : recibos) {
             if (r.equals(notaDebito.getRecibo()) == false) {
                 while (r.getSaldoSobrante() > 0) {
-                    if (saldoNotaDebito < r.getSaldoSobrante()) {
+                    BigDecimal saldoSobrante = new BigDecimal(r.getSaldoSobrante());
+                    if (saldoNotaDebito.compareTo(saldoSobrante) < 0) {
                         Pago nuevoPago = new Pago();
-                        nuevoPago.setMonto(saldoNotaDebito);
+                        nuevoPago.setMonto(saldoNotaDebito.doubleValue());
                         nuevoPago.setRecibo(r);
                         nuevoPago.setNotaDebito(notaDebito);
                         nuevoPago.setEmpresa(notaDebito.getEmpresa());
@@ -517,9 +519,9 @@ public class NotaServiceImpl implements INotaService {
                         nuevoPago.setNota("");
                         pagoService.guardar(nuevoPago);
                         pagos.add(nuevoPago);
-                        reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoNotaDebito));
+                        reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoNotaDebito.doubleValue()));
                         actualizarNotaDebitoEstadoPago(notaDebito);
-                    } else if (saldoNotaDebito >= r.getSaldoSobrante()) {
+                    } else if (saldoNotaDebito.compareTo(saldoSobrante) > -1) {
                         Pago nuevoPago = new Pago();
                         nuevoPago.setMonto(r.getSaldoSobrante());
                         nuevoPago.setRecibo(r);
@@ -899,9 +901,9 @@ public class NotaServiceImpl implements INotaService {
     }
 
     @Override
-    public double calcularTotaCreditoPorFacturaVenta(FacturaVenta facturaVenta) {
-        Double credito = notaCreditoRepository.getTotalNotasCreditoPorFacturaVenta(facturaVenta);
-        return (credito == null) ? 0.0 : credito;
+    public BigDecimal calcularTotaCreditoPorFacturaVenta(FacturaVenta facturaVenta) {
+        BigDecimal credito = notaCreditoRepository.getTotalNotasCreditoPorFacturaVenta(facturaVenta);
+        return (credito == null) ? BigDecimal.ZERO : credito;
     }
 
     @Override

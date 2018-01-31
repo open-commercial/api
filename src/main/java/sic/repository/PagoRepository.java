@@ -1,5 +1,6 @@
 package sic.repository;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -37,7 +38,7 @@ public interface PagoRepository extends PagingAndSortingRepository<Pago, Long> {
     Double getTotalPagosDeFactura(@Param("idFactura") long idFactura);
     
     @Query("SELECT SUM(p.monto) FROM Pago p INNER JOIN p.notaDebito n WHERE n.idNota = :idNota AND p.eliminado = false")
-    Double getTotalPagosDeNota(@Param("idNota") long idNota);
+    BigDecimal getTotalPagosDeNota(@Param("idNota") long idNota);
     
     List<Pago> findAllByReciboAndEliminado(Recibo recibo, boolean eliminado);
     

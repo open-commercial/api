@@ -1,5 +1,6 @@
 package sic.service;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -37,9 +38,9 @@ public interface IReciboService {
     
     List<Recibo> getByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(Date desde, Date hasta, FormaDePago formaDePago, Empresa empresa);
     
-    double pagarMultiplesComprobantesCliente(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, double monto, FormaDePago formaDePago, String nota);
+    BigDecimal pagarMultiplesComprobantesCliente(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, BigDecimal monto, FormaDePago formaDePago, String nota);
     
-    double pagarMultiplesComprobantesProveedor(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, double monto, FormaDePago formaDePago, String nota);
+    BigDecimal pagarMultiplesComprobantesProveedor(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, BigDecimal monto, FormaDePago formaDePago, String nota);
     
     List<Recibo> getRecibosConSaldoSobranteCliente(long idEmpresa, long idCliente);
     

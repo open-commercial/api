@@ -1,5 +1,6 @@
 package sic.repository;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,7 +19,7 @@ public interface NotaCreditoRepository extends NotaRepository<NotaCredito> {
     Double getTotalNotasCredito(@Param("hasta") Date hasta, @Param("cliente") Cliente cliente, @Param("empresa") Empresa empresa);
     
     @Query("SELECT SUM(nc.total) FROM NotaCredito nc WHERE nc.facturaVenta = :facturaVenta AND nc.eliminada = false")
-    Double getTotalNotasCreditoPorFacturaVenta(@Param("facturaVenta") FacturaVenta facturaVenta);
+    BigDecimal getTotalNotasCreditoPorFacturaVenta(@Param("facturaVenta") FacturaVenta facturaVenta);
     
     NotaCredito findTopByEmpresaAndTipoComprobanteOrderByNroNotaDesc(Empresa empresa, TipoDeComprobante tipoComprobante);
     

@@ -4,6 +4,7 @@ import java.io.IOException;
 import sic.modelo.BusquedaFacturaCompraCriteria;
 import sic.modelo.BusquedaFacturaVentaCriteria;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -429,12 +430,13 @@ public class FacturaServiceImpl implements IFacturaService {
                     ((FacturaCompra) facturaGuardada).getProveedor().getId_Proveedor());
         }
         List<Pago> pagos = new ArrayList<>();
-        double saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
+        BigDecimal saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
         for (Recibo r : recibos) {
+            BigDecimal saldoSobrante = new BigDecimal(r.getSaldoSobrante());
             while (r.getSaldoSobrante() > 0) {
-                if (saldoFactura < r.getSaldoSobrante()) {
+                if (saldoFactura.compareTo(saldoSobrante) == -1) {
                     Pago nuevoPago = new Pago();
-                    nuevoPago.setMonto(saldoFactura);
+                    nuevoPago.setMonto(saldoFactura.doubleValue());
                     nuevoPago.setRecibo(r);
                     nuevoPago.setFactura(facturaGuardada);
                     nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
@@ -443,8 +445,8 @@ public class FacturaServiceImpl implements IFacturaService {
                     nuevoPago.setNota("");
                     pagoService.guardar(nuevoPago);
                     pagos.add(nuevoPago);
-                    reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoFactura));
-                } else if (saldoFactura >= r.getSaldoSobrante()) {
+                    reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoFactura.doubleValue()));
+                } else if (saldoFactura.compareTo(saldoSobrante) > -1) {
                     Pago nuevoPago = new Pago();
                     nuevoPago.setMonto(r.getSaldoSobrante());
                     nuevoPago.setRecibo(r);

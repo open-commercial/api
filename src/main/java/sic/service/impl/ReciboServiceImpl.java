@@ -2,6 +2,7 @@ package sic.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -99,7 +100,7 @@ public class ReciboServiceImpl implements IReciboService {
         recibo.setNumSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
         recibo.setNumRecibo(this.getSiguienteNumeroRecibo(recibo.getEmpresa().getId_Empresa(), configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip()));
         recibo.setFecha(new Date());
-        double monto = recibo.getMonto();
+        BigDecimal monto = new BigDecimal(recibo.getMonto());
         int i = 0;
         this.validarRecibo(recibo);
         recibo = reciboRepository.save(recibo);
@@ -109,7 +110,7 @@ public class ReciboServiceImpl implements IReciboService {
                     = this.renglonCuentaCorrienteService
                             .getRenglonesFacturasYNotaDebitoCuentaCorriente(
                                     this.cuentaCorrienteService.getCuentaCorrientePorCliente(recibo.getCliente().getId_Cliente()).getIdCuentaCorriente(), pageable);
-            while (renglonesCC.hasContent()) {
+            while (renglonesCC.hasContent() && monto.compareTo(BigDecimal.ZERO) != 0) {
                 monto = this.pagarMultiplesComprobantesCliente(renglonesCC.getContent(), recibo, monto, recibo.getFormaDePago(), recibo.getConcepto());
                 if (renglonesCC.hasNext()) {
                     i++;
@@ -126,7 +127,7 @@ public class ReciboServiceImpl implements IReciboService {
                     = this.renglonCuentaCorrienteService
                             .getRenglonesFacturasYNotaDebitoCuentaCorriente(
                                     this.cuentaCorrienteService.getCuentaCorrientePorProveedor(recibo.getProveedor().getId_Proveedor()).getIdCuentaCorriente(), pageable);
-            while (renglonesCC.hasContent()) {
+            while (renglonesCC.hasContent() && monto.compareTo(BigDecimal.ZERO) != 0) {
                 monto = this.pagarMultiplesComprobantesProveedor(renglonesCC.getContent(), recibo, monto, recibo.getFormaDePago(), recibo.getConcepto());
                 if (renglonesCC.hasNext()) {
                     i++;
@@ -139,7 +140,7 @@ public class ReciboServiceImpl implements IReciboService {
                 }
             }
         }
-        recibo.setSaldoSobrante(monto);
+        recibo.setSaldoSobrante(monto.doubleValue());
         this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
         LOGGER.warn("El Recibo " + recibo + " se guardó correctamente.");
         return recibo;
@@ -229,30 +230,30 @@ public class ReciboServiceImpl implements IReciboService {
     }
       
     @Override
-    public double pagarMultiplesComprobantesCliente(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, double monto, FormaDePago formaDePago, String nota) {
+    public BigDecimal pagarMultiplesComprobantesCliente(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, BigDecimal monto, FormaDePago formaDePago, String nota) {
         for (RenglonCuentaCorriente rcc : renglonesCC) {
-            if (monto > 0.0) {
+            if (monto.compareTo(BigDecimal.ZERO) > 0) {
                 if (rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_B
                         || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_X
                         || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
                     FacturaVenta fv = (FacturaVenta) facturaService.getFacturaPorId(rcc.getIdMovimiento());
-                    double credito = notaService.calcularTotaCreditoPorFacturaVenta(fv);
-                    if (fv.isPagada() == false && fv.getTotal() > credito) {
+                    BigDecimal credito = notaService.calcularTotaCreditoPorFacturaVenta(fv);
+                    if (fv.isPagada() == false && (new BigDecimal(fv.getTotal())).compareTo(credito) > 0) {
                         fv.setPagos(this.pagoService.getPagosDeLaFactura(fv.getId_Factura()));
                         Pago nuevoPago = new Pago();
                         nuevoPago.setFormaDePago(formaDePago);
                         nuevoPago.setFactura(fv);
                         nuevoPago.setEmpresa(fv.getEmpresa());
                         nuevoPago.setNota(nota);
-                        double saldoAPagar = this.pagoService.getSaldoAPagarFactura(fv.getId_Factura()) - credito;
-                        if (saldoAPagar <= monto) {
-                            monto = monto - saldoAPagar;
+                        BigDecimal saldoAPagar = this.pagoService.getSaldoAPagarFactura(fv.getId_Factura()).subtract(credito);
+                        if (saldoAPagar.compareTo(monto) < 1) {
+                            monto = monto.subtract(saldoAPagar);
                             // Se utiliza round por un problema de presicion de la maquina ej: 828.65 - 614.0 = 214.64999...
-                            monto = Math.round(monto * 100.0) / 100.0;
-                            nuevoPago.setMonto(saldoAPagar);
+//                            monto = Math.round(monto * 100.0) / 100.0;
+                            nuevoPago.setMonto(saldoAPagar.doubleValue());
                         } else {
-                            nuevoPago.setMonto(monto);
-                            monto = 0.0;
+                            nuevoPago.setMonto(monto.doubleValue());
+                            monto = BigDecimal.ZERO;
                         }
                         nuevoPago.setFactura(fv);
                         nuevoPago.setRecibo(recibo);
@@ -269,15 +270,15 @@ public class ReciboServiceImpl implements IReciboService {
                         nuevoPago.setNotaDebito(nd);
                         nuevoPago.setEmpresa(nd.getEmpresa());
                         nuevoPago.setNota(nota);
-                        double saldoAPagar = this.pagoService.getSaldoAPagarNotaDebito(nd.getIdNota());
-                        if (saldoAPagar <= monto) {
-                            monto = monto - saldoAPagar;
-                            // Se utiliza round por un problema de presicion de la maquina ej: 828.65 - 614.0 = 214.64999...
-                            monto = Math.round(monto * 100.0) / 100.0;
-                            nuevoPago.setMonto(saldoAPagar);
+                        BigDecimal saldoAPagar = this.pagoService.getSaldoAPagarNotaDebito(nd.getIdNota());
+                        if (saldoAPagar.compareTo(monto) < 1) {
+                            monto = monto.subtract(saldoAPagar);
+//                            // Se utiliza round por un problema de presicion de la maquina ej: 828.65 - 614.0 = 214.64999...
+//                            monto = Math.round(monto * 100.0) / 100.0;
+                            nuevoPago.setMonto(saldoAPagar.doubleValue());
                         } else {
-                            nuevoPago.setMonto(monto);
-                            monto = 0.0;
+                            nuevoPago.setMonto(monto.doubleValue());
+                            monto = BigDecimal.ZERO;
                         }
                         nuevoPago.setNotaDebito(nd);
                         nuevoPago.setRecibo(recibo);
@@ -290,9 +291,9 @@ public class ReciboServiceImpl implements IReciboService {
     }
     
     @Override
-    public double pagarMultiplesComprobantesProveedor(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, double monto, FormaDePago formaDePago, String nota) {
+    public BigDecimal pagarMultiplesComprobantesProveedor(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, BigDecimal monto, FormaDePago formaDePago, String nota) {
         for (RenglonCuentaCorriente rcc : renglonesCC) {
-            if (monto > 0.0) {
+            if (monto.compareTo(BigDecimal.ZERO) > 0) {
                 if (rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_B
                         || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_X
                         || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
@@ -304,15 +305,15 @@ public class ReciboServiceImpl implements IReciboService {
                         nuevoPago.setFactura(fc);
                         nuevoPago.setEmpresa(fc.getEmpresa());
                         nuevoPago.setNota(nota);
-                        double saldoAPagar = this.pagoService.getSaldoAPagarFactura(fc.getId_Factura());
-                        if (saldoAPagar <= monto) {
-                            monto = monto - saldoAPagar;
-                            // Se utiliza round por un problema de presicion de la maquina ej: 828.65 - 614.0 = 214.64999...
-                            monto = Math.round(monto * 100.0) / 100.0;
-                            nuevoPago.setMonto(saldoAPagar);
+                        BigDecimal saldoAPagar = this.pagoService.getSaldoAPagarFactura(fc.getId_Factura());
+                        if (saldoAPagar.compareTo(monto) < 1) {
+                            monto = monto.subtract(saldoAPagar);
+//                            // Se utiliza round por un problema de presicion de la maquina ej: 828.65 - 614.0 = 214.64999...
+//                            monto = Math.round(monto * 100.0) / 100.0;
+                            nuevoPago.setMonto(saldoAPagar.doubleValue());
                         } else {
-                            nuevoPago.setMonto(monto);
-                            monto = 0.0;
+                            nuevoPago.setMonto(monto.doubleValue());
+                            monto = BigDecimal.ZERO;
                         }
                         nuevoPago.setFactura(fc);
                         nuevoPago.setRecibo(recibo);
