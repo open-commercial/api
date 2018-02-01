@@ -1,14 +1,15 @@
 package sic.service;
 
+import java.math.BigDecimal;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import sic.modelo.ItemCarritoCompra;
 
 public interface ICarritoCompraService {
 
-    double getTotal(long idUsuario);
+    BigDecimal getTotal(long idUsuario);
 
-    double getCantArticulos(long idUsuario);
+    BigDecimal getCantArticulos(long idUsuario);
     
     long getCantRenglones(long idUsuario);
 

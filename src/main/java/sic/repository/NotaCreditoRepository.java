@@ -16,7 +16,7 @@ public interface NotaCreditoRepository extends NotaRepository<NotaCredito> {
     NotaCredito getById(@Param("idNotaCredito") long idNotaCredito);
     
     @Query("SELECT SUM(nc.total) FROM NotaCredito nc WHERE nc.empresa = :empresa AND nc.cliente = :cliente AND nc.eliminada = false AND nc.fecha <= :hasta")
-    Double getTotalNotasCredito(@Param("hasta") Date hasta, @Param("cliente") Cliente cliente, @Param("empresa") Empresa empresa);
+    BigDecimal getTotalNotasCredito(@Param("hasta") Date hasta, @Param("cliente") Cliente cliente, @Param("empresa") Empresa empresa);
     
     @Query("SELECT SUM(nc.total) FROM NotaCredito nc WHERE nc.facturaVenta = :facturaVenta AND nc.eliminada = false")
     BigDecimal getTotalNotasCreditoPorFacturaVenta(@Param("facturaVenta") FacturaVenta facturaVenta);

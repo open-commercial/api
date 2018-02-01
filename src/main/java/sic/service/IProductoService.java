@@ -1,5 +1,6 @@
 package sic.service;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import sic.modelo.TipoDeOperacion;
 import java.util.List;
@@ -21,23 +22,23 @@ public interface IProductoService {
 
     Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
 
-    double calcularGanancia_Neto(double precioCosto, double ganancia_porcentaje);
+    BigDecimal calcularGanancia_Neto(double precioCosto, double ganancia_porcentaje);
 
     Map<Double, Producto> getProductosSinStockDisponible(long[] idProducto, double[] cantidad);
 
     Map<Double, Producto> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, double[] cantidad);
     
-    double calcularGanancia_Porcentaje(Double precioDeListaNuevo, 
+    BigDecimal calcularGanancia_Porcentaje(Double precioDeListaNuevo, 
             Double precioDeListaAnterior, double pvp, Double ivaPorcentaje, 
             Double impInternoPorcentaje, double precioCosto, boolean descendente);
 
-    double calcularIVA_Neto(double precioCosto, double iva_porcentaje);
+    BigDecimal calcularIVA_Neto(double precioCosto, double iva_porcentaje);
 
-    double calcularImpInterno_Neto(double precioCosto, double impInterno_porcentaje);
+    BigDecimal calcularImpInterno_Neto(double precioCosto, double impInterno_porcentaje);
 
-    double calcularPVP(double precioCosto, double ganancia_porcentaje);
+    BigDecimal calcularPVP(double precioCosto, double ganancia_porcentaje);
 
-    double calcularPrecioLista(double PVP, double iva_porcentaje, double impInterno_porcentaje);    
+    BigDecimal calcularPrecioLista(double PVP, double iva_porcentaje, double impInterno_porcentaje);    
 
     void eliminarMultiplesProductos(long[] idProducto);
 
@@ -47,7 +48,7 @@ public interface IProductoService {
 
     Producto getProductoPorId(long id_Producto);
     
-    double calcularValorStock(BusquedaProductoCriteria criteria);
+    BigDecimal calcularValorStock(BusquedaProductoCriteria criteria);
   
     byte[] getReporteListaDePreciosPorEmpresa(List<Producto> productos, Empresa empresa);
 

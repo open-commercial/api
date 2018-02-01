@@ -1,5 +1,6 @@
 package sic.service;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -28,10 +29,10 @@ public interface ICajaService {
     
     Caja cerrarCaja(long idCaja, double monto, Long idUsuario, boolean scheduling);
     
-    double getTotalCaja(Caja caja, boolean afectaCaja);
+    BigDecimal getTotalCaja(Caja caja, boolean afectaCaja);
     
-    double getSaldoFinalCajas(long idEmpresa, Long idUsuario, Date desde, Date hasta);
+    BigDecimal getSaldoFinalCajas(long idEmpresa, Long idUsuario, Date desde, Date hasta);
     
-    double getSaldoRealCajas(long idEmpresa, Long idUsuario, Date desde, Date hasta);
+    BigDecimal getSaldoRealCajas(long idEmpresa, Long idUsuario, Date desde, Date hasta);
 
 }

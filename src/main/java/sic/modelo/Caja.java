@@ -1,6 +1,7 @@
 package sic.modelo;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Map;
 import javax.persistence.Column;
@@ -77,7 +78,7 @@ public class Caja implements Serializable {
     private boolean eliminada;
     
     @Transient
-    private Map<Long, Double> totalesPorFomaDePago;
+    private Map<Long, BigDecimal> totalesPorFomaDePago;
     
     @Transient
     private double totalAfectaCaja;

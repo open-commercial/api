@@ -3,6 +3,7 @@ package sic.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -149,15 +150,15 @@ public class NotaServiceImpl implements INotaService {
     }
     
     @Override
-    public double getTotalPagado(Long idNota) {
-        double pagado = 0;
+    public BigDecimal getTotalPagado(Long idNota) {
+        BigDecimal pagado = BigDecimal.ZERO;
         List<Pago> pagos = this.getPagosNota(idNota);
-        for (Pago pago : pagos) {
-            pagado = pagado + pago.getMonto();
-        }
-        return pagado;        
+        pagos.forEach((pago) -> {
+            pagado.add(new BigDecimal(pago.getMonto()));
+        });
+        return pagado;
     }
-    
+
     @Override
     public List<Nota> getNotasPorFactura(Long idFactura) {
         return notaRepository.findAllByFacturaVentaAndEliminada((FacturaVenta) facturaService.getFacturaPorId(idFactura), false);
@@ -909,9 +910,7 @@ public class NotaServiceImpl implements INotaService {
     @Override
     @Transactional
     public Nota actualizarNotaDebitoEstadoPago(NotaDebito notaDebito) {
-        double totalFactura = Utilidades.round(notaDebito.getTotal(), 2);
-        double totalPagado = Utilidades.round(this.getTotalPagado(notaDebito.getIdNota()), 2);
-        if (totalPagado >= totalFactura) {
+        if (this.getTotalPagado(notaDebito.getIdNota()).compareTo((new BigDecimal(notaDebito.getTotal()).setScale(2, RoundingMode.HALF_UP))) > 0) {
             notaDebito.setPagada(true);
         } else {
             notaDebito.setPagada(false);

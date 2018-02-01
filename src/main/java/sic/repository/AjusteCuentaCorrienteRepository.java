@@ -1,5 +1,6 @@
 package sic.repository;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +18,7 @@ public interface AjusteCuentaCorrienteRepository extends PagingAndSortingReposit
     AjusteCuentaCorriente findByNumAjusteAndEliminado(long nroAjuste, boolean eliminado);
     
     @Query("SELECT a.monto FROM AjusteCuentaCorriente a WHERE a.idAjusteCuentaCorriente = :idAjusteCuentaCorriente AND a.eliminado = false")
-    Double getMontoById(@Param("idAjusteCuentaCorriente") long idAjusteCuentaCorriente);
+    BigDecimal getMontoById(@Param("idAjusteCuentaCorriente") long idAjusteCuentaCorriente);
     
     AjusteCuentaCorriente findTopByEmpresaAndNumSerieOrderByNumAjusteDesc(Empresa empresa, long numSerie);
     

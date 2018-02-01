@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -46,7 +47,7 @@ public class AjusteCuentaCorrienteServiceImpl implements IAjusteCuentaCorrienteS
     }
 
     @Override
-    public Double getMontoById(long idAjusteCuentaCorriente) {
+    public BigDecimal getMontoById(long idAjusteCuentaCorriente) {
         return ajusteCuentaCorrienteRepository.getMontoById(idAjusteCuentaCorriente);
     }
 

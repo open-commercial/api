@@ -1,5 +1,6 @@
 package sic.service;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import sic.modelo.Gasto;
@@ -18,7 +19,7 @@ public interface IGastoService {
     
     Gasto getGastosPorNroYEmpreas(Long nroPago, Long id_Empresa);
     
-    double calcularTotalGastos(List<Gasto> gastos);
+    BigDecimal calcularTotalGastos(List<Gasto> gastos);
 
     Gasto guardar(Gasto gasto);
 

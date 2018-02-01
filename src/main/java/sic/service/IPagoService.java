@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 import sic.modelo.Factura;
 import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
-import sic.modelo.FormaDePago;
 import sic.modelo.Pago;
 
 public interface IPagoService {
@@ -17,7 +16,7 @@ public interface IPagoService {
 
     List<Pago> getPagosDeLaFactura(long idFactura);
     
-    Double getTotalPagosDeLaFactura(long idFactura);
+    BigDecimal getTotalPagosDeLaFactura(long idFactura);
 
     BigDecimal getSaldoAPagarFactura(long idFactura); 
     
@@ -35,7 +34,7 @@ public interface IPagoService {
     
     List<Pago> getPagosRelacionadosAlRecibo(long idRecibo);
     
-    double calcularTotalPagos(List<Pago> pagos);
+    BigDecimal calcularTotalPagos(List<Pago> pagos);
     
     BigDecimal calcularTotalAdeudadoFacturasVenta(List<FacturaVenta> facturasVenta);
     
@@ -43,9 +42,7 @@ public interface IPagoService {
     
     BigDecimal calcularTotalAdeudadoFacturas(List<Factura> facturas);
     
-    double getSaldoPagosPorCliente(long idCliente, Date hasta);
-            
-    void pagarMultiplesFacturasCompra(List<Factura> facturas, BigDecimal monto, FormaDePago formaDePago, String nota);
+    BigDecimal getSaldoPagosPorCliente(long idCliente, Date hasta);
     
     void validarOperacion(Pago pago);     
 

@@ -18,7 +18,7 @@ public interface IReciboService {
     
     Recibo getReciboDelPago(long idPago);
     
-    Double getMontoById(long idRecibo);
+    BigDecimal getMontoById(long idRecibo);
     
     Recibo guardar(Recibo recibo);
     

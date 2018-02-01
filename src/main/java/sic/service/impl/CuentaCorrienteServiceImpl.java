@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
@@ -139,16 +140,16 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     }
 
     @Override
-    public double getSaldoCuentaCorriente(long idCuentaCorriente) {
-        Double saldo = renglonCuentaCorrienteService.getSaldoCuentaCorriente(idCuentaCorriente);
-        return (saldo != null) ? saldo : 0.0;
+    public BigDecimal getSaldoCuentaCorriente(long idCuentaCorriente) {
+        BigDecimal saldo = renglonCuentaCorrienteService.getSaldoCuentaCorriente(idCuentaCorriente);
+        return (saldo != null) ? saldo : BigDecimal.ZERO;
     }
     
     @Override
     public CuentaCorrienteCliente getCuentaCorrientePorCliente(long idCliente) {
         Cliente cliente = clienteService.getClientePorId(idCliente);
         CuentaCorrienteCliente cc = cuentaCorrienteClienteRepository.findByClienteAndEmpresaAndEliminada(cliente, cliente.getEmpresa(), false);
-        cc.setSaldo(this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente()));
+        cc.setSaldo(this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente()).doubleValue());
         cc.setFechaUltimoMovimiento(this.getFechaUltimoMovimiento(cc.getIdCuentaCorriente()));
         return cc;
     }
@@ -157,7 +158,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     public CuentaCorrienteProveedor getCuentaCorrientePorProveedor(long idProveedor) {
         Proveedor proveedor = proveedorService.getProveedorPorId(idProveedor);
         CuentaCorrienteProveedor cc = cuentaCorrienteProveedorRepository.findByProveedorAndEmpresaAndEliminada(proveedor, proveedor.getEmpresa(), false);
-        cc.setSaldo(this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente()));
+        cc.setSaldo(this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente()).doubleValue());
         cc.setFechaUltimoMovimiento(this.getFechaUltimoMovimiento(cc.getIdCuentaCorriente()));
         return cc;
     }
@@ -167,20 +168,20 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         CuentaCorriente cc = this.getCuentaCorrientePorID(idCuentaCorriente);
         Page<RenglonCuentaCorriente> renglonesCuentaCorriente = renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageable);
         if (!renglonesCuentaCorriente.getContent().isEmpty()) {
-            double saldoCC = this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente());
+            BigDecimal saldoCC = this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente());
             int tamanioDePaginaAuxiliar = pageable.getPageNumber() * pageable.getPageSize();
             if (tamanioDePaginaAuxiliar != 0) {
                 Pageable pageableAuxiliar = new PageRequest(0, tamanioDePaginaAuxiliar, pageable.getSort());
                 Page<RenglonCuentaCorriente> renglonesCuentaCorrienteAuxiliar = renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageableAuxiliar);
-                double saldoPaginaSuperiores = 0;
+                BigDecimal saldoPaginaSuperiores = BigDecimal.ZERO;
                 for (RenglonCuentaCorriente rcc : renglonesCuentaCorrienteAuxiliar) {
-                    saldoPaginaSuperiores += rcc.getMonto();
+                    saldoPaginaSuperiores = saldoPaginaSuperiores.add(new BigDecimal(rcc.getMonto()));
                 }
-                saldoCC = saldoCC - saldoPaginaSuperiores;
+                saldoCC = saldoCC.subtract(saldoPaginaSuperiores);
             }
             for (RenglonCuentaCorriente rcc : renglonesCuentaCorriente) {
-                rcc.setSaldo(saldoCC);
-                saldoCC -= rcc.getMonto();
+                rcc.setSaldo(saldoCC.doubleValue());
+                saldoCC.subtract(new BigDecimal(rcc.getMonto()));
                 if (rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_B
                         || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_X
                         || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {

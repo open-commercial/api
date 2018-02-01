@@ -5,6 +5,7 @@ import sic.modelo.BusquedaFacturaCompraCriteria;
 import sic.modelo.BusquedaFacturaVentaCriteria;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -56,7 +57,6 @@ import sic.modelo.TipoDeComprobante;
 import sic.service.BusinessServiceException;
 import sic.service.ServiceException;
 import sic.modelo.TipoDeOperacion;
-import sic.util.Utilidades;
 import sic.util.Validator;
 import sic.repository.FacturaVentaRepository;
 import sic.repository.FacturaCompraRepository;
@@ -137,9 +137,9 @@ public class FacturaServiceImpl implements IFacturaService {
     }
     
     @Override
-    public Double getTotalById(long idFactura) {
-        Double total = facturaRepository.getTotalById(idFactura);
-        return (total != null) ? total : 0.0;
+    public BigDecimal getTotalById(long idFactura) {
+        BigDecimal total = facturaRepository.getTotalById(idFactura);
+        return (total != null) ? total : BigDecimal.ZERO;
     }
     
     @Override
@@ -654,9 +654,8 @@ public class FacturaServiceImpl implements IFacturaService {
     @Override
     @Transactional
     public Factura actualizarFacturaEstadoPago(Factura factura) {
-        double totalFactura = Utilidades.round(factura.getTotal(), 2);
-        double totalPagado = Utilidades.round(this.getTotalPagado(factura.getId_Factura()), 2);
-        if (totalPagado >= totalFactura) {               
+        if (this.getTotalPagado(factura.getId_Factura()).setScale(2, RoundingMode.HALF_UP) //if (totalPagado.compareTo(totalFactura) >= 0) {   
+                .compareTo(new BigDecimal(factura.getTotal()).setScale(2, RoundingMode.HALF_UP)) >= 0) {                
             factura.setPagada(true);
         } else {
             factura.setPagada(false);
@@ -665,9 +664,9 @@ public class FacturaServiceImpl implements IFacturaService {
     }
     
     @Override
-    public Double getTotalPagado(long idFactura) {
-        Double total = pagoService.getTotalPagosDeLaFactura(idFactura);
-        return (total != null) ? total : 0.0;      
+    public BigDecimal getTotalPagado(long idFactura) {
+        BigDecimal total = pagoService.getTotalPagosDeLaFactura(idFactura);
+        return (total != null) ? total : BigDecimal.ZERO;      
     }
     
     @Override
@@ -751,63 +750,64 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     @Override
-    public double calcularSubTotal(double[] importes) {
-        double resultado = 0;
-        for (double importe : importes) {
-            resultado += importe;
+    public BigDecimal calcularSubTotal(BigDecimal[] importes) {
+        BigDecimal resultado = BigDecimal.ZERO;
+        for (BigDecimal importe : importes) {
+            resultado.add(importe);
         }
         return resultado;
     }
 
     @Override
-    public double calcularDescuentoNeto(double importe, double descuento_porcentaje) {
-        double resultado = 0;
-        if (descuento_porcentaje != 0) {
-            resultado = (importe * descuento_porcentaje) / 100;
+    public BigDecimal calcularDescuentoNeto(BigDecimal importe, BigDecimal descuento_porcentaje) {
+        BigDecimal resultado = BigDecimal.ZERO;
+        if (descuento_porcentaje != BigDecimal.ZERO) {
+            resultado = importe.multiply(descuento_porcentaje).divide(new BigDecimal(100));
         }
         return resultado;
     }
 
     @Override
-    public double calcularRecargoNeto(double subtotal, double recargo_porcentaje) {
-        double resultado = 0;
-        if (recargo_porcentaje != 0) {
-            resultado = (subtotal * recargo_porcentaje) / 100;
+    public BigDecimal calcularRecargoNeto(BigDecimal subtotal, BigDecimal recargo_porcentaje) {
+        BigDecimal resultado = BigDecimal.ZERO;
+        if (recargo_porcentaje != BigDecimal.ZERO) {
+            resultado = subtotal.multiply(recargo_porcentaje).divide(new BigDecimal(100));
         }
         return resultado;
     }
 
     @Override
-    public double calcularSubTotalBruto(TipoDeComprobante tipo, double subTotal,
-            double recargoNeto, double descuentoNeto, double iva105Neto, double iva21Neto) {
+    public BigDecimal calcularSubTotalBruto(TipoDeComprobante tipo, BigDecimal subTotal,
+            BigDecimal recargoNeto, BigDecimal descuentoNeto, BigDecimal iva105Neto, BigDecimal iva21Neto) {
         
-        double resultado = subTotal + recargoNeto - descuentoNeto;
+        BigDecimal resultado = subTotal.add(recargoNeto).subtract(descuentoNeto);
         if (tipo == TipoDeComprobante.FACTURA_B || tipo == TipoDeComprobante.PRESUPUESTO) {
-            resultado = resultado - (iva105Neto + iva21Neto);
+            resultado = resultado.subtract(iva105Neto.add(iva21Neto));
         }
         return resultado;
     }
 
     @Override
-    public double calcularImpInternoNeto(TipoDeComprobante tipoDeComprobante, double descuento_porcentaje,
-            double recargo_porcentaje, double[] importes, double [] impuestoPorcentajes) {
+    public BigDecimal calcularImpInternoNeto(TipoDeComprobante tipoDeComprobante, BigDecimal descuento_porcentaje,
+            BigDecimal recargo_porcentaje, BigDecimal[] importes, BigDecimal [] impuestoPorcentajes) {
 
-        double resultado = 0;
+        BigDecimal resultado = BigDecimal.ZERO;
         if (tipoDeComprobante == TipoDeComprobante.FACTURA_A || tipoDeComprobante == TipoDeComprobante.FACTURA_B || tipoDeComprobante == TipoDeComprobante.PRESUPUESTO) {
             int longitudImportes = importes.length;
             int longitudImpuestos = impuestoPorcentajes.length;
             if (longitudImportes == longitudImpuestos) {
                 for (int i = 0; i < longitudImportes; i++) {                
-                double descuento = 0;
-                if (descuento_porcentaje != 0) {
-                    descuento = (importes[i] * descuento_porcentaje) / 100;
+                BigDecimal descuento = BigDecimal.ZERO;
+                if (descuento_porcentaje != BigDecimal.ZERO) {
+                    descuento = importes[i].multiply(recargo_porcentaje).divide(new BigDecimal(100));
                 }
-                double recargo = 0;
-                if (recargo_porcentaje != 0) {
-                    recargo = (importes[i]  * recargo_porcentaje) / 100;
+                BigDecimal recargo = BigDecimal.ZERO;
+                if (recargo_porcentaje != BigDecimal.ZERO) {
+                    recargo = importes[i].multiply(recargo_porcentaje).divide(new BigDecimal(100));
                 }
-                double impInterno_neto = ((importes[i]  + recargo - descuento) * impuestoPorcentajes[i]) / 100;
-                resultado += impInterno_neto;
+                BigDecimal impInterno_neto = BigDecimal.ZERO;
+                impInterno_neto = impInterno_neto.add(importes[i]).add(recargo).subtract(descuento).multiply(impuestoPorcentajes[i]).divide(new BigDecimal(100));
+                resultado = resultado.add(impInterno_neto);
                 }
             }
         }

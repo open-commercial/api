@@ -1,5 +1,6 @@
 package sic.service;
 
+import java.math.BigDecimal;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -34,20 +35,20 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     }
 
     @Override
-    public double getTotal(long idUsuario) {
-        Double total = carritoCompraRepository.calcularTotal(idUsuario);
+    public BigDecimal getTotal(long idUsuario) {
+        BigDecimal total = carritoCompraRepository.calcularTotal(idUsuario);
         if (total == null) {
-            return 0;
+            return BigDecimal.ZERO;
         } else {
             return total;
         }        
     }
 
     @Override
-    public double getCantArticulos(long idUsuario) {
-        Double cantArticulos = carritoCompraRepository.getCantArticulos(idUsuario);
+    public BigDecimal getCantArticulos(long idUsuario) {
+        BigDecimal cantArticulos = carritoCompraRepository.getCantArticulos(idUsuario);
         if (cantArticulos == null) {
-            return 0;
+            return BigDecimal.ZERO;
         } else {
             return cantArticulos;
         }

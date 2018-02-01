@@ -1,5 +1,6 @@
 package sic.repository;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -22,7 +23,7 @@ public interface ReciboRepository extends PagingAndSortingRepository<Recibo, Lon
     Recibo getReciboDelPago(@Param("idPago") long idPago);
     
     @Query("SELECT r.monto FROM Recibo r WHERE r.idRecibo= :idRecibo AND r.eliminado = false")
-    Double getMontoById(@Param("idRecibo") long idRecibo);
+    BigDecimal getMontoById(@Param("idRecibo") long idRecibo);
     
     Recibo findTopByEmpresaAndNumSerieOrderByNumReciboDesc(Empresa empresa, long serie);
     
