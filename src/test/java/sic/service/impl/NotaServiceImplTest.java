@@ -106,6 +106,6 @@ public class NotaServiceImplTest {
         RenglonNotaCredito renglon1 = new RenglonNotaCreditoBuilder().build();
         List<RenglonNotaCredito> renglones = new ArrayList<>();
         renglones.add(renglon1);
-        assertEquals(172.062, notaServiceImpl.calcularTotalNota(renglones), 0);
+        assertEquals(172.062, notaServiceImpl.calcularTotalNota(renglones).doubleValue(), 0);
     }
 }

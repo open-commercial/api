@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -252,43 +253,43 @@ public class FacturaServiceImplTest {
         renglones.add(renglon1);
         renglones.add(renglon2);
         renglones.add(renglon3);
-        double[] importes = new double[renglones.size()];
+        BigDecimal[] importes = new BigDecimal[renglones.size()];
         int indice = 0;
         for(RenglonFactura renglon : renglones) {
-            importes[indice] = renglon.getImporte();
+            importes[indice] = new BigDecimal(renglon.getImporte());
             indice++;
         }
         double resultadoEsperado = 33.664;
-        double resultadoObtenido = facturaService.calcularSubTotal(importes);
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal resultadoObtenido = facturaService.calcularSubTotal(importes);
+        assertEquals(resultadoEsperado, resultadoObtenido.doubleValue(), 0);
     }
 
     @Test
     public void shouldCacularDescuentoNeto() {
         Double resultadoEsperado = 11.773464749999999;
-        Double resultadoObtenido = facturaService.calcularDescuentoNeto(78.255, 15.045);
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal resultadoObtenido = facturaService.calcularDescuentoNeto(new BigDecimal(78.255), new BigDecimal(15.045));
+        assertEquals(resultadoEsperado, resultadoObtenido.doubleValue(), 0);
     }
 
     @Test
     public void shouldCalcularRecargoNeto() {
         double resultadoEsperado = 12.11047244;
-        double resultadoObtenido = facturaService.calcularRecargoNeto(78.122, 15.502);
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal resultadoObtenido = facturaService.calcularRecargoNeto(new BigDecimal(78.122), new BigDecimal(15.502));
+        assertEquals(resultadoEsperado, resultadoObtenido.doubleValue(), 0);
     }
 
     @Test
     public void shouldCalcularSubTotalBrutoFacturaA() {
         double resultadoEsperado = 220.477;
-        double resultadoObtenido = facturaService.calcularSubTotalBruto(TipoDeComprobante.FACTURA_A, 225.025, 10.454, 15.002, 0, 0);
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal resultadoObtenido = facturaService.calcularSubTotalBruto(TipoDeComprobante.FACTURA_A, new BigDecimal(225.025), new BigDecimal(10.454), new BigDecimal(15.002), BigDecimal.ZERO, BigDecimal.ZERO);
+        assertEquals(resultadoEsperado, resultadoObtenido.doubleValue(), 0);
     }
     
     @Test
     public void shouldCalcularSubTotalBrutoFacturaB() {
         double resultadoEsperado = 795.2175;
-        double resultadoObtenido = facturaService.calcularSubTotalBruto(TipoDeComprobante.FACTURA_B, 1205.5, 80.5, 111.05, 253.155, 126.5775);
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal resultadoObtenido = facturaService.calcularSubTotalBruto(TipoDeComprobante.FACTURA_B, new BigDecimal(1205.5), new BigDecimal(80.5), new BigDecimal(111.05), new BigDecimal(253.155), new BigDecimal(126.5775));
+        assertEquals(resultadoEsperado, resultadoObtenido.doubleValue(), 0);
     }
 
     @Test
@@ -312,19 +313,19 @@ public class FacturaServiceImplTest {
         //El renglon3 no lo deberia tener en cuenta para el calculo ya que NO es 21% de IVA
         double resultadoEsperado = 3427.6;
         int size = renglones.size();
-        double[] cantidades = new double[size];        
-        double[] ivaPorcentajes = new double[size];
-        double[] ivaNetos = new double[size];
+        BigDecimal[] cantidades = new BigDecimal[size];        
+        BigDecimal[] ivaPorcentajes = new BigDecimal[size];
+        BigDecimal[] ivaNetos = new BigDecimal[size];
         int i = 0;
         for (RenglonFactura r : renglones) {
-            cantidades[i] = r.getCantidad();            
-            ivaPorcentajes[i] = r.getIva_porcentaje();
-            ivaNetos[i] = r.getIva_neto();
+            cantidades[i] = new BigDecimal(r.getCantidad());            
+            ivaPorcentajes[i] = new BigDecimal(r.getIva_porcentaje());
+            ivaNetos[i] = new BigDecimal(r.getIva_neto());
             i++;
         }       
-        double resultadoObtenido = facturaService.calcularIvaNetoFactura(TipoDeComprobante.FACTURA_A,
-                cantidades, ivaPorcentajes, ivaNetos, 21, 0, 0);
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal resultadoObtenido = facturaService.calcularIvaNetoFactura(TipoDeComprobante.FACTURA_A,
+                cantidades, ivaPorcentajes, ivaNetos, new BigDecimal(21), BigDecimal.ZERO, BigDecimal.ZERO);
+        assertEquals(resultadoEsperado, resultadoObtenido.doubleValue(), 0);
     }
 
     @Test
@@ -344,19 +345,19 @@ public class FacturaServiceImplTest {
         renglones.add(renglon3);
         double resultadoEsperado = 0;
         int size = renglones.size();
-        double[] cantidades = new double[size];        
-        double[] ivaPorcentajes = new double[size];
-        double[] ivaNetos = new double[size];
+        BigDecimal[] cantidades = new BigDecimal[size];        
+        BigDecimal[] ivaPorcentajes = new BigDecimal[size];
+        BigDecimal[] ivaNetos = new BigDecimal[size];
         int i = 0;
         for (RenglonFactura r : renglones) {
-            cantidades[i] = r.getCantidad();            
-            ivaPorcentajes[i] = r.getIva_porcentaje();
-            ivaNetos[i] = r.getIva_neto();
+            cantidades[i] = new BigDecimal(r.getCantidad());            
+            ivaPorcentajes[i] = new BigDecimal(r.getIva_porcentaje());
+            ivaNetos[i] = new BigDecimal(r.getIva_neto());
             i++;
         } 
-        double resultadoObtenido = facturaService.calcularIvaNetoFactura(TipoDeComprobante.FACTURA_X, 
-                cantidades, ivaPorcentajes, ivaNetos, 21, 0, 0);
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal resultadoObtenido = facturaService.calcularIvaNetoFactura(TipoDeComprobante.FACTURA_X, 
+                cantidades, ivaPorcentajes, ivaNetos, new BigDecimal(21), BigDecimal.ZERO, BigDecimal.ZERO);
+        assertEquals(resultadoEsperado, resultadoObtenido.doubleValue(), 0);
     }
 
     @Test
@@ -374,24 +375,24 @@ public class FacturaServiceImplTest {
         renglones.add(renglon1);
         renglones.add(renglon2);
         renglones.add(renglon3);
-        double[] importes = new double[renglones.size()];
-        double[] impuestoPorcentajes = new double[renglones.size()];
+        BigDecimal[] importes = new BigDecimal[renglones.size()];
+        BigDecimal[] impuestoPorcentajes = new BigDecimal[renglones.size()];
         int indice = 0;
         for(RenglonFactura renglon : renglones) {
-            importes[indice] = renglon.getImporte();
-            impuestoPorcentajes[indice] = renglon.getImpuesto_porcentaje();
+            importes[indice] = new BigDecimal(renglon.getImporte());
+            impuestoPorcentajes[indice] = new BigDecimal(renglon.getImpuesto_porcentaje());
             indice++;
         }
         double resultadoEsperado = 3.3197328185647996;
-        double resultadoObtenido = facturaService.calcularImpInternoNeto(TipoDeComprobante.FACTURA_A, 9.104, 22.008, importes, impuestoPorcentajes);
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal resultadoObtenido = facturaService.calcularImpInternoNeto(TipoDeComprobante.FACTURA_A, new BigDecimal(9.104), new BigDecimal(22.008), importes, impuestoPorcentajes);
+        assertEquals(resultadoEsperado, resultadoObtenido.doubleValue(), 0);
     }
 
     @Test
     public void shouldCalcularTotal() {
         double resultadoEsperado = 386.363;
-        double resultadoObtenido = facturaService.calcularTotal(350.451, 10.753, 25.159);
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal resultadoObtenido = facturaService.calcularTotal(new BigDecimal(350.451), new BigDecimal(10.753), new BigDecimal(25.159));
+        assertEquals(resultadoEsperado, resultadoObtenido.doubleValue(), 0);
     }
 
     @Test
@@ -400,8 +401,8 @@ public class FacturaServiceImplTest {
         double cantidad = 10;
         double precioUnitario = 10;
         double descuento = 1;
-        double resultadoObtenido = facturaService.calcularImporte(cantidad, precioUnitario, descuento);
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal resultadoObtenido = facturaService.calcularImporte(new BigDecimal(cantidad), new BigDecimal(precioUnitario), new BigDecimal(descuento));
+        assertEquals(resultadoEsperado, resultadoObtenido.doubleValue(), 0);
     }
 
     @Test
@@ -411,8 +412,8 @@ public class FacturaServiceImplTest {
         producto.setPrecioVentaPublico(121);
         producto.setIva_porcentaje(21);
         double resultadoEsperado = 21;
-        double resultadoObtenido = facturaService.calcularIVANetoRenglon(Movimiento.COMPRA, TipoDeComprobante.FACTURA_A, producto, 0.0);
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal resultadoObtenido = facturaService.calcularIVANetoRenglon(Movimiento.COMPRA, TipoDeComprobante.FACTURA_A, producto, BigDecimal.ZERO);
+        assertEquals(resultadoEsperado, resultadoObtenido.doubleValue(), 0);
     }
     
     @Test
@@ -422,8 +423,8 @@ public class FacturaServiceImplTest {
         producto.setPrecioVentaPublico(1000);
         producto.setIva_porcentaje(21);
         double resultadoEsperado = 42;
-        double resultadoObtenido = facturaService.calcularIVANetoRenglon(Movimiento.COMPRA, TipoDeComprobante.FACTURA_B, producto, 0.0);
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal resultadoObtenido = facturaService.calcularIVANetoRenglon(Movimiento.COMPRA, TipoDeComprobante.FACTURA_B, producto, BigDecimal.ZERO);
+        assertEquals(resultadoEsperado, resultadoObtenido.doubleValue(), 0);
     }
 
     @Test
@@ -432,8 +433,8 @@ public class FacturaServiceImplTest {
         producto.setPrecioVentaPublico(121);
         producto.setIva_porcentaje(21);
         double resultadoEsperado = 25.41;
-        double resultadoObtenido = facturaService.calcularIVANetoRenglon(Movimiento.VENTA, TipoDeComprobante.FACTURA_A, producto, 0.0);
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal resultadoObtenido = facturaService.calcularIVANetoRenglon(Movimiento.VENTA, TipoDeComprobante.FACTURA_A, producto, BigDecimal.ZERO);
+        assertEquals(resultadoEsperado, resultadoObtenido.doubleValue(), 0);
     }
     
     public void shouldCalcularIVANetoWhenVentaConFacturaB() {
@@ -441,8 +442,8 @@ public class FacturaServiceImplTest {
         producto.setPrecioVentaPublico(1000);
         producto.setIva_porcentaje(21);
         double resultadoEsperado = 210;
-        double resultadoObtenido = facturaService.calcularIVANetoRenglon(Movimiento.VENTA, TipoDeComprobante.FACTURA_B, producto, 0.0);
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal resultadoObtenido = facturaService.calcularIVANetoRenglon(Movimiento.VENTA, TipoDeComprobante.FACTURA_B, producto, BigDecimal.ZERO);
+        assertEquals(resultadoEsperado, resultadoObtenido.doubleValue(), 0);
     }
 
     @Test
@@ -452,8 +453,8 @@ public class FacturaServiceImplTest {
         producto.setPrecioVentaPublico(121);
         producto.setIva_porcentaje(21);
         double resultadoEsperado = 121;
-        double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_A, producto);
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_A, producto);
+        assertEquals(resultadoEsperado, resultadoObtenido.doubleValue(), 0);
     }
 
     @Test
@@ -463,8 +464,8 @@ public class FacturaServiceImplTest {
         producto.setPrecioVentaPublico(121);
         producto.setIva_porcentaje(21);
         double resultadoEsperado = 121;
-        double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_X, producto);
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_X, producto);
+        assertEquals(resultadoEsperado, resultadoObtenido.doubleValue(), 0);
     }
 
     @Test
@@ -474,8 +475,8 @@ public class FacturaServiceImplTest {
         producto.setPrecioVentaPublico(121);
         producto.setIva_porcentaje(21);
         double resultadoEsperado = 100;
-        double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_A, producto);
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_A, producto);
+        assertEquals(resultadoEsperado, resultadoObtenido.doubleValue(), 0);
     }
 
     @Test
@@ -485,8 +486,8 @@ public class FacturaServiceImplTest {
         producto.setPrecioVentaPublico(121);
         producto.setIva_porcentaje(21);
         double resultadoEsperado = 100;
-        double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_X, producto);
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_X, producto);
+        assertEquals(resultadoEsperado, resultadoObtenido.doubleValue(), 0);
     }
 
     @Test
@@ -496,8 +497,8 @@ public class FacturaServiceImplTest {
         producto.setPrecioVentaPublico(121);
         producto.setIva_porcentaje(21);
         double resultadoEsperado = 121;
-        double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_B, producto);
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_B, producto);
+        assertEquals(resultadoEsperado, resultadoObtenido.doubleValue(), 0);
     }
 
     @Test
@@ -507,7 +508,7 @@ public class FacturaServiceImplTest {
         producto.setPrecioVentaPublico(121);
         producto.setIva_porcentaje(21);
         double resultadoEsperado = 121;
-        double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_C, producto);
+        double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_C, producto).doubleValue();
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
     }
 
@@ -518,7 +519,7 @@ public class FacturaServiceImplTest {
         producto.setPrecioVentaPublico(121);
         producto.setIva_porcentaje(21);
         double resultadoEsperado = 121;
-        double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_Y, producto);
+        double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_Y, producto).doubleValue();
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
     }
 
@@ -532,7 +533,7 @@ public class FacturaServiceImplTest {
         producto.setPrecioVentaPublico(200);
         producto.setPrecioLista(242);        
         double resultadoEsperado = 242;
-        double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_B, producto);
+        double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_B, producto).doubleValue();
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
     }
 
@@ -546,7 +547,7 @@ public class FacturaServiceImplTest {
         producto.setPrecioVentaPublico(200);
         producto.setPrecioLista(242);
         double resultadoEsperado = 242;
-        double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_C, producto);
+        double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_C, producto).doubleValue();
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
     }
 
@@ -560,7 +561,7 @@ public class FacturaServiceImplTest {
         producto.setPrecioVentaPublico(200);
         producto.setPrecioLista(242);
         double resultadoEsperado = 221;
-        double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_Y, producto);
+        double resultadoObtenido = facturaService.calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_Y, producto).doubleValue();
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
     }
 }

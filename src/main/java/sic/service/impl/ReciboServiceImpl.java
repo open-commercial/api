@@ -90,7 +90,7 @@ public class ReciboServiceImpl implements IReciboService {
     }
     
     @Override
-    public Double getMontoById(long idRecibo) {
+    public BigDecimal getMontoById(long idRecibo) {
         return reciboRepository.getMontoById(idRecibo);
     }
     

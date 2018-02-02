@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import java.math.BigDecimal;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,20 +14,20 @@ public class ProductoServiceImplTest {
     private ProductoServiceImpl productoService;
     
     @Test
-    public void shouldcalcularGanancia_Porcentaje() {
+    public void shouldGanancia_Porcentaje() {
         double precioCosto = 12.34;
         double pvp = 23.45;
         double resultadoEsperado = 90.03241491085899;
-        double resultadoObtenido = productoService.calcularGanancia_Porcentaje(null ,null, pvp, null, null, precioCosto, false);
+        double resultadoObtenido = productoService.calcularGanancia_Porcentaje(null ,null, new BigDecimal(pvp), null, null, new BigDecimal(precioCosto), false).doubleValue();
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
     }
     
     @Test
-    public void shouldcalcularCalcularGanancia_Neto() {
+    public void shouldCalcularGanancia_Neto() {
         double precioCosto = 12.34;
         double gananciaPorcentaje = 100;
         double resultadoEsperado = 12.34;
-        double resultadoObtenido = productoService.calcularGanancia_Neto(precioCosto, gananciaPorcentaje);
+        double resultadoObtenido = productoService.calcularGanancia_Neto(new BigDecimal(precioCosto), new BigDecimal(gananciaPorcentaje)).doubleValue();
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
     }
     
@@ -35,16 +36,16 @@ public class ProductoServiceImplTest {
         double precioCosto = 12.34;
         double gananciaPorcentaje = 100;
         double resultadoEsperado = 24.68;
-        double resultadoObtenido = productoService.calcularPVP(precioCosto, gananciaPorcentaje);
+        double resultadoObtenido = productoService.calcularPVP(new BigDecimal(precioCosto), new BigDecimal(gananciaPorcentaje)).doubleValue();
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
     }
     
     @Test
-    public void shouldcalcularCalcularIVA_Neto() {
+    public void shouldCalcularIVA_Neto() {
         double pvp = 24.68;
         double ivaPorcentaje = 21;
-        double resultadoEsperado = 5.182799999999999;
-        double resultadoObtenido = productoService.calcularIVA_Neto(pvp, ivaPorcentaje);
+        double resultadoEsperado = 5.1828;
+        double resultadoObtenido = productoService.calcularIVA_Neto(new BigDecimal(pvp), new BigDecimal(ivaPorcentaje)).doubleValue();
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
     }
     
@@ -53,7 +54,7 @@ public class ProductoServiceImplTest {
         double pvp = 24.68;
         double impuestoInternoPorcentaje = 10;
         double resultadoEsperado = 2.468;
-        double resultadoObtenido = productoService.calcularImpInterno_Neto(pvp, impuestoInternoPorcentaje);
+        double resultadoObtenido = productoService.calcularImpInterno_Neto(new BigDecimal(pvp), new BigDecimal(impuestoInternoPorcentaje)).doubleValue();
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
     }
     
@@ -63,7 +64,7 @@ public class ProductoServiceImplTest {
         double ivaPorcentaje = 21;
         double impuestoInternoPorcentaje = 10;
         double resultadoEsperado = 32.330799999999996;
-        double resultadoObtenido = productoService.calcularPrecioLista(pvp, ivaPorcentaje, impuestoInternoPorcentaje);
+        double resultadoObtenido = productoService.calcularPrecioLista(new BigDecimal(pvp), new BigDecimal(ivaPorcentaje), new BigDecimal(impuestoInternoPorcentaje)).doubleValue();
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
     }    
 }

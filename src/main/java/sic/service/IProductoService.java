@@ -18,27 +18,27 @@ public interface IProductoService {
 
     void actualizar(Producto producto);
 
-    void actualizarStock(HashMap<Long, Double> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento);
+    void actualizarStock(HashMap<Long, BigDecimal> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento);
 
     Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
 
-    BigDecimal calcularGanancia_Neto(double precioCosto, double ganancia_porcentaje);
+    BigDecimal calcularGanancia_Neto(BigDecimal precioCosto, BigDecimal ganancia_porcentaje);
 
-    Map<Double, Producto> getProductosSinStockDisponible(long[] idProducto, double[] cantidad);
+    Map<BigDecimal, Producto> getProductosSinStockDisponible(long[] idProducto, BigDecimal[] cantidad);
 
-    Map<Double, Producto> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, double[] cantidad);
+    Map<BigDecimal, Producto> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, BigDecimal[] cantidad);
     
-    BigDecimal calcularGanancia_Porcentaje(Double precioDeListaNuevo, 
-            Double precioDeListaAnterior, double pvp, Double ivaPorcentaje, 
-            Double impInternoPorcentaje, double precioCosto, boolean descendente);
+    BigDecimal calcularGanancia_Porcentaje(BigDecimal precioDeListaNuevo, 
+            BigDecimal precioDeListaAnterior, BigDecimal pvp, BigDecimal ivaPorcentaje, 
+            BigDecimal impInternoPorcentaje, BigDecimal precioCosto, boolean descendente);
 
-    BigDecimal calcularIVA_Neto(double precioCosto, double iva_porcentaje);
+    BigDecimal calcularIVA_Neto(BigDecimal precioCosto, BigDecimal iva_porcentaje);
 
-    BigDecimal calcularImpInterno_Neto(double precioCosto, double impInterno_porcentaje);
+    BigDecimal calcularImpInterno_Neto(BigDecimal precioCosto, BigDecimal impInterno_porcentaje);
 
-    BigDecimal calcularPVP(double precioCosto, double ganancia_porcentaje);
+    BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal ganancia_porcentaje);
 
-    BigDecimal calcularPrecioLista(double PVP, double iva_porcentaje, double impInterno_porcentaje);    
+    BigDecimal calcularPrecioLista(BigDecimal PVP, BigDecimal iva_porcentaje, BigDecimal impInterno_porcentaje);    
 
     void eliminarMultiplesProductos(long[] idProducto);
 
@@ -56,15 +56,15 @@ public interface IProductoService {
 
     List<Producto> modificarMultiplesProductos(long[] idProducto,
                                                boolean checkPrecios,            
-                                               Double gananciaNeto,
-                                               Double gananciaPorcentaje,
-                                               Double impuestoInternoNeto,
-                                               Double impuestoInternoPorcentaje,
-                                               Double IVANeto,
-                                               Double IVAPorcentaje,
-                                               Double precioCosto,
-                                               Double precioLista,
-                                               Double precioVentaPublico,                                                                     
+                                               BigDecimal gananciaNeto,
+                                               BigDecimal gananciaPorcentaje,
+                                               BigDecimal impuestoInternoNeto,
+                                               BigDecimal impuestoInternoPorcentaje,
+                                               BigDecimal IVANeto,
+                                               BigDecimal IVAPorcentaje,
+                                               BigDecimal precioCosto,
+                                               BigDecimal precioLista,
+                                               BigDecimal precioVentaPublico,                                                                     
                                                boolean checkMedida, Medida medida,
                                                boolean checkRubro, Rubro rubro,
                                                boolean checkProveedor, Proveedor proveedor);    

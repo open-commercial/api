@@ -1,5 +1,6 @@
 package sic.repository.custom;
 
+import java.math.BigDecimal;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -21,7 +22,7 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
     private EntityManager em;
 
     @Override
-    public double calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria) {
+    public BigDecimal calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria) {
         String query = "SELECT SUM(f.total) FROM FacturaCompra f WHERE f.empresa = :empresa AND f.eliminada = false";
         //Fecha Factura
         if (criteria.isBuscaPorFecha() == true) {
@@ -45,17 +46,17 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
             query += " AND f.pagada = true";
         }
         query += " ORDER BY f.fecha DESC";
-        TypedQuery<Double> typedQuery = em.createQuery(query, Double.class);
+        TypedQuery<BigDecimal> typedQuery = em.createQuery(query, BigDecimal.class);
         typedQuery.setParameter("empresa", criteria.getEmpresa());
         //si es 0, recupera TODOS los registros
         if (criteria.getCantRegistros() != 0) {
             typedQuery.setMaxResults(criteria.getCantRegistros());
         }
-        return (typedQuery.getSingleResult() == null) ? 0.0 : typedQuery.getSingleResult();
+        return (typedQuery.getSingleResult() == null) ? BigDecimal.ZERO : typedQuery.getSingleResult();
     }
 
     @Override
-    public double calcularIVA_Compra(BusquedaFacturaCompraCriteria criteria, TipoDeComprobante[] tipoComprobante) {
+    public BigDecimal calcularIVA_Compra(BusquedaFacturaCompraCriteria criteria, TipoDeComprobante[] tipoComprobante) {
         String query = "SELECT SUM(f.iva_105_neto + f.iva_21_neto) FROM FacturaCompra f WHERE f.empresa = :empresa AND f.eliminada = false";
         //Fecha Factura
         if (criteria.isBuscaPorFecha() == true) {
@@ -88,13 +89,13 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
             query += " AND f.pagada = true";
         }
         query += " ORDER BY f.fecha DESC";
-        TypedQuery<Double> typedQuery = em.createQuery(query, Double.class);
+        TypedQuery<BigDecimal> typedQuery = em.createQuery(query, BigDecimal.class);
         typedQuery.setParameter("empresa", criteria.getEmpresa());
         //si es 0, recupera TODOS los registros
         if (criteria.getCantRegistros() != 0) {
             typedQuery.setMaxResults(criteria.getCantRegistros());
         }
-        return (typedQuery.getSingleResult() == null) ? 0.0 : typedQuery.getSingleResult();
+        return (typedQuery.getSingleResult() == null) ? BigDecimal.ZERO : typedQuery.getSingleResult();
     }
 
     @Override

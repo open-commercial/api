@@ -67,23 +67,23 @@ public interface INotaService {
 
     BigDecimal getIvaNetoNota(Long idNota);
 
-    List<RenglonNotaCredito> calcularRenglonCredito(TipoDeComprobante tipo, double[] cantidad, long[] idRenglonFactura);
+    List<RenglonNotaCredito> calcularRenglonCredito(TipoDeComprobante tipo, BigDecimal[] cantidad, long[] idRenglonFactura);
 
-    List<RenglonNotaDebito> calcularRenglonDebito(long idRecibo, double monto, double ivaPorcentaje);
+    List<RenglonNotaDebito> calcularRenglonDebito(long idRecibo, BigDecimal monto, BigDecimal ivaPorcentaje);
 
-    BigDecimal calcularSubTotalCredito(double[] importesBrutos);
+    BigDecimal calcularSubTotalCredito(BigDecimal[] importesBrutos);
 
-    BigDecimal calcularDecuentoNetoCredito(double subTotal, double descuentoPorcentaje);
+    BigDecimal calcularDecuentoNetoCredito(BigDecimal subTotal, BigDecimal descuentoPorcentaje);
 
-    BigDecimal calcularRecargoNetoCredito(double subTotal, double recargoPorcentaje);
+    BigDecimal calcularRecargoNetoCredito(BigDecimal subTotal, BigDecimal recargoPorcentaje);
 
-    BigDecimal calcularSubTotalBrutoCredito(TipoDeComprobante tipoDeComprobante, double subTotal, double recargoNeto, double descuentoNeto, double iva105_neto, double iva21_neto);
+    BigDecimal calcularSubTotalBrutoCredito(TipoDeComprobante tipoDeComprobante, BigDecimal subTotal, BigDecimal recargoNeto, BigDecimal descuentoNeto, BigDecimal iva105_neto, BigDecimal iva21_neto);
 
-    BigDecimal calcularIVANetoCredito(TipoDeComprobante tipoDeComprobante, double[] cantidades, double[] ivaPorcentajeRenglones, double[] ivaNetoRenglones, double ivaPorcentaje, double descuentoPorcentaje, double recargoPorcentaje);
+    BigDecimal calcularIVANetoCredito(TipoDeComprobante tipoDeComprobante, BigDecimal[] cantidades, BigDecimal[] ivaPorcentajeRenglones, BigDecimal[] ivaNetoRenglones, BigDecimal ivaPorcentaje, BigDecimal descuentoPorcentaje, BigDecimal recargoPorcentaje);
 
-    BigDecimal calcularTotalCredito(double subTotal_bruto, double iva105_neto, double iva21_neto);
+    BigDecimal calcularTotalCredito(BigDecimal subTotal_bruto, BigDecimal iva105_neto, BigDecimal iva21_neto);
     
-    BigDecimal calcularTotalDebito(double subTotal_bruto, double iva21_neto, double montoNoGravado);
+    BigDecimal calcularTotalDebito(BigDecimal subTotal_bruto, BigDecimal iva21_neto, BigDecimal montoNoGravado);
     
     BigDecimal calcularTotaCreditoPorFacturaVenta(FacturaVenta facturaVenta);
     

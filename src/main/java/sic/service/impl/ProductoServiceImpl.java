@@ -4,6 +4,8 @@ import com.querydsl.core.BooleanBuilder;
 import java.io.IOException;
 import sic.modelo.BusquedaProductoCriteria;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -222,7 +224,7 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     @Override
-    public void actualizarStock(HashMap<Long, Double> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento) {
+    public void actualizarStock(HashMap<Long, BigDecimal> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento) {
         idsYCantidades.entrySet().forEach(entry -> {
             Producto producto = productoRepository.findById(entry.getKey());
             if (producto == null) {
@@ -231,19 +233,19 @@ public class ProductoServiceImpl implements IProductoService {
             if (producto != null && producto.isIlimitado() == false) {
                 if (movimiento.equals(Movimiento.VENTA)) {
                     if (operacion == TipoDeOperacion.ALTA) {
-                        producto.setCantidad(producto.getCantidad() - entry.getValue());
+                        producto.setCantidad(producto.getCantidad() - entry.getValue().doubleValue());
                     }
 
                     if (operacion == TipoDeOperacion.ELIMINACION || operacion == TipoDeOperacion.ACTUALIZACION) {
-                        producto.setCantidad(producto.getCantidad() + entry.getValue());
+                        producto.setCantidad(producto.getCantidad() + entry.getValue().doubleValue());
                     }
                 } else if (movimiento.equals(Movimiento.COMPRA)) {
                     if (operacion == TipoDeOperacion.ALTA) {
-                        producto.setCantidad(producto.getCantidad() + entry.getValue());
+                        producto.setCantidad(producto.getCantidad() + entry.getValue().doubleValue());
                     }
 
                     if (operacion == TipoDeOperacion.ELIMINACION) {
-                        double result = producto.getCantidad() - entry.getValue();
+                        double result = producto.getCantidad() - entry.getValue().doubleValue();
                         if (result < 0) {
                             result = 0;
                         }
@@ -279,15 +281,15 @@ public class ProductoServiceImpl implements IProductoService {
     @Transactional
     public List<Producto> modificarMultiplesProductos(long[] idProducto,
             boolean checkPrecios,
-            Double gananciaNeto,
-            Double gananciaPorcentaje,
-            Double impuestoInternoNeto,
-            Double impuestoInternoPorcentaje,
-            Double IVANeto,
-            Double IVAPorcentaje,
-            Double precioCosto,
-            Double precioLista,
-            Double precioVentaPublico,
+            BigDecimal gananciaNeto,
+            BigDecimal gananciaPorcentaje,
+            BigDecimal impuestoInternoNeto,
+            BigDecimal impuestoInternoPorcentaje,
+            BigDecimal IVANeto,
+            BigDecimal IVAPorcentaje,
+            BigDecimal precioCosto,
+            BigDecimal precioLista,
+            BigDecimal precioVentaPublico,
             boolean checkMedida, Medida medida,
             boolean checkRubro, Rubro rubro,
             boolean checkProveedor, Proveedor proveedor) {
@@ -317,15 +319,15 @@ public class ProductoServiceImpl implements IProductoService {
             if (checkRubro == true) p.setRubro(rubro);
             if (checkProveedor == true) p.setProveedor(proveedor);           
             if (checkPrecios == true) {            
-                p.setPrecioCosto(precioCosto);
-                p.setGanancia_porcentaje(gananciaPorcentaje);
-                p.setGanancia_neto(gananciaNeto);
-                p.setPrecioVentaPublico(precioVentaPublico);
-                p.setIva_porcentaje(IVAPorcentaje);
-                p.setIva_neto(IVANeto);
-                p.setImpuestoInterno_porcentaje(impuestoInternoPorcentaje);
-                p.setImpuestoInterno_neto(impuestoInternoNeto);
-                p.setPrecioLista(precioLista);            
+                p.setPrecioCosto(precioCosto.doubleValue());
+                p.setGanancia_porcentaje(gananciaPorcentaje.doubleValue());
+                p.setGanancia_neto(gananciaNeto.doubleValue());
+                p.setPrecioVentaPublico(precioVentaPublico.doubleValue());
+                p.setIva_porcentaje(IVAPorcentaje.doubleValue());
+                p.setIva_neto(IVANeto.doubleValue());
+                p.setImpuestoInterno_porcentaje(impuestoInternoPorcentaje.doubleValue());
+                p.setImpuestoInterno_neto(impuestoInternoNeto.doubleValue());
+                p.setPrecioLista(precioLista.doubleValue());            
             }
             if (checkPrecios == true || checkMedida == true || checkRubro == true || checkProveedor == true) {            
                 p.setFechaUltimaModificacion(new Date());                
@@ -361,19 +363,19 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     @Override
-    public double calcularValorStock(BusquedaProductoCriteria criteria) {
+    public BigDecimal calcularValorStock(BusquedaProductoCriteria criteria) {
         return productoRepository.calcularValorStock(criteria);
     }
 
     @Override
-    public Map<Double, Producto> getProductosSinStockDisponible(long[] idProducto, double[] cantidad) {
+    public Map<BigDecimal, Producto> getProductosSinStockDisponible(long[] idProducto, BigDecimal[] cantidad) {
         Map productos = new HashMap();
         int longitudIds = idProducto.length;
         int longitudCantidades = cantidad.length;
         if (longitudIds == longitudCantidades) {
             for (int i = 0; i < longitudIds; i++) {
                 Producto p = this.getProductoPorId(idProducto[i]);
-                if (p.isIlimitado() == false && p.getCantidad() < cantidad[i]) {
+                if (p.isIlimitado() == false && p.getCantidad() < cantidad[i].doubleValue()) {
                     productos.put(cantidad[i], p);
                 }
             }
@@ -385,14 +387,14 @@ public class ProductoServiceImpl implements IProductoService {
     }
     
     @Override
-    public Map<Double, Producto> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, double[] cantidad) {
+    public Map<BigDecimal, Producto> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, BigDecimal[] cantidad) {
         Map productos = new HashMap();
         int longitudIds = idProducto.length;
         int longitudCantidades = cantidad.length;
         if (longitudIds == longitudCantidades) {
             for (int i = 0; i < longitudIds; i++) {
                 Producto p = this.getProductoPorId(idProducto[i]);
-                if (p.getVentaMinima() > cantidad[i]) {
+                if (p.getVentaMinima() > cantidad[i].doubleValue()) {
                     productos.put(cantidad[i], p);
                 }
             }
@@ -404,58 +406,53 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     @Override
-    public double calcularGanancia_Porcentaje(Double precioDeListaNuevo,
-            Double precioDeListaAnterior, double pvp, Double ivaPorcentaje,
-            Double impInternoPorcentaje, double precioCosto, boolean ascendente) {
+    public BigDecimal calcularGanancia_Porcentaje(BigDecimal precioDeListaNuevo,
+            BigDecimal precioDeListaAnterior, BigDecimal pvp, BigDecimal ivaPorcentaje,
+            BigDecimal impInternoPorcentaje, BigDecimal precioCosto, boolean ascendente) {
         //evita la division por cero
-        if (precioCosto == 0) {
-            return 0;
+        if (precioCosto.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
         }
-        double resultado;
+        BigDecimal resultado;
         if (ascendente == false) {
-            resultado = ((pvp - precioCosto) / precioCosto) * 100;
-        } else if (precioDeListaAnterior == 0 || precioCosto == 0) {
-            return 0;
+            resultado = pvp.subtract(precioCosto).divide(precioCosto, 16, RoundingMode.HALF_UP).multiply(new BigDecimal(100)); 
+        } else if (precioDeListaAnterior.compareTo(BigDecimal.ZERO) == 0 || precioCosto.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
         } else {
             resultado = precioDeListaNuevo;
-            double porcentajeIncremento = precioDeListaNuevo / precioDeListaAnterior;
-            resultado = resultado - ((pvp * (impInternoPorcentaje / 100)) * porcentajeIncremento);
-            resultado = resultado - ((pvp * (ivaPorcentaje / 100)) * porcentajeIncremento);
-            resultado = ((resultado - precioCosto) * 100) / precioCosto;
+            BigDecimal porcentajeIncremento = precioDeListaNuevo.divide(precioDeListaAnterior);
+            resultado = resultado.subtract(porcentajeIncremento.multiply(impInternoPorcentaje.divide(new BigDecimal(100)).multiply(pvp)));
+            resultado = resultado.subtract(porcentajeIncremento.multiply(ivaPorcentaje.divide(new BigDecimal(100)).multiply(pvp)));
+            resultado = resultado.subtract(precioCosto).multiply(new BigDecimal(100)).divide(precioCosto);
         }
         return resultado;
     }
 
     @Override
-    public double calcularGanancia_Neto(double precioCosto, double ganancia_porcentaje) {
-        double resultado = (precioCosto * ganancia_porcentaje) / 100;
-        return resultado;
+    public BigDecimal calcularGanancia_Neto(BigDecimal precioCosto, BigDecimal ganancia_porcentaje) {
+        return precioCosto.multiply(ganancia_porcentaje).divide(new BigDecimal(100));
     }
 
     @Override
-    public double calcularPVP(double precioCosto, double ganancia_porcentaje) {
-        double resultado = (precioCosto * (ganancia_porcentaje / 100)) + precioCosto;
-        return resultado;
+    public BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal ganancia_porcentaje) {
+        return precioCosto.add(precioCosto.multiply(ganancia_porcentaje.divide(new BigDecimal(100))));
     }
 
     @Override
-    public double calcularIVA_Neto(double pvp, double iva_porcentaje) {
-        double resultado = (pvp * iva_porcentaje) / 100;
-        return resultado;
+    public BigDecimal calcularIVA_Neto(BigDecimal pvp, BigDecimal iva_porcentaje) {
+        return pvp.multiply(iva_porcentaje).divide(new BigDecimal(100));
     }
 
     @Override
-    public double calcularImpInterno_Neto(double pvp, double impInterno_porcentaje) {
-        double resultado = (pvp * impInterno_porcentaje) / 100;
-        return resultado;
+    public BigDecimal calcularImpInterno_Neto(BigDecimal pvp, BigDecimal impInterno_porcentaje) {
+        return pvp.multiply(impInterno_porcentaje).divide(new BigDecimal(100));
     }
 
     @Override
-    public double calcularPrecioLista(double PVP, double iva_porcentaje, double impInterno_porcentaje) {
-        double resulIVA = PVP * (iva_porcentaje / 100);
-        double resultImpInterno = PVP * (impInterno_porcentaje / 100);
-        double PVPConImpuestos = PVP + resulIVA + resultImpInterno;
-        return PVPConImpuestos;
+    public BigDecimal calcularPrecioLista(BigDecimal PVP, BigDecimal iva_porcentaje, BigDecimal impInterno_porcentaje) {
+        BigDecimal resulIVA = PVP.multiply(iva_porcentaje.divide(new BigDecimal(100)));
+        BigDecimal resultImpInterno = PVP.multiply(impInterno_porcentaje.divide(new BigDecimal(100)));
+        return PVP.add(resulIVA).add(resultImpInterno);
     }
 
     @Override

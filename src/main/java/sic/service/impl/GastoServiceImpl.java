@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import java.math.BigDecimal;
 import sic.service.IGastoService;
 import java.util.Date;
 import java.util.List;
@@ -94,10 +95,10 @@ public class GastoServiceImpl implements IGastoService {
     }
     
     @Override
-    public double calcularTotalGastos(List<Gasto> gastos) {
-        double total = 0.0;
+    public BigDecimal calcularTotalGastos(List<Gasto> gastos) {
+        BigDecimal total = BigDecimal.ZERO;
         for (Gasto gasto : gastos) {
-            total += gasto.getMonto();
+            total = total.add(new BigDecimal(gasto.getMonto()));
         }
         return total;
     }

@@ -1,5 +1,6 @@
 package sic.controller;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,13 +65,13 @@ public class CarritoCompraController {
 
     @GetMapping("/carrito-compra/usuarios/{idUsuario}/total")
     @ResponseStatus(HttpStatus.OK)
-    public double getTotal(@PathVariable long idUsuario) {
+    public BigDecimal getTotal(@PathVariable long idUsuario) {
         return carritoCompraService.getTotal(idUsuario);
     }
 
     @GetMapping("/carrito-compra/usuarios/{idUsuario}/cantidad-articulos")
     @ResponseStatus(HttpStatus.OK)
-    public double getCantArticulos(@PathVariable long idUsuario) {
+    public BigDecimal getCantArticulos(@PathVariable long idUsuario) {
         return carritoCompraService.getCantArticulos(idUsuario);
     }
 

@@ -1,5 +1,6 @@
 package sic.builder;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Map;
 import sic.modelo.Caja;
@@ -22,7 +23,7 @@ public class CajaBuilder {
     private double saldoFinal;
     private double saldoReal;
     private boolean eliminada = false;
-    private Map<Long, Double> totalesPorFomaDePago;
+    private Map<Long, BigDecimal> totalesPorFomaDePago;
     private double totalAfectaCaja;
     private double totalGeneral;
     private Empresa empresa = new EmpresaBuilder().build();

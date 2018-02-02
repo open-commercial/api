@@ -1,5 +1,6 @@
 package sic.controller;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -341,25 +342,25 @@ public class FacturaController {
     public RenglonFactura calcularRenglon(@RequestParam long idProducto,
                                           @RequestParam TipoDeComprobante tipoDeComprobante,
                                           @RequestParam Movimiento movimiento,
-                                          @RequestParam double cantidad, 
-                                          @RequestParam double descuentoPorcentaje) {
+                                          @RequestParam BigDecimal cantidad, 
+                                          @RequestParam BigDecimal descuentoPorcentaje) {
         return facturaService.calcularRenglon(tipoDeComprobante, movimiento, cantidad, idProducto, descuentoPorcentaje, false);
     }
         
     @GetMapping("/facturas/total-facturado-venta/criteria")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularTotalFacturadoVenta(@RequestParam Long idEmpresa,
-                                              @RequestParam(required = false) Long desde,
-                                              @RequestParam(required = false) Long hasta,
-                                              @RequestParam(required = false) Long idCliente,
-                                              @RequestParam(required = false) Integer nroSerie,
-                                              @RequestParam(required = false) Integer nroFactura,                                              
-                                              @RequestParam(required = false) Long idViajante,
-                                              @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-                                              @RequestParam(required = false) Long idUsuario,
-                                              @RequestParam(required = false) Long nroPedido,
-                                              @RequestParam(required = false) Boolean soloImpagas,
-                                              @RequestParam(required = false) Boolean soloPagas) {
+    public BigDecimal calcularTotalFacturadoVenta(@RequestParam Long idEmpresa,
+                                                 @RequestParam(required = false) Long desde,
+                                                 @RequestParam(required = false) Long hasta,
+                                                 @RequestParam(required = false) Long idCliente,
+                                                 @RequestParam(required = false) Integer nroSerie,
+                                                 @RequestParam(required = false) Integer nroFactura,                                              
+                                                 @RequestParam(required = false) Long idViajante,
+                                                 @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
+                                                 @RequestParam(required = false) Long idUsuario,
+                                                 @RequestParam(required = false) Long nroPedido,
+                                                 @RequestParam(required = false) Boolean soloImpagas,
+                                                 @RequestParam(required = false) Boolean soloPagas) {
         Calendar fechaDesde = Calendar.getInstance();
         Calendar fechaHasta = Calendar.getInstance();
         if ((desde != null) && (hasta != null)) {
@@ -411,14 +412,14 @@ public class FacturaController {
     
     @GetMapping("/facturas/total-facturado-compra/criteria")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularTotalFacturadoCompra(@RequestParam Long idEmpresa,
-                                               @RequestParam(required = false) Long desde,
-                                               @RequestParam(required = false) Long hasta,
-                                               @RequestParam(required = false) Long idProveedor,
-                                               @RequestParam(required = false) Integer nroSerie,
-                                               @RequestParam(required = false) Integer nroFactura,
-                                               @RequestParam(required = false) Boolean soloImpagas,
-                                               @RequestParam(required = false) Boolean soloPagas) {
+    public BigDecimal calcularTotalFacturadoCompra(@RequestParam Long idEmpresa,
+                                                   @RequestParam(required = false) Long desde,
+                                                   @RequestParam(required = false) Long hasta,
+                                                   @RequestParam(required = false) Long idProveedor,
+                                                   @RequestParam(required = false) Integer nroSerie,
+                                                   @RequestParam(required = false) Integer nroFactura,
+                                                   @RequestParam(required = false) Boolean soloImpagas,
+                                                   @RequestParam(required = false) Boolean soloPagas) {
         Calendar fechaDesde = Calendar.getInstance();
         Calendar fechaHasta = Calendar.getInstance();
         if ((desde != null) && (hasta != null)) {
@@ -454,18 +455,18 @@ public class FacturaController {
     
     @GetMapping("/facturas/total-iva-venta/criteria")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularIvaVenta(@RequestParam Long idEmpresa,
-                                   @RequestParam(required = false) Long desde,
-                                   @RequestParam(required = false) Long hasta,
-                                   @RequestParam(required = false) Long idCliente,
-                                   @RequestParam(required = false) Integer nroSerie,
-                                   @RequestParam(required = false) Integer nroFactura,                                   
-                                   @RequestParam(required = false) Long idViajante,
-                                   @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-                                   @RequestParam(required = false) Long idUsuario,
-                                   @RequestParam(required = false) Long nroPedido,
-                                   @RequestParam(required = false) Boolean soloImpagas,
-                                   @RequestParam(required = false) Boolean soloPagas) {
+    public BigDecimal calcularIvaVenta(@RequestParam Long idEmpresa,
+                                       @RequestParam(required = false) Long desde,
+                                       @RequestParam(required = false) Long hasta,
+                                       @RequestParam(required = false) Long idCliente,
+                                       @RequestParam(required = false) Integer nroSerie,
+                                       @RequestParam(required = false) Integer nroFactura,                                   
+                                       @RequestParam(required = false) Long idViajante,
+                                       @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
+                                       @RequestParam(required = false) Long idUsuario,
+                                       @RequestParam(required = false) Long nroPedido,
+                                       @RequestParam(required = false) Boolean soloImpagas,
+                                       @RequestParam(required = false) Boolean soloPagas) {
         Calendar fechaDesde = Calendar.getInstance();
         Calendar fechaHasta = Calendar.getInstance();
         if ((desde != null) && (hasta != null)) {
@@ -517,14 +518,14 @@ public class FacturaController {
     
     @GetMapping("/facturas/total-iva-compra/criteria")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularTotalIvaCompra(@RequestParam Long idEmpresa,
-                                         @RequestParam(required = false) Long desde,
-                                         @RequestParam(required = false) Long hasta,
-                                         @RequestParam(required = false) Long idProveedor,
-                                         @RequestParam(required = false) Integer nroSerie,
-                                         @RequestParam(required = false) Integer nroFactura,
-                                         @RequestParam(required = false) Boolean soloImpagas,
-                                         @RequestParam(required = false) Boolean soloPagas) {
+    public BigDecimal calcularTotalIvaCompra(@RequestParam Long idEmpresa,
+                                             @RequestParam(required = false) Long desde,
+                                             @RequestParam(required = false) Long hasta,
+                                             @RequestParam(required = false) Long idProveedor,
+                                             @RequestParam(required = false) Integer nroSerie,
+                                             @RequestParam(required = false) Integer nroFactura,
+                                             @RequestParam(required = false) Boolean soloImpagas,
+                                             @RequestParam(required = false) Boolean soloPagas) {
         Calendar fechaDesde = Calendar.getInstance();
         Calendar fechaHasta = Calendar.getInstance();
         if ((desde != null) && (hasta != null)) {
@@ -560,18 +561,18 @@ public class FacturaController {
     
     @GetMapping("/facturas/ganancia-total/criteria")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularGananciaTotal(@RequestParam Long idEmpresa,
-                                        @RequestParam(required = false) Long desde,
-                                        @RequestParam(required = false) Long hasta,
-                                        @RequestParam(required = false) Long idCliente,
-                                        @RequestParam(required = false) Integer nroSerie,
-                                        @RequestParam(required = false) Integer nroFactura,                                        
-                                        @RequestParam(required = false) Long idViajante,
-                                        @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-                                        @RequestParam(required = false) Long idUsuario,
-                                        @RequestParam(required = false) Long nroPedido,
-                                        @RequestParam(required = false) Boolean soloImpagas,
-                                        @RequestParam(required = false) Boolean soloPagas) {
+    public BigDecimal calcularGananciaTotal(@RequestParam Long idEmpresa,
+                                            @RequestParam(required = false) Long desde,
+                                            @RequestParam(required = false) Long hasta,
+                                            @RequestParam(required = false) Long idCliente,
+                                            @RequestParam(required = false) Integer nroSerie,
+                                            @RequestParam(required = false) Integer nroFactura,                                        
+                                            @RequestParam(required = false) Long idViajante,
+                                            @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
+                                            @RequestParam(required = false) Long idUsuario,
+                                            @RequestParam(required = false) Long nroPedido,
+                                            @RequestParam(required = false) Boolean soloImpagas,
+                                            @RequestParam(required = false) Boolean soloPagas) {
         Calendar fechaDesde = Calendar.getInstance();
         Calendar fechaHasta = Calendar.getInstance();
         if ((desde != null) && (hasta != null)) {

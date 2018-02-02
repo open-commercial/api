@@ -118,6 +118,6 @@ public interface IFacturaService {
 
     boolean pedidoTotalmenteFacturado(Pedido pedido);
     
-    RenglonFactura calcularRenglon(TipoDeComprobante tipoDeComprobante, Movimiento movimiento, BigDecimal cantidad, long idProducto, BigDecimal descuentoPorcentaje, BigDecimal dividiendoRenglonFactura);
+    RenglonFactura calcularRenglon(TipoDeComprobante tipoDeComprobante, Movimiento movimiento, BigDecimal cantidad, long idProducto, BigDecimal descuentoPorcentaje, boolean dividiendoRenglonFactura);
 
 }

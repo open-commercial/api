@@ -46,7 +46,7 @@ public class PagoController {
     
     @GetMapping("/pagos/total")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularTotalPagos(@RequestParam long[] idPago) {
+    public BigDecimal calcularTotalPagos(@RequestParam long[] idPago) {
         List<Pago> pagos = new ArrayList<>();
         for (long id : idPago) {
             pagos.add(pagoService.getPagoPorId(id));
@@ -109,7 +109,7 @@ public class PagoController {
     
     @GetMapping("/pagos/facturas/{idFactura}/total-pagado")
     @ResponseStatus(HttpStatus.OK)
-    public double getTotalPagadoFacturas(@PathVariable long idFactura) {
+    public BigDecimal getTotalPagadoFacturas(@PathVariable long idFactura) {
         return facturaService.getTotalPagado(idFactura);
     }
     
@@ -121,7 +121,7 @@ public class PagoController {
     
     @GetMapping("/pagos/notas/{idNota}/total-pagado")
     @ResponseStatus(HttpStatus.OK)
-    public double getTotalPagadoNotas(@PathVariable long idNota) {
+    public BigDecimal getTotalPagadoNotas(@PathVariable long idNota) {
         return notaService.getTotalPagado(idNota);
     }
     

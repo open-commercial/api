@@ -5,6 +5,7 @@ import com.querydsl.core.types.dsl.DateExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -268,7 +269,7 @@ public class PedidoServiceImpl implements IPedidoService {
         this.getFacturasDelPedido(nroPedido).stream().forEach(f -> {
             f.getRenglones().stream().forEach(r -> {
                 renglonesDeFacturas.add(facturaService.calcularRenglon(f.getTipoComprobante(),
-                        Movimiento.VENTA, r.getCantidad(),r.getId_ProductoItem(), r.getDescuento_porcentaje(), false));
+                        Movimiento.VENTA, new BigDecimal(r.getCantidad()),r.getId_ProductoItem(), new BigDecimal(r.getDescuento_porcentaje()), false));
             });      
         });
         HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
