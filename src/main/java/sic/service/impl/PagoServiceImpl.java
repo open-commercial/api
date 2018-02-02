@@ -211,7 +211,7 @@ public class PagoServiceImpl implements IPagoService {
     @Override
     public void validarOperacion(Pago pago) {
         //Requeridos
-        if (pago.getMonto() <= 0) {
+        if (pago.getMonto() <= 0.0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_pago_mayorQueCero_monto"));
         }
@@ -228,8 +228,8 @@ public class PagoServiceImpl implements IPagoService {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_factura_pagada"));
             }
-            BigDecimal saldoAPagar = this.getSaldoAPagarFactura(pago.getFactura().getId_Factura()).setScale(2, RoundingMode.DOWN);;
-            if ((new BigDecimal(pago.getMonto())).setScale(2, RoundingMode.CEILING).compareTo(saldoAPagar) > 0) {
+            BigDecimal saldoAPagar = this.getSaldoAPagarFactura(pago.getFactura().getId_Factura()).setScale(3, RoundingMode.HALF_UP);;
+            if ((new BigDecimal(pago.getMonto())).setScale(3, RoundingMode.HALF_UP).compareTo(saldoAPagar) > 0) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_pago_mayorADeuda_monto"));
             }
@@ -239,8 +239,8 @@ public class PagoServiceImpl implements IPagoService {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_nota_debito_pagada"));
             }
-            BigDecimal saldoAPagar = this.getSaldoAPagarNotaDebito(pago.getNotaDebito().getIdNota()).setScale(2, RoundingMode.DOWN);
-            if ((new BigDecimal(pago.getMonto())).setScale(2, RoundingMode.CEILING).compareTo(saldoAPagar) > 0) { 
+            BigDecimal saldoAPagar = this.getSaldoAPagarNotaDebito(pago.getNotaDebito().getIdNota()).setScale(3, RoundingMode.HALF_UP);
+            if ((new BigDecimal(pago.getMonto())).setScale(3, RoundingMode.HALF_UP).compareTo(saldoAPagar) > 0) { 
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_pago_mayorADeuda_monto"));
             }

@@ -181,7 +181,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             }
             for (RenglonCuentaCorriente rcc : renglonesCuentaCorriente) {
                 rcc.setSaldo(saldoCC.doubleValue());
-                saldoCC.subtract(new BigDecimal(rcc.getMonto()));
+                saldoCC = saldoCC.subtract(new BigDecimal(rcc.getMonto()));
                 if (rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_B
                         || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_X
                         || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {

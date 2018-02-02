@@ -14,7 +14,7 @@ public class ProductoServiceImplTest {
     private ProductoServiceImpl productoService;
     
     @Test
-    public void shouldGanancia_Porcentaje() {
+    public void shouldCalcularGanancia_Porcentaje() {
         double precioCosto = 12.34;
         double pvp = 23.45;
         double resultadoEsperado = 90.03241491085899;

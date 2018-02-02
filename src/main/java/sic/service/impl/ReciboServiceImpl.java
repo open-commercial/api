@@ -3,6 +3,7 @@ package sic.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -238,18 +239,20 @@ public class ReciboServiceImpl implements IReciboService {
                         || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
                     FacturaVenta fv = (FacturaVenta) facturaService.getFacturaPorId(rcc.getIdMovimiento());
                     BigDecimal credito = notaService.calcularTotaCreditoPorFacturaVenta(fv);
-                    if (fv.isPagada() == false && (new BigDecimal(fv.getTotal())).compareTo(credito) > 0) {
+                    BigDecimal saldoAPagar = this.pagoService.getSaldoAPagarFactura(fv.getId_Factura());
+                    if(credito.compareTo(BigDecimal.ZERO) != 0) {
+                        System.err.println(credito);
+                    }
+                    if (fv.isPagada() == false && saldoAPagar.compareTo(credito) > 0) {
                         fv.setPagos(this.pagoService.getPagosDeLaFactura(fv.getId_Factura()));
                         Pago nuevoPago = new Pago();
                         nuevoPago.setFormaDePago(formaDePago);
                         nuevoPago.setFactura(fv);
                         nuevoPago.setEmpresa(fv.getEmpresa());
                         nuevoPago.setNota(nota);
-                        BigDecimal saldoAPagar = this.pagoService.getSaldoAPagarFactura(fv.getId_Factura()).subtract(credito);
+                        saldoAPagar = saldoAPagar.subtract(credito);
                         if (saldoAPagar.compareTo(monto) < 1) {
                             monto = monto.subtract(saldoAPagar);
-                            // Se utiliza round por un problema de presicion de la maquina ej: 828.65 - 614.0 = 214.64999...
-//                            monto = Math.round(monto * 100.0) / 100.0;
                             nuevoPago.setMonto(saldoAPagar.doubleValue());
                         } else {
                             nuevoPago.setMonto(monto.doubleValue());
@@ -273,8 +276,6 @@ public class ReciboServiceImpl implements IReciboService {
                         BigDecimal saldoAPagar = this.pagoService.getSaldoAPagarNotaDebito(nd.getIdNota());
                         if (saldoAPagar.compareTo(monto) < 1) {
                             monto = monto.subtract(saldoAPagar);
-//                            // Se utiliza round por un problema de presicion de la maquina ej: 828.65 - 614.0 = 214.64999...
-//                            monto = Math.round(monto * 100.0) / 100.0;
                             nuevoPago.setMonto(saldoAPagar.doubleValue());
                         } else {
                             nuevoPago.setMonto(monto.doubleValue());
