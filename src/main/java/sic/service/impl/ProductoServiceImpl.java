@@ -366,7 +366,7 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     @Override
-    public Map<Double, Producto> getProductosSinStockDisponible(long[] idProducto, double[] cantidad) {
+    public Map<Long, Double> getProductosSinStockDisponible(long[] idProducto, double[] cantidad) {
         Map productos = new HashMap();
         int longitudIds = idProducto.length;
         int longitudCantidades = cantidad.length;
@@ -374,7 +374,7 @@ public class ProductoServiceImpl implements IProductoService {
             for (int i = 0; i < longitudIds; i++) {
                 Producto p = this.getProductoPorId(idProducto[i]);
                 if (p.isIlimitado() == false && p.getCantidad() < cantidad[i]) {
-                    productos.put(cantidad[i], p);
+                    productos.put(p.getId_Producto(), cantidad[i]);
                 }
             }
         } else {
@@ -385,7 +385,7 @@ public class ProductoServiceImpl implements IProductoService {
     }
     
     @Override
-    public Map<Double, Producto> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, double[] cantidad) {
+    public Map<Long, Double> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, double[] cantidad) {
         Map productos = new HashMap();
         int longitudIds = idProducto.length;
         int longitudCantidades = cantidad.length;
@@ -393,7 +393,7 @@ public class ProductoServiceImpl implements IProductoService {
             for (int i = 0; i < longitudIds; i++) {
                 Producto p = this.getProductoPorId(idProducto[i]);
                 if (p.getVentaMinima() > cantidad[i]) {
-                    productos.put(cantidad[i], p);
+                    productos.put(p.getId_Producto(), cantidad[i]);
                 }
             }
         } else {

@@ -23,9 +23,9 @@ public interface IProductoService {
 
     double calcularGanancia_Neto(double precioCosto, double ganancia_porcentaje);
 
-    Map<Double, Producto> getProductosSinStockDisponible(long[] idProducto, double[] cantidad);
+    Map<Long, Double> getProductosSinStockDisponible(long[] idProducto, double[] cantidad);
 
-    Map<Double, Producto> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, double[] cantidad);
+    Map<Long, Double> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, double[] cantidad);
     
     double calcularGanancia_Porcentaje(Double precioDeListaNuevo, 
             Double precioDeListaAnterior, double pvp, Double ivaPorcentaje, 
