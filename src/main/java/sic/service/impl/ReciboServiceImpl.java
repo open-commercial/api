@@ -240,9 +240,6 @@ public class ReciboServiceImpl implements IReciboService {
                     FacturaVenta fv = (FacturaVenta) facturaService.getFacturaPorId(rcc.getIdMovimiento());
                     BigDecimal credito = notaService.calcularTotaCreditoPorFacturaVenta(fv);
                     BigDecimal saldoAPagar = this.pagoService.getSaldoAPagarFactura(fv.getId_Factura());
-                    if(credito.compareTo(BigDecimal.ZERO) != 0) {
-                        System.err.println(credito);
-                    }
                     if (fv.isPagada() == false && saldoAPagar.compareTo(credito) > 0) {
                         fv.setPagos(this.pagoService.getPagosDeLaFactura(fv.getId_Factura()));
                         Pago nuevoPago = new Pago();
