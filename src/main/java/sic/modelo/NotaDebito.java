@@ -2,6 +2,7 @@ package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -28,8 +29,8 @@ public class NotaDebito extends Nota implements Serializable {
     @Column(nullable = false)
     private List<RenglonNotaDebito> renglonesNotaDebito;
     
-    @Column(nullable = false)
-    private double montoNoGravado;
+    @Column(precision = 18, scale = 15)
+    private BigDecimal montoNoGravado;
     
     @ManyToOne
     @JoinColumn(name = "idRecibo", referencedColumnName = "idRecibo")
@@ -41,8 +42,8 @@ public class NotaDebito extends Nota implements Serializable {
 
     public NotaDebito(long idNota, long serie, FacturaVenta facturaVenta, List<Pago> pagos, long nroNota, boolean eliminada,
             TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa, Cliente cliente,
-            Usuario usuario, String motivo, List<RenglonNotaDebito> renglones, double subTotalBruto,
-            double iva21Neto, double iva105Neto, double total, double montoNoGravado, long CAE, Date vencimientoCAE,
+            Usuario usuario, String motivo, List<RenglonNotaDebito> renglones, BigDecimal subTotalBruto,
+            BigDecimal iva21Neto, BigDecimal iva105Neto, BigDecimal total, BigDecimal montoNoGravado, long CAE, Date vencimientoCAE,
             long numSerieAfip, long numNotaAfip, Recibo recibo, boolean pagado) {
 
         super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, cliente, usuario,

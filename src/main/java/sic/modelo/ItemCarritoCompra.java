@@ -2,6 +2,8 @@ package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -27,13 +29,15 @@ public class ItemCarritoCompra implements Serializable {
     @GeneratedValue
     private Long idItemCarritoCompra;
 
-    private double cantidad;
+    @Column(precision = 18, scale = 15)
+    private BigDecimal cantidad;
 
     @ManyToOne
     @JoinColumn(name = "id_Producto", referencedColumnName = "id_Producto")
     private Producto producto;
 
-    private double importe;
+    @Column(precision = 18, scale = 15)
+    private BigDecimal importe;
 
     @ManyToOne
     @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")

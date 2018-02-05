@@ -3,6 +3,7 @@ package sic.modelo;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -51,8 +52,8 @@ public class Pago implements Serializable {
     @JoinColumn(name = "idRecibo", referencedColumnName = "idRecibo")
     private Recibo recibo;
 
-    @Column(nullable = false)
-    private double monto;
+    @Column(precision = 18, scale = 15)
+    private BigDecimal monto;
 
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)

@@ -3,6 +3,7 @@ package sic.modelo;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Entity;
@@ -34,9 +35,9 @@ public class FacturaVenta extends Factura implements Serializable {
     public FacturaVenta(Cliente cliente, Usuario usuario, long id_Factura, Date fecha,
             TipoDeComprobante tipoComprobante, long numSerie, long numFactura, Date fechaVencimiento,
             Pedido pedido, Transportista transportista, List<RenglonFactura> renglones,
-            List<Pago> pagos, double subTotal, double recargo_porcentaje, double recargo_neto,
-            double descuento_porcentaje, double descuento_neto, double subTotal_neto, double iva_105_neto,
-            double iva_21_neto, double impuestoInterno_neto, double total, String observaciones, boolean pagada,
+            List<Pago> pagos, BigDecimal subTotal, BigDecimal recargo_porcentaje, BigDecimal recargo_neto,
+            BigDecimal descuento_porcentaje, BigDecimal descuento_neto, BigDecimal subTotal_neto, BigDecimal iva_105_neto,
+            BigDecimal iva_21_neto, BigDecimal impuestoInterno_neto, BigDecimal total, String observaciones, boolean pagada,
             Empresa empresa, boolean eliminada, long CAE, Date vencimientoCAE, long numSerieAfip, long numFacturaAfip) {
         
         super(id_Factura, fecha, tipoComprobante, numSerie, numFactura, fechaVencimiento, 

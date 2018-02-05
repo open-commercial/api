@@ -69,11 +69,14 @@ public class Caja implements Serializable {
     @Enumerated(EnumType.STRING)
     private EstadoCaja estado;
 
-    private double saldoInicial;
+    @Column(precision = 18, scale = 15)
+    private BigDecimal saldoInicial;
 
-    private double saldoFinal;
+    @Column(precision = 18, scale = 15)
+    private BigDecimal saldoFinal;
 
-    private double saldoReal;
+    @Column(precision = 18, scale = 15)
+    private BigDecimal saldoReal;
 
     private boolean eliminada;
     
@@ -81,9 +84,9 @@ public class Caja implements Serializable {
     private Map<Long, BigDecimal> totalesPorFomaDePago;
     
     @Transient
-    private double totalAfectaCaja;
+    private BigDecimal totalAfectaCaja;
             
     @Transient
-    private double totalGeneral;
+    private BigDecimal totalGeneral;
 
 }

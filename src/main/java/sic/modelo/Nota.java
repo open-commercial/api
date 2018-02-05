@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -97,17 +98,17 @@ public abstract class Nota implements Serializable {
     @Column(nullable = false)
     private String motivo;
     
-    @Column(nullable = false)
-    private double subTotalBruto; 
+    @Column(precision = 18, scale = 15)
+    private BigDecimal subTotalBruto; 
 
-    @Column(nullable = false)
-    private double iva21Neto;
+    @Column(precision = 18, scale = 15)
+    private BigDecimal iva21Neto;
             
-    @Column(nullable = false)        
-    private double iva105Neto;
+    @Column(precision = 18, scale = 15)       
+    private BigDecimal iva105Neto;
     
-    @Column(nullable = false)
-    private double total;
+    @Column(precision = 18, scale = 15)
+    private BigDecimal total;
     
     private long CAE;
     

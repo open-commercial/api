@@ -3,6 +3,7 @@ package sic.modelo;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -39,25 +40,45 @@ public class Producto implements Serializable {
     @Column(nullable = false)
     private String descripcion;
 
-    private double cantidad;
+    @Column(precision = 18, scale = 15)
+    private BigDecimal cantidad;
 
-    private double cantMinima;
+    @Column(precision = 18, scale = 15)
+    private BigDecimal cantMinima;
     
-    private double ventaMinima;
+    @Column(precision = 18, scale = 15)
+    private BigDecimal ventaMinima;
 
     @ManyToOne
     @JoinColumn(name = "id_Medida", referencedColumnName = "id_Medida")
     private Medida medida;
         
-    private double precioCosto;
-    private double ganancia_porcentaje;
-    private double ganancia_neto;
-    private double precioVentaPublico;
-    private double iva_porcentaje;
-    private double iva_neto;
-    private double impuestoInterno_porcentaje;
-    private double impuestoInterno_neto;
-    private double precioLista;
+    @Column(precision = 18, scale = 15)
+    private BigDecimal precioCosto;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal ganancia_porcentaje;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal ganancia_neto;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal precioVentaPublico;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal iva_porcentaje;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal iva_neto;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal impuestoInterno_porcentaje;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal impuestoInterno_neto;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal precioLista;
 
     @ManyToOne
     @JoinColumn(name = "id_Rubro", referencedColumnName = "id_Rubro")

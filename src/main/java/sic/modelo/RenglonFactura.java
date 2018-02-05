@@ -1,6 +1,7 @@
 package sic.modelo;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -36,16 +37,37 @@ public class RenglonFactura implements Serializable {
     @Column(nullable = false)
     private String medidaItem;
 
-    private double cantidad;
-    private double precioUnitario;
-    private double descuento_porcentaje;
-    private double descuento_neto;
-    private double iva_porcentaje;
-    private double iva_neto;
-    private double impuesto_porcentaje;
-    private double impuesto_neto;
-    private double ganancia_porcentaje;
-    private double ganancia_neto;
-    private double importe;
+    @Column(precision = 18, scale = 15)
+    private BigDecimal cantidad;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal precioUnitario;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal descuento_porcentaje;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal descuento_neto;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal iva_porcentaje;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal iva_neto;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal impuesto_porcentaje;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal impuesto_neto;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal ganancia_porcentaje;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal ganancia_neto;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal importe;
 
 }

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -90,16 +91,35 @@ public abstract class Factura implements Serializable {
     @JsonProperty(access = Access.WRITE_ONLY)
     private List<Pago> pagos;
 
-    private double subTotal;
-    private double recargo_porcentaje;
-    private double recargo_neto;
-    private double descuento_porcentaje;
-    private double descuento_neto;
-    private double subTotal_bruto;
-    private double iva_105_neto;
-    private double iva_21_neto;
-    private double impuestoInterno_neto;
-    private double total;
+    @Column(precision = 18, scale = 15)
+    private BigDecimal subTotal;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal recargo_porcentaje;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal recargo_neto;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal descuento_porcentaje;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal descuento_neto;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal subTotal_bruto;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal iva_105_neto;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal iva_21_neto;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal impuestoInterno_neto;
+    
+    @Column(precision = 18, scale = 15)
+    private BigDecimal total;
 
     @Column(nullable = false)
     private String observaciones;

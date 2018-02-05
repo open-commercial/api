@@ -3,6 +3,7 @@ package sic.modelo;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -66,9 +67,11 @@ public class Recibo implements Serializable {
     @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
     private Usuario usuario;
 
-    private double monto;
+    @Column(precision = 18, scale = 15)
+    private BigDecimal monto;
 
-    private double saldoSobrante;
+    @Column(precision = 18, scale = 15)
+    private BigDecimal saldoSobrante;
 
     @JsonGetter("formaDePago")
     public String getNombreFormaDePago() {
@@ -90,7 +93,7 @@ public class Recibo implements Serializable {
         return (proveedor != null) ? proveedor.getRazonSocial() : "";
     }
     
-       @JsonGetter("nombreUsuario")
+    @JsonGetter("nombreUsuario")
     public String getNombreUsuario() {
         return usuario.getNombre();
     }

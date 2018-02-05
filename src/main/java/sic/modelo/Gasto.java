@@ -1,6 +1,7 @@
 package sic.modelo;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -52,7 +53,8 @@ public class Gasto implements Serializable {
     @JoinColumn(name = "id_FormaDePago", referencedColumnName = "id_FormaDePago")
     private FormaDePago formaDePago;
 
-    private double monto;
+    @Column(precision = 18, scale = 15)
+    private BigDecimal monto;
 
     private boolean eliminado;
 

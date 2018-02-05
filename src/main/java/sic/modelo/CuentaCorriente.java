@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -59,7 +60,7 @@ public abstract class CuentaCorriente implements Serializable {
     private Empresa empresa;
     
     @Transient
-    private double saldo;
+    private BigDecimal saldo;
     
     @Transient
     private Date fechaUltimoMovimiento;
