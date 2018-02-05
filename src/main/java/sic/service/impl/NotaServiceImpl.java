@@ -166,7 +166,7 @@ public class NotaServiceImpl implements INotaService {
     public List<RenglonFactura> getRenglonesFacturaModificadosParaNotaCredito(long idFactura) {
         HashMap<Long, Double> listaCantidadesProductosUnificados = new HashMap<>();
         this.getNotasPorFactura(idFactura).forEach(n -> {
-            ((NotaCredito) n).getRenglonesNotaCredito().forEach((rnc) -> {
+            ((NotaCredito) n).getRenglonesNotaCredito().forEach(rnc -> {
                 if (listaCantidadesProductosUnificados.containsKey(rnc.getIdProductoItem())) {
                     listaCantidadesProductosUnificados.put(rnc.getIdProductoItem(),
                             listaCantidadesProductosUnificados.get(rnc.getIdProductoItem()) + rnc.getCantidad());
@@ -899,7 +899,7 @@ public class NotaServiceImpl implements INotaService {
     }
 
     @Override
-    public double calcularTotaCreditoPorFacturaVenta(FacturaVenta facturaVenta) {
+    public double calcularTotalCreditoPorFacturaVenta(FacturaVenta facturaVenta) {
         Double credito = notaCreditoRepository.getTotalNotasCreditoPorFacturaVenta(facturaVenta);
         return (credito == null) ? 0.0 : credito;
     }

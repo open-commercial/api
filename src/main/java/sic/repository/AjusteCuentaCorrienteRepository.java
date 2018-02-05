@@ -11,7 +11,6 @@ import sic.modelo.Cliente;
 import sic.modelo.Empresa;
 import sic.modelo.Nota;
 
-
 public interface AjusteCuentaCorrienteRepository extends PagingAndSortingRepository<AjusteCuentaCorriente, Long> {
     
     AjusteCuentaCorriente findByNumAjusteAndEliminado(long nroAjuste, boolean eliminado);

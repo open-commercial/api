@@ -2,7 +2,6 @@ package sic.service.impl;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -18,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Factura;
 import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
-import sic.modelo.FormaDePago;
 import sic.modelo.NotaDebito;
 import sic.modelo.Pago;
 import sic.service.IFacturaService;
@@ -156,16 +154,6 @@ public class PagoServiceImpl implements IPagoService {
     }
 
     @Override
-    public void eliminarPagoDeCompra(long idPago) {
-        if (facturaService.getFacturaDelPago(idPago) instanceof FacturaCompra) {
-            eliminar(idPago);
-        } else {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_pago_no_factura_compra"));
-        }
-    }
-
-    @Override
     public double calcularTotalPagos(List<Pago> pagos) {
         double total = 0.0;
         for (Pago pago : pagos) {
@@ -205,45 +193,6 @@ public class PagoServiceImpl implements IPagoService {
     public double getSaldoPagosPorCliente(long idCliente, Date hasta) {
         Double saldo = pagoRepository.getSaldoPagosPorCliente(idCliente, hasta);
         return (saldo == null) ? 0 : saldo;
-    }
-
-    @Override
-    @Transactional
-    public void pagarMultiplesFacturasCompra(List<Factura> facturas, double monto, FormaDePago formaDePago, String nota) {
-        Collections.sort(facturas, (Factura f1, Factura f2) -> {
-            if (f1.getTipoComprobante() == f2.getTipoComprobante()) {
-                return f1.getFecha().compareTo(f2.getFecha());
-            } else {
-                return f2.getTipoComprobante().compareTo(f1.getTipoComprobante());
-            }
-        });
-        if (monto <= this.calcularTotalAdeudadoFacturas(facturas)) {
-            List<Factura> facturasOrdenadas = facturaService.ordenarFacturasPorFechaAsc(facturas);
-            for (Factura factura : facturasOrdenadas) {
-                if (monto > 0.0) {
-                    factura.setPagos(this.getPagosDeLaFactura(factura.getId_Factura()));
-                    Pago nuevoPago = new Pago();
-                    nuevoPago.setFormaDePago(formaDePago);
-                    nuevoPago.setFactura(factura);
-                    nuevoPago.setEmpresa(factura.getEmpresa());
-                    nuevoPago.setNota(nota);
-                    double saldoAPagar = this.getSaldoAPagarFactura(factura.getId_Factura());
-                    if (saldoAPagar <= monto) {
-                        monto = monto - saldoAPagar;
-                        // Se utiliza round por un problema de presicion de la maquina ej: 828.65 - 614.0 = 214.64999...
-                        monto = Math.round(monto * 100.0) / 100.0;
-                        nuevoPago.setMonto(saldoAPagar);
-                    } else {
-                        nuevoPago.setMonto(monto);
-                        monto = 0.0;
-                    }
-                    this.guardar(nuevoPago);
-                }
-            }
-        } else {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_pago_mayorADeuda_monto"));
-        }
     }
 
     @Override

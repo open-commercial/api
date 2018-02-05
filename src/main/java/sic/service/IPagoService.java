@@ -7,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import sic.modelo.Factura;
 import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
-import sic.modelo.FormaDePago;
 import sic.modelo.Pago;
 
 public interface IPagoService {
@@ -43,15 +42,11 @@ public interface IPagoService {
     double calcularTotalAdeudadoFacturas(List<Factura> facturas);
     
     double getSaldoPagosPorCliente(long idCliente, Date hasta);
-            
-    void pagarMultiplesFacturasCompra(List<Factura> facturas, double monto, FormaDePago formaDePago, String nota);
-    
+                
     void validarOperacion(Pago pago);     
 
     Pago guardar(Pago pago);
 
-    void eliminar(long idPago);
-    
-    void eliminarPagoDeCompra(long idPago);
+    void eliminar(long idPago);    
     
 }
