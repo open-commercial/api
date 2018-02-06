@@ -14,13 +14,14 @@ import sic.modelo.FacturaVenta;
 import sic.modelo.Pedido;
 import sic.modelo.Producto;
 import sic.modelo.Proveedor;
+import sic.modelo.Recibo;
 import sic.modelo.RenglonFactura;
 import sic.modelo.TipoDeComprobante;
 
 public interface IFacturaService {
     
     Factura getFacturaPorId(Long id_Factura);
-
+        
     Long getCAEById(long idFactura);
     
     Double getTotalById(long idFactura);
@@ -44,8 +45,8 @@ public interface IFacturaService {
     Page<FacturaCompra> buscarFacturaCompra(BusquedaFacturaCompraCriteria criteria);
 
     Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria);
-    
-    List<Factura> guardar(List<Factura> facturas, Long idPedido);
+           
+    List<Factura> guardar(List<Factura> facturas, Long idPedido, List<Recibo> recibos);
 
     void eliminar(long[] idFactura);
     
@@ -105,8 +106,10 @@ public interface IFacturaService {
 
     List<Factura> dividirFactura(FacturaVenta factura, int[] indices);
 
-    List<RenglonFactura> convertirRenglonesPedidoARenglonesFactura(Pedido pedido, TipoDeComprobante tipoDeComprobante);
+    List<RenglonFactura> convertirRenglonesPedidoEnRenglonesFactura(Pedido pedido, TipoDeComprobante tipoDeComprobante);
 
-    RenglonFactura calcularRenglon(TipoDeComprobante tipoDeComprobante, Movimiento movimiento, double cantidad, Long idProducto, double descuento_porcentaje);
+    boolean pedidoTotalmenteFacturado(Pedido pedido);
+    
+    RenglonFactura calcularRenglon(TipoDeComprobante tipoDeComprobante, Movimiento movimiento, double cantidad, long idProducto, double descuentoPorcentaje, boolean dividiendoRenglonFactura);
 
 }

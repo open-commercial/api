@@ -7,8 +7,6 @@ import org.springframework.data.domain.Pageable;
 import sic.modelo.Factura;
 import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
-import sic.modelo.FormaDePago;
-import sic.modelo.NotaDebito;
 import sic.modelo.Pago;
 
 public interface IPagoService {
@@ -25,13 +23,15 @@ public interface IPagoService {
     
     long getSiguienteNroPago(Long idEmpresa);
 
-    List<Pago> getPagosEntreFechasYFormaDePago(long id_Empresa, long id_FormaDePago, Date desde, Date hasta);
+    List<Pago> getPagosCompraEntreFechasYFormaDePago(long id_Empresa, long id_FormaDePago, Date desde, Date hasta);
     
     List<Pago> getPagosDeNotas(long idNota);
     
     Double getTotalPagosDeNota(long idNota);
     
     Page<Pago> getPagosPorClienteEntreFechas(long idCliente, Date desde, Date hasta, Pageable page);
+    
+    List<Pago> getPagosRelacionadosAlRecibo(long idRecibo);
     
     double calcularTotalPagos(List<Pago> pagos);
     
@@ -42,12 +42,11 @@ public interface IPagoService {
     double calcularTotalAdeudadoFacturas(List<Factura> facturas);
     
     double getSaldoPagosPorCliente(long idCliente, Date hasta);
-            
-    void pagarMultiplesFacturas(List<Factura> facturas, double monto, FormaDePago formaDePago, String nota);
-    
+                
     void validarOperacion(Pago pago);     
 
     Pago guardar(Pago pago);
 
-    void eliminar(long idPago);
+    void eliminar(long idPago);    
+    
 }

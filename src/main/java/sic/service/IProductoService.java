@@ -3,6 +3,7 @@ package sic.service;
 import java.util.HashMap;
 import sic.modelo.TipoDeOperacion;
 import java.util.List;
+import java.util.Map;
 import org.springframework.data.domain.Page;
 import sic.modelo.BusquedaProductoCriteria;
 import sic.modelo.Empresa;
@@ -22,8 +23,10 @@ public interface IProductoService {
 
     double calcularGanancia_Neto(double precioCosto, double ganancia_porcentaje);
 
-    boolean existeStockDisponible(long idProducto, double cantidad);
+    Map<Long, Double> getProductosSinStockDisponible(long[] idProducto, double[] cantidad);
 
+    Map<Long, Double> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, double[] cantidad);
+    
     double calcularGanancia_Porcentaje(Double precioDeListaNuevo, 
             Double precioDeListaAnterior, double pvp, Double ivaPorcentaje, 
             Double impInternoPorcentaje, double precioCosto, boolean descendente);
@@ -63,6 +66,6 @@ public interface IProductoService {
                                                Double precioVentaPublico,                                                                     
                                                boolean checkMedida, Medida medida,
                                                boolean checkRubro, Rubro rubro,
-                                               boolean checkProveedor, Proveedor proveedor);
+                                               boolean checkProveedor, Proveedor proveedor);    
     
 }

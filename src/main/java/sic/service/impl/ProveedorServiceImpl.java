@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.modelo.CuentaCorriente;
+import sic.modelo.CuentaCorrienteProveedor;
 import sic.modelo.Empresa;
 import sic.modelo.Proveedor;
 import sic.modelo.QProveedor;
@@ -20,16 +22,19 @@ import sic.service.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
 import sic.util.Validator;
 import sic.repository.ProveedorRepository;
+import sic.service.ICuentaCorrienteService;
 
 @Service
 public class ProveedorServiceImpl implements IProveedorService {
 
     private final ProveedorRepository proveedorRepository;
+    private final ICuentaCorrienteService cuentaCorrienteService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    public ProveedorServiceImpl(ProveedorRepository proveedorRepository) {
+    public ProveedorServiceImpl(ProveedorRepository proveedorRepository, ICuentaCorrienteService cuentaCorrienteService) {
         this.proveedorRepository = proveedorRepository;
+        this.cuentaCorrienteService = cuentaCorrienteService;
     }
 
     @Override
@@ -81,9 +86,14 @@ public class ProveedorServiceImpl implements IProveedorService {
         if (criteria.isBuscaPorPais() == true) {
             builder.and(qproveedor.localidad.provincia.pais.eq(criteria.getPais()));
         }
-        List<Proveedor> list = new ArrayList<>();
-        proveedorRepository.findAll(builder, new Sort(Sort.Direction.ASC, "razonSocial")).iterator().forEachRemaining(list::add);
-        return list;
+        List<Proveedor> proveedores = new ArrayList<>();
+        proveedorRepository.findAll(builder, new Sort(Sort.Direction.ASC, "razonSocial")).iterator().forEachRemaining(proveedores::add);
+        proveedores.forEach(p -> {
+            CuentaCorriente cc = cuentaCorrienteService.getCuentaCorrientePorProveedor(p.getId_Proveedor());
+            p.setSaldoCuentaCorriente(cc.getSaldo());
+            p.setFechaUltimoMovimiento(cc.getFechaUltimoMovimiento());
+        });
+        return proveedores;
     }
     
     private BooleanBuilder buildPredicadoRazonSocial(String razonSocial, QProveedor qproveedor) {
@@ -193,6 +203,10 @@ public class ProveedorServiceImpl implements IProveedorService {
         }
         this.validarOperacion(TipoDeOperacion.ALTA, proveedor);
         proveedor = proveedorRepository.save(proveedor);
+        CuentaCorrienteProveedor cuentaCorrienteCliente = new CuentaCorrienteProveedor();
+        cuentaCorrienteCliente.setProveedor(proveedor);
+        cuentaCorrienteCliente.setEmpresa(proveedor.getEmpresa());
+        cuentaCorrienteService.guardarCuentaCorrienteProveedor(cuentaCorrienteCliente);
         LOGGER.warn("El Proveedor " + proveedor + " se guardó correctamente.");
         return proveedor;
     }

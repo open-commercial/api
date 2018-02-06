@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import sic.modelo.Cliente;
 import sic.modelo.Empresa;
 import sic.modelo.NotaDebito;
+import sic.modelo.Recibo;
 import sic.modelo.TipoDeComprobante;
 
 public interface NotaDebitoRepository extends NotaRepository<NotaDebito> {
@@ -18,6 +19,6 @@ public interface NotaDebitoRepository extends NotaRepository<NotaDebito> {
     
     NotaDebito findTopByEmpresaAndTipoComprobanteOrderByNroNotaDesc(Empresa empresa, TipoDeComprobante tipoComprobante);
     
-    NotaDebito findByPagoIdAndEliminada(Long pagoId, boolean eliminada);
-    
+    boolean existsByReciboAndEliminada(Recibo recibo, boolean eliminada);
+
 }

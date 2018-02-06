@@ -26,7 +26,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nroPago", "empresa"})
 @ToString
-@JsonIgnoreProperties({"factura", "empresa", "formaDePago"})
+@JsonIgnoreProperties({"factura", "notaDebito","empresa", "formaDePago", "recibo"})
 public class Pago implements Serializable {
 
     @Id
@@ -46,6 +46,10 @@ public class Pago implements Serializable {
     @ManyToOne
     @JoinColumn(name = "idNota", referencedColumnName = "idNota")    
     private Nota notaDebito;
+    
+    @ManyToOne
+    @JoinColumn(name = "idRecibo", referencedColumnName = "idRecibo")
+    private Recibo recibo;
 
     @Column(nullable = false)
     private double monto;

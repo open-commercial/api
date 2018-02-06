@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import sic.modelo.CuentaCorriente;
+import sic.modelo.CuentaCorrienteCliente;
+import sic.modelo.CuentaCorrienteProveedor;
 import sic.modelo.RenglonCuentaCorriente;
 import sic.service.ICuentaCorrienteService;
 
@@ -43,14 +45,26 @@ public class CuentaCorrienteController {
     
     @GetMapping("/cuentas-corrientes/clientes/{idCliente}")
     @ResponseStatus(HttpStatus.OK)
-    public CuentaCorriente getCuentaCorrientePorCliente(@PathVariable Long idCliente) {
+    public CuentaCorrienteCliente getCuentaCorrientePorCliente(@PathVariable Long idCliente) {
         return cuentaCorrienteService.getCuentaCorrientePorCliente(idCliente);
+    }
+    
+    @GetMapping("/cuentas-corrientes/proveedores/{idProveedor}")
+    @ResponseStatus(HttpStatus.OK)
+    public CuentaCorrienteProveedor getCuentaCorrientePorProveedor(@PathVariable Long idProveedor) {
+        return cuentaCorrienteService.getCuentaCorrientePorProveedor(idProveedor);
     }
     
     @GetMapping("/cuentas-corrientes/clientes/{idCliente}/saldo")
     @ResponseStatus(HttpStatus.OK)
-    public double getSaldoCuentaCorriente(@PathVariable long idCliente) {
-        return cuentaCorrienteService.getSaldoCuentaCorriente(idCliente);
+    public double getSaldoCuentaCorrienteCliente(@PathVariable long idCliente) {       
+        return cuentaCorrienteService.getSaldoCuentaCorriente(cuentaCorrienteService.getCuentaCorrientePorCliente(idCliente).getIdCuentaCorriente());
+    }
+    
+    @GetMapping("/cuentas-corrientes/proveedores/{idProveedor}/saldo")
+    @ResponseStatus(HttpStatus.OK)
+    public double getSaldoCuentaCorrienteProveedor(@PathVariable long idProveedor) {       
+        return cuentaCorrienteService.getSaldoCuentaCorriente(cuentaCorrienteService.getCuentaCorrientePorProveedor(idProveedor).getIdCuentaCorriente());
     }
     
     @GetMapping("/cuentas-corrientes/{idCuentaCorriente}/renglones")

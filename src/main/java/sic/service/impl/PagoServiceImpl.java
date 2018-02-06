@@ -17,17 +17,15 @@ import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Factura;
 import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
-import sic.modelo.FormaDePago;
+import sic.modelo.NotaDebito;
 import sic.modelo.Pago;
-import sic.modelo.TipoDeOperacion;
 import sic.service.IFacturaService;
 import sic.service.IPagoService;
 import sic.service.BusinessServiceException;
 import sic.repository.PagoRepository;
-import sic.service.ICuentaCorrienteService;
 import sic.service.IEmpresaService;
-import sic.service.IFormaDePagoService;
 import sic.service.INotaService;
+import sic.service.IReciboService;
 import sic.util.Utilidades;
 
 @Service
@@ -35,27 +33,23 @@ public class PagoServiceImpl implements IPagoService {
 
     private final PagoRepository pagoRepository;
     private final IFacturaService facturaService;
-    private final IEmpresaService empresaService;
-    private final IFormaDePagoService formaDePagoService;
+    private final IEmpresaService empresaService;    
     private final INotaService notaService;
-    private final ICuentaCorrienteService cuentaCorrienteService;
+    private final IReciboService reciboService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Lazy
     @Autowired
     public PagoServiceImpl(PagoRepository pagoRepository,
-            IEmpresaService empresaService,
-            IFormaDePagoService formaDePagoService,
+            IEmpresaService empresaService,            
             IFacturaService facturaService,
             INotaService notaService, 
-            ICuentaCorrienteService cuentaCorrienteService) {
-
-        this.empresaService = empresaService;
-        this.formaDePagoService = formaDePagoService;
+            IReciboService reciboService) {
+        this.empresaService = empresaService;        
         this.pagoRepository = pagoRepository;
         this.facturaService = facturaService;
         this.notaService = notaService;
-        this.cuentaCorrienteService = cuentaCorrienteService;
+        this.reciboService = reciboService;
     }
 
     @Override
@@ -101,14 +95,18 @@ public class PagoServiceImpl implements IPagoService {
     }
 
     @Override
-    public List<Pago> getPagosEntreFechasYFormaDePago(long id_Empresa, long id_FormaDePago, Date desde, Date hasta) {
-        return pagoRepository.findByFechaBetweenAndEmpresaAndFormaDePagoAndEliminado(desde, hasta, 
-                empresaService.getEmpresaPorId(id_Empresa), formaDePagoService.getFormasDePagoPorId(id_FormaDePago), false);
+    public List<Pago> getPagosCompraEntreFechasYFormaDePago(long id_Empresa, long id_FormaDePago, Date desde, Date hasta) {
+        return pagoRepository.getPagosComprasPorClienteEntreFechas(id_Empresa, id_FormaDePago, desde, hasta);
     }
     
     @Override
     public Page<Pago> getPagosPorClienteEntreFechas(long idCliente, Date desde, Date hasta, Pageable page) {
         return pagoRepository.getPagosPorClienteEntreFechas(idCliente, desde, hasta, page);
+    }
+    
+    @Override
+    public List<Pago> getPagosRelacionadosAlRecibo(long idRecibo) {
+        return this.pagoRepository.findAllByReciboAndEliminado(reciboService.getById(idRecibo), false);
     }
 
     @Override
@@ -130,13 +128,10 @@ public class PagoServiceImpl implements IPagoService {
         fechaPago.add(Calendar.SECOND, 1);
         pago.setFecha(fechaPago.getTime());
         pago = pagoRepository.save(pago);
-        if (pago.getNotaDebito() != null && pago.getFactura() == null) {
-            this.cuentaCorrienteService.asentarEnCuentaCorriente(pago, TipoDeOperacion.ALTA, pago.getNotaDebito().getCliente().getId_Cliente());
-        } else if (pago.getFactura() instanceof FacturaVenta) {
-            this.cuentaCorrienteService.asentarEnCuentaCorriente(pago, TipoDeOperacion.ALTA, null);
-        }
         if (pago.getFactura() != null && pago.getNotaDebito() == null) {
             facturaService.actualizarFacturaEstadoPago(pago.getFactura());
+        } else if (pago.getFactura() == null && pago.getNotaDebito() != null) {
+            notaService.actualizarNotaDebitoEstadoPago((NotaDebito)pago.getNotaDebito());
         }
         LOGGER.warn("El Pago " + pago + " se guardó correctamente.");
         return pago;
@@ -146,21 +141,18 @@ public class PagoServiceImpl implements IPagoService {
     @Transactional
     public void eliminar(long idPago) {
         Pago pago = this.getPagoPorId(idPago);
-        if (notaService.getNotaDebitoPorPago(idPago) != null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_no_se_puede_eliminar"));
-        }
         pago.setEliminado(true);
-        if (pago.getFactura() instanceof FacturaVenta) {
-            this.cuentaCorrienteService.asentarEnCuentaCorriente(pago, TipoDeOperacion.ELIMINACION, null);
-        }
-        pagoRepository.save(pago);
         if (pago.getFactura() != null) {
             facturaService.actualizarFacturaEstadoPago(pago.getFactura());
         }
+        if (pago.getNotaDebito() != null) {
+            notaService.actualizarNotaDebitoEstadoPago((NotaDebito) pago.getNotaDebito());
+        }
+        pago.getRecibo().setSaldoSobrante(pago.getMonto() + pago.getRecibo().getSaldoSobrante());
+        pagoRepository.save(pago);
         LOGGER.warn("El Pago " + pago + " se eliminó correctamente.");
     }
-    
+
     @Override
     public double calcularTotalPagos(List<Pago> pagos) {
         double total = 0.0;
@@ -204,38 +196,6 @@ public class PagoServiceImpl implements IPagoService {
     }
 
     @Override
-    @Transactional
-    public void pagarMultiplesFacturas(List<Factura> facturas, double monto, FormaDePago formaDePago, String nota) {
-        if (monto <= this.calcularTotalAdeudadoFacturas(facturas)) {
-            List<Factura> facturasOrdenadas = facturaService.ordenarFacturasPorFechaAsc(facturas);
-            for (Factura factura : facturasOrdenadas) {
-                if (monto > 0.0) {
-                    factura.setPagos(this.getPagosDeLaFactura(factura.getId_Factura()));
-                    Pago nuevoPago = new Pago();
-                    nuevoPago.setFormaDePago(formaDePago);
-                    nuevoPago.setFactura(factura);
-                    nuevoPago.setEmpresa(factura.getEmpresa());
-                    nuevoPago.setNota(nota);
-                    double saldoAPagar = this.getSaldoAPagarFactura(factura.getId_Factura());
-                    if (saldoAPagar <= monto) {
-                        monto = monto - saldoAPagar;
-                        // Se utiliza round por un problema de presicion de la maquina ej: 828.65 - 614.0 = 214.64999...
-                        monto = Math.round(monto * 100.0) / 100.0;
-                        nuevoPago.setMonto(saldoAPagar);
-                    } else {
-                        nuevoPago.setMonto(monto);
-                        monto = 0.0;
-                    }
-                    this.guardar(nuevoPago);
-                }
-            }
-        } else {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_pago_mayorADeuda_monto"));
-        }
-    }
-
-    @Override
     public void validarOperacion(Pago pago) {
         //Requeridos
         if (pago.getMonto() <= 0) {
@@ -256,6 +216,16 @@ public class PagoServiceImpl implements IPagoService {
                         .getString("mensaje_factura_pagada"));
             }
             if (Utilidades.round(pago.getMonto(), 2) > Utilidades.round(this.getSaldoAPagarFactura(pago.getFactura().getId_Factura()), 2)) {
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_pago_mayorADeuda_monto"));
+            }
+        }
+        if (pago.getNotaDebito() != null) {
+            if (((NotaDebito) pago.getNotaDebito()).isPagada() == true) {
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_nota_debito_pagada"));
+            }
+            if (Utilidades.round(pago.getMonto(), 2) > Utilidades.round(this.getSaldoAPagarNotaDebito(pago.getNotaDebito().getIdNota()), 2)) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_pago_mayorADeuda_monto"));
             }

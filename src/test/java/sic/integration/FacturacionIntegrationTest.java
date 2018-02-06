@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,8 +60,10 @@ import sic.builder.RenglonPedidoBuilder;
 import sic.modelo.EstadoPedido;
 import sic.modelo.dto.PedidoDTO;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
+import sic.modelo.Producto;
 import sic.modelo.dto.ProductoDTO;
 import sic.modelo.dto.RenglonPedidoDTO;
 
@@ -191,9 +194,9 @@ public class FacturacionIntegrationTest {
                 productoUno, ProductoDTO.class);        
         productoDos = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
                 + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
-                productoDos, ProductoDTO.class);       
-        Assert.assertTrue(restTemplate.getForObject(apiPrefix + "/productos/" + productoUno.getId_Producto() + "/stock/disponibilidad?cantidad=10", Boolean.class));
-        Assert.assertTrue(restTemplate.getForObject(apiPrefix + "/productos/" + productoDos.getId_Producto() + "/stock/disponibilidad?cantidad=6", Boolean.class));
+                productoDos, ProductoDTO.class);
+        String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
+        Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
         RenglonFactura renglonUno = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
                 + "idProducto=" + productoUno.getId_Producto()
                 + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_B
@@ -311,9 +314,9 @@ public class FacturacionIntegrationTest {
         assertEquals(renglonesDeFacturaRecuperada[0].getIva_porcentaje(), renglones.get(0).getIva_porcentaje(), 0);
         assertEquals(renglonesDeFacturaRecuperada[0].getMedidaItem(), renglones.get(0).getMedidaItem());
         assertEquals(renglonesDeFacturaRecuperada[0].getPrecioUnitario(), renglones.get(0).getPrecioUnitario(), 0); 
-        restTemplate.getForObject(apiPrefix + "/facturas/"+ facturasRecuperadas.get(0).getId_Factura() + "/reporte", byte[].class);        
-        Assert.assertTrue(restTemplate.getForObject(apiPrefix + "/productos/" + productoUno.getId_Producto() + "/stock/disponibilidad?cantidad=5", Boolean.class));
-        Assert.assertTrue(restTemplate.getForObject(apiPrefix + "/productos/" + productoDos.getId_Producto() + "/stock/disponibilidad?cantidad=4", Boolean.class));                
+        restTemplate.getForObject(apiPrefix + "/facturas/"+ facturasRecuperadas.get(0).getId_Factura() + "/reporte", byte[].class);
+        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=5,4";
+        Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
     }
     
     @Test
@@ -334,7 +337,7 @@ public class FacturacionIntegrationTest {
                 .withPredeterminado(true)
                 .withNombre("Efectivo")
                 .build();
-        restTemplate.postForObject(apiPrefix + "/formas-de-pago", formaDePago, FormaDePago.class);
+        formaDePago = restTemplate.postForObject(apiPrefix + "/formas-de-pago", formaDePago, FormaDePago.class);
         Usuario credencial = new UsuarioBuilder()
                 .withId_Usuario(1)
                 .withEliminado(false)
@@ -392,8 +395,8 @@ public class FacturacionIntegrationTest {
         productoDos = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
                 + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
                 productoDos, ProductoDTO.class);
-        Assert.assertTrue(restTemplate.getForObject(apiPrefix + "/productos/" + productoUno.getId_Producto() + "/stock/disponibilidad?cantidad=10", Boolean.class));
-        Assert.assertTrue(restTemplate.getForObject(apiPrefix + "/productos/" + productoDos.getId_Producto() + "/stock/disponibilidad?cantidad=6", Boolean.class));        
+        String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
+        Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
         RenglonFactura renglonUno = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
                 + "idProducto=" + productoUno.getId_Producto()
                 + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_B
@@ -480,6 +483,8 @@ public class FacturacionIntegrationTest {
         facturaVentaA.setTotal(total);
         facturaVentaA.setFecha(new Date());
         restTemplate.postForObject(apiPrefix + "/facturas/venta?idPedido=" + pedidoRecuperado.getId_Pedido()
+                + "&idsFormaDePago=" + formaDePago.getId_FormaDePago()
+                + "&montos=" + total
                 + "&idCliente=" + cliente.getId_Cliente()
                 + "&idEmpresa=" + empresa.getId_Empresa()
                 + "&idUsuario=" + (restTemplate.getForObject(apiPrefix + "/usuarios/busqueda?nombre=test", Usuario.class)).getId_Usuario()
@@ -491,7 +496,8 @@ public class FacturacionIntegrationTest {
                         new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {
                 })
                 .getBody().getContent();       
-        assertEquals(1, facturasRecuperadas.size(), 0);        
+        assertEquals(1, facturasRecuperadas.size(), 0);  
+        assertTrue("La factura se encuentra impaga", facturasRecuperadas.get(0).isPagada());
         pedidoRecuperado = restTemplate.getForObject(apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
         assertEquals(EstadoPedido.ACTIVO, pedidoRecuperado.getEstado());
         renglonesDelPedido = restTemplate.getForObject(apiPrefix + "/pedidos/"+ pedidoRecuperado.getId_Pedido() +"/renglones", RenglonPedidoDTO[].class);

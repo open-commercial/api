@@ -46,6 +46,8 @@ import sic.service.IPagoService;
 import sic.service.IPedidoService;
 import sic.service.IProductoService;
 import sic.modelo.Movimiento;
+import sic.modelo.Recibo;
+import sic.modelo.RenglonPedido;
 import sic.modelo.TipoDeComprobante;
 import sic.service.BusinessServiceException;
 import sic.service.ServiceException;
@@ -59,6 +61,7 @@ import sic.repository.RenglonFacturaRepository;
 import sic.service.ICuentaCorrienteService;
 import sic.service.IAfipService;
 import sic.service.INotaService;
+import sic.service.IReciboService;
 
 @Service
 public class FacturaServiceImpl implements IFacturaService {
@@ -74,6 +77,7 @@ public class FacturaServiceImpl implements IFacturaService {
     private final INotaService notaService;
     private final ICuentaCorrienteService cuentaCorrienteService;
     private final IAfipService afipService;
+    private final IReciboService reciboService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
@@ -87,7 +91,8 @@ public class FacturaServiceImpl implements IFacturaService {
             IPedidoService pedidoService, IPagoService pagoService, 
             INotaService notaService,
             ICuentaCorrienteService cuentaCorrienteService,
-            IAfipService afipService) {
+            IAfipService afipService,
+            IReciboService reciboService) {
         this.facturaRepository = facturaRepository;
         this.facturaVentaRepository = facturaVentaRepository;
         this.facturaCompraRepository = facturaCompraRepository;
@@ -99,6 +104,7 @@ public class FacturaServiceImpl implements IFacturaService {
         this.notaService = notaService;
         this.cuentaCorrienteService = cuentaCorrienteService;
         this.afipService = afipService;
+        this.reciboService = reciboService;
     }
     
     @Override
@@ -334,13 +340,13 @@ public class FacturaServiceImpl implements IFacturaService {
             factura.setNumFactura(this.calcularNumeroFacturaVenta(factura.getTipoComprobante(),
                     factura.getNumSerie(), factura.getEmpresa().getId_Empresa()));
         }
-        this.validarFactura(factura);    
+        this.validarFactura(factura);
         return factura;
     }
-    
+
     @Override
     @Transactional
-    public List<Factura> guardar(List<Factura> facturas, Long idPedido) {
+    public List<Factura> guardar(List<Factura> facturas, Long idPedido, List<Recibo> recibos) {
         List<Factura> facturasProcesadas = new ArrayList<>();
         facturas.forEach(f -> {
             if (f instanceof FacturaVenta) {
@@ -355,80 +361,130 @@ public class FacturaServiceImpl implements IFacturaService {
                 f.setPedido(pedido);
             });
             for (Factura f : facturas) {
-                List<Pago> pagosFactura = f.getPagos();
-                f.setPagos(null);
                 Factura facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFactura(f));
                 this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) facturaGuardada, TipoDeOperacion.ALTA);
                 facturasProcesadas.add(facturaGuardada);
-                if (pagosFactura != null) {
-                    pagosFactura.forEach(p -> {
-                        pagoService.guardar(p);
-                    });
-                    f.setPagos(pagosFactura);
-                }
+                this.procesarRecibosYPagarFacturas(recibos, facturaGuardada);
             }
             pedido.setFacturas(facturasProcesadas);
             pedidoService.actualizar(pedido);
             facturasProcesadas.stream().forEach(f -> {
-                this.actualizarFacturaEstadoPago(f);
                 LOGGER.warn("La Factura " + f + " se guardó correctamente.");
             });
-            pedidoService.actualizarEstadoPedido(pedido, facturasProcesadas);
+            pedidoService.actualizarEstadoPedido(pedido);
         } else {
             facturasProcesadas = new ArrayList<>();
             for (Factura f : facturas) {
-                List<Pago> pagosFactura = f.getPagos();
-                f.setPagos(null);
                 Factura facturaGuardada = null;
                 if (f instanceof FacturaVenta) {
                     facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFactura(f));
                     this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) facturaGuardada, TipoDeOperacion.ALTA);
                 } else if (f instanceof FacturaCompra) {
                     facturaGuardada = facturaCompraRepository.save((FacturaCompra) this.procesarFactura(f));
+                    this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaCompra) facturaGuardada, TipoDeOperacion.ALTA);
                 }
                 facturasProcesadas.add(facturaGuardada);
                 LOGGER.warn("La Factura " + facturaGuardada + " se guardó correctamente.");
-                if (pagosFactura != null) {
-                    pagosFactura.forEach((p) -> {
-                        pagoService.guardar(p);
-                    });
-                    f.setPagos(pagosFactura);
-                }
-                this.actualizarFacturaEstadoPago(facturaGuardada);
+                this.procesarRecibosYPagarFacturas(recibos, facturaGuardada);
             }
         }
         return facturasProcesadas;
+    }
+
+    private void procesarRecibosYPagarFacturas(List<Recibo> recibos, Factura facturaGuardada) {
+        if (recibos != null) {
+            recibos.forEach(r -> {
+                reciboService.guardar(r);
+            });
+        } else {
+            this.pagarFacturaConRecibosSobrantes(facturaGuardada);
+        }
+    }
+
+    private void pagarFacturaConRecibosSobrantes(Factura facturaGuardada) {
+        List<Recibo> recibos = new ArrayList<>();
+        if (facturaGuardada instanceof FacturaVenta) {
+            recibos = reciboService.getRecibosConSaldoSobranteCliente(facturaGuardada.getEmpresa().getId_Empresa(),
+                    ((FacturaVenta) facturaGuardada).getCliente().getId_Cliente());
+        } else if (facturaGuardada instanceof FacturaCompra) {
+            recibos = reciboService.getRecibosConSaldoSobranteProveedor(facturaGuardada.getEmpresa().getId_Empresa(),
+                    ((FacturaCompra) facturaGuardada).getProveedor().getId_Proveedor());
+        }
+        List<Pago> pagos = new ArrayList<>();
+        double saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
+        for (Recibo r : recibos) {
+            while (r.getSaldoSobrante() > 0) {
+                if (saldoFactura < r.getSaldoSobrante()) {
+                    Pago nuevoPago = new Pago();
+                    nuevoPago.setMonto(saldoFactura);
+                    nuevoPago.setRecibo(r);
+                    nuevoPago.setFactura(facturaGuardada);
+                    nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
+                    nuevoPago.setFecha(new Date());
+                    nuevoPago.setFormaDePago(r.getFormaDePago());
+                    nuevoPago.setNota("");
+                    pagoService.guardar(nuevoPago);
+                    pagos.add(nuevoPago);
+                    reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante() - saldoFactura));
+                } else if (saldoFactura >= r.getSaldoSobrante()) {
+                    Pago nuevoPago = new Pago();
+                    nuevoPago.setMonto(r.getSaldoSobrante());
+                    nuevoPago.setRecibo(r);
+                    nuevoPago.setFactura(facturaGuardada);
+                    nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
+                    nuevoPago.setFecha(new Date());
+                    nuevoPago.setFormaDePago(r.getFormaDePago());
+                    nuevoPago.setNota("");
+                    pagoService.guardar(nuevoPago);
+                    pagos.add(nuevoPago);
+                    reciboService.actualizarSaldoSobrante(r.getIdRecibo(), 0);
+                }
+                if (facturaGuardada.isPagada()) {
+                    break;
+                }
+                saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
+            }
+            if (facturaGuardada.isPagada()) {
+                break;
+            }
+        }
+        facturaGuardada.setPagos(pagos);
     }
     
     @Override
     @Transactional
     public void eliminar(long[] idsFactura) {
         for (long idFactura : idsFactura) {
-            if (!pagoService.getPagosDeLaFactura(idFactura).isEmpty()) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_no_se_puede_eliminar"));
-            }
             Factura factura = this.getFacturaPorId(idFactura);
             if (factura.getCAE() == 0L) {
-                factura.setEliminada(true);
                 if (factura instanceof FacturaVenta) {
+                    if (notaService.existsByFacturaVentaAndEliminada((FacturaVenta) factura)) {
+                        throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                                .getString("mensaje_no_se_puede_eliminar"));
+                    }
                     this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) factura, TipoDeOperacion.ELIMINACION);
                     productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.VENTA);
                 } else if (factura instanceof FacturaCompra) {
+                    this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaCompra) factura, TipoDeOperacion.ELIMINACION);
                     productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.COMPRA);
                 }
+                List<Pago> pagos = pagoService.getPagosDeLaFactura(idFactura);
+                if (!pagos.isEmpty()) {
+                    pagos.forEach(pago -> {
+                        pagoService.eliminar(pago.getId_Pago());
+                    });
+                }
+                factura.setEliminada(true);
                 if (factura.getPedido() != null) {
-                    List<Factura> facturas = new ArrayList<>();
-                    facturas.add(factura);
-                    pedidoService.actualizarEstadoPedido(factura.getPedido(), facturas);
+                    pedidoService.actualizarEstadoPedido(factura.getPedido());
                 }
             } else {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_eliminar_factura_aprobada"));
             }
-        }  
+        }
     }
-    
+
     private HashMap<Long, Double> getIdsProductosYCantidades(Factura factura) {
         HashMap<Long, Double> idsYCantidades = new HashMap<>();
         factura.getRenglones().forEach(r -> {
@@ -1089,58 +1145,74 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     @Override
-    public List<RenglonFactura> convertirRenglonesPedidoARenglonesFactura(Pedido pedido, TipoDeComprobante tipoDeComprobante) {
+    public List<RenglonFactura> convertirRenglonesPedidoEnRenglonesFactura(Pedido pedido, TipoDeComprobante tipoDeComprobante) {
         List<RenglonFactura> renglonesRestantes = new ArrayList<>();
         HashMap<Long, RenglonFactura> renglonesDeFacturas = pedidoService.getRenglonesFacturadosDelPedido(pedido.getId_Pedido());
-        List<Factura> facturasDePedido = this.getFacturasDelPedido(pedido.getId_Pedido());
-        if (facturasDePedido != null) {
-            pedido.getRenglones().stream().forEach((renglon) -> {
-                if (renglonesDeFacturas.containsKey(renglon.getProducto().getId_Producto())) {
-                    if (renglon.getCantidad() > renglonesDeFacturas.get(renglon.getProducto().getId_Producto()).getCantidad()) {
+        if (renglonesDeFacturas != null) {
+            pedido.getRenglones().stream().forEach(r -> {
+                if (renglonesDeFacturas.containsKey(r.getProducto().getId_Producto())) {
+                    if (r.getCantidad() > renglonesDeFacturas.get(r.getProducto().getId_Producto()).getCantidad()) {
                         renglonesRestantes.add(this.calcularRenglon(tipoDeComprobante,
-                                Movimiento.VENTA, renglon.getCantidad() - renglonesDeFacturas.get(renglon.getProducto().getId_Producto()).getCantidad(),
-                                renglon.getProducto().getId_Producto(), renglon.getDescuento_porcentaje()));
+                                Movimiento.VENTA, r.getCantidad() - renglonesDeFacturas.get(r.getProducto().getId_Producto()).getCantidad(),
+                                r.getProducto().getId_Producto(), r.getDescuento_porcentaje(), false));
                     }
                 } else {
                     renglonesRestantes.add(this.calcularRenglon(tipoDeComprobante, Movimiento.VENTA,
-                            renglon.getCantidad(), renglon.getProducto().getId_Producto(), renglon.getDescuento_porcentaje()));
+                            r.getCantidad(), r.getProducto().getId_Producto(), r.getDescuento_porcentaje(), false));
                 }
             });
         } else {
-            pedido.getRenglones().stream().forEach((renglon) -> {
+            pedido.getRenglones().stream().forEach(r -> {
                 renglonesRestantes.add(this.calcularRenglon(tipoDeComprobante, Movimiento.VENTA,
-                        renglon.getCantidad(), renglon.getProducto().getId_Producto(), renglon.getDescuento_porcentaje()));
+                        r.getCantidad(), r.getProducto().getId_Producto(), r.getDescuento_porcentaje(), false));
             });
         }
         return renglonesRestantes;
     }
 
     @Override
-    public RenglonFactura calcularRenglon(TipoDeComprobante tipo, Movimiento movimiento,
-            double cantidad, Long idProducto, double descuento_porcentaje) {
+    public boolean pedidoTotalmenteFacturado(Pedido pedido) {
+        boolean facturado = false;
+        HashMap<Long, RenglonFactura> renglonesDeFacturas = pedidoService.getRenglonesFacturadosDelPedido(pedido.getId_Pedido());
+        if (!renglonesDeFacturas.isEmpty()) {
+            for (RenglonPedido r : pedido.getRenglones()) {
+                if (renglonesDeFacturas.containsKey(r.getProducto().getId_Producto())) {
+                    facturado = (r.getCantidad() <= renglonesDeFacturas.get(r.getProducto().getId_Producto()).getCantidad());                        
+                } else {
+                    return false;
+                }
+            }
+        }
+        return facturado;
+    }
+    
+    @Override
+    public RenglonFactura calcularRenglon(TipoDeComprobante tipoDeComprobante, Movimiento movimiento,
+            double cantidad, long idProducto, double descuentoPorcentaje, boolean dividiendoRenglonFactura) {
         Producto producto = productoService.getProductoPorId(idProducto);
-        if ((movimiento == Movimiento.VENTA || movimiento == Movimiento.PEDIDO) && cantidad < producto.getVentaMinima()) {
+        /*if (dividiendoRenglonFactura == false && cantidad < producto.getVentaMinima()
+                && (movimiento == Movimiento.VENTA || movimiento == Movimiento.PEDIDO)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_cantidad_menor_a_minima"));
-        }
+        }*/
         RenglonFactura nuevoRenglon = new RenglonFactura();
         nuevoRenglon.setId_ProductoItem(producto.getId_Producto());
         nuevoRenglon.setCodigoItem(producto.getCodigo());
         nuevoRenglon.setDescripcionItem(producto.getDescripcion());
         nuevoRenglon.setMedidaItem(producto.getMedida().getNombre());
         nuevoRenglon.setCantidad(cantidad);
-        nuevoRenglon.setPrecioUnitario(this.calcularPrecioUnitario(movimiento, tipo, producto));
-        if (descuento_porcentaje > 100) {
+        nuevoRenglon.setPrecioUnitario(this.calcularPrecioUnitario(movimiento, tipoDeComprobante, producto));
+        if (descuentoPorcentaje > 100) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_descuento_mayor_cien"));
         }
-        nuevoRenglon.setDescuento_porcentaje(descuento_porcentaje);
-        nuevoRenglon.setDescuento_neto(this.calcularDescuentoNeto(nuevoRenglon.getPrecioUnitario(), descuento_porcentaje));
+        nuevoRenglon.setDescuento_porcentaje(descuentoPorcentaje);
+        nuevoRenglon.setDescuento_neto(this.calcularDescuentoNeto(nuevoRenglon.getPrecioUnitario(), descuentoPorcentaje));
         nuevoRenglon.setIva_porcentaje(producto.getIva_porcentaje());
-        if (tipo.equals(TipoDeComprobante.FACTURA_Y)) {
+        if (tipoDeComprobante.equals(TipoDeComprobante.FACTURA_Y)) {
             nuevoRenglon.setIva_porcentaje(producto.getIva_porcentaje() / 2);
         }
-        nuevoRenglon.setIva_neto(this.calcularIVANetoRenglon(movimiento, tipo, producto, nuevoRenglon.getDescuento_porcentaje()));
+        nuevoRenglon.setIva_neto(this.calcularIVANetoRenglon(movimiento, tipoDeComprobante, producto, nuevoRenglon.getDescuento_porcentaje()));
         nuevoRenglon.setImpuesto_porcentaje(producto.getImpuestoInterno_porcentaje());
         nuevoRenglon.setImpuesto_neto(this.calcularImpInternoNeto(movimiento, producto, nuevoRenglon.getDescuento_neto()));
         nuevoRenglon.setGanancia_porcentaje(producto.getGanancia_porcentaje());
@@ -1268,7 +1340,8 @@ public class FacturaServiceImpl implements IFacturaService {
                     cantidadProductosRenglonFacturaSinIVA = 0;
                 }
                 RenglonFactura nuevoRenglonSinIVA = this.calcularRenglon(TipoDeComprobante.FACTURA_X, Movimiento.VENTA, 
-                            cantidadProductosRenglonFacturaSinIVA, renglon.getId_ProductoItem(), renglon.getDescuento_porcentaje());
+                            cantidadProductosRenglonFacturaSinIVA, renglon.getId_ProductoItem(),
+                            renglon.getDescuento_porcentaje(), true);
                 if (nuevoRenglonSinIVA.getCantidad() != 0) {
                     renglonesSinIVA.add(nuevoRenglonSinIVA);
                 }
@@ -1298,14 +1371,14 @@ public class FacturaServiceImpl implements IFacturaService {
                     cantidadProductosRenglonFacturaConIVA = Math.ceil(renglon.getCantidad() / 2);
                 }
                 RenglonFactura nuevoRenglonConIVA = this.calcularRenglon(facturaConIVA.getTipoComprobante(), Movimiento.VENTA,
-                        cantidadProductosRenglonFacturaConIVA, renglon.getId_ProductoItem(), renglon.getDescuento_porcentaje());
+                        cantidadProductosRenglonFacturaConIVA, renglon.getId_ProductoItem(), renglon.getDescuento_porcentaje(), true);
                 renglonesConIVA.add(nuevoRenglonConIVA);
                 renglonMarcado++;
                 numeroDeRenglon++;
             } else {
                 numeroDeRenglon++;
                 RenglonFactura nuevoRenglonConIVA = this.calcularRenglon(facturaConIVA.getTipoComprobante(), Movimiento.VENTA,
-                        renglon.getCantidad(), renglon.getId_ProductoItem(), renglon.getDescuento_porcentaje());
+                        renglon.getCantidad(), renglon.getId_ProductoItem(), renglon.getDescuento_porcentaje(), false);
                 renglonesConIVA.add(nuevoRenglonConIVA);
             }
         }

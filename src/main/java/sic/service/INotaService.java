@@ -8,6 +8,7 @@ import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
 import sic.modelo.NotaDebito;
 import sic.modelo.Pago;
+import sic.modelo.Recibo;
 import sic.modelo.RenglonFactura;
 import sic.modelo.RenglonNotaCredito;
 import sic.modelo.RenglonNotaDebito;
@@ -15,7 +16,7 @@ import sic.modelo.TipoDeComprobante;
 
 public interface INotaService {
 
-    Nota guardarNota(Nota nota, long idEmpresa, long idCliente, long idUsuario, Long idFactura, Long idPago, boolean modificarStock);
+    Nota guardarNota(Nota nota, long idEmpresa, long idCliente, long idUsuario, Long idRecibo, Long idFactura, boolean modificarStock);
 
     Nota autorizarNota(Nota nota);
     
@@ -28,10 +29,14 @@ public interface INotaService {
     Double getTotalById(Long idNota);
     
     FacturaVenta getFacturaNota(Long idNota);
-
-    NotaDebito getNotaDebitoPorPago(Long idPago);
+    
+    Nota getNotaDelPago(long idPago);
     
     List<Pago> getPagosNota(Long idNota);
+    
+    boolean existeNotaDebitoPorRecibo(Recibo recibo);
+    
+    boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta);
     
     double getTotalPagado(Long idNota);
 
@@ -63,7 +68,7 @@ public interface INotaService {
 
     List<RenglonNotaCredito> calcularRenglonCredito(TipoDeComprobante tipo, double[] cantidad, long[] idRenglonFactura);
 
-    List<RenglonNotaDebito> calcularRenglonDebito(Long idPago, double monto, double ivaPorcentaje);
+    List<RenglonNotaDebito> calcularRenglonDebito(long idRecibo, double monto, double ivaPorcentaje);
 
     double calcularSubTotalCredito(double[] importesBrutos);
 
@@ -78,4 +83,9 @@ public interface INotaService {
     double calcularTotalCredito(double subTotal_bruto, double iva105_neto, double iva21_neto);
     
     double calcularTotalDebito(double subTotal_bruto, double iva21_neto, double montoNoGravado);
+    
+    double calcularTotalCreditoPorFacturaVenta(FacturaVenta facturaVenta);
+    
+    Nota actualizarNotaDebitoEstadoPago(NotaDebito notaDebito);   
+    
 }

@@ -31,5 +31,10 @@ public interface NotaRepository<T extends Nota> extends PagingAndSortingReposito
     
     @Query("SELECT n.CAE FROM Nota n WHERE n.idNota= :idNota AND n.eliminada = false")
     Long getCAEById(@Param("idNota") long idNota);
+   
+    @Query("SELECT n FROM Pago p INNER JOIN p.notaDebito n WHERE p.id_Pago = :idPago AND n.eliminada = false")
+    Nota getNotaDelPago(@Param("idPago") long idPago);
 
+    boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta, boolean eliminada);
+    
 }

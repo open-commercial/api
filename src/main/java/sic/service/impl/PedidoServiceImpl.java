@@ -130,16 +130,14 @@ public class PedidoServiceImpl implements IPedidoService {
     }
 
     @Override
-    public Pedido actualizarEstadoPedido(Pedido pedido, List<Factura> facturas) {
-        facturas.stream().forEach((f) -> {
-            pedido.setEstado(EstadoPedido.ACTIVO);
-            if (this.getFacturasDelPedido(pedido.getId_Pedido()).isEmpty()) {
-                pedido.setEstado(EstadoPedido.ABIERTO);
-            }
-            if (facturaService.convertirRenglonesPedidoARenglonesFactura(pedido, f.getTipoComprobante()).isEmpty()) {
-                pedido.setEstado(EstadoPedido.CERRADO);
-            }
-        });
+    public Pedido actualizarEstadoPedido(Pedido pedido) {
+        pedido.setEstado(EstadoPedido.ACTIVO);
+        if (this.getFacturasDelPedido(pedido.getId_Pedido()).isEmpty()) {
+            pedido.setEstado(EstadoPedido.ABIERTO);
+        }
+        if (facturaService.pedidoTotalmenteFacturado(pedido)) {
+            pedido.setEstado(EstadoPedido.CERRADO);
+        }
         return pedido;
     }
 
@@ -267,21 +265,21 @@ public class PedidoServiceImpl implements IPedidoService {
     @Override
     public HashMap<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido) {
         List<RenglonFactura> renglonesDeFacturas = new ArrayList<>();
-        this.getFacturasDelPedido(nroPedido).stream().forEach((f) -> {
-            f.getRenglones().stream().forEach((r) -> {
+        this.getFacturasDelPedido(nroPedido).stream().forEach(f -> {
+            f.getRenglones().stream().forEach(r -> {
                 renglonesDeFacturas.add(facturaService.calcularRenglon(f.getTipoComprobante(),
-                        Movimiento.VENTA, r.getCantidad(),r.getId_ProductoItem(), r.getDescuento_porcentaje()));
+                        Movimiento.VENTA, r.getCantidad(),r.getId_ProductoItem(), r.getDescuento_porcentaje(), false));
             });      
         });
         HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
         if (!renglonesDeFacturas.isEmpty()) {
-            renglonesDeFacturas.stream().forEach((renglon) -> {
-                if (listaRenglonesUnificados.containsKey(renglon.getId_ProductoItem())) {
-                    listaRenglonesUnificados.get(renglon.getId_ProductoItem())
+            renglonesDeFacturas.stream().forEach(r -> {
+                if (listaRenglonesUnificados.containsKey(r.getId_ProductoItem())) {
+                    listaRenglonesUnificados.get(r.getId_ProductoItem())
                             .setCantidad(listaRenglonesUnificados
-                                    .get(renglon.getId_ProductoItem()).getCantidad() + renglon.getCantidad());
+                                    .get(r.getId_ProductoItem()).getCantidad() + r.getCantidad());
                 } else {
-                    listaRenglonesUnificados.put(renglon.getId_ProductoItem(), renglon);
+                    listaRenglonesUnificados.put(r.getId_ProductoItem(), r);
                 }
             });
         }

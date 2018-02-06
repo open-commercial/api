@@ -22,7 +22,7 @@ public interface IPedidoService {
 
     long calcularNumeroPedido(Empresa empresa);
     
-    Pedido actualizarEstadoPedido(Pedido pedido, List<Factura> facturas);
+    Pedido actualizarEstadoPedido(Pedido pedido);
 
     Pedido calcularTotalActualDePedido(Pedido pedido);
 
