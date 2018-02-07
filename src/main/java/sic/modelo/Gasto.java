@@ -53,7 +53,7 @@ public class Gasto implements Serializable {
     @JoinColumn(name = "id_FormaDePago", referencedColumnName = "id_FormaDePago")
     private FormaDePago formaDePago;
 
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal monto;
 
     private boolean eliminado;

@@ -65,7 +65,7 @@ public class AjusteCuentaCorriente implements Serializable {
     @Enumerated(EnumType.STRING)
     private TipoDeComprobante tipoComprobante;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal monto;
     
     private boolean eliminado;     

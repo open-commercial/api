@@ -37,37 +37,37 @@ public class RenglonFactura implements Serializable {
     @Column(nullable = false)
     private String medidaItem;
 
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal cantidad;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal precioUnitario;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal descuento_porcentaje;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal descuento_neto;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal iva_porcentaje;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal iva_neto;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal impuesto_porcentaje;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal impuesto_neto;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal ganancia_porcentaje;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal ganancia_neto;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal importe;
 
 }

@@ -101,7 +101,7 @@ public class ReciboServiceImpl implements IReciboService {
         recibo.setNumSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
         recibo.setNumRecibo(this.getSiguienteNumeroRecibo(recibo.getEmpresa().getId_Empresa(), configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip()));
         recibo.setFecha(new Date());
-        BigDecimal monto = new BigDecimal(recibo.getMonto());
+        BigDecimal monto = recibo.getMonto();
         int i = 0;
         this.validarRecibo(recibo);
         recibo = reciboRepository.save(recibo);
@@ -141,7 +141,7 @@ public class ReciboServiceImpl implements IReciboService {
                 }
             }
         }
-        recibo.setSaldoSobrante(monto.doubleValue());
+        recibo.setSaldoSobrante(monto);
         this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
         LOGGER.warn("El Recibo " + recibo + " se guardó correctamente.");
         return recibo;
@@ -149,7 +149,7 @@ public class ReciboServiceImpl implements IReciboService {
 
     @Override
     @Transactional
-    public Recibo actualizarSaldoSobrante(long idRecibo, double saldoSobrante) {
+    public Recibo actualizarSaldoSobrante(long idRecibo, BigDecimal saldoSobrante) {
         Recibo r = reciboRepository.findById(idRecibo);
         r.setSaldoSobrante(saldoSobrante);
         return reciboRepository.save(r);
@@ -157,11 +157,11 @@ public class ReciboServiceImpl implements IReciboService {
 
     private void validarRecibo(Recibo recibo) {
         //Requeridos
-        if (recibo.getMonto() <= 0) {
+        if (recibo.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_recibo_monto_igual_menor_cero"));
         }
-        if (recibo.getSaldoSobrante() < 0) {
+        if (recibo.getSaldoSobrante().compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_recibo_saldo_sobrante_menor_cero"));
         }
@@ -198,15 +198,15 @@ public class ReciboServiceImpl implements IReciboService {
     }
     
     @Override 
-    public List<Recibo> construirRecibos(long[] idsFormaDePago, Empresa empresa, Cliente cliente, Usuario usuario, double[] montos, double totalFactura, Date fecha) { 
+    public List<Recibo> construirRecibos(long[] idsFormaDePago, Empresa empresa, Cliente cliente, Usuario usuario, BigDecimal[] montos, BigDecimal totalFactura, Date fecha) { 
         List<Recibo> recibos = new ArrayList<>();
         int i = 0;
         if (idsFormaDePago != null && montos != null && idsFormaDePago.length == montos.length) {
-            double totalMontos = 0.0;
-            for (double monto : montos) {
-                totalMontos += monto;
+            BigDecimal totalMontos = BigDecimal.ZERO;
+            for (BigDecimal monto : montos) {
+                totalMontos = totalMontos.add(monto);
             }
-            if (totalMontos > totalFactura || totalMontos < 0) {
+            if (totalMontos.compareTo(totalFactura) > 0 || totalMontos.compareTo(BigDecimal.ZERO) < 0) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_pagos_superan_total_factura"));
             }
@@ -222,7 +222,7 @@ public class ReciboServiceImpl implements IReciboService {
                 recibo.setNumSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
                 recibo.setNumRecibo(this.getSiguienteNumeroRecibo(empresa.getId_Empresa(), recibo.getNumSerie()));
                 recibo.setConcepto("Cancelación parcial o total de su deuda.");
-                recibo.setSaldoSobrante(0);
+                recibo.setSaldoSobrante(BigDecimal.ZERO);
                 recibos.add(recibo);
                 i++;
             }
@@ -250,9 +250,9 @@ public class ReciboServiceImpl implements IReciboService {
                         saldoAPagar = saldoAPagar.subtract(credito);
                         if (saldoAPagar.compareTo(monto) < 1) {
                             monto = monto.subtract(saldoAPagar);
-                            nuevoPago.setMonto(saldoAPagar.doubleValue());
+                            nuevoPago.setMonto(saldoAPagar);
                         } else {
-                            nuevoPago.setMonto(monto.doubleValue());
+                            nuevoPago.setMonto(monto);
                             monto = BigDecimal.ZERO;
                         }
                         nuevoPago.setFactura(fv);
@@ -273,9 +273,9 @@ public class ReciboServiceImpl implements IReciboService {
                         BigDecimal saldoAPagar = this.pagoService.getSaldoAPagarNotaDebito(nd.getIdNota());
                         if (saldoAPagar.compareTo(monto) < 1) {
                             monto = monto.subtract(saldoAPagar);
-                            nuevoPago.setMonto(saldoAPagar.doubleValue());
+                            nuevoPago.setMonto(saldoAPagar);
                         } else {
-                            nuevoPago.setMonto(monto.doubleValue());
+                            nuevoPago.setMonto(monto);
                             monto = BigDecimal.ZERO;
                         }
                         nuevoPago.setNotaDebito(nd);
@@ -306,11 +306,9 @@ public class ReciboServiceImpl implements IReciboService {
                         BigDecimal saldoAPagar = this.pagoService.getSaldoAPagarFactura(fc.getId_Factura());
                         if (saldoAPagar.compareTo(monto) < 1) {
                             monto = monto.subtract(saldoAPagar);
-//                            // Se utiliza round por un problema de presicion de la maquina ej: 828.65 - 614.0 = 214.64999...
-//                            monto = Math.round(monto * 100.0) / 100.0;
-                            nuevoPago.setMonto(saldoAPagar.doubleValue());
+                            nuevoPago.setMonto(saldoAPagar);
                         } else {
-                            nuevoPago.setMonto(monto.doubleValue());
+                            nuevoPago.setMonto(monto);
                             monto = BigDecimal.ZERO;
                         }
                         nuevoPago.setFactura(fc);

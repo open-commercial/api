@@ -1,5 +1,6 @@
 package sic.builder;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import sic.modelo.Cliente;
 import sic.modelo.Empresa;
@@ -22,8 +23,8 @@ public class ReciboBuilder {
     private Usuario usuario = new UsuarioBuilder().build();
     private Proveedor proveedor = null;
     private Date fecha = new Date();    
-    private double monto = 1000;  
-    private double saldoSobrante = 200;
+    private BigDecimal monto = new BigDecimal(1000);  
+    private BigDecimal saldoSobrante = new BigDecimal(200);
     
     public Recibo build() {
       return new Recibo(idRecibo, serie, nroRecibo, fecha, eliminado, concepto, formaDePago, empresa, cliente, proveedor, usuario, monto, saldoSobrante);
@@ -84,12 +85,12 @@ public class ReciboBuilder {
         return this;
     }
     
-    public ReciboBuilder withMonto(double monto) {
+    public ReciboBuilder withMonto(BigDecimal monto) {
         this.monto = monto;
         return this;
     }
     
-    public ReciboBuilder withSaldoSobrante(double saldoSobrante) {
+    public ReciboBuilder withSaldoSobrante(BigDecimal saldoSobrante) {
         this.saldoSobrante = saldoSobrante;
         return this;
     }

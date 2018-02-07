@@ -91,34 +91,34 @@ public abstract class Factura implements Serializable {
     @JsonProperty(access = Access.WRITE_ONLY)
     private List<Pago> pagos;
 
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal subTotal;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal recargo_porcentaje;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal recargo_neto;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal descuento_porcentaje;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal descuento_neto;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal subTotal_bruto;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal iva_105_neto;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal iva_21_neto;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal impuestoInterno_neto;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal total;
 
     @Column(nullable = false)

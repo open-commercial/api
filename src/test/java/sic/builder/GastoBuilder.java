@@ -1,5 +1,6 @@
 package sic.builder;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import sic.modelo.Empresa;
 import sic.modelo.FormaDePago;
@@ -15,7 +16,7 @@ public class GastoBuilder {
     private Empresa empresa = new EmpresaBuilder().build();
     private Usuario usuario = new UsuarioBuilder().build();
     private FormaDePago formaDePago = new FormaDePagoBuilder().build();
-    private double monto = 245.33;
+    private BigDecimal monto = new BigDecimal(245.33);
     private boolean eliminado = false;
 
     public Gasto build() {
@@ -57,7 +58,7 @@ public class GastoBuilder {
         return this;
     }
 
-    public GastoBuilder withMonto(double monto) {
+    public GastoBuilder withMonto(BigDecimal monto) {
         this.monto = monto;
         return this;
     }

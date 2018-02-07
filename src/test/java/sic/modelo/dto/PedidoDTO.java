@@ -3,6 +3,7 @@ package sic.modelo.dto;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -32,7 +33,7 @@ public class PedidoDTO implements Serializable {
     private String nombreUsuario;        
     private List<Factura> facturas;        
     private List<RenglonPedidoDTO> renglones;
-    private double totalEstimado;
-    private double totalActual;
+    private BigDecimal totalEstimado;
+    private BigDecimal totalActual;
     private EstadoPedido estado;
 }

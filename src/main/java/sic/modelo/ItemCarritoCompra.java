@@ -29,14 +29,14 @@ public class ItemCarritoCompra implements Serializable {
     @GeneratedValue
     private Long idItemCarritoCompra;
 
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal cantidad;
 
     @ManyToOne
     @JoinColumn(name = "id_Producto", referencedColumnName = "id_Producto")
     private Producto producto;
 
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal importe;
 
     @ManyToOne

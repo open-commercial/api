@@ -89,7 +89,7 @@ public class CarritoCompraController {
 
     @PostMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void agregarOrModificarItem(@PathVariable long idUsuario, @PathVariable long idProducto, @RequestParam double cantidad) {
+    public void agregarOrModificarItem(@PathVariable long idUsuario, @PathVariable long idProducto, @RequestParam BigDecimal cantidad) {
         carritoCompraService.agregarOrModificarItem(idUsuario, idProducto, cantidad);
     }
 
@@ -111,7 +111,7 @@ public class CarritoCompraController {
         Pageable pageable = new PageRequest(0, Integer.MAX_VALUE, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
         List<ItemCarritoCompra> items = carritoCompraService.getAllItemsDelUsuario(idUsuario, pageable).getContent();
         pedido.setRenglones(new ArrayList<>());
-        items.forEach(i -> pedido.getRenglones().add(new RenglonPedido(0, i.getProducto(), i.getCantidad(), 0, 0, i.getImporte())));
+        items.forEach(i -> pedido.getRenglones().add(new RenglonPedido(0, i.getProducto(), i.getCantidad(), BigDecimal.ZERO, BigDecimal.ZERO, i.getImporte())));
         Pedido p = pedidoService.guardar(pedido);
         carritoCompraService.eliminarTodosLosItems(idUsuario);
         return p;

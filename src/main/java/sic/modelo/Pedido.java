@@ -79,10 +79,10 @@ public class Pedido implements Serializable {
     @JsonProperty(access = Access.WRITE_ONLY)
     private List<RenglonPedido> renglones;
 
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal totalEstimado;
 
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal totalActual;
     
     @Enumerated(EnumType.STRING)

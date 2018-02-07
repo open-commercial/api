@@ -22,9 +22,9 @@ public interface IReciboService {
     
     Recibo guardar(Recibo recibo);
     
-    Recibo actualizarSaldoSobrante(long idRecibo, double monto);
+    Recibo actualizarSaldoSobrante(long idRecibo, BigDecimal monto);
     
-    List<Recibo> construirRecibos(long[] formaDePago, Empresa empresa, Cliente cliente, Usuario usuario, double[] monto, double totalFactura, Date fecha);
+    List<Recibo> construirRecibos(long[] formaDePago, Empresa empresa, Cliente cliente, Usuario usuario, BigDecimal[] monto, BigDecimal totalFactura, Date fecha);
     
     long getSiguienteNumeroRecibo(long idEmpresa, long serie);
     

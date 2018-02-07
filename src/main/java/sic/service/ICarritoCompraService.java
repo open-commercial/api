@@ -19,6 +19,6 @@ public interface ICarritoCompraService {
 
     void eliminarTodosLosItems(long idUsuario);
 
-    void agregarOrModificarItem(long idUsuario, long idProducto, double cantidad);
+    void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad);
 
 }

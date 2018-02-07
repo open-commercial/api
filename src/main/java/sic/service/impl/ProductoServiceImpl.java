@@ -56,39 +56,39 @@ public class ProductoServiceImpl implements IProductoService {
 
     private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
         //Entrada de Datos
-        if (producto.getCantidad() < 0) {
+        if (producto.getCantidad().compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_cantidad_negativa"));
         }
-        if (producto.getCantMinima() < 0) {
+        if (producto.getCantMinima().compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_cantidadMinima_negativa"));
         }
-        if (producto.getVentaMinima() <= 0) {
+        if (producto.getVentaMinima().compareTo(BigDecimal.ZERO) <= 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_cantidadVentaMinima_invalida"));
         }
-        if (producto.getPrecioCosto() < 0) {
+        if (producto.getPrecioCosto().compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_precioCosto_negativo"));
         }
-        if (producto.getPrecioVentaPublico() < 0) {
+        if (producto.getPrecioVentaPublico().compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_precioVentaPublico_negativo"));
         }
-        if (producto.getIva_porcentaje() < 0) {
+        if (producto.getIva_porcentaje().compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_IVAPorcentaje_negativo"));
         }
-        if (producto.getImpuestoInterno_porcentaje() < 0) {
+        if (producto.getImpuestoInterno_porcentaje().compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_ImpInternoPorcentaje_negativo"));
         }
-        if (producto.getGanancia_porcentaje() < 0) {
+        if (producto.getGanancia_porcentaje().compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_gananciaPorcentaje_negativo"));
         }
-        if (producto.getPrecioLista() < 0) {
+        if (producto.getPrecioLista().compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_precioLista_negativo"));
         }
@@ -233,21 +233,21 @@ public class ProductoServiceImpl implements IProductoService {
             if (producto != null && producto.isIlimitado() == false) {
                 if (movimiento.equals(Movimiento.VENTA)) {
                     if (operacion == TipoDeOperacion.ALTA) {
-                        producto.setCantidad(producto.getCantidad() - entry.getValue().doubleValue());
+                        producto.setCantidad(producto.getCantidad().subtract(entry.getValue()));
                     }
 
                     if (operacion == TipoDeOperacion.ELIMINACION || operacion == TipoDeOperacion.ACTUALIZACION) {
-                        producto.setCantidad(producto.getCantidad() + entry.getValue().doubleValue());
+                        producto.setCantidad(producto.getCantidad().add(entry.getValue()));
                     }
                 } else if (movimiento.equals(Movimiento.COMPRA)) {
                     if (operacion == TipoDeOperacion.ALTA) {
-                        producto.setCantidad(producto.getCantidad() + entry.getValue().doubleValue());
+                        producto.setCantidad(producto.getCantidad().add(entry.getValue()));
                     }
 
                     if (operacion == TipoDeOperacion.ELIMINACION) {
-                        double result = producto.getCantidad() - entry.getValue().doubleValue();
-                        if (result < 0) {
-                            result = 0;
+                        BigDecimal result = producto.getCantidad().subtract(entry.getValue());
+                        if (result.compareTo(BigDecimal.ZERO) < 0) {
+                            result = BigDecimal.ZERO;
                         }
                         producto.setCantidad(result);
                     }
@@ -319,15 +319,15 @@ public class ProductoServiceImpl implements IProductoService {
             if (checkRubro == true) p.setRubro(rubro);
             if (checkProveedor == true) p.setProveedor(proveedor);           
             if (checkPrecios == true) {            
-                p.setPrecioCosto(precioCosto.doubleValue());
-                p.setGanancia_porcentaje(gananciaPorcentaje.doubleValue());
-                p.setGanancia_neto(gananciaNeto.doubleValue());
-                p.setPrecioVentaPublico(precioVentaPublico.doubleValue());
-                p.setIva_porcentaje(IVAPorcentaje.doubleValue());
-                p.setIva_neto(IVANeto.doubleValue());
-                p.setImpuestoInterno_porcentaje(impuestoInternoPorcentaje.doubleValue());
-                p.setImpuestoInterno_neto(impuestoInternoNeto.doubleValue());
-                p.setPrecioLista(precioLista.doubleValue());            
+                p.setPrecioCosto(precioCosto);
+                p.setGanancia_porcentaje(gananciaPorcentaje);
+                p.setGanancia_neto(gananciaNeto);
+                p.setPrecioVentaPublico(precioVentaPublico);
+                p.setIva_porcentaje(IVAPorcentaje);
+                p.setIva_neto(IVANeto);
+                p.setImpuestoInterno_porcentaje(impuestoInternoPorcentaje);
+                p.setImpuestoInterno_neto(impuestoInternoNeto);
+                p.setPrecioLista(precioLista);            
             }
             if (checkPrecios == true || checkMedida == true || checkRubro == true || checkProveedor == true) {            
                 p.setFechaUltimaModificacion(new Date());                
@@ -375,7 +375,7 @@ public class ProductoServiceImpl implements IProductoService {
         if (longitudIds == longitudCantidades) {
             for (int i = 0; i < longitudIds; i++) {
                 Producto p = this.getProductoPorId(idProducto[i]);
-                if (p.isIlimitado() == false && p.getCantidad() < cantidad[i].doubleValue()) {
+                if (p.isIlimitado() == false && p.getCantidad().compareTo(cantidad[i]) < 0) {
                     productos.put(cantidad[i], p);
                 }
             }
@@ -385,7 +385,7 @@ public class ProductoServiceImpl implements IProductoService {
         }
         return productos;
     }
-    
+
     @Override
     public Map<BigDecimal, Producto> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, BigDecimal[] cantidad) {
         Map productos = new HashMap();
@@ -394,7 +394,7 @@ public class ProductoServiceImpl implements IProductoService {
         if (longitudIds == longitudCantidades) {
             for (int i = 0; i < longitudIds; i++) {
                 Producto p = this.getProductoPorId(idProducto[i]);
-                if (p.getVentaMinima() > cantidad[i].doubleValue()) {
+                if (p.getVentaMinima().compareTo(cantidad[i]) > 0) {
                     productos.put(cantidad[i], p);
                 }
             }

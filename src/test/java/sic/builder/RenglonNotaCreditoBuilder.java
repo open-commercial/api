@@ -1,5 +1,6 @@
 package sic.builder;
 
+import java.math.BigDecimal;
 import sic.modelo.RenglonNotaCredito;
 
 public class RenglonNotaCreditoBuilder {
@@ -9,15 +10,15 @@ public class RenglonNotaCreditoBuilder {
     private String codigoItem = "1";
     private String descripcionItem = "Acero Valyrio";
     private String medidaItem = "Kilos";
-    private double descuentoPorcentaje = 10;
-    private double descuentoNeto = 15.8;
-    private double cantidad = 2;  
-    private double precioUnitario = 100;
-    private double ivaPorcentaje =  21;
-    private double ivaNeto;
-    private double importe  = 158; //sin nada
-    private double importeBruto = 142.2;  //con descuentos y recargos, sin iva
-    private double importeNeto = 172.062; //con descuentos, recargos y con iva
+    private BigDecimal descuentoPorcentaje = new BigDecimal(10);
+    private BigDecimal descuentoNeto = new BigDecimal(15.8);
+    private BigDecimal cantidad = new BigDecimal(2);  
+    private BigDecimal precioUnitario = new BigDecimal(100);
+    private BigDecimal ivaPorcentaje =  new BigDecimal(21);
+    private BigDecimal ivaNeto;
+    private BigDecimal importe  = new BigDecimal(158); //sin nada
+    private BigDecimal importeBruto = new BigDecimal(142.2);  //con descuentos y recargos, sin iva
+    private BigDecimal importeNeto = new BigDecimal(172.062); //con descuentos, recargos y con iva
     
     public RenglonNotaCredito build() {
         return new RenglonNotaCredito(id_RenglonNota, id_ProductoItem, codigoItem, descripcionItem, medidaItem, cantidad, precioUnitario, ivaPorcentaje, 
@@ -49,47 +50,47 @@ public class RenglonNotaCreditoBuilder {
         return this;
     }
     
-    public RenglonNotaCreditoBuilder withDescuentoPorcentaje(double descuentoPorcentaje) {
+    public RenglonNotaCreditoBuilder withDescuentoPorcentaje(BigDecimal descuentoPorcentaje) {
         this.descuentoPorcentaje = descuentoPorcentaje;
         return this;
     }
     
-    public RenglonNotaCreditoBuilder withDescuentoNeto(double descuentoNeto) {
+    public RenglonNotaCreditoBuilder withDescuentoNeto(BigDecimal descuentoNeto) {
         this.descuentoNeto = descuentoNeto;
         return this;
     }
     
-    public RenglonNotaCreditoBuilder withCantidad(double cantidad) {
+    public RenglonNotaCreditoBuilder withCantidad(BigDecimal cantidad) {
         this.cantidad = cantidad;
         return this;
     }
     
-    public RenglonNotaCreditoBuilder withPrecioUnitario(double precioUnitario) {
+    public RenglonNotaCreditoBuilder withPrecioUnitario(BigDecimal precioUnitario) {
         this.precioUnitario = precioUnitario;
         return this;
     }
     
-    public RenglonNotaCreditoBuilder withIvaNeto(double ivaNeto) {
+    public RenglonNotaCreditoBuilder withIvaNeto(BigDecimal ivaNeto) {
         this.ivaNeto = ivaNeto;
         return this;
     }
     
-    public RenglonNotaCreditoBuilder withIvaPorcentaje(double ivaPorcentaje) {
+    public RenglonNotaCreditoBuilder withIvaPorcentaje(BigDecimal ivaPorcentaje) {
         this.ivaPorcentaje = ivaPorcentaje;
         return this;
     }
     
-    public RenglonNotaCreditoBuilder withSubTotal(double importe) {
+    public RenglonNotaCreditoBuilder withSubTotal(BigDecimal importe) {
         this.importe = importe;
         return this;
     }
     
-    public RenglonNotaCreditoBuilder withSubTotalBruto(double importeBruto) {
+    public RenglonNotaCreditoBuilder withSubTotalBruto(BigDecimal importeBruto) {
         this.importeBruto = importeBruto;
         return this;
     }
     
-    public RenglonNotaCreditoBuilder withImporte(double importeNeto) {
+    public RenglonNotaCreditoBuilder withImporte(BigDecimal importeNeto) {
         this.importeNeto = importeNeto;
         return this;
     }

@@ -27,7 +27,7 @@ public interface ICajaService {
 
     void validarCaja(Caja caja);
     
-    Caja cerrarCaja(long idCaja, double monto, Long idUsuario, boolean scheduling);
+    Caja cerrarCaja(long idCaja, BigDecimal monto, Long idUsuario, boolean scheduling);
     
     BigDecimal getTotalCaja(Caja caja, boolean afectaCaja);
     

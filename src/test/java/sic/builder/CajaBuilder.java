@@ -19,13 +19,13 @@ public class CajaBuilder {
     private Usuario usuarioCierraCaja = new UsuarioBuilder().build();
     private String observacion = "Caja Default para Test";
     private EstadoCaja estado = EstadoCaja.ABIERTA;
-    private double saldoInicial = 400;
-    private double saldoFinal;
-    private double saldoReal;
+    private BigDecimal saldoInicial = new BigDecimal(400);
+    private BigDecimal saldoFinal;
+    private BigDecimal saldoReal;
     private boolean eliminada = false;
     private Map<Long, BigDecimal> totalesPorFomaDePago;
-    private double totalAfectaCaja;
-    private double totalGeneral;
+    private BigDecimal totalAfectaCaja;
+    private BigDecimal totalGeneral;
     private Empresa empresa = new EmpresaBuilder().build();
 
     public Caja build() {
@@ -79,17 +79,17 @@ public class CajaBuilder {
         return this;
     }
 
-    public CajaBuilder withSaldoInicial(double saldoInicial) {
+    public CajaBuilder withSaldoInicial(BigDecimal saldoInicial) {
         this.saldoInicial = saldoInicial;
         return this;
     }
 
-    public CajaBuilder withSaldoFinal(double saldoFinal) {
+    public CajaBuilder withSaldoFinal(BigDecimal saldoFinal) {
         this.saldoFinal = saldoFinal;
         return this;
     }
 
-    public CajaBuilder withSaldoReal(double saldoReal) {
+    public CajaBuilder withSaldoReal(BigDecimal saldoReal) {
         this.saldoReal = saldoReal;
         return this;
     }

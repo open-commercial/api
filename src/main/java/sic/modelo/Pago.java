@@ -52,7 +52,7 @@ public class Pago implements Serializable {
     @JoinColumn(name = "idRecibo", referencedColumnName = "idRecibo")
     private Recibo recibo;
 
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal monto;
 
     @Column(nullable = false)

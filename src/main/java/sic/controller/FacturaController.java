@@ -88,7 +88,7 @@ public class FacturaController {
                                              @RequestParam Long idUsuario,
                                              @RequestParam Long idTransportista,
                                              @RequestParam(required = false) long[] idsFormaDePago,
-                                             @RequestParam(required = false) double[] montos,
+                                             @RequestParam(required = false) BigDecimal[] montos,
                                              @RequestParam(required = false) int[] indices,
                                              @RequestParam(required = false) Long idPedido) {
         Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);

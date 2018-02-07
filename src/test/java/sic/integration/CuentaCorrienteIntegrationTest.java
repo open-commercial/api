@@ -1,6 +1,7 @@
 package sic.integration;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -220,38 +221,39 @@ public class CuentaCorrienteIntegrationTest {
         renglones.add(renglonUno);
         renglones.add(renglonDos);
         int size = renglones.size();
-        double[] cantidades = new double[size];
-        double[] ivaPorcentajeRenglones = new double[size];
-        double[] ivaNetoRenglones = new double[size];
+        BigDecimal[] cantidades = new BigDecimal[size];
+        BigDecimal[] ivaPorcentajeRenglones = new BigDecimal[size];
+        BigDecimal[] ivaNetoRenglones = new BigDecimal[size];
         int indice = 0;
-        double subTotal = 0;
+        BigDecimal subTotal = BigDecimal.ZERO;
         for (RenglonFactura renglon : renglones) {
-            subTotal += renglon.getImporte();
+            subTotal = subTotal.add(renglon.getImporte());
             cantidades[indice] = renglon.getCantidad();
             ivaPorcentajeRenglones[indice] = renglon.getIva_porcentaje();
             ivaNetoRenglones[indice] = renglon.getIva_neto();
             indice++;
         }
-        double descuentoPorcentaje = 25;
-        double recargoPorcentaje = 10;
-        double descuento_neto = (subTotal * descuentoPorcentaje) / 100;
-        double recargo_neto = (subTotal * recargoPorcentaje) / 100;
+        BigDecimal descuentoPorcentaje = new BigDecimal(25);
+        BigDecimal recargoPorcentaje = new BigDecimal(10);
+        BigDecimal descuento_neto = subTotal.multiply(descuentoPorcentaje).divide(new BigDecimal(100));
+        BigDecimal recargo_neto = subTotal.multiply(recargoPorcentaje).divide(new BigDecimal(100));
         indice = cantidades.length;
-        double iva_105_netoFactura = 0;
-        double iva_21_netoFactura = 0;
+        BigDecimal iva_105_netoFactura = BigDecimal.ZERO;
+        BigDecimal iva_21_netoFactura = BigDecimal.ZERO;
         for (int i = 0; i < indice; i++) {
-            if (ivaPorcentajeRenglones[i] == 10.5) {
-                iva_105_netoFactura += cantidades[i] * (ivaNetoRenglones[i]
-                        - (ivaNetoRenglones[i] * (descuentoPorcentaje / 100))
-                        + (ivaNetoRenglones[i] * (recargoPorcentaje / 100)));
-            } else if (ivaPorcentajeRenglones[i] == 21) {
-                iva_21_netoFactura += cantidades[i] * (ivaNetoRenglones[i]
-                        - (ivaNetoRenglones[i] * (descuentoPorcentaje / 100))
-                        + (ivaNetoRenglones[i] * (recargoPorcentaje / 100)));
+            if (ivaPorcentajeRenglones[i].compareTo(new BigDecimal(10.5)) == 0) {
+                iva_105_netoFactura = iva_105_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i]
+                .subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(new BigDecimal(100))))
+                .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(new BigDecimal(100))))));
+            } else if (ivaPorcentajeRenglones[i].compareTo(new BigDecimal(21)) == 0) {
+                iva_21_netoFactura =  iva_21_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i]
+                        .subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(new BigDecimal(100))))
+                        .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(new BigDecimal(100))))));
             }
         }
-        double subTotalBruto = subTotal + recargo_neto - descuento_neto - (iva_105_netoFactura + iva_21_netoFactura);
-        double total = subTotalBruto + iva_105_netoFactura + iva_21_netoFactura;
+        BigDecimal subTotalBruto = subTotal.add(recargo_neto).subtract(descuento_neto).subtract(iva_105_netoFactura.add(iva_21_netoFactura));
+
+        BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
         FacturaVentaDTO facturaVentaB = new FacturaVentaDTO();
         facturaVentaB.setTipoComprobante(TipoDeComprobante.FACTURA_B);
         facturaVentaB.setRenglones(renglones);
@@ -306,15 +308,15 @@ public class CuentaCorrienteIntegrationTest {
         NotaCreditoDTO notaCredito = new NotaCreditoDTO();
         notaCredito.setRenglonesNotaCredito(renglonesNotaCredito);
         notaCredito.setSubTotal(restTemplate.getForObject(apiPrefix + "/notas/credito/sub-total?importe="
-                + renglonesNotaCredito.get(0).getImporteNeto(), Double.class));
+                + renglonesNotaCredito.get(0).getImporteNeto(), BigDecimal.class));
         notaCredito.setRecargoPorcentaje(facturasRecuperadas.get(0).getRecargo_porcentaje());
         notaCredito.setRecargoNeto(restTemplate.getForObject(apiPrefix + "/notas/credito/recargo-neto?subTotal="
                 + notaCredito.getSubTotal()
-                + "&recargoPorcentaje=" + notaCredito.getRecargoPorcentaje(), Double.class));
+                + "&recargoPorcentaje=" + notaCredito.getRecargoPorcentaje(), BigDecimal.class));
         notaCredito.setDescuentoPorcentaje(facturasRecuperadas.get(0).getDescuento_porcentaje());
         notaCredito.setDescuentoNeto(restTemplate.getForObject(apiPrefix + "/notas/credito/descuento-neto?subTotal="
                 + notaCredito.getSubTotal()
-                + "&descuentoPorcentaje=" + notaCredito.getDescuentoPorcentaje(), Double.class));
+                + "&descuentoPorcentaje=" + notaCredito.getDescuentoPorcentaje(), BigDecimal.class));
         notaCredito.setIva21Neto(restTemplate.getForObject(apiPrefix + "/notas/credito/iva-neto?"
                 + "tipoDeComprobante=" + facturasRecuperadas.get(0).getTipoComprobante().name()
                 + "&cantidades=" + renglonesNotaCredito.get(0).getCantidad()
@@ -450,38 +452,36 @@ public class CuentaCorrienteIntegrationTest {
         renglones.add(renglonUno);
         renglones.add(renglonDos);
         int size = renglones.size();
-        double[] cantidades = new double[size];
-        double[] ivaPorcentajeRenglones = new double[size];
-        double[] ivaNetoRenglones = new double[size];
+        BigDecimal[] cantidades = new BigDecimal[size];
+        BigDecimal[] ivaPorcentajeRenglones = new BigDecimal[size];
+        BigDecimal[] ivaNetoRenglones = new BigDecimal[size];
         int indice = 0;
-        double subTotal = 0;
+        BigDecimal subTotal = BigDecimal.ZERO;
         for (RenglonFactura renglon : renglones) {
-            subTotal += renglon.getImporte();
+            subTotal = subTotal.add(renglon.getImporte());
             cantidades[indice] = renglon.getCantidad();
             ivaPorcentajeRenglones[indice] = renglon.getIva_porcentaje();
             ivaNetoRenglones[indice] = renglon.getIva_neto();
             indice++;
         }
-        double descuentoPorcentaje = 25;
-        double recargoPorcentaje = 10;
-        double descuento_neto = (subTotal * descuentoPorcentaje) / 100;
-        double recargo_neto = (subTotal * recargoPorcentaje) / 100;
+        BigDecimal descuentoPorcentaje = new BigDecimal(25);
+        BigDecimal recargoPorcentaje = BigDecimal.TEN;
+        BigDecimal descuento_neto = subTotal.multiply(descuentoPorcentaje).divide(new BigDecimal(100));
+        BigDecimal recargo_neto = subTotal.multiply(recargoPorcentaje).divide(new BigDecimal(100));
         indice = cantidades.length;
-        double iva_105_netoFactura = 0;
-        double iva_21_netoFactura = 0;
+        BigDecimal iva_105_netoFactura = BigDecimal.ZERO;
+        BigDecimal iva_21_netoFactura = BigDecimal.ZERO;
         for (int i = 0; i < indice; i++) {
-            if (ivaPorcentajeRenglones[i] == 10.5) {
-                iva_105_netoFactura += cantidades[i] * (ivaNetoRenglones[i]
-                        - (ivaNetoRenglones[i] * (descuentoPorcentaje / 100))
-                        + (ivaNetoRenglones[i] * (recargoPorcentaje / 100)));
-            } else if (ivaPorcentajeRenglones[i] == 21) {
-                iva_21_netoFactura += cantidades[i] * (ivaNetoRenglones[i]
-                        - (ivaNetoRenglones[i] * (descuentoPorcentaje / 100))
-                        + (ivaNetoRenglones[i] * (recargoPorcentaje / 100)));
+            if (ivaPorcentajeRenglones[i].compareTo(new BigDecimal(10.5)) == 0) {
+                iva_105_netoFactura = iva_105_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i].subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(new BigDecimal(100))))
+                        .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(new BigDecimal(100))))));
+            } else if (ivaPorcentajeRenglones[i].compareTo(new BigDecimal(21)) == 0) {
+                iva_21_netoFactura = iva_21_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i].subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(new BigDecimal(100))))
+                        .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(new BigDecimal(100))))));
             }
         }
-        double subTotalBruto = subTotal + recargo_neto - descuento_neto - (iva_105_netoFactura + iva_21_netoFactura);
-        double total = subTotalBruto + iva_105_netoFactura + iva_21_netoFactura;
+        BigDecimal subTotalBruto = subTotal.add(recargo_neto).subtract(descuento_neto).subtract(iva_105_netoFactura.add(iva_21_netoFactura));
+        BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
         FacturaCompraDTO facturaCompraB = new FacturaCompraDTO();
         facturaCompraB.setFecha(new Date());
         facturaCompraB.setTipoComprobante(TipoDeComprobante.FACTURA_B);

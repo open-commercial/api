@@ -70,21 +70,21 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     }
 
     @Override
-    public void agregarOrModificarItem(long idUsuario, long idProducto, double cantidad) {
+    public void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad) {
         Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
         Producto producto = productoService.getProductoPorId(idProducto);
         ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(usuario, producto);
         if (item == null) {
-            double importe = producto.getPrecioLista() * cantidad;
+            BigDecimal importe = producto.getPrecioLista().multiply(cantidad);
             carritoCompraRepository.save(new ItemCarritoCompra(null, cantidad, producto, importe, usuario));
         } else {
-            double nuevaCantidad = item.getCantidad() + cantidad;
-            if (nuevaCantidad < 0) {
-                item.setCantidad(0);    
+            BigDecimal nuevaCantidad = item.getCantidad().multiply(cantidad);
+            if (nuevaCantidad.compareTo(BigDecimal.ZERO) < 0) {
+                item.setCantidad(BigDecimal.ZERO);    
             } else {
                 item.setCantidad(nuevaCantidad);    
             }            
-            item.setImporte(producto.getPrecioLista() * nuevaCantidad);
+            item.setImporte(producto.getPrecioLista().multiply(nuevaCantidad));
             carritoCompraRepository.save(item);
         }
     }

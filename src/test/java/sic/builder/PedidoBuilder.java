@@ -1,5 +1,6 @@
 package sic.builder;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -21,15 +22,15 @@ public class PedidoBuilder {
     private String nombreUsuario = "Daenerys Targaryen";
     private List<Factura> facturas;
     private List<RenglonPedidoDTO> renglones;
-    private double totalEstimado = 544.5;
-    private double totalActual = 544.5;
+    private BigDecimal totalEstimado = new BigDecimal(544.5);
+    private BigDecimal totalActual = new BigDecimal(544.5);
     private EstadoPedido estado = EstadoPedido.ABIERTO;
 
     public PedidoDTO build() {
         if (renglones == null) {
             RenglonPedidoDTO renglon1 = new RenglonPedidoBuilder().build();
             RenglonPedidoDTO renglon2 = new RenglonPedidoBuilder()
-                                            .withCantidad(1)
+                                            .withCantidad(BigDecimal.ONE)
                                             .withIdRenglonPedido(90L)
                                             .withProducto(new ProductoBuilder()
                                                 .withId_Producto(77L)
@@ -100,12 +101,12 @@ public class PedidoBuilder {
         return this;
     }
 
-    public PedidoBuilder withTotalEstimado(double totalEstimado) {
+    public PedidoBuilder withTotalEstimado(BigDecimal totalEstimado) {
         this.totalEstimado = totalEstimado;
         return this;
     }
 
-    public PedidoBuilder withTotalActual(double totalActual) {
+    public PedidoBuilder withTotalActual(BigDecimal totalActual) {
         this.totalActual = totalActual;
         return this;
     }

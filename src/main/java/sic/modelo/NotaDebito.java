@@ -29,7 +29,7 @@ public class NotaDebito extends Nota implements Serializable {
     @Column(nullable = false)
     private List<RenglonNotaDebito> renglonesNotaDebito;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal montoNoGravado;
     
     @ManyToOne

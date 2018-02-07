@@ -31,19 +31,19 @@ public class NotaCredito extends Nota implements Serializable {
     @Column(nullable = false)
     private List<RenglonNotaCredito> renglonesNotaCredito;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal subTotal;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal recargoPorcentaje;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal recargoNeto;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal descuentoPorcentaje;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal descuentoNeto;
 
     public NotaCredito() {}

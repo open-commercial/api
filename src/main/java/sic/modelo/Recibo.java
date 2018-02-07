@@ -67,10 +67,10 @@ public class Recibo implements Serializable {
     @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
     private Usuario usuario;
 
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal monto;
 
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal saldoSobrante;
 
     @JsonGetter("formaDePago")

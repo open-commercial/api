@@ -1,5 +1,6 @@
 package sic.builder;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import sic.modelo.Cliente;
 import sic.modelo.CondicionIVA;
@@ -26,7 +27,7 @@ public class ClienteBuilder {
     private Usuario credencial = new UsuarioBuilder().build();
     private boolean eliminado = false;
     private boolean predeterminado = false;
-    private double saldoCuentaCorriente = 0;
+    private BigDecimal saldoCuentaCorriente = new BigDecimal(0);
     private Date fechaUltimoMovimiento = new Date();
     
     public Cliente build() {
@@ -121,7 +122,7 @@ public class ClienteBuilder {
         return this;
     }
     
-    public ClienteBuilder whitSaldoCuentaCorriente(double saldoCuentaCorriente) {
+    public ClienteBuilder whitSaldoCuentaCorriente(BigDecimal saldoCuentaCorriente) {
         this.saldoCuentaCorriente = saldoCuentaCorriente;
         return this;
     }

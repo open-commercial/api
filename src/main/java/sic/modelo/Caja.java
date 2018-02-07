@@ -69,13 +69,13 @@ public class Caja implements Serializable {
     @Enumerated(EnumType.STRING)
     private EstadoCaja estado;
 
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal saldoInicial;
 
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal saldoFinal;
 
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal saldoReal;
 
     private boolean eliminada;

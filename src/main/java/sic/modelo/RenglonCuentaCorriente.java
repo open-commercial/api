@@ -71,7 +71,7 @@ public class RenglonCuentaCorriente implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaVencimiento;
 
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal monto;
     
     @ManyToOne

@@ -149,7 +149,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     public CuentaCorrienteCliente getCuentaCorrientePorCliente(long idCliente) {
         Cliente cliente = clienteService.getClientePorId(idCliente);
         CuentaCorrienteCliente cc = cuentaCorrienteClienteRepository.findByClienteAndEmpresaAndEliminada(cliente, cliente.getEmpresa(), false);
-        cc.setSaldo(this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente()).doubleValue());
+        cc.setSaldo(this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente()));
         cc.setFechaUltimoMovimiento(this.getFechaUltimoMovimiento(cc.getIdCuentaCorriente()));
         return cc;
     }
@@ -158,7 +158,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     public CuentaCorrienteProveedor getCuentaCorrientePorProveedor(long idProveedor) {
         Proveedor proveedor = proveedorService.getProveedorPorId(idProveedor);
         CuentaCorrienteProveedor cc = cuentaCorrienteProveedorRepository.findByProveedorAndEmpresaAndEliminada(proveedor, proveedor.getEmpresa(), false);
-        cc.setSaldo(this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente()).doubleValue());
+        cc.setSaldo(this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente()));
         cc.setFechaUltimoMovimiento(this.getFechaUltimoMovimiento(cc.getIdCuentaCorriente()));
         return cc;
     }
@@ -175,13 +175,13 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                 Page<RenglonCuentaCorriente> renglonesCuentaCorrienteAuxiliar = renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageableAuxiliar);
                 BigDecimal saldoPaginaSuperiores = BigDecimal.ZERO;
                 for (RenglonCuentaCorriente rcc : renglonesCuentaCorrienteAuxiliar) {
-                    saldoPaginaSuperiores = saldoPaginaSuperiores.add(new BigDecimal(rcc.getMonto()));
+                    saldoPaginaSuperiores = saldoPaginaSuperiores.add(rcc.getMonto());
                 }
                 saldoCC = saldoCC.subtract(saldoPaginaSuperiores);
             }
             for (RenglonCuentaCorriente rcc : renglonesCuentaCorriente) {
-                rcc.setSaldo(saldoCC.doubleValue());
-                saldoCC = saldoCC.subtract(new BigDecimal(rcc.getMonto()));
+                rcc.setSaldo(saldoCC);
+                saldoCC = saldoCC.subtract(rcc.getMonto());
                 if (rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_B
                         || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_X
                         || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
@@ -211,7 +211,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setFecha(fv.getFecha());
             rcc.setFechaVencimiento(fv.getFechaVencimiento());
             rcc.setIdMovimiento(fv.getId_Factura());
-            rcc.setMonto(-fv.getTotal());
+            rcc.setMonto(fv.getTotal().negate());
             CuentaCorriente cc = this.getCuentaCorrientePorCliente(fv.getCliente().getId_Cliente());
             cc.getRenglones().add(rcc);
             rcc.setCuentaCorriente(cc);
@@ -237,7 +237,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setFecha(fc.getFecha());
             rcc.setFechaVencimiento(fc.getFechaVencimiento());
             rcc.setIdMovimiento(fc.getId_Factura());
-            rcc.setMonto(-fc.getTotal());
+            rcc.setMonto(fc.getTotal().negate());
             CuentaCorriente cc = this.getCuentaCorrientePorProveedor(fc.getProveedor().getId_Proveedor());
             cc.getRenglones().add(rcc);
             rcc.setCuentaCorriente(cc);
@@ -264,7 +264,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                 rcc.setDescripcion(n.getMotivo()); 
             }
             if (n instanceof NotaDebito) {
-                rcc.setMonto(-n.getTotal());
+                rcc.setMonto(n.getTotal().negate());
                 String descripcion = "";
                 if (((NotaDebito) n).getRecibo() != null) {
                     descripcion = ((NotaDebito) n).getRecibo().getConcepto();

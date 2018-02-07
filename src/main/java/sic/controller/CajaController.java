@@ -69,7 +69,7 @@ public class CajaController {
     @PutMapping("/cajas/{idCaja}/cierre")
     @ResponseStatus(HttpStatus.OK)
     public Caja cerrarCaja(@PathVariable long idCaja,
-                           @RequestParam double monto,
+                           @RequestParam BigDecimal monto,
                            @RequestParam long idUsuarioCierre) {
         return cajaService.cerrarCaja(idCaja, monto, idUsuarioCierre, false);
     }

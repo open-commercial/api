@@ -28,7 +28,6 @@ import sic.repository.PagoRepository;
 import sic.service.IEmpresaService;
 import sic.service.INotaService;
 import sic.service.IReciboService;
-import sic.util.Utilidades;
 
 @Service
 public class PagoServiceImpl implements IPagoService {
@@ -150,7 +149,7 @@ public class PagoServiceImpl implements IPagoService {
         if (pago.getNotaDebito() != null) {
             notaService.actualizarNotaDebitoEstadoPago((NotaDebito) pago.getNotaDebito());
         }
-        pago.getRecibo().setSaldoSobrante(pago.getMonto() + pago.getRecibo().getSaldoSobrante());
+        pago.getRecibo().setSaldoSobrante(pago.getMonto().add(pago.getRecibo().getSaldoSobrante()));
         pagoRepository.save(pago);
         LOGGER.warn("El Pago " + pago + " se eliminó correctamente.");
     }
@@ -170,11 +169,11 @@ public class PagoServiceImpl implements IPagoService {
         BigDecimal total = BigDecimal.ZERO;
         pagos.stream().map((pago) -> {
             if (pago.getFactura() instanceof FacturaVenta) {
-                total.add(new BigDecimal(pago.getMonto()));
+                total.add(pago.getMonto());
             }
             return pago;
         }).filter((pago) -> (pago.getFactura() instanceof FacturaCompra)).forEachOrdered((pago) -> {
-            total.subtract(new BigDecimal(pago.getMonto()));
+            total.subtract(pago.getMonto());
         });
         return total;
     }
@@ -211,7 +210,7 @@ public class PagoServiceImpl implements IPagoService {
     @Override
     public void validarOperacion(Pago pago) {
         //Requeridos
-        if (pago.getMonto() <= 0.0) {
+        if (pago.getMonto().compareTo(BigDecimal.ZERO) <= 0.0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_pago_mayorQueCero_monto"));
         }
@@ -228,8 +227,7 @@ public class PagoServiceImpl implements IPagoService {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_factura_pagada"));
             }
-            BigDecimal saldoAPagar = this.getSaldoAPagarFactura(pago.getFactura().getId_Factura()).setScale(3, RoundingMode.HALF_UP);;
-            if ((new BigDecimal(pago.getMonto())).setScale(3, RoundingMode.HALF_UP).compareTo(saldoAPagar) > 0) {
+            if (pago.getMonto().setScale(3, RoundingMode.HALF_UP).compareTo(this.getSaldoAPagarFactura(pago.getFactura().getId_Factura()).setScale(3, RoundingMode.HALF_UP)) > 0) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_pago_mayorADeuda_monto"));
             }
@@ -239,8 +237,7 @@ public class PagoServiceImpl implements IPagoService {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_nota_debito_pagada"));
             }
-            BigDecimal saldoAPagar = this.getSaldoAPagarNotaDebito(pago.getNotaDebito().getIdNota()).setScale(3, RoundingMode.HALF_UP);
-            if ((new BigDecimal(pago.getMonto())).setScale(3, RoundingMode.HALF_UP).compareTo(saldoAPagar) > 0) { 
+            if (pago.getMonto().setScale(3, RoundingMode.HALF_UP).compareTo(this.getSaldoAPagarNotaDebito(pago.getNotaDebito().getIdNota()).setScale(3, RoundingMode.HALF_UP)) > 0) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_pago_mayorADeuda_monto"));
             }

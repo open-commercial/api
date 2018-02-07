@@ -98,16 +98,16 @@ public abstract class Nota implements Serializable {
     @Column(nullable = false)
     private String motivo;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal subTotalBruto; 
 
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal iva21Neto;
             
-    @Column(precision = 18, scale = 15)       
+    @Column(precision = 25, scale = 15)       
     private BigDecimal iva105Neto;
     
-    @Column(precision = 18, scale = 15)
+    @Column(precision = 25, scale = 15)
     private BigDecimal total;
     
     private long CAE;
