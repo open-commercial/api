@@ -14,11 +14,11 @@
 	<field name="descripcionItem" class="java.lang.String"/>
 	<field name="codigoItem" class="java.lang.String"/>
 	<field name="medidaItem" class="java.lang.String"/>
-	<field name="cantidad" class="java.lang.Double"/>
-	<field name="precioUnitario" class="java.lang.Double"/>
-	<field name="descuento_porcentaje" class="java.lang.Double"/>
-	<field name="importe" class="java.lang.Double"/>
-	<field name="iva_porcentaje" class="java.lang.Double"/>
+	<field name="cantidad" class="java.math.BigDecimal"/>
+	<field name="precioUnitario" class="java.math.BigDecimal"/>
+	<field name="descuento_porcentaje" class="java.math.BigDecimal"/>
+	<field name="importe" class="java.math.BigDecimal"/>
+	<field name="iva_porcentaje" class="java.math.BigDecimal"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -491,7 +491,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement textAlignment="Center">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{cantidad}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00">
 				<reportElement x="415" y="0" width="52" height="15" uuid="ef48b8f6-ecc3-42f2-b6f9-269aae20c81e">
@@ -500,7 +500,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement textAlignment="Center">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{precioUnitario}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{precioUnitario}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="">
 				<reportElement x="467" y="0" width="31" height="15" uuid="f3e07bc2-0b6a-4759-80ae-837e9ad074b8">
@@ -509,7 +509,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement textAlignment="Center">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{descuento_porcentaje}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{descuento_porcentaje}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00">
 				<reportElement x="498" y="0" width="57" height="15" uuid="e044f181-0b15-492c-bf20-af4d406e94db">
@@ -518,7 +518,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement textAlignment="Center">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{importe}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{importe}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="">
 				<reportElement x="370" y="0" width="45" height="15" uuid="7a5d637a-a063-4bbe-a486-b313a3f62c77">
@@ -640,7 +640,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getSubTotal()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getSubTotal().doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="16" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="3d6af9e9-5c5d-403d-9490-44c5d4f3a23c">
@@ -650,7 +650,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getDescuento_neto()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getDescuento_neto().doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="430" y="16" width="37" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="dbdfa74b-b9de-471a-b990-79bee14bae31">
@@ -661,7 +661,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getDescuento_porcentaje()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getDescuento_porcentaje().doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="46" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="c6a75d5b-c210-44c6-8e4a-c725bf20381e">
@@ -671,7 +671,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getSubTotal_bruto()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getSubTotal_bruto().doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="61" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="18ea0bde-b849-4259-b982-1dde09844dba">
@@ -681,7 +681,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getIva_105_neto()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getIva_105_neto().doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="76" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="e063a476-1e47-4947-9f7f-04ad07139b9e">
@@ -691,7 +691,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getIva_21_neto()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getIva_21_neto().doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="91" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="0287f0d5-94e6-4d59-ac75-cfff995614c1">
@@ -701,7 +701,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 					<font size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getTotal()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getTotal().doubleValue()]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="1" width="80" height="15" uuid="fd355cd5-1e26-40e5-baa6-26739dede4e9">
@@ -764,7 +764,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C")]]></printWh
 					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getRecargo_porcentaje()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getRecargo_porcentaje().doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="31" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="1c4b0216-1400-469c-acc2-4de6c3acca6c">
@@ -774,7 +774,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C")]]></printWh
 					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getRecargo_neto()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getRecargo_neto().doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="20" y="81" width="80" height="15" uuid="9661ecd4-ae41-44b4-b5ab-501560541e44">

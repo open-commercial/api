@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.4.3.final using JasperReports Library version 6.4.3  -->
+<!-- Created with Jaspersoft Studio version 6.5.0.final using JasperReports Library version 6.5.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ListaPreciosProductos" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="608c624e-e655-4a3f-bb85-9c440082766b">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
@@ -18,16 +18,16 @@
 	<field name="medida" class="sic.modelo.Medida">
 		<fieldDescription><![CDATA[medida]]></fieldDescription>
 	</field>
-	<field name="precioVentaPublico" class="java.lang.Double">
+	<field name="precioVentaPublico" class="java.math.BigDecimal">
 		<fieldDescription><![CDATA[precioVentaPublico]]></fieldDescription>
 	</field>
 	<field name="rubro" class="sic.modelo.Rubro">
 		<fieldDescription><![CDATA[rubro]]></fieldDescription>
 	</field>
-	<field name="precioLista" class="java.lang.Double">
+	<field name="precioLista" class="java.math.BigDecimal">
 		<fieldDescription><![CDATA[precioLista]]></fieldDescription>
 	</field>
-	<field name="ventaMinima" class="java.lang.Double">
+	<field name="ventaMinima" class="java.math.BigDecimal">
 		<fieldDescription><![CDATA[ventaMinima]]></fieldDescription>
 	</field>
 	<group name="Rubro">
@@ -198,7 +198,7 @@
 			<textField pattern="¤ #,##0.00">
 				<reportElement x="480" y="0" width="75" height="20" uuid="87b3f1e2-6d18-4fe6-b5e8-90706d7bd888"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$F{precioLista}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{precioLista}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="420" y="0" width="60" height="20" uuid="009f171c-19d7-4c35-a69b-3fe1a41fe09a"/>
@@ -208,7 +208,7 @@
 			<textField>
 				<reportElement x="350" y="0" width="70" height="20" uuid="6051dd90-cb6a-484c-9e8b-e95ebbff97f2"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$F{ventaMinima}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ventaMinima}.doubleValue()]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
