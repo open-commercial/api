@@ -81,6 +81,9 @@ public class NotaServiceImpl implements INotaService {
     private final IAjusteCuentaCorrienteService ajusteCuentaCorrienteService;
     private final IConfiguracionDelSistemaService configuracionDelSistemaService;
     private final IAfipService afipService;
+    private final static BigDecimal IVA_21 = new BigDecimal("21");
+    private final static BigDecimal IVA_105 = new BigDecimal("10.5");
+    private final static BigDecimal CIEN = new BigDecimal("100");
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
@@ -376,13 +379,13 @@ public class NotaServiceImpl implements INotaService {
                         .getString("mensaje_nota_sub_total_no_valido"));
             }
             iva21 = this.calcularIVANetoCredito(tipoDeComprobanteDeFacturaRelacionada, cantidades, ivaPorcentajes, ivaNetos,
-                    new BigDecimal(21), notaCredito.getDescuentoPorcentaje(), notaCredito.getRecargoPorcentaje());
+                    IVA_21, notaCredito.getDescuentoPorcentaje(), notaCredito.getRecargoPorcentaje());
             if (notaCredito.getIva21Neto().compareTo(iva21) != 0) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_nota_iva21_no_valido"));
             }
             iva105 = this.calcularIVANetoCredito(tipoDeComprobanteDeFacturaRelacionada, cantidades, ivaPorcentajes, ivaNetos,
-                    new BigDecimal(10.5), notaCredito.getDescuentoPorcentaje(), notaCredito.getRecargoPorcentaje());
+                    IVA_105, notaCredito.getDescuentoPorcentaje(), notaCredito.getRecargoPorcentaje());
             if (notaCredito.getIva105Neto().compareTo(iva105) != 0) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_nota_iva105_no_valido"));
@@ -453,7 +456,7 @@ public class NotaServiceImpl implements INotaService {
             case NOTA_CREDITO_A:
             case NOTA_CREDITO_B:
             case NOTA_CREDITO_PRESUPUESTO:
-                iva21 = notaDebito.getSubTotalBruto().multiply(BigDecimal.valueOf(0.21));
+                iva21 = notaDebito.getSubTotalBruto().multiply(new BigDecimal("0.21"));
                 if (notaDebito.getIva21Neto().compareTo(iva21) != 0) {
                     throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_iva21_no_valido"));
                 }
@@ -785,7 +788,7 @@ public class NotaServiceImpl implements INotaService {
         BigDecimal ivaNeto = BigDecimal.ZERO;
         if (nota instanceof NotaCredito) {
             for (RenglonNotaCredito r : this.getRenglonesDeNotaCredito(nota.getIdNota())) {
-                ivaNeto =  ivaNeto.add(r.getIvaPorcentaje().divide(new BigDecimal(100)).multiply(r.getImporte()));
+                ivaNeto =  ivaNeto.add(r.getIvaPorcentaje().divide(CIEN).multiply(r.getImporte()));
             }
         } else {
             for (RenglonNotaCredito r : this.getRenglonesDeNotaCredito(nota.getIdNota())) {
@@ -814,9 +817,9 @@ public class NotaServiceImpl implements INotaService {
                 renglonNota.setCantidad(cantidad[i]);
                 renglonNota.setPrecioUnitario(renglonFactura.getPrecioUnitario());
                 renglonNota.setDescuentoPorcentaje(renglonFactura.getDescuento_porcentaje());
-                renglonNota.setDescuentoNeto(renglonFactura.getDescuento_porcentaje().divide(new BigDecimal(100)).multiply(renglonNota.getPrecioUnitario()));
+                renglonNota.setDescuentoNeto(renglonFactura.getDescuento_porcentaje().divide(CIEN).multiply(renglonNota.getPrecioUnitario()));
                 renglonNota.setGananciaPorcentaje(renglonFactura.getGanancia_porcentaje());
-                renglonNota.getGananciaPorcentaje().divide(new BigDecimal(100)).multiply(renglonNota.getPrecioUnitario());
+                renglonNota.getGananciaPorcentaje().divide(CIEN).multiply(renglonNota.getPrecioUnitario());
                 renglonNota.setIvaPorcentaje(renglonFactura.getIva_porcentaje());
                 if (tipo.equals(TipoDeComprobante.FACTURA_Y)) {
                     renglonNota.setIvaPorcentaje(renglonFactura.getIva_porcentaje().divide(new BigDecimal(2)));
@@ -853,7 +856,7 @@ public class NotaServiceImpl implements INotaService {
         renglonNota.setDescripcion("Gasto Administrativo");
         renglonNota.setMonto(monto);
         renglonNota.setIvaPorcentaje(ivaPorcentaje);
-        renglonNota.setIvaNeto(monto.multiply(ivaPorcentaje.divide(new BigDecimal(100), 16, RoundingMode.HALF_UP)));
+        renglonNota.setIvaNeto(monto.multiply(ivaPorcentaje.divide(CIEN, 16, RoundingMode.HALF_UP)));
         renglonNota.setImporteBruto(monto);
         renglonNota.setImporteNeto(this.calcularImporteRenglon(renglonNota.getIvaNeto(), renglonNota.getImporteBruto(), BigDecimal.ONE));
         renglonesNota.add(renglonNota);

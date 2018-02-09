@@ -82,6 +82,10 @@ public class ReciboIntegrationTest {
     private String token;
 
     private final String apiPrefix = "/api/v1";
+    
+    private final static BigDecimal IVA_21 = new BigDecimal("21");
+    private final static BigDecimal IVA_105 = new BigDecimal("10.5");
+    private final static BigDecimal CIEN = new BigDecimal("100");
 
     @Before
     public void setup() {
@@ -228,20 +232,20 @@ public class ReciboIntegrationTest {
             ivaNetoRenglones[indice] = renglon.getIva_neto();
             indice++;
         }
-        BigDecimal descuentoPorcentaje = new BigDecimal(25);
-        BigDecimal recargoPorcentaje = new BigDecimal(10);
-        BigDecimal descuento_neto = subTotal.multiply(descuentoPorcentaje).divide(new BigDecimal(100));
-        BigDecimal recargo_neto = subTotal.multiply(recargoPorcentaje).divide(new BigDecimal(100));
+        BigDecimal descuentoPorcentaje = new BigDecimal("25");
+        BigDecimal recargoPorcentaje = BigDecimal.TEN;
+        BigDecimal descuento_neto = subTotal.multiply(descuentoPorcentaje).divide(CIEN);
+        BigDecimal recargo_neto = subTotal.multiply(recargoPorcentaje).divide(CIEN);
         indice = cantidades.length;
         BigDecimal iva_105_netoFactura = BigDecimal.ZERO;
         BigDecimal iva_21_netoFactura = BigDecimal.ZERO;
         for (int i = 0; i < indice; i++) {
-            if (ivaPorcentajeRenglones[i].compareTo(new BigDecimal(10.5)) == 0) {
-                iva_105_netoFactura = iva_105_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i].subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(new BigDecimal(100))))
-                        .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(new BigDecimal(100))))));
-            } else if (ivaPorcentajeRenglones[i].compareTo(new BigDecimal(21)) == 0) {
-                iva_21_netoFactura = iva_21_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i].subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(new BigDecimal(100))))
-                        .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(new BigDecimal(100))))));
+            if (ivaPorcentajeRenglones[i].compareTo(IVA_105) == 0) {
+                iva_105_netoFactura = iva_105_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i].subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(CIEN)))
+                        .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(CIEN)))));
+            } else if (ivaPorcentajeRenglones[i].compareTo(IVA_21) == 0) {
+                iva_21_netoFactura = iva_21_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i].subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(CIEN)))
+                        .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(CIEN)))));
             }
         }
         BigDecimal subTotalBruto = subTotal.add(recargo_neto).subtract(descuento_neto).subtract(iva_105_netoFactura.add(iva_21_netoFactura));
@@ -322,20 +326,20 @@ public class ReciboIntegrationTest {
             ivaNetoRenglones[indice] = renglon.getIva_neto();
             indice++;
         }
-        descuentoPorcentaje = new BigDecimal(25);
-        recargoPorcentaje = new BigDecimal(10);
-        descuento_neto = subTotal.multiply(descuentoPorcentaje).divide(new BigDecimal(100));
-        recargo_neto = subTotal.multiply(recargoPorcentaje).divide(new BigDecimal(100));
+        descuentoPorcentaje = new BigDecimal("25");
+        recargoPorcentaje = BigDecimal.TEN;
+        descuento_neto = subTotal.multiply(descuentoPorcentaje).divide(CIEN);
+        recargo_neto = subTotal.multiply(recargoPorcentaje).divide(CIEN);
         indice = cantidades.length;
         iva_105_netoFactura = BigDecimal.ZERO;
         iva_21_netoFactura = BigDecimal.ZERO;
         for (int i = 0; i < indice; i++) {
-            if (ivaPorcentajeRenglones[i].compareTo(new BigDecimal(10.5)) == 0) {
-                iva_105_netoFactura = iva_105_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i].subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(new BigDecimal(100))))
-                        .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(new BigDecimal(100))))));
-            } else if (ivaPorcentajeRenglones[i].compareTo(new BigDecimal(21)) == 0) {
-                iva_21_netoFactura = iva_21_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i].subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(new BigDecimal(100))))
-                        .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(new BigDecimal(100))))));
+            if (ivaPorcentajeRenglones[i].compareTo(IVA_105) == 0) {
+                iva_105_netoFactura = iva_105_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i].subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(CIEN)))
+                        .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(CIEN)))));
+            } else if (ivaPorcentajeRenglones[i].compareTo(IVA_21) == 0) {
+                iva_21_netoFactura = iva_21_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i].subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(CIEN)))
+                        .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(CIEN)))));
             }
         }
         subTotalBruto = subTotal.add(recargo_neto).subtract(descuento_neto).subtract(iva_105_netoFactura.add(iva_21_netoFactura));
@@ -359,7 +363,7 @@ public class ReciboIntegrationTest {
                 + "&idTransportista=" + transportista.getId_Transportista(), facturaVentaX, FacturaVenta[].class);
         assertEquals(-16192.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         facturaVentaX = restTemplate.getForObject(apiPrefix + "/facturas/2", FacturaVentaDTO.class);
-        assertTrue("El total no es el esperado", facturaVentaX.getTotal().compareTo(new BigDecimal(10200)) == 0);
+        assertTrue("El total no es el esperado", facturaVentaX.getTotal().compareTo(new BigDecimal("10200")) == 0);
         ReciboDTO r = new ReciboDTO();
         restTemplate.postForObject(apiPrefix + "/recibos/clientes?"
                 + "idUsuario=1&idEmpresa=1&idCliente=1&idFormaDePago=1", r, ReciboDTO.class);
@@ -386,12 +390,12 @@ public class ReciboIntegrationTest {
         notaDebito.setFecha(new Date());
         List<RenglonNotaDebito> renglonesCalculados = Arrays.asList(restTemplate.getForObject(apiPrefix + "/notas/renglon/debito/recibo/2?monto=1000&ivaPorcentaje=21", RenglonNotaDebito[].class));
         notaDebito.setRenglonesNotaDebito(renglonesCalculados);
-        notaDebito.setIva105Neto(0);
-        notaDebito.setIva21Neto(210);
-        notaDebito.setMontoNoGravado(2192.5);
+        notaDebito.setIva105Neto(BigDecimal.ZERO);
+        notaDebito.setIva21Neto(new BigDecimal("210"));
+        notaDebito.setMontoNoGravado(new BigDecimal("2192.5"));
         notaDebito.setMotivo("Test alta nota debito - Cheque rechazado");
-        notaDebito.setSubTotalBruto(1000);
-        notaDebito.setTotal(3402.5);
+        notaDebito.setSubTotalBruto(new BigDecimal("1000"));
+        notaDebito.setTotal(new BigDecimal("3402.5"));
         notaDebito.setUsuario(credencial);
         notaDebito.setFacturaVenta(null);
         restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1/recibo/2", notaDebito, NotaDebito.class);

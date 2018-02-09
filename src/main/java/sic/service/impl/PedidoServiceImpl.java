@@ -50,6 +50,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
     private final PedidoRepository pedidoRepository;
     private final IFacturaService facturaService;    
+    private final static BigDecimal CIEN = new BigDecimal("100");
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
@@ -147,7 +148,7 @@ public class PedidoServiceImpl implements IPedidoService {
         BigDecimal porcentajeDescuento;
         BigDecimal totalActual = BigDecimal.ZERO;
         for (RenglonPedido renglonPedido : this.getRenglonesDelPedido(pedido.getId_Pedido())) {
-            porcentajeDescuento = BigDecimal.ONE.subtract(renglonPedido.getDescuento_porcentaje().divide(new BigDecimal(100)));
+            porcentajeDescuento = BigDecimal.ONE.subtract(renglonPedido.getDescuento_porcentaje().divide(CIEN));
             renglonPedido.setSubTotal(renglonPedido.getProducto().getPrecioLista().multiply(renglonPedido.getCantidad()).multiply(porcentajeDescuento));
             totalActual = totalActual.add(renglonPedido.getSubTotal());
         }
