@@ -2,7 +2,6 @@ package sic.integration;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,11 +10,9 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -364,7 +361,6 @@ public class CuentaCorrienteIntegrationTest {
     }
 
     @Test
-    @Ignore
     public void testCuentaCorrienteProveedor() {
         this.token = restTemplate.postForEntity(apiPrefix + "/login", new Credencial("test", "test"), String.class).getBody();
         Localidad localidad = new LocalidadBuilder().build();
@@ -517,7 +513,7 @@ public class CuentaCorrienteIntegrationTest {
                 + "&idEmpresa=" + empresa.getId_Empresa()
                 + "&idTransportista=" + transportista.getId_Transportista(), facturaCompraB, FacturaCompraDTO[].class);
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
-                restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", BigDecimal.class)
+                restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/proveedores/1/saldo", BigDecimal.class)
         .compareTo(new BigDecimal("-5992.5")) == 0);
         ReciboDTO r = new ReciboDTO();
         r.setMonto(5992.5);
@@ -530,7 +526,7 @@ public class CuentaCorrienteIntegrationTest {
                 .getBody().getContent();
         assertTrue("La factura se encuentra impaga", facturasRecuperadas.get(0).isPagada());
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
-                restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", BigDecimal.class)
+                restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/proveedores/1/saldo", BigDecimal.class)
         .compareTo(BigDecimal.ZERO) == 0);
         restTemplate.delete(apiPrefix + "/recibos/1");
         facturasRecuperadas = restTemplate
@@ -540,7 +536,7 @@ public class CuentaCorrienteIntegrationTest {
                 .getBody().getContent();
         assertFalse("La factura se encuentra pagada", facturasRecuperadas.get(0).isPagada());
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
-                restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", BigDecimal.class)
+                restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/proveedores/1/saldo", BigDecimal.class)
         .compareTo(new BigDecimal("-5992.5")) == 0);
         r = new ReciboDTO();
         r.setMonto(4992.5);
@@ -553,7 +549,7 @@ public class CuentaCorrienteIntegrationTest {
                 .getBody().getContent();
         assertFalse("La factura se encuentra pagada", facturasRecuperadas.get(0).isPagada());
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
-                restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", BigDecimal.class)
+                restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/proveedores/1/saldo", BigDecimal.class)
         .compareTo(new BigDecimal("-1000")) == 0);
         r = new ReciboDTO();
         r.setMonto(2000);
@@ -566,7 +562,7 @@ public class CuentaCorrienteIntegrationTest {
                 .getBody().getContent();
         assertTrue("La factura se encuentra impaga", facturasRecuperadas.get(0).isPagada());
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
-                restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", BigDecimal.class)
+                restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/proveedores/1/saldo", BigDecimal.class)
         .compareTo(new BigDecimal("1000")) == 0);
     }
 
