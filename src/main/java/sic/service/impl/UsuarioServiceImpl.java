@@ -19,6 +19,7 @@ import sic.util.Validator;
 import sic.repository.UsuarioRepository;
 
 @Service
+@Transactional
 public class UsuarioServiceImpl implements IUsuarioService {
 
     private final UsuarioRepository usuarioRepository;
@@ -31,7 +32,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
     @Override
     public Usuario getUsuarioPorId(Long idUsuario) {
-        Usuario usuario = usuarioRepository.findOne(idUsuario);
+        Usuario usuario = usuarioRepository.findById(idUsuario);
         if (usuario == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_usuario_no_existente"));
@@ -52,48 +53,75 @@ public class UsuarioServiceImpl implements IUsuarioService {
             
     @Override
     public List<Usuario> getUsuarios() {
-        return usuarioRepository.findAllByAndEliminadoOrderByNombreAsc(false);
+        return usuarioRepository.findAllByAndEliminadoOrderByUsernameAsc(false);
     }
 
     @Override
     public List<Usuario> getUsuariosPorRol(Rol rol) {
-        return usuarioRepository.findAllByAndEliminadoAndRolesOrderByNombreAsc(false, rol);
+        return usuarioRepository.findAllByAndEliminadoAndRolesOrderByUsernameAsc(false, rol);
     }
 
     @Override
     public List<Usuario> getUsuariosAdministradores() {
-        return usuarioRepository.findAllByAndRolesAndEliminadoOrderByNombreAsc(Rol.ADMINISTRADOR, false);
+        return usuarioRepository.findAllByAndRolesAndEliminadoOrderByUsernameAsc(Rol.ADMINISTRADOR, false);
     }
 
     private void validarOperacion(TipoDeOperacion operacion, Usuario usuario) {
-        //Requeridos
+        // Requeridos
         if (Validator.esVacio(usuario.getNombre())) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_usuario_vacio_nombre"));
         }
-        if (Validator.esVacio(usuario.getPassword())) {
+        if (Validator.esVacio(usuario.getApellido())) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_usuario_vacio_password"));
+                    .getString("mensaje_usuario_vacio_apellido"));
+        }
+        if (Validator.esVacio(usuario.getUsername())) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_usuario_vacio_username"));
+        }
+        if (Validator.esEmailValido(usuario.getEmail()) == false) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_usuario_invalido_email"));
         }
         if (usuario.getRoles().isEmpty()) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_usuario_no_selecciono_rol"));
         }
-        //Duplicados
-        // Username or email
-        Usuario usuarioDuplicado = usuarioRepository.findByUsernameOrEmailAndPasswordAndEliminado(usuario.getUsername(),
-                usuario.getUsername(), usuario.getPassword());
-        if (operacion.equals(TipoDeOperacion.ALTA) && usuarioDuplicado != null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_usuario_duplicado_nombre"));
-        }
-        if (operacion.equals(TipoDeOperacion.ACTUALIZACION)) {
-            if (usuarioDuplicado != null && usuarioDuplicado.getId_Usuario() != usuario.getId_Usuario()) {
+        if (operacion == TipoDeOperacion.ALTA) {
+            if (Validator.esVacio(usuario.getPassword())) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_usuario_duplicado_nombre"));
+                        .getString("mensaje_usuario_vacio_password"));
             }
         }
-        //Ultimo usuario administrador
+        // Duplicados
+        if (operacion == TipoDeOperacion.ALTA) {
+            // username
+            if (usuarioRepository.findByUsernameAndEliminado(usuario.getUsername(), false) != null) {
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_usuario_duplicado_username"));
+            }
+            // email
+            if (usuarioRepository.findByEmailAndEliminado(usuario.getEmail(), false) != null) {
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_usuario_duplicado_email"));
+            }
+        }
+        if (operacion == TipoDeOperacion.ACTUALIZACION) {
+            // username
+            Usuario usuarioGuardado = usuarioRepository.findByUsernameAndEliminado(usuario.getUsername(), false);
+            if (usuarioGuardado != null && usuarioGuardado.getId_Usuario() != usuario.getId_Usuario()) {
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_usuario_duplicado_username"));
+            }
+            // email
+            usuarioGuardado = usuarioRepository.findByEmailAndEliminado(usuario.getEmail(), false);
+            if (usuarioGuardado != null && usuarioGuardado.getId_Usuario() != usuario.getId_Usuario()) {
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_usuario_duplicado_email"));
+            }
+        }
+        // Ultimo usuario administrador
         if ((operacion == TipoDeOperacion.ACTUALIZACION && usuario.getRoles().contains(Rol.ADMINISTRADOR) == false)
                 || operacion == TipoDeOperacion.ELIMINACION && usuario.getRoles().contains(Rol.ADMINISTRADOR) == true) {
             List<Usuario> adminitradores = this.getUsuariosAdministradores();
@@ -107,18 +135,23 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
 
     @Override
-    @Transactional
     public void actualizar(Usuario usuario) {
         this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario);
-        Usuario usuarioDB = usuarioRepository.findOne(usuario.getId_Usuario());
-        if (!usuario.getPassword().equals(usuarioDB.getPassword())) {
+        if (usuario.getPassword().isEmpty()) {
+            Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
+            usuario.setPassword(usuarioGuardado.getPassword());
+        } else {
             usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
         }
         usuarioRepository.save(usuario);
     }
+    
+    @Override
+    public void actualizarToken(String token, long idUsuario) {
+        usuarioRepository.updateToken(token, idUsuario);
+    }
 
     @Override
-    @Transactional
     public Usuario guardar(Usuario usuario) {
         this.validarOperacion(TipoDeOperacion.ALTA, usuario);
         usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
@@ -128,7 +161,6 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
 
     @Override
-    @Transactional
     public void eliminar(long idUsuario) {
         Usuario usuario = this.getUsuarioPorId(idUsuario);
         if (usuario == null) {

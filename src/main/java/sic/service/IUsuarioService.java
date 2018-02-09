@@ -10,6 +10,8 @@ public interface IUsuarioService {
     Usuario getUsuarioPorId(Long idUsuario);
     
     void actualizar(Usuario usuario);
+    
+    void actualizarToken(String token, long idUsuario);
 
     void eliminar(long idUsuario);
     

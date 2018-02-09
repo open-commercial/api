@@ -59,8 +59,7 @@ public class AuthController {
                     .getString("mensaje_usuario_logInInvalido"), ex);
         }
         String token = this.generarToken(usuario.getId_Usuario());
-        usuario.setToken(token);
-        usuarioService.actualizar(usuario);
+        usuarioService.actualizarToken(token, usuario.getId_Usuario());        
         return token;
     }
     
@@ -83,10 +82,8 @@ public class AuthController {
             throw new UnauthorizedException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_error_token_vacio_invalido"), ex);
         }
-        long idUsuario = (int) claims.get("idUsuario");
-        Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
-        usuario.setToken("");
-        usuarioService.actualizar(usuario);
+        long idUsuario = (int) claims.get("idUsuario");        
+        usuarioService.actualizarToken("", idUsuario);
     }
     
 }
