@@ -85,7 +85,12 @@ public class FacturacionIntegrationTest {
     @Before
     public void setup() {
         String md5Test = "098f6bcd4621d373cade4e832627b4f6";
-        usuarioRepository.save(new UsuarioBuilder().withNombre("test").withPassword(md5Test).build());
+        usuarioRepository.save(new UsuarioBuilder().withUsername("test")
+                                                   .withPassword(md5Test)
+                                                   .withNombre("test")
+                                                   .withApellido("test")
+                                                   .withHabilitado(true)
+                                                   .build());
         // Interceptor de RestTemplate para JWT
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
         interceptors.add((ClientHttpRequestInterceptor) (HttpRequest request, byte[] body, ClientHttpRequestExecution execution) -> {
@@ -277,7 +282,7 @@ public class FacturacionIntegrationTest {
         restTemplate.postForObject(apiPrefix + "/facturas/venta?"
                 + "idCliente=" + cliente.getId_Cliente()
                 + "&idEmpresa=" + empresa.getId_Empresa()
-                + "&idUsuario=" + (restTemplate.getForObject(apiPrefix + "/usuarios/busqueda?nombre=test", Usuario.class)).getId_Usuario()
+                + "&idUsuario=" + credencial.getId_Usuario()
                 + "&idTransportista=" + transportista.getId_Transportista(), facturaVentaB, FacturaVenta[].class);
         List<FacturaVenta> facturasRecuperadas = restTemplate
                 .exchange(apiPrefix + "/facturas/venta/busqueda/criteria?idEmpresa=1&tipoFactura=B&nroSerie=0&nroFactura=1", HttpMethod.GET, null,
@@ -438,7 +443,7 @@ public class FacturacionIntegrationTest {
         pedido.setObservaciones("Pedido Test");        
         PedidoDTO pedidoRecuperado = restTemplate.postForObject(apiPrefix + "/pedidos?idEmpresa=" + empresa.getId_Empresa()
                 + "&idCliente=" + cliente.getId_Cliente()
-                + "&idUsuario=" + (restTemplate.getForObject(apiPrefix + "/usuarios/busqueda?nombre=test", Usuario.class)).getId_Usuario(), pedido, PedidoDTO.class);
+                + "&idUsuario=" + credencial.getId_Usuario(), pedido, PedidoDTO.class);
         assertEquals(pedido.getTotalEstimado(), pedidoRecuperado.getTotalEstimado(), 0);
         assertEquals(pedido.getObservaciones(), pedidoRecuperado.getObservaciones());
         assertEquals(pedidoRecuperado.getEstado(), EstadoPedido.ABIERTO);
@@ -487,7 +492,7 @@ public class FacturacionIntegrationTest {
                 + "&montos=" + total
                 + "&idCliente=" + cliente.getId_Cliente()
                 + "&idEmpresa=" + empresa.getId_Empresa()
-                + "&idUsuario=" + (restTemplate.getForObject(apiPrefix + "/usuarios/busqueda?nombre=test", Usuario.class)).getId_Usuario()
+                + "&idUsuario=" + credencial.getId_Usuario()
                 + "&idTransportista=" + transportista.getId_Transportista(), facturaVentaA, FacturaVenta[].class);
         List<FacturaVenta> facturasRecuperadas = restTemplate
                 .exchange(apiPrefix + "/facturas/venta/busqueda/criteria?"
@@ -542,7 +547,7 @@ public class FacturacionIntegrationTest {
         restTemplate.postForObject(apiPrefix + "/facturas/venta?idPedido=" + pedidoRecuperado.getId_Pedido()
                 + "&idCliente=" + cliente.getId_Cliente()
                 + "&idEmpresa=" + empresa.getId_Empresa()
-                + "&idUsuario=" + (restTemplate.getForObject(apiPrefix + "/usuarios/busqueda?nombre=test", Usuario.class)).getId_Usuario()
+                + "&idUsuario=" + credencial.getId_Usuario()
                 + "&idTransportista=" + transportista.getId_Transportista(), facturaVentaB, FacturaVenta[].class);
         facturasRecuperadas = restTemplate.exchange(apiPrefix + "/facturas/venta/busqueda/criteria?"
                 + "idEmpresa=" + empresa.getId_Empresa()

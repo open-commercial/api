@@ -90,7 +90,12 @@ public class CuentaCorrienteIntegrationTest {
     @Before
     public void setup() {
         String md5Test = "098f6bcd4621d373cade4e832627b4f6";
-        usuarioRepository.save(new UsuarioBuilder().withNombre("test").withPassword(md5Test).build());
+        usuarioRepository.save(new UsuarioBuilder().withUsername("test")
+                                                   .withPassword(md5Test)
+                                                   .withNombre("test")
+                                                   .withApellido("test")
+                                                   .withHabilitado(true)
+                                                   .build());
         // Interceptor de RestTemplate para JWT
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
         interceptors.add((ClientHttpRequestInterceptor) (HttpRequest request, byte[] body, ClientHttpRequestExecution execution) -> {
@@ -267,7 +272,7 @@ public class CuentaCorrienteIntegrationTest {
         restTemplate.postForObject(apiPrefix + "/facturas/venta?"
                 + "idCliente=" + cliente.getId_Cliente()
                 + "&idEmpresa=" + empresa.getId_Empresa()
-                + "&idUsuario=" + (restTemplate.getForObject(apiPrefix + "/usuarios/busqueda?nombre=test", Usuario.class)).getId_Usuario()
+                + "&idUsuario=" + credencial.getId_Usuario()
                 + "&idTransportista=" + transportista.getId_Transportista(), facturaVentaB, FacturaVenta[].class);
         assertEquals(-5992.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         List<FacturaVenta> facturasRecuperadas = restTemplate
