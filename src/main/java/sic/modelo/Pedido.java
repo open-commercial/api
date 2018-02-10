@@ -95,8 +95,8 @@ public class Pedido implements Serializable {
         return cliente.getRazonSocial();
     }
     
-    @JsonGetter("usuario")
-    public String getUsuario() {
+    @JsonGetter("nombreUsuario")
+    public String getNombreUsuario() {
         return usuario.getNombre() + " " + usuario.getApellido() + " (" + usuario.getUsername() + ")";
     }
 
