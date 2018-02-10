@@ -94,6 +94,11 @@ public class UsuarioServiceImpl implements IUsuarioService {
                         .getString("mensaje_usuario_vacio_password"));
             }
         }
+        // Username sin espacios en blanco
+        if (usuario.getUsername().contains(" ")) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_usuario_username_con_espacios"));
+        }
         // Duplicados
         if (operacion == TipoDeOperacion.ALTA) {
             // username
