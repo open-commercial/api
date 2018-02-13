@@ -100,7 +100,9 @@ public class RenglonCuentaCorriente implements Serializable {
     @Transient
     private Long CAE;
     
-    @Transient
-    private double saldo;
+    @Formula(value = "(SELECT SUM(r.monto) "
+            + "FROM rengloncuentacorriente r "
+            + "WHERE r.id_cuenta_corriente = id_cuenta_corriente AND r.fecha <= fecha)")
+    private Double saldo;
     
 }

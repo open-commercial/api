@@ -165,37 +165,37 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     @Override
     public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Pageable pageable) {
         CuentaCorriente cc = this.getCuentaCorrientePorID(idCuentaCorriente);
-        Page<RenglonCuentaCorriente> renglonesCuentaCorriente = renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageable);
-        if (!renglonesCuentaCorriente.getContent().isEmpty()) {
-            double saldoCC = this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente());
-            int tamanioDePaginaAuxiliar = pageable.getPageNumber() * pageable.getPageSize();
-            if (tamanioDePaginaAuxiliar != 0) {
-                Pageable pageableAuxiliar = new PageRequest(0, tamanioDePaginaAuxiliar, pageable.getSort());
-                Page<RenglonCuentaCorriente> renglonesCuentaCorrienteAuxiliar = renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageableAuxiliar);
-                double saldoPaginaSuperiores = 0;
-                for (RenglonCuentaCorriente rcc : renglonesCuentaCorrienteAuxiliar) {
-                    saldoPaginaSuperiores += rcc.getMonto();
-                }
-                saldoCC = saldoCC - saldoPaginaSuperiores;
-            }
-            for (RenglonCuentaCorriente rcc : renglonesCuentaCorriente) {
-                rcc.setSaldo(saldoCC);
-                saldoCC -= rcc.getMonto();
-                if (rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_B
-                        || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_X
-                        || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
-                    rcc.setCAE(facturaService.getCAEById(rcc.getIdMovimiento()));
-                }
-                if (rcc.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_A || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B
-                        || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_X || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_Y
-                        || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_A
-                        || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_B || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X
-                        || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_Y || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO) {
-                    rcc.setCAE(notaService.getCAEById(rcc.getIdMovimiento()));
-                }
-            }
-        }
-        return renglonesCuentaCorriente;
+//        Page<RenglonCuentaCorriente> renglonesCuentaCorriente = renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageable);
+//        if (!renglonesCuentaCorriente.getContent().isEmpty()) {
+//            double saldoCC = this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente());
+//            int tamanioDePaginaAuxiliar = pageable.getPageNumber() * pageable.getPageSize();
+//            if (tamanioDePaginaAuxiliar != 0) {
+//                Pageable pageableAuxiliar = new PageRequest(0, tamanioDePaginaAuxiliar, pageable.getSort());
+//                Page<RenglonCuentaCorriente> renglonesCuentaCorrienteAuxiliar = renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageableAuxiliar);
+//                double saldoPaginaSuperiores = 0;
+//                for (RenglonCuentaCorriente rcc : renglonesCuentaCorrienteAuxiliar) {
+//                    saldoPaginaSuperiores += rcc.getMonto();
+//                }
+//                saldoCC = saldoCC - saldoPaginaSuperiores;
+//            }
+//            for (RenglonCuentaCorriente rcc : renglonesCuentaCorriente) {
+//                rcc.setSaldo(saldoCC);
+//                saldoCC -= rcc.getMonto();
+//                if (rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_B
+//                        || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_X
+//                        || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
+//                    rcc.setCAE(facturaService.getCAEById(rcc.getIdMovimiento()));
+//                }
+//                if (rcc.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_A || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B
+//                        || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_X || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_Y
+//                        || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_A
+//                        || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_B || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X
+//                        || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_Y || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO) {
+//                    rcc.setCAE(notaService.getCAEById(rcc.getIdMovimiento()));
+//                }
+//            }
+//        }
+        return renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageable);
     }
     
     @Override
