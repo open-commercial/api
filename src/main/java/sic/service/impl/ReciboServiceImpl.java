@@ -100,6 +100,7 @@ public class ReciboServiceImpl implements IReciboService {
         recibo.setNumSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
         recibo.setNumRecibo(this.getSiguienteNumeroRecibo(recibo.getEmpresa().getId_Empresa(), configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip()));
         recibo.setFecha(new Date());
+        recibo.setSaldoSobrante(BigDecimal.ZERO);
         BigDecimal monto = recibo.getMonto();
         int i = 0;
         this.validarRecibo(recibo);

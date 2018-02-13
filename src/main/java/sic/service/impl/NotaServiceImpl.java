@@ -155,12 +155,12 @@ public class NotaServiceImpl implements INotaService {
     public BigDecimal getTotalPagado(Long idNota) {
         BigDecimal pagado = BigDecimal.ZERO;
         List<Pago> pagos = this.getPagosNota(idNota);
-        pagos.forEach((pago) -> {
-            pagado.add(pago.getMonto());
-        });
+        for(Pago p : pagos) {
+            pagado = pagado.add(p.getMonto());
+        }
         return pagado;
     }
-
+    
     @Override
     public List<Nota> getNotasPorFactura(Long idFactura) {
         return notaRepository.findAllByFacturaVentaAndEliminada((FacturaVenta) facturaService.getFacturaPorId(idFactura), false);
@@ -913,16 +913,16 @@ public class NotaServiceImpl implements INotaService {
         BigDecimal credito = notaCreditoRepository.getTotalNotasCreditoPorFacturaVenta(facturaVenta);
         return (credito == null) ? BigDecimal.ZERO : credito;
     }
-
+    
     @Override
     @Transactional
     public Nota actualizarNotaDebitoEstadoPago(NotaDebito notaDebito) {
-        if (this.getTotalPagado(notaDebito.getIdNota()).compareTo((notaDebito.getTotal().setScale(2, RoundingMode.HALF_UP))) > 0) {
+        if (this.getTotalPagado(notaDebito.getIdNota()).compareTo((notaDebito.getTotal().setScale(2, RoundingMode.HALF_UP))) >= 0) {
             notaDebito.setPagada(true);
         } else {
             notaDebito.setPagada(false);
         }
         return notaDebito;
     }
-
+    
 }
