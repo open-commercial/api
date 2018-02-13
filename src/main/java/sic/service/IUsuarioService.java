@@ -1,20 +1,21 @@
 package sic.service;
 
 import java.util.List;
+import sic.modelo.Credencial;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
 
 public interface IUsuarioService {
    
     Usuario getUsuarioPorId(Long idUsuario);
-
+    
     void actualizar(Usuario usuario);
+    
+    void actualizarToken(String token, long idUsuario);
 
     void eliminar(long idUsuario);
-
-    Usuario getUsuarioPorNombre(String nombre);
-
-    Usuario getUsuarioPorNombreContrasenia(String nombre, String contrasenia);
+    
+    Usuario autenticarUsuario(Credencial credencial);
 
     List<Usuario> getUsuarios();
     

@@ -24,23 +24,34 @@ import lombok.ToString;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"nombre"})
-@ToString(exclude = "roles")
+@EqualsAndHashCode(of = {"username", "email"})
+@ToString(exclude = {"roles", "password"})
 public class Usuario implements Serializable {
 
     @Id
     @GeneratedValue
     private long id_Usuario;
-
+    
     @Column(nullable = false)
-    private String nombre;
-
+    private String username;
+    
     @Column(nullable = false)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     
+    @Column(nullable = false)
+    private String nombre;
+    
+    @Column(nullable = false)
+    private String apellido;
+    
+    @Column(nullable = false)
+    private String email;
+    
     @Column(nullable = true)
     private String token;
+
+    private long passwordRecoveryKey;
     
     @ElementCollection(targetClass = Rol.class)
     @CollectionTable(name="rol", joinColumns = @JoinColumn(name = "id_Usuario"))
@@ -48,6 +59,8 @@ public class Usuario implements Serializable {
     @Column(name="nombre")
     private List<Rol> roles;
 
-    private boolean eliminado;
+    private boolean habilitado;
     
+    private boolean eliminado;
+        
 }

@@ -148,9 +148,9 @@ public class ClienteServiceImpl implements IClienteService {
     
     @Override
     public void validarOperacion(TipoDeOperacion operacion, Cliente cliente) {
-        //Entrada de Datos
-        if (!"".equals(cliente.getEmail())) {
-            if (!Validator.esEmailValido(cliente.getEmail())) {
+        //Entrada de Datos        
+        if (cliente.getEmail() != null && cliente.getEmail().equals("") == false) {
+            if (Validator.esEmailValido(cliente.getEmail()) == false) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_cliente_email_invalido"));
             }

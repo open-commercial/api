@@ -67,9 +67,11 @@ public class EmpresaServiceImpl implements IEmpresaService {
 
     private void validarOperacion(TipoDeOperacion operacion, Empresa empresa) {
         //Entrada de Datos
-        if (!Validator.esEmailValido(empresa.getEmail())) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_email_invalido"));
+        if (empresa.getEmail() != null && empresa.getEmail().equals("") == false) {
+            if (Validator.esEmailValido(empresa.getEmail()) == false) {
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_empresa_email_invalido"));
+            }
         }
         //Requeridos
         if (Validator.esVacio(empresa.getNombre())) {

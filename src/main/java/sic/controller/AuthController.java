@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import sic.modelo.Credencial;
 import sic.modelo.Usuario;
 import sic.service.IUsuarioService;
-import sic.util.Utilidades;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -36,12 +35,12 @@ public class AuthController {
     }
     
     private String generarToken(long idUsuario) {
-        //24hs desde la fecha actual para expiration
+        // 24hs desde la fecha actual para expiration
         Date today = new Date();
         Calendar c = Calendar.getInstance();
         c.setTime(today);
         c.add(Calendar.DATE, 1);
-        Date tomorrow = c.getTime();        
+        Date tomorrow = c.getTime();
         return Jwts.builder()
                    .setIssuedAt(today)
                    .setExpiration(tomorrow)
@@ -54,15 +53,13 @@ public class AuthController {
     public String login(@RequestBody Credencial credencial) {
         Usuario usuario;
         try {
-            usuario = usuarioService.getUsuarioPorNombreContrasenia(credencial.getUsername(),
-                Utilidades.encriptarConMD5(credencial.getPassword()));
+            usuario = usuarioService.autenticarUsuario(credencial);
         } catch (EntityNotFoundException ex) {
             throw new UnauthorizedException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_usuario_logInInvalido"), ex);
         }
         String token = this.generarToken(usuario.getId_Usuario());
-        usuario.setToken(token);
-        usuarioService.actualizar(usuario);
+        usuarioService.actualizarToken(token, usuario.getId_Usuario());        
         return token;
     }
     
@@ -85,10 +82,8 @@ public class AuthController {
             throw new UnauthorizedException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_error_token_vacio_invalido"), ex);
         }
-        long idUsuario = (int) claims.get("idUsuario");
-        Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
-        usuario.setToken("");
-        usuarioService.actualizar(usuario);
+        long idUsuario = (int) claims.get("idUsuario");        
+        usuarioService.actualizarToken("", idUsuario);
     }
     
 }

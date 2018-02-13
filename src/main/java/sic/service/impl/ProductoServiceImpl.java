@@ -376,7 +376,7 @@ public class ProductoServiceImpl implements IProductoService {
             for (int i = 0; i < longitudIds; i++) {
                 Producto p = this.getProductoPorId(idProducto[i]);
                 if (p.isIlimitado() == false && p.getCantidad().compareTo(cantidad[i]) < 0) {
-                    productos.put(cantidad[i], p);
+                    productos.put(p.getId_Producto(), cantidad[i]);
                 }
             }
         } else {

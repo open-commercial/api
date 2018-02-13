@@ -100,7 +100,7 @@ public class Pedido implements Serializable {
     
     @JsonGetter("nombreUsuario")
     public String getNombreUsuario() {
-        return usuario.getNombre();
+        return usuario.getNombre() + " " + usuario.getApellido() + " (" + usuario.getUsername() + ")";
     }
 
 }

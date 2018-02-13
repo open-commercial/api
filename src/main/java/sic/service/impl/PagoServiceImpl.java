@@ -154,15 +154,6 @@ public class PagoServiceImpl implements IPagoService {
         LOGGER.warn("El Pago " + pago + " se eliminó correctamente.");
     }
 
-    @Override
-    public void eliminarPagoDeCompra(long idPago) {
-        if (facturaService.getFacturaDelPago(idPago) instanceof FacturaCompra) {
-            eliminar(idPago);
-        } else {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_pago_no_factura_compra"));
-        }
-    }
 
     @Override
     public BigDecimal calcularTotalPagos(List<Pago> pagos) {
