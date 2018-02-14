@@ -146,8 +146,8 @@ public class CajaServiceImpl implements ICajaService {
     }
     
     @Override
-    public Caja getCajaPorId(Long id) {
-        Caja caja = cajaRepository.findOne(id);
+    public Caja getCajaPorId(Long idCaja) {
+        Caja caja = cajaRepository.findById(idCaja);
         if (caja == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_caja_no_existente"));
@@ -256,18 +256,16 @@ public class CajaServiceImpl implements ICajaService {
     public void cerrarCajas() {
         LOGGER.warn("Cierre automático de Cajas." + LocalDateTime.now());
         List<Empresa> empresas = this.empresaService.getEmpresas();
-        for (Empresa empresa : empresas) {
-            Caja ultimaCajaDeEmpresa = this.getUltimaCaja(empresa.getId_Empresa());
-            if ((ultimaCajaDeEmpresa != null) && (ultimaCajaDeEmpresa.getEstado() == EstadoCaja.ABIERTA)) {
-                LocalDate fechaActual = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), LocalDate.now().getDayOfMonth());
-                Calendar fechaHoraCaja = new GregorianCalendar();
-                fechaHoraCaja.setTime(ultimaCajaDeEmpresa.getFechaApertura());
-                LocalDate fechaCaja = LocalDate.of(fechaHoraCaja.get(Calendar.YEAR), fechaHoraCaja.get(Calendar.MONTH) + 1, fechaHoraCaja.get(Calendar.DAY_OF_MONTH));
-                if (fechaCaja.compareTo(fechaActual) < 0) {
-                    this.cerrarCaja(ultimaCajaDeEmpresa.getId_Caja(), this.getTotalCaja(ultimaCajaDeEmpresa, true), ultimaCajaDeEmpresa.getUsuarioAbreCaja().getId_Usuario(), true);
-                }
+        empresas.stream().map((empresa) -> this.getUltimaCaja(empresa.getId_Empresa())).filter((ultimaCajaDeEmpresa) -> 
+                ((ultimaCajaDeEmpresa != null) && (ultimaCajaDeEmpresa.getEstado() == EstadoCaja.ABIERTA))).forEachOrdered((ultimaCajaDeEmpresa) -> {
+            LocalDate fechaActual = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), LocalDate.now().getDayOfMonth());
+            Calendar fechaHoraCaja = new GregorianCalendar();
+            fechaHoraCaja.setTime(ultimaCajaDeEmpresa.getFechaApertura());
+            LocalDate fechaCaja = LocalDate.of(fechaHoraCaja.get(Calendar.YEAR), fechaHoraCaja.get(Calendar.MONTH) + 1, fechaHoraCaja.get(Calendar.DAY_OF_MONTH));
+            if (fechaCaja.compareTo(fechaActual) < 0) {
+                this.cerrarCaja(ultimaCajaDeEmpresa.getId_Caja(), this.getTotalCaja(ultimaCajaDeEmpresa, true), ultimaCajaDeEmpresa.getUsuarioAbreCaja().getId_Usuario(), true);
             }
-        }
+        });
     }
     
     @Override
@@ -278,7 +276,7 @@ public class CajaServiceImpl implements ICajaService {
             if (soloAfectaCaja && fp.isAfectaCaja()) {
                 total = total.add(this.getTotalMovimientosPorFormaDePago(caja, fp));
             } else if (!soloAfectaCaja) {
-                total = total.subtract(this.getTotalMovimientosPorFormaDePago(caja, fp));
+                total = total.add(this.getTotalMovimientosPorFormaDePago(caja, fp));
             }
         }
         return total;

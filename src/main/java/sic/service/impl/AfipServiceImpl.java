@@ -201,7 +201,7 @@ public class AfipServiceImpl implements IAfipService {
             case FACTURA_B:
                 cabecera.setCbteTipo(6);
                 // menor a $1000, si DocTipo = 99 DocNro debe ser igual a 0 (simula un consumidor final ???)
-                if (comprobante.getTotal().doubleValue() < 1000) {
+                if (comprobante.getTotal().compareTo(new BigDecimal("1000")) < 0) { 
                     detalle.setDocTipo(99);
                     detalle.setDocNro(0);
                 } else {
@@ -215,7 +215,7 @@ public class AfipServiceImpl implements IAfipService {
             case NOTA_DEBITO_B:
                 cabecera.setCbteTipo(7);
                 // menor a $1000, si DocTipo = 99 DocNro debe ser igual a 0 (simula un consumidor final ???)
-                if (comprobante.getTotal().doubleValue() < 1000) {
+                if (comprobante.getTotal().compareTo(new BigDecimal("1000")) < 0) {
                     detalle.setDocTipo(99);
                     detalle.setDocNro(0);
                 } else {
@@ -229,7 +229,7 @@ public class AfipServiceImpl implements IAfipService {
             case NOTA_CREDITO_B:
                 cabecera.setCbteTipo(8);
                 // menor a $1000, si DocTipo = 99 DocNro debe ser igual a 0 (simula un consumidor final ???)
-                if (comprobante.getTotal().doubleValue() < 1000) {
+                if (comprobante.getTotal().compareTo(new BigDecimal("1000")) < 0) {
                     detalle.setDocTipo(99);
                     detalle.setDocNro(0);
                 } else {
