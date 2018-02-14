@@ -2,6 +2,7 @@ package sic.integration;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -239,18 +240,18 @@ public class ReciboIntegrationTest {
         }
         BigDecimal descuentoPorcentaje = new BigDecimal("25");
         BigDecimal recargoPorcentaje = BigDecimal.TEN;
-        BigDecimal descuento_neto = subTotal.multiply(descuentoPorcentaje).divide(CIEN);
-        BigDecimal recargo_neto = subTotal.multiply(recargoPorcentaje).divide(CIEN);
+        BigDecimal descuento_neto = subTotal.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+        BigDecimal recargo_neto = subTotal.multiply(recargoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
         indice = cantidades.length;
         BigDecimal iva_105_netoFactura = BigDecimal.ZERO;
         BigDecimal iva_21_netoFactura = BigDecimal.ZERO;
         for (int i = 0; i < indice; i++) {
             if (ivaPorcentajeRenglones[i].compareTo(IVA_105) == 0) {
-                iva_105_netoFactura = iva_105_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i].subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(CIEN)))
-                        .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(CIEN)))));
+                iva_105_netoFactura = iva_105_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i].subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
+                        .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
             } else if (ivaPorcentajeRenglones[i].compareTo(IVA_21) == 0) {
-                iva_21_netoFactura = iva_21_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i].subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(CIEN)))
-                        .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(CIEN)))));
+                iva_21_netoFactura = iva_21_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i].subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
+                        .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
             }
         }
         BigDecimal subTotalBruto = subTotal.add(recargo_neto).subtract(descuento_neto).subtract(iva_105_netoFactura.add(iva_21_netoFactura));
@@ -333,18 +334,18 @@ public class ReciboIntegrationTest {
         }
         descuentoPorcentaje = new BigDecimal("25");
         recargoPorcentaje = BigDecimal.TEN;
-        descuento_neto = subTotal.multiply(descuentoPorcentaje).divide(CIEN);
-        recargo_neto = subTotal.multiply(recargoPorcentaje).divide(CIEN);
+        descuento_neto = subTotal.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+        recargo_neto = subTotal.multiply(recargoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
         indice = cantidades.length;
         iva_105_netoFactura = BigDecimal.ZERO;
         iva_21_netoFactura = BigDecimal.ZERO;
         for (int i = 0; i < indice; i++) {
             if (ivaPorcentajeRenglones[i].compareTo(IVA_105) == 0) {
-                iva_105_netoFactura = iva_105_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i].subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(CIEN)))
-                        .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(CIEN)))));
+                iva_105_netoFactura = iva_105_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i].subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
+                        .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
             } else if (ivaPorcentajeRenglones[i].compareTo(IVA_21) == 0) {
-                iva_21_netoFactura = iva_21_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i].subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(CIEN)))
-                        .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(CIEN)))));
+                iva_21_netoFactura = iva_21_netoFactura.add(cantidades[i].multiply(ivaNetoRenglones[i].subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
+                        .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
             }
         }
         subTotalBruto = subTotal.add(recargo_neto).subtract(descuento_neto).subtract(iva_105_netoFactura.add(iva_21_netoFactura));

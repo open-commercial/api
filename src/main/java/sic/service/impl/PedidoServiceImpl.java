@@ -6,6 +6,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -148,7 +149,7 @@ public class PedidoServiceImpl implements IPedidoService {
         BigDecimal porcentajeDescuento;
         BigDecimal totalActual = BigDecimal.ZERO;
         for (RenglonPedido renglonPedido : this.getRenglonesDelPedido(pedido.getId_Pedido())) {
-            porcentajeDescuento = BigDecimal.ONE.subtract(renglonPedido.getDescuento_porcentaje().divide(CIEN));
+            porcentajeDescuento = BigDecimal.ONE.subtract(renglonPedido.getDescuento_porcentaje().divide(CIEN, 15, RoundingMode.HALF_UP));
             renglonPedido.setSubTotal(renglonPedido.getProducto().getPrecioLista().multiply(renglonPedido.getCantidad()).multiply(porcentajeDescuento));
             totalActual = totalActual.add(renglonPedido.getSubTotal());
         }

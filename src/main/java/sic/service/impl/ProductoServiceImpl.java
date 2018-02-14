@@ -48,6 +48,7 @@ public class ProductoServiceImpl implements IProductoService {
 
     private final ProductoRepository productoRepository;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final static BigDecimal CIEN = new BigDecimal("100");
 
     @Autowired
     public ProductoServiceImpl(ProductoRepository productoRepository) {
@@ -415,43 +416,43 @@ public class ProductoServiceImpl implements IProductoService {
         }
         BigDecimal resultado;
         if (ascendente == false) {
-            resultado = pvp.subtract(precioCosto).divide(precioCosto, 16, RoundingMode.HALF_UP).multiply(new BigDecimal(100)); 
+            resultado = pvp.subtract(precioCosto).divide(precioCosto, 15, RoundingMode.HALF_UP).multiply(CIEN); 
         } else if (precioDeListaAnterior.compareTo(BigDecimal.ZERO) == 0 || precioCosto.compareTo(BigDecimal.ZERO) == 0) {
             return BigDecimal.ZERO;
         } else {
             resultado = precioDeListaNuevo;
-            BigDecimal porcentajeIncremento = precioDeListaNuevo.divide(precioDeListaAnterior);
-            resultado = resultado.subtract(porcentajeIncremento.multiply(impInternoPorcentaje.divide(new BigDecimal(100)).multiply(pvp)));
-            resultado = resultado.subtract(porcentajeIncremento.multiply(ivaPorcentaje.divide(new BigDecimal(100)).multiply(pvp)));
-            resultado = resultado.subtract(precioCosto).multiply(new BigDecimal(100)).divide(precioCosto);
+            BigDecimal porcentajeIncremento = precioDeListaNuevo.divide(precioDeListaAnterior, 15, RoundingMode.HALF_UP);
+            resultado = resultado.subtract(porcentajeIncremento.multiply(impInternoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP).multiply(pvp)));
+            resultado = resultado.subtract(porcentajeIncremento.multiply(ivaPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP).multiply(pvp)));
+            resultado = resultado.subtract(precioCosto).multiply(CIEN).divide(precioCosto, 15, RoundingMode.HALF_UP);
         }
         return resultado;
     }
 
     @Override
     public BigDecimal calcularGanancia_Neto(BigDecimal precioCosto, BigDecimal ganancia_porcentaje) {
-        return precioCosto.multiply(ganancia_porcentaje).divide(new BigDecimal(100));
+        return precioCosto.multiply(ganancia_porcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
     }
 
     @Override
     public BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal ganancia_porcentaje) {
-        return precioCosto.add(precioCosto.multiply(ganancia_porcentaje.divide(new BigDecimal(100))));
+        return precioCosto.add(precioCosto.multiply(ganancia_porcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)));
     }
 
     @Override
     public BigDecimal calcularIVA_Neto(BigDecimal pvp, BigDecimal iva_porcentaje) {
-        return pvp.multiply(iva_porcentaje).divide(new BigDecimal(100));
+        return pvp.multiply(iva_porcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
     }
 
     @Override
     public BigDecimal calcularImpInterno_Neto(BigDecimal pvp, BigDecimal impInterno_porcentaje) {
-        return pvp.multiply(impInterno_porcentaje).divide(new BigDecimal(100));
+        return pvp.multiply(impInterno_porcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
     }
 
     @Override
     public BigDecimal calcularPrecioLista(BigDecimal PVP, BigDecimal iva_porcentaje, BigDecimal impInterno_porcentaje) {
-        BigDecimal resulIVA = PVP.multiply(iva_porcentaje.divide(new BigDecimal(100)));
-        BigDecimal resultImpInterno = PVP.multiply(impInterno_porcentaje.divide(new BigDecimal(100)));
+        BigDecimal resulIVA = PVP.multiply(iva_porcentaje.divide(CIEN, 15, RoundingMode.HALF_UP));
+        BigDecimal resultImpInterno = PVP.multiply(impInterno_porcentaje.divide(CIEN));
         return PVP.add(resulIVA).add(resultImpInterno);
     }
 

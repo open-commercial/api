@@ -17,7 +17,7 @@ public class ProductoServiceImplTest {
     public void shouldCalcularGanancia_Porcentaje() {
         double precioCosto = 12.34;
         double pvp = 23.45;
-        double resultadoEsperado = 90.03241491085899;
+        double resultadoEsperado = 90.032414910859;
         double resultadoObtenido = productoService.calcularGanancia_Porcentaje(null ,null, new BigDecimal(pvp), null, null, new BigDecimal(precioCosto), false).doubleValue();
         assertEquals(resultadoEsperado, resultadoObtenido, 0);
     }

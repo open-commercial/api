@@ -393,7 +393,7 @@ public class FacturaServiceImplTest {
         }
         assertTrue("El impuesto interno neto no es el esperado",
                 facturaService.calcularImpInternoNeto(TipoDeComprobante.FACTURA_A, new BigDecimal(9.104), new BigDecimal(22.008), importes, impuestoPorcentajes)
-                        .doubleValue() == 3.3197328185647996);
+                        .doubleValue() == 3.3197328185648);
     }
 
     @Test

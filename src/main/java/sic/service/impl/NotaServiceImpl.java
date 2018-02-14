@@ -788,7 +788,7 @@ public class NotaServiceImpl implements INotaService {
         BigDecimal ivaNeto = BigDecimal.ZERO;
         if (nota instanceof NotaCredito) {
             for (RenglonNotaCredito r : this.getRenglonesDeNotaCredito(nota.getIdNota())) {
-                ivaNeto =  ivaNeto.add(r.getIvaPorcentaje().divide(CIEN).multiply(r.getImporte()));
+                ivaNeto =  ivaNeto.add(r.getIvaPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP).multiply(r.getImporte()));
             }
         } else {
             for (RenglonNotaCredito r : this.getRenglonesDeNotaCredito(nota.getIdNota())) {
@@ -817,12 +817,12 @@ public class NotaServiceImpl implements INotaService {
                 renglonNota.setCantidad(cantidad[i]);
                 renglonNota.setPrecioUnitario(renglonFactura.getPrecioUnitario());
                 renglonNota.setDescuentoPorcentaje(renglonFactura.getDescuento_porcentaje());
-                renglonNota.setDescuentoNeto(renglonFactura.getDescuento_porcentaje().divide(CIEN).multiply(renglonNota.getPrecioUnitario()));
+                renglonNota.setDescuentoNeto(renglonFactura.getDescuento_porcentaje().divide(CIEN, 15, RoundingMode.HALF_UP).multiply(renglonNota.getPrecioUnitario()));
                 renglonNota.setGananciaPorcentaje(renglonFactura.getGanancia_porcentaje());
-                renglonNota.getGananciaPorcentaje().divide(CIEN).multiply(renglonNota.getPrecioUnitario());
+                renglonNota.getGananciaPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP).multiply(renglonNota.getPrecioUnitario());
                 renglonNota.setIvaPorcentaje(renglonFactura.getIva_porcentaje());
                 if (tipo.equals(TipoDeComprobante.FACTURA_Y)) {
-                    renglonNota.setIvaPorcentaje(renglonFactura.getIva_porcentaje().divide(new BigDecimal(2)));
+                    renglonNota.setIvaPorcentaje(renglonFactura.getIva_porcentaje().divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP));
                 }
                 renglonNota.setIvaNeto((tipo == TipoDeComprobante.FACTURA_A || tipo == TipoDeComprobante.FACTURA_B || tipo == TipoDeComprobante.PRESUPUESTO) ? renglonFactura.getIva_neto() : BigDecimal.ZERO);
                 renglonNota.setImporte(renglonNota.getPrecioUnitario().multiply(cantidad[i]));
@@ -856,7 +856,7 @@ public class NotaServiceImpl implements INotaService {
         renglonNota.setDescripcion("Gasto Administrativo");
         renglonNota.setMonto(monto);
         renglonNota.setIvaPorcentaje(ivaPorcentaje);
-        renglonNota.setIvaNeto(monto.multiply(ivaPorcentaje.divide(CIEN, 16, RoundingMode.HALF_UP)));
+        renglonNota.setIvaNeto(monto.multiply(ivaPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)));
         renglonNota.setImporteBruto(monto);
         renglonNota.setImporteNeto(this.calcularImporteRenglon(renglonNota.getIvaNeto(), renglonNota.getImporteBruto(), BigDecimal.ONE));
         renglonesNota.add(renglonNota);
