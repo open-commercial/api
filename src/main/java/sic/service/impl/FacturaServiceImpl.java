@@ -1340,11 +1340,11 @@ public class FacturaServiceImpl implements IFacturaService {
             if (numeroDeRenglon == indices[renglonMarcado]) {
                 BigDecimal cantidad = renglon.getCantidad();
                 if (cantidad.compareTo(BigDecimal.ONE) >= 0) {
-                    if ((cantidad.remainder(BigDecimal.ONE) != BigDecimal.ZERO) || cantidad.remainder(new BigDecimal(2)) == BigDecimal.ZERO) {
+                    if ((cantidad.remainder(BigDecimal.ONE) != BigDecimal.ZERO) || cantidad.remainder(new BigDecimal("2")) == BigDecimal.ZERO) {
                         cantidadProductosRenglonFacturaSinIVA = cantidad.divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP);
                         cantidadProductosRenglonFacturaSinIVA
                                 = cantidadProductosRenglonFacturaSinIVA.subtract(cantidadProductosRenglonFacturaSinIVA.remainder(BigDecimal.ONE));
-                    } else if (cantidad.remainder(new BigDecimal(2)).compareTo(BigDecimal.ZERO) != 0) {
+                    } else if (cantidad.remainder(new BigDecimal("2")).compareTo(BigDecimal.ZERO) != 0) {
                         cantidadProductosRenglonFacturaSinIVA = cantidad.subtract(cantidad.divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP).setScale(0, RoundingMode.CEILING));
                     }
                 } else {
@@ -1376,8 +1376,8 @@ public class FacturaServiceImpl implements IFacturaService {
                 BigDecimal cantidad = renglon.getCantidad();
                 if (cantidad.compareTo(BigDecimal.ONE) == -1 || cantidad.compareTo(BigDecimal.ONE) == 0) { //if (cantidad < 1 || cantidad == 1) {
                     cantidadProductosRenglonFacturaConIVA = cantidad;
-                } else if ((cantidad.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) != 0) || renglon.getCantidad().remainder(new BigDecimal(2)).compareTo(BigDecimal.ZERO) == 0) {
-                    cantidadProductosRenglonFacturaConIVA = renglon.getCantidad().subtract(new BigDecimal(2));
+                } else if ((cantidad.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) != 0) || renglon.getCantidad().remainder(new BigDecimal("2")).compareTo(BigDecimal.ZERO) == 0) {
+                    cantidadProductosRenglonFacturaConIVA = renglon.getCantidad().subtract(new BigDecimal("2"));
                 } else if (renglon.getCantidad().remainder(new BigDecimal("2")).compareTo(BigDecimal.ZERO) != 0) {
                     cantidadProductosRenglonFacturaConIVA = renglon.getCantidad().divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP).setScale(0, RoundingMode.CEILING);
                 }

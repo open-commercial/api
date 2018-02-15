@@ -15,56 +15,56 @@ public class ProductoServiceImplTest {
     
     @Test
     public void shouldCalcularGanancia_Porcentaje() {
-        double precioCosto = 12.34;
-        double pvp = 23.45;
-        double resultadoEsperado = 90.032414910859;
-        double resultadoObtenido = productoService.calcularGanancia_Porcentaje(null ,null, new BigDecimal(pvp), null, null, new BigDecimal(precioCosto), false).doubleValue();
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal precioCosto = new BigDecimal("12.34");
+        BigDecimal pvp = new BigDecimal("23.45");
+        BigDecimal resultadoEsperado = new BigDecimal("90.032414910859000");
+        BigDecimal resultadoObtenido = productoService.calcularGanancia_Porcentaje(null ,null, pvp, null, null, precioCosto, false);
+        assertEquals(resultadoEsperado, resultadoObtenido);
     }
     
     @Test
     public void shouldCalcularGanancia_Neto() {
-        double precioCosto = 12.34;
-        double gananciaPorcentaje = 100;
-        double resultadoEsperado = 12.34;
-        double resultadoObtenido = productoService.calcularGanancia_Neto(new BigDecimal(precioCosto), new BigDecimal(gananciaPorcentaje)).doubleValue();
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal precioCosto = new BigDecimal("12.34");
+        BigDecimal gananciaPorcentaje = new BigDecimal("100");
+        BigDecimal resultadoEsperado = new BigDecimal("12.340000000000000");
+        BigDecimal resultadoObtenido = productoService.calcularGanancia_Neto(precioCosto, gananciaPorcentaje);
+        assertEquals(resultadoEsperado, resultadoObtenido);
     }
     
     @Test
     public void shouldcalcularCalcularPVP() {
-        double precioCosto = 12.34;
-        double gananciaPorcentaje = 100;
-        double resultadoEsperado = 24.68;
-        double resultadoObtenido = productoService.calcularPVP(new BigDecimal(precioCosto), new BigDecimal(gananciaPorcentaje)).doubleValue();
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal precioCosto = new BigDecimal("12.34");
+        BigDecimal gananciaPorcentaje = new BigDecimal("100");
+        BigDecimal resultadoEsperado = new BigDecimal("24.68000000000000000");
+        BigDecimal resultadoObtenido = productoService.calcularPVP(precioCosto, gananciaPorcentaje);
+        assertEquals(resultadoEsperado, resultadoObtenido);
     }
     
     @Test
     public void shouldCalcularIVA_Neto() {
-        double pvp = 24.68;
-        double ivaPorcentaje = 21;
-        double resultadoEsperado = 5.1828;
-        double resultadoObtenido = productoService.calcularIVA_Neto(new BigDecimal(pvp), new BigDecimal(ivaPorcentaje)).doubleValue();
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal pvp = new BigDecimal("24.68");
+        BigDecimal ivaPorcentaje = new BigDecimal("21");
+        BigDecimal resultadoEsperado = new BigDecimal("5.182800000000000");
+        BigDecimal resultadoObtenido = productoService.calcularIVA_Neto(pvp, ivaPorcentaje);
+        assertEquals(resultadoEsperado, resultadoObtenido);
     }
     
     @Test
     public void shouldCalcularImpInterno_Neto() {
-        double pvp = 24.68;
-        double impuestoInternoPorcentaje = 10;
-        double resultadoEsperado = 2.468;
-        double resultadoObtenido = productoService.calcularImpInterno_Neto(new BigDecimal(pvp), new BigDecimal(impuestoInternoPorcentaje)).doubleValue();
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal pvp = new BigDecimal("24.68");
+        BigDecimal impuestoInternoPorcentaje = new BigDecimal("10");
+        BigDecimal resultadoEsperado = new BigDecimal("2.468000000000000");
+        BigDecimal resultadoObtenido = productoService.calcularImpInterno_Neto(pvp, impuestoInternoPorcentaje);
+        assertEquals(resultadoEsperado, resultadoObtenido);
     }
     
     @Test
     public void shouldCalcularPrecioLista() {
-        double pvp = 24.68;
-        double ivaPorcentaje = 21;
-        double impuestoInternoPorcentaje = 10;
-        double resultadoEsperado = 32.330799999999996;
-        double resultadoObtenido = productoService.calcularPrecioLista(new BigDecimal(pvp), new BigDecimal(ivaPorcentaje), new BigDecimal(impuestoInternoPorcentaje)).doubleValue();
-        assertEquals(resultadoEsperado, resultadoObtenido, 0);
+        BigDecimal pvp = new BigDecimal("24.68");
+        BigDecimal ivaPorcentaje = new BigDecimal("21");
+        BigDecimal impuestoInternoPorcentaje = new BigDecimal("10");
+        BigDecimal resultadoEsperado = new BigDecimal("32.33080000000000000");
+        BigDecimal resultadoObtenido = productoService.calcularPrecioLista(pvp, ivaPorcentaje, impuestoInternoPorcentaje);
+        assertEquals(resultadoEsperado, resultadoObtenido);
     }    
 }
