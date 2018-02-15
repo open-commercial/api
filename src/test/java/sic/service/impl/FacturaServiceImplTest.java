@@ -205,18 +205,18 @@ public class FacturaServiceImplTest {
         Medida medida = Mockito.mock(Medida.class);
         when(producto.getMedida()).thenReturn(medida);
         when(producto.getPrecioVentaPublico()).thenReturn(BigDecimal.ONE);
-        when(producto.getIva_porcentaje()).thenReturn(new BigDecimal(21.00));
+        when(producto.getIva_porcentaje()).thenReturn(new BigDecimal("21.00"));
         when(producto.getImpuestoInterno_porcentaje()).thenReturn(BigDecimal.ZERO);
         when(producto.getPrecioLista()).thenReturn(BigDecimal.ONE);
         when(productoService.getProductoPorId(1L)).thenReturn(producto);
         when(renglon1.getId_ProductoItem()).thenReturn(1L);
-        when(renglon1.getIva_neto()).thenReturn(new BigDecimal(21));
-        when(renglon1.getDescuento_porcentaje()).thenReturn(new BigDecimal(0));
-        when(renglon2.getDescuento_porcentaje()).thenReturn(new BigDecimal(0));
+        when(renglon1.getIva_neto()).thenReturn(new BigDecimal("21"));
+        when(renglon1.getDescuento_porcentaje()).thenReturn(BigDecimal.ZERO);
+        when(renglon2.getDescuento_porcentaje()).thenReturn(BigDecimal.ZERO);
         when(renglon2.getId_ProductoItem()).thenReturn(1L);
-        when(renglon2.getIva_neto()).thenReturn(new BigDecimal(10.5));
-        when(renglon1.getCantidad()).thenReturn(new BigDecimal(4.00));
-        when(renglon2.getCantidad()).thenReturn(new BigDecimal(7.00));
+        when(renglon2.getIva_neto()).thenReturn(new BigDecimal("10.5"));
+        when(renglon1.getCantidad()).thenReturn(new BigDecimal("4.00"));
+        when(renglon2.getCantidad()).thenReturn(new BigDecimal("7.00"));
         List<RenglonFactura> renglones = new ArrayList<>();
         renglones.add(renglon1);
         renglones.add(renglon2);
@@ -240,21 +240,21 @@ public class FacturaServiceImplTest {
         BigDecimal cantidadRenglon1SegundaFactura = result.get(1).getRenglones().get(0).getCantidad();
         BigDecimal cantidadRenglon2SegundaFactura = result.get(1).getRenglones().get(1).getCantidad();
         assertEquals(cantidadDeFacturasEsperadas, result.size());
-        assertTrue("Las cantidades no son las esperadas", cantidadRenglon1SegundaFactura.compareTo(new BigDecimal(2)) == 0);
-        assertTrue("Las cantidades no son las esperadas", cantidadRenglon2SegundaFactura.compareTo(new BigDecimal(4)) == 0);
-        assertTrue("Las cantidades no son las esperadas", cantidadRenglon1PrimeraFactura.compareTo(new BigDecimal(2)) == 0);
-        assertTrue("Las cantidades no son las esperadas", cantidadRenglon2PrimeraFactura.compareTo(new BigDecimal(3)) == 0);
+        assertTrue("Las cantidades no son las esperadas", cantidadRenglon1SegundaFactura.compareTo(new BigDecimal("2")) == 0);
+        assertTrue("Las cantidades no son las esperadas", cantidadRenglon2SegundaFactura.compareTo(new BigDecimal("4")) == 0);
+        assertTrue("Las cantidades no son las esperadas", cantidadRenglon1PrimeraFactura.compareTo(new BigDecimal("2")) == 0);
+        assertTrue("Las cantidades no son las esperadas", cantidadRenglon2PrimeraFactura.compareTo(new BigDecimal("3")) == 0);
     }
 
     //Calculos
     @Test
     public void shouldCalcularSubTotal() {
         RenglonFactura renglon1 = new RenglonFactura();
-        renglon1.setImporte(new BigDecimal(5.601));
+        renglon1.setImporte(new BigDecimal("5.601"));
         RenglonFactura renglon2 = new RenglonFactura();
-        renglon2.setImporte(new BigDecimal(18.052));
+        renglon2.setImporte(new BigDecimal("18.052"));
         RenglonFactura renglon3 = new RenglonFactura();
-        renglon3.setImporte(new BigDecimal(10.011));
+        renglon3.setImporte(new BigDecimal("10.011"));
         List<RenglonFactura> renglones = new ArrayList<>();
         renglones.add(renglon1);
         renglones.add(renglon2);
@@ -271,45 +271,45 @@ public class FacturaServiceImplTest {
 
     @Test
     public void shouldCacularDescuentoNeto() {
-        assertTrue("El descuento neto no es el esperado", facturaService.calcularDescuentoNeto(new BigDecimal(78.255), new BigDecimal(15.045))
-                .doubleValue() == 11.7734647499999993);
+        assertTrue("El descuento neto no es el esperado", facturaService.calcularDescuentoNeto(new BigDecimal("78.255"), new BigDecimal("15.045"))
+                .doubleValue() == 11.773464750000000);
     }
 
     @Test
     public void shouldCalcularRecargoNeto() {
         assertTrue("El recargo neto no es el esperado", 
-                facturaService.calcularRecargoNeto(new BigDecimal(78.122), new BigDecimal(15.502))
+                facturaService.calcularRecargoNeto(new BigDecimal("78.122"), new BigDecimal("15.502"))
                 .doubleValue() == 12.11047244);
     }
 
     @Test
     public void shouldCalcularSubTotalBrutoFacturaA() {
         assertTrue("El sub total bruto no es el esperado",
-                facturaService.calcularSubTotalBruto(TipoDeComprobante.FACTURA_A, new BigDecimal(225.025), new BigDecimal(10.454), new BigDecimal(15.002), BigDecimal.ZERO, BigDecimal.ZERO)
+                facturaService.calcularSubTotalBruto(TipoDeComprobante.FACTURA_A, new BigDecimal("225.025"), new BigDecimal("10.454"), new BigDecimal("15.002"), BigDecimal.ZERO, BigDecimal.ZERO)
                         .doubleValue() == 220.477);
     }
 
     @Test
     public void shouldCalcularSubTotalBrutoFacturaB() {
         assertTrue("El sub total bruto no es el esperado",
-                facturaService.calcularSubTotalBruto(TipoDeComprobante.FACTURA_B, new BigDecimal(1205.5), new BigDecimal(80.5), new BigDecimal(111.05), new BigDecimal(253.155), new BigDecimal(126.5775))
+                facturaService.calcularSubTotalBruto(TipoDeComprobante.FACTURA_B, new BigDecimal("1205.5"), new BigDecimal("80.5"), new BigDecimal("111.05"), new BigDecimal("253.155"), new BigDecimal("126.5775"))
                         .doubleValue() == 795.2175);
     }
 
     @Test
     public void shouldCalcularIva_netoWhenLaFacturaEsA() {
         RenglonFactura renglon1 = new RenglonFactura();
-        renglon1.setCantidad(new BigDecimal(12));
-        renglon1.setIva_porcentaje(new BigDecimal(21));
-        renglon1.setIva_neto(new BigDecimal(125.5));
+        renglon1.setCantidad(new BigDecimal("12"));
+        renglon1.setIva_porcentaje(new BigDecimal("21"));
+        renglon1.setIva_neto(new BigDecimal("125.5"));
         RenglonFactura renglon2 = new RenglonFactura();
-        renglon2.setCantidad(new BigDecimal(8));
-        renglon2.setIva_porcentaje(new BigDecimal(21));
-        renglon2.setIva_neto(new BigDecimal(240.2));
+        renglon2.setCantidad(new BigDecimal("8"));
+        renglon2.setIva_porcentaje(new BigDecimal("21"));
+        renglon2.setIva_neto(new BigDecimal("240.2"));
         RenglonFactura renglon3 = new RenglonFactura();
-        renglon3.setCantidad(new BigDecimal(4));
-        renglon3.setIva_porcentaje(new BigDecimal(10.5));
-        renglon3.setIva_neto(new BigDecimal(110.5));
+        renglon3.setCantidad(new BigDecimal("4"));
+        renglon3.setIva_porcentaje(new BigDecimal("10.5"));
+        renglon3.setIva_neto(new BigDecimal("110.5"));
         List<RenglonFactura> renglones = new ArrayList<>();
         renglones.add(renglon1);
         renglones.add(renglon2);
@@ -327,27 +327,27 @@ public class FacturaServiceImplTest {
             i++;
         }       
         assertTrue("El iva neto no es el esperado",
-                facturaService.calcularIvaNetoFactura(TipoDeComprobante.FACTURA_A, cantidades, ivaPorcentajes, ivaNetos, new BigDecimal(21), BigDecimal.ZERO, BigDecimal.ZERO)
-                        .compareTo(new BigDecimal(3427.6)) == 0);
+                facturaService.calcularIvaNetoFactura(TipoDeComprobante.FACTURA_A, cantidades, ivaPorcentajes, ivaNetos, new BigDecimal("21"), BigDecimal.ZERO, BigDecimal.ZERO)
+                        .compareTo(new BigDecimal("3427.6")) == 0);
     }
 
     @Test
     public void shouldCalcularIva_netoWhenLaFacturaEsX() {
         RenglonFactura renglon1 = new RenglonFactura();
-        renglon1.setImporte(new BigDecimal(5.601));
-        renglon1.setIva_porcentaje(new BigDecimal(0));
+        renglon1.setImporte(new BigDecimal("5.601"));
+        renglon1.setIva_porcentaje(BigDecimal.ZERO);
         renglon1.setCantidad(BigDecimal.ONE);
-        renglon1.setIva_neto(new BigDecimal(1.17621));
+        renglon1.setIva_neto(new BigDecimal("1.17621"));
         RenglonFactura renglon2 = new RenglonFactura();
-        renglon2.setImporte(new BigDecimal(18.052));
-        renglon2.setIva_porcentaje(new BigDecimal(0));
+        renglon2.setImporte(new BigDecimal("18.052"));
+        renglon2.setIva_porcentaje(BigDecimal.ZERO);
         renglon2.setCantidad(BigDecimal.ONE);
-        renglon2.setIva_neto(new BigDecimal(3.79092));       
+        renglon2.setIva_neto(new BigDecimal("3.79092"));       
         RenglonFactura renglon3 = new RenglonFactura();
-        renglon3.setImporte(new BigDecimal(10.011));
-        renglon3.setIva_porcentaje(new BigDecimal(0));
+        renglon3.setImporte(new BigDecimal("10.011"));
+        renglon3.setIva_porcentaje(BigDecimal.ZERO);
         renglon3.setCantidad(BigDecimal.ONE);
-        renglon3.setIva_neto(new BigDecimal(2.10231));           
+        renglon3.setIva_neto(new BigDecimal("2.10231"));           
         List<RenglonFactura> renglones = new ArrayList<>();
         renglones.add(renglon1);
         renglones.add(renglon2);
@@ -364,21 +364,21 @@ public class FacturaServiceImplTest {
             i++;
         } 
         assertTrue("El iva neto no es el esperado",
-                facturaService.calcularIvaNetoFactura(TipoDeComprobante.FACTURA_X, cantidades, ivaPorcentajes, ivaNetos, new BigDecimal(21), BigDecimal.ZERO, BigDecimal.ZERO)
+                facturaService.calcularIvaNetoFactura(TipoDeComprobante.FACTURA_X, cantidades, ivaPorcentajes, ivaNetos, new BigDecimal("21"), BigDecimal.ZERO, BigDecimal.ZERO)
                         .doubleValue() == 0);
     }
 
     @Test
     public void shouldCalcularImpInterno_neto() {
         RenglonFactura renglon1 = new RenglonFactura();
-        renglon1.setImporte(new BigDecimal(5.601));
-        renglon1.setImpuesto_porcentaje(new BigDecimal(15.304));
+        renglon1.setImporte(new BigDecimal("5.601"));
+        renglon1.setImpuesto_porcentaje(new BigDecimal("15.304"));
         RenglonFactura renglon2 = new RenglonFactura();
-        renglon2.setImporte(new BigDecimal(18.052));
-        renglon2.setImpuesto_porcentaje(new BigDecimal(9.043));
+        renglon2.setImporte(new BigDecimal("18.052"));
+        renglon2.setImpuesto_porcentaje(new BigDecimal("9.043"));
         RenglonFactura renglon3 = new RenglonFactura();
-        renglon3.setImporte(new BigDecimal(10.011));
-        renglon3.setImpuesto_porcentaje(new BigDecimal(4.502));
+        renglon3.setImporte(new BigDecimal("10.011"));
+        renglon3.setImpuesto_porcentaje(new BigDecimal("4.502"));
         List<RenglonFactura> renglones = new ArrayList<>();
         renglones.add(renglon1);
         renglones.add(renglon2);
@@ -392,44 +392,41 @@ public class FacturaServiceImplTest {
             indice++;
         }
         assertTrue("El impuesto interno neto no es el esperado",
-                facturaService.calcularImpInternoNeto(TipoDeComprobante.FACTURA_A, new BigDecimal(9.104), new BigDecimal(22.008), importes, impuestoPorcentajes)
+                facturaService.calcularImpInternoNeto(TipoDeComprobante.FACTURA_A, new BigDecimal("9.104"), new BigDecimal("22.008"), importes, impuestoPorcentajes)
                         .doubleValue() == 3.3197328185648);
     }
 
     @Test
     public void shouldCalcularTotal() {
         assertTrue("El total no es el esperado",
-                facturaService.calcularTotal(new BigDecimal(350.451), new BigDecimal(10.753), new BigDecimal(25.159))
+                facturaService.calcularTotal(new BigDecimal("350.451"), new BigDecimal("10.753"), new BigDecimal("25.159"))
                         .doubleValue() == 386.363);
     }
 
     @Test
     public void shouldCalcularImporte() {
-        double cantidad = 10;
-        double precioUnitario = 10;
-        double descuento = 1;
         assertTrue("El importe no es el esperado",
-                facturaService.calcularImporte(new BigDecimal(cantidad), new BigDecimal(precioUnitario), new BigDecimal(descuento))
+                facturaService.calcularImporte(new BigDecimal("10"), new BigDecimal("10"), BigDecimal.ONE)
                         .doubleValue() == 90);
     }
 
     @Test
     public void shouldCalcularIVANetoWhenCompraConFacturaA() {        
         Producto producto = new Producto();
-        producto.setPrecioCosto(new BigDecimal(100));
-        producto.setPrecioVentaPublico(new BigDecimal(121));
-        producto.setIva_porcentaje(new BigDecimal(21));
+        producto.setPrecioCosto(new BigDecimal("100"));
+        producto.setPrecioVentaPublico(new BigDecimal("121"));
+        producto.setIva_porcentaje(new BigDecimal("21"));
         assertTrue("El iva neto no es el esperado",
                 facturaService.calcularIVANetoRenglon(Movimiento.COMPRA, TipoDeComprobante.FACTURA_A, producto, BigDecimal.ZERO)
-                        .compareTo(new BigDecimal(21)) == 0);
+                        .compareTo(new BigDecimal("21")) == 0);
     }
     
     @Test
     public void shouldCalcularIVANetoWhenCompraConFacturaB() {
         Producto producto = new Producto();
-        producto.setPrecioCosto(new BigDecimal(200));
-        producto.setPrecioVentaPublico(new BigDecimal(1000));
-        producto.setIva_porcentaje(new BigDecimal(21));
+        producto.setPrecioCosto(new BigDecimal("200"));
+        producto.setPrecioVentaPublico(new BigDecimal("1000"));
+        producto.setIva_porcentaje(new BigDecimal("21"));
         assertTrue("El iva neto no es el esperado",
                 facturaService.calcularIVANetoRenglon(Movimiento.COMPRA, TipoDeComprobante.FACTURA_B, producto, BigDecimal.ZERO)
                         .doubleValue() == 42);
@@ -438,8 +435,8 @@ public class FacturaServiceImplTest {
     @Test
     public void shouldCalcularIVANetoWhenVentaConFacturaA() {
         Producto producto = new Producto();
-        producto.setPrecioVentaPublico(new BigDecimal(121));
-        producto.setIva_porcentaje(new BigDecimal(21));
+        producto.setPrecioVentaPublico(new BigDecimal("121"));
+        producto.setIva_porcentaje(new BigDecimal("21"));
         assertTrue("El iva neto no es el esperado",
                 facturaService.calcularIVANetoRenglon(Movimiento.VENTA, TipoDeComprobante.FACTURA_A, producto, BigDecimal.ZERO)
                         .doubleValue() == 25.41);
@@ -447,133 +444,133 @@ public class FacturaServiceImplTest {
     
     public void shouldCalcularIVANetoWhenVentaConFacturaB() {
         Producto producto = new Producto();
-        producto.setPrecioVentaPublico(new BigDecimal(1000));
-        producto.setIva_porcentaje(new BigDecimal(21));
+        producto.setPrecioVentaPublico(new BigDecimal("1000"));
+        producto.setIva_porcentaje(new BigDecimal("21"));
         assertTrue("El iva neto no es el esperado",
                 facturaService.calcularIVANetoRenglon(Movimiento.VENTA, TipoDeComprobante.FACTURA_B, producto, BigDecimal.ZERO)
-                        .compareTo(new BigDecimal(210)) == 0);
+                        .compareTo(new BigDecimal("210")) == 0);
     }
 
     @Test
     public void shouldCalcularPrecioUnitarioWhenEsUnaVentaConFacturaA() {
         Producto producto = new Producto();
-        producto.setPrecioCosto(new BigDecimal(100));
-        producto.setPrecioVentaPublico(new BigDecimal(121));
-        producto.setIva_porcentaje(new BigDecimal(21));
+        producto.setPrecioCosto(new BigDecimal("100"));
+        producto.setPrecioVentaPublico(new BigDecimal("121"));
+        producto.setIva_porcentaje(new BigDecimal("21"));
         assertTrue("El precio unitario no es el esperado",
                 facturaService.calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_A, producto)
-                        .compareTo(new BigDecimal(121)) == 0);
+                        .compareTo(new BigDecimal("121")) == 0);
     }
 
     @Test
     public void shouldCalcularPrecioUnitarioWhenEsUnaVentaConFacturaX() {
         Producto producto = new Producto();
-        producto.setPrecioCosto(new BigDecimal(100));
-        producto.setPrecioVentaPublico(new BigDecimal(121));
-        producto.setIva_porcentaje(new BigDecimal(21));
+        producto.setPrecioCosto(new BigDecimal("100"));
+        producto.setPrecioVentaPublico(new BigDecimal("121"));
+        producto.setIva_porcentaje(new BigDecimal("21"));
         assertTrue("El precio unitario no es el esperado",
                 facturaService.calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_X, producto)
-                        .compareTo(new BigDecimal(121)) == 0);
+                        .compareTo(new BigDecimal("121")) == 0);
     }
 
     @Test
     public void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaA() {
         Producto producto = new Producto();
-        producto.setPrecioCosto(new BigDecimal(100));
-        producto.setPrecioVentaPublico(new BigDecimal(121));
-        producto.setIva_porcentaje(new BigDecimal(21));
+        producto.setPrecioCosto(new BigDecimal("100"));
+        producto.setPrecioVentaPublico(new BigDecimal("121"));
+        producto.setIva_porcentaje(new BigDecimal("21"));
         assertTrue("El precio unitario no es el esperado",
                 facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_A, producto)
-                        .compareTo(new BigDecimal(100)) == 0);
+                        .compareTo(new BigDecimal("100")) == 0);
     }
 
     @Test
     public void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaX() {
         Producto producto = new Producto();
-        producto.setPrecioCosto(new BigDecimal(100));
-        producto.setPrecioVentaPublico(new BigDecimal(121));
-        producto.setIva_porcentaje(new BigDecimal(21));
+        producto.setPrecioCosto(new BigDecimal("100"));
+        producto.setPrecioVentaPublico(new BigDecimal("121"));
+        producto.setIva_porcentaje(new BigDecimal("21"));
         assertTrue("El precio unitario no es el esperado",
                 facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_X, producto)
-                        .compareTo(new BigDecimal(100)) == 0);
+                        .compareTo(new BigDecimal("100")) == 0);
     }
 
     @Test
     public void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaB() {
         Producto producto = new Producto();
-        producto.setPrecioCosto(new BigDecimal(100));
-        producto.setPrecioVentaPublico(new BigDecimal(121));
-        producto.setIva_porcentaje(new BigDecimal(21));
-        producto.setImpuestoInterno_porcentaje(new BigDecimal(0));
+        producto.setPrecioCosto(new BigDecimal("100"));
+        producto.setPrecioVentaPublico(new BigDecimal("121"));
+        producto.setIva_porcentaje(new BigDecimal("21"));
+        producto.setImpuestoInterno_porcentaje(BigDecimal.ZERO);
         assertTrue("El precio unitario no es el esperado",
                 facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_B, producto)
-                        .compareTo(new BigDecimal(121)) == 0);
+                        .compareTo(new BigDecimal("121")) == 0);
     }
 
     @Test
     public void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaC() {
         Producto producto = new Producto();
-        producto.setPrecioCosto(new BigDecimal(100));
-        producto.setPrecioVentaPublico(new BigDecimal(121));
-        producto.setIva_porcentaje(new BigDecimal(21));
-        producto.setImpuestoInterno_porcentaje(new BigDecimal(0));
+        producto.setPrecioCosto(new BigDecimal("100"));
+        producto.setPrecioVentaPublico(new BigDecimal("121"));
+        producto.setIva_porcentaje(new BigDecimal("21"));
+        producto.setImpuestoInterno_porcentaje(BigDecimal.ZERO);
         assertTrue("El precio unitario no es el esperado",
                 facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_C, producto)
-                        .compareTo(new BigDecimal(121)) == 0);
+                        .compareTo(new BigDecimal("121")) == 0);
     }
 
     @Test
     public void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaY() {
         Producto producto = new Producto();
-        producto.setPrecioCosto(new BigDecimal(100));
-        producto.setPrecioVentaPublico(new BigDecimal(121));
-        producto.setIva_porcentaje(new BigDecimal(21));
-        producto.setImpuestoInterno_porcentaje(new BigDecimal(0));
+        producto.setPrecioCosto(new BigDecimal("100"));
+        producto.setPrecioVentaPublico(new BigDecimal("121"));
+        producto.setIva_porcentaje(new BigDecimal("21"));
+        producto.setImpuestoInterno_porcentaje(BigDecimal.ZERO);
         assertTrue("El precio unitario no es el esperado",
                 facturaService.calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_Y, producto)
-                        .compareTo(new BigDecimal(121)) == 0);
+                        .compareTo(new BigDecimal("121")) == 0);
     }
 
     @Test
     public void shouldCalcularPrecioUnitarioWhenEsUnaVentaConFacturaB() {
         Producto producto = new Producto();
-        producto.setPrecioCosto(new BigDecimal(100));
-        producto.setGanancia_neto(new BigDecimal(100));
-        producto.setIva_porcentaje(new BigDecimal(21));
-        producto.setIva_neto(new BigDecimal(42));
-        producto.setPrecioVentaPublico(new BigDecimal(200));
-        producto.setPrecioLista(new BigDecimal(242));        
+        producto.setPrecioCosto(new BigDecimal("100"));
+        producto.setGanancia_neto(new BigDecimal("100"));
+        producto.setIva_porcentaje(new BigDecimal("21"));
+        producto.setIva_neto(new BigDecimal("42"));
+        producto.setPrecioVentaPublico(new BigDecimal("200"));
+        producto.setPrecioLista(new BigDecimal("242"));        
         assertTrue("El precio unitario no es el esperado",
                 facturaService.calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_B, producto)
-                        .compareTo(new BigDecimal(242)) == 0);
+                        .compareTo(new BigDecimal("242")) == 0);
     }
 
     @Test
     public void shouldCalcularPrecioUnitarioWhenEsUnaVentaConFacturaC() {
         Producto producto = new Producto();
-        producto.setPrecioCosto(new BigDecimal(100));
-        producto.setGanancia_neto(new BigDecimal(100));
-        producto.setIva_porcentaje(new BigDecimal(21));
-        producto.setIva_neto(new BigDecimal(42));
-        producto.setPrecioVentaPublico(new BigDecimal(200));
-        producto.setPrecioLista(new BigDecimal(242));
+        producto.setPrecioCosto(new BigDecimal("100"));
+        producto.setGanancia_neto(new BigDecimal("100"));
+        producto.setIva_porcentaje(new BigDecimal("21"));
+        producto.setIva_neto(new BigDecimal("42"));
+        producto.setPrecioVentaPublico(new BigDecimal("200"));
+        producto.setPrecioLista(new BigDecimal("242"));
         assertTrue("El precio unitario no es el esperado",
                 facturaService.calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_C, producto)
-                        .compareTo(new BigDecimal(242)) == 0);
+                        .compareTo(new BigDecimal("242")) == 0);
     }
 
     @Test
     public void shouldCalcularPrecioUnitarioWhenVentaYFacturaY() {
         Producto producto = new Producto();
-        producto.setPrecioCosto(new BigDecimal(100));
-        producto.setGanancia_neto(new BigDecimal(100));
-        producto.setIva_porcentaje(new BigDecimal(21));
-        producto.setIva_neto(new BigDecimal(42));
-        producto.setPrecioVentaPublico(new BigDecimal(200));
-        producto.setPrecioLista(new BigDecimal(242));
-        producto.setImpuestoInterno_porcentaje(new BigDecimal(0));
+        producto.setPrecioCosto(new BigDecimal("100"));
+        producto.setGanancia_neto(new BigDecimal("100"));
+        producto.setIva_porcentaje(new BigDecimal("21"));
+        producto.setIva_neto(new BigDecimal("42"));
+        producto.setPrecioVentaPublico(new BigDecimal("200"));
+        producto.setPrecioLista(new BigDecimal("242"));
+        producto.setImpuestoInterno_porcentaje(BigDecimal.ZERO);
         assertTrue("El precio unitario no es el esperado",
                 facturaService.calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_Y, producto)
-                        .compareTo(new BigDecimal(221)) == 0);
+                        .compareTo(new BigDecimal("221")) == 0);
     }
 }

@@ -1,9 +1,11 @@
 package sic.service.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -106,6 +108,6 @@ public class NotaServiceImplTest {
         RenglonNotaCredito renglon1 = new RenglonNotaCreditoBuilder().build();
         List<RenglonNotaCredito> renglones = new ArrayList<>();
         renglones.add(renglon1);
-        assertEquals(172.062, notaServiceImpl.calcularTotalNota(renglones).doubleValue(), 0);
+        assertTrue("El total de la nota de credito no es el esperdado", (new BigDecimal("172.062")).compareTo(notaServiceImpl.calcularTotalNota(renglones)) == 0 );
     }
 }

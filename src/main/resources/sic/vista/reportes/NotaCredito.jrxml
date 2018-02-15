@@ -514,7 +514,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textElement textAlignment="Center">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{medidaItem}.doubleValue()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{medidaItem}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

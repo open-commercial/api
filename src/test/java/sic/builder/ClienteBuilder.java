@@ -27,7 +27,7 @@ public class ClienteBuilder {
     private Usuario credencial = new UsuarioBuilder().build();
     private boolean eliminado = false;
     private boolean predeterminado = false;
-    private BigDecimal saldoCuentaCorriente = new BigDecimal(0);
+    private BigDecimal saldoCuentaCorriente = BigDecimal.ZERO;
     private Date fechaUltimoMovimiento = new Date();
     
     public Cliente build() {

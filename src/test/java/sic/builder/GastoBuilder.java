@@ -16,7 +16,7 @@ public class GastoBuilder {
     private Empresa empresa = new EmpresaBuilder().build();
     private Usuario usuario = new UsuarioBuilder().build();
     private FormaDePago formaDePago = new FormaDePagoBuilder().build();
-    private BigDecimal monto = new BigDecimal(245.33);
+    private BigDecimal monto = new BigDecimal("245.33");
     private boolean eliminado = false;
 
     public Gasto build() {

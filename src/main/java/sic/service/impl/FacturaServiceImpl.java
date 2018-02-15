@@ -1342,6 +1342,8 @@ public class FacturaServiceImpl implements IFacturaService {
                 if (cantidad.compareTo(BigDecimal.ONE) >= 0) {
                     if ((cantidad.remainder(BigDecimal.ONE) != BigDecimal.ZERO) || cantidad.remainder(new BigDecimal(2)) == BigDecimal.ZERO) {
                         cantidadProductosRenglonFacturaSinIVA = cantidad.divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP);
+                        cantidadProductosRenglonFacturaSinIVA
+                                = cantidadProductosRenglonFacturaSinIVA.subtract(cantidadProductosRenglonFacturaSinIVA.remainder(BigDecimal.ONE));
                     } else if (cantidad.remainder(new BigDecimal(2)).compareTo(BigDecimal.ZERO) != 0) {
                         cantidadProductosRenglonFacturaSinIVA = cantidad.subtract(cantidad.divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP).setScale(0, RoundingMode.CEILING));
                     }

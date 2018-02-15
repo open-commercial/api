@@ -28,16 +28,16 @@ public class FacturaVentaBuilder {
     private List<Pago> pagos;
     private Cliente cliente = new ClienteBuilder().build();
     private Usuario usuario = new UsuarioBuilder().build();
-    private BigDecimal subTotal = new BigDecimal(6500);
+    private BigDecimal subTotal = new BigDecimal("6500");
     private BigDecimal recargo_porcentaje = BigDecimal.ZERO;
     private BigDecimal recargo_neto = BigDecimal.ZERO;
     private BigDecimal descuento_porcentaje = BigDecimal.ZERO;
     private BigDecimal descuento_neto = BigDecimal.ZERO;
-    private BigDecimal subTotal_neto = new BigDecimal(6500);
+    private BigDecimal subTotal_neto = new BigDecimal("6500");
     private BigDecimal iva_105_neto = BigDecimal.ZERO;
-    private BigDecimal iva_21_neto = new BigDecimal(1365);
+    private BigDecimal iva_21_neto = new BigDecimal("1365");
     private BigDecimal impuestoInterno_neto = BigDecimal.ZERO;
-    private BigDecimal total = new BigDecimal(7865);
+    private BigDecimal total = new BigDecimal("7865");
     private String observaciones = "Factura por Default";
     private boolean pagada = false;
     private Empresa empresa = new EmpresaBuilder().build();
@@ -51,11 +51,11 @@ public class FacturaVentaBuilder {
         if (renglones == null) {
             RenglonFactura renglon1 = new RenglonFacturaBuilder().build();
             RenglonFactura renglon2 = new RenglonFacturaBuilder()
-                    .withCantidad(new BigDecimal(2))
+                    .withCantidad(new BigDecimal("2"))
                     .withId_ProductoItem(890L)
                     .withCodigoItem("mate.0923")
-                    .withIVAneto(new BigDecimal(1092))
-                    .withPrecioUnitario(new BigDecimal(5200))
+                    .withIVAneto(new BigDecimal("1092"))
+                    .withPrecioUnitario(new BigDecimal("5200"))
                     .build();
             List<RenglonFactura> renglonesFactura = new ArrayList<>();
             renglonesFactura.add(renglon1);

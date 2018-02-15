@@ -472,7 +472,8 @@
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{pedido}.getUsuario().getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{pedido}.getUsuario().getNombre() + " " +  $P{pedido}.getUsuario().getApellido()
++ " " + "(" +$P{pedido}.getUsuario().getUsername() + ")"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="15" width="80" height="15" uuid="43f39702-e0af-456b-bea4-3952f75b1aa5">

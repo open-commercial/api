@@ -19,7 +19,7 @@ public class CajaBuilder {
     private Usuario usuarioCierraCaja = new UsuarioBuilder().build();
     private String observacion = "Caja Default para Test";
     private EstadoCaja estado = EstadoCaja.ABIERTA;
-    private BigDecimal saldoInicial = new BigDecimal(400);
+    private BigDecimal saldoInicial = new BigDecimal("400");
     private BigDecimal saldoFinal;
     private BigDecimal saldoReal;
     private boolean eliminada = false;

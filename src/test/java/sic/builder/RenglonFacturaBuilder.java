@@ -11,16 +11,16 @@ public class RenglonFacturaBuilder {
     private String descripcionItem = "Ventiladores de pie";
     private String medidaItem = "UNIDAD";
     private BigDecimal cantidad = BigDecimal.ONE;
-    private BigDecimal precioUnitario = new BigDecimal(1300);
+    private BigDecimal precioUnitario = new BigDecimal("1300");
     private BigDecimal descuento_porcentaje = BigDecimal.ZERO;
     private BigDecimal descuento_neto = BigDecimal.ZERO;
-    private BigDecimal iva_porcentaje = new BigDecimal(21.00);
-    private BigDecimal iva_neto = new BigDecimal(273);
+    private BigDecimal iva_porcentaje = new BigDecimal("21.00");
+    private BigDecimal iva_neto = new BigDecimal("273");
     private BigDecimal impuesto_porcentaje = BigDecimal.ZERO;
     private BigDecimal impuesto_neto = BigDecimal.ZERO;
-    private BigDecimal ganancia_porcentaje = new BigDecimal(30);
-    private BigDecimal ganancia_neto = new BigDecimal(300);
-    private BigDecimal importe = new BigDecimal(1573);
+    private BigDecimal ganancia_porcentaje = new BigDecimal("30");
+    private BigDecimal ganancia_neto = new BigDecimal("300");
+    private BigDecimal importe = new BigDecimal("1573");
     
     public RenglonFactura build() {
         return new RenglonFactura(id_RenglonFactura, id_ProductoItem, codigoItem, 

@@ -22,8 +22,8 @@ public class PedidoBuilder {
     private String nombreUsuario = "Daenerys Targaryen";
     private List<Factura> facturas;
     private List<RenglonPedidoDTO> renglones;
-    private BigDecimal totalEstimado = new BigDecimal(544.5);
-    private BigDecimal totalActual = new BigDecimal(544.5);
+    private BigDecimal totalEstimado = new BigDecimal("544.5");
+    private BigDecimal totalActual = new BigDecimal("544.5");
     private EstadoPedido estado = EstadoPedido.ABIERTO;
 
     public PedidoDTO build() {

@@ -10,15 +10,15 @@ public class RenglonNotaCreditoBuilder {
     private String codigoItem = "1";
     private String descripcionItem = "Acero Valyrio";
     private String medidaItem = "Kilos";
-    private BigDecimal descuentoPorcentaje = new BigDecimal(10);
-    private BigDecimal descuentoNeto = new BigDecimal(15.8);
-    private BigDecimal cantidad = new BigDecimal(2);  
-    private BigDecimal precioUnitario = new BigDecimal(100);
-    private BigDecimal ivaPorcentaje =  new BigDecimal(21);
+    private BigDecimal descuentoPorcentaje = BigDecimal.TEN;
+    private BigDecimal descuentoNeto = new BigDecimal("15.8");
+    private BigDecimal cantidad = new BigDecimal("2");  
+    private BigDecimal precioUnitario = new BigDecimal("100");
+    private BigDecimal ivaPorcentaje =  new BigDecimal("21");
     private BigDecimal ivaNeto;
-    private BigDecimal importe  = new BigDecimal(158); //sin nada
-    private BigDecimal importeBruto = new BigDecimal(142.2);  //con descuentos y recargos, sin iva
-    private BigDecimal importeNeto = new BigDecimal(172.062); //con descuentos, recargos y con iva
+    private BigDecimal importe  = new BigDecimal("158"); //sin nada
+    private BigDecimal importeBruto = new BigDecimal("142.2");  //con descuentos y recargos, sin iva
+    private BigDecimal importeNeto = new BigDecimal("172.062"); //con descuentos, recargos y con iva
     
     public RenglonNotaCredito build() {
         return new RenglonNotaCredito(id_RenglonNota, id_ProductoItem, codigoItem, descripcionItem, medidaItem, cantidad, precioUnitario, ivaPorcentaje, 

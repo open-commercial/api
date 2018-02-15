@@ -23,8 +23,8 @@ public class ReciboBuilder {
     private Usuario usuario = new UsuarioBuilder().build();
     private Proveedor proveedor = null;
     private Date fecha = new Date();    
-    private BigDecimal monto = new BigDecimal(1000);  
-    private BigDecimal saldoSobrante = new BigDecimal(200);
+    private BigDecimal monto = new BigDecimal("1000");  
+    private BigDecimal saldoSobrante = new BigDecimal("200");
     
     public Recibo build() {
       return new Recibo(idRecibo, serie, nroRecibo, fecha, eliminado, concepto, formaDePago, empresa, cliente, proveedor, usuario, monto, saldoSobrante);

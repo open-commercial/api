@@ -14,7 +14,7 @@ public class PagoBuilder {
     private long nroPago = 1L;
     private FormaDePago formaDePago = new FormaDePagoBuilder().build();
     private Factura factura = new FacturaVentaBuilder().build();
-    private BigDecimal monto = new BigDecimal(100);
+    private BigDecimal monto = new BigDecimal("100");
     private Date fecha = new Date();
     private String nota = "Pago por 100 pesos";
     private Recibo recibo = new ReciboBuilder().build();

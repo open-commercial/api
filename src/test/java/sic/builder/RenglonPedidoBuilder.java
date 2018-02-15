@@ -8,10 +8,10 @@ public class RenglonPedidoBuilder {
     
     private long id_RenglonPedido = 0L;
     private ProductoDTO producto = new ProductoBuilder().build();
-    private BigDecimal cantidad = new BigDecimal(2);
+    private BigDecimal cantidad = new BigDecimal("2");
     private BigDecimal descuento_porcentaje = BigDecimal.ZERO;
     private BigDecimal descuento_neto = BigDecimal.ZERO;
-    private BigDecimal subTotal = new BigDecimal(363);
+    private BigDecimal subTotal = new BigDecimal("363");
     
     public RenglonPedidoDTO build() {
         return new RenglonPedidoDTO(id_RenglonPedido, producto, cantidad, descuento_porcentaje, descuento_neto, subTotal);

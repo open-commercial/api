@@ -12,7 +12,7 @@ import sic.modelo.RenglonNotaCredito;
 public class NotaCreditoDTO extends NotaDTO implements Serializable {
     
     private List<RenglonNotaCredito> renglonesNotaCredito;
-    private BigDecimal subTotal = new BigDecimal(6500);
+    private BigDecimal subTotal = new BigDecimal("6500");
     private BigDecimal recargoPorcentaje = BigDecimal.ZERO;
     private BigDecimal recargoNeto = BigDecimal.ZERO;
     private BigDecimal descuentoPorcentaje = BigDecimal.ZERO;

@@ -309,6 +309,7 @@ public class CuentaCorrienteIntegrationTest {
         notaDebito.setUsuario(credencial);
         notaDebito.setFacturaVenta(null);
         restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1/recibo/1", notaDebito, NotaDebito.class);
+        restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
                 restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", BigDecimal.class)
         .compareTo(new BigDecimal("-6113.5")) == 0);
@@ -361,6 +362,7 @@ public class CuentaCorrienteIntegrationTest {
                 + "&iva21Neto=" + notaCredito.getIva21Neto()
                 + "&iva105Neto=" + notaCredito.getIva105Neto(), BigDecimal.class));
         restTemplate.postForObject(apiPrefix + "/notas/credito/empresa/1/cliente/1/usuario/1/factura/1?modificarStock=false", notaCredito, NotaCredito.class);
+        restTemplate.getForObject(apiPrefix + "/notas/2/reporte", byte[].class);
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
                 restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", BigDecimal.class)
         .compareTo(new BigDecimal("4114")) == 0);
