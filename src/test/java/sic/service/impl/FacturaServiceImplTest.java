@@ -201,6 +201,7 @@ public class FacturaServiceImplTest {
         RenglonFactura renglon3 = Mockito.mock(RenglonFactura.class);
         RenglonFactura renglon4 = Mockito.mock(RenglonFactura.class);
         RenglonFactura renglon5 = Mockito.mock(RenglonFactura.class);
+        RenglonFactura renglon6 = Mockito.mock(RenglonFactura.class);
         Producto producto = Mockito.mock(Producto.class);
         when(producto.getId_Producto()).thenReturn(1L);
         when(producto.getCodigo()).thenReturn("1");
@@ -232,12 +233,17 @@ public class FacturaServiceImplTest {
         when(renglon5.getIva_neto()).thenReturn(new BigDecimal("21"));
         when(renglon5.getDescuento_porcentaje()).thenReturn(BigDecimal.ZERO);
         when(renglon5.getCantidad()).thenReturn(new BigDecimal("0.8"));
+        when(renglon6.getId_ProductoItem()).thenReturn(1L);
+        when(renglon6.getIva_neto()).thenReturn(new BigDecimal("21"));
+        when(renglon6.getDescuento_porcentaje()).thenReturn(BigDecimal.ZERO);
+        when(renglon6.getCantidad()).thenReturn(new BigDecimal("9.3"));
         List<RenglonFactura> renglones = new ArrayList<>();
         renglones.add(renglon1);
         renglones.add(renglon2);
         renglones.add(renglon3);
+        renglones.add(renglon6); // no participa de la division
         renglones.add(renglon4);
-        renglones.add(renglon5);
+        renglones.add(renglon5); // no participa de la division
         FacturaVenta factura = new FacturaVenta();
         factura.setDescuento_porcentaje(BigDecimal.ZERO);
         factura.setRecargo_porcentaje(BigDecimal.ZERO);
@@ -250,10 +256,10 @@ public class FacturaServiceImplTest {
         usuario.setNombre("Marian Jhons  help");
         factura.setUsuario(usuario);
         factura.setTipoComprobante(TipoDeComprobante.FACTURA_A);
-        int[] indices = {0, 1, 2, 3};
+        int[] indices = {0, 1, 2, 4};
         int cantidadDeFacturasEsperadas = 2;
         int cantidadDeRenglonesEsperadosFX = 4;
-        int cantidadDeRenglonesEsperadosFA= 5;
+        int cantidadDeRenglonesEsperadosFA= 6;
         List<Factura> result = facturaService.dividirFactura(factura, indices);
         assertEquals(cantidadDeFacturasEsperadas, result.size());
         assertEquals(cantidadDeRenglonesEsperadosFX, result.get(0).getRenglones().size());
@@ -267,11 +273,13 @@ public class FacturaServiceImplTest {
         BigDecimal cantidadTercerRenglonFacturaA = result.get(1).getRenglones().get(2).getCantidad();
         BigDecimal cantidadCuartoRenglonFacturaA = result.get(1).getRenglones().get(3).getCantidad();
         BigDecimal cantidadQuintoRenglonFacturaA = result.get(1).getRenglones().get(4).getCantidad();
+        BigDecimal cantidadSextoRenglonFacturaA = result.get(1).getRenglones().get(5).getCantidad();
         assertTrue("Las cantidades no son las esperadas", cantidadPrimerRenglonFacturaA.compareTo(new BigDecimal("2")) == 0);
         assertTrue("Las cantidades no son las esperadas", cantidadSegundoRenglonFacturaA.compareTo(new BigDecimal("4")) == 0);
         assertTrue("Las cantidades no son las esperadas", cantidadTercerRenglonFacturaA.compareTo(new BigDecimal("6.4")) == 0);
-        assertTrue("Las cantidades no son las esperadas", cantidadCuartoRenglonFacturaA.compareTo(new BigDecimal("0.6")) == 0);
-        assertTrue("Las cantidades no son las esperadas", cantidadQuintoRenglonFacturaA.compareTo(new BigDecimal("0.8")) == 0);
+        assertTrue("Las cantidades no son las esperadas", cantidadCuartoRenglonFacturaA.compareTo(new BigDecimal("9.3")) == 0);
+        assertTrue("Las cantidades no son las esperadas", cantidadQuintoRenglonFacturaA.compareTo(new BigDecimal("0.6")) == 0);
+        assertTrue("Las cantidades no son las esperadas", cantidadSextoRenglonFacturaA.compareTo(new BigDecimal("0.8")) == 0);
         assertTrue("Las cantidades no son las esperadas", cantidadPrimerRenglonFacturaX.compareTo(new BigDecimal("2")) == 0);
         assertTrue("Las cantidades no son las esperadas", cantidadSegundoRenglonFacturaX.compareTo(new BigDecimal("3")) == 0);
         assertTrue("Las cantidades no son las esperadas", cantidadTercerRenglonFacturaX.compareTo(new BigDecimal("6.4")) == 0);
