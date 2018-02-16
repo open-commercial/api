@@ -302,7 +302,7 @@ public class CajaServiceImpl implements ICajaService {
                 caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
         List<Recibo> recibos = reciboService.getByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()),
                 fdp, caja.getEmpresa());
-        recibosTotal = recibos.stream().map((recibo) -> (recibo.getProveedor() != null)? - recibo.getMonto() : recibo.getMonto()).reduce(recibosTotal, (accumulator, _item) -> accumulator + _item);
+        recibosTotal = recibos.stream().map(recibo -> (recibo.getProveedor() != null)? - recibo.getMonto() : recibo.getMonto()).reduce(recibosTotal, (accumulator, _item) -> accumulator + _item);
         gastosTotal = gastos.stream()
                 .map((gasto) -> gasto.getMonto())
                 .reduce(gastosTotal, (accumulator, _item) -> accumulator - _item);
@@ -311,7 +311,7 @@ public class CajaServiceImpl implements ICajaService {
 
     private Caja cargarRecibosyGastos(Caja caja) {
         Map<Long, Double> totalesPorFomaDePago = new HashMap<>();
-        formaDePagoService.getFormasDePago(caja.getEmpresa()).forEach((fdp) -> {
+        formaDePagoService.getFormasDePago(caja.getEmpresa()).forEach(fdp -> {
             double total = this.getTotalMovimientosPorFormaDePago(caja, fdp);
             if (total != 0) {
                 totalesPorFomaDePago.put(fdp.getId_FormaDePago(), total);
