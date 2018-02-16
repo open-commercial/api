@@ -300,23 +300,25 @@ public class CajaServiceImpl implements ICajaService {
         }
         List<Gasto> gastos = gastoService.getGastosEntreFechasYFormaDePago(caja.getEmpresa().getId_Empresa(), fdp.getId_FormaDePago(),
                 caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
-        List<Recibo> recibos = reciboService.getByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()),
-                fdp, caja.getEmpresa());
-        recibosTotal = recibos.stream().map(recibo -> recibo.getMonto()).reduce(recibosTotal, (accumulator, _item) -> accumulator + _item);
+        List<Recibo> recibos = reciboService.getByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(caja.getFechaApertura(),
+                Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()), fdp, caja.getEmpresa());
+        recibosTotal = recibos.stream()
+                              .map(recibo -> (recibo.getProveedor() != null) ? -recibo.getMonto() : recibo.getMonto())
+                              .reduce(recibosTotal, (accumulator, item) -> accumulator + item);
         gastosTotal = gastos.stream()
-                            .map((gasto) -> gasto.getMonto())
-                            .reduce(gastosTotal, (accumulator, _item) -> accumulator - _item);
+                            .map(gasto -> gasto.getMonto())
+                            .reduce(gastosTotal, (accumulator, item) -> accumulator - item);
         return recibosTotal + gastosTotal;
     }
 
     private Caja cargarRecibosyGastos(Caja caja) {
         Map<Long, Double> totalesPorFomaDePago = new HashMap<>();
-        for (FormaDePago fdp : formaDePagoService.getFormasDePago(caja.getEmpresa())) {
+        formaDePagoService.getFormasDePago(caja.getEmpresa()).forEach(fdp -> {
             double total = this.getTotalMovimientosPorFormaDePago(caja, fdp);
             if (total != 0) {
                 totalesPorFomaDePago.put(fdp.getId_FormaDePago(), total);
             }
-        }
+        });
         caja.setTotalesPorFomaDePago(totalesPorFomaDePago);
         return caja;
     }
