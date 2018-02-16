@@ -369,7 +369,7 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     @Override
-    public Map<BigDecimal, Producto> getProductosSinStockDisponible(long[] idProducto, BigDecimal[] cantidad) {
+    public Map<Long, BigDecimal> getProductosSinStockDisponible(long[] idProducto, BigDecimal[] cantidad) {
         Map productos = new HashMap();
         int longitudIds = idProducto.length;
         int longitudCantidades = cantidad.length;
@@ -388,7 +388,7 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     @Override
-    public Map<BigDecimal, Producto> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, BigDecimal[] cantidad) {
+    public Map<Long, BigDecimal> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, BigDecimal[] cantidad) {
         Map productos = new HashMap();
         int longitudIds = idProducto.length;
         int longitudCantidades = cantidad.length;
@@ -396,7 +396,7 @@ public class ProductoServiceImpl implements IProductoService {
             for (int i = 0; i < longitudIds; i++) {
                 Producto p = this.getProductoPorId(idProducto[i]);
                 if (p.getVentaMinima().compareTo(cantidad[i]) > 0) {
-                    productos.put(cantidad[i], p);
+                    productos.put(p.getId_Producto(), cantidad[i]);
                 }
             }
         } else {

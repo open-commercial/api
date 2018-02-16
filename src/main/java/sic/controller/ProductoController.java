@@ -183,15 +183,13 @@ public class ProductoController {
         
     @GetMapping("/productos/disponibilidad-stock")
     @ResponseStatus(HttpStatus.OK)
-    public Map<BigDecimal, Producto> verificarDisponibilidadStock(@RequestParam long[] idProducto,
-                                                                  @RequestParam BigDecimal[] cantidad) {
+    public Map<Long, BigDecimal> verificarDisponibilidadStock(long[] idProducto, BigDecimal[] cantidad) {
         return productoService.getProductosSinStockDisponible(idProducto, cantidad);
     }
     
     @GetMapping("/productos/cantidad-venta-minima")
     @ResponseStatus(HttpStatus.OK)
-    public Map<BigDecimal, Producto> verificarCantidadVentaMinima(@RequestParam long[] idProducto,
-                                                                  @RequestParam BigDecimal[] cantidad) {
+    public Map<Long, BigDecimal> verificarCantidadVentaMinima(long[] idProducto, BigDecimal[] cantidad) {
         return productoService.getProductosNoCumplenCantidadVentaMinima(idProducto, cantidad);        
     }
     
