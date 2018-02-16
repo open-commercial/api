@@ -1340,11 +1340,10 @@ public class FacturaServiceImpl implements IFacturaService {
             if (numeroDeRenglon == indices[renglonMarcado]) {
                 BigDecimal cantidad = renglon.getCantidad();
                 if (cantidad.compareTo(BigDecimal.ONE) >= 0) {
-                    if ((cantidad.remainder(BigDecimal.ONE) != BigDecimal.ZERO) || cantidad.remainder(new BigDecimal("2")) == BigDecimal.ZERO) {
+                    if ((cantidad.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) != 0) 
+                            || cantidad.remainder(new BigDecimal("2")).compareTo(BigDecimal.ZERO) == 0) {
                         cantidadProductosRenglonFacturaSinIVA = cantidad.divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP);
-                        cantidadProductosRenglonFacturaSinIVA
-                                = cantidadProductosRenglonFacturaSinIVA.subtract(cantidadProductosRenglonFacturaSinIVA.remainder(BigDecimal.ONE));
-                    } else if (cantidad.remainder(new BigDecimal("2")).compareTo(BigDecimal.ZERO) != 0) {
+                    } else if (cantidad.remainder(new BigDecimal(2)).compareTo(BigDecimal.ZERO) != 0) {
                         cantidadProductosRenglonFacturaSinIVA = cantidad.subtract(cantidad.divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP).setScale(0, RoundingMode.CEILING));
                     }
                 } else {
@@ -1358,6 +1357,9 @@ public class FacturaServiceImpl implements IFacturaService {
                 }
                 numeroDeRenglon++;
                 renglonMarcado++;
+                if(renglonMarcado == indices.length) {
+                    break;
+                }
             } else {
                 numeroDeRenglon++;
             }
@@ -1372,29 +1374,40 @@ public class FacturaServiceImpl implements IFacturaService {
         int renglonMarcado = 0;
         int numeroDeRenglon = 0;
         for (RenglonFactura renglon : renglones) {
-            if (numeroDeRenglon == indices[renglonMarcado]) {
-                BigDecimal cantidad = renglon.getCantidad();
-                if (cantidad.compareTo(BigDecimal.ONE) == -1 || cantidad.compareTo(BigDecimal.ONE) == 0) { //if (cantidad < 1 || cantidad == 1) {
-                    cantidadProductosRenglonFacturaConIVA = cantidad;
-                } else if ((cantidad.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) != 0) || renglon.getCantidad().remainder(new BigDecimal("2")).compareTo(BigDecimal.ZERO) == 0) {
-                    cantidadProductosRenglonFacturaConIVA = renglon.getCantidad().subtract(new BigDecimal("2"));
-                } else if (renglon.getCantidad().remainder(new BigDecimal("2")).compareTo(BigDecimal.ZERO) != 0) {
-                    cantidadProductosRenglonFacturaConIVA = renglon.getCantidad().divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP).setScale(0, RoundingMode.CEILING);
+            if (renglonMarcado < indices.length) {
+                if (numeroDeRenglon == indices[renglonMarcado]) {
+                    BigDecimal cantidad = renglon.getCantidad();
+                    if (cantidad.compareTo(BigDecimal.ONE) == -1 || cantidad.compareTo(BigDecimal.ONE) == 0) { 
+                        cantidadProductosRenglonFacturaConIVA = cantidad;
+                    } else if ((cantidad.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) != 0)
+                            || renglon.getCantidad().remainder(new BigDecimal(2)).compareTo(BigDecimal.ZERO) == 0) {
+                        cantidadProductosRenglonFacturaConIVA = renglon.getCantidad().divide(new BigDecimal("2"));
+                    } else if (renglon.getCantidad().remainder(new BigDecimal("2")).compareTo(BigDecimal.ZERO) != 0) {
+                        cantidadProductosRenglonFacturaConIVA = renglon.getCantidad().divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP).setScale(0, RoundingMode.CEILING);
+                    }
+                    renglonesConIVA.add(crearRenglonConIVA(facturaConIVA.getTipoComprobante(),
+                            cantidadProductosRenglonFacturaConIVA, renglon.getId_ProductoItem(), renglon.getDescuento_porcentaje(), true));
+                    renglonMarcado++;
+                    numeroDeRenglon++;
+                } else {
+                    numeroDeRenglon++;
+                    renglonesConIVA.add(crearRenglonConIVA(facturaConIVA.getTipoComprobante(),
+                            renglon.getCantidad(), renglon.getId_ProductoItem(), renglon.getDescuento_porcentaje(), false));
                 }
-                RenglonFactura nuevoRenglonConIVA = this.calcularRenglon(facturaConIVA.getTipoComprobante(), Movimiento.VENTA,
-                        cantidadProductosRenglonFacturaConIVA, renglon.getId_ProductoItem(), renglon.getDescuento_porcentaje(), true);
-                renglonesConIVA.add(nuevoRenglonConIVA);
-                renglonMarcado++;
-                numeroDeRenglon++;
             } else {
                 numeroDeRenglon++;
-                RenglonFactura nuevoRenglonConIVA = this.calcularRenglon(facturaConIVA.getTipoComprobante(), Movimiento.VENTA,
-                        renglon.getCantidad(), renglon.getId_ProductoItem(), renglon.getDescuento_porcentaje(), false);
-                renglonesConIVA.add(nuevoRenglonConIVA);
+                renglonesConIVA.add(crearRenglonConIVA(facturaConIVA.getTipoComprobante(),
+                        renglon.getCantidad(), renglon.getId_ProductoItem(), renglon.getDescuento_porcentaje(), false));
             }
         }
         facturaConIVA.setRenglones(renglonesConIVA);
         return facturaConIVA;
+    }
+    
+    private RenglonFactura crearRenglonConIVA(TipoDeComprobante tipoDeComprobante,
+            BigDecimal cantidad, long idProductoItem, BigDecimal descuentoPorcentaje, boolean dividir) {
+        return this.calcularRenglon(tipoDeComprobante, Movimiento.VENTA,
+                cantidad, idProductoItem, descuentoPorcentaje, dividir);
     }
 
 }
