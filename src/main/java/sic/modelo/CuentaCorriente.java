@@ -46,6 +46,7 @@ public abstract class CuentaCorriente implements Serializable {
     
     @Id
     @GeneratedValue
+    @Column(name = "id_cuenta_corriente")
     private Long idCuentaCorriente;
     
     private boolean eliminada;

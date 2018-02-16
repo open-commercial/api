@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,24 +46,19 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     private final IClienteService clienteService;
     private final IProveedorService proveedorService;
     private final IRenglonCuentaCorrienteService renglonCuentaCorrienteService;
-    private final IFacturaService facturaService;
-    private final INotaService notaService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
     @Lazy
     public CuentaCorrienteServiceImpl(CuentaCorrienteRepository cuentaCorrienteRepository, CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository,
                 CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository, IClienteService clienteService, IProveedorService proveedorService,
-                IRenglonCuentaCorrienteService renglonCuentaCorrienteService, IFacturaService facturaService,
-                INotaService notaService) {
+                IRenglonCuentaCorrienteService renglonCuentaCorrienteService) {
                 this.cuentaCorrienteRepository = cuentaCorrienteRepository;
                 this.cuentaCorrienteClienteRepository = cuentaCorrienteClienteRepository;
                 this.cuentaCorrienteProveedorRepository = cuentaCorrienteProveedorRepository;
                 this.clienteService = clienteService;
                 this.proveedorService = proveedorService;
                 this.renglonCuentaCorrienteService = renglonCuentaCorrienteService;
-                this.facturaService = facturaService;
-                this.notaService = notaService;
     }
 
     @Override
@@ -165,36 +159,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     @Override
     public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Pageable pageable) {
         CuentaCorriente cc = this.getCuentaCorrientePorID(idCuentaCorriente);
-//        Page<RenglonCuentaCorriente> renglonesCuentaCorriente = renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageable);
-//        if (!renglonesCuentaCorriente.getContent().isEmpty()) {
-//            double saldoCC = this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente());
-//            int tamanioDePaginaAuxiliar = pageable.getPageNumber() * pageable.getPageSize();
-//            if (tamanioDePaginaAuxiliar != 0) {
-//                Pageable pageableAuxiliar = new PageRequest(0, tamanioDePaginaAuxiliar, pageable.getSort());
-//                Page<RenglonCuentaCorriente> renglonesCuentaCorrienteAuxiliar = renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageableAuxiliar);
-//                double saldoPaginaSuperiores = 0;
-//                for (RenglonCuentaCorriente rcc : renglonesCuentaCorrienteAuxiliar) {
-//                    saldoPaginaSuperiores += rcc.getMonto();
-//                }
-//                saldoCC = saldoCC - saldoPaginaSuperiores;
-//            }
-//            for (RenglonCuentaCorriente rcc : renglonesCuentaCorriente) {
-//                rcc.setSaldo(saldoCC);
-//                saldoCC -= rcc.getMonto();
-//                if (rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_B
-//                        || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_X
-//                        || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
-//                    rcc.setCAE(facturaService.getCAEById(rcc.getIdMovimiento()));
-//                }
-//                if (rcc.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_A || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B
-//                        || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_X || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_Y
-//                        || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_A
-//                        || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_B || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X
-//                        || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_Y || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO) {
-//                    rcc.setCAE(notaService.getCAEById(rcc.getIdMovimiento()));
-//                }
-//            }
-//        }
         return renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageable);
     }
     

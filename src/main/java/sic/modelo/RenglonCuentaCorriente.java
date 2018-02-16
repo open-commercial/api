@@ -74,7 +74,7 @@ public class RenglonCuentaCorriente implements Serializable {
     private double monto;
     
     @ManyToOne
-    @JoinColumn(name = "idCuentaCorriente", referencedColumnName = "idCuentaCorriente")
+    @JoinColumn(name = "id_cuenta_corriente", referencedColumnName = "id_cuenta_corriente")
     private CuentaCorriente cuentaCorriente;
     
     @OneToOne
@@ -102,7 +102,7 @@ public class RenglonCuentaCorriente implements Serializable {
     
     @Formula(value = "(SELECT SUM(r.monto) "
             + "FROM rengloncuentacorriente r "
-            + "WHERE r.id_cuenta_corriente = id_cuenta_corriente AND r.fecha <= fecha)")
+            + "WHERE r.id_cuenta_corriente = id_cuenta_corriente AND r.eliminado = false AND r.fecha <= fecha)")
     private Double saldo;
     
 }
