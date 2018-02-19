@@ -34,6 +34,7 @@ public class RenglonCuentaCorriente implements Serializable {
     
     @Id
     @GeneratedValue
+    @Column(name = "id_renglon_cuenta_corriente")
     private Long idRenglonCuentaCorriente;
     
     @Column(nullable = false)
@@ -54,6 +55,9 @@ public class RenglonCuentaCorriente implements Serializable {
             + " ELSE 10"
             + " END")
     private int prioridadPago;
+    
+    @Column(name = "numero_renglon_cuenta_corriente", nullable = false)
+    private long numeroRenglonCuentaCorriente;
     
     private long serie;
     
@@ -102,7 +106,7 @@ public class RenglonCuentaCorriente implements Serializable {
     
     @Formula(value = "(SELECT SUM(r.monto) "
             + "FROM rengloncuentacorriente r "
-            + "WHERE r.id_cuenta_corriente = id_cuenta_corriente AND r.eliminado = false AND r.fecha <= fecha)")
+            + "WHERE r.id_cuenta_corriente = id_cuenta_corriente AND r.eliminado = false AND r.numero_renglon_cuenta_corriente <= numero_renglon_cuenta_corriente)")
     private Double saldo;
     
 }

@@ -78,7 +78,7 @@ public class CuentaCorrienteController {
         if (pagina == null || pagina < 0) {
             pagina = 0;
         }
-        Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, "fecha"));
+        Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, "numeroRenglonCuentaCorriente"));
         return cuentaCorrienteService.getRenglonesCuentaCorriente(idCuentaCorriente, pageable);
     }
     
