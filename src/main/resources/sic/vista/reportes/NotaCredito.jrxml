@@ -733,7 +733,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getDescuentoPorcentaje()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getDescuentoPorcentaje().doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="16" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="dd0067fe-11c0-4807-a828-5c22be265349">
@@ -764,7 +764,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getRecargoPorcentaje()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getRecargoPorcentaje().doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="31" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="5be699f5-8fd3-4f5a-b3f3-de1bffd69638">
