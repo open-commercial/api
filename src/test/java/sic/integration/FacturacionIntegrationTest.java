@@ -183,22 +183,22 @@ public class FacturacionIntegrationTest {
         ProductoDTO productoUno = new ProductoBuilder()
                 .withCodigo("1")
                 .withDescripcion("uno")
-                .withCantidad(10)
-                .withVentaMinima(1)
-                .withPrecioVentaPublico(1000)
-                .withIva_porcentaje(21.0)
-                .withIva_neto(210)
-                .withPrecioLista(1210)
+                .withCantidad(BigDecimal.TEN)
+                .withVentaMinima(BigDecimal.ONE)
+                .withPrecioVentaPublico(new BigDecimal("1000"))
+                .withIva_porcentaje(new BigDecimal("21.0"))
+                .withIva_neto(new BigDecimal("210"))
+                .withPrecioLista(new BigDecimal("1210"))
                 .build();
         ProductoDTO productoDos = new ProductoBuilder()
                 .withCodigo("2")
                 .withDescripcion("dos")
-                .withCantidad(6)                               
-                .withVentaMinima(1)
-                .withPrecioVentaPublico(1000)
-                .withIva_porcentaje(10.5)
-                .withIva_neto(105)
-                .withPrecioLista(1105)
+                .withCantidad(new BigDecimal("6"))                               
+                .withVentaMinima(BigDecimal.ONE)
+                .withPrecioVentaPublico(new BigDecimal("1000"))
+                .withIva_porcentaje(new BigDecimal("10.5"))
+                .withIva_neto(new BigDecimal("105"))
+                .withPrecioLista(new BigDecimal("1105"))
                 .build();        
         productoUno = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
                 + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
@@ -326,6 +326,9 @@ public class FacturacionIntegrationTest {
         restTemplate.getForObject(apiPrefix + "/facturas/"+ facturasRecuperadas.get(0).getId_Factura() + "/reporte", byte[].class);
         uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=5,4";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
+        restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
+        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
+        Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
     }
     
     @Test
@@ -381,22 +384,22 @@ public class FacturacionIntegrationTest {
         ProductoDTO productoUno = new ProductoBuilder()
                 .withCodigo("1")
                 .withDescripcion("uno")
-                .withCantidad(10)
-                .withVentaMinima(1)
-                .withPrecioVentaPublico(2000)                
-                .withIva_porcentaje(21.0)
-                .withIva_neto(420)
-                .withPrecioLista(2420)
+                .withCantidad(BigDecimal.TEN)
+                .withVentaMinima(BigDecimal.ONE)
+                .withPrecioVentaPublico(new BigDecimal("2000"))                
+                .withIva_porcentaje(new BigDecimal("21.0"))
+                .withIva_neto(new BigDecimal("420"))
+                .withPrecioLista(new BigDecimal("2420"))
                 .build();
         ProductoDTO productoDos = new ProductoBuilder()
                 .withCodigo("2")
                 .withDescripcion("dos")
-                .withCantidad(6)              
-                .withVentaMinima(1)
-                .withPrecioVentaPublico(2000)                
-                .withIva_porcentaje(10.5)
-                .withIva_neto(210)
-                .withPrecioLista(2210)
+                .withCantidad(new BigDecimal("6"))              
+                .withVentaMinima(BigDecimal.ONE)
+                .withPrecioVentaPublico(new BigDecimal("2000"))                
+                .withIva_porcentaje(new BigDecimal("10.5"))
+                .withIva_neto(new BigDecimal("210"))
+                .withPrecioLista(new BigDecimal("2210"))
                 .build();
         productoUno = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
                 + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
@@ -457,7 +460,6 @@ public class FacturacionIntegrationTest {
             assertTrue("El descuento neto no es el esperado", renglonesPedido.get(i).getDescuento_neto().compareTo(renglonesDelPedido[i].getDescuento_neto()) == 0);
             assertTrue("El descuento porcentaje no es el esperado", renglonesPedido.get(i).getDescuento_porcentaje().compareTo(renglonesDelPedido[i].getDescuento_porcentaje()) == 0);
             assertTrue("La sub total no es el esperado", renglonesPedido.get(i).getSubTotal().compareTo(renglonesDelPedido[i].getSubTotal()) == 0);
-            assertEquals(renglonesPedido.get(i).getProducto(), renglonesDelPedido[i].getProducto());
         }
         RenglonFactura[] renglonesParaFacturar = restTemplate.getForObject(apiPrefix + "/facturas/renglones/pedidos/" + pedidoRecuperado.getId_Pedido()
                 + "?tipoDeComprobante=" + TipoDeComprobante.FACTURA_A, RenglonFactura[].class); 
