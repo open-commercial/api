@@ -295,9 +295,9 @@ public class CajaServiceImpl implements ICajaService {
         }
         List<Gasto> gastos = gastoService.getGastosEntreFechasYFormaDePago(caja.getEmpresa().getId_Empresa(), fdp.getId_FormaDePago(),
                 caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
-        List<Recibo> recibos = reciboService.getByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()),
-                fdp, caja.getEmpresa());
-        for (Recibo recibo : recibos) {
+        List<Recibo> recibos = reciboService.getByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(caja.getFechaApertura(),
+                Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()), fdp, caja.getEmpresa());
+        for (Recibo recibo : recibos) {          
             recibosTotal = recibosTotal.add(recibo.getMonto());
         }
         for (Gasto gasto : gastos) {
@@ -310,10 +310,10 @@ public class CajaServiceImpl implements ICajaService {
         Map<Long, BigDecimal> totalesPorFomaDePago = new HashMap<>();
         for (FormaDePago fdp : formaDePagoService.getFormasDePago(caja.getEmpresa())) {
             BigDecimal total = this.getTotalMovimientosPorFormaDePago(caja, fdp);
-            if (total != BigDecimal.ZERO) {
+            if (total != BigDecimal.ZERO) {  
                 totalesPorFomaDePago.put(fdp.getId_FormaDePago(), total);
             }
-        }
+        });
         caja.setTotalesPorFomaDePago(totalesPorFomaDePago);
         return caja;
     }

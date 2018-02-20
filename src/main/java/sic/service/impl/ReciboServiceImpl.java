@@ -185,6 +185,10 @@ public class ReciboServiceImpl implements IReciboService {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_recibo_forma_de_pago_vacia"));
         }
+        if (recibo.getConcepto() == null || recibo.getConcepto().equals("")) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_recibo_concepto_vacio"));
+        }
     }
     
     @Override
@@ -221,7 +225,7 @@ public class ReciboServiceImpl implements IReciboService {
                 recibo.setMonto(montos[i]);
                 recibo.setNumSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
                 recibo.setNumRecibo(this.getSiguienteNumeroRecibo(empresa.getId_Empresa(), recibo.getNumSerie()));
-                recibo.setConcepto("Cancelación parcial o total de su deuda.");
+                recibo.setConcepto("SALDO.");
                 recibo.setSaldoSobrante(BigDecimal.ZERO);
                 recibos.add(recibo);
                 i++;
