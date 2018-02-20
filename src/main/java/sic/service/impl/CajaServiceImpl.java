@@ -308,9 +308,9 @@ public class CajaServiceImpl implements ICajaService {
 
     private Caja cargarRecibosyGastos(Caja caja) {
         Map<Long, BigDecimal> totalesPorFomaDePago = new HashMap<>();
-        for (FormaDePago fdp : formaDePagoService.getFormasDePago(caja.getEmpresa())) {
+        formaDePagoService.getFormasDePago(caja.getEmpresa()).forEach(fdp -> {
             BigDecimal total = this.getTotalMovimientosPorFormaDePago(caja, fdp);
-            if (total != BigDecimal.ZERO) {  
+            if (total != BigDecimal.ZERO) {
                 totalesPorFomaDePago.put(fdp.getId_FormaDePago(), total);
             }
         });
