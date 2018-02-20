@@ -297,8 +297,12 @@ public class CajaServiceImpl implements ICajaService {
                 caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
         List<Recibo> recibos = reciboService.getByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(caja.getFechaApertura(),
                 Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()), fdp, caja.getEmpresa());
-        for (Recibo recibo : recibos) {          
-            recibosTotal = recibosTotal.add(recibo.getMonto());
+        for (Recibo recibo : recibos) {
+            if (recibo.getCliente() != null) {
+                recibosTotal = recibosTotal.add(recibo.getMonto());
+            } else if (recibo.getProveedor() != null) {
+                recibosTotal = recibosTotal.subtract(recibo.getMonto());
+            }
         }
         for (Gasto gasto : gastos) {
             gastosTotal = gastosTotal.add(gasto.getMonto());
