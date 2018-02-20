@@ -1,5 +1,6 @@
 package sic.repository;
 
+import java.math.BigDecimal;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
@@ -15,10 +16,10 @@ public interface CarritoCompraRepository extends PagingAndSortingRepository<Item
     Page<ItemCarritoCompra> findAllByUsuario(Usuario usuario, Pageable pageable);
 
     @Query("SELECT SUM(icc.importe) FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario")
-    Double calcularTotal(@Param("idUsuario") long idUsuario);
+    BigDecimal calcularTotal(@Param("idUsuario") long idUsuario);
 
     @Query("SELECT SUM(icc.cantidad) FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario")
-    Double getCantArticulos(@Param("idUsuario") long idUsuario);
+    BigDecimal getCantArticulos(@Param("idUsuario") long idUsuario);
     
     @Query("SELECT COUNT(icc) FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario")
     Long getCantRenglones(@Param("idUsuario") long idUsuario);

@@ -1,5 +1,6 @@
 package sic.builder;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,16 +28,16 @@ public class FacturaVentaBuilder {
     private List<Pago> pagos;
     private Cliente cliente = new ClienteBuilder().build();
     private Usuario usuario = new UsuarioBuilder().build();
-    private double subTotal = 6500;
-    private double recargo_porcentaje = 0.0;
-    private double recargo_neto = 0.0;
-    private double descuento_porcentaje = 0.0;
-    private double descuento_neto = 0.0;
-    private double subTotal_neto = 6500;
-    private double iva_105_neto = 0.0;
-    private double iva_21_neto = 1365;
-    private double impuestoInterno_neto = 0.0;
-    private double total = 7865;
+    private BigDecimal subTotal = new BigDecimal("6500");
+    private BigDecimal recargo_porcentaje = BigDecimal.ZERO;
+    private BigDecimal recargo_neto = BigDecimal.ZERO;
+    private BigDecimal descuento_porcentaje = BigDecimal.ZERO;
+    private BigDecimal descuento_neto = BigDecimal.ZERO;
+    private BigDecimal subTotal_neto = new BigDecimal("6500");
+    private BigDecimal iva_105_neto = BigDecimal.ZERO;
+    private BigDecimal iva_21_neto = new BigDecimal("1365");
+    private BigDecimal impuestoInterno_neto = BigDecimal.ZERO;
+    private BigDecimal total = new BigDecimal("7865");
     private String observaciones = "Factura por Default";
     private boolean pagada = false;
     private Empresa empresa = new EmpresaBuilder().build();
@@ -50,11 +51,11 @@ public class FacturaVentaBuilder {
         if (renglones == null) {
             RenglonFactura renglon1 = new RenglonFacturaBuilder().build();
             RenglonFactura renglon2 = new RenglonFacturaBuilder()
-                    .withCantidad(4)
+                    .withCantidad(new BigDecimal("2"))
                     .withId_ProductoItem(890L)
                     .withCodigoItem("mate.0923")
-                    .withIVAneto(1092)
-                    .withPrecioUnitario(5200)
+                    .withIVAneto(new BigDecimal("1092"))
+                    .withPrecioUnitario(new BigDecimal("5200"))
                     .build();
             List<RenglonFactura> renglonesFactura = new ArrayList<>();
             renglonesFactura.add(renglon1);
@@ -129,52 +130,52 @@ public class FacturaVentaBuilder {
         return this;
     }
 
-    public FacturaVentaBuilder withSubTotal(double subTotal) {
+    public FacturaVentaBuilder withSubTotal(BigDecimal subTotal) {
         this.subTotal = subTotal;
         return this;
     }
 
-    public FacturaVentaBuilder withRecargo_porcentaje(double recargoPorcentaje) {
+    public FacturaVentaBuilder withRecargo_porcentaje(BigDecimal recargoPorcentaje) {
         this.recargo_porcentaje = recargoPorcentaje;
         return this;
     }
 
-    public FacturaVentaBuilder withRecargo_neto(double recargoNeto) {
+    public FacturaVentaBuilder withRecargo_neto(BigDecimal recargoNeto) {
         this.recargo_neto = recargoNeto;
         return this;
     }
 
-    public FacturaVentaBuilder withDescuento_porcentaje(double descuentoPorcentaje) {
+    public FacturaVentaBuilder withDescuento_porcentaje(BigDecimal descuentoPorcentaje) {
         this.descuento_porcentaje = descuentoPorcentaje;
         return this;
     }
 
-    public FacturaVentaBuilder withDescuento_neto(double descuentoNeto) {
+    public FacturaVentaBuilder withDescuento_neto(BigDecimal descuentoNeto) {
         this.descuento_neto = descuentoNeto;
         return this;
     }
 
-    public FacturaVentaBuilder withSubTotal_neto(double subTotalNeto) {
+    public FacturaVentaBuilder withSubTotal_neto(BigDecimal subTotalNeto) {
         this.subTotal_neto = subTotalNeto;
         return this;
     }
 
-    public FacturaVentaBuilder withIva_105_neto(double iva105Neto) {
+    public FacturaVentaBuilder withIva_105_neto(BigDecimal iva105Neto) {
         this.iva_105_neto = iva105Neto;
         return this;
     }
 
-    public FacturaVentaBuilder withIva_21_neto(double iva21Neto) {
+    public FacturaVentaBuilder withIva_21_neto(BigDecimal iva21Neto) {
         this.iva_21_neto = iva21Neto;
         return this;
     }
 
-    public FacturaVentaBuilder withImpuestoInterno_neto(double impuestoInternoNeto) {
+    public FacturaVentaBuilder withImpuestoInterno_neto(BigDecimal impuestoInternoNeto) {
         this.impuestoInterno_neto = impuestoInternoNeto;
         return this;
     }
 
-    public FacturaVentaBuilder withTotal(double total) {
+    public FacturaVentaBuilder withTotal(BigDecimal total) {
         this.total = total;
         return this;
     }

@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
@@ -139,9 +140,9 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     }
 
     @Override
-    public double getSaldoCuentaCorriente(long idCuentaCorriente) {
-        Double saldo = renglonCuentaCorrienteService.getSaldoCuentaCorriente(idCuentaCorriente);
-        return (saldo != null) ? saldo : 0.0;
+    public BigDecimal getSaldoCuentaCorriente(long idCuentaCorriente) {
+        BigDecimal saldo = renglonCuentaCorrienteService.getSaldoCuentaCorriente(idCuentaCorriente);
+        return (saldo != null) ? saldo : BigDecimal.ZERO;
     }
     
     @Override
@@ -167,20 +168,20 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         CuentaCorriente cc = this.getCuentaCorrientePorID(idCuentaCorriente);
         Page<RenglonCuentaCorriente> renglonesCuentaCorriente = renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageable);
         if (!renglonesCuentaCorriente.getContent().isEmpty()) {
-            double saldoCC = this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente());
+            BigDecimal saldoCC = this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente());
             int tamanioDePaginaAuxiliar = pageable.getPageNumber() * pageable.getPageSize();
             if (tamanioDePaginaAuxiliar != 0) {
                 Pageable pageableAuxiliar = new PageRequest(0, tamanioDePaginaAuxiliar, pageable.getSort());
                 Page<RenglonCuentaCorriente> renglonesCuentaCorrienteAuxiliar = renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageableAuxiliar);
-                double saldoPaginaSuperiores = 0;
+                BigDecimal saldoPaginaSuperiores = BigDecimal.ZERO;
                 for (RenglonCuentaCorriente rcc : renglonesCuentaCorrienteAuxiliar) {
-                    saldoPaginaSuperiores += rcc.getMonto();
+                    saldoPaginaSuperiores = saldoPaginaSuperiores.add(rcc.getMonto());
                 }
-                saldoCC = saldoCC - saldoPaginaSuperiores;
+                saldoCC = saldoCC.subtract(saldoPaginaSuperiores);
             }
             for (RenglonCuentaCorriente rcc : renglonesCuentaCorriente) {
                 rcc.setSaldo(saldoCC);
-                saldoCC -= rcc.getMonto();
+                saldoCC = saldoCC.subtract(rcc.getMonto());
                 if (rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_B
                         || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_X
                         || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
@@ -210,7 +211,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setFecha(fv.getFecha());
             rcc.setFechaVencimiento(fv.getFechaVencimiento());
             rcc.setIdMovimiento(fv.getId_Factura());
-            rcc.setMonto(-fv.getTotal());
+            rcc.setMonto(fv.getTotal().negate());
             CuentaCorriente cc = this.getCuentaCorrientePorCliente(fv.getCliente().getId_Cliente());
             cc.getRenglones().add(rcc);
             rcc.setCuentaCorriente(cc);
@@ -236,7 +237,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setFecha(fc.getFecha());
             rcc.setFechaVencimiento(fc.getFechaVencimiento());
             rcc.setIdMovimiento(fc.getId_Factura());
-            rcc.setMonto(-fc.getTotal());
+            rcc.setMonto(fc.getTotal().negate());
             CuentaCorriente cc = this.getCuentaCorrientePorProveedor(fc.getProveedor().getId_Proveedor());
             cc.getRenglones().add(rcc);
             rcc.setCuentaCorriente(cc);
@@ -263,7 +264,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                 rcc.setDescripcion(n.getMotivo()); 
             }
             if (n instanceof NotaDebito) {
-                rcc.setMonto(-n.getTotal());
+                rcc.setMonto(n.getTotal().negate());
                 String descripcion = "";
                 if (((NotaDebito) n).getRecibo() != null) {
                     descripcion = ((NotaDebito) n).getRecibo().getConcepto();

@@ -1,6 +1,7 @@
 package sic.modelo;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -34,32 +35,37 @@ public class RenglonNotaCredito implements Serializable {
 
     private String medidaItem;
         
-    @Column(nullable = false)
-    private double cantidad;
+    @Column(precision = 25, scale = 15)
+    private BigDecimal cantidad;
     
-    private double precioUnitario;
+    @Column(precision = 25, scale = 15)
+    private BigDecimal precioUnitario;
         
-    private double gananciaPorcentaje;
+    @Column(precision = 25, scale = 15)
+    private BigDecimal gananciaPorcentaje;
         
-    private double gananciaNeto;
+    @Column(precision = 25, scale = 15)
+    private BigDecimal gananciaNeto;
     
-    @Column(nullable = false)
-    private double importe; 
+    @Column(precision = 25, scale = 15)
+    private BigDecimal importe; 
     
-    private double descuentoPorcentaje;
+    @Column(precision = 25, scale = 15)
+    private BigDecimal descuentoPorcentaje;
     
-    private double descuentoNeto; 
+    @Column(precision = 25, scale = 15)
+    private BigDecimal descuentoNeto; 
     
-    @Column(nullable = false)
-    private double importeBruto;
+    @Column(precision = 25, scale = 15)
+    private BigDecimal importeBruto;
         
-    @Column(nullable = false)
-    private double ivaPorcentaje;
+    @Column(precision = 25, scale = 15)
+    private BigDecimal ivaPorcentaje;
     
-    @Column(nullable = false)
-    private double ivaNeto;
+    @Column(precision = 25, scale = 15)
+    private BigDecimal ivaNeto;
     
-    @Column(nullable = false)
-    private double importeNeto; 
+    @Column(precision = 25, scale = 15)
+    private BigDecimal importeNeto; 
 
 }

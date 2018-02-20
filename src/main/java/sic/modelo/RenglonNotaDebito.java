@@ -1,6 +1,7 @@
 package sic.modelo;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -25,20 +26,20 @@ public class RenglonNotaDebito implements Serializable {
     
     @Column(nullable = false)
     private String descripcion;
+     
+    @Column(precision = 25, scale = 15)
+    private BigDecimal monto; 
     
-    @Column(nullable = false)
-    private double monto; 
+    @Column(precision = 25, scale = 15)
+    private BigDecimal importeBruto; 
     
-    @Column(nullable = false)
-    private double importeBruto; 
+    @Column(precision = 25, scale = 15)
+    private BigDecimal ivaPorcentaje;
     
-    @Column(nullable = false)
-    private double ivaPorcentaje;
+    @Column(precision = 25, scale = 15)
+    private BigDecimal ivaNeto;
     
-    @Column(nullable = false)
-    private double ivaNeto;
-    
-    @Column(nullable = false)
-    private double importeNeto;
+    @Column(precision = 25, scale = 15)
+    private BigDecimal importeNeto;
 
 }

@@ -2,6 +2,7 @@ package sic.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -89,7 +90,7 @@ public class ReciboServiceImpl implements IReciboService {
     }
     
     @Override
-    public Double getMontoById(long idRecibo) {
+    public BigDecimal getMontoById(long idRecibo) {
         return reciboRepository.getMontoById(idRecibo);
     }
     
@@ -99,7 +100,8 @@ public class ReciboServiceImpl implements IReciboService {
         recibo.setNumSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
         recibo.setNumRecibo(this.getSiguienteNumeroRecibo(recibo.getEmpresa().getId_Empresa(), configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip()));
         recibo.setFecha(new Date());
-        double monto = recibo.getMonto();
+        recibo.setSaldoSobrante(BigDecimal.ZERO);
+        BigDecimal monto = recibo.getMonto();
         int i = 0;
         this.validarRecibo(recibo);
         recibo = reciboRepository.save(recibo);
@@ -109,7 +111,7 @@ public class ReciboServiceImpl implements IReciboService {
                     = this.renglonCuentaCorrienteService
                             .getRenglonesFacturasYNotaDebitoCuentaCorriente(
                                     this.cuentaCorrienteService.getCuentaCorrientePorCliente(recibo.getCliente().getId_Cliente()).getIdCuentaCorriente(), pageable);
-            while (renglonesCC.hasContent()) {
+            while (renglonesCC.hasContent() && monto.compareTo(BigDecimal.ZERO) != 0) {
                 monto = this.pagarMultiplesComprobantesCliente(renglonesCC.getContent(), recibo, monto, recibo.getFormaDePago(), recibo.getConcepto());
                 if (renglonesCC.hasNext()) {
                     i++;
@@ -126,7 +128,7 @@ public class ReciboServiceImpl implements IReciboService {
                     = this.renglonCuentaCorrienteService
                             .getRenglonesFacturasYNotaDebitoCuentaCorriente(
                                     this.cuentaCorrienteService.getCuentaCorrientePorProveedor(recibo.getProveedor().getId_Proveedor()).getIdCuentaCorriente(), pageable);
-            while (renglonesCC.hasContent()) {
+            while (renglonesCC.hasContent() && monto.compareTo(BigDecimal.ZERO) != 0) {
                 monto = this.pagarMultiplesComprobantesProveedor(renglonesCC.getContent(), recibo, monto, recibo.getFormaDePago(), recibo.getConcepto());
                 if (renglonesCC.hasNext()) {
                     i++;
@@ -147,7 +149,7 @@ public class ReciboServiceImpl implements IReciboService {
 
     @Override
     @Transactional
-    public Recibo actualizarSaldoSobrante(long idRecibo, double saldoSobrante) {
+    public Recibo actualizarSaldoSobrante(long idRecibo, BigDecimal saldoSobrante) {
         Recibo r = reciboRepository.findById(idRecibo);
         r.setSaldoSobrante(saldoSobrante);
         return reciboRepository.save(r);
@@ -155,11 +157,11 @@ public class ReciboServiceImpl implements IReciboService {
 
     private void validarRecibo(Recibo recibo) {
         //Requeridos
-        if (recibo.getMonto() <= 0) {
+        if (recibo.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_recibo_monto_igual_menor_cero"));
         }
-        if (recibo.getSaldoSobrante() < 0) {
+        if (recibo.getSaldoSobrante().compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_recibo_saldo_sobrante_menor_cero"));
         }
@@ -200,15 +202,15 @@ public class ReciboServiceImpl implements IReciboService {
     }
     
     @Override 
-    public List<Recibo> construirRecibos(long[] idsFormaDePago, Empresa empresa, Cliente cliente, Usuario usuario, double[] montos, double totalFactura, Date fecha) { 
+    public List<Recibo> construirRecibos(long[] idsFormaDePago, Empresa empresa, Cliente cliente, Usuario usuario, BigDecimal[] montos, BigDecimal totalFactura, Date fecha) { 
         List<Recibo> recibos = new ArrayList<>();
         int i = 0;
         if (idsFormaDePago != null && montos != null && idsFormaDePago.length == montos.length) {
-            double totalMontos = 0.0;
-            for (double monto : montos) {
-                totalMontos += monto;
+            BigDecimal totalMontos = BigDecimal.ZERO;
+            for (BigDecimal monto : montos) {
+                totalMontos = totalMontos.add(monto);
             }
-            if (totalMontos > totalFactura || totalMontos < 0) {
+            if (totalMontos.compareTo(totalFactura) > 0 || totalMontos.compareTo(BigDecimal.ZERO) < 0) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_pagos_superan_total_factura"));
             }
@@ -224,7 +226,7 @@ public class ReciboServiceImpl implements IReciboService {
                 recibo.setNumSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
                 recibo.setNumRecibo(this.getSiguienteNumeroRecibo(empresa.getId_Empresa(), recibo.getNumSerie()));
                 recibo.setConcepto("SALDO.");
-                recibo.setSaldoSobrante(0);
+                recibo.setSaldoSobrante(BigDecimal.ZERO);
                 recibos.add(recibo);
                 i++;
             }
@@ -233,31 +235,29 @@ public class ReciboServiceImpl implements IReciboService {
     }
       
     @Override
-    public double pagarMultiplesComprobantesCliente(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, double monto, FormaDePago formaDePago, String nota) {
+    public BigDecimal pagarMultiplesComprobantesCliente(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, BigDecimal monto, FormaDePago formaDePago, String nota) {
         for (RenglonCuentaCorriente rcc : renglonesCC) {
-            if (monto > 0.0) {
+            if (monto.compareTo(BigDecimal.ZERO) > 0) {
                 if (rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_B
                         || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_X
                         || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
                     FacturaVenta fv = (FacturaVenta) facturaService.getFacturaPorId(rcc.getIdMovimiento());
-                    double credito = notaService.calcularTotalCreditoPorFacturaVenta(fv);
-                    double saldoAPagar = this.pagoService.getSaldoAPagarFactura(fv.getId_Factura());
-                    if (fv.isPagada() == false && saldoAPagar > credito) {
+                    BigDecimal credito = notaService.calcularTotaCreditoPorFacturaVenta(fv);
+                    BigDecimal saldoAPagar = this.pagoService.getSaldoAPagarFactura(fv.getId_Factura());
+                    if (fv.isPagada() == false && saldoAPagar.compareTo(credito) > 0) {
                         fv.setPagos(this.pagoService.getPagosDeLaFactura(fv.getId_Factura()));
                         Pago nuevoPago = new Pago();
                         nuevoPago.setFormaDePago(formaDePago);
                         nuevoPago.setFactura(fv);
                         nuevoPago.setEmpresa(fv.getEmpresa());
                         nuevoPago.setNota(nota);
-                        saldoAPagar -= credito;
-                        if (saldoAPagar <= monto) {
-                            monto = monto - saldoAPagar;
-                            // Se utiliza round por un problema de presicion de la maquina ej: 828.65 - 614.0 = 214.64999...
-                            monto = Math.round(monto * 100.0) / 100.0;
+                        saldoAPagar = saldoAPagar.subtract(credito);
+                        if (saldoAPagar.compareTo(monto) < 1) {
+                            monto = monto.subtract(saldoAPagar);
                             nuevoPago.setMonto(saldoAPagar);
                         } else {
                             nuevoPago.setMonto(monto);
-                            monto = 0.0;
+                            monto = BigDecimal.ZERO;
                         }
                         nuevoPago.setFactura(fv);
                         nuevoPago.setRecibo(recibo);
@@ -274,15 +274,13 @@ public class ReciboServiceImpl implements IReciboService {
                         nuevoPago.setNotaDebito(nd);
                         nuevoPago.setEmpresa(nd.getEmpresa());
                         nuevoPago.setNota(nota);
-                        double saldoAPagar = this.pagoService.getSaldoAPagarNotaDebito(nd.getIdNota());
-                        if (saldoAPagar <= monto) {
-                            monto = monto - saldoAPagar;
-                            // Se utiliza round por un problema de presicion de la maquina ej: 828.65 - 614.0 = 214.64999...
-                            monto = Math.round(monto * 100.0) / 100.0;
+                        BigDecimal saldoAPagar = this.pagoService.getSaldoAPagarNotaDebito(nd.getIdNota());
+                        if (saldoAPagar.compareTo(monto) < 1) {
+                            monto = monto.subtract(saldoAPagar);
                             nuevoPago.setMonto(saldoAPagar);
                         } else {
                             nuevoPago.setMonto(monto);
-                            monto = 0.0;
+                            monto = BigDecimal.ZERO;
                         }
                         nuevoPago.setNotaDebito(nd);
                         nuevoPago.setRecibo(recibo);
@@ -295,9 +293,9 @@ public class ReciboServiceImpl implements IReciboService {
     }
     
     @Override
-    public double pagarMultiplesComprobantesProveedor(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, double monto, FormaDePago formaDePago, String nota) {
+    public BigDecimal pagarMultiplesComprobantesProveedor(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, BigDecimal monto, FormaDePago formaDePago, String nota) {
         for (RenglonCuentaCorriente rcc : renglonesCC) {
-            if (monto > 0.0) {
+            if (monto.compareTo(BigDecimal.ZERO) > 0) {
                 if (rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_B
                         || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_X
                         || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
@@ -309,15 +307,13 @@ public class ReciboServiceImpl implements IReciboService {
                         nuevoPago.setFactura(fc);
                         nuevoPago.setEmpresa(fc.getEmpresa());
                         nuevoPago.setNota(nota);
-                        double saldoAPagar = this.pagoService.getSaldoAPagarFactura(fc.getId_Factura());
-                        if (saldoAPagar <= monto) {
-                            monto = monto - saldoAPagar;
-                            // Se utiliza round por un problema de presicion de la maquina ej: 828.65 - 614.0 = 214.64999...
-                            monto = Math.round(monto * 100.0) / 100.0;
+                        BigDecimal saldoAPagar = this.pagoService.getSaldoAPagarFactura(fc.getId_Factura());
+                        if (saldoAPagar.compareTo(monto) < 1) {
+                            monto = monto.subtract(saldoAPagar);
                             nuevoPago.setMonto(saldoAPagar);
                         } else {
                             nuevoPago.setMonto(monto);
-                            monto = 0.0;
+                            monto = BigDecimal.ZERO;
                         }
                         nuevoPago.setFactura(fc);
                         nuevoPago.setRecibo(recibo);

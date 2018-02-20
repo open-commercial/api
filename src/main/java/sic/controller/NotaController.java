@@ -1,5 +1,6 @@
 package sic.controller;
 
+import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,9 +118,9 @@ public class NotaController {
     
     @GetMapping("/notas/saldo")
     @ResponseStatus(HttpStatus.OK)
-    public double getSaldoNotas(@RequestParam Long hasta,
-                                @RequestParam long idCliente, 
-                                @RequestParam long IdEmpresa) {
+    public BigDecimal getSaldoNotas(@RequestParam Long hasta,
+                                    @RequestParam long idCliente, 
+                                    @RequestParam long IdEmpresa) {
         Calendar fechaHasta = Calendar.getInstance();
         fechaHasta.setTimeInMillis(hasta);
         return notaService.getSaldoNotas(fechaHasta.getTime(), idCliente, IdEmpresa);
@@ -192,14 +193,14 @@ public class NotaController {
     
     @GetMapping("/notas/{idNota}/iva-neto")
     @ResponseStatus(HttpStatus.OK)
-    public double getIvaNetoNota(@PathVariable long idNota) {
+    public BigDecimal getIvaNetoNota(@PathVariable long idNota) {
         return notaService.getIvaNetoNota(idNota);
     }
     
     @GetMapping("/notas/renglon/credito/producto") 
     @ResponseStatus(HttpStatus.OK) 
     public List<RenglonNotaCredito> calcularRenglonNotaCreditoProducto(@RequestParam TipoDeComprobante tipoDeComprobante,
-                                                                       @RequestParam double[] cantidad,
+                                                                       @RequestParam BigDecimal[] cantidad,
                                                                        @RequestParam long[] idRenglonFactura) {
         return notaService.calcularRenglonCredito(tipoDeComprobante, cantidad, idRenglonFactura);
     }
@@ -207,67 +208,67 @@ public class NotaController {
     @GetMapping("/notas/renglon/debito/recibo/{idRecibo}")
     @ResponseStatus(HttpStatus.OK) 
     public List<RenglonNotaDebito> calcularRenglonNotaDebito(@PathVariable long idRecibo, 
-                                                             @RequestParam double monto,
-                                                             @RequestParam double ivaPorcentaje) {
+                                                             @RequestParam BigDecimal monto,
+                                                             @RequestParam BigDecimal ivaPorcentaje) {
         return notaService.calcularRenglonDebito(idRecibo, monto, ivaPorcentaje);
     }
     
     @GetMapping("/notas/credito/sub-total")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularSubTotalCredito(@RequestParam double[] importe) {
+    public BigDecimal calcularSubTotalCredito(@RequestParam BigDecimal[] importe) {
         return notaService.calcularSubTotalCredito(importe);
     }
     
     @GetMapping("/notas/credito/descuento-neto")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularDescuentoNetoCredito(@RequestParam double subTotal,
-                                               @RequestParam double descuentoPorcentaje) {
+    public BigDecimal calcularDescuentoNetoCredito(@RequestParam BigDecimal subTotal,
+                                                   @RequestParam BigDecimal descuentoPorcentaje) {
         return notaService.calcularDecuentoNetoCredito(subTotal, descuentoPorcentaje);
     }
     
     @GetMapping("/notas/credito/recargo-neto")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularRecargoNetoCredito(@RequestParam double subTotal,
-                                             @RequestParam double recargoPorcentaje) {
+    public BigDecimal calcularRecargoNetoCredito(@RequestParam BigDecimal subTotal,
+                                                 @RequestParam BigDecimal recargoPorcentaje) {
         return notaService.calcularRecargoNetoCredito(subTotal, recargoPorcentaje);
     }
     
     @GetMapping("/notas/credito/iva-neto")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularIVANetoCredito(@RequestParam TipoDeComprobante tipoDeComprobante,
-                                         @RequestParam double[] cantidades,
-                                         @RequestParam double[] ivaPorcentajeRenglones,
-                                         @RequestParam double[] ivaNetoRenglones,
-                                         @RequestParam double ivaPorcentaje,
-                                         @RequestParam double descuentoPorcentaje, 
-                                         @RequestParam double recargoPorcentaje){
+    public BigDecimal calcularIVANetoCredito(@RequestParam TipoDeComprobante tipoDeComprobante,
+                                             @RequestParam BigDecimal[] cantidades,
+                                             @RequestParam BigDecimal[] ivaPorcentajeRenglones,
+                                             @RequestParam BigDecimal[] ivaNetoRenglones,
+                                             @RequestParam BigDecimal ivaPorcentaje,
+                                             @RequestParam BigDecimal descuentoPorcentaje, 
+                                             @RequestParam BigDecimal recargoPorcentaje){
         return notaService.calcularIVANetoCredito(tipoDeComprobante, cantidades, ivaPorcentajeRenglones, ivaNetoRenglones, ivaPorcentaje, descuentoPorcentaje, recargoPorcentaje);
     }  
     
     @GetMapping("/notas/credito/sub-total-bruto")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularSubTotalBrutoCredito(TipoDeComprobante tipoDeComprobante, 
-                                               double subTotal, 
-                                               double recargoNeto, 
-                                               double descuentoNeto,
-                                               double iva105Neto,
-                                               double iva21Neto) {
+    public BigDecimal calcularSubTotalBrutoCredito(TipoDeComprobante tipoDeComprobante, 
+                                                   BigDecimal subTotal, 
+                                                   BigDecimal recargoNeto, 
+                                                   BigDecimal descuentoNeto,
+                                                   BigDecimal iva105Neto,
+                                                   BigDecimal iva21Neto) {
         return notaService.calcularSubTotalBrutoCredito(tipoDeComprobante, subTotal, recargoNeto, descuentoNeto, iva105Neto, iva21Neto);
     }
     
     @GetMapping("/notas/credito/total")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularTotalCredito(@RequestParam double subTotalBruto,                                
-                                       @RequestParam double iva105Neto,
-                                       @RequestParam double iva21Neto) {
+    public BigDecimal calcularTotalCredito(@RequestParam BigDecimal subTotalBruto,                                
+                                           @RequestParam BigDecimal iva105Neto,
+                                           @RequestParam BigDecimal iva21Neto) {
         return notaService.calcularTotalCredito(subTotalBruto, iva105Neto, iva21Neto);
     }
     
     @GetMapping("/notas/debito/total")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularTotalDebito(double subTotalBruto,                                
-                                      double iva21Neto,
-                                      double montoNoGravado) {
+    public BigDecimal calcularTotalDebito(BigDecimal subTotalBruto,                                
+                                          BigDecimal iva21Neto,
+                                          BigDecimal montoNoGravado) {
         return notaService.calcularTotalDebito(subTotalBruto, iva21Neto, montoNoGravado);
     }
     

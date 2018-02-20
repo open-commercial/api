@@ -1,6 +1,7 @@
 package sic.modelo;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -64,7 +65,8 @@ public class AjusteCuentaCorriente implements Serializable {
     @Enumerated(EnumType.STRING)
     private TipoDeComprobante tipoComprobante;
     
-    private double monto;
+    @Column(precision = 25, scale = 15)
+    private BigDecimal monto;
     
     private boolean eliminado;     
     

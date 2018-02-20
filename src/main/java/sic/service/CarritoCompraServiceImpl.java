@@ -1,5 +1,6 @@
 package sic.service;
 
+import java.math.BigDecimal;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -34,20 +35,20 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     }
 
     @Override
-    public double getTotal(long idUsuario) {
-        Double total = carritoCompraRepository.calcularTotal(idUsuario);
+    public BigDecimal getTotal(long idUsuario) {
+        BigDecimal total = carritoCompraRepository.calcularTotal(idUsuario);
         if (total == null) {
-            return 0;
+            return BigDecimal.ZERO;
         } else {
             return total;
         }        
     }
 
     @Override
-    public double getCantArticulos(long idUsuario) {
-        Double cantArticulos = carritoCompraRepository.getCantArticulos(idUsuario);
+    public BigDecimal getCantArticulos(long idUsuario) {
+        BigDecimal cantArticulos = carritoCompraRepository.getCantArticulos(idUsuario);
         if (cantArticulos == null) {
-            return 0;
+            return BigDecimal.ZERO;
         } else {
             return cantArticulos;
         }
@@ -69,21 +70,21 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     }
 
     @Override
-    public void agregarOrModificarItem(long idUsuario, long idProducto, double cantidad) {
+    public void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad) {
         Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
         Producto producto = productoService.getProductoPorId(idProducto);
         ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(usuario, producto);
         if (item == null) {
-            double importe = producto.getPrecioLista() * cantidad;
+            BigDecimal importe = producto.getPrecioLista().multiply(cantidad);
             carritoCompraRepository.save(new ItemCarritoCompra(null, cantidad, producto, importe, usuario));
         } else {
-            double nuevaCantidad = item.getCantidad() + cantidad;
-            if (nuevaCantidad < 0) {
-                item.setCantidad(0);    
+            BigDecimal nuevaCantidad = item.getCantidad().multiply(cantidad);
+            if (nuevaCantidad.compareTo(BigDecimal.ZERO) < 0) {
+                item.setCantidad(BigDecimal.ZERO);    
             } else {
                 item.setCantidad(nuevaCantidad);    
             }            
-            item.setImporte(producto.getPrecioLista() * nuevaCantidad);
+            item.setImporte(producto.getPrecioLista().multiply(nuevaCantidad));
             carritoCompraRepository.save(item);
         }
     }

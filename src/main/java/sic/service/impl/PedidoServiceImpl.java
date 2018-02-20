@@ -5,6 +5,8 @@ import com.querydsl.core.types.dsl.DateExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -49,6 +51,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
     private final PedidoRepository pedidoRepository;
     private final IFacturaService facturaService;    
+    private final static BigDecimal CIEN = new BigDecimal("100");
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
@@ -143,12 +146,12 @@ public class PedidoServiceImpl implements IPedidoService {
 
     @Override
     public Pedido calcularTotalActualDePedido(Pedido pedido) {
-        double porcentajeDescuento;
-        double totalActual = 0;
+        BigDecimal porcentajeDescuento;
+        BigDecimal totalActual = BigDecimal.ZERO;
         for (RenglonPedido renglonPedido : this.getRenglonesDelPedido(pedido.getId_Pedido())) {
-            porcentajeDescuento = (1 - (renglonPedido.getDescuento_porcentaje() / 100));
-            renglonPedido.setSubTotal((renglonPedido.getProducto().getPrecioLista() * renglonPedido.getCantidad() * porcentajeDescuento));
-            totalActual += renglonPedido.getSubTotal();
+            porcentajeDescuento = BigDecimal.ONE.subtract(renglonPedido.getDescuento_porcentaje().divide(CIEN, 15, RoundingMode.HALF_UP));
+            renglonPedido.setSubTotal(renglonPedido.getProducto().getPrecioLista().multiply(renglonPedido.getCantidad()).multiply(porcentajeDescuento));
+            totalActual = totalActual.add(renglonPedido.getSubTotal());
         }
         pedido.setTotalActual(totalActual);
         return pedido;
@@ -268,8 +271,8 @@ public class PedidoServiceImpl implements IPedidoService {
         this.getFacturasDelPedido(nroPedido).stream().forEach(f -> {
             f.getRenglones().stream().forEach(r -> {
                 renglonesDeFacturas.add(facturaService.calcularRenglon(f.getTipoComprobante(),
-                        Movimiento.VENTA, r.getCantidad(),r.getId_ProductoItem(), r.getDescuento_porcentaje(), false));
-            });      
+                        Movimiento.VENTA, r.getCantidad(), r.getId_ProductoItem(), r.getDescuento_porcentaje(), false));
+            });
         });
         HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
         if (!renglonesDeFacturas.isEmpty()) {
@@ -277,7 +280,7 @@ public class PedidoServiceImpl implements IPedidoService {
                 if (listaRenglonesUnificados.containsKey(r.getId_ProductoItem())) {
                     listaRenglonesUnificados.get(r.getId_ProductoItem())
                             .setCantidad(listaRenglonesUnificados
-                                    .get(r.getId_ProductoItem()).getCantidad() + r.getCantidad());
+                                    .get(r.getId_ProductoItem()).getCantidad().add(r.getCantidad()));
                 } else {
                     listaRenglonesUnificados.put(r.getId_ProductoItem(), r);
                 }

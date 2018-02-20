@@ -1,5 +1,6 @@
 package sic.controller;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -62,7 +63,7 @@ public class GastoController {
     
     @GetMapping("/gastos/total")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularTotalGastos(@RequestParam long[] idGasto) {
+    public BigDecimal calcularTotalGastos(@RequestParam long[] idGasto) {
         List<Gasto> gastos = new ArrayList<>();
         for (long id : idGasto) {
             gastos.add(gastoService.getGastoPorId(id));

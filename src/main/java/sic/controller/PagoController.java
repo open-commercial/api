@@ -1,5 +1,6 @@
 package sic.controller;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -45,7 +46,7 @@ public class PagoController {
     
     @GetMapping("/pagos/total")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularTotalPagos(@RequestParam long[] idPago) {
+    public BigDecimal calcularTotalPagos(@RequestParam long[] idPago) {
         List<Pago> pagos = new ArrayList<>();
         for (long id : idPago) {
             pagos.add(pagoService.getPagoPorId(id));
@@ -102,25 +103,25 @@ public class PagoController {
     
     @GetMapping("/pagos/facturas/{idFactura}/saldo")
     @ResponseStatus(HttpStatus.OK)
-    public double getSaldoAPagarFacturas(@PathVariable long idFactura) {
+    public BigDecimal getSaldoAPagarFacturas(@PathVariable long idFactura) {
         return pagoService.getSaldoAPagarFactura(idFactura);
     }
     
     @GetMapping("/pagos/facturas/{idFactura}/total-pagado")
     @ResponseStatus(HttpStatus.OK)
-    public double getTotalPagadoFacturas(@PathVariable long idFactura) {
+    public BigDecimal getTotalPagadoFacturas(@PathVariable long idFactura) {
         return facturaService.getTotalPagado(idFactura);
     }
     
     @GetMapping("/pagos/notas/{idNota}/saldo")
     @ResponseStatus(HttpStatus.OK)
-    public double getSaldoAPagarNotas(@PathVariable long idNota) {
+    public BigDecimal getSaldoAPagarNotas(@PathVariable long idNota) {
         return pagoService.getSaldoAPagarNotaDebito(idNota);
     }
     
     @GetMapping("/pagos/notas/{idNota}/total-pagado")
     @ResponseStatus(HttpStatus.OK)
-    public double getTotalPagadoNotas(@PathVariable long idNota) {
+    public BigDecimal getTotalPagadoNotas(@PathVariable long idNota) {
         return notaService.getTotalPagado(idNota);
     }
     

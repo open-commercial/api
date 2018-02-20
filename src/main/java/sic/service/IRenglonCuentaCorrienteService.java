@@ -1,5 +1,6 @@
 package sic.service;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +28,7 @@ public interface IRenglonCuentaCorrienteService {
     
     Slice<RenglonCuentaCorriente> getRenglonesFacturasYNotaDebitoCuentaCorriente(long idCuentaCorriente, Pageable page);
     
-    Double getSaldoCuentaCorriente(long idCuentaCorriente);
+    BigDecimal getSaldoCuentaCorriente(long idCuentaCorriente);
     
     Date getFechaUltimoMovimiento(long idCuentaCorriente);
     

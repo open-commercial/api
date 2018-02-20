@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -61,7 +62,7 @@ public class RenglonCuentaCorrienteServiceImpl implements IRenglonCuentaCorrient
     }
 
     @Override
-    public Double getSaldoCuentaCorriente(long idCuentaCorriente) {
+    public BigDecimal getSaldoCuentaCorriente(long idCuentaCorriente) {
         return renglonCuentaCorrienteRepository.getSaldoCuentaCorriente(idCuentaCorriente);
     }
 

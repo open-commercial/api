@@ -1,5 +1,6 @@
 package sic.repository;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -19,7 +20,7 @@ public interface NotaRepository<T extends Nota> extends PagingAndSortingReposito
     Nota findById(@Param("idNota") long idNota);
     
     @Query("SELECT n.total FROM Nota n WHERE n.idNota= :idNota AND n.eliminada = false")
-    Double getTotalById(@Param("idNota") long idNota);
+    BigDecimal getTotalById(@Param("idNota") long idNota);
     
     Nota findByTipoComprobanteAndNroNotaAndClienteAndEliminada(TipoDeComprobante tipoDeComprobante, long nroNota, Cliente cliente, boolean eliminada);
     

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -78,9 +79,11 @@ public class Pedido implements Serializable {
     @JsonProperty(access = Access.WRITE_ONLY)
     private List<RenglonPedido> renglones;
 
-    private double totalEstimado;
+    @Column(precision = 25, scale = 15)
+    private BigDecimal totalEstimado;
 
-    private double totalActual;
+    @Column(precision = 25, scale = 15)
+    private BigDecimal totalActual;
     
     @Enumerated(EnumType.STRING)
     private EstadoPedido estado;

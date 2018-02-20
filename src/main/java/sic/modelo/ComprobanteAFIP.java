@@ -1,5 +1,6 @@
 package sic.modelo;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import lombok.Builder;
 import lombok.Data;
@@ -16,9 +17,9 @@ public class ComprobanteAFIP {
     private long numFacturaAfip;
     private Empresa empresa;    
     private Cliente cliente;    
-    private double subtotalBruto;    
-    private double iva105neto;    
-    private double iva21neto;    
-    private double montoNoGravado;
-    private double total;
+    private BigDecimal subtotalBruto;    
+    private BigDecimal iva105neto;    
+    private BigDecimal iva21neto;    
+    private BigDecimal montoNoGravado;
+    private BigDecimal total;
 }

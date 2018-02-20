@@ -1,5 +1,6 @@
 package sic.service;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -17,13 +18,13 @@ public interface IReciboService {
     
     Recibo getReciboDelPago(long idPago);
     
-    Double getMontoById(long idRecibo);
+    BigDecimal getMontoById(long idRecibo);
     
     Recibo guardar(Recibo recibo);
     
-    Recibo actualizarSaldoSobrante(long idRecibo, double monto);
+    Recibo actualizarSaldoSobrante(long idRecibo, BigDecimal monto);
     
-    List<Recibo> construirRecibos(long[] formaDePago, Empresa empresa, Cliente cliente, Usuario usuario, double[] monto, double totalFactura, Date fecha);
+    List<Recibo> construirRecibos(long[] formaDePago, Empresa empresa, Cliente cliente, Usuario usuario, BigDecimal[] monto, BigDecimal totalFactura, Date fecha);
     
     long getSiguienteNumeroRecibo(long idEmpresa, long serie);
     
@@ -37,9 +38,9 @@ public interface IReciboService {
     
     List<Recibo> getByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(Date desde, Date hasta, FormaDePago formaDePago, Empresa empresa);
     
-    double pagarMultiplesComprobantesCliente(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, double monto, FormaDePago formaDePago, String nota);
+    BigDecimal pagarMultiplesComprobantesCliente(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, BigDecimal monto, FormaDePago formaDePago, String nota);
     
-    double pagarMultiplesComprobantesProveedor(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, double monto, FormaDePago formaDePago, String nota);
+    BigDecimal pagarMultiplesComprobantesProveedor(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, BigDecimal monto, FormaDePago formaDePago, String nota);
     
     List<Recibo> getRecibosConSaldoSobranteCliente(long idEmpresa, long idCliente);
     

@@ -22,11 +22,11 @@
 	<field name="descripcionItem" class="java.lang.String"/>
 	<field name="codigoItem" class="java.lang.String"/>
 	<field name="medidaItem" class="java.lang.String"/>
-	<field name="cantidad" class="java.lang.Double"/>
-	<field name="precioUnitario" class="java.lang.Double"/>
-	<field name="descuento_porcentaje" class="java.lang.Double"/>
-	<field name="importe" class="java.lang.Double"/>
-	<field name="iva_porcentaje" class="java.lang.Double"/>
+	<field name="cantidad" class="java.math.BigDecimal"/>
+	<field name="precioUnitario" class="java.math.BigDecimal"/>
+	<field name="descuento_porcentaje" class="java.math.BigDecimal"/>
+	<field name="importe" class="java.math.BigDecimal"/>
+	<field name="iva_porcentaje" class="java.math.BigDecimal"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -249,7 +249,7 @@
 					<font size="12" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("$#,##0.00").format(Double.valueOf($P{recibo}.getMonto()))]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("$#,##0.00").format(Double.valueOf($P{recibo}.getMonto().doubleValue()))]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="60" width="555" height="15" uuid="73b22264-238a-44d1-9501-19fe03d257be">
@@ -266,7 +266,7 @@
 				<textElement verticalAlignment="Top">
 					<font size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Recibí conforme de " + $P{recibo}.getCliente().getRazonSocial() + " la cantidad de " + new java.text.DecimalFormat("$#,##0.00").format(Double.valueOf($P{recibo}.getMonto())) + " por concepto de " + $P{recibo}.getConcepto()]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Recibí conforme de " + $P{recibo}.getCliente().getRazonSocial() + " la cantidad de " + new java.text.DecimalFormat("$#,##0.00").format(Double.valueOf($P{recibo}.getMonto().doubleValue())) + " por concepto de " + $P{recibo}.getConcepto()]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="130" width="60" height="15" uuid="cdb318a8-d17d-463d-9a89-7c074621b64a">

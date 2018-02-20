@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.4.3.final using JasperReports Library version 6.4.3  -->
+<!-- Created with Jaspersoft Studio version 6.5.0.final using JasperReports Library version 6.5.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="NotaCredito" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e47a212f-3954-4de9-aca2-5bd71a6098c5">
 	<property name="ireport.zoom" value="3.0"/>
 	<property name="ireport.x" value="0"/>
@@ -14,11 +14,11 @@
 	<field name="descripcionItem" class="java.lang.String"/>
 	<field name="codigoItem" class="java.lang.String"/>
 	<field name="medidaItem" class="java.lang.String"/>
-	<field name="cantidad" class="java.lang.Double"/>
-	<field name="precioUnitario" class="java.lang.Double"/>
-	<field name="descuentoPorcentaje" class="java.lang.Double"/>
-	<field name="importe" class="java.lang.Double"/>
-	<field name="ivaPorcentaje" class="java.lang.Double"/>
+	<field name="cantidad" class="java.math.BigDecimal"/>
+	<field name="precioUnitario" class="java.math.BigDecimal"/>
+	<field name="descuentoPorcentaje" class="java.math.BigDecimal"/>
+	<field name="importe" class="java.math.BigDecimal"/>
+	<field name="ivaPorcentaje" class="java.math.BigDecimal"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -478,7 +478,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textElement textAlignment="Center">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{cantidad}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00">
 				<reportElement x="415" y="0" width="52" height="15" uuid="ef48b8f6-ecc3-42f2-b6f9-269aae20c81e">
@@ -487,7 +487,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textElement textAlignment="Center">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{precioUnitario}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{precioUnitario}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="">
 				<reportElement x="467" y="0" width="31" height="15" uuid="f3e07bc2-0b6a-4759-80ae-837e9ad074b8">
@@ -496,7 +496,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textElement textAlignment="Center">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{descuentoPorcentaje}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{descuentoPorcentaje}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00">
 				<reportElement x="498" y="0" width="57" height="15" uuid="e044f181-0b15-492c-bf20-af4d406e94db">
@@ -505,7 +505,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textElement textAlignment="Center">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{importe}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{importe}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="">
 				<reportElement x="370" y="0" width="45" height="15" uuid="7a5d637a-a063-4bbe-a486-b313a3f62c77">
@@ -607,7 +607,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getSubTotalBruto()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getSubTotalBruto().doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="61" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="18ea0bde-b849-4259-b982-1dde09844dba">
@@ -617,7 +617,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getIva105Neto()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getIva105Neto().doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="76" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="e063a476-1e47-4947-9f7f-04ad07139b9e">
@@ -627,7 +627,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getIva21Neto()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getIva21Neto().doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="91" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="0287f0d5-94e6-4d59-ac75-cfff995614c1">
@@ -637,7 +637,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 					<font size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getTotal()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getTotal().doubleValue()]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="16" width="40" height="15" uuid="43f39702-e0af-456b-bea4-3952f75b1aa5">
@@ -712,7 +712,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getSubTotal()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getSubTotal().doubleValue()]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="360" y="16" width="70" height="15" uuid="b9c4595c-acf7-49cf-a699-fda0721f00dc">
@@ -743,7 +743,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getDescuentoNeto()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getDescuentoNeto().doubleValue()]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="360" y="31" width="70" height="15" uuid="56b32364-e9df-4484-9e27-5ffc74dc504c">
@@ -774,7 +774,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getRecargoNeto()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getRecargoNeto().doubleValue()]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="120" height="16" uuid="44c363f9-bdfd-4277-a459-912e1d05b36b">

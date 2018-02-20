@@ -1,5 +1,6 @@
 package sic.repository.custom;
 
+import java.math.BigDecimal;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -21,7 +22,7 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
     private EntityManager em;
 
     @Override
-    public double calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria) {
+    public BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria) {
         String query = "SELECT SUM(f.total) FROM FacturaVenta f WHERE f.empresa = :empresa AND f.eliminada = false";
         //Fecha
         if (criteria.isBuscaPorFecha() == true) {
@@ -60,17 +61,17 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
             query += " AND f.pagada = true";
         }
         query += " ORDER BY f.fecha DESC";
-        TypedQuery<Double> typedQuery = em.createQuery(query, Double.class);
+        TypedQuery<BigDecimal> typedQuery = em.createQuery(query, BigDecimal.class);
         typedQuery.setParameter("empresa", criteria.getEmpresa());
         //si es 0, recupera TODOS los registros
         if (criteria.getCantRegistros() != 0) {
             typedQuery.setMaxResults(criteria.getCantRegistros());
         }
-        return (typedQuery.getSingleResult() == null) ? 0.0 : typedQuery.getSingleResult();
+        return (typedQuery.getSingleResult() == null) ? BigDecimal.ZERO : typedQuery.getSingleResult();
     }
 
     @Override
-    public double calcularIVA_Venta(BusquedaFacturaVentaCriteria criteria, TipoDeComprobante[] tipoComprobante) {
+    public BigDecimal calcularIVA_Venta(BusquedaFacturaVentaCriteria criteria, TipoDeComprobante[] tipoComprobante) {
         String query = "SELECT SUM(f.iva_105_neto + f.iva_21_neto) FROM FacturaVenta f WHERE f.empresa = :empresa AND f.eliminada = false";
         //Fecha
         if (criteria.isBuscaPorFecha() == true) {
@@ -118,17 +119,17 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
             query += " AND f.pagada = true";
         }
         query += " ORDER BY f.fecha DESC";
-        TypedQuery<Double> typedQuery = em.createQuery(query, Double.class);
+        TypedQuery<BigDecimal> typedQuery = em.createQuery(query, BigDecimal.class);
         typedQuery.setParameter("empresa", criteria.getEmpresa());
         //si es 0, recupera TODOS los registros
         if (criteria.getCantRegistros() != 0) {
             typedQuery.setMaxResults(criteria.getCantRegistros());
         }
-        return (typedQuery.getSingleResult() == null) ? 0.0 : typedQuery.getSingleResult();
+        return (typedQuery.getSingleResult() == null) ? BigDecimal.ZERO : typedQuery.getSingleResult();
     }
 
     @Override
-    public double calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria) {
+    public BigDecimal calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria) {
         String query = "SELECT SUM(r.ganancia_neto * r.cantidad) FROM FacturaVenta f LEFT JOIN f.renglones r WHERE f.empresa = :empresa AND f.eliminada = false";
         //Fecha
         if (criteria.isBuscaPorFecha() == true) {
@@ -168,13 +169,13 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
             query += " AND f.pagada = true";
         }
         query += " ORDER BY f.fecha DESC";
-        TypedQuery<Double> typedQuery = em.createQuery(query, Double.class);
+        TypedQuery<BigDecimal> typedQuery = em.createQuery(query, BigDecimal.class);
         typedQuery.setParameter("empresa", criteria.getEmpresa());
         //si es 0, recupera TODOS los registros
         if (criteria.getCantRegistros() != 0) {
             typedQuery.setMaxResults(criteria.getCantRegistros());
         }
-        return (typedQuery.getSingleResult() == null) ? 0.0 : typedQuery.getSingleResult();
+        return (typedQuery.getSingleResult() == null) ? BigDecimal.ZERO : typedQuery.getSingleResult();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package sic.builder;
 
+import java.math.BigDecimal;
 import sic.modelo.RenglonFactura;
 
 public class RenglonFacturaBuilder {
@@ -9,17 +10,17 @@ public class RenglonFacturaBuilder {
     private String codigoItem = "mdk.03617";
     private String descripcionItem = "Ventiladores de pie";
     private String medidaItem = "UNIDAD";
-    private double cantidad = 1;
-    private double precioUnitario = 1300;
-    private double descuento_porcentaje = 0.0;
-    private double descuento_neto = 0.0;
-    private double iva_porcentaje = 21.00;
-    private double iva_neto = 273;
-    private double impuesto_porcentaje = 0.0;
-    private double impuesto_neto = 0;
-    private double ganancia_porcentaje = 30;
-    private double ganancia_neto = 300;
-    private double importe = 1573;
+    private BigDecimal cantidad = BigDecimal.ONE;
+    private BigDecimal precioUnitario = new BigDecimal("1300");
+    private BigDecimal descuento_porcentaje = BigDecimal.ZERO;
+    private BigDecimal descuento_neto = BigDecimal.ZERO;
+    private BigDecimal iva_porcentaje = new BigDecimal("21.00");
+    private BigDecimal iva_neto = new BigDecimal("273");
+    private BigDecimal impuesto_porcentaje = BigDecimal.ZERO;
+    private BigDecimal impuesto_neto = BigDecimal.ZERO;
+    private BigDecimal ganancia_porcentaje = new BigDecimal("30");
+    private BigDecimal ganancia_neto = new BigDecimal("300");
+    private BigDecimal importe = new BigDecimal("1573");
     
     public RenglonFactura build() {
         return new RenglonFactura(id_RenglonFactura, id_ProductoItem, codigoItem, 
@@ -53,57 +54,57 @@ public class RenglonFacturaBuilder {
         return this;
     }
     
-    public RenglonFacturaBuilder withCantidad(double cantidad) {
+    public RenglonFacturaBuilder withCantidad(BigDecimal cantidad) {
         this.cantidad = cantidad;
         return this;
     }
     
-    public RenglonFacturaBuilder withPrecioUnitario(double precioUnitario) {
+    public RenglonFacturaBuilder withPrecioUnitario(BigDecimal precioUnitario) {
         this.precioUnitario = precioUnitario;
         return this;
     }
     
-    public RenglonFacturaBuilder withDescuentoPorcentaje(double descuentoPorcentaje) {
+    public RenglonFacturaBuilder withDescuentoPorcentaje(BigDecimal descuentoPorcentaje) {
         this.descuento_porcentaje = descuentoPorcentaje;
         return this;
     }
     
-    public RenglonFacturaBuilder withDescuentoNeto(double descuentoNeto) {
+    public RenglonFacturaBuilder withDescuentoNeto(BigDecimal descuentoNeto) {
         this.descuento_neto = descuentoNeto;
         return this;
     }
     
-    public RenglonFacturaBuilder withIVAPorcentaje(double ivaPorcentaje) {
+    public RenglonFacturaBuilder withIVAPorcentaje(BigDecimal ivaPorcentaje) {
         this.iva_porcentaje = ivaPorcentaje;
         return this;
     }
     
-    public RenglonFacturaBuilder withIVAneto(double ivaNeto) {
+    public RenglonFacturaBuilder withIVAneto(BigDecimal ivaNeto) {
         this.iva_neto = ivaNeto;
         return this;
     }
     
-    public RenglonFacturaBuilder withImpuestoPorcentaje(double impuestoPorcentaje) {
+    public RenglonFacturaBuilder withImpuestoPorcentaje(BigDecimal impuestoPorcentaje) {
         this.impuesto_porcentaje = impuestoPorcentaje;
         return this;
     }
     
-    public RenglonFacturaBuilder withImpuestoNeto(double impuestoNeto) {
+    public RenglonFacturaBuilder withImpuestoNeto(BigDecimal impuestoNeto) {
         this.impuesto_neto = impuestoNeto;
         return this;
     }
     
-    public RenglonFacturaBuilder withGananciaPorcentaje(double gananciaPorcentaje) {
+    public RenglonFacturaBuilder withGananciaPorcentaje(BigDecimal gananciaPorcentaje) {
         this.ganancia_porcentaje = gananciaPorcentaje;
         return this;
     }
     
-    public RenglonFacturaBuilder withGananciaNeto(double gananciaNeto) {
+    public RenglonFacturaBuilder withGananciaNeto(BigDecimal gananciaNeto) {
         this.ganancia_neto = gananciaNeto;
         return this;
     }
     
-    public RenglonFacturaBuilder withImporte(double importe) {
+    public RenglonFacturaBuilder withImporte(BigDecimal importe) {
         this.importe = importe;
         return this;
     }

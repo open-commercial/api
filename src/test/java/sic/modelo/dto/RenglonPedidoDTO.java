@@ -1,6 +1,7 @@
 package sic.modelo.dto;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,9 +15,9 @@ public class RenglonPedidoDTO implements Serializable {
 
     private long id_RenglonPedido;
     private ProductoDTO producto;
-    private double cantidad;
-    private double descuento_porcentaje;
-    private double descuento_neto;
-    private double subTotal;
+    private BigDecimal cantidad;
+    private BigDecimal descuento_porcentaje;
+    private BigDecimal descuento_neto;
+    private BigDecimal subTotal;
 
 }

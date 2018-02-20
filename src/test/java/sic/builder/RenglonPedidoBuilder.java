@@ -1,5 +1,6 @@
 package sic.builder;
 
+import java.math.BigDecimal;
 import sic.modelo.dto.ProductoDTO;
 import sic.modelo.dto.RenglonPedidoDTO;
 
@@ -7,10 +8,10 @@ public class RenglonPedidoBuilder {
     
     private long id_RenglonPedido = 0L;
     private ProductoDTO producto = new ProductoBuilder().build();
-    private double cantidad = 2;
-    private double descuento_porcentaje = 0.0;
-    private double descuento_neto = 0.0;
-    private double subTotal = 363;
+    private BigDecimal cantidad = new BigDecimal("2");
+    private BigDecimal descuento_porcentaje = BigDecimal.ZERO;
+    private BigDecimal descuento_neto = BigDecimal.ZERO;
+    private BigDecimal subTotal = new BigDecimal("363");
     
     public RenglonPedidoDTO build() {
         return new RenglonPedidoDTO(id_RenglonPedido, producto, cantidad, descuento_porcentaje, descuento_neto, subTotal);
@@ -26,22 +27,22 @@ public class RenglonPedidoBuilder {
         return this;
     }
 
-    public RenglonPedidoBuilder withCantidad(double cantidad) {
+    public RenglonPedidoBuilder withCantidad(BigDecimal cantidad) {
         this.cantidad = cantidad;
         return this;
     }
 
-    public RenglonPedidoBuilder withDescuentoPorcentaje(double descuento_porcentaje) {
+    public RenglonPedidoBuilder withDescuentoPorcentaje(BigDecimal descuento_porcentaje) {
         this.descuento_porcentaje = descuento_porcentaje;
         return this;
     }
 
-    public RenglonPedidoBuilder withDescuentoNeto(double descuentoNeto) {
+    public RenglonPedidoBuilder withDescuentoNeto(BigDecimal descuentoNeto) {
         this.descuento_neto = descuentoNeto;
         return this;
     }
 
-    public RenglonPedidoBuilder withSubTotal(double subTotal) {
+    public RenglonPedidoBuilder withSubTotal(BigDecimal subTotal) {
         this.subTotal = subTotal;
         return this;
     }
