@@ -56,9 +56,6 @@ public class RenglonCuentaCorriente implements Serializable {
             + " END")
     private int prioridadPago;
     
-    @Column(name = "numero_renglon_cuenta_corriente", nullable = false)
-    private long numeroRenglonCuentaCorriente;
-    
     private long serie;
     
     private long numero;
@@ -106,7 +103,7 @@ public class RenglonCuentaCorriente implements Serializable {
     
     @Formula(value = "(SELECT SUM(r.monto) "
             + "FROM rengloncuentacorriente r "
-            + "WHERE r.id_cuenta_corriente = id_cuenta_corriente AND r.eliminado = false AND r.numero_renglon_cuenta_corriente <= numero_renglon_cuenta_corriente)")
+            + "WHERE r.id_cuenta_corriente = id_cuenta_corriente AND r.eliminado = false AND r.id_renglon_cuenta_corriente <= id_renglon_cuenta_corriente)")
     private Double saldo;
     
 }
