@@ -191,8 +191,6 @@ public class FacturaController {
                                                  .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
                                                  .numSerie((nroSerie != null) ? nroSerie : 0)
                                                  .numFactura((nroFactura != null) ? nroFactura : 0)
-                                                 .buscarSoloInpagas(soloImpagas)
-                                                 .buscaSoloPagadas(soloPagas)
                                                  .cantRegistros(0)
                                                  .pageable(pageable)
                                                  .build();
@@ -264,8 +262,6 @@ public class FacturaController {
                 .nroPedido((nroPedido != null) ? nroPedido : 0)
                 .buscaPorTipoComprobante(tipoDeComprobante != null)
                 .tipoComprobante((tipoDeComprobante != null) ? tipoDeComprobante : null)
-                .buscaSoloImpagas(soloImpagas)
-                .buscaSoloPagadas(soloPagas)
                 .cantRegistros(0)
                 .pageable(pageable)
                 .build();
@@ -307,35 +303,6 @@ public class FacturaController {
                                                                @RequestParam TipoDeComprobante tipoDeComprobante) {
         return facturaService.convertirRenglonesPedidoEnRenglonesFactura(pedidoService.getPedidoPorId(idPedido), tipoDeComprobante);
     } 
-    
-    @GetMapping("/facturas/pagos/{idPago}") 
-    @ResponseStatus(HttpStatus.OK)
-    public Factura getFacturaDelPago(@PathVariable long idPago) {
-        return facturaService.getFacturaDelPago(idPago);
-    }
-         
-    @GetMapping("/facturas/validaciones-pago-multiple")
-    @ResponseStatus(HttpStatus.OK)
-    public boolean validarFacturasParaPagoMultiple(@RequestParam long[] idFactura,
-                                                   @RequestParam Movimiento movimiento) {
-        List<Factura> facturas = new ArrayList<>();
-        for (long id : idFactura) {
-            facturas.add(facturaService.getFacturaPorId(id));
-        }
-        if (facturaService.validarFacturasParaPagoMultiple(facturas, movimiento)) {
-            return true;
-        } else if (!facturaService.validarClienteProveedorParaPagosMultiples(facturas, movimiento)) {              
-            if (movimiento == Movimiento.COMPRA) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_facturas_distintos_proveedores"));
-            } else if (movimiento == Movimiento.VENTA) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_facturas_distintos_clientes"));
-            }
-
-        } else if (!facturaService.validarFacturasImpagasParaPagoMultiple(facturas)) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_facturas_seEncuentran_pagadas"));
-        }
-        return false;
-    }
     
     @GetMapping("/facturas/renglon")
     @ResponseStatus(HttpStatus.OK)
@@ -403,8 +370,6 @@ public class FacturaController {
                                                  .nroPedido((nroPedido != null) ? nroPedido : 0)
                                                  .buscaPorTipoComprobante(tipoDeComprobante != null)
                                                  .tipoComprobante((tipoDeComprobante != null) ? tipoDeComprobante : null)
-                                                 .buscaSoloImpagas(soloImpagas)
-                                                 .buscaSoloPagadas(soloPagas)
                                                  .cantRegistros(0)
                                                  .build();
         return facturaService.calcularTotalFacturadoVenta(criteria);
@@ -446,8 +411,6 @@ public class FacturaController {
                                                  .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
                                                  .numSerie((nroSerie != null) ? nroSerie : 0)
                                                  .numFactura((nroFactura != null) ? nroFactura : 0)
-                                                 .buscarSoloInpagas(soloImpagas)
-                                                 .buscaSoloPagadas(soloPagas)
                                                  .cantRegistros(0)
                                                  .build();
         return facturaService.calcularTotalFacturadoCompra(criteria);
@@ -509,8 +472,6 @@ public class FacturaController {
                 .nroPedido((nroPedido != null) ? nroPedido : 0)
                 .buscaPorTipoComprobante(tipoDeComprobante != null)
                 .tipoComprobante((tipoDeComprobante != null) ? tipoDeComprobante : null)
-                .buscaSoloImpagas(soloImpagas)
-                .buscaSoloPagadas(soloPagas)
                 .cantRegistros(0)
                 .build();
         return facturaService.calcularIvaVenta(criteria);
@@ -552,8 +513,6 @@ public class FacturaController {
                                                  .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
                                                  .numSerie((nroSerie != null) ? nroSerie : 0)
                                                  .numFactura((nroFactura != null) ? nroFactura : 0)
-                                                 .buscarSoloInpagas(soloImpagas)
-                                                 .buscaSoloPagadas(soloPagas)
                                                  .cantRegistros(0)
                                                  .build();
         return facturaService.calcularIvaCompra(criteria);
@@ -615,8 +574,6 @@ public class FacturaController {
                                                  .nroPedido((nroPedido != null) ? nroPedido : 0)
                                                  .buscaPorTipoComprobante(tipoDeComprobante != null)
                                                  .tipoComprobante((tipoDeComprobante != null) ? tipoDeComprobante : null)
-                                                 .buscaSoloImpagas(soloImpagas)
-                                                 .buscaSoloPagadas(soloPagas)
                                                  .cantRegistros(0)
                                                  .build();
         return facturaService.calcularGananciaTotal(criteria);

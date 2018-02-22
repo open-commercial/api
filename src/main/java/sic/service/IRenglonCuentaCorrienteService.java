@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import sic.modelo.AjusteCuentaCorriente;
 import sic.modelo.CuentaCorriente;
 import sic.modelo.Factura;
@@ -25,8 +24,6 @@ public interface IRenglonCuentaCorrienteService {
     RenglonCuentaCorriente getRenglonCuentaCorrienteDeAjusteCuentaCorriente(AjusteCuentaCorriente ajusteCC, boolean eliminado);
     
     Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(CuentaCorriente cuentaCorriente, boolean eliminado, Pageable page);
-    
-    Slice<RenglonCuentaCorriente> getRenglonesFacturasYNotaDebitoCuentaCorriente(long idCuentaCorriente, Pageable page);
     
     BigDecimal getSaldoCuentaCorriente(long idCuentaCorriente);
     

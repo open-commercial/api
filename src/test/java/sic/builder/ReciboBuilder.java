@@ -13,7 +13,7 @@ import sic.modelo.Usuario;
 public class ReciboBuilder {
     
     private Long idRecibo = 0L;
-    private long serie = 1L;
+    private final long serie = 1L;
     private long nroRecibo = 1L;
     private boolean eliminado = false;
     private String concepto= "Recibo por contratar al GOLDEN ARMY";
@@ -24,10 +24,9 @@ public class ReciboBuilder {
     private Proveedor proveedor = null;
     private Date fecha = new Date();    
     private BigDecimal monto = new BigDecimal("1000");  
-    private BigDecimal saldoSobrante = new BigDecimal("200");
     
     public Recibo build() {
-      return new Recibo(idRecibo, serie, nroRecibo, fecha, eliminado, concepto, formaDePago, empresa, cliente, proveedor, usuario, monto, saldoSobrante);
+      return new Recibo(idRecibo, serie, nroRecibo, fecha, eliminado, concepto, formaDePago, empresa, cliente, proveedor, usuario, monto);
     }
 
     public ReciboBuilder withidRecibo(Long idRecibo) {
@@ -87,11 +86,6 @@ public class ReciboBuilder {
     
     public ReciboBuilder withMonto(BigDecimal monto) {
         this.monto = monto;
-        return this;
-    }
-    
-    public ReciboBuilder withSaldoSobrante(BigDecimal saldoSobrante) {
-        this.saldoSobrante = saldoSobrante;
         return this;
     }
     

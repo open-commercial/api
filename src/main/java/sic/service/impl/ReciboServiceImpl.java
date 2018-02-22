@@ -19,21 +19,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Cliente;
 import sic.modelo.Empresa;
-import sic.modelo.FacturaCompra;
-import sic.modelo.FacturaVenta;
 import sic.modelo.FormaDePago;
-import sic.modelo.NotaDebito;
-import sic.modelo.Pago;
 import sic.modelo.Recibo;
-import sic.modelo.RenglonCuentaCorriente;
-import sic.modelo.TipoDeComprobante;
 import sic.modelo.TipoDeOperacion;
 import sic.modelo.Usuario;
 import sic.repository.ReciboRepository;
@@ -41,40 +33,30 @@ import sic.service.BusinessServiceException;
 import sic.service.IConfiguracionDelSistemaService;
 import sic.service.ICuentaCorrienteService;
 import sic.service.IEmpresaService;
-import sic.service.IFacturaService;
 import sic.service.IFormaDePagoService;
 import sic.service.INotaService;
-import sic.service.IPagoService;
 import sic.service.IReciboService;
-import sic.service.IRenglonCuentaCorrienteService;
 import sic.service.ServiceException;
 
 @Service
 public class ReciboServiceImpl implements IReciboService {
     
     private final ReciboRepository reciboRepository;
-    private final IFacturaService facturaService;
-    private final IPagoService pagoService;
     private final ICuentaCorrienteService cuentaCorrienteService;
     private final IEmpresaService empresaService;
     private final IConfiguracionDelSistemaService configuracionDelSistemaService;
-    private final IRenglonCuentaCorrienteService renglonCuentaCorrienteService;
     private final INotaService notaService;
     private final IFormaDePagoService formaDePagoService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
-    public ReciboServiceImpl(ReciboRepository reciboRepository, IFacturaService facturaService, IPagoService pagoService,
-                             ICuentaCorrienteService cuentaCorrienteService, IEmpresaService empresaService, 
-                             IConfiguracionDelSistemaService cds, IRenglonCuentaCorrienteService renglonCuentaCorrienteService,
-                             INotaService notaService, IFormaDePagoService formaDePagoService) {
+    public ReciboServiceImpl(ReciboRepository reciboRepository, ICuentaCorrienteService cuentaCorrienteService, 
+                             IEmpresaService empresaService, IConfiguracionDelSistemaService cds, INotaService notaService,
+                             IFormaDePagoService formaDePagoService) {
         this.reciboRepository = reciboRepository;
-        this.facturaService = facturaService;
-        this.pagoService = pagoService;
         this.cuentaCorrienteService = cuentaCorrienteService;
         this.empresaService = empresaService;
         this.configuracionDelSistemaService = cds;
-        this.renglonCuentaCorrienteService = renglonCuentaCorrienteService;
         this.notaService = notaService;
         this.formaDePagoService = formaDePagoService;
     }
@@ -82,11 +64,6 @@ public class ReciboServiceImpl implements IReciboService {
     @Override
     public Recibo getById(long idRecibo) {
         return reciboRepository.findById(idRecibo);
-    }
-
-    @Override
-    public Recibo getReciboDelPago(long idPago) {
-        return reciboRepository.getReciboDelPago(idPago);
     }
     
     @Override
@@ -100,48 +77,8 @@ public class ReciboServiceImpl implements IReciboService {
         recibo.setNumSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
         recibo.setNumRecibo(this.getSiguienteNumeroRecibo(recibo.getEmpresa().getId_Empresa(), configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip()));
         recibo.setFecha(new Date());
-        recibo.setSaldoSobrante(BigDecimal.ZERO);
-        BigDecimal monto = recibo.getMonto();
-        int i = 0;
         this.validarRecibo(recibo);
         recibo = reciboRepository.save(recibo);
-        Pageable pageable = new PageRequest(i, 10);
-        if (recibo.getCliente() != null) {
-            Slice<RenglonCuentaCorriente> renglonesCC
-                    = this.renglonCuentaCorrienteService
-                            .getRenglonesFacturasYNotaDebitoCuentaCorriente(
-                                    this.cuentaCorrienteService.getCuentaCorrientePorCliente(recibo.getCliente().getId_Cliente()).getIdCuentaCorriente(), pageable);
-            while (renglonesCC.hasContent() && monto.compareTo(BigDecimal.ZERO) != 0) {
-                monto = this.pagarMultiplesComprobantesCliente(renglonesCC.getContent(), recibo, monto, recibo.getFormaDePago(), recibo.getConcepto());
-                if (renglonesCC.hasNext()) {
-                    i++;
-                    pageable = new PageRequest(i, 10);
-                    renglonesCC = this.renglonCuentaCorrienteService
-                            .getRenglonesFacturasYNotaDebitoCuentaCorriente(
-                                    this.cuentaCorrienteService.getCuentaCorrientePorCliente(recibo.getCliente().getId_Cliente()).getIdCuentaCorriente(), pageable);
-                } else {
-                    break;
-                }
-            }
-        } else if (recibo.getProveedor() != null) {
-            Slice<RenglonCuentaCorriente> renglonesCC
-                    = this.renglonCuentaCorrienteService
-                            .getRenglonesFacturasYNotaDebitoCuentaCorriente(
-                                    this.cuentaCorrienteService.getCuentaCorrientePorProveedor(recibo.getProveedor().getId_Proveedor()).getIdCuentaCorriente(), pageable);
-            while (renglonesCC.hasContent() && monto.compareTo(BigDecimal.ZERO) != 0) {
-                monto = this.pagarMultiplesComprobantesProveedor(renglonesCC.getContent(), recibo, monto, recibo.getFormaDePago(), recibo.getConcepto());
-                if (renglonesCC.hasNext()) {
-                    i++;
-                    pageable = new PageRequest(i, 10);
-                    renglonesCC = this.renglonCuentaCorrienteService
-                            .getRenglonesFacturasYNotaDebitoCuentaCorriente(
-                                    this.cuentaCorrienteService.getCuentaCorrientePorProveedor(recibo.getProveedor().getId_Proveedor()).getIdCuentaCorriente(), pageable);
-                } else {
-                    break;
-                }
-            }
-        }
-        recibo.setSaldoSobrante(monto);
         this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
         LOGGER.warn("El Recibo " + recibo + " se guardó correctamente.");
         return recibo;
@@ -151,7 +88,6 @@ public class ReciboServiceImpl implements IReciboService {
     @Transactional
     public Recibo actualizarSaldoSobrante(long idRecibo, BigDecimal saldoSobrante) {
         Recibo r = reciboRepository.findById(idRecibo);
-        r.setSaldoSobrante(saldoSobrante);
         return reciboRepository.save(r);
     }
 
@@ -160,10 +96,6 @@ public class ReciboServiceImpl implements IReciboService {
         if (recibo.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_recibo_monto_igual_menor_cero"));
-        }
-        if (recibo.getSaldoSobrante().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_recibo_saldo_sobrante_menor_cero"));
         }
         if (recibo.getEmpresa() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -226,112 +158,17 @@ public class ReciboServiceImpl implements IReciboService {
                 recibo.setNumSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
                 recibo.setNumRecibo(this.getSiguienteNumeroRecibo(empresa.getId_Empresa(), recibo.getNumSerie()));
                 recibo.setConcepto("SALDO.");
-                recibo.setSaldoSobrante(BigDecimal.ZERO);
                 recibos.add(recibo);
                 i++;
             }
         }
         return recibos;
     }
-      
-    @Override
-    public BigDecimal pagarMultiplesComprobantesCliente(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, BigDecimal monto, FormaDePago formaDePago, String nota) {
-        for (RenglonCuentaCorriente rcc : renglonesCC) {
-            if (monto.compareTo(BigDecimal.ZERO) > 0) {
-                if (rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_B
-                        || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_X
-                        || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
-                    FacturaVenta fv = (FacturaVenta) facturaService.getFacturaPorId(rcc.getIdMovimiento());
-                    BigDecimal credito = notaService.calcularTotaCreditoPorFacturaVenta(fv);
-                    BigDecimal saldoAPagar = this.pagoService.getSaldoAPagarFactura(fv.getId_Factura());
-                    if (fv.isPagada() == false && saldoAPagar.compareTo(credito) > 0) {
-                        fv.setPagos(this.pagoService.getPagosDeLaFactura(fv.getId_Factura()));
-                        Pago nuevoPago = new Pago();
-                        nuevoPago.setFormaDePago(formaDePago);
-                        nuevoPago.setFactura(fv);
-                        nuevoPago.setEmpresa(fv.getEmpresa());
-                        nuevoPago.setNota(nota);
-                        saldoAPagar = saldoAPagar.subtract(credito);
-                        if (saldoAPagar.compareTo(monto) < 1) {
-                            monto = monto.subtract(saldoAPagar);
-                            nuevoPago.setMonto(saldoAPagar);
-                        } else {
-                            nuevoPago.setMonto(monto);
-                            monto = BigDecimal.ZERO;
-                        }
-                        nuevoPago.setFactura(fv);
-                        nuevoPago.setRecibo(recibo);
-                        this.pagoService.guardar(nuevoPago);
-                    }
-                } else if (rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_A
-                        || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_B || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X
-                        || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_Y || rcc.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO) {
-                    NotaDebito nd = (NotaDebito) notaService.getNotaPorId(rcc.getIdMovimiento());
-                    nd.setPagos(this.notaService.getPagosNota(nd.getIdNota()));
-                    if (nd.isPagada() == false) {
-                        Pago nuevoPago = new Pago();
-                        nuevoPago.setFormaDePago(formaDePago);
-                        nuevoPago.setNotaDebito(nd);
-                        nuevoPago.setEmpresa(nd.getEmpresa());
-                        nuevoPago.setNota(nota);
-                        BigDecimal saldoAPagar = this.pagoService.getSaldoAPagarNotaDebito(nd.getIdNota());
-                        if (saldoAPagar.compareTo(monto) < 1) {
-                            monto = monto.subtract(saldoAPagar);
-                            nuevoPago.setMonto(saldoAPagar);
-                        } else {
-                            nuevoPago.setMonto(monto);
-                            monto = BigDecimal.ZERO;
-                        }
-                        nuevoPago.setNotaDebito(nd);
-                        nuevoPago.setRecibo(recibo);
-                        this.pagoService.guardar(nuevoPago);
-                    }
-                }
-            }
-        }
-        return monto;
-    }
-    
-    @Override
-    public BigDecimal pagarMultiplesComprobantesProveedor(List<RenglonCuentaCorriente> renglonesCC, Recibo recibo, BigDecimal monto, FormaDePago formaDePago, String nota) {
-        for (RenglonCuentaCorriente rcc : renglonesCC) {
-            if (monto.compareTo(BigDecimal.ZERO) > 0) {
-                if (rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_A || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_B
-                        || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_X
-                        || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
-                    FacturaCompra fc = (FacturaCompra) facturaService.getFacturaPorId(rcc.getIdMovimiento());
-                    if (fc.isPagada() == false) {
-                        fc.setPagos(this.pagoService.getPagosDeLaFactura(fc.getId_Factura()));
-                        Pago nuevoPago = new Pago();
-                        nuevoPago.setFormaDePago(formaDePago);
-                        nuevoPago.setFactura(fc);
-                        nuevoPago.setEmpresa(fc.getEmpresa());
-                        nuevoPago.setNota(nota);
-                        BigDecimal saldoAPagar = this.pagoService.getSaldoAPagarFactura(fc.getId_Factura());
-                        if (saldoAPagar.compareTo(monto) < 1) {
-                            monto = monto.subtract(saldoAPagar);
-                            nuevoPago.setMonto(saldoAPagar);
-                        } else {
-                            nuevoPago.setMonto(monto);
-                            monto = BigDecimal.ZERO;
-                        }
-                        nuevoPago.setFactura(fc);
-                        nuevoPago.setRecibo(recibo);
-                        this.pagoService.guardar(nuevoPago);
-                    }
-                }
-            }
-        }
-        return monto;
-    }
    
     @Override
     public void eliminar(long idRecibo) {
         Recibo r = reciboRepository.findById(idRecibo);
-        if (notaService.existeNotaDebitoPorRecibo(r) == false) {
-            pagoService.getPagosRelacionadosAlRecibo(idRecibo).forEach((p) -> {
-                pagoService.eliminar(p.getId_Pago());
-            });           
+        if (notaService.existeNotaDebitoPorRecibo(r) == false) {           
             r.setEliminado(true);
             this.cuentaCorrienteService.asentarEnCuentaCorriente(r, TipoDeOperacion.ELIMINACION);
             reciboRepository.save(r);
@@ -360,16 +197,6 @@ public class ReciboServiceImpl implements IReciboService {
     @Override
     public List<Recibo> getByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(Date desde, Date hasta, FormaDePago formaDePago, Empresa empresa) {
         return reciboRepository.findAllByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(desde, hasta, formaDePago, empresa, false);
-    }
-    
-    @Override
-    public List<Recibo> getRecibosConSaldoSobranteCliente(long idEmpresa, long idCliente) {
-        return reciboRepository.getRecibosConSaldoSobranteCliente(idEmpresa, idCliente);
-    }
-    
-    @Override
-    public List<Recibo> getRecibosConSaldoSobranteProveedor(long idEmpresa, long idProveedor) {
-        return reciboRepository.getRecibosConSaldoSobranteProveedor(idEmpresa, idProveedor);
     }
     
     @Override

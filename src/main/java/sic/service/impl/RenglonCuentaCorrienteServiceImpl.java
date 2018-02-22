@@ -57,11 +57,6 @@ public class RenglonCuentaCorrienteServiceImpl implements IRenglonCuentaCorrient
     }
 
     @Override
-    public Slice<RenglonCuentaCorriente> getRenglonesFacturasYNotaDebitoCuentaCorriente(long idCuentaCorriente, Pageable page) {
-        return renglonCuentaCorrienteRepository.getRenglonesFacturasYNotaDebitoCuentaCorriente(idCuentaCorriente, page);
-    }
-
-    @Override
     public BigDecimal getSaldoCuentaCorriente(long idCuentaCorriente) {
         return renglonCuentaCorrienteRepository.getSaldoCuentaCorriente(idCuentaCorriente);
     }
@@ -70,4 +65,5 @@ public class RenglonCuentaCorrienteServiceImpl implements IRenglonCuentaCorrient
     public Date getFechaUltimoMovimiento(long idCuentaCorriente) {
         return renglonCuentaCorrienteRepository.getFechaUltimoMovimiento(idCuentaCorriente);
     }
+
 }

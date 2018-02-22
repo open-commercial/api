@@ -37,14 +37,6 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
         if (criteria.isBuscaPorNumeroFactura() == true) {
             query += " AND f.numSerie = " + criteria.getNumSerie() + " AND f.numFactura = " + criteria.getNumFactura();
         }
-        //Inpagas
-        if (criteria.isBuscarSoloInpagas() == true) {
-            query += " AND f.pagada = false";
-        }
-        //Pagas
-        if (criteria.isBuscaSoloPagadas() == true) {
-            query += " AND f.pagada = true";
-        }
         query += " ORDER BY f.fecha DESC";
         TypedQuery<BigDecimal> typedQuery = em.createQuery(query, BigDecimal.class);
         typedQuery.setParameter("empresa", criteria.getEmpresa());
@@ -80,14 +72,6 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
         if (criteria.isBuscaPorNumeroFactura() == true) {
             query += " AND f.numSerie = " + criteria.getNumSerie() + " AND f.numFactura = " + criteria.getNumFactura();
         }
-        //Inpagas
-        if (criteria.isBuscarSoloInpagas() == true) {
-            query += " AND f.pagada = false";
-        }
-        //Pagas
-        if (criteria.isBuscaSoloPagadas() == true) {
-            query += " AND f.pagada = true";
-        }
         query += " ORDER BY f.fecha DESC";
         TypedQuery<BigDecimal> typedQuery = em.createQuery(query, BigDecimal.class);
         typedQuery.setParameter("empresa", criteria.getEmpresa());
@@ -115,14 +99,6 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
         //Nro de Factura
         if (criteria.isBuscaPorNumeroFactura() == true) {
             query += " AND f.numSerie = " + criteria.getNumSerie() + " AND f.numFactura = " + criteria.getNumFactura();
-        }
-        //Inpagas
-        if (criteria.isBuscarSoloInpagas() == true) {
-            query += " AND f.pagada = false";
-        }
-        //Pagas
-        if (criteria.isBuscaSoloPagadas() == true) {
-            query += " AND f.pagada = true";
         }
         queryCount += query;
         if (criteria.getPageable().getSort().getOrderFor("fecha").getDirection() == Sort.Direction.ASC) {//name().equals("ASC")) {

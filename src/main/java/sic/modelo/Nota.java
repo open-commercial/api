@@ -39,7 +39,6 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"fecha", "tipoComprobante", "serie", "nroNota", "empresa", "cliente"})
-@ToString(exclude = "pagos")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idNota", scope = Nota.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
@@ -90,10 +89,6 @@ public abstract class Nota implements Serializable {
     @JoinColumn(name = "id_Factura")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private FacturaVenta facturaVenta;
-    
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "notaDebito")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private List<Pago> pagos;
     
     @Column(nullable = false)
     private String motivo;

@@ -53,12 +53,6 @@ public class ReciboController {
         return reciboService.getById(idRecibo);
     }
     
-    @GetMapping("/recibos/pagos/{idPago}") 
-    @ResponseStatus(HttpStatus.OK)
-    public Recibo getReciboDelPago(@PathVariable long idPago) {
-        return reciboService.getReciboDelPago(idPago);
-    }
-    
     @PostMapping("/recibos/clientes")
     @ResponseStatus(HttpStatus.CREATED)
     public Recibo guardarReciboCliente(@RequestParam long idUsuario,

@@ -527,51 +527,43 @@ public class CuentaCorrienteIntegrationTest {
         r.setMonto(5992.5);
         restTemplate.postForObject(apiPrefix + "/recibos/proveedores?"
                 + "idUsuario=1&idEmpresa=1&idProveedor=1&idFormaDePago=1", r, Recibo.class);
-        List<FacturaCompraDTO> facturasRecuperadas = restTemplate
-                .exchange(apiPrefix + "/facturas/compra/busqueda/criteria?idEmpresa=1&tipoFactura=B", HttpMethod.GET, null,
-                        new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompraDTO>>() {
-                })
+        restTemplate.exchange(apiPrefix + "/facturas/compra/busqueda/criteria?idEmpresa=1&tipoFactura=B", HttpMethod.GET, null,
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompraDTO>>() {
+        })
                 .getBody().getContent();
-        assertTrue("La factura se encuentra impaga", facturasRecuperadas.get(0).isPagada());
-        assertTrue("El saldo de la cuenta corriente no es el esperado", 
+        assertTrue("El saldo de la cuenta corriente no es el esperado",
                 restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/proveedores/1/saldo", BigDecimal.class)
-        .compareTo(BigDecimal.ZERO) == 0);
+                        .compareTo(BigDecimal.ZERO) == 0);
         restTemplate.delete(apiPrefix + "/recibos/1");
-        facturasRecuperadas = restTemplate
-                .exchange(apiPrefix + "/facturas/compra/busqueda/criteria?idEmpresa=1&tipoFactura=B", HttpMethod.GET, null,
-                        new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompraDTO>>() {
-                })
+        restTemplate.exchange(apiPrefix + "/facturas/compra/busqueda/criteria?idEmpresa=1&tipoFactura=B", HttpMethod.GET, null,
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompraDTO>>() {
+        })
                 .getBody().getContent();
-        assertFalse("La factura se encuentra pagada", facturasRecuperadas.get(0).isPagada());
-        assertTrue("El saldo de la cuenta corriente no es el esperado", 
+        assertTrue("El saldo de la cuenta corriente no es el esperado",
                 restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/proveedores/1/saldo", BigDecimal.class)
-        .compareTo(new BigDecimal("-5992.5")) == 0);
+                        .compareTo(new BigDecimal("-5992.5")) == 0);
         r = new ReciboDTO();
         r.setMonto(4992.5);
         restTemplate.postForObject(apiPrefix + "/recibos/proveedores?"
                 + "idUsuario=1&idEmpresa=1&idProveedor=1&idFormaDePago=1", r, Recibo.class);
-        facturasRecuperadas = restTemplate
-                .exchange(apiPrefix + "/facturas/compra/busqueda/criteria?idEmpresa=1&tipoFactura=B", HttpMethod.GET, null,
-                        new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompraDTO>>() {
-                })
+        restTemplate.exchange(apiPrefix + "/facturas/compra/busqueda/criteria?idEmpresa=1&tipoFactura=B", HttpMethod.GET, null,
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompraDTO>>() {
+        })
                 .getBody().getContent();
-        assertFalse("La factura se encuentra pagada", facturasRecuperadas.get(0).isPagada());
-        assertTrue("El saldo de la cuenta corriente no es el esperado", 
+        assertTrue("El saldo de la cuenta corriente no es el esperado",
                 restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/proveedores/1/saldo", BigDecimal.class)
-        .compareTo(new BigDecimal("-1000")) == 0);
+                        .compareTo(new BigDecimal("-1000")) == 0);
         r = new ReciboDTO();
         r.setMonto(2000);
         restTemplate.postForObject(apiPrefix + "/recibos/proveedores?"
                 + "idUsuario=1&idEmpresa=1&idProveedor=1&idFormaDePago=1", r, Recibo.class);
-        facturasRecuperadas = restTemplate
-                .exchange(apiPrefix + "/facturas/compra/busqueda/criteria?idEmpresa=1&tipoFactura=B", HttpMethod.GET, null,
-                        new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompraDTO>>() {
-                })
+        restTemplate.exchange(apiPrefix + "/facturas/compra/busqueda/criteria?idEmpresa=1&tipoFactura=B", HttpMethod.GET, null,
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompraDTO>>() {
+        })
                 .getBody().getContent();
-        assertTrue("La factura se encuentra impaga", facturasRecuperadas.get(0).isPagada());
-        assertTrue("El saldo de la cuenta corriente no es el esperado", 
+        assertTrue("El saldo de la cuenta corriente no es el esperado",
                 restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/proveedores/1/saldo", BigDecimal.class)
-        .compareTo(new BigDecimal("1000")) == 0);
+                        .compareTo(new BigDecimal("1000")) == 0);
     }
 
 }
