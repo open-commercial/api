@@ -13,7 +13,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.AjusteCuentaCorriente;
 import sic.modelo.Cliente;
 import sic.modelo.CuentaCorriente;
 import sic.modelo.CuentaCorrienteCliente;
@@ -282,32 +281,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         }
         if (tipo == TipoDeOperacion.ELIMINACION) {
             RenglonCuentaCorriente rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeNota(n, false);
-            rcc.setEliminado(true);
-            LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
-        }
-    }
-    
-    @Override
-    @Transactional
-    public void asentarEnCuentaCorriente(AjusteCuentaCorriente ajusteCC, TipoDeOperacion tipo) {
-        if (tipo == TipoDeOperacion.ALTA) {
-            RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
-            rcc.setTipoComprobante(ajusteCC.getTipoComprobante());
-            rcc.setSerie(ajusteCC.getNumSerie());
-            rcc.setNumero(ajusteCC.getNumAjuste());
-            rcc.setMonto(ajusteCC.getMonto());
-            rcc.setDescripcion(ajusteCC.getConcepto()); 
-            rcc.setAjusteCuentaCorriente(ajusteCC); 
-            rcc.setFecha(ajusteCC.getFecha());
-            rcc.setIdMovimiento(ajusteCC.getIdAjusteCuentaCorriente());
-            CuentaCorriente cc = this.getCuentaCorrientePorCliente(ajusteCC.getCliente().getId_Cliente());
-            cc.getRenglones().add(rcc);
-            rcc.setCuentaCorriente(cc);
-            this.renglonCuentaCorrienteService.guardar(rcc);
-            LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
-        }
-        if (tipo == TipoDeOperacion.ELIMINACION) {
-            RenglonCuentaCorriente rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeAjusteCuentaCorriente(ajusteCC, false);
             rcc.setEliminado(true);
             LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
         }

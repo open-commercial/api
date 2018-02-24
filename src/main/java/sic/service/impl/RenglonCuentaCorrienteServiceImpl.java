@@ -5,9 +5,7 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
-import sic.modelo.AjusteCuentaCorriente;
 import sic.modelo.CuentaCorriente;
 import sic.modelo.Factura;
 import sic.modelo.Nota;
@@ -46,11 +44,6 @@ public class RenglonCuentaCorrienteServiceImpl implements IRenglonCuentaCorrient
         return renglonCuentaCorrienteRepository.findByReciboAndEliminado(r, eliminado);
     }
     
-    @Override
-    public RenglonCuentaCorriente getRenglonCuentaCorrienteDeAjusteCuentaCorriente(AjusteCuentaCorriente ajusteCC, boolean eliminado) {
-        return renglonCuentaCorrienteRepository.findByAjusteCuentaCorrienteAndEliminado(ajusteCC, eliminado);
-    }
-
     @Override
     public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(CuentaCorriente cuentaCorriente, boolean eliminado, Pageable page) {
         return renglonCuentaCorrienteRepository.findAllByCuentaCorrienteAndEliminado(cuentaCorriente, eliminado, page);
