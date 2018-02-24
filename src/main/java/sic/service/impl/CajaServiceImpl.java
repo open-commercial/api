@@ -307,7 +307,7 @@ public class CajaServiceImpl implements ICajaService {
         for (Gasto gasto : gastos) {
             gastosTotal = gastosTotal.add(gasto.getMonto());
         }
-        return recibosTotal.add(gastosTotal);
+        return recibosTotal.subtract(gastosTotal);
     }
 
     private Caja cargarRecibosyGastos(Caja caja) {
