@@ -670,9 +670,10 @@ public class NotaServiceImpl implements INotaService {
     
     private void actualizarStock(List<RenglonNotaCredito> renglonesNotaCredito, TipoDeOperacion tipoOperacion) {
         HashMap<Long, BigDecimal> idsYCantidades = new HashMap<>();
-        renglonesNotaCredito.forEach(r -> {
-            idsYCantidades.put(r.getIdProductoItem(), r.getCantidad());
-        });
+        renglonesNotaCredito.forEach(r -> idsYCantidades.put(r.getIdProductoItem(), r.getCantidad()));
+        if (tipoOperacion == TipoDeOperacion.ELIMINACION) {
+            tipoOperacion = TipoDeOperacion.ALTA;
+        }
         productoService.actualizarStock(idsYCantidades, tipoOperacion, Movimiento.VENTA);
     }
 
@@ -741,15 +742,10 @@ public class NotaServiceImpl implements INotaService {
             Nota nota = this.getNotaPorId(idNota);
             if (nota != null && nota.getCAE() == 0l) {
                 if (getPagosNota(idNota).isEmpty()) {
-                    //if (nota instanceof NotaDebito) {
-                    //    pagos.forEach(pago -> {
-                    //        pagoService.eliminar(pago.getId_Pago());
-                    //    });
-                    //}
                     if (nota instanceof NotaCredito) {
                         NotaCredito nc = (NotaCredito) nota;
                         if (nc.isModificaStock()) {
-                            this.actualizarStock(nc.getRenglonesNotaCredito(), TipoDeOperacion.ALTA);
+                            this.actualizarStock(nc.getRenglonesNotaCredito(), TipoDeOperacion.ELIMINACION);
                         }
                     } else if (nota instanceof NotaDebito) {
                         AjusteCuentaCorriente ajusteCC = ajusteCuentaCorrienteService.findByNotaDebito(nota);
