@@ -1,5 +1,6 @@
 package sic.builder;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import sic.modelo.dto.ProductoDTO;
 
@@ -8,19 +9,19 @@ public class ProductoBuilder {
     private Long id_Producto = 0L;
     private String codigo = "ABC123";
     private String descripcion = "Cinta adhesiva doble faz 3M";
-    private double cantidad = 10;
-    private double cantMinima = 2;    
-    private double ventaMinima = 0;
+    private BigDecimal cantidad = BigDecimal.TEN;
+    private BigDecimal cantMinima = new BigDecimal("2");    
+    private BigDecimal ventaMinima = BigDecimal.ZERO;
     private String nombreMedida = "Unidad";
-    private double precioCosto = 100;
-    private double ganancia_porcentaje = 50;
-    private double ganancia_neto = 50;
-    private double precioVentaPublico = 150;
-    private double iva_porcentaje = 21;
-    private double iva_neto = 31.5;
-    private double impuestoInterno_porcentaje = 0;
-    private double impuestoInterno_neto = 0;
-    private double precioLista = 181.5;    
+    private BigDecimal precioCosto = new BigDecimal("100");
+    private BigDecimal ganancia_porcentaje = new BigDecimal("50");
+    private BigDecimal ganancia_neto = new BigDecimal("50");
+    private BigDecimal precioVentaPublico = new BigDecimal("150");
+    private BigDecimal iva_porcentaje = new BigDecimal("21");
+    private BigDecimal iva_neto = new BigDecimal("31.5");
+    private BigDecimal impuestoInterno_porcentaje = BigDecimal.ZERO;
+    private BigDecimal impuestoInterno_neto = BigDecimal.ZERO;
+    private BigDecimal precioLista = new BigDecimal("181.5");    
     private String nombreRubro = "Ferreteria";
     private boolean ilimitado = false;
     private Date fechaUltimaModificacion = new Date(1463540400000L); // 18-05-2016
@@ -56,17 +57,17 @@ public class ProductoBuilder {
         return this;
     }
     
-    public ProductoBuilder withCantidad(double cantidad) {
+    public ProductoBuilder withCantidad(BigDecimal cantidad) {
         this.cantidad = cantidad;
         return this;
     }
     
-    public ProductoBuilder withCantMinima(double cantMinima) {
+    public ProductoBuilder withCantMinima(BigDecimal cantMinima) {
         this.cantMinima = cantMinima;
         return this;
     }
     
-    public ProductoBuilder withVentaMinima(double ventaMinima) {
+    public ProductoBuilder withVentaMinima(BigDecimal ventaMinima) {
         this.ventaMinima = ventaMinima;
         return this;
     }
@@ -76,47 +77,47 @@ public class ProductoBuilder {
         return this;
     }
     
-    public ProductoBuilder withPrecioCosto(double precioCosto) {
+    public ProductoBuilder withPrecioCosto(BigDecimal precioCosto) {
         this.precioCosto = precioCosto;
         return this;
     }
     
-    public ProductoBuilder withGanancia_porcentaje(double ganancia_porcentaje) {
+    public ProductoBuilder withGanancia_porcentaje(BigDecimal ganancia_porcentaje) {
         this.ganancia_porcentaje = ganancia_porcentaje;
         return this;
     }
     
-    public ProductoBuilder withGanancia_neto(double ganancia_neto) {
+    public ProductoBuilder withGanancia_neto(BigDecimal ganancia_neto) {
         this.ganancia_neto = ganancia_neto;
         return this;
     }
     
-    public ProductoBuilder withPrecioVentaPublico(double precioVentaPublico) {
+    public ProductoBuilder withPrecioVentaPublico(BigDecimal precioVentaPublico) {
         this.precioVentaPublico = precioVentaPublico;
         return this;
     }
     
-    public ProductoBuilder withIva_porcentaje(double iva_porcentaje) {
+    public ProductoBuilder withIva_porcentaje(BigDecimal iva_porcentaje) {
         this.iva_porcentaje = iva_porcentaje;
         return this;
     }
     
-    public ProductoBuilder withIva_neto(double iva_neto) {
+    public ProductoBuilder withIva_neto(BigDecimal iva_neto) {
         this.iva_neto = iva_neto;
         return this;
     }
     
-    public ProductoBuilder withImpuestoInterno_porcentaje(double impuestoInterno_porcentaje) {
+    public ProductoBuilder withImpuestoInterno_porcentaje(BigDecimal impuestoInterno_porcentaje) {
         this.impuestoInterno_porcentaje = impuestoInterno_porcentaje;
         return this;
     }
     
-    public ProductoBuilder withImpuestoInterno_neto(double impuestoInterno_neto) {
+    public ProductoBuilder withImpuestoInterno_neto(BigDecimal impuestoInterno_neto) {
         this.impuestoInterno_neto = impuestoInterno_neto;
         return this;
     }
     
-    public ProductoBuilder withPrecioLista(double precioLista) {
+    public ProductoBuilder withPrecioLista(BigDecimal precioLista) {
         this.precioLista = precioLista;
         return this;
     }

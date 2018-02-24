@@ -558,6 +558,7 @@ public class FacturaServiceImpl implements IFacturaService {
                 .subtotalBruto(fv.getSubTotal_bruto())
                 .iva105neto(fv.getIva_105_neto())
                 .iva21neto(fv.getIva_21_neto())
+                .montoNoGravado(BigDecimal.ZERO)
                 .total(fv.getTotal())
                 .build();
         afipService.autorizar(comprobante);
