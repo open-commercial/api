@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>sic-api</groupId>
     <artifactId>SIC-API</artifactId>
-    <version>32</version>
+    <version>34</version>
     <packaging>jar</packaging>
     
     <parent>

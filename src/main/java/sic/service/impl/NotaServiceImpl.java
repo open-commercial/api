@@ -571,9 +571,10 @@ public class NotaServiceImpl implements INotaService {
     
     private void actualizarStock(List<RenglonNotaCredito> renglonesNotaCredito, TipoDeOperacion tipoOperacion) {
         HashMap<Long, BigDecimal> idsYCantidades = new HashMap<>();
-        renglonesNotaCredito.forEach(r -> {
-            idsYCantidades.put(r.getIdProductoItem(), r.getCantidad());
-        });
+        renglonesNotaCredito.forEach(r -> idsYCantidades.put(r.getIdProductoItem(), r.getCantidad()));
+        if (tipoOperacion == TipoDeOperacion.ELIMINACION) {
+            tipoOperacion = TipoDeOperacion.ALTA;
+        }
         productoService.actualizarStock(idsYCantidades, tipoOperacion, Movimiento.VENTA);
     }
 
@@ -704,7 +705,7 @@ public class NotaServiceImpl implements INotaService {
                 renglonNota.setDescuentoPorcentaje(renglonFactura.getDescuento_porcentaje());
                 renglonNota.setDescuentoNeto(renglonFactura.getDescuento_porcentaje().divide(CIEN, 15, RoundingMode.HALF_UP).multiply(renglonNota.getPrecioUnitario()));
                 renglonNota.setGananciaPorcentaje(renglonFactura.getGanancia_porcentaje());
-                renglonNota.getGananciaPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP).multiply(renglonNota.getPrecioUnitario());
+                renglonNota.setGananciaNeto(renglonNota.getGananciaPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP).multiply(renglonNota.getPrecioUnitario()));
                 renglonNota.setIvaPorcentaje(renglonFactura.getIva_porcentaje());
                 if (tipo.equals(TipoDeComprobante.FACTURA_Y)) {
                     renglonNota.setIvaPorcentaje(renglonFactura.getIva_porcentaje().divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP));
@@ -715,7 +716,7 @@ public class NotaServiceImpl implements INotaService {
                 if (tipo == TipoDeComprobante.FACTURA_B || tipo == TipoDeComprobante.PRESUPUESTO) {
                     renglonNota.setImporteNeto(renglonNota.getImporteBruto());
                 } else {
-                    renglonNota.getImporteBruto().add(renglonNota.getIvaNeto().multiply(cantidad[i]));
+                    renglonNota.setImporteNeto(renglonNota.getImporteBruto().add(renglonNota.getIvaNeto().multiply(cantidad[i])));
                 }
                 renglonesNota.add(renglonNota);
             }
