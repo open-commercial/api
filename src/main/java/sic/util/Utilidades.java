@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -63,28 +62,6 @@ public class Utilidades {
     
     public static ByteArrayInputStream convertirByteArrayToInputStream(byte[] byteArray) {
      return new ByteArrayInputStream(byteArray);
-    }
-
-    /**
-     * Trunca los decimales de un double, segun la cantidad que uno requiera
-     *
-     * @param valor para ser truncado
-     * @param cantidadDecimales cantidad de decimales que debe mantener
-     * @return numero truncado
-     */
-    public static double truncarDecimal(double valor, int cantidadDecimales) {
-        if (valor > 0) {
-            return (new BigDecimal(String.valueOf(valor)).setScale(cantidadDecimales, BigDecimal.ROUND_FLOOR)).doubleValue();
-        } else {
-            return (new BigDecimal(String.valueOf(valor)).setScale(cantidadDecimales, BigDecimal.ROUND_CEILING)).doubleValue();
-        }
-    }
-    
-    public static double round(double value, int places) {
-        if (places < 0) {
-            throw new IllegalArgumentException();
-        }
-        return new BigDecimal(value).setScale(places, RoundingMode.HALF_UP).doubleValue();
     }
 
 }

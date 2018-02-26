@@ -1,5 +1,6 @@
 package sic.controller;
 
+import java.math.BigDecimal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -57,13 +58,13 @@ public class CuentaCorrienteController {
     
     @GetMapping("/cuentas-corrientes/clientes/{idCliente}/saldo")
     @ResponseStatus(HttpStatus.OK)
-    public double getSaldoCuentaCorrienteCliente(@PathVariable long idCliente) {       
+    public BigDecimal getSaldoCuentaCorrienteCliente(@PathVariable long idCliente) {       
         return cuentaCorrienteService.getSaldoCuentaCorriente(cuentaCorrienteService.getCuentaCorrientePorCliente(idCliente).getIdCuentaCorriente());
     }
     
     @GetMapping("/cuentas-corrientes/proveedores/{idProveedor}/saldo")
     @ResponseStatus(HttpStatus.OK)
-    public double getSaldoCuentaCorrienteProveedor(@PathVariable long idProveedor) {       
+    public BigDecimal getSaldoCuentaCorrienteProveedor(@PathVariable long idProveedor) {       
         return cuentaCorrienteService.getSaldoCuentaCorriente(cuentaCorrienteService.getCuentaCorrientePorProveedor(idProveedor).getIdCuentaCorriente());
     }
     

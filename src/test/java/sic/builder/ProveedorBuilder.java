@@ -1,5 +1,6 @@
 package sic.builder;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import sic.modelo.CondicionIVA;
 import sic.modelo.Empresa;
@@ -22,7 +23,7 @@ public class ProveedorBuilder {
     private Localidad localidad = new LocalidadBuilder().build();
     private Empresa empresa = new EmpresaBuilder().build();
     private boolean eliminado = false;
-    private double saldoCuentaCorriente = 0;
+    private BigDecimal saldoCuentaCorriente = BigDecimal.ZERO;
     private Date fechaUltimoMovimiento = null;
     
     public Proveedor build() {
@@ -100,7 +101,7 @@ public class ProveedorBuilder {
         return this;
     }
     
-    public ProveedorBuilder withSaldoCuentaCorriente(double saldoCuentaCorriente) {
+    public ProveedorBuilder withSaldoCuentaCorriente(BigDecimal saldoCuentaCorriente) {
         this.saldoCuentaCorriente = saldoCuentaCorriente;
         return this;
     }

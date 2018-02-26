@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.4.3.final using JasperReports Library version 6.4.3  -->
+<!-- Created with Jaspersoft Studio version 6.5.0.final using JasperReports Library version 6.5.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="FacturaVenta" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e47a212f-3954-4de9-aca2-5bd71a6098c5">
 	<property name="ireport.zoom" value="3.0"/>
 	<property name="ireport.x" value="0"/>
@@ -10,9 +10,9 @@
 	<parameter name="logo" class="java.awt.Image"/>
 	<parameter name="preImpresa" class="java.lang.Boolean"/>
 	<field name="producto" class="sic.modelo.Producto"/>
-	<field name="cantidad" class="java.lang.Double"/>
-	<field name="descuento_porcentaje" class="java.lang.Double"/>
-	<field name="subTotal" class="java.lang.Double"/>
+	<field name="cantidad" class="java.math.BigDecimal"/>
+	<field name="descuento_porcentaje" class="java.math.BigDecimal"/>
+	<field name="subTotal" class="java.math.BigDecimal"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -393,7 +393,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{cantidad}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00">
 				<reportElement x="408" y="0" width="60" height="15" uuid="ef48b8f6-ecc3-42f2-b6f9-269aae20c81e">
@@ -402,7 +402,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{producto}.getPrecioLista()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{producto}.getPrecioLista().doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="468" y="0" width="32" height="15" uuid="f3e07bc2-0b6a-4759-80ae-837e9ad074b8">
@@ -411,7 +411,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{descuento_porcentaje}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{descuento_porcentaje}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00">
 				<reportElement x="500" y="0" width="55" height="15" uuid="e044f181-0b15-492c-bf20-af4d406e94db">
@@ -420,7 +420,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{subTotal}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{subTotal}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="358" y="0" width="50" height="15" uuid="bcf57628-f476-4076-a07f-12d67d344675">
@@ -472,7 +472,8 @@
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{pedido}.getUsuario().getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{pedido}.getUsuario().getNombre() + " " +  $P{pedido}.getUsuario().getApellido()
++ " " + "(" +$P{pedido}.getUsuario().getUsername() + ")"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="15" width="80" height="15" uuid="43f39702-e0af-456b-bea4-3952f75b1aa5">
@@ -507,7 +508,7 @@
 					<font size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{pedido}.getTotalEstimado()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{pedido}.getTotalEstimado().doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
 				<reportElement x="40" y="78" width="45" height="12" uuid="83464f91-2a14-4bc5-829b-95be62eecaaa"/>

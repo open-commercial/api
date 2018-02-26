@@ -1,5 +1,6 @@
 package sic.service;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -15,11 +16,11 @@ public interface IPagoService {
 
     List<Pago> getPagosDeLaFactura(long idFactura);
     
-    Double getTotalPagosDeLaFactura(long idFactura);
+    BigDecimal getTotalPagosDeLaFactura(long idFactura);
 
-    double getSaldoAPagarFactura(long idFactura); 
+    BigDecimal getSaldoAPagarFactura(long idFactura); 
     
-    double getSaldoAPagarNotaDebito(long idNota);
+    BigDecimal getSaldoAPagarNotaDebito(long idNota);
     
     long getSiguienteNroPago(Long idEmpresa);
 
@@ -27,22 +28,22 @@ public interface IPagoService {
     
     List<Pago> getPagosDeNotas(long idNota);
     
-    Double getTotalPagosDeNota(long idNota);
+    BigDecimal getTotalPagosDeNota(long idNota);
     
     Page<Pago> getPagosPorClienteEntreFechas(long idCliente, Date desde, Date hasta, Pageable page);
     
     List<Pago> getPagosRelacionadosAlRecibo(long idRecibo);
     
-    double calcularTotalPagos(List<Pago> pagos);
+    BigDecimal calcularTotalPagos(List<Pago> pagos);
     
-    double calcularTotalAdeudadoFacturasVenta(List<FacturaVenta> facturasVenta);
+    BigDecimal calcularTotalAdeudadoFacturasVenta(List<FacturaVenta> facturasVenta);
     
-    double calcularTotalAdeudadoFacturasCompra(List<FacturaCompra> facturasCompra);
+    BigDecimal calcularTotalAdeudadoFacturasCompra(List<FacturaCompra> facturasCompra);
     
-    double calcularTotalAdeudadoFacturas(List<Factura> facturas);
+    BigDecimal calcularTotalAdeudadoFacturas(List<Factura> facturas);
     
-    double getSaldoPagosPorCliente(long idCliente, Date hasta);
-                
+    BigDecimal getSaldoPagosPorCliente(long idCliente, Date hasta);
+    
     void validarOperacion(Pago pago);     
 
     Pago guardar(Pago pago);

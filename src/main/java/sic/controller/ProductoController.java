@@ -1,5 +1,6 @@
 package sic.controller;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -69,13 +70,13 @@ public class ProductoController {
     
     @GetMapping("/productos/valor-stock/criteria")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularValorStock(@RequestParam long idEmpresa,
-                                     @RequestParam(required = false) String codigo,
-                                     @RequestParam(required = false) String descripcion,
-                                     @RequestParam(required = false) Long idRubro,
-                                     @RequestParam(required = false) Long idProveedor,                                          
-                                     @RequestParam(required = false) Integer cantidadRegistros,
-                                     @RequestParam(required = false) boolean soloFantantes) {
+    public BigDecimal calcularValorStock(@RequestParam long idEmpresa,
+                                         @RequestParam(required = false) String codigo,
+                                         @RequestParam(required = false) String descripcion,
+                                         @RequestParam(required = false) Long idRubro,
+                                         @RequestParam(required = false) Long idProveedor,                                          
+                                         @RequestParam(required = false) Integer cantidadRegistros,
+                                         @RequestParam(required = false) boolean soloFantantes) {
         Rubro rubro = null;
         if (idRubro != null) {
             rubro = rubroService.getRubroPorId(idRubro);
@@ -182,32 +183,32 @@ public class ProductoController {
         
     @GetMapping("/productos/disponibilidad-stock")
     @ResponseStatus(HttpStatus.OK)
-    public Map<Long, Double> verificarDisponibilidadStock(long[] idProducto, double[] cantidad) {
+    public Map<Long, BigDecimal> verificarDisponibilidadStock(long[] idProducto, BigDecimal[] cantidad) {
         return productoService.getProductosSinStockDisponible(idProducto, cantidad);
     }
     
     @GetMapping("/productos/cantidad-venta-minima")
     @ResponseStatus(HttpStatus.OK)
-    public Map<Long, Double> verificarCantidadVentaMinima(long[] idProducto, double[] cantidad) {
+    public Map<Long, BigDecimal> verificarCantidadVentaMinima(long[] idProducto, BigDecimal[] cantidad) {
         return productoService.getProductosNoCumplenCantidadVentaMinima(idProducto, cantidad);        
     }
     
     @GetMapping("/productos/ganancia-neto")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularGananciaNeto(@RequestParam double precioCosto, 
-                                       @RequestParam double gananciaPorcentaje) {
+    public BigDecimal calcularGananciaNeto(@RequestParam BigDecimal precioCosto, 
+                                           @RequestParam BigDecimal gananciaPorcentaje) {
         return productoService.calcularGanancia_Neto(precioCosto, gananciaPorcentaje);
     }
     
     @GetMapping("/productos/ganancia-porcentaje")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularGananciaPorcentaje(@RequestParam(required = false) boolean ascendente,
-                                             @RequestParam double precioCosto,
-                                             @RequestParam double pvp, 
-                                             @RequestParam(required = false) Double ivaPorcentaje, 
-                                             @RequestParam(defaultValue = "0", required = false) Double impInternoPorcentaje,                                              
-                                             @RequestParam(required = false) Double precioDeLista, 
-                                             @RequestParam(required = false) Double precioDeListaAnterior){
+    public BigDecimal calcularGananciaPorcentaje(@RequestParam(required = false) boolean ascendente,
+                                                 @RequestParam BigDecimal precioCosto,
+                                                 @RequestParam BigDecimal pvp, 
+                                                 @RequestParam(required = false) BigDecimal ivaPorcentaje, 
+                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal impInternoPorcentaje,                                              
+                                                 @RequestParam(required = false) BigDecimal precioDeLista, 
+                                                 @RequestParam(required = false) BigDecimal precioDeListaAnterior){
         return productoService.calcularGanancia_Porcentaje(precioDeLista, precioDeListaAnterior,
                                                            pvp, ivaPorcentaje, impInternoPorcentaje, 
                                                            precioCosto, ascendente);
@@ -215,30 +216,30 @@ public class ProductoController {
     
     @GetMapping("/productos/iva-neto")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularIVANeto(@RequestParam double pvp, 
-                                  @RequestParam double ivaPorcentaje) {
+    public BigDecimal calcularIVANeto(@RequestParam BigDecimal pvp, 
+                                      @RequestParam BigDecimal ivaPorcentaje) {
         return productoService.calcularIVA_Neto(pvp, ivaPorcentaje);
     }
     
     @GetMapping("/productos/imp-interno-neto")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularImpInternoNeto(@RequestParam double pvp, 
-                                         @RequestParam(defaultValue = "0",required = false) double impInternoPorcentaje){
+    public BigDecimal calcularImpInternoNeto(@RequestParam BigDecimal pvp, 
+                                             @RequestParam(defaultValue = "0",required = false) BigDecimal impInternoPorcentaje){
         return productoService.calcularImpInterno_Neto(pvp, impInternoPorcentaje);
     }
     
     @GetMapping("/productos/pvp")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularPVP(@RequestParam double precioCosto, 
-                              @RequestParam double gananciaPorcentaje) {
+    public BigDecimal calcularPVP(@RequestParam BigDecimal precioCosto, 
+                                  @RequestParam BigDecimal gananciaPorcentaje) {
         return productoService.calcularPVP(precioCosto, gananciaPorcentaje);
     }
     
     @GetMapping("/productos/precio-lista")
     @ResponseStatus(HttpStatus.OK)
-    public double calcularPrecioLista(@RequestParam double pvp, 
-                                      @RequestParam double ivaPorcentaje, 
-                                      @RequestParam(defaultValue = "0",required = false) double impInternoPorcentaje) {
+    public BigDecimal calcularPrecioLista(@RequestParam BigDecimal pvp, 
+                                          @RequestParam BigDecimal ivaPorcentaje, 
+                                          @RequestParam(defaultValue = "0",required = false) BigDecimal impInternoPorcentaje) {
         return productoService.calcularPrecioLista(pvp, ivaPorcentaje, impInternoPorcentaje);
     }
 
@@ -286,15 +287,15 @@ public class ProductoController {
                                             @RequestParam(required = false) Long idMedida,
                                             @RequestParam(required = false) Long idRubro,
                                             @RequestParam(required = false) Long idProveedor,
-                                            @RequestParam(required = false) Double gananciaNeto,
-                                            @RequestParam(required = false) Double gananciaPorcentaje,
-                                            @RequestParam(defaultValue = "0",required = false) Double impuestoInternoNeto,
-                                            @RequestParam(defaultValue = "0",required = false) Double impuestoInternoPorcentaje,
-                                            @RequestParam(required = false) Double IVANeto,
-                                            @RequestParam(required = false) Double IVAPorcentaje,
-                                            @RequestParam(required = false) Double precioCosto,
-                                            @RequestParam(required = false) Double precioLista,
-                                            @RequestParam(required = false) Double precioVentaPublico) {
+                                            @RequestParam(required = false) BigDecimal gananciaNeto,
+                                            @RequestParam(required = false) BigDecimal gananciaPorcentaje,
+                                            @RequestParam(defaultValue = "0",required = false) BigDecimal impuestoInternoNeto,
+                                            @RequestParam(defaultValue = "0",required = false) BigDecimal impuestoInternoPorcentaje,
+                                            @RequestParam(required = false) BigDecimal IVANeto,
+                                            @RequestParam(required = false) BigDecimal IVAPorcentaje,
+                                            @RequestParam(required = false) BigDecimal precioCosto,
+                                            @RequestParam(required = false) BigDecimal precioLista,
+                                            @RequestParam(required = false) BigDecimal precioVentaPublico) {
         
         boolean actualizaPrecios = false;
         if (gananciaNeto != null && gananciaPorcentaje != null && impuestoInternoNeto != null && impuestoInternoPorcentaje != null

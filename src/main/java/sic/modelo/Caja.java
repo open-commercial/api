@@ -1,6 +1,7 @@
 package sic.modelo;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Map;
 import javax.persistence.Column;
@@ -68,21 +69,24 @@ public class Caja implements Serializable {
     @Enumerated(EnumType.STRING)
     private EstadoCaja estado;
 
-    private double saldoInicial;
+    @Column(precision = 25, scale = 15)
+    private BigDecimal saldoInicial;
 
-    private double saldoFinal;
+    @Column(precision = 25, scale = 15)
+    private BigDecimal saldoFinal;
 
-    private double saldoReal;
+    @Column(precision = 25, scale = 15)
+    private BigDecimal saldoReal;
 
     private boolean eliminada;
     
     @Transient
-    private Map<Long, Double> totalesPorFomaDePago;
+    private Map<Long, BigDecimal> totalesPorFomaDePago;
     
     @Transient
-    private double totalAfectaCaja;
+    private BigDecimal totalAfectaCaja;
             
     @Transient
-    private double totalGeneral;
+    private BigDecimal totalGeneral;
 
 }

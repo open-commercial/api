@@ -24,12 +24,12 @@ public class UsuarioBuilder {
         return new Usuario(id_Usuario, username, password, nombre, apellido, email,
                 token, passwordRecoveryKey, roles, habilitado, eliminado);
     }
-    
+
     public UsuarioBuilder withId_Usuario(long idUsuario) {
         this.id_Usuario = idUsuario;
         return this;
     }
-    
+
     public UsuarioBuilder withUsername(String username) {
         this.username = username;
         return this;

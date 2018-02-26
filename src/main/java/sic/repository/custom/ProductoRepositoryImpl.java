@@ -1,5 +1,6 @@
 package sic.repository.custom;
 
+import java.math.BigDecimal;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
@@ -12,7 +13,7 @@ public class ProductoRepositoryImpl implements ProductoRepositoryCustom {
     private EntityManager em;
             
     @Override
-    public double calcularValorStock(BusquedaProductoCriteria criteria) {
+    public BigDecimal calcularValorStock(BusquedaProductoCriteria criteria) {
         String query = "SELECT SUM(p.cantidad * p.precioCosto) FROM Producto p WHERE p.empresa = :empresa "
                 + "AND p.eliminado = false AND p.ilimitado = false";
         //Codigo y Descripcion
@@ -56,13 +57,13 @@ public class ProductoRepositoryImpl implements ProductoRepositoryCustom {
             query += " AND p.cantidad <= p.cantMinima AND p.ilimitado = 0";
         }
         query += " ORDER BY p.descripcion ASC";
-        TypedQuery<Double> typedQuery = em.createQuery(query, Double.class);
+        TypedQuery<BigDecimal> typedQuery = em.createQuery(query, BigDecimal.class);
         typedQuery.setParameter("empresa", criteria.getEmpresa());
         //si es 0, recupera TODOS los registros
         if (criteria.getCantRegistros() != 0) {
             typedQuery.setMaxResults(criteria.getCantRegistros());
         }
-        return (typedQuery.getSingleResult() == null) ? 0.0 : typedQuery.getSingleResult();
+        return (typedQuery.getSingleResult() == null) ? BigDecimal.ZERO : typedQuery.getSingleResult();
     }
     
 }

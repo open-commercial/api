@@ -1,5 +1,6 @@
 package sic.service;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +19,7 @@ public interface IAjusteCuentaCorrienteService {
     
     AjusteCuentaCorriente findByNotaDebito(Nota notaDebito);
     
-    Double getMontoById(long idRecibo);
+    BigDecimal getMontoById(long idRecibo);
     
     AjusteCuentaCorriente guardar(AjusteCuentaCorriente ajusteCuentaCorriente);
     

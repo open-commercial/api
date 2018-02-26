@@ -2,6 +2,7 @@ package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -71,8 +72,8 @@ public class RenglonCuentaCorriente implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaVencimiento;
 
-    @Column(nullable = false)
-    private double monto;
+    @Column(precision = 25, scale = 15)
+    private BigDecimal monto;
     
     @ManyToOne
     @JoinColumn(name = "id_cuenta_corriente", referencedColumnName = "id_cuenta_corriente")

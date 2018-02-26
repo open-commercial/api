@@ -1,6 +1,8 @@
 package sic.modelo;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -29,10 +31,17 @@ public class RenglonPedido implements Serializable {
     @ManyToOne
     @JoinColumn(name = "id_Producto", referencedColumnName = "id_Producto")
     private Producto producto;
-
-    private double cantidad;
-    private double descuento_porcentaje;
-    private double descuento_neto;
-    private double subTotal;
+    
+    @Column(precision = 25, scale = 15)
+    private BigDecimal cantidad;
+    
+    @Column(precision = 25, scale = 15)
+    private BigDecimal descuento_porcentaje;
+    
+    @Column(precision = 25, scale = 15)
+    private BigDecimal descuento_neto;
+    
+    @Column(precision = 25, scale = 15)
+    private BigDecimal subTotal;
 
 }

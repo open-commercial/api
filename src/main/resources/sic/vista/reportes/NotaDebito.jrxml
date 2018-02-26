@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.4.3.final using JasperReports Library version 6.4.3  -->
+<!-- Created with Jaspersoft Studio version 6.5.0.final using JasperReports Library version 6.5.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="FacturaVenta" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e47a212f-3954-4de9-aca2-5bd71a6098c5">
 	<property name="ireport.zoom" value="3.0"/>
 	<property name="ireport.x" value="0"/>
@@ -12,9 +12,9 @@
 	<parameter name="formasDePago" class="java.lang.String"/>
 	<parameter name="nroNota" class="java.lang.Long"/>
 	<field name="descripcion" class="java.lang.String"/>
-	<field name="monto" class="java.lang.Double"/>
-	<field name="importeNeto" class="java.lang.Double"/>
-	<field name="ivaPorcentaje" class="java.lang.Double"/>
+	<field name="monto" class="java.math.BigDecimal"/>
+	<field name="importeNeto" class="java.math.BigDecimal"/>
+	<field name="ivaPorcentaje" class="java.math.BigDecimal"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -436,7 +436,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{importeNeto}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{importeNeto}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="">
 				<reportElement x="440" y="0" width="50" height="15" uuid="7a5d637a-a063-4bbe-a486-b313a3f62c77">
@@ -445,14 +445,14 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ivaPorcentaje}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ivaPorcentaje}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00">
 				<reportElement x="360" y="0" width="80" height="15" uuid="c7b87790-d932-4831-a827-5a9da47c5d43"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{monto}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{monto}.doubleValue()]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
@@ -525,7 +525,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaDebito}.getSubTotalBruto()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getSubTotalBruto().doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="17" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="e063a476-1e47-4947-9f7f-04ad07139b9e">
@@ -535,7 +535,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaDebito}.getIva21Neto()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getIva21Neto().doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="47" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="0287f0d5-94e6-4d59-ac75-cfff995614c1">
@@ -545,7 +545,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 					<font size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaDebito}.getTotal()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getTotal().doubleValue()]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="2" width="50" height="15" uuid="43f39702-e0af-456b-bea4-3952f75b1aa5">
@@ -619,7 +619,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 					<font size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaDebito}.getMontoNoGravado()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getMontoNoGravado().doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="51" width="40" height="12" uuid="d5e55495-b09b-4b6e-986b-662e63e6fcdb">

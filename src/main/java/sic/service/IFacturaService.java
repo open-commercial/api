@@ -1,5 +1,6 @@
 package sic.service;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import sic.modelo.Movimiento;
 import java.util.List;
@@ -24,7 +25,7 @@ public interface IFacturaService {
         
     Long getCAEById(long idFactura);
     
-    Double getTotalById(long idFactura);
+    BigDecimal getTotalById(long idFactura);
     
     List<Factura> getFacturasDelPedido(Long idPedido);
 
@@ -54,7 +55,7 @@ public interface IFacturaService {
     
     Factura actualizarFacturaEstadoPago(Factura factura);
     
-    Double getTotalPagado(long idFactura);
+    BigDecimal getTotalPagado(long idFactura);
 
     List<Factura> ordenarFacturasPorFechaAsc(List<Factura> facturas);
 
@@ -66,41 +67,41 @@ public interface IFacturaService {
 
     boolean validarCantidadMaximaDeRenglones(int cantidad, Empresa empresa);
 
-    double calcularSubTotal(double[] importes);
+    BigDecimal calcularSubTotal(BigDecimal[] importes);
 
-    double calcularDescuentoNeto(double subtotal, double descuento_porcentaje);
+    BigDecimal calcularDescuentoNeto(BigDecimal subtotal, BigDecimal descuento_porcentaje);
 
-    double calcularRecargoNeto(double subtotal, double recargo_porcentaje);
+    BigDecimal calcularRecargoNeto(BigDecimal subtotal, BigDecimal recargo_porcentaje);
 
-    double calcularSubTotalBruto(TipoDeComprobante tipoDeComprobante, double subTotal, double recargoNeto, double descuentoNeto, double iva105Neto, double iva21Neto);
+    BigDecimal calcularSubTotalBruto(TipoDeComprobante tipoDeComprobante, BigDecimal subTotal, BigDecimal recargoNeto, BigDecimal descuentoNeto, BigDecimal iva105Neto, BigDecimal iva21Neto);
 
-    double calcularIvaNetoFactura(TipoDeComprobante tipo, double[] cantidades, double[] ivaPorcentajeRenglones, double[] ivaNetoRenglones, double ivaPorcentaje, double porcentajeDescuento, double porcentajeRecargo);
+    BigDecimal calcularIvaNetoFactura(TipoDeComprobante tipo, BigDecimal[] cantidades, BigDecimal[] ivaPorcentajeRenglones, BigDecimal[] ivaNetoRenglones, BigDecimal ivaPorcentaje, BigDecimal porcentajeDescuento, BigDecimal porcentajeRecargo);
 
-    double calcularImpInternoNeto(TipoDeComprobante tipoDeComprobante, double descuento_porcentaje, double recargo_porcentaje, double[] importes, double [] impuestoPorcentajes);
+    BigDecimal calcularImpInternoNeto(TipoDeComprobante tipoDeComprobante, BigDecimal descuento_porcentaje, BigDecimal recargo_porcentaje, BigDecimal[] importes, BigDecimal[] impuestoPorcentajes);
 
-    double calcularImpInternoNeto(Movimiento movimiento, Producto producto, double descuento_neto);
+    BigDecimal calcularImpInternoNeto(Movimiento movimiento, Producto producto, BigDecimal descuento_neto);
 
-    public double calcularTotal(double subTotal_bruto, double iva105_neto, double iva21_neto);
+    BigDecimal calcularTotal(BigDecimal subTotal_bruto, BigDecimal iva105_neto, BigDecimal iva21_neto);
 
-    double calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria);
+    BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria);
     
-    double getSaldoFacturasVentaSegunClienteYEmpresa(long empresa, long cliente, Date hasta);
+    BigDecimal getSaldoFacturasVentaSegunClienteYEmpresa(long empresa, long cliente, Date hasta);
 
-    double calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria);
+    BigDecimal calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria);
 
-    double calcularIvaVenta(BusquedaFacturaVentaCriteria criteria);
+    BigDecimal calcularIvaVenta(BusquedaFacturaVentaCriteria criteria);
 
-    double calcularIvaCompra(BusquedaFacturaCompraCriteria criteria);
+    BigDecimal calcularIvaCompra(BusquedaFacturaCompraCriteria criteria);
 
-    double calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria);
+    BigDecimal calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria);
 
-    double calcularIVANetoRenglon(Movimiento movimiento, TipoDeComprobante tipo, Producto producto, double descuento_porcentaje);
+    BigDecimal calcularIVANetoRenglon(Movimiento movimiento, TipoDeComprobante tipo, Producto producto, BigDecimal descuento_porcentaje);
 
-    double calcularPrecioUnitario(Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto);
+    BigDecimal calcularPrecioUnitario(Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto);
 
     long calcularNumeroFacturaVenta(TipoDeComprobante tipoDeComprobante, long serie, long idEmpresa);
 
-    double calcularImporte(double cantidad, double precioUnitario, double descuento_neto);    
+    BigDecimal calcularImporte(BigDecimal cantidad, BigDecimal precioUnitario, BigDecimal descuento_neto);    
 
     byte[] getReporteFacturaVenta(Factura factura);
 
@@ -110,6 +111,6 @@ public interface IFacturaService {
 
     boolean pedidoTotalmenteFacturado(Pedido pedido);
     
-    RenglonFactura calcularRenglon(TipoDeComprobante tipoDeComprobante, Movimiento movimiento, double cantidad, long idProducto, double descuentoPorcentaje, boolean dividiendoRenglonFactura);
+    RenglonFactura calcularRenglon(TipoDeComprobante tipoDeComprobante, Movimiento movimiento, BigDecimal cantidad, long idProducto, BigDecimal descuentoPorcentaje, boolean dividiendoRenglonFactura);
 
 }

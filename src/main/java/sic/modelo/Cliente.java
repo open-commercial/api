@@ -2,6 +2,7 @@ package sic.modelo;
 
 import com.querydsl.core.annotations.QueryInit;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -86,7 +87,7 @@ public class Cliente implements Serializable {
     private boolean predeterminado;
 
     @Transient
-    private Double saldoCuentaCorriente;
+    private BigDecimal saldoCuentaCorriente;
     
     @Transient 
     private Date fechaUltimoMovimiento;

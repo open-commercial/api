@@ -1,5 +1,6 @@
 package sic.repository;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -29,15 +30,15 @@ public interface PagoRepository extends PagingAndSortingRepository<Pago, Long> {
     Pago findTopByEmpresaOrderByNroPagoDesc(Empresa empresa);
     
     @Query("SELECT SUM(p.monto) FROM FacturaVenta fv INNER JOIN fv.pagos p WHERE fv.cliente.id_Cliente = :idCliente AND p.eliminado = false AND p.fecha <= :hasta")
-    Double getSaldoPagosPorCliente(@Param("idCliente") long idCliente, @Param("hasta") Date hasta);
+    BigDecimal getSaldoPagosPorCliente(@Param("idCliente") long idCliente, @Param("hasta") Date hasta);
     
     List<Pago> findByNotaDebitoAndEliminado(Nota nota, boolean eliminado);
     
     @Query("SELECT SUM(p.monto) FROM Factura f INNER JOIN f.pagos p WHERE f.id_Factura = :idFactura AND p.eliminado = false")
-    Double getTotalPagosDeFactura(@Param("idFactura") long idFactura);
+    BigDecimal getTotalPagosDeFactura(@Param("idFactura") long idFactura);
     
     @Query("SELECT SUM(p.monto) FROM Pago p INNER JOIN p.notaDebito n WHERE n.idNota = :idNota AND p.eliminado = false")
-    Double getTotalPagosDeNota(@Param("idNota") long idNota);
+    BigDecimal getTotalPagosDeNota(@Param("idNota") long idNota);
     
     List<Pago> findAllByReciboAndEliminado(Recibo recibo, boolean eliminado);
     

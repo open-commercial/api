@@ -1,5 +1,6 @@
 package sic.repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -15,7 +16,7 @@ public interface FacturaRepository<T extends Factura> extends PagingAndSortingRe
     Factura findById(@Param("idFactura") long idFactura);
     
     @Query("SELECT f.total FROM Factura f WHERE f.id_Factura = :idFactura AND f.eliminada = false")
-    Double getTotalById(@Param("idFactura") long idFactura);
+    BigDecimal getTotalById(@Param("idFactura") long idFactura);
     
     Factura findByTipoComprobanteAndNumSerieAndNumFacturaAndEmpresaAndEliminada(TipoDeComprobante tipoComprobante,
             long serie, long num, Empresa empresa, boolean eliminada);

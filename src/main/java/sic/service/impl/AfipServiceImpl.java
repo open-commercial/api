@@ -15,6 +15,8 @@ import afip.wsfe.wsdl.FECompUltimoAutorizado;
 import afip.wsfe.wsdl.FERecuperaLastCbteResponse;
 import java.io.Reader;
 import java.io.StringReader;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
@@ -34,7 +36,6 @@ import sic.modelo.TipoDeComprobante;
 import sic.service.BusinessServiceException;
 import sic.service.IConfiguracionDelSistemaService;
 import sic.util.FormatterFechaHora;
-import sic.util.Utilidades;
 
 @Service
 @Transactional
@@ -200,7 +201,7 @@ public class AfipServiceImpl implements IAfipService {
             case FACTURA_B:
                 cabecera.setCbteTipo(6);
                 // menor a $1000, si DocTipo = 99 DocNro debe ser igual a 0 (simula un consumidor final ???)
-                if (comprobante.getTotal() < 1000) {
+                if (comprobante.getTotal().compareTo(new BigDecimal("1000")) < 0) { 
                     detalle.setDocTipo(99);
                     detalle.setDocNro(0);
                 } else {
@@ -214,7 +215,7 @@ public class AfipServiceImpl implements IAfipService {
             case NOTA_DEBITO_B:
                 cabecera.setCbteTipo(7);
                 // menor a $1000, si DocTipo = 99 DocNro debe ser igual a 0 (simula un consumidor final ???)
-                if (comprobante.getTotal() < 1000) {
+                if (comprobante.getTotal().compareTo(new BigDecimal("1000")) < 0) {
                     detalle.setDocTipo(99);
                     detalle.setDocNro(0);
                 } else {
@@ -228,7 +229,7 @@ public class AfipServiceImpl implements IAfipService {
             case NOTA_CREDITO_B:
                 cabecera.setCbteTipo(8);
                 // menor a $1000, si DocTipo = 99 DocNro debe ser igual a 0 (simula un consumidor final ???)
-                if (comprobante.getTotal() < 1000) {
+                if (comprobante.getTotal().compareTo(new BigDecimal("1000")) < 0) {
                     detalle.setDocTipo(99);
                     detalle.setDocNro(0);
                 } else {
@@ -254,25 +255,25 @@ public class AfipServiceImpl implements IAfipService {
         detalle.setConcepto(1); // Concepto del Comprobante. Valores permitidos: 1 Productos, 2 Servicios, 3 Productos y Servicios        
         detalle.setCbteFch(formatterFechaHora.format(comprobante.getFecha()).replace("/", "")); // Fecha del comprobante (yyyymmdd)        
         ArrayOfAlicIva arrayIVA = new ArrayOfAlicIva();
-        if (comprobante.getIva21neto() != 0) {
+        if (comprobante.getIva21neto().compareTo(BigDecimal.ZERO) != 0) {
             AlicIva alicIVA21 = new AlicIva();
             alicIVA21.setId(5); // Valores: 5 (21%), 4 (10.5%)  
-            alicIVA21.setBaseImp(Utilidades.round((100 * comprobante.getIva21neto()) / 21, 2)); // Se calcula con: (100 * IVA_neto) / %IVA
-            alicIVA21.setImporte(Utilidades.round(comprobante.getIva21neto(), 2));
+            alicIVA21.setBaseImp(comprobante.getIva21neto().multiply(new BigDecimal("100")).divide(new BigDecimal("21"), 2, RoundingMode.HALF_UP).doubleValue()); // Se calcula con: (100 * IVA_neto) / %IVA
+            alicIVA21.setImporte(comprobante.getIva21neto().setScale(2, RoundingMode.HALF_UP).doubleValue()); 
             arrayIVA.getAlicIva().add(alicIVA21);
         }
-        if (comprobante.getIva105neto() != 0) {
+        if (comprobante.getIva105neto().compareTo(BigDecimal.ZERO) != 0) {
             AlicIva alicIVA105 = new AlicIva();
             alicIVA105.setId(4); // Valores: 5 (21%), 4 (10.5%)
-            alicIVA105.setBaseImp(Utilidades.round((100 * comprobante.getIva105neto()) / 10.5, 2)); // Se calcula con: (100 * IVA_neto) / %IVA
-            alicIVA105.setImporte(Utilidades.round(comprobante.getIva105neto(), 2));
+            alicIVA105.setBaseImp(comprobante.getIva105neto().multiply(new BigDecimal("100")).divide(new BigDecimal("21"), 2, RoundingMode.HALF_UP).doubleValue()); // Se calcula con: (100 * IVA_neto) / %IVA
+            alicIVA105.setImporte(comprobante.getIva105neto().setScale(2, RoundingMode.HALF_UP).doubleValue());
             arrayIVA.getAlicIva().add(alicIVA105);
         }
         detalle.setIva(arrayIVA); // Array para informar las alícuotas y sus importes asociados a un comprobante <AlicIva>. Para comprobantes tipo C y Bienes Usados – Emisor Monotributista no debe informar el array.
-        detalle.setImpIVA(Utilidades.round(comprobante.getIva105neto() + comprobante.getIva21neto(), 2)); // Suma de los importes del array de IVA. Para comprobantes tipo C debe ser igual a cero (0).
-        detalle.setImpNeto(Utilidades.round(comprobante.getSubtotalBruto(), 2)); // Importe neto gravado. Debe ser menor o igual a Importe total y no puede ser menor a cero. Para comprobantes tipo C este campo corresponde al Importe del Sub Total                
-        detalle.setImpTotConc(comprobante.getMontoNoGravado()); // El campo “Importe neto no gravado” <ImpTotConc>. No puede ser menor a cero(0). Para comprobantes tipo C debe ser igual a cero (0).
-        detalle.setImpTotal(Utilidades.round(comprobante.getTotal(), 2)); // Importe total del comprobante, Debe ser igual a Importe neto no gravado + Importe exento + Importe neto gravado + todos los campos de IVA al XX% + Importe de tributos                        
+        detalle.setImpIVA(comprobante.getIva105neto().add(comprobante.getIva21neto()).setScale(2, RoundingMode.HALF_UP).doubleValue()); // Suma de los importes del array de IVA. Para comprobantes tipo C debe ser igual a cero (0).        
+        detalle.setImpNeto(comprobante.getSubtotalBruto().setScale(2, RoundingMode.HALF_UP).doubleValue()); // Importe neto gravado. Debe ser menor o igual a Importe total y no puede ser menor a cero. Para comprobantes tipo C este campo corresponde al Importe del Sub Total                
+        detalle.setImpTotConc(comprobante.getMontoNoGravado().doubleValue()); // El campo “Importe neto no gravado” <ImpTotConc>. No puede ser menor a cero(0). Para comprobantes tipo C debe ser igual a cero (0).
+        detalle.setImpTotal(comprobante.getTotal().setScale(2, RoundingMode.HALF_UP).doubleValue()); // Importe total del comprobante, Debe ser igual a Importe neto no gravado + Importe exento + Importe neto gravado + todos los campos de IVA al XX% + Importe de tributos                        
         detalle.setMonId("PES"); // Código de moneda del comprobante. Consultar método FEParamGetTiposMonedas para valores posibles
         detalle.setMonCotiz(1); // Cotización de la moneda informada. Para PES, pesos argentinos la misma debe ser 1
         arrayDetalle.getFECAEDetRequest().add(detalle);                               

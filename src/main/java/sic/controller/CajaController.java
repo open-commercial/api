@@ -1,5 +1,6 @@
 package sic.controller;
 
+import java.math.BigDecimal;
 import java.util.Calendar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -68,7 +69,7 @@ public class CajaController {
     @PutMapping("/cajas/{idCaja}/cierre")
     @ResponseStatus(HttpStatus.OK)
     public Caja cerrarCaja(@PathVariable long idCaja,
-                           @RequestParam double monto,
+                           @RequestParam BigDecimal monto,
                            @RequestParam long idUsuarioCierre) {
         return cajaService.cerrarCaja(idCaja, monto, idUsuarioCierre, false);
     }
@@ -113,16 +114,16 @@ public class CajaController {
     
     
     @GetMapping("/cajas/{idCaja}/total")
-    public double getTotalCaja(@PathVariable long idCaja, 
-                               @RequestParam(required = false) boolean soloAfectaCaja) {
+    public BigDecimal getTotalCaja(@PathVariable long idCaja, 
+                                   @RequestParam(required = false) boolean soloAfectaCaja) {
         return cajaService.getTotalCaja(cajaService.getCajaPorId(idCaja), soloAfectaCaja);
     }
     
     @GetMapping("/cajas/empresas/{idEmpresa}/saldo-final")
-    public double getSaldoFinalCajas(@PathVariable long idEmpresa,
-                                     @RequestParam(value = "idUsuario", required = false) Long idUsuario,
-                                     @RequestParam(value = "desde", required = false) Long desde,
-                                     @RequestParam(value = "hasta", required = false) Long hasta) {
+    public BigDecimal getSaldoFinalCajas(@PathVariable long idEmpresa,
+                                         @RequestParam(value = "idUsuario", required = false) Long idUsuario,
+                                         @RequestParam(value = "desde", required = false) Long desde,
+                                         @RequestParam(value = "hasta", required = false) Long hasta) {
         Calendar fechaDesde = Calendar.getInstance();
         fechaDesde.add(Calendar.YEAR, -17); // Rango temporal hasta la implementacion de criteria builder
         Calendar fechaHasta = Calendar.getInstance();
@@ -142,10 +143,10 @@ public class CajaController {
     }
 
     @GetMapping("/cajas/empresas/{idEmpresa}/saldo-real")
-    public double getSaldoRealCajas(@PathVariable long idEmpresa,
-                                    @RequestParam(value = "idUsuario", required = false) Long idUsuario,
-                                    @RequestParam(value = "desde", required = false) Long desde,
-                                    @RequestParam(value = "hasta", required = false) Long hasta) {
+    public BigDecimal getSaldoRealCajas(@PathVariable long idEmpresa,
+                                        @RequestParam(value = "idUsuario", required = false) Long idUsuario,
+                                        @RequestParam(value = "desde", required = false) Long desde,
+                                        @RequestParam(value = "hasta", required = false) Long hasta) {
         Calendar fechaDesde = Calendar.getInstance();
         fechaDesde.add(Calendar.YEAR, -17); // Rango temporal hasta la implementacion de criteria builder
         Calendar fechaHasta = Calendar.getInstance();
