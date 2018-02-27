@@ -52,8 +52,8 @@ public class RenglonCuentaCorrienteServiceImpl implements IRenglonCuentaCorrient
     }
 
     @Override
-    public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(CuentaCorriente cuentaCorriente, boolean eliminado, Pageable page) {
-        return renglonCuentaCorrienteRepository.findAllByCuentaCorrienteAndEliminado(cuentaCorriente, eliminado, page);
+    public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Pageable page) {
+        return renglonCuentaCorrienteRepository.findAllByCuentaCorrienteAndEliminado(idCuentaCorriente, page);
     }
 
     @Override

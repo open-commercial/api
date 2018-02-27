@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.AjusteCuentaCorriente;
-import sic.modelo.CuentaCorriente;
 import sic.modelo.Factura;
 import sic.modelo.Nota;
 import sic.modelo.Recibo;
@@ -25,7 +24,10 @@ public interface RenglonCuentaCorrienteRepository extends PagingAndSortingReposi
     
     RenglonCuentaCorriente findByAjusteCuentaCorrienteAndEliminado(AjusteCuentaCorriente ajusteCC, boolean eliminado);
 
-    Page<RenglonCuentaCorriente> findAllByCuentaCorrienteAndEliminado(CuentaCorriente cuentaCorriente, boolean eliminado, Pageable page);
+    @Query("SELECT r FROM CuentaCorriente cc INNER JOIN cc.renglones r"
+            + " WHERE cc.idCuentaCorriente = :idCuentaCorriente AND cc.eliminada = false AND r.eliminado = false"
+            + " ORDER BY r.idRenglonCuentaCorriente DESC")
+    Page<RenglonCuentaCorriente> findAllByCuentaCorrienteAndEliminado(@Param("idCuentaCorriente") long idCuentaCorriente, Pageable page);
     
     @Query("SELECT r FROM CuentaCorriente cc INNER JOIN cc.renglones r"
             + " WHERE cc.idCuentaCorriente = :idCuentaCorriente AND cc.eliminada = false AND r.eliminado = false "

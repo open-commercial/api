@@ -159,8 +159,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     
     @Override
     public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Pageable pageable) {
-        CuentaCorriente cc = this.getCuentaCorrientePorID(idCuentaCorriente);
-        return renglonCuentaCorrienteService.getRenglonesCuentaCorriente(cc, false, pageable);
+        return renglonCuentaCorrienteService.getRenglonesCuentaCorriente(idCuentaCorriente, pageable);
     }
     
     @Override
