@@ -131,7 +131,6 @@ public class CuentaCorrienteIntegrationTest {
     }
 
     @Test
-    @Ignore
     public void testCuentaCorrienteCliente() {
         this.token = restTemplate.postForEntity(apiPrefix + "/login", new Credencial("test", "test"), String.class).getBody();
         Localidad localidad = new LocalidadBuilder().build();
@@ -384,7 +383,6 @@ public class CuentaCorrienteIntegrationTest {
     }
 
     @Test
-    @Ignore
     public void testCuentaCorrienteProveedor() {
         this.token = restTemplate.postForEntity(apiPrefix + "/login", new Credencial("test", "test"), String.class).getBody();
         Localidad localidad = new LocalidadBuilder().build();
@@ -467,8 +465,7 @@ public class CuentaCorrienteIntegrationTest {
                 productoUno, ProductoDTO.class);
         productoDos = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
                 + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
-                productoDos, ProductoDTO.class);
-        
+                productoDos, ProductoDTO.class);        
         String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<BigDecimal, Producto>>() {}).getBody().isEmpty());
         RenglonFactura renglonUno = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
@@ -601,15 +598,11 @@ public class CuentaCorrienteIntegrationTest {
                         + "?pagina=" + 0 + "&tamanio=" + 50, HttpMethod.GET, null,
                         new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {
                 }).getBody().getContent();
-        assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(0).getSaldo() == 4114);
-        assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(1).getSaldo() == 0);
-        assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(2).getSaldo() == -6113.5);
-        assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(3).getSaldo() == 0);
-        assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(4).getSaldo() == -5992.5);
+        assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(0).getSaldo() == 6992.5);
+        assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(1).getSaldo() == 4992.5);
     }
     
     @Test
-    @Ignore
     public void testRecibo() {
         this.token = restTemplate.postForEntity(apiPrefix + "/login", new Credencial("test", "test"), String.class).getBody();
         Localidad localidad = new LocalidadBuilder().build();
@@ -901,12 +894,14 @@ public class CuentaCorrienteIntegrationTest {
         assertEquals(2192.5, restTemplate.getForObject(apiPrefix + "/recibos/2", ReciboDTO.class).getSaldoSobrante(), 0);
         restTemplate.delete(apiPrefix + "/notas?idsNota=1");
         assertEquals(6992.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
-                List<RenglonCuentaCorriente> renglonesCuentaCorriente = restTemplate
+        List<RenglonCuentaCorriente> renglonesCuentaCorriente = restTemplate
                 .exchange(apiPrefix + "/cuentas-corrientes/1/renglones"
                         + "?pagina=" + 0 + "&tamanio=" + 50, HttpMethod.GET, null,
                         new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {
                 }).getBody().getContent();
-        assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(0).getSaldo() == 4114);
+        assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(0).getSaldo() == 6992.5);
+        assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(1).getSaldo() == 4800);
+        assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(2).getSaldo() == -10200);
     }
 
 }
