@@ -197,8 +197,7 @@ public class ProductoController {
     
     @GetMapping("/productos/ganancia-neto")
     @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularGananciaNeto(@RequestParam BigDecimal precioCosto, 
-                                           @RequestParam BigDecimal gananciaPorcentaje) {
+    public BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal gananciaPorcentaje) {
         if (precioCosto == null || gananciaPorcentaje == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
         }
@@ -213,19 +212,17 @@ public class ProductoController {
                                                  @RequestParam(defaultValue = "0", required = false) BigDecimal ivaPorcentaje, 
                                                  @RequestParam(defaultValue = "0", required = false) BigDecimal impInternoPorcentaje,                                              
                                                  @RequestParam(defaultValue = "0", required = false) BigDecimal precioDeLista, 
-                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal precioDeListaAnterior){
+                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal precioDeListaAnterior) {
         if (precioCosto == null || pvp == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
         }
-        return productoService.calcularGanancia_Porcentaje(precioDeLista, precioDeListaAnterior,
-                                                           pvp, ivaPorcentaje, impInternoPorcentaje, 
-                                                           precioCosto, ascendente);
+        return productoService.calcularGanancia_Porcentaje(precioDeLista, precioDeListaAnterior, pvp, ivaPorcentaje,
+                impInternoPorcentaje, precioCosto, ascendente);
     }
     
     @GetMapping("/productos/iva-neto")
     @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularIVANeto(@RequestParam BigDecimal pvp, 
-                                      @RequestParam BigDecimal ivaPorcentaje) {
+    public BigDecimal calcularIVANeto(BigDecimal pvp, BigDecimal ivaPorcentaje) {
         if (ivaPorcentaje == null || pvp == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
         }
@@ -235,7 +232,7 @@ public class ProductoController {
     @GetMapping("/productos/imp-interno-neto")
     @ResponseStatus(HttpStatus.OK)
     public BigDecimal calcularImpInternoNeto(@RequestParam BigDecimal pvp, 
-                                             @RequestParam(defaultValue = "0",required = false) BigDecimal impInternoPorcentaje){
+                                             @RequestParam(defaultValue = "0",required = false) BigDecimal impInternoPorcentaje) {
         if (pvp == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
         }
@@ -244,8 +241,7 @@ public class ProductoController {
     
     @GetMapping("/productos/pvp")
     @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularPVP(@RequestParam BigDecimal precioCosto, 
-                                  @RequestParam BigDecimal gananciaPorcentaje) {
+    public BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal gananciaPorcentaje) {
         if (precioCosto == null || gananciaPorcentaje == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
         }
