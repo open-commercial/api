@@ -15,7 +15,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -265,7 +264,6 @@ public class CuentaCorrienteIntegrationTest {
             }
         }
         BigDecimal subTotalBruto = subTotal.add(recargo_neto).subtract(descuento_neto).subtract(iva_105_netoFactura.add(iva_21_netoFactura));
-
         BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
         FacturaVentaDTO facturaVentaB = new FacturaVentaDTO();
         facturaVentaB.setTipoComprobante(TipoDeComprobante.FACTURA_B);
@@ -284,6 +282,8 @@ public class CuentaCorrienteIntegrationTest {
                 + "&idEmpresa=" + empresa.getId_Empresa()
                 + "&idUsuario=" + credencial.getId_Usuario()
                 + "&idTransportista=" + transportista.getId_Transportista(), facturaVentaB, FacturaVenta[].class);
+        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=5,4";
+        Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
                 restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", BigDecimal.class)
         .compareTo(new BigDecimal("-5992.5")) == 0);
@@ -365,8 +365,10 @@ public class CuentaCorrienteIntegrationTest {
         notaCredito.setTotal(restTemplate.getForObject(apiPrefix + "/notas/credito/total?subTotalBruto=" + notaCredito.getSubTotalBruto()
                 + "&iva21Neto=" + notaCredito.getIva21Neto()
                 + "&iva105Neto=" + notaCredito.getIva105Neto(), BigDecimal.class));
-        restTemplate.postForObject(apiPrefix + "/notas/credito/empresa/1/cliente/1/usuario/1/factura/1?modificarStock=false", notaCredito, NotaCredito.class);
+        restTemplate.postForObject(apiPrefix + "/notas/credito/empresa/1/cliente/1/usuario/1/factura/1?modificarStock=true", notaCredito, NotaCredito.class);
         restTemplate.getForObject(apiPrefix + "/notas/2/reporte", byte[].class);
+        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=5,4";
+        Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
                 restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", BigDecimal.class)
         .compareTo(new BigDecimal("4114")) == 0);
