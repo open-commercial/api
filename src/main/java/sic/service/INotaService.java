@@ -5,8 +5,11 @@ import java.util.Date;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import sic.modelo.BusquedaNotaCriteria;
+import sic.modelo.Factura;
+import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
+import sic.modelo.NotaCredito;
 import sic.modelo.NotaDebito;
 import sic.modelo.Pago;
 import sic.modelo.Recibo;
@@ -29,7 +32,9 @@ public interface INotaService {
     
     BigDecimal getTotalById(Long idNota);
     
-    FacturaVenta getFacturaNota(Long idNota);
+    FacturaVenta getFacturaNotaCreditoCliente(Long idNota);
+    
+    FacturaCompra getFacturaNotaCreditoProveedor(Long idNota);
     
     Nota getNotaDelPago(long idPago);
     
@@ -37,23 +42,21 @@ public interface INotaService {
     
     boolean existeNotaDebitoPorRecibo(Recibo recibo);
     
-    boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta);
+    boolean existsByFacturaAndEliminada(Factura factura);
     
     BigDecimal getTotalPagado(Long idNota);
 
-    List<Nota> getNotasPorFactura(Long idFactura);
+    List<NotaCredito> getNotasCreditoPorFactura(Long idFactura);
 
-    Page<Nota> buscarNotasPorClienteYEmpresa(BusquedaNotaCriteria criteria);
+    Page<NotaCredito> buscarNotasCreditoPorClienteYEmpresa(BusquedaNotaCriteria criteria);
 
-    List<Nota> getNotasPorClienteYEmpresa(Long idCliente, Long idEmpresa);
+    List<Nota> getNotasCreditoPorClienteYEmpresa(Long idCliente, Long idEmpresa);
 
     long getSiguienteNumeroNotaDebito(Long idEmpresa, TipoDeComprobante tipoComprobante);
 
     long getSiguienteNumeroNotaCredito(Long idEmpresa, TipoDeComprobante tipoComprobante);
 
-    BigDecimal getSaldoNotas(Date hasta, Long idCliente, Long idEmpresa);
-
-    TipoDeComprobante[] getTipoNota(Long idCliente, Long idEmpresa);
+    TipoDeComprobante[] getTipoNotaCliente(Long idCliente, Long idEmpresa);
 
     List<RenglonNotaCredito> getRenglonesDeNotaCredito(Long idNota);
 
@@ -85,7 +88,7 @@ public interface INotaService {
     
     BigDecimal calcularTotalDebito(BigDecimal subTotal_bruto, BigDecimal iva21_neto, BigDecimal montoNoGravado);
     
-    BigDecimal calcularTotaCreditoPorFacturaVenta(FacturaVenta facturaVenta);
+    BigDecimal calcularTotaCreditoPorFactura(Factura factura);
     
     Nota actualizarNotaDebitoEstadoPago(NotaDebito notaDebito);   
     

@@ -242,7 +242,7 @@ public class ReciboServiceImpl implements IReciboService {
                         || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_C || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_X
                         || rcc.getTipoComprobante() == TipoDeComprobante.FACTURA_Y || rcc.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
                     FacturaVenta fv = (FacturaVenta) facturaService.getFacturaPorId(rcc.getIdMovimiento());
-                    BigDecimal credito = notaService.calcularTotaCreditoPorFacturaVenta(fv);
+                    BigDecimal credito = notaService.calcularTotaCreditoPorFactura(fv);
                     BigDecimal saldoAPagar = this.pagoService.getSaldoAPagarFactura(fv.getId_Factura());
                     if (fv.isPagada() == false && saldoAPagar.compareTo(credito) > 0) {
                         fv.setPagos(this.pagoService.getPagosDeLaFactura(fv.getId_Factura()));

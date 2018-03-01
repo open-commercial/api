@@ -274,10 +274,10 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setNota(n); 
             rcc.setFecha(n.getFecha());
             rcc.setIdMovimiento(n.getIdNota());
-            CuentaCorriente cc = this.getCuentaCorrientePorCliente(n.getCliente().getId_Cliente());
-            cc.getRenglones().add(rcc);
-            rcc.setCuentaCorriente(cc);
-            this.renglonCuentaCorrienteService.guardar(rcc);
+//            CuentaCorriente cc = this.getCuentaCorrientePorCliente(n.getCliente().getId_Cliente());
+//            cc.getRenglones().add(rcc);
+//            rcc.setCuentaCorriente(cc);
+//            this.renglonCuentaCorrienteService.guardar(rcc);
             LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
         }
         if (tipo == TipoDeOperacion.ELIMINACION) {

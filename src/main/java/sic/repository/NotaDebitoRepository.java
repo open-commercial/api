@@ -15,10 +15,7 @@ public interface NotaDebitoRepository extends NotaRepository<NotaDebito> {
     @Query("SELECT nd FROM NotaDebito nd WHERE nd.idNota= :idNotaDebito AND nd.eliminada = false")
     NotaDebito getById(@Param("idNotaDebito") long idNotaDebito);
     
-    @Query("SELECT SUM(nd.total) FROM NotaDebito nd WHERE nd.empresa = :empresa AND nd.cliente = :cliente AND nd.eliminada = false AND nd.fecha <= :hasta")
-    BigDecimal totalNotasDebito(@Param("hasta") Date hasta, @Param("cliente") Cliente cliente, @Param("empresa") Empresa empresa);
-    
-    NotaDebito findTopByEmpresaAndTipoComprobanteOrderByNroNotaDesc(Empresa empresa, TipoDeComprobante tipoComprobante);
+    NotaDebito findTopByEmpresaAndTipoComprobanteAndSerieOrderByNroNotaDesc(Empresa empresa, TipoDeComprobante tipoComprobante, long serie);
     
     boolean existsByReciboAndEliminada(Recibo recibo, boolean eliminada);
 

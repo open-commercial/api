@@ -4,9 +4,19 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
+@Entity
+@Table(name = "notadebitocliente")
+@Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class NotaDebitoCliente extends NotaDebito implements Serializable {
     
     @ManyToOne

@@ -46,15 +46,10 @@ public abstract class NotaCredito extends Nota implements Serializable {
     
     @Column(precision = 25, scale = 15)
     private BigDecimal descuentoNeto;
-    
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "id_Factura")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Factura factura;
 
     public NotaCredito() {}
 
-    public NotaCredito(long idNota, long serie, Factura factura, List<Pago> pagos, long nroNota, boolean eliminada,
+    public NotaCredito(long idNota, long serie, List<Pago> pagos, long nroNota, boolean eliminada,
             TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa,
             Usuario usuario, String motivo, List<RenglonNotaCredito> renglones, BigDecimal subTotalBruto, BigDecimal iva21Neto,
             BigDecimal iva105Neto, BigDecimal total, long CAE, Date vencimientoCAE,
@@ -62,7 +57,6 @@ public abstract class NotaCredito extends Nota implements Serializable {
 
         super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, usuario, pagos, motivo,
                 subTotalBruto, iva21Neto, iva105Neto, total, CAE, vencimientoCAE, numSerieAfip, numFacturaAfip);
-        this.factura = factura;
         this.renglonesNotaCredito = renglones;
     }
 

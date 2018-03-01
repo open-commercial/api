@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import sic.modelo.BusquedaNotaCriteria;
-import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
 import sic.modelo.NotaCredito;
 import sic.modelo.NotaDebito;
@@ -59,11 +58,11 @@ public class NotaController {
         return notaService.getNotaPorId(idNota);
     }
  
-    @GetMapping("/notas/{idNota}/facturas")
-    @ResponseStatus(HttpStatus.OK)
-    public FacturaVenta getFacturaNota(@PathVariable long idNota) {
-        return notaService.getFacturaNota(idNota);
-    }
+//    @GetMapping("/notas/{idNota}/facturas")
+//    @ResponseStatus(HttpStatus.OK)
+//    public FacturaVenta getFacturaNota(@PathVariable long idNota) {
+//        return notaService.getFacturaNota(idNota);
+//    }
     
     @GetMapping("/notas/debito/recibo/{idRecibo}/existe")
     @ResponseStatus(HttpStatus.OK)
@@ -74,7 +73,7 @@ public class NotaController {
     @GetMapping("/notas/cliente/{idCliente}/empresa/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
     public List<Nota> getNotasPorClienteYEmpresa(Long idEmpresa, Long idCliente) {
-        return notaService.getNotasPorClienteYEmpresa(idEmpresa, idCliente);
+        return notaService.getNotasCreditoPorClienteYEmpresa(idEmpresa, idCliente);
     }
     
     @GetMapping("/notas/pagos/{idPago}")
@@ -113,24 +112,14 @@ public class NotaController {
                 .cliente(clienteService.getClientePorId(idCliente))
                 .pageable(pageable)
                 .build();
-        return notaService.buscarNotasPorClienteYEmpresa(criteria);
-    }
-    
-    @GetMapping("/notas/saldo")
-    @ResponseStatus(HttpStatus.OK)
-    public BigDecimal getSaldoNotas(@RequestParam Long hasta,
-                                    @RequestParam long idCliente, 
-                                    @RequestParam long IdEmpresa) {
-        Calendar fechaHasta = Calendar.getInstance();
-        fechaHasta.setTimeInMillis(hasta);
-        return notaService.getSaldoNotas(fechaHasta.getTime(), idCliente, IdEmpresa);
+        return notaService.buscarNotasCreditoPorClienteYEmpresa(criteria);
     }
     
     @GetMapping("/notas/tipos")
     @ResponseStatus(HttpStatus.OK)
     public TipoDeComprobante[] getTipoNota(@RequestParam long idCliente,
                                            @RequestParam long idEmpresa) {
-        return notaService.getTipoNota(idCliente, idEmpresa);
+        return notaService.getTipoNotaCliente(idCliente, idEmpresa);
     }
     
     @GetMapping("/notas/renglones/credito/{idNotaCredito}")
