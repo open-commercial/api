@@ -280,10 +280,12 @@ public class NotaServiceImpl implements INotaService {
     private void validarNota(Nota nota, long idEmpresa, long idCliente, long idUsuario, Long idFactura) {
         if (idFactura != null && nota instanceof NotaCredito) {
             Factura f = facturaService.getFacturaPorId(idFactura);
+            no
             if (f instanceof FacturaVenta) {
                 nota.setFacturaVenta((FacturaVenta) f);
                 nota.setCliente(((FacturaVenta) f).getCliente());
             } else {
+                nota.setf
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_nota_de_credito_factura_no_valida"));
             }

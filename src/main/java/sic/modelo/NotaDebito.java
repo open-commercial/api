@@ -21,7 +21,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true, exclude = "renglonesNotaDebito")
-public class NotaDebito extends Nota implements Serializable {
+public abstract class NotaDebito extends Nota implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "idNota")
@@ -40,14 +40,13 @@ public class NotaDebito extends Nota implements Serializable {
 
     public NotaDebito() {}
 
-    public NotaDebito(long idNota, long serie, FacturaVenta facturaVenta, List<Pago> pagos, long nroNota, boolean eliminada,
-            TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa, Cliente cliente,
-            Usuario usuario, String motivo, List<RenglonNotaDebito> renglones, BigDecimal subTotalBruto,
-            BigDecimal iva21Neto, BigDecimal iva105Neto, BigDecimal total, BigDecimal montoNoGravado, long CAE, Date vencimientoCAE,
-            long numSerieAfip, long numNotaAfip, Recibo recibo, boolean pagado) {
+    public NotaDebito(long idNota, long serie, Factura factura, List<Pago> pagos, long nroNota, boolean eliminada,
+            TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa, Usuario usuario, String motivo, List<RenglonNotaDebito> renglones, 
+            BigDecimal subTotalBruto, BigDecimal iva21Neto, BigDecimal iva105Neto, BigDecimal total, BigDecimal montoNoGravado, long CAE, 
+            Date vencimientoCAE, long numSerieAfip, long numNotaAfip, Recibo recibo, boolean pagado) {
 
-        super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, cliente, usuario,
-                facturaVenta, pagos, motivo, subTotalBruto, iva21Neto, iva105Neto, total, CAE, vencimientoCAE, numSerieAfip, numNotaAfip);
+        super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, usuario,
+              pagos, motivo, subTotalBruto, iva21Neto, iva105Neto, total, CAE, vencimientoCAE, numSerieAfip, numNotaAfip);
         this.montoNoGravado = montoNoGravado;
         this.renglonesNotaDebito = renglones;
         this.recibo = recibo;

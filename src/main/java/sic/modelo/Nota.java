@@ -38,13 +38,15 @@ import lombok.ToString;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"fecha", "tipoComprobante", "serie", "nroNota", "empresa", "cliente"})
+@EqualsAndHashCode(of = {"fecha", "tipoComprobante", "serie", "nroNota", "empresa"})
 @ToString(exclude = "pagos")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idNota", scope = Nota.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
-  @JsonSubTypes.Type(value = NotaCredito.class), 
-  @JsonSubTypes.Type(value = NotaDebito.class) 
+  @JsonSubTypes.Type(value = NotaCreditoCliente.class),
+  @JsonSubTypes.Type(value = NotaCreditoProveedor.class), 
+  @JsonSubTypes.Type(value = NotaDebitoCliente.class), 
+  @JsonSubTypes.Type(value = NotaDebitoProveedor.class)
 })
 public abstract class Nota implements Serializable {
     
@@ -78,18 +80,8 @@ public abstract class Nota implements Serializable {
     private Empresa empresa;
     
     @ManyToOne
-    @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
-    private Cliente cliente;
-    
-    @ManyToOne
     @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
     private Usuario usuario;
-    
-    //Mover este atributo a notaCredito, y solo FACTURA
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "id_Factura")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private FacturaVenta facturaVenta;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "notaDebito")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
