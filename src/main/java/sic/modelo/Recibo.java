@@ -70,9 +70,6 @@ public class Recibo implements Serializable {
     @Column(precision = 25, scale = 15)
     private BigDecimal monto;
 
-    @Column(precision = 25, scale = 15)
-    private BigDecimal saldoSobrante;
-
     @JsonGetter("formaDePago")
     public String getNombreFormaDePago() {
         return formaDePago.getNombre();

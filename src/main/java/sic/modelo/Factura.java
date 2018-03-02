@@ -40,7 +40,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"fecha", "tipoComprobante", "numSerie", "numFactura", "empresa"})
-@ToString(exclude = {"renglones", "pagos"})
+@ToString(exclude = {"renglones"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Factura", scope = Factura.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
@@ -86,10 +86,6 @@ public abstract class Factura implements Serializable {
     @JoinColumn(name = "id_Factura")
     @JsonProperty(access = Access.WRITE_ONLY)
     private List<RenglonFactura> renglones;
-    
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "factura")
-    @JsonProperty(access = Access.WRITE_ONLY)
-    private List<Pago> pagos;
 
     @Column(precision = 25, scale = 15)
     private BigDecimal subTotal;
@@ -123,8 +119,6 @@ public abstract class Factura implements Serializable {
 
     @Column(nullable = false)
     private String observaciones;
-
-    private boolean pagada;
 
     @ManyToOne
     @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")    

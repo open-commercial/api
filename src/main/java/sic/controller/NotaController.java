@@ -77,12 +77,6 @@ public class NotaController {
         return notaService.getNotasPorClienteYEmpresa(idEmpresa, idCliente);
     }
     
-    @GetMapping("/notas/pagos/{idPago}")
-    @ResponseStatus(HttpStatus.OK)
-    public Nota getNotaDelPago(@PathVariable long idPago) {
-        return notaService.getNotaDelPago(idPago);
-    }
-    
     @GetMapping("/notas/busqueda/criteria") 
     @ResponseStatus(HttpStatus.OK)
     public Page<Nota> buscarNotasPorClienteYEmpresa(@RequestParam(value = "desde", required = false) Long desde,

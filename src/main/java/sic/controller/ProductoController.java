@@ -2,6 +2,7 @@ package sic.controller;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.ResourceBundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +28,7 @@ import sic.modelo.Medida;
 import sic.modelo.Producto;
 import sic.modelo.Proveedor;
 import sic.modelo.Rubro;
+import sic.service.BusinessServiceException;
 import sic.service.IEmpresaService;
 import sic.service.IMedidaService;
 import sic.service.IProductoService;
@@ -195,43 +197,54 @@ public class ProductoController {
     
     @GetMapping("/productos/ganancia-neto")
     @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularGananciaNeto(@RequestParam BigDecimal precioCosto, 
-                                           @RequestParam BigDecimal gananciaPorcentaje) {
+    public BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal gananciaPorcentaje) {
+        if (precioCosto == null || gananciaPorcentaje == null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
+        }
         return productoService.calcularGanancia_Neto(precioCosto, gananciaPorcentaje);
     }
     
     @GetMapping("/productos/ganancia-porcentaje")
     @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularGananciaPorcentaje(@RequestParam(required = false) boolean ascendente,
+    public BigDecimal calcularGananciaPorcentaje(@RequestParam(defaultValue = "0", required = false) boolean ascendente,
                                                  @RequestParam BigDecimal precioCosto,
                                                  @RequestParam BigDecimal pvp, 
-                                                 @RequestParam(required = false) BigDecimal ivaPorcentaje, 
+                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal ivaPorcentaje, 
                                                  @RequestParam(defaultValue = "0", required = false) BigDecimal impInternoPorcentaje,                                              
-                                                 @RequestParam(required = false) BigDecimal precioDeLista, 
-                                                 @RequestParam(required = false) BigDecimal precioDeListaAnterior){
-        return productoService.calcularGanancia_Porcentaje(precioDeLista, precioDeListaAnterior,
-                                                           pvp, ivaPorcentaje, impInternoPorcentaje, 
-                                                           precioCosto, ascendente);
+                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal precioDeLista, 
+                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal precioDeListaAnterior) {
+        if (precioCosto == null || pvp == null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
+        }
+        return productoService.calcularGanancia_Porcentaje(precioDeLista, precioDeListaAnterior, pvp, ivaPorcentaje,
+                impInternoPorcentaje, precioCosto, ascendente);
     }
     
     @GetMapping("/productos/iva-neto")
     @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularIVANeto(@RequestParam BigDecimal pvp, 
-                                      @RequestParam BigDecimal ivaPorcentaje) {
+    public BigDecimal calcularIVANeto(BigDecimal pvp, BigDecimal ivaPorcentaje) {
+        if (ivaPorcentaje == null || pvp == null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
+        }
         return productoService.calcularIVA_Neto(pvp, ivaPorcentaje);
     }
     
     @GetMapping("/productos/imp-interno-neto")
     @ResponseStatus(HttpStatus.OK)
     public BigDecimal calcularImpInternoNeto(@RequestParam BigDecimal pvp, 
-                                             @RequestParam(defaultValue = "0",required = false) BigDecimal impInternoPorcentaje){
+                                             @RequestParam(defaultValue = "0",required = false) BigDecimal impInternoPorcentaje) {
+        if (pvp == null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
+        }
         return productoService.calcularImpInterno_Neto(pvp, impInternoPorcentaje);
     }
     
     @GetMapping("/productos/pvp")
     @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularPVP(@RequestParam BigDecimal precioCosto, 
-                                  @RequestParam BigDecimal gananciaPorcentaje) {
+    public BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal gananciaPorcentaje) {
+        if (precioCosto == null || gananciaPorcentaje == null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
+        }
         return productoService.calcularPVP(precioCosto, gananciaPorcentaje);
     }
     
@@ -240,6 +253,9 @@ public class ProductoController {
     public BigDecimal calcularPrecioLista(@RequestParam BigDecimal pvp, 
                                           @RequestParam BigDecimal ivaPorcentaje, 
                                           @RequestParam(defaultValue = "0",required = false) BigDecimal impInternoPorcentaje) {
+        if (pvp == null || ivaPorcentaje == null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
+        }
         return productoService.calcularPrecioLista(pvp, ivaPorcentaje, impInternoPorcentaje);
     }
 

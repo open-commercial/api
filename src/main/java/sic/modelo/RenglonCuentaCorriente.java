@@ -94,11 +94,6 @@ public class RenglonCuentaCorriente implements Serializable {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Recibo recibo;
     
-    @OneToOne
-    @JoinColumn(name = "idAjusteCuentaCorriente", referencedColumnName = "idAjusteCuentaCorriente")  
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private AjusteCuentaCorriente ajusteCuentaCorriente;
-    
     @Transient
     private Long CAE;
     

@@ -37,14 +37,12 @@ import sic.modelo.Empresa;
 import sic.modelo.Factura;
 import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
-import sic.modelo.Pago;
 import sic.modelo.Pedido;
 import sic.modelo.Producto;
 import sic.modelo.Proveedor;
 import sic.modelo.RenglonFactura;
 import sic.service.IConfiguracionDelSistemaService;
 import sic.service.IFacturaService;
-import sic.service.IPagoService;
 import sic.service.IPedidoService;
 import sic.service.IProductoService;
 import sic.modelo.Movimiento;
@@ -74,7 +72,6 @@ public class FacturaServiceImpl implements IFacturaService {
     private final IProductoService productoService;
     private final IConfiguracionDelSistemaService configuracionDelSistemaService;
     private final IPedidoService pedidoService;
-    private final IPagoService pagoService;
     private final INotaService notaService;
     private final ICuentaCorrienteService cuentaCorrienteService;
     private final IAfipService afipService;
@@ -92,11 +89,9 @@ public class FacturaServiceImpl implements IFacturaService {
             RenglonFacturaRepository renglonFacturaRepository,
             IProductoService productoService,
             IConfiguracionDelSistemaService configuracionDelSistemaService,
-            IPedidoService pedidoService, IPagoService pagoService, 
-            INotaService notaService,
+            IPedidoService pedidoService, INotaService notaService,
             ICuentaCorrienteService cuentaCorrienteService,
-            IAfipService afipService,
-            IReciboService reciboService) {
+            IAfipService afipService, IReciboService reciboService) {
         this.facturaRepository = facturaRepository;
         this.facturaVentaRepository = facturaVentaRepository;
         this.facturaCompraRepository = facturaCompraRepository;
@@ -104,7 +99,6 @@ public class FacturaServiceImpl implements IFacturaService {
         this.productoService = productoService;
         this.configuracionDelSistemaService = configuracionDelSistemaService;
         this.pedidoService = pedidoService;
-        this.pagoService = pagoService;
         this.notaService = notaService;
         this.cuentaCorrienteService = cuentaCorrienteService;
         this.afipService = afipService;
@@ -246,11 +240,6 @@ public class FacturaServiceImpl implements IFacturaService {
     }  
     
     @Override
-    public Factura getFacturaDelPago(long idPago) {
-        return facturaRepository.getFacturaDelPago(idPago);
-    }
-    
-    @Override
     public List<RenglonFactura> getRenglonesDeLaFacturaModificadosParaCredito(Long id_Factura) {
         return notaService.getRenglonesFacturaModificadosParaNotaCredito(id_Factura);
     }
@@ -361,20 +350,18 @@ public class FacturaServiceImpl implements IFacturaService {
         });
         if (idPedido != null) {
             Pedido pedido = pedidoService.getPedidoPorId(idPedido);
-            facturas.forEach(f -> {
-                f.setPedido(pedido);
-            });
+            facturas.forEach(f -> f.setPedido(pedido));
             for (Factura f : facturas) {
                 Factura facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFactura(f));
                 this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) facturaGuardada, TipoDeOperacion.ALTA);
                 facturasProcesadas.add(facturaGuardada);
-                this.procesarRecibosYPagarFacturas(recibos, facturaGuardada);
+                if (recibos != null) {
+                    recibos.forEach(r -> reciboService.guardar(r));
+                }
             }
             pedido.setFacturas(facturasProcesadas);
             pedidoService.actualizar(pedido);
-            facturasProcesadas.stream().forEach(f -> {
-                LOGGER.warn("La Factura " + f + " se guardó correctamente.");
-            });
+            facturasProcesadas.forEach(f -> LOGGER.warn("La Factura " + f + " se guardó correctamente."));
             pedidoService.actualizarEstadoPedido(pedido);
         } else {
             facturasProcesadas = new ArrayList<>();
@@ -389,73 +376,14 @@ public class FacturaServiceImpl implements IFacturaService {
                 }
                 facturasProcesadas.add(facturaGuardada);
                 LOGGER.warn("La Factura " + facturaGuardada + " se guardó correctamente.");
-                this.procesarRecibosYPagarFacturas(recibos, facturaGuardada);
+                if (recibos != null) {
+                    recibos.forEach(r -> reciboService.guardar(r));
+                }
             }
         }
         return facturasProcesadas;
     }
 
-    private void procesarRecibosYPagarFacturas(List<Recibo> recibos, Factura facturaGuardada) {
-        if (recibos != null) {
-            recibos.forEach(r -> {
-                reciboService.guardar(r);
-            });
-        } else {
-            this.pagarFacturaConRecibosSobrantes(facturaGuardada);
-        }
-    }
-
-    private void pagarFacturaConRecibosSobrantes(Factura facturaGuardada) {
-        List<Recibo> recibos = new ArrayList<>();
-        if (facturaGuardada instanceof FacturaVenta) {
-            recibos = reciboService.getRecibosConSaldoSobranteCliente(facturaGuardada.getEmpresa().getId_Empresa(),
-                    ((FacturaVenta) facturaGuardada).getCliente().getId_Cliente());
-        } else if (facturaGuardada instanceof FacturaCompra) {
-            recibos = reciboService.getRecibosConSaldoSobranteProveedor(facturaGuardada.getEmpresa().getId_Empresa(),
-                    ((FacturaCompra) facturaGuardada).getProveedor().getId_Proveedor());
-        }
-        List<Pago> pagos = new ArrayList<>();
-        BigDecimal saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
-        for (Recibo r : recibos) {
-            BigDecimal saldoSobrante = r.getSaldoSobrante();
-            while (r.getSaldoSobrante().compareTo(BigDecimal.ZERO) > 0) {
-                if (saldoFactura.compareTo(saldoSobrante) == -1) {
-                    Pago nuevoPago = new Pago();
-                    nuevoPago.setMonto(saldoFactura);
-                    nuevoPago.setRecibo(r);
-                    nuevoPago.setFactura(facturaGuardada);
-                    nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
-                    nuevoPago.setFecha(new Date());
-                    nuevoPago.setFormaDePago(r.getFormaDePago());
-                    nuevoPago.setNota("");
-                    pagoService.guardar(nuevoPago);
-                    pagos.add(nuevoPago);
-                    reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante().subtract(saldoFactura)));
-                } else if (saldoFactura.compareTo(saldoSobrante) > -1) {
-                    Pago nuevoPago = new Pago();
-                    nuevoPago.setMonto(r.getSaldoSobrante());
-                    nuevoPago.setRecibo(r);
-                    nuevoPago.setFactura(facturaGuardada);
-                    nuevoPago.setEmpresa(facturaGuardada.getEmpresa());
-                    nuevoPago.setFecha(new Date());
-                    nuevoPago.setFormaDePago(r.getFormaDePago());
-                    nuevoPago.setNota("");
-                    pagoService.guardar(nuevoPago);
-                    pagos.add(nuevoPago);
-                    reciboService.actualizarSaldoSobrante(r.getIdRecibo(), BigDecimal.ZERO);
-                }
-                if (facturaGuardada.isPagada()) {
-                    break;
-                }
-                saldoFactura = pagoService.getSaldoAPagarFactura(facturaGuardada.getId_Factura());
-            }
-            if (facturaGuardada.isPagada()) {
-                break;
-            }
-        }
-        facturaGuardada.setPagos(pagos);
-    }
-    
     @Override
     @Transactional
     public void eliminar(long[] idsFactura) {
@@ -472,12 +400,6 @@ public class FacturaServiceImpl implements IFacturaService {
                 } else if (factura instanceof FacturaCompra) {
                     this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaCompra) factura, TipoDeOperacion.ELIMINACION);
                     productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.COMPRA);
-                }
-                List<Pago> pagos = pagoService.getPagosDeLaFactura(idFactura);
-                if (!pagos.isEmpty()) {
-                    pagos.forEach(pago -> {
-                        pagoService.eliminar(pago.getId_Pago());
-                    });
                 }
                 factura.setEliminada(true);
                 if (factura.getPedido() != null) {
@@ -637,94 +559,10 @@ public class FacturaServiceImpl implements IFacturaService {
     }
     
     @Override
-    @Transactional
-    public Factura actualizarFacturaEstadoPago(Factura factura) {
-        if (this.getTotalPagado(factura.getId_Factura()).setScale(2, RoundingMode.HALF_UP) 
-                .compareTo(factura.getTotal().setScale(2, RoundingMode.HALF_UP)) >= 0) {                
-            factura.setPagada(true);
-        } else {
-            factura.setPagada(false);
-        }
-        return factura;
-    }
-    
-    @Override
-    public BigDecimal getTotalPagado(long idFactura) {
-        BigDecimal total = pagoService.getTotalPagosDeLaFactura(idFactura);
-        return (total != null) ? total : BigDecimal.ZERO;      
-    }
-    
-    @Override
     public List<Factura> ordenarFacturasPorFechaAsc(List<Factura> facturas) {
         Comparator comparador = (Comparator<Factura>) (Factura f1, Factura f2) -> f1.getFecha().compareTo(f2.getFecha());
         facturas.sort(comparador);
         return facturas;
-    }
-
-    @Override
-    public boolean validarFacturasParaPagoMultiple(List<Factura> facturas, Movimiento movimiento) {
-        return (this.validarClienteProveedorParaPagosMultiples(facturas, movimiento)
-                && this.validarFacturasImpagasParaPagoMultiple(facturas));
-    }
-
-    @Override
-    public boolean validarClienteProveedorParaPagosMultiples(List<Factura> facturas, Movimiento movimiento) {
-        boolean resultado = true;
-        if (movimiento == Movimiento.VENTA) {
-            if (facturas != null) {
-                if (facturas.isEmpty()) {
-                    resultado = false;
-                } else {
-                    Cliente cliente = ((FacturaVenta) facturas.get(0)).getCliente();
-                    for (Factura factura : facturas) {
-                        if (!cliente.equals(((FacturaVenta) factura).getCliente())) {
-                            resultado = false;
-                            break;
-                        }
-                    }
-                }
-            } else {
-                resultado = false;
-            }
-        }
-        if (movimiento == Movimiento.COMPRA) {
-            if (facturas != null) {
-                if (facturas.isEmpty()) {
-                    resultado = false;
-                } else {
-                    Proveedor proveedor = ((FacturaCompra) facturas.get(0)).getProveedor();
-                    for (Factura factura : facturas) {
-                        if (!proveedor.equals(((FacturaCompra) factura).getProveedor())) {
-                            resultado = false;
-                            break;
-                        }
-                    }
-                }
-            } else {
-                resultado = false;
-            }
-        }
-        return resultado;
-    }
-
-    @Override
-    public boolean validarFacturasImpagasParaPagoMultiple(List<Factura> facturas) {
-        boolean resultado = true;
-        if (facturas != null) {
-            if (facturas.isEmpty()) {
-                resultado = false;
-            } else {
-                for (Factura factura : facturas) {
-                    if (factura.isPagada()) {
-                        resultado = false;
-                        break;
-                    }
-                }
-            }
-        } else {
-            resultado = false;
-        }
-        return resultado;
     }
 
     @Override
@@ -1109,12 +947,6 @@ public class FacturaServiceImpl implements IFacturaService {
         Map params = new HashMap();
         ConfiguracionDelSistema cds = configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(factura.getEmpresa());
         params.put("preImpresa", cds.isUsarFacturaVentaPreImpresa());
-        String formasDePago = "";
-        formasDePago = pagoService.getPagosDeLaFactura(factura.getId_Factura())
-                                  .stream()
-                                  .map((pago) -> pago.getFormaDePago().getNombre() + " -")
-                                  .reduce(formasDePago, String::concat);
-        params.put("formasDePago", formasDePago);
         if (factura.getTipoComprobante().equals(TipoDeComprobante.FACTURA_B) || factura.getTipoComprobante().equals(TipoDeComprobante.PRESUPUESTO)) {
             factura.setSubTotal_bruto(factura.getTotal());
             factura.setIva_105_neto(BigDecimal.ZERO);
@@ -1289,7 +1121,6 @@ public class FacturaServiceImpl implements IFacturaService {
                 facturaSinIVA.getRecargo_neto(), facturaSinIVA.getDescuento_neto(), facturaSinIVA.getIva_105_neto(), facturaSinIVA.getIva_21_neto()));
         facturaSinIVA.setTotal(this.calcularTotal(facturaSinIVA.getSubTotal_bruto(), facturaSinIVA.getIva_105_neto(), facturaSinIVA.getIva_21_neto()));
         facturaSinIVA.setObservaciones(facturaADividir.getObservaciones());
-        facturaSinIVA.setPagada(facturaADividir.isPagada());
         facturaSinIVA.setEmpresa(facturaADividir.getEmpresa());
         facturaSinIVA.setEliminada(facturaADividir.isEliminada());
         return facturaSinIVA;
@@ -1326,7 +1157,6 @@ public class FacturaServiceImpl implements IFacturaService {
                 facturaConIVA.getRecargo_neto(), facturaConIVA.getDescuento_neto(), facturaConIVA.getIva_105_neto(), facturaConIVA.getIva_21_neto()));
         facturaConIVA.setTotal(this.calcularTotal(facturaConIVA.getSubTotal_bruto(), facturaConIVA.getIva_105_neto(), facturaConIVA.getIva_21_neto()));
         facturaConIVA.setObservaciones(facturaADividir.getObservaciones());
-        facturaConIVA.setPagada(facturaADividir.isPagada());
         facturaConIVA.setEmpresa(facturaADividir.getEmpresa());
         facturaConIVA.setEliminada(facturaADividir.isEliminada());
         return facturaConIVA;

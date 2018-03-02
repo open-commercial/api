@@ -21,8 +21,6 @@ public class BusquedaFacturaCompraCriteria {
     private boolean buscaPorNumeroFactura;
     private long numSerie;
     private long numFactura;
-    private boolean buscarSoloInpagas;
-    private boolean buscaSoloPagadas;
     private Empresa empresa;
     private int cantRegistros;
     private Pageable pageable;

@@ -12,7 +12,6 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
@@ -544,49 +543,41 @@ public class CuentaCorrienteIntegrationTest {
         r.setMonto(5992.5);
         restTemplate.postForObject(apiPrefix + "/recibos/proveedores?"
                 + "idUsuario=1&idEmpresa=1&idProveedor=1&idFormaDePago=1", r, Recibo.class);
-        List<FacturaCompraDTO> facturasRecuperadas = restTemplate
-                .exchange(apiPrefix + "/facturas/compra/busqueda/criteria?idEmpresa=1&tipoFactura=B", HttpMethod.GET, null,
-                        new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompraDTO>>() {
-                })
+        restTemplate.exchange(apiPrefix + "/facturas/compra/busqueda/criteria?idEmpresa=1&tipoFactura=B", HttpMethod.GET, null,
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompraDTO>>() {
+        })
                 .getBody().getContent();
-        assertTrue("La factura se encuentra impaga", facturasRecuperadas.get(0).isPagada());
-        assertTrue("El saldo de la cuenta corriente no es el esperado", 
+        assertTrue("El saldo de la cuenta corriente no es el esperado",
                 restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/proveedores/1/saldo", BigDecimal.class)
-        .compareTo(BigDecimal.ZERO) == 0);
+                        .compareTo(BigDecimal.ZERO) == 0);
         restTemplate.delete(apiPrefix + "/recibos/1");
-        facturasRecuperadas = restTemplate
-                .exchange(apiPrefix + "/facturas/compra/busqueda/criteria?idEmpresa=1&tipoFactura=B", HttpMethod.GET, null,
-                        new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompraDTO>>() {
-                })
+        restTemplate.exchange(apiPrefix + "/facturas/compra/busqueda/criteria?idEmpresa=1&tipoFactura=B", HttpMethod.GET, null,
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompraDTO>>() {
+        })
                 .getBody().getContent();
-        assertFalse("La factura se encuentra pagada", facturasRecuperadas.get(0).isPagada());
-        assertTrue("El saldo de la cuenta corriente no es el esperado", 
+        assertTrue("El saldo de la cuenta corriente no es el esperado",
                 restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/proveedores/1/saldo", BigDecimal.class)
-        .compareTo(new BigDecimal("-5992.5")) == 0);
+                        .compareTo(new BigDecimal("-5992.5")) == 0);
         r = new ReciboDTO();
         r.setMonto(4992.5);
         restTemplate.postForObject(apiPrefix + "/recibos/proveedores?"
                 + "idUsuario=1&idEmpresa=1&idProveedor=1&idFormaDePago=1", r, Recibo.class);
-        facturasRecuperadas = restTemplate
-                .exchange(apiPrefix + "/facturas/compra/busqueda/criteria?idEmpresa=1&tipoFactura=B", HttpMethod.GET, null,
-                        new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompraDTO>>() {
-                })
+        restTemplate.exchange(apiPrefix + "/facturas/compra/busqueda/criteria?idEmpresa=1&tipoFactura=B", HttpMethod.GET, null,
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompraDTO>>() {
+        })
                 .getBody().getContent();
-        assertFalse("La factura se encuentra pagada", facturasRecuperadas.get(0).isPagada());
-        assertTrue("El saldo de la cuenta corriente no es el esperado", 
+        assertTrue("El saldo de la cuenta corriente no es el esperado",
                 restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/proveedores/1/saldo", BigDecimal.class)
-        .compareTo(new BigDecimal("-1000")) == 0);
+                        .compareTo(new BigDecimal("-1000")) == 0);
         r = new ReciboDTO();
         r.setMonto(2000);
         restTemplate.postForObject(apiPrefix + "/recibos/proveedores?"
                 + "idUsuario=1&idEmpresa=1&idProveedor=1&idFormaDePago=1", r, Recibo.class);
-        facturasRecuperadas = restTemplate
-                .exchange(apiPrefix + "/facturas/compra/busqueda/criteria?idEmpresa=1&tipoFactura=B", HttpMethod.GET, null,
-                        new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompraDTO>>() {
-                })
+        restTemplate.exchange(apiPrefix + "/facturas/compra/busqueda/criteria?idEmpresa=1&tipoFactura=B", HttpMethod.GET, null,
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompraDTO>>() {
+        })
                 .getBody().getContent();
-        assertTrue("La factura se encuentra impaga", facturasRecuperadas.get(0).isPagada());
-        assertTrue("El saldo de la cuenta corriente no es el esperado", 
+        assertTrue("El saldo de la cuenta corriente no es el esperado",
                 restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/proveedores/1/saldo", BigDecimal.class)
         .compareTo(new BigDecimal("1000")) == 0);
         restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
@@ -859,10 +850,8 @@ public class CuentaCorrienteIntegrationTest {
         restTemplate.getForObject(apiPrefix + "/recibos/1/reporte", byte[].class);
         facturaVentaX = restTemplate.getForObject(apiPrefix + "/facturas/2", FacturaVentaDTO.class);
         assertEquals(TipoDeComprobante.FACTURA_X, facturaVentaX.getTipoComprobante());
-        assertTrue("La fv X se encuentra impaga", facturaVentaX.isPagada());
         facturaVentaB = restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaVentaDTO.class);
         assertEquals(TipoDeComprobante.FACTURA_B, facturaVentaB.getTipoComprobante());
-        assertFalse("La fv B se encuentra pagada", facturaVentaB.isPagada());
         r = new ReciboDTO();
         r.setMonto(2192.5);
         restTemplate.postForObject(apiPrefix + "/recibos/clientes?"
@@ -870,7 +859,6 @@ public class CuentaCorrienteIntegrationTest {
         assertEquals(1000, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         facturaVentaB = restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaVentaDTO.class);
         assertEquals(TipoDeComprobante.FACTURA_B, facturaVentaB.getTipoComprobante());
-        assertTrue("La fv B se encuentra impaga", facturaVentaB.isPagada());
         NotaDebitoDTO notaDebito = new NotaDebitoDTO();
         notaDebito.setCAE(0L);
         notaDebito.setCliente(cliente);
@@ -887,13 +875,9 @@ public class CuentaCorrienteIntegrationTest {
         notaDebito.setUsuario(credencial);
         notaDebito.setFacturaVenta(null);
         restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1/recibo/2", notaDebito, NotaDebito.class);
-        assertEquals(-3402.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
-        assertEquals(0, restTemplate.getForObject(apiPrefix + "/recibos/1", ReciboDTO.class).getSaldoSobrante(), 0);
-        assertEquals(1000, restTemplate.getForObject(apiPrefix + "/recibos/2", ReciboDTO.class).getSaldoSobrante(), 0);
+        assertEquals(-2402.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-        assertEquals(2590, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
-        assertEquals(4800, restTemplate.getForObject(apiPrefix + "/recibos/1", ReciboDTO.class).getSaldoSobrante(), 0);
-        assertEquals(2192.5, restTemplate.getForObject(apiPrefix + "/recibos/2", ReciboDTO.class).getSaldoSobrante(), 0);
+        assertEquals(3590, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         restTemplate.delete(apiPrefix + "/notas?idsNota=1");
         assertEquals(6992.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         List<RenglonCuentaCorriente> renglonesCuentaCorriente = restTemplate
