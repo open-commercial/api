@@ -14,5 +14,4 @@ public interface FacturaCompraRepositoryCustom {
 
     Page<FacturaCompra> buscarFacturasCompra(BusquedaFacturaCompraCriteria criteria);
 
-
 }

@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 import sic.modelo.Empresa;
 import sic.modelo.FacturaCompra;
-import sic.modelo.Pago;
 import sic.modelo.Pedido;
 import sic.modelo.Proveedor;
 import sic.modelo.RenglonFactura;
@@ -24,7 +23,6 @@ public class FacturaCompraBuilder {
     private Pedido pedido = null;
     private Transportista transportista = new TransportistaBuilder().build();
     private List<RenglonFactura> renglones;
-    private List<Pago> pagos;
     private Proveedor proveedor = new ProveedorBuilder().build();
     private BigDecimal subTotal = new BigDecimal("6500");
     private BigDecimal recargo_porcentaje = BigDecimal.ZERO;
@@ -61,10 +59,10 @@ public class FacturaCompraBuilder {
             this.renglones = renglonesFactura;
         }
         FacturaCompra factura = new FacturaCompra(id_Factura, fecha, tipoFactura, 
-                numSerie, numFactura, fechaVencimiento, pedido, transportista, renglones, 
-                pagos, subTotal, recargo_porcentaje, recargo_neto, descuento_porcentaje, descuento_neto, 
-                subTotal_neto, iva_105_neto, iva_21_neto, impuestoInterno_neto, total, observaciones, 
-                pagada, empresa, eliminada, CAE, vencimientoCAE, proveedor, numSerieAfip, numFacturaAfip);
+                numSerie, numFactura, fechaVencimiento, pedido, transportista, renglones,
+                subTotal, recargo_porcentaje, recargo_neto, descuento_porcentaje, descuento_neto,
+                subTotal_neto, iva_105_neto, iva_21_neto, impuestoInterno_neto, total, observaciones,
+                empresa, eliminada, CAE, vencimientoCAE, proveedor, numSerieAfip, numFacturaAfip);
         return factura;
     }
     
@@ -90,11 +88,6 @@ public class FacturaCompraBuilder {
 
     public FacturaCompraBuilder withPedido(Pedido pedido) {
         this.pedido = pedido;
-        return this;
-    }
-
-    public FacturaCompraBuilder withPagos(List<Pago> pagos) {
-        this.pagos = pagos;
         return this;
     }
 

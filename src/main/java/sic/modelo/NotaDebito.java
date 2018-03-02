@@ -36,22 +36,19 @@ public class NotaDebito extends Nota implements Serializable {
     @JoinColumn(name = "idRecibo", referencedColumnName = "idRecibo")
     private Recibo recibo;
     
-    private boolean pagada;
-
     public NotaDebito() {}
 
-    public NotaDebito(long idNota, long serie, FacturaVenta facturaVenta, List<Pago> pagos, long nroNota, boolean eliminada,
+    public NotaDebito(long idNota, long serie, FacturaVenta facturaVenta, long nroNota, boolean eliminada,
             TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa, Cliente cliente,
             Usuario usuario, String motivo, List<RenglonNotaDebito> renglones, BigDecimal subTotalBruto,
-            BigDecimal iva21Neto, BigDecimal iva105Neto, BigDecimal total, BigDecimal montoNoGravado, long CAE, Date vencimientoCAE,
-            long numSerieAfip, long numNotaAfip, Recibo recibo, boolean pagado) {
+            BigDecimal iva21Neto, BigDecimal iva105Neto, BigDecimal total, BigDecimal montoNoGravado, long CAE,
+            Date vencimientoCAE, long numSerieAfip, long numNotaAfip, Recibo recibo) {
 
-        super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, cliente, usuario,
-                facturaVenta, pagos, motivo, subTotalBruto, iva21Neto, iva105Neto, total, CAE, vencimientoCAE, numSerieAfip, numNotaAfip);
+        super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, cliente, usuario, facturaVenta,
+                motivo, subTotalBruto, iva21Neto, iva105Neto, total, CAE, vencimientoCAE, numSerieAfip, numNotaAfip);
         this.montoNoGravado = montoNoGravado;
         this.renglonesNotaDebito = renglones;
         this.recibo = recibo;
-        this.pagada = pagado;
     }
 
 }

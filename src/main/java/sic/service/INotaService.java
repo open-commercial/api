@@ -8,7 +8,6 @@ import sic.modelo.BusquedaNotaCriteria;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
 import sic.modelo.NotaDebito;
-import sic.modelo.Pago;
 import sic.modelo.Recibo;
 import sic.modelo.RenglonFactura;
 import sic.modelo.RenglonNotaCredito;
@@ -31,15 +30,9 @@ public interface INotaService {
     
     FacturaVenta getFacturaNota(Long idNota);
     
-    Nota getNotaDelPago(long idPago);
-    
-    List<Pago> getPagosNota(Long idNota);
-    
     boolean existeNotaDebitoPorRecibo(Recibo recibo);
     
     boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta);
-    
-    BigDecimal getTotalPagado(Long idNota);
 
     List<Nota> getNotasPorFactura(Long idFactura);
 
@@ -86,7 +79,5 @@ public interface INotaService {
     BigDecimal calcularTotalDebito(BigDecimal subTotal_bruto, BigDecimal iva21_neto, BigDecimal montoNoGravado);
     
     BigDecimal calcularTotaCreditoPorFacturaVenta(FacturaVenta facturaVenta);
-    
-    Nota actualizarNotaDebitoEstadoPago(NotaDebito notaDebito);   
     
 }
