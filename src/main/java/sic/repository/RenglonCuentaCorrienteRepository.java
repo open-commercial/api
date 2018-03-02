@@ -14,11 +14,11 @@ import sic.modelo.RenglonCuentaCorriente;
 
 public interface RenglonCuentaCorrienteRepository extends PagingAndSortingRepository<RenglonCuentaCorriente, Long> {
 
-    RenglonCuentaCorriente findByFacturaAndEliminado(Factura f, boolean eliminado);
+    RenglonCuentaCorriente findByFacturaAndEliminado(Factura factura, boolean eliminado);
 
-    RenglonCuentaCorriente findByNotaAndEliminado(Nota n, boolean eliminado);
+    RenglonCuentaCorriente findByNotaAndEliminado(Nota nota, boolean eliminado);
     
-    RenglonCuentaCorriente findByReciboAndEliminado(Recibo r, boolean eliminado);
+    RenglonCuentaCorriente findByReciboAndEliminado(Recibo recibo, boolean eliminado);
 
     @Query("SELECT r FROM CuentaCorriente cc INNER JOIN cc.renglones r"
             + " WHERE cc.idCuentaCorriente = :idCuentaCorriente AND cc.eliminada = false AND r.eliminado = false"

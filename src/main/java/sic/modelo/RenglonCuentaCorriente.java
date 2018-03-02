@@ -99,7 +99,8 @@ public class RenglonCuentaCorriente implements Serializable {
     
     @Formula(value = "(SELECT SUM(r.monto) "
             + "FROM rengloncuentacorriente r "
-            + "WHERE r.id_cuenta_corriente = id_cuenta_corriente AND r.eliminado = false AND r.id_renglon_cuenta_corriente <= id_renglon_cuenta_corriente)")
+            + "WHERE r.id_cuenta_corriente = id_cuenta_corriente AND r.eliminado = false "
+            + "AND r.id_renglon_cuenta_corriente <= id_renglon_cuenta_corriente)")
     private Double saldo;
     
 }

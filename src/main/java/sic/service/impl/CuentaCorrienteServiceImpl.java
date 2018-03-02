@@ -32,8 +32,6 @@ import sic.repository.CuentaCorrienteRepository;
 import sic.service.BusinessServiceException;
 import sic.service.IClienteService;
 import sic.service.ICuentaCorrienteService;
-import sic.service.IFacturaService;
-import sic.service.INotaService;
 import sic.service.IProveedorService;
 import sic.service.IRenglonCuentaCorrienteService;
 
@@ -50,9 +48,12 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     
     @Autowired
     @Lazy
-    public CuentaCorrienteServiceImpl(CuentaCorrienteRepository cuentaCorrienteRepository, CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository,
-                CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository, IClienteService clienteService, IProveedorService proveedorService,
-                IRenglonCuentaCorrienteService renglonCuentaCorrienteService) {
+    public CuentaCorrienteServiceImpl(CuentaCorrienteRepository cuentaCorrienteRepository,
+                                      CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository,
+                                      CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository,
+                                      IClienteService clienteService, IProveedorService proveedorService,
+                                      IRenglonCuentaCorrienteService renglonCuentaCorrienteService) {
+
                 this.cuentaCorrienteRepository = cuentaCorrienteRepository;
                 this.cuentaCorrienteClienteRepository = cuentaCorrienteClienteRepository;
                 this.cuentaCorrienteProveedorRepository = cuentaCorrienteProveedorRepository;
