@@ -133,10 +133,10 @@ public class ReciboServiceImpl implements IReciboService {
         }
     }
     
-    @Override 
-    public List<Recibo> construirRecibos(long[] idsFormaDePago, Empresa empresa, Cliente cliente, Usuario usuario, BigDecimal[] montos, BigDecimal totalFactura, Date fecha) { 
+    @Override
+    public List<Recibo> construirRecibos(long[] idsFormaDePago, Empresa empresa, Cliente cliente,
+                                         Usuario usuario, BigDecimal[] montos, BigDecimal totalFactura, Date fecha) {
         List<Recibo> recibos = new ArrayList<>();
-        int i = 0;
         if (idsFormaDePago != null && montos != null && idsFormaDePago.length == montos.length) {
             BigDecimal totalMontos = BigDecimal.ZERO;
             for (BigDecimal monto : montos) {
@@ -144,16 +144,17 @@ public class ReciboServiceImpl implements IReciboService {
             }
             if (totalMontos.compareTo(totalFactura) > 0 || totalMontos.compareTo(BigDecimal.ZERO) < 0) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_pagos_superan_total_factura"));
+                        .getString("mensaje_recibo_superan_total_factura"));
             }
+            int i = 0;
             for (long idFormaDePago : idsFormaDePago) {
                 Recibo recibo = new Recibo();
                 recibo.setCliente(cliente);
                 recibo.setUsuario(usuario);
                 recibo.setEmpresa(empresa);
                 recibo.setFecha(fecha);
-                FormaDePago fp = formaDePagoService.getFormasDePagoPorId(idFormaDePago);
-                recibo.setFormaDePago(fp);
+                FormaDePago fdp = formaDePagoService.getFormasDePagoPorId(idFormaDePago);
+                recibo.setFormaDePago(fdp);
                 recibo.setMonto(montos[i]);
                 recibo.setNumSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa()).getNroPuntoDeVentaAfip());
                 recibo.setNumRecibo(this.getSiguienteNumeroRecibo(empresa.getId_Empresa(), recibo.getNumSerie()));

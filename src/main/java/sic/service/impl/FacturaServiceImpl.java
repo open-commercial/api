@@ -89,11 +89,9 @@ public class FacturaServiceImpl implements IFacturaService {
             RenglonFacturaRepository renglonFacturaRepository,
             IProductoService productoService,
             IConfiguracionDelSistemaService configuracionDelSistemaService,
-            IPedidoService pedidoService,
-            INotaService notaService,
+            IPedidoService pedidoService, INotaService notaService,
             ICuentaCorrienteService cuentaCorrienteService,
-            IAfipService afipService,
-            IReciboService reciboService) {
+            IAfipService afipService, IReciboService reciboService) {
         this.facturaRepository = facturaRepository;
         this.facturaVentaRepository = facturaVentaRepository;
         this.facturaCompraRepository = facturaCompraRepository;
@@ -352,20 +350,18 @@ public class FacturaServiceImpl implements IFacturaService {
         });
         if (idPedido != null) {
             Pedido pedido = pedidoService.getPedidoPorId(idPedido);
-            facturas.forEach(f -> {
-                f.setPedido(pedido);
-            });
+            facturas.forEach(f -> f.setPedido(pedido));
             for (Factura f : facturas) {
                 Factura facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFactura(f));
                 this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) facturaGuardada, TipoDeOperacion.ALTA);
                 facturasProcesadas.add(facturaGuardada);
-                this.procesarRecibosYPagarFacturas(recibos);
+                if (recibos != null) {
+                    recibos.forEach(r -> reciboService.guardar(r));
+                }
             }
             pedido.setFacturas(facturasProcesadas);
             pedidoService.actualizar(pedido);
-            facturasProcesadas.stream().forEach(f -> {
-                LOGGER.warn("La Factura " + f + " se guardó correctamente.");
-            });
+            facturasProcesadas.forEach(f -> LOGGER.warn("La Factura " + f + " se guardó correctamente."));
             pedidoService.actualizarEstadoPedido(pedido);
         } else {
             facturasProcesadas = new ArrayList<>();
@@ -380,21 +376,14 @@ public class FacturaServiceImpl implements IFacturaService {
                 }
                 facturasProcesadas.add(facturaGuardada);
                 LOGGER.warn("La Factura " + facturaGuardada + " se guardó correctamente.");
-                this.procesarRecibosYPagarFacturas(recibos);
+                if (recibos != null) {
+                    recibos.forEach(r -> reciboService.guardar(r));
+                }
             }
         }
         return facturasProcesadas;
     }
 
-    private void procesarRecibosYPagarFacturas(List<Recibo> recibos) {
-        if (recibos != null) {
-            recibos.forEach(r -> {
-                reciboService.guardar(r);
-            });
-        }
-    }
-
-    
     @Override
     @Transactional
     public void eliminar(long[] idsFactura) {
@@ -958,7 +947,6 @@ public class FacturaServiceImpl implements IFacturaService {
         Map params = new HashMap();
         ConfiguracionDelSistema cds = configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(factura.getEmpresa());
         params.put("preImpresa", cds.isUsarFacturaVentaPreImpresa());
-        String formasDePago = "";
         if (factura.getTipoComprobante().equals(TipoDeComprobante.FACTURA_B) || factura.getTipoComprobante().equals(TipoDeComprobante.PRESUPUESTO)) {
             factura.setSubTotal_bruto(factura.getTotal());
             factura.setIva_105_neto(BigDecimal.ZERO);

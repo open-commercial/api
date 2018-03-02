@@ -34,13 +34,13 @@ public interface ICuentaCorrienteService {
       
       Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Pageable pageable); 
       
-      void asentarEnCuentaCorriente(FacturaVenta fv, TipoDeOperacion tipo);
+      void asentarEnCuentaCorriente(FacturaVenta facturaVenta, TipoDeOperacion tipo);
       
-      void asentarEnCuentaCorriente(FacturaCompra fc, TipoDeOperacion tipo);
+      void asentarEnCuentaCorriente(FacturaCompra facturaCompra, TipoDeOperacion tipo);
       
-      void asentarEnCuentaCorriente(Nota n, TipoDeOperacion tipo);
+      void asentarEnCuentaCorriente(Nota nota, TipoDeOperacion tipo);
 
-      void asentarEnCuentaCorriente(Recibo r, TipoDeOperacion tipo);
+      void asentarEnCuentaCorriente(Recibo recibo, TipoDeOperacion tipo);
       
       Date getFechaUltimoMovimiento(long idCuentaCorriente);
       

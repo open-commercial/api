@@ -87,6 +87,7 @@ public class NotaServiceImpl implements INotaService {
             IClienteService clienteService, IUsuarioService usuarioService, IProductoService productoService,
             IEmpresaService empresaService, ICuentaCorrienteService cuentaCorrienteService,
             IReciboService reciboService, IConfiguracionDelSistemaService cds, IAfipService afipService) {
+
         this.notaRepository = notaRepository;
         this.notaCreditoRepository = notaDeCreditoRepository;
         this.notaDebitoRepository = notaDeDebitoRespository;
@@ -459,20 +460,16 @@ public class NotaServiceImpl implements INotaService {
             LOGGER.warn("La Nota " + notaCredito + " se guardó correctamente.");
             return notaCredito;
         } else {
-            return this.guardarNotaDebito((NotaDebito) nota, idRecibo, idEmpresa, idCliente);
+            NotaDebito notaDebito = (NotaDebito) nota;
+            notaDebito.setRecibo(reciboService.getById(idRecibo));
+            notaDebito.setTipoComprobante(this.getTipoDeNotaDebito(facturaService.getTipoFacturaVenta(notaDebito.getEmpresa(), notaDebito.getCliente())[0]));
+            notaDebito.setNroNota(this.getSiguienteNumeroNotaDebito(idEmpresa, notaDebito.getTipoComprobante()));
+            this.validarCalculosDebito(notaDebito);
+            notaDebito = notaDebitoRepository.save(notaDebito);
+            cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito, TipoDeOperacion.ALTA);
+            LOGGER.warn("La Nota " + notaDebito + " se guardó correctamente.");
+            return notaDebito;
         }
-    }
-
-    private NotaDebito guardarNotaDebito(NotaDebito notaDebito, long idRecibo, long idEmpresa, long idCliente) {
-        notaDebito.setRecibo(reciboService.getById(idRecibo));
-        notaDebito.setTipoComprobante(
-        this.getTipoDeNotaDebito(this.facturaService.getTipoFacturaVenta(notaDebito.getEmpresa(), notaDebito.getCliente())[0]));
-        notaDebito.setNroNota(this.getSiguienteNumeroNotaDebito(idEmpresa, notaDebito.getTipoComprobante()));
-        this.validarCalculosDebito(notaDebito);       
-        notaDebito = notaDebitoRepository.save(notaDebito);
-        cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito, TipoDeOperacion.ALTA);
-        LOGGER.warn("La Nota " + notaDebito + " se guardó correctamente.");
-        return notaDebito;
     }
 
     @Override

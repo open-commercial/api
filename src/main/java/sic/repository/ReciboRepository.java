@@ -31,15 +31,15 @@ public interface ReciboRepository extends PagingAndSortingRepository<Recibo, Lon
     Page<Recibo> findAllByFechaBetweenAndClienteAndEmpresaAndEliminado(Date desde, Date hasta, Cliente cliente, Empresa empresa, boolean eliminado, Pageable page);
     
     List<Recibo> findAllByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(Date desde, Date hasta, FormaDePago formaDePago, Empresa empresa, boolean eliminado);
-    
-//    @Query("SELECT r FROM Recibo r "
-//            + "WHERE r.empresa.id_Empresa= :idEmpresa AND r.cliente.id_Cliente= :idCliente AND r.eliminado = false AND r.saldoSobrante > 0 "
-//            + "ORDER BY r.fecha ASC")
-//    List<Recibo> getRecibosConSaldoSobranteCliente(@Param("idEmpresa") long idEmpresa, @Param("idCliente") long idCliente);
-//    
-//    @Query("SELECT r FROM Recibo r "
-//            + "WHERE r.empresa.id_Empresa= :idEmpresa AND r.proveedor.id_Proveedor= :idProveedor AND r.eliminado = false AND r.saldoSobrante > 0 "
-//            + "ORDER BY r.fecha ASC")
-//    List<Recibo> getRecibosConSaldoSobranteProveedor(@Param("idEmpresa") long idEmpresa, @Param("idProveedor") long idProveedor);
-    
+/*
+    @Query("SELECT r FROM Recibo r "
+            + "WHERE r.empresa.id_Empresa= :idEmpresa AND r.cliente.id_Cliente= :idCliente AND r.eliminado = false AND r.saldoSobrante > 0 "
+            + "ORDER BY r.fecha ASC")
+    List<Recibo> getRecibosConSaldoSobranteCliente(@Param("idEmpresa") long idEmpresa, @Param("idCliente") long idCliente);
+
+    @Query("SELECT r FROM Recibo r "
+            + "WHERE r.empresa.id_Empresa= :idEmpresa AND r.proveedor.id_Proveedor= :idProveedor AND r.eliminado = false AND r.saldoSobrante > 0 "
+            + "ORDER BY r.fecha ASC")
+    List<Recibo> getRecibosConSaldoSobranteProveedor(@Param("idEmpresa") long idEmpresa, @Param("idProveedor") long idProveedor);
+*/
 }

@@ -9,7 +9,6 @@ import sic.modelo.Proveedor;
 import sic.modelo.Recibo;
 import sic.modelo.Usuario;
 
-
 public class ReciboBuilder {
     
     private Long idRecibo = 0L;

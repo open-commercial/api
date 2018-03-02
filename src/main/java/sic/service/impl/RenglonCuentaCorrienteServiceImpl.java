@@ -30,18 +30,18 @@ public class RenglonCuentaCorrienteServiceImpl implements IRenglonCuentaCorrient
     }
 
     @Override
-    public RenglonCuentaCorriente getRenglonCuentaCorrienteDeFactura(Factura f, boolean eliminado) {
-        return renglonCuentaCorrienteRepository.findByFacturaAndEliminado(f, eliminado);
+    public RenglonCuentaCorriente getRenglonCuentaCorrienteDeFactura(Factura factura, boolean eliminado) {
+        return renglonCuentaCorrienteRepository.findByFacturaAndEliminado(factura, eliminado);
     }
 
     @Override
-    public RenglonCuentaCorriente getRenglonCuentaCorrienteDeNota(Nota n, boolean eliminado) {
-        return renglonCuentaCorrienteRepository.findByNotaAndEliminado(n, eliminado);
+    public RenglonCuentaCorriente getRenglonCuentaCorrienteDeNota(Nota nota, boolean eliminado) {
+        return renglonCuentaCorrienteRepository.findByNotaAndEliminado(nota, eliminado);
     }
 
     @Override
-    public RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(Recibo r, boolean eliminado) {
-        return renglonCuentaCorrienteRepository.findByReciboAndEliminado(r, eliminado);
+    public RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(Recibo recibo, boolean eliminado) {
+        return renglonCuentaCorrienteRepository.findByReciboAndEliminado(recibo, eliminado);
     }
     
     @Override

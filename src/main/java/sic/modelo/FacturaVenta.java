@@ -34,10 +34,11 @@ public class FacturaVenta extends Factura implements Serializable {
 
     public FacturaVenta(Cliente cliente, Usuario usuario, long id_Factura, Date fecha,
             TipoDeComprobante tipoComprobante, long numSerie, long numFactura, Date fechaVencimiento,
-            Pedido pedido, Transportista transportista, List<RenglonFactura> renglones, BigDecimal subTotal, BigDecimal recargo_porcentaje, BigDecimal recargo_neto,
-            BigDecimal descuento_porcentaje, BigDecimal descuento_neto, BigDecimal subTotal_neto, BigDecimal iva_105_neto,
-            BigDecimal iva_21_neto, BigDecimal impuestoInterno_neto, BigDecimal total, String observaciones,
-            Empresa empresa, boolean eliminada, long CAE, Date vencimientoCAE, long numSerieAfip, long numFacturaAfip) {
+            Pedido pedido, Transportista transportista, List<RenglonFactura> renglones, BigDecimal subTotal,
+            BigDecimal recargo_porcentaje, BigDecimal recargo_neto, BigDecimal descuento_porcentaje,
+            BigDecimal descuento_neto, BigDecimal subTotal_neto, BigDecimal iva_105_neto, BigDecimal iva_21_neto,
+            BigDecimal impuestoInterno_neto, BigDecimal total, String observaciones, Empresa empresa,
+            boolean eliminada, long CAE, Date vencimientoCAE, long numSerieAfip, long numFacturaAfip) {
         
         super(id_Factura, fecha, tipoComprobante, numSerie, numFactura, fechaVencimiento, 
                 pedido, transportista, renglones, subTotal, recargo_porcentaje, 

@@ -14,11 +14,11 @@ public interface IRenglonCuentaCorrienteService {
     
     RenglonCuentaCorriente guardar(RenglonCuentaCorriente renglonCuentaCorriente);
     
-    RenglonCuentaCorriente getRenglonCuentaCorrienteDeFactura(Factura f, boolean eliminado);
+    RenglonCuentaCorriente getRenglonCuentaCorrienteDeFactura(Factura factura, boolean eliminado);
     
-    RenglonCuentaCorriente getRenglonCuentaCorrienteDeNota(Nota n, boolean eliminado);
+    RenglonCuentaCorriente getRenglonCuentaCorrienteDeNota(Nota nota, boolean eliminado);
     
-    RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(Recibo r, boolean eliminado);
+    RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(Recibo recibo, boolean eliminado);
     
     Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(CuentaCorriente cuentaCorriente, boolean eliminado, Pageable page);
     

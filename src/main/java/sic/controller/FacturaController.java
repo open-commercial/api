@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.ResourceBundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,7 +40,6 @@ import sic.modelo.Movimiento;
 import sic.modelo.Proveedor;
 import sic.modelo.TipoDeComprobante;
 import sic.modelo.Usuario;
-import sic.service.BusinessServiceException;
 import sic.service.IReciboService;
 import sic.service.ITransportistaService;
 
@@ -209,8 +207,6 @@ public class FacturaController {
                                                  @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
                                                  @RequestParam(required = false) Long idUsuario,
                                                  @RequestParam(required = false) Long nroPedido,
-                                                 @RequestParam(required = false) Boolean soloImpagas,
-                                                 @RequestParam(required = false) Boolean soloPagas,
                                                  @RequestParam(required = false) Integer pagina,
                                                  @RequestParam(required = false) Integer tamanio) {
         Calendar fechaDesde = Calendar.getInstance();
@@ -218,12 +214,6 @@ public class FacturaController {
         if ((desde != null) && (hasta != null)) {
             fechaDesde.setTimeInMillis(desde);
             fechaHasta.setTimeInMillis(hasta);
-        }
-        soloImpagas = (soloImpagas == null) ? false : soloImpagas;
-        soloPagas = (soloPagas == null) ? false : soloPagas;
-        if ((soloImpagas == true) && (soloPagas == true)) {
-            soloImpagas = false;
-            soloPagas = false;
         }
         Cliente cliente = new Cliente();
         if (idCliente != null) {
