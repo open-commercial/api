@@ -78,7 +78,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
             BigDecimal importe = producto.getPrecioLista().multiply(cantidad);
             carritoCompraRepository.save(new ItemCarritoCompra(null, cantidad, producto, importe, usuario));
         } else {
-            BigDecimal nuevaCantidad = item.getCantidad().multiply(cantidad);
+            BigDecimal nuevaCantidad = item.getCantidad().add(cantidad);
             if (nuevaCantidad.compareTo(BigDecimal.ZERO) < 0) {
                 item.setCantidad(BigDecimal.ZERO);    
             } else {
