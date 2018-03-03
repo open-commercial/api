@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import sic.modelo.CuentaCorriente;
 import sic.modelo.Factura;
 import sic.modelo.Nota;
 import sic.modelo.Recibo;
@@ -20,7 +19,7 @@ public interface IRenglonCuentaCorrienteService {
     
     RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(Recibo recibo, boolean eliminado);
     
-    Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(CuentaCorriente cuentaCorriente, boolean eliminado, Pageable page);
+    Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Pageable page);
     
     BigDecimal getSaldoCuentaCorriente(long idCuentaCorriente);
     
