@@ -8,8 +8,7 @@ import sic.modelo.AjusteCuentaCorriente;
 import sic.modelo.CuentaCorriente;
 import sic.modelo.CuentaCorrienteCliente;
 import sic.modelo.CuentaCorrienteProveedor;
-import sic.modelo.FacturaCompra;
-import sic.modelo.FacturaVenta;
+import sic.modelo.Factura;
 import sic.modelo.Nota;
 import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
@@ -35,9 +34,7 @@ public interface ICuentaCorrienteService {
       
       Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Pageable pageable); 
       
-      void asentarEnCuentaCorriente(FacturaVenta fv, TipoDeOperacion tipo);
-      
-      void asentarEnCuentaCorriente(FacturaCompra fc, TipoDeOperacion tipo);
+      void asentarEnCuentaCorriente(Factura fv, TipoDeOperacion tipo);
       
       void asentarEnCuentaCorriente(Nota n, TipoDeOperacion tipo);
 

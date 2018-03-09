@@ -1,7 +1,6 @@
 package sic.service;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import sic.modelo.BusquedaNotaCriteria;
@@ -10,6 +9,7 @@ import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
 import sic.modelo.NotaCredito;
+import sic.modelo.NotaCreditoCliente;
 import sic.modelo.NotaDebito;
 import sic.modelo.Pago;
 import sic.modelo.Recibo;
@@ -32,6 +32,8 @@ public interface INotaService {
     
     BigDecimal getTotalById(Long idNota);
     
+    Factura getFacturaNotaCredito(Long idNota);
+    
     FacturaVenta getFacturaNotaCreditoCliente(Long idNota);
     
     FacturaCompra getFacturaNotaCreditoProveedor(Long idNota);
@@ -48,7 +50,7 @@ public interface INotaService {
 
     List<NotaCredito> getNotasCreditoPorFactura(Long idFactura);
 
-    Page<NotaCredito> buscarNotasCreditoPorClienteYEmpresa(BusquedaNotaCriteria criteria);
+    Page<NotaCreditoCliente> buscarNotasCreditoPorClienteYEmpresa(BusquedaNotaCriteria criteria);
 
     List<Nota> getNotasCreditoPorClienteYEmpresa(Long idCliente, Long idEmpresa);
 
@@ -88,7 +90,7 @@ public interface INotaService {
     
     BigDecimal calcularTotalDebito(BigDecimal subTotal_bruto, BigDecimal iva21_neto, BigDecimal montoNoGravado);
     
-    BigDecimal calcularTotaCreditoPorFactura(Factura factura);
+    BigDecimal calcularTotalCreditoClientePorFacturaVenta(FacturaVenta factura);
     
     Nota actualizarNotaDebitoEstadoPago(NotaDebito notaDebito);   
     

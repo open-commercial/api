@@ -16,9 +16,11 @@ import sic.modelo.NotaCreditoCliente;
 
 public interface NotaCreditoClienteRepository extends NotaCreditoRepository<NotaCreditoCliente> {
     
-    Page<NotaCredito> findAllByFechaBetweenAndClienteAndEmpresaAndEliminada(Date desde, Date hasta, Cliente cliente, Empresa empresa, boolean eliminada, Pageable page);
+    Page<NotaCreditoCliente> findAllByFechaBetweenAndClienteAndEmpresaAndEliminada(Date desde, Date hasta, Cliente cliente, Empresa empresa, boolean eliminada, Pageable page);
     
     List<Nota> findAllByClienteAndEmpresaAndEliminada(Cliente cliente, Empresa empresa, boolean eliminada);
+    
+    List<NotaCredito> findAllByFacturaVentaAndEliminada(FacturaVenta factura, boolean eliminada);
     
     @Query("SELECT SUM(ncc.total) FROM NotaCreditoCliente ncc WHERE ncc.facturaVenta = :facturaVenta AND ncc.eliminada = false")
     BigDecimal getTotalNotasCreditoPorFactura(@Param("facturaVenta") FacturaVenta facturaVenta);
@@ -26,5 +28,7 @@ public interface NotaCreditoClienteRepository extends NotaCreditoRepository<Nota
     @Override
     @Query("SELECT ncc FROM NotaCreditoCliente ncc WHERE ncc.idNota = :idNotaCreditoCliente AND ncc.eliminada = false")
     NotaCreditoCliente getById(@Param("idNotaCreditoCliente") long idNotaCreditoCliente);
+    
+    boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta, boolean eliminada);
 
 }

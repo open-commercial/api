@@ -1,13 +1,8 @@
 package sic.controller;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import sic.modelo.BusquedaNotaCriteria;
+import sic.modelo.Factura;
 import sic.modelo.Nota;
 import sic.modelo.NotaCredito;
 import sic.modelo.NotaDebito;
@@ -38,17 +33,12 @@ import sic.service.IReciboService;
 public class NotaController {
     
     private final INotaService notaService;
-    private final IClienteService clienteService;
-    private final IEmpresaService empresaService;
     private final IReciboService reciboService;
-    private final int TAMANIO_PAGINA_DEFAULT = 50;
     
     @Autowired
     public NotaController(INotaService notaService, IClienteService clienteService,
             IEmpresaService empresaService, IReciboService reciboService) {
         this.notaService = notaService;
-        this.clienteService = clienteService;
-        this.empresaService = empresaService;
         this.reciboService = reciboService;
     }
     
@@ -58,11 +48,11 @@ public class NotaController {
         return notaService.getNotaPorId(idNota);
     }
  
-//    @GetMapping("/notas/{idNota}/facturas")
-//    @ResponseStatus(HttpStatus.OK)
-//    public FacturaVenta getFacturaNota(@PathVariable long idNota) {
-//        return notaService.getFacturaNota(idNota);
-//    }
+    @GetMapping("/notas/{idNota}/facturas")
+    @ResponseStatus(HttpStatus.OK)
+    public Factura getFacturaNota(@PathVariable long idNota) {
+        return notaService.getFacturaNotaCredito(idNota);
+    }
     
     @GetMapping("/notas/debito/recibo/{idRecibo}/existe")
     @ResponseStatus(HttpStatus.OK)
@@ -80,39 +70,6 @@ public class NotaController {
     @ResponseStatus(HttpStatus.OK)
     public Nota getNotaDelPago(@PathVariable long idPago) {
         return notaService.getNotaDelPago(idPago);
-    }
-    
-    @GetMapping("/notas/busqueda/criteria") 
-    @ResponseStatus(HttpStatus.OK)
-    public Page<Nota> buscarNotasPorClienteYEmpresa(@RequestParam(value = "desde", required = false) Long desde,
-                                                    @RequestParam(value = "hasta", required = false) Long hasta,
-                                                    @RequestParam Long idCliente, 
-                                                    @RequestParam Long idEmpresa,
-                                                    @RequestParam(required = false) Integer pagina,
-                                                    @RequestParam(required = false) Integer tamanio) {
-        Calendar fechaDesde = Calendar.getInstance();
-        Calendar fechaHasta = Calendar.getInstance();
-        if (desde != null && hasta != null) {
-            fechaDesde.setTimeInMillis(desde);
-            fechaHasta.setTimeInMillis(hasta);
-        }
-        if (tamanio == null || tamanio <= 0) {
-            tamanio = TAMANIO_PAGINA_DEFAULT;
-        }
-        if (pagina == null || pagina < 0) {
-            pagina = 0;
-        }
-        Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "fecha"));
-        BusquedaNotaCriteria criteria = BusquedaNotaCriteria.builder()
-                .buscaPorFecha((desde != null) && (hasta != null))
-                .fechaDesde(fechaDesde.getTime())
-                .fechaHasta(fechaHasta.getTime())
-                .empresa(empresaService.getEmpresaPorId(idEmpresa))
-                .cantidadDeRegistros(0)
-                .cliente(clienteService.getClientePorId(idCliente))
-                .pageable(pageable)
-                .build();
-        return notaService.buscarNotasCreditoPorClienteYEmpresa(criteria);
     }
     
     @GetMapping("/notas/tipos")

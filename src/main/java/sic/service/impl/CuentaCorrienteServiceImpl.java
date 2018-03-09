@@ -18,6 +18,7 @@ import sic.modelo.Cliente;
 import sic.modelo.CuentaCorriente;
 import sic.modelo.CuentaCorrienteCliente;
 import sic.modelo.CuentaCorrienteProveedor;
+import sic.modelo.Factura;
 import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
@@ -201,51 +202,31 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     
     @Override
     @Transactional
-    public void asentarEnCuentaCorriente(FacturaVenta fv, TipoDeOperacion tipo) {
+    public void asentarEnCuentaCorriente(Factura factura, TipoDeOperacion tipo) {
         if (tipo == TipoDeOperacion.ALTA) {
             RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
-            rcc.setTipoComprobante(fv.getTipoComprobante());
-            rcc.setSerie(fv.getNumSerie());
-            rcc.setNumero(fv.getNumFactura());
-            rcc.setFactura(fv);
-            rcc.setFecha(fv.getFecha());
-            rcc.setFechaVencimiento(fv.getFechaVencimiento());
-            rcc.setIdMovimiento(fv.getId_Factura());
-            rcc.setMonto(fv.getTotal().negate());
-            CuentaCorriente cc = this.getCuentaCorrientePorCliente(fv.getCliente().getId_Cliente());
-            cc.getRenglones().add(rcc);
-            rcc.setCuentaCorriente(cc);
+            rcc.setTipoComprobante(factura.getTipoComprobante());
+            rcc.setSerie(factura.getNumSerie());
+            rcc.setNumero(factura.getNumFactura());
+            rcc.setFactura(factura);
+            rcc.setFecha(factura.getFecha());
+            rcc.setFechaVencimiento(factura.getFechaVencimiento());
+            rcc.setIdMovimiento(factura.getId_Factura());
+            rcc.setMonto(factura.getTotal().negate());
+            if (factura instanceof FacturaCompra) {
+                CuentaCorrienteProveedor cuentaCorrienteProveedor = this.getCuentaCorrientePorProveedor(((FacturaCompra) factura).getProveedor().getId_Proveedor());
+                cuentaCorrienteProveedor.getRenglones().add(rcc);
+                rcc.setCuentaCorriente(cuentaCorrienteProveedor);
+            } else if (factura instanceof FacturaVenta) {
+                CuentaCorrienteCliente cuentaCorrienteCliente = this.getCuentaCorrientePorCliente(((FacturaVenta) factura).getCliente().getId_Cliente());
+                cuentaCorrienteCliente.getRenglones().add(rcc);
+                rcc.setCuentaCorriente(cuentaCorrienteCliente);
+            }
             this.renglonCuentaCorrienteService.guardar(rcc);
             LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
         }
         if (tipo == TipoDeOperacion.ELIMINACION) {
-            RenglonCuentaCorriente rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeFactura(fv, false);
-            rcc.setEliminado(true);
-            LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
-        }
-    }
-    
-    @Override
-    @Transactional
-    public void asentarEnCuentaCorriente(FacturaCompra fc, TipoDeOperacion tipo) {
-        if (tipo == TipoDeOperacion.ALTA) {
-            RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
-            rcc.setTipoComprobante(fc.getTipoComprobante());
-            rcc.setSerie(fc.getNumSerie());
-            rcc.setNumero(fc.getNumFactura());
-            rcc.setFactura(fc);
-            rcc.setFecha(fc.getFecha());
-            rcc.setFechaVencimiento(fc.getFechaVencimiento());
-            rcc.setIdMovimiento(fc.getId_Factura());
-            rcc.setMonto(fc.getTotal().negate());
-            CuentaCorriente cc = this.getCuentaCorrientePorProveedor(fc.getProveedor().getId_Proveedor());
-            cc.getRenglones().add(rcc);
-            rcc.setCuentaCorriente(cc);
-            this.renglonCuentaCorrienteService.guardar(rcc);
-            LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
-        }
-        if (tipo == TipoDeOperacion.ELIMINACION) {
-            RenglonCuentaCorriente rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeFactura(fc, false);
+            RenglonCuentaCorriente rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeFactura(factura, false);
             rcc.setEliminado(true);
             LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
         }

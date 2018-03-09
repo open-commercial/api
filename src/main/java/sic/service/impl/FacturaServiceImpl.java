@@ -462,15 +462,14 @@ public class FacturaServiceImpl implements IFacturaService {
         for (long idFactura : idsFactura) {
             Factura factura = this.getFacturaPorId(idFactura);
             if (factura.getCAE() == 0L) {
+                if (notaService.existsByFacturaAndEliminada(factura)) {
+                    throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                            .getString("mensaje_no_se_puede_eliminar"));
+                }
+                this.cuentaCorrienteService.asentarEnCuentaCorriente(factura, TipoDeOperacion.ELIMINACION);
                 if (factura instanceof FacturaVenta) {
-                    if (notaService.existsByFacturaVentaAndEliminada((FacturaVenta) factura)) {
-                        throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                                .getString("mensaje_no_se_puede_eliminar"));
-                    }
-                    this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) factura, TipoDeOperacion.ELIMINACION);
                     productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.VENTA);
                 } else if (factura instanceof FacturaCompra) {
-                    this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaCompra) factura, TipoDeOperacion.ELIMINACION);
                     productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.COMPRA);
                 }
                 List<Pago> pagos = pagoService.getPagosDeLaFactura(idFactura);
