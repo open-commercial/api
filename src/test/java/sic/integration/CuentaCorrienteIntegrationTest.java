@@ -70,8 +70,8 @@ import sic.modelo.Transportista;
 import sic.modelo.Usuario;
 import sic.modelo.dto.FacturaCompraDTO;
 import sic.modelo.dto.FacturaVentaDTO;
-import sic.modelo.dto.NotaCreditoDTO;
-import sic.modelo.dto.NotaDebitoDTO;
+import sic.modelo.dto.NotaCreditoClienteDTO;
+import sic.modelo.dto.NotaDebitoClienteDTO;
 import sic.modelo.dto.ProductoDTO;
 import sic.modelo.dto.ReciboDTO;
 import sic.repository.UsuarioRepository;
@@ -298,21 +298,20 @@ public class CuentaCorrienteIntegrationTest {
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
                 restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", BigDecimal.class)
         .compareTo(BigDecimal.ZERO) == 0);
-        NotaDebitoDTO notaDebito = new NotaDebitoDTO();
-        notaDebito.setCliente(cliente);
-        notaDebito.setEmpresa(empresa);
+        NotaDebitoClienteDTO notaDebitoCliente = new NotaDebitoClienteDTO();
+        notaDebitoCliente.setCliente(cliente);
+        notaDebitoCliente.setEmpresa(empresa);
         List<RenglonNotaDebito> renglonesCalculados = Arrays.asList(restTemplate.getForObject(apiPrefix + "/notas/renglon/debito/recibo/1?monto=100&ivaPorcentaje=21", RenglonNotaDebito[].class));
-        notaDebito.setRenglonesNotaDebito(renglonesCalculados);
-        notaDebito.setIva105Neto(BigDecimal.ZERO);
-        notaDebito.setIva21Neto(new BigDecimal("21"));
-        notaDebito.setMontoNoGravado(new BigDecimal("5992.5"));
-        notaDebito.setMotivo("Test alta nota debito - Cheque rechazado");
-        notaDebito.setSubTotalBruto(new BigDecimal("100"));
-        notaDebito.setTotal(new BigDecimal("6113.5"));
-        notaDebito.setUsuario(credencial);
-        notaDebito.setFacturaVenta(null);
-        restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1/recibo/1", notaDebito, NotaDebitoCliente.class);
-        restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
+        notaDebitoCliente.setRenglonesNotaDebito(renglonesCalculados);
+        notaDebitoCliente.setIva105Neto(BigDecimal.ZERO);
+        notaDebitoCliente.setIva21Neto(new BigDecimal("21"));
+        notaDebitoCliente.setMontoNoGravado(new BigDecimal("5992.5"));
+        notaDebitoCliente.setMotivo("Test alta nota debito - Cheque rechazado");
+        notaDebitoCliente.setSubTotalBruto(new BigDecimal("100"));
+        notaDebitoCliente.setTotal(new BigDecimal("6113.5"));
+        notaDebitoCliente.setUsuario(credencial);
+        restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1/recibo/1", notaDebitoCliente, NotaDebitoCliente.class);
+//        restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
                 restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", BigDecimal.class)
         .compareTo(new BigDecimal("-6113.5")) == 0);
@@ -326,7 +325,7 @@ public class CuentaCorrienteIntegrationTest {
         List<RenglonNotaCredito> renglonesNotaCredito = Arrays.asList(restTemplate.getForObject(apiPrefix + "/notas/renglon/credito/producto?"
                 + "tipoDeComprobante=" + facturasRecuperadas.get(0).getTipoComprobante().name()
                 + "&cantidad=5&idRenglonFactura=1", RenglonNotaCredito[].class));
-        NotaCreditoDTO notaCredito = new NotaCreditoDTO();
+        NotaCreditoClienteDTO notaCredito = new NotaCreditoClienteDTO();
         notaCredito.setRenglonesNotaCredito(renglonesNotaCredito);
         notaCredito.setSubTotal(restTemplate.getForObject(apiPrefix + "/notas/credito/sub-total?importe="
                 + renglonesNotaCredito.get(0).getImporteNeto(), BigDecimal.class));
@@ -852,7 +851,7 @@ public class CuentaCorrienteIntegrationTest {
         facturaVentaB = restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaVentaDTO.class);
         assertEquals(TipoDeComprobante.FACTURA_B, facturaVentaB.getTipoComprobante());
         assertTrue("La fv B se encuentra impaga", facturaVentaB.isPagada());
-        NotaDebitoDTO notaDebito = new NotaDebitoDTO();
+        NotaDebitoClienteDTO notaDebito = new NotaDebitoClienteDTO();
         notaDebito.setCAE(0L);
         notaDebito.setCliente(cliente);
         notaDebito.setEmpresa(empresa);
@@ -866,7 +865,6 @@ public class CuentaCorrienteIntegrationTest {
         notaDebito.setSubTotalBruto(new BigDecimal("1000"));
         notaDebito.setTotal(new BigDecimal("3402.5"));
         notaDebito.setUsuario(credencial);
-        notaDebito.setFacturaVenta(null);
         restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1/recibo/2", notaDebito, NotaDebito.class);
         assertEquals(-3402.5, restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", Double.class), 0);
         assertEquals(0, restTemplate.getForObject(apiPrefix + "/recibos/1", ReciboDTO.class).getSaldoSobrante(), 0);

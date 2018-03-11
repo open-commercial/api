@@ -110,7 +110,7 @@ public class ReciboServiceImpl implements IReciboService {
             Slice<RenglonCuentaCorriente> renglonesCC
                     = this.renglonCuentaCorrienteService
                             .getRenglonesFacturasYNotaDebitoCuentaCorriente(
-                                    this.cuentaCorrienteService.getCuentaCorrientePorCliente(recibo.getCliente().getId_Cliente()).getIdCuentaCorriente(), pageable);
+                                    this.cuentaCorrienteService.getCuentaCorrientePorCliente(recibo.getCliente()).getIdCuentaCorriente(), pageable);
             while (renglonesCC.hasContent() && monto.compareTo(BigDecimal.ZERO) != 0) {
                 monto = this.pagarMultiplesComprobantesCliente(renglonesCC.getContent(), recibo, monto, recibo.getFormaDePago(), recibo.getConcepto());
                 if (renglonesCC.hasNext()) {
@@ -118,7 +118,7 @@ public class ReciboServiceImpl implements IReciboService {
                     pageable = new PageRequest(i, 10);
                     renglonesCC = this.renglonCuentaCorrienteService
                             .getRenglonesFacturasYNotaDebitoCuentaCorriente(
-                                    this.cuentaCorrienteService.getCuentaCorrientePorCliente(recibo.getCliente().getId_Cliente()).getIdCuentaCorriente(), pageable);
+                                    this.cuentaCorrienteService.getCuentaCorrientePorCliente(recibo.getCliente()).getIdCuentaCorriente(), pageable);
                 } else {
                     break;
                 }
@@ -127,7 +127,7 @@ public class ReciboServiceImpl implements IReciboService {
             Slice<RenglonCuentaCorriente> renglonesCC
                     = this.renglonCuentaCorrienteService
                             .getRenglonesFacturasYNotaDebitoCuentaCorriente(
-                                    this.cuentaCorrienteService.getCuentaCorrientePorProveedor(recibo.getProveedor().getId_Proveedor()).getIdCuentaCorriente(), pageable);
+                                    this.cuentaCorrienteService.getCuentaCorrientePorProveedor(recibo.getProveedor()).getIdCuentaCorriente(), pageable);
             while (renglonesCC.hasContent() && monto.compareTo(BigDecimal.ZERO) != 0) {
                 monto = this.pagarMultiplesComprobantesProveedor(renglonesCC.getContent(), recibo, monto, recibo.getFormaDePago(), recibo.getConcepto());
                 if (renglonesCC.hasNext()) {
@@ -135,7 +135,7 @@ public class ReciboServiceImpl implements IReciboService {
                     pageable = new PageRequest(i, 10);
                     renglonesCC = this.renglonCuentaCorrienteService
                             .getRenglonesFacturasYNotaDebitoCuentaCorriente(
-                                    this.cuentaCorrienteService.getCuentaCorrientePorProveedor(recibo.getProveedor().getId_Proveedor()).getIdCuentaCorriente(), pageable);
+                                    this.cuentaCorrienteService.getCuentaCorrientePorProveedor(recibo.getProveedor()).getIdCuentaCorriente(), pageable);
                 } else {
                     break;
                 }
@@ -378,7 +378,7 @@ public class ReciboServiceImpl implements IReciboService {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_recibo_reporte_proveedor"));
         }
-        recibo.getCliente().setSaldoCuentaCorriente(cuentaCorrienteService.getCuentaCorrientePorCliente(recibo.getCliente().getId_Cliente()).getSaldo());
+        recibo.getCliente().setSaldoCuentaCorriente(cuentaCorrienteService.getCuentaCorrientePorCliente(recibo.getCliente()).getSaldo());
         ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
         InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Recibo.jasper");
         Map params = new HashMap();

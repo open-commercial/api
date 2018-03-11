@@ -5,11 +5,13 @@ import java.util.Date;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import sic.modelo.AjusteCuentaCorriente;
+import sic.modelo.Cliente;
 import sic.modelo.CuentaCorriente;
 import sic.modelo.CuentaCorrienteCliente;
 import sic.modelo.CuentaCorrienteProveedor;
 import sic.modelo.Factura;
 import sic.modelo.Nota;
+import sic.modelo.Proveedor;
 import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
 import sic.modelo.TipoDeOperacion;
@@ -20,9 +22,9 @@ public interface ICuentaCorrienteService {
 
       CuentaCorriente getCuentaCorrientePorID(Long idCuentaCorriente);
       
-      CuentaCorrienteCliente getCuentaCorrientePorCliente(long idCliente);
+      CuentaCorrienteCliente getCuentaCorrientePorCliente(Cliente cliente);
       
-      CuentaCorrienteProveedor getCuentaCorrientePorProveedor(long idProveedor);
+      CuentaCorrienteProveedor getCuentaCorrientePorProveedor(Proveedor proveedor);
 
       CuentaCorrienteCliente guardarCuentaCorrienteCliente(CuentaCorrienteCliente cuentaCorrienteCliente);
       

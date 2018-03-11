@@ -255,12 +255,10 @@ public class NotaServiceImpl implements INotaService {
     }
     
     @Override
-    public long getSiguienteNumeroNotaCredito(Long idEmpresa, TipoDeComprobante tipoDeComprobante) {
+    public long getSiguienteNumeroNotaCreditoCliente(Long idEmpresa, TipoDeComprobante tipoDeComprobante) {
         Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
-        Nota nota = notaCreditoRepository
-                .findTopByEmpresaAndTipoComprobanteAndSerieOrderByNroNotaDesc(empresa, tipoDeComprobante,
-                        configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa).getNroPuntoDeVentaAfip());
-        return (nota == null) ? 1 : nota.getNroNota() + 1;
+        Long numeroNota = notaCreditoClienteRepository.buscarMayorNumNotaCreditoSegunTipo(tipoDeComprobante, configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa).getNroPuntoDeVentaAfip(), idEmpresa);
+        return (numeroNota == null) ? 1 : numeroNota + 1;
     }
 
     @Override
@@ -486,11 +484,8 @@ public class NotaServiceImpl implements INotaService {
         nota.setSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(nota.getEmpresa()).getNroPuntoDeVentaAfip());
         if (nota instanceof NotaCredito) {
             if (nota instanceof NotaCreditoCliente) {
-                NotaCreditoCliente notaCredito = (NotaCreditoCliente) nota;
-                notaCredito.setTipoComprobante(this.getTipoDeNotaCreditoSegunFactura(notaCredito.getFacturaVenta()));
-                notaCredito.setNroNota(this.getSiguienteNumeroNotaCredito(idEmpresa, nota.getTipoComprobante()));
-                notaCredito.setModificaStock(modificarStock);
                 Factura factura = facturaService.getFacturaPorId(idFactura);
+                NotaCreditoCliente notaCredito = (NotaCreditoCliente) nota;
                 if (factura instanceof FacturaVenta) {
                     notaCredito.setFacturaVenta((FacturaVenta) factura);
                 } else {
@@ -502,6 +497,10 @@ public class NotaServiceImpl implements INotaService {
                     throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                             .getString("mensaje_cliente_no_existente"));
                 }
+                notaCredito.setTipoComprobante(this.getTipoDeNotaCreditoSegunFactura(notaCredito.getFacturaVenta()));
+                notaCredito.setNroNota(this.getSiguienteNumeroNotaCreditoCliente(idEmpresa, nota.getTipoComprobante()));
+                notaCredito.setModificaStock(modificarStock);
+
                 notaCredito.setCliente(cliente);
                 if (modificarStock) {
                     this.actualizarStock(notaCredito.getRenglonesNotaCredito(), TipoDeOperacion.ACTUALIZACION);
@@ -515,11 +514,10 @@ public class NotaServiceImpl implements INotaService {
             } else if (nota instanceof NotaCreditoProveedor) {
                 return null;
             }
-            if (nota instanceof NotaDebitoCliente) {
-                nota = this.guardarNotaDebitoCliente((NotaDebitoCliente) nota, idRecibo, idEmpresa, idCliente);
-            } else if (nota instanceof NotaDebitoProveedor) {
-                return null;
-            }
+        } else if (nota instanceof NotaDebitoCliente) {
+            nota = this.guardarNotaDebitoCliente((NotaDebitoCliente) nota, idRecibo, idEmpresa, idCliente);
+        } else if (nota instanceof NotaDebitoProveedor) {
+            return null;
         }
         return nota;
     }
@@ -586,7 +584,7 @@ public class NotaServiceImpl implements INotaService {
 
     private void crearYGuardarAjusteCuentaCorriente(NotaDebito notaDebito) {
         AjusteCuentaCorriente ajusteCC = new AjusteCuentaCorriente();
-//        ajusteCC.setCliente(notaDebito.getCliente());
+        ajusteCC.setCliente(((NotaDebitoCliente)notaDebito).getCliente());
         ajusteCC.setConcepto("Ajuste Nota Debito "
                 + ((notaDebito.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_A)) ? "\"A\""
                 : (notaDebito.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_B)) ? "\"B\""

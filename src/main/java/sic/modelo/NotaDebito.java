@@ -1,6 +1,8 @@
 package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -21,6 +23,11 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true, exclude = "renglonesNotaDebito")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonSubTypes({
+  @JsonSubTypes.Type(value = NotaDebitoCliente.class), 
+  @JsonSubTypes.Type(value = NotaDebitoProveedor.class)
+})
 public abstract class NotaDebito extends Nota implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

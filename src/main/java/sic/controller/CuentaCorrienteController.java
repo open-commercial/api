@@ -18,18 +18,24 @@ import sic.modelo.CuentaCorriente;
 import sic.modelo.CuentaCorrienteCliente;
 import sic.modelo.CuentaCorrienteProveedor;
 import sic.modelo.RenglonCuentaCorriente;
+import sic.service.IClienteService;
 import sic.service.ICuentaCorrienteService;
+import sic.service.IProveedorService;
 
 @RestController
 @RequestMapping("/api/v1")
 public class CuentaCorrienteController {
     
     private final ICuentaCorrienteService cuentaCorrienteService;
+    private final IProveedorService proveedorService;
+    private final IClienteService clienteService;
     private final int TAMANIO_PAGINA_DEFAULT = 100;
     
     @Autowired
-    public CuentaCorrienteController(ICuentaCorrienteService cuentaCorrienteService) {
+    public CuentaCorrienteController(ICuentaCorrienteService cuentaCorrienteService, IProveedorService proveedorService, IClienteService clienteService) {
         this.cuentaCorrienteService = cuentaCorrienteService;
+        this.clienteService = clienteService;
+        this.proveedorService = proveedorService;
     }
     
     @DeleteMapping("/cuentas-corrientes/{idCuentaCorriente}")
@@ -47,25 +53,25 @@ public class CuentaCorrienteController {
     @GetMapping("/cuentas-corrientes/clientes/{idCliente}")
     @ResponseStatus(HttpStatus.OK)
     public CuentaCorrienteCliente getCuentaCorrientePorCliente(@PathVariable Long idCliente) {
-        return cuentaCorrienteService.getCuentaCorrientePorCliente(idCliente);
+        return cuentaCorrienteService.getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente));
     }
     
     @GetMapping("/cuentas-corrientes/proveedores/{idProveedor}")
     @ResponseStatus(HttpStatus.OK)
     public CuentaCorrienteProveedor getCuentaCorrientePorProveedor(@PathVariable Long idProveedor) {
-        return cuentaCorrienteService.getCuentaCorrientePorProveedor(idProveedor);
+        return cuentaCorrienteService.getCuentaCorrientePorProveedor(proveedorService.getProveedorPorId(idProveedor));
     }
     
     @GetMapping("/cuentas-corrientes/clientes/{idCliente}/saldo")
     @ResponseStatus(HttpStatus.OK)
     public BigDecimal getSaldoCuentaCorrienteCliente(@PathVariable long idCliente) {       
-        return cuentaCorrienteService.getSaldoCuentaCorriente(cuentaCorrienteService.getCuentaCorrientePorCliente(idCliente).getIdCuentaCorriente());
+        return cuentaCorrienteService.getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente)).getSaldo();
     }
     
     @GetMapping("/cuentas-corrientes/proveedores/{idProveedor}/saldo")
     @ResponseStatus(HttpStatus.OK)
     public BigDecimal getSaldoCuentaCorrienteProveedor(@PathVariable long idProveedor) {       
-        return cuentaCorrienteService.getSaldoCuentaCorriente(cuentaCorrienteService.getCuentaCorrientePorProveedor(idProveedor).getIdCuentaCorriente());
+        return cuentaCorrienteService.getCuentaCorrientePorProveedor(proveedorService.getProveedorPorId(idProveedor)).getSaldo();
     }
     
     @GetMapping("/cuentas-corrientes/{idCuentaCorriente}/renglones")
