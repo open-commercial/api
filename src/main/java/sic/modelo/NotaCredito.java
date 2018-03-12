@@ -55,13 +55,13 @@ public abstract class NotaCredito extends Nota implements Serializable {
 
     public NotaCredito() {}
 
-    public NotaCredito(long idNota, long serie, List<Pago> pagos, long nroNota, boolean eliminada,
+    public NotaCredito(long idNota, long serie, long nroNota, boolean eliminada,
             TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa,
             Usuario usuario, String motivo, List<RenglonNotaCredito> renglones, BigDecimal subTotalBruto, BigDecimal iva21Neto,
             BigDecimal iva105Neto, BigDecimal total, long CAE, Date vencimientoCAE,
             long numSerieAfip, long numFacturaAfip) {
 
-        super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, usuario, pagos, motivo,
+        super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, usuario, motivo,
                 subTotalBruto, iva21Neto, iva105Neto, total, CAE, vencimientoCAE, numSerieAfip, numFacturaAfip);
         this.renglonesNotaCredito = renglones;
     }

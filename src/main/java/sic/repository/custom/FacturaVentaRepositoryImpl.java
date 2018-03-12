@@ -52,14 +52,6 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
         if (criteria.isBuscarPorPedido() == true) {
             query += " AND f.pedido.nroPedido = " + criteria.getNroPedido();
         }
-        //Inpagas
-        if (criteria.isBuscaSoloImpagas() == true) {
-            query += " AND f.pagada = false";
-        }
-        //Pagas
-        if (criteria.isBuscaSoloPagadas() == true) {
-            query += " AND f.pagada = true";
-        }
         query += " ORDER BY f.fecha DESC";
         TypedQuery<BigDecimal> typedQuery = em.createQuery(query, BigDecimal.class);
         typedQuery.setParameter("empresa", criteria.getEmpresa());
@@ -110,14 +102,6 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
         if (criteria.isBuscarPorPedido() == true) {
             query += " AND f.pedido.nroPedido = " + criteria.getNroPedido();
         }
-        //Inpagas
-        if (criteria.isBuscaSoloImpagas() == true) {
-            query += " AND f.pagada = false";
-        }
-        //Pagas
-        if (criteria.isBuscaSoloPagadas() == true) {
-            query += " AND f.pagada = true";
-        }
         query += " ORDER BY f.fecha DESC";
         TypedQuery<BigDecimal> typedQuery = em.createQuery(query, BigDecimal.class);
         typedQuery.setParameter("empresa", criteria.getEmpresa());
@@ -159,14 +143,6 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
         //Pedido
         if (criteria.isBuscarPorPedido() == true) {
             query += " AND f.pedido.nroPedido = " + criteria.getNroPedido();
-        }
-        //Inpagas
-        if (criteria.isBuscaSoloImpagas() == true) {
-            query += " AND f.pagada = false";
-        }
-        //Pagas
-        if (criteria.isBuscaSoloPagadas() == true) {
-            query += " AND f.pagada = true";
         }
         query += " ORDER BY f.fecha DESC";
         TypedQuery<BigDecimal> typedQuery = em.createQuery(query, BigDecimal.class);
@@ -210,15 +186,7 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
         //Pedido
         if (criteria.isBuscarPorPedido() == true) {
             query += " AND f.pedido.nroPedido = " + criteria.getNroPedido();
-        }
-        //Inpagas
-        if (criteria.isBuscaSoloImpagas() == true) {
-            query += " AND f.pagada = false";
-        }
-        //Pagas
-        if (criteria.isBuscaSoloPagadas() == true) {
-            query += " AND f.pagada = true";
-        }        
+        }     
         queryCount += query;
         if (criteria.getPageable().getSort().getOrderFor("fecha").getDirection() == Sort.Direction.ASC) {//name().equals("ASC")) {
             queryData += query + " ORDER BY f.fecha ASC";

@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.AjusteCuentaCorriente;
 import sic.modelo.BusquedaNotaCriteria;
 import sic.modelo.Cliente;
 import sic.modelo.ComprobanteAFIP;
@@ -42,7 +41,6 @@ import sic.modelo.NotaCreditoProveedor;
 import sic.modelo.NotaDebito;
 import sic.modelo.NotaDebitoCliente;
 import sic.modelo.NotaDebitoProveedor;
-import sic.modelo.Pago;
 import sic.modelo.Recibo;
 import sic.modelo.RenglonFactura;
 import sic.modelo.RenglonNotaCredito;
@@ -61,10 +59,8 @@ import sic.repository.NotaCreditoRepository;
 import sic.repository.NotaDebitoRepository;
 import sic.repository.NotaRepository;
 import sic.service.IAfipService;
-import sic.service.IAjusteCuentaCorrienteService;
 import sic.service.IConfiguracionDelSistemaService;
 import sic.service.ICuentaCorrienteService;
-import sic.service.IPagoService;
 import sic.service.IProductoService;
 import sic.service.IReciboService;
 import sic.service.IUsuarioService;
@@ -83,11 +79,9 @@ public class NotaServiceImpl implements INotaService {
     private final IClienteService clienteService;
     private final IEmpresaService empresaService;
     private final IUsuarioService usuarioService;
-    private final IPagoService pagoService;
     private final IProductoService productoService;
     private final ICuentaCorrienteService cuentaCorrienteService;
     private final IReciboService reciboService;
-    private final IAjusteCuentaCorrienteService ajusteCuentaCorrienteService;
     private final IConfiguracionDelSistemaService configuracionDelSistemaService;
     private final IAfipService afipService;
     private final static BigDecimal IVA_21 = new BigDecimal("21");
@@ -101,9 +95,9 @@ public class NotaServiceImpl implements INotaService {
             NotaCreditoClienteRepository notaCreditoClienteRepository, NotaCreditoProveedorRepository notaCreditoProveedorRepository,
             NotaDebitoRepository notaDeDebitoRespository, IFacturaService facturaService,
             IClienteService clienteService, IUsuarioService usuarioService, IProductoService productoService,
-            IEmpresaService empresaService, IPagoService pagoService, ICuentaCorrienteService cuentaCorrienteService,
-            IReciboService reciboService, IConfiguracionDelSistemaService cds, IAfipService afipService,
-            IAjusteCuentaCorrienteService ajusteCuentaCorrienteService) {
+            IEmpresaService empresaService, ICuentaCorrienteService cuentaCorrienteService,
+            IReciboService reciboService, IConfiguracionDelSistemaService cds, IAfipService afipService) {
+
         this.notaRepository = notaRepository;
         this.notaCreditoRepository = notaDeCreditoRepository;
         this.notaCreditoClienteRepository = notaCreditoClienteRepository;
@@ -113,11 +107,9 @@ public class NotaServiceImpl implements INotaService {
         this.clienteService = clienteService;
         this.usuarioService = usuarioService;
         this.empresaService = empresaService;
-        this.pagoService = pagoService;
         this.productoService = productoService;
         this.cuentaCorrienteService = cuentaCorrienteService;
         this.reciboService = reciboService;
-        this.ajusteCuentaCorrienteService = ajusteCuentaCorrienteService;
         this.configuracionDelSistemaService = cds;
         this.afipService = afipService;
     }
@@ -157,16 +149,6 @@ public class NotaServiceImpl implements INotaService {
     public FacturaCompra getFacturaNotaCreditoProveedor(Long idNota) {
         return this.notaCreditoProveedorRepository.getById(idNota).getFacturaCompra();
     }
-        
-    @Override
-    public Nota getNotaDelPago(long idPago) {
-        return notaRepository.getNotaDelPago(idPago);
-    }
-    
-    @Override
-    public List<Pago> getPagosNota(Long idNota) {
-        return pagoService.getPagosDeNotas(idNota);
-    }
     
     @Override
     public boolean existeNotaDebitoPorRecibo(Recibo recibo) {
@@ -174,29 +156,20 @@ public class NotaServiceImpl implements INotaService {
     }
     
     @Override
-    public boolean existsByFacturaAndEliminada(Factura factura) {
-//        return notaCreditoRepository.existsByFacturaAndEliminada(factura, false);
-        return false;
-    }
-
-    @Override
-    public BigDecimal getTotalPagado(Long idNota) {
-        BigDecimal pagado = BigDecimal.ZERO;
-        List<Pago> pagos = this.getPagosNota(idNota);
-        for(Pago p : pagos) {
-            pagado = pagado.add(p.getMonto());
-        }
-        return pagado;
+    public boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta) {
+        return notaCreditoClienteRepository.existsByFacturaVentaAndEliminada(facturaVenta, false);
     }
     
     @Override
     public List<NotaCredito> getNotasCreditoPorFactura(Long idFactura) {
-//        Factura factura = facturaService.getFacturaPorId(idFactura);
-//        if (factura instanceof FacturaVenta) {
-//            return notaCreditoClienteRepository.findAllByFacturaVentaAndEliminada((FacturaVenta)factura, false);
-//        } else if (factura instanceof FacturaVenta) {
-//        }
-        return null;
+        List<NotaCredito> notasCredito = new ArrayList<>();
+        Factura factura = facturaService.getFacturaPorId(idFactura);
+        if (factura instanceof FacturaVenta) {
+            notasCredito = notaCreditoClienteRepository.findAllByFacturaVentaAndEliminada((FacturaVenta)factura, false);
+        } else if (factura instanceof FacturaCompra) {
+            return null;
+        }
+        return notasCredito;
     }
 
     @Override
@@ -221,22 +194,6 @@ public class NotaServiceImpl implements INotaService {
             });
         }
         return renglonesFactura;
-    }
-
-    @Override
-    public Page<NotaCreditoCliente> buscarNotasCreditoPorClienteYEmpresa(BusquedaNotaCriteria criteria) {
-        //Empresa
-        if (criteria.getEmpresa() == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
-        //Cliente
-        if (criteria.getEmpresa() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_cliente_no_existente"));
-        }
-        return notaCreditoClienteRepository.findAllByFechaBetweenAndClienteAndEmpresaAndEliminada(criteria.getFechaDesde(),
-               criteria.getFechaHasta(), criteria.getCliente(), criteria.getEmpresa(), false, criteria.getPageable());
     }
 
     @Override
@@ -530,104 +487,45 @@ public class NotaServiceImpl implements INotaService {
         this.validarCalculosDebito(notaDebitoCliente);
         notaDebitoCliente = notaDebitoRepository.save(notaDebitoCliente);
         cuentaCorrienteService.asentarEnCuentaCorriente(notaDebitoCliente, TipoDeOperacion.ALTA);
-        if (notaDebitoCliente.getRecibo().getSaldoSobrante().compareTo(BigDecimal.ZERO) > 0) {
-            this.crearYGuardarAjusteCuentaCorriente(notaDebitoCliente);
-        }
-        List<Recibo> recibos = reciboService.getRecibosConSaldoSobranteCliente(idEmpresa, idCliente);
-        BigDecimal saldoNotaDebito = pagoService.getSaldoAPagarNotaDebito(notaDebitoCliente.getIdNota());
-        List<Pago> pagos = new ArrayList<>();
-        for (Recibo r : recibos) {
-            if (r.equals(notaDebitoCliente.getRecibo()) == false) {
-                while (r.getSaldoSobrante().compareTo(BigDecimal.ZERO) > 0) {
-                    BigDecimal saldoSobrante = r.getSaldoSobrante();
-                    if (saldoNotaDebito.compareTo(saldoSobrante) < 0) {
-                        Pago nuevoPago = new Pago();
-                        nuevoPago.setMonto(saldoNotaDebito);
-                        nuevoPago.setRecibo(r);
-                        nuevoPago.setNotaDebito(notaDebitoCliente);
-                        nuevoPago.setEmpresa(notaDebitoCliente.getEmpresa());
-                        nuevoPago.setFecha(new Date());
-                        nuevoPago.setFormaDePago(r.getFormaDePago());
-                        nuevoPago.setNota("");
-                        pagoService.guardar(nuevoPago);
-                        pagos.add(nuevoPago);
-                        reciboService.actualizarSaldoSobrante(r.getIdRecibo(), (r.getSaldoSobrante().subtract(saldoNotaDebito)));
-                        actualizarNotaDebitoEstadoPago(notaDebitoCliente);
-                    } else if (saldoNotaDebito.compareTo(saldoSobrante) > -1) {
-                        Pago nuevoPago = new Pago();
-                        nuevoPago.setMonto(r.getSaldoSobrante());
-                        nuevoPago.setRecibo(r);
-                        nuevoPago.setNotaDebito(notaDebitoCliente);
-                        nuevoPago.setEmpresa(notaDebitoCliente.getEmpresa());
-                        nuevoPago.setFecha(new Date());
-                        nuevoPago.setFormaDePago(r.getFormaDePago());
-                        nuevoPago.setNota("");
-                        pagoService.guardar(nuevoPago);
-                        pagos.add(nuevoPago);
-                        reciboService.actualizarSaldoSobrante(r.getIdRecibo(), BigDecimal.ZERO);
-                        actualizarNotaDebitoEstadoPago(notaDebitoCliente);
-                    }
-                    if (notaDebitoCliente.isPagada()) {
-                        break;
-                    }
-                    saldoNotaDebito = pagoService.getSaldoAPagarNotaDebito(notaDebitoCliente.getIdNota());
-                }
-            }
-            if (notaDebitoCliente.isPagada()) {
-                break;
-            }
-        }
-        notaDebitoCliente.setPagos(pagos);
         LOGGER.warn("La Nota " + notaDebitoCliente + " se guardó correctamente.");
         return notaDebitoCliente;
-    }
-
-    private void crearYGuardarAjusteCuentaCorriente(NotaDebito notaDebito) {
-        AjusteCuentaCorriente ajusteCC = new AjusteCuentaCorriente();
-        ajusteCC.setCliente(((NotaDebitoCliente)notaDebito).getCliente());
-        ajusteCC.setConcepto("Ajuste Nota Debito "
-                + ((notaDebito.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_A)) ? "\"A\""
-                : (notaDebito.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_B)) ? "\"B\""
-                : (notaDebito.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO)) ? "\"PRESUPUESTO\""
-                : (notaDebito.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_X)) ? "\"X\""
-                : (notaDebito.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_Y)) ? "\"Y\"" : "")
-                + " " + notaDebito.getSerie() + " - " + notaDebito.getNroNota());
-        ajusteCC.setEmpresa(notaDebito.getEmpresa());
-        ajusteCC.setFecha(notaDebito.getFecha());
-        ajusteCC.setMonto(notaDebito.getRecibo().getSaldoSobrante().negate());
-        ajusteCC.setNotaDebito(notaDebito);
-        ajusteCC.setNumSerie(notaDebito.getSerie());
-        ajusteCC.setNumAjuste(ajusteCuentaCorrienteService.getSiguienteNumeroAjuste(notaDebito.getEmpresa().getId_Empresa(), ajusteCC.getNumSerie()));
-        ajusteCC.setTipoComprobante(TipoDeComprobante.AJUSTE);
-        ajusteCC.setUsuario(notaDebito.getUsuario());
-        ajusteCuentaCorrienteService.guardar(ajusteCC);
-        cuentaCorrienteService.asentarEnCuentaCorriente(ajusteCC, TipoDeOperacion.ALTA);
     }
 
     @Override
     @Transactional
     public Nota autorizarNota(Nota nota) {
-        BigDecimal montoNoGravado = (nota instanceof NotaDebito) ? ((NotaDebito) nota).getMontoNoGravado() : BigDecimal.ZERO;
-        ComprobanteAFIP comprobante = ComprobanteAFIP.builder()
-                .fecha(nota.getFecha())
-                .tipoComprobante(nota.getTipoComprobante())
-                .CAE(nota.getCAE())
-                .vencimientoCAE(nota.getVencimientoCAE())
-                .numSerieAfip(nota.getNumSerieAfip())
-                .numFacturaAfip(nota.getNumNotaAfip())
-                .empresa(nota.getEmpresa())
-//                .cliente(nota.getCliente())
-                .subtotalBruto(nota.getSubTotalBruto())
-                .iva105neto(nota.getIva105Neto())
-                .iva21neto(nota.getIva21Neto())
-                .montoNoGravado(montoNoGravado)
-                .total(nota.getTotal())
-                .build();
-        afipService.autorizar(comprobante);
-        nota.setCAE(comprobante.getCAE());
-        nota.setVencimientoCAE(comprobante.getVencimientoCAE());
-        nota.setNumSerieAfip(comprobante.getNumSerieAfip());
-        nota.setNumNotaAfip(comprobante.getNumFacturaAfip());
+        BigDecimal montoNoGravado = (nota instanceof NotaDebitoCliente) ? ((NotaDebito) nota).getMontoNoGravado() : BigDecimal.ZERO;
+        if (nota instanceof NotaCreditoCliente || nota instanceof NotaDebitoCliente) {
+            Cliente cliente = new Cliente();
+            if (nota instanceof NotaCreditoCliente) {
+                cliente = ((NotaCreditoCliente) nota).getCliente();
+            } else if (nota instanceof NotaDebitoCliente) {
+                cliente = ((NotaDebitoCliente) nota).getCliente();
+            }
+            ComprobanteAFIP comprobante = ComprobanteAFIP.builder()
+                    .fecha(nota.getFecha())
+                    .tipoComprobante(nota.getTipoComprobante())
+                    .CAE(nota.getCAE())
+                    .vencimientoCAE(nota.getVencimientoCAE())
+                    .numSerieAfip(nota.getNumSerieAfip())
+                    .numFacturaAfip(nota.getNumNotaAfip())
+                    .empresa(nota.getEmpresa())
+                    .cliente(cliente)
+                    .subtotalBruto(nota.getSubTotalBruto())
+                    .iva105neto(nota.getIva105Neto())
+                    .iva21neto(nota.getIva21Neto())
+                    .montoNoGravado(montoNoGravado)
+                    .total(nota.getTotal())
+                    .build();
+            afipService.autorizar(comprobante);
+            nota.setCAE(comprobante.getCAE());
+            nota.setVencimientoCAE(comprobante.getVencimientoCAE());
+            nota.setNumSerieAfip(comprobante.getNumSerieAfip());
+            nota.setNumNotaAfip(comprobante.getNumFacturaAfip());
+        } else {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_comprobanteAFIP_invalido"));
+        }
         return nota;
     }
 
@@ -771,27 +669,16 @@ public class NotaServiceImpl implements INotaService {
         for (long idNota : idsNota) {
             Nota nota = this.getNotaPorId(idNota);
             if (nota != null && nota.getCAE() == 0l) {
-                if (getPagosNota(idNota).isEmpty()) {
-                    if (nota instanceof NotaCredito) {
-                        NotaCredito nc = (NotaCredito) nota;
-                        if (nc.isModificaStock()) {
-                            this.actualizarStock(nc.getRenglonesNotaCredito(), TipoDeOperacion.ELIMINACION);
-                        }
-                    } else if (nota instanceof NotaDebito) {
-                        AjusteCuentaCorriente ajusteCC = ajusteCuentaCorrienteService.findByNotaDebito(nota);
-                        if (ajusteCC != null) {
-                            this.cuentaCorrienteService.asentarEnCuentaCorriente(ajusteCuentaCorrienteService.findByNotaDebito(nota), TipoDeOperacion.ELIMINACION);
-                            ajusteCuentaCorrienteService.eliminar(ajusteCC.getIdAjusteCuentaCorriente());
-                        }
+                if (nota instanceof NotaCredito) {
+                    NotaCredito nc = (NotaCredito) nota;
+                    if (nc.isModificaStock()) {
+                        this.actualizarStock(nc.getRenglonesNotaCredito(), TipoDeOperacion.ALTA);
                     }
-                    nota.setEliminada(true);
-                    this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ELIMINACION);
-                    notaRepository.save(nota);
-                    LOGGER.warn("La Nota " + nota + " se eliminó correctamente.");
-                } else {
-                    throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                            .getString("mensaje_no_se_puede_eliminar"));
                 }
+                nota.setEliminada(true);
+                this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ELIMINACION);
+                notaRepository.save(nota);
+                LOGGER.warn("La Nota " + nota + " se eliminó correctamente.");
             } else {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_eliminar_nota_aprobada"));
@@ -939,16 +826,5 @@ public class NotaServiceImpl implements INotaService {
         BigDecimal credito = notaCreditoClienteRepository.getTotalNotasCreditoPorFactura(facturaVenta);
         return (credito == null) ? BigDecimal.ZERO : credito;
     }
-    
-    @Override
-    @Transactional
-    public Nota actualizarNotaDebitoEstadoPago(NotaDebito notaDebito) {
-        if (this.getTotalPagado(notaDebito.getIdNota()).compareTo((notaDebito.getTotal().setScale(2, RoundingMode.HALF_UP))) >= 0) {
-            notaDebito.setPagada(true);
-        } else {
-            notaDebito.setPagada(false);
-        }
-        return notaDebito;
-    }
-    
+   
 }

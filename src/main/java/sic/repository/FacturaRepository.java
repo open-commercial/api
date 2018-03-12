@@ -26,7 +26,4 @@ public interface FacturaRepository<T extends Factura> extends PagingAndSortingRe
     @Query("SELECT f.CAE FROM Factura f WHERE f.id_Factura = :idFactura AND f.eliminada = false")
     Long getCAEById(@Param("idFactura") long idFactura);
     
-    @Query("SELECT f FROM Pago p INNER JOIN p.factura f WHERE p.id_Pago = :idPago AND f.eliminada = false")
-    Factura getFacturaDelPago(@Param("idPago") long idPago);
-    
 }

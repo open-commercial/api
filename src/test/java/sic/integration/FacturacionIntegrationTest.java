@@ -508,7 +508,6 @@ public class FacturacionIntegrationTest {
                 })
                 .getBody().getContent();       
         assertEquals(1, facturasRecuperadas.size(), 0);  
-        assertTrue("La factura se encuentra impaga", facturasRecuperadas.get(0).isPagada());
         pedidoRecuperado = restTemplate.getForObject(apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
         assertEquals(EstadoPedido.ACTIVO, pedidoRecuperado.getEstado());
         renglonesDelPedido = restTemplate.getForObject(apiPrefix + "/pedidos/"+ pedidoRecuperado.getId_Pedido() +"/renglones", RenglonPedidoDTO[].class);

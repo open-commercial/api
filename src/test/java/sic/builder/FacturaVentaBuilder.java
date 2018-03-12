@@ -7,7 +7,6 @@ import java.util.List;
 import sic.modelo.Cliente;
 import sic.modelo.Empresa;
 import sic.modelo.FacturaVenta;
-import sic.modelo.Pago;
 import sic.modelo.Pedido;
 import sic.modelo.RenglonFactura;
 import sic.modelo.TipoDeComprobante;
@@ -25,7 +24,6 @@ public class FacturaVentaBuilder {
     private Pedido pedido =  null;
     private Transportista transportista = new TransportistaBuilder().build();
     private List<RenglonFactura> renglones;
-    private List<Pago> pagos;
     private Cliente cliente = new ClienteBuilder().build();
     private Usuario usuario = new UsuarioBuilder().build();
     private BigDecimal subTotal = new BigDecimal("6500");
@@ -39,7 +37,6 @@ public class FacturaVentaBuilder {
     private BigDecimal impuestoInterno_neto = BigDecimal.ZERO;
     private BigDecimal total = new BigDecimal("7865");
     private String observaciones = "Factura por Default";
-    private boolean pagada = false;
     private Empresa empresa = new EmpresaBuilder().build();
     private boolean eliminada = false;
     private long CAE = 21064126523746l;
@@ -64,9 +61,9 @@ public class FacturaVentaBuilder {
         }
         FacturaVenta factura = new FacturaVenta(cliente, usuario, id_Factura, fecha,
                 tipoFactura, numSerie, numFactura, fechaVencimiento, pedido, transportista,
-                renglones, pagos, subTotal, recargo_porcentaje, recargo_neto, descuento_porcentaje, 
+                renglones, subTotal, recargo_porcentaje, recargo_neto, descuento_porcentaje, 
                 descuento_neto, subTotal_neto, iva_105_neto, iva_21_neto, impuestoInterno_neto, total, 
-                observaciones, pagada, empresa, eliminada, CAE, vencimientoCAE, numSerieAfip, numFacturaAfip);
+                observaciones, empresa, eliminada, CAE, vencimientoCAE, numSerieAfip, numFacturaAfip);
         return factura;
     }
     
@@ -92,11 +89,6 @@ public class FacturaVentaBuilder {
 
     public FacturaVentaBuilder withPedido(Pedido pedido) {
         this.pedido = pedido;
-        return this;
-    }
-
-    public FacturaVentaBuilder withPagos(List<Pago> pagos) {
-        this.pagos = pagos;
         return this;
     }
 
@@ -182,11 +174,6 @@ public class FacturaVentaBuilder {
 
     public FacturaVentaBuilder withObservaciones(String observarciones) {
         this.observaciones = observarciones;
-        return this;
-    }
-
-    public FacturaVentaBuilder withPagada(boolean pagada) {
-        this.pagada = pagada;
         return this;
     }
 

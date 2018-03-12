@@ -4,9 +4,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import sic.modelo.AjusteCuentaCorriente;
-import sic.modelo.CuentaCorriente;
 import sic.modelo.Factura;
 import sic.modelo.Nota;
 import sic.modelo.Recibo;
@@ -16,17 +13,13 @@ public interface IRenglonCuentaCorrienteService {
     
     RenglonCuentaCorriente guardar(RenglonCuentaCorriente renglonCuentaCorriente);
     
-    RenglonCuentaCorriente getRenglonCuentaCorrienteDeFactura(Factura f, boolean eliminado);
+    RenglonCuentaCorriente getRenglonCuentaCorrienteDeFactura(Factura factura, boolean eliminado);
     
-    RenglonCuentaCorriente getRenglonCuentaCorrienteDeNota(Nota n, boolean eliminado);
+    RenglonCuentaCorriente getRenglonCuentaCorrienteDeNota(Nota nota, boolean eliminado);
     
-    RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(Recibo r, boolean eliminado);
+    RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(Recibo recibo, boolean eliminado);
     
-    RenglonCuentaCorriente getRenglonCuentaCorrienteDeAjusteCuentaCorriente(AjusteCuentaCorriente ajusteCC, boolean eliminado);
-    
-    Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(CuentaCorriente cuentaCorriente, boolean eliminado, Pageable page);
-    
-    Slice<RenglonCuentaCorriente> getRenglonesFacturasYNotaDebitoCuentaCorriente(long idCuentaCorriente, Pageable page);
+    Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Pageable page);
     
     BigDecimal getSaldoCuentaCorriente(long idCuentaCorriente);
     

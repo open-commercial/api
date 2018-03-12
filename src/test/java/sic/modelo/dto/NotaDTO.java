@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import sic.builder.ClienteBuilder;
@@ -17,7 +16,6 @@ import sic.modelo.Cliente;
 import sic.modelo.Empresa;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
-import sic.modelo.Pago;
 import sic.modelo.TipoDeComprobante;
 import sic.modelo.Usuario;
 
@@ -38,7 +36,6 @@ public abstract class NotaDTO implements Serializable {
     private Cliente cliente = new ClienteBuilder().build();
     private Usuario usuario = new UsuarioBuilder().build();
     private FacturaVenta facturaVenta = new FacturaVentaBuilder().build();
-    private List<Pago> pagos;
     private String motivo = "Nota por default";
     private BigDecimal subTotalBruto = new BigDecimal("6500"); 
     private BigDecimal iva21Neto = new BigDecimal("1365");     

@@ -35,6 +35,7 @@ public class RenglonCuentaCorriente implements Serializable {
     
     @Id
     @GeneratedValue
+    @Column(name = "id_renglon_cuenta_corriente")
     private Long idRenglonCuentaCorriente;
     
     @Column(nullable = false)
@@ -75,7 +76,7 @@ public class RenglonCuentaCorriente implements Serializable {
     private BigDecimal monto;
     
     @ManyToOne
-    @JoinColumn(name = "idCuentaCorriente", referencedColumnName = "idCuentaCorriente")
+    @JoinColumn(name = "id_cuenta_corriente", referencedColumnName = "id_cuenta_corriente")
     private CuentaCorriente cuentaCorriente;
     
     @OneToOne
@@ -93,15 +94,13 @@ public class RenglonCuentaCorriente implements Serializable {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Recibo recibo;
     
-    @OneToOne
-    @JoinColumn(name = "idAjusteCuentaCorriente", referencedColumnName = "idAjusteCuentaCorriente")  
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private AjusteCuentaCorriente ajusteCuentaCorriente;
-    
     @Transient
     private Long CAE;
     
-    @Transient
-    private BigDecimal saldo;
+    @Formula(value = "(SELECT SUM(r.monto) "
+            + "FROM rengloncuentacorriente r "
+            + "WHERE r.id_cuenta_corriente = id_cuenta_corriente AND r.eliminado = false "
+            + "AND r.id_renglon_cuenta_corriente <= id_renglon_cuenta_corriente)")
+    private Double saldo;
     
 }

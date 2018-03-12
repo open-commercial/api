@@ -704,33 +704,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textFieldExpression><![CDATA[$P{facturaVenta}.getTotal().doubleValue()]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="1" width="80" height="15" uuid="fd355cd5-1e26-40e5-baa6-26739dede4e9">
-					<property name="local_mesure_unitheight" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<printWhenExpression><![CDATA[$P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_A") ||
-$P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_B") ||
-$P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C")]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font size="8" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Forma de Pago:]]></text>
-			</staticText>
-			<textField>
-				<reportElement x="80" y="1" width="250" height="15" uuid="73b22264-238a-44d1-9501-19fe03d257be">
-					<property name="local_mesure_unitheight" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<printWhenExpression><![CDATA[$P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_A") ||
-$P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_B") ||
-$P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C")]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{formasDePago}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="0" y="16" width="80" height="15" uuid="43f39702-e0af-456b-bea4-3952f75b1aa5">
+				<reportElement x="0" y="1" width="80" height="15" uuid="43f39702-e0af-456b-bea4-3952f75b1aa5">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
@@ -739,7 +713,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C")]]></printWh
 				<text><![CDATA[Observaciones:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="80" y="16" width="250" height="65" uuid="7d4cd7c6-3ef8-449b-b63b-9d16f6eb9934"/>
+				<reportElement x="80" y="1" width="250" height="80" uuid="7d4cd7c6-3ef8-449b-b63b-9d16f6eb9934"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>

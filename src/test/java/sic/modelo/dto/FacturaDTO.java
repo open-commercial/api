@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import sic.modelo.Pago;
 import sic.modelo.RenglonFactura;
 import sic.modelo.TipoDeComprobante;
 
@@ -32,7 +31,6 @@ public abstract class FacturaDTO implements Serializable {
     private Date fechaVencimiento;    
     private String nombreTransportista = "Correo OCA";
     private List<RenglonFactura> renglones;
-    private List<Pago> pagos;
     private BigDecimal subTotal = new BigDecimal("6500");
     private BigDecimal recargo_porcentaje = BigDecimal.ZERO;
     private BigDecimal recargo_neto = BigDecimal.ZERO;
@@ -44,7 +42,6 @@ public abstract class FacturaDTO implements Serializable {
     private BigDecimal impuestoInterno_neto = BigDecimal.ZERO;
     private BigDecimal total = new BigDecimal("7865");
     private String observaciones = "Factura por Default";
-    private boolean pagada = false;
     private String nombreEmpresa = "Globo Corporation";
     private boolean eliminada = false;
 }

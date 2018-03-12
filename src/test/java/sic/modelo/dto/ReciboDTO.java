@@ -20,6 +20,5 @@ public class ReciboDTO {
     private String razonSocialProveedor = ""; 
     private String nombreUsuario = "test";
     private double monto = 15000;
-    private double saldoSobrante = 0;
     
 }

@@ -37,8 +37,6 @@ public interface IFacturaService {
 
     List<RenglonFactura> getRenglonesDeLaFactura(Long id_Factura);
     
-    Factura getFacturaDelPago(long idPago);
-    
     List<RenglonFactura> getRenglonesDeLaFacturaModificadosParaCredito(Long id_Factura);
     
     RenglonFactura getRenglonFactura(Long idRenglonFactura);
@@ -52,18 +50,8 @@ public interface IFacturaService {
     void eliminar(long[] idFactura);
     
     FacturaVenta autorizarFacturaVenta(FacturaVenta fv);
-    
-    Factura actualizarFacturaEstadoPago(Factura factura);
-    
-    BigDecimal getTotalPagado(long idFactura);
 
     List<Factura> ordenarFacturasPorFechaAsc(List<Factura> facturas);
-
-    boolean validarFacturasParaPagoMultiple(List<Factura> facturas, Movimiento movimiento);
-
-    boolean validarClienteProveedorParaPagosMultiples(List<Factura> facturas, Movimiento movimiento);
-
-    boolean validarFacturasImpagasParaPagoMultiple(List<Factura> facturas);
 
     boolean validarCantidadMaximaDeRenglones(int cantidad, Empresa empresa);
 

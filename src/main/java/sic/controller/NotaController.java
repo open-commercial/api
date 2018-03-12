@@ -23,8 +23,6 @@ import sic.modelo.NotaDebito;
 import sic.modelo.RenglonNotaCredito;
 import sic.modelo.RenglonNotaDebito;
 import sic.modelo.TipoDeComprobante;
-import sic.service.IClienteService;
-import sic.service.IEmpresaService;
 import sic.service.INotaService;
 import sic.service.IReciboService;
 
@@ -34,14 +32,13 @@ public class NotaController {
     
     private final INotaService notaService;
     private final IReciboService reciboService;
-    
+
     @Autowired
-    public NotaController(INotaService notaService, IClienteService clienteService,
-            IEmpresaService empresaService, IReciboService reciboService) {
+    public NotaController(INotaService notaService, IReciboService reciboService) {
         this.notaService = notaService;
         this.reciboService = reciboService;
     }
-    
+
     @GetMapping("/notas/{idNota}")
     @ResponseStatus(HttpStatus.OK)
     public Nota getNota(@PathVariable long idNota) {
@@ -50,7 +47,7 @@ public class NotaController {
  
     @GetMapping("/notas/{idNota}/facturas")
     @ResponseStatus(HttpStatus.OK)
-    public Factura getFacturaNota(@PathVariable long idNota) {
+    public Factura getFacturaNotaCredito(@PathVariable long idNota) {
         return notaService.getFacturaNotaCredito(idNota);
     }
     
@@ -64,12 +61,6 @@ public class NotaController {
     @ResponseStatus(HttpStatus.OK)
     public List<Nota> getNotasPorClienteYEmpresa(Long idEmpresa, Long idCliente) {
         return notaService.getNotasCreditoPorClienteYEmpresa(idEmpresa, idCliente);
-    }
-    
-    @GetMapping("/notas/pagos/{idPago}")
-    @ResponseStatus(HttpStatus.OK)
-    public Nota getNotaDelPago(@PathVariable long idPago) {
-        return notaService.getNotaDelPago(idPago);
     }
     
     @GetMapping("/notas/tipos")
