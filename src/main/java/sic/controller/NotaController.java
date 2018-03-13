@@ -59,7 +59,7 @@ public class NotaController {
     
     @GetMapping("/notas/cliente/{idCliente}/empresa/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
-    public List<Nota> getNotasPorClienteYEmpresa(Long idEmpresa, Long idCliente) {
+    public List<NotaCredito> getNotasCreditoPorClienteYEmpresa(Long idEmpresa, Long idCliente) {
         return notaService.getNotasCreditoPorClienteYEmpresa(idEmpresa, idCliente);
     }
     

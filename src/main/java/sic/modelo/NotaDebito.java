@@ -48,7 +48,7 @@ public abstract class NotaDebito extends Nota implements Serializable {
     public NotaDebito(long idNota, long serie, Factura factura, long nroNota, boolean eliminada,
             TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa, Usuario usuario, String motivo, List<RenglonNotaDebito> renglones, 
             BigDecimal subTotalBruto, BigDecimal iva21Neto, BigDecimal iva105Neto, BigDecimal total, BigDecimal montoNoGravado, long CAE, 
-            Date vencimientoCAE, long numSerieAfip, long numNotaAfip, Recibo recibo, boolean pagado) {
+            Date vencimientoCAE, long numSerieAfip, long numNotaAfip, Recibo recibo) {
 
         super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, usuario,
               motivo, subTotalBruto, iva21Neto, iva105Neto, total, CAE, vencimientoCAE, numSerieAfip, numNotaAfip);

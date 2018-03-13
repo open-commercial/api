@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import javax.imageio.ImageIO;
-import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -22,10 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.BusquedaNotaCriteria;
 import sic.modelo.Cliente;
 import sic.modelo.ComprobanteAFIP;
 import sic.modelo.ConfiguracionDelSistema;
@@ -56,12 +53,15 @@ import sic.service.IEmpresaService;
 import sic.service.IFacturaService;
 import sic.service.INotaService;
 import sic.repository.NotaCreditoRepository;
+import sic.repository.NotaDebitoClienteRepository;
+import sic.repository.NotaDebitoProveedorRepository;
 import sic.repository.NotaDebitoRepository;
 import sic.repository.NotaRepository;
 import sic.service.IAfipService;
 import sic.service.IConfiguracionDelSistemaService;
 import sic.service.ICuentaCorrienteService;
 import sic.service.IProductoService;
+import sic.service.IProveedorService;
 import sic.service.IReciboService;
 import sic.service.IUsuarioService;
 import sic.service.ServiceException;
@@ -75,8 +75,11 @@ public class NotaServiceImpl implements INotaService {
     private final NotaCreditoClienteRepository notaCreditoClienteRepository;
     private final NotaCreditoProveedorRepository notaCreditoProveedorRepository;
     private final NotaDebitoRepository notaDebitoRepository;
+    private final NotaDebitoClienteRepository notaDebitoClienteRepository;
+    private final NotaDebitoProveedorRepository notaDebitoProveedorRepository;
     private final IFacturaService facturaService;
     private final IClienteService clienteService;
+    private final IProveedorService proveedorService;
     private final IEmpresaService empresaService;
     private final IUsuarioService usuarioService;
     private final IProductoService productoService;
@@ -93,8 +96,10 @@ public class NotaServiceImpl implements INotaService {
     @Lazy
     public NotaServiceImpl(NotaRepository notaRepository, NotaCreditoRepository notaDeCreditoRepository,
             NotaCreditoClienteRepository notaCreditoClienteRepository, NotaCreditoProveedorRepository notaCreditoProveedorRepository,
-            NotaDebitoRepository notaDeDebitoRespository, IFacturaService facturaService,
-            IClienteService clienteService, IUsuarioService usuarioService, IProductoService productoService,
+            NotaDebitoRepository notaDeDebitoRespository, NotaDebitoClienteRepository notaDebitoClienteRepository, 
+            NotaDebitoProveedorRepository notaDebitoProveedorRepository, IFacturaService facturaService,
+            IClienteService clienteService, IProveedorService proveedorService, 
+            IUsuarioService usuarioService, IProductoService productoService,
             IEmpresaService empresaService, ICuentaCorrienteService cuentaCorrienteService,
             IReciboService reciboService, IConfiguracionDelSistemaService cds, IAfipService afipService) {
 
@@ -103,8 +108,11 @@ public class NotaServiceImpl implements INotaService {
         this.notaCreditoClienteRepository = notaCreditoClienteRepository;
         this.notaCreditoProveedorRepository = notaCreditoProveedorRepository;
         this.notaDebitoRepository = notaDeDebitoRespository;
+        this.notaDebitoClienteRepository = notaDebitoClienteRepository;
+        this.notaDebitoProveedorRepository = notaDebitoProveedorRepository;
         this.facturaService = facturaService;
         this.clienteService = clienteService;
+        this.proveedorService = proveedorService;
         this.usuarioService = usuarioService;
         this.empresaService = empresaService;
         this.productoService = productoService;
@@ -152,9 +160,15 @@ public class NotaServiceImpl implements INotaService {
     
     @Override
     public boolean existeNotaDebitoPorRecibo(Recibo recibo) {
-        return notaDebitoRepository.existsByReciboAndEliminada(recibo, false);
+        boolean existeNotaDebito = false;
+        if (recibo.getCliente() != null) {
+            existeNotaDebito = notaDebitoClienteRepository.existsByReciboAndEliminada(recibo, false);
+        } else if (recibo.getProveedor() != null) {
+            existeNotaDebito = notaDebitoProveedorRepository.existsByReciboAndEliminada(recibo, false);
+        }
+        return existeNotaDebito;
     }
-    
+
     @Override
     public boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta) {
         return notaCreditoClienteRepository.existsByFacturaVentaAndEliminada(facturaVenta, false);
@@ -165,9 +179,9 @@ public class NotaServiceImpl implements INotaService {
         List<NotaCredito> notasCredito = new ArrayList<>();
         Factura factura = facturaService.getFacturaPorId(idFactura);
         if (factura instanceof FacturaVenta) {
-            notasCredito = notaCreditoClienteRepository.findAllByFacturaVentaAndEliminada((FacturaVenta)factura, false);
+            notasCredito = notaCreditoClienteRepository.findAllByFacturaVentaAndEliminada((FacturaVenta) factura, false);
         } else if (factura instanceof FacturaCompra) {
-            return null;
+            notasCredito = notaCreditoProveedorRepository.findAllByFacturaCompraAndEliminada((FacturaCompra) factura, false);
         }
         return notasCredito;
     }
@@ -197,24 +211,28 @@ public class NotaServiceImpl implements INotaService {
     }
 
     @Override
-    public List<Nota> getNotasCreditoPorClienteYEmpresa(Long idCliente, Long idEmpresa) {
+    public List<NotaCredito> getNotasCreditoPorClienteYEmpresa(Long idCliente, Long idEmpresa) {
         return this.notaCreditoClienteRepository.findAllByClienteAndEmpresaAndEliminada(this.clienteService.getClientePorId(idCliente),
                this.empresaService.getEmpresaPorId(idEmpresa), false);
     }
+    
+    @Override
+    public List<NotaCredito> getNotasCreditoPorProveedorYEmpresa(Long idProveedor, Long idEmpresa) {
+        return this.notaCreditoProveedorRepository.findAllByProveedorAndEmpresaAndEliminada(this.proveedorService.getProveedorPorId(idProveedor),
+                this.empresaService.getEmpresaPorId(idEmpresa), false);
+    }
 
     @Override
-    public long getSiguienteNumeroNotaDebito(Long idEmpresa, TipoDeComprobante tipoDeComprobante) {
+    public long getSiguienteNumeroNotaDebitoCliente(Long idEmpresa, TipoDeComprobante tipoDeComprobante) {
         Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
-        Nota nota = notaDebitoRepository
-                .findTopByEmpresaAndTipoComprobanteAndSerieOrderByNroNotaDesc(empresa, tipoDeComprobante, 
-                configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa).getNroPuntoDeVentaAfip());
-        return (nota == null) ? 1 : nota.getNroNota() + 1;
+        Long numeroNota = notaDebitoClienteRepository.buscarMayorNumNotaDebitoClienteSegunTipo(tipoDeComprobante, configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa).getNroPuntoDeVentaAfip(), idEmpresa);
+        return (numeroNota == null) ? 1 : numeroNota + 1;
     }
     
     @Override
     public long getSiguienteNumeroNotaCreditoCliente(Long idEmpresa, TipoDeComprobante tipoDeComprobante) {
         Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
-        Long numeroNota = notaCreditoClienteRepository.buscarMayorNumNotaCreditoSegunTipo(tipoDeComprobante, configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa).getNroPuntoDeVentaAfip(), idEmpresa);
+        Long numeroNota = notaCreditoClienteRepository.buscarMayorNumNotaCreditoClienteSegunTipo(tipoDeComprobante, configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa).getNroPuntoDeVentaAfip(), idEmpresa);
         return (numeroNota == null) ? 1 : numeroNota + 1;
     }
 
@@ -483,9 +501,9 @@ public class NotaServiceImpl implements INotaService {
         notaDebitoCliente.setRecibo(reciboService.getById(idRecibo));
         notaDebitoCliente.setTipoComprobante(
         this.getTipoDeNotaDebito(this.facturaService.getTipoFacturaVenta(notaDebitoCliente.getEmpresa(), notaDebitoCliente.getCliente())[0]));
-        notaDebitoCliente.setNroNota(this.getSiguienteNumeroNotaDebito(idEmpresa, notaDebitoCliente.getTipoComprobante()));
+        notaDebitoCliente.setNroNota(this.getSiguienteNumeroNotaDebitoCliente(idEmpresa, notaDebitoCliente.getTipoComprobante()));
         this.validarCalculosDebito(notaDebitoCliente);
-        notaDebitoCliente = notaDebitoRepository.save(notaDebitoCliente);
+        notaDebitoCliente = notaDebitoClienteRepository.save(notaDebitoCliente);
         cuentaCorrienteService.asentarEnCuentaCorriente(notaDebitoCliente, TipoDeOperacion.ALTA);
         LOGGER.warn("La Nota " + notaDebitoCliente + " se guardó correctamente.");
         return notaDebitoCliente;
@@ -823,7 +841,7 @@ public class NotaServiceImpl implements INotaService {
 
     @Override
     public BigDecimal calcularTotalCreditoClientePorFacturaVenta(FacturaVenta facturaVenta) {
-        BigDecimal credito = notaCreditoClienteRepository.getTotalNotasCreditoPorFactura(facturaVenta);
+        BigDecimal credito = notaCreditoClienteRepository.getTotalNotasCreditoPorFacturaVenta(facturaVenta);
         return (credito == null) ? BigDecimal.ZERO : credito;
     }
    

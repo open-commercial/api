@@ -2,14 +2,11 @@ package sic.service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import org.springframework.data.domain.Page;
-import sic.modelo.BusquedaNotaCriteria;
 import sic.modelo.Factura;
 import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
 import sic.modelo.NotaCredito;
-import sic.modelo.NotaCreditoCliente;
 import sic.modelo.Recibo;
 import sic.modelo.RenglonFactura;
 import sic.modelo.RenglonNotaCredito;
@@ -42,9 +39,11 @@ public interface INotaService {
 
     List<NotaCredito> getNotasCreditoPorFactura(Long idFactura);
 
-    List<Nota> getNotasCreditoPorClienteYEmpresa(Long idCliente, Long idEmpresa);
+    List<NotaCredito> getNotasCreditoPorClienteYEmpresa(Long idCliente, Long idEmpresa);
+    
+    List<NotaCredito> getNotasCreditoPorProveedorYEmpresa(Long idProveedor, Long idEmpresa);
 
-    long getSiguienteNumeroNotaDebito(Long idEmpresa, TipoDeComprobante tipoComprobante);
+    long getSiguienteNumeroNotaDebitoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
 
     long getSiguienteNumeroNotaCreditoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
 

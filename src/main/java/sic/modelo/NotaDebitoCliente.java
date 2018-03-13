@@ -29,10 +29,10 @@ public class NotaDebitoCliente extends NotaDebito implements Serializable {
     public NotaDebitoCliente(long idNota, long serie, FacturaVenta facturaVenta, long nroNota, boolean eliminada,
             TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa, Usuario usuario, String motivo, List<RenglonNotaDebito> renglones, 
             BigDecimal subTotalBruto, BigDecimal iva21Neto, BigDecimal iva105Neto, BigDecimal total, BigDecimal montoNoGravado, long CAE, 
-            Date vencimientoCAE, long numSerieAfip, long numNotaAfip, Recibo recibo, boolean pagado, Cliente cliente) {
+            Date vencimientoCAE, long numSerieAfip, long numNotaAfip, Recibo recibo, Cliente cliente) {
 
         super(idNota, serie, facturaVenta, nroNota, eliminada, tipoDeComprobante, fecha, empresa, usuario, motivo, renglones,
-                subTotalBruto, iva21Neto, iva105Neto, total, montoNoGravado, CAE, vencimientoCAE, numSerieAfip, numNotaAfip, recibo, pagado);
+                subTotalBruto, iva21Neto, iva105Neto, total, montoNoGravado, CAE, vencimientoCAE, numSerieAfip, numNotaAfip, recibo);
         this.cliente = cliente;
     }
     
