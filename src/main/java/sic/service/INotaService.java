@@ -15,7 +15,9 @@ import sic.modelo.TipoDeComprobante;
 
 public interface INotaService {
 
-    Nota guardarNota(Nota nota, long idEmpresa, long idCliente, long idUsuario, Long idRecibo, Long idFactura, boolean modificarStock);
+    Nota guardarNotaCliente(Nota nota, long idEmpresa, long idCliente, long idUsuario, Long idRecibo, Long idFactura, boolean modificarStock);
+    
+    Nota guardarNotaProveedor(Nota nota, long idEmpresa, long idProveedor, long idUsuario, Long idRecibo, Long idFactura, boolean modificarStock);
 
     Nota autorizarNota(Nota nota);
     
@@ -38,10 +40,6 @@ public interface INotaService {
     boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta);
 
     List<NotaCredito> getNotasCreditoPorFactura(Long idFactura);
-
-    List<NotaCredito> getNotasCreditoPorClienteYEmpresa(Long idCliente, Long idEmpresa);
-    
-    List<NotaCredito> getNotasCreditoPorProveedorYEmpresa(Long idProveedor, Long idEmpresa);
 
     long getSiguienteNumeroNotaDebitoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
 

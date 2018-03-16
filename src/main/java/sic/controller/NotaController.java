@@ -57,12 +57,6 @@ public class NotaController {
         return notaService.existeNotaDebitoPorRecibo(reciboService.getById(idRecibo));
     }
     
-    @GetMapping("/notas/cliente/{idCliente}/empresa/{idEmpresa}")
-    @ResponseStatus(HttpStatus.OK)
-    public List<NotaCredito> getNotasCreditoPorClienteYEmpresa(Long idEmpresa, Long idCliente) {
-        return notaService.getNotasCreditoPorClienteYEmpresa(idEmpresa, idCliente);
-    }
-    
     @GetMapping("/notas/tipos")
     @ResponseStatus(HttpStatus.OK)
     public TipoDeComprobante[] getTipoNota(@RequestParam long idCliente,
@@ -84,23 +78,44 @@ public class NotaController {
     
     @PostMapping("/notas/credito/empresa/{idEmpresa}/cliente/{idCliente}/usuario/{idUsuario}/factura/{idFactura}")
     @ResponseStatus(HttpStatus.CREATED)
-    public Nota guardarNotaCredito(@RequestBody NotaCredito nota,
+    public Nota guardarNotaCreditoCliente(@RequestBody NotaCredito nota,
                                    @PathVariable long idEmpresa,
                                    @PathVariable long idCliente,
                                    @PathVariable long idUsuario,
                                    @PathVariable long idFactura, 
                                    @RequestParam boolean modificarStock) {
-        return notaService.guardarNota(nota, idEmpresa, idCliente, idUsuario, null, idFactura, modificarStock);
+        return notaService.guardarNotaCliente(nota, idEmpresa, idCliente, idUsuario, null, idFactura, modificarStock);
     }
     
     @PostMapping("/notas/debito/empresa/{idEmpresa}/cliente/{idCliente}/usuario/{idUsuario}/recibo/{idRecibo}")
     @ResponseStatus(HttpStatus.CREATED)
-    public Nota guardarNotaDebito(@RequestBody NotaDebito nota,
+    public Nota guardarNotaDebitoCliente(@RequestBody NotaDebito nota,
                                   @PathVariable long idEmpresa,
                                   @PathVariable long idCliente,
                                   @PathVariable long idUsuario,
                                   @PathVariable long idRecibo) {
-        return notaService.guardarNota(nota, idEmpresa, idCliente, idUsuario, idRecibo, null, false);
+        return notaService.guardarNotaCliente(nota, idEmpresa, idCliente, idUsuario, idRecibo, null, false);
+    }
+    
+    @PostMapping("/notas/credito/empresa/{idEmpresa}/proveedor/{idProveedor}/usuario/{idUsuario}/factura/{idFactura}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Nota guardarNotaCreditoProveedor(@RequestBody NotaCredito nota,
+                                   @PathVariable long idEmpresa,
+                                   @PathVariable long idProveedor,
+                                   @PathVariable long idUsuario,
+                                   @PathVariable long idFactura, 
+                                   @RequestParam boolean modificarStock) {
+        return notaService.guardarNotaProveedor(nota, idEmpresa, idProveedor, idUsuario, null, idFactura, modificarStock);
+    }
+    
+    @PostMapping("/notas/debito/empresa/{idEmpresa}/proveedor/{idProveedor}/usuario/{idUsuario}/recibo/{idRecibo}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Nota guardarNotaDebitoProveedor(@RequestBody NotaDebito nota,
+                                  @PathVariable long idEmpresa,
+                                  @PathVariable long idProveedor,
+                                  @PathVariable long idUsuario,
+                                  @PathVariable long idRecibo) {
+        return notaService.guardarNotaProveedor(nota, idEmpresa, idProveedor, idUsuario, idRecibo, null, false);
     }
 
     @GetMapping("/notas/{idNota}/reporte")

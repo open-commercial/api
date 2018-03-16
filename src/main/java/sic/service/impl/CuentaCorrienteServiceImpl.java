@@ -263,7 +263,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         } else if (nota instanceof NotaCreditoProveedor || nota instanceof NotaDebitoProveedor) {
             if (nota instanceof NotaCreditoProveedor) {
                 cc = this.getCuentaCorrientePorProveedor(((NotaCreditoProveedor) nota).getProveedor());
-            } else if (nota instanceof NotaDebitoCliente) {
+            } else if (nota instanceof NotaDebitoProveedor) {
                 cc = this.getCuentaCorrientePorProveedor(((NotaDebitoProveedor) nota).getProveedor());
             }
         }
