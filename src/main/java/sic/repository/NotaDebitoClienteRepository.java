@@ -18,10 +18,10 @@ public interface NotaDebitoClienteRepository extends NotaDebitoRepository<NotaDe
     
     List<NotaDebitoCliente> findAllByClienteAndEmpresaAndEliminada(Cliente cliente, Empresa empresa, boolean eliminada);
     
-    @Query("SELECT max(ncp.nroNota) FROM NotaDebitoCliente ncp WHERE ncp.tipoComprobante = :tipoComprobante AND ncp.serie = :serie AND ncp.empresa.id_Empresa = :idEmpresa")
+    @Query("SELECT max(ndc.nroNota) FROM NotaDebitoCliente ndc WHERE ndc.tipoComprobante = :tipoComprobante AND ndc.serie = :serie AND ndc.empresa.id_Empresa = :idEmpresa")
     Long buscarMayorNumNotaDebitoClienteSegunTipo(@Param("tipoComprobante") TipoDeComprobante tipoComprobante, @Param("serie") long serie, @Param("idEmpresa") long idEmpresa);
     
-    @Query("SELECT ncc FROM NotaCreditoCliente ncc WHERE ncc.idNota = :idNotaCreditoCliente AND ncc.eliminada = false")
+    @Query("SELECT ndc FROM NotaDebitoCliente ndc WHERE ndc.idNota = :idNotaCreditoCliente AND ndc.eliminada = false")
     @Override
     NotaDebitoCliente getById(@Param("idNotaCreditoCliente") long idNotaCreditoCliente);
     

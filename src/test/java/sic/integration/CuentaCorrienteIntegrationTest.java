@@ -316,7 +316,7 @@ public class CuentaCorrienteIntegrationTest {
         notaDebitoCliente.setTotal(new BigDecimal("6113.5"));
         notaDebitoCliente.setUsuario(credencial);
         restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1/recibo/1", notaDebitoCliente, NotaDebitoCliente.class);
-//        restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
+        restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
                 restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", BigDecimal.class)
         .compareTo(new BigDecimal("-6113.5")) == 0);
@@ -369,7 +369,7 @@ public class CuentaCorrienteIntegrationTest {
                 + "&iva21Neto=" + notaCredito.getIva21Neto()
                 + "&iva105Neto=" + notaCredito.getIva105Neto(), BigDecimal.class));
         restTemplate.postForObject(apiPrefix + "/notas/credito/empresa/1/cliente/1/usuario/1/factura/1?modificarStock=true", notaCredito, NotaCredito.class);
-//        restTemplate.getForObject(apiPrefix + "/notas/2/reporte", byte[].class);
+        restTemplate.getForObject(apiPrefix + "/notas/2/reporte", byte[].class);
         uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,4";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
         assertTrue("El saldo de la cuenta corriente no es el esperado", 

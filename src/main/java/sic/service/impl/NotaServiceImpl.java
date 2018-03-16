@@ -258,13 +258,23 @@ public class NotaServiceImpl implements INotaService {
     }
 
     @Override
-    public List<RenglonNotaCredito> getRenglonesDeNotaCredito(Long idNota) {
-        return this.notaCreditoRepository.getById(idNota).getRenglonesNotaCredito();
+    public List<RenglonNotaCredito> getRenglonesDeNotaCreditoCliente(Long idNota) {
+        return this.notaCreditoClienteRepository.getById(idNota).getRenglonesNotaCredito();
     }
 
     @Override
-    public List<RenglonNotaDebito> getRenglonesDeNotaDebito(Long idNota) {
-        return this.notaDebitoRepository.getById(idNota).getRenglonesNotaDebito();
+    public List<RenglonNotaDebito> getRenglonesDeNotaDebitoCliente(Long idNota) {
+        return this.notaDebitoClienteRepository.getById(idNota).getRenglonesNotaDebito();
+    }
+    
+    @Override
+    public List<RenglonNotaCredito> getRenglonesDeNotaCreditoProveedor(Long idNota) {
+        return this.notaCreditoProveedorRepository.getById(idNota).getRenglonesNotaCredito();
+    }
+
+    @Override
+    public List<RenglonNotaDebito> getRenglonesDeNotaDebitoProveedor(Long idNota) {
+        return this.notaDebitoProveedorRepository.getById(idNota).getRenglonesNotaDebito();
     }
 
     private void validarNota(Nota nota, long idEmpresa, long idUsuario) {
@@ -661,12 +671,12 @@ public class NotaServiceImpl implements INotaService {
         Map params = new HashMap();
         if (nota instanceof NotaCredito) {
             isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/NotaCredito.jasper");
-            List<RenglonNotaCredito> renglones = this.getRenglonesDeNotaCredito(nota.getIdNota());
+            List<RenglonNotaCredito> renglones = this.getRenglonesDeNotaCreditoCliente(nota.getIdNota());
             ds = new JRBeanCollectionDataSource(renglones);
             params.put("notaCredito", (NotaCredito) nota);
         } else {
             isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/NotaDebito.jasper");
-            List<RenglonNotaDebito> renglones = this.getRenglonesDeNotaDebito(nota.getIdNota());
+            List<RenglonNotaDebito> renglones = this.getRenglonesDeNotaDebitoCliente(nota.getIdNota());
             ds = new JRBeanCollectionDataSource(renglones);
             params.put("notaDebito", (NotaDebito) nota);
         }
@@ -753,11 +763,11 @@ public class NotaServiceImpl implements INotaService {
         Nota nota = this.getNotaPorId(idNota);
         BigDecimal ivaNeto = BigDecimal.ZERO;
         if (nota instanceof NotaCredito) {
-            for (RenglonNotaCredito r : this.getRenglonesDeNotaCredito(nota.getIdNota())) {
+            for (RenglonNotaCredito r : this.getRenglonesDeNotaCreditoCliente(nota.getIdNota())) {
                 ivaNeto =  ivaNeto.add(r.getIvaPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP).multiply(r.getImporte()));
             }
         } else {
-            for (RenglonNotaCredito r : this.getRenglonesDeNotaCredito(nota.getIdNota())) {
+            for (RenglonNotaCredito r : this.getRenglonesDeNotaCreditoCliente(nota.getIdNota())) {
                 ivaNeto = ivaNeto.add(r.getIvaNeto());
             }
         }
