@@ -11,7 +11,7 @@
 -- NOTA CREDITO CLIENTE
  INSERT into new_schema.notacreditocliente(idNota, id_Cliente, id_Factura) 
  select idNota, id_Cliente, id_Factura from
- (SELECT nota.idNota, id_Cliente, id_Factura from nota inner join notacredito on nota.idNota = notacredito.idNota) as notacreditocliente;
+ (SELECT nota.idNota, id_Cliente, id_Factura from ykcojs0liv7ir9od.nota inner join ykcojs0liv7ir9od.notacredito on nota.idNota = notacredito.idNota) as notacreditocliente;
 -- NOTA DEBITO
  INSERT into new_schema.notadebito(montoNoGravado, idNota, idRecibo) 
  select montoNoGravado, idNota, idRecibo from
@@ -20,4 +20,4 @@
 -- NOTA DEBITO CLIENTE
  INSERT into new_schema.notadebitocliente(idNota, id_Cliente) 
  select idNota, id_Cliente from
- (SELECT nota.idNota, id_Cliente FROM ykcojs0liv7ir9od.nota inner join notadebito on nota.idNota = notadebito.idNota) as notadebitocliente;
+ (SELECT nota.idNota, id_Cliente FROM ykcojs0liv7ir9od.nota inner join ykcojs0liv7ir9od.notadebito on nota.idNota = notadebito.idNota) as notadebitocliente;

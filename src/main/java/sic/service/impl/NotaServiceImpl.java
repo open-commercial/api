@@ -301,14 +301,6 @@ public class NotaServiceImpl implements INotaService {
                         throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                                 .getString("mensaje_nota_fecha_incorrecta"));
                     }
-                    if (!((NotaCreditoCliente) nota).getCliente().equals(((NotaCreditoCliente) nota).getFacturaVenta().getCliente())) {
-                        throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                                .getString("mensaje_nota_cliente_incorrecto"));
-                    }
-                    if (!nota.getEmpresa().equals(((NotaCreditoCliente) nota).getFacturaVenta().getEmpresa())) {
-                        throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                                .getString("mensaje_nota_empresa_incorrecta"));
-                    }
                 }
             }
         } else if (nota.getFecha() == null) {
@@ -542,6 +534,7 @@ public class NotaServiceImpl implements INotaService {
     private NotaDebitoProveedor guardarNotaDebitoProveedor(NotaDebitoProveedor notaDebitoProveedor, Long idRecibo, Proveedor proveedor) {
         notaDebitoProveedor.setProveedor(proveedor);
         notaDebitoProveedor.setRecibo(reciboService.getById(idRecibo));
+        notaDebitoProveedor.setTipoComprobante(this.getTipoDeNotaDebito(this.facturaService.getTipoFacturaCompra(notaDebitoProveedor.getEmpresa(), notaDebitoProveedor.getProveedor())[0]));
         this.validarCalculosDebito(notaDebitoProveedor);
         notaDebitoProveedor = notaDebitoProveedorRepository.save(notaDebitoProveedor);
         cuentaCorrienteService.asentarEnCuentaCorriente(notaDebitoProveedor, TipoDeOperacion.ALTA);
