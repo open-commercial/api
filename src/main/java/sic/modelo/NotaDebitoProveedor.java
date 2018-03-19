@@ -26,12 +26,12 @@ public class NotaDebitoProveedor extends NotaDebito implements Serializable {
     public NotaDebitoProveedor() {
     }
 
-    public NotaDebitoProveedor(long idNota, long serie, FacturaVenta facturaVenta, long nroNota, boolean eliminada,
+    public NotaDebitoProveedor(long idNota, long serie, long nroNota, boolean eliminada,
             TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa, Usuario usuario, String motivo, List<RenglonNotaDebito> renglones,
             BigDecimal subTotalBruto, BigDecimal iva21Neto, BigDecimal iva105Neto, BigDecimal total, BigDecimal montoNoGravado, long CAE,
             Date vencimientoCAE, long numSerieAfip, long numNotaAfip, Recibo recibo, Proveedor proveedor) {
 
-        super(idNota, serie, facturaVenta, nroNota, eliminada, tipoDeComprobante, fecha, empresa, usuario, motivo, renglones,
+        super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, usuario, motivo, renglones,
                 subTotalBruto, iva21Neto, iva105Neto, total, montoNoGravado, CAE, vencimientoCAE, numSerieAfip, numNotaAfip, recibo);
         this.proveedor = proveedor;
     }
