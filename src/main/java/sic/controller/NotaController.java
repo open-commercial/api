@@ -66,25 +66,25 @@ public class NotaController {
     
     @GetMapping("/notas/renglones/credito/clientes/{idNotaCredito}")
     @ResponseStatus(HttpStatus.OK)
-    public List<RenglonNotaCredito> getRenglonesDeNotaCreditoCliente(@RequestParam long idNotaCredito) {
+    public List<RenglonNotaCredito> getRenglonesDeNotaCreditoCliente(@PathVariable long idNotaCredito) {
         return notaService.getRenglonesDeNotaCreditoCliente(idNotaCredito);
     }
     
     @GetMapping("/notas/renglones/debito/clientes/{idNotaDebito}")
     @ResponseStatus(HttpStatus.OK)
-    public List<RenglonNotaDebito> getRenglonesDeNotaDebitoCliente(@RequestParam long idNotaDebito) {
+    public List<RenglonNotaDebito> getRenglonesDeNotaDebitoCliente(@PathVariable long idNotaDebito) {
         return notaService.getRenglonesDeNotaDebitoCliente(idNotaDebito);
     }
     
     @GetMapping("/notas/renglones/credito/proveedores/{idNotaCredito}")
     @ResponseStatus(HttpStatus.OK)
-    public List<RenglonNotaCredito> getRenglonesDeNotaCreditoProveedor(@RequestParam long idNotaCredito) {
+    public List<RenglonNotaCredito> getRenglonesDeNotaCreditoProveedor(@PathVariable long idNotaCredito) {
         return notaService.getRenglonesDeNotaCreditoProveedor(idNotaCredito);
     }
     
     @GetMapping("/notas/renglones/debito/proveedores/{idNotaDebito}")
     @ResponseStatus(HttpStatus.OK)
-    public List<RenglonNotaDebito> getRenglonesDeNotaDebitoProveedor(@RequestParam long idNotaDebito) {
+    public List<RenglonNotaDebito> getRenglonesDeNotaDebitoProveedor(@PathVariable long idNotaDebito) {
         return notaService.getRenglonesDeNotaDebitoProveedor(idNotaDebito);
     }
     
