@@ -16,7 +16,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -94,7 +93,6 @@ public class RenglonCuentaCorriente implements Serializable {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Recibo recibo;
     
-    @Transient
     private Long CAE;
     
     @Formula(value = "(SELECT SUM(r.monto) "
