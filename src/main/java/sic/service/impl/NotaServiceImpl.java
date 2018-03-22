@@ -299,12 +299,19 @@ public class NotaServiceImpl implements INotaService {
                     .getString("mensaje_nota_de_empresa_vacia"));
         }
         if (nota.getFecha() != null) {
-            if (nota instanceof NotaCredito) {
-                if (nota instanceof NotaCreditoCliente) {
-                    if (nota.getFecha().compareTo(((NotaCreditoCliente) nota).getFacturaVenta().getFecha()) <= 0) {
-                        throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                                .getString("mensaje_nota_fecha_incorrecta"));
-                    }
+            if (nota instanceof NotaCreditoCliente) {
+                if (nota.getFecha().compareTo(((NotaCreditoCliente) nota).getFacturaVenta().getFecha()) <= 0) {
+                    throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                            .getString("mensaje_nota_fecha_incorrecta"));
+                }
+                if (nota.getCAE() != 0l) {
+                    throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                            .getString("mensaje_nota_cliente_CAE"));
+                }
+            } else if (nota instanceof NotaDebitoCliente) {
+                if (nota.getCAE() != 0l) {
+                    throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                            .getString("mensaje_nota_cliente_CAE"));
                 }
             }
         } else if (nota.getFecha() == null) {
@@ -723,11 +730,17 @@ public class NotaServiceImpl implements INotaService {
     public void eliminarNota(long[] idsNota) {
         for (long idNota : idsNota) {
             Nota nota = this.getNotaPorId(idNota);
-            if (nota != null && nota.getCAE() == 0l) {
-                if (nota instanceof NotaCreditoCliente) {
-                    NotaCredito nc = (NotaCredito) nota;
-                    if (nc.isModificaStock()) {
-                        this.actualizarStock(nc.getRenglonesNotaCredito(), TipoDeOperacion.ALTA);
+            if (nota != null) {
+                if (nota instanceof NotaCreditoCliente || nota instanceof NotaDebitoCliente) {
+                    if (nota.getCAE() != 0l) {
+                        throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                                .getString("mensaje_eliminar_nota_aprobada"));
+                    }
+                    if (nota instanceof NotaCreditoCliente) {
+                        NotaCredito nc = (NotaCredito) nota;
+                        if (nc.isModificaStock()) {
+                            this.actualizarStock(nc.getRenglonesNotaCredito(), TipoDeOperacion.ALTA);
+                        }
                     }
                 } else if (nota instanceof NotaCreditoProveedor) {
                     NotaCredito nc = (NotaCredito) nota;
@@ -739,9 +752,6 @@ public class NotaServiceImpl implements INotaService {
                 this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ELIMINACION);
                 notaRepository.save(nota);
                 LOGGER.warn("La Nota " + nota + " se eliminó correctamente.");
-            } else {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_eliminar_nota_aprobada"));
             }
         }
     }
