@@ -58,4 +58,14 @@ public class RenglonCuentaCorrienteServiceImpl implements IRenglonCuentaCorrient
         return renglonCuentaCorrienteRepository.getFechaUltimoMovimiento(idCuentaCorriente);
     }
 
+    @Override
+    public int updateCAEFactura(long idFactura, long CAE) {
+        return renglonCuentaCorrienteRepository.updateCAEFactura(idFactura, CAE);
+    }
+
+    @Override
+    public int updateCAENota(long idNota, long CAE) {
+        return renglonCuentaCorrienteRepository.updateCAENota(idNota, CAE);
+    }
+
 }

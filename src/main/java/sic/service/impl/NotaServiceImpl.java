@@ -56,6 +56,7 @@ import sic.service.IConfiguracionDelSistemaService;
 import sic.service.ICuentaCorrienteService;
 import sic.service.IProductoService;
 import sic.service.IReciboService;
+import sic.service.IRenglonCuentaCorrienteService;
 import sic.service.IUsuarioService;
 import sic.service.ServiceException;
 import sic.util.FormatterFechaHora;
@@ -73,6 +74,7 @@ public class NotaServiceImpl implements INotaService {
     private final IProductoService productoService;
     private final ICuentaCorrienteService cuentaCorrienteService;
     private final IReciboService reciboService;
+    private final IRenglonCuentaCorrienteService renglonCuentaCorrienteService;
     private final IConfiguracionDelSistemaService configuracionDelSistemaService;
     private final IAfipService afipService;
     private final static BigDecimal IVA_21 = new BigDecimal("21");
@@ -86,7 +88,8 @@ public class NotaServiceImpl implements INotaService {
             NotaDebitoRepository notaDeDebitoRespository, IFacturaService facturaService,
             IClienteService clienteService, IUsuarioService usuarioService, IProductoService productoService,
             IEmpresaService empresaService, ICuentaCorrienteService cuentaCorrienteService,
-            IReciboService reciboService, IConfiguracionDelSistemaService cds, IAfipService afipService) {
+            IReciboService reciboService, IConfiguracionDelSistemaService cds, IAfipService afipService,
+            IRenglonCuentaCorrienteService renglonCuentaCorrienteService) {
 
         this.notaRepository = notaRepository;
         this.notaCreditoRepository = notaDeCreditoRepository;
@@ -100,6 +103,7 @@ public class NotaServiceImpl implements INotaService {
         this.reciboService = reciboService;
         this.configuracionDelSistemaService = cds;
         this.afipService = afipService;
+        this.renglonCuentaCorrienteService = renglonCuentaCorrienteService;
     }
 
     @Override
@@ -496,6 +500,7 @@ public class NotaServiceImpl implements INotaService {
         nota.setVencimientoCAE(comprobante.getVencimientoCAE());
         nota.setNumSerieAfip(comprobante.getNumSerieAfip());
         nota.setNumNotaAfip(comprobante.getNumFacturaAfip());
+        renglonCuentaCorrienteService.updateCAENota(nota.getIdNota(), comprobante.getCAE());
         return nota;
     }
 

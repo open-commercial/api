@@ -25,4 +25,8 @@ public interface IRenglonCuentaCorrienteService {
     
     Date getFechaUltimoMovimiento(long idCuentaCorriente);
     
+    int updateCAEFactura(long idFactura, long CAE);
+    
+    int updateCAENota(long idNota, long CAE);
+    
 }
