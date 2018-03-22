@@ -46,9 +46,9 @@ public abstract class NotaDTO implements Serializable {
     private BigDecimal iva21Neto = new BigDecimal("1365");     
     private BigDecimal iva105Neto = BigDecimal.ZERO;
     private BigDecimal total = new BigDecimal("7865");    
-    private long CAE = 1l;
+    private long CAE = 0l;
     private Date vencimientoCAE = new Date();   
-    private long numSerieAfip = 1l;
-    private long numFacturaAfip= 000000011l;   
+    private long numSerieAfip = 0l;
+    private long numFacturaAfip= 000000000l;   
     
 }

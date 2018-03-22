@@ -381,6 +381,9 @@ public class CuentaCorrienteIntegrationTest {
         assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(2).getSaldo() == -6113.5);
         assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(3).getSaldo() == 0);
         assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(4).getSaldo() == -5992.5);
+        restTemplate.delete(apiPrefix + "/notas?idsNota=2");
+        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=5,4";
+        Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
     }
 
     @Test
