@@ -13,6 +13,8 @@ import afip.wsfe.wsdl.FECAEResponse;
 import afip.wsfe.wsdl.FECAESolicitar;
 import afip.wsfe.wsdl.FECompUltimoAutorizado;
 import afip.wsfe.wsdl.FERecuperaLastCbteResponse;
+
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.math.BigDecimal;
@@ -35,6 +37,7 @@ import sic.modelo.Empresa;
 import sic.modelo.TipoDeComprobante;
 import sic.service.BusinessServiceException;
 import sic.service.IConfiguracionDelSistemaService;
+import sic.service.ServiceException;
 import sic.util.FormatterFechaHora;
 
 @Service
@@ -72,6 +75,9 @@ public class AfipServiceImpl implements IAfipService {
         } catch (WebServiceClientException ex) {
             LOGGER.error(ex.getMessage());            
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_token_wsaa_error"));
+        } catch (IOException ex) {
+            LOGGER.error(ex.getMessage());
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_xml"));
         }
         try {
             Reader tokenReader = new StringReader(loginTicketResponse);
@@ -122,7 +128,7 @@ public class AfipServiceImpl implements IAfipService {
                 msjError += response.getFeDetResp().getFECAEDetResponse().get(0).getObservaciones().getObs().get(0).getMsg();
                 LOGGER.error(msjError);
                 throw new BusinessServiceException(msjError);
-            }            
+            }
             long cae = Long.valueOf(response.getFeDetResp().getFECAEDetResponse().get(0).getCAE());
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             comprobante.setCAE(cae);
@@ -135,6 +141,9 @@ public class AfipServiceImpl implements IAfipService {
         } catch (ParseException ex) {
             LOGGER.error(ex.getMessage());
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_fecha"));
+        } catch (IOException ex) {
+            LOGGER.error(ex.getMessage());
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_xml"));
         }
     }
     
@@ -172,6 +181,9 @@ public class AfipServiceImpl implements IAfipService {
         } catch (WebServiceClientException ex) {
             LOGGER.error(ex.getMessage());            
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_siguiente_nro_comprobante_error"));
+        } catch (IOException ex) {
+            LOGGER.error(ex.getMessage());
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_xml"));
         }
     }
     

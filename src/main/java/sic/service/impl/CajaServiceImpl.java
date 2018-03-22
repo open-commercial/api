@@ -263,7 +263,7 @@ public class CajaServiceImpl implements ICajaService {
             fechaHoraCaja.setTime(ultimaCajaDeEmpresa.getFechaApertura());
             LocalDate fechaCaja = LocalDate.of(fechaHoraCaja.get(Calendar.YEAR), fechaHoraCaja.get(Calendar.MONTH) + 1, fechaHoraCaja.get(Calendar.DAY_OF_MONTH));
             if (fechaCaja.compareTo(fechaActual) < 0) {
-                this.cerrarCaja(ultimaCajaDeEmpresa.getId_Caja(), this.getTotalCaja(ultimaCajaDeEmpresa, true), ultimaCajaDeEmpresa.getUsuarioAbreCaja().getId_Usuario(), true);
+                this.cerrarCaja(ultimaCajaDeEmpresa.getId_Caja(), this.getTotalCaja(ultimaCajaDeEmpresa, false), ultimaCajaDeEmpresa.getUsuarioAbreCaja().getId_Usuario(), true);
             }
         });
     }
