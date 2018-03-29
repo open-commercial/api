@@ -721,6 +721,7 @@ DROP TABLE IF EXISTS `rengloncuentacorriente`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `rengloncuentacorriente` (
   `id_renglon_cuenta_corriente` bigint(20) NOT NULL AUTO_INCREMENT,
+  `CAE` bigint(20) DEFAULT NULL,
   `descripcion` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `eliminado` bit(1) NOT NULL,
   `fecha` datetime NOT NULL,
@@ -941,4 +942,4 @@ CREATE TABLE `usuario` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-03-18 21:35:03
+-- Dump completed on 2018-03-28 21:25:47
