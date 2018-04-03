@@ -58,6 +58,12 @@ public class UsuarioController {
        usuarioService.actualizar(usuario);
     }
     
+    @PutMapping("/usuarios/{idUsuario}/empresas/{idEmpresa}")
+    @ResponseStatus(HttpStatus.OK)
+    public void actualizarIdEmpresaDeUsuario(@PathVariable long idUsuario, @PathVariable long idEmpresa) {
+       usuarioService.actualizarIdEmpresaDeUsuario(idUsuario, idEmpresa);
+    }
+    
     @DeleteMapping("/usuarios/{idUsuario}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable long idUsuario) {
