@@ -475,7 +475,7 @@ public class NotaServiceImpl implements INotaService {
                 nota = notaCreditoClienteRepository.save(notaCredito);
                 this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ALTA);
                 LOGGER.warn("La Nota " + notaCredito + " se guardó correctamente.");
-                return notaCredito;
+                return nota;
 
             }
         } else if (nota instanceof NotaDebitoCliente) {
