@@ -53,10 +53,8 @@ import sic.service.IClienteService;
 import sic.service.IEmpresaService;
 import sic.service.IFacturaService;
 import sic.service.INotaService;
-import sic.repository.NotaCreditoRepository;
 import sic.repository.NotaDebitoClienteRepository;
 import sic.repository.NotaDebitoProveedorRepository;
-import sic.repository.NotaDebitoRepository;
 import sic.repository.NotaRepository;
 import sic.service.IAfipService;
 import sic.service.IConfiguracionDelSistemaService;
@@ -64,7 +62,6 @@ import sic.service.ICuentaCorrienteService;
 import sic.service.IProductoService;
 import sic.service.IProveedorService;
 import sic.service.IReciboService;
-import sic.service.IRenglonCuentaCorrienteService;
 import sic.service.IUsuarioService;
 import sic.service.ServiceException;
 import sic.util.FormatterFechaHora;
@@ -73,10 +70,8 @@ import sic.util.FormatterFechaHora;
 public class NotaServiceImpl implements INotaService {
 
     private final NotaRepository notaRepository;
-    private final NotaCreditoRepository notaCreditoRepository;
     private final NotaCreditoClienteRepository notaCreditoClienteRepository;
     private final NotaCreditoProveedorRepository notaCreditoProveedorRepository;
-    private final NotaDebitoRepository notaDebitoRepository;
     private final NotaDebitoClienteRepository notaDebitoClienteRepository;
     private final NotaDebitoProveedorRepository notaDebitoProveedorRepository;
     private final IFacturaService facturaService;
@@ -87,7 +82,6 @@ public class NotaServiceImpl implements INotaService {
     private final IProductoService productoService;
     private final ICuentaCorrienteService cuentaCorrienteService;
     private final IReciboService reciboService;
-    private final IRenglonCuentaCorrienteService renglonCuentaCorrienteService;
     private final IConfiguracionDelSistemaService configuracionDelSistemaService;
     private final IAfipService afipService;
     private final static BigDecimal IVA_21 = new BigDecimal("21");
@@ -97,21 +91,18 @@ public class NotaServiceImpl implements INotaService {
 
     @Autowired
     @Lazy
-    public NotaServiceImpl(NotaRepository notaRepository, NotaCreditoRepository notaDeCreditoRepository,
-            NotaCreditoClienteRepository notaCreditoClienteRepository, NotaCreditoProveedorRepository notaCreditoProveedorRepository,
-            NotaDebitoRepository notaDeDebitoRespository, NotaDebitoClienteRepository notaDebitoClienteRepository, 
+    public NotaServiceImpl(NotaRepository notaRepository, NotaCreditoClienteRepository notaCreditoClienteRepository,
+            NotaCreditoProveedorRepository notaCreditoProveedorRepository,
+            NotaDebitoClienteRepository notaDebitoClienteRepository,
             NotaDebitoProveedorRepository notaDebitoProveedorRepository, IFacturaService facturaService,
             IClienteService clienteService, IProveedorService proveedorService, 
             IUsuarioService usuarioService, IProductoService productoService,
             IEmpresaService empresaService, ICuentaCorrienteService cuentaCorrienteService,
-            IReciboService reciboService, IConfiguracionDelSistemaService cds, IAfipService afipService,
-            IRenglonCuentaCorrienteService renglonCuentaCorrienteService) {
+            IReciboService reciboService, IConfiguracionDelSistemaService cds, IAfipService afipService) {
 
         this.notaRepository = notaRepository;
-        this.notaCreditoRepository = notaDeCreditoRepository;
         this.notaCreditoClienteRepository = notaCreditoClienteRepository;
         this.notaCreditoProveedorRepository = notaCreditoProveedorRepository;
-        this.notaDebitoRepository = notaDeDebitoRespository;
         this.notaDebitoClienteRepository = notaDebitoClienteRepository;
         this.notaDebitoProveedorRepository = notaDebitoProveedorRepository;
         this.facturaService = facturaService;
@@ -124,7 +115,6 @@ public class NotaServiceImpl implements INotaService {
         this.reciboService = reciboService;
         this.configuracionDelSistemaService = cds;
         this.afipService = afipService;
-        this.renglonCuentaCorrienteService = renglonCuentaCorrienteService;
     }
 
     @Override
