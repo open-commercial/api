@@ -5,8 +5,8 @@
  tipoComprobante, total, vencimientoCAE, id_Empresa, id_Usuario from
  (SELECT * FROM ykcojs0liv7ir9od.nota) as nota;
 -- NOTA CREDITO
- INSERT into new_schema.notacredito(descuentoNeto, descuentoPorcentaje, modificaStock, recargoPorcentaje, subTotal, idNota) 
- select descuentoNeto, descuentoPorcentaje, modificaStock, recargoPorcentaje, subTotal, idNota from
+ INSERT into new_schema.notacredito(descuentoNeto, descuentoPorcentaje, modificaStock, recargoNeto, recargoPorcentaje, subTotal, idNota) 
+ select descuentoNeto, descuentoPorcentaje, modificaStock, recargoNeto, recargoPorcentaje, subTotal, idNota from
  (SELECT * FROM ykcojs0liv7ir9od.notacredito) as notacredito;
 -- NOTA CREDITO CLIENTE
  INSERT into new_schema.notacreditocliente(idNota, id_Cliente, id_Factura) 
