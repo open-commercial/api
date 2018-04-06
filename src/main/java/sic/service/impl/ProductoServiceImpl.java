@@ -16,6 +16,7 @@ import java.util.ResourceBundle;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
+import javax.validation.Valid;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -206,7 +207,7 @@ public class ProductoServiceImpl implements IProductoService {
 
     @Override
     @Transactional
-    public Producto guardar(Producto producto) {
+    public Producto guardar(@Valid Producto producto) {
         if (producto.getCodigo() == null) {
             producto.setCodigo("");
         }
