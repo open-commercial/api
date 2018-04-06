@@ -8,9 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import sic.modelo.Cliente;
 import sic.modelo.Empresa;
-import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
 import sic.modelo.TipoDeComprobante;
 
@@ -22,17 +20,13 @@ public interface NotaRepository<T extends Nota> extends PagingAndSortingReposito
     @Query("SELECT n.total FROM Nota n WHERE n.idNota= :idNota AND n.eliminada = false")
     BigDecimal getTotalById(@Param("idNota") long idNota);
     
-    Nota findByTipoComprobanteAndNroNotaAndClienteAndEliminada(TipoDeComprobante tipoDeComprobante, long nroNota, Cliente cliente, boolean eliminada);
+    Nota findByTipoComprobanteAndNroNotaAndEliminada(TipoDeComprobante tipoDeComprobante, long nroNota, boolean eliminada);
     
-    List<Nota> findAllByClienteAndEmpresaAndEliminada(Cliente cliente, Empresa empresa, boolean eliminada);
+    List<Nota> findAllByEmpresaAndEliminada(Empresa empresa, boolean eliminada);
     
-    Page<Nota> findAllByFechaBetweenAndClienteAndEmpresaAndEliminada(Date desde, Date hasta, Cliente cliente, Empresa empresa, boolean eliminada, Pageable page);
-            
-    List<Nota> findAllByFacturaVentaAndEliminada(FacturaVenta facturaVenta, boolean eliminada);
+    Page<Nota> findAllByFechaBetweenAndEmpresaAndEliminada(Date desde, Date hasta, Empresa empresa, boolean eliminada, Pageable page);
     
     @Query("SELECT n.CAE FROM Nota n WHERE n.idNota= :idNota AND n.eliminada = false")
     Long getCAEById(@Param("idNota") long idNota);
-
-    boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta, boolean eliminada);
     
 }

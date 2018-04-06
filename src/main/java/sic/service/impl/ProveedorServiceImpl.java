@@ -89,7 +89,7 @@ public class ProveedorServiceImpl implements IProveedorService {
         List<Proveedor> proveedores = new ArrayList<>();
         proveedorRepository.findAll(builder, new Sort(Sort.Direction.ASC, "razonSocial")).iterator().forEachRemaining(proveedores::add);
         proveedores.forEach(p -> {
-            CuentaCorriente cc = cuentaCorrienteService.getCuentaCorrientePorProveedor(p.getId_Proveedor());
+            CuentaCorriente cc = cuentaCorrienteService.getCuentaCorrientePorProveedor(p);
             p.setSaldoCuentaCorriente(cc.getSaldo());
             p.setFechaUltimoMovimiento(cc.getFechaUltimoMovimiento());
         });

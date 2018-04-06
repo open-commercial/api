@@ -20,7 +20,11 @@ import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
 import sic.modelo.NotaCredito;
+import sic.modelo.NotaCreditoCliente;
+import sic.modelo.NotaCreditoProveedor;
 import sic.modelo.NotaDebito;
+import sic.modelo.NotaDebitoCliente;
+import sic.modelo.NotaDebitoProveedor;
 import sic.modelo.Proveedor;
 import sic.modelo.Recibo;
 import sic.modelo.RenglonCuentaCorriente;
@@ -140,8 +144,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     }
     
     @Override
-    public CuentaCorrienteCliente getCuentaCorrientePorCliente(long idCliente) {
-        Cliente cliente = clienteService.getClientePorId(idCliente);
+    public CuentaCorrienteCliente getCuentaCorrientePorCliente(Cliente cliente) {
         CuentaCorrienteCliente cc = cuentaCorrienteClienteRepository.findByClienteAndEmpresaAndEliminada(cliente, cliente.getEmpresa(), false);
         cc.setSaldo(this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente()));
         cc.setFechaUltimoMovimiento(this.getFechaUltimoMovimiento(cc.getIdCuentaCorriente()));
@@ -149,8 +152,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     }
     
     @Override
-    public CuentaCorrienteProveedor getCuentaCorrientePorProveedor(long idProveedor) {
-        Proveedor proveedor = proveedorService.getProveedorPorId(idProveedor);
+    public CuentaCorrienteProveedor getCuentaCorrientePorProveedor(Proveedor proveedor) {
         CuentaCorrienteProveedor cc = cuentaCorrienteProveedorRepository.findByProveedorAndEmpresaAndEliminada(proveedor, proveedor.getEmpresa(), false);
         cc.setSaldo(this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente()));
         cc.setFechaUltimoMovimiento(this.getFechaUltimoMovimiento(cc.getIdCuentaCorriente()));
@@ -175,7 +177,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setFechaVencimiento(facturaVenta.getFechaVencimiento());
             rcc.setIdMovimiento(facturaVenta.getId_Factura());
             rcc.setMonto(facturaVenta.getTotal().negate());
-            CuentaCorriente cc = this.getCuentaCorrientePorCliente(facturaVenta.getCliente().getId_Cliente());
+            CuentaCorriente cc = this.getCuentaCorrientePorCliente(facturaVenta.getCliente());
             cc.getRenglones().add(rcc);
             rcc.setCuentaCorriente(cc);
             this.renglonCuentaCorrienteService.guardar(rcc);
@@ -201,7 +203,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setFechaVencimiento(facturaCompra.getFechaVencimiento());
             rcc.setIdMovimiento(facturaCompra.getId_Factura());
             rcc.setMonto(facturaCompra.getTotal().negate());
-            CuentaCorriente cc = this.getCuentaCorrientePorProveedor(facturaCompra.getProveedor().getId_Proveedor());
+            CuentaCorriente cc = this.getCuentaCorrientePorProveedor(facturaCompra.getProveedor());
             cc.getRenglones().add(rcc);
             rcc.setCuentaCorriente(cc);
             this.renglonCuentaCorrienteService.guardar(rcc);
@@ -224,7 +226,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setNumero(nota.getNroNota());
             if (nota instanceof NotaCredito) {
                 rcc.setMonto(nota.getTotal());
-                rcc.setDescripcion(nota.getMotivo());
+                rcc.setDescripcion(nota.getMotivo()); 
             }
             if (nota instanceof NotaDebito) {
                 rcc.setMonto(nota.getTotal().negate());
@@ -234,10 +236,10 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                 }           
                 rcc.setDescripcion(descripcion);
             }
-            rcc.setNota(nota);
+            rcc.setNota(nota); 
             rcc.setFecha(nota.getFecha());
             rcc.setIdMovimiento(nota.getIdNota());
-            CuentaCorriente cc = this.getCuentaCorrientePorCliente(nota.getCliente().getId_Cliente());
+            CuentaCorriente cc = this.getCuentaCorrientePorNota(nota);
             cc.getRenglones().add(rcc);
             rcc.setCuentaCorriente(cc);
             this.renglonCuentaCorrienteService.guardar(rcc);
@@ -248,6 +250,24 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setEliminado(true);
             LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
         }
+    }
+    
+    public CuentaCorriente getCuentaCorrientePorNota(Nota nota) {
+        CuentaCorriente cc = null;
+        if (nota instanceof NotaCreditoCliente || nota instanceof NotaDebitoCliente) {
+            if (nota instanceof NotaCreditoCliente) {
+                cc = this.getCuentaCorrientePorCliente(((NotaCreditoCliente) nota).getCliente());
+            } else if (nota instanceof NotaDebitoCliente) {
+                cc = this.getCuentaCorrientePorCliente(((NotaDebitoCliente) nota).getCliente());
+            }
+        } else if (nota instanceof NotaCreditoProveedor || nota instanceof NotaDebitoProveedor) {
+            if (nota instanceof NotaCreditoProveedor) {
+                cc = this.getCuentaCorrientePorProveedor(((NotaCreditoProveedor) nota).getProveedor());
+            } else if (nota instanceof NotaDebitoProveedor) {
+                cc = this.getCuentaCorrientePorProveedor(((NotaDebitoProveedor) nota).getProveedor());
+            }
+        }
+        return cc;
     }
     
     @Override
@@ -266,9 +286,9 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             rcc.setMonto(recibo.getMonto());
             CuentaCorriente cc = null;
             if (recibo.getCliente() != null) {
-                cc = this.getCuentaCorrientePorCliente(recibo.getCliente().getId_Cliente());
+                cc = this.getCuentaCorrientePorCliente(recibo.getCliente());
             } else if (recibo.getProveedor() != null) {
-                cc = this.getCuentaCorrientePorProveedor(recibo.getProveedor().getId_Proveedor());
+                cc = this.getCuentaCorrientePorProveedor(recibo.getProveedor());
             }
             if (null == cc) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")

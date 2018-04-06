@@ -49,7 +49,7 @@ public class NotaServiceImplTest {
                                          TipoDeComprobante.NOTA_DEBITO_A,
                                          TipoDeComprobante.NOTA_DEBITO_X,
                                          TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO};
-        TipoDeComprobante[] result = notaServiceImpl.getTipoNota(1L, 1L);
+        TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCliente(1L, 1L);
         assertArrayEquals(expResult, result);
     }
     
@@ -72,7 +72,7 @@ public class NotaServiceImplTest {
                                          TipoDeComprobante.NOTA_DEBITO_B,
                                          TipoDeComprobante.NOTA_DEBITO_X,
                                          TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO};
-        TipoDeComprobante[] result = notaServiceImpl.getTipoNota(1L, 1L);
+        TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCliente(1L, 1L);
         assertArrayEquals(expResult, result);
     }
     
@@ -93,7 +93,7 @@ public class NotaServiceImplTest {
                                          TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO,
                                          TipoDeComprobante.NOTA_DEBITO_X,
                                          TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO};
-        TipoDeComprobante[] result = notaServiceImpl.getTipoNota(1L, 1L);
+        TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCliente(1L, 1L);
         assertArrayEquals(expResult, result);
     }
 
@@ -114,7 +114,7 @@ public class NotaServiceImplTest {
                                          TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO,
                                          TipoDeComprobante.NOTA_DEBITO_X,
                                          TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO};
-        TipoDeComprobante[] result = notaServiceImpl.getTipoNota(1L, 1L);
+        TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCliente(1L, 1L);
         assertArrayEquals(expResult, result);
     }
     
