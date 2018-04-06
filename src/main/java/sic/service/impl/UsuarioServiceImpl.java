@@ -6,6 +6,7 @@ import javax.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Credencial;
@@ -17,17 +18,21 @@ import sic.modelo.TipoDeOperacion;
 import sic.util.Utilidades;
 import sic.util.Validator;
 import sic.repository.UsuarioRepository;
+import sic.service.IEmpresaService;
 
 @Service
 @Transactional
 public class UsuarioServiceImpl implements IUsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final IEmpresaService empresaService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository) {
+    @Lazy
+    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, IEmpresaService empresaService) {
         this.usuarioRepository = usuarioRepository;
+        this.empresaService = empresaService;
     }
 
     @Override
@@ -176,5 +181,14 @@ public class UsuarioServiceImpl implements IUsuarioService {
         usuario.setEliminado(true);
         usuarioRepository.save(usuario);
     }
-   
+    
+    @Override
+    public int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada) {
+        if (empresaService.getEmpresaPorId(idEmpresaPredeterminada) == null) {
+            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_empresa_no_existente"));
+        }
+        return usuarioRepository.updateIdEmpresa(idUsuario, idEmpresaPredeterminada);
+    }
+
 }
