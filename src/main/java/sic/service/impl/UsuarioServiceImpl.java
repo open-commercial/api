@@ -183,21 +183,12 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
     
     @Override
-    public int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresa) {
-        if (empresaService.getEmpresaPorId(idEmpresa) == null) {
+    public int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada) {
+        if (empresaService.getEmpresaPorId(idEmpresaPredeterminada) == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_empresa_no_existente"));
         }
-        return usuarioRepository.updateIdEmpresa(idUsuario, idEmpresa);
-    }
-
-    @Override
-    public int desvincularEmpresaDeUsuarios(long idEmpresa) {
-        if (empresaService.getEmpresaPorId(idEmpresa) == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
-        return usuarioRepository.desvincularEmpresaDeUsuarios(idEmpresa);
+        return usuarioRepository.updateIdEmpresa(idUsuario, idEmpresaPredeterminada);
     }
 
 }

@@ -46,7 +46,7 @@ public class EmpresaServiceImpl implements IEmpresaService {
     
     @Override
     public Empresa getEmpresaPorId(Long idEmpresa){
-        Empresa empresa = empresaRepository.findOne(idEmpresa);
+        Empresa empresa = empresaRepository.findById(idEmpresa);
         if (empresa == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_empresa_no_existente"));
@@ -151,11 +151,6 @@ public class EmpresaServiceImpl implements IEmpresaService {
     @Transactional
     public void eliminar(Long idEmpresa) {
         Empresa empresa = this.getEmpresaPorId(idEmpresa);
-        if (empresa == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
-        usuarioService.desvincularEmpresaDeUsuarios(idEmpresa);
         empresa.setEliminada(true);
         configuracionDelSistemaService.eliminar(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa));
         empresaRepository.save(empresa);

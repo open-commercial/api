@@ -25,8 +25,6 @@ public interface IUsuarioService {
 
     Usuario guardar(Usuario usuario);
     
-    int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresa);
-    
-    int desvincularEmpresaDeUsuarios(long idEmpresa);
+    int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada);
     
 }
