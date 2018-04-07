@@ -35,6 +35,8 @@ import sic.service.IProductoService;
 import sic.service.IProveedorService;
 import sic.service.IRubroService;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/api/v1")
 public class ProductoController {
@@ -171,7 +173,7 @@ public class ProductoController {
     
     @PostMapping("/productos")
     @ResponseStatus(HttpStatus.CREATED)
-    public Producto guardar(@RequestBody Producto producto,
+    public Producto guardar(@RequestBody @Valid Producto producto,
                             @RequestParam long idMedida,
                             @RequestParam long idRubro, 
                             @RequestParam long idProveedor,

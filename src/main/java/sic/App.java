@@ -65,17 +65,22 @@ public class App extends WebMvcConfigurerAdapter {
     @Bean
     public MessageSource messageSource() {
         ResourceBundleMessageSource source = new ResourceBundleMessageSource();
-        source.setBasename("messages");
+        source.setBasename("Mensajes");
+        source.setDefaultEncoding("UTF-8");
         return source;
+    }
+
+    @Bean
+    public LocalValidatorFactoryBean validator() {
+        LocalValidatorFactoryBean bean = new LocalValidatorFactoryBean();
+        bean.setValidationMessageSource(this.messageSource());
+        return bean;
     }
 
     @Override
     public Validator getValidator() {
-        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
-        validator.setValidationMessageSource(messageSource());
-        return validator;
+        return this.validator();
     }
-
 
     public static void main(String[] args) {
         SpringApplication.run(App.class, args);

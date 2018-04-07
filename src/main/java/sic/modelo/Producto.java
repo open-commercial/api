@@ -14,12 +14,16 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.validator.constraints.Email;
 
 @Entity
 @Table(name = "producto")
@@ -34,21 +38,22 @@ public class Producto implements Serializable {
     @Id
     @GeneratedValue
     private long id_Producto;
-
-    @Column(nullable = false)
+    
     private String codigo;
 
     @NotNull
-    @Column(nullable = false)
     private String descripcion;
 
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value= "0")
     private BigDecimal cantidad;
 
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value= "0")
     private BigDecimal cantMinima;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value= "0", inclusive= false)
     private BigDecimal ventaMinima;
 
     @ManyToOne
@@ -56,30 +61,39 @@ public class Producto implements Serializable {
     private Medida medida;
         
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value= "0", inclusive= false)
     private BigDecimal precioCosto;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value= "0", inclusive= false)
     private BigDecimal ganancia_porcentaje;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value= "0", inclusive = false)
     private BigDecimal ganancia_neto;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value= "0", inclusive = false)
     private BigDecimal precioVentaPublico;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value= "0", inclusive= false)
     private BigDecimal iva_porcentaje;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value= "0", inclusive= false)
     private BigDecimal iva_neto;
     
     @Column(precision = 25, scale = 15)
+    //@DecimalMin(value= "0", inclusive = false)
     private BigDecimal impuestoInterno_porcentaje;
     
     @Column(precision = 25, scale = 15)
+    //@DecimalMin(value= "0", inclusive = false)
     private BigDecimal impuestoInterno_neto;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value= "0", inclusive = false)
     private BigDecimal precioLista;
 
     @ManyToOne
@@ -88,21 +102,22 @@ public class Producto implements Serializable {
         
     private boolean ilimitado;
 
-    @Column(nullable = false)
+    @NotNull
     @Temporal(TemporalType.TIMESTAMP)
+    @Past
     private Date fechaUltimaModificacion;
 
-    @Column(nullable = false)
+    @NotNull
     private String estanteria;
 
-    @Column(nullable = false)
+    @NotNull
     private String estante;
     
     @ManyToOne
     @JoinColumn(name = "id_Proveedor", referencedColumnName = "id_Proveedor")
     private Proveedor proveedor;
         
-    @Column(nullable = false)
+    @NotNull
     private String nota;
 
     @Column(nullable = false)

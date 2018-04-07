@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+import javax.validation.ConstraintViolationException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -47,6 +49,13 @@ public class ControllersExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
     public String handleEntityNotFoundException(EntityNotFoundException ex) {        
+        return log(ex);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public String handleConstraintViolationException(ConstraintViolationException ex) {
         return log(ex);
     }
     
