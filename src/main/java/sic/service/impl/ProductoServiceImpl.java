@@ -56,48 +56,7 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
-        //Entrada de Datos
-        if (producto.getCantidad().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_cantidad_negativa"));
-        }
-        if (producto.getCantMinima().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_cantidadMinima_negativa"));
-        }
-        if (producto.getVentaMinima().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_cantidadVentaMinima_invalida"));
-        }
-        if (producto.getPrecioCosto().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_precioCosto_negativo"));
-        }
-        if (producto.getPrecioVentaPublico().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_precioVentaPublico_negativo"));
-        }
-        if (producto.getIva_porcentaje().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_IVAPorcentaje_negativo"));
-        }
-        if (producto.getImpuestoInterno_porcentaje().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_ImpInternoPorcentaje_negativo"));
-        }
-        if (producto.getGanancia_porcentaje().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_gananciaPorcentaje_negativo"));
-        }
-        if (producto.getPrecioLista().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_precioLista_negativo"));
-        }
         //Requeridos
-        if (Validator.esVacio(producto.getDescripcion())) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_vacio_descripcion"));
-        }
         if (producto.getMedida() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_vacio_medida"));

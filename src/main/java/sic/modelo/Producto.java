@@ -38,22 +38,22 @@ public class Producto implements Serializable {
     @Id
     @GeneratedValue
     private long id_Producto;
-    
+
     private String codigo;
 
     @NotNull
     private String descripcion;
 
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0")
+    @DecimalMin(value= "0", message = "{mensaje_producto_cantidad_negativa}")
     private BigDecimal cantidad;
 
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0")
+    @DecimalMin(value= "0",  message = "{mensaje_producto_cantidadMinima_negativa}")
     private BigDecimal cantMinima;
     
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0", inclusive= false)
+    @DecimalMin(value= "0", inclusive= false, message = "{mensaje_producto_cantidadVentaMinima_invalida}")
     private BigDecimal ventaMinima;
 
     @ManyToOne
@@ -61,39 +61,39 @@ public class Producto implements Serializable {
     private Medida medida;
         
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0", inclusive= false)
+    @DecimalMin(value= "0", inclusive= false, message = "{mensaje_producto_precioCosto_negativo}")
     private BigDecimal precioCosto;
     
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0", inclusive= false)
+    @DecimalMin(value= "0", inclusive= false, message = "{mensaje_producto_gananciaPorcentaje_negativo}")
     private BigDecimal ganancia_porcentaje;
     
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0", inclusive = false)
+    @DecimalMin(value= "0", inclusive = false, message = "{mensaje_producto_gananciaNeto_negativo}")
     private BigDecimal ganancia_neto;
     
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0", inclusive = false)
+    @DecimalMin(value= "0", inclusive = false, message = "{mensaje_producto_venta_publico_negativo}")
     private BigDecimal precioVentaPublico;
     
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0", inclusive= false)
+    @DecimalMin(value= "0", inclusive= false, message = "{mensaje_producto_IVAPorcentaje_negativo}")
     private BigDecimal iva_porcentaje;
     
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0", inclusive= false)
+    @DecimalMin(value= "0", inclusive= false, message = "{mensaje_producto_IVANeto_negativo}")
     private BigDecimal iva_neto;
     
     @Column(precision = 25, scale = 15)
-    //@DecimalMin(value= "0", inclusive = false)
+    @DecimalMin(value= "0", message = "{mensaje_producto_ImpInternoPorcentaje_negativo}")
     private BigDecimal impuestoInterno_porcentaje;
     
     @Column(precision = 25, scale = 15)
-    //@DecimalMin(value= "0", inclusive = false)
+    @DecimalMin(value= "0", message = "{mensaje_producto_ImpInternoNeto_negativo}")
     private BigDecimal impuestoInterno_neto;
     
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0", inclusive = false)
+    @DecimalMin(value= "0", inclusive = false, message = "{mensaje_producto_precioLista_negativo}")
     private BigDecimal precioLista;
 
     @ManyToOne
@@ -102,15 +102,12 @@ public class Producto implements Serializable {
         
     private boolean ilimitado;
 
-    @NotNull
     @Temporal(TemporalType.TIMESTAMP)
     @Past
     private Date fechaUltimaModificacion;
 
-    @NotNull
     private String estanteria;
 
-    @NotNull
     private String estante;
     
     @ManyToOne
