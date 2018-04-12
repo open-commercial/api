@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.springframework.test.context.junit4.SpringRunner;
-import sic.modelo.Producto;
 
 @RunWith(SpringRunner.class)
 public class ProductoServiceImplTest {

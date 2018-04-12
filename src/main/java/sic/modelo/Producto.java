@@ -41,65 +41,65 @@ public class Producto implements Serializable {
 
     private String codigo;
 
-    @NotNull
+    @NotNull(message = "{mensaje_producto_vacio_descripcion}")
     private String descripcion;
 
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0", message = "{mensaje_producto_cantidad_negativa}")
+    @DecimalMin(value = "0", message = "{mensaje_producto_cantidad_negativa}")
     private BigDecimal cantidad;
 
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0",  message = "{mensaje_producto_cantidadMinima_negativa}")
+    @DecimalMin(value = "0", message = "{mensaje_producto_cantidadMinima_negativa}")
     private BigDecimal cantMinima;
-    
+
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0", inclusive= false, message = "{mensaje_producto_cantidadVentaMinima_invalida}")
+    @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_cantidadVentaMinima_invalida}")
     private BigDecimal ventaMinima;
 
     @ManyToOne
     @JoinColumn(name = "id_Medida", referencedColumnName = "id_Medida")
     private Medida medida;
-        
+
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0", inclusive= false, message = "{mensaje_producto_precioCosto_negativo}")
+    @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_precioCosto_negativo}")
     private BigDecimal precioCosto;
-    
+
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0", inclusive= false, message = "{mensaje_producto_gananciaPorcentaje_negativo}")
+    @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_gananciaPorcentaje_negativo}")
     private BigDecimal ganancia_porcentaje;
-    
+
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0", inclusive = false, message = "{mensaje_producto_gananciaNeto_negativo}")
+    @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_gananciaNeto_negativo}")
     private BigDecimal ganancia_neto;
-    
+
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0", inclusive = false, message = "{mensaje_producto_venta_publico_negativo}")
+    @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_venta_publico_negativo}")
     private BigDecimal precioVentaPublico;
-    
+
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0", inclusive= false, message = "{mensaje_producto_IVAPorcentaje_negativo}")
+    @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_IVAPorcentaje_negativo}")
     private BigDecimal iva_porcentaje;
-    
+
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0", inclusive= false, message = "{mensaje_producto_IVANeto_negativo}")
+    @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_IVANeto_negativo}")
     private BigDecimal iva_neto;
-    
+
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0", message = "{mensaje_producto_ImpInternoPorcentaje_negativo}")
+    @DecimalMin(value = "0", message = "{mensaje_producto_ImpInternoPorcentaje_negativo}")
     private BigDecimal impuestoInterno_porcentaje;
-    
+
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0", message = "{mensaje_producto_ImpInternoNeto_negativo}")
+    @DecimalMin(value = "0", message = "{mensaje_producto_ImpInternoNeto_negativo}")
     private BigDecimal impuestoInterno_neto;
-    
+
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value= "0", inclusive = false, message = "{mensaje_producto_precioLista_negativo}")
+    @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_precioLista_negativo}")
     private BigDecimal precioLista;
 
     @ManyToOne
     @JoinColumn(name = "id_Rubro", referencedColumnName = "id_Rubro")
     private Rubro rubro;
-        
+
     private boolean ilimitado;
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -109,12 +109,12 @@ public class Producto implements Serializable {
     private String estanteria;
 
     private String estante;
-    
+
     @ManyToOne
     @JoinColumn(name = "id_Proveedor", referencedColumnName = "id_Proveedor")
     private Proveedor proveedor;
-        
-    @NotNull
+
+    @NotNull(message = "{mensaje_producto_vacio_nota}")
     private String nota;
 
     @Column(nullable = false)
@@ -127,24 +127,24 @@ public class Producto implements Serializable {
     @ManyToOne
     @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
     private Empresa empresa;
-    
+
     private boolean eliminado;
 
     @JsonGetter("nombreMedida")
     public String getNombreMedida() {
         return medida.getNombre();
-    }    
-    
+    }
+
     @JsonGetter("nombreRubro")
     public String getNombreRubro() {
         return rubro.getNombre();
-    }    
-    
+    }
+
     @JsonGetter("razonSocialProveedor")
     public String getRazonSocialProveedor() {
         return proveedor.getRazonSocial();
-    }    
-    
+    }
+
     @JsonGetter("nombreEmpresa")
     public String getNombreEmpresa() {
         return empresa.getNombre();
