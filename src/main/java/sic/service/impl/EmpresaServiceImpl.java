@@ -20,6 +20,7 @@ import sic.util.Validator;
 import sic.repository.EmpresaRepository;
 import sic.service.IAmazonService;
 import sic.service.IConfiguracionDelSistemaService;
+import sic.service.IUsuarioService;
 import sic.util.BASE64DecodedMultipartFile;
 
 @Service
@@ -28,21 +29,24 @@ public class EmpresaServiceImpl implements IEmpresaService {
     private final EmpresaRepository empresaRepository;
     private final IConfiguracionDelSistemaService configuracionDelSistemaService;
     private final IAmazonService amazonService;
+    private final IUsuarioService usuarioService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
     public EmpresaServiceImpl(EmpresaRepository empresaRepository,
             IConfiguracionDelSistemaService configuracionDelSistemaService,
+            IUsuarioService usuarioService,
             IAmazonService amazonService) {
 
         this.empresaRepository = empresaRepository;
         this.configuracionDelSistemaService = configuracionDelSistemaService;
+        this.usuarioService = usuarioService;
         this.amazonService = amazonService;
     }
     
     @Override
     public Empresa getEmpresaPorId(Long idEmpresa){
-        Empresa empresa = empresaRepository.findOne(idEmpresa);
+        Empresa empresa = empresaRepository.findById(idEmpresa);
         if (empresa == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_empresa_no_existente"));
@@ -147,10 +151,6 @@ public class EmpresaServiceImpl implements IEmpresaService {
     @Transactional
     public void eliminar(Long idEmpresa) {
         Empresa empresa = this.getEmpresaPorId(idEmpresa);
-        if (empresa == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
         empresa.setEliminada(true);
         configuracionDelSistemaService.eliminar(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa));
         empresaRepository.save(empresa);

@@ -393,28 +393,28 @@ public class FacturaServiceImpl implements IFacturaService {
     public void eliminar(long[] idsFactura) {
         for (long idFactura : idsFactura) {
             Factura factura = this.getFacturaPorId(idFactura);
-            if (factura.getCAE() == 0L) {
-                if (factura instanceof FacturaVenta) {
-                    if (notaService.existsByFacturaVentaAndEliminada((FacturaVenta) factura)) {
-                        throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                                .getString("mensaje_no_se_puede_eliminar"));
-                    }
-                    this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) factura, TipoDeOperacion.ELIMINACION);
-                    productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.VENTA);
-                } else if (factura instanceof FacturaCompra) {
-                    this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaCompra) factura, TipoDeOperacion.ELIMINACION);
-                    productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.COMPRA);
+            if (factura instanceof FacturaVenta) {
+                if (factura.getCAE() != 0L) {
+                    throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                            .getString("mensaje_eliminar_factura_aprobada"));
                 }
-                factura.setEliminada(true);
-                if (factura.getPedido() != null) {
-                    pedidoService.actualizarEstadoPedido(factura.getPedido());
+                if (notaService.existsByFacturaVentaAndEliminada((FacturaVenta) factura)) {
+                    throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                            .getString("mensaje_no_se_puede_eliminar"));
                 }
-            } else {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_eliminar_factura_aprobada"));
+                this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) factura, TipoDeOperacion.ELIMINACION);
+                productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.VENTA);
+            } else if (factura instanceof FacturaCompra) {
+                this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaCompra) factura, TipoDeOperacion.ELIMINACION);
+                productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.COMPRA);
+            }
+            factura.setEliminada(true);
+            if (factura.getPedido() != null) {
+                pedidoService.actualizarEstadoPedido(factura.getPedido());
             }
         }
     }
+
 
     private HashMap<Long, BigDecimal> getIdsProductosYCantidades(Factura factura) {
         HashMap<Long, BigDecimal> idsYCantidades = new HashMap<>();
@@ -481,6 +481,10 @@ public class FacturaServiceImpl implements IFacturaService {
             if (facturaVenta.getUsuario() == null) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_factura_usuario_vacio"));
+            }
+            if (facturaVenta.getCAE() != 0l) {
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_factura_venta_CAE"));
             }
         }
         //Calculos

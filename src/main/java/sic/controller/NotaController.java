@@ -1,13 +1,8 @@
 package sic.controller;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,16 +16,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import sic.modelo.BusquedaNotaCriteria;
-import sic.modelo.FacturaVenta;
+import sic.modelo.Factura;
 import sic.modelo.Nota;
 import sic.modelo.NotaCredito;
 import sic.modelo.NotaDebito;
 import sic.modelo.RenglonNotaCredito;
 import sic.modelo.RenglonNotaDebito;
 import sic.modelo.TipoDeComprobante;
-import sic.service.IClienteService;
-import sic.service.IEmpresaService;
 import sic.service.INotaService;
 import sic.service.IReciboService;
 
@@ -39,20 +31,14 @@ import sic.service.IReciboService;
 public class NotaController {
     
     private final INotaService notaService;
-    private final IClienteService clienteService;
-    private final IEmpresaService empresaService;
     private final IReciboService reciboService;
-    private final int TAMANIO_PAGINA_DEFAULT = 50;
-    
+
     @Autowired
-    public NotaController(INotaService notaService, IClienteService clienteService,
-            IEmpresaService empresaService, IReciboService reciboService) {
+    public NotaController(INotaService notaService, IReciboService reciboService) {
         this.notaService = notaService;
-        this.clienteService = clienteService;
-        this.empresaService = empresaService;
         this.reciboService = reciboService;
     }
-    
+
     @GetMapping("/notas/{idNota}")
     @ResponseStatus(HttpStatus.OK)
     public Nota getNota(@PathVariable long idNota) {
@@ -61,8 +47,8 @@ public class NotaController {
  
     @GetMapping("/notas/{idNota}/facturas")
     @ResponseStatus(HttpStatus.OK)
-    public FacturaVenta getFacturaNota(@PathVariable long idNota) {
-        return notaService.getFacturaNota(idNota);
+    public Factura getFacturaNotaCredito(@PathVariable long idNota) {
+        return notaService.getFacturaNotaCredito(idNota);
     }
     
     @GetMapping("/notas/debito/recibo/{idRecibo}/existe")
@@ -71,93 +57,77 @@ public class NotaController {
         return notaService.existeNotaDebitoPorRecibo(reciboService.getById(idRecibo));
     }
     
-    @GetMapping("/notas/cliente/{idCliente}/empresa/{idEmpresa}")
-    @ResponseStatus(HttpStatus.OK)
-    public List<Nota> getNotasPorClienteYEmpresa(Long idEmpresa, Long idCliente) {
-        return notaService.getNotasPorClienteYEmpresa(idEmpresa, idCliente);
-    }
-    
-    @GetMapping("/notas/busqueda/criteria") 
-    @ResponseStatus(HttpStatus.OK)
-    public Page<Nota> buscarNotasPorClienteYEmpresa(@RequestParam(value = "desde", required = false) Long desde,
-                                                    @RequestParam(value = "hasta", required = false) Long hasta,
-                                                    @RequestParam Long idCliente, 
-                                                    @RequestParam Long idEmpresa,
-                                                    @RequestParam(required = false) Integer pagina,
-                                                    @RequestParam(required = false) Integer tamanio) {
-        Calendar fechaDesde = Calendar.getInstance();
-        Calendar fechaHasta = Calendar.getInstance();
-        if (desde != null && hasta != null) {
-            fechaDesde.setTimeInMillis(desde);
-            fechaHasta.setTimeInMillis(hasta);
-        }
-        if (tamanio == null || tamanio <= 0) {
-            tamanio = TAMANIO_PAGINA_DEFAULT;
-        }
-        if (pagina == null || pagina < 0) {
-            pagina = 0;
-        }
-        Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "fecha"));
-        BusquedaNotaCriteria criteria = BusquedaNotaCriteria.builder()
-                .buscaPorFecha((desde != null) && (hasta != null))
-                .fechaDesde(fechaDesde.getTime())
-                .fechaHasta(fechaHasta.getTime())
-                .empresa(empresaService.getEmpresaPorId(idEmpresa))
-                .cantidadDeRegistros(0)
-                .cliente(clienteService.getClientePorId(idCliente))
-                .pageable(pageable)
-                .build();
-        return notaService.buscarNotasPorClienteYEmpresa(criteria);
-    }
-    
-    @GetMapping("/notas/saldo")
-    @ResponseStatus(HttpStatus.OK)
-    public BigDecimal getSaldoNotas(@RequestParam Long hasta,
-                                    @RequestParam long idCliente, 
-                                    @RequestParam long IdEmpresa) {
-        Calendar fechaHasta = Calendar.getInstance();
-        fechaHasta.setTimeInMillis(hasta);
-        return notaService.getSaldoNotas(fechaHasta.getTime(), idCliente, IdEmpresa);
-    }
-    
     @GetMapping("/notas/tipos")
     @ResponseStatus(HttpStatus.OK)
     public TipoDeComprobante[] getTipoNota(@RequestParam long idCliente,
                                            @RequestParam long idEmpresa) {
-        return notaService.getTipoNota(idCliente, idEmpresa);
+        return notaService.getTipoNotaCliente(idCliente, idEmpresa);
     }
     
-    @GetMapping("/notas/renglones/credito/{idNotaCredito}")
+    @GetMapping("/notas/renglones/credito/clientes/{idNotaCredito}")
     @ResponseStatus(HttpStatus.OK)
-    public List<RenglonNotaCredito> getRenglonesDeNotaCredito(@RequestParam long idNotaCredito) {
-        return notaService.getRenglonesDeNotaCredito(idNotaCredito);
+    public List<RenglonNotaCredito> getRenglonesDeNotaCreditoCliente(@PathVariable long idNotaCredito) {
+        return notaService.getRenglonesDeNotaCreditoCliente(idNotaCredito);
     }
     
-    @GetMapping("/notas/renglones/debito/{idNotaDebito}")
+    @GetMapping("/notas/renglones/debito/clientes/{idNotaDebito}")
     @ResponseStatus(HttpStatus.OK)
-    public List<RenglonNotaDebito> getRenglonesDeNotaDebito(@RequestParam long idNotaDebito) {
-        return notaService.getRenglonesDeNotaDebito(idNotaDebito);
+    public List<RenglonNotaDebito> getRenglonesDeNotaDebitoCliente(@PathVariable long idNotaDebito) {
+        return notaService.getRenglonesDeNotaDebitoCliente(idNotaDebito);
+    }
+    
+    @GetMapping("/notas/renglones/credito/proveedores/{idNotaCredito}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<RenglonNotaCredito> getRenglonesDeNotaCreditoProveedor(@PathVariable long idNotaCredito) {
+        return notaService.getRenglonesDeNotaCreditoProveedor(idNotaCredito);
+    }
+    
+    @GetMapping("/notas/renglones/debito/proveedores/{idNotaDebito}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<RenglonNotaDebito> getRenglonesDeNotaDebitoProveedor(@PathVariable long idNotaDebito) {
+        return notaService.getRenglonesDeNotaDebitoProveedor(idNotaDebito);
     }
     
     @PostMapping("/notas/credito/empresa/{idEmpresa}/cliente/{idCliente}/usuario/{idUsuario}/factura/{idFactura}")
     @ResponseStatus(HttpStatus.CREATED)
-    public Nota guardarNotaCredito(@RequestBody NotaCredito nota,
+    public Nota guardarNotaCreditoCliente(@RequestBody NotaCredito nota,
                                    @PathVariable long idEmpresa,
                                    @PathVariable long idCliente,
                                    @PathVariable long idUsuario,
                                    @PathVariable long idFactura, 
                                    @RequestParam boolean modificarStock) {
-        return notaService.guardarNota(nota, idEmpresa, idCliente, idUsuario, null, idFactura, modificarStock);
+        return notaService.guardarNotaCliente(nota, idEmpresa, idCliente, idUsuario, null, idFactura, modificarStock);
     }
     
     @PostMapping("/notas/debito/empresa/{idEmpresa}/cliente/{idCliente}/usuario/{idUsuario}/recibo/{idRecibo}")
     @ResponseStatus(HttpStatus.CREATED)
-    public Nota guardarNotaDebito(@RequestBody NotaDebito nota,
+    public Nota guardarNotaDebitoCliente(@RequestBody NotaDebito nota,
                                   @PathVariable long idEmpresa,
                                   @PathVariable long idCliente,
                                   @PathVariable long idUsuario,
                                   @PathVariable long idRecibo) {
-        return notaService.guardarNota(nota, idEmpresa, idCliente, idUsuario, idRecibo, null, false);
+        return notaService.guardarNotaCliente(nota, idEmpresa, idCliente, idUsuario, idRecibo, null, false);
+    }
+    
+    @PostMapping("/notas/credito/empresa/{idEmpresa}/proveedor/{idProveedor}/usuario/{idUsuario}/factura/{idFactura}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Nota guardarNotaCreditoProveedor(@RequestBody NotaCredito nota,
+                                   @PathVariable long idEmpresa,
+                                   @PathVariable long idProveedor,
+                                   @PathVariable long idUsuario,
+                                   @PathVariable long idFactura, 
+                                   @RequestParam boolean modificarStock) {
+        return notaService.guardarNotaProveedor(nota, idEmpresa, idProveedor, idUsuario, null, idFactura, modificarStock);
+    }
+    
+    @PostMapping("/notas/debito/empresa/{idEmpresa}/proveedor/{idProveedor}/usuario/{idUsuario}/recibo/{idRecibo}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Nota guardarNotaDebitoProveedor(@RequestBody NotaDebito nota,
+                                  @PathVariable long idEmpresa,
+                                  @PathVariable long idProveedor,
+                                  @PathVariable long idUsuario,
+                                  @PathVariable long idRecibo) {
+        return notaService.guardarNotaProveedor(nota, idEmpresa, idProveedor, idUsuario, idRecibo, null, false);
     }
 
     @GetMapping("/notas/{idNota}/reporte")

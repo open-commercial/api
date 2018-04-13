@@ -29,4 +29,9 @@ public interface UsuarioRepository extends PagingAndSortingRepository<Usuario, L
       @Modifying
       @Query("UPDATE Usuario u SET u.token = ?1 WHERE u.id_Usuario = ?2")
       int updateToken(String token, long idUsuario);
+      
+      @Modifying
+      @Query("UPDATE Usuario u SET u.idEmpresaPredeterminada = :idEmpresaPredeterminada WHERE u.id_Usuario = :idUsuario")
+      int updateIdEmpresa(@Param("idUsuario") long idUsuario, @Param("idEmpresaPredeterminada") long idEmpresaPredeterminada);
+      
 }

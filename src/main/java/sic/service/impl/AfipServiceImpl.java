@@ -277,7 +277,7 @@ public class AfipServiceImpl implements IAfipService {
         if (comprobante.getIva105neto().compareTo(BigDecimal.ZERO) != 0) {
             AlicIva alicIVA105 = new AlicIva();
             alicIVA105.setId(4); // Valores: 5 (21%), 4 (10.5%)
-            alicIVA105.setBaseImp(comprobante.getIva105neto().multiply(new BigDecimal("100")).divide(new BigDecimal("21"), 2, RoundingMode.HALF_UP).doubleValue()); // Se calcula con: (100 * IVA_neto) / %IVA
+            alicIVA105.setBaseImp(comprobante.getIva105neto().multiply(new BigDecimal("100")).divide(new BigDecimal("10.5"), 2, RoundingMode.HALF_UP).doubleValue()); // Se calcula con: (100 * IVA_neto) / %IVA
             alicIVA105.setImporte(comprobante.getIva105neto().setScale(2, RoundingMode.HALF_UP).doubleValue());
             arrayIVA.getAlicIva().add(alicIVA105);
         }

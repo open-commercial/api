@@ -1,6 +1,8 @@
 package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -20,7 +22,12 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true, exclude = "renglonesNotaCredito")
-public class NotaCredito extends Nota implements Serializable {
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonSubTypes({
+  @JsonSubTypes.Type(value = NotaCreditoCliente.class),
+  @JsonSubTypes.Type(value = NotaCreditoProveedor.class), 
+})
+public abstract class NotaCredito extends Nota implements Serializable {
     
     @Column(nullable = false)
     private boolean modificaStock;
@@ -48,13 +55,13 @@ public class NotaCredito extends Nota implements Serializable {
 
     public NotaCredito() {}
 
-    public NotaCredito(long idNota, long serie, FacturaVenta facturaVenta, long nroNota, boolean eliminada,
-            TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa, Cliente cliente,
-            Usuario usuario, String motivo, List<RenglonNotaCredito> renglones, BigDecimal subTotalBruto,
-            BigDecimal iva21Neto, BigDecimal iva105Neto, BigDecimal total, long CAE, Date vencimientoCAE,
+    public NotaCredito(long idNota, long serie, long nroNota, boolean eliminada,
+            TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa,
+            Usuario usuario, String motivo, List<RenglonNotaCredito> renglones, BigDecimal subTotalBruto, BigDecimal iva21Neto,
+            BigDecimal iva105Neto, BigDecimal total, long CAE, Date vencimientoCAE,
             long numSerieAfip, long numFacturaAfip) {
 
-        super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, cliente, usuario, facturaVenta, motivo,
+        super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, usuario, motivo,
                 subTotalBruto, iva21Neto, iva105Neto, total, CAE, vencimientoCAE, numSerieAfip, numFacturaAfip);
         this.renglonesNotaCredito = renglones;
     }

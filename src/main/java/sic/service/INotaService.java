@@ -1,13 +1,12 @@
 package sic.service;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
-import org.springframework.data.domain.Page;
-import sic.modelo.BusquedaNotaCriteria;
+import sic.modelo.Factura;
+import sic.modelo.FacturaCompra;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Nota;
-import sic.modelo.NotaDebito;
+import sic.modelo.NotaCredito;
 import sic.modelo.Recibo;
 import sic.modelo.RenglonFactura;
 import sic.modelo.RenglonNotaCredito;
@@ -16,7 +15,9 @@ import sic.modelo.TipoDeComprobante;
 
 public interface INotaService {
 
-    Nota guardarNota(Nota nota, long idEmpresa, long idCliente, long idUsuario, Long idRecibo, Long idFactura, boolean modificarStock);
+    Nota guardarNotaCliente(Nota nota, long idEmpresa, long idCliente, long idUsuario, Long idRecibo, Long idFactura, boolean modificarStock);
+    
+    Nota guardarNotaProveedor(Nota nota, long idEmpresa, long idProveedor, long idUsuario, Long idRecibo, Long idFactura, boolean modificarStock);
 
     Nota autorizarNota(Nota nota);
     
@@ -28,29 +29,31 @@ public interface INotaService {
     
     BigDecimal getTotalById(Long idNota);
     
-    FacturaVenta getFacturaNota(Long idNota);
+    Factura getFacturaNotaCredito(Long idNota);
+    
+    FacturaVenta getFacturaNotaCreditoCliente(Long idNota);
+    
+    FacturaCompra getFacturaNotaCreditoProveedor(Long idNota);
     
     boolean existeNotaDebitoPorRecibo(Recibo recibo);
     
     boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta);
 
-    List<Nota> getNotasPorFactura(Long idFactura);
+    List<NotaCredito> getNotasCreditoPorFactura(Long idFactura);
 
-    Page<Nota> buscarNotasPorClienteYEmpresa(BusquedaNotaCriteria criteria);
+    long getSiguienteNumeroNotaDebitoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
 
-    List<Nota> getNotasPorClienteYEmpresa(Long idCliente, Long idEmpresa);
+    long getSiguienteNumeroNotaCreditoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
 
-    long getSiguienteNumeroNotaDebito(Long idEmpresa, TipoDeComprobante tipoComprobante);
+    TipoDeComprobante[] getTipoNotaCliente(Long idCliente, Long idEmpresa);
 
-    long getSiguienteNumeroNotaCredito(Long idEmpresa, TipoDeComprobante tipoComprobante);
+    List<RenglonNotaCredito> getRenglonesDeNotaCreditoCliente(Long idNota);
 
-    BigDecimal getSaldoNotas(Date hasta, Long idCliente, Long idEmpresa);
+    List<RenglonNotaDebito> getRenglonesDeNotaDebitoCliente(Long idNota);
+    
+    List<RenglonNotaCredito> getRenglonesDeNotaCreditoProveedor(Long idNota);
 
-    TipoDeComprobante[] getTipoNota(Long idCliente, Long idEmpresa);
-
-    List<RenglonNotaCredito> getRenglonesDeNotaCredito(Long idNota);
-
-    List<RenglonNotaDebito> getRenglonesDeNotaDebito(Long idNota);
+    List<RenglonNotaDebito> getRenglonesDeNotaDebitoProveedor(Long idNota);
     
     List<RenglonFactura> getRenglonesFacturaModificadosParaNotaCredito(long idFactura);
 
@@ -78,6 +81,6 @@ public interface INotaService {
     
     BigDecimal calcularTotalDebito(BigDecimal subTotal_bruto, BigDecimal iva21_neto, BigDecimal montoNoGravado);
     
-    BigDecimal calcularTotaCreditoPorFacturaVenta(FacturaVenta facturaVenta);
+    BigDecimal calcularTotalCreditoClientePorFacturaVenta(FacturaVenta factura);
     
 }

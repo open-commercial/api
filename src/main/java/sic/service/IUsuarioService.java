@@ -25,4 +25,6 @@ public interface IUsuarioService {
 
     Usuario guardar(Usuario usuario);
     
+    int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada);
+    
 }

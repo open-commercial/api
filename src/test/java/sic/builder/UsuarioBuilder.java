@@ -19,10 +19,10 @@ public class UsuarioBuilder {
     private List<Rol> roles = new ArrayList<>(Arrays.asList(Rol.ADMINISTRADOR));
     private boolean habilitado = true;
     private boolean eliminado = false;
+    private long idEmpresa = 0l;
     
     public Usuario build() {
-        return new Usuario(id_Usuario, username, password, nombre, apellido, email,
-                token, passwordRecoveryKey, roles, habilitado, eliminado);
+        return new Usuario(id_Usuario, username, password, nombre, apellido, email, token, idEmpresa, passwordRecoveryKey, roles, habilitado, eliminado);
     }
 
     public UsuarioBuilder withId_Usuario(long idUsuario) {
@@ -57,6 +57,11 @@ public class UsuarioBuilder {
     
     public UsuarioBuilder withToken(String token) {
         this.token = token;
+        return this;
+    }
+    
+    public UsuarioBuilder withidEmpresa(long idEmpresa) {
+        this.idEmpresa = idEmpresa;
         return this;
     }
     
