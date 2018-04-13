@@ -23,7 +23,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.validator.constraints.Email;
 
 @Entity
 @Table(name = "producto")

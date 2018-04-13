@@ -102,6 +102,27 @@ public class ProductoServiceImpl implements IProductoService {
                         .getString("mensaje_producto_duplicado_descripcion"));
             }
         }
+        //Calculos 
+        if (producto.getGanancia_neto().compareTo(this.calcularGanancia_Neto(producto.getPrecioCosto(), producto.getGanancia_porcentaje())) != 0) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_producto_ganancia_neta_incorrecta"));
+        }
+        if (producto.getImpuestoInterno_neto().compareTo(this.calcularImpInterno_Neto(producto.getPrecioVentaPublico(), producto.getImpuestoInterno_porcentaje())) != 0) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_producto_impuesto_interno_neto_incorrecto"));
+        }
+        if (producto.getIva_neto().compareTo(this.calcularIVA_Neto(producto.getPrecioVentaPublico(), producto.getIva_porcentaje())) != 0) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_producto_iva_neto"));
+        }
+        if (producto.getPrecioLista().compareTo(this.calcularPrecioLista(producto.getPrecioVentaPublico(), producto.getIva_porcentaje(), producto.getImpuestoInterno_porcentaje())) != 0) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_producto_precio_lista"));
+        }
+        if (producto.getPrecioVentaPublico().compareTo(this.calcularPVP(producto.getPrecioCosto(), producto.getGanancia_porcentaje())) != 0) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_precio_venta_publico"));
+        }
     }
 
     @Override
