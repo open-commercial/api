@@ -113,15 +113,15 @@ public class ProductoServiceImpl implements IProductoService {
         }
         if (producto.getIva_neto().compareTo(this.calcularIVA_Neto(producto.getPrecioVentaPublico(), producto.getIva_porcentaje())) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_producto_iva_neto"));
+                        .getString("mensaje_producto_iva_neto_incorrecto"));
         }
         if (producto.getPrecioLista().compareTo(this.calcularPrecioLista(producto.getPrecioVentaPublico(), producto.getIva_porcentaje(), producto.getImpuestoInterno_porcentaje())) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_producto_precio_lista"));
+                        .getString("mensaje_producto_precio_lista_incorrecto"));
         }
         if (producto.getPrecioVentaPublico().compareTo(this.calcularPVP(producto.getPrecioCosto(), producto.getGanancia_porcentaje())) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_precio_venta_publico"));
+                        .getString("mensaje_precio_venta_publico_incorrecto"));
         }
     }
 
