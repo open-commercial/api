@@ -60,25 +60,28 @@ public class ControllersExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public Map<String, String> handleConstraintViolationException(ConstraintViolationException ex) {
-        Map<String, String> errors = new LinkedHashMap<>();
-        errors.put(ex.getMessage(), "(Transaction ID: " + new Date().getTime() + ")");
+    public String handleConstraintViolationException(ConstraintViolationException ex) {
+        message(ex);
+        String message = "";
         for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
-            errors.put(violation.getRootBeanClass().getSimpleName() + ": " + violation.getPropertyPath(), violation.getMessage());
+            if (message.isEmpty()) {
+                message = message.concat(violation.getRootBeanClass().getSimpleName() + "\n");
+            }
+            message = message.concat(violation.getPropertyPath() + ": " + violation.getMessage() + "\n");
         }
-        return errors;
+        return message;
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    protected Map<String, String> handleMethodArgumentNotValid(final MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new LinkedHashMap<>();
-        // errors.put(ex.getMessage(), "(Transaction ID: " + new Date().getTime() + ")");
+    protected String handleMethodArgumentNotValid(final MethodArgumentNotValidException ex) {
+        message(ex);
+        String message = "";
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            errors.put(error.getField(), error.getDefaultMessage());
+            message = message.concat(error.getField() + ": " + error.getDefaultMessage() + "\n");
         }
-        return errors;
+        return message;
     }
     
     @ExceptionHandler(Exception.class)
