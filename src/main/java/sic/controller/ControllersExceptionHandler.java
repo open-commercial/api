@@ -21,47 +21,43 @@ public class ControllersExceptionHandler {
 
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-    private String message(Exception ex) {
+    private String log(Exception ex) {
         String mensaje = ex.getMessage() + "\n(Transaction ID: " + new Date().getTime() + ")";
-        log(ex, mensaje);
-        return mensaje;
-    }
-
-    private void log(Exception ex, String mensaje) {
         if (ex.getCause() != null) {
             LOGGER.error(mensaje + " " + ex.getCause().getMessage() + "\n" + Arrays.toString(ex.getStackTrace()));
         } else {
             LOGGER.error(mensaje + " " + ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_error_sin_causa") + "\n" + Arrays.toString(ex.getStackTrace()));
         }
+        return mensaje;
     }
     
     @ExceptionHandler(ServiceException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public String handleServiceException(ServiceException ex) {
-        return message(ex);
+        return log(ex);
     }
     
     @ExceptionHandler(UnauthorizedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ResponseBody
     public String handleUnauthorizedException(UnauthorizedException ex) {
-        return message(ex);
+        return log(ex);
     }       
     
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
     public String handleEntityNotFoundException(EntityNotFoundException ex) {        
-        return message(ex);
+        return log(ex);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public String handleConstraintViolationException(ConstraintViolationException ex) {
-        message(ex);
+        log(ex);
         String message = "";
         for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
             if (message.isEmpty()) {
@@ -76,7 +72,7 @@ public class ControllersExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     protected String handleMethodArgumentNotValid(final MethodArgumentNotValidException ex) {
-        message(ex);
+        log(ex);
         String message = "";
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             message = message.concat(error.getField() + ": " + error.getDefaultMessage() + "\n");
@@ -88,6 +84,6 @@ public class ControllersExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     public String handleException(Exception ex) {
-        return message(ex);
+        return log(ex);
     }
 }
