@@ -64,11 +64,11 @@ public class Producto implements Serializable {
     private BigDecimal precioCosto;
 
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_gananciaPorcentaje_negativo}")
+    @DecimalMin(value = "0", message = "{mensaje_producto_gananciaPorcentaje_negativo}")
     private BigDecimal ganancia_porcentaje;
 
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_gananciaNeto_negativo}")
+    @DecimalMin(value = "0", message = "{mensaje_producto_gananciaNeto_negativo}")
     private BigDecimal ganancia_neto;
 
     @Column(precision = 25, scale = 15)
@@ -76,11 +76,11 @@ public class Producto implements Serializable {
     private BigDecimal precioVentaPublico;
 
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_IVAPorcentaje_negativo}")
+    @DecimalMin(value = "0", message = "{mensaje_producto_IVAPorcentaje_negativo}")
     private BigDecimal iva_porcentaje;
 
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_IVANeto_negativo}")
+    @DecimalMin(value = "0", message = "{mensaje_producto_IVANeto_negativo}")
     private BigDecimal iva_neto;
 
     @Column(precision = 25, scale = 15)
