@@ -50,17 +50,6 @@ public class GastoController {
         gastoService.eliminar(idGasto);
     }
     
-    @GetMapping("/gastos/busqueda")
-    @ResponseStatus(HttpStatus.OK)
-    public List<Gasto> getGastosPorCajaYFormaDePago(@RequestParam long idEmpresa,
-                                                    @RequestParam long idFormaDePago,
-                                                    @RequestParam long desde,
-                                                    @RequestParam long hasta) {
-        Date fechaDesde = new Date(desde);
-        Date fechaHasta = new Date(hasta);
-        return gastoService.getGastosEntreFechasYFormaDePago(idEmpresa, idFormaDePago, fechaDesde, fechaHasta);
-    }
-    
     @GetMapping("/gastos/total")
     @ResponseStatus(HttpStatus.OK)
     public BigDecimal calcularTotalGastos(@RequestParam long[] idGasto) {

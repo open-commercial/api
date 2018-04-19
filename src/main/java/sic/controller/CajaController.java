@@ -1,7 +1,11 @@
 package sic.controller;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,9 +24,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import sic.modelo.BusquedaCajaCriteria;
 import sic.modelo.Caja;
+import sic.modelo.MovimientoCaja;
 import sic.modelo.Usuario;
 import sic.service.ICajaService;
 import sic.service.IEmpresaService;
+import sic.service.IFormaDePagoService;
 import sic.service.IUsuarioService;
 
 @RestController
@@ -32,13 +38,15 @@ public class CajaController {
     private final ICajaService cajaService;    
     private final IEmpresaService empresaService;
     private final IUsuarioService usuarioService;
+    private final IFormaDePagoService formaDePagoService;
     private final int TAMANIO_PAGINA_DEFAULT = 50;
     
     @Autowired
     public CajaController(ICajaService cajaService, IEmpresaService empresaService,
-                          IUsuarioService usuarioService) {
+                          IFormaDePagoService formaDePagoService, IUsuarioService usuarioService) {
         this.cajaService = cajaService;        
         this.empresaService = empresaService;
+        this.formaDePagoService = formaDePagoService;
         this.usuarioService = usuarioService;
     }
     
@@ -112,57 +120,22 @@ public class CajaController {
         return cajaService.getCajasCriteria(criteria);        
     }
     
-    
-    @GetMapping("/cajas/{idCaja}/total")
-    public BigDecimal getTotalCaja(@PathVariable long idCaja, 
-                                   @RequestParam(required = false) boolean soloAfectaCaja) {
-        return cajaService.getTotalCaja(cajaService.getCajaPorId(idCaja), soloAfectaCaja);
-    }
-    
-    @GetMapping("/cajas/empresas/{idEmpresa}/saldo-final")
-    public BigDecimal getSaldoFinalCajas(@PathVariable long idEmpresa,
-                                         @RequestParam(value = "idUsuario", required = false) Long idUsuario,
-                                         @RequestParam(value = "desde", required = false) Long desde,
-                                         @RequestParam(value = "hasta", required = false) Long hasta) {
-        Calendar fechaDesde = Calendar.getInstance();
-        fechaDesde.add(Calendar.YEAR, -17); // Rango temporal hasta la implementacion de criteria builder
-        Calendar fechaHasta = Calendar.getInstance();
-        if (desde != null && hasta != null) {
-            fechaDesde.setTimeInMillis(desde);
-            fechaDesde.set(Calendar.HOUR_OF_DAY, 0);
-            fechaDesde.set(Calendar.MINUTE, 0);
-            fechaDesde.set(Calendar.SECOND, 0);
-            fechaDesde.set(Calendar.MILLISECOND, 0);
-            fechaHasta.setTimeInMillis(hasta);
-            fechaHasta.set(Calendar.HOUR_OF_DAY, 23);
-            fechaHasta.set(Calendar.MINUTE, 59);
-            fechaHasta.set(Calendar.SECOND, 59);
-            fechaHasta.set(Calendar.MILLISECOND, 0);
+    @GetMapping("/cajas/{idCaja}/movimientos")
+    @ResponseStatus(HttpStatus.OK)
+    public List<MovimientoCaja> getCajaPorId(@PathVariable long idCaja,
+                                             @RequestParam(value = "idFormaDePago") long idFormaDePago) {
+        Caja caja = cajaService.getCajaPorId(idCaja);
+        LocalDateTime desde = caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        LocalDateTime hasta = caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        if (caja.getFechaCierre() == null) {
+            hasta = hasta.withHour(23);
+            hasta = hasta.withMinute(59);
+            hasta = hasta.withSecond(59);
+        } else {
+            hasta = caja.getFechaCierre().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         }
-        return cajaService.getSaldoFinalCajas(idEmpresa, idUsuario, fechaDesde.getTime(), fechaHasta.getTime());
-    }
-
-    @GetMapping("/cajas/empresas/{idEmpresa}/saldo-real")
-    public BigDecimal getSaldoRealCajas(@PathVariable long idEmpresa,
-                                        @RequestParam(value = "idUsuario", required = false) Long idUsuario,
-                                        @RequestParam(value = "desde", required = false) Long desde,
-                                        @RequestParam(value = "hasta", required = false) Long hasta) {
-        Calendar fechaDesde = Calendar.getInstance();
-        fechaDesde.add(Calendar.YEAR, -17); // Rango temporal hasta la implementacion de criteria builder
-        Calendar fechaHasta = Calendar.getInstance();
-        if (desde != null && hasta != null) {
-            fechaDesde.setTimeInMillis(desde);
-            fechaDesde.set(Calendar.HOUR_OF_DAY, 0);
-            fechaDesde.set(Calendar.MINUTE, 0);
-            fechaDesde.set(Calendar.SECOND, 0);
-            fechaDesde.set(Calendar.MILLISECOND, 0);
-            fechaHasta.setTimeInMillis(hasta);
-            fechaHasta.set(Calendar.HOUR_OF_DAY, 23);
-            fechaHasta.set(Calendar.MINUTE, 59);
-            fechaHasta.set(Calendar.SECOND, 59);
-            fechaHasta.set(Calendar.MILLISECOND, 0);
-        }
-        return cajaService.getSaldoRealCajas(idEmpresa, idUsuario, fechaDesde.getTime(), fechaHasta.getTime());
+        return cajaService.getMovimientosPorFormaDePagoEntreFechas(caja.getEmpresa(), formaDePagoService.getFormasDePagoPorId(idFormaDePago),
+                Date.from(desde.atZone(ZoneId.systemDefault()).toInstant()), Date.from(hasta.atZone(ZoneId.systemDefault()).toInstant()));
     }
     
 }

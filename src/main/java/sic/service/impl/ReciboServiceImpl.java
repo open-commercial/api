@@ -18,8 +18,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Cliente;
@@ -169,7 +167,7 @@ public class ReciboServiceImpl implements IReciboService {
     @Override
     public void eliminar(long idRecibo) {
         Recibo r = reciboRepository.findById(idRecibo);
-        if (notaService.existeNotaDebitoPorRecibo(r) == false) {           
+        if (notaService.existeNotaDebitoPorRecibo(r) == false) {
             r.setEliminado(true);
             this.cuentaCorrienteService.asentarEnCuentaCorriente(r, TipoDeOperacion.ELIMINACION);
             reciboRepository.save(r);
@@ -179,25 +177,10 @@ public class ReciboServiceImpl implements IReciboService {
                     .getString("mensaje_no_se_puede_eliminar"));
         }
     }
-
-    @Override
-    public List<Recibo> getByClienteAndEmpresaAndEliminado(Cliente cliente, Empresa empresa, boolean eliminado) {
-        return reciboRepository.findAllByClienteAndEmpresaAndEliminado(cliente, empresa, eliminado);
-    }
-
-    @Override
-    public List<Recibo> getByUsuarioAndEmpresaAndEliminado(Usuario usuario, Empresa empresa, boolean eliminado) {
-        return reciboRepository.findAllByUsuarioAndEmpresaAndEliminado(usuario, empresa, eliminado);
-    }
-
-    @Override
-    public Page<Recibo> getByFechaBetweenAndClienteAndEmpresaAndEliminado(Date desde, Date hasta, Cliente cliente, Empresa empresa, boolean eliminado, Pageable page) {
-        return reciboRepository.findAllByFechaBetweenAndClienteAndEmpresaAndEliminado(desde, hasta, cliente, empresa, eliminado, page);
-    }
     
     @Override
-    public List<Recibo> getByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(Date desde, Date hasta, FormaDePago formaDePago, Empresa empresa) {
-        return reciboRepository.findAllByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(desde, hasta, formaDePago, empresa, false);
+    public List<Recibo> getRecibosEntreFechasPorFormaDePago(Date desde, Date hasta, FormaDePago formaDePago, Empresa empresa) {
+        return reciboRepository.getRecibosEntreFechasPorFormaDePago(empresa.getId_Empresa(), formaDePago.getId_FormaDePago(), desde, hasta);
     }
     
     @Override
@@ -227,6 +210,18 @@ public class ReciboServiceImpl implements IReciboService {
             throw new ServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_error_reporte"), ex);
         }
+    }
+
+    @Override
+    public BigDecimal getTotalRecibosClientesEntreFechasPorFormaDePago(long idEmpresa, long idFormaDePago, Date desde, Date hasta) {
+        BigDecimal total = reciboRepository.getTotalRecibosClientesEntreFechasPorFormaDePago(idEmpresa, idFormaDePago, desde, hasta);
+        return (total == null) ? BigDecimal.ZERO : total;
+    }
+
+    @Override
+    public BigDecimal getTotalRecibosProveedoresEntreFechasPorFormaDePago(long idEmpresa, long idFormaDePago, Date desde, Date hasta) {
+        BigDecimal total = reciboRepository.getTotalRecibosProveedoresEntreFechasPorFormaDePago(idEmpresa, idFormaDePago,desde, hasta);
+        return (total == null) ? BigDecimal.ZERO : total;
     }
   
 }

@@ -3,14 +3,11 @@ package sic.repository;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.Cliente;
 import sic.modelo.Empresa;
-import sic.modelo.FormaDePago;
 import sic.modelo.Recibo;
 import sic.modelo.Usuario;
 
@@ -28,18 +25,13 @@ public interface ReciboRepository extends PagingAndSortingRepository<Recibo, Lon
     
     List<Recibo> findAllByUsuarioAndEmpresaAndEliminado(Usuario usuario, Empresa empresa, boolean eliminado);
     
-    Page<Recibo> findAllByFechaBetweenAndClienteAndEmpresaAndEliminado(Date desde, Date hasta, Cliente cliente, Empresa empresa, boolean eliminado, Pageable page);
-    
-    List<Recibo> findAllByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(Date desde, Date hasta, FormaDePago formaDePago, Empresa empresa, boolean eliminado);
-/*
-    @Query("SELECT r FROM Recibo r "
-            + "WHERE r.empresa.id_Empresa= :idEmpresa AND r.cliente.id_Cliente= :idCliente AND r.eliminado = false AND r.saldoSobrante > 0 "
-            + "ORDER BY r.fecha ASC")
-    List<Recibo> getRecibosConSaldoSobranteCliente(@Param("idEmpresa") long idEmpresa, @Param("idCliente") long idCliente);
+    @Query("SELECT r FROM Recibo r WHERE r.empresa.id_Empresa = :idEmpresa AND r.formaDePago.id_FormaDePago = :idFormaDePago AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
+    List<Recibo> getRecibosEntreFechasPorFormaDePago(@Param("idEmpresa") long idEmpresa, @Param("idFormaDePago") long idFormaDePago, @Param("desde") Date desde, @Param("hasta") Date hasta);
 
-    @Query("SELECT r FROM Recibo r "
-            + "WHERE r.empresa.id_Empresa= :idEmpresa AND r.proveedor.id_Proveedor= :idProveedor AND r.eliminado = false AND r.saldoSobrante > 0 "
-            + "ORDER BY r.fecha ASC")
-    List<Recibo> getRecibosConSaldoSobranteProveedor(@Param("idEmpresa") long idEmpresa, @Param("idProveedor") long idProveedor);
-*/
+    @Query("SELECT SUM(r.monto) FROM Recibo r WHERE r.empresa.id_Empresa = :idEmpresa AND (r.proveedor is null) AND r.formaDePago.id_FormaDePago = :idFormaDePago AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
+    BigDecimal getTotalRecibosClientesEntreFechasPorFormaDePago(@Param("idEmpresa") long idEmpresa, @Param("idFormaDePago") long idFormaDePago, @Param("desde") Date desde, @Param("hasta") Date hasta);
+
+    @Query("SELECT SUM(r.monto) FROM Recibo r WHERE r.empresa.id_Empresa = :idEmpresa AND (r.cliente is null) AND r.formaDePago.id_FormaDePago = :idFormaDePago AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
+    BigDecimal getTotalRecibosProveedoresEntreFechasPorFormaDePago(@Param("idEmpresa") long idEmpresa, @Param("idFormaDePago") long idFormaDePago, @Param("desde") Date desde, @Param("hasta") Date hasta);
+
 }

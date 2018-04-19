@@ -13,7 +13,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Caja;
+import sic.modelo.Empresa;
 import sic.modelo.EstadoCaja;
+import sic.modelo.FormaDePago;
 import sic.modelo.Gasto;
 import sic.service.BusinessServiceException;
 import sic.repository.GastoRepository;
@@ -114,19 +116,13 @@ public class GastoServiceImpl implements IGastoService {
     }
 
     @Override
-    public List<Gasto> getGastosPorFecha(Long idEmpresa, Date desde, Date hasta) {
-        return gastoRepository.findAllByFechaBetweenAndEmpresaAndEliminado(desde, hasta, empresaService.getEmpresaPorId(idEmpresa), false);
-    }
-
-    @Override
     public Gasto getGastosPorNroYEmpreas(Long nroPago, Long idEmpresa) {
         return gastoRepository.findByNroGastoAndEmpresaAndEliminado(nroPago, empresaService.getEmpresaPorId(idEmpresa), false);
     }
 
     @Override
-    public List<Gasto> getGastosEntreFechasYFormaDePago(Long idEmpresa, Long idFormaDePago, Date desde, Date hasta) {
-        return gastoRepository.findAllByFechaBetweenAndEmpresaAndFormaDePagoAndEliminado(desde, hasta, empresaService.getEmpresaPorId(idEmpresa), 
-                formaDePagoService.getFormasDePagoPorId(idFormaDePago), false);
+    public List<Gasto> getGastosEntreFechasYFormaDePago(Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta) {
+        return gastoRepository.getGastosEntreFechasPorFormaDePago(empresa.getId_Empresa(), formaDePago.getId_FormaDePago(), desde, hasta);
     }
 
     @Override
@@ -150,6 +146,12 @@ public class GastoServiceImpl implements IGastoService {
     @Override
     public long getUltimoNumeroDeGasto(long idEmpresa) {
         return gastoRepository.findTopByEmpresaAndEliminadoOrderByNroGastoDesc(empresaService.getEmpresaPorId(idEmpresa), false).getNroGasto();
+    }
+
+    @Override
+    public BigDecimal getTotalGastosEntreFechasYFormaDePago(long idEmpresa, long idFormaDePago, Date desde, Date hasta) {
+        BigDecimal total = gastoRepository.getTotalGastosEntreFechasPorFormaDePago(idEmpresa, idFormaDePago, desde, hasta);
+        return (total == null) ? BigDecimal.ZERO : total;
     }
 
 }

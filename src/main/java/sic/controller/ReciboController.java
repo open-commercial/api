@@ -87,17 +87,6 @@ public class ReciboController {
         reciboService.eliminar(idRecibo);
     }
     
-    @GetMapping("/recibos/busqueda")
-    @ResponseStatus(HttpStatus.OK)
-    public List<Recibo> getRecibosPorCajaYFormaDePago(@RequestParam long idEmpresa,
-                                                      @RequestParam long idFormaDePago,
-                                                      @RequestParam long desde,
-                                                      @RequestParam long hasta) {
-        Date fechaDesde = new Date(desde);
-        Date fechaHasta = new Date(hasta);
-        return reciboService.getByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(fechaDesde, fechaHasta, formaDePagoService.getFormasDePagoPorId(idFormaDePago), empresaService.getEmpresaPorId(idEmpresa));
-    }
-    
     @GetMapping("/recibos/{idRecibo}/reporte")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<byte[]> getReporteRecibo(@PathVariable long idRecibo) {        

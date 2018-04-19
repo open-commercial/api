@@ -6,6 +6,9 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import sic.modelo.BusquedaCajaCriteria;
 import sic.modelo.Caja;
+import sic.modelo.Empresa;
+import sic.modelo.FormaDePago;
+import sic.modelo.MovimientoCaja;
 
 public interface ICajaService {
 
@@ -34,5 +37,7 @@ public interface ICajaService {
     BigDecimal getSaldoFinalCajas(long idEmpresa, Long idUsuario, Date desde, Date hasta);
     
     BigDecimal getSaldoRealCajas(long idEmpresa, Long idUsuario, Date desde, Date hasta);
+    
+    List<MovimientoCaja> getMovimientosPorFormaDePagoEntreFechas(Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta);
 
 }
