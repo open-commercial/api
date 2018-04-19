@@ -53,29 +53,14 @@ public class ControllersExceptionHandler {
         return log(ex);
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ResponseBody
-    public String handleConstraintViolationException(ConstraintViolationException ex) {
-        log(ex);
-        String message = "";
-        for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
-            if (message.isEmpty()) {
-                message = message.concat(violation.getRootBeanClass().getSimpleName() + "\n");
-            }
-            message = message.concat(violation.getPropertyPath() + ": " + violation.getMessage() + "\n");
-        }
-        return message;
-    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    protected String handleMethodArgumentNotValid(final MethodArgumentNotValidException ex) {
+    public String handleMethodArgumentNotValid(final MethodArgumentNotValidException ex) {
         log(ex);
         String message = "";
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            message = message.concat(error.getField() + ": " + error.getDefaultMessage() + "\n");
+            message = message.concat(error.getDefaultMessage() + "\n");
         }
         return message;
     }

@@ -157,7 +157,7 @@ public class ProductoController {
     
     @PutMapping("/productos")
     @ResponseStatus(HttpStatus.OK)
-    public void actualizar(@RequestBody Producto producto,
+    public void actualizar(@RequestBody @Valid Producto producto,
                            @RequestParam long idMedida,
                            @RequestParam long idRubro, 
                            @RequestParam long idProveedor,
