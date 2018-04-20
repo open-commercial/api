@@ -25,13 +25,25 @@ public interface ReciboRepository extends PagingAndSortingRepository<Recibo, Lon
     
     List<Recibo> findAllByUsuarioAndEmpresaAndEliminado(Usuario usuario, Empresa empresa, boolean eliminado);
     
-    @Query("SELECT r FROM Recibo r WHERE r.empresa.id_Empresa = :idEmpresa AND r.formaDePago.id_FormaDePago = :idFormaDePago AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
-    List<Recibo> getRecibosEntreFechasPorFormaDePago(@Param("idEmpresa") long idEmpresa, @Param("idFormaDePago") long idFormaDePago, @Param("desde") Date desde, @Param("hasta") Date hasta);
+    @Query("SELECT r FROM Recibo r " +
+            "WHERE r.empresa.id_Empresa = :idEmpresa " +
+            "AND r.formaDePago.id_FormaDePago = :idFormaDePago " +
+            "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
+    List<Recibo> getRecibosEntreFechasPorFormaDePago(@Param("idEmpresa") long idEmpresa,
+                                                     @Param("idFormaDePago") long idFormaDePago,
+                                                     @Param("desde") Date desde, @Param("hasta") Date hasta);
 
-    @Query("SELECT SUM(r.monto) FROM Recibo r WHERE r.empresa.id_Empresa = :idEmpresa AND (r.proveedor is null) AND r.formaDePago.id_FormaDePago = :idFormaDePago AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
+    @Query("SELECT SUM(r.monto) FROM Recibo r " +
+            "WHERE r.empresa.id_Empresa = :idEmpresa " +
+            "AND (r.proveedor is null) AND r.formaDePago.id_FormaDePago = :idFormaDePago " +
+            "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
     BigDecimal getTotalRecibosClientesEntreFechasPorFormaDePago(@Param("idEmpresa") long idEmpresa, @Param("idFormaDePago") long idFormaDePago, @Param("desde") Date desde, @Param("hasta") Date hasta);
 
-    @Query("SELECT SUM(r.monto) FROM Recibo r WHERE r.empresa.id_Empresa = :idEmpresa AND (r.cliente is null) AND r.formaDePago.id_FormaDePago = :idFormaDePago AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
+    @Query("SELECT SUM(r.monto) FROM Recibo r " +
+            "WHERE r.empresa.id_Empresa = :idEmpresa " +
+            "AND (r.cliente is null) " +
+            "AND r.formaDePago.id_FormaDePago = :idFormaDePago " +
+            "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
     BigDecimal getTotalRecibosProveedoresEntreFechasPorFormaDePago(@Param("idEmpresa") long idEmpresa, @Param("idFormaDePago") long idFormaDePago, @Param("desde") Date desde, @Param("hasta") Date hasta);
 
 }
