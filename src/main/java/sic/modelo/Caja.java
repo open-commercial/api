@@ -46,7 +46,6 @@ public class Caja implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaCorteInforme;
 
-    @Column(nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaCierre;
 
@@ -73,7 +72,7 @@ public class Caja implements Serializable {
     private BigDecimal saldoInicial;
 
     @Column(precision = 25, scale = 15)
-    private BigDecimal saldoFinal;
+    private BigDecimal saldoFinal;  // saldo sistema
 
     @Column(precision = 25, scale = 15)
     private BigDecimal saldoReal;
@@ -81,12 +80,12 @@ public class Caja implements Serializable {
     private boolean eliminada;
     
     @Transient
-    private Map<Long, BigDecimal> totalesPorFomaDePago;
+    private Map<Long, BigDecimal> totalesPorFomaDePago; // endpoint como movimientos
     
     @Transient
-    private BigDecimal totalAfectaCaja;
+    private BigDecimal totalAfectaCaja;  // endpoint
             
     @Transient
-    private BigDecimal totalGeneral;
+    private BigDecimal totalGeneral;  // el mismo que saldo sistema
 
 }

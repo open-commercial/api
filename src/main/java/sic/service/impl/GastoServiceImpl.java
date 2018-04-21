@@ -21,24 +21,20 @@ import sic.service.BusinessServiceException;
 import sic.repository.GastoRepository;
 import sic.service.ICajaService;
 import sic.service.IEmpresaService;
-import sic.service.IFormaDePagoService;
 
 @Service
 public class GastoServiceImpl implements IGastoService {
 
     private final GastoRepository gastoRepository;
     private final IEmpresaService empresaService;
-    private final IFormaDePagoService formaDePagoService;
     private final ICajaService cajaService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     @Lazy
-    public GastoServiceImpl(GastoRepository gastoRepository, IEmpresaService empresaService, 
-                            IFormaDePagoService formaDePagoService, ICajaService cajaService) {
+    public GastoServiceImpl(GastoRepository gastoRepository, IEmpresaService empresaService, ICajaService cajaService) {
         this.gastoRepository = gastoRepository;
         this.empresaService = empresaService;
-        this.formaDePagoService = formaDePagoService;
         this.cajaService = cajaService;
     }
     

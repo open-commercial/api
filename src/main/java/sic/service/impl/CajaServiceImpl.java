@@ -33,10 +33,8 @@ import sic.modelo.Caja;
 import sic.modelo.Empresa;
 import sic.modelo.FormaDePago;
 import sic.modelo.EstadoCaja;
-import sic.modelo.Gasto;
 import sic.modelo.MovimientoCaja;
 import sic.modelo.QCaja;
-import sic.modelo.Recibo;
 import sic.modelo.Rol;
 import sic.service.BusinessServiceException;
 import sic.service.IEmpresaService;
@@ -337,14 +335,8 @@ public class CajaServiceImpl implements ICajaService {
     @Override
     public List<MovimientoCaja> getMovimientosPorFormaDePagoEntreFechas(Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta) {
         List<MovimientoCaja> movimientos = new ArrayList<>();
-        gastoService.getGastosEntreFechasYFormaDePago(empresa, formaDePago, desde, hasta);
-        gastoService.getGastosEntreFechasYFormaDePago(empresa, formaDePago, desde, hasta).forEach(gasto -> {
-            movimientos.add(new MovimientoCaja(gasto));
-        });
-        reciboService.getRecibosEntreFechasPorFormaDePago(desde, hasta, formaDePago, empresa);
-        reciboService.getRecibosEntreFechasPorFormaDePago(desde, hasta, formaDePago, empresa).forEach(recibo -> {
-            movimientos.add(new MovimientoCaja(recibo));
-        });
+        gastoService.getGastosEntreFechasYFormaDePago(empresa, formaDePago, desde, hasta).forEach(gasto -> movimientos.add(new MovimientoCaja(gasto)));
+        reciboService.getRecibosEntreFechasPorFormaDePago(desde, hasta, formaDePago, empresa).forEach(recibo -> movimientos.add(new MovimientoCaja(recibo)));
         Collections.sort(movimientos);
         return movimientos;
     }
