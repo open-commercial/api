@@ -1,6 +1,8 @@
 package sic.service.impl;
 
 import java.math.BigDecimal;
+
+import sic.modelo.*;
 import sic.service.IGastoService;
 import java.util.Date;
 import java.util.List;
@@ -12,11 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.Caja;
-import sic.modelo.Empresa;
-import sic.modelo.EstadoCaja;
-import sic.modelo.FormaDePago;
-import sic.modelo.Gasto;
 import sic.service.BusinessServiceException;
 import sic.repository.GastoRepository;
 import sic.service.ICajaService;
@@ -107,13 +104,9 @@ public class GastoServiceImpl implements IGastoService {
         this.validarGasto(gasto);
         gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getEmpresa().getId_Empresa()) + 1);
         gasto = gastoRepository.save(gasto);
+        this.cajaService.actualizarSaldoSistema(gasto, TipoDeOperacion.ALTA);
         LOGGER.warn("El Gasto " + gasto + " se guardó correctamente." );
         return gasto;
-    }
-
-    @Override
-    public Gasto getGastosPorNroYEmpreas(Long nroPago, Long idEmpresa) {
-        return gastoRepository.findByNroGastoAndEmpresaAndEliminado(nroPago, empresaService.getEmpresaPorId(idEmpresa), false);
     }
 
     @Override
@@ -137,6 +130,7 @@ public class GastoServiceImpl implements IGastoService {
         }
         gastoParaEliminar.setEliminado(true);
         gastoRepository.save(gastoParaEliminar);
+        this.cajaService.actualizarSaldoSistema(gastoParaEliminar, TipoDeOperacion.ELIMINACION);
     }
     
     @Override
@@ -147,6 +141,12 @@ public class GastoServiceImpl implements IGastoService {
     @Override
     public BigDecimal getTotalGastosEntreFechasYFormaDePago(long idEmpresa, long idFormaDePago, Date desde, Date hasta) {
         BigDecimal total = gastoRepository.getTotalGastosEntreFechasPorFormaDePago(idEmpresa, idFormaDePago, desde, hasta);
+        return (total == null) ? BigDecimal.ZERO : total;
+    }
+
+    @Override
+    public BigDecimal getTotalGastosEntreFechas(long idEmpresa, Date desde, Date hasta) {
+        BigDecimal total = gastoRepository.getTotalGastosEntreFechas(idEmpresa, desde, hasta);
         return (total == null) ? BigDecimal.ZERO : total;
     }
 

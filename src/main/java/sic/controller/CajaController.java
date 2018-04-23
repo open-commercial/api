@@ -6,6 +6,8 @@ import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -137,5 +139,71 @@ public class CajaController {
         return cajaService.getMovimientosPorFormaDePagoEntreFechas(caja.getEmpresa(), formaDePagoService.getFormasDePagoPorId(idFormaDePago),
                 Date.from(desde.atZone(ZoneId.systemDefault()).toInstant()), Date.from(hasta.atZone(ZoneId.systemDefault()).toInstant()));
     }
+
+    @GetMapping("/cajas/{idCaja}/total-afecta-caja")
+    @ResponseStatus(HttpStatus.OK)
+    public BigDecimal getTotalQueAfectaCaja(@PathVariable long idCaja) {
+        return cajaService.getTotalQueAfectaCaja(cajaService.getCajaPorId(idCaja));
+    }
+
+    @GetMapping("/cajas/empresas/{idEmpresa}/saldo-sistema")
+    @ResponseStatus(HttpStatus.OK)
+    public BigDecimal getSaldoSistemaCajas(@PathVariable long idEmpresa,
+                                           @RequestParam(value = "idUsuario", required = false) Long idUsuario,
+                                           @RequestParam(value = "desde", required = false) Long desde,
+                                           @RequestParam(value = "hasta", required = false) Long hasta) {
+        Calendar fechaDesde = Calendar.getInstance();
+        fechaDesde.add(Calendar.YEAR, -17); // Rango temporal hasta la implementacion de criteria builder
+        Calendar fechaHasta = Calendar.getInstance();
+        if (desde != null && hasta != null) {
+            fechaDesde.setTimeInMillis(desde);
+            fechaDesde.set(Calendar.HOUR_OF_DAY, 0);
+            fechaDesde.set(Calendar.MINUTE, 0);
+            fechaDesde.set(Calendar.SECOND, 0);
+            fechaDesde.set(Calendar.MILLISECOND, 0);
+            fechaHasta.setTimeInMillis(hasta);
+            fechaHasta.set(Calendar.HOUR_OF_DAY, 23);
+            fechaHasta.set(Calendar.MINUTE, 59);
+            fechaHasta.set(Calendar.SECOND, 59);
+            fechaHasta.set(Calendar.MILLISECOND, 0);
+        }
+        return cajaService.getSaldoSistemaCajas(idEmpresa, idUsuario, fechaDesde.getTime(), fechaHasta.getTime());
+    }
+
+    @GetMapping("/cajas/empresas/{idEmpresa}/saldo-real")
+    @ResponseStatus(HttpStatus.OK)
+    public BigDecimal getSaldoRealCajas(@PathVariable long idEmpresa,
+                                        @RequestParam(value = "idUsuario", required = false) Long idUsuario,
+                                        @RequestParam(value = "desde", required = false) Long desde,
+                                        @RequestParam(value = "hasta", required = false) Long hasta) {
+        Calendar fechaDesde = Calendar.getInstance();
+        fechaDesde.add(Calendar.YEAR, -17); // Rango temporal hasta la implementacion de criteria builder
+        Calendar fechaHasta = Calendar.getInstance();
+        if (desde != null && hasta != null) {
+            fechaDesde.setTimeInMillis(desde);
+            fechaDesde.set(Calendar.HOUR_OF_DAY, 0);
+            fechaDesde.set(Calendar.MINUTE, 0);
+            fechaDesde.set(Calendar.SECOND, 0);
+            fechaDesde.set(Calendar.MILLISECOND, 0);
+            fechaHasta.setTimeInMillis(hasta);
+            fechaHasta.set(Calendar.HOUR_OF_DAY, 23);
+            fechaHasta.set(Calendar.MINUTE, 59);
+            fechaHasta.set(Calendar.SECOND, 59);
+            fechaHasta.set(Calendar.MILLISECOND, 0);
+        }
+        return cajaService.getSaldoRealCajas(idEmpresa, idUsuario, fechaDesde.getTime(), fechaHasta.getTime());
+    }
+
+    @GetMapping("/cajas/{idCaja}/totales-formas-de-pago")
+    @ResponseStatus(HttpStatus.OK)
+    public Map<Long, BigDecimal> getTotalesPorFormaDePago(@PathVariable long idCaja) {
+        return cajaService.getTotalesDeFormaDePago(idCaja);
+    }
+
+//    @GetMapping("/cajas/ultima-caja/empresas/{idEmpresa}")
+//    @ResponseStatus(HttpStatus.OK)
+//    public Caja getTotalesPorFormaDePago(@PathVariable long idCaja) {
+//        return cajaService.getTotalesDeFormaDePago(idCaja);
+//    }
     
 }

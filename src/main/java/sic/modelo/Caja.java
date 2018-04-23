@@ -3,7 +3,6 @@ package sic.modelo;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -16,7 +15,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -72,20 +70,11 @@ public class Caja implements Serializable {
     private BigDecimal saldoInicial;
 
     @Column(precision = 25, scale = 15)
-    private BigDecimal saldoFinal;  // saldo sistema
+    private BigDecimal saldoSistema;
 
     @Column(precision = 25, scale = 15)
     private BigDecimal saldoReal;
 
     private boolean eliminada;
-    
-    @Transient
-    private Map<Long, BigDecimal> totalesPorFomaDePago; // endpoint como movimientos
-    
-    @Transient
-    private BigDecimal totalAfectaCaja;  // endpoint
-            
-    @Transient
-    private BigDecimal totalGeneral;  // el mismo que saldo sistema
 
 }

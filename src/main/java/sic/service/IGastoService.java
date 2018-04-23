@@ -17,8 +17,6 @@ public interface IGastoService {
 
     List<Gasto> getGastosEntreFechasYFormaDePago(Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta);
     
-    Gasto getGastosPorNroYEmpreas(Long nroPago, Long id_Empresa);
-    
     BigDecimal calcularTotalGastos(List<Gasto> gastos);
 
     Gasto guardar(Gasto gasto);
@@ -28,5 +26,7 @@ public interface IGastoService {
     long getUltimoNumeroDeGasto(long id_empresa);
 
     BigDecimal getTotalGastosEntreFechasYFormaDePago(long idEmpresa, long idFormaDePago, Date desde, Date hasta);
+
+    BigDecimal getTotalGastosEntreFechas(long idEmpresa, Date desde, Date hasta);
 
 }

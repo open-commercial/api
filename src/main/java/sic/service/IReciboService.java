@@ -13,11 +13,7 @@ public interface IReciboService {
     
     Recibo getById(long idRecibo);
     
-    BigDecimal getMontoById(long idRecibo);
-    
     Recibo guardar(Recibo recibo);
-    
-    Recibo actualizarSaldoSobrante(long idRecibo, BigDecimal monto);
     
     List<Recibo> construirRecibos(long[] formaDePago, Empresa empresa, Cliente cliente, Usuario usuario, BigDecimal[] monto, BigDecimal totalFactura, Date fecha);
     
@@ -31,6 +27,10 @@ public interface IReciboService {
 
     BigDecimal getTotalRecibosProveedoresEntreFechasPorFormaDePago(long idEmpresa,long idFormaDePago, Date desde, Date hasta);
 
-    List<Recibo> getRecibosEntreFechasPorFormaDePago(Date desde, Date hasta, FormaDePago formaDePago, Empresa empresa); 
+    List<Recibo> getRecibosEntreFechasPorFormaDePago(Date desde, Date hasta, FormaDePago formaDePago, Empresa empresa);
+
+    BigDecimal getTotalRecibosClientesEntreFechas(long idEmpresa, Date desde, Date hasta);
+
+    BigDecimal getTotalRecibosProveedoresEntreFechas(long idEmpresa, Date desde, Date hasta);
     
 }

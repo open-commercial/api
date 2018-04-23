@@ -3,12 +3,16 @@ package sic.service.impl;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.DateExpression;
 import com.querydsl.core.types.dsl.Expressions;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+
+import sic.modelo.*;
 import sic.service.ICajaService;
+
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -18,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,14 +33,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.BusquedaCajaCriteria;
-import sic.modelo.Caja;
-import sic.modelo.Empresa;
-import sic.modelo.FormaDePago;
-import sic.modelo.EstadoCaja;
-import sic.modelo.MovimientoCaja;
-import sic.modelo.QCaja;
-import sic.modelo.Rol;
 import sic.service.BusinessServiceException;
 import sic.service.IEmpresaService;
 import sic.service.IFormaDePagoService;
@@ -59,8 +56,8 @@ public class CajaServiceImpl implements ICajaService {
 
     @Autowired
     public CajaServiceImpl(CajaRepository cajaRepository, IFormaDePagoService formaDePagoService, IGastoService gastoService,
-            IEmpresaService empresaService, IUsuarioService usuarioService,
-            IReciboService reciboService) {
+                           IEmpresaService empresaService, IUsuarioService usuarioService,
+                           IReciboService reciboService) {
         this.cajaRepository = cajaRepository;
         this.formaDePagoService = formaDePagoService;
         this.gastoService = gastoService;
@@ -153,11 +150,11 @@ public class CajaServiceImpl implements ICajaService {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_caja_no_existente"));
         }
-        caja = this.cargarRecibosyGastos(caja);
-        caja.setTotalAfectaCaja(this.getTotalCaja(caja, true));
-        caja.setTotalGeneral(this.getTotalCaja(caja, false));
+        /*caja = this.getTotalesDeFormaDePago(caja);
+        caja.setTotalAfectaCaja(this.getTotalQueAfectaCaja(caja, true));
+        caja.setTotalGeneral(this.getTotalQueAfectaCaja(caja, false));
         caja.setSaldoFinal(caja.getTotalGeneral());
-        this.actualizar(caja);
+        this.actualizar(caja);*/
         return caja;
     }
 
@@ -169,11 +166,6 @@ public class CajaServiceImpl implements ICajaService {
         } else {
             return caja.getNroCaja();
         }
-    }
-
-    @Override
-    public List<Caja> getCajas(long idEmpresa, Date desde, Date hasta) {
-        return cajaRepository.findAllByFechaAperturaBetweenAndEmpresaAndEliminada(desde, hasta, empresaService.getEmpresaPorId(idEmpresa), false);
     }
 
     @Override
@@ -233,7 +225,7 @@ public class CajaServiceImpl implements ICajaService {
     @Transactional
     public Caja cerrarCaja(long idCaja, BigDecimal monto, Long idUsuario, boolean scheduling) {
         Caja cajaACerrar = this.getCajaPorId(idCaja);
-        cajaACerrar.setSaldoFinal(this.getTotalCaja(cajaACerrar, false));
+        /*   cajaACerrar.setSaldoFinal(this.getTotalQueAfectaCaja(cajaACerrar, false));*/
         cajaACerrar.setSaldoReal(monto);
         if (scheduling) {
             LocalDateTime fechaCierre = LocalDateTime.ofInstant(cajaACerrar.getFechaApertura().toInstant(), ZoneId.systemDefault());
@@ -264,23 +256,28 @@ public class CajaServiceImpl implements ICajaService {
             fechaHoraCaja.setTime(ultimaCajaDeEmpresa.getFechaApertura());
             LocalDate fechaCaja = LocalDate.of(fechaHoraCaja.get(Calendar.YEAR), fechaHoraCaja.get(Calendar.MONTH) + 1, fechaHoraCaja.get(Calendar.DAY_OF_MONTH));
             if (fechaCaja.compareTo(fechaActual) < 0) {
-                this.cerrarCaja(ultimaCajaDeEmpresa.getId_Caja(), this.getTotalCaja(ultimaCajaDeEmpresa, false), ultimaCajaDeEmpresa.getUsuarioAbreCaja().getId_Usuario(), true);
+                this.cerrarCaja(ultimaCajaDeEmpresa.getId_Caja(), this.getTotalQueAfectaCaja(ultimaCajaDeEmpresa), ultimaCajaDeEmpresa.getUsuarioAbreCaja().getId_Usuario(), true);
             }
         });
     }
 
     @Override
-    public BigDecimal getTotalCaja(Caja caja, boolean soloAfectaCaja) {
-        List<FormaDePago> formasDePago = formaDePagoService.getFormasDePago(caja.getEmpresa());
-        BigDecimal total = caja.getSaldoInicial();
-        for (FormaDePago fp : formasDePago) {
-            if (soloAfectaCaja && fp.isAfectaCaja()) {
-                total = total.add(this.getTotalMovimientosPorFormaDePago(caja, fp));
-            } else if (!soloAfectaCaja) {
-                total = total.add(this.getTotalMovimientosPorFormaDePago(caja, fp));
-            }
+    public BigDecimal getTotalQueAfectaCaja(Caja caja) {
+        LocalDateTime ldt = caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        if (caja.getFechaCierre() == null) {
+            ldt = ldt.withHour(23);
+            ldt = ldt.withMinute(59);
+            ldt = ldt.withSecond(59);
+        } else {
+            ldt = caja.getFechaCierre().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         }
-        return total;
+        BigDecimal totalRecibosCliente = reciboService.getTotalRecibosClientesEntreFechas(caja.getEmpresa().getId_Empresa(),
+                caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
+        BigDecimal totalRecibosProveedor = reciboService.getTotalRecibosProveedoresEntreFechas(caja.getEmpresa().getId_Empresa(),
+                caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
+        BigDecimal totalGastos = gastoService.getTotalGastosEntreFechas(caja.getEmpresa().getId_Empresa(),
+                caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
+        return caja.getSaldoInicial().add(totalRecibosCliente).subtract(totalRecibosProveedor).subtract(totalGastos);
     }
 
     private BigDecimal getTotalMovimientosPorFormaDePago(Caja caja, FormaDePago fdp) {
@@ -292,33 +289,37 @@ public class CajaServiceImpl implements ICajaService {
         } else {
             ldt = caja.getFechaCierre().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         }
-        BigDecimal recibosTotal = reciboService.getTotalRecibosClientesEntreFechasPorFormaDePago(caja.getEmpresa().getId_Empresa(), fdp.getId_FormaDePago(), caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()))
-                .subtract(reciboService.getTotalRecibosProveedoresEntreFechasPorFormaDePago(caja.getEmpresa().getId_Empresa(), fdp.getId_FormaDePago(), caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant())));
-        BigDecimal gastosTotal = gastoService.getTotalGastosEntreFechasYFormaDePago(caja.getEmpresa().getId_Empresa(), fdp.getId_FormaDePago(), caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
+        BigDecimal recibosTotal = reciboService.getTotalRecibosClientesEntreFechasPorFormaDePago(caja.getEmpresa().getId_Empresa(),
+                fdp.getId_FormaDePago(), caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()))
+                .subtract(reciboService.getTotalRecibosProveedoresEntreFechasPorFormaDePago(caja.getEmpresa().getId_Empresa(),
+                        fdp.getId_FormaDePago(), caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant())));
+        BigDecimal gastosTotal = gastoService.getTotalGastosEntreFechasYFormaDePago(caja.getEmpresa().getId_Empresa(), fdp.getId_FormaDePago(),
+                caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
         return recibosTotal.subtract(gastosTotal);
     }
 
-    private Caja cargarRecibosyGastos(Caja caja) {
+    @Override
+    public Map<Long, BigDecimal> getTotalesDeFormaDePago(long idCaja) {
+        Caja caja = cajaRepository.findById(idCaja);
         Map<Long, BigDecimal> totalesPorFomaDePago = new HashMap<>();
         formaDePagoService.getFormasDePago(caja.getEmpresa()).forEach(fdp -> {
             BigDecimal total = this.getTotalMovimientosPorFormaDePago(caja, fdp);
-            if (total != BigDecimal.ZERO) {
+            if (total.compareTo(BigDecimal.ZERO) != 0) {
                 totalesPorFomaDePago.put(fdp.getId_FormaDePago(), total);
             }
         });
-        caja.setTotalesPorFomaDePago(totalesPorFomaDePago);
-        return caja;
+        return totalesPorFomaDePago;
     }
 
     @Override
-    public BigDecimal getSaldoFinalCajas(long idEmpresa, Long idUsuario, Date desde, Date hasta) {
-        BigDecimal saldoFinal;
+    public BigDecimal getSaldoSistemaCajas(long idEmpresa, Long idUsuario, Date desde, Date hasta) {
+        BigDecimal saldoSistema;
         if (idUsuario != null) {
-            saldoFinal = cajaRepository.getSaldoFinalCajasPorUsuarioDeCierre(idEmpresa, idUsuario, desde, hasta);
+            saldoSistema = cajaRepository.getSaldoSistemaCajasPorUsuarioDeCierre(idEmpresa, idUsuario, desde, hasta);
         } else {
-            saldoFinal = cajaRepository.getSaldoFinalCajas(idEmpresa, desde, hasta);
+            saldoSistema = cajaRepository.getSaldoSistemaCajas(idEmpresa, desde, hasta);
         }
-        return (saldoFinal == null) ? BigDecimal.ZERO : saldoFinal;
+        return (saldoSistema == null) ? BigDecimal.ZERO : saldoSistema;
     }
 
     @Override
@@ -331,7 +332,7 @@ public class CajaServiceImpl implements ICajaService {
         }
         return (saldoReal == null) ? BigDecimal.ZERO : saldoReal;
     }
-    
+
     @Override
     public List<MovimientoCaja> getMovimientosPorFormaDePagoEntreFechas(Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta) {
         List<MovimientoCaja> movimientos = new ArrayList<>();
@@ -339,6 +340,42 @@ public class CajaServiceImpl implements ICajaService {
         reciboService.getRecibosEntreFechasPorFormaDePago(desde, hasta, formaDePago, empresa).forEach(recibo -> movimientos.add(new MovimientoCaja(recibo)));
         Collections.sort(movimientos);
         return movimientos;
+    }
+
+    @Override
+    public void actualizarSaldoSistema(Recibo recibo, TipoDeOperacion tipoDeOperacion) {
+        Caja caja = this.getUltimaCaja(recibo.getEmpresa().getId_Empresa());
+        if (caja != null && caja.getEstado().equals(EstadoCaja.ABIERTA)) {
+            BigDecimal monto = BigDecimal.ZERO;
+            if (tipoDeOperacion.equals(TipoDeOperacion.ALTA)) {
+                if (recibo.getCliente() != null) {
+                    monto = recibo.getMonto();
+                } else if (recibo.getProveedor() != null) {
+                    monto = recibo.getMonto().negate();
+                }
+            } else if (tipoDeOperacion.equals(TipoDeOperacion.ELIMINACION)) {
+                if (recibo.getCliente() != null) {
+                    monto = recibo.getMonto().negate();
+                } else if (recibo.getProveedor() != null) {
+                    monto = recibo.getMonto();
+                }
+            }
+            cajaRepository.actualizarSaldoSistema(caja.getId_Caja(), monto);
+        }
+    }
+
+    @Override
+    public void actualizarSaldoSistema(Gasto gasto, TipoDeOperacion tipoDeOperacion) {
+        Caja caja = this.getUltimaCaja(gasto.getEmpresa().getId_Empresa());
+        if (caja != null) {
+            BigDecimal monto = BigDecimal.ZERO;
+            if (tipoDeOperacion.equals(TipoDeOperacion.ALTA)) {
+                monto = gasto.getMonto().negate();
+            } else if (tipoDeOperacion.equals(TipoDeOperacion.ELIMINACION)) {
+                monto = gasto.getMonto();
+            }
+            cajaRepository.actualizarSaldoSistema(caja.getId_Caja(), monto);
+        }
     }
 
 }
