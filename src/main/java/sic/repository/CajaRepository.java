@@ -20,7 +20,7 @@ public interface CajaRepository extends PagingAndSortingRepository<Caja, Long>, 
       Caja findTopByEmpresaAndEliminadaOrderByFechaAperturaDesc(Empresa empresa, boolean eliminada);
 
       @Query("SELECT (c.estado = sic.modelo.EstadoCaja.ABIERTA) FROM Caja c WHERE c.empresa.id_Empresa = :idEmpresa AND c.eliminada = false ORDER BY c.id_Caja DESC")
-      boolean ultimaCajaAbierta(@Param("idEmpresa") long idEmpresa);
+      boolean isUltimaCajaAbierta(@Param("idEmpresa") long idEmpresa);
       
       @Query("SELECT SUM(c.saldoSistema) FROM Caja c WHERE c.empresa.id_Empresa = :idEmpresa AND c.usuarioCierraCaja.id_Usuario = :idUsuario AND c.fechaApertura BETWEEN :desde AND :hasta AND c.eliminada = false")
       BigDecimal getSaldoSistemaCajasPorUsuarioDeCierre(@Param("idEmpresa") long idEmpresa, @Param("idUsuario") long idUsuario, @Param("desde") Date desde, @Param("hasta") Date hasta);

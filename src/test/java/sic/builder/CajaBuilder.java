@@ -12,7 +12,6 @@ public class CajaBuilder {
     private long id_Caja = 0L;
     private int nroCaja = 22;
     private Date fechaApertura = new Date();
-    private Date fechaCorteInforme = new Date();
     private Date fechaCierre;
     private Usuario usuarioAbreCaja = new UsuarioBuilder().build();
     private Usuario usuarioCierraCaja = new UsuarioBuilder().build();
@@ -25,7 +24,7 @@ public class CajaBuilder {
     private Empresa empresa = new EmpresaBuilder().build();
 
     public Caja build() {
-        return new Caja(id_Caja, nroCaja, fechaApertura, fechaCorteInforme, fechaCierre, empresa,
+        return new Caja(id_Caja, nroCaja, fechaApertura, fechaCierre, empresa,
                 usuarioAbreCaja, usuarioCierraCaja, observacion, estado,
                 saldoInicial, saldoSistema, saldoReal, eliminada);
     }
@@ -42,11 +41,6 @@ public class CajaBuilder {
 
     public CajaBuilder withFechaApertura(Date fechaApertura) {
         this.fechaApertura = fechaApertura;
-        return this;
-    }
-
-    public CajaBuilder withFechaCorteInforme(Date fechaCorteInforme) {
-        this.fechaCorteInforme = fechaCorteInforme;
         return this;
     }
 

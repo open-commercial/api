@@ -31,6 +31,8 @@ public interface ICajaService {
     Caja cerrarCaja(long idCaja, BigDecimal monto, Long idUsuario, boolean scheduling);
     
     BigDecimal getTotalQueAfectaCaja(Caja caja);
+
+    boolean isUltimaCajaAbierta(long idEmpresa);
     
     BigDecimal getSaldoSistemaCajas(long idEmpresa, Long idUsuario, Date desde, Date hasta);
     

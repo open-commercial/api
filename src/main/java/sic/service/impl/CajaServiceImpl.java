@@ -87,11 +87,6 @@ public class CajaServiceImpl implements ICajaService {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_caja_usuario_no_administrador"));
         }
-        //Hora de Corte
-        if (caja.getFechaCorteInforme().before(new Date())) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_caja_fecha_corte_no_valida"));
-        }
         //Una Caja por dia
         Caja ultimaCaja = this.getUltimaCaja(caja.getEmpresa().getId_Empresa());
         if (ultimaCaja != null && ultimaCaja.getEstado() == EstadoCaja.ABIERTA) {
@@ -278,6 +273,11 @@ public class CajaServiceImpl implements ICajaService {
         BigDecimal totalGastos = gastoService.getTotalGastosEntreFechas(caja.getEmpresa().getId_Empresa(),
                 caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
         return caja.getSaldoInicial().add(totalRecibosCliente).subtract(totalRecibosProveedor).subtract(totalGastos);
+    }
+
+    @Override
+    public boolean isUltimaCajaAbierta(long idEmpresa) {
+        return cajaRepository.isUltimaCajaAbierta(idEmpresa);
     }
 
     private BigDecimal getTotalMovimientosPorFormaDePago(Caja caja, FormaDePago fdp) {

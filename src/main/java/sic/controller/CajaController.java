@@ -146,6 +146,12 @@ public class CajaController {
         return cajaService.getTotalQueAfectaCaja(cajaService.getCajaPorId(idCaja));
     }
 
+    @GetMapping("/cajas/empresas/{idEmpresa}/estado-ultima-caja")
+    @ResponseStatus(HttpStatus.OK)
+    public boolean getEstadoUltimaCaja(@PathVariable long idEmpresa) {
+        return cajaService.isUltimaCajaAbierta(idEmpresa);
+    }
+
     @GetMapping("/cajas/empresas/{idEmpresa}/saldo-sistema")
     @ResponseStatus(HttpStatus.OK)
     public BigDecimal getSaldoSistemaCajas(@PathVariable long idEmpresa,
@@ -200,10 +206,4 @@ public class CajaController {
         return cajaService.getTotalesDeFormaDePago(idCaja);
     }
 
-//    @GetMapping("/cajas/ultima-caja/empresas/{idEmpresa}")
-//    @ResponseStatus(HttpStatus.OK)
-//    public Caja getTotalesPorFormaDePago(@PathVariable long idCaja) {
-//        return cajaService.getTotalesDeFormaDePago(idCaja);
-//    }
-    
 }
