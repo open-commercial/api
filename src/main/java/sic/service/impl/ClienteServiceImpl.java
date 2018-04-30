@@ -240,5 +240,9 @@ public class ClienteServiceImpl implements IClienteService {
     public Cliente getClientePorIdPedido(long idPedido) {
         return clienteRepository.findClienteByIdPedido(idPedido);
     }
-    
+
+    @Override
+    public Cliente getClientePorIdUsuario(long idUsuario) {
+        return clienteRepository.findClienteByIdUsuario(idUsuario);
+    }
 }

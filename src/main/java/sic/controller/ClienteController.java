@@ -17,11 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import sic.modelo.BusquedaClienteCriteria;
-import sic.modelo.Cliente;
-import sic.modelo.Localidad;
-import sic.modelo.Pais;
-import sic.modelo.Provincia;
+import sic.modelo.*;
 import sic.service.IClienteService;
 import sic.service.IEmpresaService;
 import sic.service.ILocalidadService;
@@ -151,5 +147,11 @@ public class ClienteController {
     @ResponseStatus(HttpStatus.OK)
     public Cliente getClientePorIdPedido(@PathVariable long idPedido) {
        return clienteService.getClientePorIdPedido(idPedido);
+    }
+
+    @GetMapping("/clientes/usuarios/{idUsuario}")
+    @ResponseStatus(HttpStatus.OK)
+    public Cliente getClientePorIdUsuario(@PathVariable long idUsuario) {
+        return clienteService.getClientePorIdUsuario(idUsuario);
     }
 }

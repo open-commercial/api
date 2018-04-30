@@ -207,10 +207,10 @@ public class CajaServiceImpl implements ICajaService {
         QCaja qcaja = QCaja.caja;
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(qcaja.empresa.eq(criteria.getEmpresa()).and(qcaja.eliminada.eq(false)));
-        if (criteria.isBuscaPorUsuario() == true) {
+        if (criteria.isBuscaPorUsuario()) {
             builder.and(qcaja.usuarioCierraCaja.eq(criteria.getUsuario()));
         }
-        if (criteria.isBuscaPorFecha() == true) {
+        if (criteria.isBuscaPorFecha()) {
             FormatterFechaHora formateadorFecha = new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
             DateExpression<Date> fDesde = Expressions.dateTemplate(Date.class, "convert({0}, datetime)", formateadorFecha.format(criteria.getFechaDesde()));
             DateExpression<Date> fHasta = Expressions.dateTemplate(Date.class, "convert({0}, datetime)", formateadorFecha.format(criteria.getFechaHasta()));

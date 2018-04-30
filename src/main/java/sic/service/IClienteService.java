@@ -35,4 +35,5 @@ public interface IClienteService {
     
     Cliente getClientePorIdPedido(long idPedido);
 
+    Cliente getClientePorIdUsuario(long idUsuario);
 }
