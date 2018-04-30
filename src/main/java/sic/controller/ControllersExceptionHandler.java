@@ -2,9 +2,6 @@ package sic.controller;
 
 import java.util.*;
 import javax.persistence.EntityNotFoundException;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -38,7 +35,19 @@ public class ControllersExceptionHandler {
     public String handleServiceException(ServiceException ex) {
         return log(ex);
     }
-    
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public String handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        log(ex);
+        String message = "";
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            message = message.concat(error.getDefaultMessage() + "\n");
+        }
+        return message;
+    }
+
     @ExceptionHandler(UnauthorizedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ResponseBody
@@ -51,18 +60,6 @@ public class ControllersExceptionHandler {
     @ResponseBody
     public String handleEntityNotFoundException(EntityNotFoundException ex) {        
         return log(ex);
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ResponseBody
-    public String handleMethodArgumentNotValid(final MethodArgumentNotValidException ex) {
-        log(ex);
-        String message = "";
-        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            message = message.concat(error.getDefaultMessage() + "\n");
-        }
-        return message;
     }
     
     @ExceptionHandler(Exception.class)

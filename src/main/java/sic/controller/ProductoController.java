@@ -34,7 +34,6 @@ import sic.service.IMedidaService;
 import sic.service.IProductoService;
 import sic.service.IProveedorService;
 import sic.service.IRubroService;
-
 import javax.validation.Valid;
 
 @RestController
