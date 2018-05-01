@@ -16,6 +16,8 @@ import java.util.ResourceBundle;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
+import javax.validation.Valid;
+
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
