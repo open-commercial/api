@@ -34,13 +34,15 @@ public interface ICajaService {
 
     boolean isUltimaCajaAbierta(long idEmpresa);
     
-    BigDecimal getSaldoSistemaCajas(long idEmpresa, Long idUsuario, Date desde, Date hasta);
+    BigDecimal getSaldoSistemaCajas(BusquedaCajaCriteria criteria);
     
-    BigDecimal getSaldoRealCajas(long idEmpresa, Long idUsuario, Date desde, Date hasta);
+    BigDecimal getSaldoRealCajas(BusquedaCajaCriteria criteria);
     
     List<MovimientoCaja> getMovimientosPorFormaDePagoEntreFechas(Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta);
 
     void actualizarSaldoSistema(Recibo recibo, TipoDeOperacion tipoDeOperacion);
 
     void actualizarSaldoSistema(Gasto gasto, TipoDeOperacion tipoDeOperacion);
+
+    void reabrircaja(long idCaja, BigDecimal saldoInicial, long idUsuario);
 }

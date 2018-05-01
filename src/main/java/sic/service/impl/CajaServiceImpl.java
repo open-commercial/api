@@ -145,11 +145,6 @@ public class CajaServiceImpl implements ICajaService {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_caja_no_existente"));
         }
-        /*caja = this.getTotalesDeFormaDePago(caja);
-        caja.setTotalAfectaCaja(this.getTotalQueAfectaCaja(caja, true));
-        caja.setTotalGeneral(this.getTotalQueAfectaCaja(caja, false));
-        caja.setSaldoFinal(caja.getTotalGeneral());
-        this.actualizar(caja);*/
         return caja;
     }
 
@@ -165,17 +160,30 @@ public class CajaServiceImpl implements ICajaService {
 
     @Override
     public Page<Caja> getCajasCriteria(BusquedaCajaCriteria criteria) {
+        int pageNumber = 0;
+        int pageSize = Integer.MAX_VALUE;
+        Sort sorting = new Sort(Sort.Direction.DESC, "fechaApertura");
+        if (criteria.getPageable() != null) {
+            pageNumber = criteria.getPageable().getPageNumber();
+            pageSize = criteria.getPageable().getPageSize();
+            sorting = criteria.getPageable().getSort();
+        }
+        Pageable pageable = new PageRequest(pageNumber, pageSize, sorting);
+        return cajaRepository.findAll(getBuilder(criteria), pageable);
+    }
+
+    private BooleanBuilder getBuilder(BusquedaCajaCriteria criteria) {
         //Empresa
         if (criteria.getEmpresa() == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_empresa_no_existente"));
         }
         //Fecha
-        if (criteria.isBuscaPorFecha() == true && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+        if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_caja_fechas_invalidas"));
         }
-        if (criteria.isBuscaPorFecha() == true) {
+        if (criteria.isBuscaPorFecha()) {
             Calendar cal = new GregorianCalendar();
             cal.setTime(criteria.getFechaDesde());
             cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -195,32 +203,29 @@ public class CajaServiceImpl implements ICajaService {
         QCaja qcaja = QCaja.caja;
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(qcaja.empresa.eq(criteria.getEmpresa()).and(qcaja.eliminada.eq(false)));
-        if (criteria.isBuscaPorUsuario() == true) {
-            builder.and(qcaja.usuarioCierraCaja.eq(criteria.getUsuario()));
+        if (criteria.isBuscaPorUsuarioApertura() && !criteria.isBuscaPorUsuarioCierre()) {
+            builder.and(qcaja.usuarioAbreCaja.eq(criteria.getUsuarioApertura()));
         }
-        if (criteria.isBuscaPorFecha() == true) {
+        if (criteria.isBuscaPorUsuarioCierre() && !criteria.isBuscaPorUsuarioApertura()) {
+            builder.and(qcaja.usuarioCierraCaja.eq(criteria.getUsuarioCierre()));
+        }
+
+        if (criteria.isBuscaPorUsuarioCierre() && criteria.isBuscaPorUsuarioApertura()) {
+            builder.and(qcaja.usuarioAbreCaja.eq(criteria.getUsuarioApertura()).and(qcaja.usuarioCierraCaja.eq(criteria.getUsuarioCierre())));
+        }
+        if (criteria.isBuscaPorFecha()) {
             FormatterFechaHora formateadorFecha = new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
             DateExpression<Date> fDesde = Expressions.dateTemplate(Date.class, "convert({0}, datetime)", formateadorFecha.format(criteria.getFechaDesde()));
             DateExpression<Date> fHasta = Expressions.dateTemplate(Date.class, "convert({0}, datetime)", formateadorFecha.format(criteria.getFechaHasta()));
             builder.and(qcaja.fechaApertura.between(fDesde, fHasta));
         }
-        int pageNumber = 0;
-        int pageSize = Integer.MAX_VALUE;
-        Sort sorting = new Sort(Sort.Direction.DESC, "fechaApertura");
-        if (criteria.getPageable() != null) {
-            pageNumber = criteria.getPageable().getPageNumber();
-            pageSize = criteria.getPageable().getPageSize();
-            sorting = criteria.getPageable().getSort();
-        }
-        Pageable pageable = new PageRequest(pageNumber, pageSize, sorting);
-        return cajaRepository.findAll(builder, pageable);
+        return builder;
     }
 
     @Override
     @Transactional
     public Caja cerrarCaja(long idCaja, BigDecimal monto, Long idUsuario, boolean scheduling) {
         Caja cajaACerrar = this.getCajaPorId(idCaja);
-        /*   cajaACerrar.setSaldoFinal(this.getTotalQueAfectaCaja(cajaACerrar, false));*/
         cajaACerrar.setSaldoReal(monto);
         if (scheduling) {
             LocalDateTime fechaCierre = LocalDateTime.ofInstant(cajaACerrar.getFechaApertura().toInstant(), ZoneId.systemDefault());
@@ -277,7 +282,7 @@ public class CajaServiceImpl implements ICajaService {
 
     @Override
     public boolean isUltimaCajaAbierta(long idEmpresa) {
-        return cajaRepository.isUltimaCajaAbierta(idEmpresa);
+        return cajaRepository.isUltimaCajaAbierta(idEmpresa).get(0);
     }
 
     private BigDecimal getTotalMovimientosPorFormaDePago(Caja caja, FormaDePago fdp) {
@@ -312,25 +317,13 @@ public class CajaServiceImpl implements ICajaService {
     }
 
     @Override
-    public BigDecimal getSaldoSistemaCajas(long idEmpresa, Long idUsuario, Date desde, Date hasta) {
-        BigDecimal saldoSistema;
-        if (idUsuario != null) {
-            saldoSistema = cajaRepository.getSaldoSistemaCajasPorUsuarioDeCierre(idEmpresa, idUsuario, desde, hasta);
-        } else {
-            saldoSistema = cajaRepository.getSaldoSistemaCajas(idEmpresa, desde, hasta);
-        }
-        return (saldoSistema == null) ? BigDecimal.ZERO : saldoSistema;
+    public BigDecimal getSaldoSistemaCajas(BusquedaCajaCriteria criteria) {
+          return cajaRepository.getSaldoSistemaCajas(getBuilder(criteria));
     }
 
     @Override
-    public BigDecimal getSaldoRealCajas(long idEmpresa, Long idUsuario, Date desde, Date hasta) {
-        BigDecimal saldoReal;
-        if (idUsuario != null) {
-            saldoReal = cajaRepository.getSaldoRealCajasPorUsuarioDeCierre(idEmpresa, idUsuario, desde, hasta);
-        } else {
-            saldoReal = cajaRepository.getSaldoRealCajas(idEmpresa, desde, hasta);
-        }
-        return (saldoReal == null) ? BigDecimal.ZERO : saldoReal;
+    public BigDecimal getSaldoRealCajas(BusquedaCajaCriteria criteria) {
+        return cajaRepository.getSaldoRealCajas(getBuilder(criteria));
     }
 
     @Override
@@ -375,6 +368,28 @@ public class CajaServiceImpl implements ICajaService {
                 monto = gasto.getMonto();
             }
             cajaRepository.actualizarSaldoSistema(caja.getId_Caja(), monto);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void reabrircaja(long idCaja, BigDecimal saldoInicial, long idUsuario) {
+        Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
+        if (!usuario.getRoles().contains(Rol.ADMINISTRADOR)) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_usuario_rol_no_valido"));
+        }
+        Caja caja = getCajaPorId(idCaja);
+        if (caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isEqual(LocalDate.now())) {
+            caja.setUsuarioCierraCaja(null);
+            caja.setSaldoSistema(caja.getSaldoSistema().subtract(caja.getSaldoInicial().subtract(saldoInicial).abs()));
+            caja.setSaldoInicial(saldoInicial);
+            caja.setSaldoReal(BigDecimal.ZERO);
+            caja.setEstado(EstadoCaja.ABIERTA);
+            this.actualizar(caja);
+        } else {
+            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_caja_re_apertura_no_valida"));
         }
     }
 
