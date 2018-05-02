@@ -244,7 +244,7 @@ public class CajaController {
                 .setSigningKey(secretkey)
                 .parseClaimsJws(request.getHeader("Authorization").substring(7)) //token
                 .getBody();
-        cajaService.reabrircaja(idCaja, monto, ((int) claims.get("idUsuario")));
+        cajaService.reabrirCaja(idCaja, monto, ((int) claims.get("idUsuario")));
     }
 
 }

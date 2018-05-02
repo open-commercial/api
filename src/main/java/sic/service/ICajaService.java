@@ -44,5 +44,5 @@ public interface ICajaService {
 
     void actualizarSaldoSistema(Gasto gasto, TipoDeOperacion tipoDeOperacion);
 
-    void reabrircaja(long idCaja, BigDecimal saldoInicial, long idUsuario);
+    void reabrirCaja(long idCaja, BigDecimal saldoInicial, long idUsuario);
 }

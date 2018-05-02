@@ -282,7 +282,8 @@ public class CajaServiceImpl implements ICajaService {
 
     @Override
     public boolean isUltimaCajaAbierta(long idEmpresa) {
-        return cajaRepository.isUltimaCajaAbierta(idEmpresa).get(0);
+        Caja caja = cajaRepository.isUltimaCajaAbierta(idEmpresa);
+        return (caja != null) && cajaRepository.isUltimaCajaAbierta(idEmpresa).getEstado().equals(EstadoCaja.ABIERTA);
     }
 
     private BigDecimal getTotalMovimientosPorFormaDePago(Caja caja, FormaDePago fdp) {
@@ -318,12 +319,12 @@ public class CajaServiceImpl implements ICajaService {
 
     @Override
     public BigDecimal getSaldoSistemaCajas(BusquedaCajaCriteria criteria) {
-          return cajaRepository.getSaldoSistemaCajas(getBuilder(criteria));
+          return cajaRepository.getSaldoSistemaCajas(this.getBuilder(criteria));
     }
 
     @Override
     public BigDecimal getSaldoRealCajas(BusquedaCajaCriteria criteria) {
-        return cajaRepository.getSaldoRealCajas(getBuilder(criteria));
+        return cajaRepository.getSaldoRealCajas(this.getBuilder(criteria));
     }
 
     @Override
@@ -373,23 +374,29 @@ public class CajaServiceImpl implements ICajaService {
 
     @Override
     @Transactional
-    public void reabrircaja(long idCaja, BigDecimal saldoInicial, long idUsuario) {
+    public void reabrirCaja(long idCaja, BigDecimal saldoInicialNuevo, long idUsuario) {
         Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
-        if (!usuario.getRoles().contains(Rol.ADMINISTRADOR)) {
+        if (usuario.getRoles().contains(Rol.ADMINISTRADOR)) {
+            Caja caja = getCajaPorId(idCaja);
+            if (caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isEqual(LocalDate.now())) {
+                caja.setUsuarioCierraCaja(null);
+                BigDecimal diferenciaSaldosIniciales = caja.getSaldoInicial().subtract(saldoInicialNuevo);
+                if (diferenciaSaldosIniciales.signum() == -1) {
+                    caja.setSaldoSistema(caja.getSaldoSistema().add(diferenciaSaldosIniciales.abs()));
+                } else if (diferenciaSaldosIniciales.signum() == 1) {
+                    caja.setSaldoSistema(caja.getSaldoSistema().subtract(diferenciaSaldosIniciales));
+                }
+                caja.setSaldoInicial(saldoInicialNuevo);
+                caja.setSaldoReal(BigDecimal.ZERO);
+                caja.setEstado(EstadoCaja.ABIERTA);
+                this.actualizar(caja);
+            } else {
+                throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_caja_re_apertura_no_valida"));
+            }
+        } else {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_usuario_rol_no_valido"));
-        }
-        Caja caja = getCajaPorId(idCaja);
-        if (caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isEqual(LocalDate.now())) {
-            caja.setUsuarioCierraCaja(null);
-            caja.setSaldoSistema(caja.getSaldoSistema().subtract(caja.getSaldoInicial().subtract(saldoInicial).abs()));
-            caja.setSaldoInicial(saldoInicial);
-            caja.setSaldoReal(BigDecimal.ZERO);
-            caja.setEstado(EstadoCaja.ABIERTA);
-            this.actualizar(caja);
-        } else {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_caja_re_apertura_no_valida"));
         }
     }
 
