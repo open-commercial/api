@@ -133,8 +133,8 @@ public class CajaController {
     
     @GetMapping("/cajas/{idCaja}/movimientos")
     @ResponseStatus(HttpStatus.OK)
-    public List<MovimientoCaja> getCajaPorId(@PathVariable long idCaja,
-                                             @RequestParam(value = "idFormaDePago") long idFormaDePago) {
+    public List<MovimientoCaja> getMovimientosDeCaja(@PathVariable long idCaja,
+                                                     @RequestParam(value = "idFormaDePago") long idFormaDePago) {
         Caja caja = cajaService.getCajaPorId(idCaja);
         LocalDateTime desde = caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         LocalDateTime hasta = caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
@@ -210,11 +210,11 @@ public class CajaController {
             fechaHasta.setTimeInMillis(hasta);
         }
         Usuario usuarioApertura = new Usuario();
-        if(idUsuarioApertura != null) {
+        if (idUsuarioApertura != null) {
             usuarioApertura = usuarioService.getUsuarioPorId(idUsuarioApertura);
         }
         Usuario usuarioCierre = new Usuario();
-        if(idUsuarioCierre != null) {
+        if (idUsuarioCierre != null) {
             usuarioCierre = usuarioService.getUsuarioPorId(idUsuarioCierre);
         }
         BusquedaCajaCriteria criteria = BusquedaCajaCriteria.builder()

@@ -88,15 +88,6 @@ public class GastoServiceImpl implements IGastoService {
                     .getString("mensaje_gasto_duplicada"));
         }
     }
-    
-    @Override
-    public BigDecimal calcularTotalGastos(List<Gasto> gastos) {
-        BigDecimal total = BigDecimal.ZERO;
-        for (Gasto gasto : gastos) {
-            total = total.add(gasto.getMonto());
-        }
-        return total;
-    }
 
     @Override
     @Transactional

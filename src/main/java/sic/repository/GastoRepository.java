@@ -11,32 +11,31 @@ import sic.modelo.Gasto;
 
 public interface GastoRepository extends PagingAndSortingRepository<Gasto, Long> {
 
-      @Query("SELECT g FROM Gasto g WHERE g.id_Gasto = :idGasto AND g.eliminado = false")
-      Gasto findById(@Param("idGasto") long idGasto);
-      
-      Gasto findByNroGastoAndEmpresaAndEliminado(Long nroPago, Empresa empresa, boolean eliminado);
+    @Query("SELECT g FROM Gasto g WHERE g.id_Gasto = :idGasto AND g.eliminado = false")
+    Gasto findById(@Param("idGasto") long idGasto);
 
-      @Query("SELECT g FROM Gasto g " +
-              "WHERE g.empresa.id_Empresa = :idEmpresa " +
-              "AND g.formaDePago.id_FormaDePago = :idFormaDePago " +
-              "AND g.fecha BETWEEN :desde AND :hasta AND g.eliminado = false")
-      List<Gasto> getGastosEntreFechasPorFormaDePago(@Param("idEmpresa") long idEmpresa,
-                                                     @Param("idFormaDePago") long idFormaDePago,
-                                                     @Param("desde") Date desde, @Param("hasta") Date hasta);
+    @Query("SELECT g FROM Gasto g " +
+            "WHERE g.empresa.id_Empresa = :idEmpresa " +
+            "AND g.formaDePago.id_FormaDePago = :idFormaDePago " +
+            "AND g.fecha BETWEEN :desde AND :hasta AND g.eliminado = false")
+    List<Gasto> getGastosEntreFechasPorFormaDePago(@Param("idEmpresa") long idEmpresa,
+                                                   @Param("idFormaDePago") long idFormaDePago,
+                                                   @Param("desde") Date desde, @Param("hasta") Date hasta);
 
-      Gasto findTopByEmpresaAndEliminadoOrderByNroGastoDesc(Empresa empresa, boolean eliminado);
+    Gasto findTopByEmpresaAndEliminadoOrderByNroGastoDesc(Empresa empresa, boolean eliminado);
 
-      @Query("SELECT SUM(g.monto) FROM Gasto g " +
-              "WHERE g.empresa.id_Empresa = :idEmpresa " +
-              "AND g.formaDePago.id_FormaDePago = :idFormaDePago " +
-              "AND g.fecha BETWEEN :desde AND :hasta AND g.eliminado = false")
-      BigDecimal getTotalGastosEntreFechasPorFormaDePago(@Param("idEmpresa") long idEmpresa, @Param("idFormaDePago") long idFormaDePago, @Param("desde") Date desde, @Param("hasta") Date hasta);
+    @Query("SELECT SUM(g.monto) FROM Gasto g " +
+            "WHERE g.empresa.id_Empresa = :idEmpresa " +
+            "AND g.formaDePago.id_FormaDePago = :idFormaDePago " +
+            "AND g.fecha BETWEEN :desde AND :hasta AND g.eliminado = false")
+    BigDecimal getTotalGastosEntreFechasPorFormaDePago(@Param("idEmpresa") long idEmpresa, @Param("idFormaDePago") long idFormaDePago,
+                                                       @Param("desde") Date desde, @Param("hasta") Date hasta);
 
-      @Query("SELECT SUM(g.monto) FROM Gasto g " +
-              "WHERE g.empresa.id_Empresa = :idEmpresa " +
-              "AND g.formaDePago.afectaCaja = true " +
-              "AND g.fecha BETWEEN :desde AND :hasta AND g.eliminado = false")
-      BigDecimal getTotalGastosEntreFechas(@Param("idEmpresa") long idEmpresa,
-                                           @Param("desde") Date desde, @Param("hasta") Date hasta);
+    @Query("SELECT SUM(g.monto) FROM Gasto g " +
+            "WHERE g.empresa.id_Empresa = :idEmpresa " +
+            "AND g.formaDePago.afectaCaja = true " +
+            "AND g.fecha BETWEEN :desde AND :hasta AND g.eliminado = false")
+    BigDecimal getTotalGastosEntreFechas(@Param("idEmpresa") long idEmpresa,
+                                         @Param("desde") Date desde, @Param("hasta") Date hasta);
 
 }

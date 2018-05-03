@@ -13,10 +13,7 @@ public interface ReciboRepository extends PagingAndSortingRepository<Recibo, Lon
     
     @Query("SELECT r FROM Recibo r WHERE r.idRecibo= :idRecibo AND r.eliminado = false")
     Recibo findById(@Param("idRecibo") long idRecibo);
-    
-    @Query("SELECT r.monto FROM Recibo r WHERE r.idRecibo= :idRecibo AND r.eliminado = false")
-    BigDecimal getMontoById(@Param("idRecibo") long idRecibo);
-    
+
     Recibo findTopByEmpresaAndNumSerieOrderByNumReciboDesc(Empresa empresa, long serie);
 
     @Query("SELECT r FROM Recibo r " +
@@ -50,7 +47,7 @@ public interface ReciboRepository extends PagingAndSortingRepository<Recibo, Lon
             "AND r.formaDePago.afectaCaja = true " +
             "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
     BigDecimal getTotalRecibosClientesEntreFechasPorFormaDePago(@Param("idEmpresa") long idEmpresa,
-                                                                   @Param("desde") Date desde, @Param("hasta") Date hasta);
+                                                                @Param("desde") Date desde, @Param("hasta") Date hasta);
 
     @Query("SELECT SUM(r.monto) FROM Recibo r " +
             "WHERE r.empresa.id_Empresa = :idEmpresa " +
