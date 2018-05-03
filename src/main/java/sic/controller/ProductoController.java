@@ -156,10 +156,10 @@ public class ProductoController {
     @PutMapping("/productos")
     @ResponseStatus(HttpStatus.OK)
     public void actualizar(@RequestBody Producto producto,
-                           @RequestParam long idMedida,
-                           @RequestParam long idRubro, 
-                           @RequestParam long idProveedor,
-                           @RequestParam long idEmpresa) {
+                           @RequestParam Long idMedida,
+                           @RequestParam Long idRubro,
+                           @RequestParam Long idProveedor,
+                           @RequestParam Long idEmpresa) {
         if (productoService.getProductoPorId(producto.getId_Producto()) != null) {
             producto.setMedida(medidaService.getMedidaPorId(idMedida));
             producto.setRubro(rubroService.getRubroPorId(idRubro));
@@ -172,17 +172,17 @@ public class ProductoController {
     @PostMapping("/productos")
     @ResponseStatus(HttpStatus.CREATED)
     public Producto guardar(@RequestBody Producto producto,
-                            @RequestParam long idMedida,
-                            @RequestParam long idRubro, 
-                            @RequestParam long idProveedor,
-                            @RequestParam long idEmpresa) {
+                            @RequestParam Long idMedida,
+                            @RequestParam Long idRubro,
+                            @RequestParam Long idProveedor,
+                            @RequestParam Long idEmpresa) {
         producto.setMedida(medidaService.getMedidaPorId(idMedida));
         producto.setRubro(rubroService.getRubroPorId(idRubro));
         producto.setProveedor(proveedorService.getProveedorPorId(idProveedor));
         producto.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
         return productoService.guardar(producto);
     }
-        
+
     @GetMapping("/productos/disponibilidad-stock")
     @ResponseStatus(HttpStatus.OK)
     public Map<Long, BigDecimal> verificarDisponibilidadStock(long[] idProducto, BigDecimal[] cantidad) {

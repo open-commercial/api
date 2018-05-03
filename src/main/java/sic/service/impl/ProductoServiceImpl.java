@@ -58,23 +58,6 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
-        //Requeridos
-        if (producto.getMedida() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_vacio_medida"));
-        }
-        if (producto.getRubro() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_vacio_rubro"));
-        }
-        if (producto.getProveedor() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_vacio_proveedor"));
-        }
-        if (producto.getEmpresa() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_vacio_empresa"));
-        }
         //Duplicados
         //Codigo
         if (!producto.getCodigo().equals("")) {

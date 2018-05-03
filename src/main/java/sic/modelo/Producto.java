@@ -23,6 +23,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
 @Table(name = "producto")
@@ -41,6 +42,7 @@ public class Producto implements Serializable {
     private String codigo;
 
     @NotNull(message = "{mensaje_producto_vacio_descripcion}")
+    @NotEmpty(message = "{mensaje_producto_vacio_descripcion}")
     private String descripcion;
 
     @Column(precision = 25, scale = 15)
@@ -57,10 +59,11 @@ public class Producto implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_Medida", referencedColumnName = "id_Medida")
+    @NotNull(message = "{mensaje_producto_vacio_medida}")
     private Medida medida;
 
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_precioCosto_negativo}")
+    @DecimalMin(value = "0", message = "{mensaje_producto_precioCosto_negativo}")
     private BigDecimal precioCosto;
 
     @Column(precision = 25, scale = 15)
@@ -72,7 +75,7 @@ public class Producto implements Serializable {
     private BigDecimal ganancia_neto;
 
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_venta_publico_negativo}")
+    @DecimalMin(value = "0", message = "{mensaje_producto_venta_publico_negativo}")
     private BigDecimal precioVentaPublico;
 
     @Column(precision = 25, scale = 15)
@@ -92,11 +95,12 @@ public class Producto implements Serializable {
     private BigDecimal impuestoInterno_neto;
 
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_precioLista_negativo}")
+    @DecimalMin(value = "0", message = "{mensaje_producto_precioLista_negativo}")
     private BigDecimal precioLista;
 
     @ManyToOne
     @JoinColumn(name = "id_Rubro", referencedColumnName = "id_Rubro")
+    @NotNull(message = "{mensaje_producto_vacio_rubro}")
     private Rubro rubro;
 
     private boolean ilimitado;
@@ -111,6 +115,7 @@ public class Producto implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_Proveedor", referencedColumnName = "id_Proveedor")
+    @NotNull(message = "{mensaje_producto_vacio_proveedor}")
     private Proveedor proveedor;
 
     @NotNull(message = "{mensaje_producto_vacio_nota}")
@@ -125,6 +130,7 @@ public class Producto implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+    @NotNull(message = "{mensaje_producto_vacio_empresa}")
     private Empresa empresa;
 
     private boolean eliminado;
