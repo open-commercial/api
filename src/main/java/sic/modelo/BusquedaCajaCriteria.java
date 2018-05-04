@@ -18,8 +18,10 @@ public class BusquedaCajaCriteria {
     private Date fechaHasta;
     private Empresa empresa;
     private int cantidadDeRegistros;
-    private boolean buscaPorUsuario;
-    private Usuario usuario;
+    private boolean buscaPorUsuarioApertura;
+    private Usuario usuarioApertura;
+    private boolean buscaPorUsuarioCierre;
+    private Usuario usuarioCierre;
     private Pageable pageable;
     
 }

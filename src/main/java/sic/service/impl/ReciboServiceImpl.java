@@ -18,8 +18,7 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Cliente;
@@ -29,14 +28,7 @@ import sic.modelo.Recibo;
 import sic.modelo.TipoDeOperacion;
 import sic.modelo.Usuario;
 import sic.repository.ReciboRepository;
-import sic.service.BusinessServiceException;
-import sic.service.IConfiguracionDelSistemaService;
-import sic.service.ICuentaCorrienteService;
-import sic.service.IEmpresaService;
-import sic.service.IFormaDePagoService;
-import sic.service.INotaService;
-import sic.service.IReciboService;
-import sic.service.ServiceException;
+import sic.service.*;
 
 @Service
 public class ReciboServiceImpl implements IReciboService {
@@ -47,28 +39,26 @@ public class ReciboServiceImpl implements IReciboService {
     private final IConfiguracionDelSistemaService configuracionDelSistemaService;
     private final INotaService notaService;
     private final IFormaDePagoService formaDePagoService;
+    private final ICajaService cajaService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
+    @Lazy
     public ReciboServiceImpl(ReciboRepository reciboRepository, ICuentaCorrienteService cuentaCorrienteService, 
                              IEmpresaService empresaService, IConfiguracionDelSistemaService cds, INotaService notaService,
-                             IFormaDePagoService formaDePagoService) {
+                             IFormaDePagoService formaDePagoService, ICajaService cajaService) {
         this.reciboRepository = reciboRepository;
         this.cuentaCorrienteService = cuentaCorrienteService;
         this.empresaService = empresaService;
         this.configuracionDelSistemaService = cds;
         this.notaService = notaService;
         this.formaDePagoService = formaDePagoService;
+        this.cajaService = cajaService;
     }
 
     @Override
     public Recibo getById(long idRecibo) {
         return reciboRepository.findById(idRecibo);
-    }
-    
-    @Override
-    public BigDecimal getMontoById(long idRecibo) {
-        return reciboRepository.getMontoById(idRecibo);
     }
     
     @Override 
@@ -80,15 +70,9 @@ public class ReciboServiceImpl implements IReciboService {
         this.validarRecibo(recibo);
         recibo = reciboRepository.save(recibo);
         this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
+        this.cajaService.actualizarSaldoSistema(recibo, TipoDeOperacion.ALTA);
         LOGGER.warn("El Recibo " + recibo + " se guardó correctamente.");
         return recibo;
-    }
-
-    @Override
-    @Transactional
-    public Recibo actualizarSaldoSobrante(long idRecibo, BigDecimal saldoSobrante) {
-        Recibo r = reciboRepository.findById(idRecibo);
-        return reciboRepository.save(r);
     }
 
     private void validarRecibo(Recibo recibo) {
@@ -167,10 +151,12 @@ public class ReciboServiceImpl implements IReciboService {
     }
    
     @Override
+    @Transactional
     public void eliminar(long idRecibo) {
         Recibo r = reciboRepository.findById(idRecibo);
-        if (notaService.existeNotaDebitoPorRecibo(r) == false) {           
+        if (notaService.existeNotaDebitoPorRecibo(r) == false) {
             r.setEliminado(true);
+            this.cajaService.actualizarSaldoSistema(r, TipoDeOperacion.ELIMINACION);
             this.cuentaCorrienteService.asentarEnCuentaCorriente(r, TipoDeOperacion.ELIMINACION);
             reciboRepository.save(r);
             LOGGER.warn("El Recibo " + r + " se eliminó correctamente.");
@@ -179,25 +165,10 @@ public class ReciboServiceImpl implements IReciboService {
                     .getString("mensaje_no_se_puede_eliminar"));
         }
     }
-
-    @Override
-    public List<Recibo> getByClienteAndEmpresaAndEliminado(Cliente cliente, Empresa empresa, boolean eliminado) {
-        return reciboRepository.findAllByClienteAndEmpresaAndEliminado(cliente, empresa, eliminado);
-    }
-
-    @Override
-    public List<Recibo> getByUsuarioAndEmpresaAndEliminado(Usuario usuario, Empresa empresa, boolean eliminado) {
-        return reciboRepository.findAllByUsuarioAndEmpresaAndEliminado(usuario, empresa, eliminado);
-    }
-
-    @Override
-    public Page<Recibo> getByFechaBetweenAndClienteAndEmpresaAndEliminado(Date desde, Date hasta, Cliente cliente, Empresa empresa, boolean eliminado, Pageable page) {
-        return reciboRepository.findAllByFechaBetweenAndClienteAndEmpresaAndEliminado(desde, hasta, cliente, empresa, eliminado, page);
-    }
     
     @Override
-    public List<Recibo> getByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(Date desde, Date hasta, FormaDePago formaDePago, Empresa empresa) {
-        return reciboRepository.findAllByFechaBetweenAndFormaDePagoAndEmpresaAndEliminado(desde, hasta, formaDePago, empresa, false);
+    public List<Recibo> getRecibosEntreFechasPorFormaDePago(Date desde, Date hasta, FormaDePago formaDePago, Empresa empresa) {
+        return reciboRepository.getRecibosEntreFechasPorFormaDePago(empresa.getId_Empresa(), formaDePago.getId_FormaDePago(), desde, hasta);
     }
     
     @Override
@@ -227,6 +198,30 @@ public class ReciboServiceImpl implements IReciboService {
             throw new ServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_error_reporte"), ex);
         }
+    }
+
+    @Override
+    public BigDecimal getTotalRecibosClientesEntreFechasPorFormaDePago(long idEmpresa, long idFormaDePago, Date desde, Date hasta) {
+        BigDecimal total = reciboRepository.getTotalRecibosClientesEntreFechasPorFormaDePago(idEmpresa, idFormaDePago, desde, hasta);
+        return (total == null) ? BigDecimal.ZERO : total;
+    }
+
+    @Override
+    public BigDecimal getTotalRecibosProveedoresEntreFechasPorFormaDePago(long idEmpresa, long idFormaDePago, Date desde, Date hasta) {
+        BigDecimal total = reciboRepository.getTotalRecibosProveedoresEntreFechasPorFormaDePago(idEmpresa, idFormaDePago,desde, hasta);
+        return (total == null) ? BigDecimal.ZERO : total;
+    }
+
+    @Override
+    public BigDecimal getTotalRecibosClientesEntreFechas(long idEmpresa, Date desde, Date hasta) {
+        BigDecimal total = reciboRepository.getTotalRecibosClientesEntreFechasPorFormaDePago(idEmpresa, desde, hasta);
+        return (total == null) ? BigDecimal.ZERO : total;
+    }
+
+    @Override
+    public BigDecimal getTotalRecibosProveedoresEntreFechas(long idEmpresa, Date desde, Date hasta) {
+        BigDecimal total = reciboRepository.getTotalRecibosProveedoresEntreFechasPorFormaDePago(idEmpresa, desde, hasta);
+        return (total == null) ? BigDecimal.ZERO : total;
     }
   
 }
