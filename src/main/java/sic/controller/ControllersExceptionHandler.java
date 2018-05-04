@@ -62,6 +62,6 @@ public class ControllersExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     public String handleException(Exception ex) {
-        return this.log(ex);
+        return log(new Exception(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_request"), ex));
     }
 }
