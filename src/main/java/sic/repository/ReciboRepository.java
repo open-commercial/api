@@ -56,5 +56,4 @@ public interface ReciboRepository extends PagingAndSortingRepository<Recibo, Lon
             "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
     BigDecimal getTotalRecibosProveedoresEntreFechasPorFormaDePago(@Param("idEmpresa") long idEmpresa,
                                                                    @Param("desde") Date desde, @Param("hasta") Date hasta);
-
 }

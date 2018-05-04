@@ -16,6 +16,8 @@ import java.util.ResourceBundle;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
+import javax.validation.Valid;
+
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -56,64 +58,6 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
-        //Entrada de Datos
-        if (producto.getCantidad().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_cantidad_negativa"));
-        }
-        if (producto.getCantMinima().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_cantidadMinima_negativa"));
-        }
-        if (producto.getVentaMinima().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_cantidadVentaMinima_invalida"));
-        }
-        if (producto.getPrecioCosto().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_precioCosto_negativo"));
-        }
-        if (producto.getPrecioVentaPublico().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_precioVentaPublico_negativo"));
-        }
-        if (producto.getIva_porcentaje().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_IVAPorcentaje_negativo"));
-        }
-        if (producto.getImpuestoInterno_porcentaje().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_ImpInternoPorcentaje_negativo"));
-        }
-        if (producto.getGanancia_porcentaje().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_gananciaPorcentaje_negativo"));
-        }
-        if (producto.getPrecioLista().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_precioLista_negativo"));
-        }
-        //Requeridos
-        if (Validator.esVacio(producto.getDescripcion())) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_vacio_descripcion"));
-        }
-        if (producto.getMedida() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_vacio_medida"));
-        }
-        if (producto.getRubro() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_vacio_rubro"));
-        }
-        if (producto.getProveedor() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_vacio_proveedor"));
-        }
-        if (producto.getEmpresa() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_vacio_empresa"));
-        }
         //Duplicados
         //Codigo
         if (!producto.getCodigo().equals("")) {
@@ -142,6 +86,27 @@ public class ProductoServiceImpl implements IProductoService {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_producto_duplicado_descripcion"));
             }
+        }
+        //Calculos 
+        if (producto.getGanancia_neto().compareTo(this.calcularGanancia_Neto(producto.getPrecioCosto(), producto.getGanancia_porcentaje())) != 0) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_producto_ganancia_neta_incorrecta"));
+        }
+        if (producto.getImpuestoInterno_neto().compareTo(this.calcularImpInterno_Neto(producto.getPrecioVentaPublico(), producto.getImpuestoInterno_porcentaje())) != 0) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_producto_impuesto_interno_neto_incorrecto"));
+        }
+        if (producto.getIva_neto().compareTo(this.calcularIVA_Neto(producto.getPrecioVentaPublico(), producto.getIva_porcentaje())) != 0) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_producto_iva_neto_incorrecto"));
+        }
+        if (producto.getPrecioLista().compareTo(this.calcularPrecioLista(producto.getPrecioVentaPublico(), producto.getIva_porcentaje(), producto.getImpuestoInterno_porcentaje())) != 0) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_producto_precio_lista_incorrecto"));
+        }
+        if (producto.getPrecioVentaPublico().compareTo(this.calcularPVP(producto.getPrecioCosto(), producto.getGanancia_porcentaje())) != 0) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_precio_venta_publico_incorrecto"));
         }
     }
 

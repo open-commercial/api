@@ -67,4 +67,5 @@ public class ProductoServiceImplTest {
         BigDecimal resultadoObtenido = productoService.calcularPrecioLista(pvp, ivaPorcentaje, impuestoInternoPorcentaje);
         assertEquals(resultadoEsperado, resultadoObtenido);
     }    
+    
 }
