@@ -2,7 +2,6 @@ package sic.builder;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.Map;
 import sic.modelo.Caja;
 import sic.modelo.Empresa;
 import sic.modelo.EstadoCaja;
@@ -13,25 +12,21 @@ public class CajaBuilder {
     private long id_Caja = 0L;
     private int nroCaja = 22;
     private Date fechaApertura = new Date();
-    private Date fechaCorteInforme = new Date();
     private Date fechaCierre;
     private Usuario usuarioAbreCaja = new UsuarioBuilder().build();
     private Usuario usuarioCierraCaja = new UsuarioBuilder().build();
     private String observacion = "Caja Default para Test";
     private EstadoCaja estado = EstadoCaja.ABIERTA;
     private BigDecimal saldoInicial = new BigDecimal("400");
-    private BigDecimal saldoFinal;
+    private BigDecimal saldoSistema;
     private BigDecimal saldoReal;
     private boolean eliminada = false;
-    private Map<Long, BigDecimal> totalesPorFomaDePago;
-    private BigDecimal totalAfectaCaja;
-    private BigDecimal totalGeneral;
     private Empresa empresa = new EmpresaBuilder().build();
 
     public Caja build() {
-        return new Caja(id_Caja, nroCaja, fechaApertura, fechaCorteInforme, fechaCierre, empresa,
+        return new Caja(id_Caja, nroCaja, fechaApertura, fechaCierre, empresa,
                 usuarioAbreCaja, usuarioCierraCaja, observacion, estado,
-                saldoInicial, saldoFinal, saldoReal, eliminada, totalesPorFomaDePago, totalAfectaCaja, totalGeneral);
+                saldoInicial, saldoSistema, saldoReal, eliminada);
     }
 
     public CajaBuilder withIdCaja(long idCaja) {
@@ -46,11 +41,6 @@ public class CajaBuilder {
 
     public CajaBuilder withFechaApertura(Date fechaApertura) {
         this.fechaApertura = fechaApertura;
-        return this;
-    }
-
-    public CajaBuilder withFechaCorteInforme(Date fechaCorteInforme) {
-        this.fechaCorteInforme = fechaCorteInforme;
         return this;
     }
 
@@ -84,8 +74,8 @@ public class CajaBuilder {
         return this;
     }
 
-    public CajaBuilder withSaldoFinal(BigDecimal saldoFinal) {
-        this.saldoFinal = saldoFinal;
+    public CajaBuilder withSaldoSistema(BigDecimal saldoSistema) {
+        this.saldoSistema = saldoSistema;
         return this;
     }
 
