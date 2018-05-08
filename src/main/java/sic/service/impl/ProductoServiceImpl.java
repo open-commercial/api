@@ -16,8 +16,6 @@ import java.util.ResourceBundle;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
-import javax.validation.Valid;
-
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -176,6 +174,8 @@ public class ProductoServiceImpl implements IProductoService {
             producto.setCodigo("");
         }
         this.validarOperacion(TipoDeOperacion.ALTA, producto);
+        producto.setFechaAlta(new Date());
+        producto.setFechaUltimaModificacion(new Date());
         producto = productoRepository.save(producto);
         LOGGER.warn("El Producto " + producto + " se guardó correctamente.");
         return producto;
@@ -185,6 +185,7 @@ public class ProductoServiceImpl implements IProductoService {
     @Transactional
     public void actualizar(Producto producto) {
         this.validarOperacion(TipoDeOperacion.ACTUALIZACION, producto);
+        producto.setFechaUltimaModificacion(new Date());
         productoRepository.save(producto);
         LOGGER.warn("El Producto " + producto + " se modificó correctamente.");
     }
@@ -245,20 +246,20 @@ public class ProductoServiceImpl implements IProductoService {
 
     @Override
     @Transactional
-    public List<Producto> modificarMultiplesProductos(long[] idProducto,
-            boolean checkPrecios,
-            BigDecimal gananciaNeto,
-            BigDecimal gananciaPorcentaje,
-            BigDecimal impuestoInternoNeto,
-            BigDecimal impuestoInternoPorcentaje,
-            BigDecimal IVANeto,
-            BigDecimal IVAPorcentaje,
-            BigDecimal precioCosto,
-            BigDecimal precioLista,
-            BigDecimal precioVentaPublico,
-            boolean checkMedida, Medida medida,
-            boolean checkRubro, Rubro rubro,
-            boolean checkProveedor, Proveedor proveedor) {
+    public List<Producto> actualizarMultiples(long[] idProducto,
+                                              boolean checkPrecios,
+                                              BigDecimal gananciaNeto,
+                                              BigDecimal gananciaPorcentaje,
+                                              BigDecimal impuestoInternoNeto,
+                                              BigDecimal impuestoInternoPorcentaje,
+                                              BigDecimal IVANeto,
+                                              BigDecimal IVAPorcentaje,
+                                              BigDecimal precioCosto,
+                                              BigDecimal precioLista,
+                                              BigDecimal precioVentaPublico,
+                                              boolean checkMedida, Medida medida,
+                                              boolean checkRubro, Rubro rubro,
+                                              boolean checkProveedor, Proveedor proveedor) {
         if (Validator.tieneDuplicados(idProducto)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_error_ids_duplicados"));
@@ -268,23 +269,23 @@ public class ProductoServiceImpl implements IProductoService {
             productos.add(this.getProductoPorId(i));
         }
         //Requeridos
-        if (checkMedida == true && medida == null) {
+        if (checkMedida && medida == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_vacio_medida"));
         }
-        if (checkRubro == true && rubro == null) {
+        if (checkRubro && rubro == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_vacio_rubro"));
         }
-        if (checkProveedor == true && proveedor == null) {
+        if (checkProveedor && proveedor == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_vacio_proveedor"));
         }        
-        productos.stream().forEach(p -> {
-            if (checkMedida == true) p.setMedida(medida);
-            if (checkRubro == true) p.setRubro(rubro);
-            if (checkProveedor == true) p.setProveedor(proveedor);           
-            if (checkPrecios == true) {            
+        productos.forEach(p -> {
+            if (checkMedida) p.setMedida(medida);
+            if (checkRubro) p.setRubro(rubro);
+            if (checkProveedor) p.setProveedor(proveedor);
+            if (checkPrecios) {
                 p.setPrecioCosto(precioCosto);
                 p.setGanancia_porcentaje(gananciaPorcentaje);
                 p.setGanancia_neto(gananciaNeto);
@@ -295,9 +296,10 @@ public class ProductoServiceImpl implements IProductoService {
                 p.setImpuestoInterno_neto(impuestoInternoNeto);
                 p.setPrecioLista(precioLista);            
             }
-            if (checkPrecios == true || checkMedida == true || checkRubro == true || checkProveedor == true) {            
+            if (checkMedida || checkRubro || checkProveedor || checkPrecios) {
                 p.setFechaUltimaModificacion(new Date());                
             }
+            this.validarOperacion(TipoDeOperacion.ACTUALIZACION, p);
         });        
         productoRepository.save(productos);
         LOGGER.warn("Los Productos " + productos + " se modificaron correctamente.");

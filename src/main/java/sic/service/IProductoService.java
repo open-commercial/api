@@ -27,10 +27,10 @@ public interface IProductoService {
     Map<Long, BigDecimal> getProductosSinStockDisponible(long[] idProducto, BigDecimal[] cantidad);
 
     Map<Long, BigDecimal> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, BigDecimal[] cantidad);
-    
-    BigDecimal calcularGanancia_Porcentaje(BigDecimal precioDeListaNuevo, 
-            BigDecimal precioDeListaAnterior, BigDecimal pvp, BigDecimal ivaPorcentaje, 
-            BigDecimal impInternoPorcentaje, BigDecimal precioCosto, boolean descendente);
+
+    BigDecimal calcularGanancia_Porcentaje(BigDecimal precioDeListaNuevo,
+                                           BigDecimal precioDeListaAnterior, BigDecimal pvp, BigDecimal ivaPorcentaje,
+                                           BigDecimal impInternoPorcentaje, BigDecimal precioCosto, boolean descendente);
 
     BigDecimal calcularIVA_Neto(BigDecimal precioCosto, BigDecimal iva_porcentaje);
 
@@ -38,7 +38,7 @@ public interface IProductoService {
 
     BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal ganancia_porcentaje);
 
-    BigDecimal calcularPrecioLista(BigDecimal PVP, BigDecimal iva_porcentaje, BigDecimal impInterno_porcentaje);    
+    BigDecimal calcularPrecioLista(BigDecimal PVP, BigDecimal iva_porcentaje, BigDecimal impInterno_porcentaje);
 
     void eliminarMultiplesProductos(long[] idProducto);
 
@@ -47,26 +47,18 @@ public interface IProductoService {
     Producto getProductoPorDescripcion(String descripcion, Empresa empresa);
 
     Producto getProductoPorId(long id_Producto);
-    
+
     BigDecimal calcularValorStock(BusquedaProductoCriteria criteria);
-  
+
     byte[] getReporteListaDePreciosPorEmpresa(List<Producto> productos, Empresa empresa);
 
     Producto guardar(Producto producto);
 
-    List<Producto> modificarMultiplesProductos(long[] idProducto,
-                                               boolean checkPrecios,            
-                                               BigDecimal gananciaNeto,
-                                               BigDecimal gananciaPorcentaje,
-                                               BigDecimal impuestoInternoNeto,
-                                               BigDecimal impuestoInternoPorcentaje,
-                                               BigDecimal IVANeto,
-                                               BigDecimal IVAPorcentaje,
-                                               BigDecimal precioCosto,
-                                               BigDecimal precioLista,
-                                               BigDecimal precioVentaPublico,                                                                     
-                                               boolean checkMedida, Medida medida,
-                                               boolean checkRubro, Rubro rubro,
-                                               boolean checkProveedor, Proveedor proveedor);    
-    
+    List<Producto> actualizarMultiples(long[] idProducto, boolean checkPrecios, BigDecimal gananciaNeto,
+                                       BigDecimal gananciaPorcentaje, BigDecimal impuestoInternoNeto,
+                                       BigDecimal impuestoInternoPorcentaje, BigDecimal IVANeto,
+                                       BigDecimal IVAPorcentaje, BigDecimal precioCosto, BigDecimal precioLista,
+                                       BigDecimal precioVentaPublico, boolean checkMedida, Medida medida,
+                                       boolean checkRubro, Rubro rubro, boolean checkProveedor, Proveedor proveedor);
+
 }

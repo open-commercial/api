@@ -183,6 +183,44 @@ public class ProductoController {
         return productoService.guardar(producto);
     }
 
+    @PutMapping("/productos/multiples")
+    @ResponseStatus(HttpStatus.OK)
+    public void actualizarMultiplesProductos(@RequestParam long[] idProducto,
+                                            @RequestParam(required = false) Long idMedida,
+                                            @RequestParam(required = false) Long idRubro,
+                                            @RequestParam(required = false) Long idProveedor,
+                                            @RequestParam(required = false) BigDecimal gananciaNeto,
+                                            @RequestParam(required = false) BigDecimal gananciaPorcentaje,
+                                            @RequestParam(defaultValue = "0",required = false) BigDecimal impuestoInternoNeto,
+                                            @RequestParam(defaultValue = "0",required = false) BigDecimal impuestoInternoPorcentaje,
+                                            @RequestParam(required = false) BigDecimal IVANeto,
+                                            @RequestParam(required = false) BigDecimal IVAPorcentaje,
+                                            @RequestParam(required = false) BigDecimal precioCosto,
+                                            @RequestParam(required = false) BigDecimal precioLista,
+                                            @RequestParam(required = false) BigDecimal precioVentaPublico) {
+        boolean actualizaPrecios = false;
+        if (gananciaNeto != null && gananciaPorcentaje != null && impuestoInternoNeto != null && impuestoInternoPorcentaje != null
+                && IVANeto != null && IVAPorcentaje != null && precioCosto != null && precioLista != null && precioVentaPublico != null) {
+            actualizaPrecios = true;
+        }
+        Medida medida = null;
+        if (idMedida != null) {
+            medida = medidaService.getMedidaPorId(idMedida);
+        }
+        Rubro rubro = null;
+        if (idRubro != null) {
+            rubro = rubroService.getRubroPorId(idRubro);
+        }
+        Proveedor proveedor = null;
+        if (idProveedor != null) {
+            proveedor = proveedorService.getProveedorPorId(idProveedor);
+        }
+        productoService.actualizarMultiples(idProducto, actualizaPrecios, gananciaNeto, gananciaPorcentaje,
+                impuestoInternoNeto, impuestoInternoPorcentaje, IVANeto, IVAPorcentaje,
+                precioCosto, precioLista, precioVentaPublico, (idMedida != null), medida,
+                (idRubro != null), rubro, (idProveedor != null), proveedor);
+    }
+
     @GetMapping("/productos/disponibilidad-stock")
     @ResponseStatus(HttpStatus.OK)
     public Map<Long, BigDecimal> verificarDisponibilidadStock(long[] idProducto, BigDecimal[] cantidad) {
@@ -213,7 +251,7 @@ public class ProductoController {
                                                  @RequestParam(defaultValue = "0", required = false) BigDecimal impInternoPorcentaje,                                              
                                                  @RequestParam(defaultValue = "0", required = false) BigDecimal precioDeLista, 
                                                  @RequestParam(defaultValue = "0", required = false) BigDecimal precioDeListaAnterior) {
-        if (precioCosto == null || pvp == null) {
+            if (precioCosto == null || pvp == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
         }
         return productoService.calcularGanancia_Porcentaje(precioDeLista, precioDeListaAnterior, pvp, ivaPorcentaje,
@@ -295,54 +333,5 @@ public class ProductoController {
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
         byte[] reportePDF = productoService.getReporteListaDePreciosPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
-    }
-    
-    @PutMapping("/productos/multiples")
-    @ResponseStatus(HttpStatus.OK)
-    public void modificarMultiplesProductos(@RequestParam long[] idProducto,
-                                            @RequestParam(required = false) Long idMedida,
-                                            @RequestParam(required = false) Long idRubro,
-                                            @RequestParam(required = false) Long idProveedor,
-                                            @RequestParam(required = false) BigDecimal gananciaNeto,
-                                            @RequestParam(required = false) BigDecimal gananciaPorcentaje,
-                                            @RequestParam(defaultValue = "0",required = false) BigDecimal impuestoInternoNeto,
-                                            @RequestParam(defaultValue = "0",required = false) BigDecimal impuestoInternoPorcentaje,
-                                            @RequestParam(required = false) BigDecimal IVANeto,
-                                            @RequestParam(required = false) BigDecimal IVAPorcentaje,
-                                            @RequestParam(required = false) BigDecimal precioCosto,
-                                            @RequestParam(required = false) BigDecimal precioLista,
-                                            @RequestParam(required = false) BigDecimal precioVentaPublico) {
-        
-        boolean actualizaPrecios = false;
-        if (gananciaNeto != null && gananciaPorcentaje != null && impuestoInternoNeto != null && impuestoInternoPorcentaje != null
-                && IVANeto != null && IVAPorcentaje != null && precioCosto != null && precioLista != null && precioVentaPublico != null) {
-            actualizaPrecios = true;
-        }        
-        Medida medida = null;
-        if (idMedida != null) {
-            medida = medidaService.getMedidaPorId(idMedida);
-        }
-        Rubro rubro = null;
-        if (idRubro != null) {
-            rubro = rubroService.getRubroPorId(idRubro);
-        }
-        Proveedor proveedor = null;
-        if (idProveedor != null) {
-            proveedor = proveedorService.getProveedorPorId(idProveedor);
-        }        
-        productoService.modificarMultiplesProductos(idProducto,
-                actualizaPrecios,
-                gananciaNeto,
-                gananciaPorcentaje,
-                impuestoInternoNeto,
-                impuestoInternoPorcentaje,
-                IVANeto,
-                IVAPorcentaje,
-                precioCosto,
-                precioLista,
-                precioVentaPublico,                                             
-                (idMedida != null), medida,
-                (idRubro != null), rubro,
-                (idProveedor != null), proveedor);
     }
 }
