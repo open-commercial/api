@@ -35,7 +35,7 @@ public class ProductoServiceImplTest {
     public void shouldcalcularCalcularPVP() {
         BigDecimal precioCosto = new BigDecimal("12.34");
         BigDecimal gananciaPorcentaje = new BigDecimal("100");
-        BigDecimal resultadoEsperado = new BigDecimal("24.68000000000000000");
+        BigDecimal resultadoEsperado = new BigDecimal("24.680000000000000");
         BigDecimal resultadoObtenido = productoService.calcularPVP(precioCosto, gananciaPorcentaje);
         assertEquals(resultadoEsperado, resultadoObtenido);
     }
@@ -63,7 +63,7 @@ public class ProductoServiceImplTest {
         BigDecimal pvp = new BigDecimal("24.68");
         BigDecimal ivaPorcentaje = new BigDecimal("21");
         BigDecimal impuestoInternoPorcentaje = new BigDecimal("10");
-        BigDecimal resultadoEsperado = new BigDecimal("32.33080000000000000");
+        BigDecimal resultadoEsperado = new BigDecimal("32.330800000000000");
         BigDecimal resultadoObtenido = productoService.calcularPrecioLista(pvp, ivaPorcentaje, impuestoInternoPorcentaje);
         assertEquals(resultadoEsperado, resultadoObtenido);
     }    
