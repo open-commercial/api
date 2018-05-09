@@ -25,31 +25,31 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
     public BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria) {
         String query = "SELECT SUM(f.total) FROM FacturaVenta f WHERE f.empresa = :empresa AND f.eliminada = false";
         //Fecha
-        if (criteria.isBuscaPorFecha() == true) {
+        if (criteria.isBuscaPorFecha()) {
             FormatterFechaHora formateadorFecha = new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
             query += " AND f.fecha BETWEEN '" + formateadorFecha.format(criteria.getFechaDesde()) + "' AND '" + formateadorFecha.format(criteria.getFechaHasta()) + "'";
         }
         //Cliente
-        if (criteria.isBuscaCliente() == true) {
+        if (criteria.isBuscaCliente()) {
             query += " AND f.cliente = " + criteria.getCliente().getId_Cliente();
         }
         //Tipo de Factura
-        if (criteria.isBuscaPorTipoComprobante() == true) {
+        if (criteria.isBuscaPorTipoComprobante()) {
             query += " AND f.tipoComprobante = " + "\'" + criteria.getTipoComprobante() + "\'";
         }
         //Usuario
-        if (criteria.isBuscaUsuario() == true) {
+        if (criteria.isBuscaUsuario()) {
             query += " AND f.usuario = " + criteria.getUsuario().getId_Usuario();
         }
-        if (criteria.isBuscaViajante() == true) {
+        if (criteria.isBuscaViajante()) {
             query += " AND f.cliente.viajante = " + criteria.getViajante().getId_Usuario();
         }
         //Nro de Factura
-        if (criteria.isBuscaPorNumeroFactura() == true) {
+        if (criteria.isBuscaPorNumeroFactura()) {
             query += " AND f.numSerie = " + criteria.getNumSerie() + " AND f.numFactura = " + criteria.getNumFactura();
         }
         //Pedido
-        if (criteria.isBuscarPorPedido() == true) {
+        if (criteria.isBuscarPorPedido()) {
             query += " AND f.pedido.nroPedido = " + criteria.getNroPedido();
         }
         query += " ORDER BY f.fecha DESC";
@@ -63,20 +63,20 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
     }
 
     @Override
-    public BigDecimal calcularIVA_Venta(BusquedaFacturaVentaCriteria criteria, TipoDeComprobante[] tipoComprobante) {
+    public BigDecimal calcularIVAVenta(BusquedaFacturaVentaCriteria criteria, TipoDeComprobante[] tipoComprobante) {
         String query = "SELECT SUM(f.iva_105_neto + f.iva_21_neto) FROM FacturaVenta f WHERE f.empresa = :empresa AND f.eliminada = false";
         //Fecha
-        if (criteria.isBuscaPorFecha() == true) {
+        if (criteria.isBuscaPorFecha()) {
             FormatterFechaHora formateadorFecha = new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
             query += " AND f.fecha BETWEEN '" + formateadorFecha.format(criteria.getFechaDesde())
                     + "' AND '" + formateadorFecha.format(criteria.getFechaHasta()) + "'";
         }
         //Cliente
-        if (criteria.isBuscaCliente() == true) {
+        if (criteria.isBuscaCliente()) {
             query += " AND f.cliente = " + criteria.getCliente().getId_Cliente();
         }
         //Tipo de Factura
-        if (criteria.isBuscaPorTipoComprobante() == true) {
+        if (criteria.isBuscaPorTipoComprobante()) {
             query += " AND f.tipoComprobante = " + "\'" + criteria.getTipoComprobante() + "\'";
         }
         for (int i = 0; i < tipoComprobante.length; i++) {
@@ -88,18 +88,18 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
         }
         query += " )";
         //Usuario
-        if (criteria.isBuscaUsuario() == true) {
+        if (criteria.isBuscaUsuario()) {
             query += " AND f.usuario = " + criteria.getUsuario().getId_Usuario();
         }
-        if (criteria.isBuscaViajante() == true) {
+        if (criteria.isBuscaViajante()) {
             query += " AND f.cliente.viajante = " + criteria.getViajante().getId_Usuario();
         }
         //Nro de Factura
-        if (criteria.isBuscaPorNumeroFactura() == true) {
+        if (criteria.isBuscaPorNumeroFactura()) {
             query += " AND f.numSerie = " + criteria.getNumSerie() + " AND f.numFactura = " + criteria.getNumFactura();
         }
         //Pedido
-        if (criteria.isBuscarPorPedido() == true) {
+        if (criteria.isBuscarPorPedido()) {
             query += " AND f.pedido.nroPedido = " + criteria.getNroPedido();
         }
         query += " ORDER BY f.fecha DESC";
@@ -116,32 +116,32 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
     public BigDecimal calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria) {
         String query = "SELECT SUM(r.ganancia_neto * r.cantidad) FROM FacturaVenta f LEFT JOIN f.renglones r WHERE f.empresa = :empresa AND f.eliminada = false";
         //Fecha
-        if (criteria.isBuscaPorFecha() == true) {
+        if (criteria.isBuscaPorFecha()) {
             FormatterFechaHora formateadorFecha = new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
             query += " AND f.fecha BETWEEN '" + formateadorFecha.format(criteria.getFechaDesde())
                     + "' AND '" + formateadorFecha.format(criteria.getFechaHasta()) + "'";
         }
         //Cliente
-        if (criteria.isBuscaCliente() == true) {
+        if (criteria.isBuscaCliente()) {
             query += " AND f.cliente = " + criteria.getCliente().getId_Cliente();
         }
         //Tipo de Factura
-        if (criteria.isBuscaPorTipoComprobante() == true) {
+        if (criteria.isBuscaPorTipoComprobante()) {
             query += " AND f.tipoComprobante = " + "\'" + criteria.getTipoComprobante() + "\'";
         }
         //Usuario
-        if (criteria.isBuscaUsuario() == true) {
+        if (criteria.isBuscaUsuario()) {
             query += " AND f.usuario = " + criteria.getUsuario().getId_Usuario();
         }
-        if (criteria.isBuscaViajante() == true) {
+        if (criteria.isBuscaViajante()) {
             query += " AND f.cliente.viajante = " + criteria.getViajante().getId_Usuario();
         }
         //Nro de Factura
-        if (criteria.isBuscaPorNumeroFactura() == true) {
+        if (criteria.isBuscaPorNumeroFactura()) {
             query += " AND f.numSerie = " + criteria.getNumSerie() + " AND f.numFactura = " + criteria.getNumFactura();
         }
         //Pedido
-        if (criteria.isBuscarPorPedido() == true) {
+        if (criteria.isBuscarPorPedido()) {
             query += " AND f.pedido.nroPedido = " + criteria.getNroPedido();
         }
         query += " ORDER BY f.fecha DESC";
@@ -160,31 +160,32 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
         String queryData = "SELECT f";
         String query = " FROM FacturaVenta f WHERE f.empresa = :empresa AND f.eliminada = false";
         //Fecha
-        if (criteria.isBuscaPorFecha() == true) {
+        if (criteria.isBuscaPorFecha()) {
             FormatterFechaHora formateadorFecha = new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
-            query += " AND f.fecha BETWEEN '" + formateadorFecha.format(criteria.getFechaDesde()) + "' AND '" + formateadorFecha.format(criteria.getFechaHasta()) + "'";
+            query += " AND f.fecha BETWEEN '" + formateadorFecha.format(criteria.getFechaDesde())
+                    + "' AND '" + formateadorFecha.format(criteria.getFechaHasta()) + "'";
         }
         //Cliente
-        if (criteria.isBuscaCliente() == true) {
+        if (criteria.isBuscaCliente()) {
             query += " AND f.cliente = " + criteria.getCliente().getId_Cliente();
         }
         //Tipo de Factura
-        if (criteria.isBuscaPorTipoComprobante() == true) {
+        if (criteria.isBuscaPorTipoComprobante()) {
             query += " AND f.tipoComprobante = " + "\'" + criteria.getTipoComprobante() + "\'";
         }
         //Usuario
-        if (criteria.isBuscaUsuario() == true) {
+        if (criteria.isBuscaUsuario()) {
             query += " AND f.usuario = " + criteria.getUsuario().getId_Usuario();
         }
-        if (criteria.isBuscaViajante() == true) {
+        if (criteria.isBuscaViajante()) {
             query += " AND f.cliente.viajante = " + criteria.getViajante().getId_Usuario();
         }
         //Nro de Factura
-        if (criteria.isBuscaPorNumeroFactura() == true) {
+        if (criteria.isBuscaPorNumeroFactura()) {
             query += " AND f.numSerie = " + criteria.getNumSerie() + " AND f.numFactura = " + criteria.getNumFactura();
         }
         //Pedido
-        if (criteria.isBuscarPorPedido() == true) {
+        if (criteria.isBuscarPorPedido()) {
             query += " AND f.pedido.nroPedido = " + criteria.getNroPedido();
         }     
         queryCount += query;
@@ -203,5 +204,4 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
         long total = typedQueryCount.getSingleResult();
         return new PageImpl<>(facturas, criteria.getPageable(), total);
     }
-
 }
