@@ -261,11 +261,11 @@ public class FacturaServiceImpl implements IFacturaService {
                     .getString("mensaje_empresa_no_existente"));
         }
         //Fecha de Factura        
-        if (criteria.isBuscaPorFecha() == true & (criteria.getFechaDesde() == null | criteria.getFechaHasta() == null)) {
+        if (criteria.isBuscaPorFecha() & (criteria.getFechaDesde() == null | criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_fechas_busqueda_invalidas"));
         }
-        if (criteria.isBuscaPorFecha() == true) {
+        if (criteria.isBuscaPorFecha()) {
             Calendar cal = new GregorianCalendar();
             cal.setTime(criteria.getFechaDesde());
             cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -279,7 +279,7 @@ public class FacturaServiceImpl implements IFacturaService {
             criteria.setFechaHasta(cal.getTime());
         }
         //Proveedor
-        if (criteria.isBuscaPorProveedor() == true && criteria.getProveedor() == null) {
+        if (criteria.isBuscaPorProveedor() && criteria.getProveedor() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_proveedor_vacio"));
         }
@@ -294,11 +294,11 @@ public class FacturaServiceImpl implements IFacturaService {
                     .getString("mensaje_empresa_no_existente"));
         }
         //Fecha de Factura        
-        if (criteria.isBuscaPorFecha() == true && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+        if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_fechas_busqueda_invalidas"));
         }
-        if (criteria.isBuscaPorFecha() == true) {
+        if (criteria.isBuscaPorFecha()) {
             Calendar cal = new GregorianCalendar();
             cal.setTime(criteria.getFechaDesde());
             cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -312,16 +312,16 @@ public class FacturaServiceImpl implements IFacturaService {
             criteria.setFechaHasta(cal.getTime());
         }
         //Cliente
-        if (criteria.isBuscaCliente() == true && criteria.getCliente() == null) {
+        if (criteria.isBuscaCliente() && criteria.getCliente() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_cliente_vacio"));
         }
         //Usuario
-        if (criteria.isBuscaUsuario() == true && criteria.getUsuario() == null) {
+        if (criteria.isBuscaUsuario() && criteria.getUsuario() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_usuario_vacio"));
         }
-        if (criteria.isBuscaViajante() == true && criteria.getViajante() == null) {
+        if (criteria.isBuscaViajante() && criteria.getViajante() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_viajante_vacio"));
         }
@@ -659,11 +659,11 @@ public class FacturaServiceImpl implements IFacturaService {
                     .getString("mensaje_empresa_no_existente"));
         }
         //Fecha de Factura        
-        if (criteria.isBuscaPorFecha() == true && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+        if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_fechas_busqueda_invalidas"));
         }
-        if (criteria.isBuscaPorFecha() == true) {
+        if (criteria.isBuscaPorFecha()) {
             Calendar cal = new GregorianCalendar();
             cal.setTime(criteria.getFechaDesde());
             cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -677,16 +677,16 @@ public class FacturaServiceImpl implements IFacturaService {
             criteria.setFechaHasta(cal.getTime());
         }
         //Cliente
-        if (criteria.isBuscaCliente() == true && criteria.getCliente() == null) {
+        if (criteria.isBuscaCliente() && criteria.getCliente() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_cliente_vacio"));
         }
         //Usuario
-        if (criteria.isBuscaUsuario() == true && criteria.getUsuario() == null) {
+        if (criteria.isBuscaUsuario() && criteria.getUsuario() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_usuario_vacio"));
         }
-        if (criteria.isBuscaViajante() == true && criteria.getViajante() == null) {
+        if (criteria.isBuscaViajante() && criteria.getViajante() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_viajante_vacio"));
         }
@@ -707,11 +707,11 @@ public class FacturaServiceImpl implements IFacturaService {
                     .getString("mensaje_empresa_no_existente"));
         }
         //Fecha de Factura        
-        if (criteria.isBuscaPorFecha() == true & (criteria.getFechaDesde() == null | criteria.getFechaHasta() == null)) {
+        if (criteria.isBuscaPorFecha() & (criteria.getFechaDesde() == null | criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_fechas_busqueda_invalidas"));
         }
-        if (criteria.isBuscaPorFecha() == true) {
+        if (criteria.isBuscaPorFecha()) {
             Calendar cal = new GregorianCalendar();
             cal.setTime(criteria.getFechaDesde());
             cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -725,7 +725,7 @@ public class FacturaServiceImpl implements IFacturaService {
             criteria.setFechaHasta(cal.getTime());
         }
         //Proveedor
-        if (criteria.isBuscaPorProveedor() == true && criteria.getProveedor() == null) {
+        if (criteria.isBuscaPorProveedor() && criteria.getProveedor() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_proveedor_vacio"));
         }
@@ -740,11 +740,11 @@ public class FacturaServiceImpl implements IFacturaService {
                     .getString("mensaje_empresa_no_existente"));
         }
         //Fecha de Factura        
-        if (criteria.isBuscaPorFecha() == true && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+        if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_fechas_busqueda_invalidas"));
         }
-        if (criteria.isBuscaPorFecha() == true) {
+        if (criteria.isBuscaPorFecha()) {
             Calendar cal = new GregorianCalendar();
             cal.setTime(criteria.getFechaDesde());
             cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -758,21 +758,21 @@ public class FacturaServiceImpl implements IFacturaService {
             criteria.setFechaHasta(cal.getTime());
         }
         //Cliente
-        if (criteria.isBuscaCliente() == true && criteria.getCliente() == null) {
+        if (criteria.isBuscaCliente() && criteria.getCliente() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_cliente_vacio"));
         }
         //Usuario
-        if (criteria.isBuscaUsuario() == true && criteria.getUsuario() == null) {
+        if (criteria.isBuscaUsuario() && criteria.getUsuario() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_usuario_vacio"));
         }
-        if (criteria.isBuscaViajante() == true && criteria.getViajante() == null) {
+        if (criteria.isBuscaViajante() && criteria.getViajante() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_viajante_vacio"));
         }
         TipoDeComprobante[] tipoFactura = {TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B};
-        return facturaVentaRepository.calcularIVA_Venta(criteria, tipoFactura);
+        return facturaVentaRepository.calcularIVAVenta(criteria, tipoFactura);
     }
 
     @Override
@@ -783,11 +783,11 @@ public class FacturaServiceImpl implements IFacturaService {
                     .getString("mensaje_empresa_no_existente"));
         }
         //Fecha de Factura        
-        if (criteria.isBuscaPorFecha() == true & (criteria.getFechaDesde() == null | criteria.getFechaHasta() == null)) {
+        if (criteria.isBuscaPorFecha() & (criteria.getFechaDesde() == null | criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_fechas_busqueda_invalidas"));
         }
-        if (criteria.isBuscaPorFecha() == true) {
+        if (criteria.isBuscaPorFecha()) {
             Calendar cal = new GregorianCalendar();
             cal.setTime(criteria.getFechaDesde());
             cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -801,12 +801,12 @@ public class FacturaServiceImpl implements IFacturaService {
             criteria.setFechaHasta(cal.getTime());
         }
         //Proveedor
-        if (criteria.isBuscaPorProveedor() == true && criteria.getProveedor() == null) {
+        if (criteria.isBuscaPorProveedor() && criteria.getProveedor() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_proveedor_vacio"));
         }
         TipoDeComprobante[] tipoFactura = {TipoDeComprobante.FACTURA_A};
-        return facturaCompraRepository.calcularIVA_Compra(criteria, tipoFactura);
+        return facturaCompraRepository.calcularIVACompra(criteria, tipoFactura);
     }
 
     @Override
@@ -817,11 +817,11 @@ public class FacturaServiceImpl implements IFacturaService {
                     .getString("mensaje_empresa_no_existente"));
         }
         //Fecha de Factura        
-        if (criteria.isBuscaPorFecha() == true && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+        if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_fechas_busqueda_invalidas"));
         }
-        if (criteria.isBuscaPorFecha() == true) {
+        if (criteria.isBuscaPorFecha()) {
             Calendar cal = new GregorianCalendar();
             cal.setTime(criteria.getFechaDesde());
             cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -835,16 +835,16 @@ public class FacturaServiceImpl implements IFacturaService {
             criteria.setFechaHasta(cal.getTime());
         }
         //Cliente
-        if (criteria.isBuscaCliente() == true && criteria.getCliente() == null) {
+        if (criteria.isBuscaCliente() && criteria.getCliente() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_cliente_vacio"));
         }
         //Usuario
-        if (criteria.isBuscaUsuario() == true && criteria.getUsuario() == null) {
+        if (criteria.isBuscaUsuario() && criteria.getUsuario() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_usuario_vacio"));
         }
-        if (criteria.isBuscaViajante() == true && criteria.getViajante() == null) {
+        if (criteria.isBuscaViajante() && criteria.getViajante() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_viajante_vacio"));
         }

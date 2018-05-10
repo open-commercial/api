@@ -25,16 +25,20 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
     public BigDecimal calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria) {
         String query = "SELECT SUM(f.total) FROM FacturaCompra f WHERE f.empresa = :empresa AND f.eliminada = false";
         //Fecha Factura
-        if (criteria.isBuscaPorFecha() == true) {
+        if (criteria.isBuscaPorFecha()) {
             FormatterFechaHora formateadorFecha = new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
             query += " AND f.fecha BETWEEN '" + formateadorFecha.format(criteria.getFechaDesde()) + "' AND '" + formateadorFecha.format(criteria.getFechaHasta()) + "'";
         }
         //Proveedor
-        if (criteria.isBuscaPorProveedor() == true) {
+        if (criteria.isBuscaPorProveedor()) {
             query += " AND f.proveedor = " + criteria.getProveedor().getId_Proveedor();
         }
+        //Tipo de Factura
+        if (criteria.isBuscaPorTipoComprobante()) {
+            query += " AND f.tipoComprobante = " + "\'" + criteria.getTipoComprobante() + "\'";
+        }
         //Nro de Factura
-        if (criteria.isBuscaPorNumeroFactura() == true) {
+        if (criteria.isBuscaPorNumeroFactura()) {
             query += " AND f.numSerie = " + criteria.getNumSerie() + " AND f.numFactura = " + criteria.getNumFactura();
         }
         query += " ORDER BY f.fecha DESC";
@@ -48,17 +52,21 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
     }
 
     @Override
-    public BigDecimal calcularIVA_Compra(BusquedaFacturaCompraCriteria criteria, TipoDeComprobante[] tipoComprobante) {
+    public BigDecimal calcularIVACompra(BusquedaFacturaCompraCriteria criteria, TipoDeComprobante[] tipoComprobante) {
         String query = "SELECT SUM(f.iva_105_neto + f.iva_21_neto) FROM FacturaCompra f WHERE f.empresa = :empresa AND f.eliminada = false";
         //Fecha Factura
-        if (criteria.isBuscaPorFecha() == true) {
+        if (criteria.isBuscaPorFecha()) {
             FormatterFechaHora formateadorFecha = new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
             query += " AND f.fecha BETWEEN '" + formateadorFecha.format(criteria.getFechaDesde())
                     + "' AND '" + formateadorFecha.format(criteria.getFechaHasta()) + "'";
         }
         //Proveedor
-        if (criteria.isBuscaPorProveedor() == true) {
+        if (criteria.isBuscaPorProveedor()) {
             query += " AND f.proveedor = " + criteria.getProveedor().getId_Proveedor();
+        }
+        //Tipo de Factura
+        if (criteria.isBuscaPorTipoComprobante()) {
+            query += " AND f.tipoComprobante = " + "\'" + criteria.getTipoComprobante() + "\'";
         }
         for (int i = 0; i < tipoComprobante.length; i++) {
             if (i == 0) {
@@ -69,7 +77,7 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
         }
         query += " )";
         //Nro de Factura
-        if (criteria.isBuscaPorNumeroFactura() == true) {
+        if (criteria.isBuscaPorNumeroFactura()) {
             query += " AND f.numSerie = " + criteria.getNumSerie() + " AND f.numFactura = " + criteria.getNumFactura();
         }
         query += " ORDER BY f.fecha DESC";
@@ -88,16 +96,21 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
         String queryData = "SELECT f ";
         String query = "FROM FacturaCompra f WHERE f.empresa = :empresa AND f.eliminada = false";
         //Fecha Factura
-        if (criteria.isBuscaPorFecha() == true) {
+        if (criteria.isBuscaPorFecha()) {
             FormatterFechaHora formateadorFecha = new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
-            query += " AND f.fecha BETWEEN '" + formateadorFecha.format(criteria.getFechaDesde()) + "' AND '" + formateadorFecha.format(criteria.getFechaHasta()) + "'";
+            query += " AND f.fecha BETWEEN '" + formateadorFecha.format(criteria.getFechaDesde())
+                    + "' AND '" + formateadorFecha.format(criteria.getFechaHasta()) + "'";
         }
         //Proveedor
-        if (criteria.isBuscaPorProveedor() == true) {
+        if (criteria.isBuscaPorProveedor()) {
             query += " AND f.proveedor = " + criteria.getProveedor().getId_Proveedor();
         }
+        //Tipo de Factura
+        if (criteria.isBuscaPorTipoComprobante()) {
+            query += " AND f.tipoComprobante = " + "\'" + criteria.getTipoComprobante() + "\'";
+        }
         //Nro de Factura
-        if (criteria.isBuscaPorNumeroFactura() == true) {
+        if (criteria.isBuscaPorNumeroFactura()) {
             query += " AND f.numSerie = " + criteria.getNumSerie() + " AND f.numFactura = " + criteria.getNumFactura();
         }
         queryCount += query;
@@ -115,7 +128,6 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
         typedQueryCount.setParameter("empresa", criteria.getEmpresa());
         long total = typedQueryCount.getSingleResult();
         return new PageImpl<>(facturas, criteria.getPageable(), total);
-        
     }
 
 }

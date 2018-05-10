@@ -10,7 +10,7 @@ public interface FacturaCompraRepositoryCustom {
     
     BigDecimal calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria);
 
-    BigDecimal calcularIVA_Compra(BusquedaFacturaCompraCriteria criteria, TipoDeComprobante[] tipoComprobante);
+    BigDecimal calcularIVACompra(BusquedaFacturaCompraCriteria criteria, TipoDeComprobante[] tipoComprobante);
 
     Page<FacturaCompra> buscarFacturasCompra(BusquedaFacturaCompraCriteria criteria);
 
