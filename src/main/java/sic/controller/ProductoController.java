@@ -38,45 +38,45 @@ import sic.service.IRubroService;
 @RestController
 @RequestMapping("/api/v1")
 public class ProductoController {
-    
+
     private final IProductoService productoService;
     private final IEmpresaService empresaService;
     private final IRubroService rubroService;
-    private final IProveedorService proveedorService;  
+    private final IProveedorService proveedorService;
     private final IMedidaService medidaService;
     private final int TAMANIO_PAGINA_DEFAULT = 50;
-    
+
     @Autowired
     public ProductoController(IProductoService productoService, IEmpresaService empresaService,
                               IRubroService rubroService, IProveedorService proveedorService,
-                              IMedidaService medidaService) {        
-       this.productoService = productoService;
-       this.empresaService = empresaService;
-       this.rubroService = rubroService;
-       this.proveedorService = proveedorService;
-       this.medidaService = medidaService;
+                              IMedidaService medidaService) {
+        this.productoService = productoService;
+        this.empresaService = empresaService;
+        this.rubroService = rubroService;
+        this.proveedorService = proveedorService;
+        this.medidaService = medidaService;
     }
-    
+
     @GetMapping("/productos/{idProducto}")
     @ResponseStatus(HttpStatus.OK)
     public Producto getProductoPorId(@PathVariable long idProducto) {
         return productoService.getProductoPorId(idProducto);
     }
-    
+
     @GetMapping("/productos/busqueda")
     @ResponseStatus(HttpStatus.OK)
     public Producto getProductoPorCodigo(@RequestParam long idEmpresa,
                                          @RequestParam String codigo) {
         return productoService.getProductoPorCodigo(codigo, empresaService.getEmpresaPorId(idEmpresa));
     }
-    
+
     @GetMapping("/productos/valor-stock/criteria")
     @ResponseStatus(HttpStatus.OK)
     public BigDecimal calcularValorStock(@RequestParam long idEmpresa,
                                          @RequestParam(required = false) String codigo,
                                          @RequestParam(required = false) String descripcion,
                                          @RequestParam(required = false) Long idRubro,
-                                         @RequestParam(required = false) Long idProveedor,                                          
+                                         @RequestParam(required = false) Long idProveedor,
                                          @RequestParam(required = false) Integer cantidadRegistros,
                                          @RequestParam(required = false) boolean soloFantantes) {
         Rubro rubro = null;
@@ -91,22 +91,22 @@ public class ProductoController {
             cantidadRegistros = 0;
         }
         BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder()
-                                            .buscarPorCodigo((codigo!=null))
-                                            .codigo(codigo)
-                                            .buscarPorDescripcion(descripcion!=null)
-                                            .descripcion(descripcion)
-                                            .buscarPorRubro(rubro!=null)
-                                            .rubro(rubro)
-                                            .buscarPorProveedor(proveedor!=null)
-                                            .proveedor(proveedor)
-                                            .empresa(empresaService.getEmpresaPorId(idEmpresa))
-                                            .cantRegistros(cantidadRegistros)
-                                            .listarSoloFaltantes(soloFantantes)
-                                            .build();
+                .buscarPorCodigo((codigo!=null))
+                .codigo(codigo)
+                .buscarPorDescripcion(descripcion!=null)
+                .descripcion(descripcion)
+                .buscarPorRubro(rubro!=null)
+                .rubro(rubro)
+                .buscarPorProveedor(proveedor!=null)
+                .proveedor(proveedor)
+                .empresa(empresaService.getEmpresaPorId(idEmpresa))
+                .cantRegistros(cantidadRegistros)
+                .listarSoloFaltantes(soloFantantes)
+                .build();
         return productoService.calcularValorStock(criteria);
     }
-    
-    @GetMapping("/productos/busqueda/criteria") 
+
+    @GetMapping("/productos/busqueda/criteria")
     @ResponseStatus(HttpStatus.OK)
     public Page<Producto> buscarProductos(@RequestParam long idEmpresa,
                                           @RequestParam(required = false) String codigo,
@@ -132,27 +132,27 @@ public class ProductoController {
         }
         Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "descripcion"));
         BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder()
-                                            .buscarPorCodigo((codigo!=null && !codigo.isEmpty()))
-                                            .codigo(codigo)
-                                            .buscarPorDescripcion(descripcion!=null && !descripcion.isEmpty())
-                                            .descripcion(descripcion)
-                                            .buscarPorRubro(rubro!=null)
-                                            .rubro(rubro)
-                                            .buscarPorProveedor(proveedor!=null)
-                                            .proveedor(proveedor)
-                                            .empresa(empresaService.getEmpresaPorId(idEmpresa))
-                                            .listarSoloFaltantes(soloFantantes)
-                                            .pageable(pageable)
-                                            .build();
+                .buscarPorCodigo((codigo!=null && !codigo.isEmpty()))
+                .codigo(codigo)
+                .buscarPorDescripcion(descripcion!=null && !descripcion.isEmpty())
+                .descripcion(descripcion)
+                .buscarPorRubro(rubro!=null)
+                .rubro(rubro)
+                .buscarPorProveedor(proveedor!=null)
+                .proveedor(proveedor)
+                .empresa(empresaService.getEmpresaPorId(idEmpresa))
+                .listarSoloFaltantes(soloFantantes)
+                .pageable(pageable)
+                .build();
         return productoService.buscarProductos(criteria);
     }
-        
+
     @DeleteMapping("/productos")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarMultiplesProductos(@RequestParam long[] idProducto) {        
+    public void eliminarMultiplesProductos(@RequestParam long[] idProducto) {
         productoService.eliminarMultiplesProductos(idProducto);
     }
-    
+
     @PutMapping("/productos")
     @ResponseStatus(HttpStatus.OK)
     public void actualizar(@RequestBody Producto producto,
@@ -168,7 +168,7 @@ public class ProductoController {
             productoService.actualizar(producto);
         }
     }
-    
+
     @PostMapping("/productos")
     @ResponseStatus(HttpStatus.CREATED)
     public Producto guardar(@RequestBody Producto producto,
@@ -188,13 +188,13 @@ public class ProductoController {
     public Map<Long, BigDecimal> verificarDisponibilidadStock(long[] idProducto, BigDecimal[] cantidad) {
         return productoService.getProductosSinStockDisponible(idProducto, cantidad);
     }
-    
+
     @GetMapping("/productos/cantidad-venta-minima")
     @ResponseStatus(HttpStatus.OK)
     public Map<Long, BigDecimal> verificarCantidadVentaMinima(long[] idProducto, BigDecimal[] cantidad) {
-        return productoService.getProductosNoCumplenCantidadVentaMinima(idProducto, cantidad);        
+        return productoService.getProductosNoCumplenCantidadVentaMinima(idProducto, cantidad);
     }
-    
+
     @GetMapping("/productos/ganancia-neto")
     @ResponseStatus(HttpStatus.OK)
     public BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal gananciaPorcentaje) {
@@ -203,15 +203,15 @@ public class ProductoController {
         }
         return productoService.calcularGanancia_Neto(precioCosto, gananciaPorcentaje);
     }
-    
+
     @GetMapping("/productos/ganancia-porcentaje")
     @ResponseStatus(HttpStatus.OK)
     public BigDecimal calcularGananciaPorcentaje(@RequestParam(defaultValue = "0", required = false) boolean ascendente,
                                                  @RequestParam BigDecimal precioCosto,
-                                                 @RequestParam BigDecimal pvp, 
-                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal ivaPorcentaje, 
-                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal impInternoPorcentaje,                                              
-                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal precioDeLista, 
+                                                 @RequestParam BigDecimal pvp,
+                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal ivaPorcentaje,
+                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal impInternoPorcentaje,
+                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal precioDeLista,
                                                  @RequestParam(defaultValue = "0", required = false) BigDecimal precioDeListaAnterior) {
         if (precioCosto == null || pvp == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
@@ -219,7 +219,7 @@ public class ProductoController {
         return productoService.calcularGanancia_Porcentaje(precioDeLista, precioDeListaAnterior, pvp, ivaPorcentaje,
                 impInternoPorcentaje, precioCosto, ascendente);
     }
-    
+
     @GetMapping("/productos/iva-neto")
     @ResponseStatus(HttpStatus.OK)
     public BigDecimal calcularIVANeto(BigDecimal pvp, BigDecimal ivaPorcentaje) {
@@ -228,17 +228,17 @@ public class ProductoController {
         }
         return productoService.calcularIVA_Neto(pvp, ivaPorcentaje);
     }
-    
+
     @GetMapping("/productos/imp-interno-neto")
     @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularImpInternoNeto(@RequestParam BigDecimal pvp, 
+    public BigDecimal calcularImpInternoNeto(@RequestParam BigDecimal pvp,
                                              @RequestParam(defaultValue = "0",required = false) BigDecimal impInternoPorcentaje) {
         if (pvp == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
         }
         return productoService.calcularImpInterno_Neto(pvp, impInternoPorcentaje);
     }
-    
+
     @GetMapping("/productos/pvp")
     @ResponseStatus(HttpStatus.OK)
     public BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal gananciaPorcentaje) {
@@ -247,11 +247,11 @@ public class ProductoController {
         }
         return productoService.calcularPVP(precioCosto, gananciaPorcentaje);
     }
-    
+
     @GetMapping("/productos/precio-lista")
     @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularPrecioLista(@RequestParam BigDecimal pvp, 
-                                          @RequestParam BigDecimal ivaPorcentaje, 
+    public BigDecimal calcularPrecioLista(@RequestParam BigDecimal pvp,
+                                          @RequestParam BigDecimal ivaPorcentaje,
                                           @RequestParam(defaultValue = "0",required = false) BigDecimal impInternoPorcentaje) {
         if (pvp == null || ivaPorcentaje == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
@@ -260,12 +260,12 @@ public class ProductoController {
     }
 
     @GetMapping("/productos/reporte/criteria")
-    public ResponseEntity<byte[]> getReporteListaDePrecios(@RequestParam(value = "idEmpresa") long idEmpresa,
-                                                           @RequestParam(value = "codigo", required = false) String codigo,
-                                                           @RequestParam(value = "descripcion", required = false) String descripcion,
-                                                           @RequestParam(value = "idRubro", required = false) Long idRubro,
-                                                           @RequestParam(value = "idProveedor", required = false) Long idProveedor,                                                           
-                                                           @RequestParam(value = "soloFaltantes", required = false) boolean soloFantantes) {
+    public ResponseEntity<byte[]> getListaDePreciosXls(@RequestParam(value = "idEmpresa") long idEmpresa,
+                                                       @RequestParam(value = "codigo", required = false) String codigo,
+                                                       @RequestParam(value = "descripcion", required = false) String descripcion,
+                                                       @RequestParam(value = "idRubro", required = false) Long idRubro,
+                                                       @RequestParam(value = "idProveedor", required = false) Long idProveedor,
+                                                       @RequestParam(value = "soloFaltantes", required = false) boolean soloFantantes) {
         Rubro rubro = null;
         if (idRubro != null) {
             rubro = rubroService.getRubroPorId(idRubro);
@@ -290,13 +290,14 @@ public class ProductoController {
                 .pageable(null)
                 .build();
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);        
-        headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
+        headers.setContentType(new MediaType("application", "vnd.ms-excel"));
+        headers.set("Content-Disposition", "attachment; filename=reporte.xls");
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        byte[] reportePDF = productoService.getReporteListaDePreciosPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
-        return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+        byte[] reporteXls = productoService.getListaDePreciosXlsPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
+        headers.setContentLength(reporteXls.length);
+        return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
     }
-    
+
     @PutMapping("/productos/multiples")
     @ResponseStatus(HttpStatus.OK)
     public void modificarMultiplesProductos(@RequestParam long[] idProducto,
@@ -312,12 +313,12 @@ public class ProductoController {
                                             @RequestParam(required = false) BigDecimal precioCosto,
                                             @RequestParam(required = false) BigDecimal precioLista,
                                             @RequestParam(required = false) BigDecimal precioVentaPublico) {
-        
+
         boolean actualizaPrecios = false;
         if (gananciaNeto != null && gananciaPorcentaje != null && impuestoInternoNeto != null && impuestoInternoPorcentaje != null
                 && IVANeto != null && IVAPorcentaje != null && precioCosto != null && precioLista != null && precioVentaPublico != null) {
             actualizaPrecios = true;
-        }        
+        }
         Medida medida = null;
         if (idMedida != null) {
             medida = medidaService.getMedidaPorId(idMedida);
@@ -329,7 +330,7 @@ public class ProductoController {
         Proveedor proveedor = null;
         if (idProveedor != null) {
             proveedor = proveedorService.getProveedorPorId(idProveedor);
-        }        
+        }
         productoService.modificarMultiplesProductos(idProducto,
                 actualizaPrecios,
                 gananciaNeto,
@@ -340,7 +341,7 @@ public class ProductoController {
                 IVAPorcentaje,
                 precioCosto,
                 precioLista,
-                precioVentaPublico,                                             
+                precioVentaPublico,
                 (idMedida != null), medida,
                 (idRubro != null), rubro,
                 (idProveedor != null), proveedor);
