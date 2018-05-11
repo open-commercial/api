@@ -5,7 +5,6 @@ import java.io.IOException;
 import sic.modelo.BusquedaProductoCriteria;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.util.ArrayList;
@@ -17,8 +16,6 @@ import java.util.ResourceBundle;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
-import javax.validation.Valid;
-
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -402,7 +399,7 @@ public class ProductoServiceImpl implements IProductoService {
             resultado = resultado.subtract(porcentajeIncremento.multiply(ivaPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP).multiply(pvp)));
             resultado = resultado.subtract(precioCosto).multiply(CIEN).divide(precioCosto, 15, RoundingMode.HALF_UP);
         }
-        return resultado.setScale(15, RoundingMode.HALF_UP);
+        return resultado;
     }
 
     @Override
