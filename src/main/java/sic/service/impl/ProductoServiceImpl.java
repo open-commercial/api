@@ -86,23 +86,33 @@ public class ProductoServiceImpl implements IProductoService {
             }
         }
         //Calculos 
-        if (producto.getGanancia_neto().compareTo(this.calcularGanancia_Neto(producto.getPrecioCosto(), producto.getGanancia_porcentaje())) != 0) {
+        if (producto.getGanancia_neto().setScale(15, RoundingMode.DOWN)
+                .compareTo(this.calcularGanancia_Neto(producto.getPrecioCosto(), producto.getGanancia_porcentaje())
+                        .setScale(15, RoundingMode.DOWN)) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_producto_ganancia_neta_incorrecta"));
         }
-        if (producto.getImpuestoInterno_neto().compareTo(this.calcularImpInterno_Neto(producto.getPrecioVentaPublico(), producto.getImpuestoInterno_porcentaje())) != 0) {
+        if (producto.getImpuestoInterno_neto().setScale(15, RoundingMode.DOWN)
+                .compareTo(this.calcularImpInterno_Neto(producto.getPrecioVentaPublico(), producto.getImpuestoInterno_porcentaje())
+                        .setScale(15, RoundingMode.DOWN)) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_producto_impuesto_interno_neto_incorrecto"));
         }
-        if (producto.getIva_neto().compareTo(this.calcularIVA_Neto(producto.getPrecioVentaPublico(), producto.getIva_porcentaje())) != 0) {
+        if (producto.getIva_neto().setScale(15, RoundingMode.DOWN)
+                .compareTo(this.calcularIVA_Neto(producto.getPrecioVentaPublico(), producto.getIva_porcentaje())
+                        .setScale(15, RoundingMode.DOWN)) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_producto_iva_neto_incorrecto"));
         }
-        if (producto.getPrecioLista().compareTo(this.calcularPrecioLista(producto.getPrecioVentaPublico(), producto.getIva_porcentaje(), producto.getImpuestoInterno_porcentaje())) != 0) {
+        if (producto.getPrecioLista().setScale(15, RoundingMode.DOWN)
+                .compareTo(this.calcularPrecioLista(producto.getPrecioVentaPublico(), producto.getIva_porcentaje(), producto.getImpuestoInterno_porcentaje())
+                        .setScale(15, RoundingMode.DOWN)) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_producto_precio_lista_incorrecto"));
         }
-        if (producto.getPrecioVentaPublico().compareTo(this.calcularPVP(producto.getPrecioCosto(), producto.getGanancia_porcentaje())) != 0) {
+        if (producto.getPrecioVentaPublico().setScale(15, RoundingMode.DOWN)
+                .compareTo(this.calcularPVP(producto.getPrecioCosto(), producto.getGanancia_porcentaje())
+                        .setScale(15, RoundingMode.DOWN)) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_precio_venta_publico_incorrecto"));
         }
@@ -419,7 +429,7 @@ public class ProductoServiceImpl implements IProductoService {
     @Override
     public BigDecimal calcularPrecioLista(BigDecimal PVP, BigDecimal iva_porcentaje, BigDecimal impInterno_porcentaje) {
         BigDecimal resulIVA = PVP.multiply(iva_porcentaje.divide(CIEN, 15, RoundingMode.HALF_UP));
-        BigDecimal resultImpInterno = PVP.multiply(impInterno_porcentaje.divide(CIEN));
+        BigDecimal resultImpInterno = PVP.multiply(impInterno_porcentaje.divide(CIEN, 15, RoundingMode.HALF_UP));
         return PVP.add(resulIVA).add(resultImpInterno);
     }
 
