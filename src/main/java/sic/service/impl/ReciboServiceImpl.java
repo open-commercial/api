@@ -70,7 +70,6 @@ public class ReciboServiceImpl implements IReciboService {
         this.validarRecibo(recibo);
         recibo = reciboRepository.save(recibo);
         this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
-        this.cajaService.actualizarSaldoSistema(recibo, TipoDeOperacion.ALTA);
         LOGGER.warn("El Recibo " + recibo + " se guardó correctamente.");
         return recibo;
     }
@@ -154,9 +153,8 @@ public class ReciboServiceImpl implements IReciboService {
     @Transactional
     public void eliminar(long idRecibo) {
         Recibo r = reciboRepository.findById(idRecibo);
-        if (notaService.existeNotaDebitoPorRecibo(r) == false) {
+        if (!notaService.existeNotaDebitoPorRecibo(r)) {
             r.setEliminado(true);
-            this.cajaService.actualizarSaldoSistema(r, TipoDeOperacion.ELIMINACION);
             this.cuentaCorrienteService.asentarEnCuentaCorriente(r, TipoDeOperacion.ELIMINACION);
             reciboRepository.save(r);
             LOGGER.warn("El Recibo " + r + " se eliminó correctamente.");
@@ -213,15 +211,28 @@ public class ReciboServiceImpl implements IReciboService {
     }
 
     @Override
+    public BigDecimal getTotalRecibosClientesQueAfectanCajaEntreFechas(long idEmpresa, Date desde, Date hasta) {
+        BigDecimal total = reciboRepository.getTotalRecibosClientesQueAfectanCajaEntreFechas(idEmpresa, desde, hasta);
+        return (total == null) ? BigDecimal.ZERO : total;
+    }
+
+    @Override
+    public BigDecimal getTotalRecibosProveedoresQueAfectanCajaEntreFechas(long idEmpresa, Date desde, Date hasta) {
+        BigDecimal total = reciboRepository.getTotalRecibosProveedoresQueAfectanCajaEntreFechas(idEmpresa, desde, hasta);
+        return (total == null) ? BigDecimal.ZERO : total;
+    }
+
+    @Override
     public BigDecimal getTotalRecibosClientesEntreFechas(long idEmpresa, Date desde, Date hasta) {
-        BigDecimal total = reciboRepository.getTotalRecibosClientesEntreFechasPorFormaDePago(idEmpresa, desde, hasta);
+        BigDecimal total = reciboRepository.getTotalRecibosClientesEntreFechas(idEmpresa, desde, hasta);
         return (total == null) ? BigDecimal.ZERO : total;
     }
 
     @Override
     public BigDecimal getTotalRecibosProveedoresEntreFechas(long idEmpresa, Date desde, Date hasta) {
-        BigDecimal total = reciboRepository.getTotalRecibosProveedoresEntreFechasPorFormaDePago(idEmpresa, desde, hasta);
+        BigDecimal total = reciboRepository.getTotalRecibosProveedoresEntreFechas(idEmpresa, desde, hasta);
         return (total == null) ? BigDecimal.ZERO : total;
     }
-  
+
+
 }

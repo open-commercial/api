@@ -29,6 +29,10 @@ public interface IReciboService {
 
     List<Recibo> getRecibosEntreFechasPorFormaDePago(Date desde, Date hasta, FormaDePago formaDePago, Empresa empresa);
 
+    BigDecimal getTotalRecibosClientesQueAfectanCajaEntreFechas(long idEmpresa, Date desde, Date hasta);
+
+    BigDecimal getTotalRecibosProveedoresQueAfectanCajaEntreFechas(long idEmpresa, Date desde, Date hasta);
+
     BigDecimal getTotalRecibosClientesEntreFechas(long idEmpresa, Date desde, Date hasta);
 
     BigDecimal getTotalRecibosProveedoresEntreFechas(long idEmpresa, Date desde, Date hasta);

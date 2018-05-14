@@ -108,6 +108,7 @@ public class CajaServiceImpl implements ICajaService {
     @Transactional
     public Caja guardar(Caja caja) {
         caja.setFechaApertura(new Date());
+        caja.setSaldoSistema(null);
         this.validarCaja(caja);
         caja.setNroCaja(this.getUltimoNumeroDeCaja(caja.getEmpresa().getId_Empresa()) + 1);
         caja = cajaRepository.save(caja);
@@ -239,6 +240,7 @@ public class CajaServiceImpl implements ICajaService {
         if (idUsuario != null) {
             cajaACerrar.setUsuarioCierraCaja(usuarioService.getUsuarioPorId(idUsuario));
         }
+        cajaACerrar.setSaldoSistema(this.getSaldoSistema(cajaACerrar));
         cajaACerrar.setEstado(EstadoCaja.CERRADA);
         this.actualizar(cajaACerrar);
         LOGGER.warn("La Caja " + cajaACerrar + " se cerró correctamente.");
@@ -256,13 +258,13 @@ public class CajaServiceImpl implements ICajaService {
             fechaHoraCaja.setTime(ultimaCajaDeEmpresa.getFechaApertura());
             LocalDate fechaCaja = LocalDate.of(fechaHoraCaja.get(Calendar.YEAR), fechaHoraCaja.get(Calendar.MONTH) + 1, fechaHoraCaja.get(Calendar.DAY_OF_MONTH));
             if (fechaCaja.compareTo(fechaActual) < 0) {
-                this.cerrarCaja(ultimaCajaDeEmpresa.getId_Caja(), this.getTotalQueAfectaCaja(ultimaCajaDeEmpresa), ultimaCajaDeEmpresa.getUsuarioAbreCaja().getId_Usuario(), true);
+                this.cerrarCaja(ultimaCajaDeEmpresa.getId_Caja(), this.getSaldoQueAfectaCaja(ultimaCajaDeEmpresa), ultimaCajaDeEmpresa.getUsuarioAbreCaja().getId_Usuario(), true);
             }
         });
     }
 
     @Override
-    public BigDecimal getTotalQueAfectaCaja(Caja caja) {
+    public BigDecimal getSaldoQueAfectaCaja(Caja caja) {
         LocalDateTime ldt = caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         if (caja.getFechaCierre() == null) {
             ldt = ldt.withHour(23);
@@ -271,13 +273,36 @@ public class CajaServiceImpl implements ICajaService {
         } else {
             ldt = caja.getFechaCierre().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         }
-        BigDecimal totalRecibosCliente = reciboService.getTotalRecibosClientesEntreFechas(caja.getEmpresa().getId_Empresa(),
+        BigDecimal totalRecibosCliente = reciboService.getTotalRecibosClientesQueAfectanCajaEntreFechas(caja.getEmpresa().getId_Empresa(),
                 caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
-        BigDecimal totalRecibosProveedor = reciboService.getTotalRecibosProveedoresEntreFechas(caja.getEmpresa().getId_Empresa(),
+        BigDecimal totalRecibosProveedor = reciboService.getTotalRecibosProveedoresQueAfectanCajaEntreFechas(caja.getEmpresa().getId_Empresa(),
                 caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
-        BigDecimal totalGastos = gastoService.getTotalGastosEntreFechas(caja.getEmpresa().getId_Empresa(),
+        BigDecimal totalGastos = gastoService.getTotalGastosQueAfectanCajaEntreFechas(caja.getEmpresa().getId_Empresa(),
                 caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
         return caja.getSaldoInicial().add(totalRecibosCliente).subtract(totalRecibosProveedor).subtract(totalGastos);
+    }
+
+    @Override
+    public BigDecimal getSaldoSistema(Caja caja) {
+        if (caja.getEstado().equals(EstadoCaja.ABIERTA)) {
+            LocalDateTime ldt = caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+            if (caja.getFechaCierre() == null) {
+                ldt = ldt.withHour(23);
+                ldt = ldt.withMinute(59);
+                ldt = ldt.withSecond(59);
+            } else {
+                ldt = caja.getFechaCierre().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+            }
+            BigDecimal totalRecibosCliente = reciboService.getTotalRecibosClientesEntreFechas(caja.getEmpresa().getId_Empresa(),
+                    caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
+            BigDecimal totalRecibosProveedor = reciboService.getTotalRecibosProveedoresEntreFechas(caja.getEmpresa().getId_Empresa(),
+                    caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
+            BigDecimal totalGastos = gastoService.getTotalGastosEntreFechas(caja.getEmpresa().getId_Empresa(),
+                    caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
+            return caja.getSaldoInicial().add(totalRecibosCliente).subtract(totalRecibosProveedor).subtract(totalGastos);
+        } else {
+            return caja.getSaldoSistema();
+        }
     }
 
     @Override
@@ -287,20 +312,20 @@ public class CajaServiceImpl implements ICajaService {
     }
 
     private BigDecimal getTotalMovimientosPorFormaDePago(Caja caja, FormaDePago fdp) {
-        LocalDateTime ldt = caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        LocalDateTime hasta = caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         if (caja.getFechaCierre() == null) {
-            ldt = ldt.withHour(23);
-            ldt = ldt.withMinute(59);
-            ldt = ldt.withSecond(59);
+            hasta = hasta.withHour(23);
+            hasta = hasta.withMinute(59);
+            hasta = hasta.withSecond(59);
         } else {
-            ldt = caja.getFechaCierre().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+            hasta = caja.getFechaCierre().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         }
         BigDecimal recibosTotal = reciboService.getTotalRecibosClientesEntreFechasPorFormaDePago(caja.getEmpresa().getId_Empresa(),
-                fdp.getId_FormaDePago(), caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()))
+                fdp.getId_FormaDePago(), caja.getFechaApertura(), Date.from(hasta.atZone(ZoneId.systemDefault()).toInstant()))
                 .subtract(reciboService.getTotalRecibosProveedoresEntreFechasPorFormaDePago(caja.getEmpresa().getId_Empresa(),
-                        fdp.getId_FormaDePago(), caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant())));
+                        fdp.getId_FormaDePago(), caja.getFechaApertura(), Date.from(hasta.atZone(ZoneId.systemDefault()).toInstant())));
         BigDecimal gastosTotal = gastoService.getTotalGastosEntreFechasYFormaDePago(caja.getEmpresa().getId_Empresa(), fdp.getId_FormaDePago(),
-                caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
+                caja.getFechaApertura(), Date.from(hasta.atZone(ZoneId.systemDefault()).toInstant()));
         return recibosTotal.subtract(gastosTotal);
     }
 
@@ -337,58 +362,18 @@ public class CajaServiceImpl implements ICajaService {
     }
 
     @Override
-    public void actualizarSaldoSistema(Recibo recibo, TipoDeOperacion tipoDeOperacion) {
-        Caja caja = this.getUltimaCaja(recibo.getEmpresa().getId_Empresa());
-        if (caja != null && caja.getEstado().equals(EstadoCaja.ABIERTA)) {
-            BigDecimal monto = BigDecimal.ZERO;
-            if (tipoDeOperacion.equals(TipoDeOperacion.ALTA)) {
-                if (recibo.getCliente() != null) {
-                    monto = recibo.getMonto();
-                } else if (recibo.getProveedor() != null) {
-                    monto = recibo.getMonto().negate();
-                }
-            } else if (tipoDeOperacion.equals(TipoDeOperacion.ELIMINACION)) {
-                if (recibo.getCliente() != null) {
-                    monto = recibo.getMonto().negate();
-                } else if (recibo.getProveedor() != null) {
-                    monto = recibo.getMonto();
-                }
-            }
-            cajaRepository.actualizarSaldoSistema(caja.getId_Caja(), monto);
-        }
-    }
-
-    @Override
-    public void actualizarSaldoSistema(Gasto gasto, TipoDeOperacion tipoDeOperacion) {
-        Caja caja = this.getUltimaCaja(gasto.getEmpresa().getId_Empresa());
-        if (caja != null) {
-            BigDecimal monto = BigDecimal.ZERO;
-            if (tipoDeOperacion.equals(TipoDeOperacion.ALTA)) {
-                monto = gasto.getMonto().negate();
-            } else if (tipoDeOperacion.equals(TipoDeOperacion.ELIMINACION)) {
-                monto = gasto.getMonto();
-            }
-            cajaRepository.actualizarSaldoSistema(caja.getId_Caja(), monto);
-        }
-    }
-
-    @Override
     @Transactional
-    public void reabrirCaja(long idCaja, BigDecimal saldoInicialNuevo, long idUsuario) {
+    public void reabrirCaja(long idCaja, BigDecimal saldoAperturaNuevo, long idUsuario) {
         Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
         if (usuario.getRoles().contains(Rol.ADMINISTRADOR)) {
             Caja caja = getCajaPorId(idCaja);
             if (caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isEqual(LocalDate.now())) {
-                caja.setUsuarioCierraCaja(null);
-                BigDecimal diferenciaSaldosIniciales = caja.getSaldoInicial().subtract(saldoInicialNuevo);
-                if (diferenciaSaldosIniciales.signum() == -1) {
-                    caja.setSaldoSistema(caja.getSaldoSistema().add(diferenciaSaldosIniciales.abs()));
-                } else if (diferenciaSaldosIniciales.signum() == 1) {
-                    caja.setSaldoSistema(caja.getSaldoSistema().subtract(diferenciaSaldosIniciales));
-                }
-                caja.setSaldoInicial(saldoInicialNuevo);
+                caja.setSaldoSistema(null);
+                caja.setSaldoInicial(saldoAperturaNuevo);
                 caja.setSaldoReal(BigDecimal.ZERO);
                 caja.setEstado(EstadoCaja.ABIERTA);
+                caja.setUsuarioCierraCaja(null);
+                caja.setFechaCierre(null);
                 this.actualizar(caja);
             } else {
                 throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")

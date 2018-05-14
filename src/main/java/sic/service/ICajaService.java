@@ -30,7 +30,9 @@ public interface ICajaService {
     
     Caja cerrarCaja(long idCaja, BigDecimal monto, Long idUsuario, boolean scheduling);
     
-    BigDecimal getTotalQueAfectaCaja(Caja caja);
+    BigDecimal getSaldoQueAfectaCaja(Caja caja);
+
+    BigDecimal getSaldoSistema(Caja caja);
 
     boolean isUltimaCajaAbierta(long idEmpresa);
     
@@ -40,9 +42,6 @@ public interface ICajaService {
     
     List<MovimientoCaja> getMovimientosPorFormaDePagoEntreFechas(Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta);
 
-    void actualizarSaldoSistema(Recibo recibo, TipoDeOperacion tipoDeOperacion);
-
-    void actualizarSaldoSistema(Gasto gasto, TipoDeOperacion tipoDeOperacion);
-
     void reabrirCaja(long idCaja, BigDecimal saldoInicial, long idUsuario);
+
 }

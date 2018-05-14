@@ -20,9 +20,5 @@ public interface CajaRepository extends PagingAndSortingRepository<Caja, Long>, 
             "WHERE c.empresa.id_Empresa = :idEmpresa AND c.eliminada = false AND c.estado = sic.modelo.EstadoCaja.ABIERTA " +
             "ORDER BY c.id_Caja DESC")
     Caja isUltimaCajaAbierta(@Param("idEmpresa") long idEmpresa);
-
-    @Modifying
-    @Query("UPDATE Caja c SET c.saldoSistema = c.saldoSistema + :monto WHERE c.id_Caja = :idCaja AND c.estado = sic.modelo.EstadoCaja.ABIERTA")
-    int actualizarSaldoSistema(@Param("idCaja") long idCaja, @Param("monto") BigDecimal monto);
       
 }
