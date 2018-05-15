@@ -106,14 +106,16 @@ public class CajaServiceImpl implements ICajaService {
 
     @Override
     @Transactional
-    public Caja guardar(Caja caja) {
+    public Caja abrirCaja(Empresa empresa, Usuario usuarioApertura, String observacion, BigDecimal saldoApertura) {
+        Caja caja = new Caja();
+        caja.setEstado(EstadoCaja.ABIERTA);
+        caja.setObservacion("Apertura de Caja");
+        caja.setEmpresa(empresa);
+        caja.setSaldoInicial(saldoApertura);
+        caja.setUsuarioAbreCaja(usuarioApertura);
         caja.setFechaApertura(new Date());
-        caja.setSaldoSistema(null);
         this.validarCaja(caja);
-        caja.setNroCaja(this.getUltimoNumeroDeCaja(caja.getEmpresa().getId_Empresa()) + 1);
-        caja = cajaRepository.save(caja);
-        LOGGER.warn("La Caja " + caja + " se guardó correctamente.");
-        return caja;
+        return cajaRepository.save(caja);
     }
 
     @Override

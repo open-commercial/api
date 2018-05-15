@@ -24,7 +24,7 @@ public interface ICajaService {
 
     int getUltimoNumeroDeCaja(long id_Empresa);
 
-    Caja guardar(Caja caja);
+    Caja abrirCaja(Empresa empresa, Usuario usuarioApertura, String observacion, BigDecimal saldoApertura);
 
     void validarCaja(Caja caja);
     

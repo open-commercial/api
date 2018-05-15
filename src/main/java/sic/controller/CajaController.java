@@ -53,17 +53,20 @@ public class CajaController {
     public Caja getCajaPorId(@PathVariable long idCaja) {
         return cajaService.getCajaPorId(idCaja);
     }
-    
+
+    @PostMapping("/cajas/empresas/{idEmpresa}/usuarios/{idUsuario}/abrir")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Caja abrirCaja(@PathVariable long idEmpresa ,
+                          @PathVariable long idUsuario,
+                          @RequestParam String observacion,
+                          @RequestParam BigDecimal saldoApertura) {
+        return cajaService.abrirCaja(empresaService.getEmpresaPorId(idEmpresa), usuarioService.getUsuarioPorId(idUsuario), observacion, saldoApertura);
+    }
+
     @PutMapping("/cajas")
     @ResponseStatus(HttpStatus.OK)
     public void actualizar(@RequestBody Caja caja) {
         cajaService.actualizar(caja);        
-    }
-    
-    @PostMapping("/cajas")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Caja guardar(@RequestBody Caja caja) {
-        return cajaService.guardar(caja);
     }
     
     @DeleteMapping("/cajas/{idCaja}")
