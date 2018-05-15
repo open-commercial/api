@@ -17,16 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import sic.modelo.BusquedaClienteCriteria;
-import sic.modelo.Cliente;
-import sic.modelo.Localidad;
-import sic.modelo.Pais;
-import sic.modelo.Provincia;
-import sic.service.IClienteService;
-import sic.service.IEmpresaService;
-import sic.service.ILocalidadService;
-import sic.service.IPaisService;
-import sic.service.IProvinciaService;
+import sic.modelo.*;
+import sic.service.*;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -37,17 +29,19 @@ public class ClienteController {
     private final IPaisService paisService;
     private final IProvinciaService provinciaService;
     private final ILocalidadService localidadService;
+    private final IUsuarioService usuarioService;
     private final int TAMANIO_PAGINA_DEFAULT = 50;
     
     @Autowired
     public ClienteController(IClienteService clienteService, IEmpresaService empresaService,
-            IPaisService paisService, IProvinciaService provinciaService,
-            ILocalidadService localidadService) {
+                             IPaisService paisService, IProvinciaService provinciaService,
+                             ILocalidadService localidadService, IUsuarioService usuarioService) {
         this.clienteService = clienteService;
         this.empresaService = empresaService;
         this.paisService = paisService;
         this.provinciaService = provinciaService;
         this.localidadService = localidadService;
+        this.usuarioService = usuarioService;
     }
   
     @GetMapping("/clientes/{idCliente}")
@@ -62,46 +56,41 @@ public class ClienteController {
                                            @RequestParam(required = false) String razonSocial,
                                            @RequestParam(required = false) String nombreFantasia,
                                            @RequestParam(required = false) String idFiscal,
+                                           @RequestParam(required = false) Long idViajante,
                                            @RequestParam(required = false) Long idPais,
                                            @RequestParam(required = false) Long idProvincia, 
                                            @RequestParam(required = false) Long idLocalidad,
                                            @RequestParam(required = false) Integer pagina,
                                            @RequestParam(required = false) Integer tamanio) {
+        Usuario viajante = null;
+        if (idViajante != null) viajante = usuarioService.getUsuarioPorId(idViajante);
         Pais pais = null;
-        if (idPais != null) {
-            pais = paisService.getPaisPorId(idPais);
-        }
+        if (idPais != null) pais = paisService.getPaisPorId(idPais);
         Provincia provincia = null;
-        if (idProvincia != null) {
-            provincia = provinciaService.getProvinciaPorId(idProvincia);
-        }
+        if (idProvincia != null) provincia = provinciaService.getProvinciaPorId(idProvincia);
         Localidad localidad = null;
-        if (idLocalidad != null) {
-            localidad = localidadService.getLocalidadPorId(idLocalidad);
-        }
-        if (tamanio == null || tamanio <= 0) {
-            tamanio = TAMANIO_PAGINA_DEFAULT;
-        }
-        if (pagina == null || pagina < 0) {
-            pagina = 0;
-        }
+        if (idLocalidad != null) localidad = localidadService.getLocalidadPorId(idLocalidad);
+        if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
+        if (pagina == null || pagina < 0) pagina = 0;
         Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "razonSocial"));
         BusquedaClienteCriteria criteria = BusquedaClienteCriteria.builder()
-                .buscaPorRazonSocial(razonSocial != null)
-                .razonSocial(razonSocial)
-                .buscaPorNombreFantasia(nombreFantasia != null)
-                .nombreFantasia(nombreFantasia)
-                .buscaPorId_Fiscal(idFiscal != null)
-                .idFiscal(idFiscal)
-                .buscaPorPais(idPais != null)
-                .pais(pais)
-                .buscaPorProvincia(idProvincia != null)
-                .provincia(provincia)
-                .buscaPorLocalidad(idLocalidad != null)
-                .localidad(localidad)
-                .empresa(empresaService.getEmpresaPorId(idEmpresa))
-                .pageable(pageable)
-                .build();
+                                                                  .buscaPorRazonSocial(razonSocial != null)
+                                                                  .razonSocial(razonSocial)
+                                                                  .buscaPorNombreFantasia(nombreFantasia != null)
+                                                                  .nombreFantasia(nombreFantasia)
+                                                                  .buscaPorId_Fiscal(idFiscal != null)
+                                                                  .idFiscal(idFiscal)
+                                                                  .buscaPorViajante(idViajante != null)
+                                                                  .viajante(viajante)
+                                                                  .buscaPorPais(idPais != null)
+                                                                  .pais(pais)
+                                                                  .buscaPorProvincia(idProvincia != null)
+                                                                  .provincia(provincia)
+                                                                  .buscaPorLocalidad(idLocalidad != null)
+                                                                  .localidad(localidad)
+                                                                  .empresa(empresaService.getEmpresaPorId(idEmpresa))
+                                                                  .pageable(pageable)
+                                                                  .build();
         return clienteService.buscarClientes(criteria);
     }
        
