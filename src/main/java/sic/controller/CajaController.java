@@ -14,10 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import sic.modelo.BusquedaCajaCriteria;
-import sic.modelo.Caja;
-import sic.modelo.MovimientoCaja;
-import sic.modelo.Usuario;
+import sic.modelo.*;
 import sic.service.ICajaService;
 import sic.service.IEmpresaService;
 import sic.service.IFormaDePagoService;
@@ -54,7 +51,7 @@ public class CajaController {
         return cajaService.getCajaPorId(idCaja);
     }
 
-    @PostMapping("/cajas/empresas/{idEmpresa}/usuarios/{idUsuario}/abrir")
+    @PostMapping("/cajas/apertura/empresas/{idEmpresa}/usuarios/{idUsuario}")
     @ResponseStatus(HttpStatus.CREATED)
     public Caja abrirCaja(@PathVariable long idEmpresa ,
                           @PathVariable long idUsuario,
@@ -99,19 +96,11 @@ public class CajaController {
             fechaHasta.setTimeInMillis(hasta);
         }
         Usuario usuarioApertura = new Usuario();
-        if(idUsuarioApertura != null) {
-            usuarioApertura = usuarioService.getUsuarioPorId(idUsuarioApertura);
-        }
+        if (idUsuarioApertura != null) usuarioApertura = usuarioService.getUsuarioPorId(idUsuarioApertura);
         Usuario usuarioCierre = new Usuario();
-        if(idUsuarioCierre != null) {
-            usuarioCierre = usuarioService.getUsuarioPorId(idUsuarioCierre);
-        }
-        if (tamanio == null || tamanio <= 0) {
-            tamanio = TAMANIO_PAGINA_DEFAULT;
-        }
-        if (pagina == null || pagina < 0) {
-            pagina = 0;
-        }
+        if (idUsuarioCierre != null) usuarioCierre = usuarioService.getUsuarioPorId(idUsuarioCierre);
+        if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
+        if (pagina == null || pagina < 0) pagina = 0;
         Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, "fechaApertura"));
         BusquedaCajaCriteria criteria = BusquedaCajaCriteria.builder()
                                         .buscaPorFecha((desde != null) && (hasta != null))

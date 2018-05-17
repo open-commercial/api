@@ -114,7 +114,7 @@ public class GastoServiceImpl implements IGastoService {
     @Transactional
     public void eliminar(long idGasto) {
         Gasto gastoParaEliminar = this.getGastoPorId(idGasto);
-        if(this.cajaService.getUltimaCaja(gastoParaEliminar.getEmpresa().getId_Empresa()).getEstado().equals(EstadoCaja.CERRADA)){
+        if (this.cajaService.getUltimaCaja(gastoParaEliminar.getEmpresa().getId_Empresa()).getEstado().equals(EstadoCaja.CERRADA)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_gasto_caja_cerrada"));
         }

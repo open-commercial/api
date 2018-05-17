@@ -22,8 +22,6 @@ public interface ICajaService {
 
     Caja getUltimaCaja(long id_Empresa);
 
-    int getUltimoNumeroDeCaja(long id_Empresa);
-
     Caja abrirCaja(Empresa empresa, Usuario usuarioApertura, String observacion, BigDecimal saldoApertura);
 
     void validarCaja(Caja caja);
@@ -43,5 +41,9 @@ public interface ICajaService {
     List<MovimientoCaja> getMovimientosPorFormaDePagoEntreFechas(Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta);
 
     void reabrirCaja(long idCaja, BigDecimal saldoInicial, long idUsuario);
+
+    Caja encontrarCajaCerradaQueContengaFecha(long idEmpresa, Date fecha);
+
+    int actualizarSaldoSistema(Caja caja, BigDecimal monto);
 
 }

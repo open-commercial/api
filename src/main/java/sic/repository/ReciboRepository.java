@@ -62,12 +62,12 @@ public interface ReciboRepository extends PagingAndSortingRepository<Recibo, Lon
             "AND (r.proveedor is null) " +
             "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
     BigDecimal getTotalRecibosClientesEntreFechas(@Param("idEmpresa") long idEmpresa,
-                                                                @Param("desde") Date desde, @Param("hasta") Date hasta);
+                                                  @Param("desde") Date desde, @Param("hasta") Date hasta);
 
     @Query("SELECT SUM(r.monto) FROM Recibo r " +
             "WHERE r.empresa.id_Empresa = :idEmpresa " +
             "AND (r.cliente is null) " +
             "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
     BigDecimal getTotalRecibosProveedoresEntreFechas(@Param("idEmpresa") long idEmpresa,
-                                                                   @Param("desde") Date desde, @Param("hasta") Date hasta);
+                                                     @Param("desde") Date desde, @Param("hasta") Date hasta);
 }

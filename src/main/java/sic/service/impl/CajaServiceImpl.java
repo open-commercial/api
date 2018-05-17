@@ -109,9 +109,8 @@ public class CajaServiceImpl implements ICajaService {
     public Caja abrirCaja(Empresa empresa, Usuario usuarioApertura, String observacion, BigDecimal saldoApertura) {
         Caja caja = new Caja();
         caja.setEstado(EstadoCaja.ABIERTA);
-        caja.setObservacion("Apertura de Caja");
         caja.setEmpresa(empresa);
-        caja.setSaldoInicial(saldoApertura);
+        caja.setSaldoApertura(saldoApertura);
         caja.setUsuarioAbreCaja(usuarioApertura);
         caja.setFechaApertura(new Date());
         this.validarCaja(caja);
@@ -149,16 +148,6 @@ public class CajaServiceImpl implements ICajaService {
                     .getString("mensaje_caja_no_existente"));
         }
         return caja;
-    }
-
-    @Override
-    public int getUltimoNumeroDeCaja(long idEmpresa) {
-        Caja caja = this.getUltimaCaja(idEmpresa);
-        if (caja == null) {
-            return 0;
-        } else {
-            return caja.getNroCaja();
-        }
     }
 
     @Override
@@ -281,7 +270,7 @@ public class CajaServiceImpl implements ICajaService {
                 caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
         BigDecimal totalGastos = gastoService.getTotalGastosQueAfectanCajaEntreFechas(caja.getEmpresa().getId_Empresa(),
                 caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
-        return caja.getSaldoInicial().add(totalRecibosCliente).subtract(totalRecibosProveedor).subtract(totalGastos);
+        return caja.getSaldoApertura().add(totalRecibosCliente).subtract(totalRecibosProveedor).subtract(totalGastos);
     }
 
     @Override
@@ -301,7 +290,7 @@ public class CajaServiceImpl implements ICajaService {
                     caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
             BigDecimal totalGastos = gastoService.getTotalGastosEntreFechas(caja.getEmpresa().getId_Empresa(),
                     caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
-            return caja.getSaldoInicial().add(totalRecibosCliente).subtract(totalRecibosProveedor).subtract(totalGastos);
+            return caja.getSaldoApertura().add(totalRecibosCliente).subtract(totalRecibosProveedor).subtract(totalGastos);
         } else {
             return caja.getSaldoSistema();
         }
@@ -371,7 +360,7 @@ public class CajaServiceImpl implements ICajaService {
             Caja caja = getCajaPorId(idCaja);
             if (caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isEqual(LocalDate.now())) {
                 caja.setSaldoSistema(null);
-                caja.setSaldoInicial(saldoAperturaNuevo);
+                caja.setSaldoApertura(saldoAperturaNuevo);
                 caja.setSaldoReal(BigDecimal.ZERO);
                 caja.setEstado(EstadoCaja.ABIERTA);
                 caja.setUsuarioCierraCaja(null);
@@ -387,4 +376,14 @@ public class CajaServiceImpl implements ICajaService {
         }
     }
 
+    @Override
+    public Caja encontrarCajaCerradaQueContengaFecha(long idEmpresa, Date fecha) {
+        return cajaRepository.encontrarCajaCerradaQueContengaFecha(idEmpresa, fecha);
+    }
+
+    @Override
+    @Transactional
+    public int actualizarSaldoSistema(Caja caja, BigDecimal monto) {
+        return cajaRepository.actualizarSaldoSistema(caja.getId_Caja(), monto);
+    }
 }
