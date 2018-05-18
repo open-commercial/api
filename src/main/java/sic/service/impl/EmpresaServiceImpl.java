@@ -29,18 +29,15 @@ public class EmpresaServiceImpl implements IEmpresaService {
     private final EmpresaRepository empresaRepository;
     private final IConfiguracionDelSistemaService configuracionDelSistemaService;
     private final IAmazonService amazonService;
-    private final IUsuarioService usuarioService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
     public EmpresaServiceImpl(EmpresaRepository empresaRepository,
             IConfiguracionDelSistemaService configuracionDelSistemaService,
-            IUsuarioService usuarioService,
             IAmazonService amazonService) {
 
         this.empresaRepository = empresaRepository;
         this.configuracionDelSistemaService = configuracionDelSistemaService;
-        this.usuarioService = usuarioService;
         this.amazonService = amazonService;
     }
     

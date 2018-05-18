@@ -6,7 +6,6 @@ import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.Caja;
-import sic.modelo.Empresa;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -16,7 +15,8 @@ public interface CajaRepository extends PagingAndSortingRepository<Caja, Long>, 
     @Query("SELECT c FROM Caja c WHERE c.id_Caja = :idCaja AND c.eliminada = false")
     Caja findById(@Param("idCaja") long idCaja);
 
-    Caja findTopByEmpresaAndEliminadaOrderByFechaAperturaDesc(Empresa empresa, boolean eliminada);
+    @Query("SELECT c FROM Caja c WHERE c.empresa.id_Empresa = :idEmpresa AND c.eliminada = false ORDER BY c.id_Caja DESC")
+    Caja findTopByEmpresaAndEliminadaOrderByIdCajaDesc(@Param("idEmpresa") long idEmpresa);
 
     @Query("SELECT c FROM Caja c " +
             "WHERE c.empresa.id_Empresa = :idEmpresa AND c.eliminada = false AND c.estado = sic.modelo.EstadoCaja.ABIERTA " +

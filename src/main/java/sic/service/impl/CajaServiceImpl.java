@@ -137,7 +137,7 @@ public class CajaServiceImpl implements ICajaService {
 
     @Override
     public Caja getUltimaCaja(long id_Empresa) {
-        return cajaRepository.findTopByEmpresaAndEliminadaOrderByFechaAperturaDesc(empresaService.getEmpresaPorId(id_Empresa), false);
+        return cajaRepository.findTopByEmpresaAndEliminadaOrderByIdCajaDesc(id_Empresa);
     }
 
     @Override
@@ -346,7 +346,7 @@ public class CajaServiceImpl implements ICajaService {
         Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
         if (usuario.getRoles().contains(Rol.ADMINISTRADOR)) {
             Caja caja = getCajaPorId(idCaja);
-            if (caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isEqual(LocalDate.now())) {
+            if (caja.getId_Caja() ==  this.getUltimaCaja(caja.getEmpresa().getId_Empresa()).getId_Caja()) {
                 caja.setSaldoSistema(null);
                 caja.setSaldoApertura(saldoAperturaNuevo);
                 caja.setSaldoReal(null);
