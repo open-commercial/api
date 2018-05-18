@@ -55,15 +55,8 @@ public class CajaController {
     @ResponseStatus(HttpStatus.CREATED)
     public Caja abrirCaja(@PathVariable long idEmpresa ,
                           @PathVariable long idUsuario,
-                          @RequestParam String observacion,
                           @RequestParam BigDecimal saldoApertura) {
-        return cajaService.abrirCaja(empresaService.getEmpresaPorId(idEmpresa), usuarioService.getUsuarioPorId(idUsuario), observacion, saldoApertura);
-    }
-
-    @PutMapping("/cajas")
-    @ResponseStatus(HttpStatus.OK)
-    public void actualizar(@RequestBody Caja caja) {
-        cajaService.actualizar(caja);        
+        return cajaService.abrirCaja(empresaService.getEmpresaPorId(idEmpresa), usuarioService.getUsuarioPorId(idUsuario), saldoApertura);
     }
     
     @DeleteMapping("/cajas/{idCaja}")
@@ -123,16 +116,12 @@ public class CajaController {
                                                      @RequestParam(value = "idFormaDePago") long idFormaDePago) {
         Caja caja = cajaService.getCajaPorId(idCaja);
         LocalDateTime desde = caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-        LocalDateTime hasta = caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-        if (caja.getFechaCierre() == null) {
-            hasta = hasta.withHour(23);
-            hasta = hasta.withMinute(59);
-            hasta = hasta.withSecond(59);
-        } else {
-            hasta = caja.getFechaCierre().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        Date fechaHasta = new Date();
+        if (caja.getFechaCierre() != null) {
+            fechaHasta = caja.getFechaCierre();
         }
         return cajaService.getMovimientosPorFormaDePagoEntreFechas(caja.getEmpresa(), formaDePagoService.getFormasDePagoPorId(idFormaDePago),
-                Date.from(desde.atZone(ZoneId.systemDefault()).toInstant()), Date.from(hasta.atZone(ZoneId.systemDefault()).toInstant()));
+                caja.getFechaApertura(), fechaHasta);
     }
 
     @GetMapping("/cajas/{idCaja}/saldo-afecta-caja")

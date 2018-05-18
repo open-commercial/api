@@ -161,7 +161,7 @@ public class ReciboServiceImpl implements IReciboService {
     }
 
     private void actualizarCajaPorEliminacionDeRecibo(Recibo recibo) {
-        Caja caja = this.cajaService.encontrarCajaCerradaQueContengaFecha(recibo.getEmpresa().getId_Empresa(), recibo.getFecha());
+        Caja caja = this.cajaService.encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(recibo.getEmpresa().getId_Empresa(), recibo.getFecha());
         BigDecimal monto = BigDecimal.ZERO;
         if (caja != null && caja.getEstado().equals(EstadoCaja.CERRADA)) {
             if (recibo.getCliente() != null) {

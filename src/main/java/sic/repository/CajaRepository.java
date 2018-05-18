@@ -26,7 +26,7 @@ public interface CajaRepository extends PagingAndSortingRepository<Caja, Long>, 
     @Query("SELECT c FROM Caja c " +
             "WHERE c.empresa.id_Empresa = :idEmpresa AND c.eliminada = false AND c.estado = sic.modelo.EstadoCaja.CERRADA " +
             "AND :fecha BETWEEN c.fechaApertura AND c.fechaCierre")
-    Caja encontrarCajaCerradaQueContengaFecha(@Param("idEmpresa") long idEmpresa, @Param("fecha") Date fecha);
+    Caja encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(@Param("idEmpresa") long idEmpresa, @Param("fecha") Date fecha);
 
     @Modifying
     @Query("UPDATE Caja c SET c.saldoSistema = c.saldoSistema + :monto WHERE c.id_Caja = :idCaja AND c.estado = sic.modelo.EstadoCaja.CERRADA")

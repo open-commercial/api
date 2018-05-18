@@ -106,7 +106,7 @@ public class CajaServiceImpl implements ICajaService {
 
     @Override
     @Transactional
-    public Caja abrirCaja(Empresa empresa, Usuario usuarioApertura, String observacion, BigDecimal saldoApertura) {
+    public Caja abrirCaja(Empresa empresa, Usuario usuarioApertura, BigDecimal saldoApertura) {
         Caja caja = new Caja();
         caja.setEstado(EstadoCaja.ABIERTA);
         caja.setEmpresa(empresa);
@@ -256,40 +256,32 @@ public class CajaServiceImpl implements ICajaService {
 
     @Override
     public BigDecimal getSaldoQueAfectaCaja(Caja caja) {
-        LocalDateTime ldt = caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-        if (caja.getFechaCierre() == null) {
-            ldt = ldt.withHour(23);
-            ldt = ldt.withMinute(59);
-            ldt = ldt.withSecond(59);
-        } else {
-            ldt = caja.getFechaCierre().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        Date fechaHasta = new Date();
+        if (caja.getFechaCierre() != null) {
+            fechaHasta = caja.getFechaCierre();
         }
         BigDecimal totalRecibosCliente = reciboService.getTotalRecibosClientesQueAfectanCajaEntreFechas(caja.getEmpresa().getId_Empresa(),
-                caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
+                caja.getFechaApertura(), fechaHasta);
         BigDecimal totalRecibosProveedor = reciboService.getTotalRecibosProveedoresQueAfectanCajaEntreFechas(caja.getEmpresa().getId_Empresa(),
-                caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
+                caja.getFechaApertura(), fechaHasta);
         BigDecimal totalGastos = gastoService.getTotalGastosQueAfectanCajaEntreFechas(caja.getEmpresa().getId_Empresa(),
-                caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
+                caja.getFechaApertura(), fechaHasta);
         return caja.getSaldoApertura().add(totalRecibosCliente).subtract(totalRecibosProveedor).subtract(totalGastos);
     }
 
     @Override
     public BigDecimal getSaldoSistema(Caja caja) {
         if (caja.getEstado().equals(EstadoCaja.ABIERTA)) {
-            LocalDateTime ldt = caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-            if (caja.getFechaCierre() == null) {
-                ldt = ldt.withHour(23);
-                ldt = ldt.withMinute(59);
-                ldt = ldt.withSecond(59);
-            } else {
-                ldt = caja.getFechaCierre().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+            Date fechaHasta = new Date();
+            if (caja.getFechaCierre() != null) {
+                fechaHasta = caja.getFechaCierre();
             }
             BigDecimal totalRecibosCliente = reciboService.getTotalRecibosClientesEntreFechas(caja.getEmpresa().getId_Empresa(),
-                    caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
+                    caja.getFechaApertura(), fechaHasta);
             BigDecimal totalRecibosProveedor = reciboService.getTotalRecibosProveedoresEntreFechas(caja.getEmpresa().getId_Empresa(),
-                    caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
+                    caja.getFechaApertura(), fechaHasta);
             BigDecimal totalGastos = gastoService.getTotalGastosEntreFechas(caja.getEmpresa().getId_Empresa(),
-                    caja.getFechaApertura(), Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
+                    caja.getFechaApertura(), fechaHasta);
             return caja.getSaldoApertura().add(totalRecibosCliente).subtract(totalRecibosProveedor).subtract(totalGastos);
         } else {
             return caja.getSaldoSistema();
@@ -303,20 +295,16 @@ public class CajaServiceImpl implements ICajaService {
     }
 
     private BigDecimal getTotalMovimientosPorFormaDePago(Caja caja, FormaDePago fdp) {
-        LocalDateTime hasta = caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-        if (caja.getFechaCierre() == null) {
-            hasta = hasta.withHour(23);
-            hasta = hasta.withMinute(59);
-            hasta = hasta.withSecond(59);
-        } else {
-            hasta = caja.getFechaCierre().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        Date fechaHasta = new Date();
+        if (caja.getFechaCierre() != null) {
+            fechaHasta = caja.getFechaCierre();
         }
         BigDecimal recibosTotal = reciboService.getTotalRecibosClientesEntreFechasPorFormaDePago(caja.getEmpresa().getId_Empresa(),
-                fdp.getId_FormaDePago(), caja.getFechaApertura(), Date.from(hasta.atZone(ZoneId.systemDefault()).toInstant()))
+                fdp.getId_FormaDePago(), caja.getFechaApertura(), fechaHasta)
                 .subtract(reciboService.getTotalRecibosProveedoresEntreFechasPorFormaDePago(caja.getEmpresa().getId_Empresa(),
-                        fdp.getId_FormaDePago(), caja.getFechaApertura(), Date.from(hasta.atZone(ZoneId.systemDefault()).toInstant())));
+                        fdp.getId_FormaDePago(), caja.getFechaApertura(), fechaHasta));
         BigDecimal gastosTotal = gastoService.getTotalGastosEntreFechasYFormaDePago(caja.getEmpresa().getId_Empresa(), fdp.getId_FormaDePago(),
-                caja.getFechaApertura(), Date.from(hasta.atZone(ZoneId.systemDefault()).toInstant()));
+                caja.getFechaApertura(), fechaHasta);
         return recibosTotal.subtract(gastosTotal);
     }
 
@@ -361,7 +349,7 @@ public class CajaServiceImpl implements ICajaService {
             if (caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isEqual(LocalDate.now())) {
                 caja.setSaldoSistema(null);
                 caja.setSaldoApertura(saldoAperturaNuevo);
-                caja.setSaldoReal(BigDecimal.ZERO);
+                caja.setSaldoReal(null);
                 caja.setEstado(EstadoCaja.ABIERTA);
                 caja.setUsuarioCierraCaja(null);
                 caja.setFechaCierre(null);
@@ -377,8 +365,8 @@ public class CajaServiceImpl implements ICajaService {
     }
 
     @Override
-    public Caja encontrarCajaCerradaQueContengaFecha(long idEmpresa, Date fecha) {
-        return cajaRepository.encontrarCajaCerradaQueContengaFecha(idEmpresa, fecha);
+    public Caja encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(long idEmpresa, Date fecha) {
+        return cajaRepository.encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(idEmpresa, fecha);
     }
 
     @Override
