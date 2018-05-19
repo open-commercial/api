@@ -25,6 +25,8 @@ public interface IGastoService {
 
     BigDecimal getTotalGastosEntreFechasYFormaDePago(long idEmpresa, long idFormaDePago, Date desde, Date hasta);
 
+    BigDecimal getTotalGastosQueAfectanCajaEntreFechas(long idEmpresa, Date desde, Date hasta);
+
     BigDecimal getTotalGastosEntreFechas(long idEmpresa, Date desde, Date hasta);
 
 }

@@ -13,16 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sic.modelo.*;
 import sic.service.ICajaService;
 import sic.service.IEmpresaService;
@@ -59,17 +50,13 @@ public class CajaController {
     public Caja getCajaPorId(@PathVariable long idCaja) {
         return cajaService.getCajaPorId(idCaja);
     }
-    
-    @PutMapping("/cajas")
-    @ResponseStatus(HttpStatus.OK)
-    public void actualizar(@RequestBody Caja caja) {
-        cajaService.actualizar(caja);        
-    }
-    
-    @PostMapping("/cajas")
+
+    @PostMapping("/cajas/apertura/empresas/{idEmpresa}/usuarios/{idUsuario}")
     @ResponseStatus(HttpStatus.CREATED)
-    public Caja guardar(@RequestBody Caja caja) {
-        return cajaService.guardar(caja);
+    public Caja abrirCaja(@PathVariable long idEmpresa ,
+                          @PathVariable long idUsuario,
+                          @RequestParam BigDecimal saldoApertura) {
+        return cajaService.abrirCaja(empresaService.getEmpresaPorId(idEmpresa), usuarioService.getUsuarioPorId(idUsuario), saldoApertura);
     }
     
     @DeleteMapping("/cajas/{idCaja}")
@@ -102,19 +89,11 @@ public class CajaController {
             fechaHasta.setTimeInMillis(hasta);
         }
         Usuario usuarioApertura = new Usuario();
-        if(idUsuarioApertura != null) {
-            usuarioApertura = usuarioService.getUsuarioPorId(idUsuarioApertura);
-        }
+        if (idUsuarioApertura != null) usuarioApertura = usuarioService.getUsuarioPorId(idUsuarioApertura);
         Usuario usuarioCierre = new Usuario();
-        if(idUsuarioCierre != null) {
-            usuarioCierre = usuarioService.getUsuarioPorId(idUsuarioCierre);
-        }
-        if (tamanio == null || tamanio <= 0) {
-            tamanio = TAMANIO_PAGINA_DEFAULT;
-        }
-        if (pagina == null || pagina < 0) {
-            pagina = 0;
-        }
+        if (idUsuarioCierre != null) usuarioCierre = usuarioService.getUsuarioPorId(idUsuarioCierre);
+        if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
+        if (pagina == null || pagina < 0) pagina = 0;
         Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, "fechaApertura"));
         BusquedaCajaCriteria criteria = BusquedaCajaCriteria.builder()
                                         .buscaPorFecha((desde != null) && (hasta != null))
@@ -137,22 +116,24 @@ public class CajaController {
                                                      @RequestParam(value = "idFormaDePago") long idFormaDePago) {
         Caja caja = cajaService.getCajaPorId(idCaja);
         LocalDateTime desde = caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-        LocalDateTime hasta = caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-        if (caja.getFechaCierre() == null) {
-            hasta = hasta.withHour(23);
-            hasta = hasta.withMinute(59);
-            hasta = hasta.withSecond(59);
-        } else {
-            hasta = caja.getFechaCierre().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        Date fechaHasta = new Date();
+        if (caja.getFechaCierre() != null) {
+            fechaHasta = caja.getFechaCierre();
         }
         return cajaService.getMovimientosPorFormaDePagoEntreFechas(caja.getEmpresa(), formaDePagoService.getFormasDePagoPorId(idFormaDePago),
-                Date.from(desde.atZone(ZoneId.systemDefault()).toInstant()), Date.from(hasta.atZone(ZoneId.systemDefault()).toInstant()));
+                caja.getFechaApertura(), fechaHasta);
     }
 
-    @GetMapping("/cajas/{idCaja}/total-afecta-caja")
+    @GetMapping("/cajas/{idCaja}/saldo-afecta-caja")
     @ResponseStatus(HttpStatus.OK)
-    public BigDecimal getTotalQueAfectaCaja(@PathVariable long idCaja) {
-        return cajaService.getTotalQueAfectaCaja(cajaService.getCajaPorId(idCaja));
+    public BigDecimal getSaldoQueAfectaCaja(@PathVariable long idCaja) {
+        return cajaService.getSaldoQueAfectaCaja(cajaService.getCajaPorId(idCaja));
+    }
+
+    @GetMapping("/cajas/{idCaja}/saldo-sistema")
+    @ResponseStatus(HttpStatus.OK)
+    public BigDecimal getSaldoSistema(@PathVariable long idCaja) {
+        return cajaService.getSaldoSistema(cajaService.getCajaPorId(idCaja));
     }
 
     @GetMapping("/cajas/empresas/{idEmpresa}/estado-ultima-caja")

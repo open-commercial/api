@@ -34,8 +34,6 @@ public class Caja implements Serializable {
     @GeneratedValue
     private long id_Caja;
 
-    private int nroCaja;
-
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaApertura;
@@ -56,14 +54,11 @@ public class Caja implements Serializable {
     private Usuario usuarioCierraCaja;
 
     @Column(nullable = false)
-    private String observacion;
-
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private EstadoCaja estado;
 
     @Column(precision = 25, scale = 15)
-    private BigDecimal saldoInicial;
+    private BigDecimal saldoApertura;
 
     @Column(precision = 25, scale = 15)
     private BigDecimal saldoSistema;

@@ -95,7 +95,6 @@ public class GastoServiceImpl implements IGastoService {
         this.validarGasto(gasto);
         gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getEmpresa().getId_Empresa()) + 1);
         gasto = gastoRepository.save(gasto);
-        this.cajaService.actualizarSaldoSistema(gasto, TipoDeOperacion.ALTA);
         LOGGER.warn("El Gasto " + gasto + " se guardó correctamente." );
         return gasto;
     }
@@ -115,13 +114,12 @@ public class GastoServiceImpl implements IGastoService {
     @Transactional
     public void eliminar(long idGasto) {
         Gasto gastoParaEliminar = this.getGastoPorId(idGasto);
-        if(this.cajaService.getUltimaCaja(gastoParaEliminar.getEmpresa().getId_Empresa()).getEstado().equals(EstadoCaja.CERRADA)){
+        if (this.cajaService.getUltimaCaja(gastoParaEliminar.getEmpresa().getId_Empresa()).getEstado().equals(EstadoCaja.CERRADA)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_gasto_caja_cerrada"));
         }
         gastoParaEliminar.setEliminado(true);
         gastoRepository.save(gastoParaEliminar);
-        this.cajaService.actualizarSaldoSistema(gastoParaEliminar, TipoDeOperacion.ELIMINACION);
     }
     
     @Override
@@ -132,6 +130,12 @@ public class GastoServiceImpl implements IGastoService {
     @Override
     public BigDecimal getTotalGastosEntreFechasYFormaDePago(long idEmpresa, long idFormaDePago, Date desde, Date hasta) {
         BigDecimal total = gastoRepository.getTotalGastosEntreFechasPorFormaDePago(idEmpresa, idFormaDePago, desde, hasta);
+        return (total == null) ? BigDecimal.ZERO : total;
+    }
+
+    @Override
+    public BigDecimal getTotalGastosQueAfectanCajaEntreFechas(long idEmpresa, Date desde, Date hasta) {
+        BigDecimal total = gastoRepository.getTotalGastosQueAfectanCajaEntreFechas(idEmpresa, desde, hasta);
         return (total == null) ? BigDecimal.ZERO : total;
     }
 
