@@ -7,12 +7,8 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.stream.IntStream;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
@@ -85,7 +81,12 @@ public class ProductoServiceImpl implements IProductoService {
                         .getString("mensaje_producto_duplicado_descripcion"));
             }
         }
-        //Calculos 
+        //Calculos
+        Double[] IVAS = {10.5,21.0,0.0};
+        if (!Arrays.asList(IVAS).contains(producto.getIva_porcentaje().doubleValue())) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_producto_ganancia_neta_incorrecta"));
+        }
         if (producto.getGanancia_neto().setScale(3, RoundingMode.DOWN)
                 .compareTo(this.calcularGananciaNeto(producto.getPrecioCosto(), producto.getGanancia_porcentaje())
                         .setScale(3, RoundingMode.DOWN)) != 0) {
@@ -126,36 +127,36 @@ public class ProductoServiceImpl implements IProductoService {
                     .getString("mensaje_empresa_no_existente"));
         }
         //Rubro
-        if (criteria.isBuscarPorRubro() == true && criteria.getRubro() == null) {
+        if (criteria.isBuscarPorRubro() && criteria.getRubro() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_vacio_rubro"));
         }
         //Proveedor
-        if (criteria.isBuscarPorProveedor() == true && criteria.getProveedor() == null) {
+        if (criteria.isBuscarPorProveedor() && criteria.getProveedor() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_vacio_proveedor"));
         }
         QProducto qproducto = QProducto.producto;
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(qproducto.empresa.eq(criteria.getEmpresa()).and(qproducto.eliminado.eq(false)));
-        if (criteria.isBuscarPorCodigo() == true && criteria.isBuscarPorDescripcion() == true) {
+        if (criteria.isBuscarPorCodigo() && criteria.isBuscarPorDescripcion()) {
             builder.and(qproducto.codigo.containsIgnoreCase(criteria.getCodigo())
                     .or(this.buildPredicadoDescripcion(criteria.getDescripcion(), qproducto)));            
         } else {
-            if (criteria.isBuscarPorCodigo() == true) {
+            if (criteria.isBuscarPorCodigo()) {
                 builder.and(qproducto.codigo.containsIgnoreCase(criteria.getCodigo()));
             }
-            if (criteria.isBuscarPorDescripcion() == true) {
+            if (criteria.isBuscarPorDescripcion()) {
                 builder.and(this.buildPredicadoDescripcion(criteria.getDescripcion(), qproducto));
             }
         }
-        if (criteria.isBuscarPorRubro() == true) {
+        if (criteria.isBuscarPorRubro()) {
             builder.and(qproducto.rubro.eq(criteria.getRubro()));
         }
         if (criteria.isBuscarPorProveedor()) {
             builder.and(qproducto.proveedor.eq(criteria.getProveedor()));
         }
-        if (criteria.isListarSoloFaltantes() == true) {
+        if (criteria.isListarSoloFaltantes()) {
             builder.and(qproducto.cantidad.loe(qproducto.cantMinima)).and(qproducto.ilimitado.eq(false));
         }
         int pageNumber = 0;
@@ -207,7 +208,7 @@ public class ProductoServiceImpl implements IProductoService {
             if (producto == null) {
                 LOGGER.warn("Se intenta actualizar el stock de un producto eliminado.");
             }
-            if (producto != null && producto.isIlimitado() == false) {
+            if (producto != null && producto.isIlimitado()) {
                 if (movimiento.equals(Movimiento.VENTA)) {
                     if (operacion == TipoDeOperacion.ALTA) {
                         producto.setCantidad(producto.getCantidad().subtract(entry.getValue()));
@@ -328,7 +329,7 @@ public class ProductoServiceImpl implements IProductoService {
 
     @Override
     public Producto getProductoPorCodigo(String codigo, Empresa empresa) {
-        if (codigo.isEmpty() == true || empresa == null) {
+        if (codigo.isEmpty()|| empresa == null) {
             return null;
         } else {
             return productoRepository.findByCodigoAndEmpresaAndEliminado(codigo, empresa, false);
@@ -353,7 +354,7 @@ public class ProductoServiceImpl implements IProductoService {
         if (longitudIds == longitudCantidades) {
             for (int i = 0; i < longitudIds; i++) {
                 Producto p = this.getProductoPorId(idProducto[i]);
-                if (p.isIlimitado() == false && p.getCantidad().compareTo(cantidad[i]) < 0) {
+                if (p.isIlimitado() && p.getCantidad().compareTo(cantidad[i]) < 0) {
                     productos.put(p.getId_Producto(), cantidad[i]);
                 }
             }
