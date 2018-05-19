@@ -243,16 +243,19 @@ public class CajaServiceImpl implements ICajaService {
     public void cerrarCajas() {
         LOGGER.warn("Cierre automático de Cajas." + LocalDateTime.now());
         List<Empresa> empresas = this.empresaService.getEmpresas();
-        empresas.stream().map((empresa) -> this.getUltimaCaja(empresa.getId_Empresa())).filter((ultimaCajaDeEmpresa)
-                -> ((ultimaCajaDeEmpresa != null) && (ultimaCajaDeEmpresa.getEstado() == EstadoCaja.ABIERTA))).forEachOrdered((ultimaCajaDeEmpresa) -> {
-            LocalDate fechaActual = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), LocalDate.now().getDayOfMonth());
-            Calendar fechaHoraCaja = new GregorianCalendar();
-            fechaHoraCaja.setTime(ultimaCajaDeEmpresa.getFechaApertura());
-            LocalDate fechaCaja = LocalDate.of(fechaHoraCaja.get(Calendar.YEAR), fechaHoraCaja.get(Calendar.MONTH) + 1, fechaHoraCaja.get(Calendar.DAY_OF_MONTH));
-            if (fechaCaja.compareTo(fechaActual) < 0) {
-                this.cerrarCaja(ultimaCajaDeEmpresa.getId_Caja(), this.getSaldoQueAfectaCaja(ultimaCajaDeEmpresa), ultimaCajaDeEmpresa.getUsuarioAbreCaja().getId_Usuario(), true);
-            }
-        });
+        empresas.stream().map(empresa -> this.getUltimaCaja(empresa.getId_Empresa()))
+                .filter(ultimaCajaDeEmpresa -> ((ultimaCajaDeEmpresa != null) && (ultimaCajaDeEmpresa.getEstado() == EstadoCaja.ABIERTA)))
+                .forEachOrdered(ultimaCajaDeEmpresa -> {
+                    LocalDate fechaActual = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), LocalDate.now().getDayOfMonth());
+                    Calendar fechaHoraCaja = new GregorianCalendar();
+                    fechaHoraCaja.setTime(ultimaCajaDeEmpresa.getFechaApertura());
+                    LocalDate fechaCaja = LocalDate.of(fechaHoraCaja.get(Calendar.YEAR), fechaHoraCaja.get(Calendar.MONTH) + 1,
+                            fechaHoraCaja.get(Calendar.DAY_OF_MONTH));
+                    if (fechaCaja.compareTo(fechaActual) < 0) {
+                        this.cerrarCaja(ultimaCajaDeEmpresa.getId_Caja(), this.getSaldoQueAfectaCaja(ultimaCajaDeEmpresa),
+                                ultimaCajaDeEmpresa.getUsuarioAbreCaja().getId_Usuario(), true);
+                    }
+                });
     }
 
     @Override

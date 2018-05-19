@@ -48,7 +48,6 @@ public class GastoController {
     @PostMapping("/gastos")
     @ResponseStatus(HttpStatus.CREATED)
     public Gasto guardar(@RequestBody Gasto gasto) {
-        gastoService.validarGasto(gasto);
         return gastoService.guardar(gasto);
     }
 
