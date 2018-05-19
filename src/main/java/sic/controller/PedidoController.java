@@ -21,12 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import sic.modelo.BusquedaPedidoCriteria;
-import sic.modelo.Cliente;
-import sic.modelo.Empresa;
-import sic.modelo.Pedido;
-import sic.modelo.RenglonPedido;
-import sic.modelo.Usuario;
+import sic.modelo.*;
 import sic.service.IClienteService;
 import sic.service.IEmpresaService;
 import sic.service.IPedidoService;
@@ -102,6 +97,7 @@ public class PedidoController {
                                           @RequestParam(required = false) Long idCliente,
                                           @RequestParam(required = false) Long idUsuario,
                                           @RequestParam(required = false) Long nroPedido,
+                                          @RequestParam(required = false) EstadoPedido estadoPedido,
                                           @RequestParam(required = false) Integer pagina,
                                           @RequestParam(required = false) Integer tamanio) {
         Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
@@ -112,33 +108,27 @@ public class PedidoController {
             fechaHasta.setTimeInMillis(hasta);
         }
         Usuario usuario = null;
-        if (idUsuario != null) {
-            usuario = usuarioService.getUsuarioPorId(idUsuario);
-        }
+        if (idUsuario != null) usuario = usuarioService.getUsuarioPorId(idUsuario);
         Cliente cliente = null;
-        if (idCliente != null) {
-            cliente = clienteService.getClientePorId(idCliente);
-        }
-        if (tamanio == null || tamanio <= 0) {
-            tamanio = TAMANIO_PAGINA_DEFAULT;
-        }
-        if (pagina == null || pagina < 0) {
-            pagina = 0;
-        }
+        if (idCliente != null) cliente = clienteService.getClientePorId(idCliente);
+        if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
+        if (pagina == null || pagina < 0) pagina = 0;
         Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, "fecha"));
         BusquedaPedidoCriteria criteria = BusquedaPedidoCriteria.builder()
-                                          .buscaPorFecha((desde != null) && (hasta != null))
-                                          .fechaDesde(fechaDesde.getTime())
-                                          .fechaHasta(fechaHasta.getTime())
-                                          .buscaCliente(cliente != null)
-                                          .cliente(cliente)
-                                          .buscaUsuario(idUsuario != null)
-                                          .usuario(usuario)
-                                          .buscaPorNroPedido(nroPedido != null)
-                                          .nroPedido((nroPedido != null) ? nroPedido : 0)
-                                          .empresa(empresa)
-                                          .pageable(pageable)
-                                          .build();
+                                                                .buscaPorFecha((desde != null) && (hasta != null))
+                                                                .fechaDesde(fechaDesde.getTime())
+                                                                .fechaHasta(fechaHasta.getTime())
+                                                                .buscaCliente(cliente != null)
+                                                                .cliente(cliente)
+                                                                .buscaUsuario(idUsuario != null)
+                                                                .usuario(usuario)
+                                                                .buscaPorNroPedido(nroPedido != null)
+                                                                .nroPedido((nroPedido != null) ? nroPedido : 0)
+                                                                .buscaPorEstadoPedido(estadoPedido != null)
+                                                                .estadoPedido(estadoPedido)
+                                                                .empresa(empresa)
+                                                                .pageable(pageable)
+                                                                .build();
         return pedidoService.buscarConCriteria(criteria);
     }
     
