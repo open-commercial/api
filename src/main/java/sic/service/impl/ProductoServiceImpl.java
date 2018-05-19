@@ -82,8 +82,8 @@ public class ProductoServiceImpl implements IProductoService {
             }
         }
         //Calculos
-        Double[] IVAS = {10.5,21.0,0.0};
-        if (!Arrays.asList(IVAS).contains(producto.getIva_porcentaje().doubleValue())) {
+        Double[] IVAs = {10.5, 21.0, 0.0};
+        if (!Arrays.asList(IVAs).contains(producto.getIva_porcentaje().doubleValue())) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_ganancia_neta_incorrecta"));
         }
