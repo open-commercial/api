@@ -137,7 +137,8 @@ public class CajaServiceImpl implements ICajaService {
 
     @Override
     public Caja getUltimaCaja(long id_Empresa) {
-        return cajaRepository.findTopByEmpresaAndEliminadaOrderByIdCajaDesc(id_Empresa);
+        Pageable pageable = new PageRequest(0, 1);
+        return cajaRepository.findTopByEmpresaAndEliminadaOrderByIdCajaDesc(id_Empresa, pageable).getContent().get(0);
     }
 
     @Override

@@ -26,7 +26,7 @@ import lombok.ToString;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"nroCaja", "empresa"})
+@EqualsAndHashCode(of = {"id_Caja", "empresa"})
 @ToString
 public class Caja implements Serializable {
 

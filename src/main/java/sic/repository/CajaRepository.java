@@ -1,5 +1,7 @@
 package sic.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
@@ -16,7 +18,7 @@ public interface CajaRepository extends PagingAndSortingRepository<Caja, Long>, 
     Caja findById(@Param("idCaja") long idCaja);
 
     @Query("SELECT c FROM Caja c WHERE c.empresa.id_Empresa = :idEmpresa AND c.eliminada = false ORDER BY c.id_Caja DESC")
-    Caja findTopByEmpresaAndEliminadaOrderByIdCajaDesc(@Param("idEmpresa") long idEmpresa);
+    Page<Caja> findTopByEmpresaAndEliminadaOrderByIdCajaDesc(@Param("idEmpresa") long idEmpresa, Pageable page);
 
     @Query("SELECT c FROM Caja c " +
             "WHERE c.empresa.id_Empresa = :idEmpresa AND c.eliminada = false AND c.estado = sic.modelo.EstadoCaja.ABIERTA " +
