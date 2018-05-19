@@ -86,35 +86,35 @@ public class ProductoServiceImpl implements IProductoService {
             }
         }
         //Calculos 
-        if (producto.getGanancia_neto().setScale(15, RoundingMode.DOWN)
-                .compareTo(this.calcularGanancia_Neto(producto.getPrecioCosto(), producto.getGanancia_porcentaje())
-                        .setScale(15, RoundingMode.DOWN)) != 0) {
+        if (producto.getGanancia_neto().setScale(3, RoundingMode.DOWN)
+                .compareTo(this.calcularGananciaNeto(producto.getPrecioCosto(), producto.getGanancia_porcentaje())
+                        .setScale(3, RoundingMode.DOWN)) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_producto_ganancia_neta_incorrecta"));
         }
-        if (producto.getImpuestoInterno_neto().setScale(15, RoundingMode.DOWN)
-                .compareTo(this.calcularImpInterno_Neto(producto.getPrecioVentaPublico(), producto.getImpuestoInterno_porcentaje())
-                        .setScale(15, RoundingMode.DOWN)) != 0) {
+        if (producto.getPrecioVentaPublico().setScale(3, RoundingMode.DOWN)
+                .compareTo(this.calcularPVP(producto.getPrecioCosto(), producto.getGanancia_porcentaje())
+                        .setScale(3, RoundingMode.DOWN)) != 0) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_precio_venta_publico_incorrecto"));
+        }
+        if (producto.getImpuestoInterno_neto().setScale(3, RoundingMode.DOWN)
+                .compareTo(this.calcularImpInternoNeto(producto.getPrecioVentaPublico(), producto.getImpuestoInterno_porcentaje())
+                        .setScale(3, RoundingMode.DOWN)) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_producto_impuesto_interno_neto_incorrecto"));
         }
-        if (producto.getIva_neto().setScale(15, RoundingMode.DOWN)
-                .compareTo(this.calcularIVA_Neto(producto.getPrecioVentaPublico(), producto.getIva_porcentaje())
-                        .setScale(15, RoundingMode.DOWN)) != 0) {
+        if (producto.getIva_neto().setScale(3, RoundingMode.DOWN)
+                .compareTo(this.calcularIVANeto(producto.getPrecioVentaPublico(), producto.getIva_porcentaje())
+                        .setScale(3, RoundingMode.DOWN)) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_producto_iva_neto_incorrecto"));
         }
-        if (producto.getPrecioLista().setScale(15, RoundingMode.DOWN)
+        if (producto.getPrecioLista().setScale(3, RoundingMode.DOWN)
                 .compareTo(this.calcularPrecioLista(producto.getPrecioVentaPublico(), producto.getIva_porcentaje(), producto.getImpuestoInterno_porcentaje())
-                        .setScale(15, RoundingMode.DOWN)) != 0) {
+                        .setScale(3, RoundingMode.DOWN)) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_producto_precio_lista_incorrecto"));
-        }
-        if (producto.getPrecioVentaPublico().setScale(15, RoundingMode.DOWN)
-                .compareTo(this.calcularPVP(producto.getPrecioCosto(), producto.getGanancia_porcentaje())
-                        .setScale(15, RoundingMode.DOWN)) != 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_precio_venta_publico_incorrecto"));
         }
     }
 
@@ -270,14 +270,6 @@ public class ProductoServiceImpl implements IProductoService {
                                               boolean checkMedida, Medida medida,
                                               boolean checkRubro, Rubro rubro,
                                               boolean checkProveedor, Proveedor proveedor) {
-        if (Validator.tieneDuplicados(idProducto)) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_error_ids_duplicados"));
-        }
-        List<Producto> productos = new ArrayList<>();
-        for (long i : idProducto) {
-            productos.add(this.getProductoPorId(i));
-        }
         //Requeridos
         if (checkMedida && medida == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -290,7 +282,15 @@ public class ProductoServiceImpl implements IProductoService {
         if (checkProveedor && proveedor == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_vacio_proveedor"));
-        }        
+        }
+        if (Validator.tieneDuplicados(idProducto)) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_error_ids_duplicados"));
+        }
+        List<Producto> productos = new ArrayList<>();
+        for (long i : idProducto) {
+            productos.add(this.getProductoPorId(i));
+        }
         productos.forEach(p -> {
             if (checkMedida) p.setMedida(medida);
             if (checkRubro) p.setRubro(rubro);
@@ -384,15 +384,13 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     @Override
-    public BigDecimal calcularGanancia_Porcentaje(BigDecimal precioDeListaNuevo,
-            BigDecimal precioDeListaAnterior, BigDecimal pvp, BigDecimal ivaPorcentaje,
-            BigDecimal impInternoPorcentaje, BigDecimal precioCosto, boolean ascendente) {
+    public BigDecimal calcularGananciaPorcentaje(BigDecimal precioDeListaNuevo,
+                                                 BigDecimal precioDeListaAnterior, BigDecimal pvp, BigDecimal ivaPorcentaje,
+                                                 BigDecimal impInternoPorcentaje, BigDecimal precioCosto, boolean ascendente) {
         //evita la division por cero
-        if (precioCosto.compareTo(BigDecimal.ZERO) == 0) {
-            return BigDecimal.ZERO;
-        }
+        if (precioCosto.compareTo(BigDecimal.ZERO) == 0) return BigDecimal.ZERO;
         BigDecimal resultado;
-        if (ascendente == false) {
+        if (!ascendente) {
             resultado = pvp.subtract(precioCosto).divide(precioCosto, 15, RoundingMode.HALF_UP).multiply(CIEN); 
         } else if (precioDeListaAnterior.compareTo(BigDecimal.ZERO) == 0 || precioCosto.compareTo(BigDecimal.ZERO) == 0) {
             return BigDecimal.ZERO;
@@ -407,29 +405,29 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     @Override
-    public BigDecimal calcularGanancia_Neto(BigDecimal precioCosto, BigDecimal ganancia_porcentaje) {
-        return precioCosto.multiply(ganancia_porcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+    public BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal gananciaPorcentaje) {
+        return precioCosto.multiply(gananciaPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
     }
 
     @Override
-    public BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal ganancia_porcentaje) {
-        return precioCosto.add(precioCosto.multiply(ganancia_porcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)));
+    public BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal gananciaPorcentaje) {
+        return precioCosto.add(precioCosto.multiply(gananciaPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)));
     }
 
     @Override
-    public BigDecimal calcularIVA_Neto(BigDecimal pvp, BigDecimal iva_porcentaje) {
-        return pvp.multiply(iva_porcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+    public BigDecimal calcularIVANeto(BigDecimal pvp, BigDecimal ivaPorcentaje) {
+        return pvp.multiply(ivaPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
     }
 
     @Override
-    public BigDecimal calcularImpInterno_Neto(BigDecimal pvp, BigDecimal impInterno_porcentaje) {
-        return pvp.multiply(impInterno_porcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+    public BigDecimal calcularImpInternoNeto(BigDecimal pvp, BigDecimal impInternoPorcentaje) {
+        return pvp.multiply(impInternoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
     }
 
     @Override
-    public BigDecimal calcularPrecioLista(BigDecimal PVP, BigDecimal iva_porcentaje, BigDecimal impInterno_porcentaje) {
-        BigDecimal resulIVA = PVP.multiply(iva_porcentaje.divide(CIEN, 15, RoundingMode.HALF_UP));
-        BigDecimal resultImpInterno = PVP.multiply(impInterno_porcentaje.divide(CIEN, 15, RoundingMode.HALF_UP));
+    public BigDecimal calcularPrecioLista(BigDecimal PVP, BigDecimal ivaPorcentaje, BigDecimal impInternoPorcentaje) {
+        BigDecimal resulIVA = PVP.multiply(ivaPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP));
+        BigDecimal resultImpInterno = PVP.multiply(impInternoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP));
         return PVP.add(resulIVA).add(resultImpInterno);
     }
 

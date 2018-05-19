@@ -239,7 +239,7 @@ public class ProductoController {
         if (precioCosto == null || gananciaPorcentaje == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
         }
-        return productoService.calcularGanancia_Neto(precioCosto, gananciaPorcentaje);
+        return productoService.calcularGananciaNeto(precioCosto, gananciaPorcentaje);
     }
     
     @GetMapping("/productos/ganancia-porcentaje")
@@ -251,10 +251,8 @@ public class ProductoController {
                                                  @RequestParam(defaultValue = "0", required = false) BigDecimal impInternoPorcentaje,                                              
                                                  @RequestParam(defaultValue = "0", required = false) BigDecimal precioDeLista, 
                                                  @RequestParam(defaultValue = "0", required = false) BigDecimal precioDeListaAnterior) {
-            if (precioCosto == null || pvp == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
-        }
-        return productoService.calcularGanancia_Porcentaje(precioDeLista, precioDeListaAnterior, pvp, ivaPorcentaje,
+        if (precioCosto == null || pvp == null) throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
+        return productoService.calcularGananciaPorcentaje(precioDeLista, precioDeListaAnterior, pvp, ivaPorcentaje,
                 impInternoPorcentaje, precioCosto, ascendente);
     }
     
@@ -264,7 +262,7 @@ public class ProductoController {
         if (ivaPorcentaje == null || pvp == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
         }
-        return productoService.calcularIVA_Neto(pvp, ivaPorcentaje);
+        return productoService.calcularIVANeto(pvp, ivaPorcentaje);
     }
     
     @GetMapping("/productos/imp-interno-neto")
@@ -274,7 +272,7 @@ public class ProductoController {
         if (pvp == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
         }
-        return productoService.calcularImpInterno_Neto(pvp, impInternoPorcentaje);
+        return productoService.calcularImpInternoNeto(pvp, impInternoPorcentaje);
     }
     
     @GetMapping("/productos/pvp")

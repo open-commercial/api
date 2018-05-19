@@ -18,7 +18,7 @@ public class ProductoServiceImplTest {
         BigDecimal precioCosto = new BigDecimal("12.34");
         BigDecimal pvp = new BigDecimal("23.45");
         BigDecimal resultadoEsperado = new BigDecimal("90.032414910859000");
-        BigDecimal resultadoObtenido = productoService.calcularGanancia_Porcentaje(null ,null, pvp, null, null, precioCosto, false);
+        BigDecimal resultadoObtenido = productoService.calcularGananciaPorcentaje(null ,null, pvp, null, null, precioCosto, false);
         assertEquals(resultadoEsperado, resultadoObtenido);
     }
     
@@ -27,7 +27,7 @@ public class ProductoServiceImplTest {
         BigDecimal precioCosto = new BigDecimal("12.34");
         BigDecimal gananciaPorcentaje = new BigDecimal("100");
         BigDecimal resultadoEsperado = new BigDecimal("12.340000000000000");
-        BigDecimal resultadoObtenido = productoService.calcularGanancia_Neto(precioCosto, gananciaPorcentaje);
+        BigDecimal resultadoObtenido = productoService.calcularGananciaNeto(precioCosto, gananciaPorcentaje);
         assertEquals(resultadoEsperado, resultadoObtenido);
     }
     
@@ -45,7 +45,7 @@ public class ProductoServiceImplTest {
         BigDecimal pvp = new BigDecimal("24.68");
         BigDecimal ivaPorcentaje = new BigDecimal("21");
         BigDecimal resultadoEsperado = new BigDecimal("5.182800000000000");
-        BigDecimal resultadoObtenido = productoService.calcularIVA_Neto(pvp, ivaPorcentaje);
+        BigDecimal resultadoObtenido = productoService.calcularIVANeto(pvp, ivaPorcentaje);
         assertEquals(resultadoEsperado, resultadoObtenido);
     }
     
@@ -54,7 +54,7 @@ public class ProductoServiceImplTest {
         BigDecimal pvp = new BigDecimal("24.68");
         BigDecimal impuestoInternoPorcentaje = new BigDecimal("10");
         BigDecimal resultadoEsperado = new BigDecimal("2.468000000000000");
-        BigDecimal resultadoObtenido = productoService.calcularImpInterno_Neto(pvp, impuestoInternoPorcentaje);
+        BigDecimal resultadoObtenido = productoService.calcularImpInternoNeto(pvp, impuestoInternoPorcentaje);
         assertEquals(resultadoEsperado, resultadoObtenido);
     }
     

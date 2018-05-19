@@ -22,19 +22,19 @@ public interface IProductoService {
 
     Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
 
-    BigDecimal calcularGanancia_Neto(BigDecimal precioCosto, BigDecimal ganancia_porcentaje);
+    BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal ganancia_porcentaje);
 
     Map<Long, BigDecimal> getProductosSinStockDisponible(long[] idProducto, BigDecimal[] cantidad);
 
     Map<Long, BigDecimal> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, BigDecimal[] cantidad);
 
-    BigDecimal calcularGanancia_Porcentaje(BigDecimal precioDeListaNuevo,
-                                           BigDecimal precioDeListaAnterior, BigDecimal pvp, BigDecimal ivaPorcentaje,
-                                           BigDecimal impInternoPorcentaje, BigDecimal precioCosto, boolean descendente);
+    BigDecimal calcularGananciaPorcentaje(BigDecimal precioDeListaNuevo,
+                                          BigDecimal precioDeListaAnterior, BigDecimal pvp, BigDecimal ivaPorcentaje,
+                                          BigDecimal impInternoPorcentaje, BigDecimal precioCosto, boolean descendente);
 
-    BigDecimal calcularIVA_Neto(BigDecimal precioCosto, BigDecimal iva_porcentaje);
+    BigDecimal calcularIVANeto(BigDecimal precioCosto, BigDecimal iva_porcentaje);
 
-    BigDecimal calcularImpInterno_Neto(BigDecimal precioCosto, BigDecimal impInterno_porcentaje);
+    BigDecimal calcularImpInternoNeto(BigDecimal precioCosto, BigDecimal impInterno_porcentaje);
 
     BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal ganancia_porcentaje);
 
