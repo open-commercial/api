@@ -208,7 +208,7 @@ public class ProductoServiceImpl implements IProductoService {
             if (producto == null) {
                 LOGGER.warn("Se intenta actualizar el stock de un producto eliminado.");
             }
-            if (producto != null && producto.isIlimitado()) {
+            if (producto != null && !producto.isIlimitado()) {
                 if (movimiento.equals(Movimiento.VENTA)) {
                     if (operacion == TipoDeOperacion.ALTA) {
                         producto.setCantidad(producto.getCantidad().subtract(entry.getValue()));
@@ -354,7 +354,7 @@ public class ProductoServiceImpl implements IProductoService {
         if (longitudIds == longitudCantidades) {
             for (int i = 0; i < longitudIds; i++) {
                 Producto p = this.getProductoPorId(idProducto[i]);
-                if (p.isIlimitado() && p.getCantidad().compareTo(cantidad[i]) < 0) {
+                if (!p.isIlimitado() && p.getCantidad().compareTo(cantidad[i]) < 0) {
                     productos.put(p.getId_Producto(), cantidad[i]);
                 }
             }
