@@ -85,7 +85,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_usuario_vacio_username"));
         }
-        if (Validator.esEmailValido(usuario.getEmail()) == false) {
+        if (!Validator.esEmailValido(usuario.getEmail())) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_usuario_invalido_email"));
         }
@@ -132,8 +132,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
             }
         }
         // Ultimo usuario administrador
-        if ((operacion == TipoDeOperacion.ACTUALIZACION && usuario.getRoles().contains(Rol.ADMINISTRADOR) == false)
-                || operacion == TipoDeOperacion.ELIMINACION && usuario.getRoles().contains(Rol.ADMINISTRADOR) == true) {
+        if ((operacion == TipoDeOperacion.ACTUALIZACION && !usuario.getRoles().contains(Rol.ADMINISTRADOR))
+                || operacion == TipoDeOperacion.ELIMINACION && usuario.getRoles().contains(Rol.ADMINISTRADOR)) {
             List<Usuario> adminitradores = this.getUsuariosAdministradores();
             if (adminitradores.size() == 1) {
                 if (adminitradores.get(0).getId_Usuario() == usuario.getId_Usuario()) {

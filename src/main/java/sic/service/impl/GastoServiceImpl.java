@@ -1,6 +1,8 @@
 package sic.service.impl;
 
 import java.math.BigDecimal;
+
+import sic.modelo.*;
 import sic.service.IGastoService;
 import java.util.Date;
 import java.util.List;
@@ -12,31 +14,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.Caja;
-import sic.modelo.EstadoCaja;
-import sic.modelo.Gasto;
 import sic.service.BusinessServiceException;
 import sic.repository.GastoRepository;
 import sic.service.ICajaService;
 import sic.service.IEmpresaService;
-import sic.service.IFormaDePagoService;
 
 @Service
 public class GastoServiceImpl implements IGastoService {
 
     private final GastoRepository gastoRepository;
     private final IEmpresaService empresaService;
-    private final IFormaDePagoService formaDePagoService;
     private final ICajaService cajaService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     @Lazy
-    public GastoServiceImpl(GastoRepository gastoRepository, IEmpresaService empresaService, 
-                            IFormaDePagoService formaDePagoService, ICajaService cajaService) {
+    public GastoServiceImpl(GastoRepository gastoRepository, IEmpresaService empresaService, ICajaService cajaService) {
         this.gastoRepository = gastoRepository;
         this.empresaService = empresaService;
-        this.formaDePagoService = formaDePagoService;
         this.cajaService = cajaService;
     }
     
@@ -93,15 +88,6 @@ public class GastoServiceImpl implements IGastoService {
                     .getString("mensaje_gasto_duplicada"));
         }
     }
-    
-    @Override
-    public BigDecimal calcularTotalGastos(List<Gasto> gastos) {
-        BigDecimal total = BigDecimal.ZERO;
-        for (Gasto gasto : gastos) {
-            total = total.add(gasto.getMonto());
-        }
-        return total;
-    }
 
     @Override
     @Transactional
@@ -114,19 +100,8 @@ public class GastoServiceImpl implements IGastoService {
     }
 
     @Override
-    public List<Gasto> getGastosPorFecha(Long idEmpresa, Date desde, Date hasta) {
-        return gastoRepository.findAllByFechaBetweenAndEmpresaAndEliminado(desde, hasta, empresaService.getEmpresaPorId(idEmpresa), false);
-    }
-
-    @Override
-    public Gasto getGastosPorNroYEmpreas(Long nroPago, Long idEmpresa) {
-        return gastoRepository.findByNroGastoAndEmpresaAndEliminado(nroPago, empresaService.getEmpresaPorId(idEmpresa), false);
-    }
-
-    @Override
-    public List<Gasto> getGastosEntreFechasYFormaDePago(Long idEmpresa, Long idFormaDePago, Date desde, Date hasta) {
-        return gastoRepository.findAllByFechaBetweenAndEmpresaAndFormaDePagoAndEliminado(desde, hasta, empresaService.getEmpresaPorId(idEmpresa), 
-                formaDePagoService.getFormasDePagoPorId(idFormaDePago), false);
+    public List<Gasto> getGastosEntreFechasYFormaDePago(Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta) {
+        return gastoRepository.getGastosEntreFechasPorFormaDePago(empresa.getId_Empresa(), formaDePago.getId_FormaDePago(), desde, hasta);
     }
 
     @Override
@@ -139,7 +114,7 @@ public class GastoServiceImpl implements IGastoService {
     @Transactional
     public void eliminar(long idGasto) {
         Gasto gastoParaEliminar = this.getGastoPorId(idGasto);
-        if(this.cajaService.getUltimaCaja(gastoParaEliminar.getEmpresa().getId_Empresa()).getEstado().equals(EstadoCaja.CERRADA)){
+        if (this.cajaService.getUltimaCaja(gastoParaEliminar.getEmpresa().getId_Empresa()).getEstado().equals(EstadoCaja.CERRADA)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_gasto_caja_cerrada"));
         }
@@ -150,6 +125,24 @@ public class GastoServiceImpl implements IGastoService {
     @Override
     public long getUltimoNumeroDeGasto(long idEmpresa) {
         return gastoRepository.findTopByEmpresaAndEliminadoOrderByNroGastoDesc(empresaService.getEmpresaPorId(idEmpresa), false).getNroGasto();
+    }
+
+    @Override
+    public BigDecimal getTotalGastosEntreFechasYFormaDePago(long idEmpresa, long idFormaDePago, Date desde, Date hasta) {
+        BigDecimal total = gastoRepository.getTotalGastosEntreFechasPorFormaDePago(idEmpresa, idFormaDePago, desde, hasta);
+        return (total == null) ? BigDecimal.ZERO : total;
+    }
+
+    @Override
+    public BigDecimal getTotalGastosQueAfectanCajaEntreFechas(long idEmpresa, Date desde, Date hasta) {
+        BigDecimal total = gastoRepository.getTotalGastosQueAfectanCajaEntreFechas(idEmpresa, desde, hasta);
+        return (total == null) ? BigDecimal.ZERO : total;
+    }
+
+    @Override
+    public BigDecimal getTotalGastosEntreFechas(long idEmpresa, Date desde, Date hasta) {
+        BigDecimal total = gastoRepository.getTotalGastosEntreFechas(idEmpresa, desde, hasta);
+        return (total == null) ? BigDecimal.ZERO : total;
     }
 
 }

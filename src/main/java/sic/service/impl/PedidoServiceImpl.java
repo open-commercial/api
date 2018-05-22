@@ -187,11 +187,11 @@ public class PedidoServiceImpl implements IPedidoService {
     @Override
     public Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria) {
         //Fecha
-        if (criteria.isBuscaPorFecha() == true & (criteria.getFechaDesde() == null | criteria.getFechaHasta() == null)) {
+        if (criteria.isBuscaPorFecha() & (criteria.getFechaDesde() == null | criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_pedido_fechas_busqueda_invalidas"));
         }
-        if (criteria.isBuscaPorFecha() == true) {
+        if (criteria.isBuscaPorFecha()) {
             Calendar cal = new GregorianCalendar();
             cal.setTime(criteria.getFechaDesde());
             cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -210,33 +210,28 @@ public class PedidoServiceImpl implements IPedidoService {
                     .getString("mensaje_empresa_no_existente"));
         }
         //Cliente
-        if (criteria.isBuscaCliente() == true && criteria.getCliente() == null) {
+        if (criteria.isBuscaCliente() && criteria.getCliente() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_cliente_vacio_razonSocial"));
         }
         //Usuario
-        if (criteria.isBuscaUsuario() == true && criteria.getUsuario() == null) {
+        if (criteria.isBuscaUsuario() && criteria.getUsuario() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_usuario_vacio_nombre"));
         }
         QPedido qpedido = QPedido.pedido;
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(qpedido.empresa.eq(criteria.getEmpresa()).and(qpedido.eliminado.eq(false)));       
-        if (criteria.isBuscaPorFecha() == true) {
+        if (criteria.isBuscaPorFecha()) {
             FormatterFechaHora formateadorFecha = new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
             DateExpression<Date> fDesde = Expressions.dateTemplate(Date.class, "convert({0}, datetime)", formateadorFecha.format(criteria.getFechaDesde()));
             DateExpression<Date> fHasta = Expressions.dateTemplate(Date.class, "convert({0}, datetime)", formateadorFecha.format(criteria.getFechaHasta()));            
             builder.and(qpedido.fecha.between(fDesde, fHasta));
         }
-        if (criteria.isBuscaCliente() == true) {
-            builder.and(qpedido.cliente.eq(criteria.getCliente()));
-        }
-        if (criteria.isBuscaUsuario() == true) {
-            builder.and(qpedido.usuario.eq(criteria.getUsuario()));
-        }
-        if (criteria.isBuscaPorNroPedido() == true) {
-            builder.and(qpedido.nroPedido.eq(criteria.getNroPedido()));
-        }        
+        if (criteria.isBuscaCliente()) builder.and(qpedido.cliente.eq(criteria.getCliente()));
+        if (criteria.isBuscaUsuario()) builder.and(qpedido.usuario.eq(criteria.getUsuario()));
+        if (criteria.isBuscaPorNroPedido()) builder.and(qpedido.nroPedido.eq(criteria.getNroPedido()));
+        if (criteria.isBuscaPorEstadoPedido()) builder.and(qpedido.estado.eq(criteria.getEstadoPedido()));
         Page<Pedido> pedidos = pedidoRepository.findAll(builder, criteria.getPageable());
         this.calcularTotalActualDePedidos(pedidos.getContent());
         return pedidos;

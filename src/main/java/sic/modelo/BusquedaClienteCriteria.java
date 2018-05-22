@@ -18,6 +18,8 @@ public class BusquedaClienteCriteria {
     private String nombreFantasia;
     private boolean buscaPorId_Fiscal;
     private String idFiscal;
+    private boolean buscaPorViajante;
+    private Usuario viajante;
     private boolean buscaPorPais;
     private Pais pais;
     private boolean buscaPorProvincia;

@@ -3,9 +3,10 @@ package sic.service;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.data.domain.Page;
-import sic.modelo.BusquedaCajaCriteria;
-import sic.modelo.Caja;
+import sic.modelo.*;
 
 public interface ICajaService {
 
@@ -15,24 +16,34 @@ public interface ICajaService {
     
     Caja getCajaPorId(Long id);
 
-    List<Caja> getCajas(long id_Empresa, Date desde, Date hasta);
-
     Page<Caja> getCajasCriteria(BusquedaCajaCriteria criteria);
+
+    Map<Long, BigDecimal> getTotalesDeFormaDePago(long idCaja);
 
     Caja getUltimaCaja(long id_Empresa);
 
-    int getUltimoNumeroDeCaja(long id_Empresa);
-
-    Caja guardar(Caja caja);
+    Caja abrirCaja(Empresa empresa, Usuario usuarioApertura, BigDecimal saldoApertura);
 
     void validarCaja(Caja caja);
     
     Caja cerrarCaja(long idCaja, BigDecimal monto, Long idUsuario, boolean scheduling);
     
-    BigDecimal getTotalCaja(Caja caja, boolean afectaCaja);
+    BigDecimal getSaldoQueAfectaCaja(Caja caja);
+
+    BigDecimal getSaldoSistema(Caja caja);
+
+    boolean isUltimaCajaAbierta(long idEmpresa);
     
-    BigDecimal getSaldoFinalCajas(long idEmpresa, Long idUsuario, Date desde, Date hasta);
+    BigDecimal getSaldoSistemaCajas(BusquedaCajaCriteria criteria);
     
-    BigDecimal getSaldoRealCajas(long idEmpresa, Long idUsuario, Date desde, Date hasta);
+    BigDecimal getSaldoRealCajas(BusquedaCajaCriteria criteria);
+    
+    List<MovimientoCaja> getMovimientosPorFormaDePagoEntreFechas(Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta);
+
+    void reabrirCaja(long idCaja, BigDecimal saldoInicial, long idUsuario);
+
+    Caja encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(long idEmpresa, Date fecha);
+
+    int actualizarSaldoSistema(Caja caja, BigDecimal monto);
 
 }

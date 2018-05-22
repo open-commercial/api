@@ -126,14 +126,17 @@ public class ClienteServiceImpl implements IClienteService {
                 idPredicate.and(qcliente.idFiscal.containsIgnoreCase(termino));    
             }            
             builder.or(idPredicate);
-        }       
-        if (criteria.isBuscaPorLocalidad() == true) {
+        }
+        if (criteria.isBuscaPorViajante()) {
+            builder.and(qcliente.viajante.eq(criteria.getViajante()));
+        }
+        if (criteria.isBuscaPorLocalidad()) {
             builder.and(qcliente.localidad.eq(criteria.getLocalidad()));
         }
-        if (criteria.isBuscaPorProvincia() == true) {
+        if (criteria.isBuscaPorProvincia()) {
             builder.and(qcliente.localidad.provincia.eq(criteria.getProvincia()));
         }
-        if (criteria.isBuscaPorPais() == true) {
+        if (criteria.isBuscaPorPais()) {
             builder.and(qcliente.localidad.provincia.pais.eq(criteria.getPais()));
         }
         builder.and(qcliente.empresa.eq(criteria.getEmpresa()).and(qcliente.eliminado.eq(false)));        
@@ -142,15 +145,15 @@ public class ClienteServiceImpl implements IClienteService {
             CuentaCorriente cc = cuentaCorrienteService.getCuentaCorrientePorCliente(c);
             c.setSaldoCuentaCorriente(cc.getSaldo());
             c.setFechaUltimoMovimiento(cc.getFechaUltimoMovimiento());
-        });        
+        });
         return page;
     }
     
     @Override
     public void validarOperacion(TipoDeOperacion operacion, Cliente cliente) {
         //Entrada de Datos        
-        if (cliente.getEmail() != null && cliente.getEmail().equals("") == false) {
-            if (Validator.esEmailValido(cliente.getEmail()) == false) {
+        if (cliente.getEmail() != null && !cliente.getEmail().equals("")) {
+            if (!Validator.esEmailValido(cliente.getEmail())) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_cliente_email_invalido"));
             }

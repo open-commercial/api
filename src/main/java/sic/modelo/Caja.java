@@ -3,7 +3,6 @@ package sic.modelo;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -16,7 +15,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -28,7 +26,7 @@ import lombok.ToString;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"nroCaja", "empresa"})
+@EqualsAndHashCode(of = {"id_Caja", "empresa"})
 @ToString
 public class Caja implements Serializable {
 
@@ -36,17 +34,10 @@ public class Caja implements Serializable {
     @GeneratedValue
     private long id_Caja;
 
-    private int nroCaja;
-
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaApertura;
 
-    @Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fechaCorteInforme;
-
-    @Column(nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaCierre;
 
@@ -63,30 +54,18 @@ public class Caja implements Serializable {
     private Usuario usuarioCierraCaja;
 
     @Column(nullable = false)
-    private String observacion;
-
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private EstadoCaja estado;
 
     @Column(precision = 25, scale = 15)
-    private BigDecimal saldoInicial;
+    private BigDecimal saldoApertura;
 
     @Column(precision = 25, scale = 15)
-    private BigDecimal saldoFinal;
+    private BigDecimal saldoSistema;
 
     @Column(precision = 25, scale = 15)
     private BigDecimal saldoReal;
 
     private boolean eliminada;
-    
-    @Transient
-    private Map<Long, BigDecimal> totalesPorFomaDePago;
-    
-    @Transient
-    private BigDecimal totalAfectaCaja;
-            
-    @Transient
-    private BigDecimal totalGeneral;
 
 }
