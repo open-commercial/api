@@ -22,15 +22,15 @@ public interface ICajaService {
 
     Caja getUltimaCaja(long id_Empresa);
 
-    int getUltimoNumeroDeCaja(long id_Empresa);
-
-    Caja guardar(Caja caja);
+    Caja abrirCaja(Empresa empresa, Usuario usuarioApertura, BigDecimal saldoApertura);
 
     void validarCaja(Caja caja);
     
     Caja cerrarCaja(long idCaja, BigDecimal monto, Long idUsuario, boolean scheduling);
     
-    BigDecimal getTotalQueAfectaCaja(Caja caja);
+    BigDecimal getSaldoQueAfectaCaja(Caja caja);
+
+    BigDecimal getSaldoSistema(Caja caja);
 
     boolean isUltimaCajaAbierta(long idEmpresa);
     
@@ -40,9 +40,10 @@ public interface ICajaService {
     
     List<MovimientoCaja> getMovimientosPorFormaDePagoEntreFechas(Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta);
 
-    void actualizarSaldoSistema(Recibo recibo, TipoDeOperacion tipoDeOperacion);
-
-    void actualizarSaldoSistema(Gasto gasto, TipoDeOperacion tipoDeOperacion);
-
     void reabrirCaja(long idCaja, BigDecimal saldoInicial, long idUsuario);
+
+    Caja encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(long idEmpresa, Date fecha);
+
+    int actualizarSaldoSistema(Caja caja, BigDecimal monto);
+
 }

@@ -10,12 +10,10 @@ import sic.modelo.Usuario;
 public class CajaBuilder {
 
     private long id_Caja = 0L;
-    private int nroCaja = 22;
     private Date fechaApertura = new Date();
     private Date fechaCierre;
     private Usuario usuarioAbreCaja = new UsuarioBuilder().build();
     private Usuario usuarioCierraCaja = new UsuarioBuilder().build();
-    private String observacion = "Caja Default para Test";
     private EstadoCaja estado = EstadoCaja.ABIERTA;
     private BigDecimal saldoInicial = new BigDecimal("400");
     private BigDecimal saldoSistema;
@@ -24,18 +22,13 @@ public class CajaBuilder {
     private Empresa empresa = new EmpresaBuilder().build();
 
     public Caja build() {
-        return new Caja(id_Caja, nroCaja, fechaApertura, fechaCierre, empresa,
-                usuarioAbreCaja, usuarioCierraCaja, observacion, estado,
+        return new Caja(id_Caja, fechaApertura, fechaCierre, empresa,
+                usuarioAbreCaja, usuarioCierraCaja, estado,
                 saldoInicial, saldoSistema, saldoReal, eliminada);
     }
 
     public CajaBuilder withIdCaja(long idCaja) {
         this.id_Caja = idCaja;
-        return this;
-    }
-
-    public CajaBuilder withNroCaja(int nroCaja) {
-        this.nroCaja = nroCaja;
         return this;
     }
 
@@ -56,11 +49,6 @@ public class CajaBuilder {
 
     public CajaBuilder withUsuarioCierraCaja(Usuario usuarioCierraCaja) {
         this.usuarioCierraCaja = usuarioCierraCaja;
-        return this;
-    }
-
-    public CajaBuilder withObservacion(String observacion) {
-        this.observacion = observacion;
         return this;
     }
 

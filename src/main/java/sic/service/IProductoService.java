@@ -22,23 +22,23 @@ public interface IProductoService {
 
     Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
 
-    BigDecimal calcularGanancia_Neto(BigDecimal precioCosto, BigDecimal ganancia_porcentaje);
+    BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal ganancia_porcentaje);
 
     Map<Long, BigDecimal> getProductosSinStockDisponible(long[] idProducto, BigDecimal[] cantidad);
 
     Map<Long, BigDecimal> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, BigDecimal[] cantidad);
-    
-    BigDecimal calcularGanancia_Porcentaje(BigDecimal precioDeListaNuevo, 
-            BigDecimal precioDeListaAnterior, BigDecimal pvp, BigDecimal ivaPorcentaje, 
-            BigDecimal impInternoPorcentaje, BigDecimal precioCosto, boolean descendente);
 
-    BigDecimal calcularIVA_Neto(BigDecimal precioCosto, BigDecimal iva_porcentaje);
+    BigDecimal calcularGananciaPorcentaje(BigDecimal precioDeListaNuevo,
+                                          BigDecimal precioDeListaAnterior, BigDecimal pvp, BigDecimal ivaPorcentaje,
+                                          BigDecimal impInternoPorcentaje, BigDecimal precioCosto, boolean descendente);
 
-    BigDecimal calcularImpInterno_Neto(BigDecimal precioCosto, BigDecimal impInterno_porcentaje);
+    BigDecimal calcularIVANeto(BigDecimal precioCosto, BigDecimal iva_porcentaje);
+
+    BigDecimal calcularImpInternoNeto(BigDecimal precioCosto, BigDecimal impInterno_porcentaje);
 
     BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal ganancia_porcentaje);
 
-    BigDecimal calcularPrecioLista(BigDecimal PVP, BigDecimal iva_porcentaje, BigDecimal impInterno_porcentaje);    
+    BigDecimal calcularPrecioLista(BigDecimal PVP, BigDecimal iva_porcentaje, BigDecimal impInterno_porcentaje);
 
     void eliminarMultiplesProductos(long[] idProducto);
 
@@ -47,26 +47,20 @@ public interface IProductoService {
     Producto getProductoPorDescripcion(String descripcion, Empresa empresa);
 
     Producto getProductoPorId(long id_Producto);
-    
+
     BigDecimal calcularValorStock(BusquedaProductoCriteria criteria);
   
     byte[] getListaDePreciosXlsPorEmpresa(List<Producto> productos, Empresa empresa);
 
+    byte[] getListaDePreciosPDFPorEmpresa(List<Producto> productos, Empresa empresa);
+
     Producto guardar(Producto producto);
 
-    List<Producto> modificarMultiplesProductos(long[] idProducto,
-                                               boolean checkPrecios,            
-                                               BigDecimal gananciaNeto,
-                                               BigDecimal gananciaPorcentaje,
-                                               BigDecimal impuestoInternoNeto,
-                                               BigDecimal impuestoInternoPorcentaje,
-                                               BigDecimal IVANeto,
-                                               BigDecimal IVAPorcentaje,
-                                               BigDecimal precioCosto,
-                                               BigDecimal precioLista,
-                                               BigDecimal precioVentaPublico,                                                                     
-                                               boolean checkMedida, Medida medida,
-                                               boolean checkRubro, Rubro rubro,
-                                               boolean checkProveedor, Proveedor proveedor);    
-    
+    List<Producto> actualizarMultiples(long[] idProducto, boolean checkPrecios, BigDecimal gananciaNeto,
+                                       BigDecimal gananciaPorcentaje, BigDecimal impuestoInternoNeto,
+                                       BigDecimal impuestoInternoPorcentaje, BigDecimal IVANeto,
+                                       BigDecimal IVAPorcentaje, BigDecimal precioCosto, BigDecimal precioLista,
+                                       BigDecimal precioVentaPublico, boolean checkMedida, Medida medida,
+                                       boolean checkRubro, Rubro rubro, boolean checkProveedor, Proveedor proveedor);
+
 }

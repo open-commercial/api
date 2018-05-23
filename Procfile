@@ -1,1 +1,1 @@
-web java -Dserver.port=$PORT -jar target/SIC-API-38.jar
+web java -Dserver.port=$PORT -jar target/SIC-API-Athena.jar

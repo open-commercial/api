@@ -16,8 +16,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Past;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -106,7 +104,6 @@ public class Producto implements Serializable {
     private boolean ilimitado;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Past
     private Date fechaUltimaModificacion;
 
     private String estanteria;

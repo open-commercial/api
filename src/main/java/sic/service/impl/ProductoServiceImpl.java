@@ -13,17 +13,11 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.stream.IntStream;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
-import javax.validation.Valid;
-
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -94,25 +88,40 @@ public class ProductoServiceImpl implements IProductoService {
             }
         }
         //Calculos
-        if (producto.getGanancia_neto().compareTo(this.calcularGanancia_Neto(producto.getPrecioCosto(), producto.getGanancia_porcentaje())) != 0) {
+        Double[] IVAs = {10.5, 21.0, 0.0};
+        if (!Arrays.asList(IVAs).contains(producto.getIva_porcentaje().doubleValue())) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_ganancia_neta_incorrecta"));
         }
-        if (producto.getImpuestoInterno_neto().compareTo(this.calcularImpInterno_Neto(producto.getPrecioVentaPublico(), producto.getImpuestoInterno_porcentaje())) != 0) {
+        if (producto.getGanancia_neto().setScale(3, RoundingMode.DOWN)
+                .compareTo(this.calcularGananciaNeto(producto.getPrecioCosto(), producto.getGanancia_porcentaje())
+                        .setScale(3, RoundingMode.DOWN)) != 0) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_producto_ganancia_neta_incorrecta"));
+        }
+        if (producto.getPrecioVentaPublico().setScale(3, RoundingMode.DOWN)
+                .compareTo(this.calcularPVP(producto.getPrecioCosto(), producto.getGanancia_porcentaje())
+                        .setScale(3, RoundingMode.DOWN)) != 0) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_precio_venta_publico_incorrecto"));
+        }
+        if (producto.getImpuestoInterno_neto().setScale(3, RoundingMode.DOWN)
+                .compareTo(this.calcularImpInternoNeto(producto.getPrecioVentaPublico(), producto.getImpuestoInterno_porcentaje())
+                        .setScale(3, RoundingMode.DOWN)) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_impuesto_interno_neto_incorrecto"));
         }
-        if (producto.getIva_neto().compareTo(this.calcularIVA_Neto(producto.getPrecioVentaPublico(), producto.getIva_porcentaje())) != 0) {
+        if (producto.getIva_neto().setScale(3, RoundingMode.DOWN)
+                .compareTo(this.calcularIVANeto(producto.getPrecioVentaPublico(), producto.getIva_porcentaje())
+                        .setScale(3, RoundingMode.DOWN)) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_iva_neto_incorrecto"));
         }
-        if (producto.getPrecioLista().compareTo(this.calcularPrecioLista(producto.getPrecioVentaPublico(), producto.getIva_porcentaje(), producto.getImpuestoInterno_porcentaje())) != 0) {
+        if (producto.getPrecioLista().setScale(3, RoundingMode.DOWN)
+                .compareTo(this.calcularPrecioLista(producto.getPrecioVentaPublico(), producto.getIva_porcentaje(), producto.getImpuestoInterno_porcentaje())
+                        .setScale(3, RoundingMode.DOWN)) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_precio_lista_incorrecto"));
-        }
-        if (producto.getPrecioVentaPublico().compareTo(this.calcularPVP(producto.getPrecioCosto(), producto.getGanancia_porcentaje())) != 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_precio_venta_publico_incorrecto"));
         }
     }
 
@@ -124,36 +133,36 @@ public class ProductoServiceImpl implements IProductoService {
                     .getString("mensaje_empresa_no_existente"));
         }
         //Rubro
-        if (criteria.isBuscarPorRubro() == true && criteria.getRubro() == null) {
+        if (criteria.isBuscarPorRubro() && criteria.getRubro() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_vacio_rubro"));
         }
         //Proveedor
-        if (criteria.isBuscarPorProveedor() == true && criteria.getProveedor() == null) {
+        if (criteria.isBuscarPorProveedor() && criteria.getProveedor() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_vacio_proveedor"));
         }
         QProducto qproducto = QProducto.producto;
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(qproducto.empresa.eq(criteria.getEmpresa()).and(qproducto.eliminado.eq(false)));
-        if (criteria.isBuscarPorCodigo() == true && criteria.isBuscarPorDescripcion() == true) {
+        if (criteria.isBuscarPorCodigo() && criteria.isBuscarPorDescripcion()) {
             builder.and(qproducto.codigo.containsIgnoreCase(criteria.getCodigo())
                     .or(this.buildPredicadoDescripcion(criteria.getDescripcion(), qproducto)));
         } else {
-            if (criteria.isBuscarPorCodigo() == true) {
+            if (criteria.isBuscarPorCodigo()) {
                 builder.and(qproducto.codigo.containsIgnoreCase(criteria.getCodigo()));
             }
-            if (criteria.isBuscarPorDescripcion() == true) {
+            if (criteria.isBuscarPorDescripcion()) {
                 builder.and(this.buildPredicadoDescripcion(criteria.getDescripcion(), qproducto));
             }
         }
-        if (criteria.isBuscarPorRubro() == true) {
+        if (criteria.isBuscarPorRubro()) {
             builder.and(qproducto.rubro.eq(criteria.getRubro()));
         }
         if (criteria.isBuscarPorProveedor()) {
             builder.and(qproducto.proveedor.eq(criteria.getProveedor()));
         }
-        if (criteria.isListarSoloFaltantes() == true) {
+        if (criteria.isListarSoloFaltantes()) {
             builder.and(qproducto.cantidad.loe(qproducto.cantMinima)).and(qproducto.ilimitado.eq(false));
         }
         int pageNumber = 0;
@@ -182,6 +191,8 @@ public class ProductoServiceImpl implements IProductoService {
             producto.setCodigo("");
         }
         this.validarOperacion(TipoDeOperacion.ALTA, producto);
+        producto.setFechaAlta(new Date());
+        producto.setFechaUltimaModificacion(new Date());
         producto = productoRepository.save(producto);
         LOGGER.warn("El Producto " + producto + " se guardó correctamente.");
         return producto;
@@ -191,6 +202,7 @@ public class ProductoServiceImpl implements IProductoService {
     @Transactional
     public void actualizar(Producto producto) {
         this.validarOperacion(TipoDeOperacion.ACTUALIZACION, producto);
+        producto.setFechaUltimaModificacion(new Date());
         productoRepository.save(producto);
         LOGGER.warn("El Producto " + producto + " se modificó correctamente.");
     }
@@ -202,7 +214,7 @@ public class ProductoServiceImpl implements IProductoService {
             if (producto == null) {
                 LOGGER.warn("Se intenta actualizar el stock de un producto eliminado.");
             }
-            if (producto != null && producto.isIlimitado() == false) {
+            if (producto != null && !producto.isIlimitado()) {
                 if (movimiento.equals(Movimiento.VENTA)) {
                     if (operacion == TipoDeOperacion.ALTA) {
                         producto.setCantidad(producto.getCantidad().subtract(entry.getValue()));
@@ -251,20 +263,33 @@ public class ProductoServiceImpl implements IProductoService {
 
     @Override
     @Transactional
-    public List<Producto> modificarMultiplesProductos(long[] idProducto,
-                                                      boolean checkPrecios,
-                                                      BigDecimal gananciaNeto,
-                                                      BigDecimal gananciaPorcentaje,
-                                                      BigDecimal impuestoInternoNeto,
-                                                      BigDecimal impuestoInternoPorcentaje,
-                                                      BigDecimal IVANeto,
-                                                      BigDecimal IVAPorcentaje,
-                                                      BigDecimal precioCosto,
-                                                      BigDecimal precioLista,
-                                                      BigDecimal precioVentaPublico,
-                                                      boolean checkMedida, Medida medida,
-                                                      boolean checkRubro, Rubro rubro,
-                                                      boolean checkProveedor, Proveedor proveedor) {
+    public List<Producto> actualizarMultiples(long[] idProducto,
+                                              boolean checkPrecios,
+                                              BigDecimal gananciaNeto,
+                                              BigDecimal gananciaPorcentaje,
+                                              BigDecimal impuestoInternoNeto,
+                                              BigDecimal impuestoInternoPorcentaje,
+                                              BigDecimal IVANeto,
+                                              BigDecimal IVAPorcentaje,
+                                              BigDecimal precioCosto,
+                                              BigDecimal precioLista,
+                                              BigDecimal precioVentaPublico,
+                                              boolean checkMedida, Medida medida,
+                                              boolean checkRubro, Rubro rubro,
+                                              boolean checkProveedor, Proveedor proveedor) {
+        //Requeridos
+        if (checkMedida && medida == null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_producto_vacio_medida"));
+        }
+        if (checkRubro && rubro == null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_producto_vacio_rubro"));
+        }
+        if (checkProveedor && proveedor == null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_producto_vacio_proveedor"));
+        }
         if (Validator.tieneDuplicados(idProducto)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_error_ids_duplicados"));
@@ -273,24 +298,11 @@ public class ProductoServiceImpl implements IProductoService {
         for (long i : idProducto) {
             productos.add(this.getProductoPorId(i));
         }
-        //Requeridos
-        if (checkMedida == true && medida == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_vacio_medida"));
-        }
-        if (checkRubro == true && rubro == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_vacio_rubro"));
-        }
-        if (checkProveedor == true && proveedor == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_vacio_proveedor"));
-        }
-        productos.stream().forEach(p -> {
-            if (checkMedida == true) p.setMedida(medida);
-            if (checkRubro == true) p.setRubro(rubro);
-            if (checkProveedor == true) p.setProveedor(proveedor);
-            if (checkPrecios == true) {
+        productos.forEach(p -> {
+            if (checkMedida) p.setMedida(medida);
+            if (checkRubro) p.setRubro(rubro);
+            if (checkProveedor) p.setProveedor(proveedor);
+            if (checkPrecios) {
                 p.setPrecioCosto(precioCosto);
                 p.setGanancia_porcentaje(gananciaPorcentaje);
                 p.setGanancia_neto(gananciaNeto);
@@ -301,9 +313,10 @@ public class ProductoServiceImpl implements IProductoService {
                 p.setImpuestoInterno_neto(impuestoInternoNeto);
                 p.setPrecioLista(precioLista);
             }
-            if (checkPrecios == true || checkMedida == true || checkRubro == true || checkProveedor == true) {
-                p.setFechaUltimaModificacion(new Date());
+            if (checkMedida || checkRubro || checkProveedor || checkPrecios) {
+                p.setFechaUltimaModificacion(new Date());                
             }
+            this.validarOperacion(TipoDeOperacion.ACTUALIZACION, p);
         });
         productoRepository.save(productos);
         LOGGER.warn("Los Productos " + productos + " se modificaron correctamente.");
@@ -322,7 +335,7 @@ public class ProductoServiceImpl implements IProductoService {
 
     @Override
     public Producto getProductoPorCodigo(String codigo, Empresa empresa) {
-        if (codigo.isEmpty() == true || empresa == null) {
+        if (codigo.isEmpty()|| empresa == null) {
             return null;
         } else {
             return productoRepository.findByCodigoAndEmpresaAndEliminado(codigo, empresa, false);
@@ -341,13 +354,13 @@ public class ProductoServiceImpl implements IProductoService {
 
     @Override
     public Map<Long, BigDecimal> getProductosSinStockDisponible(long[] idProducto, BigDecimal[] cantidad) {
-        Map productos = new HashMap();
+        Map<Long, BigDecimal> productos = new HashMap<>();
         int longitudIds = idProducto.length;
         int longitudCantidades = cantidad.length;
         if (longitudIds == longitudCantidades) {
             for (int i = 0; i < longitudIds; i++) {
                 Producto p = this.getProductoPorId(idProducto[i]);
-                if (p.isIlimitado() == false && p.getCantidad().compareTo(cantidad[i]) < 0) {
+                if (!p.isIlimitado() && p.getCantidad().compareTo(cantidad[i]) < 0) {
                     productos.put(p.getId_Producto(), cantidad[i]);
                 }
             }
@@ -360,7 +373,7 @@ public class ProductoServiceImpl implements IProductoService {
 
     @Override
     public Map<Long, BigDecimal> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, BigDecimal[] cantidad) {
-        Map productos = new HashMap();
+        Map<Long, BigDecimal> productos = new HashMap<>();
         int longitudIds = idProducto.length;
         int longitudCantidades = cantidad.length;
         if (longitudIds == longitudCantidades) {
@@ -378,15 +391,13 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     @Override
-    public BigDecimal calcularGanancia_Porcentaje(BigDecimal precioDeListaNuevo,
-                                                  BigDecimal precioDeListaAnterior, BigDecimal pvp, BigDecimal ivaPorcentaje,
-                                                  BigDecimal impInternoPorcentaje, BigDecimal precioCosto, boolean ascendente) {
+    public BigDecimal calcularGananciaPorcentaje(BigDecimal precioDeListaNuevo,
+                                                 BigDecimal precioDeListaAnterior, BigDecimal pvp, BigDecimal ivaPorcentaje,
+                                                 BigDecimal impInternoPorcentaje, BigDecimal precioCosto, boolean ascendente) {
         //evita la division por cero
-        if (precioCosto.compareTo(BigDecimal.ZERO) == 0) {
-            return BigDecimal.ZERO;
-        }
+        if (precioCosto.compareTo(BigDecimal.ZERO) == 0) return BigDecimal.ZERO;
         BigDecimal resultado;
-        if (ascendente == false) {
+        if (!ascendente) {
             resultado = pvp.subtract(precioCosto).divide(precioCosto, 15, RoundingMode.HALF_UP).multiply(CIEN);
         } else if (precioDeListaAnterior.compareTo(BigDecimal.ZERO) == 0 || precioCosto.compareTo(BigDecimal.ZERO) == 0) {
             return BigDecimal.ZERO;
@@ -401,29 +412,29 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     @Override
-    public BigDecimal calcularGanancia_Neto(BigDecimal precioCosto, BigDecimal ganancia_porcentaje) {
-        return precioCosto.multiply(ganancia_porcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+    public BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal gananciaPorcentaje) {
+        return precioCosto.multiply(gananciaPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
     }
 
     @Override
-    public BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal ganancia_porcentaje) {
-        return precioCosto.add(precioCosto.multiply(ganancia_porcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)));
+    public BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal gananciaPorcentaje) {
+        return precioCosto.add(precioCosto.multiply(gananciaPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)));
     }
 
     @Override
-    public BigDecimal calcularIVA_Neto(BigDecimal pvp, BigDecimal iva_porcentaje) {
-        return pvp.multiply(iva_porcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+    public BigDecimal calcularIVANeto(BigDecimal pvp, BigDecimal ivaPorcentaje) {
+        return pvp.multiply(ivaPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
     }
 
     @Override
-    public BigDecimal calcularImpInterno_Neto(BigDecimal pvp, BigDecimal impInterno_porcentaje) {
-        return pvp.multiply(impInterno_porcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+    public BigDecimal calcularImpInternoNeto(BigDecimal pvp, BigDecimal impInternoPorcentaje) {
+        return pvp.multiply(impInternoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
     }
 
     @Override
-    public BigDecimal calcularPrecioLista(BigDecimal PVP, BigDecimal iva_porcentaje, BigDecimal impInterno_porcentaje) {
-        BigDecimal resulIVA = PVP.multiply(iva_porcentaje.divide(CIEN, 15, RoundingMode.HALF_UP));
-        BigDecimal resultImpInterno = PVP.multiply(impInterno_porcentaje.divide(CIEN));
+    public BigDecimal calcularPrecioLista(BigDecimal PVP, BigDecimal ivaPorcentaje, BigDecimal impInternoPorcentaje) {
+        BigDecimal resulIVA = PVP.multiply(ivaPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP));
+        BigDecimal resultImpInterno = PVP.multiply(impInternoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP));
         return PVP.add(resulIVA).add(resultImpInterno);
     }
 
@@ -432,19 +443,9 @@ public class ProductoServiceImpl implements IProductoService {
         ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
         InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");
         Map params = new HashMap();
-        params.put("empresa", empresa);
-        if (!empresa.getLogo().isEmpty()) {
-            try {
-                params.put("logo", new ImageIcon(ImageIO.read(new URL(empresa.getLogo()))).getImage());
-            } catch (IOException ex) {
-                LOGGER.error(ex.getMessage());
-                throw new ServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_empresa_404_logo"), ex);
-            }
-        }
         JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(productos);
         try {
-            return xlsReportToArray(JasperFillManager.fillReport(isFileReport, params, ds));
+            return xlsReportToArray(JasperFillManager.fillReport(isFileReport, this.agregarParametros(params, empresa), ds));
         } catch (JRException ex) {
             LOGGER.error(ex.getMessage());
             throw new ServiceException(ResourceBundle.getBundle("Mensajes")
@@ -461,9 +462,6 @@ public class ProductoServiceImpl implements IProductoService {
             jasperXlsExportMgr.setExporterInput(new SimpleExporterInput(jasperPrint));
             jasperXlsExportMgr.setExporterOutput(simpleOutputStreamExporterOutput);
             SimpleXlsReportConfiguration configuration = new SimpleXlsReportConfiguration();
-            configuration.setOnePagePerSheet(true);
-            configuration.setDetectCellType(true);
-            configuration.setCollapseRowSpan(false);
             jasperXlsExportMgr.setConfiguration(configuration);
             jasperXlsExportMgr.exportReport();
             bytes = out.toByteArray();
@@ -476,6 +474,35 @@ public class ProductoServiceImpl implements IProductoService {
             LOGGER.error(ex.getMessage());
         }
         return bytes;
+    }
+
+    @Override
+    public byte[] getListaDePreciosPDFPorEmpresa(List<Producto> productos, Empresa empresa) {
+        ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
+        InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");
+        Map<String, Object> params = new HashMap<>();
+        JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(productos);
+        try {
+            return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(isFileReport, this.agregarParametros(params, empresa), ds));
+        } catch (JRException ex) {
+            LOGGER.error(ex.getMessage());
+            throw new ServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_error_reporte"), ex);
+        }
+    }
+
+    private Map<String, Object> agregarParametros(Map<String, Object> params, Empresa empresa) {
+        params.put("empresa", empresa);
+        if (!empresa.getLogo().isEmpty()) {
+            try {
+                params.put("logo", new ImageIcon(ImageIO.read(new URL(empresa.getLogo()))).getImage());
+            } catch (IOException ex) {
+                LOGGER.error(ex.getMessage());
+                throw new ServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_empresa_404_logo"), ex);
+            }
+        }
+        return params;
     }
 
 }

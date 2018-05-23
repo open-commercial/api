@@ -10,7 +10,7 @@ public interface FacturaVentaRepositoryCustom {
 
     BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria);
 
-    BigDecimal calcularIVA_Venta(BusquedaFacturaVentaCriteria criteria, TipoDeComprobante[] tipoComprobante);
+    BigDecimal calcularIVAVenta(BusquedaFacturaVentaCriteria criteria, TipoDeComprobante[] tipoComprobante);
 
     BigDecimal calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria);
 

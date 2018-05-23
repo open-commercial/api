@@ -152,8 +152,7 @@ public class FacturaController {
                                                    @RequestParam(required = false) Long idProveedor,
                                                    @RequestParam(required = false) Integer nroSerie,
                                                    @RequestParam(required = false) Integer nroFactura,
-                                                   @RequestParam(required = false) Boolean soloImpagas,
-                                                   @RequestParam(required = false) Boolean soloPagas,
+                                                   @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
                                                    @RequestParam(required = false) Integer pagina,
                                                    @RequestParam(required = false) Integer tamanio) {
         Calendar fechaDesde = Calendar.getInstance();
@@ -161,12 +160,6 @@ public class FacturaController {
         if ((desde != null) && (hasta != null)) {
             fechaDesde.setTimeInMillis(desde);            
             fechaHasta.setTimeInMillis(hasta);
-        }
-        if (soloImpagas == null) {
-            soloImpagas = false;
-        }
-        if (soloPagas == null) {
-            soloPagas = false;
         }
         Proveedor proveedor = null;
         if (idProveedor != null) {
@@ -189,6 +182,8 @@ public class FacturaController {
                                                  .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
                                                  .numSerie((nroSerie != null) ? nroSerie : 0)
                                                  .numFactura((nroFactura != null) ? nroFactura : 0)
+                                                 .buscaPorTipoComprobante(tipoDeComprobante != null)
+                                                 .tipoComprobante((tipoDeComprobante != null) ? tipoDeComprobante : null)
                                                  .cantRegistros(0)
                                                  .pageable(pageable)
                                                  .build();
@@ -307,28 +302,20 @@ public class FacturaController {
     @GetMapping("/facturas/total-facturado-venta/criteria")
     @ResponseStatus(HttpStatus.OK)
     public BigDecimal calcularTotalFacturadoVenta(@RequestParam Long idEmpresa,
-                                                 @RequestParam(required = false) Long desde,
-                                                 @RequestParam(required = false) Long hasta,
-                                                 @RequestParam(required = false) Long idCliente,
-                                                 @RequestParam(required = false) Integer nroSerie,
-                                                 @RequestParam(required = false) Integer nroFactura,                                              
-                                                 @RequestParam(required = false) Long idViajante,
-                                                 @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-                                                 @RequestParam(required = false) Long idUsuario,
-                                                 @RequestParam(required = false) Long nroPedido,
-                                                 @RequestParam(required = false) Boolean soloImpagas,
-                                                 @RequestParam(required = false) Boolean soloPagas) {
+                                                  @RequestParam(required = false) Long desde,
+                                                  @RequestParam(required = false) Long hasta,
+                                                  @RequestParam(required = false) Long idCliente,
+                                                  @RequestParam(required = false) Integer nroSerie,
+                                                  @RequestParam(required = false) Integer nroFactura,
+                                                  @RequestParam(required = false) Long idViajante,
+                                                  @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
+                                                  @RequestParam(required = false) Long idUsuario,
+                                                  @RequestParam(required = false) Long nroPedido) {
         Calendar fechaDesde = Calendar.getInstance();
         Calendar fechaHasta = Calendar.getInstance();
         if ((desde != null) && (hasta != null)) {
             fechaDesde.setTimeInMillis(desde);
             fechaHasta.setTimeInMillis(hasta);
-        }
-        if ((soloImpagas != null) && (soloPagas != null)) {
-            if ((soloImpagas == true) && (soloPagas == true)) {
-                soloImpagas = false;
-                soloPagas = false;
-            }
         }
         Cliente cliente = new Cliente();
         if (idCliente != null) {
@@ -371,21 +358,14 @@ public class FacturaController {
                                                    @RequestParam(required = false) Long desde,
                                                    @RequestParam(required = false) Long hasta,
                                                    @RequestParam(required = false) Long idProveedor,
+                                                   @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
                                                    @RequestParam(required = false) Integer nroSerie,
-                                                   @RequestParam(required = false) Integer nroFactura,
-                                                   @RequestParam(required = false) Boolean soloImpagas,
-                                                   @RequestParam(required = false) Boolean soloPagas) {
+                                                   @RequestParam(required = false) Integer nroFactura) {
         Calendar fechaDesde = Calendar.getInstance();
         Calendar fechaHasta = Calendar.getInstance();
         if ((desde != null) && (hasta != null)) {
             fechaDesde.setTimeInMillis(desde);            
             fechaHasta.setTimeInMillis(hasta);
-        }
-        if (soloImpagas == null) {
-            soloImpagas = false;
-        }
-        if (soloPagas == null) {
-            soloPagas = false;
         }
         Proveedor proveedor = null;
         if (idProveedor != null) {
@@ -398,6 +378,8 @@ public class FacturaController {
                                                  .fechaHasta(fechaHasta.getTime())
                                                  .buscaPorProveedor(idProveedor != null)
                                                  .proveedor(proveedor)
+                                                 .buscaPorTipoComprobante(tipoDeComprobante != null)
+                                                 .tipoComprobante((tipoDeComprobante != null) ? tipoDeComprobante : null)
                                                  .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
                                                  .numSerie((nroSerie != null) ? nroSerie : 0)
                                                  .numFactura((nroFactura != null) ? nroFactura : 0)
@@ -417,20 +399,12 @@ public class FacturaController {
                                        @RequestParam(required = false) Long idViajante,
                                        @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
                                        @RequestParam(required = false) Long idUsuario,
-                                       @RequestParam(required = false) Long nroPedido,
-                                       @RequestParam(required = false) Boolean soloImpagas,
-                                       @RequestParam(required = false) Boolean soloPagas) {
+                                       @RequestParam(required = false) Long nroPedido) {
         Calendar fechaDesde = Calendar.getInstance();
         Calendar fechaHasta = Calendar.getInstance();
         if ((desde != null) && (hasta != null)) {
             fechaDesde.setTimeInMillis(desde);
             fechaHasta.setTimeInMillis(hasta);
-        }
-        if ((soloImpagas != null) && (soloPagas != null)) {
-            if ((soloImpagas == true) && (soloPagas == true)) {
-                soloImpagas = false;
-                soloPagas = false;
-            }
         }
         Cliente cliente = new Cliente();
         if (idCliente != null) {
@@ -445,25 +419,25 @@ public class FacturaController {
             viajante = usuarioService.getUsuarioPorId(idViajante);
         }
         BusquedaFacturaVentaCriteria criteria = BusquedaFacturaVentaCriteria.builder()
-                .empresa(empresaService.getEmpresaPorId(idEmpresa))
-                .buscaPorFecha((desde != null) && (hasta != null))
-                .fechaDesde(fechaDesde.getTime())
-                .fechaHasta(fechaHasta.getTime())
-                .buscaCliente(idCliente != null)
-                .cliente(cliente)
-                .buscaUsuario(idUsuario != null)
-                .usuario(usuario)
-                .buscaViajante(idViajante != null)
-                .viajante(viajante)
-                .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
-                .numSerie((nroSerie != null) ? nroSerie : 0)
-                .numFactura((nroFactura != null) ? nroFactura : 0)
-                .buscarPorPedido(nroPedido != null)
-                .nroPedido((nroPedido != null) ? nroPedido : 0)
-                .buscaPorTipoComprobante(tipoDeComprobante != null)
-                .tipoComprobante((tipoDeComprobante != null) ? tipoDeComprobante : null)
-                .cantRegistros(0)
-                .build();
+                                                .empresa(empresaService.getEmpresaPorId(idEmpresa))
+                                                .buscaPorFecha((desde != null) && (hasta != null))
+                                                .fechaDesde(fechaDesde.getTime())
+                                                .fechaHasta(fechaHasta.getTime())
+                                                .buscaCliente(idCliente != null)
+                                                .cliente(cliente)
+                                                .buscaUsuario(idUsuario != null)
+                                                .usuario(usuario)
+                                                .buscaViajante(idViajante != null)
+                                                .viajante(viajante)
+                                                .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
+                                                .numSerie((nroSerie != null) ? nroSerie : 0)
+                                                .numFactura((nroFactura != null) ? nroFactura : 0)
+                                                .buscarPorPedido(nroPedido != null)
+                                                .nroPedido((nroPedido != null) ? nroPedido : 0)
+                                                .buscaPorTipoComprobante(tipoDeComprobante != null)
+                                                .tipoComprobante((tipoDeComprobante != null) ? tipoDeComprobante : null)
+                                                .cantRegistros(0)
+                                                .build();
         return facturaService.calcularIvaVenta(criteria);
     }
     
@@ -473,21 +447,14 @@ public class FacturaController {
                                              @RequestParam(required = false) Long desde,
                                              @RequestParam(required = false) Long hasta,
                                              @RequestParam(required = false) Long idProveedor,
+                                             @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
                                              @RequestParam(required = false) Integer nroSerie,
-                                             @RequestParam(required = false) Integer nroFactura,
-                                             @RequestParam(required = false) Boolean soloImpagas,
-                                             @RequestParam(required = false) Boolean soloPagas) {
+                                             @RequestParam(required = false) Integer nroFactura) {
         Calendar fechaDesde = Calendar.getInstance();
         Calendar fechaHasta = Calendar.getInstance();
         if ((desde != null) && (hasta != null)) {
             fechaDesde.setTimeInMillis(desde);            
             fechaHasta.setTimeInMillis(hasta);
-        }
-        if (soloImpagas == null) {
-            soloImpagas = false;
-        }
-        if (soloPagas == null) {
-            soloPagas = false;
         }
         Proveedor proveedor = null;
         if (idProveedor != null) {
@@ -500,6 +467,8 @@ public class FacturaController {
                                                  .fechaHasta(fechaHasta.getTime())
                                                  .buscaPorProveedor(idProveedor != null)
                                                  .proveedor(proveedor)
+                                                 .buscaPorTipoComprobante(tipoDeComprobante != null)
+                                                 .tipoComprobante((tipoDeComprobante != null) ? tipoDeComprobante : null)
                                                  .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
                                                  .numSerie((nroSerie != null) ? nroSerie : 0)
                                                  .numFactura((nroFactura != null) ? nroFactura : 0)
@@ -519,20 +488,12 @@ public class FacturaController {
                                             @RequestParam(required = false) Long idViajante,
                                             @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
                                             @RequestParam(required = false) Long idUsuario,
-                                            @RequestParam(required = false) Long nroPedido,
-                                            @RequestParam(required = false) Boolean soloImpagas,
-                                            @RequestParam(required = false) Boolean soloPagas) {
+                                            @RequestParam(required = false) Long nroPedido) {
         Calendar fechaDesde = Calendar.getInstance();
         Calendar fechaHasta = Calendar.getInstance();
         if ((desde != null) && (hasta != null)) {
             fechaDesde.setTimeInMillis(desde);
             fechaHasta.setTimeInMillis(hasta);
-        }
-        if ((soloImpagas != null) && (soloPagas != null)) {
-            if ((soloImpagas == true) && (soloPagas == true)) {
-                soloImpagas = false;
-                soloPagas = false;
-            }
         }
         Cliente cliente = new Cliente();
         if (idCliente != null) {
@@ -568,5 +529,4 @@ public class FacturaController {
                                                  .build();
         return facturaService.calcularGananciaTotal(criteria);
     }
-        
 }

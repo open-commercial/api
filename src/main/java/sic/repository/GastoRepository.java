@@ -35,6 +35,12 @@ public interface GastoRepository extends PagingAndSortingRepository<Gasto, Long>
             "WHERE g.empresa.id_Empresa = :idEmpresa " +
             "AND g.formaDePago.afectaCaja = true " +
             "AND g.fecha BETWEEN :desde AND :hasta AND g.eliminado = false")
+    BigDecimal getTotalGastosQueAfectanCajaEntreFechas(@Param("idEmpresa") long idEmpresa,
+                                                       @Param("desde") Date desde, @Param("hasta") Date hasta);
+
+    @Query("SELECT SUM(g.monto) FROM Gasto g " +
+            "WHERE g.empresa.id_Empresa = :idEmpresa " +
+            "AND g.fecha BETWEEN :desde AND :hasta AND g.eliminado = false")
     BigDecimal getTotalGastosEntreFechas(@Param("idEmpresa") long idEmpresa,
                                          @Param("desde") Date desde, @Param("hasta") Date hasta);
 
