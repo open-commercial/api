@@ -1,18 +1,38 @@
 package sic.service.impl;
 
 import java.math.BigDecimal;
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.test.context.junit4.SpringRunner;
+import sic.modelo.Producto;
+import sic.repository.ProductoRepository;
 
 @RunWith(SpringRunner.class)
 public class ProductoServiceImplTest {
     
     @InjectMocks
     private ProductoServiceImpl productoService;
-    
+
+    @Mock
+    private ProductoRepository productoRepository;
+
+    /*@Before
+    public void init() {
+        MockitoAnnotations.initMocks(this);
+    }*/
+
     @Test
     public void shouldCalcularGanancia_Porcentaje() {
         BigDecimal precioCosto = new BigDecimal("12.34");
@@ -66,6 +86,20 @@ public class ProductoServiceImplTest {
         BigDecimal resultadoEsperado = new BigDecimal("32.33080000000000000");
         BigDecimal resultadoObtenido = productoService.calcularPrecioLista(pvp, ivaPorcentaje, impuestoInternoPorcentaje);
         assertEquals(resultadoEsperado, resultadoObtenido);
-    }    
-    
+    }
+
+    @Test
+    public void shouldGetProductosSinStockDisponible() {
+        Producto producto = new Producto();
+        producto.setId_Producto(1);
+        producto.setCantidad(BigDecimal.TEN);
+        producto.setIlimitado(false);
+        when(productoRepository.findOne((long) 1)).thenReturn(producto);
+        when(productoService.getProductoPorId(1)).thenReturn(producto);
+        long[] idProducto = {1};
+        BigDecimal[] cantidad = {BigDecimal.TEN.add(BigDecimal.ONE)};
+        Map<Long, BigDecimal> resultadoObtenido = productoService.getProductosSinStockDisponible(idProducto, cantidad);
+        assertFalse("El producto no debería poseer stock disponible.", resultadoObtenido.isEmpty());
+    }
+
 }

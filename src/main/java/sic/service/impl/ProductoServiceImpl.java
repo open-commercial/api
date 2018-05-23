@@ -348,7 +348,7 @@ public class ProductoServiceImpl implements IProductoService {
 
     @Override
     public Map<Long, BigDecimal> getProductosSinStockDisponible(long[] idProducto, BigDecimal[] cantidad) {
-        Map productos = new HashMap();
+        Map<Long, BigDecimal> productos = new HashMap<>();
         int longitudIds = idProducto.length;
         int longitudCantidades = cantidad.length;
         if (longitudIds == longitudCantidades) {
@@ -367,7 +367,7 @@ public class ProductoServiceImpl implements IProductoService {
 
     @Override
     public Map<Long, BigDecimal> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, BigDecimal[] cantidad) {
-        Map productos = new HashMap();
+        Map<Long, BigDecimal> productos = new HashMap<>();
         int longitudIds = idProducto.length;
         int longitudCantidades = cantidad.length;
         if (longitudIds == longitudCantidades) {
