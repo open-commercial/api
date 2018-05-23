@@ -6,7 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.JRXlsExporter;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.export.*;
 import sic.modelo.BusquedaProductoCriteria;
 import java.io.InputStream;
@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.util.*;
-import java.util.stream.IntStream;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
@@ -439,7 +438,7 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     @Override
-    public byte[] getListaDePreciosXlsPorEmpresa(List<Producto> productos, Empresa empresa) {
+    public byte[] getListaDePreciosXlsxPorEmpresa(List<Producto> productos, Empresa empresa) {
         ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
         InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");
         Map params = new HashMap();
@@ -456,14 +455,12 @@ public class ProductoServiceImpl implements IProductoService {
     private byte[] xlsReportToArray(JasperPrint jasperPrint) {
         byte[] bytes = null;
         try{
-            JRXlsExporter jasperXlsExportMgr = new JRXlsExporter();
+            JRXlsxExporter jasperXlsxExportMgr = new JRXlsxExporter();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             SimpleOutputStreamExporterOutput simpleOutputStreamExporterOutput = new SimpleOutputStreamExporterOutput(out);
-            jasperXlsExportMgr.setExporterInput(new SimpleExporterInput(jasperPrint));
-            jasperXlsExportMgr.setExporterOutput(simpleOutputStreamExporterOutput);
-            SimpleXlsReportConfiguration configuration = new SimpleXlsReportConfiguration();
-            jasperXlsExportMgr.setConfiguration(configuration);
-            jasperXlsExportMgr.exportReport();
+            jasperXlsxExportMgr.setExporterInput(new SimpleExporterInput(jasperPrint));
+            jasperXlsxExportMgr.setExporterOutput(simpleOutputStreamExporterOutput);
+            jasperXlsxExportMgr.exportReport();
             bytes = out.toByteArray();
             out.close();
         } catch (JRException ex){
