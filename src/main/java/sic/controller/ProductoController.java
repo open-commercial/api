@@ -329,7 +329,7 @@ public class ProductoController {
         headers.setContentType(new MediaType("application", "vnd.ms-excel"));
         headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        byte[] reporteXls = productoService.getListaDePreciosXlsPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
+        byte[] reporteXls = productoService.getListaDePreciosXlsxPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
         headers.setContentLength(reporteXls.length);
         return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
     }
