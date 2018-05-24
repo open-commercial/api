@@ -39,8 +39,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     private final CuentaCorrienteRepository cuentaCorrienteRepository;
     private final CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository;
     private final CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository;
-    private final IClienteService clienteService;
-    private final IProveedorService proveedorService;
     private final IRenglonCuentaCorrienteService renglonCuentaCorrienteService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     
@@ -49,14 +47,11 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     public CuentaCorrienteServiceImpl(CuentaCorrienteRepository cuentaCorrienteRepository,
                                       CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository,
                                       CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository,
-                                      IClienteService clienteService, IProveedorService proveedorService,
                                       IRenglonCuentaCorrienteService renglonCuentaCorrienteService) {
 
                 this.cuentaCorrienteRepository = cuentaCorrienteRepository;
                 this.cuentaCorrienteClienteRepository = cuentaCorrienteClienteRepository;
                 this.cuentaCorrienteProveedorRepository = cuentaCorrienteProveedorRepository;
-                this.clienteService = clienteService;
-                this.proveedorService = proveedorService;
                 this.renglonCuentaCorrienteService = renglonCuentaCorrienteService;
     }
 
@@ -251,13 +246,13 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         if (nota instanceof NotaCreditoCliente || nota instanceof NotaDebitoCliente) {
             if (nota instanceof NotaCreditoCliente) {
                 cc = this.getCuentaCorrientePorCliente(((NotaCreditoCliente) nota).getCliente());
-            } else if (nota instanceof NotaDebitoCliente) {
+            } else {
                 cc = this.getCuentaCorrientePorCliente(((NotaDebitoCliente) nota).getCliente());
             }
         } else if (nota instanceof NotaCreditoProveedor || nota instanceof NotaDebitoProveedor) {
             if (nota instanceof NotaCreditoProveedor) {
                 cc = this.getCuentaCorrientePorProveedor(((NotaCreditoProveedor) nota).getProveedor());
-            } else if (nota instanceof NotaDebitoProveedor) {
+            } else {
                 cc = this.getCuentaCorrientePorProveedor(((NotaDebitoProveedor) nota).getProveedor());
             }
         }

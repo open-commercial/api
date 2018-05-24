@@ -28,12 +28,7 @@ import sic.modelo.Medida;
 import sic.modelo.Producto;
 import sic.modelo.Proveedor;
 import sic.modelo.Rubro;
-import sic.service.BusinessServiceException;
-import sic.service.IEmpresaService;
-import sic.service.IMedidaService;
-import sic.service.IProductoService;
-import sic.service.IProveedorService;
-import sic.service.IRubroService;
+import sic.service.*;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -265,19 +260,23 @@ public class ProductoController {
                 .pageable(null)
                 .build();
         HttpHeaders headers = new HttpHeaders();
-        if (formato.equals("xlsx")) {
-            headers.setContentType(new MediaType("application", "vnd.ms-excel"));
-            headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
-            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-            byte[] reporteXls = productoService.getListaDePreciosXlsxPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
-            headers.setContentLength(reporteXls.length);
-            return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
-        } else {
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
-            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-            byte[] reportePDF = productoService.getListaDePreciosPDFPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
-            return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+        switch (formato) {
+            case "xlsx":
+                headers.setContentType(new MediaType("application", "vnd.ms-excel"));
+                headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
+                headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+                byte[] reporteXls = productoService.getListaDePreciosXlsxPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
+                headers.setContentLength(reporteXls.length);
+                return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
+            case "pdf":
+                headers.setContentType(MediaType.APPLICATION_PDF);
+                headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
+                headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+                byte[] reportePDF = productoService.getListaDePreciosPDFPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
+                return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+            default:
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_formato_no_valido"));
         }
 
     }

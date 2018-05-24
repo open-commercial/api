@@ -1,6 +1,8 @@
 package sic.controller;
 
 import java.math.BigDecimal;
+import java.util.ResourceBundle;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +23,7 @@ import sic.modelo.CuentaCorriente;
 import sic.modelo.CuentaCorrienteCliente;
 import sic.modelo.CuentaCorrienteProveedor;
 import sic.modelo.RenglonCuentaCorriente;
+import sic.service.BusinessServiceException;
 import sic.service.IClienteService;
 import sic.service.ICuentaCorrienteService;
 import sic.service.IProveedorService;
@@ -105,21 +108,24 @@ public class CuentaCorrienteController {
         }
         Pageable pageable = new PageRequest(pagina, tamanio);
         HttpHeaders headers = new HttpHeaders();
-        if (formato.equals("xlsx")) {
-            headers.setContentType(new MediaType("application", "vnd.ms-excel"));
-            headers.set("Content-Disposition", "attachment; filename=EstadoCuentaCorriente.xlsx");
-            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-            byte[] reporteXls = cuentaCorrienteService.getReporteCuentaCorrienteClienteXlsx(cuentaCorrienteService.getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente)), pageable);
-            headers.setContentLength(reporteXls.length);
-            return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
-        } else {
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.add("content-disposition", "inline; filename=EstadoCuentaCorriente.pdf");
-            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-            byte[] reportePDF = cuentaCorrienteService.getReporteCuentaCorrienteClientePDF(cuentaCorrienteService.getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente)), pageable);
-            return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+        switch (formato) {
+            case "xlsx":
+                headers.setContentType(new MediaType("application", "vnd.ms-excel"));
+                headers.set("Content-Disposition", "attachment; filename=EstadoCuentaCorriente.xlsx");
+                headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+                byte[] reporteXls = cuentaCorrienteService.getReporteCuentaCorrienteClienteXlsx(cuentaCorrienteService.getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente)), pageable);
+                headers.setContentLength(reporteXls.length);
+                return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
+            case "pdf":
+                headers.setContentType(MediaType.APPLICATION_PDF);
+                headers.add("content-disposition", "inline; filename=EstadoCuentaCorriente.pdf");
+                headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+                byte[] reportePDF = cuentaCorrienteService.getReporteCuentaCorrienteClientePDF(cuentaCorrienteService.getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente)), pageable);
+                return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+            default:
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_formato_no_valido"));
         }
-
     }
 
 }
