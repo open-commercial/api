@@ -309,7 +309,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     @Override
     public byte[] getReporteCuentaCorrienteClienteXlsx(CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page) {
         ClassLoader classLoader = CuentaCorrienteServiceImpl.class.getClassLoader();
-        InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/EstadoCuentaCorriente.jasper");
+        InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/CuentaCorriente.jasper");
         Map<String, Object> params = new HashMap<>();
         page = new PageRequest(0, (page.getPageNumber() + 1) * page.getPageSize());
         JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(this.getRenglonesCuentaCorriente(cuentaCorrienteCliente.getIdCuentaCorriente(), page).getContent());
