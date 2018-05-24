@@ -6,7 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -87,6 +90,26 @@ public class CuentaCorrienteController {
         }
         Pageable pageable = new PageRequest(pagina, tamanio);
         return cuentaCorrienteService.getRenglonesCuentaCorriente(idCuentaCorriente, pageable);
+    }
+
+    @GetMapping("/cuentas-corrientes/clientes/{idCliente}/reporte-xls")
+    public ResponseEntity<byte[]> getReporteCuentaCorrienteXls(@PathVariable long idCliente,
+                                                       @RequestParam(required = false) Integer pagina,
+                                                       @RequestParam(required = false) Integer tamanio) {
+        if (tamanio == null || tamanio <= 0) {
+            tamanio = TAMANIO_PAGINA_DEFAULT;
+        }
+        if (pagina == null || pagina < 0) {
+            pagina = 0;
+        }
+        Pageable pageable = new PageRequest(pagina, tamanio);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("application", "vnd.ms-excel"));
+        headers.set("Content-Disposition", "attachment; filename=EstadoCuentaCorriente.xlsx");
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+        byte[] reporteXls = cuentaCorrienteService.getReporteCuentaCorrienteClienteXlsx(cuentaCorrienteService.getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente)), pageable);
+        headers.setContentLength(reporteXls.length);
+        return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
     }
     
 }
