@@ -186,18 +186,18 @@ public class ProductoController {
     @PutMapping("/productos/multiples")
     @ResponseStatus(HttpStatus.OK)
     public void actualizarMultiplesProductos(@RequestParam long[] idProducto,
-                                            @RequestParam(required = false) Long idMedida,
-                                            @RequestParam(required = false) Long idRubro,
-                                            @RequestParam(required = false) Long idProveedor,
-                                            @RequestParam(required = false) BigDecimal gananciaNeto,
-                                            @RequestParam(required = false) BigDecimal gananciaPorcentaje,
-                                            @RequestParam(defaultValue = "0",required = false) BigDecimal impuestoInternoNeto,
-                                            @RequestParam(defaultValue = "0",required = false) BigDecimal impuestoInternoPorcentaje,
-                                            @RequestParam(required = false) BigDecimal IVANeto,
-                                            @RequestParam(required = false) BigDecimal IVAPorcentaje,
-                                            @RequestParam(required = false) BigDecimal precioCosto,
-                                            @RequestParam(required = false) BigDecimal precioLista,
-                                            @RequestParam(required = false) BigDecimal precioVentaPublico) {
+                                             @RequestParam(required = false) Long idMedida,
+                                             @RequestParam(required = false) Long idRubro,
+                                             @RequestParam(required = false) Long idProveedor,
+                                             @RequestParam(required = false) BigDecimal gananciaNeto,
+                                             @RequestParam(required = false) BigDecimal gananciaPorcentaje,
+                                             @RequestParam(defaultValue = "0",required = false) BigDecimal impuestoInternoNeto,
+                                             @RequestParam(defaultValue = "0",required = false) BigDecimal impuestoInternoPorcentaje,
+                                             @RequestParam(required = false) BigDecimal IVANeto,
+                                             @RequestParam(required = false) BigDecimal IVAPorcentaje,
+                                             @RequestParam(required = false) BigDecimal precioCosto,
+                                             @RequestParam(required = false) BigDecimal precioLista,
+                                             @RequestParam(required = false) BigDecimal precioVentaPublico) {
         boolean actualizaPrecios = false;
         if (gananciaNeto != null && gananciaPorcentaje != null && impuestoInternoNeto != null && impuestoInternoPorcentaje != null
                 && IVANeto != null && IVAPorcentaje != null && precioCosto != null && precioLista != null && precioVentaPublico != null) {
@@ -233,6 +233,57 @@ public class ProductoController {
         return productoService.getProductosNoCumplenCantidadVentaMinima(idProducto, cantidad);
     }
 
+    @GetMapping("/productos/reporte/criteria")
+    public ResponseEntity<byte[]> getListaDePrecios(@RequestParam(value = "idEmpresa") long idEmpresa,
+                                                       @RequestParam(value = "codigo", required = false) String codigo,
+                                                       @RequestParam(value = "descripcion", required = false) String descripcion,
+                                                       @RequestParam(value = "idRubro", required = false) Long idRubro,
+                                                       @RequestParam(value = "idProveedor", required = false) Long idProveedor,
+                                                       @RequestParam(value = "soloFaltantes", required = false) boolean soloFantantes,
+                                                       @RequestParam(required = false) String formato) {
+        Rubro rubro = null;
+        if (idRubro != null) {
+            rubro = rubroService.getRubroPorId(idRubro);
+        }
+        Proveedor proveedor = null;
+        if (idProveedor != null) {
+            proveedor = proveedorService.getProveedorPorId(idProveedor);
+        }
+        Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
+        BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder()
+                .buscarPorCodigo((codigo != null))
+                .codigo(codigo)
+                .buscarPorDescripcion(descripcion != null)
+                .descripcion(descripcion)
+                .buscarPorRubro(idRubro != null)
+                .rubro(rubro)
+                .buscarPorProveedor(proveedor != null)
+                .proveedor(proveedor)
+                .empresa(empresa)
+                .cantRegistros(0)
+                .listarSoloFaltantes(soloFantantes)
+                .pageable(null)
+                .build();
+        HttpHeaders headers = new HttpHeaders();
+        if (formato.equals("xlsx")) {
+            headers.setContentType(new MediaType("application", "vnd.ms-excel"));
+            headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+            byte[] reporteXls = productoService.getListaDePreciosXlsxPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
+            headers.setContentLength(reporteXls.length);
+            return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
+        } else {
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+            byte[] reportePDF = productoService.getListaDePreciosPDFPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
+            return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+        }
+
+    }
+
+    /*
+>>>>>>> master
     @GetMapping("/productos/ganancia-neto")
     @ResponseStatus(HttpStatus.OK)
     public BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal gananciaPorcentaje) {
@@ -294,54 +345,6 @@ public class ProductoController {
         }
         return productoService.calcularPrecioLista(pvp, ivaPorcentaje, impInternoPorcentaje);
     }
-
-    @GetMapping("/productos/reporte/criteria")
-    public ResponseEntity<byte[]> getListaDePreciosXls(@RequestParam(value = "idEmpresa") long idEmpresa,
-                                                       @RequestParam(value = "codigo", required = false) String codigo,
-                                                       @RequestParam(value = "descripcion", required = false) String descripcion,
-                                                       @RequestParam(value = "idRubro", required = false) Long idRubro,
-                                                       @RequestParam(value = "idProveedor", required = false) Long idProveedor,
-                                                       @RequestParam(value = "soloFaltantes", required = false) boolean soloFantantes,
-                                                       @RequestParam(required = false) String formato) {
-        Rubro rubro = null;
-        if (idRubro != null) {
-            rubro = rubroService.getRubroPorId(idRubro);
-        }
-        Proveedor proveedor = null;
-        if (idProveedor != null) {
-            proveedor = proveedorService.getProveedorPorId(idProveedor);
-        }
-        Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
-        BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder()
-                .buscarPorCodigo((codigo != null))
-                .codigo(codigo)
-                .buscarPorDescripcion(descripcion != null)
-                .descripcion(descripcion)
-                .buscarPorRubro(idRubro != null)
-                .rubro(rubro)
-                .buscarPorProveedor(proveedor != null)
-                .proveedor(proveedor)
-                .empresa(empresa)
-                .cantRegistros(0)
-                .listarSoloFaltantes(soloFantantes)
-                .pageable(null)
-                .build();
-        HttpHeaders headers = new HttpHeaders();
-        if (formato.equals("xlsx")) {
-            headers.setContentType(new MediaType("application", "vnd.ms-excel"));
-            headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
-            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-            byte[] reporteXls = productoService.getListaDePreciosXlsxPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
-            headers.setContentLength(reporteXls.length);
-            return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
-        } else {
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
-            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-            byte[] reportePDF = productoService.getListaDePreciosPDFPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
-            return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
-        }
-
-    }
+    */
 
 }
