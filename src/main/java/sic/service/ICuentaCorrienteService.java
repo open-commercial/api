@@ -38,4 +38,6 @@ public interface ICuentaCorrienteService {
 
       byte[] getReporteCuentaCorrienteClienteXlsx(CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page);
 
+      byte[] getReporteCuentaCorrienteClientePDF(CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page);
+
 }

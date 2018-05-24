@@ -258,7 +258,7 @@
 				<text><![CDATA[CUENTA CORRIENTE]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="659" y="250" width="71" height="16" uuid="318cdd67-7e0d-4a5a-a524-e3a17e8a1e0d">
+				<reportElement x="659" y="251" width="71" height="16" uuid="318cdd67-7e0d-4a5a-a524-e3a17e8a1e0d">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -268,11 +268,11 @@
 				<text><![CDATA[Saldo:]]></text>
 			</staticText>
 			<textField pattern="¤ #,##0.00">
-				<reportElement x="730" y="251" width="71" height="15" uuid="d79999bb-94af-4ac3-895a-7c3ff70d751c">
+				<reportElement x="730" y="251" width="71" height="16" uuid="d79999bb-94af-4ac3-895a-7c3ff70d751c">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="8"/>
+					<font size="10" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getSaldo().doubleValue()]]></textFieldExpression>
 			</textField>
@@ -280,7 +280,7 @@
 				<reportElement x="0" y="267" width="800" height="1" uuid="9554feb6-2d03-455d-a9bb-071b6982915e"/>
 			</line>
 			<staticText>
-				<reportElement x="1" y="268" width="76" height="15" uuid="0ba8e29c-2f1e-4b9f-b40c-cdd66d250bea">
+				<reportElement x="1" y="268" width="87" height="15" uuid="0ba8e29c-2f1e-4b9f-b40c-cdd66d250bea">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -290,7 +290,7 @@
 				<text><![CDATA[Fecha]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="77" y="268" width="125" height="16" uuid="01f242fd-85d5-4c4e-9b09-f1c09d95b55a">
+				<reportElement x="88" y="268" width="114" height="16" uuid="01f242fd-85d5-4c4e-9b09-f1c09d95b55a">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="local_mesure_unitwidth" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -301,7 +301,7 @@
 				<text><![CDATA[Comprobante]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="202" y="268" width="79" height="16" uuid="e2f0a5f2-9774-4ad4-962c-8b064818b692">
+				<reportElement x="202" y="268" width="72" height="16" uuid="e2f0a5f2-9774-4ad4-962c-8b064818b692">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -337,7 +337,7 @@
 				<text><![CDATA[Saldo]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="281" y="268" width="82" height="16" uuid="92d2b330-c0cf-4e16-8082-bc3659e31754">
+				<reportElement x="274" y="268" width="89" height="16" uuid="92d2b330-c0cf-4e16-8082-bc3659e31754">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -348,19 +348,12 @@
 			<line>
 				<reportElement x="0" y="284" width="800" height="3" uuid="11ca4359-6606-44e0-bf65-0eb1f4a2a410"/>
 			</line>
-			<staticText>
-				<reportElement x="340" y="46" width="100" height="30" uuid="8ead4f35-b15b-4c4a-b032-75075cdc57ac"/>
-				<textElement>
-					<font isBold="true"/>
-				</textElement>
-				<text><![CDATA[entombed]]></text>
-			</staticText>
 		</band>
 	</title>
 	<detail>
 		<band height="15" splitType="Stretch">
 			<textField pattern="">
-				<reportElement x="77" y="0" width="124" height="15" uuid="f2bfc27d-700e-40b7-a73b-6303c546d09a">
+				<reportElement x="88" y="0" width="114" height="15" uuid="f2bfc27d-700e-40b7-a73b-6303c546d09a">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="local_mesure_unitwidth" value="pixel"/>
@@ -372,7 +365,7 @@
 				<textFieldExpression><![CDATA[$F{tipoComprobante} + " Nº " + $F{serie} + " - " + $F{numero}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy">
-				<reportElement x="202" y="0" width="79" height="15" uuid="5dc407ad-61c0-4c06-bc77-1ab3136f8e40">
+				<reportElement x="202" y="0" width="72" height="15" uuid="5dc407ad-61c0-4c06-bc77-1ab3136f8e40">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -384,7 +377,7 @@
 				<reportElement x="363" y="0" width="296" height="15" uuid="ef48b8f6-ecc3-42f2-b6f9-269aae20c81e">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
-				<textElement textAlignment="Center">
+				<textElement textAlignment="Left">
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{descripcion}  == null ? "": $F{descripcion}]]></textFieldExpression>
@@ -408,7 +401,7 @@
 				<textFieldExpression><![CDATA[$F{saldo}]]></textFieldExpression>
 			</textField>
 			<textField pattern="">
-				<reportElement x="281" y="0" width="82" height="15" uuid="7a5d637a-a063-4bbe-a486-b313a3f62c77">
+				<reportElement x="274" y="0" width="89" height="15" uuid="7a5d637a-a063-4bbe-a486-b313a3f62c77">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -417,10 +410,10 @@
 				<textFieldExpression><![CDATA[$F{CAE} == null ? "": $F{CAE}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy HH:mm:ss">
-				<reportElement stretchType="ElementGroupHeight" x="1" y="0" width="76" height="15" uuid="40bb9abf-b844-4456-aeda-6e3608ffb5e0">
+				<reportElement stretchType="ElementGroupHeight" x="1" y="0" width="87" height="15" uuid="40bb9abf-b844-4456-aeda-6e3608ffb5e0">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
-				<textElement textAlignment="Center">
+				<textElement textAlignment="Left">
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{fecha}]]></textFieldExpression>
@@ -448,7 +441,4 @@
 			</textField>
 		</band>
 	</pageFooter>
-	<lastPageFooter>
-		<band height="108"/>
-	</lastPageFooter>
 </jasperReport>

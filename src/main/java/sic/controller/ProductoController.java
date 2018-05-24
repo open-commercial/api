@@ -295,13 +295,14 @@ public class ProductoController {
         return productoService.calcularPrecioLista(pvp, ivaPorcentaje, impInternoPorcentaje);
     }
 
-    @GetMapping("/productos/reporte-xls/criteria")
+    @GetMapping("/productos/reporte/criteria")
     public ResponseEntity<byte[]> getListaDePreciosXls(@RequestParam(value = "idEmpresa") long idEmpresa,
                                                        @RequestParam(value = "codigo", required = false) String codigo,
                                                        @RequestParam(value = "descripcion", required = false) String descripcion,
                                                        @RequestParam(value = "idRubro", required = false) Long idRubro,
                                                        @RequestParam(value = "idProveedor", required = false) Long idProveedor,
-                                                       @RequestParam(value = "soloFaltantes", required = false) boolean soloFantantes) {
+                                                       @RequestParam(value = "soloFaltantes", required = false) boolean soloFantantes,
+                                                       @RequestParam(required = false) String formato) {
         Rubro rubro = null;
         if (idRubro != null) {
             rubro = rubroService.getRubroPorId(idRubro);
@@ -326,50 +327,21 @@ public class ProductoController {
                 .pageable(null)
                 .build();
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(new MediaType("application", "vnd.ms-excel"));
-        headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
-        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        byte[] reporteXls = productoService.getListaDePreciosXlsxPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
-        headers.setContentLength(reporteXls.length);
-        return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
-    }
+        if (formato.equals("xlsx")) {
+            headers.setContentType(new MediaType("application", "vnd.ms-excel"));
+            headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+            byte[] reporteXls = productoService.getListaDePreciosXlsxPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
+            headers.setContentLength(reporteXls.length);
+            return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
+        } else {
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+            byte[] reportePDF = productoService.getListaDePreciosPDFPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
+            return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+        }
 
-    @GetMapping("/productos/reporte-pdf/criteria")
-    public ResponseEntity<byte[]> getListaDePreciosPDF(@RequestParam(value = "idEmpresa") long idEmpresa,
-                                                       @RequestParam(value = "codigo", required = false) String codigo,
-                                                       @RequestParam(value = "descripcion", required = false) String descripcion,
-                                                       @RequestParam(value = "idRubro", required = false) Long idRubro,
-                                                       @RequestParam(value = "idProveedor", required = false) Long idProveedor,
-                                                       @RequestParam(value = "soloFaltantes", required = false) boolean soloFantantes) {
-        Rubro rubro = null;
-        if (idRubro != null) {
-            rubro = rubroService.getRubroPorId(idRubro);
-        }
-        Proveedor proveedor = null;
-        if (idProveedor != null) {
-            proveedor = proveedorService.getProveedorPorId(idProveedor);
-        }
-        Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
-        BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder()
-                .buscarPorCodigo((codigo != null))
-                .codigo(codigo)
-                .buscarPorDescripcion(descripcion != null)
-                .descripcion(descripcion)
-                .buscarPorRubro(idRubro != null)
-                .rubro(rubro)
-                .buscarPorProveedor(proveedor != null)
-                .proveedor(proveedor)
-                .empresa(empresa)
-                .cantRegistros(0)
-                .listarSoloFaltantes(soloFantantes)
-                .pageable(null)
-                .build();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
-        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        byte[] reportePDF = productoService.getListaDePreciosPDFPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
-        return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
     }
 
 }

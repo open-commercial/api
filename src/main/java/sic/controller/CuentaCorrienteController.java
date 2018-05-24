@@ -92,10 +92,11 @@ public class CuentaCorrienteController {
         return cuentaCorrienteService.getRenglonesCuentaCorriente(idCuentaCorriente, pageable);
     }
 
-    @GetMapping("/cuentas-corrientes/clientes/{idCliente}/reporte-xls")
+    @GetMapping("/cuentas-corrientes/clientes/{idCliente}/reporte")
     public ResponseEntity<byte[]> getReporteCuentaCorrienteXls(@PathVariable long idCliente,
-                                                       @RequestParam(required = false) Integer pagina,
-                                                       @RequestParam(required = false) Integer tamanio) {
+                                                               @RequestParam(required = false) Integer pagina,
+                                                               @RequestParam(required = false) Integer tamanio,
+                                                               @RequestParam(required = false) String formato) {
         if (tamanio == null || tamanio <= 0) {
             tamanio = TAMANIO_PAGINA_DEFAULT;
         }
@@ -104,12 +105,21 @@ public class CuentaCorrienteController {
         }
         Pageable pageable = new PageRequest(pagina, tamanio);
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(new MediaType("application", "vnd.ms-excel"));
-        headers.set("Content-Disposition", "attachment; filename=EstadoCuentaCorriente.xlsx");
-        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        byte[] reporteXls = cuentaCorrienteService.getReporteCuentaCorrienteClienteXlsx(cuentaCorrienteService.getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente)), pageable);
-        headers.setContentLength(reporteXls.length);
-        return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
+        if (formato.equals("xlsx")) {
+            headers.setContentType(new MediaType("application", "vnd.ms-excel"));
+            headers.set("Content-Disposition", "attachment; filename=EstadoCuentaCorriente.xlsx");
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+            byte[] reporteXls = cuentaCorrienteService.getReporteCuentaCorrienteClienteXlsx(cuentaCorrienteService.getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente)), pageable);
+            headers.setContentLength(reporteXls.length);
+            return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
+        } else {
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.add("content-disposition", "inline; filename=EstadoCuentaCorriente.pdf");
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+            byte[] reportePDF = cuentaCorrienteService.getReporteCuentaCorrienteClientePDF(cuentaCorrienteService.getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente)), pageable);
+            return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+        }
+
     }
-    
+
 }

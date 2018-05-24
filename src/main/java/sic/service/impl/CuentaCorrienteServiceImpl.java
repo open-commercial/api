@@ -246,7 +246,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         }
     }
     
-    public CuentaCorriente getCuentaCorrientePorNota(Nota nota) {
+    private CuentaCorriente getCuentaCorrientePorNota(Nota nota) {
         CuentaCorriente cc = null;
         if (nota instanceof NotaCreditoCliente || nota instanceof NotaDebitoCliente) {
             if (nota instanceof NotaCreditoCliente) {
@@ -315,6 +315,22 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(this.getRenglonesCuentaCorriente(cuentaCorrienteCliente.getIdCuentaCorriente(), page).getContent());
         try {
             return xlsReportToArray(JasperFillManager.fillReport(isFileReport,  this.agregarParametros(params, cuentaCorrienteCliente), ds));
+        } catch (JRException ex) {
+            LOGGER.error(ex.getMessage());
+            throw new ServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_error_reporte"), ex);
+        }
+    }
+
+    @Override
+    public byte[] getReporteCuentaCorrienteClientePDF(CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page) {
+        ClassLoader classLoader = CuentaCorrienteServiceImpl.class.getClassLoader();
+        InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/CuentaCorriente.jasper");
+        Map<String, Object> params = new HashMap<>();
+        page = new PageRequest(0, (page.getPageNumber() + 1) * page.getPageSize());
+        JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(this.getRenglonesCuentaCorriente(cuentaCorrienteCliente.getIdCuentaCorriente(), page).getContent());
+        try {
+            return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(isFileReport, this.agregarParametros(params, cuentaCorrienteCliente), ds));
         } catch (JRException ex) {
             LOGGER.error(ex.getMessage());
             throw new ServiceException(ResourceBundle.getBundle("Mensajes")
