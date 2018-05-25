@@ -50,9 +50,7 @@ public interface IProductoService {
 
     BigDecimal calcularValorStock(BusquedaProductoCriteria criteria);
   
-    byte[] getListaDePreciosXlsxPorEmpresa(List<Producto> productos, Empresa empresa);
-
-    byte[] getListaDePreciosPDFPorEmpresa(List<Producto> productos, Empresa empresa);
+    byte[] getListaDePreciosPorEmpresa(List<Producto> productos, Empresa empresa, String formato);
 
     Producto guardar(Producto producto);
 

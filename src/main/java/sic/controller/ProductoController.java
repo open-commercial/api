@@ -230,12 +230,12 @@ public class ProductoController {
 
     @GetMapping("/productos/reporte/criteria")
     public ResponseEntity<byte[]> getListaDePrecios(@RequestParam(value = "idEmpresa") long idEmpresa,
-                                                       @RequestParam(value = "codigo", required = false) String codigo,
-                                                       @RequestParam(value = "descripcion", required = false) String descripcion,
-                                                       @RequestParam(value = "idRubro", required = false) Long idRubro,
-                                                       @RequestParam(value = "idProveedor", required = false) Long idProveedor,
-                                                       @RequestParam(value = "soloFaltantes", required = false) boolean soloFantantes,
-                                                       @RequestParam(required = false) String formato) {
+                                                    @RequestParam(value = "codigo", required = false) String codigo,
+                                                    @RequestParam(value = "descripcion", required = false) String descripcion,
+                                                    @RequestParam(value = "idRubro", required = false) Long idRubro,
+                                                    @RequestParam(value = "idProveedor", required = false) Long idProveedor,
+                                                    @RequestParam(value = "soloFaltantes", required = false) boolean soloFantantes,
+                                                    @RequestParam(required = false) String formato) {
         Rubro rubro = null;
         if (idRubro != null) {
             rubro = rubroService.getRubroPorId(idRubro);
@@ -265,14 +265,14 @@ public class ProductoController {
                 headers.setContentType(new MediaType("application", "vnd.ms-excel"));
                 headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
                 headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-                byte[] reporteXls = productoService.getListaDePreciosXlsxPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
+                byte[] reporteXls = productoService.getListaDePreciosPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa, formato);
                 headers.setContentLength(reporteXls.length);
                 return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
             case "pdf":
                 headers.setContentType(MediaType.APPLICATION_PDF);
                 headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
                 headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-                byte[] reportePDF = productoService.getListaDePreciosPDFPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa);
+                byte[] reportePDF = productoService.getListaDePreciosPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa, formato);
                 return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
             default:
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")

@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -108,19 +107,18 @@ public class CuentaCorrienteController {
         }
         Pageable pageable = new PageRequest(pagina, tamanio);
         HttpHeaders headers = new HttpHeaders();
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
         switch (formato) {
             case "xlsx":
                 headers.setContentType(new MediaType("application", "vnd.ms-excel"));
                 headers.set("Content-Disposition", "attachment; filename=EstadoCuentaCorriente.xlsx");
-                headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-                byte[] reporteXls = cuentaCorrienteService.getReporteCuentaCorrienteClienteXlsx(cuentaCorrienteService.getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente)), pageable);
+                byte[] reporteXls = cuentaCorrienteService.getReporteCuentaCorrienteCliente(cuentaCorrienteService.getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente)), pageable, formato);
                 headers.setContentLength(reporteXls.length);
                 return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
             case "pdf":
                 headers.setContentType(MediaType.APPLICATION_PDF);
-                headers.add("content-disposition", "inline; filename=EstadoCuentaCorriente.pdf");
-                headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-                byte[] reportePDF = cuentaCorrienteService.getReporteCuentaCorrienteClientePDF(cuentaCorrienteService.getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente)), pageable);
+                headers.add("Content-Disposition", "attachment; filename=EstadoCuentaCorriente.pdf");
+                byte[] reportePDF = cuentaCorrienteService.getReporteCuentaCorrienteCliente(cuentaCorrienteService.getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente)), pageable, formato);
                 return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
             default:
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")

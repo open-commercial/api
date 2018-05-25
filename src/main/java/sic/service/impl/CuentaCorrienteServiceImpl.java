@@ -302,38 +302,12 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     }
 
     @Override
-    public byte[] getReporteCuentaCorrienteClienteXlsx(CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page) {
+    public byte[] getReporteCuentaCorrienteCliente(CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page, String formato) {
         ClassLoader classLoader = CuentaCorrienteServiceImpl.class.getClassLoader();
         InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/CuentaCorriente.jasper");
-        Map<String, Object> params = new HashMap<>();
         page = new PageRequest(0, (page.getPageNumber() + 1) * page.getPageSize());
         JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(this.getRenglonesCuentaCorriente(cuentaCorrienteCliente.getIdCuentaCorriente(), page).getContent());
-        try {
-            return xlsReportToArray(JasperFillManager.fillReport(isFileReport,  this.agregarParametros(params, cuentaCorrienteCliente), ds));
-        } catch (JRException ex) {
-            LOGGER.error(ex.getMessage());
-            throw new ServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_error_reporte"), ex);
-        }
-    }
-
-    @Override
-    public byte[] getReporteCuentaCorrienteClientePDF(CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page) {
-        ClassLoader classLoader = CuentaCorrienteServiceImpl.class.getClassLoader();
-        InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/CuentaCorriente.jasper");
         Map<String, Object> params = new HashMap<>();
-        page = new PageRequest(0, (page.getPageNumber() + 1) * page.getPageSize());
-        JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(this.getRenglonesCuentaCorriente(cuentaCorrienteCliente.getIdCuentaCorriente(), page).getContent());
-        try {
-            return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(isFileReport, this.agregarParametros(params, cuentaCorrienteCliente), ds));
-        } catch (JRException ex) {
-            LOGGER.error(ex.getMessage());
-            throw new ServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_error_reporte"), ex);
-        }
-    }
-
-    private Map<String, Object> agregarParametros(Map<String, Object> params, CuentaCorrienteCliente cuentaCorrienteCliente) {
         params.put("cuentaCorrienteCliente", cuentaCorrienteCliente);
         if (!cuentaCorrienteCliente.getEmpresa().getLogo().isEmpty()) {
             try {
@@ -344,12 +318,33 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                         .getString("mensaje_empresa_404_logo"), ex);
             }
         }
-        return params;
+        switch (formato) {
+            case "xlsx":
+                try {
+                    return xlsReportToArray(JasperFillManager.fillReport(isFileReport, params, ds));
+                } catch (JRException ex) {
+                    LOGGER.error(ex.getMessage());
+                    throw new ServiceException(ResourceBundle.getBundle("Mensajes")
+                            .getString("mensaje_error_reporte"), ex);
+                }
+            case "pdf":
+                try {
+                    return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(isFileReport, params, ds));
+                } catch (JRException ex) {
+                    LOGGER.error(ex.getMessage());
+                    throw new ServiceException(ResourceBundle.getBundle("Mensajes")
+                            .getString("mensaje_error_reporte"), ex);
+                }
+            default:
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_formato_no_valido"));
+        }
+
     }
 
     private byte[] xlsReportToArray(JasperPrint jasperPrint) {
         byte[] bytes = null;
-        try{
+        try {
             JRXlsxExporter jasperXlsxExportMgr = new JRXlsxExporter();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             SimpleOutputStreamExporterOutput simpleOutputStreamExporterOutput = new SimpleOutputStreamExporterOutput(out);

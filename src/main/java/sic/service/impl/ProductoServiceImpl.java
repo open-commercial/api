@@ -438,23 +438,47 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     @Override
-    public byte[] getListaDePreciosXlsxPorEmpresa(List<Producto> productos, Empresa empresa) {
+    public byte[] getListaDePreciosPorEmpresa(List<Producto> productos, Empresa empresa, String formato) {
         ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
         InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");
-        Map params = new HashMap();
+        Map<String, Object> params = new HashMap<>();
+        params.put("empresa", empresa);
+        if (!empresa.getLogo().isEmpty()) {
+            try {
+                params.put("logo", new ImageIcon(ImageIO.read(new URL(empresa.getLogo()))).getImage());
+            } catch (IOException ex) {
+                LOGGER.error(ex.getMessage());
+                throw new ServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_empresa_404_logo"), ex);
+            }
+        }
         JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(productos);
-        try {
-            return xlsReportToArray(JasperFillManager.fillReport(isFileReport, this.agregarParametros(params, empresa), ds));
-        } catch (JRException ex) {
-            LOGGER.error(ex.getMessage());
-            throw new ServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_error_reporte"), ex);
+        switch (formato) {
+            case "xlsx":
+                try {
+                    return xlsReportToArray(JasperFillManager.fillReport(isFileReport, params, ds));
+                } catch (JRException ex) {
+                    LOGGER.error(ex.getMessage());
+                    throw new ServiceException(ResourceBundle.getBundle("Mensajes")
+                            .getString("mensaje_error_reporte"), ex);
+                }
+            case "pdf":
+                try {
+                    return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(isFileReport, params, ds));
+                } catch (JRException ex) {
+                    LOGGER.error(ex.getMessage());
+                    throw new ServiceException(ResourceBundle.getBundle("Mensajes")
+                            .getString("mensaje_error_reporte"), ex);
+                }
+            default:
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_formato_no_valido"));
         }
     }
 
     private byte[] xlsReportToArray(JasperPrint jasperPrint) {
         byte[] bytes = null;
-        try{
+        try {
             JRXlsxExporter jasperXlsxExportMgr = new JRXlsxExporter();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             SimpleOutputStreamExporterOutput simpleOutputStreamExporterOutput = new SimpleOutputStreamExporterOutput(out);
@@ -473,33 +497,5 @@ public class ProductoServiceImpl implements IProductoService {
         return bytes;
     }
 
-    @Override
-    public byte[] getListaDePreciosPDFPorEmpresa(List<Producto> productos, Empresa empresa) {
-        ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
-        InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");
-        Map<String, Object> params = new HashMap<>();
-        JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(productos);
-        try {
-            return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(isFileReport, this.agregarParametros(params, empresa), ds));
-        } catch (JRException ex) {
-            LOGGER.error(ex.getMessage());
-            throw new ServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_error_reporte"), ex);
-        }
-    }
-
-    private Map<String, Object> agregarParametros(Map<String, Object> params, Empresa empresa) {
-        params.put("empresa", empresa);
-        if (!empresa.getLogo().isEmpty()) {
-            try {
-                params.put("logo", new ImageIcon(ImageIO.read(new URL(empresa.getLogo()))).getImage());
-            } catch (IOException ex) {
-                LOGGER.error(ex.getMessage());
-                throw new ServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_empresa_404_logo"), ex);
-            }
-        }
-        return params;
-    }
 
 }

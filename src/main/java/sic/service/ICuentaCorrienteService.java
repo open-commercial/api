@@ -36,8 +36,6 @@ public interface ICuentaCorrienteService {
       
       Date getFechaUltimoMovimiento(long idCuentaCorriente);
 
-      byte[] getReporteCuentaCorrienteClienteXlsx(CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page);
-
-      byte[] getReporteCuentaCorrienteClientePDF(CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page);
+      byte[] getReporteCuentaCorrienteCliente(CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page, String formato);
 
 }
