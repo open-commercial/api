@@ -75,16 +75,10 @@ public class ProductoController {
                                          @RequestParam(required = false) Integer cantidadRegistros,
                                          @RequestParam(required = false) boolean soloFantantes) {
         Rubro rubro = null;
-        if (idRubro != null) {
-            rubro = rubroService.getRubroPorId(idRubro);
-        }
+        if (idRubro != null) rubro = rubroService.getRubroPorId(idRubro);
         Proveedor proveedor = null;
-        if (idProveedor != null) {
-            proveedor = proveedorService.getProveedorPorId(idProveedor);
-        }
-        if (cantidadRegistros == null) {
-            cantidadRegistros = 0;
-        }
+        if (idProveedor != null) proveedor = proveedorService.getProveedorPorId(idProveedor);
+        if (cantidadRegistros == null) cantidadRegistros = 0;
         BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder()
                 .buscarPorCodigo((codigo!=null))
                 .codigo(codigo)
@@ -112,19 +106,11 @@ public class ProductoController {
                                           @RequestParam(required = false) Integer pagina,
                                           @RequestParam(required = false) Integer tamanio) {
         Rubro rubro = null;
-        if (idRubro != null) {
-            rubro = rubroService.getRubroPorId(idRubro);
-        }
+        if (idRubro != null) rubro = rubroService.getRubroPorId(idRubro);
         Proveedor proveedor = null;
-        if (idProveedor != null) {
-            proveedor = proveedorService.getProveedorPorId(idProveedor);
-        }
-        if (tamanio == null || tamanio <= 0) {
-            tamanio = TAMANIO_PAGINA_DEFAULT;
-        }
-        if (pagina == null || pagina < 0) {
-            pagina = 0;
-        }
+        if (idProveedor != null) proveedor = proveedorService.getProveedorPorId(idProveedor);
+        if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
+        if (pagina == null || pagina < 0) pagina = 0;
         Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "descripcion"));
         BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder()
                 .buscarPorCodigo((codigo!=null && !codigo.isEmpty()))
@@ -199,17 +185,11 @@ public class ProductoController {
             actualizaPrecios = true;
         }
         Medida medida = null;
-        if (idMedida != null) {
-            medida = medidaService.getMedidaPorId(idMedida);
-        }
+        if (idMedida != null) medida = medidaService.getMedidaPorId(idMedida);
         Rubro rubro = null;
-        if (idRubro != null) {
-            rubro = rubroService.getRubroPorId(idRubro);
-        }
+        if (idRubro != null) rubro = rubroService.getRubroPorId(idRubro);
         Proveedor proveedor = null;
-        if (idProveedor != null) {
-            proveedor = proveedorService.getProveedorPorId(idProveedor);
-        }
+        if (idProveedor != null) proveedor = proveedorService.getProveedorPorId(idProveedor);
         productoService.actualizarMultiples(idProducto, actualizaPrecios, gananciaNeto, gananciaPorcentaje,
                 impuestoInternoNeto, impuestoInternoPorcentaje, IVANeto, IVAPorcentaje,
                 precioCosto, precioLista, precioVentaPublico, (idMedida != null), medida,
@@ -237,13 +217,9 @@ public class ProductoController {
                                                     @RequestParam(value = "soloFaltantes", required = false) boolean soloFantantes,
                                                     @RequestParam(required = false) String formato) {
         Rubro rubro = null;
-        if (idRubro != null) {
-            rubro = rubroService.getRubroPorId(idRubro);
-        }
+        if (idRubro != null) rubro = rubroService.getRubroPorId(idRubro);
         Proveedor proveedor = null;
-        if (idProveedor != null) {
-            proveedor = proveedorService.getProveedorPorId(idProveedor);
-        }
+        if (idProveedor != null) proveedor = proveedorService.getProveedorPorId(idProveedor);
         Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
         BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder()
                 .buscarPorCodigo((codigo != null))
@@ -282,7 +258,6 @@ public class ProductoController {
     }
 
     /*
->>>>>>> master
     @GetMapping("/productos/ganancia-neto")
     @ResponseStatus(HttpStatus.OK)
     public BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal gananciaPorcentaje) {
