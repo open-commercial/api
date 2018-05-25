@@ -1,12 +1,16 @@
 package sic.controller;
 
 import java.math.BigDecimal;
+import java.util.ResourceBundle;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +22,7 @@ import sic.modelo.CuentaCorriente;
 import sic.modelo.CuentaCorrienteCliente;
 import sic.modelo.CuentaCorrienteProveedor;
 import sic.modelo.RenglonCuentaCorriente;
+import sic.service.BusinessServiceException;
 import sic.service.IClienteService;
 import sic.service.ICuentaCorrienteService;
 import sic.service.IProveedorService;
@@ -88,5 +93,37 @@ public class CuentaCorrienteController {
         Pageable pageable = new PageRequest(pagina, tamanio);
         return cuentaCorrienteService.getRenglonesCuentaCorriente(idCuentaCorriente, pageable);
     }
-    
+
+    @GetMapping("/cuentas-corrientes/clientes/{idCliente}/reporte")
+    public ResponseEntity<byte[]> getReporteCuentaCorrienteXls(@PathVariable long idCliente,
+                                                               @RequestParam(required = false) Integer pagina,
+                                                               @RequestParam(required = false) Integer tamanio,
+                                                               @RequestParam(required = false) String formato) {
+        if (tamanio == null || tamanio <= 0) {
+            tamanio = TAMANIO_PAGINA_DEFAULT;
+        }
+        if (pagina == null || pagina < 0) {
+            pagina = 0;
+        }
+        Pageable pageable = new PageRequest(pagina, tamanio);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+        switch (formato) {
+            case "xlsx":
+                headers.setContentType(new MediaType("application", "vnd.ms-excel"));
+                headers.set("Content-Disposition", "attachment; filename=EstadoCuentaCorriente.xlsx");
+                byte[] reporteXls = cuentaCorrienteService.getReporteCuentaCorrienteCliente(cuentaCorrienteService.getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente)), pageable, formato);
+                headers.setContentLength(reporteXls.length);
+                return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
+            case "pdf":
+                headers.setContentType(MediaType.APPLICATION_PDF);
+                headers.add("Content-Disposition", "attachment; filename=EstadoCuentaCorriente.pdf");
+                byte[] reportePDF = cuentaCorrienteService.getReporteCuentaCorrienteCliente(cuentaCorrienteService.getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente)), pageable, formato);
+                return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+            default:
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_formato_no_valido"));
+        }
+    }
+
 }

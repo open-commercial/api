@@ -4,17 +4,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import sic.modelo.Cliente;
-import sic.modelo.CuentaCorriente;
-import sic.modelo.CuentaCorrienteCliente;
-import sic.modelo.CuentaCorrienteProveedor;
-import sic.modelo.FacturaCompra;
-import sic.modelo.FacturaVenta;
-import sic.modelo.Nota;
-import sic.modelo.Proveedor;
-import sic.modelo.Recibo;
-import sic.modelo.RenglonCuentaCorriente;
-import sic.modelo.TipoDeOperacion;
+import sic.modelo.*;
 
 public interface ICuentaCorrienteService {
 
@@ -45,5 +35,7 @@ public interface ICuentaCorrienteService {
       void asentarEnCuentaCorriente(Recibo recibo, TipoDeOperacion tipo);
       
       Date getFechaUltimoMovimiento(long idCuentaCorriente);
-      
+
+      byte[] getReporteCuentaCorrienteCliente(CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page, String formato);
+
 }
