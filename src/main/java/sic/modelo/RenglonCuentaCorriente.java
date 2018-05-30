@@ -43,19 +43,7 @@ public class RenglonCuentaCorriente implements Serializable {
     @Column(nullable = false, name = "tipo_comprobante")
     @Enumerated(EnumType.STRING)
     private TipoDeComprobante tipoComprobante;
-    
-    //Formula de hibernate no coloca en la consulta el mismo alias para los campos, que SpringData.
-    @Formula(value = "CASE tipo_comprobante"
-            + " WHEN 'FACTURA_Y' THEN 1"
-            + " WHEN 'NOTA_DEBITO_Y' THEN 2"
-            + " WHEN 'FACTURA_X' THEN 3"
-            + " WHEN 'NOTA_DEBITO_X' THEN 4"
-            + " WHEN 'PRESUPUESTO' THEN 5"
-            + " WHEN 'NOTA_DEBITO_PRESUPUESTO' THEN 6"
-            + " ELSE 10"
-            + " END")
-    private int prioridadPago;
-    
+
     private long serie;
     
     private long numero;
@@ -94,7 +82,8 @@ public class RenglonCuentaCorriente implements Serializable {
     private Recibo recibo;
     
     private Long CAE;
-    
+
+    // Formula de Hibernate no coloca en la consulta el mismo alias para los campos que Spring Data.
     @Formula(value = "(SELECT SUM(r.monto) "
             + "FROM rengloncuentacorriente r "
             + "WHERE r.id_cuenta_corriente = id_cuenta_corriente AND r.eliminado = false "

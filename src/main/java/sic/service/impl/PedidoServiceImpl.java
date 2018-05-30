@@ -125,13 +125,6 @@ public class PedidoServiceImpl implements IPedidoService {
         }        
     }
 
-    private List<Pedido> calcularTotalActualDePedidos(List<Pedido> pedidos) {
-        pedidos.stream().forEach(p -> {
-            this.calcularTotalActualDePedido(p);
-        });
-        return pedidos;
-    }
-
     @Override
     public Pedido actualizarEstadoPedido(Pedido pedido) {
         pedido.setEstado(EstadoPedido.ACTIVO);
@@ -233,7 +226,7 @@ public class PedidoServiceImpl implements IPedidoService {
         if (criteria.isBuscaPorNroPedido()) builder.and(qpedido.nroPedido.eq(criteria.getNroPedido()));
         if (criteria.isBuscaPorEstadoPedido()) builder.and(qpedido.estado.eq(criteria.getEstadoPedido()));
         Page<Pedido> pedidos = pedidoRepository.findAll(builder, criteria.getPageable());
-        this.calcularTotalActualDePedidos(pedidos.getContent());
+        pedidos.getContent().forEach(p -> this.calcularTotalActualDePedido(p));
         return pedidos;
     }
 
@@ -263,15 +256,13 @@ public class PedidoServiceImpl implements IPedidoService {
     @Override
     public HashMap<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido) {
         List<RenglonFactura> renglonesDeFacturas = new ArrayList<>();
-        this.getFacturasDelPedido(nroPedido).stream().forEach(f -> {
-            f.getRenglones().stream().forEach(r -> {
-                renglonesDeFacturas.add(facturaService.calcularRenglon(f.getTipoComprobante(),
-                        Movimiento.VENTA, r.getCantidad(), r.getId_ProductoItem(), r.getDescuento_porcentaje(), false));
-            });
-        });
+        this.getFacturasDelPedido(nroPedido).forEach(f ->
+            f.getRenglones().forEach(r -> renglonesDeFacturas.add(facturaService.calcularRenglon(f.getTipoComprobante(),
+                        Movimiento.VENTA, r.getCantidad(), r.getId_ProductoItem(), r.getDescuento_porcentaje(),false)))
+        );
         HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
         if (!renglonesDeFacturas.isEmpty()) {
-            renglonesDeFacturas.stream().forEach(r -> {
+            renglonesDeFacturas.forEach(r -> {
                 if (listaRenglonesUnificados.containsKey(r.getId_ProductoItem())) {
                     listaRenglonesUnificados.get(r.getId_ProductoItem())
                             .setCantidad(listaRenglonesUnificados
@@ -288,7 +279,7 @@ public class PedidoServiceImpl implements IPedidoService {
     public byte[] getReportePedido(Pedido pedido) {
         ClassLoader classLoader = PedidoServiceImpl.class.getClassLoader();
         InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Pedido.jasper");
-        Map params = new HashMap();
+        Map<String, Object> params = new HashMap<>();
         params.put("pedido", pedido);
         if (!pedido.getEmpresa().getLogo().isEmpty()) {
             try {
