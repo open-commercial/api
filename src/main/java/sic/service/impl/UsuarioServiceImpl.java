@@ -9,12 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.Credencial;
-import sic.modelo.Rol;
-import sic.modelo.Usuario;
+import sic.modelo.*;
+import sic.service.IClienteService;
 import sic.service.IUsuarioService;
 import sic.service.BusinessServiceException;
-import sic.modelo.TipoDeOperacion;
 import sic.util.Utilidades;
 import sic.util.Validator;
 import sic.repository.UsuarioRepository;
@@ -26,13 +24,16 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final IEmpresaService empresaService;
+    private final IClienteService clienteService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     @Lazy
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, IEmpresaService empresaService) {
+    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, IEmpresaService empresaService,
+                              IClienteService clienteService) {
         this.usuarioRepository = usuarioRepository;
         this.empresaService = empresaService;
+        this.clienteService = clienteService;
     }
 
     @Override
@@ -145,13 +146,30 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
 
     @Override
-    public void actualizar(Usuario usuario) {
+    public void actualizar(Usuario usuario, long idCliente) {
         this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario);
         if (usuario.getPassword().isEmpty()) {
             Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
             usuario.setPassword(usuarioGuardado.getPassword());
         } else {
             usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
+        }
+        Cliente cliente;
+        if (usuario.getRoles().contains(Rol.CLIENTE) && idCliente != 0L) {
+            cliente = clienteService.getClientePorId(idCliente);
+            if (cliente.getCredencial() == null) {
+                cliente.setCredencial(usuario);
+                clienteService.actualizar(cliente);
+            } else {
+                throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_usuario_cliente_no_valido"));
+            }
+        } else if(!usuario.getRoles().contains(Rol.CLIENTE)) {
+            cliente = clienteService.getClientePorIdUsuario(usuario.getId_Usuario());
+            if (cliente != null) {
+                cliente.setCredencial(null);
+                clienteService.actualizar(cliente);
+            }
         }
         usuarioRepository.save(usuario);
     }
@@ -162,8 +180,18 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
 
     @Override
-    public Usuario guardar(Usuario usuario) {
-        this.validarOperacion(TipoDeOperacion.ALTA, usuario);
+    public Usuario guardar(Usuario usuario, long idCliente) {
+        if (usuario.getRoles().contains(Rol.CLIENTE)) {
+            Cliente cliente = clienteService.getClientePorId(idCliente);
+            if (cliente.getCredencial() == null) {
+                cliente.setCredencial(usuario);
+                clienteService.actualizar(cliente);
+            } else {
+                throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_usuario_cliente_no_valido"));
+            }
+        }
+            this.validarOperacion(TipoDeOperacion.ALTA, usuario);
         usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
         usuario = usuarioRepository.save(usuario);
         LOGGER.warn("El Usuario " + usuario + " se guardó correctamente.");
