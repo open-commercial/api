@@ -1,17 +1,15 @@
 package sic.service;
 
-import sic.modelo.TipoDeOperacion;
+import sic.modelo.*;
+
 import java.util.List;
 import org.springframework.data.domain.Page;
-import sic.modelo.BusquedaClienteCriteria;
-import sic.modelo.Cliente;
-import sic.modelo.Empresa;
 
 public interface IClienteService {
 
     void actualizar(Cliente cliente);
         
-    Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria);
+    Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long  idUsuario);
 
     void eliminar(Long idCliente);
 
@@ -25,7 +23,7 @@ public interface IClienteService {
     
     boolean existeClientePredeterminado(Empresa empresa);
 
-    List<Cliente> getClientes(Empresa empresa);
+    List<Cliente> getClientes(Empresa empresa, long idUsuario);
 
     Cliente guardar(Cliente cliente);
 

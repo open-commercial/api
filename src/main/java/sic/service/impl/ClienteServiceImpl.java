@@ -1,24 +1,28 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.BusquedaClienteCriteria;
-import sic.modelo.Cliente;
-import sic.modelo.CuentaCorriente;
-import sic.modelo.CuentaCorrienteCliente;
-import sic.modelo.Empresa;
-import sic.modelo.QCliente;
+import sic.modelo.*;
 import sic.service.IClienteService;
 import sic.service.BusinessServiceException;
-import sic.modelo.TipoDeOperacion;
+import sic.service.IUsuarioService;
 import sic.util.Validator;
 import sic.repository.ClienteRepository;
 import sic.service.ICuentaCorrienteService;
@@ -28,12 +32,15 @@ public class ClienteServiceImpl implements IClienteService {
 
     private final ClienteRepository clienteRepository;    
     private final ICuentaCorrienteService cuentaCorrienteService;
+    private final IUsuarioService usuarioService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    public ClienteServiceImpl(ClienteRepository clienteRepository, ICuentaCorrienteService cuentaCorrienteService) {
+    public ClienteServiceImpl(ClienteRepository clienteRepository, ICuentaCorrienteService cuentaCorrienteService,
+                              IUsuarioService usuarioService) {
         this.clienteRepository = clienteRepository;
         this.cuentaCorrienteService = cuentaCorrienteService;
+        this.usuarioService = usuarioService;
     }
 
     @Override
@@ -47,8 +54,13 @@ public class ClienteServiceImpl implements IClienteService {
     }
 
     @Override
-    public List<Cliente> getClientes(Empresa empresa) {        
-        return clienteRepository.findAllByAndEmpresaAndEliminadoOrderByRazonSocialAsc(empresa, false);                   
+    public List<Cliente> getClientes(Empresa empresa, long idUsuario) {
+        Pageable pageable = new PageRequest(0, Integer.MAX_VALUE, new Sort(Sort.Direction.ASC, "razonSocial"));
+        BusquedaClienteCriteria criteria = BusquedaClienteCriteria.builder()
+                                                                  .empresa(empresa)
+                                                                  .pageable(pageable)
+                                                                  .build();
+        return this.buscarClientes(criteria, idUsuario).getContent();
     }
 
     @Override
@@ -96,35 +108,35 @@ public class ClienteServiceImpl implements IClienteService {
     }
 
     @Override
-    public Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria) {
+    public Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long idUsuario) {
         if (criteria.getEmpresa() == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_empresa_no_existente"));
         }
         QCliente qcliente = QCliente.cliente;
-        BooleanBuilder builder = new BooleanBuilder();        
+        BooleanBuilder builder = new BooleanBuilder();
         if (criteria.isBuscaPorRazonSocial()) {
             String[] terminos = criteria.getRazonSocial().split(" ");
-            BooleanBuilder rsPredicate = new BooleanBuilder();            
-            for (String termino : terminos) {                
-                rsPredicate.and(qcliente.razonSocial.containsIgnoreCase(termino));    
+            BooleanBuilder rsPredicate = new BooleanBuilder();
+            for (String termino : terminos) {
+                rsPredicate.and(qcliente.razonSocial.containsIgnoreCase(termino));
             }
             builder.or(rsPredicate);
         }
         if (criteria.isBuscaPorNombreFantasia()) {
             String[] terminos = criteria.getNombreFantasia().split(" ");
-            BooleanBuilder nfPredicate = new BooleanBuilder();            
+            BooleanBuilder nfPredicate = new BooleanBuilder();
             for (String termino : terminos) {
-                nfPredicate.and(qcliente.nombreFantasia.containsIgnoreCase(termino));    
-            }            
+                nfPredicate.and(qcliente.nombreFantasia.containsIgnoreCase(termino));
+            }
             builder.or(nfPredicate);
         }
         if (criteria.isBuscaPorId_Fiscal()) {
             String[] terminos = criteria.getIdFiscal().split(" ");
-            BooleanBuilder idPredicate = new BooleanBuilder();            
+            BooleanBuilder idPredicate = new BooleanBuilder();
             for (String termino : terminos) {
-                idPredicate.and(qcliente.idFiscal.containsIgnoreCase(termino));    
-            }            
+                idPredicate.and(qcliente.idFiscal.containsIgnoreCase(termino));
+            }
             builder.or(idPredicate);
         }
         if (criteria.isBuscaPorViajante()) {
@@ -139,7 +151,17 @@ public class ClienteServiceImpl implements IClienteService {
         if (criteria.isBuscaPorPais()) {
             builder.and(qcliente.localidad.provincia.pais.eq(criteria.getPais()));
         }
-        builder.and(qcliente.empresa.eq(criteria.getEmpresa()).and(qcliente.eliminado.eq(false)));        
+        Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
+        if (usuario.getRoles().contains(Rol.VIAJANTE) && usuario.getRoles().contains(Rol.CLIENTE)) {
+            builder.and(qcliente.viajante.eq(usuario).or(qcliente.eq(this.getClientePorIdUsuario(usuario.getId_Usuario()))));
+        }
+        if (usuario.getRoles().contains(Rol.VIAJANTE)) {
+            builder.and(qcliente.viajante.eq(usuario));
+        }
+        if (usuario.getRoles().contains(Rol.CLIENTE)) {
+            builder.and(qcliente.eq(this.getClientePorIdUsuario(usuario.getId_Usuario())));
+        }
+        builder.and(qcliente.empresa.eq(criteria.getEmpresa()).and(qcliente.eliminado.eq(false)));
         Page<Cliente> page = clienteRepository.findAll(builder, criteria.getPageable());
         page.getContent().forEach(c -> {
             CuentaCorriente cc = cuentaCorrienteService.getCuentaCorrientePorCliente(c);
@@ -235,6 +257,7 @@ public class ClienteServiceImpl implements IClienteService {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_cliente_no_existente"));
         }
+        cliente.setCredencial(null);
         cliente.setEliminado(true);        
         clienteRepository.save(cliente);                   
     }

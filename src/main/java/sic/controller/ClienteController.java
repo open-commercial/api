@@ -1,22 +1,17 @@
 package sic.controller;
 
 import java.util.List;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sic.modelo.*;
 import sic.service.*;
 
@@ -31,6 +26,9 @@ public class ClienteController {
     private final ILocalidadService localidadService;
     private final IUsuarioService usuarioService;
     private final int TAMANIO_PAGINA_DEFAULT = 50;
+
+    @Value("${SIC_JWT_KEY}")
+    private String secretkey;
     
     @Autowired
     public ClienteController(IClienteService clienteService, IEmpresaService empresaService,
@@ -61,7 +59,8 @@ public class ClienteController {
                                            @RequestParam(required = false) Long idProvincia, 
                                            @RequestParam(required = false) Long idLocalidad,
                                            @RequestParam(required = false) Integer pagina,
-                                           @RequestParam(required = false) Integer tamanio) {
+                                           @RequestParam(required = false) Integer tamanio,
+                                           @RequestHeader("Authorization") String token) {
         Usuario viajante = null;
         if (idViajante != null) viajante = usuarioService.getUsuarioPorId(idViajante);
         Pais pais = null;
@@ -91,13 +90,21 @@ public class ClienteController {
                                                                   .empresa(empresaService.getEmpresaPorId(idEmpresa))
                                                                   .pageable(pageable)
                                                                   .build();
-        return clienteService.buscarClientes(criteria);
+        Claims claims = Jwts.parser()
+                            .setSigningKey(secretkey)
+                            .parseClaimsJws(token.substring(7))
+                            .getBody();
+        return clienteService.buscarClientes(criteria, (int) claims.get("idUsuario"));
     }
        
     @GetMapping("/clientes/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
-    public List<Cliente> getClientes(@PathVariable long idEmpresa) {
-        return clienteService.getClientes(empresaService.getEmpresaPorId(idEmpresa));
+    public List<Cliente> getClientes(@PathVariable long idEmpresa, @RequestHeader("Authorization") String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(secretkey)
+                .parseClaimsJws(token.substring(7))
+                .getBody();
+        return clienteService.getClientes(empresaService.getEmpresaPorId(idEmpresa), (int) claims.get("idUsuario"));
     }
     
     @GetMapping("/clientes/predeterminado/empresas/{idEmpresa}")
