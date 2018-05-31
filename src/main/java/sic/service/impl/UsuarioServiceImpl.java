@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
@@ -146,7 +147,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
 
     @Override
-    public void actualizar(Usuario usuario, long idCliente) {
+    public void actualizar(Usuario usuario, Long idCliente) {
         this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario);
         if (usuario.getPassword().isEmpty()) {
             Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
@@ -155,15 +156,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
             usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
         }
         Cliente cliente;
-        if (usuario.getRoles().contains(Rol.CLIENTE) && idCliente != 0L) {
-            cliente = clienteService.getClientePorId(idCliente);
-            if (cliente.getCredencial() == null) {
-                cliente.setCredencial(usuario);
-                clienteService.actualizar(cliente);
-            } else {
-                throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_usuario_cliente_no_valido"));
-            }
+        if (usuario.getRoles().contains(Rol.CLIENTE) && idCliente != null) {
+            this.actualizarCredencial(idCliente, usuario);
         } else if(!usuario.getRoles().contains(Rol.CLIENTE)) {
             cliente = clienteService.getClientePorIdUsuario(usuario.getId_Usuario());
             if (cliente != null) {
@@ -180,22 +174,27 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
 
     @Override
-    public Usuario guardar(Usuario usuario, long idCliente) {
+    public Usuario guardar(Usuario usuario, Long idCliente) {
         if (usuario.getRoles().contains(Rol.CLIENTE)) {
-            Cliente cliente = clienteService.getClientePorId(idCliente);
-            if (cliente.getCredencial() == null) {
-                cliente.setCredencial(usuario);
-                clienteService.actualizar(cliente);
-            } else {
-                throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_usuario_cliente_no_valido"));
-            }
+            this.actualizarCredencial(idCliente, usuario);
         }
-            this.validarOperacion(TipoDeOperacion.ALTA, usuario);
+        this.validarOperacion(TipoDeOperacion.ALTA, usuario);
         usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
         usuario = usuarioRepository.save(usuario);
         LOGGER.warn("El Usuario " + usuario + " se guardó correctamente.");
         return usuario;
+    }
+
+    private void actualizarCredencial(long idCliente, Usuario usuario) {
+        Cliente cliente = clienteService.getClientePorId(idCliente);
+        if (cliente.getCredencial() == null) {
+            cliente.setCredencial(usuario);
+            clienteService.actualizar(cliente);
+        } else {
+            String mensaje = ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_usuario_cliente_no_valido");
+            throw new BusinessServiceException(MessageFormat.format(mensaje, cliente.getCredencial().getUsername()));
+        }
     }
 
     @Override

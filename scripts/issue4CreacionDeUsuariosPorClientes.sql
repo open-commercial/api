@@ -1,7 +1,7 @@
 -- ALTER TABLE usuario
 -- ADD columnaTemporal bigint(20); 
 -- -- -- 
-
+-- 
 -- INSERT INTO usuario(apellido, eliminado, email,
 --   habilitado, nombre, username, password, passwordRecoveryKey, columnaTemporal)
 --  SELECT cliente.razonSocial , cliente.eliminado, (SELECT IF(email = "",concat(rand(id_Cliente) * 1000000000000000, "@","globo.com" ), email) AS emailColumn), 
@@ -14,7 +14,8 @@
 -- SET UNIQUE_CHECKS = 0; 
 -- INSERT INTO rol(id_Usuario, nombre)
 -- SELECT usuario.id_Usuario, "CLIENTE"
--- FROM usuario;
+-- FROM usuario
+-- WHERE usuario.id_Usuario > 33;
 -- SET SQL_SAFE_UPDATES = 1;
 -- SET foreign_key_checks = 1;
 -- SET UNIQUE_CHECKS = 1; 
@@ -28,4 +29,3 @@
 -- 
 -- ALTER TABLE usuario
 -- DROP COLUMN columnaTemporal; 
--- 

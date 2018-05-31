@@ -9,7 +9,7 @@ public interface IUsuarioService {
    
     Usuario getUsuarioPorId(Long idUsuario);
     
-    void actualizar(Usuario usuario, long idCliente);
+    void actualizar(Usuario usuario, Long idCliente);
     
     void actualizarToken(String token, long idUsuario);
 
@@ -23,7 +23,7 @@ public interface IUsuarioService {
 
     List<Usuario> getUsuariosAdministradores();
 
-    Usuario guardar(Usuario usuario, long idUsuario);
+    Usuario guardar(Usuario usuario, Long idUsuario);
     
     int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada);
     

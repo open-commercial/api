@@ -2,7 +2,6 @@ package sic.controller;
 
 import java.util.List;
 
-import org.omg.PortableServer.POAPackage.AdapterAlreadyExistsHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -42,14 +41,14 @@ public class UsuarioController {
     @PostMapping("/usuarios")
     @ResponseStatus(HttpStatus.CREATED)
     public Usuario guardar(@RequestBody Usuario usuario,
-                           @RequestParam(required = false) long idCliente) {
+                           @RequestParam(required = false) Long idCliente) {
         return usuarioService.guardar(usuario, idCliente);
     }
     
     @PutMapping("/usuarios")
     @ResponseStatus(HttpStatus.OK)
     public void actualizar(@RequestBody Usuario usuario,
-                           @RequestParam(required = false) long idCliente) {
+                           @RequestParam(required = false) Long idCliente) {
        usuarioService.actualizar(usuario, idCliente);
     }
     
