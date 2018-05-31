@@ -90,20 +90,15 @@ public class ClienteController {
                                                                   .empresa(empresaService.getEmpresaPorId(idEmpresa))
                                                                   .pageable(pageable)
                                                                   .build();
-        Claims claims = Jwts.parser()
-                            .setSigningKey(secretkey)
-                            .parseClaimsJws(token.substring(7))
-                            .getBody();
+        Claims claims = Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
         return clienteService.buscarClientes(criteria, (int) claims.get("idUsuario"));
     }
        
     @GetMapping("/clientes/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
-    public List<Cliente> getClientes(@PathVariable long idEmpresa, @RequestHeader("Authorization") String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(secretkey)
-                .parseClaimsJws(token.substring(7))
-                .getBody();
+    public List<Cliente> getClientes(@PathVariable long idEmpresa,
+                                     @RequestHeader("Authorization") String token) {
+        Claims claims = Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
         return clienteService.getClientes(empresaService.getEmpresaPorId(idEmpresa), (int) claims.get("idUsuario"));
     }
     

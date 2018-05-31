@@ -11,9 +11,9 @@ public interface IClienteService {
         
     Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long  idUsuario);
 
-    void eliminar(Long idCliente);
+    void eliminar(long idCliente);
 
-    Cliente getClientePorId(Long id_Cliente);
+    Cliente getClientePorId(long id_Cliente);
 
     Cliente getClientePorIdFiscal(String idFiscal, Empresa empresa);
 
