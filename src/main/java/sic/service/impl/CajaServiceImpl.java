@@ -195,7 +195,7 @@ public class CajaServiceImpl implements ICajaService {
         }
         QCaja qcaja = QCaja.caja;
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qcaja.empresa.eq(criteria.getEmpresa()).and(qcaja.eliminada.eq(false)));
+        builder.and(qcaja.empresa.id_Empresa.eq(criteria.getEmpresa().getId_Empresa()).and(qcaja.eliminada.eq(false)));
         if (criteria.isBuscaPorUsuarioApertura() && !criteria.isBuscaPorUsuarioCierre()) {
             builder.and(qcaja.usuarioAbreCaja.eq(criteria.getUsuarioApertura()));
         }

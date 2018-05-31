@@ -44,7 +44,7 @@ public class ClienteServiceImpl implements IClienteService {
     }
 
     @Override
-    public Cliente getClientePorId(Long idCliente) {    
+    public Cliente getClientePorId(long idCliente) {
         Cliente cliente = clienteRepository.findOne(idCliente);
         if (cliente == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
@@ -143,17 +143,12 @@ public class ClienteServiceImpl implements IClienteService {
         if (criteria.isBuscaPorLocalidad()) builder.and(qcliente.localidad.eq(criteria.getLocalidad()));
         if (criteria.isBuscaPorProvincia()) builder.and(qcliente.localidad.provincia.eq(criteria.getProvincia()));
         if (criteria.isBuscaPorPais()) builder.and(qcliente.localidad.provincia.pais.eq(criteria.getPais()));
-        Usuario userLoggedIn = usuarioService.getUsuarioPorId(idUserLoggedIn);
-        if (userLoggedIn.getRoles().contains(Rol.VIAJANTE) && userLoggedIn.getRoles().contains(Rol.CLIENTE)) {
-            builder.and(qcliente.viajante.eq(userLoggedIn).or(qcliente.eq(this.getClientePorIdUsuario(userLoggedIn.getId_Usuario()))));
-        } else {
-            if (userLoggedIn.getRoles().contains(Rol.VIAJANTE)) {
-                builder.and(qcliente.viajante.eq(userLoggedIn));
-            }
-            if (userLoggedIn.getRoles().contains(Rol.CLIENTE)) {
-                builder.and(qcliente.eq(this.getClientePorIdUsuario(userLoggedIn.getId_Usuario())));
-            }
+        Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUserLoggedIn);
+        if (usuarioLoggedIn.getRoles().contains(Rol.VIAJANTE) && usuarioLoggedIn.getRoles().contains(Rol.CLIENTE)) {
+            builder.and(qcliente.viajante.eq(usuarioLoggedIn).or(qcliente.eq(this.getClientePorIdUsuario(usuarioLoggedIn.getId_Usuario()))));
         }
+        if (usuarioLoggedIn.getRoles().contains(Rol.VIAJANTE)) builder.and(qcliente.viajante.eq(usuarioLoggedIn));
+        if (usuarioLoggedIn.getRoles().contains(Rol.CLIENTE)) builder.and(qcliente.eq(this.getClientePorIdUsuario(usuarioLoggedIn.getId_Usuario())));
         builder.and(qcliente.empresa.eq(criteria.getEmpresa()).and(qcliente.eliminado.eq(false)));
         Page<Cliente> page = clienteRepository.findAll(builder, criteria.getPageable());
         page.getContent().forEach(c -> {
@@ -244,7 +239,7 @@ public class ClienteServiceImpl implements IClienteService {
 
     @Override
     @Transactional
-    public void eliminar(Long idCliente) {
+    public void eliminar(long idCliente) {
         Cliente cliente = this.getClientePorId(idCliente);
         if (cliente == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")

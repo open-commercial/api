@@ -115,11 +115,8 @@ public class CajaController {
     public List<MovimientoCaja> getMovimientosDeCaja(@PathVariable long idCaja,
                                                      @RequestParam(value = "idFormaDePago") long idFormaDePago) {
         Caja caja = cajaService.getCajaPorId(idCaja);
-        LocalDateTime desde = caja.getFechaApertura().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         Date fechaHasta = new Date();
-        if (caja.getFechaCierre() != null) {
-            fechaHasta = caja.getFechaCierre();
-        }
+        if (caja.getFechaCierre() != null) fechaHasta = caja.getFechaCierre();
         return cajaService.getMovimientosPorFormaDePagoEntreFechas(caja.getEmpresa(), formaDePagoService.getFormasDePagoPorId(idFormaDePago),
                 caja.getFechaApertura(), fechaHasta);
     }
@@ -220,11 +217,11 @@ public class CajaController {
 
     @PutMapping("/cajas/{idCaja}/reabrir")
     @ResponseStatus(HttpStatus.OK)
-    public void abrirCaja(@PathVariable long idCaja, @RequestParam BigDecimal monto, HttpServletRequest request) {
+    public void abrirCaja(@PathVariable long idCaja, @RequestParam BigDecimal monto, @RequestHeader("Authorization") String token) {
         Claims claims = Jwts.parser()
-                .setSigningKey(secretkey)
-                .parseClaimsJws(request.getHeader("Authorization").substring(7)) //token
-                .getBody();
+                            .setSigningKey(secretkey)
+                            .parseClaimsJws(token.substring(7))
+                            .getBody();
         cajaService.reabrirCaja(idCaja, monto, ((int) claims.get("idUsuario")));
     }
 
