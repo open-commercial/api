@@ -54,16 +54,6 @@ public class ClienteServiceImpl implements IClienteService {
     }
 
     @Override
-    public List<Cliente> getClientes(Empresa empresa, long idUserLoggedIn) {
-        Pageable pageable = new PageRequest(0, Integer.MAX_VALUE, new Sort(Sort.Direction.ASC, "razonSocial"));
-        BusquedaClienteCriteria criteria = BusquedaClienteCriteria.builder()
-                                                                  .empresa(empresa)
-                                                                  .pageable(pageable)
-                                                                  .build();
-        return this.buscarClientes(criteria, idUserLoggedIn).getContent();
-    }
-
-    @Override
     public Cliente getClientePorRazonSocial(String razonSocial, Empresa empresa) {        
         return clienteRepository.findByRazonSocialAndEmpresaAndEliminado(razonSocial, empresa, false);                   
     }
@@ -154,11 +144,13 @@ public class ClienteServiceImpl implements IClienteService {
         }
         builder.and(qcliente.empresa.eq(criteria.getEmpresa()).and(qcliente.eliminado.eq(false)));
         Page<Cliente> page = clienteRepository.findAll(builder, criteria.getPageable());
-        page.getContent().forEach(c -> {
-            CuentaCorriente cc = cuentaCorrienteService.getCuentaCorrientePorCliente(c);
-            c.setSaldoCuentaCorriente(cc.getSaldo());
-            c.setFechaUltimoMovimiento(cc.getFechaUltimoMovimiento());
-        });
+        if (criteria.isConSaldo()) {
+            page.getContent().forEach(c -> {
+                CuentaCorriente cc = cuentaCorrienteService.getCuentaCorrientePorCliente(c);
+                c.setSaldoCuentaCorriente(cc.getSaldo());
+                c.setFechaUltimoMovimiento(cc.getFechaUltimoMovimiento());
+            });
+        }
         return page;
     }
     

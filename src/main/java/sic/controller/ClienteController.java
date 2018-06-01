@@ -60,6 +60,7 @@ public class ClienteController {
                                            @RequestParam(required = false) Long idLocalidad,
                                            @RequestParam(required = false) Integer pagina,
                                            @RequestParam(required = false) Integer tamanio,
+                                           @RequestParam(required = false, defaultValue = "true") boolean conSaldo,
                                            @RequestHeader("Authorization") String token) {
         Usuario viajante = null;
         if (idViajante != null) viajante = usuarioService.getUsuarioPorId(idViajante);
@@ -89,17 +90,10 @@ public class ClienteController {
                                                                   .localidad(localidad)
                                                                   .empresa(empresaService.getEmpresaPorId(idEmpresa))
                                                                   .pageable(pageable)
+                                                                  .conSaldo(conSaldo)
                                                                   .build();
         Claims claims = Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
         return clienteService.buscarClientes(criteria, (int) claims.get("idUsuario"));
-    }
-       
-    @GetMapping("/clientes/empresas/{idEmpresa}")
-    @ResponseStatus(HttpStatus.OK)
-    public List<Cliente> getClientes(@PathVariable long idEmpresa,
-                                     @RequestHeader("Authorization") String token) {
-        Claims claims = Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-        return clienteService.getClientes(empresaService.getEmpresaPorId(idEmpresa), (int) claims.get("idUsuario"));
     }
     
     @GetMapping("/clientes/predeterminado/empresas/{idEmpresa}")

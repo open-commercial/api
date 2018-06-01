@@ -28,4 +28,5 @@ public class BusquedaClienteCriteria {
     private Localidad localidad;
     private Empresa empresa;
     private Pageable pageable;
+    private boolean conSaldo;
 }

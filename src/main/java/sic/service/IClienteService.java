@@ -23,8 +23,6 @@ public interface IClienteService {
     
     boolean existeClientePredeterminado(Empresa empresa);
 
-    List<Cliente> getClientes(Empresa empresa, long idUsuario);
-
     Cliente guardar(Cliente cliente);
 
     void setClientePredeterminado(Cliente cliente);
