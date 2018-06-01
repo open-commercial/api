@@ -108,7 +108,7 @@ public class ClienteServiceImpl implements IClienteService {
     }
 
     @Override
-    public Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long idUserLoggedIn) {
+    public Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long idUsuarioLoggedIn) {
         if (criteria.getEmpresa() == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_empresa_no_existente"));
@@ -143,12 +143,15 @@ public class ClienteServiceImpl implements IClienteService {
         if (criteria.isBuscaPorLocalidad()) builder.and(qcliente.localidad.eq(criteria.getLocalidad()));
         if (criteria.isBuscaPorProvincia()) builder.and(qcliente.localidad.provincia.eq(criteria.getProvincia()));
         if (criteria.isBuscaPorPais()) builder.and(qcliente.localidad.provincia.pais.eq(criteria.getPais()));
-        Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUserLoggedIn);
-        if (usuarioLoggedIn.getRoles().contains(Rol.VIAJANTE) && usuarioLoggedIn.getRoles().contains(Rol.CLIENTE)) {
-            builder.and(qcliente.viajante.eq(usuarioLoggedIn).or(qcliente.eq(this.getClientePorIdUsuario(usuarioLoggedIn.getId_Usuario()))));
+        Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+        if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR) && !usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR)) {
+            if (usuarioLoggedIn.getRoles().contains(Rol.VIAJANTE) && usuarioLoggedIn.getRoles().contains(Rol.CLIENTE)) {
+                builder.and(qcliente.viajante.eq(usuarioLoggedIn).or(qcliente.eq(this.getClientePorIdUsuario(usuarioLoggedIn.getId_Usuario()))));
+            }
+            if (usuarioLoggedIn.getRoles().contains(Rol.VIAJANTE)) builder.and(qcliente.viajante.eq(usuarioLoggedIn));
+            if (usuarioLoggedIn.getRoles().contains(Rol.CLIENTE))
+                builder.and(qcliente.eq(this.getClientePorIdUsuario(usuarioLoggedIn.getId_Usuario())));
         }
-        if (usuarioLoggedIn.getRoles().contains(Rol.VIAJANTE)) builder.and(qcliente.viajante.eq(usuarioLoggedIn));
-        if (usuarioLoggedIn.getRoles().contains(Rol.CLIENTE)) builder.and(qcliente.eq(this.getClientePorIdUsuario(usuarioLoggedIn.getId_Usuario())));
         builder.and(qcliente.empresa.eq(criteria.getEmpresa()).and(qcliente.eliminado.eq(false)));
         Page<Cliente> page = clienteRepository.findAll(builder, criteria.getPageable());
         page.getContent().forEach(c -> {
