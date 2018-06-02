@@ -137,10 +137,12 @@ public class ClienteServiceImpl implements IClienteService {
         if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR) && !usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR)) {
             if (usuarioLoggedIn.getRoles().contains(Rol.VIAJANTE) && usuarioLoggedIn.getRoles().contains(Rol.CLIENTE)) {
                 builder.and(qcliente.viajante.eq(usuarioLoggedIn).or(qcliente.eq(this.getClientePorIdUsuario(usuarioLoggedIn.getId_Usuario()))));
+            } else {
+                if (usuarioLoggedIn.getRoles().contains(Rol.VIAJANTE))
+                    builder.and(qcliente.viajante.eq(usuarioLoggedIn));
+                if (usuarioLoggedIn.getRoles().contains(Rol.CLIENTE))
+                    builder.and(qcliente.eq(this.getClientePorIdUsuario(usuarioLoggedIn.getId_Usuario())));
             }
-            if (usuarioLoggedIn.getRoles().contains(Rol.VIAJANTE)) builder.and(qcliente.viajante.eq(usuarioLoggedIn));
-            if (usuarioLoggedIn.getRoles().contains(Rol.CLIENTE))
-                builder.and(qcliente.eq(this.getClientePorIdUsuario(usuarioLoggedIn.getId_Usuario())));
         }
         builder.and(qcliente.empresa.eq(criteria.getEmpresa()).and(qcliente.eliminado.eq(false)));
         Page<Cliente> page = clienteRepository.findAll(builder, criteria.getPageable());
