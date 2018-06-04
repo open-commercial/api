@@ -4,10 +4,16 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+
+import com.querydsl.core.BooleanBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
@@ -57,21 +63,73 @@ public class UsuarioServiceImpl implements IUsuarioService {
         }
         return usuario;
     }
-            
-    @Override
-    public List<Usuario> getUsuarios() {
-        return usuarioRepository.findAllByAndEliminadoOrderByUsernameAsc(false);
-    }
 
-    @Override
-    public List<Usuario> getUsuariosPorRol(Rol rol) {
-        return usuarioRepository.findAllByAndEliminadoAndRolesOrderByUsernameAsc(false, rol);
-    }
-
-    @Override
-    public List<Usuario> getUsuariosAdministradores() {
-        return usuarioRepository.findAllByAndRolesAndEliminadoOrderByUsernameAsc(Rol.ADMINISTRADOR, false);
-    }
+  @Override
+  public Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria, long idUsuarioLoggedIn) {
+    Usuario usuarioLoggedIn = this.getUsuarioPorId(idUsuarioLoggedIn);
+    if (usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
+      if (criteria.getEmpresa() == null) {
+        throw new EntityNotFoundException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_empresa_no_existente"));
+      }
+      QUsuario qusuario = QUsuario.usuario;
+      BooleanBuilder builder = new BooleanBuilder();
+      if (criteria.isBuscaPorApellido()) {
+        String[] terminos = criteria.getApellido().split(" ");
+        BooleanBuilder rsPredicate = new BooleanBuilder();
+        for (String termino : terminos) {
+          rsPredicate.and(qusuario.apellido.containsIgnoreCase(termino));
+        }
+        builder.or(rsPredicate);
+      }
+      if (criteria.isBuscaPorNombre()) {
+        String[] terminos = criteria.getNombre().split(" ");
+        BooleanBuilder rsPredicate = new BooleanBuilder();
+        for (String termino : terminos) {
+          rsPredicate.and(qusuario.nombre.containsIgnoreCase(termino));
+        }
+        builder.or(rsPredicate);
+      }
+      if (criteria.isBuscarPorNombreDeUsuario()) {
+        String[] terminos = criteria.getUsername().split(" ");
+        BooleanBuilder rsPredicate = new BooleanBuilder();
+        for (String termino : terminos) {
+          rsPredicate.and(qusuario.username.containsIgnoreCase(termino));
+        }
+        builder.or(rsPredicate);
+      }
+      if (criteria.isBuscaPorEmail()) {
+        String[] terminos = criteria.getEmail().split(" ");
+        BooleanBuilder rsPredicate = new BooleanBuilder();
+        for (String termino : terminos) {
+          rsPredicate.and(qusuario.email.containsIgnoreCase(termino));
+        }
+        builder.or(rsPredicate);
+      }
+      if (criteria.isBuscarPorRol() && !criteria.getRoles().isEmpty()) {
+        BooleanBuilder rsPredicate = new BooleanBuilder();
+        for (Rol rol : criteria.getRoles()) {
+          switch (rol) {
+            case ADMINISTRADOR:
+              rsPredicate.or(qusuario.roles.contains(Rol.ADMINISTRADOR));
+              break;
+            case VENDEDOR:
+              rsPredicate.or(qusuario.roles.contains(Rol.VENDEDOR));
+              break;
+            case VIAJANTE:
+              rsPredicate.or(qusuario.roles.contains(Rol.VIAJANTE));
+              break;
+            case CLIENTE:
+              rsPredicate.or(qusuario.roles.contains(Rol.CLIENTE));
+              break;
+          }
+        }
+        builder.and(rsPredicate);
+      }
+      builder.and(qusuario.eliminado.eq(false));
+      return usuarioRepository.findAll(builder, criteria.getPageable());
+    } else return null;
+  }
 
     private void validarOperacion(TipoDeOperacion operacion, Usuario usuario) {
         // Requeridos
@@ -136,7 +194,11 @@ public class UsuarioServiceImpl implements IUsuarioService {
         // Ultimo usuario administrador
         if ((operacion == TipoDeOperacion.ACTUALIZACION && !usuario.getRoles().contains(Rol.ADMINISTRADOR))
                 || operacion == TipoDeOperacion.ELIMINACION && usuario.getRoles().contains(Rol.ADMINISTRADOR)) {
-            List<Usuario> adminitradores = this.getUsuariosAdministradores();
+            Pageable pageable = new PageRequest(0, 1, new Sort(Sort.Direction.DESC, "id_Usuario"));
+            QUsuario qusuario = QUsuario.usuario;
+            BooleanBuilder builder = new BooleanBuilder();
+            builder.and(qusuario.roles.contains(Rol.ADMINISTRADOR)).and(qusuario.eliminado.eq(false));
+            List<Usuario> adminitradores = usuarioRepository.findAll(builder, pageable).getContent();
             if (adminitradores.size() == 1) {
                 if (adminitradores.get(0).getId_Usuario() == usuario.getId_Usuario()) {
                     throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")

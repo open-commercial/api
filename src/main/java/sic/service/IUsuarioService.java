@@ -1,6 +1,9 @@
 package sic.service;
 
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import sic.modelo.BusquedaUsuarioCriteria;
 import sic.modelo.Credencial;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
@@ -17,11 +20,7 @@ public interface IUsuarioService {
     
     Usuario autenticarUsuario(Credencial credencial);
 
-    List<Usuario> getUsuarios();
-    
-    List<Usuario> getUsuariosPorRol(Rol rol);
-
-    List<Usuario> getUsuariosAdministradores();
+    Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria, long idUsuarioLoggedIn);
 
     Usuario guardar(Usuario usuario, Long idUsuario);
     

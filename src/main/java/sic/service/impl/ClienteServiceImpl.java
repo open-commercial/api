@@ -2,21 +2,13 @@ package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
@@ -65,7 +57,7 @@ public class ClienteServiceImpl implements IClienteService {
 
     @Override
     public Cliente getClientePredeterminado(Empresa empresa) {   
-        Cliente cliente = clienteRepository.findByAndEmpresaAndPredeterminadoAndEliminado(empresa, true, false); 
+        Cliente cliente = clienteRepository.findByEmpresaAndPredeterminadoAndEliminado(empresa, true, false);
         if (cliente == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_cliente_sin_predeterminado"));
@@ -75,7 +67,7 @@ public class ClienteServiceImpl implements IClienteService {
     
     @Override
     public boolean existeClientePredeterminado(Empresa empresa) {
-        return clienteRepository.existsByAndEmpresaAndPredeterminadoAndEliminado(empresa, true, false);
+        return clienteRepository.existsByEmpresaAndPredeterminadoAndEliminado(empresa, true, false);
     }
 
     /**
@@ -88,7 +80,7 @@ public class ClienteServiceImpl implements IClienteService {
     @Override
     @Transactional
     public void setClientePredeterminado(Cliente cliente) {        
-        Cliente clientePredeterminadoAnterior = clienteRepository.findByAndEmpresaAndPredeterminadoAndEliminado(cliente.getEmpresa(), true, false);
+        Cliente clientePredeterminadoAnterior = clienteRepository.findByEmpresaAndPredeterminadoAndEliminado(cliente.getEmpresa(), true, false);
         if (clientePredeterminadoAnterior != null) {
             clientePredeterminadoAnterior.setPredeterminado(false);
             clienteRepository.save(clientePredeterminadoAnterior);

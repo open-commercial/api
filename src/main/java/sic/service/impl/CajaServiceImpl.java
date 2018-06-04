@@ -83,7 +83,7 @@ public class CajaServiceImpl implements ICajaService {
                     .getString("mensaje_caja_usuario_vacio"));
         }
         //Administrador
-        if (!usuarioService.getUsuariosPorRol(Rol.ADMINISTRADOR).contains(caja.getUsuarioAbreCaja())) {
+        if (!usuarioService.getUsuarioPorId(caja.getUsuarioAbreCaja().getId_Usuario()).getRoles().contains(Rol.ADMINISTRADOR)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_caja_usuario_no_administrador"));
         }
