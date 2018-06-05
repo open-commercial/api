@@ -1,6 +1,7 @@
 package sic.service.impl;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
@@ -66,12 +67,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria, long idUsuarioLoggedIn) {
-    Usuario usuarioLoggedIn = this.getUsuarioPorId(idUsuarioLoggedIn);
-    if (usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
-      if (criteria.getEmpresa() == null) {
-        throw new EntityNotFoundException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_empresa_no_existente"));
-      }
+    if (esUsuarioAdministrador(idUsuarioLoggedIn)) {
       QUsuario qusuario = QUsuario.usuario;
       BooleanBuilder builder = new BooleanBuilder();
       if (criteria.isBuscaPorApellido()) {
@@ -131,121 +127,139 @@ public class UsuarioServiceImpl implements IUsuarioService {
     } else return null;
   }
 
-    private void validarOperacion(TipoDeOperacion operacion, Usuario usuario) {
-        // Requeridos
-        if (Validator.esVacio(usuario.getNombre())) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_usuario_vacio_nombre"));
-        }
-        if (Validator.esVacio(usuario.getApellido())) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_usuario_vacio_apellido"));
-        }
-        if (Validator.esVacio(usuario.getUsername())) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_usuario_vacio_username"));
-        }
-        if (!Validator.esEmailValido(usuario.getEmail())) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_usuario_invalido_email"));
-        }
-        if (usuario.getRoles().isEmpty()) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_usuario_no_selecciono_rol"));
-        }
-        if (operacion == TipoDeOperacion.ALTA) {
-            if (Validator.esVacio(usuario.getPassword())) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_usuario_vacio_password"));
-            }
-        }
-        // Username sin espacios en blanco
-        if (usuario.getUsername().contains(" ")) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_usuario_username_con_espacios"));
-        }
-        // Duplicados
-        if (operacion == TipoDeOperacion.ALTA) {
-            // username
-            if (usuarioRepository.findByUsernameAndEliminado(usuario.getUsername(), false) != null) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_usuario_duplicado_username"));
-            }
-            // email
-            if (usuarioRepository.findByEmailAndEliminado(usuario.getEmail(), false) != null) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_usuario_duplicado_email"));
-            }
-        }
-        if (operacion == TipoDeOperacion.ACTUALIZACION) {
-            // username
-            Usuario usuarioGuardado = usuarioRepository.findByUsernameAndEliminado(usuario.getUsername(), false);
-            if (usuarioGuardado != null && usuarioGuardado.getId_Usuario() != usuario.getId_Usuario()) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_usuario_duplicado_username"));
-            }
-            // email
-            usuarioGuardado = usuarioRepository.findByEmailAndEliminado(usuario.getEmail(), false);
-            if (usuarioGuardado != null && usuarioGuardado.getId_Usuario() != usuario.getId_Usuario()) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_usuario_duplicado_email"));
-            }
-        }
-        // Ultimo usuario administrador
-        if ((operacion == TipoDeOperacion.ACTUALIZACION && !usuario.getRoles().contains(Rol.ADMINISTRADOR))
-                || operacion == TipoDeOperacion.ELIMINACION && usuario.getRoles().contains(Rol.ADMINISTRADOR)) {
-            Pageable pageable = new PageRequest(0, 1, new Sort(Sort.Direction.DESC, "id_Usuario"));
-            QUsuario qusuario = QUsuario.usuario;
-            BooleanBuilder builder = new BooleanBuilder();
-            builder.and(qusuario.roles.contains(Rol.ADMINISTRADOR)).and(qusuario.eliminado.eq(false));
-            List<Usuario> adminitradores = usuarioRepository.findAll(builder, pageable).getContent();
-            if (adminitradores.size() == 1) {
-                if (adminitradores.get(0).getId_Usuario() == usuario.getId_Usuario()) {
-                    throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                            .getString("mensaje_usuario_ultimoAdmin"));
-                }
-            }
-        }
+  private void validarOperacion(
+      TipoDeOperacion operacion, Usuario usuario, long idUsuarioLoggedIn) {
+    // Requeridos
+    if (Validator.esVacio(usuario.getNombre())) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_vacio_nombre"));
     }
+    if (Validator.esVacio(usuario.getApellido())) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_vacio_apellido"));
+    }
+    if (Validator.esVacio(usuario.getUsername())) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_vacio_username"));
+    }
+    if (!Validator.esEmailValido(usuario.getEmail())) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_invalido_email"));
+    }
+    if (usuario.getRoles().isEmpty()) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_no_selecciono_rol"));
+    }
+    if (operacion == TipoDeOperacion.ALTA) {
+      if (Validator.esVacio(usuario.getPassword())) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_vacio_password"));
+      }
+    }
+    // Username sin espacios en blanco
+    if (usuario.getUsername().contains(" ")) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_username_con_espacios"));
+    }
+    // Duplicados
+    if (operacion == TipoDeOperacion.ALTA) {
+      // username
+      if (usuarioRepository.findByUsernameAndEliminado(usuario.getUsername(), false) != null) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_duplicado_username"));
+      }
+      // email
+      if (usuarioRepository.findByEmailAndEliminado(usuario.getEmail(), false) != null) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_duplicado_email"));
+      }
+    }
+    if (operacion == TipoDeOperacion.ACTUALIZACION) {
+      // username
+      Usuario usuarioGuardado =
+          usuarioRepository.findByUsernameAndEliminado(usuario.getUsername(), false);
+      if (usuarioGuardado != null && usuarioGuardado.getId_Usuario() != usuario.getId_Usuario()) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_duplicado_username"));
+      }
+      // email
+      usuarioGuardado = usuarioRepository.findByEmailAndEliminado(usuario.getEmail(), false);
+      if (usuarioGuardado != null && usuarioGuardado.getId_Usuario() != usuario.getId_Usuario()) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_duplicado_email"));
+      }
+    }
+    // Ultimo usuario administrador
+    if ((operacion == TipoDeOperacion.ACTUALIZACION
+            && !usuario.getRoles().contains(Rol.ADMINISTRADOR))
+        || operacion == TipoDeOperacion.ELIMINACION
+            && usuario.getRoles().contains(Rol.ADMINISTRADOR)) {
+      Pageable pageable = new PageRequest(0, Integer.MAX_VALUE);
+      List<Rol> roles = new ArrayList<>();
+      roles.add(Rol.ADMINISTRADOR);
+      BusquedaUsuarioCriteria criteria =
+          BusquedaUsuarioCriteria.builder()
+              .buscarPorRol(true)
+              .roles(roles)
+              .pageable(pageable)
+              .build();
+      List<Usuario> administradores = this.buscarUsuarios(criteria, idUsuarioLoggedIn).getContent();
+      if (administradores.size() == 1
+          && administradores.get(0).getId_Usuario() == usuario.getId_Usuario()) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_ultimoAdmin"));
+      }
+    }
+  }
 
     @Override
-    public void actualizar(Usuario usuario, Long idCliente) {
-        this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario);
-        if (usuario.getPassword().isEmpty()) {
-            Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
-            usuario.setPassword(usuarioGuardado.getPassword());
-        } else {
-            usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
+    public void actualizar(Usuario usuario, Long idCliente, long idUsuarioLoggedIn) {
+    if (esUsuarioAdministrador(idUsuarioLoggedIn)) {
+      this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario, idUsuarioLoggedIn);
+      if (usuario.getPassword().isEmpty()) {
+        Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
+        usuario.setPassword(usuarioGuardado.getPassword());
+      } else {
+        usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
+      }
+      Cliente cliente;
+      if (usuario.getRoles().contains(Rol.CLIENTE) && idCliente != null) {
+        this.actualizarCredencial(idCliente, usuario);
+      } else if (!usuario.getRoles().contains(Rol.CLIENTE)) {
+        cliente = clienteService.getClientePorIdUsuario(usuario.getId_Usuario());
+        if (cliente != null) {
+          cliente.setCredencial(null);
+          clienteService.actualizar(cliente);
         }
-        Cliente cliente;
-        if (usuario.getRoles().contains(Rol.CLIENTE) && idCliente != null) {
-            this.actualizarCredencial(idCliente, usuario);
-        } else if(!usuario.getRoles().contains(Rol.CLIENTE)) {
-            cliente = clienteService.getClientePorIdUsuario(usuario.getId_Usuario());
-            if (cliente != null) {
-                cliente.setCredencial(null);
-                clienteService.actualizar(cliente);
-            }
-        }
-        usuarioRepository.save(usuario);
+      }
+      usuarioRepository.save(usuario);
+    } else {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
     }
-    
+  }
+
     @Override
     public void actualizarToken(String token, long idUsuario) {
         usuarioRepository.updateToken(token, idUsuario);
     }
 
-    @Override
-    public Usuario guardar(Usuario usuario, Long idCliente) {
-        if (usuario.getRoles().contains(Rol.CLIENTE)) {
-            this.actualizarCredencial(idCliente, usuario);
-        }
-        this.validarOperacion(TipoDeOperacion.ALTA, usuario);
-        usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
-        usuario = usuarioRepository.save(usuario);
-        LOGGER.warn("El Usuario " + usuario + " se guardó correctamente.");
-        return usuario;
+  @Override
+  public Usuario guardar(Usuario usuario, Long idCliente, long idUsuarioLoggedIn) {
+    if (esUsuarioAdministrador(idUsuarioLoggedIn)) {
+      if (usuario.getRoles().contains(Rol.CLIENTE)) {
+        this.actualizarCredencial(idCliente, usuario);
+      }
+      this.validarOperacion(TipoDeOperacion.ALTA, usuario, idUsuarioLoggedIn);
+      usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
+      usuario = usuarioRepository.save(usuario);
+      LOGGER.warn("El Usuario " + usuario + " se guardó correctamente.");
+      return usuario;
+    } else {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
     }
+  }
 
     private void actualizarCredencial(long idCliente, Usuario usuario) {
         Cliente cliente = clienteService.getClientePorId(idCliente);
@@ -260,15 +274,20 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
 
     @Override
-    public void eliminar(long idUsuario) {
-        Usuario usuario = this.getUsuarioPorId(idUsuario);
-        if (usuario == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_usuario_no_existente"));
-        }
-        this.validarOperacion(TipoDeOperacion.ELIMINACION, usuario);
-        usuario.setEliminado(true);
-        usuarioRepository.save(usuario);
+    public void eliminar(long idUsuario, long idUsuarioLoggedIn) {
+    if (esUsuarioAdministrador(idUsuarioLoggedIn)) {
+      Usuario usuario = this.getUsuarioPorId(idUsuario);
+      if (usuario == null) {
+        throw new EntityNotFoundException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_no_existente"));
+      }
+      this.validarOperacion(TipoDeOperacion.ELIMINACION, usuario, idUsuarioLoggedIn);
+      usuario.setEliminado(true);
+      usuarioRepository.save(usuario);
+    } else {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+    }
     }
     
     @Override
@@ -280,4 +299,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
         return usuarioRepository.updateIdEmpresa(idUsuario, idEmpresaPredeterminada);
     }
 
+  private boolean esUsuarioAdministrador(long idUsuarioLoggedIn) {
+    Usuario usuarioLoggedIn = this.getUsuarioPorId(idUsuarioLoggedIn);
+    return (usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR));
+  }
 }

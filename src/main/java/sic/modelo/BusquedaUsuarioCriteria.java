@@ -24,7 +24,6 @@ public class BusquedaUsuarioCriteria {
     private String email;
     private boolean buscarPorRol;
     private List<Rol> roles;
-    private Empresa empresa;
     private Pageable pageable;
 
 }

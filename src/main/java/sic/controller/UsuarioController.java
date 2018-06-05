@@ -23,16 +23,14 @@ import sic.service.IUsuarioService;
 public class UsuarioController {
     
     private final IUsuarioService usuarioService;
-    private final IEmpresaService empresaService;
     private final int TAMANIO_PAGINA_DEFAULT = 50;
 
     @Value("${SIC_JWT_KEY}")
     private String secretkey;
     
     @Autowired
-    public UsuarioController(IUsuarioService usuarioService, IEmpresaService empresaService) {
+    public UsuarioController(IUsuarioService usuarioService) {
         this.usuarioService = usuarioService;
-        this.empresaService =  empresaService;
     }
     
     @GetMapping("/usuarios/{idUsuario}")
@@ -43,8 +41,7 @@ public class UsuarioController {
 
     @GetMapping("/usuarios/busqueda/criteria")
     @ResponseStatus(HttpStatus.OK)
-    public Page<Usuario> buscarUsuarios(@RequestParam Long idEmpresa,
-                                        @RequestParam(required = false) String username,
+    public Page<Usuario> buscarUsuarios(@RequestParam(required = false) String username,
                                         @RequestParam(required = false) String nombre,
                                         @RequestParam(required = false) String apellido,
                                         @RequestParam(required = false) String email,
@@ -66,27 +63,34 @@ public class UsuarioController {
                 .email(email)
                 .buscarPorRol(roles != null && !roles.isEmpty())
                 .roles(roles)
-                .empresa(empresaService.getEmpresaPorId(idEmpresa))
                 .pageable(pageable)
                 .build();
         Claims claims = Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
         return usuarioService.buscarUsuarios(criteria, (int) claims.get("idUsuario"));
     }
-    
-    @PostMapping("/usuarios")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Usuario guardar(@RequestBody Usuario usuario,
-                           @RequestParam(required = false) Long idCliente) {
-        return usuarioService.guardar(usuario, idCliente);
-    }
-    
-    @PutMapping("/usuarios")
-    @ResponseStatus(HttpStatus.OK)
-    public void actualizar(@RequestBody Usuario usuario,
-                           @RequestParam(required = false) Long idCliente) {
-       usuarioService.actualizar(usuario, idCliente);
-    }
-    
+
+  @PostMapping("/usuarios")
+  @ResponseStatus(HttpStatus.CREATED)
+  public Usuario guardar(
+      @RequestBody Usuario usuario,
+      @RequestParam(required = false) Long idCliente,
+      @RequestHeader("Authorization") String token) {
+    Claims claims =
+        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    return usuarioService.guardar(usuario, idCliente, (int) claims.get("idUsuario"));
+  }
+
+  @PutMapping("/usuarios")
+  @ResponseStatus(HttpStatus.OK)
+  public void actualizar(
+      @RequestBody Usuario usuario,
+      @RequestParam(required = false) Long idCliente,
+      @RequestHeader("Authorization") String token) {
+    Claims claims =
+        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    usuarioService.actualizar(usuario, idCliente, (int) claims.get("idUsuario"));
+  }
+
     @PutMapping("/usuarios/{idUsuario}/empresas/{idEmpresaPredeterminada}")
     @ResponseStatus(HttpStatus.OK)
     public void actualizarIdEmpresaDeUsuario(@PathVariable long idUsuario, @PathVariable long idEmpresaPredeterminada) {
@@ -95,7 +99,9 @@ public class UsuarioController {
     
     @DeleteMapping("/usuarios/{idUsuario}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminar(@PathVariable long idUsuario) {
-        usuarioService.eliminar(idUsuario);
+    public void eliminar(@PathVariable long idUsuario,
+                         @RequestHeader("Authorization") String token) {
+        Claims claims = Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+        usuarioService.eliminar(idUsuario, (int) claims.get("idUsuario"));
     }    
 }

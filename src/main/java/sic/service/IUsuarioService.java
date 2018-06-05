@@ -12,17 +12,17 @@ public interface IUsuarioService {
    
     Usuario getUsuarioPorId(Long idUsuario);
     
-    void actualizar(Usuario usuario, Long idCliente);
+    void actualizar(Usuario usuario, Long idCliente, long idUsuarioLoggedIn);
     
     void actualizarToken(String token, long idUsuario);
 
-    void eliminar(long idUsuario);
+    void eliminar(long idUsuario, long idUsuarioLoggedIn);
     
     Usuario autenticarUsuario(Credencial credencial);
 
     Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria, long idUsuarioLoggedIn);
 
-    Usuario guardar(Usuario usuario, Long idUsuario);
+    Usuario guardar(Usuario usuario, Long idUsuario, long idUsuarioLoggedIn);
     
     int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada);
     
