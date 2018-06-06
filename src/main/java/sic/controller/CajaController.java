@@ -1,10 +1,7 @@
 package sic.controller;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
-
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,8 +18,6 @@ import sic.service.IFormaDePagoService;
 import sic.service.IUsuarioService;
 import io.jsonwebtoken.Jwts;
 
-import javax.servlet.http.HttpServletRequest;
-
 @RestController
 @RequestMapping("/api/v1")
 public class CajaController {
@@ -35,30 +30,37 @@ public class CajaController {
 
     @Value("${SIC_JWT_KEY}")
     private String secretkey;
-    
-    @Autowired
-    public CajaController(ICajaService cajaService, IEmpresaService empresaService,
-                          IFormaDePagoService formaDePagoService, IUsuarioService usuarioService) {
-        this.cajaService = cajaService;        
-        this.empresaService = empresaService;
-        this.formaDePagoService = formaDePagoService;
-        this.usuarioService = usuarioService;
-    }
-    
+
+  @Autowired
+  public CajaController(
+      ICajaService cajaService,
+      IEmpresaService empresaService,
+      IFormaDePagoService formaDePagoService,
+      IUsuarioService usuarioService) {
+    this.cajaService = cajaService;
+    this.empresaService = empresaService;
+    this.formaDePagoService = formaDePagoService;
+    this.usuarioService = usuarioService;
+  }
+
     @GetMapping("/cajas/{idCaja}")
     @ResponseStatus(HttpStatus.OK)
     public Caja getCajaPorId(@PathVariable long idCaja) {
         return cajaService.getCajaPorId(idCaja);
     }
 
-    @PostMapping("/cajas/apertura/empresas/{idEmpresa}/usuarios/{idUsuario}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Caja abrirCaja(@PathVariable long idEmpresa ,
-                          @PathVariable long idUsuario,
-                          @RequestParam BigDecimal saldoApertura) {
-        return cajaService.abrirCaja(empresaService.getEmpresaPorId(idEmpresa), usuarioService.getUsuarioPorId(idUsuario), saldoApertura);
-    }
-    
+  @PostMapping("/cajas/apertura/empresas/{idEmpresa}/usuarios/{idUsuario}")
+  @ResponseStatus(HttpStatus.CREATED)
+  public Caja abrirCaja(
+      @PathVariable long idEmpresa,
+      @PathVariable long idUsuario,
+      @RequestParam BigDecimal saldoApertura) {
+    return cajaService.abrirCaja(
+        empresaService.getEmpresaPorId(idEmpresa),
+        usuarioService.getUsuarioPorId(idUsuario),
+        saldoApertura);
+  }
+
     @DeleteMapping("/cajas/{idCaja}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable long idCaja) {
@@ -109,17 +111,20 @@ public class CajaController {
                                         .build();
         return cajaService.getCajasCriteria(criteria);
     }
-    
-    @GetMapping("/cajas/{idCaja}/movimientos")
-    @ResponseStatus(HttpStatus.OK)
-    public List<MovimientoCaja> getMovimientosDeCaja(@PathVariable long idCaja,
-                                                     @RequestParam(value = "idFormaDePago") long idFormaDePago) {
-        Caja caja = cajaService.getCajaPorId(idCaja);
-        Date fechaHasta = new Date();
-        if (caja.getFechaCierre() != null) fechaHasta = caja.getFechaCierre();
-        return cajaService.getMovimientosPorFormaDePagoEntreFechas(caja.getEmpresa(), formaDePagoService.getFormasDePagoPorId(idFormaDePago),
-                caja.getFechaApertura(), fechaHasta);
-    }
+
+  @GetMapping("/cajas/{idCaja}/movimientos")
+  @ResponseStatus(HttpStatus.OK)
+  public List<MovimientoCaja> getMovimientosDeCaja(
+      @PathVariable long idCaja, @RequestParam(value = "idFormaDePago") long idFormaDePago) {
+    Caja caja = cajaService.getCajaPorId(idCaja);
+    Date fechaHasta = new Date();
+    if (caja.getFechaCierre() != null) fechaHasta = caja.getFechaCierre();
+    return cajaService.getMovimientosPorFormaDePagoEntreFechas(
+        caja.getEmpresa(),
+        formaDePagoService.getFormasDePagoPorId(idFormaDePago),
+        caja.getFechaApertura(),
+        fechaHasta);
+  }
 
     @GetMapping("/cajas/{idCaja}/saldo-afecta-caja")
     @ResponseStatus(HttpStatus.OK)
@@ -215,14 +220,14 @@ public class CajaController {
         return cajaService.getTotalesDeFormaDePago(idCaja);
     }
 
-    @PutMapping("/cajas/{idCaja}/reabrir")
-    @ResponseStatus(HttpStatus.OK)
-    public void abrirCaja(@PathVariable long idCaja, @RequestParam BigDecimal monto, @RequestHeader("Authorization") String token) {
-        Claims claims = Jwts.parser()
-                            .setSigningKey(secretkey)
-                            .parseClaimsJws(token.substring(7))
-                            .getBody();
-        cajaService.reabrirCaja(idCaja, monto, ((int) claims.get("idUsuario")));
-    }
-
+  @PutMapping("/cajas/{idCaja}/reapertura")
+  @ResponseStatus(HttpStatus.OK)
+  public void reabrirCaja(
+      @PathVariable long idCaja,
+      @RequestParam BigDecimal monto,
+      @RequestHeader("Authorization") String token) {
+    Claims claims =
+        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    cajaService.reabrirCaja(idCaja, monto, ((int) claims.get("idUsuario")));
+  }
 }

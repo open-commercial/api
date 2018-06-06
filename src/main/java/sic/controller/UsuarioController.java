@@ -1,7 +1,6 @@
 package sic.controller;
 
 import java.util.List;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import sic.modelo.BusquedaUsuarioCriteria;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
-import sic.service.IEmpresaService;
 import sic.service.IUsuarioService;
 
 @RestController
@@ -39,35 +37,38 @@ public class UsuarioController {
         return usuarioService.getUsuarioPorId(idUsuario);
     }
 
-    @GetMapping("/usuarios/busqueda/criteria")
-    @ResponseStatus(HttpStatus.OK)
-    public Page<Usuario> buscarUsuarios(@RequestParam(required = false) String username,
-                                        @RequestParam(required = false) String nombre,
-                                        @RequestParam(required = false) String apellido,
-                                        @RequestParam(required = false) String email,
-                                        @RequestParam(required = false) Integer pagina,
-                                        @RequestParam(required = false) Integer tamanio,
-                                        @RequestParam(required = false) List<Rol> roles,
-                                        @RequestHeader("Authorization") String token) {
-        if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
-        if (pagina == null || pagina < 0) pagina = 0;
-        Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "username"));
-        BusquedaUsuarioCriteria criteria = BusquedaUsuarioCriteria.builder()
-                .buscarPorNombreDeUsuario(username != null)
-                .username(username)
-                .buscaPorNombre(nombre != null)
-                .nombre(nombre)
-                .buscaPorApellido(apellido!= null)
-                .apellido(apellido)
-                .buscaPorEmail(email != null)
-                .email(email)
-                .buscarPorRol(roles != null && !roles.isEmpty())
-                .roles(roles)
-                .pageable(pageable)
-                .build();
-        Claims claims = Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-        return usuarioService.buscarUsuarios(criteria, (int) claims.get("idUsuario"));
-    }
+  @GetMapping("/usuarios/busqueda/criteria")
+  @ResponseStatus(HttpStatus.OK)
+  public Page<Usuario> buscarUsuarios(
+      @RequestParam(required = false) String username,
+      @RequestParam(required = false) String nombre,
+      @RequestParam(required = false) String apellido,
+      @RequestParam(required = false) String email,
+      @RequestParam(required = false) Integer pagina,
+      @RequestParam(required = false) Integer tamanio,
+      @RequestParam(required = false) List<Rol> roles,
+      @RequestHeader("Authorization") String token) {
+    if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
+    if (pagina == null || pagina < 0) pagina = 0;
+    Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "username"));
+    BusquedaUsuarioCriteria criteria =
+        BusquedaUsuarioCriteria.builder()
+            .buscarPorNombreDeUsuario(username != null)
+            .username(username)
+            .buscaPorNombre(nombre != null)
+            .nombre(nombre)
+            .buscaPorApellido(apellido != null)
+            .apellido(apellido)
+            .buscaPorEmail(email != null)
+            .email(email)
+            .buscarPorRol(roles != null && !roles.isEmpty())
+            .roles(roles)
+            .pageable(pageable)
+            .build();
+    Claims claims =
+        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    return usuarioService.buscarUsuarios(criteria, (int) claims.get("idUsuario"));
+  }
 
   @PostMapping("/usuarios")
   @ResponseStatus(HttpStatus.CREATED)

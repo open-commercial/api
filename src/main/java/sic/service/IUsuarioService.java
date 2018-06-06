@@ -1,29 +1,25 @@
 package sic.service;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import sic.modelo.BusquedaUsuarioCriteria;
 import sic.modelo.Credencial;
-import sic.modelo.Rol;
 import sic.modelo.Usuario;
 
 public interface IUsuarioService {
-   
-    Usuario getUsuarioPorId(Long idUsuario);
-    
-    void actualizar(Usuario usuario, Long idCliente, long idUsuarioLoggedIn);
-    
-    void actualizarToken(String token, long idUsuario);
 
-    void eliminar(long idUsuario, long idUsuarioLoggedIn);
-    
-    Usuario autenticarUsuario(Credencial credencial);
+  Usuario getUsuarioPorId(Long idUsuario);
 
-    Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria, long idUsuarioLoggedIn);
+  void actualizar(Usuario usuario, Long idCliente, long idUsuarioLoggedIn);
 
-    Usuario guardar(Usuario usuario, Long idUsuario, long idUsuarioLoggedIn);
-    
-    int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada);
-    
+  void actualizarToken(String token, long idUsuario);
+
+  void eliminar(long idUsuario, long idUsuarioLoggedIn);
+
+  Usuario autenticarUsuario(Credencial credencial);
+
+  Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria, long idUsuarioLoggedIn);
+
+  Usuario guardar(Usuario usuario, Long idUsuario, long idUsuarioLoggedIn);
+
+  int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada);
 }

@@ -29,14 +29,17 @@ public class CuentaCorrienteController {
     private final IProveedorService proveedorService;
     private final IClienteService clienteService;
     private final int TAMANIO_PAGINA_DEFAULT = 100;
-    
-    @Autowired
-    public CuentaCorrienteController(ICuentaCorrienteService cuentaCorrienteService, IProveedorService proveedorService, IClienteService clienteService) {
-        this.cuentaCorrienteService = cuentaCorrienteService;
-        this.clienteService = clienteService;
-        this.proveedorService = proveedorService;
-    }
-    
+
+  @Autowired
+  public CuentaCorrienteController(
+      ICuentaCorrienteService cuentaCorrienteService,
+      IProveedorService proveedorService,
+      IClienteService clienteService) {
+    this.cuentaCorrienteService = cuentaCorrienteService;
+    this.clienteService = clienteService;
+    this.proveedorService = proveedorService;
+  }
+
     @DeleteMapping("/cuentas-corrientes/{idCuentaCorriente}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable Long idCuentaCorriente) {
@@ -78,12 +81,8 @@ public class CuentaCorrienteController {
     public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(@PathVariable long idCuentaCorriente,
                                                                     @RequestParam(required = false) Integer pagina,
                                                                     @RequestParam(required = false) Integer tamanio) {  
-        if (tamanio == null || tamanio <= 0) {
-            tamanio = TAMANIO_PAGINA_DEFAULT;
-        }
-        if (pagina == null || pagina < 0) {
-            pagina = 0;
-        } // filtrar los resultados por roles
+        if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
+        if (pagina == null || pagina < 0) pagina = 0;
         Pageable pageable = new PageRequest(pagina, tamanio);
         return cuentaCorrienteService.getRenglonesCuentaCorriente(idCuentaCorriente, pageable);
     }

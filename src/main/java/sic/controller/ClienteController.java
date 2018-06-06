@@ -1,7 +1,5 @@
 package sic.controller;
 
-import java.util.List;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;

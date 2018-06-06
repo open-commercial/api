@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
-
 import com.querydsl.core.BooleanBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +13,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
@@ -67,14 +65,14 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria, long idUsuarioLoggedIn) {
-    if (esUsuarioAdministrador(idUsuarioLoggedIn)) {
-      QUsuario qusuario = QUsuario.usuario;
+    if (this.esUsuarioAdministrador(idUsuarioLoggedIn)) {
+      QUsuario qUsuario = QUsuario.usuario;
       BooleanBuilder builder = new BooleanBuilder();
       if (criteria.isBuscaPorApellido()) {
         String[] terminos = criteria.getApellido().split(" ");
         BooleanBuilder rsPredicate = new BooleanBuilder();
         for (String termino : terminos) {
-          rsPredicate.and(qusuario.apellido.containsIgnoreCase(termino));
+          rsPredicate.and(qUsuario.apellido.containsIgnoreCase(termino));
         }
         builder.or(rsPredicate);
       }
@@ -82,7 +80,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
         String[] terminos = criteria.getNombre().split(" ");
         BooleanBuilder rsPredicate = new BooleanBuilder();
         for (String termino : terminos) {
-          rsPredicate.and(qusuario.nombre.containsIgnoreCase(termino));
+          rsPredicate.and(qUsuario.nombre.containsIgnoreCase(termino));
         }
         builder.or(rsPredicate);
       }
@@ -90,7 +88,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
         String[] terminos = criteria.getUsername().split(" ");
         BooleanBuilder rsPredicate = new BooleanBuilder();
         for (String termino : terminos) {
-          rsPredicate.and(qusuario.username.containsIgnoreCase(termino));
+          rsPredicate.and(qUsuario.username.containsIgnoreCase(termino));
         }
         builder.or(rsPredicate);
       }
@@ -98,7 +96,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
         String[] terminos = criteria.getEmail().split(" ");
         BooleanBuilder rsPredicate = new BooleanBuilder();
         for (String termino : terminos) {
-          rsPredicate.and(qusuario.email.containsIgnoreCase(termino));
+          rsPredicate.and(qUsuario.email.containsIgnoreCase(termino));
         }
         builder.or(rsPredicate);
       }
@@ -107,22 +105,22 @@ public class UsuarioServiceImpl implements IUsuarioService {
         for (Rol rol : criteria.getRoles()) {
           switch (rol) {
             case ADMINISTRADOR:
-              rsPredicate.or(qusuario.roles.contains(Rol.ADMINISTRADOR));
+              rsPredicate.or(qUsuario.roles.contains(Rol.ADMINISTRADOR));
               break;
             case VENDEDOR:
-              rsPredicate.or(qusuario.roles.contains(Rol.VENDEDOR));
+              rsPredicate.or(qUsuario.roles.contains(Rol.VENDEDOR));
               break;
             case VIAJANTE:
-              rsPredicate.or(qusuario.roles.contains(Rol.VIAJANTE));
+              rsPredicate.or(qUsuario.roles.contains(Rol.VIAJANTE));
               break;
             case CLIENTE:
-              rsPredicate.or(qusuario.roles.contains(Rol.CLIENTE));
+              rsPredicate.or(qUsuario.roles.contains(Rol.CLIENTE));
               break;
           }
         }
         builder.and(rsPredicate);
       }
-      builder.and(qusuario.eliminado.eq(false));
+      builder.and(qUsuario.eliminado.eq(false));
       return usuarioRepository.findAll(builder, criteria.getPageable());
     } else return null;
   }
@@ -214,7 +212,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
     @Override
     public void actualizar(Usuario usuario, Long idCliente, long idUsuarioLoggedIn) {
-    if (esUsuarioAdministrador(idUsuarioLoggedIn)) {
+    if (this.esUsuarioAdministrador(idUsuarioLoggedIn)) {
       this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario, idUsuarioLoggedIn);
       if (usuario.getPassword().isEmpty()) {
         Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
@@ -246,7 +244,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public Usuario guardar(Usuario usuario, Long idCliente, long idUsuarioLoggedIn) {
-    if (esUsuarioAdministrador(idUsuarioLoggedIn)) {
+    if (this.esUsuarioAdministrador(idUsuarioLoggedIn)) {
       if (usuario.getRoles().contains(Rol.CLIENTE)) {
         this.actualizarCredencial(idCliente, usuario);
       }
@@ -273,9 +271,9 @@ public class UsuarioServiceImpl implements IUsuarioService {
         }
     }
 
-    @Override
-    public void eliminar(long idUsuario, long idUsuarioLoggedIn) {
-    if (esUsuarioAdministrador(idUsuarioLoggedIn)) {
+  @Override
+  public void eliminar(long idUsuario, long idUsuarioLoggedIn) {
+    if (this.esUsuarioAdministrador(idUsuarioLoggedIn)) {
       Usuario usuario = this.getUsuarioPorId(idUsuario);
       if (usuario == null) {
         throw new EntityNotFoundException(
@@ -288,8 +286,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
     }
-    }
-    
+  }
+
     @Override
     public int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada) {
         if (empresaService.getEmpresaPorId(idEmpresaPredeterminada) == null) {
