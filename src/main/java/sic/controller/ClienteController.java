@@ -106,24 +106,36 @@ public class ClienteController {
         return clienteService.existeClientePredeterminado(empresaService.getEmpresaPorId(idEmpresa));
     }
 
-    @DeleteMapping("/clientes/{idCliente}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminar(@PathVariable long idCliente) {
-        clienteService.eliminar(idCliente);
-    }
-    
-    @PostMapping("/clientes")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Cliente guardar(@RequestBody Cliente cliente) {
-        return clienteService.guardar(cliente);
-    }
-    
-    @PutMapping("/clientes")
-    @ResponseStatus(HttpStatus.OK)
-    public void actualizar(@RequestBody Cliente cliente) {
-       clienteService.actualizar(cliente);       
-    }
-    
+  @DeleteMapping("/clientes/{idCliente}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void eliminar(@PathVariable long idCliente, @RequestHeader("Authorization") String token) {
+    Claims claims =
+        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    clienteService.eliminar(idCliente, (int) claims.get("idUsuario"));
+  }
+
+  @PostMapping("/clientes")
+  @ResponseStatus(HttpStatus.CREATED)
+  public Cliente guardar(
+      @RequestBody Cliente cliente,
+      @RequestParam(required = false) Long idUsuarioCredencial,
+      @RequestHeader("Authorization") String token) {
+    Claims claims =
+        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    return clienteService.guardar(cliente, idUsuarioCredencial, (int) claims.get("idUsuario"));
+  }
+
+  @PutMapping("/clientes")
+  @ResponseStatus(HttpStatus.OK)
+  public void actualizar(
+      @RequestBody Cliente cliente,
+      @RequestParam(required = false) Long idUsuarioCredencial,
+      @RequestHeader("Authorization") String token) {
+    Claims claims =
+        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    clienteService.actualizar(cliente, idUsuarioCredencial, (int) claims.get("idUsuario"));
+  }
+
     @PutMapping("/clientes/{idCliente}/predeterminado")
     @ResponseStatus(HttpStatus.OK)
     public void setClientePredeterminado(@PathVariable long idCliente) {
@@ -136,9 +148,10 @@ public class ClienteController {
        return clienteService.getClientePorIdPedido(idPedido);
     }
 
-    @GetMapping("/clientes/usuarios/{idUsuario}")
+    @GetMapping("/clientes/usuarios/{idUsuario}/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
-    public Cliente getClientePorIdUsuario(@PathVariable long idUsuario) {
-        return clienteService.getClientePorIdUsuario(idUsuario);
+    public Cliente getClientePorIdUsuario(@PathVariable long idUsuario,
+                                          @PathVariable long idEmpresa) {
+        return clienteService.getClientePorIdUsuarioYidEmpresa(idUsuario, empresaService.getEmpresaPorId(idEmpresa));
     }
 }

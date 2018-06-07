@@ -74,22 +74,20 @@ public class UsuarioController {
   @ResponseStatus(HttpStatus.CREATED)
   public Usuario guardar(
       @RequestBody Usuario usuario,
-      @RequestParam(required = false) Long idCliente,
       @RequestHeader("Authorization") String token) {
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    return usuarioService.guardar(usuario, idCliente, (int) claims.get("idUsuario"));
+    return usuarioService.guardar(usuario, (int) claims.get("idUsuario"));
   }
 
   @PutMapping("/usuarios")
   @ResponseStatus(HttpStatus.OK)
   public void actualizar(
       @RequestBody Usuario usuario,
-      @RequestParam(required = false) Long idCliente,
       @RequestHeader("Authorization") String token) {
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    usuarioService.actualizar(usuario, idCliente, (int) claims.get("idUsuario"));
+    usuarioService.actualizar(usuario, (int) claims.get("idUsuario"));
   }
 
     @PutMapping("/usuarios/{idUsuario}/empresas/{idEmpresaPredeterminada}")

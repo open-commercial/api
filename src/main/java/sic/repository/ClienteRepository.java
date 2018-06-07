@@ -28,6 +28,8 @@ public interface ClienteRepository
       "SELECT c FROM Pedido p INNER JOIN p.cliente c WHERE p.id_Pedido = :idPedido AND c.eliminado = false")
   Cliente findClienteByIdPedido(@Param("idPedido") long idPedido);
 
-  @Query("SELECT c FROM Cliente c WHERE c.credencial.id_Usuario = :idUsuario")
-  Cliente findClienteByIdUsuario(@Param("idUsuario") long idUsuario);
+  @Query(
+      "SELECT c FROM Cliente c WHERE c.credencial.id_Usuario = :idUsuario AND c.empresa.id_Empresa = :idEmpresa AND c.eliminado = false")
+  Cliente findClienteByIdUsuarioYidEmpresa(
+      @Param("idUsuario") long idUsuario, @Param("idEmpresa") long idEmpresa);
 }

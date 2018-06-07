@@ -1,6 +1,5 @@
 package sic.service.impl;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -65,68 +64,67 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria, long idUsuarioLoggedIn) {
-    if (this.esUsuarioAdministrador(idUsuarioLoggedIn)) {
-      QUsuario qUsuario = QUsuario.usuario;
-      BooleanBuilder builder = new BooleanBuilder();
-      if (criteria.isBuscaPorApellido()) {
-        String[] terminos = criteria.getApellido().split(" ");
-        BooleanBuilder rsPredicate = new BooleanBuilder();
-        for (String termino : terminos) {
-          rsPredicate.and(qUsuario.apellido.containsIgnoreCase(termino));
-        }
-        builder.or(rsPredicate);
+    verificarAdministrador(idUsuarioLoggedIn);
+    QUsuario qusuario = QUsuario.usuario;
+    BooleanBuilder builder = new BooleanBuilder();
+    if (criteria.isBuscaPorApellido()) {
+      String[] terminos = criteria.getApellido().split(" ");
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        rsPredicate.and(qusuario.apellido.containsIgnoreCase(termino));
       }
-      if (criteria.isBuscaPorNombre()) {
-        String[] terminos = criteria.getNombre().split(" ");
-        BooleanBuilder rsPredicate = new BooleanBuilder();
-        for (String termino : terminos) {
-          rsPredicate.and(qUsuario.nombre.containsIgnoreCase(termino));
-        }
-        builder.or(rsPredicate);
+      builder.or(rsPredicate);
+    }
+    if (criteria.isBuscaPorNombre()) {
+      String[] terminos = criteria.getNombre().split(" ");
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        rsPredicate.and(qusuario.nombre.containsIgnoreCase(termino));
       }
-      if (criteria.isBuscarPorNombreDeUsuario()) {
-        String[] terminos = criteria.getUsername().split(" ");
-        BooleanBuilder rsPredicate = new BooleanBuilder();
-        for (String termino : terminos) {
-          rsPredicate.and(qUsuario.username.containsIgnoreCase(termino));
-        }
-        builder.or(rsPredicate);
+      builder.or(rsPredicate);
+    }
+    if (criteria.isBuscarPorNombreDeUsuario()) {
+      String[] terminos = criteria.getUsername().split(" ");
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        rsPredicate.and(qusuario.username.containsIgnoreCase(termino));
       }
-      if (criteria.isBuscaPorEmail()) {
-        String[] terminos = criteria.getEmail().split(" ");
-        BooleanBuilder rsPredicate = new BooleanBuilder();
-        for (String termino : terminos) {
-          rsPredicate.and(qUsuario.email.containsIgnoreCase(termino));
-        }
-        builder.or(rsPredicate);
+      builder.or(rsPredicate);
+    }
+    if (criteria.isBuscaPorEmail()) {
+      String[] terminos = criteria.getEmail().split(" ");
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        rsPredicate.and(qusuario.email.containsIgnoreCase(termino));
       }
-      if (criteria.isBuscarPorRol() && !criteria.getRoles().isEmpty()) {
-        BooleanBuilder rsPredicate = new BooleanBuilder();
-        for (Rol rol : criteria.getRoles()) {
-          switch (rol) {
-            case ADMINISTRADOR:
-              rsPredicate.or(qUsuario.roles.contains(Rol.ADMINISTRADOR));
-              break;
-            case VENDEDOR:
-              rsPredicate.or(qUsuario.roles.contains(Rol.VENDEDOR));
-              break;
-            case VIAJANTE:
-              rsPredicate.or(qUsuario.roles.contains(Rol.VIAJANTE));
-              break;
-            case CLIENTE:
-              rsPredicate.or(qUsuario.roles.contains(Rol.CLIENTE));
-              break;
-          }
+      builder.or(rsPredicate);
+    }
+    if (criteria.isBuscarPorRol() && !criteria.getRoles().isEmpty()) {
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (Rol rol : criteria.getRoles()) {
+        switch (rol) {
+          case ADMINISTRADOR:
+            rsPredicate.or(qusuario.roles.contains(Rol.ADMINISTRADOR));
+            break;
+          case VENDEDOR:
+            rsPredicate.or(qusuario.roles.contains(Rol.VENDEDOR));
+            break;
+          case VIAJANTE:
+            rsPredicate.or(qusuario.roles.contains(Rol.VIAJANTE));
+            break;
+          case CLIENTE:
+            rsPredicate.or(qusuario.roles.contains(Rol.CLIENTE));
+            break;
         }
-        builder.and(rsPredicate);
       }
-      builder.and(qUsuario.eliminado.eq(false));
-      return usuarioRepository.findAll(builder, criteria.getPageable());
-    } else return null;
+      builder.and(rsPredicate);
+    }
+    builder.and(qusuario.eliminado.eq(false));
+    return usuarioRepository.findAll(builder, criteria.getPageable());
   }
 
   private void validarOperacion(
-      TipoDeOperacion operacion, Usuario usuario, long idUsuarioLoggedIn) {
+    TipoDeOperacion operacion, Usuario usuario, long idUsuarioLoggedIn) {
     // Requeridos
     if (Validator.esVacio(usuario.getNombre())) {
       throw new BusinessServiceException(
@@ -210,31 +208,17 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
   }
 
-    @Override
-    public void actualizar(Usuario usuario, Long idCliente, long idUsuarioLoggedIn) {
-    if (this.esUsuarioAdministrador(idUsuarioLoggedIn)) {
-      this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario, idUsuarioLoggedIn);
-      if (usuario.getPassword().isEmpty()) {
-        Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
-        usuario.setPassword(usuarioGuardado.getPassword());
-      } else {
-        usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
-      }
-      Cliente cliente;
-      if (usuario.getRoles().contains(Rol.CLIENTE) && idCliente != null) {
-        this.actualizarCredencial(idCliente, usuario);
-      } else if (!usuario.getRoles().contains(Rol.CLIENTE)) {
-        cliente = clienteService.getClientePorIdUsuario(usuario.getId_Usuario());
-        if (cliente != null) {
-          cliente.setCredencial(null);
-          clienteService.actualizar(cliente);
-        }
-      }
-      usuarioRepository.save(usuario);
+  @Override
+  public void actualizar(Usuario usuario, long idUsuarioLoggedIn) {
+    verificarAdministrador(idUsuarioLoggedIn);
+    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario, idUsuarioLoggedIn);
+    if (usuario.getPassword().isEmpty()) {
+      Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
+      usuario.setPassword(usuarioGuardado.getPassword());
     } else {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+      usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
     }
+    usuarioRepository.save(usuario);
   }
 
     @Override
@@ -243,62 +227,43 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
 
   @Override
-  public Usuario guardar(Usuario usuario, Long idCliente, long idUsuarioLoggedIn) {
-    if (this.esUsuarioAdministrador(idUsuarioLoggedIn)) {
-      if (usuario.getRoles().contains(Rol.CLIENTE)) {
-        this.actualizarCredencial(idCliente, usuario);
-      }
-      this.validarOperacion(TipoDeOperacion.ALTA, usuario, idUsuarioLoggedIn);
-      usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
-      usuario = usuarioRepository.save(usuario);
-      LOGGER.warn("El Usuario " + usuario + " se guardó correctamente.");
-      return usuario;
-    } else {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
-    }
+  public Usuario guardar(Usuario usuario, long idUsuarioLoggedIn) {
+    verificarAdministrador(idUsuarioLoggedIn);
+    this.validarOperacion(TipoDeOperacion.ALTA, usuario, idUsuarioLoggedIn);
+    usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
+    usuario = usuarioRepository.save(usuario);
+    LOGGER.warn("El Usuario " + usuario + " se guardó correctamente.");
+    return usuario;
   }
-
-    private void actualizarCredencial(long idCliente, Usuario usuario) {
-        Cliente cliente = clienteService.getClientePorId(idCliente);
-        if (cliente.getCredencial() == null) {
-            cliente.setCredencial(usuario);
-            clienteService.actualizar(cliente);
-        } else {
-            String mensaje = ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_usuario_cliente_no_valido");
-            throw new BusinessServiceException(MessageFormat.format(mensaje, cliente.getCredencial().getUsername()));
-        }
-    }
 
   @Override
   public void eliminar(long idUsuario, long idUsuarioLoggedIn) {
-    if (this.esUsuarioAdministrador(idUsuarioLoggedIn)) {
-      Usuario usuario = this.getUsuarioPorId(idUsuario);
-      if (usuario == null) {
-        throw new EntityNotFoundException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_no_existente"));
-      }
-      this.validarOperacion(TipoDeOperacion.ELIMINACION, usuario, idUsuarioLoggedIn);
-      usuario.setEliminado(true);
-      usuarioRepository.save(usuario);
-    } else {
+    verificarAdministrador(idUsuarioLoggedIn);
+    Usuario usuario = this.getUsuarioPorId(idUsuario);
+    if (usuario == null) {
+      throw new EntityNotFoundException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_no_existente"));
+    }
+    this.validarOperacion(TipoDeOperacion.ELIMINACION, usuario, idUsuarioLoggedIn);
+    usuario.setEliminado(true);
+    usuarioRepository.save(usuario);
+  }
+
+  @Override
+  public int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada) {
+    if (empresaService.getEmpresaPorId(idEmpresaPredeterminada) == null) {
+      throw new EntityNotFoundException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_empresa_no_existente"));
+    }
+    return usuarioRepository.updateIdEmpresa(idUsuario, idEmpresaPredeterminada);
+  }
+
+  @Override
+  public void verificarAdministrador(long idUsuarioLoggedIn) {
+    Usuario usuarioLoggedIn = this.getUsuarioPorId(idUsuarioLoggedIn);
+    if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
     }
-  }
-
-    @Override
-    public int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada) {
-        if (empresaService.getEmpresaPorId(idEmpresaPredeterminada) == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
-        return usuarioRepository.updateIdEmpresa(idUsuario, idEmpresaPredeterminada);
-    }
-
-  private boolean esUsuarioAdministrador(long idUsuarioLoggedIn) {
-    Usuario usuarioLoggedIn = this.getUsuarioPorId(idUsuarioLoggedIn);
-    return (usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR));
   }
 }

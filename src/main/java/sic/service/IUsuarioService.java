@@ -9,7 +9,7 @@ public interface IUsuarioService {
 
   Usuario getUsuarioPorId(Long idUsuario);
 
-  void actualizar(Usuario usuario, Long idCliente, long idUsuarioLoggedIn);
+  void actualizar(Usuario usuario, long idUsuarioLoggedIn);
 
   void actualizarToken(String token, long idUsuario);
 
@@ -19,7 +19,9 @@ public interface IUsuarioService {
 
   Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria, long idUsuarioLoggedIn);
 
-  Usuario guardar(Usuario usuario, Long idUsuario, long idUsuarioLoggedIn);
+  Usuario guardar(Usuario usuario, long idUsuarioLoggedIn);
 
   int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada);
+
+  void verificarAdministrador(long idUsuarioLoggedIn);
 }

@@ -5,13 +5,13 @@ import org.springframework.data.domain.Page;
 
 public interface IClienteService {
 
-  void actualizar(Cliente cliente);
+  void actualizar(Cliente cliente, Long idUsuarioCrendencial, long idUsuarioLoggedIn);
 
   Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long idUsuario);
 
-  void eliminar(long idCliente);
+  void eliminar(long idCliente, long idUsuarioLoggedIn);
 
-  Cliente getClientePorId(long id_Cliente);
+  Cliente getClientePorId(long idCliente);
 
   Cliente getClientePorIdFiscal(String idFiscal, Empresa empresa);
 
@@ -21,13 +21,13 @@ public interface IClienteService {
 
   boolean existeClientePredeterminado(Empresa empresa);
 
-  Cliente guardar(Cliente cliente);
-
   void setClientePredeterminado(Cliente cliente);
+
+  Cliente guardar(Cliente cliente, Long idUsuarioCrendencial, long idUsuarioLoggedIn);
 
   void validarOperacion(TipoDeOperacion operacion, Cliente cliente);
 
   Cliente getClientePorIdPedido(long idPedido);
 
-  Cliente getClientePorIdUsuario(long idUsuario);
+  Cliente getClientePorIdUsuarioYidEmpresa(long idUsuario, Empresa empresa);
 }

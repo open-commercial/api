@@ -2,6 +2,8 @@ package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
 
+import java.text.MessageFormat;
+import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 
@@ -22,7 +24,7 @@ import sic.service.ICuentaCorrienteService;
 @Service
 public class ClienteServiceImpl implements IClienteService {
 
-    private final ClienteRepository clienteRepository;    
+    private final ClienteRepository clienteRepository;
     private final ICuentaCorrienteService cuentaCorrienteService;
     private final IUsuarioService usuarioService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
@@ -42,29 +44,29 @@ public class ClienteServiceImpl implements IClienteService {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_cliente_no_existente"));
         }
-        return cliente;                  
+        return cliente;
     }
 
     @Override
-    public Cliente getClientePorRazonSocial(String razonSocial, Empresa empresa) {        
-        return clienteRepository.findByRazonSocialAndEmpresaAndEliminado(razonSocial, empresa, false);                   
+    public Cliente getClientePorRazonSocial(String razonSocial, Empresa empresa) {
+        return clienteRepository.findByRazonSocialAndEmpresaAndEliminado(razonSocial, empresa, false);
     }
 
     @Override
-    public Cliente getClientePorIdFiscal(String idFiscal, Empresa empresa) {        
-        return clienteRepository.findByIdFiscalAndEmpresaAndEliminado(idFiscal, empresa, false);               
+    public Cliente getClientePorIdFiscal(String idFiscal, Empresa empresa) {
+        return clienteRepository.findByIdFiscalAndEmpresaAndEliminado(idFiscal, empresa, false);
     }
 
     @Override
-    public Cliente getClientePredeterminado(Empresa empresa) {   
+    public Cliente getClientePredeterminado(Empresa empresa) {
         Cliente cliente = clienteRepository.findByEmpresaAndPredeterminadoAndEliminado(empresa, true, false);
         if (cliente == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_cliente_sin_predeterminado"));
         }
-        return cliente;                   
+        return cliente;
     }
-    
+
     @Override
     public boolean existeClientePredeterminado(Empresa empresa) {
         return clienteRepository.existsByEmpresaAndPredeterminadoAndEliminado(empresa, true, false);
@@ -79,85 +81,102 @@ public class ClienteServiceImpl implements IClienteService {
      */
     @Override
     @Transactional
-    public void setClientePredeterminado(Cliente cliente) {        
+    public void setClientePredeterminado(Cliente cliente) {
         Cliente clientePredeterminadoAnterior = clienteRepository.findByEmpresaAndPredeterminadoAndEliminado(cliente.getEmpresa(), true, false);
         if (clientePredeterminadoAnterior != null) {
             clientePredeterminadoAnterior.setPredeterminado(false);
             clienteRepository.save(clientePredeterminadoAnterior);
         }
         cliente.setPredeterminado(true);
-        clienteRepository.save(cliente);        
+        clienteRepository.save(cliente);
     }
 
-    @Override
-    public Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long idUsuarioLoggedIn) {
-        if (criteria.getEmpresa() == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
-        QCliente qcliente = QCliente.cliente;
-        BooleanBuilder builder = new BooleanBuilder();
-        if (criteria.isBuscaPorRazonSocial()) {
-            String[] terminos = criteria.getRazonSocial().split(" ");
-            BooleanBuilder rsPredicate = new BooleanBuilder();
-            for (String termino : terminos) {
-                rsPredicate.and(qcliente.razonSocial.containsIgnoreCase(termino));
-            }
-            builder.or(rsPredicate);
-        }
-        if (criteria.isBuscaPorNombreFantasia()) {
-            String[] terminos = criteria.getNombreFantasia().split(" ");
-            BooleanBuilder nfPredicate = new BooleanBuilder();
-            for (String termino : terminos) {
-                nfPredicate.and(qcliente.nombreFantasia.containsIgnoreCase(termino));
-            }
-            builder.or(nfPredicate);
-        }
-        if (criteria.isBuscaPorId_Fiscal()) {
-            String[] terminos = criteria.getIdFiscal().split(" ");
-            BooleanBuilder idPredicate = new BooleanBuilder();
-            for (String termino : terminos) {
-                idPredicate.and(qcliente.idFiscal.containsIgnoreCase(termino));
-            }
-            builder.or(idPredicate);
-        }
-        if (criteria.isBuscaPorViajante()) builder.and(qcliente.viajante.eq(criteria.getViajante()));
-        if (criteria.isBuscaPorLocalidad()) builder.and(qcliente.localidad.eq(criteria.getLocalidad()));
-        if (criteria.isBuscaPorProvincia()) builder.and(qcliente.localidad.provincia.eq(criteria.getProvincia()));
-        if (criteria.isBuscaPorPais()) builder.and(qcliente.localidad.provincia.pais.eq(criteria.getPais()));
-        Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
-        if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR) && !usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR)) {
-            if (usuarioLoggedIn.getRoles().contains(Rol.VIAJANTE) && usuarioLoggedIn.getRoles().contains(Rol.CLIENTE)) {
-                builder.and(qcliente.viajante.eq(usuarioLoggedIn).or(qcliente.eq(this.getClientePorIdUsuario(usuarioLoggedIn.getId_Usuario()))));
-            } else {
-                if (usuarioLoggedIn.getRoles().contains(Rol.VIAJANTE))
-                    builder.and(qcliente.viajante.eq(usuarioLoggedIn));
-                if (usuarioLoggedIn.getRoles().contains(Rol.CLIENTE))
-                    builder.and(qcliente.eq(this.getClientePorIdUsuario(usuarioLoggedIn.getId_Usuario())));
-            }
-        }
-        builder.and(qcliente.empresa.eq(criteria.getEmpresa()).and(qcliente.eliminado.eq(false)));
-        Page<Cliente> page = clienteRepository.findAll(builder, criteria.getPageable());
-        if (criteria.isConSaldo()) {
-            page.getContent().forEach(c -> {
+  @Override
+  public Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long idUsuarioLoggedIn) {
+    if (criteria.getEmpresa() == null) {
+      throw new EntityNotFoundException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_empresa_no_existente"));
+    }
+    QCliente qcliente = QCliente.cliente;
+    BooleanBuilder builder = new BooleanBuilder();
+    if (criteria.isBuscaPorRazonSocial()) {
+      String[] terminos = criteria.getRazonSocial().split(" ");
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        rsPredicate.and(qcliente.razonSocial.containsIgnoreCase(termino));
+      }
+      builder.or(rsPredicate);
+    }
+    if (criteria.isBuscaPorNombreFantasia()) {
+      String[] terminos = criteria.getNombreFantasia().split(" ");
+      BooleanBuilder nfPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        nfPredicate.and(qcliente.nombreFantasia.containsIgnoreCase(termino));
+      }
+      builder.or(nfPredicate);
+    }
+    if (criteria.isBuscaPorId_Fiscal()) {
+      String[] terminos = criteria.getIdFiscal().split(" ");
+      BooleanBuilder idPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        idPredicate.and(qcliente.idFiscal.containsIgnoreCase(termino));
+      }
+      builder.or(idPredicate);
+    }
+    if (criteria.isBuscaPorViajante()) builder.and(qcliente.viajante.eq(criteria.getViajante()));
+    if (criteria.isBuscaPorLocalidad()) builder.and(qcliente.localidad.eq(criteria.getLocalidad()));
+    if (criteria.isBuscaPorProvincia())
+      builder.and(qcliente.localidad.provincia.eq(criteria.getProvincia()));
+    if (criteria.isBuscaPorPais())
+      builder.and(qcliente.localidad.provincia.pais.eq(criteria.getPais()));
+    Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
+        && !usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR)) {
+      if (usuarioLoggedIn.getRoles().contains(Rol.VIAJANTE)
+          && usuarioLoggedIn.getRoles().contains(Rol.CLIENTE)) {
+        builder.and(
+            qcliente
+                .viajante
+                .eq(usuarioLoggedIn)
+                .or(
+                    qcliente.eq(
+                        this.getClientePorIdUsuarioYidEmpresa(
+                            usuarioLoggedIn.getId_Usuario(),
+                            criteria.getEmpresa()))));
+      } else {
+        if (usuarioLoggedIn.getRoles().contains(Rol.VIAJANTE))
+          builder.and(qcliente.viajante.eq(usuarioLoggedIn));
+        if (usuarioLoggedIn.getRoles().contains(Rol.CLIENTE))
+          builder.and(
+              qcliente.eq(
+                  this.getClientePorIdUsuarioYidEmpresa(
+                      usuarioLoggedIn.getId_Usuario(), criteria.getEmpresa())));
+      }
+    }
+    builder.and(qcliente.empresa.eq(criteria.getEmpresa()).and(qcliente.eliminado.eq(false)));
+    Page<Cliente> page = clienteRepository.findAll(builder, criteria.getPageable());
+    if (criteria.isConSaldo()) {
+      page.getContent()
+          .forEach(
+              c -> {
                 CuentaCorriente cc = cuentaCorrienteService.getCuentaCorrientePorCliente(c);
                 c.setSaldoCuentaCorriente(cc.getSaldo());
                 c.setFechaUltimoMovimiento(cc.getFechaUltimoMovimiento());
-            });
-        }
-        return page;
+              });
     }
-    
+    return page;
+  }
+
     @Override
     public void validarOperacion(TipoDeOperacion operacion, Cliente cliente) {
-        //Entrada de Datos        
+        //Entrada de Datos
         if (cliente.getEmail() != null && !cliente.getEmail().equals("")) {
             if (!Validator.esEmailValido(cliente.getEmail())) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_cliente_email_invalido"));
             }
         }
-        //Requeridos        
+        //Requeridos
         if (Validator.esVacio(cliente.getRazonSocial())) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_cliente_vacio_razonSocial"));
@@ -205,47 +224,91 @@ public class ClienteServiceImpl implements IClienteService {
         }
     }
 
-    @Override
-    @Transactional
-    public Cliente guardar(Cliente cliente) {        
-        this.validarOperacion(TipoDeOperacion.ALTA, cliente);
-        cliente = clienteRepository.save(cliente);  
-        CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
-        cuentaCorrienteCliente.setCliente(cliente);
-        cuentaCorrienteCliente.setEmpresa(cliente.getEmpresa());
-        cuentaCorrienteCliente.setFechaApertura(cliente.getFechaAlta());
-        cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);
-        LOGGER.warn("El Cliente " + cliente + " se guardó correctamente." );
-        return cliente;
+  @Override
+  @Transactional
+  public Cliente guardar(Cliente cliente, Long idUsuarioCrendencial, long idUsuarioLoggedIn) {
+    usuarioService.verificarAdministrador(idUsuarioLoggedIn);
+    this.validarOperacion(TipoDeOperacion.ALTA, cliente);
+    CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
+    cuentaCorrienteCliente.setCliente(cliente);
+    cuentaCorrienteCliente.setEmpresa(cliente.getEmpresa());
+    cuentaCorrienteCliente.setFechaApertura(cliente.getFechaAlta());
+    if (idUsuarioCrendencial != null) {
+      Cliente clienteYaAsignado =
+          this.getClientePorIdUsuarioYidEmpresa(idUsuarioCrendencial, cliente.getEmpresa());
+      if (clienteYaAsignado != null) {
+        throw new BusinessServiceException(
+            MessageFormat.format(
+                ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_cliente_credencial_no_valida"),
+                clienteYaAsignado.getRazonSocial()));
+      }
+      cliente.setCredencial(usuarioService.getUsuarioPorId(idUsuarioCrendencial));
+      this.actualizarRolUsuarioParaVincular(idUsuarioCrendencial, idUsuarioLoggedIn);
     }
+    cliente = clienteRepository.save(cliente);
+    cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);
+    LOGGER.warn("El Cliente " + cliente + " se guardó correctamente.");
+    return cliente;
+  }
+
+  @Override
+  @Transactional
+  public void actualizar(Cliente cliente, Long idUsuarioCrendencial, long idUsuarioLoggedIn) {
+    usuarioService.verificarAdministrador(idUsuarioLoggedIn);
+    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, cliente);
+    if (idUsuarioCrendencial != null) {
+      Cliente clienteYaAsignado =
+          this.getClientePorIdUsuarioYidEmpresa(idUsuarioCrendencial, cliente.getEmpresa());
+      if (clienteYaAsignado != null) {
+        throw new BusinessServiceException(
+            MessageFormat.format(
+                ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_cliente_credencial_no_valida"),
+                clienteYaAsignado.getRazonSocial()));
+      }
+      cliente.setCredencial(usuarioService.getUsuarioPorId(idUsuarioCrendencial));
+      this.actualizarRolUsuarioParaVincular(idUsuarioCrendencial, idUsuarioLoggedIn);
+    } else {
+      cliente.setCredencial(null);
+    }
+    clienteRepository.save(cliente);
+  }
+
+  private void actualizarRolUsuarioParaVincular(
+      Long idUsuarioParaVincular, long idUsuarioLoggedIn) {
+    if (idUsuarioParaVincular != null) {
+      Usuario usuarioAModificarRol = usuarioService.getUsuarioPorId(idUsuarioParaVincular);
+      if (!usuarioAModificarRol.getRoles().contains(Rol.CLIENTE)) {
+        List<Rol> roles = usuarioAModificarRol.getRoles();
+        roles.add(Rol.CLIENTE);
+        usuarioAModificarRol.setRoles(roles);
+        usuarioService.actualizar(usuarioAModificarRol, idUsuarioLoggedIn);
+      }
+    }
+  }
 
     @Override
     @Transactional
-    public void actualizar(Cliente cliente) {
-        this.validarOperacion(TipoDeOperacion.ACTUALIZACION, cliente);        
-        clienteRepository.save(cliente);                   
-    }
-
-    @Override
-    @Transactional
-    public void eliminar(long idCliente) {
+    public void eliminar(long idCliente, long idUsuarioLoggedIn) {
+        usuarioService.verificarAdministrador(idUsuarioLoggedIn);
         Cliente cliente = this.getClientePorId(idCliente);
         if (cliente == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_cliente_no_existente"));
         }
-        cliente.setCredencial(null);
-        cliente.setEliminado(true);        
-        clienteRepository.save(cliente);                   
+        //cliente.setCredencial(null);
+        cliente.setEliminado(true);
+        clienteRepository.save(cliente);
     }
-    
+
     @Override
     public Cliente getClientePorIdPedido(long idPedido) {
         return clienteRepository.findClienteByIdPedido(idPedido);
     }
 
     @Override
-    public Cliente getClientePorIdUsuario(long idUsuario) {
-        return clienteRepository.findClienteByIdUsuario(idUsuario);
+    public Cliente getClientePorIdUsuarioYidEmpresa(long idUsuario, Empresa empresa) {
+        return clienteRepository.findClienteByIdUsuarioYidEmpresa(idUsuario, empresa.getId_Empresa());
     }
 }
