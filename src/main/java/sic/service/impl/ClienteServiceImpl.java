@@ -244,8 +244,8 @@ public class ClienteServiceImpl implements IClienteService {
                 clienteYaAsignado.getRazonSocial()));
       }
       cliente.setCredencial(usuarioService.getUsuarioPorId(idUsuarioCrendencial));
-      this.actualizarRolUsuarioParaVincular(idUsuarioCrendencial, idUsuarioLoggedIn);
     }
+    this.actualizarRolUsuarioParaVincular(idUsuarioCrendencial, idUsuarioLoggedIn, cliente.getEmpresa());
     cliente = clienteRepository.save(cliente);
     cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);
     LOGGER.warn("El Cliente " + cliente + " se guardó correctamente.");
@@ -268,23 +268,26 @@ public class ClienteServiceImpl implements IClienteService {
                 clienteYaAsignado.getRazonSocial()));
       }
       cliente.setCredencial(usuarioService.getUsuarioPorId(idUsuarioCrendencial));
-      this.actualizarRolUsuarioParaVincular(idUsuarioCrendencial, idUsuarioLoggedIn);
     } else {
       cliente.setCredencial(null);
     }
+    this.actualizarRolUsuarioParaVincular(idUsuarioCrendencial, idUsuarioLoggedIn, cliente.getEmpresa());
     clienteRepository.save(cliente);
   }
 
   private void actualizarRolUsuarioParaVincular(
-      Long idUsuarioParaVincular, long idUsuarioLoggedIn) {
+      Long idUsuarioParaVincular, long idUsuarioLoggedIn, Empresa empresa) {
     if (idUsuarioParaVincular != null) {
       Usuario usuarioAModificarRol = usuarioService.getUsuarioPorId(idUsuarioParaVincular);
+      List<Rol> roles = usuarioAModificarRol.getRoles();
       if (!usuarioAModificarRol.getRoles().contains(Rol.CLIENTE)) {
-        List<Rol> roles = usuarioAModificarRol.getRoles();
         roles.add(Rol.CLIENTE);
-        usuarioAModificarRol.setRoles(roles);
-        usuarioService.actualizar(usuarioAModificarRol, idUsuarioLoggedIn);
       }
+      if (this.getClientePorIdUsuarioYidEmpresa(idUsuarioParaVincular, empresa) == null) {
+          roles.remove(Rol.CLIENTE); // Que pasa si tiene un cliente en otra empresa? otra query para traer todos los clientes
+      }                              // y no quitarle el roll?
+      usuarioAModificarRol.setRoles(roles);
+      usuarioService.actualizar(usuarioAModificarRol, idUsuarioLoggedIn);
     }
   }
 
