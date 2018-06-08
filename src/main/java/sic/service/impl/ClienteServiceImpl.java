@@ -244,8 +244,8 @@ public class ClienteServiceImpl implements IClienteService {
                 clienteYaAsignado.getRazonSocial()));
       }
       cliente.setCredencial(usuarioService.getUsuarioPorId(idUsuarioCrendencial));
+      this.editarRolUsuario(cliente, idUsuarioLoggedIn, true);
     }
-    this.actualizarRolUsuarioParaVincular(idUsuarioCrendencial, idUsuarioLoggedIn, cliente.getEmpresa());
     cliente = clienteRepository.save(cliente);
     cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);
     LOGGER.warn("El Cliente " + cliente + " se guardó correctamente.");
@@ -268,27 +268,29 @@ public class ClienteServiceImpl implements IClienteService {
                 clienteYaAsignado.getRazonSocial()));
       }
       cliente.setCredencial(usuarioService.getUsuarioPorId(idUsuarioCrendencial));
+      this.editarRolUsuario(cliente, idUsuarioLoggedIn, true);
     } else {
+      this.editarRolUsuario(cliente, idUsuarioLoggedIn, false);
       cliente.setCredencial(null);
     }
-    this.actualizarRolUsuarioParaVincular(idUsuarioCrendencial, idUsuarioLoggedIn, cliente.getEmpresa());
     clienteRepository.save(cliente);
   }
 
-  private void actualizarRolUsuarioParaVincular(
-      Long idUsuarioParaVincular, long idUsuarioLoggedIn, Empresa empresa) {
-    if (idUsuarioParaVincular != null) {
-      Usuario usuarioAModificarRol = usuarioService.getUsuarioPorId(idUsuarioParaVincular);
-      List<Rol> roles = usuarioAModificarRol.getRoles();
-      if (!usuarioAModificarRol.getRoles().contains(Rol.CLIENTE)) {
+  private void editarRolUsuario(Cliente cliente, long idUsuarioLoggedIn, boolean agregar) {
+    Usuario usuarioAModificarRol =
+        usuarioService.getUsuarioPorId(cliente.getCredencial().getId_Usuario());
+    List<Rol> roles = usuarioAModificarRol.getRoles();
+    if (agregar) {
+      if (!roles.contains(Rol.CLIENTE)) {
         roles.add(Rol.CLIENTE);
       }
-      if (this.getClientePorIdUsuarioYidEmpresa(idUsuarioParaVincular, empresa) == null) {
-          roles.remove(Rol.CLIENTE); // Que pasa si tiene un cliente en otra empresa? otra query para traer todos los clientes
-      }                              // y no quitarle el roll?
-      usuarioAModificarRol.setRoles(roles);
-      usuarioService.actualizar(usuarioAModificarRol, idUsuarioLoggedIn);
+    } else {
+      if (this.getClientesPorIdUsuario(cliente.getCredencial().getId_Usuario()).size() == 1) {
+        roles.remove(Rol.CLIENTE);
+      }
     }
+    usuarioAModificarRol.setRoles(roles);
+    usuarioService.actualizar(usuarioAModificarRol, idUsuarioLoggedIn);
   }
 
     @Override
@@ -300,7 +302,6 @@ public class ClienteServiceImpl implements IClienteService {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_cliente_no_existente"));
         }
-        //cliente.setCredencial(null);
         cliente.setEliminado(true);
         clienteRepository.save(cliente);
     }
@@ -314,4 +315,10 @@ public class ClienteServiceImpl implements IClienteService {
     public Cliente getClientePorIdUsuarioYidEmpresa(long idUsuario, Empresa empresa) {
         return clienteRepository.findClienteByIdUsuarioYidEmpresa(idUsuario, empresa.getId_Empresa());
     }
+
+    @Override
+    public List<Cliente> getClientesPorIdUsuario(long idUsuario) {
+        return clienteRepository.findClienteByIdUsuario(idUsuario);
+    }
+
 }

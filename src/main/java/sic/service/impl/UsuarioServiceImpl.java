@@ -142,10 +142,6 @@ public class UsuarioServiceImpl implements IUsuarioService {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_invalido_email"));
     }
-    if (usuario.getRoles().isEmpty()) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_no_selecciono_rol"));
-    }
     if (operacion == TipoDeOperacion.ALTA) {
       if (Validator.esVacio(usuario.getPassword())) {
         throw new BusinessServiceException(

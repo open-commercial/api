@@ -3,6 +3,8 @@ package sic.service;
 import sic.modelo.*;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 public interface IClienteService {
 
   void actualizar(Cliente cliente, Long idUsuarioCrendencial, long idUsuarioLoggedIn);
@@ -30,4 +32,6 @@ public interface IClienteService {
   Cliente getClientePorIdPedido(long idPedido);
 
   Cliente getClientePorIdUsuarioYidEmpresa(long idUsuario, Empresa empresa);
+
+  List<Cliente> getClientesPorIdUsuario(long idUsuario);
 }

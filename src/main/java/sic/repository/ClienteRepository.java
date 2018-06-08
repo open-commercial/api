@@ -7,6 +7,8 @@ import org.springframework.data.repository.query.Param;
 import sic.modelo.Cliente;
 import sic.modelo.Empresa;
 
+import java.util.List;
+
 public interface ClienteRepository
     extends PagingAndSortingRepository<Cliente, Long>, QueryDslPredicateExecutor<Cliente> {
 
@@ -32,4 +34,9 @@ public interface ClienteRepository
       "SELECT c FROM Cliente c WHERE c.credencial.id_Usuario = :idUsuario AND c.empresa.id_Empresa = :idEmpresa AND c.eliminado = false")
   Cliente findClienteByIdUsuarioYidEmpresa(
       @Param("idUsuario") long idUsuario, @Param("idEmpresa") long idEmpresa);
+
+  @Query(
+          "SELECT c FROM Cliente c WHERE c.credencial.id_Usuario = :idUsuario AND c.eliminado = false")
+  List<Cliente> findClienteByIdUsuario(
+          @Param("idUsuario") long idUsuario);
 }
