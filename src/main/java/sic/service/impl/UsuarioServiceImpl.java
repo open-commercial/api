@@ -15,7 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
-import sic.service.IClienteService;
 import sic.service.IUsuarioService;
 import sic.service.BusinessServiceException;
 import sic.util.Utilidades;
@@ -29,16 +28,13 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final IEmpresaService empresaService;
-    private final IClienteService clienteService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     @Lazy
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, IEmpresaService empresaService,
-                              IClienteService clienteService) {
+    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, IEmpresaService empresaService) {
         this.usuarioRepository = usuarioRepository;
         this.empresaService = empresaService;
-        this.clienteService = clienteService;
     }
 
     @Override
