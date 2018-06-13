@@ -2,7 +2,11 @@ package sic.controller;
 
 import java.util.Calendar;
 import java.util.List;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,16 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sic.modelo.*;
 import sic.service.IClienteService;
 import sic.service.IEmpresaService;
@@ -36,7 +31,10 @@ public class PedidoController {
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
     private final int TAMANIO_PAGINA_DEFAULT = 50;
-    
+
+    @Value("${SIC_JWT_KEY}")
+    private String secretkey;
+
     @Autowired
     public PedidoController(IPedidoService pedidoService, IEmpresaService empresaService,
                             IUsuarioService usuarioService, IClienteService clienteService) {
@@ -99,7 +97,8 @@ public class PedidoController {
                                           @RequestParam(required = false) Long nroPedido,
                                           @RequestParam(required = false) EstadoPedido estadoPedido,
                                           @RequestParam(required = false) Integer pagina,
-                                          @RequestParam(required = false) Integer tamanio) {
+                                          @RequestParam(required = false) Integer tamanio,
+                                          @RequestHeader("Authorization") String token) {
         Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
         Calendar fechaDesde = Calendar.getInstance();
         Calendar fechaHasta = Calendar.getInstance();
@@ -129,7 +128,9 @@ public class PedidoController {
                                                                 .empresa(empresa)
                                                                 .pageable(pageable)
                                                                 .build();
-        return pedidoService.buscarConCriteria(criteria);
+        Claims claims =
+                Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+        return pedidoService.buscarConCriteria(criteria, (int) claims.get("idUsuario"));
     }
     
     @DeleteMapping("/pedidos/{idPedido}")

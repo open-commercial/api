@@ -29,20 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.BusquedaPedidoCriteria;
-import sic.modelo.Empresa;
-import sic.modelo.Factura;
-import sic.modelo.Pedido;
-import sic.modelo.RenglonFactura;
-import sic.modelo.RenglonPedido;
-import sic.modelo.EstadoPedido;
-import sic.modelo.Movimiento;
-import sic.modelo.QPedido;
-import sic.service.IFacturaService;
-import sic.service.IPedidoService;
-import sic.service.BusinessServiceException;
-import sic.service.ServiceException;
-import sic.modelo.TipoDeOperacion;
+import sic.modelo.*;
+import sic.service.*;
 import sic.repository.PedidoRepository;
 import sic.util.FormatterFechaHora;
 
@@ -50,14 +38,19 @@ import sic.util.FormatterFechaHora;
 public class PedidoServiceImpl implements IPedidoService {
 
     private final PedidoRepository pedidoRepository;
-    private final IFacturaService facturaService;    
+    private final IFacturaService facturaService;
+    private final IUsuarioService usuarioService;
+    private final IClienteService clienteService;
     private final static BigDecimal CIEN = new BigDecimal("100");
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
-    public PedidoServiceImpl(IFacturaService facturaService, PedidoRepository pedidoRepository) {
+    public PedidoServiceImpl(IFacturaService facturaService, PedidoRepository pedidoRepository,
+                             IUsuarioService usuarioService, IClienteService clienteService) {
         this.facturaService = facturaService;
-        this.pedidoRepository = pedidoRepository;        
+        this.pedidoRepository = pedidoRepository;
+        this.usuarioService = usuarioService;
+        this.clienteService = clienteService;
     }
 
     @Override
@@ -185,7 +178,7 @@ public class PedidoServiceImpl implements IPedidoService {
     }
 
     @Override
-    public Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria) {
+    public Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
         //Fecha
         if (criteria.isBuscaPorFecha() & (criteria.getFechaDesde() == null | criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -232,6 +225,26 @@ public class PedidoServiceImpl implements IPedidoService {
         if (criteria.isBuscaUsuario()) builder.and(qpedido.usuario.eq(criteria.getUsuario()));
         if (criteria.isBuscaPorNroPedido()) builder.and(qpedido.nroPedido.eq(criteria.getNroPedido()));
         if (criteria.isBuscaPorEstadoPedido()) builder.and(qpedido.estado.eq(criteria.getEstadoPedido()));
+        Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+        BooleanBuilder rsPredicate = new BooleanBuilder();
+        if (!usuarioLogueado.getRoles().isEmpty()) {
+            for (Rol rol : usuarioLogueado.getRoles()) {
+                switch (rol) {
+                    case VIAJANTE:
+                        rsPredicate.or(qpedido.cliente.viajante.eq(usuarioLogueado));
+                        break;
+                    case CLIENTE:
+                        Cliente clienteRelacionado =
+                                clienteService.getClientePorIdUsuarioYidEmpresa(
+                                        idUsuarioLoggedIn, criteria.getEmpresa());
+                        if (clienteRelacionado != null) {
+                            rsPredicate.or(qpedido.cliente.eq(clienteRelacionado));
+                        }
+                        break;
+                }
+            }
+            builder.and(rsPredicate);
+        }
         Page<Pedido> pedidos = pedidoRepository.findAll(builder, criteria.getPageable());
         this.calcularTotalActualDePedidos(pedidos.getContent());
         return pedidos;
