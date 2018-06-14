@@ -8,14 +8,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
@@ -69,17 +62,7 @@ public class PedidoServiceImpl implements IPedidoService {
         }
         return pedido;
     }
-    
-    @Override
-    public Pedido getPedidoPorNumeroYEmpresa(Long nroPedido, Empresa empresa) {
-        Pedido pedido = this.pedidoRepository.findByNroPedidoAndEmpresaAndEliminado(nroPedido, empresa, false);
-        if (pedido == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_pedido_no_existente"));
-        }
-        return pedido;
-    }
-    
+
     private void validarPedido(TipoDeOperacion operacion, Pedido pedido) {
         //Entrada de Datos
         //Requeridos
@@ -150,15 +133,19 @@ public class PedidoServiceImpl implements IPedidoService {
         return pedido;
     }
 
-    @Override
-    public long calcularNumeroPedido(Empresa empresa) {
-        Pedido pedido = pedidoRepository.findTopByEmpresaAndEliminadoOrderByNroPedidoDesc(empresa, false);
-        if (pedido == null) {
-            return 1; // No existe ningun Pedido anterior
-        } else {
-            return 1 + pedido.getNroPedido();
-        }
+  @Override
+  public long calcularNumeroPedido(Empresa empresa) {
+    long min = 1L;
+    long max = 9999999999L; // 10 digitos
+    long randomLong = 0L;
+    boolean esRepetido = true;
+    while (esRepetido) {
+      randomLong = min + (long) (Math.random() * (max - min));
+      Pedido p = pedidoRepository.findByNroPedidoAndEmpresaAndEliminado(randomLong, empresa, false);
+      if (p == null) esRepetido = false;
     }
+    return randomLong;
+  }
 
     @Override
     public List<Factura> getFacturasDelPedido(long idPedido) {
