@@ -34,4 +34,7 @@ public interface IClienteService {
   Cliente getClientePorIdUsuarioYidEmpresa(long idUsuario, Empresa empresa);
 
   List<Cliente> getClientesPorIdUsuario(long idUsuario);
+
+  int desvincularUsuariosDeViajante(long idViajante);
+
 }

@@ -1,5 +1,6 @@
 package sic.repository;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -39,4 +40,8 @@ public interface ClienteRepository
           "SELECT c FROM Cliente c WHERE c.credencial.id_Usuario = :idUsuario AND c.eliminado = false")
   List<Cliente> findClienteByIdUsuario(
           @Param("idUsuario") long idUsuario);
+
+  @Modifying
+  @Query("UPDATE Cliente c SET c.viajante = null " + "WHERE c.viajante.id_Usuario = :idViajante")
+  int desvincularViajante(@Param("idViajante") long idViajante);
 }

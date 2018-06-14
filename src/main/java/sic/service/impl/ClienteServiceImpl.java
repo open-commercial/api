@@ -244,7 +244,7 @@ public class ClienteServiceImpl implements IClienteService {
                 clienteYaAsignado.getRazonSocial()));
       }
       cliente.setCredencial(usuarioService.getUsuarioPorId(idUsuarioCrendencial));
-      this.editarRolUsuario(cliente, idUsuarioLoggedIn, true);
+      this.editarRolClienteDeUsuario(cliente, idUsuarioLoggedIn, true);
     }
     cliente = clienteRepository.save(cliente);
     cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);
@@ -268,15 +268,15 @@ public class ClienteServiceImpl implements IClienteService {
                 clienteYaAsignado.getRazonSocial()));
       }
       cliente.setCredencial(usuarioService.getUsuarioPorId(idUsuarioCrendencial));
-      this.editarRolUsuario(cliente, idUsuarioLoggedIn, true);
+      this.editarRolClienteDeUsuario(cliente, idUsuarioLoggedIn, true);
     } else {
-      this.editarRolUsuario(cliente, idUsuarioLoggedIn, false);
+      this.editarRolClienteDeUsuario(cliente, idUsuarioLoggedIn, false);
       cliente.setCredencial(null);
     }
     clienteRepository.save(cliente);
   }
 
-  private void editarRolUsuario(Cliente cliente, long idUsuarioLoggedIn, boolean agregar) {
+  private void editarRolClienteDeUsuario(Cliente cliente, long idUsuarioLoggedIn, boolean agregar) {
     Usuario usuarioAModificarRol =
         usuarioService.getUsuarioPorId(cliente.getCredencial().getId_Usuario());
     List<Rol> roles = usuarioAModificarRol.getRoles();
@@ -321,4 +321,8 @@ public class ClienteServiceImpl implements IClienteService {
         return clienteRepository.findClienteByIdUsuario(idUsuario);
     }
 
+  @Override
+  public int desvincularUsuariosDeViajante(long idViajante) {
+    return clienteRepository.desvincularViajante(idViajante);
+  }
 }
