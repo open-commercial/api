@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
@@ -141,7 +140,7 @@ public class PedidoServiceImpl implements IPedidoService {
     long randomLong = 0L;
     boolean esRepetido = true;
     while (esRepetido) {
-      randomLong = ThreadLocalRandom.current().nextLong(min, max);
+      randomLong = min + (long) (Math.random() * (max - min));
       Pedido p = pedidoRepository.findByNroPedidoAndEmpresaAndEliminado(randomLong, empresa, false);
       if (p == null) esRepetido = false;
     }
