@@ -89,11 +89,15 @@ public class CajaServiceImpl implements ICajaService {
         }
         //Una Caja por dia
         Caja ultimaCaja = this.getUltimaCaja(caja.getEmpresa().getId_Empresa());
-        if (ultimaCaja != null && ultimaCaja.getEstado() == EstadoCaja.ABIERTA) {
+        if (ultimaCaja == null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_caja_no_existente"));
+        }
+        if (ultimaCaja.getEstado() == EstadoCaja.ABIERTA) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_caja_anterior_abierta"));
         }
-        if (ultimaCaja != null && Validator.compararDias(ultimaCaja.getFechaApertura(), caja.getFechaApertura()) >= 0) {
+        if (Validator.compararDias(ultimaCaja.getFechaApertura(), caja.getFechaApertura()) >= 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_fecha_apertura_no_valida"));
         }
@@ -349,7 +353,12 @@ public class CajaServiceImpl implements ICajaService {
         Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
         if (usuario.getRoles().contains(Rol.ADMINISTRADOR)) {
             Caja caja = getCajaPorId(idCaja);
-            if (caja.getId_Caja() ==  this.getUltimaCaja(caja.getEmpresa().getId_Empresa()).getId_Caja()) {
+            Caja ultimaCaja = this.getUltimaCaja(caja.getEmpresa().getId_Empresa());
+            if (ultimaCaja == null) {
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_caja_no_existente"));
+            }
+            if (caja.getId_Caja() == ultimaCaja.getId_Caja()) {
                 caja.setSaldoSistema(null);
                 caja.setSaldoApertura(saldoAperturaNuevo);
                 caja.setSaldoReal(null);

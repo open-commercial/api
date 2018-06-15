@@ -8,14 +8,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
@@ -62,17 +55,7 @@ public class PedidoServiceImpl implements IPedidoService {
         }
         return pedido;
     }
-    
-    @Override
-    public Pedido getPedidoPorNumeroYEmpresa(Long nroPedido, Empresa empresa) {
-        Pedido pedido = this.pedidoRepository.findByNroPedidoAndEmpresaAndEliminado(nroPedido, empresa, false);
-        if (pedido == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_pedido_no_existente"));
-        }
-        return pedido;
-    }
-    
+
     private void validarPedido(TipoDeOperacion operacion, Pedido pedido) {
         //Entrada de Datos
         //Requeridos
@@ -118,13 +101,6 @@ public class PedidoServiceImpl implements IPedidoService {
         }        
     }
 
-    private List<Pedido> calcularTotalActualDePedidos(List<Pedido> pedidos) {
-        pedidos.stream().forEach(p -> {
-            this.calcularTotalActualDePedido(p);
-        });
-        return pedidos;
-    }
-
     @Override
     public Pedido actualizarEstadoPedido(Pedido pedido) {
         pedido.setEstado(EstadoPedido.ACTIVO);
@@ -150,15 +126,19 @@ public class PedidoServiceImpl implements IPedidoService {
         return pedido;
     }
 
-    @Override
-    public long calcularNumeroPedido(Empresa empresa) {
-        Pedido pedido = pedidoRepository.findTopByEmpresaAndEliminadoOrderByNroPedidoDesc(empresa, false);
-        if (pedido == null) {
-            return 1; // No existe ningun Pedido anterior
-        } else {
-            return 1 + pedido.getNroPedido();
-        }
+  @Override
+  public long calcularNumeroPedido(Empresa empresa) {
+    long min = 1L;
+    long max = 9999999999L; // 10 digitos
+    long randomLong = 0L;
+    boolean esRepetido = true;
+    while (esRepetido) {
+      randomLong = min + (long) (Math.random() * (max - min));
+      Pedido p = pedidoRepository.findByNroPedidoAndEmpresaAndEliminado(randomLong, empresa, false);
+      if (p == null) esRepetido = false;
     }
+    return randomLong;
+  }
 
     @Override
     public List<Factura> getFacturasDelPedido(long idPedido) {
@@ -246,7 +226,7 @@ public class PedidoServiceImpl implements IPedidoService {
             builder.and(rsPredicate);
         }
         Page<Pedido> pedidos = pedidoRepository.findAll(builder, criteria.getPageable());
-        this.calcularTotalActualDePedidos(pedidos.getContent());
+        pedidos.getContent().forEach(p -> this.calcularTotalActualDePedido(p));
         return pedidos;
     }
 
@@ -276,15 +256,13 @@ public class PedidoServiceImpl implements IPedidoService {
     @Override
     public HashMap<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido) {
         List<RenglonFactura> renglonesDeFacturas = new ArrayList<>();
-        this.getFacturasDelPedido(nroPedido).stream().forEach(f -> {
-            f.getRenglones().stream().forEach(r -> {
-                renglonesDeFacturas.add(facturaService.calcularRenglon(f.getTipoComprobante(),
-                        Movimiento.VENTA, r.getCantidad(), r.getId_ProductoItem(), r.getDescuento_porcentaje(), false));
-            });
-        });
+        this.getFacturasDelPedido(nroPedido).forEach(f ->
+            f.getRenglones().forEach(r -> renglonesDeFacturas.add(facturaService.calcularRenglon(f.getTipoComprobante(),
+                        Movimiento.VENTA, r.getCantidad(), r.getId_ProductoItem(), r.getDescuento_porcentaje(),false)))
+        );
         HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
         if (!renglonesDeFacturas.isEmpty()) {
-            renglonesDeFacturas.stream().forEach(r -> {
+            renglonesDeFacturas.forEach(r -> {
                 if (listaRenglonesUnificados.containsKey(r.getId_ProductoItem())) {
                     listaRenglonesUnificados.get(r.getId_ProductoItem())
                             .setCantidad(listaRenglonesUnificados
@@ -301,7 +279,7 @@ public class PedidoServiceImpl implements IPedidoService {
     public byte[] getReportePedido(Pedido pedido) {
         ClassLoader classLoader = PedidoServiceImpl.class.getClassLoader();
         InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Pedido.jasper");
-        Map params = new HashMap();
+        Map<String, Object> params = new HashMap<>();
         params.put("pedido", pedido);
         if (!pedido.getEmpresa().getLogo().isEmpty()) {
             try {

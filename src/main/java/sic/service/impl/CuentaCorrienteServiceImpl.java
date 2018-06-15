@@ -1,43 +1,37 @@
 package sic.service.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.ResourceBundle;
+import java.net.URL;
+import java.util.*;
+import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
+import javax.swing.*;
+
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.Cliente;
-import sic.modelo.CuentaCorriente;
-import sic.modelo.CuentaCorrienteCliente;
-import sic.modelo.CuentaCorrienteProveedor;
-import sic.modelo.FacturaCompra;
-import sic.modelo.FacturaVenta;
-import sic.modelo.Nota;
-import sic.modelo.NotaCredito;
-import sic.modelo.NotaCreditoCliente;
-import sic.modelo.NotaCreditoProveedor;
-import sic.modelo.NotaDebito;
-import sic.modelo.NotaDebitoCliente;
-import sic.modelo.NotaDebitoProveedor;
-import sic.modelo.Proveedor;
-import sic.modelo.Recibo;
-import sic.modelo.RenglonCuentaCorriente;
-import sic.modelo.TipoDeComprobante;
-import sic.modelo.TipoDeOperacion;
+import sic.modelo.*;
 import sic.repository.CuentaCorrienteClienteRepository;
 import sic.repository.CuentaCorrienteProveedorRepository;
 import sic.repository.CuentaCorrienteRepository;
-import sic.service.BusinessServiceException;
-import sic.service.IClienteService;
-import sic.service.ICuentaCorrienteService;
-import sic.service.IProveedorService;
-import sic.service.IRenglonCuentaCorrienteService;
+import sic.service.*;
 
 @Service
 public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
@@ -45,8 +39,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     private final CuentaCorrienteRepository cuentaCorrienteRepository;
     private final CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository;
     private final CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository;
-    private final IClienteService clienteService;
-    private final IProveedorService proveedorService;
     private final IRenglonCuentaCorrienteService renglonCuentaCorrienteService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     
@@ -55,14 +47,11 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     public CuentaCorrienteServiceImpl(CuentaCorrienteRepository cuentaCorrienteRepository,
                                       CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository,
                                       CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository,
-                                      IClienteService clienteService, IProveedorService proveedorService,
                                       IRenglonCuentaCorrienteService renglonCuentaCorrienteService) {
 
                 this.cuentaCorrienteRepository = cuentaCorrienteRepository;
                 this.cuentaCorrienteClienteRepository = cuentaCorrienteClienteRepository;
                 this.cuentaCorrienteProveedorRepository = cuentaCorrienteProveedorRepository;
-                this.clienteService = clienteService;
-                this.proveedorService = proveedorService;
                 this.renglonCuentaCorrienteService = renglonCuentaCorrienteService;
     }
 
@@ -252,18 +241,18 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         }
     }
     
-    public CuentaCorriente getCuentaCorrientePorNota(Nota nota) {
+    private CuentaCorriente getCuentaCorrientePorNota(Nota nota) {
         CuentaCorriente cc = null;
         if (nota instanceof NotaCreditoCliente || nota instanceof NotaDebitoCliente) {
             if (nota instanceof NotaCreditoCliente) {
                 cc = this.getCuentaCorrientePorCliente(((NotaCreditoCliente) nota).getCliente());
-            } else if (nota instanceof NotaDebitoCliente) {
+            } else {
                 cc = this.getCuentaCorrientePorCliente(((NotaDebitoCliente) nota).getCliente());
             }
         } else if (nota instanceof NotaCreditoProveedor || nota instanceof NotaDebitoProveedor) {
             if (nota instanceof NotaCreditoProveedor) {
                 cc = this.getCuentaCorrientePorProveedor(((NotaCreditoProveedor) nota).getProveedor());
-            } else if (nota instanceof NotaDebitoProveedor) {
+            } else {
                 cc = this.getCuentaCorrientePorProveedor(((NotaDebitoProveedor) nota).getProveedor());
             }
         }
@@ -310,6 +299,68 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     @Override
     public Date getFechaUltimoMovimiento(long idCuentaCorriente) {
         return renglonCuentaCorrienteService.getFechaUltimoMovimiento(idCuentaCorriente);
+    }
+
+    @Override
+    public byte[] getReporteCuentaCorrienteCliente(CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page, String formato) {
+        ClassLoader classLoader = CuentaCorrienteServiceImpl.class.getClassLoader();
+        InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/CuentaCorriente.jasper");
+        page = new PageRequest(0, (page.getPageNumber() + 1) * page.getPageSize());
+        JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(this.getRenglonesCuentaCorriente(cuentaCorrienteCliente.getIdCuentaCorriente(), page).getContent());
+        Map<String, Object> params = new HashMap<>();
+        params.put("cuentaCorrienteCliente", cuentaCorrienteCliente);
+        if (!cuentaCorrienteCliente.getEmpresa().getLogo().isEmpty()) {
+            try {
+                params.put("logo", new ImageIcon(ImageIO.read(new URL(cuentaCorrienteCliente.getEmpresa().getLogo()))).getImage());
+            } catch (IOException ex) {
+                LOGGER.error(ex.getMessage());
+                throw new ServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_empresa_404_logo"), ex);
+            }
+        }
+        switch (formato) {
+            case "xlsx":
+                try {
+                    return xlsReportToArray(JasperFillManager.fillReport(isFileReport, params, ds));
+                } catch (JRException ex) {
+                    LOGGER.error(ex.getMessage());
+                    throw new ServiceException(ResourceBundle.getBundle("Mensajes")
+                            .getString("mensaje_error_reporte"), ex);
+                }
+            case "pdf":
+                try {
+                    return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(isFileReport, params, ds));
+                } catch (JRException ex) {
+                    LOGGER.error(ex.getMessage());
+                    throw new ServiceException(ResourceBundle.getBundle("Mensajes")
+                            .getString("mensaje_error_reporte"), ex);
+                }
+            default:
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_formato_no_valido"));
+        }
+
+    }
+
+    private byte[] xlsReportToArray(JasperPrint jasperPrint) {
+        byte[] bytes = null;
+        try {
+            JRXlsxExporter jasperXlsxExportMgr = new JRXlsxExporter();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            SimpleOutputStreamExporterOutput simpleOutputStreamExporterOutput = new SimpleOutputStreamExporterOutput(out);
+            jasperXlsxExportMgr.setExporterInput(new SimpleExporterInput(jasperPrint));
+            jasperXlsxExportMgr.setExporterOutput(simpleOutputStreamExporterOutput);
+            jasperXlsxExportMgr.exportReport();
+            bytes = out.toByteArray();
+            out.close();
+        } catch (JRException ex){
+            LOGGER.error(ex.getMessage());
+            throw new ServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_error_reporte"), ex);
+        } catch (IOException ex) {
+            LOGGER.error(ex.getMessage());
+        }
+        return bytes;
     }
 
 }
