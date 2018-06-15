@@ -112,8 +112,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
           case VIAJANTE:
             rsPredicate.or(qusuario.roles.contains(Rol.VIAJANTE));
             break;
-          case CLIENTE:
-            rsPredicate.or(qusuario.roles.contains(Rol.CLIENTE));
+          case COMPRADOR:
+            rsPredicate.or(qusuario.roles.contains(Rol.COMPRADOR));
             break;
         }
       }
@@ -147,6 +147,10 @@ public class UsuarioServiceImpl implements IUsuarioService {
         throw new BusinessServiceException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_vacio_password"));
       }
+    }
+    if (usuario.getRoles().isEmpty()) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_no_selecciono_rol"));
     }
     // Username sin espacios en blanco
     if (usuario.getUsername().contains(" ")) {
@@ -218,7 +222,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
       this.clienteService.desvincularUsuariosDeViajante(usuario.getId_Usuario());
     }
     if (this.getUsuarioPorId(idUsuarioLoggedIn).getId_Usuario() != usuario.getId_Usuario()) {
-      usuario.setToken(null);
+      this.actualizarToken(null, usuario.getId_Usuario());
     }
     usuarioRepository.save(usuario);
   }
@@ -268,4 +272,22 @@ public class UsuarioServiceImpl implements IUsuarioService {
           ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
     }
   }
+
+  @Override
+  public int getNivelDeAcceso(Usuario usuario) {
+    if (usuario.getRoles().contains(Rol.ADMINISTRADOR)) {
+      return Rol.ADMINISTRADOR.getNivelDeAcceso();
+    }
+    if (usuario.getRoles().contains(Rol.ENCARGADO)) {
+      return Rol.ENCARGADO.getNivelDeAcceso();
+    }
+    if (usuario.getRoles().contains(Rol.VENDEDOR)) {
+      return Rol.VENDEDOR.getNivelDeAcceso();
+    }
+    if (usuario.getRoles().contains(Rol.VIAJANTE)) {
+      return Rol.VIAJANTE.getNivelDeAcceso();
+    }
+    return Rol.COMPRADOR.getNivelDeAcceso();
+  }
+
 }

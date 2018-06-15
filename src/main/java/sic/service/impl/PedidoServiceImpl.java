@@ -233,7 +233,7 @@ public class PedidoServiceImpl implements IPedidoService {
                     case VIAJANTE:
                         rsPredicate.or(qpedido.cliente.viajante.eq(usuarioLogueado));
                         break;
-                    case CLIENTE:
+                    case COMPRADOR:
                         Cliente clienteRelacionado =
                                 clienteService.getClientePorIdUsuarioYidEmpresa(
                                         idUsuarioLoggedIn, criteria.getEmpresa());

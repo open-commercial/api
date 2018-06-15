@@ -133,7 +133,7 @@ public class ClienteServiceImpl implements IClienteService {
     if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR)) {
       if (usuarioLoggedIn.getRoles().contains(Rol.VIAJANTE)
-          && usuarioLoggedIn.getRoles().contains(Rol.CLIENTE)) {
+          && usuarioLoggedIn.getRoles().contains(Rol.COMPRADOR)) {
         builder.and(
             qcliente
                 .viajante
@@ -146,7 +146,7 @@ public class ClienteServiceImpl implements IClienteService {
       } else {
         if (usuarioLoggedIn.getRoles().contains(Rol.VIAJANTE))
           builder.and(qcliente.viajante.eq(usuarioLoggedIn));
-        if (usuarioLoggedIn.getRoles().contains(Rol.CLIENTE))
+        if (usuarioLoggedIn.getRoles().contains(Rol.COMPRADOR))
           builder.and(
               qcliente.eq(
                   this.getClientePorIdUsuarioYidEmpresa(
@@ -281,12 +281,12 @@ public class ClienteServiceImpl implements IClienteService {
         usuarioService.getUsuarioPorId(cliente.getCredencial().getId_Usuario());
     List<Rol> roles = usuarioAModificarRol.getRoles();
     if (agregar) {
-      if (!roles.contains(Rol.CLIENTE)) {
-        roles.add(Rol.CLIENTE);
+      if (!roles.contains(Rol.COMPRADOR)) {
+        roles.add(Rol.COMPRADOR);
       }
     } else {
       if (this.getClientesPorIdUsuario(cliente.getCredencial().getId_Usuario()).size() == 1) {
-        roles.remove(Rol.CLIENTE);
+        roles.remove(Rol.COMPRADOR);
       }
     }
     usuarioAModificarRol.setRoles(roles);

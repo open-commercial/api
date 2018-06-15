@@ -13,7 +13,6 @@ import java.math.RoundingMode;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -357,7 +356,7 @@ public class FacturaServiceImpl implements IFacturaService {
           case VIAJANTE:
             rsPredicate.or(qFacturaVenta.cliente.viajante.eq(usuarioLogueado));
             break;
-          case CLIENTE:
+          case COMPRADOR:
             Cliente clienteRelacionado =
                 clienteService.getClientePorIdUsuarioYidEmpresa(
                     idUsuarioLoggedIn, criteria.getEmpresa());
