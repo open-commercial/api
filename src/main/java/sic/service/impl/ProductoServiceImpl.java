@@ -1,14 +1,19 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import net.sf.jasperreports.export.*;
 import sic.modelo.BusquedaProductoCriteria;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.util.*;
-import java.util.stream.IntStream;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
@@ -91,7 +96,7 @@ public class ProductoServiceImpl implements IProductoService {
                 .compareTo(this.calcularGananciaNeto(producto.getPrecioCosto(), producto.getGanancia_porcentaje())
                         .setScale(3, RoundingMode.DOWN)) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_producto_ganancia_neta_incorrecta"));
+                    .getString("mensaje_producto_ganancia_neta_incorrecta"));
         }
         if (producto.getPrecioVentaPublico().setScale(3, RoundingMode.DOWN)
                 .compareTo(this.calcularPVP(producto.getPrecioCosto(), producto.getGanancia_porcentaje())
@@ -103,19 +108,19 @@ public class ProductoServiceImpl implements IProductoService {
                 .compareTo(this.calcularImpInternoNeto(producto.getPrecioVentaPublico(), producto.getImpuestoInterno_porcentaje())
                         .setScale(3, RoundingMode.DOWN)) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_producto_impuesto_interno_neto_incorrecto"));
+                    .getString("mensaje_producto_impuesto_interno_neto_incorrecto"));
         }
         if (producto.getIva_neto().setScale(3, RoundingMode.DOWN)
                 .compareTo(this.calcularIVANeto(producto.getPrecioVentaPublico(), producto.getIva_porcentaje())
                         .setScale(3, RoundingMode.DOWN)) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_producto_iva_neto_incorrecto"));
+                    .getString("mensaje_producto_iva_neto_incorrecto"));
         }
         if (producto.getPrecioLista().setScale(3, RoundingMode.DOWN)
                 .compareTo(this.calcularPrecioLista(producto.getPrecioVentaPublico(), producto.getIva_porcentaje(), producto.getImpuestoInterno_porcentaje())
                         .setScale(3, RoundingMode.DOWN)) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_producto_precio_lista_incorrecto"));
+                    .getString("mensaje_producto_precio_lista_incorrecto"));
         }
     }
 
@@ -141,7 +146,7 @@ public class ProductoServiceImpl implements IProductoService {
         builder.and(qproducto.empresa.eq(criteria.getEmpresa()).and(qproducto.eliminado.eq(false)));
         if (criteria.isBuscarPorCodigo() && criteria.isBuscarPorDescripcion()) {
             builder.and(qproducto.codigo.containsIgnoreCase(criteria.getCodigo())
-                    .or(this.buildPredicadoDescripcion(criteria.getDescripcion(), qproducto)));            
+                    .or(this.buildPredicadoDescripcion(criteria.getDescripcion(), qproducto)));
         } else {
             if (criteria.isBuscarPorCodigo()) {
                 builder.and(qproducto.codigo.containsIgnoreCase(criteria.getCodigo()));
@@ -160,7 +165,7 @@ public class ProductoServiceImpl implements IProductoService {
             builder.and(qproducto.cantidad.loe(qproducto.cantMinima)).and(qproducto.ilimitado.eq(false));
         }
         int pageNumber = 0;
-        int pageSize = Integer.MAX_VALUE;        
+        int pageSize = Integer.MAX_VALUE;
         if (criteria.getPageable() != null) {
             pageNumber = criteria.getPageable().getPageNumber();
             pageSize = criteria.getPageable().getPageSize();
@@ -168,7 +173,7 @@ public class ProductoServiceImpl implements IProductoService {
         Pageable pageable = new PageRequest(pageNumber, pageSize, new Sort(Sort.Direction.ASC, "descripcion"));
         return productoRepository.findAll(builder, pageable);
     }
-    
+
     private BooleanBuilder buildPredicadoDescripcion(String descripcion, QProducto qproducto) {
         String[] terminos = descripcion.split(" ");
         BooleanBuilder descripcionProducto = new BooleanBuilder();
@@ -305,13 +310,13 @@ public class ProductoServiceImpl implements IProductoService {
                 p.setIva_neto(IVANeto);
                 p.setImpuestoInterno_porcentaje(impuestoInternoPorcentaje);
                 p.setImpuestoInterno_neto(impuestoInternoNeto);
-                p.setPrecioLista(precioLista);            
+                p.setPrecioLista(precioLista);
             }
             if (checkMedida || checkRubro || checkProveedor || checkPrecios) {
                 p.setFechaUltimaModificacion(new Date());                
             }
             this.validarOperacion(TipoDeOperacion.ACTUALIZACION, p);
-        });        
+        });
         productoRepository.save(productos);
         LOGGER.warn("Los Productos " + productos + " se modificaron correctamente.");
         return productos;
@@ -348,7 +353,7 @@ public class ProductoServiceImpl implements IProductoService {
 
     @Override
     public Map<Long, BigDecimal> getProductosSinStockDisponible(long[] idProducto, BigDecimal[] cantidad) {
-        Map productos = new HashMap();
+        Map<Long, BigDecimal> productos = new HashMap<>();
         int longitudIds = idProducto.length;
         int longitudCantidades = cantidad.length;
         if (longitudIds == longitudCantidades) {
@@ -367,7 +372,7 @@ public class ProductoServiceImpl implements IProductoService {
 
     @Override
     public Map<Long, BigDecimal> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, BigDecimal[] cantidad) {
-        Map productos = new HashMap();
+        Map<Long, BigDecimal> productos = new HashMap<>();
         int longitudIds = idProducto.length;
         int longitudCantidades = cantidad.length;
         if (longitudIds == longitudCantidades) {
@@ -392,7 +397,7 @@ public class ProductoServiceImpl implements IProductoService {
         if (precioCosto.compareTo(BigDecimal.ZERO) == 0) return BigDecimal.ZERO;
         BigDecimal resultado;
         if (!ascendente) {
-            resultado = pvp.subtract(precioCosto).divide(precioCosto, 15, RoundingMode.HALF_UP).multiply(CIEN); 
+            resultado = pvp.subtract(precioCosto).divide(precioCosto, 15, RoundingMode.HALF_UP).multiply(CIEN);
         } else if (precioDeListaAnterior.compareTo(BigDecimal.ZERO) == 0 || precioCosto.compareTo(BigDecimal.ZERO) == 0) {
             return BigDecimal.ZERO;
         } else {
@@ -433,10 +438,10 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     @Override
-    public byte[] getReporteListaDePreciosPorEmpresa(List<Producto> productos, Empresa empresa) {
+    public byte[] getListaDePreciosPorEmpresa(List<Producto> productos, Empresa empresa, String formato) {
         ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
-        InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");        
-        Map params = new HashMap();
+        InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");
+        Map<String, Object> params = new HashMap<>();
         params.put("empresa", empresa);
         if (!empresa.getLogo().isEmpty()) {
             try {
@@ -448,13 +453,49 @@ public class ProductoServiceImpl implements IProductoService {
             }
         }
         JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(productos);
+        switch (formato) {
+            case "xlsx":
+                try {
+                    return xlsReportToArray(JasperFillManager.fillReport(isFileReport, params, ds));
+                } catch (JRException ex) {
+                    LOGGER.error(ex.getMessage());
+                    throw new ServiceException(ResourceBundle.getBundle("Mensajes")
+                            .getString("mensaje_error_reporte"), ex);
+                }
+            case "pdf":
+                try {
+                    return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(isFileReport, params, ds));
+                } catch (JRException ex) {
+                    LOGGER.error(ex.getMessage());
+                    throw new ServiceException(ResourceBundle.getBundle("Mensajes")
+                            .getString("mensaje_error_reporte"), ex);
+                }
+            default:
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_formato_no_valido"));
+        }
+    }
+
+    private byte[] xlsReportToArray(JasperPrint jasperPrint) {
+        byte[] bytes = null;
         try {
-            return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(isFileReport, params, ds));
-        } catch (JRException ex) {
+            JRXlsxExporter jasperXlsxExportMgr = new JRXlsxExporter();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            SimpleOutputStreamExporterOutput simpleOutputStreamExporterOutput = new SimpleOutputStreamExporterOutput(out);
+            jasperXlsxExportMgr.setExporterInput(new SimpleExporterInput(jasperPrint));
+            jasperXlsxExportMgr.setExporterOutput(simpleOutputStreamExporterOutput);
+            jasperXlsxExportMgr.exportReport();
+            bytes = out.toByteArray();
+            out.close();
+        } catch (JRException ex){
             LOGGER.error(ex.getMessage());
             throw new ServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_error_reporte"), ex);
+        } catch (IOException ex) {
+            LOGGER.error(ex.getMessage());
         }
+        return bytes;
     }
-    
+
+
 }
