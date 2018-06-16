@@ -227,13 +227,21 @@ public class ClienteServiceImpl implements IClienteService {
   @Override
   @Transactional
   public Cliente guardar(Cliente cliente, Long idUsuarioCrendencial, long idUsuarioLoggedIn) {
-    usuarioService.verificarAdministrador(idUsuarioLoggedIn);
+    usuarioService.verificarRol(Rol.ADMINISTRADOR, idUsuarioLoggedIn);
     this.validarOperacion(TipoDeOperacion.ALTA, cliente);
     CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
     cuentaCorrienteCliente.setCliente(cliente);
     cuentaCorrienteCliente.setEmpresa(cliente.getEmpresa());
     cuentaCorrienteCliente.setFechaApertura(cliente.getFechaAlta());
     if (idUsuarioCrendencial != null) {
+      if (!usuarioService
+          .getUsuarioPorId(idUsuarioCrendencial)
+          .getRoles()
+          .contains(Rol.COMPRADOR)) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes")
+                .getString("mensaje_usuario_credencial_no_comprador"));
+      }
       Cliente clienteYaAsignado =
           this.getClientePorIdUsuarioYidEmpresa(idUsuarioCrendencial, cliente.getEmpresa());
       if (clienteYaAsignado != null) {
@@ -244,7 +252,6 @@ public class ClienteServiceImpl implements IClienteService {
                 clienteYaAsignado.getRazonSocial()));
       }
       cliente.setCredencial(usuarioService.getUsuarioPorId(idUsuarioCrendencial));
-      this.editarRolClienteDeUsuario(cliente, idUsuarioLoggedIn, true);
     }
     cliente = clienteRepository.save(cliente);
     cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);
@@ -255,12 +262,21 @@ public class ClienteServiceImpl implements IClienteService {
   @Override
   @Transactional
   public void actualizar(Cliente cliente, Long idUsuarioCrendencial, long idUsuarioLoggedIn) {
-    usuarioService.verificarAdministrador(idUsuarioLoggedIn);
+    usuarioService.verificarRol(Rol.ADMINISTRADOR, idUsuarioLoggedIn);
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, cliente);
     if (idUsuarioCrendencial != null) {
+      if (!usuarioService
+          .getUsuarioPorId(idUsuarioCrendencial)
+          .getRoles()
+          .contains(Rol.COMPRADOR)) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes")
+                .getString("mensaje_usuario_credencial_no_comprador"));
+      }
       Cliente clienteYaAsignado =
           this.getClientePorIdUsuarioYidEmpresa(idUsuarioCrendencial, cliente.getEmpresa());
-      if (clienteYaAsignado != null && clienteYaAsignado.getId_Cliente() != cliente.getId_Cliente()) {
+      if (clienteYaAsignado != null
+          && clienteYaAsignado.getId_Cliente() != cliente.getId_Cliente()) {
         throw new BusinessServiceException(
             MessageFormat.format(
                 ResourceBundle.getBundle("Mensajes")
@@ -268,35 +284,16 @@ public class ClienteServiceImpl implements IClienteService {
                 clienteYaAsignado.getRazonSocial()));
       }
       cliente.setCredencial(usuarioService.getUsuarioPorId(idUsuarioCrendencial));
-      this.editarRolClienteDeUsuario(cliente, idUsuarioLoggedIn, true);
     } else {
-      this.editarRolClienteDeUsuario(cliente, idUsuarioLoggedIn, false);
       cliente.setCredencial(null);
     }
     clienteRepository.save(cliente);
   }
 
-  private void editarRolClienteDeUsuario(Cliente cliente, long idUsuarioLoggedIn, boolean agregar) {
-    Usuario usuarioAModificarRol =
-        usuarioService.getUsuarioPorId(cliente.getCredencial().getId_Usuario());
-    List<Rol> roles = usuarioAModificarRol.getRoles();
-    if (agregar) {
-      if (!roles.contains(Rol.COMPRADOR)) {
-        roles.add(Rol.COMPRADOR);
-      }
-    } else {
-      if (this.getClientesPorIdUsuario(cliente.getCredencial().getId_Usuario()).size() == 1) {
-        roles.remove(Rol.COMPRADOR);
-      }
-    }
-    usuarioAModificarRol.setRoles(roles);
-    usuarioService.actualizar(usuarioAModificarRol, idUsuarioLoggedIn);
-  }
-
     @Override
     @Transactional
     public void eliminar(long idCliente, long idUsuarioLoggedIn) {
-        usuarioService.verificarAdministrador(idUsuarioLoggedIn);
+        usuarioService.verificarRol(Rol.ADMINISTRADOR, idUsuarioLoggedIn);
         Cliente cliente = this.getClientePorId(idCliente);
         if (cliente == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
@@ -325,4 +322,10 @@ public class ClienteServiceImpl implements IClienteService {
   public int desvincularUsuariosDeViajante(long idViajante) {
     return clienteRepository.desvincularViajante(idViajante);
   }
+
+  @Override
+  public int desvincularClienteDeComprador(long idCliente) {
+    return clienteRepository.desvincularClienteDeUsuarioComprador(idCliente);
+  }
+
 }

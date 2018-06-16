@@ -42,6 +42,11 @@ public interface ClienteRepository
           @Param("idUsuario") long idUsuario);
 
   @Modifying
-  @Query("UPDATE Cliente c SET c.viajante = null " + "WHERE c.viajante.id_Usuario = :idViajante")
+  @Query("UPDATE Cliente c SET c.viajante = null WHERE c.viajante.id_Usuario = :idViajante")
   int desvincularViajante(@Param("idViajante") long idViajante);
+
+  @Modifying
+  @Query("UPDATE Cliente c SET c.credencial = null WHERE c.credencial.id_Usuario = :idUsuarioComprador")
+  int desvincularClienteDeUsuarioComprador(@Param("idUsuarioComprador") long idUsuarioComprador);
+
 }

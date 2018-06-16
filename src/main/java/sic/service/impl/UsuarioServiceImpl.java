@@ -64,7 +64,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria, long idUsuarioLoggedIn) {
-    verificarAdministrador(idUsuarioLoggedIn);
+    verificarRol(Rol.ADMINISTRADOR, idUsuarioLoggedIn);
     QUsuario qusuario = QUsuario.usuario;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.isBuscaPorApellido()) {
@@ -210,7 +210,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public void actualizar(Usuario usuario, long idUsuarioLoggedIn) {
-    verificarAdministrador(idUsuarioLoggedIn);
+    verificarRol(Rol.ADMINISTRADOR, idUsuarioLoggedIn);
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario, idUsuarioLoggedIn);
     if (usuario.getPassword().isEmpty()) {
       Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
@@ -220,6 +220,9 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
     if (!usuario.getRoles().contains(Rol.VIAJANTE)) {
       this.clienteService.desvincularUsuariosDeViajante(usuario.getId_Usuario());
+    }
+    if (!usuario.getRoles().contains(Rol.COMPRADOR)) {
+      this.clienteService.desvincularClienteDeComprador(usuario.getId_Usuario());
     }
     if (this.getUsuarioPorId(idUsuarioLoggedIn).getId_Usuario() != usuario.getId_Usuario()) {
       this.actualizarToken(null, usuario.getId_Usuario());
@@ -234,7 +237,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public Usuario guardar(Usuario usuario, long idUsuarioLoggedIn) {
-    verificarAdministrador(idUsuarioLoggedIn);
+    verificarRol(Rol.ADMINISTRADOR, idUsuarioLoggedIn);
     this.validarOperacion(TipoDeOperacion.ALTA, usuario, idUsuarioLoggedIn);
     usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
     usuario = usuarioRepository.save(usuario);
@@ -244,7 +247,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public void eliminar(long idUsuario, long idUsuarioLoggedIn) {
-    verificarAdministrador(idUsuarioLoggedIn);
+    verificarRol(Rol.ADMINISTRADOR, idUsuarioLoggedIn);
     Usuario usuario = this.getUsuarioPorId(idUsuario);
     if (usuario == null) {
       throw new EntityNotFoundException(
@@ -265,9 +268,9 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public void verificarAdministrador(long idUsuarioLoggedIn) {
+  public void verificarRol(Rol rolAVerificar, long idUsuarioLoggedIn) {
     Usuario usuarioLoggedIn = this.getUsuarioPorId(idUsuarioLoggedIn);
-    if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
+    if (!usuarioLoggedIn.getRoles().contains(rolAVerificar)) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
     }

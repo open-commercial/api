@@ -3,6 +3,7 @@ package sic.service;
 import org.springframework.data.domain.Page;
 import sic.modelo.BusquedaUsuarioCriteria;
 import sic.modelo.Credencial;
+import sic.modelo.Rol;
 import sic.modelo.Usuario;
 
 public interface IUsuarioService {
@@ -23,7 +24,7 @@ public interface IUsuarioService {
 
   int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada);
 
-  void verificarAdministrador(long idUsuarioLoggedIn);
+  void verificarRol(Rol rolAVerificar, long idUsuarioLoggedIn);
 
   int getNivelDeAcceso(Usuario usuario);
 

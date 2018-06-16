@@ -37,4 +37,6 @@ public interface IClienteService {
 
   int desvincularUsuariosDeViajante(long idViajante);
 
+  int desvincularClienteDeComprador(long idCliente);
+
 }
