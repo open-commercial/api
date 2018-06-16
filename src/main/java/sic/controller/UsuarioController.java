@@ -50,7 +50,7 @@ public class UsuarioController {
       @RequestHeader("Authorization") String token) {
     if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
     if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "username"));
+    Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "nombre"));
     BusquedaUsuarioCriteria criteria =
         BusquedaUsuarioCriteria.builder()
             .buscarPorNombreDeUsuario(username != null)

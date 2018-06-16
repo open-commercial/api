@@ -260,7 +260,7 @@ public class ClienteServiceImpl implements IClienteService {
     if (idUsuarioCrendencial != null) {
       Cliente clienteYaAsignado =
           this.getClientePorIdUsuarioYidEmpresa(idUsuarioCrendencial, cliente.getEmpresa());
-      if (clienteYaAsignado != null) {
+      if (clienteYaAsignado != null && clienteYaAsignado.getId_Cliente() != cliente.getId_Cliente()) {
         throw new BusinessServiceException(
             MessageFormat.format(
                 ResourceBundle.getBundle("Mensajes")
