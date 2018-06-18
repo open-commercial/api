@@ -24,8 +24,6 @@ public interface IUsuarioService {
 
   int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada);
 
-  void verificarRol(Rol rolAVerificar, long idUsuarioLoggedIn);
-
-  int getNivelDeAcceso(Usuario usuario);
+  void verificarNivelDeAcceso(int nivelDeAccesoEsperado, long idUsuarioLoggedIn);
 
 }

@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 
+import sic.controller.ForbiddenException;
 import sic.modelo.*;
 import sic.service.ICajaService;
 
@@ -371,7 +372,7 @@ public class CajaServiceImpl implements ICajaService {
                         .getString("mensaje_caja_re_apertura_no_valida"));
             }
         } else {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+            throw new ForbiddenException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_usuario_rol_no_valido"));
         }
     }

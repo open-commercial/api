@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.controller.ForbiddenException;
 import sic.modelo.*;
 import sic.service.IClienteService;
 import sic.service.IUsuarioService;
@@ -50,7 +51,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
         }
         return usuario;
     }
-        
+
     @Override
     public Usuario autenticarUsuario(Credencial credencial) {
         Usuario usuario = usuarioRepository.findByUsernameOrEmailAndPasswordAndEliminado(credencial.getUsername(),
@@ -64,7 +65,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria, long idUsuarioLoggedIn) {
-    verificarRol(Rol.ADMINISTRADOR, idUsuarioLoggedIn);
+    this.verificarNivelDeAcceso(2, idUsuarioLoggedIn);
     QUsuario qusuario = QUsuario.usuario;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.isBuscaPorApellido()) {
@@ -210,7 +211,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public void actualizar(Usuario usuario, long idUsuarioLoggedIn) {
-    verificarRol(Rol.ADMINISTRADOR, idUsuarioLoggedIn);
+    verificarNivelDeAcceso(1, idUsuarioLoggedIn);
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario, idUsuarioLoggedIn);
     if (usuario.getPassword().isEmpty()) {
       Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
@@ -219,7 +220,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
       usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
     }
     if (!usuario.getRoles().contains(Rol.VIAJANTE)) {
-      this.clienteService.desvincularUsuariosDeViajante(usuario.getId_Usuario());
+      this.clienteService.desvincularClienteDeViajante(usuario.getId_Usuario());
     }
     if (!usuario.getRoles().contains(Rol.COMPRADOR)) {
       this.clienteService.desvincularClienteDeComprador(usuario.getId_Usuario());
@@ -237,7 +238,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public Usuario guardar(Usuario usuario, long idUsuarioLoggedIn) {
-    verificarRol(Rol.ADMINISTRADOR, idUsuarioLoggedIn);
+    verificarNivelDeAcceso(1, idUsuarioLoggedIn);
     this.validarOperacion(TipoDeOperacion.ALTA, usuario, idUsuarioLoggedIn);
     usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
     usuario = usuarioRepository.save(usuario);
@@ -247,7 +248,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public void eliminar(long idUsuario, long idUsuarioLoggedIn) {
-    verificarRol(Rol.ADMINISTRADOR, idUsuarioLoggedIn);
+    verificarNivelDeAcceso(1, idUsuarioLoggedIn);
     Usuario usuario = this.getUsuarioPorId(idUsuario);
     if (usuario == null) {
       throw new EntityNotFoundException(
@@ -268,16 +269,16 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public void verificarRol(Rol rolAVerificar, long idUsuarioLoggedIn) {
+  public void verificarNivelDeAcceso(int nivelDeAccesoEsperado, long idUsuarioLoggedIn) {
     Usuario usuarioLoggedIn = this.getUsuarioPorId(idUsuarioLoggedIn);
-    if (!usuarioLoggedIn.getRoles().contains(rolAVerificar)) {
-      throw new BusinessServiceException(
+    int nivelDeAccesoUsuario = this.getNivelDeAcceso(usuarioLoggedIn);
+    if (nivelDeAccesoUsuario > nivelDeAccesoEsperado) {
+      throw new ForbiddenException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
     }
   }
 
-  @Override
-  public int getNivelDeAcceso(Usuario usuario) {
+  private int getNivelDeAcceso(Usuario usuario) {
     if (usuario.getRoles().contains(Rol.ADMINISTRADOR)) {
       return Rol.ADMINISTRADOR.getNivelDeAcceso();
     }

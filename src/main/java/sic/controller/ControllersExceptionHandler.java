@@ -49,8 +49,15 @@ public class ControllersExceptionHandler {
     @ResponseBody
     public String handleUnauthorizedException(UnauthorizedException ex) {
         return this.log(ex);
-    }       
-    
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseBody
+    public String handleForbiddenException(ForbiddenException ex) {
+        return this.log(ex);
+    }
+
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody

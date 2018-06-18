@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.controller.ForbiddenException;
 import sic.modelo.*;
 import sic.service.IClienteService;
 import sic.service.BusinessServiceException;
@@ -227,7 +228,7 @@ public class ClienteServiceImpl implements IClienteService {
   @Override
   @Transactional
   public Cliente guardar(Cliente cliente, Long idUsuarioCrendencial, long idUsuarioLoggedIn) {
-    usuarioService.verificarRol(Rol.ADMINISTRADOR, idUsuarioLoggedIn);
+    usuarioService.verificarNivelDeAcceso(1, idUsuarioLoggedIn);
     this.validarOperacion(TipoDeOperacion.ALTA, cliente);
     CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
     cuentaCorrienteCliente.setCliente(cliente);
@@ -262,14 +263,14 @@ public class ClienteServiceImpl implements IClienteService {
   @Override
   @Transactional
   public void actualizar(Cliente cliente, Long idUsuarioCrendencial, long idUsuarioLoggedIn) {
-    usuarioService.verificarRol(Rol.ADMINISTRADOR, idUsuarioLoggedIn);
+    usuarioService.verificarNivelDeAcceso(1, idUsuarioLoggedIn);
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, cliente);
     if (idUsuarioCrendencial != null) {
       if (!usuarioService
           .getUsuarioPorId(idUsuarioCrendencial)
           .getRoles()
           .contains(Rol.COMPRADOR)) {
-        throw new BusinessServiceException(
+        throw new ForbiddenException(
             ResourceBundle.getBundle("Mensajes")
                 .getString("mensaje_usuario_credencial_no_comprador"));
       }
@@ -293,7 +294,7 @@ public class ClienteServiceImpl implements IClienteService {
     @Override
     @Transactional
     public void eliminar(long idCliente, long idUsuarioLoggedIn) {
-        usuarioService.verificarRol(Rol.ADMINISTRADOR, idUsuarioLoggedIn);
+        usuarioService.verificarNivelDeAcceso(1, idUsuarioLoggedIn);
         Cliente cliente = this.getClientePorId(idCliente);
         if (cliente == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
@@ -313,19 +314,14 @@ public class ClienteServiceImpl implements IClienteService {
         return clienteRepository.findClienteByIdUsuarioYidEmpresa(idUsuario, empresa.getId_Empresa());
     }
 
-    @Override
-    public List<Cliente> getClientesPorIdUsuario(long idUsuario) {
-        return clienteRepository.findClienteByIdUsuario(idUsuario);
-    }
-
   @Override
-  public int desvincularUsuariosDeViajante(long idViajante) {
-    return clienteRepository.desvincularViajante(idViajante);
+  public int desvincularClienteDeViajante(long idViajante) {
+    return clienteRepository.desvincularClienteDeViajante(idViajante);
   }
 
   @Override
   public int desvincularClienteDeComprador(long idCliente) {
-    return clienteRepository.desvincularClienteDeUsuarioComprador(idCliente);
+    return clienteRepository.desvincularClienteDeComprador(idCliente);
   }
 
 }
