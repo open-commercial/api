@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import sic.modelo.*;
 import sic.service.*;
 
+import java.util.Collections;
+
 @RestController
 @RequestMapping("/api/v1")
 public class ClienteController {
@@ -23,6 +25,7 @@ public class ClienteController {
     private final IProvinciaService provinciaService;
     private final ILocalidadService localidadService;
     private final IUsuarioService usuarioService;
+    private final IAuthService authService;
     private final int TAMANIO_PAGINA_DEFAULT = 50;
 
     @Value("${SIC_JWT_KEY}")
@@ -31,13 +34,15 @@ public class ClienteController {
     @Autowired
     public ClienteController(IClienteService clienteService, IEmpresaService empresaService,
                              IPaisService paisService, IProvinciaService provinciaService,
-                             ILocalidadService localidadService, IUsuarioService usuarioService) {
+                             ILocalidadService localidadService, IUsuarioService usuarioService,
+                             IAuthService authService) {
         this.clienteService = clienteService;
         this.empresaService = empresaService;
         this.paisService = paisService;
         this.provinciaService = provinciaService;
         this.localidadService = localidadService;
         this.usuarioService = usuarioService;
+        this.authService = authService;
     }
   
     @GetMapping("/clientes/{idCliente}")
@@ -111,7 +116,8 @@ public class ClienteController {
   public void eliminar(@PathVariable long idCliente, @RequestHeader("Authorization") String token) {
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    clienteService.eliminar(idCliente, (int) claims.get("idUsuario"));
+    authService.verificarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
+    clienteService.eliminar(idCliente);
   }
 
   @PostMapping("/clientes")
@@ -122,7 +128,8 @@ public class ClienteController {
       @RequestHeader("Authorization") String token) {
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    return clienteService.guardar(cliente, idUsuarioCredencial, (int) claims.get("idUsuario"));
+    authService.verificarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
+    return clienteService.guardar(cliente, idUsuarioCredencial);
   }
 
   @PutMapping("/clientes")
@@ -133,7 +140,8 @@ public class ClienteController {
       @RequestHeader("Authorization") String token) {
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    clienteService.actualizar(cliente, idUsuarioCredencial, (int) claims.get("idUsuario"));
+    authService.verificarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
+    clienteService.actualizar(cliente, idUsuarioCredencial);
   }
 
     @PutMapping("/clientes/{idCliente}/predeterminado")

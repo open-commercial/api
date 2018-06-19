@@ -227,8 +227,7 @@ public class ClienteServiceImpl implements IClienteService {
 
   @Override
   @Transactional
-  public Cliente guardar(Cliente cliente, Long idUsuarioCrendencial, long idUsuarioLoggedIn) {
-    usuarioService.verificarNivelDeAcceso(1, idUsuarioLoggedIn);
+  public Cliente guardar(Cliente cliente, Long idUsuarioCrendencial) {
     this.validarOperacion(TipoDeOperacion.ALTA, cliente);
     CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
     cuentaCorrienteCliente.setCliente(cliente);
@@ -262,8 +261,7 @@ public class ClienteServiceImpl implements IClienteService {
 
   @Override
   @Transactional
-  public void actualizar(Cliente cliente, Long idUsuarioCrendencial, long idUsuarioLoggedIn) {
-    usuarioService.verificarNivelDeAcceso(1, idUsuarioLoggedIn);
+  public void actualizar(Cliente cliente, Long idUsuarioCrendencial) {
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, cliente);
     if (idUsuarioCrendencial != null) {
       if (!usuarioService
@@ -293,8 +291,7 @@ public class ClienteServiceImpl implements IClienteService {
 
     @Override
     @Transactional
-    public void eliminar(long idCliente, long idUsuarioLoggedIn) {
-        usuarioService.verificarNivelDeAcceso(1, idUsuarioLoggedIn);
+    public void eliminar(long idCliente) {
         Cliente cliente = this.getClientePorId(idCliente);
         if (cliente == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")

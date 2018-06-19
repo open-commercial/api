@@ -1,5 +1,7 @@
 package sic.controller;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import sic.modelo.BusquedaUsuarioCriteria;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
+import sic.service.IAuthService;
 import sic.service.IUsuarioService;
 
 @RestController
@@ -21,14 +24,16 @@ import sic.service.IUsuarioService;
 public class UsuarioController {
     
     private final IUsuarioService usuarioService;
+    private final IAuthService authService;
     private final int TAMANIO_PAGINA_DEFAULT = 50;
 
     @Value("${SIC_JWT_KEY}")
     private String secretkey;
     
     @Autowired
-    public UsuarioController(IUsuarioService usuarioService) {
+    public UsuarioController(IUsuarioService usuarioService, IAuthService authService) {
         this.usuarioService = usuarioService;
+        this.authService = authService;
     }
     
     @GetMapping("/usuarios/{idUsuario}")
@@ -67,7 +72,9 @@ public class UsuarioController {
             .build();
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    return usuarioService.buscarUsuarios(criteria, (int) claims.get("idUsuario"));
+    List<Rol> rolesPermitidos = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO);
+    authService.verificarAcceso(rolesPermitidos, (int) claims.get("idUsuario"));
+    return usuarioService.buscarUsuarios(criteria);
   }
 
   @PostMapping("/usuarios")
@@ -77,7 +84,8 @@ public class UsuarioController {
       @RequestHeader("Authorization") String token) {
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    return usuarioService.guardar(usuario, (int) claims.get("idUsuario"));
+    authService.verificarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
+    return usuarioService.guardar(usuario);
   }
 
   @PutMapping("/usuarios")
@@ -87,6 +95,7 @@ public class UsuarioController {
       @RequestHeader("Authorization") String token) {
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    authService.verificarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
     usuarioService.actualizar(usuario, (int) claims.get("idUsuario"));
   }
 
@@ -101,6 +110,7 @@ public class UsuarioController {
     public void eliminar(@PathVariable long idUsuario,
                          @RequestHeader("Authorization") String token) {
         Claims claims = Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-        usuarioService.eliminar(idUsuario, (int) claims.get("idUsuario"));
+        authService.verificarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
+        usuarioService.eliminar(idUsuario);
     }    
 }

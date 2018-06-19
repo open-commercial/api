@@ -64,8 +64,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
 
   @Override
-  public Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria, long idUsuarioLoggedIn) {
-    this.verificarNivelDeAcceso(2, idUsuarioLoggedIn);
+  public Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria) {
     QUsuario qusuario = QUsuario.usuario;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.isBuscaPorApellido()) {
@@ -125,7 +124,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   private void validarOperacion(
-    TipoDeOperacion operacion, Usuario usuario, long idUsuarioLoggedIn) {
+    TipoDeOperacion operacion, Usuario usuario) {
     // Requeridos
     if (Validator.esVacio(usuario.getNombre())) {
       throw new BusinessServiceException(
@@ -200,7 +199,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
               .roles(roles)
               .pageable(pageable)
               .build();
-      List<Usuario> administradores = this.buscarUsuarios(criteria, idUsuarioLoggedIn).getContent();
+      List<Usuario> administradores = this.buscarUsuarios(criteria).getContent();
       if (administradores.size() == 1
           && administradores.get(0).getId_Usuario() == usuario.getId_Usuario()) {
         throw new BusinessServiceException(
@@ -211,8 +210,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public void actualizar(Usuario usuario, long idUsuarioLoggedIn) {
-    verificarNivelDeAcceso(1, idUsuarioLoggedIn);
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario, idUsuarioLoggedIn);
+    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario);
     if (usuario.getPassword().isEmpty()) {
       Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
       usuario.setPassword(usuarioGuardado.getPassword());
@@ -237,9 +235,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
 
   @Override
-  public Usuario guardar(Usuario usuario, long idUsuarioLoggedIn) {
-    verificarNivelDeAcceso(1, idUsuarioLoggedIn);
-    this.validarOperacion(TipoDeOperacion.ALTA, usuario, idUsuarioLoggedIn);
+  public Usuario guardar(Usuario usuario) {
+    this.validarOperacion(TipoDeOperacion.ALTA, usuario);
     usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
     usuario = usuarioRepository.save(usuario);
     LOGGER.warn("El Usuario " + usuario + " se guardó correctamente.");
@@ -247,14 +244,13 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public void eliminar(long idUsuario, long idUsuarioLoggedIn) {
-    verificarNivelDeAcceso(1, idUsuarioLoggedIn);
+  public void eliminar(long idUsuario) {
     Usuario usuario = this.getUsuarioPorId(idUsuario);
     if (usuario == null) {
       throw new EntityNotFoundException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_no_existente"));
     }
-    this.validarOperacion(TipoDeOperacion.ELIMINACION, usuario, idUsuarioLoggedIn);
+    this.validarOperacion(TipoDeOperacion.ELIMINACION, usuario);
     usuario.setEliminado(true);
     usuarioRepository.save(usuario);
   }
@@ -266,32 +262,6 @@ public class UsuarioServiceImpl implements IUsuarioService {
           ResourceBundle.getBundle("Mensajes").getString("mensaje_empresa_no_existente"));
     }
     return usuarioRepository.updateIdEmpresa(idUsuario, idEmpresaPredeterminada);
-  }
-
-  @Override
-  public void verificarNivelDeAcceso(int nivelDeAccesoEsperado, long idUsuarioLoggedIn) {
-    Usuario usuarioLoggedIn = this.getUsuarioPorId(idUsuarioLoggedIn);
-    int nivelDeAccesoUsuario = this.getNivelDeAcceso(usuarioLoggedIn);
-    if (nivelDeAccesoUsuario > nivelDeAccesoEsperado) {
-      throw new ForbiddenException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
-    }
-  }
-
-  private int getNivelDeAcceso(Usuario usuario) {
-    if (usuario.getRoles().contains(Rol.ADMINISTRADOR)) {
-      return Rol.ADMINISTRADOR.getNivelDeAcceso();
-    }
-    if (usuario.getRoles().contains(Rol.ENCARGADO)) {
-      return Rol.ENCARGADO.getNivelDeAcceso();
-    }
-    if (usuario.getRoles().contains(Rol.VENDEDOR)) {
-      return Rol.VENDEDOR.getNivelDeAcceso();
-    }
-    if (usuario.getRoles().contains(Rol.VIAJANTE)) {
-      return Rol.VIAJANTE.getNivelDeAcceso();
-    }
-    return Rol.COMPRADOR.getNivelDeAcceso();
   }
 
 }
