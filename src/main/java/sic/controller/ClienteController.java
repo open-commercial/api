@@ -116,7 +116,7 @@ public class ClienteController {
   public void eliminar(@PathVariable long idCliente, @RequestHeader("Authorization") String token) {
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    authService.verificarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
+    authService.autorizarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
     clienteService.eliminar(idCliente);
   }
 
@@ -128,7 +128,7 @@ public class ClienteController {
       @RequestHeader("Authorization") String token) {
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    authService.verificarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
+    authService.autorizarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
     return clienteService.guardar(cliente, idUsuarioCredencial);
   }
 
@@ -140,7 +140,7 @@ public class ClienteController {
       @RequestHeader("Authorization") String token) {
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    authService.verificarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
+    authService.autorizarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
     clienteService.actualizar(cliente, idUsuarioCredencial);
   }
 

@@ -362,6 +362,8 @@ public class FacturaServiceImpl implements IFacturaService {
                     idUsuarioLoggedIn, criteria.getEmpresa());
             if (clienteRelacionado != null) {
               rsPredicate.or(qFacturaVenta.cliente.eq(clienteRelacionado));
+            } else {
+              rsPredicate.or(qFacturaVenta.cliente.isNull());
             }
             break;
         }

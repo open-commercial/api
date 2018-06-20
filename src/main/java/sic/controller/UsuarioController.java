@@ -73,7 +73,7 @@ public class UsuarioController {
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
     List<Rol> rolesPermitidos = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO);
-    authService.verificarAcceso(rolesPermitidos, (int) claims.get("idUsuario"));
+    authService.autorizarAcceso(rolesPermitidos, (int) claims.get("idUsuario"));
     return usuarioService.buscarUsuarios(criteria);
   }
 
@@ -84,7 +84,7 @@ public class UsuarioController {
       @RequestHeader("Authorization") String token) {
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    authService.verificarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
+    authService.autorizarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
     return usuarioService.guardar(usuario);
   }
 
@@ -95,7 +95,7 @@ public class UsuarioController {
       @RequestHeader("Authorization") String token) {
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    authService.verificarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
+    authService.autorizarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
     usuarioService.actualizar(usuario, (int) claims.get("idUsuario"));
   }
 
@@ -110,7 +110,7 @@ public class UsuarioController {
     public void eliminar(@PathVariable long idUsuario,
                          @RequestHeader("Authorization") String token) {
         Claims claims = Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-        authService.verificarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
+        authService.autorizarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
         usuarioService.eliminar(idUsuario);
     }    
 }

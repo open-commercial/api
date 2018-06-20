@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface IAuthService {
 
-    void verificarAcceso(List<Rol> roles, long idUsuarioLoggedIn);
+    void autorizarAcceso(List<Rol> roles, long idUsuarioLoggedIn);
 
 }
