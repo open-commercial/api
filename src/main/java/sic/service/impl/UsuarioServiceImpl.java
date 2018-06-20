@@ -1,5 +1,7 @@
 package sic.service.impl;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -14,12 +16,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.controller.ForbiddenException;
 import sic.modelo.*;
 import sic.service.IClienteService;
 import sic.service.IUsuarioService;
 import sic.service.BusinessServiceException;
-import sic.util.Utilidades;
 import sic.util.Validator;
 import sic.repository.UsuarioRepository;
 import sic.service.IEmpresaService;
@@ -42,6 +42,20 @@ public class UsuarioServiceImpl implements IUsuarioService {
         this.clienteService = clienteService;
     }
 
+  public String encriptarConMD5(String password) {
+    try {
+      MessageDigest md = MessageDigest.getInstance("MD5");
+      byte[] array = md.digest(password.getBytes());
+      StringBuilder sb = new StringBuilder();
+      for (byte anArray : array) {
+        sb.append(Integer.toHexString((anArray & 0xFF) | 0x100));
+      }
+      return sb.toString();
+    } catch (NoSuchAlgorithmException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
     @Override
     public Usuario getUsuarioPorId(Long idUsuario) {
         Usuario usuario = usuarioRepository.findById(idUsuario);
@@ -55,7 +69,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
     @Override
     public Usuario autenticarUsuario(Credencial credencial) {
         Usuario usuario = usuarioRepository.findByUsernameOrEmailAndPasswordAndEliminado(credencial.getUsername(),
-                credencial.getUsername(), Utilidades.encriptarConMD5(credencial.getPassword()));
+                credencial.getUsername(), this.encriptarConMD5(credencial.getPassword()));
         if (usuario == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_usuario_no_existente"));
@@ -215,7 +229,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
       Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
       usuario.setPassword(usuarioGuardado.getPassword());
     } else {
-      usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
+      usuario.setPassword(this.encriptarConMD5(usuario.getPassword()));
     }
     if (!usuario.getRoles().contains(Rol.VIAJANTE)) {
       this.clienteService.desvincularClienteDeViajante(usuario.getId_Usuario());
@@ -237,7 +251,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   @Override
   public Usuario guardar(Usuario usuario) {
     this.validarOperacion(TipoDeOperacion.ALTA, usuario);
-    usuario.setPassword(Utilidades.encriptarConMD5(usuario.getPassword()));
+    usuario.setPassword(this.encriptarConMD5(usuario.getPassword()));
     usuario = usuarioRepository.save(usuario);
     LOGGER.warn("El Usuario " + usuario + " se guardó correctamente.");
     return usuario;
