@@ -12,11 +12,11 @@ import javax.servlet.http.HttpServletRequest;
 @Component
 public class ExampleAspect {
 
-  @Before("@annotation(logExecutionTime)")
-  public void logExecutionTime(LogExecutionTime logExecutionTime) {
+  @Before("@annotation(controlAcceso)")
+  public void logExecutionTime(ControlAcceso controlAcceso) {
     HttpServletRequest request =
         ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
     String token = request.getHeader("Authorization");
-    System.out.println(logExecutionTime.value());
+    System.out.println(controlAcceso.value());
   }
 }

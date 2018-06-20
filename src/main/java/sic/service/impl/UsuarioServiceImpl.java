@@ -48,7 +48,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
       byte[] array = md.digest(password.getBytes());
       StringBuilder sb = new StringBuilder();
       for (byte anArray : array) {
-        sb.append(Integer.toHexString((anArray & 0xFF) | 0x100));
+        sb.append(Integer.toHexString((anArray & 0xFF) | 0x100).substring(1, 3));
       }
       return sb.toString();
     } catch (NoSuchAlgorithmException ex) {
