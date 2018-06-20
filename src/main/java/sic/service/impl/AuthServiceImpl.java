@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 @Service
-@Transactional
 public class AuthServiceImpl implements IAuthService {
 
   private final IUsuarioService usuarioService;
@@ -23,9 +22,15 @@ public class AuthServiceImpl implements IAuthService {
     this.usuarioService = usuarioService;
   }
 
-  public void verificarAcceso(List<Rol> roles, long idUsuarioLoggedIn) {
+  public void autorizarAcceso(List<Rol> rolesRequeridos, long idUsuarioLoggedIn) {
     Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
-    if (!usuarioLoggedIn.getRoles().containsAll(roles)) {
+    boolean accesoNoAutorizado = true;
+    for(Rol rolRequerido : rolesRequeridos) {
+      if(usuarioLoggedIn.getRoles().contains(rolRequerido)) {
+        accesoNoAutorizado = false;
+      }
+    }
+    if (accesoNoAutorizado) {
       throw new ForbiddenException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
     }
