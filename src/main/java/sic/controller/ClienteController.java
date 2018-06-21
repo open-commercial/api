@@ -10,10 +10,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.service.*;
-
-import java.util.Collections;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -25,7 +24,6 @@ public class ClienteController {
     private final IProvinciaService provinciaService;
     private final ILocalidadService localidadService;
     private final IUsuarioService usuarioService;
-    private final IAuthService authService;
     private final int TAMANIO_PAGINA_DEFAULT = 50;
 
     @Value("${SIC_JWT_KEY}")
@@ -34,19 +32,18 @@ public class ClienteController {
     @Autowired
     public ClienteController(IClienteService clienteService, IEmpresaService empresaService,
                              IPaisService paisService, IProvinciaService provinciaService,
-                             ILocalidadService localidadService, IUsuarioService usuarioService,
-                             IAuthService authService) {
+                             ILocalidadService localidadService, IUsuarioService usuarioService) {
         this.clienteService = clienteService;
         this.empresaService = empresaService;
         this.paisService = paisService;
         this.provinciaService = provinciaService;
         this.localidadService = localidadService;
         this.usuarioService = usuarioService;
-        this.authService = authService;
     }
   
     @GetMapping("/clientes/{idCliente}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Cliente getCliente(@PathVariable long idCliente) {
         return clienteService.getClientePorId(idCliente);
     }
@@ -101,63 +98,60 @@ public class ClienteController {
     
     @GetMapping("/clientes/predeterminado/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Cliente getClientePredeterminado(@PathVariable long idEmpresa) {
      return clienteService.getClientePredeterminado(empresaService.getEmpresaPorId(idEmpresa));
     }
     
     @GetMapping("/clientes/existe-predeterminado/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public boolean existeClientePredeterminado(@PathVariable long idEmpresa) {
         return clienteService.existeClientePredeterminado(empresaService.getEmpresaPorId(idEmpresa));
     }
 
   @DeleteMapping("/clientes/{idCliente}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void eliminar(@PathVariable long idCliente, @RequestHeader("Authorization") String token) {
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    authService.autorizarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
+  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
+  public void eliminar(@PathVariable long idCliente) {
     clienteService.eliminar(idCliente);
   }
 
   @PostMapping("/clientes")
   @ResponseStatus(HttpStatus.CREATED)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public Cliente guardar(
       @RequestBody Cliente cliente,
-      @RequestParam(required = false) Long idUsuarioCredencial,
-      @RequestHeader("Authorization") String token) {
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    authService.autorizarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
+      @RequestParam(required = false) Long idUsuarioCredencial) {
     return clienteService.guardar(cliente, idUsuarioCredencial);
   }
 
   @PutMapping("/clientes")
   @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void actualizar(
       @RequestBody Cliente cliente,
-      @RequestParam(required = false) Long idUsuarioCredencial,
-      @RequestHeader("Authorization") String token) {
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    authService.autorizarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
+      @RequestParam(required = false) Long idUsuarioCredencial) {
     clienteService.actualizar(cliente, idUsuarioCredencial);
   }
 
     @PutMapping("/clientes/{idCliente}/predeterminado")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void setClientePredeterminado(@PathVariable long idCliente) {
        clienteService.setClientePredeterminado(clienteService.getClientePorId(idCliente));       
     }
     
     @GetMapping("/clientes/pedidos/{idPedido}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
     public Cliente getClientePorIdPedido(@PathVariable long idPedido) {
        return clienteService.getClientePorIdPedido(idPedido);
     }
 
     @GetMapping("/clientes/usuarios/{idUsuario}/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Cliente getClientePorIdUsuario(@PathVariable long idUsuario,
                                           @PathVariable long idEmpresa) {
         return clienteService.getClientePorIdUsuarioYidEmpresa(idUsuario, empresaService.getEmpresaPorId(idEmpresa));

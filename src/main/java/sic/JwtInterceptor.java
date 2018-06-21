@@ -50,7 +50,7 @@ public class JwtInterceptor extends HandlerInterceptorAdapter {
             throw new UnauthorizedException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_error_token_invalido"));
         }               
-        if (usuario.isHabilitado() == false) {
+        if (!usuario.isHabilitado()) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_usuario_no_habilitado"));
         }

@@ -22,12 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import sic.modelo.BusquedaProductoCriteria;
-import sic.modelo.Empresa;
-import sic.modelo.Medida;
-import sic.modelo.Producto;
-import sic.modelo.Proveedor;
-import sic.modelo.Rubro;
+import sic.aspect.AccesoRolesPermitidos;
+import sic.modelo.*;
 import sic.service.*;
 
 @RestController
@@ -54,19 +50,21 @@ public class ProductoController {
 
     @GetMapping("/productos/{idProducto}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Producto getProductoPorId(@PathVariable long idProducto) {
         return productoService.getProductoPorId(idProducto);
     }
 
     @GetMapping("/productos/busqueda")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Producto getProductoPorCodigo(@RequestParam long idEmpresa,
                                          @RequestParam String codigo) {
         return productoService.getProductoPorCodigo(codigo, empresaService.getEmpresaPorId(idEmpresa));
     }
 
     @GetMapping("/productos/valor-stock/criteria")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.OK)@AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public BigDecimal calcularValorStock(@RequestParam long idEmpresa,
                                          @RequestParam(required = false) String codigo,
                                          @RequestParam(required = false) String descripcion,
@@ -97,6 +95,7 @@ public class ProductoController {
 
     @GetMapping("/productos/busqueda/criteria")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Page<Producto> buscarProductos(@RequestParam long idEmpresa,
                                           @RequestParam(required = false) String codigo,
                                           @RequestParam(required = false) String descripcion,
@@ -130,12 +129,14 @@ public class ProductoController {
 
     @DeleteMapping("/productos")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void eliminarMultiplesProductos(@RequestParam long[] idProducto) {
         productoService.eliminarMultiplesProductos(idProducto);
     }
 
     @PutMapping("/productos")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void actualizar(@RequestBody Producto producto,
                            @RequestParam Long idMedida,
                            @RequestParam Long idRubro,
@@ -152,6 +153,7 @@ public class ProductoController {
 
     @PostMapping("/productos")
     @ResponseStatus(HttpStatus.CREATED)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Producto guardar(@RequestBody Producto producto,
                             @RequestParam Long idMedida,
                             @RequestParam Long idRubro,
@@ -166,6 +168,7 @@ public class ProductoController {
 
     @PutMapping("/productos/multiples")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void actualizarMultiplesProductos(@RequestParam long[] idProducto,
                                              @RequestParam(required = false) Long idMedida,
                                              @RequestParam(required = false) Long idRubro,
@@ -198,17 +201,20 @@ public class ProductoController {
 
     @GetMapping("/productos/disponibilidad-stock")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Map<Long, BigDecimal> verificarDisponibilidadStock(long[] idProducto, BigDecimal[] cantidad) {
         return productoService.getProductosSinStockDisponible(idProducto, cantidad);
     }
 
     @GetMapping("/productos/cantidad-venta-minima")
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     @ResponseStatus(HttpStatus.OK)
     public Map<Long, BigDecimal> verificarCantidadVentaMinima(long[] idProducto, BigDecimal[] cantidad) {
         return productoService.getProductosNoCumplenCantidadVentaMinima(idProducto, cantidad);
     }
 
     @GetMapping("/productos/reporte/criteria")
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public ResponseEntity<byte[]> getListaDePrecios(@RequestParam(value = "idEmpresa") long idEmpresa,
                                                     @RequestParam(value = "codigo", required = false) String codigo,
                                                     @RequestParam(value = "descripcion", required = false) String descripcion,

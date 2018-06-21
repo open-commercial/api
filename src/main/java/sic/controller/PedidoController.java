@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.service.IClienteService;
 import sic.service.IEmpresaService;
@@ -46,18 +47,21 @@ public class PedidoController {
     
     @GetMapping("/pedidos/{idPedido}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Pedido getPedidoPorId(@PathVariable long idPedido) {
         return pedidoService.getPedidoPorId(idPedido);
     }
     
     @GetMapping("/pedidos/{idPedido}/renglones")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public List<RenglonPedido> getRenglonesDelPedido(@PathVariable long idPedido) {
         return pedidoService.getRenglonesDelPedido(idPedido);
     }
     
     @PutMapping("/pedidos")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public void actualizar(@RequestParam Long idEmpresa,
                            @RequestParam Long idUsuario,
                            @RequestParam Long idCliente,
@@ -76,6 +80,7 @@ public class PedidoController {
     }
     
     @PostMapping("/pedidos")
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     @ResponseStatus(HttpStatus.CREATED)
     public Pedido guardar(@RequestParam Long idEmpresa,
                           @RequestParam Long idUsuario,
@@ -89,6 +94,7 @@ public class PedidoController {
     
     @GetMapping("/pedidos/busqueda/criteria")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Page<Pedido> buscarConCriteria(@RequestParam Long idEmpresa,
                                           @RequestParam(required = false) Long desde,
                                           @RequestParam(required = false) Long hasta,
@@ -135,11 +141,13 @@ public class PedidoController {
     
     @DeleteMapping("/pedidos/{idPedido}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public void eliminar(@PathVariable long idPedido) {
         pedidoService.eliminar(idPedido);
     }       
         
     @GetMapping("/pedidos/{idPedido}/reporte")
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public ResponseEntity<byte[]> getReportePedido(@PathVariable long idPedido) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);        

@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Empresa;
+import sic.modelo.Rol;
 import sic.service.IEmpresaService;
 
 @RestController
@@ -28,38 +30,43 @@ public class EmpresaController {
     
     @GetMapping("/empresas")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public List<Empresa> getEmpresas() {
         return empresaService.getEmpresas();
     }
     
     @GetMapping("/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Empresa getEmpresaPorId(@PathVariable long idEmpresa) {
         return empresaService.getEmpresaPorId(idEmpresa);
     }
     
     @PostMapping("/empresas")
     @ResponseStatus(HttpStatus.CREATED)
+    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
     public Empresa guardar(@RequestBody Empresa empresa) {
         return empresaService.guardar(empresa);
     }
-    
-    @PutMapping("/empresas")
-    @ResponseStatus(HttpStatus.OK)
-    public void actualizar(@RequestBody Empresa empresa) {
-        if(empresaService.getEmpresaPorId(empresa.getId_Empresa()) != null) {
-            empresaService.actualizar(empresa);
-        }
-    }
-    
+
+  @PutMapping("/empresas")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
+  public void actualizar(@RequestBody Empresa empresa) {
+    if (empresaService.getEmpresaPorId(empresa.getId_Empresa()) != null)
+      empresaService.actualizar(empresa);
+  }
+
     @DeleteMapping("/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
     public void eliminar(@PathVariable long idEmpresa) {
         empresaService.eliminar(idEmpresa);
     }
     
     @PostMapping("/empresas/logo")
     @ResponseStatus(HttpStatus.CREATED)
+    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
     public String uploadLogo(@RequestBody byte[] imagen) {
         return empresaService.guardarLogo(imagen);
     }

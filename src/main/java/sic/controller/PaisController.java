@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Pais;
+import sic.modelo.Rol;
 import sic.service.IPaisService;
 
 
@@ -29,12 +31,14 @@ public class PaisController {
     
     @GetMapping("/paises/{idPais}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Pais getPaisPorId(@PathVariable long idPais) {
         return paisService.getPaisPorId(idPais);
     }
     
     @PutMapping("/paises")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void actualizar(@RequestBody Pais pais) {
         if (paisService.getPaisPorId(pais.getId_Pais()) != null) {
             paisService.actualizar(pais);
@@ -43,18 +47,21 @@ public class PaisController {
     
     @DeleteMapping("/paises/{idPais}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void eliminar(@PathVariable long idPais) {
         paisService.eliminar(idPais);
     }
     
     @PostMapping("/paises")
     @ResponseStatus(HttpStatus.CREATED)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Pais guardar(@RequestBody Pais pais) {
         return paisService.guardar(pais);
     }
     
     @GetMapping("/paises")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public List<Pais> getPaises() {
         return paisService.getPaises();
     }

@@ -18,10 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import sic.modelo.CuentaCorriente;
-import sic.modelo.CuentaCorrienteCliente;
-import sic.modelo.CuentaCorrienteProveedor;
-import sic.modelo.RenglonCuentaCorriente;
+import sic.aspect.AccesoRolesPermitidos;
+import sic.modelo.*;
 import sic.service.BusinessServiceException;
 import sic.service.IClienteService;
 import sic.service.ICuentaCorrienteService;
@@ -48,42 +46,49 @@ public class CuentaCorrienteController {
 
     @DeleteMapping("/cuentas-corrientes/{idCuentaCorriente}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
     public void eliminar(@PathVariable Long idCuentaCorriente) {
         cuentaCorrienteService.eliminar(idCuentaCorriente);
     }
     
     @GetMapping("/cuentas-corrientes/{idCuentaCorriente}")
     @ResponseStatus(HttpStatus.OK)
-    public CuentaCorriente getCuentaCorrientePorID(@PathVariable Long idCuentaCorriente) {
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
+    public CuentaCorriente getCuentaCorrientePorId(@PathVariable Long idCuentaCorriente) {
         return cuentaCorrienteService.getCuentaCorrientePorID(idCuentaCorriente);
     }
     
     @GetMapping("/cuentas-corrientes/clientes/{idCliente}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public CuentaCorrienteCliente getCuentaCorrientePorCliente(@PathVariable Long idCliente) {
         return cuentaCorrienteService.getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente));
     }
     
     @GetMapping("/cuentas-corrientes/proveedores/{idProveedor}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public CuentaCorrienteProveedor getCuentaCorrientePorProveedor(@PathVariable Long idProveedor) {
         return cuentaCorrienteService.getCuentaCorrientePorProveedor(proveedorService.getProveedorPorId(idProveedor));
     }
     
     @GetMapping("/cuentas-corrientes/clientes/{idCliente}/saldo")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public BigDecimal getSaldoCuentaCorrienteCliente(@PathVariable long idCliente) {       
         return cuentaCorrienteService.getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente)).getSaldo();
     }
     
     @GetMapping("/cuentas-corrientes/proveedores/{idProveedor}/saldo")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public BigDecimal getSaldoCuentaCorrienteProveedor(@PathVariable long idProveedor) {       
         return cuentaCorrienteService.getCuentaCorrientePorProveedor(proveedorService.getProveedorPorId(idProveedor)).getSaldo();
     }
     
     @GetMapping("/cuentas-corrientes/{idCuentaCorriente}/renglones")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(@PathVariable long idCuentaCorriente,
                                                                     @RequestParam(required = false) Integer pagina,
                                                                     @RequestParam(required = false) Integer tamanio) {  
@@ -94,6 +99,7 @@ public class CuentaCorrienteController {
     }
 
     @GetMapping("/cuentas-corrientes/clientes/{idCliente}/reporte")
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public ResponseEntity<byte[]> getReporteCuentaCorrienteXls(@PathVariable long idCliente,
                                                                @RequestParam(required = false) Integer pagina,
                                                                @RequestParam(required = false) Integer tamanio,

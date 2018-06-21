@@ -1,7 +1,5 @@
 package sic.controller;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -13,10 +11,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.BusquedaUsuarioCriteria;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
-import sic.service.IAuthService;
 import sic.service.IUsuarioService;
 
 @RestController
@@ -24,16 +22,14 @@ import sic.service.IUsuarioService;
 public class UsuarioController {
     
     private final IUsuarioService usuarioService;
-    private final IAuthService authService;
     private final int TAMANIO_PAGINA_DEFAULT = 50;
 
     @Value("${SIC_JWT_KEY}")
     private String secretkey;
     
     @Autowired
-    public UsuarioController(IUsuarioService usuarioService, IAuthService authService) {
+    public UsuarioController(IUsuarioService usuarioService) {
         this.usuarioService = usuarioService;
-        this.authService = authService;
     }
     
     @GetMapping("/usuarios/{idUsuario}")
@@ -44,6 +40,7 @@ public class UsuarioController {
 
   @GetMapping("/usuarios/busqueda/criteria")
   @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Page<Usuario> buscarUsuarios(
       @RequestParam(required = false) String username,
       @RequestParam(required = false) String nombre,
@@ -51,8 +48,7 @@ public class UsuarioController {
       @RequestParam(required = false) String email,
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) Integer tamanio,
-      @RequestParam(required = false) List<Rol> roles,
-      @RequestHeader("Authorization") String token) {
+      @RequestParam(required = false) List<Rol> roles) {
     if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
     if (pagina == null || pagina < 0) pagina = 0;
     Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "nombre"));
@@ -70,32 +66,25 @@ public class UsuarioController {
             .roles(roles)
             .pageable(pageable)
             .build();
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    List<Rol> rolesPermitidos = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO);
-    authService.autorizarAcceso(rolesPermitidos, (int) claims.get("idUsuario"));
     return usuarioService.buscarUsuarios(criteria);
   }
 
   @PostMapping("/usuarios")
   @ResponseStatus(HttpStatus.CREATED)
+  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public Usuario guardar(
-      @RequestBody Usuario usuario,
-      @RequestHeader("Authorization") String token) {
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    authService.autorizarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
+      @RequestBody Usuario usuario) {
     return usuarioService.guardar(usuario);
   }
 
   @PutMapping("/usuarios")
   @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void actualizar(
       @RequestBody Usuario usuario,
       @RequestHeader("Authorization") String token) {
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    authService.autorizarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
     usuarioService.actualizar(usuario, (int) claims.get("idUsuario"));
   }
 
@@ -107,10 +96,8 @@ public class UsuarioController {
     
     @DeleteMapping("/usuarios/{idUsuario}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminar(@PathVariable long idUsuario,
-                         @RequestHeader("Authorization") String token) {
-        Claims claims = Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-        authService.autorizarAcceso(Collections.singletonList(Rol.ADMINISTRADOR), (int) claims.get("idUsuario"));
+    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
+    public void eliminar(@PathVariable long idUsuario) {
         usuarioService.eliminar(idUsuario);
     }    
 }

@@ -18,24 +18,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sic.modelo.BusquedaFacturaCompraCriteria;
-import sic.modelo.BusquedaFacturaVentaCriteria;
-import sic.modelo.Cliente;
-import sic.modelo.Empresa;
-import sic.modelo.Factura;
-import sic.modelo.FacturaCompra;
-import sic.modelo.FacturaVenta;
-import sic.modelo.RenglonFactura;
+import sic.aspect.AccesoRolesPermitidos;
+import sic.modelo.*;
 import sic.service.IClienteService;
 import sic.service.IEmpresaService;
 import sic.service.IFacturaService;
 import sic.service.IPedidoService;
 import sic.service.IProveedorService;
 import sic.service.IUsuarioService;
-import sic.modelo.Movimiento;
-import sic.modelo.Proveedor;
-import sic.modelo.TipoDeComprobante;
-import sic.modelo.Usuario;
 import sic.service.IReciboService;
 import sic.service.ITransportistaService;
 
@@ -73,12 +63,14 @@ public class FacturaController {
     
     @GetMapping("/facturas/{idFactura}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Factura getFacturaPorId(@PathVariable long idFactura) {
         return facturaService.getFacturaPorId(idFactura);
     }
     
     @PostMapping("/facturas/venta")
     @ResponseStatus(HttpStatus.CREATED)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public List<Factura> guardarFacturaVenta(@RequestBody FacturaVenta fv,
                                              @RequestParam Long idEmpresa, 
                                              @RequestParam Long idCliente,
@@ -107,6 +99,7 @@ public class FacturaController {
     
     @PostMapping("/facturas/compra")
     @ResponseStatus(HttpStatus.CREATED)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public List<Factura> guardarFacturaCompra(@RequestBody FacturaCompra fc,
                                               @RequestParam Long idEmpresa,
                                               @RequestParam Long idProveedor,
@@ -121,30 +114,35 @@ public class FacturaController {
     
     @PostMapping("/facturas/{idFactura}/autorizacion")
     @ResponseStatus(HttpStatus.CREATED)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public FacturaVenta autorizarFactura(@PathVariable long idFactura) {
         return facturaService.autorizarFacturaVenta((FacturaVenta) facturaService.getFacturaPorId(idFactura));
     }
     
     @DeleteMapping("/facturas")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
     public void eliminar(@RequestParam long[] idFactura) {
         facturaService.eliminar(idFactura);
     }
         
     @GetMapping("/facturas/{idFactura}/renglones")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public List<RenglonFactura> getRenglonesDeLaFactura(@PathVariable long idFactura) {
             return facturaService.getRenglonesDeLaFactura(idFactura);
     }
     
     @GetMapping("/facturas/{idFactura}/renglones/notas/credito") 
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public List<RenglonFactura> getRenglonesDeLaFacturaModificadosParaCredito(@PathVariable long idFactura) {
             return facturaService.getRenglonesDeLaFacturaModificadosParaCredito(idFactura);
     }
     
     @GetMapping("/facturas/compra/busqueda/criteria")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Page<FacturaCompra> buscarFacturaCompra(@RequestParam Long idEmpresa,
                                                    @RequestParam(required = false) Long desde,
                                                    @RequestParam(required = false) Long hasta,
@@ -191,6 +189,7 @@ public class FacturaController {
     
     @GetMapping("/facturas/venta/busqueda/criteria")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Page<FacturaVenta> buscarFacturaVenta(@RequestParam Long idEmpresa,
                                                  @RequestParam(required = false) Long desde,
                                                  @RequestParam(required = false) Long hasta,
@@ -257,24 +256,28 @@ public class FacturaController {
     
     @GetMapping("/facturas/compra/tipos/empresas/{idEmpresa}/proveedores/{idProveedor}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public TipoDeComprobante[] getTipoFacturaCompra(@PathVariable long idEmpresa, @PathVariable long idProveedor) {
         return facturaService.getTipoFacturaCompra(empresaService.getEmpresaPorId(idEmpresa), proveedorService.getProveedorPorId(idProveedor));
     }
     
     @GetMapping("/facturas/venta/tipos/empresas/{idEmpresa}/clientes/{idCliente}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public TipoDeComprobante[] getTipoFacturaVenta(@PathVariable long idEmpresa, @PathVariable long idCliente) {
         return facturaService.getTipoFacturaVenta(empresaService.getEmpresaPorId(idEmpresa), clienteService.getClientePorId(idCliente));
     }
     
     @GetMapping("/facturas/tipos/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public TipoDeComprobante[] getTiposFacturaSegunEmpresa(@PathVariable long idEmpresa) {
         return facturaService.getTiposFacturaSegunEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     }    
     
     @GetMapping("/facturas/{idFactura}/reporte")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public ResponseEntity<byte[]> getReporteFacturaVenta(@PathVariable long idFactura) {        
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);        
@@ -286,6 +289,7 @@ public class FacturaController {
     
     @GetMapping("/facturas/renglones/pedidos/{idPedido}") 
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public List<RenglonFactura> getRenglonesPedidoParaFacturar(@PathVariable long idPedido,
                                                                @RequestParam TipoDeComprobante tipoDeComprobante) {
         return facturaService.convertirRenglonesPedidoEnRenglonesFactura(pedidoService.getPedidoPorId(idPedido), tipoDeComprobante);
@@ -293,6 +297,7 @@ public class FacturaController {
     
     @GetMapping("/facturas/renglon")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public RenglonFactura calcularRenglon(@RequestParam long idProducto,
                                           @RequestParam TipoDeComprobante tipoDeComprobante,
                                           @RequestParam Movimiento movimiento,
@@ -303,6 +308,7 @@ public class FacturaController {
         
     @GetMapping("/facturas/total-facturado-venta/criteria")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public BigDecimal calcularTotalFacturadoVenta(@RequestParam Long idEmpresa,
                                                   @RequestParam(required = false) Long desde,
                                                   @RequestParam(required = false) Long hasta,
@@ -359,6 +365,7 @@ public class FacturaController {
     
     @GetMapping("/facturas/total-facturado-compra/criteria")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public BigDecimal calcularTotalFacturadoCompra(@RequestParam Long idEmpresa,
                                                    @RequestParam(required = false) Long desde,
                                                    @RequestParam(required = false) Long hasta,
@@ -395,6 +402,7 @@ public class FacturaController {
     
     @GetMapping("/facturas/total-iva-venta/criteria")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public BigDecimal calcularIvaVenta(@RequestParam Long idEmpresa,
                                        @RequestParam(required = false) Long desde,
                                        @RequestParam(required = false) Long hasta,
@@ -451,6 +459,7 @@ public class FacturaController {
     
     @GetMapping("/facturas/total-iva-compra/criteria")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public BigDecimal calcularTotalIvaCompra(@RequestParam Long idEmpresa,
                                              @RequestParam(required = false) Long desde,
                                              @RequestParam(required = false) Long hasta,
@@ -487,6 +496,7 @@ public class FacturaController {
     
     @GetMapping("/facturas/ganancia-total/criteria")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public BigDecimal calcularGananciaTotal(@RequestParam Long idEmpresa,
                                             @RequestParam(required = false) Long desde,
                                             @RequestParam(required = false) Long hasta,

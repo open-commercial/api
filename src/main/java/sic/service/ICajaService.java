@@ -40,7 +40,7 @@ public interface ICajaService {
     
     List<MovimientoCaja> getMovimientosPorFormaDePagoEntreFechas(Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta);
 
-    void reabrirCaja(long idCaja, BigDecimal saldoInicial, long idUsuario);
+    void reabrirCaja(long idCaja, BigDecimal saldoInicial);
 
     Caja encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(long idEmpresa, Date fecha);
 

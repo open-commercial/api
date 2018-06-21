@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.ConfiguracionDelSistema;
+import sic.modelo.Rol;
 import sic.service.IConfiguracionDelSistemaService;
 import sic.service.IEmpresaService;
 
@@ -30,12 +32,14 @@ public class ConfiguracionDelSistemaController {
     
     @GetMapping("/configuraciones-del-sistema/{idConfiguracionDelSistema}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
     public ConfiguracionDelSistema getConfiguracionDelSistemaPorId(@PathVariable long idConfiguracionDelSistema) {
         return configuracionDelSistemaService.getConfiguracionDelSistemaPorId(idConfiguracionDelSistema);
     }
     
     @PutMapping("/configuraciones-del-sistema")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
     public void actualizar(@RequestBody ConfiguracionDelSistema configuracionDelSistema) {
         if(configuracionDelSistemaService.getConfiguracionDelSistemaPorId(configuracionDelSistema.getId_ConfiguracionDelSistema()) != null) {
             configuracionDelSistemaService.actualizar(configuracionDelSistema);
@@ -44,12 +48,14 @@ public class ConfiguracionDelSistemaController {
     
     @PostMapping("/configuracion-del-sistema")
     @ResponseStatus(HttpStatus.CREATED)
+    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
     public ConfiguracionDelSistema guardar(@RequestBody ConfiguracionDelSistema configuracionDelSistema) {
         return configuracionDelSistemaService.guardar(configuracionDelSistema);
     }
     
     @GetMapping("/configuraciones-del-sistema/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
     public ConfiguracionDelSistema getconfiguracionDelSistemaPorEmpresa(@PathVariable long idEmpresa) {
         return configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     }

@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.CondicionIVA;
+import sic.modelo.Rol;
 import sic.service.ICondicionIVAService;
 
 @RestController
@@ -25,15 +27,17 @@ public class CondicionIVAController {
     public CondicionIVAController(ICondicionIVAService condicionIVAService) {
         this.condicionIVAService = condicionIVAService;
     }
-    
-    @GetMapping("/condiciones-iva/{idCondicionIva}")
+
+    @GetMapping("/condiciones-iva")
     @ResponseStatus(HttpStatus.OK)
-    public CondicionIVA getCondicionIVAPorId(@PathVariable long idCondicionIva) {
-        return condicionIVAService.getCondicionIVAPorId(idCondicionIva);
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
+    public List<CondicionIVA> getCondicionesIVA() {
+        return condicionIVAService.getCondicionesIVA();
     }
     
     @PutMapping("/condiciones-iva")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void actualizar(@RequestBody CondicionIVA condicionIVA) {
         if(condicionIVAService.getCondicionIVAPorId(condicionIVA.getId_CondicionIVA()) != null) {
             condicionIVAService.actualizar(condicionIVA);
@@ -42,18 +46,14 @@ public class CondicionIVAController {
     
     @DeleteMapping("/condiciones-iva/{idCondicionIva}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void eliminar(@PathVariable long idCondicionIva) {
         condicionIVAService.eliminar(idCondicionIva);
     }
     
-    @GetMapping("/condiciones-iva")
-    @ResponseStatus(HttpStatus.OK)
-    public List<CondicionIVA> getCondicionesIVA() {
-        return condicionIVAService.getCondicionesIVA();
-    }
-    
     @PostMapping("/condiciones-iva")
     @ResponseStatus(HttpStatus.CREATED)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public CondicionIVA guardar(@RequestBody CondicionIVA condicionIVA) {
         return condicionIVAService.guardar(condicionIVA);
     }

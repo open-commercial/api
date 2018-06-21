@@ -348,34 +348,28 @@ public class CajaServiceImpl implements ICajaService {
         return movimientos;
     }
 
-    @Override
-    @Transactional
-    public void reabrirCaja(long idCaja, BigDecimal saldoAperturaNuevo, long idUsuario) {
-        Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
-        if (usuario.getRoles().contains(Rol.ADMINISTRADOR)) {
-            Caja caja = getCajaPorId(idCaja);
-            Caja ultimaCaja = this.getUltimaCaja(caja.getEmpresa().getId_Empresa());
-            if (ultimaCaja == null) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_caja_no_existente"));
-            }
-            if (caja.getId_Caja() == ultimaCaja.getId_Caja()) {
-                caja.setSaldoSistema(null);
-                caja.setSaldoApertura(saldoAperturaNuevo);
-                caja.setSaldoReal(null);
-                caja.setEstado(EstadoCaja.ABIERTA);
-                caja.setUsuarioCierraCaja(null);
-                caja.setFechaCierre(null);
-                this.actualizar(caja);
-            } else {
-                throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_caja_re_apertura_no_valida"));
-            }
-        } else {
-            throw new ForbiddenException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_usuario_rol_no_valido"));
-        }
+  @Override
+  @Transactional
+  public void reabrirCaja(long idCaja, BigDecimal saldoAperturaNuevo) {
+    Caja caja = getCajaPorId(idCaja);
+    Caja ultimaCaja = this.getUltimaCaja(caja.getEmpresa().getId_Empresa());
+    if (ultimaCaja == null) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_caja_no_existente"));
     }
+    if (caja.getId_Caja() == ultimaCaja.getId_Caja()) {
+      caja.setSaldoSistema(null);
+      caja.setSaldoApertura(saldoAperturaNuevo);
+      caja.setSaldoReal(null);
+      caja.setEstado(EstadoCaja.ABIERTA);
+      caja.setUsuarioCierraCaja(null);
+      caja.setFechaCierre(null);
+      this.actualizar(caja);
+    } else {
+      throw new EntityNotFoundException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_caja_re_apertura_no_valida"));
+    }
+  }
 
     @Override
     public Caja encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(long idEmpresa, Date fecha) {
