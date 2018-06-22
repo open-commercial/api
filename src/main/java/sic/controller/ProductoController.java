@@ -64,7 +64,8 @@ public class ProductoController {
     }
 
     @GetMapping("/productos/valor-stock/criteria")
-    @ResponseStatus(HttpStatus.OK)@AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+    @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public BigDecimal calcularValorStock(@RequestParam long idEmpresa,
                                          @RequestParam(required = false) String codigo,
                                          @RequestParam(required = false) String descripcion,
