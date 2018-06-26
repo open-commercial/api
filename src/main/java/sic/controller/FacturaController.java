@@ -261,7 +261,7 @@ public class FacturaController {
 
   @GetMapping("/facturas/venta/tipos/empresas/{idEmpresa}/clientes/{idCliente}")
   @ResponseStatus(HttpStatus.OK)
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public TipoDeComprobante[] getTipoFacturaVenta(
       @PathVariable long idEmpresa,
       @PathVariable long idCliente,

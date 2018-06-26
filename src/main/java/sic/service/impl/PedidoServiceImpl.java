@@ -207,7 +207,9 @@ public class PedidoServiceImpl implements IPedidoService {
         if (criteria.isBuscaPorEstadoPedido()) builder.and(qpedido.estado.eq(criteria.getEstadoPedido()));
         Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
         BooleanBuilder rsPredicate = new BooleanBuilder();
-        if (!usuarioLogueado.getRoles().isEmpty()) {
+        if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
+                && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
+                && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
             for (Rol rol : usuarioLogueado.getRoles()) {
                 switch (rol) {
                     case VIAJANTE:

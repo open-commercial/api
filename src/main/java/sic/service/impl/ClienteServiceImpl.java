@@ -130,29 +130,28 @@ public class ClienteServiceImpl implements IClienteService {
       builder.and(qcliente.localidad.provincia.eq(criteria.getProvincia()));
     if (criteria.isBuscaPorPais())
       builder.and(qcliente.localidad.provincia.pais.eq(criteria.getPais()));
-    Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
-    if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
-        && !usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR)) {
-      if (usuarioLoggedIn.getRoles().contains(Rol.VIAJANTE)
-          && usuarioLoggedIn.getRoles().contains(Rol.COMPRADOR)) {
-        builder.and(
-            qcliente
-                .viajante
-                .eq(usuarioLoggedIn)
-                .or(
-                    qcliente.eq(
-                        this.getClientePorIdUsuarioYidEmpresa(
-                            usuarioLoggedIn.getId_Usuario(),
-                            criteria.getEmpresa()))));
-      } else {
-        if (usuarioLoggedIn.getRoles().contains(Rol.VIAJANTE))
-          builder.and(qcliente.viajante.eq(usuarioLoggedIn));
-        if (usuarioLoggedIn.getRoles().contains(Rol.COMPRADOR))
-          builder.and(
-              qcliente.eq(
-                  this.getClientePorIdUsuarioYidEmpresa(
-                      usuarioLoggedIn.getId_Usuario(), criteria.getEmpresa())));
+    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
+            && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
+            && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (Rol rol : usuarioLogueado.getRoles()) {
+        switch (rol) {
+          case VIAJANTE:
+            rsPredicate.or(qcliente.viajante.eq(usuarioLogueado));
+            break;
+          case COMPRADOR:
+            Cliente clienteRelacionado =
+                this.getClientePorIdUsuarioYidEmpresa(idUsuarioLoggedIn, criteria.getEmpresa());
+            if (clienteRelacionado != null) {
+              rsPredicate.or(qcliente.eq(clienteRelacionado));
+            } else {
+              rsPredicate.or(qcliente.isNull());
+            }
+            break;
+        }
       }
+      builder.and(rsPredicate);
     }
     builder.and(qcliente.empresa.eq(criteria.getEmpresa()).and(qcliente.eliminado.eq(false)));
     Page<Cliente> page = clienteRepository.findAll(builder, criteria.getPageable());
