@@ -59,7 +59,7 @@ public class AfipServiceImpl implements IAfipService {
     @Override
     public FEAuthRequest getFEAuth(String afipNombreServicio, Empresa empresa) {
         FEAuthRequest feAuthRequest = new FEAuthRequest();
-        String loginTicketResponse = "";
+        String loginTicketResponse;
         byte[] p12file = configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa).getCertificadoAfip();
         if (p12file.length == 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_cds_certificado_vacio"));
@@ -74,10 +74,10 @@ public class AfipServiceImpl implements IAfipService {
             loginTicketResponse = afipWebServiceSOAPClient.loginCMS(loginCms);        
         } catch (WebServiceClientException ex) {
             LOGGER.error(ex.getMessage());            
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_token_wsaa_error"));
+            throw new ServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_token_wsaa_error"), ex);
         } catch (IOException ex) {
             LOGGER.error(ex.getMessage());
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_xml"));
+            throw new ServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_xml"), ex);
         }
         try {
             Reader tokenReader = new StringReader(loginTicketResponse);
@@ -87,14 +87,14 @@ public class AfipServiceImpl implements IAfipService {
             feAuthRequest.setCuit(empresa.getCuip());
         } catch (DocumentException ex) {
             LOGGER.error(ex.getMessage());
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_xml"));
+            throw new ServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_xml"), ex);
         }
         return feAuthRequest;
     }
     
     @Override    
     public void autorizar(ComprobanteAFIP comprobante) {
-        if (configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(comprobante.getEmpresa()).isFacturaElectronicaHabilitada() == false) {
+        if (!configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(comprobante.getEmpresa()).isFacturaElectronicaHabilitada()) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_cds_fe_habilitada"));
         }
         if (comprobante.getTipoComprobante() != TipoDeComprobante.FACTURA_A && comprobante.getTipoComprobante() != TipoDeComprobante.FACTURA_B
@@ -137,13 +137,13 @@ public class AfipServiceImpl implements IAfipService {
             comprobante.setNumFacturaAfip(siguienteNroComprobante);
         } catch (WebServiceClientException ex) {
             LOGGER.error(ex.getMessage());
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_autorizacion_error"));
+            throw new ServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_autorizacion_error"), ex);
         } catch (ParseException ex) {
             LOGGER.error(ex.getMessage());
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_fecha"));
+            throw new ServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_fecha"), ex);
         } catch (IOException ex) {
             LOGGER.error(ex.getMessage());
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_xml"));
+            throw new ServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_xml"), ex);
         }
     }
     
@@ -180,10 +180,10 @@ public class AfipServiceImpl implements IAfipService {
             return response.getCbteNro() + 1;
         } catch (WebServiceClientException ex) {
             LOGGER.error(ex.getMessage());            
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_siguiente_nro_comprobante_error"));
+            throw new ServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_siguiente_nro_comprobante_error"), ex);
         } catch (IOException ex) {
             LOGGER.error(ex.getMessage());
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_xml"));
+            throw new ServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_xml"), ex);
         }
     }
     
