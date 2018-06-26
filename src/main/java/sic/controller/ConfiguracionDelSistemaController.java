@@ -30,13 +30,6 @@ public class ConfiguracionDelSistemaController {
         this.empresaService = empresaService;
     }
     
-    @GetMapping("/configuraciones-del-sistema/{idConfiguracionDelSistema}")
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-    public ConfiguracionDelSistema getConfiguracionDelSistemaPorId(@PathVariable long idConfiguracionDelSistema) {
-        return configuracionDelSistemaService.getConfiguracionDelSistemaPorId(idConfiguracionDelSistema);
-    }
-    
     @PutMapping("/configuraciones-del-sistema")
     @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
@@ -58,5 +51,12 @@ public class ConfiguracionDelSistemaController {
     @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
     public ConfiguracionDelSistema getconfiguracionDelSistemaPorEmpresa(@PathVariable long idEmpresa) {
         return configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    }
+
+    @GetMapping("/configuraciones-del-sistema/empresas/{idEmpresa}/cantidad-renglones")
+    @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
+    public int getCantidadMaximaDeRenglonesPorIdEmpresa(@PathVariable long idEmpresa) {
+        return configuracionDelSistemaService.getCantidadMaximaDeRenglonesPorIdEmpresa(idEmpresa);
     }
 }

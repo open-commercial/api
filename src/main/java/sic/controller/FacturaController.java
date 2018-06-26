@@ -1,9 +1,7 @@
 package sic.controller;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -260,14 +258,32 @@ public class FacturaController {
     public TipoDeComprobante[] getTipoFacturaCompra(@PathVariable long idEmpresa, @PathVariable long idProveedor) {
         return facturaService.getTipoFacturaCompra(empresaService.getEmpresaPorId(idEmpresa), proveedorService.getProveedorPorId(idProveedor));
     }
-    
-    @GetMapping("/facturas/venta/tipos/empresas/{idEmpresa}/clientes/{idCliente}")
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-    public TipoDeComprobante[] getTipoFacturaVenta(@PathVariable long idEmpresa, @PathVariable long idCliente) {
-        return facturaService.getTipoFacturaVenta(empresaService.getEmpresaPorId(idEmpresa), clienteService.getClientePorId(idCliente));
+
+  @GetMapping("/facturas/venta/tipos/empresas/{idEmpresa}/clientes/{idCliente}")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public TipoDeComprobante[] getTipoFacturaVenta(
+      @PathVariable long idEmpresa,
+      @PathVariable long idCliente,
+      @RequestHeader("Authorization") String token) {
+    Claims claims =
+        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    long idUsuario = (int) claims.get("idUsuario");
+    List<Rol> rolesDeUsuario =
+        usuarioService.getUsuarioPorId(idUsuario).getRoles();
+    if (rolesDeUsuario.contains(Rol.ADMINISTRADOR)
+        || rolesDeUsuario.contains(Rol.ENCARGADO)
+        || rolesDeUsuario.contains(Rol.VENDEDOR)) {
+      return facturaService.getTipoFacturaVenta(
+          empresaService.getEmpresaPorId(idEmpresa), clienteService.getClientePorId(idCliente));
+    } else if (rolesDeUsuario.contains(Rol.VIAJANTE)
+            || rolesDeUsuario.contains(Rol.COMPRADOR)) {
+      TipoDeComprobante[] tipoDeComprobantes = {TipoDeComprobante.PEDIDO};
+      return tipoDeComprobantes;
     }
-    
+    return null;
+  }
+
     @GetMapping("/facturas/tipos/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})

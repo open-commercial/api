@@ -17,5 +17,7 @@ public interface IConfiguracionDelSistemaService {
     void eliminar(ConfiguracionDelSistema cds);
     
     void validarCds(TipoDeOperacion tipoOperacion, ConfiguracionDelSistema cds);
+
+    int getCantidadMaximaDeRenglonesPorIdEmpresa(long  idEmpresa);
     
 }

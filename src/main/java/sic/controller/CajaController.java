@@ -147,7 +147,7 @@ public class CajaController {
 
     @GetMapping("/cajas/empresas/{idEmpresa}/estado-ultima-caja")
     @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public boolean getEstadoUltimaCaja(@PathVariable long idEmpresa) {
         return cajaService.isUltimaCajaAbierta(idEmpresa);
     }

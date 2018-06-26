@@ -48,7 +48,7 @@ public class Usuario implements Serializable {
     @Column(nullable = false)
     private String email;
     
-    @Column(nullable = true)
+    @Column(length = 300)
     private String token;
     
     private long idEmpresaPredeterminada;
