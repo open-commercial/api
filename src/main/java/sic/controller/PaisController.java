@@ -61,7 +61,7 @@ public class PaisController {
     
     @GetMapping("/paises")
     @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.VIAJANTE})
     public List<Pais> getPaises() {
         return paisService.getPaises();
     }
