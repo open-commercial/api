@@ -130,14 +130,14 @@ public class ProductoController {
 
     @DeleteMapping("/productos")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
     public void eliminarMultiplesProductos(@RequestParam long[] idProducto) {
         productoService.eliminarMultiplesProductos(idProducto);
     }
 
     @PutMapping("/productos")
     @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
     public void actualizar(@RequestBody Producto producto,
                            @RequestParam Long idMedida,
                            @RequestParam Long idRubro,

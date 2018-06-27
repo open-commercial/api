@@ -78,7 +78,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
 
   @Override
-  public Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria) {
+  public Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria, long idUsuarioLoggedIn) {
     QUsuario qusuario = QUsuario.usuario;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.isBuscaPorApellido()) {
@@ -115,20 +115,31 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
     if (criteria.isBuscarPorRol() && !criteria.getRoles().isEmpty()) {
       BooleanBuilder rsPredicate = new BooleanBuilder();
-      for (Rol rol : criteria.getRoles()) {
-        switch (rol) {
-          case ADMINISTRADOR:
-            rsPredicate.or(qusuario.roles.contains(Rol.ADMINISTRADOR));
-            break;
-          case VENDEDOR:
-            rsPredicate.or(qusuario.roles.contains(Rol.VENDEDOR));
-            break;
-          case VIAJANTE:
-            rsPredicate.or(qusuario.roles.contains(Rol.VIAJANTE));
-            break;
-          case COMPRADOR:
-            rsPredicate.or(qusuario.roles.contains(Rol.COMPRADOR));
-            break;
+      List<Rol> rolesDeUsuario = this.getUsuarioPorId(idUsuarioLoggedIn).getRoles();
+      if (rolesDeUsuario.contains(Rol.VIAJANTE)
+          && !rolesDeUsuario.contains(Rol.ADMINISTRADOR)
+          && !rolesDeUsuario.contains(Rol.ENCARGADO)
+          && !rolesDeUsuario.contains(Rol.VENDEDOR)) {
+        rsPredicate.or(qusuario.id_Usuario.eq(idUsuarioLoggedIn));
+      } else {
+        for (Rol rol : criteria.getRoles()) {
+          switch (rol) {
+            case ADMINISTRADOR:
+              rsPredicate.or(qusuario.roles.contains(Rol.ADMINISTRADOR));
+              break;
+            case ENCARGADO:
+              rsPredicate.or(qusuario.roles.contains(Rol.ENCARGADO));
+              break;
+            case VENDEDOR:
+              rsPredicate.or(qusuario.roles.contains(Rol.VENDEDOR));
+              break;
+            case VIAJANTE:
+              rsPredicate.or(qusuario.roles.contains(Rol.VIAJANTE));
+              break;
+            case COMPRADOR:
+              rsPredicate.or(qusuario.roles.contains(Rol.COMPRADOR));
+              break;
+          }
         }
       }
       builder.and(rsPredicate);
@@ -213,7 +224,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
               .roles(roles)
               .pageable(pageable)
               .build();
-      List<Usuario> administradores = this.buscarUsuarios(criteria).getContent();
+      List<Usuario> administradores = this.buscarUsuarios(criteria, usuario.getId_Usuario()).getContent();
       if (administradores.size() == 1
           && administradores.get(0).getId_Usuario() == usuario.getId_Usuario()) {
         throw new BusinessServiceException(

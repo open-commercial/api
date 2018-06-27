@@ -40,7 +40,7 @@ public class UsuarioController {
 
   @GetMapping("/usuarios/busqueda/criteria")
   @ResponseStatus(HttpStatus.OK)
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VIAJANTE, Rol.VENDEDOR})
   public Page<Usuario> buscarUsuarios(
       @RequestParam(required = false) String username,
       @RequestParam(required = false) String nombre,
@@ -48,7 +48,8 @@ public class UsuarioController {
       @RequestParam(required = false) String email,
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) Integer tamanio,
-      @RequestParam(required = false) List<Rol> roles) {
+      @RequestParam(required = false) List<Rol> roles,
+      @RequestHeader("Authorization") String token) {
     if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
     if (pagina == null || pagina < 0) pagina = 0;
     Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "nombre"));
@@ -66,7 +67,9 @@ public class UsuarioController {
             .roles(roles)
             .pageable(pageable)
             .build();
-    return usuarioService.buscarUsuarios(criteria);
+    Claims claims =
+            Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    return usuarioService.buscarUsuarios(criteria, (int) claims.get("idUsuario"));
   }
 
   @PostMapping("/usuarios")
@@ -93,11 +96,11 @@ public class UsuarioController {
     public void actualizarIdEmpresaDeUsuario(@PathVariable long idUsuario, @PathVariable long idEmpresaPredeterminada) {
        usuarioService.actualizarIdEmpresaDeUsuario(idUsuario, idEmpresaPredeterminada);
     }
-    
-    @DeleteMapping("/usuarios/{idUsuario}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-    public void eliminar(@PathVariable long idUsuario) {
-        usuarioService.eliminar(idUsuario);
-    }    
+
+  @DeleteMapping("/usuarios/{idUsuario}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
+  public void eliminar(@PathVariable long idUsuario) {
+    usuarioService.eliminar(idUsuario);
+  }
 }

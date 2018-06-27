@@ -17,7 +17,7 @@ public interface IUsuarioService {
 
   Usuario autenticarUsuario(Credencial credencial);
 
-  Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria);
+  Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria, long idUsuarioLoggedIn);
 
   Usuario guardar(Usuario usuario);
 
