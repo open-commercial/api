@@ -215,22 +215,19 @@ public class UsuarioServiceImpl implements IUsuarioService {
             && !usuario.getRoles().contains(Rol.ADMINISTRADOR))
         || operacion == TipoDeOperacion.ELIMINACION
             && usuario.getRoles().contains(Rol.ADMINISTRADOR)) {
-      Pageable pageable = new PageRequest(0, Integer.MAX_VALUE);
-      List<Rol> roles = new ArrayList<>();
-      roles.add(Rol.ADMINISTRADOR);
-      BusquedaUsuarioCriteria criteria =
-          BusquedaUsuarioCriteria.builder()
-              .buscarPorRol(true)
-              .roles(roles)
-              .pageable(pageable)
-              .build();
-      List<Usuario> administradores = this.buscarUsuarios(criteria, usuario.getId_Usuario()).getContent();
+      List<Usuario> administradores = this.getUsuariosAdministradores().getContent();
       if (administradores.size() == 1
           && administradores.get(0).getId_Usuario() == usuario.getId_Usuario()) {
         throw new BusinessServiceException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_ultimoAdmin"));
       }
     }
+  }
+
+  @Override
+  public Page<Usuario> getUsuariosAdministradores() {
+    Pageable pageable = new PageRequest(0, Integer.MAX_VALUE);
+    return usuarioRepository.findAllByRolesContainsAndEliminado(Rol.ADMINISTRADOR, false, pageable);
   }
 
   @Override

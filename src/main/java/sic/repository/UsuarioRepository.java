@@ -1,11 +1,16 @@
 package sic.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import sic.modelo.Rol;
 import sic.modelo.Usuario;
+
+import java.util.List;
 
 public interface UsuarioRepository
     extends PagingAndSortingRepository<Usuario, Long>, QueryDslPredicateExecutor<Usuario> {
@@ -37,4 +42,7 @@ public interface UsuarioRepository
   int updateIdEmpresa(
       @Param("idUsuario") long idUsuario,
       @Param("idEmpresaPredeterminada") long idEmpresaPredeterminada);
+
+  Page<Usuario> findAllByRolesContainsAndEliminado(Rol rol, boolean eliminado, Pageable pageable);
+
 }
