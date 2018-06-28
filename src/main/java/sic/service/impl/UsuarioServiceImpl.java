@@ -2,7 +2,9 @@ package sic.service.impl;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import com.querydsl.core.BooleanBuilder;
 import org.slf4j.Logger;
@@ -219,7 +221,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
             && !usuario.getRoles().contains(Rol.ADMINISTRADOR))
         || operacion == TipoDeOperacion.ELIMINACION
             && usuario.getRoles().contains(Rol.ADMINISTRADOR)) {
-      List<Usuario> administradores = this.getUsuariosAdministradores().getContent();
+      List<Usuario> administradores = this.getUsuariosPorRol(Rol.ADMINISTRADOR).getContent();
       if (administradores.size() == 1
           && administradores.get(0).getId_Usuario() == usuario.getId_Usuario()) {
         throw new BusinessServiceException(
@@ -229,9 +231,9 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public Page<Usuario> getUsuariosAdministradores() {
+  public Page<Usuario> getUsuariosPorRol(Rol rol) {
     Pageable pageable = new PageRequest(0, Integer.MAX_VALUE);
-    return usuarioRepository.findAllByRolesContainsAndEliminado(Rol.ADMINISTRADOR, false, pageable);
+    return usuarioRepository.findAllByRolesContainsAndEliminado(rol, false, pageable);
   }
 
   @Override
