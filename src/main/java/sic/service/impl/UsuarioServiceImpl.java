@@ -2,9 +2,7 @@ package sic.service.impl;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 import javax.persistence.EntityNotFoundException;
 import com.querydsl.core.BooleanBuilder;
 import org.slf4j.Logger;
@@ -79,13 +77,13 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria, long idUsuarioLoggedIn) {
-    QUsuario qusuario = QUsuario.usuario;
+    QUsuario qUsuario = QUsuario.usuario;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.isBuscaPorApellido()) {
       String[] terminos = criteria.getApellido().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
-        rsPredicate.and(qusuario.apellido.containsIgnoreCase(termino));
+        rsPredicate.and(qUsuario.apellido.containsIgnoreCase(termino));
       }
       builder.or(rsPredicate);
     }
@@ -93,7 +91,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
       String[] terminos = criteria.getNombre().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
-        rsPredicate.and(qusuario.nombre.containsIgnoreCase(termino));
+        rsPredicate.and(qUsuario.nombre.containsIgnoreCase(termino));
       }
       builder.or(rsPredicate);
     }
@@ -101,7 +99,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
       String[] terminos = criteria.getUsername().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
-        rsPredicate.and(qusuario.username.containsIgnoreCase(termino));
+        rsPredicate.and(qUsuario.username.containsIgnoreCase(termino));
       }
       builder.or(rsPredicate);
     }
@@ -109,42 +107,48 @@ public class UsuarioServiceImpl implements IUsuarioService {
       String[] terminos = criteria.getEmail().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
-        rsPredicate.and(qusuario.email.containsIgnoreCase(termino));
+        rsPredicate.and(qUsuario.email.containsIgnoreCase(termino));
       }
       builder.or(rsPredicate);
     }
     if (criteria.isBuscarPorRol() && !criteria.getRoles().isEmpty()) {
       BooleanBuilder rsPredicate = new BooleanBuilder();
       List<Rol> rolesDeUsuario = this.getUsuarioPorId(idUsuarioLoggedIn).getRoles();
-      if (rolesDeUsuario.contains(Rol.VIAJANTE)
-          && !rolesDeUsuario.contains(Rol.ADMINISTRADOR)
-          && !rolesDeUsuario.contains(Rol.ENCARGADO)
-          && !rolesDeUsuario.contains(Rol.VENDEDOR)) {
-        rsPredicate.or(qusuario.id_Usuario.eq(idUsuarioLoggedIn));
+      if (rolesDeUsuario.containsAll(Collections.singletonList(Rol.VIAJANTE))) {
+        for (Rol rol : criteria.getRoles()) {
+          switch (rol) {
+            case VIAJANTE:
+              rsPredicate.or(qUsuario.id_Usuario.eq(idUsuarioLoggedIn));
+              break;
+            default:
+              rsPredicate.or(qUsuario.id_Usuario.eq(0L));
+              break;
+          }
+        }
       } else {
         for (Rol rol : criteria.getRoles()) {
           switch (rol) {
             case ADMINISTRADOR:
-              rsPredicate.or(qusuario.roles.contains(Rol.ADMINISTRADOR));
+              rsPredicate.or(qUsuario.roles.contains(Rol.ADMINISTRADOR));
               break;
             case ENCARGADO:
-              rsPredicate.or(qusuario.roles.contains(Rol.ENCARGADO));
+              rsPredicate.or(qUsuario.roles.contains(Rol.ENCARGADO));
               break;
             case VENDEDOR:
-              rsPredicate.or(qusuario.roles.contains(Rol.VENDEDOR));
+              rsPredicate.or(qUsuario.roles.contains(Rol.VENDEDOR));
               break;
             case VIAJANTE:
-              rsPredicate.or(qusuario.roles.contains(Rol.VIAJANTE));
+              rsPredicate.or(qUsuario.roles.contains(Rol.VIAJANTE));
               break;
             case COMPRADOR:
-              rsPredicate.or(qusuario.roles.contains(Rol.COMPRADOR));
+              rsPredicate.or(qUsuario.roles.contains(Rol.COMPRADOR));
               break;
           }
         }
       }
       builder.and(rsPredicate);
     }
-    builder.and(qusuario.eliminado.eq(false));
+    builder.and(qUsuario.eliminado.eq(false));
     return usuarioRepository.findAll(builder, criteria.getPageable());
   }
 
