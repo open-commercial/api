@@ -1,9 +1,9 @@
 package sic.service;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import sic.modelo.BusquedaUsuarioCriteria;
 import sic.modelo.Credencial;
+import sic.modelo.Rol;
 import sic.modelo.Usuario;
 
 public interface IUsuarioService {
@@ -24,6 +24,5 @@ public interface IUsuarioService {
 
   int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada);
 
-  Page<Usuario> getUsuariosAdministradores();
-
+  Page<Usuario> getUsuariosPorRol(Rol rol);
 }
