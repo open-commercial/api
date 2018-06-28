@@ -64,7 +64,7 @@ public class CajaController {
 
     @DeleteMapping("/cajas/{idCaja}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void eliminar(@PathVariable long idCaja) {
         cajaService.eliminar(idCaja);
     }

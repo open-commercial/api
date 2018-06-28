@@ -98,14 +98,14 @@ public class ClienteController {
     
     @GetMapping("/clientes/predeterminado/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public Cliente getClientePredeterminado(@PathVariable long idEmpresa) {
      return clienteService.getClientePredeterminado(empresaService.getEmpresaPorId(idEmpresa));
     }
     
     @GetMapping("/clientes/existe-predeterminado/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public boolean existeClientePredeterminado(@PathVariable long idEmpresa) {
         return clienteService.existeClientePredeterminado(empresaService.getEmpresaPorId(idEmpresa));
     }
