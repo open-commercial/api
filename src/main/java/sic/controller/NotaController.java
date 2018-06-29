@@ -153,7 +153,7 @@ public class NotaController {
     
     @PostMapping("/notas/{idNota}/autorizacion")
     @ResponseStatus(HttpStatus.CREATED)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public Nota autorizarNota(@PathVariable long idNota) {
         return notaService.autorizarNota(notaService.getNotaPorId(idNota));
     }
