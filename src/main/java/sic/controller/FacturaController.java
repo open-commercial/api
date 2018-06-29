@@ -305,7 +305,7 @@ public class FacturaController {
     
     @GetMapping("/facturas/renglones/pedidos/{idPedido}") 
     @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
     public List<RenglonFactura> getRenglonesPedidoParaFacturar(@PathVariable long idPedido,
                                                                @RequestParam TipoDeComprobante tipoDeComprobante) {
         return facturaService.convertirRenglonesPedidoEnRenglonesFactura(pedidoService.getPedidoPorId(idPedido), tipoDeComprobante);

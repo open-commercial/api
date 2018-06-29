@@ -37,7 +37,7 @@ public class CondicionIVAController {
     
     @PutMapping("/condiciones-iva")
     @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
     public void actualizar(@RequestBody CondicionIVA condicionIVA) {
         if(condicionIVAService.getCondicionIVAPorId(condicionIVA.getId_CondicionIVA()) != null) {
             condicionIVAService.actualizar(condicionIVA);
@@ -46,14 +46,14 @@ public class CondicionIVAController {
     
     @DeleteMapping("/condiciones-iva/{idCondicionIva}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
     public void eliminar(@PathVariable long idCondicionIva) {
         condicionIVAService.eliminar(idCondicionIva);
     }
     
     @PostMapping("/condiciones-iva")
     @ResponseStatus(HttpStatus.CREATED)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
     public CondicionIVA guardar(@RequestBody CondicionIVA condicionIVA) {
         return condicionIVAService.guardar(condicionIVA);
     }

@@ -128,7 +128,7 @@ public class ClienteController {
 
   @PutMapping("/clientes")
   @ResponseStatus(HttpStatus.OK)
-  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public void actualizar(
       @RequestBody Cliente cliente,
       @RequestParam(required = false) Long idUsuarioCredencial) {
