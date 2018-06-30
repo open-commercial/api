@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidAlgorithmParameterException;
@@ -47,7 +48,6 @@ import org.springframework.ws.WebServiceMessage;
 import org.springframework.ws.soap.SoapMessage;
 import org.springframework.xml.transform.StringResult;
 import sic.service.BusinessServiceException;
-import sic.util.Utilidades;
 
 public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
 
@@ -91,14 +91,13 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
     }
 
     public byte[] crearCMS(byte[] p12file, String p12pass, String signer, String service, long ticketTime) {
-        PrivateKey pKey = null;
-        X509Certificate pCertificate = null;
-        byte[] asn1_cms = null;
-        CertStore cstore = null;
+        PrivateKey pKey;
+        X509Certificate pCertificate;
+        byte[] asn1_cms;
+        CertStore cstore;
         try {
             KeyStore ks = KeyStore.getInstance("pkcs12");
-            InputStream is;
-            is = Utilidades.convertirByteArrayToInputStream(p12file);
+            InputStream is = new ByteArrayInputStream(p12file);
             ks.load(is, p12pass.toCharArray());
             is.close();
             pKey = (PrivateKey) ks.getKey(signer, p12pass.toCharArray());
@@ -144,7 +143,7 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
         }
         XMLGregorianCalendar XMLGenTime = datatypeFactory.newXMLGregorianCalendar(genenerationTime);
         XMLGregorianCalendar XMLExpTime = datatypeFactory.newXMLGregorianCalendar(expirationTime);
-        String LoginTicketRequest_xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
                 + "<loginTicketRequest version=\"1.0\">"
                 + "<header>"
                 + "<uniqueId>" + uniqueId + "</uniqueId>"
@@ -153,7 +152,6 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
                 + "</header>"
                 + "<service>" + service + "</service>"
                 + "</loginTicketRequest>";
-        return LoginTicketRequest_xml;
     }
 
     public FERecuperaLastCbteResponse FECompUltimoAutorizado(FECompUltimoAutorizado solicitud) throws IOException {

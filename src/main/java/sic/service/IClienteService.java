@@ -1,38 +1,40 @@
 package sic.service;
 
-import sic.modelo.TipoDeOperacion;
-import java.util.List;
+import sic.modelo.*;
 import org.springframework.data.domain.Page;
-import sic.modelo.BusquedaClienteCriteria;
-import sic.modelo.Cliente;
-import sic.modelo.Empresa;
+
+import java.util.List;
 
 public interface IClienteService {
 
-    void actualizar(Cliente cliente);
-        
-    Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria);
+  void actualizar(Cliente cliente);
 
-    void eliminar(Long idCliente);
+  Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long idUsuario);
 
-    Cliente getClientePorId(Long id_Cliente);
+  void eliminar(long idCliente);
 
-    Cliente getClientePorIdFiscal(String idFiscal, Empresa empresa);
+  Cliente getClientePorId(long idCliente);
 
-    Cliente getClientePorRazonSocial(String razonSocial, Empresa empresa);
+  Cliente getClientePorIdFiscal(String idFiscal, Empresa empresa);
 
-    Cliente getClientePredeterminado(Empresa empresa);
-    
-    boolean existeClientePredeterminado(Empresa empresa);
+  Cliente getClientePorRazonSocial(String razonSocial, Empresa empresa);
 
-    List<Cliente> getClientes(Empresa empresa);
+  Cliente getClientePredeterminado(Empresa empresa);
 
-    Cliente guardar(Cliente cliente);
+  boolean existeClientePredeterminado(Empresa empresa);
 
-    void setClientePredeterminado(Cliente cliente);
+  void setClientePredeterminado(Cliente cliente);
 
-    void validarOperacion(TipoDeOperacion operacion, Cliente cliente);
-    
-    Cliente getClientePorIdPedido(long idPedido);
+  Cliente guardar(Cliente cliente);
+
+  void validarOperacion(TipoDeOperacion operacion, Cliente cliente);
+
+  Cliente getClientePorIdPedido(long idPedido);
+
+  Cliente getClientePorIdUsuarioYidEmpresa(long idUsuario, Empresa empresa);
+
+  int desvincularClienteDeViajante(long idViajante);
+
+  int desvincularClienteDeComprador(long idCliente);
 
 }

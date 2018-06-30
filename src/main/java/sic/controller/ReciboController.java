@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Recibo;
+import sic.modelo.Rol;
 import sic.service.IClienteService;
 import sic.service.IEmpresaService;
 import sic.service.IFormaDePagoService;
@@ -47,12 +49,14 @@ public class ReciboController {
     
     @GetMapping("/recibos/{idRecibo}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Recibo getReciboPorId(@PathVariable long idRecibo) {
         return reciboService.getById(idRecibo);
     }
     
     @PostMapping("/recibos/clientes")
     @ResponseStatus(HttpStatus.CREATED)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Recibo guardarReciboCliente(@RequestParam long idUsuario,
                                        @RequestParam long idEmpresa,
                                        @RequestParam long idCliente,
@@ -67,6 +71,7 @@ public class ReciboController {
     
     @PostMapping("/recibos/proveedores")
     @ResponseStatus(HttpStatus.CREATED)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Recibo guardarReciboProveedor(@RequestParam long idUsuario,
                                          @RequestParam long idEmpresa,
                                          @RequestParam long idProveedor,
@@ -81,12 +86,14 @@ public class ReciboController {
     
     @DeleteMapping("/recibos/{idRecibo}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
     public void eliminar(@PathVariable long idRecibo) {
         reciboService.eliminar(idRecibo);
     }
     
     @GetMapping("/recibos/{idRecibo}/reporte")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public ResponseEntity<byte[]> getReporteRecibo(@PathVariable long idRecibo) {        
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);        

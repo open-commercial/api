@@ -2,6 +2,7 @@ package sic.service;
 
 import java.math.BigDecimal;
 import java.util.Date;
+
 import sic.modelo.Movimiento;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -43,17 +44,13 @@ public interface IFacturaService {
  
     Page<FacturaCompra> buscarFacturaCompra(BusquedaFacturaCompraCriteria criteria);
 
-    Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria);
+    Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
            
     List<Factura> guardar(List<Factura> facturas, Long idPedido, List<Recibo> recibos);
 
     void eliminar(long[] idFactura);
     
     FacturaVenta autorizarFacturaVenta(FacturaVenta fv);
-
-    List<Factura> ordenarFacturasPorFechaAsc(List<Factura> facturas);
-
-    boolean validarCantidadMaximaDeRenglones(int cantidad, Empresa empresa);
 
     BigDecimal calcularSubTotal(BigDecimal[] importes);
 
@@ -71,17 +68,17 @@ public interface IFacturaService {
 
     BigDecimal calcularTotal(BigDecimal subTotal_bruto, BigDecimal iva105_neto, BigDecimal iva21_neto);
 
-    BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria);
+    BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
     
     BigDecimal getSaldoFacturasVentaSegunClienteYEmpresa(long empresa, long cliente, Date hasta);
 
     BigDecimal calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria);
 
-    BigDecimal calcularIvaVenta(BusquedaFacturaVentaCriteria criteria);
+    BigDecimal calcularIvaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
 
     BigDecimal calcularIvaCompra(BusquedaFacturaCompraCriteria criteria);
 
-    BigDecimal calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria);
+    BigDecimal calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
 
     BigDecimal calcularIVANetoRenglon(Movimiento movimiento, TipoDeComprobante tipo, Producto producto, BigDecimal descuento_porcentaje);
 

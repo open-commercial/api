@@ -13,11 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import sic.modelo.BusquedaTransportistaCriteria;
-import sic.modelo.Localidad;
-import sic.modelo.Pais;
-import sic.modelo.Provincia;
-import sic.modelo.Transportista;
+import sic.aspect.AccesoRolesPermitidos;
+import sic.modelo.*;
 import sic.service.IEmpresaService;
 import sic.service.ILocalidadService;
 import sic.service.IPaisService;
@@ -47,12 +44,14 @@ public class TransportistaController {
     
     @GetMapping("/transportistas/{idTransportista}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Transportista getTransportistaPorId(@PathVariable long idTransportista) {
         return transportistaService.getTransportistaPorId(idTransportista);
     }
     
     @PutMapping("/transportistas")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void actualizar(@RequestBody Transportista transportista) {
         if (transportistaService.getTransportistaPorId(transportista.getId_Transportista()) != null) {
             transportistaService.actualizar(transportista);
@@ -61,6 +60,7 @@ public class TransportistaController {
     
     @GetMapping("/transportistas/busqueda/criteria") 
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public List<Transportista> buscarTransportista(@RequestParam(value = "idEmpresa") long idEmpresa,
                                                    @RequestParam(value = "nombre", required = false) String nombre,
                                                    @RequestParam(value = "idPais", required = false) Long idPais,
@@ -89,12 +89,14 @@ public class TransportistaController {
     
     @DeleteMapping("/transportistas/{idTransportista}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
     public void eliminar(@PathVariable long idTransportista) {
         transportistaService.eliminar(idTransportista);
     }
     
     @GetMapping("/transportistas/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public List<Transportista> getTransportistas(@PathVariable long idEmpresa) {
         return transportistaService.getTransportistas(empresaService.getEmpresaPorId(idEmpresa));
     }

@@ -13,11 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import sic.modelo.BusquedaProveedorCriteria;
-import sic.modelo.Localidad;
-import sic.modelo.Pais;
-import sic.modelo.Proveedor;
-import sic.modelo.Provincia;
+import sic.aspect.AccesoRolesPermitidos;
+import sic.modelo.*;
 import sic.service.IEmpresaService;
 import sic.service.ILocalidadService;
 import sic.service.IPaisService;
@@ -46,18 +43,21 @@ public class ProveedorController {
     
     @GetMapping("/proveedores/{idProveedor}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Proveedor getProveedorPorId(@PathVariable long idProveedor) {
         return this.proveedorService.getProveedorPorId(idProveedor);
     }
     
     @PostMapping("/proveedores")
     @ResponseStatus(HttpStatus.CREATED)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Proveedor guardar(@RequestBody Proveedor proveedor) {
         return proveedorService.guardar(proveedor);
     }    
     
     @PutMapping("/proveedores")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void actualizar(@RequestBody Proveedor proveedor) {
         if (proveedorService.getProveedorPorId(proveedor.getId_Proveedor()) != null) {
             proveedorService.actualizar(proveedor);
@@ -66,6 +66,7 @@ public class ProveedorController {
     
     @GetMapping("/proveedores/busqueda/criteria")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public List<Proveedor> buscarProveedores(@RequestParam(value = "codigo", required = false) String codigo,
                                              @RequestParam(value = "razonSocial", required = false) String razonSocial,
                                              @RequestParam(value = "idFiscal", required = false) String idFiscal,
@@ -98,12 +99,14 @@ public class ProveedorController {
     
     @DeleteMapping("/proveedores/{idProveedor}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void eliminar(@PathVariable long idProveedor) {
         proveedorService.eliminar(idProveedor);
     }
     
     @GetMapping("/proveedores/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public List<Proveedor> getProveedores(@PathVariable long idEmpresa) {
         return proveedorService.getProveedores(empresaService.getEmpresaPorId(idEmpresa));
     }

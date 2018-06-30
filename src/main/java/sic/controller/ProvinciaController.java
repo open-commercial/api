@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Provincia;
+import sic.modelo.Rol;
 import sic.service.IPaisService;
 import sic.service.IProvinciaService;
 
@@ -31,12 +33,14 @@ public class ProvinciaController {
     
     @GetMapping("/provincias/{idProvincia}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Provincia getProvinciaPorId(@PathVariable long idProvincia) {
         return provinciaService.getProvinciaPorId(idProvincia);
     }
     
     @PutMapping("/provincias")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void actualizar(@RequestBody Provincia provincia) { 
         if (provinciaService.getProvinciaPorId(provincia.getId_Provincia()) != null) {
             provinciaService.actualizar(provincia);
@@ -45,18 +49,21 @@ public class ProvinciaController {
     
     @DeleteMapping("/provincias/{idProvincia}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
     public void eliminar(@PathVariable long idProvincia) {
         provinciaService.eliminar(idProvincia);        
     }
     
     @GetMapping("/provincias/paises/{idPais}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.VIAJANTE})
     public List<Provincia> getProvinciasDelPais(@PathVariable long idPais) {
         return provinciaService.getProvinciasDelPais(paisService.getPaisPorId(idPais));
     }
     
     @PostMapping("/provincias")
     @ResponseStatus(HttpStatus.CREATED)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Provincia guardar(@RequestBody Provincia provincia) {
         return provinciaService.guardar(provincia);
     }

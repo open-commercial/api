@@ -24,8 +24,6 @@ public enum TipoDeComprobante {
     
     GASTO,
     
-    AJUSTE,
-    
     NOTA_CREDITO_A,
     
     NOTA_CREDITO_B,

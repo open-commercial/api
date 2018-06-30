@@ -35,7 +35,7 @@ public class ClienteServiceImplTest {
     public void shouldSetClientePredeterminado() {
         Cliente resultadoEsperado = new ClienteBuilder().build();
         clienteServiceImpl.setClientePredeterminado(resultadoEsperado);
-        when(clienteRepository.findByAndEmpresaAndPredeterminadoAndEliminado((new EmpresaBuilder()).build(), true, false))
+        when(clienteRepository.findByEmpresaAndPredeterminadoAndEliminado((new EmpresaBuilder()).build(), true, false))
                                      .thenReturn((new ClienteBuilder()).build());
         Cliente resultadoObtenido = clienteServiceImpl.getClientePredeterminado((new EmpresaBuilder()).build());
         assertEquals(resultadoEsperado, resultadoObtenido);

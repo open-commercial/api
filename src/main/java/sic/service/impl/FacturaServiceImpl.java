@@ -1,15 +1,18 @@
 package sic.service.impl;
 
 import java.io.IOException;
-import sic.modelo.BusquedaFacturaCompraCriteria;
-import sic.modelo.BusquedaFacturaVentaCriteria;
+
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.DateExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import sic.modelo.*;
+
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -30,38 +33,13 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.Cliente;
-import sic.modelo.ComprobanteAFIP;
-import sic.modelo.ConfiguracionDelSistema;
-import sic.modelo.Empresa;
-import sic.modelo.Factura;
-import sic.modelo.FacturaCompra;
-import sic.modelo.FacturaVenta;
-import sic.modelo.Pedido;
-import sic.modelo.Producto;
-import sic.modelo.Proveedor;
-import sic.modelo.RenglonFactura;
-import sic.service.IConfiguracionDelSistemaService;
-import sic.service.IFacturaService;
-import sic.service.IPedidoService;
-import sic.service.IProductoService;
-import sic.modelo.Movimiento;
-import sic.modelo.Recibo;
-import sic.modelo.RenglonPedido;
-import sic.modelo.TipoDeComprobante;
-import sic.service.BusinessServiceException;
-import sic.service.ServiceException;
-import sic.modelo.TipoDeOperacion;
+import sic.service.*;
+import sic.util.FormatterFechaHora;
 import sic.util.Validator;
 import sic.repository.FacturaVentaRepository;
 import sic.repository.FacturaCompraRepository;
 import sic.repository.FacturaRepository;
 import sic.repository.RenglonFacturaRepository;
-import sic.service.ICuentaCorrienteService;
-import sic.service.IAfipService;
-import sic.service.INotaService;
-import sic.service.IReciboService;
-import sic.service.IRenglonCuentaCorrienteService;
 
 @Service
 public class FacturaServiceImpl implements IFacturaService {
@@ -78,23 +56,26 @@ public class FacturaServiceImpl implements IFacturaService {
     private final IAfipService afipService;
     private final IReciboService reciboService;
     private final IRenglonCuentaCorrienteService renglonCuentaCorrienteService;
+    private final IUsuarioService usuarioService;
+    private final IClienteService clienteService;
     private final static BigDecimal IVA_21 = new BigDecimal("21");
     private final static BigDecimal IVA_105 = new BigDecimal("10.5");
     private final static BigDecimal CIEN = new BigDecimal("100");
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-    
+
     @Autowired
     @Lazy
     public FacturaServiceImpl(FacturaRepository facturaRepository,
-            FacturaVentaRepository facturaVentaRepository,
-            FacturaCompraRepository facturaCompraRepository,
-            RenglonFacturaRepository renglonFacturaRepository,
-            IProductoService productoService,
-            IConfiguracionDelSistemaService configuracionDelSistemaService,
-            IPedidoService pedidoService, INotaService notaService,
-            ICuentaCorrienteService cuentaCorrienteService,
-            IAfipService afipService, IReciboService reciboService,
-            IRenglonCuentaCorrienteService renglonCuentaCorrienteService) {
+                              FacturaVentaRepository facturaVentaRepository,
+                              FacturaCompraRepository facturaCompraRepository,
+                              RenglonFacturaRepository renglonFacturaRepository,
+                              IProductoService productoService,
+                              IConfiguracionDelSistemaService configuracionDelSistemaService,
+                              IPedidoService pedidoService, INotaService notaService,
+                              ICuentaCorrienteService cuentaCorrienteService,
+                              IAfipService afipService, IReciboService reciboService,
+                              IRenglonCuentaCorrienteService renglonCuentaCorrienteService,
+                              IUsuarioService usuarioService, IClienteService clienteService) {
         this.facturaRepository = facturaRepository;
         this.facturaVentaRepository = facturaVentaRepository;
         this.facturaCompraRepository = facturaCompraRepository;
@@ -107,8 +88,10 @@ public class FacturaServiceImpl implements IFacturaService {
         this.afipService = afipService;
         this.reciboService = reciboService;
         this.renglonCuentaCorrienteService = renglonCuentaCorrienteService;
+        this.usuarioService = usuarioService;
+        this.clienteService = clienteService;
     }
-    
+
     @Override
     public Factura getFacturaPorId(Long idFactura) {
         Factura factura = facturaRepository.findById(idFactura);
@@ -118,23 +101,23 @@ public class FacturaServiceImpl implements IFacturaService {
         }
         return factura;
     }
-    
+
     @Override
-    public Long getCAEById(long idFactura) {    
+    public Long getCAEById(long idFactura) {
          return facturaRepository.getCAEById(idFactura);
     }
-    
+
     @Override
     public BigDecimal getTotalById(long idFactura) {
         BigDecimal total = facturaRepository.getTotalById(idFactura);
         return (total != null) ? total : BigDecimal.ZERO;
     }
-    
+
     @Override
     public List<Factura> getFacturasDelPedido(Long idPedido) {
         return facturaRepository.findAllByPedidoAndEliminada(pedidoService.getPedidoPorId(idPedido), false);
     }
-    
+
     @Override
     public TipoDeComprobante[] getTipoFacturaCompra(Empresa empresa, Proveedor proveedor) {
         //cuando la Empresa discrimina IVA
@@ -156,7 +139,7 @@ public class FacturaServiceImpl implements IFacturaService {
                 return tiposPermitidos;
             }
         } else {
-            //cuando la Empresa NO discrimina IVA                
+            //cuando la Empresa NO discrimina IVA
             if (proveedor.getCondicionIVA().isDiscriminaIVA()) {
                 //cuando Empresa NO discrimina IVA y el Proveedor SI
                 TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
@@ -182,9 +165,9 @@ public class FacturaServiceImpl implements IFacturaService {
             if (cliente.getCondicionIVA().isDiscriminaIVA()) {
                 //cuando la Empresa discrimina IVA y el Cliente tambien
                 TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
-                tiposPermitidos[0] = TipoDeComprobante.FACTURA_A;                
+                tiposPermitidos[0] = TipoDeComprobante.FACTURA_A;
                 tiposPermitidos[1] = TipoDeComprobante.FACTURA_X;
-                tiposPermitidos[2] = TipoDeComprobante.FACTURA_Y;                
+                tiposPermitidos[2] = TipoDeComprobante.FACTURA_Y;
                 tiposPermitidos[3] = TipoDeComprobante.PRESUPUESTO;
                 return tiposPermitidos;
             } else {
@@ -192,7 +175,7 @@ public class FacturaServiceImpl implements IFacturaService {
                 TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
                 tiposPermitidos[0] = TipoDeComprobante.FACTURA_B;
                 tiposPermitidos[1] = TipoDeComprobante.FACTURA_X;
-                tiposPermitidos[2] = TipoDeComprobante.FACTURA_Y;                
+                tiposPermitidos[2] = TipoDeComprobante.FACTURA_Y;
                 tiposPermitidos[3] = TipoDeComprobante.PRESUPUESTO;
                 return tiposPermitidos;
             }
@@ -203,7 +186,7 @@ public class FacturaServiceImpl implements IFacturaService {
                 TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
                 tiposPermitidos[0] = TipoDeComprobante.FACTURA_C;
                 tiposPermitidos[1] = TipoDeComprobante.FACTURA_X;
-                tiposPermitidos[2] = TipoDeComprobante.FACTURA_Y;                
+                tiposPermitidos[2] = TipoDeComprobante.FACTURA_Y;
                 tiposPermitidos[3] = TipoDeComprobante.PRESUPUESTO;
                 return tiposPermitidos;
             } else {
@@ -211,7 +194,7 @@ public class FacturaServiceImpl implements IFacturaService {
                 TipoDeComprobante[] tiposPermitidos = new  TipoDeComprobante[4];
                 tiposPermitidos[0] = TipoDeComprobante.FACTURA_C;
                 tiposPermitidos[1] = TipoDeComprobante.FACTURA_X;
-                tiposPermitidos[2] = TipoDeComprobante.FACTURA_Y;                
+                tiposPermitidos[2] = TipoDeComprobante.FACTURA_Y;
                 tiposPermitidos[3] = TipoDeComprobante.PRESUPUESTO;
                 return tiposPermitidos;
             }
@@ -241,13 +224,13 @@ public class FacturaServiceImpl implements IFacturaService {
     @Override
     public List<RenglonFactura> getRenglonesDeLaFactura(Long idFactura) {
         return this.getFacturaPorId(idFactura).getRenglones();
-    }  
-    
+    }
+
     @Override
     public List<RenglonFactura> getRenglonesDeLaFacturaModificadosParaCredito(Long id_Factura) {
         return notaService.getRenglonesFacturaModificadosParaNotaCredito(id_Factura);
     }
-    
+
     @Override
     public RenglonFactura getRenglonFactura(Long idRenglonFactura) {
         return renglonFacturaRepository.findOne(idRenglonFactura);
@@ -260,7 +243,7 @@ public class FacturaServiceImpl implements IFacturaService {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_empresa_no_existente"));
         }
-        //Fecha de Factura        
+        //Fecha de Factura
         if (criteria.isBuscaPorFecha() & (criteria.getFechaDesde() == null | criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_fechas_busqueda_invalidas"));
@@ -287,13 +270,13 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     @Override
-    public Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria) {
+    public Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
         //Empresa
         if(criteria.getEmpresa() == null ) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_empresa_no_existente"));
         }
-        //Fecha de Factura        
+        //Fecha de Factura
         if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_fechas_busqueda_invalidas"));
@@ -325,8 +308,72 @@ public class FacturaServiceImpl implements IFacturaService {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_viajante_vacio"));
         }
-        return facturaVentaRepository.buscarFacturasVenta(criteria);
+        return facturaVentaRepository.findAll(this.getBuilder(criteria, idUsuarioLoggedIn), criteria.getPageable());
     }
+
+  private BooleanBuilder getBuilder(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
+    QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
+    BooleanBuilder builder = new BooleanBuilder();
+    builder.and(
+        qFacturaVenta
+            .empresa
+            .id_Empresa
+            .eq(criteria.getEmpresa().getId_Empresa())
+            .and(qFacturaVenta.eliminada.eq(false)));
+    // Fecha
+    if (criteria.isBuscaPorFecha()) {
+      FormatterFechaHora formateadorFecha =
+          new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      DateExpression<Date> fDesde =
+          Expressions.dateTemplate(
+              Date.class,
+              "convert({0}, datetime)",
+              formateadorFecha.format(criteria.getFechaDesde()));
+      DateExpression<Date> fHasta =
+          Expressions.dateTemplate(
+              Date.class,
+              "convert({0}, datetime)",
+              formateadorFecha.format(criteria.getFechaHasta()));
+      builder.and(qFacturaVenta.fecha.between(fDesde, fHasta));
+    }
+    if (criteria.isBuscaCliente()) builder.and(qFacturaVenta.cliente.eq(criteria.getCliente()));
+    if (criteria.isBuscaPorTipoComprobante())
+      builder.and(qFacturaVenta.tipoComprobante.eq(criteria.getTipoComprobante()));
+    if (criteria.isBuscaUsuario()) builder.and(qFacturaVenta.usuario.eq(criteria.getUsuario()));
+    if (criteria.isBuscaViajante())
+      builder.and(qFacturaVenta.cliente.viajante.eq(criteria.getViajante()));
+    if (criteria.isBuscaPorNumeroFactura())
+      builder
+          .and(qFacturaVenta.numSerie.eq(criteria.getNumSerie()))
+          .and(qFacturaVenta.numFactura.eq(criteria.getNumFactura()));
+    if (criteria.isBuscarPorPedido())
+      builder.and(qFacturaVenta.pedido.nroPedido.eq(criteria.getNroPedido()));
+    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    BooleanBuilder rsPredicate = new BooleanBuilder();
+    if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
+        && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
+        && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
+      for (Rol rol : usuarioLogueado.getRoles()) {
+        switch (rol) {
+          case VIAJANTE:
+            rsPredicate.or(qFacturaVenta.cliente.viajante.eq(usuarioLogueado));
+            break;
+          case COMPRADOR:
+            Cliente clienteRelacionado =
+                clienteService.getClientePorIdUsuarioYidEmpresa(
+                    idUsuarioLoggedIn, criteria.getEmpresa());
+            if (clienteRelacionado != null) {
+              rsPredicate.or(qFacturaVenta.cliente.eq(clienteRelacionado));
+            } else {
+              rsPredicate.or(qFacturaVenta.cliente.isNull());
+            }
+            break;
+        }
+      }
+      builder.and(rsPredicate);
+    }
+    return builder;
+  }
 
     private Factura procesarFactura(Factura factura) {
         factura.setEliminada(false);
@@ -432,7 +479,7 @@ public class FacturaServiceImpl implements IFacturaService {
             calFechaVencimiento.set(Calendar.HOUR, 0);
             calFechaVencimiento.set(Calendar.MINUTE, 0);
             calFechaVencimiento.set(Calendar.SECOND, 0);
-            calFechaVencimiento.set(Calendar.MILLISECOND, 0);          
+            calFechaVencimiento.set(Calendar.MILLISECOND, 0);
             Calendar calFechaFactura = new GregorianCalendar();
             calFechaFactura.setTime(factura.getFecha());
             calFechaFactura.set(Calendar.HOUR, 0);
@@ -494,7 +541,7 @@ public class FacturaServiceImpl implements IFacturaService {
         for (RenglonFactura renglon : factura.getRenglones()) {
             importes[i] = renglon.getImporte();
             i++;
-        }        
+        }
         if (factura.getSubTotal().compareTo(this.calcularSubTotal(importes)) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_sub_total_no_valido"));
@@ -522,11 +569,11 @@ public class FacturaServiceImpl implements IFacturaService {
             BigDecimal ivaNeto21 = this.calcularIvaNetoFactura(factura.getTipoComprobante(), cantidades, ivaPorcentajes, ivaNetos,
                     IVA_21, factura.getDescuento_porcentaje(), factura.getRecargo_porcentaje());
             BigDecimal ivaNeto105 = this.calcularIvaNetoFactura(factura.getTipoComprobante(), cantidades, ivaPorcentajes, ivaNetos,
-                    IVA_105, factura.getDescuento_porcentaje(), factura.getRecargo_porcentaje());            
+                    IVA_105, factura.getDescuento_porcentaje(), factura.getRecargo_porcentaje());
             if (factura.getIva_21_neto().compareTo(ivaNeto21) != 0) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_factura_iva21_no_valido"));
-            }            
+            }
             if (factura.getIva_105_neto().compareTo(ivaNeto105) != 0) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_factura_iva105_no_valido"));
@@ -566,20 +613,6 @@ public class FacturaServiceImpl implements IFacturaService {
         renglonCuentaCorrienteService.updateCAEFactura(fv.getId_Factura(), comprobante.getCAE());
         return fv;
     }
-    
-    @Override
-    public List<Factura> ordenarFacturasPorFechaAsc(List<Factura> facturas) {
-        Comparator comparador = (Comparator<Factura>) (Factura f1, Factura f2) -> f1.getFecha().compareTo(f2.getFecha());
-        facturas.sort(comparador);
-        return facturas;
-    }
-
-    @Override
-    public boolean validarCantidadMaximaDeRenglones(int cantidad, Empresa empresa) {
-        ConfiguracionDelSistema cds = configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa);
-        int max = cds.getCantidadMaximaDeRenglonesEnFactura();
-        return cantidad < max;
-    }
 
     @Override
     public BigDecimal calcularSubTotal(BigDecimal[] importes) {
@@ -611,7 +644,7 @@ public class FacturaServiceImpl implements IFacturaService {
     @Override
     public BigDecimal calcularSubTotalBruto(TipoDeComprobante tipo, BigDecimal subTotal,
             BigDecimal recargoNeto, BigDecimal descuentoNeto, BigDecimal iva105Neto, BigDecimal iva21Neto) {
-        
+
         BigDecimal resultado = subTotal.add(recargoNeto).subtract(descuentoNeto);
         if (tipo == TipoDeComprobante.FACTURA_B || tipo == TipoDeComprobante.PRESUPUESTO) {
             resultado = resultado.subtract(iva105Neto.add(iva21Neto));
@@ -628,7 +661,7 @@ public class FacturaServiceImpl implements IFacturaService {
             int longitudImportes = importes.length;
             int longitudImpuestos = impuestoPorcentajes.length;
             if (longitudImportes == longitudImpuestos) {
-                for (int i = 0; i < longitudImportes; i++) {                
+                for (int i = 0; i < longitudImportes; i++) {
                 BigDecimal descuento = BigDecimal.ZERO;
                 if (descuento_porcentaje != BigDecimal.ZERO) {
                     descuento = importes[i].multiply(descuento_porcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
@@ -648,17 +681,17 @@ public class FacturaServiceImpl implements IFacturaService {
 
     @Override
     public BigDecimal calcularTotal(BigDecimal subTotalBruto, BigDecimal iva105Neto, BigDecimal iva21Neto) {
-        return subTotalBruto.add(iva105Neto).add(iva21Neto);        
+        return subTotalBruto.add(iva105Neto).add(iva21Neto);
     }
 
     @Override
-    public BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria) {
+    public BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
         //Empresa
         if(criteria.getEmpresa() == null ) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_empresa_no_existente"));
         }
-        //Fecha de Factura        
+        //Fecha de Factura
         if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_fechas_busqueda_invalidas"));
@@ -690,9 +723,10 @@ public class FacturaServiceImpl implements IFacturaService {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_viajante_vacio"));
         }
-        return facturaVentaRepository.calcularTotalFacturadoVenta(criteria);
+        BigDecimal totalFacturado = facturaVentaRepository.calcularTotalFacturadoVenta(this.getBuilder(criteria,idUsuarioLoggedIn));
+        return (totalFacturado != null? totalFacturado : BigDecimal.ZERO);
     }
-    
+
     @Override
     public BigDecimal getSaldoFacturasVentaSegunClienteYEmpresa(long empresa, long cliente, Date hasta) {
         BigDecimal saldo = facturaVentaRepository.getSaldoFacturasVentaSegunClienteYEmpresa(empresa, cliente, hasta);
@@ -706,7 +740,7 @@ public class FacturaServiceImpl implements IFacturaService {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_empresa_no_existente"));
         }
-        //Fecha de Factura        
+        //Fecha de Factura
         if (criteria.isBuscaPorFecha() & (criteria.getFechaDesde() == null | criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_fechas_busqueda_invalidas"));
@@ -733,13 +767,13 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     @Override
-    public BigDecimal calcularIvaVenta(BusquedaFacturaVentaCriteria criteria) {
+    public BigDecimal calcularIvaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
         //Empresa
         if(criteria.getEmpresa() == null ) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_empresa_no_existente"));
         }
-        //Fecha de Factura        
+        //Fecha de Factura
         if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_fechas_busqueda_invalidas"));
@@ -772,7 +806,8 @@ public class FacturaServiceImpl implements IFacturaService {
                     .getString("mensaje_factura_viajante_vacio"));
         }
         TipoDeComprobante[] tipoFactura = {TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B};
-        return facturaVentaRepository.calcularIVAVenta(criteria, tipoFactura);
+        BigDecimal ivaVenta = facturaVentaRepository.calcularIVAVenta(this.getBuilder(criteria, idUsuarioLoggedIn), tipoFactura);
+        return (ivaVenta != null? ivaVenta : BigDecimal.ZERO);
     }
 
     @Override
@@ -782,7 +817,7 @@ public class FacturaServiceImpl implements IFacturaService {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_empresa_no_existente"));
         }
-        //Fecha de Factura        
+        //Fecha de Factura
         if (criteria.isBuscaPorFecha() & (criteria.getFechaDesde() == null | criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_fechas_busqueda_invalidas"));
@@ -810,13 +845,13 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     @Override
-    public BigDecimal calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria) {
+    public BigDecimal calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
         //Empresa
         if (criteria.getEmpresa() == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_empresa_no_existente"));
         }
-        //Fecha de Factura        
+        //Fecha de Factura
         if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_fechas_busqueda_invalidas"));
@@ -848,10 +883,11 @@ public class FacturaServiceImpl implements IFacturaService {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_viajante_vacio"));
         }
-        return facturaVentaRepository.calcularGananciaTotal(criteria);
+        BigDecimal gananciaTotal = facturaVentaRepository.calcularGananciaTotal(this.getBuilder(criteria,idUsuarioLoggedIn));
+        return (gananciaTotal != null? gananciaTotal : BigDecimal.ZERO);
     }
 
-    @Override    
+    @Override
     public BigDecimal calcularIVANetoRenglon(Movimiento movimiento, TipoDeComprobante tipo, Producto producto, BigDecimal descuento_porcentaje) {
         BigDecimal resultado = BigDecimal.ZERO;
         if (movimiento == Movimiento.COMPRA) {
@@ -862,10 +898,10 @@ public class FacturaServiceImpl implements IFacturaService {
             if (tipo == TipoDeComprobante.FACTURA_A || tipo == TipoDeComprobante.FACTURA_B || tipo == TipoDeComprobante.PRESUPUESTO) {
                 resultado = producto.getPrecioVentaPublico().multiply(BigDecimal.ONE.subtract(descuento_porcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)).multiply(producto.getIva_porcentaje().divide(CIEN, 15, RoundingMode.HALF_UP)));
             }
-        }                               
+        }
         return resultado;
     }
-    
+
     @Override
     public BigDecimal calcularIvaNetoFactura(TipoDeComprobante tipo, BigDecimal[] cantidades, BigDecimal[] ivaPorcentajeRenglones,
             BigDecimal[] ivaNetoRenglones, BigDecimal ivaPorcentaje, BigDecimal descuentoPorcentaje, BigDecimal recargoPorcentaje) {
@@ -891,7 +927,7 @@ public class FacturaServiceImpl implements IFacturaService {
         BigDecimal resultado = BigDecimal.ZERO;
         if (movimiento == Movimiento.COMPRA) {
             resultado = producto.getPrecioCosto().subtract(descuento_neto).multiply(producto.getImpuestoInterno_porcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
-        } 
+        }
         if (movimiento == Movimiento.VENTA) {
             resultado = producto.getPrecioVentaPublico().subtract(descuento_neto).multiply(producto.getImpuestoInterno_porcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
         }
@@ -1028,7 +1064,7 @@ public class FacturaServiceImpl implements IFacturaService {
         if (!renglonesDeFacturas.isEmpty()) {
             for (RenglonPedido r : pedido.getRenglones()) {
                 if (renglonesDeFacturas.containsKey(r.getProducto().getId_Producto())) {
-                    facturado = (r.getCantidad().compareTo(renglonesDeFacturas.get(r.getProducto().getId_Producto()).getCantidad()) < 1);                   
+                    facturado = (r.getCantidad().compareTo(renglonesDeFacturas.get(r.getProducto().getId_Producto()).getCantidad()) < 1);
                 } else {
                     return false;
                 }
@@ -1036,7 +1072,7 @@ public class FacturaServiceImpl implements IFacturaService {
         }
         return facturado;
     }
-    
+
     @Override
     public RenglonFactura calcularRenglon(TipoDeComprobante tipoDeComprobante, Movimiento movimiento,
             BigDecimal cantidad, long idProducto, BigDecimal descuentoPorcentaje, boolean dividiendoRenglonFactura) {
@@ -1098,7 +1134,7 @@ public class FacturaServiceImpl implements IFacturaService {
         facturas.add(facturaConIVA);
         return facturas;
     }
-    
+
     private FacturaVenta procesarFacturaSinIVA(FacturaVenta facturaADividir, FacturaVenta facturaSinIVA) {
         int size = facturaSinIVA.getRenglones().size();
         BigDecimal[] importes = new BigDecimal[size];
@@ -1180,7 +1216,7 @@ public class FacturaServiceImpl implements IFacturaService {
             if (numeroDeRenglon == indices[renglonMarcado]) {
                 BigDecimal cantidad = renglon.getCantidad();
                 if (cantidad.compareTo(BigDecimal.ONE) >= 0) {
-                    if ((cantidad.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) != 0) 
+                    if ((cantidad.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) != 0)
                             || cantidad.remainder(new BigDecimal("2")).compareTo(BigDecimal.ZERO) == 0) {
                         cantidadProductosRenglonFacturaSinIVA = cantidad.divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP);
                     } else if (cantidad.remainder(new BigDecimal(2)).compareTo(BigDecimal.ZERO) != 0) {
@@ -1189,7 +1225,7 @@ public class FacturaServiceImpl implements IFacturaService {
                 } else {
                     cantidadProductosRenglonFacturaSinIVA = BigDecimal.ZERO;
                 }
-                RenglonFactura nuevoRenglonSinIVA = this.calcularRenglon(TipoDeComprobante.FACTURA_X, Movimiento.VENTA, 
+                RenglonFactura nuevoRenglonSinIVA = this.calcularRenglon(TipoDeComprobante.FACTURA_X, Movimiento.VENTA,
                             cantidadProductosRenglonFacturaSinIVA, renglon.getId_ProductoItem(),
                             renglon.getDescuento_porcentaje(), true);
                 if (nuevoRenglonSinIVA.getCantidad().compareTo(BigDecimal.ZERO) != 0) {
@@ -1217,7 +1253,7 @@ public class FacturaServiceImpl implements IFacturaService {
             if (renglonMarcado < indices.length) {
                 if (numeroDeRenglon == indices[renglonMarcado]) {
                     BigDecimal cantidad = renglon.getCantidad();
-                    if (cantidad.compareTo(BigDecimal.ONE) == -1 || cantidad.compareTo(BigDecimal.ONE) == 0) { 
+                    if (cantidad.compareTo(BigDecimal.ONE) == -1 || cantidad.compareTo(BigDecimal.ONE) == 0) {
                         cantidadProductosRenglonFacturaConIVA = cantidad;
                     } else if ((cantidad.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) != 0)
                             || renglon.getCantidad().remainder(new BigDecimal(2)).compareTo(BigDecimal.ZERO) == 0) {
@@ -1243,7 +1279,7 @@ public class FacturaServiceImpl implements IFacturaService {
         facturaConIVA.setRenglones(renglonesConIVA);
         return facturaConIVA;
     }
-    
+
     private RenglonFactura crearRenglonConIVA(TipoDeComprobante tipoDeComprobante,
             BigDecimal cantidad, long idProductoItem, BigDecimal descuentoPorcentaje, boolean dividir) {
         return this.calcularRenglon(tipoDeComprobante, Movimiento.VENTA,

@@ -1,24 +1,20 @@
 package sic.controller;
 
-import java.util.List;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.service.*;
+
+import java.util.ResourceBundle;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -31,6 +27,9 @@ public class ClienteController {
     private final ILocalidadService localidadService;
     private final IUsuarioService usuarioService;
     private final int TAMANIO_PAGINA_DEFAULT = 50;
+
+    @Value("${SIC_JWT_KEY}")
+    private String secretkey;
     
     @Autowired
     public ClienteController(IClienteService clienteService, IEmpresaService empresaService,
@@ -46,6 +45,7 @@ public class ClienteController {
   
     @GetMapping("/clientes/{idCliente}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Cliente getCliente(@PathVariable long idCliente) {
         return clienteService.getClientePorId(idCliente);
     }
@@ -61,7 +61,9 @@ public class ClienteController {
                                            @RequestParam(required = false) Long idProvincia, 
                                            @RequestParam(required = false) Long idLocalidad,
                                            @RequestParam(required = false) Integer pagina,
-                                           @RequestParam(required = false) Integer tamanio) {
+                                           @RequestParam(required = false) Integer tamanio,
+                                           @RequestParam(required = false, defaultValue = "true") boolean conSaldo,
+                                           @RequestHeader("Authorization") String token) {
         Usuario viajante = null;
         if (idViajante != null) viajante = usuarioService.getUsuarioPorId(idViajante);
         Pais pais = null;
@@ -90,55 +92,86 @@ public class ClienteController {
                                                                   .localidad(localidad)
                                                                   .empresa(empresaService.getEmpresaPorId(idEmpresa))
                                                                   .pageable(pageable)
+                                                                  .conSaldo(conSaldo)
                                                                   .build();
-        return clienteService.buscarClientes(criteria);
-    }
-       
-    @GetMapping("/clientes/empresas/{idEmpresa}")
-    @ResponseStatus(HttpStatus.OK)
-    public List<Cliente> getClientes(@PathVariable long idEmpresa) {
-        return clienteService.getClientes(empresaService.getEmpresaPorId(idEmpresa));
+        Claims claims = Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+        return clienteService.buscarClientes(criteria, (int) claims.get("idUsuario"));
     }
     
     @GetMapping("/clientes/predeterminado/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public Cliente getClientePredeterminado(@PathVariable long idEmpresa) {
      return clienteService.getClientePredeterminado(empresaService.getEmpresaPorId(idEmpresa));
     }
     
     @GetMapping("/clientes/existe-predeterminado/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public boolean existeClientePredeterminado(@PathVariable long idEmpresa) {
         return clienteService.existeClientePredeterminado(empresaService.getEmpresaPorId(idEmpresa));
     }
 
-    @DeleteMapping("/clientes/{idCliente}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminar(@PathVariable long idCliente) {
-        clienteService.eliminar(idCliente);
+  @DeleteMapping("/clientes/{idCliente}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
+  public void eliminar(@PathVariable long idCliente) {
+    clienteService.eliminar(idCliente);
+  }
+
+  @PostMapping("/clientes")
+  @ResponseStatus(HttpStatus.CREATED)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
+  public Cliente guardar(
+      @RequestBody Cliente cliente, @RequestParam(required = false) Long idUsuarioCredencial) {
+    if (idUsuarioCredencial != null) {
+      Usuario usuarioCredencial = usuarioService.getUsuarioPorId(idUsuarioCredencial);
+      if (!usuarioCredencial.getRoles().contains(Rol.COMPRADOR))
+        throw new ForbiddenException(
+            ResourceBundle.getBundle("Mensajes")
+                .getString("mensaje_usuario_credencial_no_comprador"));
+      cliente.setCredencial(usuarioCredencial);
     }
-    
-    @PostMapping("/clientes")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Cliente guardar(@RequestBody Cliente cliente) {
-        return clienteService.guardar(cliente);
+    return clienteService.guardar(cliente);
+  }
+
+  @PutMapping("/clientes")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
+  public void actualizar(
+      @RequestBody Cliente cliente, @RequestParam(required = false) Long idUsuarioCredencial) {
+    if (idUsuarioCredencial == null) {
+      cliente.setCredencial(null);
+    } else {
+      Usuario usuarioCredencial = usuarioService.getUsuarioPorId(idUsuarioCredencial);
+      if (!usuarioCredencial.getRoles().contains(Rol.COMPRADOR))
+        throw new ForbiddenException(
+            ResourceBundle.getBundle("Mensajes")
+                .getString("mensaje_usuario_credencial_no_comprador"));
+      cliente.setCredencial(usuarioCredencial);
     }
-    
-    @PutMapping("/clientes")
-    @ResponseStatus(HttpStatus.OK)
-    public void actualizar(@RequestBody Cliente cliente) {
-       clienteService.actualizar(cliente);       
-    }
-    
+    clienteService.actualizar(cliente);
+  }
+
     @PutMapping("/clientes/{idCliente}/predeterminado")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void setClientePredeterminado(@PathVariable long idCliente) {
        clienteService.setClientePredeterminado(clienteService.getClientePorId(idCliente));       
     }
     
     @GetMapping("/clientes/pedidos/{idPedido}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
     public Cliente getClientePorIdPedido(@PathVariable long idPedido) {
        return clienteService.getClientePorIdPedido(idPedido);
+    }
+
+    @GetMapping("/clientes/usuarios/{idUsuario}/empresas/{idEmpresa}")
+    @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
+    public Cliente getClientePorIdUsuario(@PathVariable long idUsuario,
+                                          @PathVariable long idEmpresa) {
+        return clienteService.getClientePorIdUsuarioYidEmpresa(idUsuario, empresaService.getEmpresaPorId(idEmpresa));
     }
 }

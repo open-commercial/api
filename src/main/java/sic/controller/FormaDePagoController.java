@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.FormaDePago;
+import sic.modelo.Rol;
 import sic.service.IEmpresaService;
 import sic.service.IFormaDePagoService;
 
@@ -32,36 +34,42 @@ public class FormaDePagoController {
     
     @GetMapping("/formas-de-pago/{idFormaDePago}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public FormaDePago getFormaDePagoPorId(@PathVariable long idFormaDePago) {
         return formaDePagoService.getFormasDePagoPorId(idFormaDePago);
     }
     
     @DeleteMapping("/formas-de-pago/{idFormaDePago}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
     public void eliminar(@PathVariable long idFormaDePago) {
         formaDePagoService.eliminar(idFormaDePago);
     }
     
     @GetMapping("/formas-de-pago/predeterminada/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public FormaDePago getFormaDePagoPredeterminada(@PathVariable long idEmpresa) {
         return formaDePagoService.getFormaDePagoPredeterminada(empresaService.getEmpresaPorId(idEmpresa));
     }
     
     @GetMapping("/formas-de-pago/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public List<FormaDePago> getFormasDePago(@PathVariable long idEmpresa) {
         return formaDePagoService.getFormasDePago(empresaService.getEmpresaPorId(idEmpresa));
     }
     
     @PostMapping("/formas-de-pago")
     @ResponseStatus(HttpStatus.CREATED)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public FormaDePago guardar(@RequestBody FormaDePago formaDePago) {
         return formaDePagoService.guardar(formaDePago);
     }
     
     @PutMapping("/formas-de-pago/predeterminada/{idFormaDePago}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void setFormaDePagoPredeterminada(@PathVariable long idFormaDePago) {
         formaDePagoService.setFormaDePagoPredeterminada(formaDePagoService.getFormasDePagoPorId(idFormaDePago));
     }    

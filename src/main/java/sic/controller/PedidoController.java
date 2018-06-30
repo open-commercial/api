@@ -2,7 +2,11 @@ package sic.controller;
 
 import java.util.Calendar;
 import java.util.List;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,16 +15,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.service.IClienteService;
 import sic.service.IEmpresaService;
@@ -36,7 +32,10 @@ public class PedidoController {
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
     private final int TAMANIO_PAGINA_DEFAULT = 50;
-    
+
+    @Value("${SIC_JWT_KEY}")
+    private String secretkey;
+
     @Autowired
     public PedidoController(IPedidoService pedidoService, IEmpresaService empresaService,
                             IUsuarioService usuarioService, IClienteService clienteService) {
@@ -48,18 +47,21 @@ public class PedidoController {
     
     @GetMapping("/pedidos/{idPedido}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Pedido getPedidoPorId(@PathVariable long idPedido) {
         return pedidoService.getPedidoPorId(idPedido);
     }
     
     @GetMapping("/pedidos/{idPedido}/renglones")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public List<RenglonPedido> getRenglonesDelPedido(@PathVariable long idPedido) {
         return pedidoService.getRenglonesDelPedido(idPedido);
     }
     
     @PutMapping("/pedidos")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public void actualizar(@RequestParam Long idEmpresa,
                            @RequestParam Long idUsuario,
                            @RequestParam Long idCliente,
@@ -78,6 +80,7 @@ public class PedidoController {
     }
     
     @PostMapping("/pedidos")
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     @ResponseStatus(HttpStatus.CREATED)
     public Pedido guardar(@RequestParam Long idEmpresa,
                           @RequestParam Long idUsuario,
@@ -91,6 +94,7 @@ public class PedidoController {
     
     @GetMapping("/pedidos/busqueda/criteria")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Page<Pedido> buscarConCriteria(@RequestParam Long idEmpresa,
                                           @RequestParam(required = false) Long desde,
                                           @RequestParam(required = false) Long hasta,
@@ -99,7 +103,8 @@ public class PedidoController {
                                           @RequestParam(required = false) Long nroPedido,
                                           @RequestParam(required = false) EstadoPedido estadoPedido,
                                           @RequestParam(required = false) Integer pagina,
-                                          @RequestParam(required = false) Integer tamanio) {
+                                          @RequestParam(required = false) Integer tamanio,
+                                          @RequestHeader("Authorization") String token) {
         Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
         Calendar fechaDesde = Calendar.getInstance();
         Calendar fechaHasta = Calendar.getInstance();
@@ -129,16 +134,20 @@ public class PedidoController {
                                                                 .empresa(empresa)
                                                                 .pageable(pageable)
                                                                 .build();
-        return pedidoService.buscarConCriteria(criteria);
+        Claims claims =
+                Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+        return pedidoService.buscarConCriteria(criteria, (int) claims.get("idUsuario"));
     }
     
     @DeleteMapping("/pedidos/{idPedido}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public void eliminar(@PathVariable long idPedido) {
         pedidoService.eliminar(idPedido);
     }       
         
     @GetMapping("/pedidos/{idPedido}/reporte")
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public ResponseEntity<byte[]> getReportePedido(@PathVariable long idPedido) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);        

@@ -92,4 +92,9 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
             }
         }
     }
+
+    @Override
+    public int getCantidadMaximaDeRenglonesPorIdEmpresa(long idEmpresa) {
+        return configuracionRepository.getCantidadMaximaDeRenglones(idEmpresa);
+    }
 }

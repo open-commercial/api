@@ -1,18 +1,18 @@
 package sic.controller;
 
 import java.util.List;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import sic.aspect.AccesoRolesPermitidos;
+import sic.modelo.BusquedaUsuarioCriteria;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
 import sic.service.IUsuarioService;
@@ -22,6 +22,10 @@ import sic.service.IUsuarioService;
 public class UsuarioController {
     
     private final IUsuarioService usuarioService;
+    private final int TAMANIO_PAGINA_DEFAULT = 50;
+
+    @Value("${SIC_JWT_KEY}")
+    private String secretkey;
     
     @Autowired
     public UsuarioController(IUsuarioService usuarioService) {
@@ -33,40 +37,70 @@ public class UsuarioController {
     public Usuario getUsuarioPorId(@PathVariable long idUsuario) {
         return usuarioService.getUsuarioPorId(idUsuario);
     }
-        
-    @GetMapping("/usuarios")
-    @ResponseStatus(HttpStatus.OK)
-    public List<Usuario> getUsuarios() {
-        return usuarioService.getUsuarios();
-    }
-    
-    @GetMapping("/usuarios/roles")
-    @ResponseStatus(HttpStatus.OK)
-    public List<Usuario> getUsuariosPorRol(@RequestParam Rol rol) {
-        return usuarioService.getUsuariosPorRol(rol);
-    }
-    
-    @PostMapping("/usuarios")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Usuario guardar(@RequestBody Usuario usuario) {
-        return usuarioService.guardar(usuario);
-    }
-    
-    @PutMapping("/usuarios")
-    @ResponseStatus(HttpStatus.OK)
-    public void actualizar(@RequestBody Usuario usuario) {
-       usuarioService.actualizar(usuario);
-    }
-    
+
+  @GetMapping("/usuarios/busqueda/criteria")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VIAJANTE, Rol.VENDEDOR})
+  public Page<Usuario> buscarUsuarios(
+      @RequestParam(required = false) String username,
+      @RequestParam(required = false) String nombre,
+      @RequestParam(required = false) String apellido,
+      @RequestParam(required = false) String email,
+      @RequestParam(required = false) Integer pagina,
+      @RequestParam(required = false) Integer tamanio,
+      @RequestParam(required = false) List<Rol> roles,
+      @RequestHeader("Authorization") String token) {
+    if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
+    if (pagina == null || pagina < 0) pagina = 0;
+    Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "nombre"));
+    BusquedaUsuarioCriteria criteria =
+        BusquedaUsuarioCriteria.builder()
+            .buscarPorNombreDeUsuario(username != null)
+            .username(username)
+            .buscaPorNombre(nombre != null)
+            .nombre(nombre)
+            .buscaPorApellido(apellido != null)
+            .apellido(apellido)
+            .buscaPorEmail(email != null)
+            .email(email)
+            .buscarPorRol(roles != null && !roles.isEmpty())
+            .roles(roles)
+            .pageable(pageable)
+            .build();
+    Claims claims =
+            Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    return usuarioService.buscarUsuarios(criteria, (int) claims.get("idUsuario"));
+  }
+
+  @PostMapping("/usuarios")
+  @ResponseStatus(HttpStatus.CREATED)
+  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
+  public Usuario guardar(
+      @RequestBody Usuario usuario) {
+    return usuarioService.guardar(usuario);
+  }
+
+  @PutMapping("/usuarios")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
+  public void actualizar(
+      @RequestBody Usuario usuario,
+      @RequestHeader("Authorization") String token) {
+    Claims claims =
+        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    usuarioService.actualizar(usuario, (int) claims.get("idUsuario"));
+  }
+
     @PutMapping("/usuarios/{idUsuario}/empresas/{idEmpresaPredeterminada}")
     @ResponseStatus(HttpStatus.OK)
     public void actualizarIdEmpresaDeUsuario(@PathVariable long idUsuario, @PathVariable long idEmpresaPredeterminada) {
        usuarioService.actualizarIdEmpresaDeUsuario(idUsuario, idEmpresaPredeterminada);
     }
-    
-    @DeleteMapping("/usuarios/{idUsuario}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminar(@PathVariable long idUsuario) {
-        usuarioService.eliminar(idUsuario);
-    }    
+
+  @DeleteMapping("/usuarios/{idUsuario}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
+  public void eliminar(@PathVariable long idUsuario) {
+    usuarioService.eliminar(idUsuario);
+  }
 }

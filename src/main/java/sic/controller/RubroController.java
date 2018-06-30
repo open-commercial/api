@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import sic.aspect.AccesoRolesPermitidos;
+import sic.modelo.Rol;
 import sic.modelo.Rubro;
 import sic.service.IEmpresaService;
 import sic.service.IRubroService;
@@ -31,12 +33,14 @@ public class RubroController {
     
     @GetMapping("/rubros/{idRubro}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Rubro getRubroPorId(@PathVariable long idRubro) {
         return rubroService.getRubroPorId(idRubro);
     }
     
     @PutMapping("/rubros")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void actualizar(@RequestBody Rubro rubro) { 
         if (rubroService.getRubroPorId(rubro.getId_Rubro()) != null) {
            rubroService.actualizar(rubro);
@@ -45,18 +49,21 @@ public class RubroController {
     
     @DeleteMapping("/rubros/{idRubro}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
     public void eliminar(@PathVariable long idRubro) {
         rubroService.eliminar(idRubro);       
     }
     
     @PostMapping("/rubros")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Rubro guardar(@RequestBody Rubro rubro) {
         return rubroService.guardar(rubro);
     }
     
     @GetMapping("/rubros/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public List<Rubro> getRubros(@PathVariable long idEmpresa) {
         return rubroService.getRubros(empresaService.getEmpresaPorId(idEmpresa));
     }

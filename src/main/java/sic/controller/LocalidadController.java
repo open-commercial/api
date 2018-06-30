@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Localidad;
+import sic.modelo.Rol;
 import sic.service.ILocalidadService;
 import sic.service.IProvinciaService;
 
@@ -31,12 +33,14 @@ public class LocalidadController {
     
     @GetMapping("/localidades/{idLocalidad}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Localidad getLocalidadPorId(@PathVariable long idLocalidad) {
         return localidadService.getLocalidadPorId(idLocalidad);
     }
     
     @PutMapping("/localidades")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void actualizar(@RequestBody Localidad localidad) { 
         if (localidadService.getLocalidadPorId(localidad.getId_Localidad()) != null) {
             localidadService.actualizar(localidad);
@@ -45,18 +49,21 @@ public class LocalidadController {
     
     @DeleteMapping("/localidades/{idLocalidad}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
     public void eliminar(@PathVariable long idLocalidad) {
         localidadService.eliminar(idLocalidad);
     }
     
     @PostMapping("/localidades")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Localidad guardar(@RequestBody Localidad localidad) {
         return localidadService.guardar(localidad);
     }
     
     @GetMapping("/localidades/provincias/{idProvincia}")
     @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.VIAJANTE})
     public List<Localidad> getLocalidadesDeLaProvincia(@PathVariable long idProvincia) {
         return localidadService.getLocalidadesDeLaProvincia(provinciaService.getProvinciaPorId(idProvincia));
     }

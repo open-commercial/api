@@ -1,24 +1,21 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import java.util.List;
+
+import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.BusquedaClienteCriteria;
-import sic.modelo.Cliente;
-import sic.modelo.CuentaCorriente;
-import sic.modelo.CuentaCorrienteCliente;
-import sic.modelo.Empresa;
-import sic.modelo.QCliente;
+import sic.modelo.*;
 import sic.service.IClienteService;
 import sic.service.BusinessServiceException;
-import sic.modelo.TipoDeOperacion;
+import sic.service.IUsuarioService;
 import sic.util.Validator;
 import sic.repository.ClienteRepository;
 import sic.service.ICuentaCorrienteService;
@@ -26,54 +23,52 @@ import sic.service.ICuentaCorrienteService;
 @Service
 public class ClienteServiceImpl implements IClienteService {
 
-    private final ClienteRepository clienteRepository;    
+    private final ClienteRepository clienteRepository;
     private final ICuentaCorrienteService cuentaCorrienteService;
+    private final IUsuarioService usuarioService;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    public ClienteServiceImpl(ClienteRepository clienteRepository, ICuentaCorrienteService cuentaCorrienteService) {
+    public ClienteServiceImpl(ClienteRepository clienteRepository, ICuentaCorrienteService cuentaCorrienteService,
+                              IUsuarioService usuarioService) {
         this.clienteRepository = clienteRepository;
         this.cuentaCorrienteService = cuentaCorrienteService;
+        this.usuarioService = usuarioService;
     }
 
     @Override
-    public Cliente getClientePorId(Long idCliente) {    
+    public Cliente getClientePorId(long idCliente) {
         Cliente cliente = clienteRepository.findOne(idCliente);
         if (cliente == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_cliente_no_existente"));
         }
-        return cliente;                  
+        return cliente;
     }
 
     @Override
-    public List<Cliente> getClientes(Empresa empresa) {        
-        return clienteRepository.findAllByAndEmpresaAndEliminadoOrderByRazonSocialAsc(empresa, false);                   
+    public Cliente getClientePorRazonSocial(String razonSocial, Empresa empresa) {
+        return clienteRepository.findByRazonSocialAndEmpresaAndEliminado(razonSocial, empresa, false);
     }
 
     @Override
-    public Cliente getClientePorRazonSocial(String razonSocial, Empresa empresa) {        
-        return clienteRepository.findByRazonSocialAndEmpresaAndEliminado(razonSocial, empresa, false);                   
+    public Cliente getClientePorIdFiscal(String idFiscal, Empresa empresa) {
+        return clienteRepository.findByIdFiscalAndEmpresaAndEliminado(idFiscal, empresa, false);
     }
 
     @Override
-    public Cliente getClientePorIdFiscal(String idFiscal, Empresa empresa) {        
-        return clienteRepository.findByIdFiscalAndEmpresaAndEliminado(idFiscal, empresa, false);               
-    }
-
-    @Override
-    public Cliente getClientePredeterminado(Empresa empresa) {   
-        Cliente cliente = clienteRepository.findByAndEmpresaAndPredeterminadoAndEliminado(empresa, true, false); 
+    public Cliente getClientePredeterminado(Empresa empresa) {
+        Cliente cliente = clienteRepository.findByEmpresaAndPredeterminadoAndEliminado(empresa, true, false);
         if (cliente == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_cliente_sin_predeterminado"));
         }
-        return cliente;                   
+        return cliente;
     }
-    
+
     @Override
     public boolean existeClientePredeterminado(Empresa empresa) {
-        return clienteRepository.existsByAndEmpresaAndPredeterminadoAndEliminado(empresa, true, false);
+        return clienteRepository.existsByEmpresaAndPredeterminadoAndEliminado(empresa, true, false);
     }
 
     /**
@@ -85,80 +80,101 @@ public class ClienteServiceImpl implements IClienteService {
      */
     @Override
     @Transactional
-    public void setClientePredeterminado(Cliente cliente) {        
-        Cliente clientePredeterminadoAnterior = clienteRepository.findByAndEmpresaAndPredeterminadoAndEliminado(cliente.getEmpresa(), true, false);
+    public void setClientePredeterminado(Cliente cliente) {
+        Cliente clientePredeterminadoAnterior = clienteRepository.findByEmpresaAndPredeterminadoAndEliminado(cliente.getEmpresa(), true, false);
         if (clientePredeterminadoAnterior != null) {
             clientePredeterminadoAnterior.setPredeterminado(false);
             clienteRepository.save(clientePredeterminadoAnterior);
         }
         cliente.setPredeterminado(true);
-        clienteRepository.save(cliente);        
+        clienteRepository.save(cliente);
     }
 
-    @Override
-    public Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria) {
-        if (criteria.getEmpresa() == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
-        QCliente qcliente = QCliente.cliente;
-        BooleanBuilder builder = new BooleanBuilder();        
-        if (criteria.isBuscaPorRazonSocial()) {
-            String[] terminos = criteria.getRazonSocial().split(" ");
-            BooleanBuilder rsPredicate = new BooleanBuilder();            
-            for (String termino : terminos) {                
-                rsPredicate.and(qcliente.razonSocial.containsIgnoreCase(termino));    
-            }
-            builder.or(rsPredicate);
-        }
-        if (criteria.isBuscaPorNombreFantasia()) {
-            String[] terminos = criteria.getNombreFantasia().split(" ");
-            BooleanBuilder nfPredicate = new BooleanBuilder();            
-            for (String termino : terminos) {
-                nfPredicate.and(qcliente.nombreFantasia.containsIgnoreCase(termino));    
-            }            
-            builder.or(nfPredicate);
-        }
-        if (criteria.isBuscaPorId_Fiscal()) {
-            String[] terminos = criteria.getIdFiscal().split(" ");
-            BooleanBuilder idPredicate = new BooleanBuilder();            
-            for (String termino : terminos) {
-                idPredicate.and(qcliente.idFiscal.containsIgnoreCase(termino));    
-            }            
-            builder.or(idPredicate);
-        }
-        if (criteria.isBuscaPorViajante()) {
-            builder.and(qcliente.viajante.eq(criteria.getViajante()));
-        }
-        if (criteria.isBuscaPorLocalidad()) {
-            builder.and(qcliente.localidad.eq(criteria.getLocalidad()));
-        }
-        if (criteria.isBuscaPorProvincia()) {
-            builder.and(qcliente.localidad.provincia.eq(criteria.getProvincia()));
-        }
-        if (criteria.isBuscaPorPais()) {
-            builder.and(qcliente.localidad.provincia.pais.eq(criteria.getPais()));
-        }
-        builder.and(qcliente.empresa.eq(criteria.getEmpresa()).and(qcliente.eliminado.eq(false)));        
-        Page<Cliente> page = clienteRepository.findAll(builder, criteria.getPageable());
-        page.getContent().forEach(c -> {
-            CuentaCorriente cc = cuentaCorrienteService.getCuentaCorrientePorCliente(c);
-            c.setSaldoCuentaCorriente(cc.getSaldo());
-            c.setFechaUltimoMovimiento(cc.getFechaUltimoMovimiento());
-        });
-        return page;
+  @Override
+  public Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long idUsuarioLoggedIn) {
+    if (criteria.getEmpresa() == null) {
+      throw new EntityNotFoundException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_empresa_no_existente"));
     }
-    
+    QCliente qcliente = QCliente.cliente;
+    BooleanBuilder builder = new BooleanBuilder();
+    if (criteria.isBuscaPorRazonSocial()) {
+      String[] terminos = criteria.getRazonSocial().split(" ");
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        rsPredicate.and(qcliente.razonSocial.containsIgnoreCase(termino));
+      }
+      builder.or(rsPredicate);
+    }
+    if (criteria.isBuscaPorNombreFantasia()) {
+      String[] terminos = criteria.getNombreFantasia().split(" ");
+      BooleanBuilder nfPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        nfPredicate.and(qcliente.nombreFantasia.containsIgnoreCase(termino));
+      }
+      builder.or(nfPredicate);
+    }
+    if (criteria.isBuscaPorId_Fiscal()) {
+      String[] terminos = criteria.getIdFiscal().split(" ");
+      BooleanBuilder idPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        idPredicate.and(qcliente.idFiscal.containsIgnoreCase(termino));
+      }
+      builder.or(idPredicate);
+    }
+    if (criteria.isBuscaPorViajante()) builder.and(qcliente.viajante.eq(criteria.getViajante()));
+    if (criteria.isBuscaPorLocalidad()) builder.and(qcliente.localidad.eq(criteria.getLocalidad()));
+    if (criteria.isBuscaPorProvincia())
+      builder.and(qcliente.localidad.provincia.eq(criteria.getProvincia()));
+    if (criteria.isBuscaPorPais())
+      builder.and(qcliente.localidad.provincia.pais.eq(criteria.getPais()));
+    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
+            && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
+            && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (Rol rol : usuarioLogueado.getRoles()) {
+        switch (rol) {
+          case VIAJANTE:
+            rsPredicate.or(qcliente.viajante.eq(usuarioLogueado));
+            break;
+          case COMPRADOR:
+            Cliente clienteRelacionado =
+                this.getClientePorIdUsuarioYidEmpresa(idUsuarioLoggedIn, criteria.getEmpresa());
+            if (clienteRelacionado != null) {
+              rsPredicate.or(qcliente.eq(clienteRelacionado));
+            } else {
+              rsPredicate.or(qcliente.isNull());
+            }
+            break;
+        }
+      }
+      builder.and(rsPredicate);
+    }
+    builder.and(qcliente.empresa.eq(criteria.getEmpresa()).and(qcliente.eliminado.eq(false)));
+    Page<Cliente> page = clienteRepository.findAll(builder, criteria.getPageable());
+    if (criteria.isConSaldo()) {
+      page.getContent()
+          .forEach(
+              c -> {
+                CuentaCorriente cc = cuentaCorrienteService.getCuentaCorrientePorCliente(c);
+                c.setSaldoCuentaCorriente(cc.getSaldo());
+                c.setFechaUltimoMovimiento(cc.getFechaUltimoMovimiento());
+              });
+    }
+    return page;
+  }
+
     @Override
     public void validarOperacion(TipoDeOperacion operacion, Cliente cliente) {
-        //Entrada de Datos        
+        //Entrada de Datos
         if (cliente.getEmail() != null && !cliente.getEmail().equals("")) {
             if (!Validator.esEmailValido(cliente.getEmail())) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_cliente_email_invalido"));
             }
         }
-        //Requeridos        
+        //Requeridos
         if (Validator.esVacio(cliente.getRazonSocial())) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_cliente_vacio_razonSocial"));
@@ -206,42 +222,82 @@ public class ClienteServiceImpl implements IClienteService {
         }
     }
 
-    @Override
-    @Transactional
-    public Cliente guardar(Cliente cliente) {        
-        this.validarOperacion(TipoDeOperacion.ALTA, cliente);
-        cliente = clienteRepository.save(cliente);  
-        CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
-        cuentaCorrienteCliente.setCliente(cliente);
-        cuentaCorrienteCliente.setEmpresa(cliente.getEmpresa());
-        cuentaCorrienteCliente.setFechaApertura(cliente.getFechaAlta());
-        cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);
-        LOGGER.warn("El Cliente " + cliente + " se guardó correctamente." );
-        return cliente;
+  @Override
+  @Transactional
+  public Cliente guardar(Cliente cliente) {
+    this.validarOperacion(TipoDeOperacion.ALTA, cliente);
+    CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
+    cuentaCorrienteCliente.setCliente(cliente);
+    cuentaCorrienteCliente.setEmpresa(cliente.getEmpresa());
+    cuentaCorrienteCliente.setFechaApertura(cliente.getFechaAlta());
+    if (cliente.getCredencial() != null) {
+      Cliente clienteYaAsignado =
+          this.getClientePorIdUsuarioYidEmpresa(
+              cliente.getCredencial().getId_Usuario(), cliente.getEmpresa());
+      if (clienteYaAsignado != null) {
+        throw new BusinessServiceException(
+            MessageFormat.format(
+                ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_cliente_credencial_no_valida"),
+                clienteYaAsignado.getRazonSocial()));
+      }
     }
+    cliente = clienteRepository.save(cliente);
+    cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);
+    LOGGER.warn("El Cliente " + cliente + " se guardó correctamente.");
+    return cliente;
+  }
+
+  @Override
+  @Transactional
+  public void actualizar(Cliente cliente) {
+    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, cliente);
+    if (cliente.getCredencial() != null) {
+      Cliente clienteYaAsignado =
+          this.getClientePorIdUsuarioYidEmpresa(
+              cliente.getCredencial().getId_Usuario(), cliente.getEmpresa());
+      if (clienteYaAsignado != null
+          && clienteYaAsignado.getId_Cliente() != cliente.getId_Cliente()) {
+        throw new BusinessServiceException(
+            MessageFormat.format(
+                ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_cliente_credencial_no_valida"),
+                clienteYaAsignado.getRazonSocial()));
+      }
+    }
+    clienteRepository.save(cliente);
+  }
 
     @Override
     @Transactional
-    public void actualizar(Cliente cliente) {
-        this.validarOperacion(TipoDeOperacion.ACTUALIZACION, cliente);        
-        clienteRepository.save(cliente);                   
-    }
-
-    @Override
-    @Transactional
-    public void eliminar(Long idCliente) {
+    public void eliminar(long idCliente) {
         Cliente cliente = this.getClientePorId(idCliente);
         if (cliente == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_cliente_no_existente"));
         }
-        cliente.setEliminado(true);        
-        clienteRepository.save(cliente);                   
+        cliente.setEliminado(true);
+        clienteRepository.save(cliente);
     }
-    
+
     @Override
     public Cliente getClientePorIdPedido(long idPedido) {
         return clienteRepository.findClienteByIdPedido(idPedido);
     }
-    
+
+    @Override
+    public Cliente getClientePorIdUsuarioYidEmpresa(long idUsuario, Empresa empresa) {
+        return clienteRepository.findClienteByIdUsuarioYidEmpresa(idUsuario, empresa.getId_Empresa());
+    }
+
+  @Override
+  public int desvincularClienteDeViajante(long idViajante) {
+    return clienteRepository.desvincularClienteDeViajante(idViajante);
+  }
+
+  @Override
+  public int desvincularClienteDeComprador(long idCliente) {
+    return clienteRepository.desvincularClienteDeComprador(idCliente);
+  }
+
 }
