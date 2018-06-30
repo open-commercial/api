@@ -3,7 +3,6 @@ package sic.service.impl;
 import com.querydsl.core.BooleanBuilder;
 
 import java.text.MessageFormat;
-import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.controller.ForbiddenException;
 import sic.modelo.*;
 import sic.service.IClienteService;
 import sic.service.BusinessServiceException;
