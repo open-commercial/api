@@ -139,9 +139,10 @@ public class ClienteController {
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public void actualizar(
-      @RequestBody Cliente cliente,
-      @RequestParam(required = false) Long idUsuarioCredencial) {
-    if (idUsuarioCredencial != null) {
+      @RequestBody Cliente cliente, @RequestParam(required = false) Long idUsuarioCredencial) {
+    if (idUsuarioCredencial == null) {
+      cliente.setCredencial(null);
+    } else {
       Usuario usuarioCredencial = usuarioService.getUsuarioPorId(idUsuarioCredencial);
       if (!usuarioCredencial.getRoles().contains(Rol.COMPRADOR))
         throw new ForbiddenException(
