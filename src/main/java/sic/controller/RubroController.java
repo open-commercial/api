@@ -63,7 +63,7 @@ public class RubroController {
     
     @GetMapping("/rubros/empresas/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE}) // TO-DO HotFix
     public List<Rubro> getRubros(@PathVariable long idEmpresa) {
         return rubroService.getRubros(empresaService.getEmpresaPorId(idEmpresa));
     }
