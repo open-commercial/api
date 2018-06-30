@@ -62,14 +62,14 @@ public class FormaDePagoController {
     
     @PostMapping("/formas-de-pago")
     @ResponseStatus(HttpStatus.CREATED)
-    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public FormaDePago guardar(@RequestBody FormaDePago formaDePago) {
         return formaDePagoService.guardar(formaDePago);
     }
     
     @PutMapping("/formas-de-pago/predeterminada/{idFormaDePago}")
     @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void setFormaDePagoPredeterminada(@PathVariable long idFormaDePago) {
         formaDePagoService.setFormaDePagoPredeterminada(formaDePagoService.getFormasDePagoPorId(idFormaDePago));
     }    

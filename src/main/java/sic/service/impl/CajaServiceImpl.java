@@ -83,11 +83,6 @@ public class CajaServiceImpl implements ICajaService {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_caja_usuario_vacio"));
         }
-        //Administrador
-        if (!usuarioService.getUsuarioPorId(caja.getUsuarioAbreCaja().getId_Usuario()).getRoles().contains(Rol.ADMINISTRADOR)) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_caja_usuario_no_administrador"));
-        }
         //Una Caja por dia
         Caja ultimaCaja = this.getUltimaCaja(caja.getEmpresa().getId_Empresa());
         if (ultimaCaja == null) {

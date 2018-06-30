@@ -44,7 +44,7 @@ public class GastoController {
     }
     
     @DeleteMapping("/gastos/{idGasto}")
-    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable long idGasto) {
         gastoService.eliminar(idGasto);
