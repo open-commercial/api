@@ -49,7 +49,7 @@ public class LocalidadController {
     
     @DeleteMapping("/localidades/{idLocalidad}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
     public void eliminar(@PathVariable long idLocalidad) {
         localidadService.eliminar(idLocalidad);
     }

@@ -47,7 +47,7 @@ public class PaisController {
     
     @DeleteMapping("/paises/{idPais}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
     public void eliminar(@PathVariable long idPais) {
         paisService.eliminar(idPais);
     }
