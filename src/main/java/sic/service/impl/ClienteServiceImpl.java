@@ -232,15 +232,17 @@ public class ClienteServiceImpl implements IClienteService {
     cuentaCorrienteCliente.setCliente(cliente);
     cuentaCorrienteCliente.setEmpresa(cliente.getEmpresa());
     cuentaCorrienteCliente.setFechaApertura(cliente.getFechaAlta());
-    Cliente clienteYaAsignado =
-        this.getClientePorIdUsuarioYidEmpresa(
-            cliente.getCredencial().getId_Usuario(), cliente.getEmpresa());
-    if (clienteYaAsignado != null) {
-      throw new BusinessServiceException(
-          MessageFormat.format(
-              ResourceBundle.getBundle("Mensajes")
-                  .getString("mensaje_cliente_credencial_no_valida"),
-              clienteYaAsignado.getRazonSocial()));
+    if (cliente.getCredencial() != null) {
+      Cliente clienteYaAsignado =
+          this.getClientePorIdUsuarioYidEmpresa(
+              cliente.getCredencial().getId_Usuario(), cliente.getEmpresa());
+      if (clienteYaAsignado != null) {
+        throw new BusinessServiceException(
+            MessageFormat.format(
+                ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_cliente_credencial_no_valida"),
+                clienteYaAsignado.getRazonSocial()));
+      }
     }
     cliente = clienteRepository.save(cliente);
     cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);
