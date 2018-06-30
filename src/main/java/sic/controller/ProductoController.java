@@ -137,7 +137,7 @@ public class ProductoController {
 
     @PutMapping("/productos")
     @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void actualizar(@RequestBody Producto producto,
                            @RequestParam Long idMedida,
                            @RequestParam Long idRubro,
