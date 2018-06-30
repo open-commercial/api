@@ -14,6 +14,8 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.service.*;
 
+import java.util.ResourceBundle;
+
 @RestController
 @RequestMapping("/api/v1")
 public class ClienteController {
@@ -121,9 +123,16 @@ public class ClienteController {
   @ResponseStatus(HttpStatus.CREATED)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public Cliente guardar(
-      @RequestBody Cliente cliente,
-      @RequestParam(required = false) Long idUsuarioCredencial) {
-    return clienteService.guardar(cliente, idUsuarioCredencial);
+      @RequestBody Cliente cliente, @RequestParam(required = false) Long idUsuarioCredencial) {
+    if (idUsuarioCredencial != null) {
+      Usuario usuarioCredencial = usuarioService.getUsuarioPorId(idUsuarioCredencial);
+      if (!usuarioCredencial.getRoles().contains(Rol.COMPRADOR))
+        throw new ForbiddenException(
+            ResourceBundle.getBundle("Mensajes")
+                .getString("mensaje_usuario_credencial_no_comprador"));
+      cliente.setCredencial(usuarioCredencial);
+    }
+    return clienteService.guardar(cliente);
   }
 
   @PutMapping("/clientes")
@@ -132,7 +141,15 @@ public class ClienteController {
   public void actualizar(
       @RequestBody Cliente cliente,
       @RequestParam(required = false) Long idUsuarioCredencial) {
-    clienteService.actualizar(cliente, idUsuarioCredencial);
+    if (idUsuarioCredencial != null) {
+      Usuario usuarioCredencial = usuarioService.getUsuarioPorId(idUsuarioCredencial);
+      if (!usuarioCredencial.getRoles().contains(Rol.COMPRADOR))
+        throw new ForbiddenException(
+            ResourceBundle.getBundle("Mensajes")
+                .getString("mensaje_usuario_credencial_no_comprador"));
+      cliente.setCredencial(usuarioCredencial);
+    }
+    clienteService.actualizar(cliente);
   }
 
     @PutMapping("/clientes/{idCliente}/predeterminado")

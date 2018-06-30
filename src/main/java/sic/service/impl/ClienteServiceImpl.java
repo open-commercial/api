@@ -226,31 +226,21 @@ public class ClienteServiceImpl implements IClienteService {
 
   @Override
   @Transactional
-  public Cliente guardar(Cliente cliente, Long idUsuarioCrendencial) {
+  public Cliente guardar(Cliente cliente) {
     this.validarOperacion(TipoDeOperacion.ALTA, cliente);
     CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
     cuentaCorrienteCliente.setCliente(cliente);
     cuentaCorrienteCliente.setEmpresa(cliente.getEmpresa());
     cuentaCorrienteCliente.setFechaApertura(cliente.getFechaAlta());
-    if (idUsuarioCrendencial != null) {
-      if (!usuarioService
-          .getUsuarioPorId(idUsuarioCrendencial)
-          .getRoles()
-          .contains(Rol.COMPRADOR)) {
-        throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes")
-                .getString("mensaje_usuario_credencial_no_comprador"));
-      }
-      Cliente clienteYaAsignado =
-          this.getClientePorIdUsuarioYidEmpresa(idUsuarioCrendencial, cliente.getEmpresa());
-      if (clienteYaAsignado != null) {
-        throw new BusinessServiceException(
-            MessageFormat.format(
-                ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_cliente_credencial_no_valida"),
-                clienteYaAsignado.getRazonSocial()));
-      }
-      cliente.setCredencial(usuarioService.getUsuarioPorId(idUsuarioCrendencial));
+    Cliente clienteYaAsignado =
+        this.getClientePorIdUsuarioYidEmpresa(
+            cliente.getCredencial().getId_Usuario(), cliente.getEmpresa());
+    if (clienteYaAsignado != null) {
+      throw new BusinessServiceException(
+          MessageFormat.format(
+              ResourceBundle.getBundle("Mensajes")
+                  .getString("mensaje_cliente_credencial_no_valida"),
+              clienteYaAsignado.getRazonSocial()));
     }
     cliente = clienteRepository.save(cliente);
     cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);
@@ -260,19 +250,12 @@ public class ClienteServiceImpl implements IClienteService {
 
   @Override
   @Transactional
-  public void actualizar(Cliente cliente, Long idUsuarioCrendencial) {
+  public void actualizar(Cliente cliente) {
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, cliente);
-    if (idUsuarioCrendencial != null) {
-      if (!usuarioService
-          .getUsuarioPorId(idUsuarioCrendencial)
-          .getRoles()
-          .contains(Rol.COMPRADOR)) {
-        throw new ForbiddenException(
-            ResourceBundle.getBundle("Mensajes")
-                .getString("mensaje_usuario_credencial_no_comprador"));
-      }
+    if (cliente.getCredencial() != null) {
       Cliente clienteYaAsignado =
-          this.getClientePorIdUsuarioYidEmpresa(idUsuarioCrendencial, cliente.getEmpresa());
+          this.getClientePorIdUsuarioYidEmpresa(
+              cliente.getCredencial().getId_Usuario(), cliente.getEmpresa());
       if (clienteYaAsignado != null
           && clienteYaAsignado.getId_Cliente() != cliente.getId_Cliente()) {
         throw new BusinessServiceException(
@@ -281,9 +264,6 @@ public class ClienteServiceImpl implements IClienteService {
                     .getString("mensaje_cliente_credencial_no_valida"),
                 clienteYaAsignado.getRazonSocial()));
       }
-      cliente.setCredencial(usuarioService.getUsuarioPorId(idUsuarioCrendencial));
-    } else {
-      cliente.setCredencial(null);
     }
     clienteRepository.save(cliente);
   }

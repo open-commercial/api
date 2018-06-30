@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface IClienteService {
 
-  void actualizar(Cliente cliente, Long idUsuarioCrendencial);
+  void actualizar(Cliente cliente);
 
   Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long idUsuario);
 
@@ -25,7 +25,7 @@ public interface IClienteService {
 
   void setClientePredeterminado(Cliente cliente);
 
-  Cliente guardar(Cliente cliente, Long idUsuarioCrendencial);
+  Cliente guardar(Cliente cliente);
 
   void validarOperacion(TipoDeOperacion operacion, Cliente cliente);
 
