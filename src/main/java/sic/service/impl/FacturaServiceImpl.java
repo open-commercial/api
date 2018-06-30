@@ -350,7 +350,9 @@ public class FacturaServiceImpl implements IFacturaService {
       builder.and(qFacturaVenta.pedido.nroPedido.eq(criteria.getNroPedido()));
     Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
     BooleanBuilder rsPredicate = new BooleanBuilder();
-    if (!usuarioLogueado.getRoles().isEmpty()) {
+    if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
+        && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
+        && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
       for (Rol rol : usuarioLogueado.getRoles()) {
         switch (rol) {
           case VIAJANTE:
