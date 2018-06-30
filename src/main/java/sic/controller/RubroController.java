@@ -49,7 +49,7 @@ public class RubroController {
     
     @DeleteMapping("/rubros/{idRubro}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
     public void eliminar(@PathVariable long idRubro) {
         rubroService.eliminar(idRubro);       
     }
