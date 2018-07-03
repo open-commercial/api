@@ -10,8 +10,6 @@ import org.springframework.data.repository.query.Param;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
 
-import java.util.List;
-
 public interface UsuarioRepository
     extends PagingAndSortingRepository<Usuario, Long>, QueryDslPredicateExecutor<Usuario> {
 
@@ -44,5 +42,4 @@ public interface UsuarioRepository
       @Param("idEmpresaPredeterminada") long idEmpresaPredeterminada);
 
   Page<Usuario> findAllByRolesContainsAndEliminado(Rol rol, boolean eliminado, Pageable pageable);
-
 }

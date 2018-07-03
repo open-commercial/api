@@ -2,7 +2,6 @@ package sic.service.impl;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
@@ -28,19 +27,21 @@ import sic.service.IEmpresaService;
 @Transactional
 public class UsuarioServiceImpl implements IUsuarioService {
 
-    private final UsuarioRepository usuarioRepository;
-    private final IEmpresaService empresaService;
-    private final IClienteService clienteService;
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+  private final UsuarioRepository usuarioRepository;
+  private final IEmpresaService empresaService;
+  private final IClienteService clienteService;
+  private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
-    @Lazy
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, IEmpresaService empresaService,
-                              IClienteService clienteService) {
-        this.usuarioRepository = usuarioRepository;
-        this.empresaService = empresaService;
-        this.clienteService = clienteService;
-    }
+  @Autowired
+  @Lazy
+  public UsuarioServiceImpl(
+      UsuarioRepository usuarioRepository,
+      IEmpresaService empresaService,
+      IClienteService clienteService) {
+    this.usuarioRepository = usuarioRepository;
+    this.empresaService = empresaService;
+    this.clienteService = clienteService;
+  }
 
   public String encriptarConMD5(String password) {
     try {
@@ -56,26 +57,29 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
   }
 
-    @Override
-    public Usuario getUsuarioPorId(Long idUsuario) {
-        Usuario usuario = usuarioRepository.findById(idUsuario);
-        if (usuario == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_usuario_no_existente"));
-        }
-        return usuario;
+  @Override
+  public Usuario getUsuarioPorId(Long idUsuario) {
+    Usuario usuario = usuarioRepository.findById(idUsuario);
+    if (usuario == null) {
+      throw new EntityNotFoundException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_no_existente"));
     }
+    return usuario;
+  }
 
-    @Override
-    public Usuario autenticarUsuario(Credencial credencial) {
-        Usuario usuario = usuarioRepository.findByUsernameOrEmailAndPasswordAndEliminado(credencial.getUsername(),
-                credencial.getUsername(), this.encriptarConMD5(credencial.getPassword()));
-        if (usuario == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_usuario_no_existente"));
-        }
-        return usuario;
+  @Override
+  public Usuario autenticarUsuario(Credencial credencial) {
+    Usuario usuario =
+        usuarioRepository.findByUsernameOrEmailAndPasswordAndEliminado(
+            credencial.getUsername(),
+            credencial.getUsername(),
+            this.encriptarConMD5(credencial.getPassword()));
+    if (usuario == null) {
+      throw new EntityNotFoundException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_no_existente"));
     }
+    return usuario;
+  }
 
   @Override
   public Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria, long idUsuarioLoggedIn) {
@@ -117,9 +121,9 @@ public class UsuarioServiceImpl implements IUsuarioService {
       BooleanBuilder rsPredicate = new BooleanBuilder();
       List<Rol> rolesDeUsuario = this.getUsuarioPorId(idUsuarioLoggedIn).getRoles();
       if (rolesDeUsuario.contains(Rol.VIAJANTE)
-              && !rolesDeUsuario.contains(Rol.ADMINISTRADOR)
-              && !rolesDeUsuario.contains(Rol.ENCARGADO)
-              && !rolesDeUsuario.contains(Rol.VENDEDOR)) {
+          && !rolesDeUsuario.contains(Rol.ADMINISTRADOR)
+          && !rolesDeUsuario.contains(Rol.ENCARGADO)
+          && !rolesDeUsuario.contains(Rol.VENDEDOR)) {
         for (Rol rol : criteria.getRoles()) {
           switch (rol) {
             case VIAJANTE:
@@ -157,8 +161,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
     return usuarioRepository.findAll(builder, criteria.getPageable());
   }
 
-  private void validarOperacion(
-    TipoDeOperacion operacion, Usuario usuario) {
+  private void validarOperacion(TipoDeOperacion operacion, Usuario usuario) {
     // Requeridos
     if (Validator.esVacio(usuario.getNombre())) {
       throw new BusinessServiceException(
@@ -258,12 +261,13 @@ public class UsuarioServiceImpl implements IUsuarioService {
       this.actualizarToken(null, usuario.getId_Usuario());
     }
     usuarioRepository.save(usuario);
+    LOGGER.warn("El Usuario " + usuario + " se actualizó correctamente.");
   }
 
-    @Override
-    public void actualizarToken(String token, long idUsuario) {
-        usuarioRepository.updateToken(token, idUsuario);
-    }
+  @Override
+  public void actualizarToken(String token, long idUsuario) {
+    usuarioRepository.updateToken(token, idUsuario);
+  }
 
   @Override
   public Usuario guardar(Usuario usuario) {
@@ -284,6 +288,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
     this.validarOperacion(TipoDeOperacion.ELIMINACION, usuario);
     usuario.setEliminado(true);
     usuarioRepository.save(usuario);
+    LOGGER.warn("El Usuario " + usuario + " se eliminó correctamente.");
   }
 
   @Override
@@ -294,5 +299,4 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
     return usuarioRepository.updateIdEmpresa(idUsuario, idEmpresaPredeterminada);
   }
-
 }

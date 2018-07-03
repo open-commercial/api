@@ -20,23 +20,22 @@ import sic.service.IUsuarioService;
 @RestController
 @RequestMapping("/api/v1")
 public class UsuarioController {
-    
-    private final IUsuarioService usuarioService;
-    private final int TAMANIO_PAGINA_DEFAULT = 50;
 
-    @Value("${SIC_JWT_KEY}")
-    private String secretkey;
-    
-    @Autowired
-    public UsuarioController(IUsuarioService usuarioService) {
-        this.usuarioService = usuarioService;
-    }
-    
-    @GetMapping("/usuarios/{idUsuario}")
-    @ResponseStatus(HttpStatus.OK)
-    public Usuario getUsuarioPorId(@PathVariable long idUsuario) {
-        return usuarioService.getUsuarioPorId(idUsuario);
-    }
+  private final IUsuarioService usuarioService;
+
+  @Value("${SIC_JWT_KEY}")
+  private String secretkey;
+
+  @Autowired
+  public UsuarioController(IUsuarioService usuarioService) {
+    this.usuarioService = usuarioService;
+  }
+
+  @GetMapping("/usuarios/{idUsuario}")
+  @ResponseStatus(HttpStatus.OK)
+  public Usuario getUsuarioPorId(@PathVariable long idUsuario) {
+    return usuarioService.getUsuarioPorId(idUsuario);
+  }
 
   @GetMapping("/usuarios/busqueda/criteria")
   @ResponseStatus(HttpStatus.OK)
@@ -50,6 +49,7 @@ public class UsuarioController {
       @RequestParam(required = false) Integer tamanio,
       @RequestParam(required = false) List<Rol> roles,
       @RequestHeader("Authorization") String token) {
+    int TAMANIO_PAGINA_DEFAULT = 50;
     if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
     if (pagina == null || pagina < 0) pagina = 0;
     Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "nombre"));
@@ -68,15 +68,14 @@ public class UsuarioController {
             .pageable(pageable)
             .build();
     Claims claims =
-            Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
     return usuarioService.buscarUsuarios(criteria, (int) claims.get("idUsuario"));
   }
 
   @PostMapping("/usuarios")
   @ResponseStatus(HttpStatus.CREATED)
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-  public Usuario guardar(
-      @RequestBody Usuario usuario) {
+  public Usuario guardar(@RequestBody Usuario usuario) {
     return usuarioService.guardar(usuario);
   }
 
@@ -84,18 +83,18 @@ public class UsuarioController {
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void actualizar(
-      @RequestBody Usuario usuario,
-      @RequestHeader("Authorization") String token) {
+      @RequestBody Usuario usuario, @RequestHeader("Authorization") String token) {
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
     usuarioService.actualizar(usuario, (int) claims.get("idUsuario"));
   }
 
-    @PutMapping("/usuarios/{idUsuario}/empresas/{idEmpresaPredeterminada}")
-    @ResponseStatus(HttpStatus.OK)
-    public void actualizarIdEmpresaDeUsuario(@PathVariable long idUsuario, @PathVariable long idEmpresaPredeterminada) {
-       usuarioService.actualizarIdEmpresaDeUsuario(idUsuario, idEmpresaPredeterminada);
-    }
+  @PutMapping("/usuarios/{idUsuario}/empresas/{idEmpresaPredeterminada}")
+  @ResponseStatus(HttpStatus.OK)
+  public void actualizarIdEmpresaDeUsuario(
+      @PathVariable long idUsuario, @PathVariable long idEmpresaPredeterminada) {
+    usuarioService.actualizarIdEmpresaDeUsuario(idUsuario, idEmpresaPredeterminada);
+  }
 
   @DeleteMapping("/usuarios/{idUsuario}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
