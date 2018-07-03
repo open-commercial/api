@@ -278,8 +278,7 @@ public class FacturaController {
           empresaService.getEmpresaPorId(idEmpresa), clienteService.getClientePorId(idCliente));
     } else if (rolesDeUsuario.contains(Rol.VIAJANTE)
             || rolesDeUsuario.contains(Rol.COMPRADOR)) {
-      TipoDeComprobante[] tipoDeComprobantes = {TipoDeComprobante.PEDIDO};
-      return tipoDeComprobantes;
+      return new TipoDeComprobante[] {TipoDeComprobante.PEDIDO};
     }
     return null;
   }

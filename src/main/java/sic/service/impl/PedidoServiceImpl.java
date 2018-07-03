@@ -228,7 +228,7 @@ public class PedidoServiceImpl implements IPedidoService {
             builder.and(rsPredicate);
         }
         Page<Pedido> pedidos = pedidoRepository.findAll(builder, criteria.getPageable());
-        pedidos.getContent().forEach(p -> this.calcularTotalActualDePedido(p));
+        pedidos.getContent().forEach(this::calcularTotalActualDePedido);
         return pedidos;
     }
 
