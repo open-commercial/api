@@ -24,6 +24,7 @@ public class ProductoBuilder {
     private BigDecimal precioLista = new BigDecimal("181.5");    
     private String nombreRubro = "Ferreteria";
     private boolean ilimitado = false;
+    private boolean publicable = true;
     private Date fechaUltimaModificacion = new Date(1463540400000L); // 18-05-2016
     private String estanteria = "A";
     private String estante = "1";
@@ -38,8 +39,8 @@ public class ProductoBuilder {
         return new ProductoDTO(id_Producto, codigo, descripcion, cantidad, cantMinima, ventaMinima, nombreMedida,
                 precioCosto, ganancia_porcentaje, ganancia_neto, precioVentaPublico,
                 iva_porcentaje, iva_neto, impuestoInterno_porcentaje, impuestoInterno_neto, precioLista,
-                nombreRubro, ilimitado, fechaUltimaModificacion, estanteria, estante, razonSocialProveedor, nota,
-                fechaAlta, fechaVencimiento, nombreEmpresa, eliminado);
+                nombreRubro, ilimitado, publicable, fechaUltimaModificacion, estanteria, estante, razonSocialProveedor,
+                nota, fechaAlta, fechaVencimiento, nombreEmpresa, eliminado);
     }
     
     public ProductoBuilder withId_Producto(Long id_Producto) {
@@ -129,6 +130,11 @@ public class ProductoBuilder {
     
     public ProductoBuilder withIlimitado(boolean ilimitado) {
         this.ilimitado = ilimitado;
+        return this;
+    }
+
+    public ProductoBuilder withPublicable(boolean publicable) {
+        this.publicable = publicable;
         return this;
     }
     

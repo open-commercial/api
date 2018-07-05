@@ -29,6 +29,7 @@ public class ProductoDTO {
     private BigDecimal precioLista = new BigDecimal("181.5");    
     private String nombreRubro = "Ferreteria";
     private boolean ilimitado = false;
+    private boolean prublicable = true;
     private Date fechaUltimaModificacion = new Date(1463540400000L); // 18-05-2016
     private String estanteria = "A";
     private String estante = "1";
