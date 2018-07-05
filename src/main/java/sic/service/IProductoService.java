@@ -54,11 +54,11 @@ public interface IProductoService {
 
     Producto guardar(Producto producto);
 
-    List<Producto> actualizarMultiples(long[] idProducto, boolean checkPrecios, BigDecimal gananciaNeto,
+    List<Producto> actualizarMultiples(long[] idProducto, boolean checkPrecios,
+                                       boolean isDescuento, BigDecimal porcentaje, BigDecimal gananciaNeto,
                                        BigDecimal gananciaPorcentaje, BigDecimal impuestoInternoNeto,
                                        BigDecimal impuestoInternoPorcentaje, BigDecimal IVANeto,
                                        BigDecimal IVAPorcentaje, BigDecimal precioCosto, BigDecimal precioLista,
                                        BigDecimal precioVentaPublico, boolean checkMedida, Medida medida,
                                        boolean checkRubro, Rubro rubro, boolean checkProveedor, Proveedor proveedor);
-
 }

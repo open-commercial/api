@@ -264,6 +264,8 @@ public class ProductoServiceImpl implements IProductoService {
     @Transactional
     public List<Producto> actualizarMultiples(long[] idProducto,
                                               boolean checkPrecios,
+                                              boolean checkPorcentaje,
+                                              BigDecimal porcentaje,
                                               BigDecimal gananciaNeto,
                                               BigDecimal gananciaPorcentaje,
                                               BigDecimal impuestoInternoNeto,
@@ -297,6 +299,9 @@ public class ProductoServiceImpl implements IProductoService {
         for (long i : idProducto) {
             productos.add(this.getProductoPorId(i));
         }
+        final BigDecimal multiplicador = (porcentaje.compareTo(BigDecimal.ZERO) > 0) ?
+                porcentaje.divide(CIEN, 15, RoundingMode.HALF_UP).add(BigDecimal.ONE) // 1.2
+                : BigDecimal.ONE.subtract(porcentaje.abs().divide(CIEN, 15, RoundingMode.HALF_UP)); // 0.8
         productos.forEach(p -> {
             if (checkMedida) p.setMedida(medida);
             if (checkRubro) p.setRubro(rubro);
@@ -311,6 +316,15 @@ public class ProductoServiceImpl implements IProductoService {
                 p.setImpuestoInterno_porcentaje(impuestoInternoPorcentaje);
                 p.setImpuestoInterno_neto(impuestoInternoNeto);
                 p.setPrecioLista(precioLista);
+            }
+            if (checkPorcentaje) {
+                p.setPrecioCosto(p.getPrecioCosto().multiply(multiplicador));
+                p.setGanancia_neto(p.getGanancia_neto().multiply(multiplicador));
+                p.setPrecioVentaPublico(p.getPrecioVentaPublico().multiply(multiplicador));
+                p.setIva_neto(p.getIva_neto().multiply(multiplicador));
+                p.setImpuestoInterno_neto(p.getImpuestoInterno_neto().multiply(multiplicador));
+                p.setPrecioLista(p.getPrecioLista().multiply(multiplicador));
+                p.setFechaUltimaModificacion(new Date());
             }
             if (checkMedida || checkRubro || checkProveedor || checkPrecios) {
                 p.setFechaUltimaModificacion(new Date());                
