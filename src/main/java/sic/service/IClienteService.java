@@ -3,11 +3,9 @@ package sic.service;
 import sic.modelo.*;
 import org.springframework.data.domain.Page;
 
-import java.util.List;
-
 public interface IClienteService {
 
-  void actualizar(Cliente cliente);
+  void actualizar(Cliente clientePorActualizar, Cliente clientePersistido);
 
   Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long idUsuario);
 

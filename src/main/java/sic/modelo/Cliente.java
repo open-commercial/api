@@ -1,5 +1,7 @@
 package sic.modelo;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.querydsl.core.annotations.QueryInit;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -28,6 +30,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"razonSocial", "idFiscal", "empresa"})
 @ToString
+@JsonIgnoreProperties({"condicionIVA", "localidad", "empresa", "viajante", "credencial", "eliminado"})
 public class Cliente implements Serializable {
 
     @Id
@@ -92,4 +95,89 @@ public class Cliente implements Serializable {
     @Transient 
     private Date fechaUltimoMovimiento;
 
+    @JsonGetter("idCondicionIVA")
+    public Long getIdCondicionIVA() {
+        return condicionIVA.getId_CondicionIVA();
+    }
+
+    @JsonGetter("nombreCondicionIVA")
+    public String getNombreCondicionIVA() {
+        return condicionIVA.getNombre();
+    }
+
+    @JsonGetter("idLocalidad")
+    public Long getIdLocalidad() {
+        return localidad.getId_Localidad();
+    }
+
+    @JsonGetter("nombreLocalidad")
+    public String getNombreLocalidad() {
+        return localidad.getNombre();
+    }
+
+    @JsonGetter("idProvincia")
+    public Long getIdProvincia() {
+        return localidad.getProvincia().getId_Provincia();
+    }
+
+    @JsonGetter("nombreProvincia")
+    public String getNombreProvincia() {
+        return localidad.getProvincia().getNombre();
+    }
+
+    @JsonGetter("idPais")
+    public Long getIdPais() {
+        return localidad.getProvincia().getPais().getId_Pais();
+    }
+
+    @JsonGetter("nombrePais")
+    public String getNombrePais() {
+        return localidad.getProvincia().getPais().getNombre();
+    }
+
+    @JsonGetter("idEmpresa")
+    public Long getIdEmpresa() {
+        return empresa.getId_Empresa();
+    }
+
+    @JsonGetter("nombreEmpresa")
+    public String getNombreEmpresa() {
+        return empresa.getNombre();
+    }
+
+    @JsonGetter("idViajante")
+    public Long getIdViajante() {
+        if (viajante != null) {
+            return viajante.getId_Usuario();
+        } else {
+            return null;
+        }
+    }
+
+    @JsonGetter("nombreViajante")
+    public String getNombreViajante() {
+        if (viajante != null) {
+            return viajante.getNombre() + " " + viajante.getApellido() + " (" + viajante.getUsername() + ")";
+        } else {
+            return null;
+        }
+    }
+
+    @JsonGetter("idCredencial")
+    public Long getIdCredencial() {
+        if (credencial != null) {
+            return credencial.getId_Usuario();
+        } else {
+            return null;
+        }
+    }
+
+    @JsonGetter("nombreCredencial")
+    public String getNombreCredencial() {
+        if (credencial != null) {
+            return credencial.getNombre() + " " + credencial.getApellido() + " (" + credencial.getUsername() + ")";
+        } else {
+            return null;
+        }
+    }
 }
