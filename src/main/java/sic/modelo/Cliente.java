@@ -42,23 +42,18 @@ public class Cliente implements Serializable {
 
     private String nombreFantasia;
 
-    @Column(nullable = false)
     private String direccion;
 
     @ManyToOne
     @JoinColumn(name = "id_CondicionIVA", referencedColumnName = "id_CondicionIVA")
     private CondicionIVA condicionIVA;
 
-    @Column(nullable = false)
     private String idFiscal;
 
-    @Column(nullable = false)
     private String email;
 
-    @Column(nullable = false)
     private String telPrimario;
 
-    @Column(nullable = false)
     private String telSecundario;
 
     @ManyToOne
@@ -66,7 +61,6 @@ public class Cliente implements Serializable {
     @QueryInit("provincia.pais")
     private Localidad localidad;
 
-    @Column(nullable = false)
     private String contacto;
 
     @Column(nullable = false)

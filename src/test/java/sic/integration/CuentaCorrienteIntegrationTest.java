@@ -31,7 +31,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
-import sic.builder.ClienteBuilder;
 import sic.builder.CondicionIVABuilder;
 import sic.builder.EmpresaBuilder;
 import sic.builder.FormaDePagoBuilder;
@@ -42,42 +41,8 @@ import sic.builder.ProveedorBuilder;
 import sic.builder.RubroBuilder;
 import sic.builder.TransportistaBuilder;
 import sic.builder.UsuarioBuilder;
-import sic.modelo.Cliente;
-import sic.modelo.CondicionIVA;
-import sic.modelo.Credencial;
-import sic.modelo.Empresa;
-import sic.modelo.FacturaCompra;
-import sic.modelo.FacturaVenta;
-import sic.modelo.FormaDePago;
-import sic.modelo.Localidad;
-import sic.modelo.Medida;
-import sic.modelo.Movimiento;
-import sic.modelo.NotaCredito;
-import sic.modelo.NotaCreditoProveedor;
-import sic.modelo.NotaDebito;
-import sic.modelo.NotaDebitoCliente;
-import sic.modelo.Pais;
-import sic.modelo.Producto;
-import sic.modelo.Proveedor;
-import sic.modelo.Provincia;
-import sic.modelo.Recibo;
-import sic.modelo.RenglonCuentaCorriente;
-import sic.modelo.RenglonFactura;
-import sic.modelo.RenglonNotaCredito;
-import sic.modelo.RenglonNotaDebito;
-import sic.modelo.Rol;
-import sic.modelo.Rubro;
-import sic.modelo.TipoDeComprobante;
-import sic.modelo.Transportista;
-import sic.modelo.Usuario;
-import sic.modelo.dto.FacturaCompraDTO;
-import sic.modelo.dto.FacturaVentaDTO;
-import sic.modelo.dto.NotaCreditoClienteDTO;
-import sic.modelo.dto.NotaCreditoProveedorDTO;
-import sic.modelo.dto.NotaDebitoClienteDTO;
-import sic.modelo.dto.NotaDebitoProveedorDTO;
-import sic.modelo.dto.ProductoDTO;
-import sic.modelo.dto.ReciboDTO;
+import sic.modelo.*;
+import sic.modelo.dto.*;
 import sic.repository.UsuarioRepository;
 
 @RunWith(SpringRunner.class)
@@ -140,9 +105,11 @@ public class CuentaCorrienteIntegrationTest {
         localidad.getProvincia().setPais(restTemplate.postForObject(apiPrefix + "/paises", localidad.getProvincia().getPais(), Pais.class));
         localidad.setProvincia(restTemplate.postForObject(apiPrefix + "/provincias", localidad.getProvincia(), Provincia.class));
         CondicionIVA condicionIVA = new CondicionIVABuilder().build();
+        condicionIVA = restTemplate.postForObject(apiPrefix + "/condiciones-iva", condicionIVA, CondicionIVA.class);
+        localidad = restTemplate.postForObject(apiPrefix + "/localidades", localidad, Localidad.class);
         Empresa empresa = new EmpresaBuilder()
-                .withLocalidad(restTemplate.postForObject(apiPrefix + "/localidades", localidad, Localidad.class))
-                .withCondicionIVA(restTemplate.postForObject(apiPrefix + "/condiciones-iva", condicionIVA, CondicionIVA.class))
+                .withLocalidad(localidad)
+                .withCondicionIVA(condicionIVA)
                 .build();
         empresa = restTemplate.postForObject(apiPrefix + "/empresas", empresa, Empresa.class);
         FormaDePago formaDePago = new FormaDePagoBuilder()
@@ -152,31 +119,23 @@ public class CuentaCorrienteIntegrationTest {
                 .withNombre("Efectivo")
                 .build();
         formaDePago = restTemplate.postForObject(apiPrefix + "/formas-de-pago", formaDePago, FormaDePago.class);
-        Usuario credencial = new UsuarioBuilder()
-                .withId_Usuario(1)
-                .withEliminado(false)
-                .withNombre("Marcelo Cruz")
-                .withPassword("marce")
-                .withToken("yJhbGci1NiIsInR5cCI6IkpXVCJ9.eyJub21icmUiOiJjZWNpbGlvIn0.MCfaorSC7Wdc8rSW7BJizasfzsa")
-                .withRol(new ArrayList<>())
+        UsuarioDTO credencial = UsuarioDTO.builder()
+                .username("marce")
+                .password("marce123")
+                .nombre("Marcelo")
+                .apellido("Rockefeller")
+                .email("marce.r@gmail.com")
+                .roles(new ArrayList<>(Arrays.asList(Rol.COMPRADOR)))
                 .build();
-        Usuario viajante = new UsuarioBuilder()
-                .withId_Usuario(1)
-                .withEliminado(false)
-                .withNombre("Fernando Aguirre")
-                .withPassword("fernando")
-                .withToken("yJhbGci1NiIsInR5cCI6IkpXVCJ9.eyJub21icmUiOiJjZWNpbGlvIn0.MCfaorSC7Wdc8rSW7BJizasfzsb")
-                .withRol(new ArrayList<>(Arrays.asList(Rol.VIAJANTE)))
+        credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
+        ClienteDTO cliente = ClienteDTO.builder()
+                .razonSocial("Peter Parker")
                 .build();
-        Cliente cliente = new ClienteBuilder()
-                .withEmpresa(empresa)
-                .withCondicionIVA(empresa.getCondicionIVA())
-                .withLocalidad(empresa.getLocalidad())
-                .withPredeterminado(true)
-                .withCredencial(credencial)
-                .withViajante(viajante)
-                .build();
-        cliente = restTemplate.postForObject(apiPrefix + "/clientes", cliente, Cliente.class);
+        cliente = restTemplate.postForObject(apiPrefix + "/clientes?idEmpresa=" + empresa.getId_Empresa()
+                        + "&idCondicionIVA=" + condicionIVA.getId_CondicionIVA()
+                        + "&idLocalidad=" + localidad.getId_Localidad()
+                        + "&idUsuarioCredencial=" + credencial.getId_Usuario(),
+                cliente, ClienteDTO.class);
         Transportista transportista = new TransportistaBuilder()
                 .withEmpresa(empresa)
                 .withLocalidad(empresa.getLocalidad())
@@ -305,7 +264,11 @@ public class CuentaCorrienteIntegrationTest {
         ReciboDTO r = new ReciboDTO();
         r.setMonto(5992.5);
         restTemplate.postForObject(apiPrefix + "/recibos/clientes?"
-                + "idUsuario=1&idEmpresa=1&idCliente=1&idFormaDePago=1", r, Recibo.class);
+                + "idUsuario=1" +
+                "&idEmpresa=1" +
+                "&idCliente=1" +
+                "&idFormaDePago=1",
+                r, Recibo.class);
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
                 restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", BigDecimal.class)
         .compareTo(BigDecimal.ZERO) == 0);
@@ -321,7 +284,7 @@ public class CuentaCorrienteIntegrationTest {
         notaDebitoCliente.setSubTotalBruto(new BigDecimal("100"));
         notaDebitoCliente.setTotal(new BigDecimal("6113.5"));
         notaDebitoCliente.setUsuario(credencial);
-        restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1/recibo/1", notaDebitoCliente, NotaDebitoCliente.class);
+        restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1/recibo/1", notaDebitoCliente, NotaDebitoClienteDTO.class);
         restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
                 restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", BigDecimal.class)
@@ -329,7 +292,11 @@ public class CuentaCorrienteIntegrationTest {
         r = new ReciboDTO();
         r.setMonto(6113.5);
         restTemplate.postForObject(apiPrefix + "/recibos/clientes?"
-                + "idUsuario=1&idEmpresa=1&idCliente=1&idFormaDePago=" + formaDePago.getId_FormaDePago(), r, Recibo.class);
+                + "idUsuario=1" +
+                "&idEmpresa=1" +
+                "&idCliente=1" +
+                "&idFormaDePago=" + formaDePago.getId_FormaDePago(),
+                r, Recibo.class);
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
                 restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/clientes/1/saldo", BigDecimal.class)
         .compareTo(BigDecimal.ZERO) == 0);
@@ -403,9 +370,11 @@ public class CuentaCorrienteIntegrationTest {
         localidad.getProvincia().setPais(restTemplate.postForObject(apiPrefix + "/paises", localidad.getProvincia().getPais(), Pais.class));
         localidad.setProvincia(restTemplate.postForObject(apiPrefix + "/provincias", localidad.getProvincia(), Provincia.class));
         CondicionIVA condicionIVA = new CondicionIVABuilder().build();
+        condicionIVA = restTemplate.postForObject(apiPrefix + "/condiciones-iva", condicionIVA, CondicionIVA.class);
+        localidad = restTemplate.postForObject(apiPrefix + "/localidades", localidad, Localidad.class);
         Empresa empresa = new EmpresaBuilder()
-                .withLocalidad(restTemplate.postForObject(apiPrefix + "/localidades", localidad, Localidad.class))
-                .withCondicionIVA(restTemplate.postForObject(apiPrefix + "/condiciones-iva", condicionIVA, CondicionIVA.class))
+                .withLocalidad(localidad)
+                .withCondicionIVA(condicionIVA)
                 .build();
         empresa = restTemplate.postForObject(apiPrefix + "/empresas", empresa, Empresa.class);
         FormaDePago formaDePago = new FormaDePagoBuilder()
@@ -415,31 +384,15 @@ public class CuentaCorrienteIntegrationTest {
                 .withNombre("Efectivo")
                 .build();
         restTemplate.postForObject(apiPrefix + "/formas-de-pago", formaDePago, FormaDePago.class);
-        Usuario credencial = new UsuarioBuilder()
-                .withId_Usuario(1)
-                .withEliminado(false)
-                .withNombre("Marcelo Cruz")
-                .withPassword("marce")
-                .withToken("yJhbGci1NiIsInR5cCI6IkpXVCJ9.eyJub21icmUiOiJjZWNpbGlvIn0.MCfaorSC7Wdc8rSW7BJizasfzsa")
-                .withRol(new ArrayList<>())
+        UsuarioDTO credencial = UsuarioDTO.builder()
+                .username("marce")
+                .password("marce123")
+                .nombre("Marcelo")
+                .apellido("Rockefeller")
+                .email("marce.r@gmail.com")
+                .roles(new ArrayList<>(Arrays.asList(Rol.COMPRADOR)))
                 .build();
-        Usuario viajante = new UsuarioBuilder()
-                .withId_Usuario(1)
-                .withEliminado(false)
-                .withNombre("Fernando Aguirre")
-                .withPassword("fernando")
-                .withToken("yJhbGci1NiIsInR5cCI6IkpXVCJ9.eyJub21icmUiOiJjZWNpbGlvIn0.MCfaorSC7Wdc8rSW7BJizasfzsb")
-                .withRol(new ArrayList<>(Arrays.asList(Rol.VIAJANTE)))
-                .build();
-        Cliente cliente = new ClienteBuilder()
-                .withEmpresa(empresa)
-                .withCondicionIVA(empresa.getCondicionIVA())
-                .withLocalidad(empresa.getLocalidad())
-                .withPredeterminado(true)
-                .withCredencial(credencial)
-                .withViajante(viajante)
-                .build();
-        restTemplate.postForObject(apiPrefix + "/clientes", cliente, Cliente.class);
+        credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
         Transportista transportista = new TransportistaBuilder()
                 .withEmpresa(empresa)
                 .withLocalidad(empresa.getLocalidad())
@@ -447,7 +400,8 @@ public class CuentaCorrienteIntegrationTest {
         transportista = restTemplate.postForObject(apiPrefix + "/transportistas", transportista, Transportista.class);
         Medida medida = new MedidaBuilder().withEmpresa(empresa).build();
         medida = restTemplate.postForObject(apiPrefix + "/medidas", medida, Medida.class);
-        Proveedor proveedor = new ProveedorBuilder().withEmpresa(empresa)
+        Proveedor proveedor = new ProveedorBuilder()
+                .withEmpresa(empresa)
                 .withLocalidad(empresa.getLocalidad())
                 .withCondicionIVA(empresa.getCondicionIVA())
                 .build();
@@ -480,11 +434,15 @@ public class CuentaCorrienteIntegrationTest {
                 .withIva_neto(new BigDecimal("105"))
                 .withPrecioLista(new BigDecimal("1105"))
                 .build();
-        productoUno = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
-                + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
+        productoUno = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida()
+                + "&idRubro=" + rubro.getId_Rubro()
+                + "&idProveedor=" + proveedor.getId_Proveedor()
+                + "&idEmpresa=" + empresa.getId_Empresa(),
                 productoUno, ProductoDTO.class);
-        productoDos = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
-                + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
+        productoDos = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida()
+                + "&idRubro=" + rubro.getId_Rubro()
+                + "&idProveedor=" + proveedor.getId_Proveedor()
+                + "&idEmpresa=" + empresa.getId_Empresa(),
                 productoDos, ProductoDTO.class);        
         String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {}).getBody().isEmpty());
@@ -555,9 +513,9 @@ public class CuentaCorrienteIntegrationTest {
                 + "&idTransportista=" + transportista.getId_Transportista(), facturaCompraB, FacturaCompraDTO[].class);
         uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=15,8";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {}).getBody().isEmpty());
-        assertTrue("El saldo de la cuenta corriente no es el esperado", 
+        assertTrue("El saldo de la cuenta corriente no es el esperado",
                 restTemplate.getForObject(apiPrefix + "/cuentas-corrientes/proveedores/1/saldo", BigDecimal.class)
-        .compareTo(new BigDecimal("-5992.5")) == 0);
+                    .compareTo(new BigDecimal("-5992.5")) == 0);
         ReciboDTO r = new ReciboDTO();
         r.setMonto(5992.5);
         restTemplate.postForObject(apiPrefix + "/recibos/proveedores?"
@@ -606,7 +564,7 @@ public class CuentaCorrienteIntegrationTest {
         uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {}).getBody().isEmpty());
         List<RenglonCuentaCorriente> renglonesCuentaCorriente = restTemplate
-                .exchange(apiPrefix + "/cuentas-corrientes/2/renglones"
+                .exchange(apiPrefix + "/cuentas-corrientes/1/renglones"
                         + "?pagina=" + 0 + "&tamanio=" + 50, HttpMethod.GET, null,
                         new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {
                 }).getBody().getContent();
@@ -663,7 +621,7 @@ public class CuentaCorrienteIntegrationTest {
                 + "&iva105Neto=" + notaCreditoProveedor.getIva105Neto(), BigDecimal.class));      
         restTemplate.postForObject(apiPrefix + "/notas/credito/empresa/1/proveedor/1/usuario/1/factura/2?modificarStock=true", notaCreditoProveedor, NotaCreditoProveedor.class);        
         renglonesCuentaCorriente = restTemplate
-                .exchange(apiPrefix + "/cuentas-corrientes/2/renglones"
+                .exchange(apiPrefix + "/cuentas-corrientes/1/renglones"
                         + "?pagina=" + 0 + "&tamanio=" + 50, HttpMethod.GET, null,
                         new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {
                 }).getBody().getContent();
@@ -675,7 +633,9 @@ public class CuentaCorrienteIntegrationTest {
         notaDebito.setCAE(0L);
         notaDebito.setEmpresa(empresa);
         notaDebito.setFecha(new Date());
-        List<RenglonNotaDebito> renglonesCalculados = Arrays.asList(restTemplate.getForObject(apiPrefix + "/notas/renglon/debito/recibo/3?monto=1000&ivaPorcentaje=21", RenglonNotaDebito[].class));
+        List<RenglonNotaDebito> renglonesCalculados = Arrays.asList(
+                restTemplate.getForObject(apiPrefix + "/notas/renglon/debito/recibo/3?monto=1000&ivaPorcentaje=21",
+                        RenglonNotaDebito[].class));
         notaDebito.setRenglonesNotaDebito(renglonesCalculados);
         notaDebito.setIva105Neto(BigDecimal.ZERO);
         notaDebito.setIva21Neto(new BigDecimal("210"));
@@ -687,7 +647,7 @@ public class CuentaCorrienteIntegrationTest {
         notaDebito.setTipoComprobante(TipoDeComprobante.NOTA_DEBITO_B);
         restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/proveedor/1/usuario/1/recibo/3", notaDebito, NotaDebito.class);
         renglonesCuentaCorriente = restTemplate
-                .exchange(apiPrefix + "/cuentas-corrientes/2/renglones"
+                .exchange(apiPrefix + "/cuentas-corrientes/1/renglones"
                         + "?pagina=" + 0 + "&tamanio=" + 50, HttpMethod.GET, null,
                         new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {
                 }).getBody().getContent();
@@ -705,9 +665,11 @@ public class CuentaCorrienteIntegrationTest {
         localidad.getProvincia().setPais(restTemplate.postForObject(apiPrefix + "/paises", localidad.getProvincia().getPais(), Pais.class));
         localidad.setProvincia(restTemplate.postForObject(apiPrefix + "/provincias", localidad.getProvincia(), Provincia.class));
         CondicionIVA condicionIVA = new CondicionIVABuilder().build();
+        condicionIVA = restTemplate.postForObject(apiPrefix + "/condiciones-iva", condicionIVA, CondicionIVA.class);
+        localidad = restTemplate.postForObject(apiPrefix + "/localidades", localidad, Localidad.class);
         Empresa empresa = new EmpresaBuilder()
-                .withLocalidad(restTemplate.postForObject(apiPrefix + "/localidades", localidad, Localidad.class))
-                .withCondicionIVA(restTemplate.postForObject(apiPrefix + "/condiciones-iva", condicionIVA, CondicionIVA.class))
+                .withLocalidad(localidad)
+                .withCondicionIVA(condicionIVA)
                 .build();
         empresa = restTemplate.postForObject(apiPrefix + "/empresas", empresa, Empresa.class);
         FormaDePago formaDePago = new FormaDePagoBuilder()
@@ -717,31 +679,23 @@ public class CuentaCorrienteIntegrationTest {
                 .withNombre("Efectivo")
                 .build();
         restTemplate.postForObject(apiPrefix + "/formas-de-pago", formaDePago, FormaDePago.class);
-        Usuario credencial = new UsuarioBuilder()
-                .withId_Usuario(1)
-                .withEliminado(false)
-                .withNombre("Marcelo Cruz")
-                .withPassword("marce")
-                .withToken("yJhbGci1NiIsInR5cCI6IkpXVCJ9.eyJub21icmUiOiJjZWNpbGlvIn0.MCfaorSC7Wdc8rSW7BJizasfzsa")
-                .withRol(new ArrayList<>())
+        UsuarioDTO credencial = UsuarioDTO.builder()
+                .username("marce")
+                .password("marce123")
+                .nombre("Marcelo")
+                .apellido("Rockefeller")
+                .email("marce.r@gmail.com")
+                .roles(new ArrayList<>(Arrays.asList(Rol.COMPRADOR)))
                 .build();
-        Usuario viajante = new UsuarioBuilder()
-                .withId_Usuario(1)
-                .withEliminado(false)
-                .withNombre("Fernando Aguirre")
-                .withPassword("fernando")
-                .withToken("yJhbGci1NiIsInR5cCI6IkpXVCJ9.eyJub21icmUiOiJjZWNpbGlvIn0.MCfaorSC7Wdc8rSW7BJizasfzsb")
-                .withRol(new ArrayList<>(Arrays.asList(Rol.VIAJANTE)))
+        credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
+        ClienteDTO cliente = ClienteDTO.builder()
+                .razonSocial("Peter Parker")
                 .build();
-        Cliente cliente = new ClienteBuilder()
-                .withEmpresa(empresa)
-                .withCondicionIVA(empresa.getCondicionIVA())
-                .withLocalidad(empresa.getLocalidad())
-                .withPredeterminado(true)
-                .withCredencial(credencial)
-                .withViajante(viajante)
-                .build();
-        cliente = restTemplate.postForObject(apiPrefix + "/clientes", cliente, Cliente.class);
+        cliente = restTemplate.postForObject(apiPrefix + "/clientes?idEmpresa=" + empresa.getId_Empresa()
+                        + "&idCondicionIVA=" + condicionIVA.getId_CondicionIVA()
+                        + "&idLocalidad=" + localidad.getId_Localidad()
+                        + "&idUsuarioCredencial=" + credencial.getId_Usuario(),
+                cliente, ClienteDTO.class);
         Transportista transportista = new TransportistaBuilder()
                 .withEmpresa(empresa)
                 .withLocalidad(empresa.getLocalidad())

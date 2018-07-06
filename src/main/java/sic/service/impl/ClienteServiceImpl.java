@@ -192,7 +192,7 @@ public class ClienteServiceImpl implements IClienteService {
     }
     // Duplicados
     // ID Fiscal
-    if (!cliente.getIdFiscal().equals("")) {
+    if (cliente.getIdFiscal() != null && !cliente.getIdFiscal().equals("")) {
       Cliente clienteDuplicado =
           this.getClientePorIdFiscal(cliente.getIdFiscal(), cliente.getEmpresa());
       if (operacion.equals(TipoDeOperacion.ACTUALIZACION)

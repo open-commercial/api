@@ -168,14 +168,29 @@ public class ClienteController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public void actualizar(
       @RequestBody Cliente clientePorActualizar,
-      @RequestParam Long idCondicionIVA,
-      @RequestParam Long idLocalidad,
-      @RequestParam Long idEmpresa,
+      @RequestParam(required = false) Long idCondicionIVA,
+      @RequestParam(required = false) Long idLocalidad,
+      @RequestParam(required = false) Long idEmpresa,
       @RequestParam(required = false) Long idUsuarioViajante,
       @RequestParam(required = false) Long idUsuarioCredencial) {
     Cliente clientePersistido =
         clienteService.getClientePorId(clientePorActualizar.getId_Cliente());
-    clientePorActualizar.setCondicionIVA(condicionIVAService.getCondicionIVAPorId(idCondicionIVA));
+    if (idCondicionIVA != null) {
+      clientePorActualizar.setCondicionIVA(
+          condicionIVAService.getCondicionIVAPorId(idCondicionIVA));
+    } else {
+      clientePorActualizar.setCondicionIVA(clientePersistido.getCondicionIVA());
+    }
+    if (idLocalidad != null) {
+      clientePorActualizar.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
+    } else {
+      clientePorActualizar.setLocalidad(clientePersistido.getLocalidad());
+    }
+    if (idEmpresa != null) {
+      clientePorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    } else {
+      clientePorActualizar.setEmpresa(clientePersistido.getEmpresa());
+    }
     clientePorActualizar.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
     clientePorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     if (idUsuarioViajante != null) {

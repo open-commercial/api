@@ -35,12 +35,11 @@ public class NotaServiceImplTest {
     
     @Test
     public void shouldGetTipoNotaWhenEmpresaYClienteDiscriminanIVA() {
-        Empresa empresa = new EmpresaBuilder()
-                          .withId_Empresa(1L)
-                          .build();
-        Cliente cliente = new ClienteBuilder()
-                          .withId_Cliente(1L)
-                          .build();
+        Empresa empresa = new EmpresaBuilder().build();
+        CondicionIVA condicionIVA = new CondicionIVA();
+        condicionIVA.setDiscriminaIVA(true);
+        Cliente cliente = new Cliente();
+        cliente.setCondicionIVA(condicionIVA);
         when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
         when(clienteService.getClientePorId(1L)).thenReturn(cliente);
         TipoDeComprobante[] expResult = {TipoDeComprobante.NOTA_CREDITO_A,
@@ -55,12 +54,11 @@ public class NotaServiceImplTest {
     
     @Test
     public void shouldGetTipoNotaWhenEmpresaDiscriminaYClienteNoIVA() {
-        Empresa empresa = new EmpresaBuilder()
-                          .withId_Empresa(1L)
-                          .build();
-        Cliente cliente = new ClienteBuilder()
-                          .withId_Cliente(1L)
-                          .build();
+        Empresa empresa = new EmpresaBuilder().build();
+        CondicionIVA condicionIVA = new CondicionIVA();
+        condicionIVA.setDiscriminaIVA(false);
+        Cliente cliente = new Cliente();
+        cliente.setCondicionIVA(condicionIVA);
         CondicionIVA condicionIVAqueDiscrimina = Mockito.mock(CondicionIVA.class);
         when(condicionIVAqueDiscrimina.isDiscriminaIVA()).thenReturn(Boolean.FALSE);
         cliente.setCondicionIVA(condicionIVAqueDiscrimina);
@@ -78,12 +76,11 @@ public class NotaServiceImplTest {
     
     @Test
     public void shouldGetTipoNotaWhenEmpresaNoDiscriminaYClienteSiIVA() {
-        Empresa empresa = new EmpresaBuilder()
-                .withId_Empresa(1L)
-                .build();
-        Cliente cliente = new ClienteBuilder()
-                .withId_Cliente(1L)
-                .build();
+        Empresa empresa = new EmpresaBuilder().build();
+        CondicionIVA condicionIVA = new CondicionIVA();
+        condicionIVA.setDiscriminaIVA(true);
+        Cliente cliente = new Cliente();
+        cliente.setCondicionIVA(condicionIVA);
         CondicionIVA condicionIVAqueDiscrimina = Mockito.mock(CondicionIVA.class);
         when(condicionIVAqueDiscrimina.isDiscriminaIVA()).thenReturn(Boolean.FALSE);
         empresa.setCondicionIVA(condicionIVAqueDiscrimina);
@@ -102,9 +99,10 @@ public class NotaServiceImplTest {
         Empresa empresa = new EmpresaBuilder()
                           .withId_Empresa(1L)
                           .build();
-        Cliente cliente = new ClienteBuilder()
-                          .withId_Cliente(1L)
-                          .build();
+        CondicionIVA condicionIVA = new CondicionIVA();
+        condicionIVA.setDiscriminaIVA(false);
+        Cliente cliente = new Cliente();
+        cliente.setCondicionIVA(condicionIVA);
         CondicionIVA condicionIVAqueDiscrimina = Mockito.mock(CondicionIVA.class);
         when(condicionIVAqueDiscrimina.isDiscriminaIVA()).thenReturn(Boolean.FALSE);
         empresa.setCondicionIVA(condicionIVAqueDiscrimina);
@@ -117,12 +115,14 @@ public class NotaServiceImplTest {
         TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCliente(1L, 1L);
         assertArrayEquals(expResult, result);
     }
-    
-    @Test
-    public void shouldCalcularTotalNotaCredito() {
-        RenglonNotaCredito renglon1 = new RenglonNotaCreditoBuilder().build();
-        List<RenglonNotaCredito> renglones = new ArrayList<>();
-        renglones.add(renglon1);
-        assertTrue("El total de la nota de credito no es el esperado", (new BigDecimal("172.062")).compareTo(notaServiceImpl.calcularTotalNota(renglones)) == 0 );
-    }
+
+  @Test
+  public void shouldCalcularTotalNotaCredito() {
+    RenglonNotaCredito renglon1 = new RenglonNotaCreditoBuilder().build();
+    List<RenglonNotaCredito> renglones = new ArrayList<>();
+    renglones.add(renglon1);
+    assertTrue(
+        "El total de la nota de credito no es el esperado",
+        (new BigDecimal("172.062")).compareTo(notaServiceImpl.calcularTotalNota(renglones)) == 0);
+  }
 }
