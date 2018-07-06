@@ -98,7 +98,7 @@ public class ProductoIntegrationTest {
   }
 
     @Test
-    public void testFacturarConComprobanteB() {
+    public void testCalcularPreciosDeProductosConRegargo() {
         this.token = restTemplate.postForEntity(apiPrefix + "/login", new Credencial("test", "test"), String.class).getBody();
         Localidad localidad = new LocalidadBuilder().build();
         localidad.getProvincia().setPais(restTemplate.postForObject(apiPrefix + "/paises", localidad.getProvincia().getPais(), Pais.class));
@@ -159,20 +159,20 @@ public class ProductoIntegrationTest {
                 productoDos, ProductoDTO.class);
         String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
-        uri = apiPrefix + "/productos/multiples?idProducto=1,2&porcentaje=10";
+        uri = apiPrefix + "/productos/multiples?idProducto=1,2&descuentoRecargoPorcentaje=10";
         restTemplate.put(uri, null);
         productoUno = restTemplate.getForObject(apiPrefix +"/productos/1", ProductoDTO.class);
         productoDos = restTemplate.getForObject(apiPrefix +"/productos/2", ProductoDTO.class);
-        assertTrue("El precio de costo no sufrió los cambios correctos.", productoUno.getPrecioCosto().compareTo(new BigDecimal("110")) == 0);
-        assertTrue("La ganacia neta no sufrió los cambios correctos.", productoUno.getGanancia_neto().compareTo(new BigDecimal("990")) == 0);
-        assertTrue("El pvp no sufrió los cambios correctos.", productoUno.getPrecioVentaPublico().compareTo(new BigDecimal("1100")) == 0);
-        assertTrue("El IVA neto los cambios correctos.", productoUno.getIva_neto().compareTo(new BigDecimal("231")) == 0);
-        assertTrue("El precio de lista no sufrió los cambios correctos.", productoUno.getPrecioLista().compareTo(new BigDecimal("1331")) == 0);
-        assertTrue("El precio de costo no sufrió los cambios correctos.", productoDos.getPrecioCosto().compareTo(new BigDecimal("110")) == 0);
-        assertTrue("La ganacia neta no sufrió los cambios correctos.", productoDos.getGanancia_neto().compareTo(new BigDecimal("990")) == 0);
-        assertTrue("El pvp no sufrió los cambios correctos.", productoDos.getPrecioVentaPublico().compareTo(new BigDecimal("1100")) == 0);
-        assertTrue("El IVA neto los cambios correctos.", productoDos.getIva_neto().compareTo(new BigDecimal("115.5")) == 0);
-        assertTrue("El precio de lista no sufrió los cambios correctos.", productoDos.getPrecioLista().compareTo(new BigDecimal("1215.5")) == 0);
+        assertTrue("El precio de costo no sufrió el cambio esperado.", productoUno.getPrecioCosto().compareTo(new BigDecimal("110")) == 0);
+        assertTrue("La ganacia neta no sufrió el cambio esperado.", productoUno.getGanancia_neto().compareTo(new BigDecimal("990")) == 0);
+        assertTrue("El pvp no sufrió el cambio esperado.", productoUno.getPrecioVentaPublico().compareTo(new BigDecimal("1100")) == 0);
+        assertTrue("El IVA neto no sufrió el cambio esperado.", productoUno.getIva_neto().compareTo(new BigDecimal("231")) == 0);
+        assertTrue("El precio de lista no sufrió el cambio esperado.", productoUno.getPrecioLista().compareTo(new BigDecimal("1331")) == 0);
+        assertTrue("El precio de costo no sufrió el cambio esperado.", productoDos.getPrecioCosto().compareTo(new BigDecimal("110")) == 0);
+        assertTrue("La ganacia neta no sufrió el cambio esperado.", productoDos.getGanancia_neto().compareTo(new BigDecimal("990")) == 0);
+        assertTrue("El pvp no sufrió no sufrió el cambio esperado.", productoDos.getPrecioVentaPublico().compareTo(new BigDecimal("1100")) == 0);
+        assertTrue("El IVA neto no sufrió el cambio esperado.", productoDos.getIva_neto().compareTo(new BigDecimal("115.5")) == 0);
+        assertTrue("El precio de lista no sufrió el cambio esperado.", productoDos.getPrecioLista().compareTo(new BigDecimal("1215.5")) == 0);
   }
 
 }

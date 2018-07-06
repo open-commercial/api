@@ -265,7 +265,7 @@ public class ProductoServiceImpl implements IProductoService {
     public List<Producto> actualizarMultiples(long[] idProducto,
                                               boolean checkPrecios,
                                               boolean checkPorcentaje,
-                                              BigDecimal porcentaje,
+                                              BigDecimal descuentoRecargoPorcentaje,
                                               BigDecimal gananciaNeto,
                                               BigDecimal gananciaPorcentaje,
                                               BigDecimal impuestoInternoNeto,
@@ -299,9 +299,9 @@ public class ProductoServiceImpl implements IProductoService {
         for (long i : idProducto) {
             productos.add(this.getProductoPorId(i));
         }
-        final BigDecimal multiplicador = (porcentaje.compareTo(BigDecimal.ZERO) > 0) ?
-                porcentaje.divide(CIEN, 15, RoundingMode.HALF_UP).add(BigDecimal.ONE) // 1.2
-                : BigDecimal.ONE.subtract(porcentaje.abs().divide(CIEN, 15, RoundingMode.HALF_UP)); // 0.8
+        final BigDecimal multiplicador = (descuentoRecargoPorcentaje.compareTo(BigDecimal.ZERO) > 0) ?
+                descuentoRecargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP).add(BigDecimal.ONE) // 1.2
+                : BigDecimal.ONE.subtract(descuentoRecargoPorcentaje.abs().divide(CIEN, 15, RoundingMode.HALF_UP)); // 0.8
         productos.forEach(p -> {
             if (checkMedida) p.setMedida(medida);
             if (checkRubro) p.setRubro(rubro);

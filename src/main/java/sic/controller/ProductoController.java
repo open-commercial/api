@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import org.apache.coyote.http11.Constants;
-import org.omg.PortableServer.POAPackage.AdapterAlreadyExistsHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -173,30 +171,30 @@ public class ProductoController {
     @PutMapping("/productos/multiples")
     @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public void actualizarMultiplesProductosPrecios(@RequestParam long[] idProducto,
-                                                    @RequestParam(required = false) BigDecimal porcentaje,
-                                                    @RequestParam(required = false) Long idMedida,
-                                                    @RequestParam(required = false) Long idRubro,
-                                                    @RequestParam(required = false) Long idProveedor,
-                                                    @RequestParam(required = false) BigDecimal gananciaNeto,
-                                                    @RequestParam(required = false) BigDecimal gananciaPorcentaje,
-                                                    @RequestParam(defaultValue = "0",required = false) BigDecimal impuestoInternoNeto,
-                                                    @RequestParam(defaultValue = "0",required = false) BigDecimal impuestoInternoPorcentaje,
-                                                    @RequestParam(required = false) BigDecimal IVANeto,
-                                                    @RequestParam(required = false) BigDecimal IVAPorcentaje,
-                                                    @RequestParam(required = false) BigDecimal precioCosto,
-                                                    @RequestParam(required = false) BigDecimal precioLista,
-                                                    @RequestParam(required = false) BigDecimal precioVentaPublico) {
+    public void actualizarMultiplesProductos(@RequestParam long[] idProducto,
+                                             @RequestParam(required = false) BigDecimal descuentoRecargoPorcentaje,
+                                             @RequestParam(required = false) Long idMedida,
+                                             @RequestParam(required = false) Long idRubro,
+                                             @RequestParam(required = false) Long idProveedor,
+                                             @RequestParam(required = false) BigDecimal gananciaNeto,
+                                             @RequestParam(required = false) BigDecimal gananciaPorcentaje,
+                                             @RequestParam(defaultValue = "0",required = false) BigDecimal impuestoInternoNeto,
+                                             @RequestParam(defaultValue = "0",required = false) BigDecimal impuestoInternoPorcentaje,
+                                             @RequestParam(required = false) BigDecimal IVANeto,
+                                             @RequestParam(required = false) BigDecimal IVAPorcentaje,
+                                             @RequestParam(required = false) BigDecimal precioCosto,
+                                             @RequestParam(required = false) BigDecimal precioLista,
+                                             @RequestParam(required = false) BigDecimal precioVentaPublico) {
         boolean actualizaPrecios = false;
         if (gananciaNeto != null && gananciaPorcentaje != null && impuestoInternoNeto != null && impuestoInternoPorcentaje != null
                 && IVANeto != null && IVAPorcentaje != null && precioCosto != null && precioLista != null && precioVentaPublico != null) {
             actualizaPrecios = true;
         }
         boolean checkPorcentaje = false;
-        if (porcentaje != null) {
+        if (descuentoRecargoPorcentaje != null) {
             checkPorcentaje = true;
         } else {
-            porcentaje = BigDecimal.ZERO;
+            descuentoRecargoPorcentaje = BigDecimal.ZERO;
         }
         if (checkPorcentaje && actualizaPrecios) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -208,7 +206,7 @@ public class ProductoController {
         if (idRubro != null) rubro = rubroService.getRubroPorId(idRubro);
         Proveedor proveedor = null;
         if (idProveedor != null) proveedor = proveedorService.getProveedorPorId(idProveedor);
-        productoService.actualizarMultiples(idProducto, actualizaPrecios, checkPorcentaje, porcentaje, gananciaNeto, gananciaPorcentaje,
+        productoService.actualizarMultiples(idProducto, actualizaPrecios, checkPorcentaje, descuentoRecargoPorcentaje, gananciaNeto, gananciaPorcentaje,
                 impuestoInternoNeto, impuestoInternoPorcentaje, IVANeto, IVAPorcentaje,
                 precioCosto, precioLista, precioVentaPublico, (idMedida != null), medida,
                 (idRubro != null), rubro, (idProveedor != null), proveedor);
