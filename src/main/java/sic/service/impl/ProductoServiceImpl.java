@@ -148,32 +148,24 @@ public class ProductoServiceImpl implements IProductoService {
     QProducto qproducto = QProducto.producto;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(qproducto.empresa.eq(criteria.getEmpresa()).and(qproducto.eliminado.eq(false)));
-    if (criteria.isBuscarPorCodigo() && criteria.isBuscarPorDescripcion()) {
+    if (criteria.isBuscarPorCodigo() && criteria.isBuscarPorDescripcion())
       builder.and(
           qproducto
               .codigo
               .containsIgnoreCase(criteria.getCodigo())
               .or(this.buildPredicadoDescripcion(criteria.getDescripcion(), qproducto)));
-    } else {
-      if (criteria.isBuscarPorCodigo()) {
+    else {
+      if (criteria.isBuscarPorCodigo())
         builder.and(qproducto.codigo.containsIgnoreCase(criteria.getCodigo()));
-      }
-      if (criteria.isBuscarPorDescripcion()) {
+      if (criteria.isBuscarPorDescripcion())
         builder.and(this.buildPredicadoDescripcion(criteria.getDescripcion(), qproducto));
-      }
     }
-    if (criteria.isBuscarPorRubro()) {
-      builder.and(qproducto.rubro.eq(criteria.getRubro()));
-    }
-    if (criteria.isBuscarPorProveedor()) {
+    if (criteria.isBuscarPorRubro()) builder.and(qproducto.rubro.eq(criteria.getRubro()));
+    if (criteria.isBuscarPorProveedor())
       builder.and(qproducto.proveedor.eq(criteria.getProveedor()));
-    }
-    if (criteria.isListarSoloFaltantes()) {
+    if (criteria.isListarSoloFaltantes())
       builder.and(qproducto.cantidad.loe(qproducto.cantMinima)).and(qproducto.ilimitado.eq(false));
-    }
-    if (criteria.isListarSoloPublicables()) {
-      builder.and(qproducto.publicable.isTrue());
-    }
+    if (criteria.isListarSoloPublicables()) builder.and(qproducto.publicable.isTrue());
     return builder;
   }
 
