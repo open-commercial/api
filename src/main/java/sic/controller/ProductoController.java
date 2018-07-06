@@ -72,7 +72,8 @@ public class ProductoController {
                                          @RequestParam(required = false) Long idRubro,
                                          @RequestParam(required = false) Long idProveedor,
                                          @RequestParam(required = false) Integer cantidadRegistros,
-                                         @RequestParam(required = false) boolean soloFantantes) {
+                                         @RequestParam(required = false) boolean soloFantantes,
+                                         @RequestParam(required = false) boolean soloPublicables) {
         Rubro rubro = null;
         if (idRubro != null) rubro = rubroService.getRubroPorId(idRubro);
         Proveedor proveedor = null;
@@ -90,6 +91,7 @@ public class ProductoController {
                 .empresa(empresaService.getEmpresaPorId(idEmpresa))
                 .cantRegistros(cantidadRegistros)
                 .listarSoloFaltantes(soloFantantes)
+                .listarSoloPublicables(soloPublicables)
                 .build();
         return productoService.calcularValorStock(criteria);
     }
@@ -103,6 +105,7 @@ public class ProductoController {
                                           @RequestParam(required = false) Long idRubro,
                                           @RequestParam(required = false) Long idProveedor,
                                           @RequestParam(required = false) boolean soloFantantes,
+                                          @RequestParam(required = false) boolean soloPublicables,
                                           @RequestParam(required = false) Integer pagina,
                                           @RequestParam(required = false) Integer tamanio) {
         Rubro rubro = null;
@@ -123,6 +126,7 @@ public class ProductoController {
                 .proveedor(proveedor)
                 .empresa(empresaService.getEmpresaPorId(idEmpresa))
                 .listarSoloFaltantes(soloFantantes)
+                .listarSoloPublicables(soloPublicables)
                 .pageable(pageable)
                 .build();
         return productoService.buscarProductos(criteria);
@@ -263,69 +267,5 @@ public class ProductoController {
         }
 
     }
-
-    /*
-    @GetMapping("/productos/ganancia-neto")
-    @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal gananciaPorcentaje) {
-        if (precioCosto == null || gananciaPorcentaje == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
-        }
-        return productoService.calcularGananciaNeto(precioCosto, gananciaPorcentaje);
-    }
-
-    @GetMapping("/productos/ganancia-porcentaje")
-    @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularGananciaPorcentaje(@RequestParam(defaultValue = "0", required = false) boolean ascendente,
-                                                 @RequestParam BigDecimal precioCosto,
-                                                 @RequestParam BigDecimal pvp,
-                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal ivaPorcentaje,
-                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal impInternoPorcentaje,
-                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal precioDeLista,
-                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal precioDeListaAnterior) {
-        if (precioCosto == null || pvp == null) throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
-        return productoService.calcularGananciaPorcentaje(precioDeLista, precioDeListaAnterior, pvp, ivaPorcentaje,
-                impInternoPorcentaje, precioCosto, ascendente);
-    }
-
-    @GetMapping("/productos/iva-neto")
-    @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularIVANeto(BigDecimal pvp, BigDecimal ivaPorcentaje) {
-        if (ivaPorcentaje == null || pvp == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
-        }
-        return productoService.calcularIVANeto(pvp, ivaPorcentaje);
-    }
-
-    @GetMapping("/productos/imp-interno-neto")
-    @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularImpInternoNeto(@RequestParam BigDecimal pvp,
-                                             @RequestParam(defaultValue = "0",required = false) BigDecimal impInternoPorcentaje) {
-        if (pvp == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
-        }
-        return productoService.calcularImpInternoNeto(pvp, impInternoPorcentaje);
-    }
-
-    @GetMapping("/productos/pvp")
-    @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal gananciaPorcentaje) {
-        if (precioCosto == null || gananciaPorcentaje == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
-        }
-        return productoService.calcularPVP(precioCosto, gananciaPorcentaje);
-    }
-
-    @GetMapping("/productos/precio-lista")
-    @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularPrecioLista(@RequestParam BigDecimal pvp,
-                                          @RequestParam BigDecimal ivaPorcentaje,
-                                          @RequestParam(defaultValue = "0",required = false) BigDecimal impInternoPorcentaje) {
-        if (pvp == null || ivaPorcentaje == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
-        }
-        return productoService.calcularPrecioLista(pvp, ivaPorcentaje, impInternoPorcentaje);
-    }
-    */
 
 }
