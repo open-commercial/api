@@ -260,81 +260,93 @@ public class ProductoServiceImpl implements IProductoService {
         productoRepository.save(productos);
     }
 
-    @Override
-    @Transactional
-    public List<Producto> actualizarMultiples(long[] idProducto,
-                                              boolean checkPrecios,
-                                              boolean checkPorcentaje,
-                                              BigDecimal descuentoRecargoPorcentaje,
-                                              BigDecimal gananciaNeto,
-                                              BigDecimal gananciaPorcentaje,
-                                              BigDecimal impuestoInternoNeto,
-                                              BigDecimal impuestoInternoPorcentaje,
-                                              BigDecimal IVANeto,
-                                              BigDecimal IVAPorcentaje,
-                                              BigDecimal precioCosto,
-                                              BigDecimal precioLista,
-                                              BigDecimal precioVentaPublico,
-                                              boolean checkMedida, Medida medida,
-                                              boolean checkRubro, Rubro rubro,
-                                              boolean checkProveedor, Proveedor proveedor) {
-        //Requeridos
-        if (checkMedida && medida == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_vacio_medida"));
-        }
-        if (checkRubro && rubro == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_vacio_rubro"));
-        }
-        if (checkProveedor && proveedor == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_producto_vacio_proveedor"));
-        }
-        if (Validator.tieneDuplicados(idProducto)) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_error_ids_duplicados"));
-        }
-        List<Producto> productos = new ArrayList<>();
-        for (long i : idProducto) {
-            productos.add(this.getProductoPorId(i));
-        }
-        final BigDecimal multiplicador = (descuentoRecargoPorcentaje.compareTo(BigDecimal.ZERO) > 0) ?
-                descuentoRecargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP).add(BigDecimal.ONE) // 1.2
-                : BigDecimal.ONE.subtract(descuentoRecargoPorcentaje.abs().divide(CIEN, 15, RoundingMode.HALF_UP)); // 0.8
-        productos.forEach(p -> {
-            if (checkMedida) p.setMedida(medida);
-            if (checkRubro) p.setRubro(rubro);
-            if (checkProveedor) p.setProveedor(proveedor);
-            if (checkPrecios) {
-                p.setPrecioCosto(precioCosto);
-                p.setGanancia_porcentaje(gananciaPorcentaje);
-                p.setGanancia_neto(gananciaNeto);
-                p.setPrecioVentaPublico(precioVentaPublico);
-                p.setIva_porcentaje(IVAPorcentaje);
-                p.setIva_neto(IVANeto);
-                p.setImpuestoInterno_porcentaje(impuestoInternoPorcentaje);
-                p.setImpuestoInterno_neto(impuestoInternoNeto);
-                p.setPrecioLista(precioLista);
-            }
-            if (checkPorcentaje) {
-                p.setPrecioCosto(p.getPrecioCosto().multiply(multiplicador));
-                p.setGanancia_neto(p.getGanancia_neto().multiply(multiplicador));
-                p.setPrecioVentaPublico(p.getPrecioVentaPublico().multiply(multiplicador));
-                p.setIva_neto(p.getIva_neto().multiply(multiplicador));
-                p.setImpuestoInterno_neto(p.getImpuestoInterno_neto().multiply(multiplicador));
-                p.setPrecioLista(p.getPrecioLista().multiply(multiplicador));
-                p.setFechaUltimaModificacion(new Date());
-            }
-            if (checkMedida || checkRubro || checkProveedor || checkPrecios) {
-                p.setFechaUltimaModificacion(new Date());                
-            }
-            this.validarOperacion(TipoDeOperacion.ACTUALIZACION, p);
-        });
-        productoRepository.save(productos);
-        LOGGER.warn("Los Productos " + productos + " se modificaron correctamente.");
-        return productos;
+  @Override
+  @Transactional
+  public List<Producto> actualizarMultiples(
+      long[] idProducto,
+      boolean checkPrecios,
+      boolean checkDescuentoRecargoPorcentaje,
+      BigDecimal descuentoRecargoPorcentaje,
+      BigDecimal gananciaNeto,
+      BigDecimal gananciaPorcentaje,
+      BigDecimal impuestoInternoNeto,
+      BigDecimal impuestoInternoPorcentaje,
+      BigDecimal IVANeto,
+      BigDecimal IVAPorcentaje,
+      BigDecimal precioCosto,
+      BigDecimal precioLista,
+      BigDecimal precioVentaPublico,
+      boolean checkMedida,
+      Medida medida,
+      boolean checkRubro,
+      Rubro rubro,
+      boolean checkProveedor,
+      Proveedor proveedor) {
+    // Requeridos
+    if (checkMedida && medida == null) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_producto_vacio_medida"));
     }
+    if (checkRubro && rubro == null) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_producto_vacio_rubro"));
+    }
+    if (checkProveedor && proveedor == null) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_producto_vacio_proveedor"));
+    }
+    if (Validator.tieneDuplicados(idProducto)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ids_duplicados"));
+    }
+    List<Producto> productos = new ArrayList<>();
+    for (long i : idProducto) {
+      productos.add(this.getProductoPorId(i));
+    }
+    BigDecimal multiplicador = BigDecimal.ZERO;
+    if (checkDescuentoRecargoPorcentaje) {
+      if (descuentoRecargoPorcentaje.compareTo(BigDecimal.ZERO) > 0) {
+        multiplicador =
+            descuentoRecargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP).add(BigDecimal.ONE);
+      } else {
+        multiplicador =
+            BigDecimal.ONE.subtract(
+                descuentoRecargoPorcentaje.abs().divide(CIEN, 15, RoundingMode.HALF_UP));
+      }
+    }
+    for (Producto p : productos) {
+      if (checkMedida) p.setMedida(medida);
+      if (checkRubro) p.setRubro(rubro);
+      if (checkProveedor) p.setProveedor(proveedor);
+      if (checkPrecios) {
+        p.setPrecioCosto(precioCosto);
+        p.setGanancia_porcentaje(gananciaPorcentaje);
+        p.setGanancia_neto(gananciaNeto);
+        p.setPrecioVentaPublico(precioVentaPublico);
+        p.setIva_porcentaje(IVAPorcentaje);
+        p.setIva_neto(IVANeto);
+        p.setImpuestoInterno_porcentaje(impuestoInternoPorcentaje);
+        p.setImpuestoInterno_neto(impuestoInternoNeto);
+        p.setPrecioLista(precioLista);
+      }
+      if (checkDescuentoRecargoPorcentaje) {
+        p.setPrecioCosto(p.getPrecioCosto().multiply(multiplicador));
+        p.setGanancia_neto(p.getGanancia_neto().multiply(multiplicador));
+        p.setPrecioVentaPublico(p.getPrecioVentaPublico().multiply(multiplicador));
+        p.setIva_neto(p.getIva_neto().multiply(multiplicador));
+        p.setImpuestoInterno_neto(p.getImpuestoInterno_neto().multiply(multiplicador));
+        p.setPrecioLista(p.getPrecioLista().multiply(multiplicador));
+        p.setFechaUltimaModificacion(new Date());
+      }
+      if (checkMedida || checkRubro || checkProveedor || checkPrecios) {
+        p.setFechaUltimaModificacion(new Date());
+      }
+      this.validarOperacion(TipoDeOperacion.ACTUALIZACION, p);
+    }
+    productoRepository.save(productos);
+    LOGGER.warn("Los Productos " + productos + " se modificaron correctamente.");
+    return productos;
+  }
 
     @Override
     public Producto getProductoPorId(long idProducto) {
