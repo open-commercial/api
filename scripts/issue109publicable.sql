@@ -1,7 +1,7 @@
--- ALTER TABLE producto
--- ADD publicable BIT(1) AFTER ilimitado;
+ALTER TABLE producto
+ADD publico BIT(1) AFTER ilimitado;
 
--- SET SQL_SAFE_UPDATES = 0;
--- UPDATE producto
--- SET producto.publicable = true;
--- SET SQL_SAFE_UPDATES = 1;
+SET SQL_SAFE_UPDATES = 0;
+UPDATE producto
+SET producto.publico = true;
+SET SQL_SAFE_UPDATES = 1;

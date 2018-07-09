@@ -23,6 +23,7 @@ public class BusquedaProductoCriteria {
     private Empresa empresa;
     private int cantRegistros;
     private boolean listarSoloFaltantes;
-    private boolean listarSoloPublicables;
+    private boolean buscaPorVisibilidad;
+    private Boolean publicoOPrivado;
     private Pageable pageable;
 }

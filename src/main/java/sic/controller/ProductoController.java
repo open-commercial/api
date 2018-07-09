@@ -73,7 +73,7 @@ public class ProductoController {
                                          @RequestParam(required = false) Long idProveedor,
                                          @RequestParam(required = false) Integer cantidadRegistros,
                                          @RequestParam(required = false) boolean soloFantantes,
-                                         @RequestParam(required = false) boolean soloPublicables) {
+                                         @RequestParam(required = false) Boolean visibilidad) {
         Rubro rubro = null;
         if (idRubro != null) rubro = rubroService.getRubroPorId(idRubro);
         Proveedor proveedor = null;
@@ -91,7 +91,8 @@ public class ProductoController {
                 .empresa(empresaService.getEmpresaPorId(idEmpresa))
                 .cantRegistros(cantidadRegistros)
                 .listarSoloFaltantes(soloFantantes)
-                .listarSoloPublicables(soloPublicables)
+                .buscaPorVisibilidad(visibilidad!=null)
+                .publicoOPrivado(visibilidad)
                 .build();
         return productoService.calcularValorStock(criteria);
     }
@@ -105,7 +106,7 @@ public class ProductoController {
                                           @RequestParam(required = false) Long idRubro,
                                           @RequestParam(required = false) Long idProveedor,
                                           @RequestParam(required = false) boolean soloFantantes,
-                                          @RequestParam(required = false) boolean soloPublicables,
+                                          @RequestParam(required = false) Boolean publicos,
                                           @RequestParam(required = false) Integer pagina,
                                           @RequestParam(required = false) Integer tamanio) {
         Rubro rubro = null;
@@ -126,7 +127,8 @@ public class ProductoController {
                 .proveedor(proveedor)
                 .empresa(empresaService.getEmpresaPorId(idEmpresa))
                 .listarSoloFaltantes(soloFantantes)
-                .listarSoloPublicables(soloPublicables)
+                .buscaPorVisibilidad(publicos!=null)
+                .publicoOPrivado(publicos)
                 .pageable(pageable)
                 .build();
         return productoService.buscarProductos(criteria);
