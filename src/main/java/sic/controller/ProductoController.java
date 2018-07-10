@@ -92,7 +92,7 @@ public class ProductoController {
                 .cantRegistros(cantidadRegistros)
                 .listarSoloFaltantes(soloFantantes)
                 .buscaPorVisibilidad(visibilidad!=null)
-                .publicoOPrivado(visibilidad)
+                .publico(visibilidad)
                 .build();
         return productoService.calcularValorStock(criteria);
     }
@@ -128,7 +128,7 @@ public class ProductoController {
                 .empresa(empresaService.getEmpresaPorId(idEmpresa))
                 .listarSoloFaltantes(soloFantantes)
                 .buscaPorVisibilidad(publicos!=null)
-                .publicoOPrivado(publicos)
+                .publico(publicos)
                 .pageable(pageable)
                 .build();
         return productoService.buscarProductos(criteria);

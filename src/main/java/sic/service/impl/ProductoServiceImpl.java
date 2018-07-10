@@ -166,7 +166,7 @@ public class ProductoServiceImpl implements IProductoService {
     if (criteria.isListarSoloFaltantes())
       builder.and(qproducto.cantidad.loe(qproducto.cantMinima)).and(qproducto.ilimitado.eq(false));
     if (criteria.isBuscaPorVisibilidad())
-      if (criteria.getPublicoOPrivado()) builder.and(qproducto.publico.isTrue());
+      if (criteria.getPublico()) builder.and(qproducto.publico.isTrue());
       else builder.and(qproducto.publico.isFalse());
     return builder;
   }
