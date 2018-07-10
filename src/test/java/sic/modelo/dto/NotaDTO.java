@@ -9,11 +9,9 @@ import java.util.Date;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import sic.builder.EmpresaBuilder;
-import sic.builder.UsuarioBuilder;
 import sic.modelo.Empresa;
 import sic.modelo.Nota;
 import sic.modelo.TipoDeComprobante;
-import sic.modelo.Usuario;
 
 @Data
 @EqualsAndHashCode(of = {"fecha", "tipoComprobante", "serie", "nroNota", "empresa"})
@@ -29,15 +27,15 @@ public abstract class NotaDTO implements Serializable {
     private TipoDeComprobante tipoComprobante;
     private Date fecha;
     private Empresa empresa = new EmpresaBuilder().build();
-    private Usuario usuario = new UsuarioBuilder().build();
+    private UsuarioDTO usuario = UsuarioDTO.builder().build();
     private String motivo = "Nota por default";
     private BigDecimal subTotalBruto = new BigDecimal("6500"); 
     private BigDecimal iva21Neto = new BigDecimal("1365");     
     private BigDecimal iva105Neto = BigDecimal.ZERO;
     private BigDecimal total = new BigDecimal("7865");    
-    private long CAE = 0l;
+    private long CAE = 0L;
     private Date vencimientoCAE = new Date();   
-    private long numSerieAfip = 0l;
-    private long numFacturaAfip= 000000000l;   
+    private long numSerieAfip = 0L;
+    private long numFacturaAfip= 0L;
     
 }
