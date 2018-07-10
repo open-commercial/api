@@ -3,6 +3,7 @@ package sic.controller;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.ResourceBundle;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -167,38 +168,70 @@ public class ProductoController {
         return productoService.guardar(producto);
     }
 
-    @PutMapping("/productos/multiples")
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public void actualizarMultiplesProductos(@RequestParam long[] idProducto,
-                                             @RequestParam(required = false) Long idMedida,
-                                             @RequestParam(required = false) Long idRubro,
-                                             @RequestParam(required = false) Long idProveedor,
-                                             @RequestParam(required = false) BigDecimal gananciaNeto,
-                                             @RequestParam(required = false) BigDecimal gananciaPorcentaje,
-                                             @RequestParam(defaultValue = "0",required = false) BigDecimal impuestoInternoNeto,
-                                             @RequestParam(defaultValue = "0",required = false) BigDecimal impuestoInternoPorcentaje,
-                                             @RequestParam(required = false) BigDecimal IVANeto,
-                                             @RequestParam(required = false) BigDecimal IVAPorcentaje,
-                                             @RequestParam(required = false) BigDecimal precioCosto,
-                                             @RequestParam(required = false) BigDecimal precioLista,
-                                             @RequestParam(required = false) BigDecimal precioVentaPublico) {
-        boolean actualizaPrecios = false;
-        if (gananciaNeto != null && gananciaPorcentaje != null && impuestoInternoNeto != null && impuestoInternoPorcentaje != null
-                && IVANeto != null && IVAPorcentaje != null && precioCosto != null && precioLista != null && precioVentaPublico != null) {
-            actualizaPrecios = true;
-        }
-        Medida medida = null;
-        if (idMedida != null) medida = medidaService.getMedidaPorId(idMedida);
-        Rubro rubro = null;
-        if (idRubro != null) rubro = rubroService.getRubroPorId(idRubro);
-        Proveedor proveedor = null;
-        if (idProveedor != null) proveedor = proveedorService.getProveedorPorId(idProveedor);
-        productoService.actualizarMultiples(idProducto, actualizaPrecios, gananciaNeto, gananciaPorcentaje,
-                impuestoInternoNeto, impuestoInternoPorcentaje, IVANeto, IVAPorcentaje,
-                precioCosto, precioLista, precioVentaPublico, (idMedida != null), medida,
-                (idRubro != null), rubro, (idProveedor != null), proveedor);
+  @PutMapping("/productos/multiples")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public void actualizarMultiplesProductos(
+      @RequestParam long[] idProducto,
+      @RequestParam(required = false) BigDecimal descuentoRecargoPorcentaje,
+      @RequestParam(required = false) Long idMedida,
+      @RequestParam(required = false) Long idRubro,
+      @RequestParam(required = false) Long idProveedor,
+      @RequestParam(required = false) BigDecimal gananciaNeto,
+      @RequestParam(required = false) BigDecimal gananciaPorcentaje,
+      @RequestParam(defaultValue = "0", required = false) BigDecimal impuestoInternoNeto,
+      @RequestParam(defaultValue = "0", required = false) BigDecimal impuestoInternoPorcentaje,
+      @RequestParam(required = false) BigDecimal IVANeto,
+      @RequestParam(required = false) BigDecimal IVAPorcentaje,
+      @RequestParam(required = false) BigDecimal precioCosto,
+      @RequestParam(required = false) BigDecimal precioLista,
+      @RequestParam(required = false) BigDecimal precioVentaPublico) {
+    boolean actualizaPrecios = false;
+    if (gananciaNeto != null
+        && gananciaPorcentaje != null
+        && impuestoInternoNeto != null
+        && impuestoInternoPorcentaje != null
+        && IVANeto != null
+        && IVAPorcentaje != null
+        && precioCosto != null
+        && precioLista != null
+        && precioVentaPublico != null) {
+      actualizaPrecios = true;
     }
+    boolean aplicaDescuentoRecargoPorcentaje = false;
+    if (descuentoRecargoPorcentaje != null) aplicaDescuentoRecargoPorcentaje = true;
+    if (aplicaDescuentoRecargoPorcentaje && actualizaPrecios) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_modificar_producto_no_permitido"));
+    }
+    Medida medida = null;
+    if (idMedida != null) medida = medidaService.getMedidaPorId(idMedida);
+    Rubro rubro = null;
+    if (idRubro != null) rubro = rubroService.getRubroPorId(idRubro);
+    Proveedor proveedor = null;
+    if (idProveedor != null) proveedor = proveedorService.getProveedorPorId(idProveedor);
+    productoService.actualizarMultiples(
+        idProducto,
+        actualizaPrecios,
+        aplicaDescuentoRecargoPorcentaje,
+        descuentoRecargoPorcentaje,
+        gananciaNeto,
+        gananciaPorcentaje,
+        impuestoInternoNeto,
+        impuestoInternoPorcentaje,
+        IVANeto,
+        IVAPorcentaje,
+        precioCosto,
+        precioLista,
+        precioVentaPublico,
+        (idMedida != null),
+        medida,
+        (idRubro != null),
+        rubro,
+        (idProveedor != null),
+        proveedor);
+  }
 
     @GetMapping("/productos/disponibilidad-stock")
     @ResponseStatus(HttpStatus.OK)
@@ -263,69 +296,5 @@ public class ProductoController {
         }
 
     }
-
-    /*
-    @GetMapping("/productos/ganancia-neto")
-    @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal gananciaPorcentaje) {
-        if (precioCosto == null || gananciaPorcentaje == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
-        }
-        return productoService.calcularGananciaNeto(precioCosto, gananciaPorcentaje);
-    }
-
-    @GetMapping("/productos/ganancia-porcentaje")
-    @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularGananciaPorcentaje(@RequestParam(defaultValue = "0", required = false) boolean ascendente,
-                                                 @RequestParam BigDecimal precioCosto,
-                                                 @RequestParam BigDecimal pvp,
-                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal ivaPorcentaje,
-                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal impInternoPorcentaje,
-                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal precioDeLista,
-                                                 @RequestParam(defaultValue = "0", required = false) BigDecimal precioDeListaAnterior) {
-        if (precioCosto == null || pvp == null) throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
-        return productoService.calcularGananciaPorcentaje(precioDeLista, precioDeListaAnterior, pvp, ivaPorcentaje,
-                impInternoPorcentaje, precioCosto, ascendente);
-    }
-
-    @GetMapping("/productos/iva-neto")
-    @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularIVANeto(BigDecimal pvp, BigDecimal ivaPorcentaje) {
-        if (ivaPorcentaje == null || pvp == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
-        }
-        return productoService.calcularIVANeto(pvp, ivaPorcentaje);
-    }
-
-    @GetMapping("/productos/imp-interno-neto")
-    @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularImpInternoNeto(@RequestParam BigDecimal pvp,
-                                             @RequestParam(defaultValue = "0",required = false) BigDecimal impInternoPorcentaje) {
-        if (pvp == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
-        }
-        return productoService.calcularImpInternoNeto(pvp, impInternoPorcentaje);
-    }
-
-    @GetMapping("/productos/pvp")
-    @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal gananciaPorcentaje) {
-        if (precioCosto == null || gananciaPorcentaje == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
-        }
-        return productoService.calcularPVP(precioCosto, gananciaPorcentaje);
-    }
-
-    @GetMapping("/productos/precio-lista")
-    @ResponseStatus(HttpStatus.OK)
-    public BigDecimal calcularPrecioLista(@RequestParam BigDecimal pvp,
-                                          @RequestParam BigDecimal ivaPorcentaje,
-                                          @RequestParam(defaultValue = "0",required = false) BigDecimal impInternoPorcentaje) {
-        if (pvp == null || ivaPorcentaje == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_big_decimal_null"));
-        }
-        return productoService.calcularPrecioLista(pvp, ivaPorcentaje, impInternoPorcentaje);
-    }
-    */
 
 }
