@@ -8,7 +8,8 @@ import java.io.IOException;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.export.*;
-import sic.modelo.BusquedaProductoCriteria;
+import sic.modelo.*;
+
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -30,17 +31,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.Empresa;
-import sic.modelo.Medida;
-import sic.modelo.Movimiento;
-import sic.modelo.Producto;
-import sic.modelo.Proveedor;
-import sic.modelo.QProducto;
-import sic.modelo.Rubro;
 import sic.service.IProductoService;
 import sic.service.BusinessServiceException;
 import sic.service.ServiceException;
-import sic.modelo.TipoDeOperacion;
 import sic.util.Validator;
 import sic.repository.ProductoRepository;
 
@@ -141,29 +134,6 @@ public class ProductoServiceImpl implements IProductoService {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_vacio_proveedor"));
         }
-        QProducto qproducto = QProducto.producto;
-        BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qproducto.empresa.eq(criteria.getEmpresa()).and(qproducto.eliminado.eq(false)));
-        if (criteria.isBuscarPorCodigo() && criteria.isBuscarPorDescripcion()) {
-            builder.and(qproducto.codigo.containsIgnoreCase(criteria.getCodigo())
-                    .or(this.buildPredicadoDescripcion(criteria.getDescripcion(), qproducto)));
-        } else {
-            if (criteria.isBuscarPorCodigo()) {
-                builder.and(qproducto.codigo.containsIgnoreCase(criteria.getCodigo()));
-            }
-            if (criteria.isBuscarPorDescripcion()) {
-                builder.and(this.buildPredicadoDescripcion(criteria.getDescripcion(), qproducto));
-            }
-        }
-        if (criteria.isBuscarPorRubro()) {
-            builder.and(qproducto.rubro.eq(criteria.getRubro()));
-        }
-        if (criteria.isBuscarPorProveedor()) {
-            builder.and(qproducto.proveedor.eq(criteria.getProveedor()));
-        }
-        if (criteria.isListarSoloFaltantes()) {
-            builder.and(qproducto.cantidad.loe(qproducto.cantMinima)).and(qproducto.ilimitado.eq(false));
-        }
         int pageNumber = 0;
         int pageSize = Integer.MAX_VALUE;
         if (criteria.getPageable() != null) {
@@ -171,8 +141,35 @@ public class ProductoServiceImpl implements IProductoService {
             pageSize = criteria.getPageable().getPageSize();
         }
         Pageable pageable = new PageRequest(pageNumber, pageSize, new Sort(Sort.Direction.ASC, "descripcion"));
-        return productoRepository.findAll(builder, pageable);
+        return productoRepository.findAll(this.getBuilder(criteria), pageable);
     }
+
+  private BooleanBuilder getBuilder(BusquedaProductoCriteria criteria) {
+    QProducto qproducto = QProducto.producto;
+    BooleanBuilder builder = new BooleanBuilder();
+    builder.and(qproducto.empresa.eq(criteria.getEmpresa()).and(qproducto.eliminado.eq(false)));
+    if (criteria.isBuscarPorCodigo() && criteria.isBuscarPorDescripcion())
+      builder.and(
+          qproducto
+              .codigo
+              .containsIgnoreCase(criteria.getCodigo())
+              .or(this.buildPredicadoDescripcion(criteria.getDescripcion(), qproducto)));
+    else {
+      if (criteria.isBuscarPorCodigo())
+        builder.and(qproducto.codigo.containsIgnoreCase(criteria.getCodigo()));
+      if (criteria.isBuscarPorDescripcion())
+        builder.and(this.buildPredicadoDescripcion(criteria.getDescripcion(), qproducto));
+    }
+    if (criteria.isBuscarPorRubro()) builder.and(qproducto.rubro.eq(criteria.getRubro()));
+    if (criteria.isBuscarPorProveedor())
+      builder.and(qproducto.proveedor.eq(criteria.getProveedor()));
+    if (criteria.isListarSoloFaltantes())
+      builder.and(qproducto.cantidad.loe(qproducto.cantMinima)).and(qproducto.ilimitado.eq(false));
+    if (criteria.isBuscaPorVisibilidad())
+      if (criteria.getPublico()) builder.and(qproducto.publico.isTrue());
+      else builder.and(qproducto.publico.isFalse());
+    return builder;
+  }
 
     private BooleanBuilder buildPredicadoDescripcion(String descripcion, QProducto qproducto) {
         String[] terminos = descripcion.split(" ");
@@ -374,7 +371,7 @@ public class ProductoServiceImpl implements IProductoService {
 
     @Override
     public BigDecimal calcularValorStock(BusquedaProductoCriteria criteria) {
-        return productoRepository.calcularValorStock(criteria);
+        return productoRepository.calcularValorStock(this.getBuilder(criteria));
     }
 
     @Override

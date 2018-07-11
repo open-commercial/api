@@ -24,6 +24,7 @@ public class ProductoBuilder {
     private BigDecimal precioLista = new BigDecimal("181.5");    
     private String nombreRubro = "Ferreteria";
     private boolean ilimitado = false;
+    private boolean publico = true;
     private Date fechaUltimaModificacion = new Date(1463540400000L); // 18-05-2016
     private String estanteria = "A";
     private String estante = "1";
@@ -129,6 +130,11 @@ public class ProductoBuilder {
     
     public ProductoBuilder withIlimitado(boolean ilimitado) {
         this.ilimitado = ilimitado;
+        return this;
+    }
+
+    public ProductoBuilder withPublico(boolean publico) {
+        this.publico = publico;
         return this;
     }
     
