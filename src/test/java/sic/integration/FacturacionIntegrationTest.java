@@ -5,7 +5,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.util.*;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +34,6 @@ import sic.builder.ProveedorBuilder;
 import sic.builder.RubroBuilder;
 import sic.builder.TransportistaBuilder;
 import sic.builder.UsuarioBuilder;
-import sic.modelo.Cliente;
 import sic.modelo.CondicionIVA;
 import sic.modelo.Credencial;
 import sic.modelo.Empresa;
@@ -53,18 +51,16 @@ import sic.modelo.Rubro;
 import sic.modelo.TipoDeComprobante;
 import sic.modelo.Transportista;
 import sic.modelo.Usuario;
-import sic.modelo.dto.FacturaVentaDTO;
+import sic.modelo.dto.*;
 import sic.repository.UsuarioRepository;
 import sic.builder.RenglonPedidoBuilder;
 import sic.modelo.EstadoPedido;
-import sic.modelo.dto.PedidoDTO;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import sic.modelo.Producto;
-import sic.modelo.dto.ProductoDTO;
-import sic.modelo.dto.RenglonPedidoDTO;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -125,10 +121,12 @@ public class FacturacionIntegrationTest {
         Localidad localidad = new LocalidadBuilder().build();
         localidad.getProvincia().setPais(restTemplate.postForObject(apiPrefix + "/paises", localidad.getProvincia().getPais(), Pais.class));
         localidad.setProvincia(restTemplate.postForObject(apiPrefix + "/provincias", localidad.getProvincia(), Provincia.class));
-        CondicionIVA condicionIVA = new CondicionIVABuilder().build();          
+        CondicionIVA condicionIVA = new CondicionIVABuilder().build();
+        localidad = restTemplate.postForObject(apiPrefix + "/localidades", localidad, Localidad.class);
+        condicionIVA = restTemplate.postForObject(apiPrefix + "/condiciones-iva", condicionIVA, CondicionIVA.class);
         Empresa empresa = new EmpresaBuilder()
-                .withLocalidad(restTemplate.postForObject(apiPrefix + "/localidades", localidad, Localidad.class))
-                .withCondicionIVA(restTemplate.postForObject(apiPrefix + "/condiciones-iva", condicionIVA, CondicionIVA.class))
+                .withLocalidad(localidad)
+                .withCondicionIVA(condicionIVA)
                 .build();
         empresa = restTemplate.postForObject(apiPrefix + "/empresas", empresa, Empresa.class);
         FormaDePago formaDePago = new FormaDePagoBuilder()
@@ -138,14 +136,15 @@ public class FacturacionIntegrationTest {
                 .withNombre("Efectivo")
                 .build();
         restTemplate.postForObject(apiPrefix + "/formas-de-pago", formaDePago, FormaDePago.class);
-        Usuario credencial = new UsuarioBuilder()
-                .withId_Usuario(1)
-                .withEliminado(false)
-                .withNombre("Marcelo Cruz")
-                .withPassword("marce")
-                .withToken("yJhbGci1NiIsInR5cCI6IkpXVCJ9.eyJub21icmUiOiJjZWNpbGlvIn0.MCfaorSC7Wdc8rSW7BJizasfzsa")
-                .withRol(new ArrayList<>())
+        UsuarioDTO credencial = UsuarioDTO.builder()
+                .username("marce")
+                .password("marce123")
+                .nombre("Marcelo")
+                .apellido("Rockefeller")
+                .email("marce.r@gmail.com")
+                .roles(new ArrayList<>(Arrays.asList(Rol.COMPRADOR)))
                 .build();
+        credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
         Usuario viajante = new UsuarioBuilder()
                 .withId_Usuario(1)
                 .withEliminado(false)
@@ -154,15 +153,15 @@ public class FacturacionIntegrationTest {
                 .withToken("yJhbGci1NiIsInR5cCI6IkpXVCJ9.eyJub21icmUiOiJjZWNpbGlvIn0.MCfaorSC7Wdc8rSW7BJizasfzsb")
                 .withRol(new ArrayList<>(Arrays.asList(Rol.VIAJANTE)))
                 .build();
-        Cliente cliente = new ClienteBuilder()
-                .withEmpresa(empresa)
-                .withCondicionIVA(empresa.getCondicionIVA())
-                .withLocalidad(empresa.getLocalidad())
-                .withPredeterminado(true)
-                .withCredencial(credencial)
-                .withViajante(viajante)
+        ClienteDTO cliente = ClienteDTO.builder()
+                .razonSocial("Peter Parker")
                 .build();
-        cliente = restTemplate.postForObject(apiPrefix + "/clientes", cliente, Cliente.class);
+        cliente = restTemplate.postForObject(apiPrefix + "/clientes?idEmpresa=" + empresa.getId_Empresa()
+                        + "&idCondicionIVA=" + condicionIVA.getId_CondicionIVA()
+                        + "&idLocalidad=" + localidad.getId_Localidad()
+                        + "&idUsuarioViajante=" + viajante.getId_Usuario()
+                        + "&idUsuarioCredencial=" + credencial.getId_Usuario(),
+                cliente, ClienteDTO.class);
         Transportista transportista = new TransportistaBuilder()
                 .withEmpresa(empresa)
                 .withLocalidad(empresa.getLocalidad())
@@ -204,10 +203,12 @@ public class FacturacionIntegrationTest {
                 .withPrecioLista(new BigDecimal("1105"))
                 .build();        
         productoUno = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
-                + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
+                + "&idProveedor=" + proveedor.getId_Proveedor()
+                + "&idEmpresa=" + empresa.getId_Empresa(),
                 productoUno, ProductoDTO.class);        
         productoDos = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
-                + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
+                + "&idProveedor=" + proveedor.getId_Proveedor()
+                + "&idEmpresa=" + empresa.getId_Empresa(),
                 productoDos, ProductoDTO.class);
         String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
@@ -340,10 +341,12 @@ public class FacturacionIntegrationTest {
         Localidad localidad = new LocalidadBuilder().build();
         localidad.getProvincia().setPais(restTemplate.postForObject(apiPrefix + "/paises", localidad.getProvincia().getPais(), Pais.class));
         localidad.setProvincia(restTemplate.postForObject(apiPrefix + "/provincias", localidad.getProvincia(), Provincia.class));
-        CondicionIVA condicionIVA = new CondicionIVABuilder().build();          
+        CondicionIVA condicionIVA = new CondicionIVABuilder().build();
+        localidad = restTemplate.postForObject(apiPrefix + "/localidades", localidad, Localidad.class);
+        condicionIVA = restTemplate.postForObject(apiPrefix + "/condiciones-iva", condicionIVA, CondicionIVA.class);
         Empresa empresa = new EmpresaBuilder()
-                .withLocalidad(restTemplate.postForObject(apiPrefix + "/localidades", localidad, Localidad.class))
-                .withCondicionIVA(restTemplate.postForObject(apiPrefix + "/condiciones-iva", condicionIVA, CondicionIVA.class))
+                .withLocalidad(localidad)
+                .withCondicionIVA(condicionIVA)
                 .build();
         empresa = restTemplate.postForObject(apiPrefix + "/empresas", empresa, Empresa.class);
         FormaDePago formaDePago = new FormaDePagoBuilder()
@@ -353,23 +356,23 @@ public class FacturacionIntegrationTest {
                 .withNombre("Efectivo")
                 .build();
         formaDePago = restTemplate.postForObject(apiPrefix + "/formas-de-pago", formaDePago, FormaDePago.class);
-        Usuario credencial = new UsuarioBuilder()
-                .withId_Usuario(1)
-                .withEliminado(false)
-                .withNombre("Marcelo Cruz")
-                .withPassword("marce")
-                .withToken("yJhbGci1NiIsInR5cCI6IkpXVCJ9.eyJub21icmUiOiJjZWNpbGlvIn0.MCfaorSC7Wdc8rSW7BJizasfzsa")
-                .withRol(new ArrayList<>())
+        UsuarioDTO credencial = UsuarioDTO.builder()
+                .username("marce")
+                .password("marce123")
+                .nombre("Marcelo")
+                .apellido("Rockefeller")
+                .email("marce.r@gmail.com")
+                .roles(new ArrayList<>(Arrays.asList(Rol.COMPRADOR)))
                 .build();
-        Cliente cliente = new ClienteBuilder()
-                .withEmpresa(empresa)
-                .withCondicionIVA(empresa.getCondicionIVA())
-                .withLocalidad(empresa.getLocalidad())
-                .withPredeterminado(true)
-                .withCredencial(credencial)
-                .withViajante(null)
+        credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
+        ClienteDTO cliente = ClienteDTO.builder()
+                .razonSocial("Peter Parker")
                 .build();
-        cliente = restTemplate.postForObject(apiPrefix + "/clientes", cliente, Cliente.class);
+        cliente = restTemplate.postForObject(apiPrefix + "/clientes?idEmpresa=" + empresa.getId_Empresa()
+                        + "&idCondicionIVA=" + condicionIVA.getId_CondicionIVA()
+                        + "&idLocalidad=" + localidad.getId_Localidad()
+                        + "&idUsuarioCredencial=" + credencial.getId_Usuario(),
+                cliente, ClienteDTO.class);
         Transportista transportista = new TransportistaBuilder()
                 .withEmpresa(empresa)
                 .withLocalidad(empresa.getLocalidad())
@@ -411,10 +414,12 @@ public class FacturacionIntegrationTest {
                 .withPrecioLista(new BigDecimal("2210"))
                 .build();
         productoUno = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
-                + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
+                + "&idProveedor=" + proveedor.getId_Proveedor()
+                + "&idEmpresa=" + empresa.getId_Empresa(),
                 productoUno, ProductoDTO.class);        
         productoDos = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
-                + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
+                + "&idProveedor=" + proveedor.getId_Proveedor()
+                + "&idEmpresa=" + empresa.getId_Empresa(),
                 productoDos, ProductoDTO.class);
         String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());

@@ -39,8 +39,8 @@ public class ProductoBuilder {
         return new ProductoDTO(id_Producto, codigo, descripcion, cantidad, cantMinima, ventaMinima, nombreMedida,
                 precioCosto, ganancia_porcentaje, ganancia_neto, precioVentaPublico,
                 iva_porcentaje, iva_neto, impuestoInterno_porcentaje, impuestoInterno_neto, precioLista,
-                nombreRubro, ilimitado, publico, fechaUltimaModificacion, estanteria, estante, razonSocialProveedor,
-                nota, fechaAlta, fechaVencimiento, nombreEmpresa, eliminado);
+                nombreRubro, ilimitado, fechaUltimaModificacion, estanteria, estante, razonSocialProveedor, nota,
+                fechaAlta, fechaVencimiento, nombreEmpresa, eliminado);
     }
     
     public ProductoBuilder withId_Producto(Long id_Producto) {

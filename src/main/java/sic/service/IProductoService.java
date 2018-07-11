@@ -16,49 +16,70 @@ import sic.modelo.Rubro;
 
 public interface IProductoService {
 
-    void actualizar(Producto producto);
+  void actualizar(Producto producto);
 
-    void actualizarStock(HashMap<Long, BigDecimal> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento);
+  void actualizarStock(
+      HashMap<Long, BigDecimal> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento);
 
-    Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
+  Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
 
-    BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal ganancia_porcentaje);
+  BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal ganancia_porcentaje);
 
-    Map<Long, BigDecimal> getProductosSinStockDisponible(long[] idProducto, BigDecimal[] cantidad);
+  Map<Long, BigDecimal> getProductosSinStockDisponible(long[] idProducto, BigDecimal[] cantidad);
 
-    Map<Long, BigDecimal> getProductosNoCumplenCantidadVentaMinima(long[] idProducto, BigDecimal[] cantidad);
+  Map<Long, BigDecimal> getProductosNoCumplenCantidadVentaMinima(
+      long[] idProducto, BigDecimal[] cantidad);
 
-    BigDecimal calcularGananciaPorcentaje(BigDecimal precioDeListaNuevo,
-                                          BigDecimal precioDeListaAnterior, BigDecimal pvp, BigDecimal ivaPorcentaje,
-                                          BigDecimal impInternoPorcentaje, BigDecimal precioCosto, boolean descendente);
+  BigDecimal calcularGananciaPorcentaje(
+      BigDecimal precioDeListaNuevo,
+      BigDecimal precioDeListaAnterior,
+      BigDecimal pvp,
+      BigDecimal ivaPorcentaje,
+      BigDecimal impInternoPorcentaje,
+      BigDecimal precioCosto,
+      boolean descendente);
 
-    BigDecimal calcularIVANeto(BigDecimal precioCosto, BigDecimal iva_porcentaje);
+  BigDecimal calcularIVANeto(BigDecimal precioCosto, BigDecimal iva_porcentaje);
 
-    BigDecimal calcularImpInternoNeto(BigDecimal precioCosto, BigDecimal impInterno_porcentaje);
+  BigDecimal calcularImpInternoNeto(BigDecimal precioCosto, BigDecimal impInterno_porcentaje);
 
-    BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal ganancia_porcentaje);
+  BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal ganancia_porcentaje);
 
-    BigDecimal calcularPrecioLista(BigDecimal PVP, BigDecimal iva_porcentaje, BigDecimal impInterno_porcentaje);
+  BigDecimal calcularPrecioLista(
+      BigDecimal PVP, BigDecimal iva_porcentaje, BigDecimal impInterno_porcentaje);
 
-    void eliminarMultiplesProductos(long[] idProducto);
+  void eliminarMultiplesProductos(long[] idProducto);
 
-    Producto getProductoPorCodigo(String codigo, Empresa empresa);
+  Producto getProductoPorCodigo(String codigo, Empresa empresa);
 
-    Producto getProductoPorDescripcion(String descripcion, Empresa empresa);
+  Producto getProductoPorDescripcion(String descripcion, Empresa empresa);
 
-    Producto getProductoPorId(long id_Producto);
+  Producto getProductoPorId(long id_Producto);
 
-    BigDecimal calcularValorStock(BusquedaProductoCriteria criteria);
-  
-    byte[] getListaDePreciosPorEmpresa(List<Producto> productos, Empresa empresa, String formato);
+  BigDecimal calcularValorStock(BusquedaProductoCriteria criteria);
 
-    Producto guardar(Producto producto);
+  byte[] getListaDePreciosPorEmpresa(List<Producto> productos, Empresa empresa, String formato);
 
-    List<Producto> actualizarMultiples(long[] idProducto, boolean checkPrecios, BigDecimal gananciaNeto,
-                                       BigDecimal gananciaPorcentaje, BigDecimal impuestoInternoNeto,
-                                       BigDecimal impuestoInternoPorcentaje, BigDecimal IVANeto,
-                                       BigDecimal IVAPorcentaje, BigDecimal precioCosto, BigDecimal precioLista,
-                                       BigDecimal precioVentaPublico, boolean checkMedida, Medida medida,
-                                       boolean checkRubro, Rubro rubro, boolean checkProveedor, Proveedor proveedor);
+  Producto guardar(Producto producto);
 
+  List<Producto> actualizarMultiples(
+      long[] idProducto,
+      boolean checkPrecios,
+      boolean checkDescuentoRecargoPorcentaje,
+      BigDecimal descuentoRecargoPorcentaje,
+      BigDecimal gananciaNeto,
+      BigDecimal gananciaPorcentaje,
+      BigDecimal impuestoInternoNeto,
+      BigDecimal impuestoInternoPorcentaje,
+      BigDecimal IVANeto,
+      BigDecimal IVAPorcentaje,
+      BigDecimal precioCosto,
+      BigDecimal precioLista,
+      BigDecimal precioVentaPublico,
+      boolean checkMedida,
+      Medida medida,
+      boolean checkRubro,
+      Rubro rubro,
+      boolean checkProveedor,
+      Proveedor proveedor);
 }

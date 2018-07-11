@@ -3,6 +3,7 @@ package sic.controller;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.ResourceBundle;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -173,38 +174,70 @@ public class ProductoController {
         return productoService.guardar(producto);
     }
 
-    @PutMapping("/productos/multiples")
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public void actualizarMultiplesProductos(@RequestParam long[] idProducto,
-                                             @RequestParam(required = false) Long idMedida,
-                                             @RequestParam(required = false) Long idRubro,
-                                             @RequestParam(required = false) Long idProveedor,
-                                             @RequestParam(required = false) BigDecimal gananciaNeto,
-                                             @RequestParam(required = false) BigDecimal gananciaPorcentaje,
-                                             @RequestParam(defaultValue = "0",required = false) BigDecimal impuestoInternoNeto,
-                                             @RequestParam(defaultValue = "0",required = false) BigDecimal impuestoInternoPorcentaje,
-                                             @RequestParam(required = false) BigDecimal IVANeto,
-                                             @RequestParam(required = false) BigDecimal IVAPorcentaje,
-                                             @RequestParam(required = false) BigDecimal precioCosto,
-                                             @RequestParam(required = false) BigDecimal precioLista,
-                                             @RequestParam(required = false) BigDecimal precioVentaPublico) {
-        boolean actualizaPrecios = false;
-        if (gananciaNeto != null && gananciaPorcentaje != null && impuestoInternoNeto != null && impuestoInternoPorcentaje != null
-                && IVANeto != null && IVAPorcentaje != null && precioCosto != null && precioLista != null && precioVentaPublico != null) {
-            actualizaPrecios = true;
-        }
-        Medida medida = null;
-        if (idMedida != null) medida = medidaService.getMedidaPorId(idMedida);
-        Rubro rubro = null;
-        if (idRubro != null) rubro = rubroService.getRubroPorId(idRubro);
-        Proveedor proveedor = null;
-        if (idProveedor != null) proveedor = proveedorService.getProveedorPorId(idProveedor);
-        productoService.actualizarMultiples(idProducto, actualizaPrecios, gananciaNeto, gananciaPorcentaje,
-                impuestoInternoNeto, impuestoInternoPorcentaje, IVANeto, IVAPorcentaje,
-                precioCosto, precioLista, precioVentaPublico, (idMedida != null), medida,
-                (idRubro != null), rubro, (idProveedor != null), proveedor);
+  @PutMapping("/productos/multiples")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public void actualizarMultiplesProductos(
+      @RequestParam long[] idProducto,
+      @RequestParam(required = false) BigDecimal descuentoRecargoPorcentaje,
+      @RequestParam(required = false) Long idMedida,
+      @RequestParam(required = false) Long idRubro,
+      @RequestParam(required = false) Long idProveedor,
+      @RequestParam(required = false) BigDecimal gananciaNeto,
+      @RequestParam(required = false) BigDecimal gananciaPorcentaje,
+      @RequestParam(defaultValue = "0", required = false) BigDecimal impuestoInternoNeto,
+      @RequestParam(defaultValue = "0", required = false) BigDecimal impuestoInternoPorcentaje,
+      @RequestParam(required = false) BigDecimal IVANeto,
+      @RequestParam(required = false) BigDecimal IVAPorcentaje,
+      @RequestParam(required = false) BigDecimal precioCosto,
+      @RequestParam(required = false) BigDecimal precioLista,
+      @RequestParam(required = false) BigDecimal precioVentaPublico) {
+    boolean actualizaPrecios = false;
+    if (gananciaNeto != null
+        && gananciaPorcentaje != null
+        && impuestoInternoNeto != null
+        && impuestoInternoPorcentaje != null
+        && IVANeto != null
+        && IVAPorcentaje != null
+        && precioCosto != null
+        && precioLista != null
+        && precioVentaPublico != null) {
+      actualizaPrecios = true;
     }
+    boolean aplicaDescuentoRecargoPorcentaje = false;
+    if (descuentoRecargoPorcentaje != null) aplicaDescuentoRecargoPorcentaje = true;
+    if (aplicaDescuentoRecargoPorcentaje && actualizaPrecios) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_modificar_producto_no_permitido"));
+    }
+    Medida medida = null;
+    if (idMedida != null) medida = medidaService.getMedidaPorId(idMedida);
+    Rubro rubro = null;
+    if (idRubro != null) rubro = rubroService.getRubroPorId(idRubro);
+    Proveedor proveedor = null;
+    if (idProveedor != null) proveedor = proveedorService.getProveedorPorId(idProveedor);
+    productoService.actualizarMultiples(
+        idProducto,
+        actualizaPrecios,
+        aplicaDescuentoRecargoPorcentaje,
+        descuentoRecargoPorcentaje,
+        gananciaNeto,
+        gananciaPorcentaje,
+        impuestoInternoNeto,
+        impuestoInternoPorcentaje,
+        IVANeto,
+        IVAPorcentaje,
+        precioCosto,
+        precioLista,
+        precioVentaPublico,
+        (idMedida != null),
+        medida,
+        (idRubro != null),
+        rubro,
+        (idProveedor != null),
+        proveedor);
+  }
 
     @GetMapping("/productos/disponibilidad-stock")
     @ResponseStatus(HttpStatus.OK)
