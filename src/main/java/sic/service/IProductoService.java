@@ -81,5 +81,7 @@ public interface IProductoService {
       boolean checkRubro,
       Rubro rubro,
       boolean checkProveedor,
-      Proveedor proveedor);
+      Proveedor proveedor,
+      boolean checkVisibilidad,
+      Boolean publicos);
 }

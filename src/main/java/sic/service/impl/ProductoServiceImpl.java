@@ -278,7 +278,9 @@ public class ProductoServiceImpl implements IProductoService {
       boolean checkRubro,
       Rubro rubro,
       boolean checkProveedor,
-      Proveedor proveedor) {
+      Proveedor proveedor,
+      boolean checkVisibilidad,
+      Boolean publicos) {
     // Requeridos
     if (checkMedida && medida == null) {
       throw new BusinessServiceException(
@@ -338,6 +340,7 @@ public class ProductoServiceImpl implements IProductoService {
       if (checkMedida || checkRubro || checkProveedor || checkPrecios) {
         p.setFechaUltimaModificacion(new Date());
       }
+      if (checkVisibilidad) p.setPublico(publicos);
       this.validarOperacion(TipoDeOperacion.ACTUALIZACION, p);
     }
     productoRepository.save(productos);
