@@ -192,7 +192,7 @@ public class ProductoController {
       @RequestParam(required = false) BigDecimal precioCosto,
       @RequestParam(required = false) BigDecimal precioLista,
       @RequestParam(required = false) BigDecimal precioVentaPublico,
-      @RequestParam(required = false) Boolean publicos) {
+      @RequestParam(required = false) Boolean publico) {
     boolean actualizaPrecios = false;
     if (gananciaNeto != null
         && gananciaPorcentaje != null
@@ -238,8 +238,8 @@ public class ProductoController {
         rubro,
         (idProveedor != null),
         proveedor,
-        (publicos != null),
-        publicos);
+        (publico != null),
+        publico);
   }
 
     @GetMapping("/productos/disponibilidad-stock")

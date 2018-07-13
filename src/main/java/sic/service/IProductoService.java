@@ -83,5 +83,5 @@ public interface IProductoService {
       boolean checkProveedor,
       Proveedor proveedor,
       boolean checkVisibilidad,
-      Boolean publicos);
+      Boolean publico);
 }
