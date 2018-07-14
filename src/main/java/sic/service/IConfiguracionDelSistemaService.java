@@ -19,5 +19,7 @@ public interface IConfiguracionDelSistemaService {
     void validarCds(TipoDeOperacion tipoOperacion, ConfiguracionDelSistema cds);
 
     int getCantidadMaximaDeRenglonesPorIdEmpresa(long  idEmpresa);
+
+    boolean isFacturaElectronicaHabilitada(long  idEmpresa);
     
 }

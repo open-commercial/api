@@ -388,52 +388,70 @@ public class FacturaServiceImpl implements IFacturaService {
         return factura;
     }
 
-    @Override
-    @Transactional
-    public List<Factura> guardar(List<Factura> facturas, Long idPedido, List<Recibo> recibos) {
-        List<Factura> facturasProcesadas = new ArrayList<>();
-        facturas.forEach(f -> {
-            if (f instanceof FacturaVenta) {
-                productoService.actualizarStock(this.getIdsProductosYCantidades(f), TipoDeOperacion.ALTA, Movimiento.VENTA);
-            } else if (f instanceof FacturaCompra) {
-                productoService.actualizarStock(this.getIdsProductosYCantidades(f), TipoDeOperacion.ALTA, Movimiento.COMPRA);
-            }
+  @Override
+  @Transactional
+  public List<FacturaVenta> guardar(
+      List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos) {
+    List<FacturaVenta> facturasProcesadas = new ArrayList<>();
+    facturas.forEach(
+        f -> {
+          productoService.actualizarStock(
+              this.getIdsProductosYCantidades(f), TipoDeOperacion.ALTA, Movimiento.VENTA);
         });
-        if (idPedido != null) {
-            Pedido pedido = pedidoService.getPedidoPorId(idPedido);
-            facturas.forEach(f -> f.setPedido(pedido));
-            for (Factura f : facturas) {
-                Factura facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFactura(f));
-                this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) facturaGuardada, TipoDeOperacion.ALTA);
-                facturasProcesadas.add(facturaGuardada);
-                if (recibos != null) {
-                    recibos.forEach(r -> reciboService.guardar(r));
-                }
-            }
-            pedido.setFacturas(facturasProcesadas);
-            pedidoService.actualizar(pedido);
-            facturasProcesadas.forEach(f -> LOGGER.warn("La Factura " + f + " se guardó correctamente."));
-            pedidoService.actualizarEstadoPedido(pedido);
-        } else {
-            facturasProcesadas = new ArrayList<>();
-            for (Factura f : facturas) {
-                Factura facturaGuardada = null;
-                if (f instanceof FacturaVenta) {
-                    facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFactura(f));
-                    this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) facturaGuardada, TipoDeOperacion.ALTA);
-                } else if (f instanceof FacturaCompra) {
-                    facturaGuardada = facturaCompraRepository.save((FacturaCompra) this.procesarFactura(f));
-                    this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaCompra) facturaGuardada, TipoDeOperacion.ALTA);
-                }
-                facturasProcesadas.add(facturaGuardada);
-                LOGGER.warn("La Factura " + facturaGuardada + " se guardó correctamente.");
-                if (recibos != null) {
-                    recibos.forEach(r -> reciboService.guardar(r));
-                }
-            }
+    if (idPedido != null) {
+      Pedido pedido = pedidoService.getPedidoPorId(idPedido);
+      facturas.forEach(f -> f.setPedido(pedido));
+      for (Factura f : facturas) {
+        FacturaVenta facturaGuardada =
+            facturaVentaRepository.save((FacturaVenta) this.procesarFactura(f));
+        this.cuentaCorrienteService.asentarEnCuentaCorriente(
+            facturaGuardada, TipoDeOperacion.ALTA);
+        facturasProcesadas.add(facturaGuardada);
+        if (recibos != null) {
+          recibos.forEach(reciboService::guardar);
         }
-        return facturasProcesadas;
+      }
+      List<Factura> facturasParaRelacionarAlPedido = new ArrayList<>(facturasProcesadas);
+      pedido.setFacturas(facturasParaRelacionarAlPedido);
+      pedidoService.actualizar(pedido);
+      facturasProcesadas.forEach(f -> LOGGER.warn("La Factura " + f + " se guardó correctamente."));
+      pedidoService.actualizarEstadoPedido(pedido);
+    } else {
+      facturasProcesadas = new ArrayList<>();
+      for (Factura f : facturas) {
+        FacturaVenta facturaGuardada = null;
+          facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFactura(f));
+          this.cuentaCorrienteService.asentarEnCuentaCorriente(
+              facturaGuardada, TipoDeOperacion.ALTA);
+        facturasProcesadas.add(facturaGuardada);
+        LOGGER.warn("La Factura " + facturaGuardada + " se guardó correctamente.");
+        if (recibos != null) {
+          recibos.forEach(reciboService::guardar);
+        }
+      }
     }
+    return facturasProcesadas;
+  }
+
+  @Override
+  @Transactional
+  public List<FacturaCompra> guardar(List<FacturaCompra> facturas) {
+    List<FacturaCompra> facturasProcesadas = new ArrayList<>();
+    facturas.forEach(
+        f -> {
+          productoService.actualizarStock(
+              this.getIdsProductosYCantidades(f), TipoDeOperacion.ALTA, Movimiento.COMPRA);
+        });
+    for (Factura f : facturas) {
+      FacturaCompra facturaGuardada = null;
+      if (f instanceof FacturaCompra) {
+        facturaGuardada = facturaCompraRepository.save((FacturaCompra) this.procesarFactura(f));
+        this.cuentaCorrienteService.asentarEnCuentaCorriente(facturaGuardada, TipoDeOperacion.ALTA);
+      }
+      facturasProcesadas.add(facturaGuardada);
+    }
+    return facturasProcesadas;
+  }
 
     @Override
     @Transactional
@@ -612,6 +630,14 @@ public class FacturaServiceImpl implements IFacturaService {
         fv.setNumFacturaAfip(comprobante.getNumFacturaAfip());
         renglonCuentaCorrienteService.updateCAEFactura(fv.getId_Factura(), comprobante.getCAE());
         return fv;
+    }
+
+    @Override
+    @Transactional
+    public void autorizarFacturasVentas(List<FacturaVenta> facturasVentas) {
+        for (FacturaVenta fv : facturasVentas) {
+            this.autorizarFacturaVenta(fv);
+        }
     }
 
     @Override
@@ -1109,7 +1135,7 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     @Override
-    public List<Factura> dividirFactura(FacturaVenta facturaADividir, int[] indices) {
+    public List<FacturaVenta> dividirFactura(FacturaVenta facturaADividir, int[] indices) {
         FacturaVenta facturaSinIVA = new FacturaVenta();
         facturaSinIVA.setCliente(facturaADividir.getCliente());
         facturaSinIVA.setUsuario(facturaADividir.getUsuario());
@@ -1123,10 +1149,10 @@ public class FacturaServiceImpl implements IFacturaService {
         facturaConIVA.setTipoComprobante(facturaADividir.getTipoComprobante());
         facturaConIVA.setDescuento_porcentaje(facturaADividir.getDescuento_porcentaje());
         facturaConIVA.setRecargo_porcentaje(facturaADividir.getRecargo_porcentaje());
-        List<Factura> facturas = new ArrayList<>();
+        List<FacturaVenta> facturas = new ArrayList<>();
         facturaSinIVA = this.agregarRenglonesAFacturaSinIVA(facturaSinIVA, indices, facturaADividir.getRenglones());
         facturaConIVA = this.agregarRenglonesAFacturaConIVA(facturaConIVA, indices,facturaADividir.getRenglones());
-        if (facturaSinIVA.getRenglones().size() > 0) {
+        if (!facturaSinIVA.getRenglones().isEmpty()) {
             facturaSinIVA = this.procesarFacturaSinIVA(facturaADividir, facturaSinIVA);
             facturas.add(facturaSinIVA);
         }

@@ -46,11 +46,15 @@ public interface IFacturaService {
 
     Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
            
-    List<Factura> guardar(List<Factura> facturas, Long idPedido, List<Recibo> recibos);
+    List<FacturaVenta> guardar(List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos);
+
+    List<FacturaCompra> guardar(List<FacturaCompra> facturas);
 
     void eliminar(long[] idFactura);
     
     FacturaVenta autorizarFacturaVenta(FacturaVenta fv);
+
+    void autorizarFacturasVentas(List<FacturaVenta> facturasVentas);
 
     BigDecimal calcularSubTotal(BigDecimal[] importes);
 
@@ -90,7 +94,7 @@ public interface IFacturaService {
 
     byte[] getReporteFacturaVenta(Factura factura);
 
-    List<Factura> dividirFactura(FacturaVenta factura, int[] indices);
+    List<FacturaVenta> dividirFactura(FacturaVenta factura, int[] indices);
 
     List<RenglonFactura> convertirRenglonesPedidoEnRenglonesFactura(Pedido pedido, TipoDeComprobante tipoDeComprobante);
 
