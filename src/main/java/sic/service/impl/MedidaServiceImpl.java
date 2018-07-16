@@ -29,7 +29,7 @@ public class MedidaServiceImpl implements IMedidaService {
 
     @Override
     public Medida getMedidaPorId(Long idMedida) {
-        Medida medida = medidaRepository.findOne(idMedida);
+        Medida medida = medidaRepository.findById(idMedida);
         if (medida == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_medida_no_existente"));

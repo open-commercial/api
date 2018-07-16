@@ -17,10 +17,10 @@ public class BusquedaProductoCriteria {
     private boolean buscarPorDescripcion;
     private String descripcion;
     private boolean buscarPorRubro;
-    private Rubro rubro;
+    private Long idRubro;
     private boolean buscarPorProveedor;
-    private Proveedor proveedor;
-    private Empresa empresa;
+    private Long idProveedor;
+    private long idEmpresa;
     private int cantRegistros;
     private boolean listarSoloFaltantes;
     private boolean buscaPorVisibilidad;
