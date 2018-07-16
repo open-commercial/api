@@ -60,7 +60,7 @@ public class ConfiguracionDelSistemaController {
         return configuracionDelSistemaService.getCantidadMaximaDeRenglonesPorIdEmpresa(idEmpresa);
     }
 
-    @GetMapping("/configuraciones-del-sistema/empresas/{idEmpresa}/factura-electronica")
+    @GetMapping("/configuraciones-del-sistema/empresas/{idEmpresa}/factura-electronica-habilitada")
     @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public boolean isFacturaElectronicaHabilitada(@PathVariable long idEmpresa) {

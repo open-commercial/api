@@ -58,9 +58,9 @@ public class FacturaServiceImpl implements IFacturaService {
     private final IRenglonCuentaCorrienteService renglonCuentaCorrienteService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
-    private final static BigDecimal IVA_21 = new BigDecimal("21");
-    private final static BigDecimal IVA_105 = new BigDecimal("10.5");
-    private final static BigDecimal CIEN = new BigDecimal("100");
+    private static final BigDecimal IVA_21 = new BigDecimal("21");
+    private static final BigDecimal IVA_105 = new BigDecimal("10.5");
+    private static final BigDecimal CIEN = new BigDecimal("100");
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
@@ -244,7 +244,7 @@ public class FacturaServiceImpl implements IFacturaService {
                     .getString("mensaje_empresa_no_existente"));
         }
         //Fecha de Factura
-        if (criteria.isBuscaPorFecha() & (criteria.getFechaDesde() == null | criteria.getFechaHasta() == null)) {
+        if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_fechas_busqueda_invalidas"));
         }
@@ -394,11 +394,9 @@ public class FacturaServiceImpl implements IFacturaService {
       List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos) {
     List<FacturaVenta> facturasProcesadas = new ArrayList<>();
     facturas.forEach(
-        f -> {
-          productoService.actualizarStock(
-              this.getIdsProductosYCantidades(f), TipoDeOperacion.ALTA, Movimiento.VENTA);
-        });
-    if (idPedido != null) {
+        f -> productoService.actualizarStock(
+                this.getIdsProductosYCantidades(f), TipoDeOperacion.ALTA, Movimiento.VENTA));
+      if (idPedido != null) {
       Pedido pedido = pedidoService.getPedidoPorId(idPedido);
       facturas.forEach(f -> f.setPedido(pedido));
       for (Factura f : facturas) {
@@ -419,7 +417,7 @@ public class FacturaServiceImpl implements IFacturaService {
     } else {
       facturasProcesadas = new ArrayList<>();
       for (Factura f : facturas) {
-        FacturaVenta facturaGuardada = null;
+        FacturaVenta facturaGuardada;
           facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFactura(f));
           this.cuentaCorrienteService.asentarEnCuentaCorriente(
               facturaGuardada, TipoDeOperacion.ALTA);
@@ -438,10 +436,8 @@ public class FacturaServiceImpl implements IFacturaService {
   public List<FacturaCompra> guardar(List<FacturaCompra> facturas) {
     List<FacturaCompra> facturasProcesadas = new ArrayList<>();
     facturas.forEach(
-        f -> {
-          productoService.actualizarStock(
-              this.getIdsProductosYCantidades(f), TipoDeOperacion.ALTA, Movimiento.COMPRA);
-        });
+        f -> productoService.actualizarStock(
+                this.getIdsProductosYCantidades(f), TipoDeOperacion.ALTA, Movimiento.COMPRA));
     for (Factura f : facturas) {
       FacturaCompra facturaGuardada = null;
       if (f instanceof FacturaCompra) {
@@ -633,14 +629,6 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     @Override
-    @Transactional
-    public void autorizarFacturasVentas(List<FacturaVenta> facturasVentas) {
-        for (FacturaVenta fv : facturasVentas) {
-            this.autorizarFacturaVenta(fv);
-        }
-    }
-
-    @Override
     public BigDecimal calcularSubTotal(BigDecimal[] importes) {
         BigDecimal resultado = BigDecimal.ZERO;
         for (BigDecimal importe : importes) {
@@ -650,19 +638,19 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     @Override
-    public BigDecimal calcularDescuentoNeto(BigDecimal importe, BigDecimal descuento_porcentaje) {
+    public BigDecimal calcularDescuentoNeto(BigDecimal importe, BigDecimal descuentoPorcentaje) {
         BigDecimal resultado = BigDecimal.ZERO;
-        if (descuento_porcentaje != BigDecimal.ZERO) {
-            resultado = importe.multiply(descuento_porcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+        if (descuentoPorcentaje != BigDecimal.ZERO) {
+            resultado = importe.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
         }
         return resultado;
     }
 
     @Override
-    public BigDecimal calcularRecargoNeto(BigDecimal subtotal, BigDecimal recargo_porcentaje) {
+    public BigDecimal calcularRecargoNeto(BigDecimal subtotal, BigDecimal recargoPorcentaje) {
         BigDecimal resultado = BigDecimal.ZERO;
-        if (recargo_porcentaje != BigDecimal.ZERO) {
-            resultado = subtotal.multiply(recargo_porcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+        if (recargoPorcentaje != BigDecimal.ZERO) {
+            resultado = subtotal.multiply(recargoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
         }
         return resultado;
     }
@@ -679,8 +667,8 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     @Override
-    public BigDecimal calcularImpInternoNeto(TipoDeComprobante tipoDeComprobante, BigDecimal descuento_porcentaje,
-            BigDecimal recargo_porcentaje, BigDecimal[] importes, BigDecimal [] impuestoPorcentajes) {
+    public BigDecimal calcularImpInternoNeto(TipoDeComprobante tipoDeComprobante, BigDecimal descuentoPorcentaje,
+            BigDecimal recargoPorcentaje, BigDecimal[] importes, BigDecimal [] impuestoPorcentajes) {
 
         BigDecimal resultado = BigDecimal.ZERO;
         if (tipoDeComprobante == TipoDeComprobante.FACTURA_A || tipoDeComprobante == TipoDeComprobante.FACTURA_B || tipoDeComprobante == TipoDeComprobante.PRESUPUESTO) {
@@ -689,12 +677,12 @@ public class FacturaServiceImpl implements IFacturaService {
             if (longitudImportes == longitudImpuestos) {
                 for (int i = 0; i < longitudImportes; i++) {
                 BigDecimal descuento = BigDecimal.ZERO;
-                if (descuento_porcentaje != BigDecimal.ZERO) {
-                    descuento = importes[i].multiply(descuento_porcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+                if (descuentoPorcentaje != BigDecimal.ZERO) {
+                    descuento = importes[i].multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
                 }
                 BigDecimal recargo = BigDecimal.ZERO;
-                if (recargo_porcentaje != BigDecimal.ZERO) {
-                    recargo = importes[i].multiply(recargo_porcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+                if (recargoPorcentaje != BigDecimal.ZERO) {
+                    recargo = importes[i].multiply(recargoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
                 }
                 BigDecimal impInterno_neto = BigDecimal.ZERO;
                 impInterno_neto = impInterno_neto.add(importes[i]).add(recargo).subtract(descuento).multiply(impuestoPorcentajes[i]).divide(CIEN, 15, RoundingMode.HALF_UP);
@@ -767,7 +755,7 @@ public class FacturaServiceImpl implements IFacturaService {
                     .getString("mensaje_empresa_no_existente"));
         }
         //Fecha de Factura
-        if (criteria.isBuscaPorFecha() & (criteria.getFechaDesde() == null | criteria.getFechaHasta() == null)) {
+        if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_fechas_busqueda_invalidas"));
         }
@@ -844,7 +832,7 @@ public class FacturaServiceImpl implements IFacturaService {
                     .getString("mensaje_empresa_no_existente"));
         }
         //Fecha de Factura
-        if (criteria.isBuscaPorFecha() & (criteria.getFechaDesde() == null | criteria.getFechaHasta() == null)) {
+        if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_fechas_busqueda_invalidas"));
         }

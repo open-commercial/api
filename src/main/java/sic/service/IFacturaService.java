@@ -54,8 +54,6 @@ public interface IFacturaService {
     
     FacturaVenta autorizarFacturaVenta(FacturaVenta fv);
 
-    void autorizarFacturasVentas(List<FacturaVenta> facturasVentas);
-
     BigDecimal calcularSubTotal(BigDecimal[] importes);
 
     BigDecimal calcularDescuentoNeto(BigDecimal subtotal, BigDecimal descuento_porcentaje);
