@@ -36,7 +36,6 @@ public class ProductoController {
     private final IRubroService rubroService;
     private final IProveedorService proveedorService;
     private final IMedidaService medidaService;
-    private final int TAMANIO_PAGINA_DEFAULT = 50;
 
     @Autowired
     public ProductoController(IProductoService productoService, IEmpresaService empresaService,
@@ -110,6 +109,7 @@ public class ProductoController {
                                           @RequestParam(required = false) Boolean publicos,
                                           @RequestParam(required = false) Integer pagina,
                                           @RequestParam(required = false) Integer tamanio) {
+        final int TAMANIO_PAGINA_DEFAULT = 50;
         Rubro rubro = null;
         if (idRubro != null) rubro = rubroService.getRubroPorId(idRubro);
         Proveedor proveedor = null;
