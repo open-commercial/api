@@ -176,11 +176,15 @@ public class CuentaCorrienteIntegrationTest {
                 .withIva_neto(new BigDecimal("105"))
                 .withPrecioLista(new BigDecimal("1105"))
                 .build();
-        productoUno = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
-                + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
+        productoUno = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida()
+                        + "&idRubro=" + rubro.getId_Rubro()
+                        + "&idProveedor=" + proveedor.getId_Proveedor()
+                        + "&idEmpresa=" + empresa.getId_Empresa(),
                 productoUno, ProductoDTO.class);
-        productoDos = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
-                + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
+        productoDos = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida()
+                        + "&idRubro=" + rubro.getId_Rubro()
+                        + "&idProveedor=" + proveedor.getId_Proveedor()
+                        + "&idEmpresa=" + empresa.getId_Empresa(),
                 productoDos, ProductoDTO.class);
         String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {}).getBody().isEmpty());

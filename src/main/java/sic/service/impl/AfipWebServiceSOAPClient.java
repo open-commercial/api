@@ -55,7 +55,7 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
     private final String WSAA_PRODUCTION = "https://wsaa.afip.gov.ar/ws/services/LoginCms";
     private final String WSFE_TESTING = "https://wswhomo.afip.gov.ar/wsfev1/service.asmx";
     private final String WSFE_PRODUCTION = "https://servicios1.afip.gov.ar/wsfev1/service.asmx";
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final Logger loggerSoapClient = LoggerFactory.getLogger(this.getClass());
     private final String SOAP_ACTION_FECAESolicitar = "http://ar.gov.afip.dif.FEV1/FECAESolicitar";
     private final String SOAP_ACTION_FECompUltimoAutorizado = "http://ar.gov.afip.dif.FEV1/FECompUltimoAutorizado";
 
@@ -81,11 +81,11 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
     public String loginCMS(LoginCms loginCMS) throws IOException {
         Result result = new StringResult();
         this.getWebServiceTemplate().getMarshaller().marshal(loginCMS, result);
-        LOGGER.warn("TOKEN WSAA XML REQUEST: " + result.toString());
+        loggerSoapClient.warn("TOKEN WSAA XML REQUEST: " + result.toString());
         LoginCmsResponse response = (LoginCmsResponse) this.getWebServiceTemplate()
                 .marshalSendAndReceive(this.getWSAA_URI(), loginCMS);
         this.getWebServiceTemplate().getMarshaller().marshal(response, result);
-        LOGGER.warn("TOKEN WSAA XML RESPONSE: " + result.toString());
+        loggerSoapClient.warn("TOKEN WSAA XML RESPONSE: " + result.toString());
 
         return response.getLoginCmsReturn();
     }
@@ -110,7 +110,7 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
             cstore = CertStore.getInstance("Collection", new CollectionCertStoreParameters(certList), "BC");
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException
                 | UnrecoverableKeyException | InvalidAlgorithmParameterException | NoSuchProviderException ex) {
-            LOGGER.error(ex.getMessage());
+            loggerSoapClient.error(ex.getMessage());
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_certificado_error"));
         }
         String loginTicketRequest_xml = this.crearTicketRequerimientoAcceso(service, ticketTime);
@@ -122,7 +122,7 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
             CMSSignedData signed = generator.generate(data, true, "BC");
             asn1_cms = signed.getEncoded();
         } catch (IllegalArgumentException | CertStoreException | CMSException | NoSuchAlgorithmException | NoSuchProviderException | IOException ex) {
-            LOGGER.error(ex.getMessage());
+            loggerSoapClient.error(ex.getMessage());
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_firmando_certificado_error"));
         }
         return asn1_cms;
@@ -138,7 +138,7 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
         try {
             datatypeFactory = DatatypeFactory.newInstance();
         } catch (DatatypeConfigurationException ex) {
-            LOGGER.error(ex.getMessage());
+            loggerSoapClient.error(ex.getMessage());
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_xml_factory"));
         }
         XMLGregorianCalendar XMLGenTime = datatypeFactory.newXMLGregorianCalendar(genenerationTime);
@@ -157,24 +157,24 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
     public FERecuperaLastCbteResponse FECompUltimoAutorizado(FECompUltimoAutorizado solicitud) throws IOException {
         Result result = new StringResult();
         this.getWebServiceTemplate().getMarshaller().marshal(solicitud, result);
-        LOGGER.warn("ULTIMO COMPROBANTE AUTORIZADO XML REQUEST: " + result.toString());
+        loggerSoapClient.warn("ULTIMO COMPROBANTE AUTORIZADO XML REQUEST: " + result.toString());
         FECompUltimoAutorizadoResponse response = (FECompUltimoAutorizadoResponse)
                 this.getWebServiceTemplate().marshalSendAndReceive(this.getWSFE_URI(), solicitud, (WebServiceMessage message)
                         -> ((SoapMessage) message).setSoapAction(SOAP_ACTION_FECompUltimoAutorizado));
         this.getWebServiceTemplate().getMarshaller().marshal(response, result);
-        LOGGER.warn("ULTIMO COMPROBANTE AUTORIZADO XML RESPONSE: " + result.toString());
+        loggerSoapClient.warn("ULTIMO COMPROBANTE AUTORIZADO XML RESPONSE: " + result.toString());
         return response.getFECompUltimoAutorizadoResult();
     }
 
     public FECAEResponse FECAESolicitar(FECAESolicitar solicitud) throws IOException {
         Result result = new StringResult();
         this.getWebServiceTemplate().getMarshaller().marshal(solicitud, result);
-        LOGGER.warn("SOLICITAR CAE XML REQUEST: " + result.toString());
+        loggerSoapClient.warn("SOLICITAR CAE XML REQUEST: " + result.toString());
         FECAESolicitarResponse response = (FECAESolicitarResponse)
                 this.getWebServiceTemplate().marshalSendAndReceive(this.getWSFE_URI(), solicitud, (WebServiceMessage message)
                         -> ((SoapMessage) message).setSoapAction(SOAP_ACTION_FECAESolicitar));
         this.getWebServiceTemplate().getMarshaller().marshal(response, result);
-        LOGGER.warn("SOLICITAR CAE XML RESPONSE: " + result.toString());
+        loggerSoapClient.warn("SOLICITAR CAE XML RESPONSE: " + result.toString());
         return response.getFECAESolicitarResult();
     }
 }

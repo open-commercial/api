@@ -2,6 +2,7 @@ package sic.builder;
 
 import sic.modelo.ConfiguracionDelSistema;
 import sic.modelo.Empresa;
+import java.util.Date;
 
 public class ConfiguracionDelSistemaBuilder {
 
@@ -9,16 +10,21 @@ public class ConfiguracionDelSistemaBuilder {
     private boolean usarFacturaVentaPreImpresa = true;
     private int cantidadMaximaDeRenglonesEnFactura = 28;
     private boolean facturaElectronicaHabilitada = false;    
-//    private String pathCertificadoAfip = "certs/MiEmpresaTesting.p12";
+    private byte[] certificadoAfip = null;
     private String firmanteCertificadoAfip = "test";
     private String passwordCertificadoAfip = "test123";
     private int nroPuntoDeVentaAfip = 1;
+    private String tokenWSAA = null;
+    private String signTokenWSAA = null;
+    private Date fechaGeneracionTokenWSAA = null;
+    private Date fechaVencimientoTokenWSAA = null;
     private Empresa empresa = new EmpresaBuilder().build();
 
     public ConfiguracionDelSistema build() {
         return new ConfiguracionDelSistema(id_ConfiguracionDelSistema, usarFacturaVentaPreImpresa,
                 cantidadMaximaDeRenglonesEnFactura, facturaElectronicaHabilitada, null,
-                firmanteCertificadoAfip, passwordCertificadoAfip, nroPuntoDeVentaAfip, empresa);
+                firmanteCertificadoAfip, passwordCertificadoAfip, nroPuntoDeVentaAfip, tokenWSAA, signTokenWSAA,
+                fechaGeneracionTokenWSAA, fechaVencimientoTokenWSAA, empresa);
     }
 
     public ConfiguracionDelSistemaBuilder withIdConfiguracionDelSistema(long idCds) {
@@ -41,10 +47,10 @@ public class ConfiguracionDelSistemaBuilder {
         return this;
     }
     
-//    public ConfiguracionDelSistemaBuilder withPathCertificadoAfip(String pathCertificadoAfip) {
-//        this.pathCertificadoAfip = pathCertificadoAfip;
-//        return this;
-//    }
+    public ConfiguracionDelSistemaBuilder withCertificadoAfip(byte[] certificadoAfip) {
+        this.certificadoAfip = certificadoAfip;
+        return this;
+    }
     
     public ConfiguracionDelSistemaBuilder withFirmanteCertificadoAfip(String firmanteCertificadoAfip) {
         this.firmanteCertificadoAfip = firmanteCertificadoAfip;
@@ -60,7 +66,27 @@ public class ConfiguracionDelSistemaBuilder {
         this.nroPuntoDeVentaAfip = nroPuntoDeVentaAfip;
         return this;
     }
-    
+
+    public ConfiguracionDelSistemaBuilder withTokenWSAA(String tokenWSAA) {
+        this.tokenWSAA = tokenWSAA;
+        return this;
+    }
+
+    public ConfiguracionDelSistemaBuilder withSignTokenWSAA(String signTokenWSAA) {
+        this.signTokenWSAA = signTokenWSAA;
+        return this;
+    }
+
+    public ConfiguracionDelSistemaBuilder withFechaGeneracionTokenWSAA(Date fechaGeneracionTokenWSAA) {
+        this.fechaGeneracionTokenWSAA = fechaGeneracionTokenWSAA;
+        return this;
+    }
+
+    public ConfiguracionDelSistemaBuilder withFechaVencimientoTokenWSAA(Date fechaVencimientoTokenWSAA) {
+        this.fechaVencimientoTokenWSAA = fechaVencimientoTokenWSAA;
+        return this;
+    }
+
     public ConfiguracionDelSistemaBuilder withEmpresa(Empresa empresa) {
         this.empresa = empresa;
         return this;

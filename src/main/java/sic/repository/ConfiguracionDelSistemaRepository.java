@@ -6,11 +6,16 @@ import org.springframework.data.repository.query.Param;
 import sic.modelo.ConfiguracionDelSistema;
 import sic.modelo.Empresa;
 
-public interface ConfiguracionDelSistemaRepository extends PagingAndSortingRepository<ConfiguracionDelSistema, Long> {
+public interface ConfiguracionDelSistemaRepository
+    extends PagingAndSortingRepository<ConfiguracionDelSistema, Long> {
 
-      ConfiguracionDelSistema findByEmpresa(Empresa empresa);
+  ConfiguracionDelSistema findByEmpresa(Empresa empresa);
 
-      @Query("SELECT cds.cantidadMaximaDeRenglonesEnFactura FROM ConfiguracionDelSistema cds WHERE cds.empresa.id_Empresa = :idEmpresa")
-      int getCantidadMaximaDeRenglones(@Param("idEmpresa") long idEmpresa);
-    
+  @Query(
+      "SELECT cds.cantidadMaximaDeRenglonesEnFactura FROM ConfiguracionDelSistema cds WHERE cds.empresa.id_Empresa = :idEmpresa")
+  int getCantidadMaximaDeRenglones(@Param("idEmpresa") long idEmpresa);
+
+  @Query(
+      "SELECT cds.facturaElectronicaHabilitada FROM ConfiguracionDelSistema cds WHERE cds.empresa.id_Empresa = :idEmpresa")
+  boolean isFacturaElectronicaHabilitada(@Param("idEmpresa") long idEmpresa);
 }

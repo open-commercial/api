@@ -48,22 +48,10 @@ import sic.modelo.TipoDeOperacion;
 import sic.modelo.Usuario;
 import sic.repository.NotaCreditoClienteRepository;
 import sic.repository.NotaCreditoProveedorRepository;
-import sic.service.BusinessServiceException;
-import sic.service.IClienteService;
-import sic.service.IEmpresaService;
-import sic.service.IFacturaService;
-import sic.service.INotaService;
+import sic.service.*;
 import sic.repository.NotaDebitoClienteRepository;
 import sic.repository.NotaDebitoProveedorRepository;
 import sic.repository.NotaRepository;
-import sic.service.IAfipService;
-import sic.service.IConfiguracionDelSistemaService;
-import sic.service.ICuentaCorrienteService;
-import sic.service.IProductoService;
-import sic.service.IProveedorService;
-import sic.service.IReciboService;
-import sic.service.IUsuarioService;
-import sic.service.ServiceException;
 import sic.util.FormatterFechaHora;
 
 @Service
@@ -81,12 +69,13 @@ public class NotaServiceImpl implements INotaService {
     private final IUsuarioService usuarioService;
     private final IProductoService productoService;
     private final ICuentaCorrienteService cuentaCorrienteService;
+    private final IRenglonCuentaCorrienteService renglonCuentaCorrienteService;
     private final IReciboService reciboService;
     private final IConfiguracionDelSistemaService configuracionDelSistemaService;
     private final IAfipService afipService;
-    private final static BigDecimal IVA_21 = new BigDecimal("21");
-    private final static BigDecimal IVA_105 = new BigDecimal("10.5");
-    private final static BigDecimal CIEN = new BigDecimal("100");
+    private static final BigDecimal IVA_21 = new BigDecimal("21");
+    private static final BigDecimal IVA_105 = new BigDecimal("10.5");
+    private static final BigDecimal CIEN = new BigDecimal("100");
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
@@ -98,8 +87,8 @@ public class NotaServiceImpl implements INotaService {
             IClienteService clienteService, IProveedorService proveedorService, 
             IUsuarioService usuarioService, IProductoService productoService,
             IEmpresaService empresaService, ICuentaCorrienteService cuentaCorrienteService,
+            IRenglonCuentaCorrienteService renglonCuentaCorrienteService,
             IReciboService reciboService, IConfiguracionDelSistemaService cds, IAfipService afipService) {
-
         this.notaRepository = notaRepository;
         this.notaCreditoClienteRepository = notaCreditoClienteRepository;
         this.notaCreditoProveedorRepository = notaCreditoProveedorRepository;
@@ -112,6 +101,7 @@ public class NotaServiceImpl implements INotaService {
         this.empresaService = empresaService;
         this.productoService = productoService;
         this.cuentaCorrienteService = cuentaCorrienteService;
+        this.renglonCuentaCorrienteService = renglonCuentaCorrienteService;
         this.reciboService = reciboService;
         this.configuracionDelSistemaService = cds;
         this.afipService = afipService;
@@ -208,14 +198,16 @@ public class NotaServiceImpl implements INotaService {
     @Override
     public long getSiguienteNumeroNotaDebitoCliente(Long idEmpresa, TipoDeComprobante tipoDeComprobante) {
         Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
-        Long numeroNota = notaDebitoClienteRepository.buscarMayorNumNotaDebitoClienteSegunTipo(tipoDeComprobante, configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa).getNroPuntoDeVentaAfip(), idEmpresa);
+        Long numeroNota = notaDebitoClienteRepository.buscarMayorNumNotaDebitoClienteSegunTipo(tipoDeComprobante,
+                configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa).getNroPuntoDeVentaAfip(), idEmpresa);
         return (numeroNota == null) ? 1 : numeroNota + 1;
     }
     
     @Override
     public long getSiguienteNumeroNotaCreditoCliente(Long idEmpresa, TipoDeComprobante tipoDeComprobante) {
         Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
-        Long numeroNota = notaCreditoClienteRepository.buscarMayorNumNotaCreditoClienteSegunTipo(tipoDeComprobante, configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa).getNroPuntoDeVentaAfip(), idEmpresa);
+        Long numeroNota = notaCreditoClienteRepository.buscarMayorNumNotaCreditoClienteSegunTipo(tipoDeComprobante,
+                configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa).getNroPuntoDeVentaAfip(), idEmpresa);
         return (numeroNota == null) ? 1 : numeroNota + 1;
     }
 
@@ -294,12 +286,12 @@ public class NotaServiceImpl implements INotaService {
                     throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                             .getString("mensaje_nota_fecha_incorrecta"));
                 }
-                if (nota.getCAE() != 0l) {
+                if (nota.getCAE() != 0L) {
                     throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                             .getString("mensaje_nota_cliente_CAE"));
                 }
             } else if (nota instanceof NotaDebitoCliente) {
-                if (nota.getCAE() != 0l) {
+                if (nota.getCAE() != 0L) {
                     throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                             .getString("mensaje_nota_cliente_CAE"));
                 }
@@ -541,45 +533,56 @@ public class NotaServiceImpl implements INotaService {
         cuentaCorrienteService.asentarEnCuentaCorriente(notaDebitoProveedor, TipoDeOperacion.ALTA);
         LOGGER.warn("La Nota " + notaDebitoProveedor + " se guardó correctamente.");
         return notaDebitoProveedor;
-    } 
-
-    @Override
-    @Transactional
-    public Nota autorizarNota(Nota nota) {
-        BigDecimal montoNoGravado = (nota instanceof NotaDebitoCliente) ? ((NotaDebito) nota).getMontoNoGravado() : BigDecimal.ZERO;
-        if (nota instanceof NotaCreditoCliente || nota instanceof NotaDebitoCliente) {
-            Cliente cliente = new Cliente();
-            if (nota instanceof NotaCreditoCliente) {
-                cliente = ((NotaCreditoCliente) nota).getCliente();
-            } else if (nota instanceof NotaDebitoCliente) {
-                cliente = ((NotaDebitoCliente) nota).getCliente();
-            }
-            ComprobanteAFIP comprobante = ComprobanteAFIP.builder()
-                    .fecha(nota.getFecha())
-                    .tipoComprobante(nota.getTipoComprobante())
-                    .CAE(nota.getCAE())
-                    .vencimientoCAE(nota.getVencimientoCAE())
-                    .numSerieAfip(nota.getNumSerieAfip())
-                    .numFacturaAfip(nota.getNumNotaAfip())
-                    .empresa(nota.getEmpresa())
-                    .cliente(cliente)
-                    .subtotalBruto(nota.getSubTotalBruto())
-                    .iva105neto(nota.getIva105Neto())
-                    .iva21neto(nota.getIva21Neto())
-                    .montoNoGravado(montoNoGravado)
-                    .total(nota.getTotal())
-                    .build();
-            afipService.autorizar(comprobante);
-            nota.setCAE(comprobante.getCAE());
-            nota.setVencimientoCAE(comprobante.getVencimientoCAE());
-            nota.setNumSerieAfip(comprobante.getNumSerieAfip());
-            nota.setNumNotaAfip(comprobante.getNumFacturaAfip());
-        } else {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_comprobanteAFIP_invalido"));
-        }
-        return nota;
     }
+
+  @Override
+  @Transactional
+  public Nota autorizarNota(Nota nota) {
+    if (nota instanceof NotaCreditoCliente || nota instanceof NotaDebitoCliente) {
+      BigDecimal montoNoGravado =
+          (nota instanceof NotaDebitoCliente)
+              ? ((NotaDebito) nota).getMontoNoGravado()
+              : BigDecimal.ZERO;
+      Cliente cliente;
+      if (nota instanceof NotaCreditoCliente) {
+        NotaCreditoCliente notaCreditoCliente = (NotaCreditoCliente) nota;
+        if (notaCreditoCliente.getFacturaVenta().getCAE() == 0L) {
+          throw new BusinessServiceException(
+              ResourceBundle.getBundle("Mensajes")
+                  .getString("mensaje_nota_factura_relacionada_sin_CAE"));
+        }
+        cliente = notaCreditoCliente.getCliente();
+      } else {
+        cliente = ((NotaDebitoCliente) nota).getCliente();
+      }
+      ComprobanteAFIP comprobante =
+          ComprobanteAFIP.builder()
+              .fecha(nota.getFecha())
+              .tipoComprobante(nota.getTipoComprobante())
+              .CAE(nota.getCAE())
+              .vencimientoCAE(nota.getVencimientoCAE())
+              .numSerieAfip(nota.getNumSerieAfip())
+              .numFacturaAfip(nota.getNumNotaAfip())
+              .empresa(nota.getEmpresa())
+              .cliente(cliente)
+              .subtotalBruto(nota.getSubTotalBruto())
+              .iva105neto(nota.getIva105Neto())
+              .iva21neto(nota.getIva21Neto())
+              .montoNoGravado(montoNoGravado)
+              .total(nota.getTotal())
+              .build();
+      afipService.autorizar(comprobante);
+      nota.setCAE(comprobante.getCAE());
+      nota.setVencimientoCAE(comprobante.getVencimientoCAE());
+      nota.setNumSerieAfip(comprobante.getNumSerieAfip());
+      nota.setNumNotaAfip(comprobante.getNumFacturaAfip());
+      renglonCuentaCorrienteService.updateCAENota(nota.getIdNota(), comprobante.getCAE());
+    } else {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_comprobanteAFIP_invalido"));
+    }
+    return nota;
+  }
 
     private TipoDeComprobante getTipoDeNotaDebito(TipoDeComprobante tipo) {
         switch (tipo) {
@@ -722,7 +725,7 @@ public class NotaServiceImpl implements INotaService {
             Nota nota = this.getNotaPorId(idNota);
             if (nota != null) {
                 if (nota instanceof NotaCreditoCliente || nota instanceof NotaDebitoCliente) {
-                    if (nota.getCAE() != 0l) {
+                    if (nota.getCAE() != 0L) {
                         throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                                 .getString("mensaje_eliminar_nota_aprobada"));
                     }
@@ -872,13 +875,13 @@ public class NotaServiceImpl implements INotaService {
     }
     
     @Override
-    public BigDecimal calcularTotalCredito(BigDecimal subTotal_bruto, BigDecimal iva105_neto, BigDecimal iva21_neto) {
-        return facturaService.calcularTotal(subTotal_bruto, iva105_neto, iva21_neto);
+    public BigDecimal calcularTotalCredito(BigDecimal subTotalBruto, BigDecimal iva105Neto, BigDecimal iva21Neto) {
+        return facturaService.calcularTotal(subTotalBruto, iva105Neto, iva21Neto);
     }
     
     @Override
-    public BigDecimal calcularTotalDebito(BigDecimal subTotal_bruto, BigDecimal iva21_neto, BigDecimal montoNoGravado) {
-        return subTotal_bruto.add(iva21_neto).add(montoNoGravado);
+    public BigDecimal calcularTotalDebito(BigDecimal subTotalBruto, BigDecimal iva21Neto, BigDecimal montoNoGravado) {
+        return subTotalBruto.add(iva21Neto).add(montoNoGravado);
     }
 
     @Override

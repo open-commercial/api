@@ -46,7 +46,9 @@ public interface IFacturaService {
 
     Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
            
-    List<Factura> guardar(List<Factura> facturas, Long idPedido, List<Recibo> recibos);
+    List<FacturaVenta> guardar(List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos);
+
+    List<FacturaCompra> guardar(List<FacturaCompra> facturas);
 
     void eliminar(long[] idFactura);
     
@@ -90,7 +92,7 @@ public interface IFacturaService {
 
     byte[] getReporteFacturaVenta(Factura factura);
 
-    List<Factura> dividirFactura(FacturaVenta factura, int[] indices);
+    List<FacturaVenta> dividirFactura(FacturaVenta factura, int[] indices);
 
     List<RenglonFactura> convertirRenglonesPedidoEnRenglonesFactura(Pedido pedido, TipoDeComprobante tipoDeComprobante);
 
