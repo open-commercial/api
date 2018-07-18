@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 
 public class FormatterFechaHora extends SimpleDateFormat {
 
+    public static final String FORMATO_FECHAHORA_INTERNACIONAL_MILISEGUNDO = "yyyy-MM-dd'T'HH:mm:ss.SSS";
     public static final String FORMATO_FECHAHORA_INTERNACIONAL = "yyyy/MM/dd HH:mm:ss";
     public static final String FORMATO_FECHA_INTERNACIONAL = "yyyy/MM/dd";
     public static final String FORMATO_HORA_INTERNACIONAL = "HH:mm:ss";

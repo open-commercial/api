@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import sic.modelo.ConfiguracionDelSistema;
 import sic.service.IAfipService;
 import afip.wsaa.wsdl.LoginCms;
 import afip.wsfe.wsdl.AlicIva;
@@ -13,7 +14,6 @@ import afip.wsfe.wsdl.FECAEResponse;
 import afip.wsfe.wsdl.FECAESolicitar;
 import afip.wsfe.wsdl.FECompUltimoAutorizado;
 import afip.wsfe.wsdl.FERecuperaLastCbteResponse;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -22,6 +22,7 @@ import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
+import java.util.Date;
 import java.util.ResourceBundle;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -30,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ws.client.WebServiceClientException;
 import sic.modelo.ComprobanteAFIP;
 import sic.modelo.Empresa;
@@ -41,14 +41,12 @@ import sic.service.ServiceException;
 import sic.util.FormatterFechaHora;
 
 @Service
-@Transactional
 public class AfipServiceImpl implements IAfipService {
 
     private final AfipWebServiceSOAPClient afipWebServiceSOAPClient;
     private final IConfiguracionDelSistemaService configuracionDelSistemaService;
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());    
-    private final FormatterFechaHora formatterFechaHora = new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHA_INTERNACIONAL);
-    private final static String WEBSERVICE_FACTURA_ELECTRONICA = "wsfe";
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final String WEBSERVICE_FACTURA_ELECTRONICA = "wsfe";
 
     @Autowired
     public AfipServiceImpl(AfipWebServiceSOAPClient afipWebServiceSOAPClient, IConfiguracionDelSistemaService cds) {
@@ -56,42 +54,64 @@ public class AfipServiceImpl implements IAfipService {
         this.configuracionDelSistemaService = cds;
     }
 
-    @Override
-    public FEAuthRequest getFEAuth(String afipNombreServicio, Empresa empresa) {
-        FEAuthRequest feAuthRequest = new FEAuthRequest();
-        String loginTicketResponse;
-        byte[] p12file = configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa).getCertificadoAfip();
-        if (p12file.length == 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_cds_certificado_vacio"));
-        }
-        String p12signer = configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa).getFirmanteCertificadoAfip();
-        String p12pass = configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa).getPasswordCertificadoAfip();
-        long ticketTime = 3600000L; //siempre devuelve por 12hs
-        byte[] loginTicketRequest_xml_cms = afipWebServiceSOAPClient.crearCMS(p12file, p12pass, p12signer, afipNombreServicio, ticketTime);
-        LoginCms loginCms = new LoginCms();
-        loginCms.setIn0(Base64.getEncoder().encodeToString(loginTicketRequest_xml_cms));
-        try {
-            loginTicketResponse = afipWebServiceSOAPClient.loginCMS(loginCms);        
-        } catch (WebServiceClientException ex) {
-            LOGGER.error(ex.getMessage());            
-            throw new ServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_token_wsaa_error"), ex);
-        } catch (IOException ex) {
-            LOGGER.error(ex.getMessage());
-            throw new ServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_xml"), ex);
-        }
-        try {
-            Reader tokenReader = new StringReader(loginTicketResponse);
-            Document tokenDoc = new SAXReader(false).read(tokenReader);
-            feAuthRequest.setToken(tokenDoc.valueOf("/loginTicketResponse/credentials/token"));
-            feAuthRequest.setSign(tokenDoc.valueOf("/loginTicketResponse/credentials/sign"));
-            feAuthRequest.setCuit(empresa.getCuip());
-        } catch (DocumentException ex) {
-            LOGGER.error(ex.getMessage());
-            throw new ServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_xml"), ex);
-        }
+  @Override
+  public FEAuthRequest getFEAuth(String afipNombreServicio, Empresa empresa) {
+    FEAuthRequest feAuthRequest = new FEAuthRequest();
+    ConfiguracionDelSistema cds =
+        configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa);
+    Date fechaVencimientoToken = cds.getFechaVencimientoTokenWSAA();
+    if (fechaVencimientoToken != null && fechaVencimientoToken.after(new Date())) {
+      feAuthRequest.setToken(cds.getTokenWSAA());
+      feAuthRequest.setSign(cds.getSignTokenWSAA());
+      feAuthRequest.setCuit(empresa.getCuip());
+      return feAuthRequest;
+    } else {
+      byte[] p12file = cds.getCertificadoAfip();
+      if (p12file.length == 0) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_cds_certificado_vacio"));
+      }
+      String p12signer = cds.getFirmanteCertificadoAfip();
+      String p12pass = cds.getPasswordCertificadoAfip();
+      long ticketTime = 3600000L; // siempre devuelve por 12hs
+      byte[] loginTicketRequestXmlCms =
+          afipWebServiceSOAPClient.crearCMS(
+              p12file, p12pass, p12signer, afipNombreServicio, ticketTime);
+      LoginCms loginCms = new LoginCms();
+      loginCms.setIn0(Base64.getEncoder().encodeToString(loginTicketRequestXmlCms));
+      try {
+        String loginTicketResponse = afipWebServiceSOAPClient.loginCMS(loginCms);
+        Reader tokenReader = new StringReader(loginTicketResponse);
+        Document tokenDoc = new SAXReader(false).read(tokenReader);
+        String tokenWSAA = tokenDoc.valueOf("/loginTicketResponse/credentials/token");
+        String signTokenWSAA = tokenDoc.valueOf("/loginTicketResponse/credentials/sign");
+        feAuthRequest.setToken(tokenWSAA);
+        feAuthRequest.setSign(signTokenWSAA);
+        feAuthRequest.setCuit(empresa.getCuip());
+        cds.setTokenWSAA(tokenWSAA);
+        cds.setSignTokenWSAA(signTokenWSAA);
+        String generationTime = tokenDoc.valueOf("/loginTicketResponse/header/generationTime");
+        String expirationTime = tokenDoc.valueOf("/loginTicketResponse/header/expirationTime");
+        SimpleDateFormat sdf = new SimpleDateFormat(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL_MILISEGUNDO);
+        cds.setFechaGeneracionTokenWSAA(sdf.parse(generationTime));
+        cds.setFechaVencimientoTokenWSAA(sdf.parse(expirationTime));
+        configuracionDelSistemaService.actualizar(cds);
         return feAuthRequest;
+      } catch (DocumentException | IOException ex) {
+        logger.error(ex.getMessage());
+        throw new ServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_xml"), ex);
+      } catch (ParseException ex) {
+        logger.error(ex.getMessage());
+        throw new ServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_fecha"), ex);
+      } catch (WebServiceClientException ex) {
+        logger.error(ex.getMessage());
+        throw new ServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_token_wsaa_error"), ex);
+      }
     }
-    
+  }
+
     @Override    
     public void autorizar(ComprobanteAFIP comprobante) {
         if (!configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(comprobante.getEmpresa()).isFacturaElectronicaHabilitada()) {
@@ -118,7 +138,7 @@ public class AfipServiceImpl implements IAfipService {
             // errores generales de la request
             if (response.getErrors() != null) {
                 msjError = response.getErrors().getErr().get(0).getCode() + "-" + response.getErrors().getErr().get(0).getMsg();
-                LOGGER.error(msjError);
+                logger.error(msjError);
                 if (!msjError.isEmpty()) {
                     throw new BusinessServiceException(msjError);
                 }
@@ -126,23 +146,23 @@ public class AfipServiceImpl implements IAfipService {
             // errores particulares de cada comprobante
             if (response.getFeDetResp().getFECAEDetResponse().get(0).getResultado().equals("R")) {
                 msjError += response.getFeDetResp().getFECAEDetResponse().get(0).getObservaciones().getObs().get(0).getMsg();
-                LOGGER.error(msjError);
+                logger.error(msjError);
                 throw new BusinessServiceException(msjError);
             }
-            long cae = Long.valueOf(response.getFeDetResp().getFECAEDetResponse().get(0).getCAE());
+            long cae = Long.parseLong(response.getFeDetResp().getFECAEDetResponse().get(0).getCAE());
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             comprobante.setCAE(cae);
             comprobante.setVencimientoCAE(formatter.parse(response.getFeDetResp().getFECAEDetResponse().get(0).getCAEFchVto()));
             comprobante.setNumSerieAfip(nroPuntoDeVentaAfip);
             comprobante.setNumFacturaAfip(siguienteNroComprobante);
         } catch (WebServiceClientException ex) {
-            LOGGER.error(ex.getMessage());
+            logger.error(ex.getMessage());
             throw new ServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_autorizacion_error"), ex);
         } catch (ParseException ex) {
-            LOGGER.error(ex.getMessage());
+            logger.error(ex.getMessage());
             throw new ServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_fecha"), ex);
         } catch (IOException ex) {
-            LOGGER.error(ex.getMessage());
+            logger.error(ex.getMessage());
             throw new ServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_xml"), ex);
         }
     }
@@ -173,16 +193,18 @@ public class AfipServiceImpl implements IAfipService {
             case FACTURA_C:                
                 solicitud.setCbteTipo(11);
                 break;
+            default:
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_comprobanteAFIP_invalido"));
         }
         solicitud.setPtoVta(nroPuntoDeVentaAfip);
         try {
             FERecuperaLastCbteResponse response = afipWebServiceSOAPClient.FECompUltimoAutorizado(solicitud);
             return response.getCbteNro() + 1;
         } catch (WebServiceClientException ex) {
-            LOGGER.error(ex.getMessage());            
+            logger.error(ex.getMessage());
             throw new ServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_siguiente_nro_comprobante_error"), ex);
         } catch (IOException ex) {
-            LOGGER.error(ex.getMessage());
+            logger.error(ex.getMessage());
             throw new ServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_procesando_xml"), ex);
         }
     }
@@ -257,15 +279,18 @@ public class AfipServiceImpl implements IAfipService {
                 detalle.setDocTipo(0);
                 detalle.setDocNro(0);
                 break;
+            default:
+                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_comprobanteAFIP_invalido"));
         }
         cabecera.setCantReg(1); // Cantidad de registros del detalle del comprobante o lote de comprobantes de ingreso
         cabecera.setPtoVta(nroPuntoDeVentaAfip); // Punto de Venta del comprobante que se está informando. Si se informa más de un comprobante, todos deben corresponder al mismo punto de venta
         fecaeRequest.setFeCabReq(cabecera);
+        SimpleDateFormat sdf = new SimpleDateFormat(FormatterFechaHora.FORMATO_FECHA_INTERNACIONAL);
         ArrayOfFECAEDetRequest arrayDetalle = new ArrayOfFECAEDetRequest();        
         detalle.setCbteDesde(siguienteNroComprobante);
         detalle.setCbteHasta(siguienteNroComprobante);
         detalle.setConcepto(1); // Concepto del Comprobante. Valores permitidos: 1 Productos, 2 Servicios, 3 Productos y Servicios        
-        detalle.setCbteFch(formatterFechaHora.format(comprobante.getFecha()).replace("/", "")); // Fecha del comprobante (yyyymmdd)        
+        detalle.setCbteFch(sdf.format(comprobante.getFecha()).replace("/", "")); // Fecha del comprobante (yyyymmdd)
         ArrayOfAlicIva arrayIVA = new ArrayOfAlicIva();
         if (comprobante.getIva21neto().compareTo(BigDecimal.ZERO) != 0) {
             AlicIva alicIVA21 = new AlicIva();

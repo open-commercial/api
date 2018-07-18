@@ -2,13 +2,8 @@ package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import java.util.Date;
+import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -43,6 +38,17 @@ public class ConfiguracionDelSistema implements Serializable {
     private String passwordCertificadoAfip;
     
     private int nroPuntoDeVentaAfip;
+
+    @Column(length = 1000)
+    private String tokenWSAA;
+
+    private String signTokenWSAA;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date fechaGeneracionTokenWSAA;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date fechaVencimientoTokenWSAA;
 
     @ManyToOne
     @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
