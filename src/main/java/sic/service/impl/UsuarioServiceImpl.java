@@ -257,8 +257,9 @@ public class UsuarioServiceImpl implements IUsuarioService {
     if (!usuario.getRoles().contains(Rol.COMPRADOR)) {
       this.clienteService.desvincularClienteDeComprador(usuario.getId_Usuario());
     }
-    if (this.getUsuarioPorId(idUsuarioLoggedIn).getId_Usuario() != usuario.getId_Usuario()) {
-      this.actualizarToken(null, usuario.getId_Usuario());
+    Usuario usuarioLoggedIn = this.getUsuarioPorId(idUsuarioLoggedIn);
+    if (usuarioLoggedIn.getId_Usuario() == usuario.getId_Usuario()) {
+      usuario.setToken(usuarioLoggedIn.getToken());
     }
     usuarioRepository.save(usuario);
     LOGGER.warn("El Usuario " + usuario + " se actualizó correctamente.");

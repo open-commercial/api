@@ -32,7 +32,6 @@ import sic.service.*;
 public class ProductoController {
 
     private final IProductoService productoService;
-    private final int TAMANIO_PAGINA_DEFAULT = 50;
 
     @Autowired
     public ProductoController(IProductoService productoService) {
@@ -96,6 +95,7 @@ public class ProductoController {
                                           @RequestParam(required = false) Boolean publicos,
                                           @RequestParam(required = false) Integer pagina,
                                           @RequestParam(required = false) Integer tamanio) {
+        final int TAMANIO_PAGINA_DEFAULT = 50;
         if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
         if (pagina == null || pagina < 0) pagina = 0;
         Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "descripcion"));

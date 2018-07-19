@@ -97,4 +97,9 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
     public int getCantidadMaximaDeRenglonesPorIdEmpresa(long idEmpresa) {
         return configuracionRepository.getCantidadMaximaDeRenglones(idEmpresa);
     }
+
+  @Override
+  public boolean isFacturaElectronicaHabilitada(long idEmpresa) {
+    return configuracionRepository.isFacturaElectronicaHabilitada(idEmpresa);
+  }
 }

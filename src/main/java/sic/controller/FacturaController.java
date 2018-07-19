@@ -39,7 +39,7 @@ public class FacturaController {
     private final IPedidoService pedidoService;
     private final ITransportistaService transportistaService;
     private final IReciboService reciboService;
-    private final int TAMANIO_PAGINA_DEFAULT = 50;
+    private static final int TAMANIO_PAGINA_DEFAULT = 50;
 
     @Value("${SIC_JWT_KEY}")
     private String secretkey;
@@ -65,51 +65,74 @@ public class FacturaController {
     public Factura getFacturaPorId(@PathVariable long idFactura) {
         return facturaService.getFacturaPorId(idFactura);
     }
-    
-    @PostMapping("/facturas/venta")
-    @ResponseStatus(HttpStatus.CREATED)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-    public List<Factura> guardarFacturaVenta(@RequestBody FacturaVenta fv,
-                                             @RequestParam Long idEmpresa, 
-                                             @RequestParam Long idCliente,
-                                             @RequestParam Long idUsuario,
-                                             @RequestParam Long idTransportista,
-                                             @RequestParam(required = false) long[] idsFormaDePago,
-                                             @RequestParam(required = false) BigDecimal[] montos,
-                                             @RequestParam(required = false) int[] indices,
-                                             @RequestParam(required = false) Long idPedido) {
-        Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
-        fv.setEmpresa(empresa);
-        fv.setCliente(clienteService.getClientePorId(idCliente));
-        fv.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-        fv.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
-        if (indices != null) {
-            return facturaService.guardar(facturaService.dividirFactura((FacturaVenta) fv, indices), idPedido, 
-                    reciboService.construirRecibos(idsFormaDePago, empresa,
-                            fv.getCliente(), fv.getUsuario(), montos, fv.getTotal(), fv.getFecha()));
-        } else {
-            List<Factura> facturas = new ArrayList<>();
-            facturas.add(fv);
-            return facturaService.guardar(facturas, idPedido, reciboService.construirRecibos(idsFormaDePago, empresa,
-                            fv.getCliente(), fv.getUsuario(), montos, fv.getTotal(), fv.getFecha()));         
-        }
-    }   
-    
-    @PostMapping("/facturas/compra")
-    @ResponseStatus(HttpStatus.CREATED)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public List<Factura> guardarFacturaCompra(@RequestBody FacturaCompra fc,
-                                              @RequestParam Long idEmpresa,
-                                              @RequestParam Long idProveedor,
-                                              @RequestParam Long idTransportista) {
-            fc.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-            fc.setProveedor(proveedorService.getProveedorPorId(idProveedor));
-            fc.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
-            List<Factura> facturas = new ArrayList<>();
-            facturas.add(fc);
-            return facturaService.guardar(facturas, null, null);         
-    }   
-    
+
+  @PostMapping("/facturas/venta")
+  @ResponseStatus(HttpStatus.CREATED)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public List<FacturaVenta> guardarFacturaVenta(
+      @RequestBody FacturaVenta fv,
+      @RequestParam Long idEmpresa,
+      @RequestParam Long idCliente,
+      @RequestParam Long idUsuario,
+      @RequestParam Long idTransportista,
+      @RequestParam(required = false) long[] idsFormaDePago,
+      @RequestParam(required = false) BigDecimal[] montos,
+      @RequestParam(required = false) int[] indices,
+      @RequestParam(required = false) Long idPedido) {
+    Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
+    fv.setEmpresa(empresa);
+    fv.setCliente(clienteService.getClientePorId(idCliente));
+    fv.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
+    fv.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
+    List<FacturaVenta> facturasGuardadas;
+    if (indices != null) {
+      facturasGuardadas =
+          facturaService.guardar(
+              facturaService.dividirFactura(fv, indices),
+              idPedido,
+              reciboService.construirRecibos(
+                  idsFormaDePago,
+                  empresa,
+                  fv.getCliente(),
+                  fv.getUsuario(),
+                  montos,
+                  fv.getTotal(),
+                  fv.getFecha()));
+    } else {
+      List<FacturaVenta> facturas = new ArrayList<>();
+      facturas.add(fv);
+      facturasGuardadas =
+          facturaService.guardar(
+              facturas,
+              idPedido,
+              reciboService.construirRecibos(
+                  idsFormaDePago,
+                  empresa,
+                  fv.getCliente(),
+                  fv.getUsuario(),
+                  montos,
+                  fv.getTotal(),
+                  fv.getFecha()));
+    }
+    return facturasGuardadas;
+  }
+
+  @PostMapping("/facturas/compra")
+  @ResponseStatus(HttpStatus.CREATED)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public List<FacturaCompra> guardarFacturaCompra(
+      @RequestBody FacturaCompra fc,
+      @RequestParam Long idEmpresa,
+      @RequestParam Long idProveedor,
+      @RequestParam Long idTransportista) {
+    fc.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    fc.setProveedor(proveedorService.getProveedorPorId(idProveedor));
+    fc.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
+    List<FacturaCompra> facturas = new ArrayList<>();
+    facturas.add(fc);
+    return facturaService.guardar(facturas);
+  }
+
     @PostMapping("/facturas/{idFactura}/autorizacion")
     @ResponseStatus(HttpStatus.CREATED)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})

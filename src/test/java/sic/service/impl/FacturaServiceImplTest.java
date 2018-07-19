@@ -18,7 +18,6 @@ import sic.builder.TransportistaBuilder;
 import sic.modelo.Cliente;
 import sic.modelo.CondicionIVA;
 import sic.modelo.Empresa;
-import sic.modelo.Factura;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Medida;
 import sic.modelo.Producto;
@@ -194,8 +193,12 @@ public class FacturaServiceImplTest {
 
     @Test
     public void shouldDividirFactura() {
-        when(facturaVentaRepository.buscarMayorNumFacturaSegunTipo(TipoDeComprobante.FACTURA_X, 1L, new EmpresaBuilder().build().getId_Empresa())).thenReturn(1L);
-        when(facturaVentaRepository.buscarMayorNumFacturaSegunTipo(TipoDeComprobante.FACTURA_A, 1L, new EmpresaBuilder().build().getId_Empresa())).thenReturn(1L);
+        when(facturaVentaRepository.buscarMayorNumFacturaSegunTipo(TipoDeComprobante.FACTURA_X,
+                1L, new EmpresaBuilder()
+                .build().getId_Empresa())).thenReturn(1L);
+        when(facturaVentaRepository.buscarMayorNumFacturaSegunTipo(TipoDeComprobante.FACTURA_A,
+                1L, new EmpresaBuilder()
+                .build().getId_Empresa())).thenReturn(1L);
         RenglonFactura renglon1 = Mockito.mock(RenglonFactura.class);
         RenglonFactura renglon2 = Mockito.mock(RenglonFactura.class);
         RenglonFactura renglon3 = Mockito.mock(RenglonFactura.class);
@@ -260,7 +263,7 @@ public class FacturaServiceImplTest {
         int cantidadDeFacturasEsperadas = 2;
         int cantidadDeRenglonesEsperadosFX = 4;
         int cantidadDeRenglonesEsperadosFA= 6;
-        List<Factura> result = facturaService.dividirFactura(factura, indices);
+        List<FacturaVenta> result = facturaService.dividirFactura(factura, indices);
         assertEquals(cantidadDeFacturasEsperadas, result.size());
         assertEquals(cantidadDeRenglonesEsperadosFX, result.get(0).getRenglones().size());
         assertEquals(cantidadDeRenglonesEsperadosFA, result.get(1).getRenglones().size());
