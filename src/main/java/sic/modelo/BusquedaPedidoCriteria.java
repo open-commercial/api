@@ -17,14 +17,14 @@ public class BusquedaPedidoCriteria {
     private Date fechaDesde;
     private Date fechaHasta;
     private boolean buscaCliente;
-    private Cliente cliente;
+    private Long idCliente;
     private boolean buscaUsuario;
-    private Usuario usuario;
+    private Long idUsuario;
     private boolean buscaPorNroPedido;
     private long nroPedido;
     private boolean buscaPorEstadoPedido;
     private EstadoPedido estadoPedido;
-    private Empresa empresa;
+    private Long idEmpresa;
     private int cantRegistros;    
     private Pageable pageable;
 }

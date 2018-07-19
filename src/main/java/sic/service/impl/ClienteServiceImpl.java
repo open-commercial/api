@@ -91,10 +91,6 @@ public class ClienteServiceImpl implements IClienteService {
 
   @Override
   public Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long idUsuarioLoggedIn) {
-    if (criteria.getEmpresa() == null) {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_empresa_no_existente"));
-    }
     QCliente qCliente = QCliente.cliente;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.isBuscaPorRazonSocial()) {
@@ -121,12 +117,12 @@ public class ClienteServiceImpl implements IClienteService {
       }
       builder.or(idPredicate);
     }
-    if (criteria.isBuscaPorViajante()) builder.and(qCliente.viajante.eq(criteria.getViajante()));
-    if (criteria.isBuscaPorLocalidad()) builder.and(qCliente.localidad.eq(criteria.getLocalidad()));
+    if (criteria.isBuscaPorViajante()) builder.and(qCliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
+    if (criteria.isBuscaPorLocalidad()) builder.and(qCliente.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
-      builder.and(qCliente.localidad.provincia.eq(criteria.getProvincia()));
+      builder.and(qCliente.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
     if (criteria.isBuscaPorPais())
-      builder.and(qCliente.localidad.provincia.pais.eq(criteria.getPais()));
+      builder.and(qCliente.localidad.provincia.pais.id_Pais.eq(criteria.getIdPais()));
     Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
@@ -139,7 +135,7 @@ public class ClienteServiceImpl implements IClienteService {
             break;
           case COMPRADOR:
             Cliente clienteRelacionado =
-                this.getClientePorIdUsuarioYidEmpresa(idUsuarioLoggedIn, criteria.getEmpresa());
+                this.getClientePorIdUsuarioYidEmpresa(idUsuarioLoggedIn, criteria.getIdEmpresa());
             if (clienteRelacionado != null) {
               rsPredicate.or(qCliente.eq(clienteRelacionado));
             } else {
@@ -150,7 +146,7 @@ public class ClienteServiceImpl implements IClienteService {
       }
       builder.and(rsPredicate);
     }
-    builder.and(qCliente.empresa.eq(criteria.getEmpresa()).and(qCliente.eliminado.eq(false)));
+    builder.and(qCliente.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qCliente.eliminado.eq(false)));
     Page<Cliente> page = clienteRepository.findAll(builder, criteria.getPageable());
     if (criteria.isConSaldo()) {
       page.getContent()
@@ -237,7 +233,7 @@ public class ClienteServiceImpl implements IClienteService {
     if (cliente.getCredencial() != null) {
       Cliente clienteYaAsignado =
           this.getClientePorIdUsuarioYidEmpresa(
-              cliente.getCredencial().getId_Usuario(), cliente.getEmpresa());
+              cliente.getCredencial().getId_Usuario(), cliente.getEmpresa().getId_Empresa());
       if (clienteYaAsignado != null) {
         throw new BusinessServiceException(
             MessageFormat.format(
@@ -263,7 +259,7 @@ public class ClienteServiceImpl implements IClienteService {
       Cliente clienteYaAsignado =
           this.getClientePorIdUsuarioYidEmpresa(
               clientePorActualizar.getCredencial().getId_Usuario(),
-              clientePorActualizar.getEmpresa());
+              clientePorActualizar.getEmpresa().getId_Empresa());
       if (clienteYaAsignado != null
           && clienteYaAsignado.getId_Cliente() != clientePorActualizar.getId_Cliente()) {
         throw new BusinessServiceException(
@@ -296,8 +292,8 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public Cliente getClientePorIdUsuarioYidEmpresa(long idUsuario, Empresa empresa) {
-    return clienteRepository.findClienteByIdUsuarioYidEmpresa(idUsuario, empresa.getId_Empresa());
+  public Cliente getClientePorIdUsuarioYidEmpresa(long idUsuario, long idEmpresa) {
+    return clienteRepository.findClienteByIdUsuarioYidEmpresa(idUsuario, idEmpresa);
   }
 
   @Override

@@ -94,10 +94,6 @@ public class CajaController {
             fechaDesde.setTimeInMillis(desde);
             fechaHasta.setTimeInMillis(hasta);
         }
-        Usuario usuarioApertura = new Usuario();
-        if (idUsuarioApertura != null) usuarioApertura = usuarioService.getUsuarioPorId(idUsuarioApertura);
-        Usuario usuarioCierre = new Usuario();
-        if (idUsuarioCierre != null) usuarioCierre = usuarioService.getUsuarioPorId(idUsuarioCierre);
         if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
         if (pagina == null || pagina < 0) pagina = 0;
         Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, "fechaApertura"));
@@ -105,12 +101,12 @@ public class CajaController {
                                         .buscaPorFecha((desde != null) && (hasta != null))
                                         .fechaDesde(fechaDesde.getTime())
                                         .fechaHasta(fechaHasta.getTime())
-                                        .empresa(empresaService.getEmpresaPorId(idEmpresa))
+                                        .idEmpresa(idEmpresa)
                                         .cantidadDeRegistros(0)
                                         .buscaPorUsuarioApertura(idUsuarioApertura != null)
-                                        .usuarioApertura(usuarioApertura)
+                                        .idUsuarioApertura(idUsuarioApertura)
                                         .buscaPorUsuarioCierre(idUsuarioCierre != null)
-                                        .usuarioCierre(usuarioCierre)
+                                        .idUsuarioCierre(idUsuarioCierre)
                                         .pageable(pageable)
                                         .build();
         return cajaService.getCajasCriteria(criteria);
@@ -166,24 +162,16 @@ public class CajaController {
             fechaDesde.setTimeInMillis(desde);
             fechaHasta.setTimeInMillis(hasta);
         }
-        Usuario usuarioApertura = new Usuario();
-        if(idUsuarioApertura != null) {
-            usuarioApertura = usuarioService.getUsuarioPorId(idUsuarioApertura);
-        }
-        Usuario usuarioCierre = new Usuario();
-        if(idUsuarioCierre != null) {
-            usuarioCierre = usuarioService.getUsuarioPorId(idUsuarioCierre);
-        }
         BusquedaCajaCriteria criteria = BusquedaCajaCriteria.builder()
                 .buscaPorFecha((desde != null) && (hasta != null))
                 .fechaDesde(fechaDesde.getTime())
                 .fechaHasta(fechaHasta.getTime())
-                .empresa(empresaService.getEmpresaPorId(idEmpresa))
+                .idEmpresa(idEmpresa)
                 .cantidadDeRegistros(0)
                 .buscaPorUsuarioApertura(idUsuarioApertura != null)
-                .usuarioApertura(usuarioApertura)
+                .idUsuarioApertura(idUsuarioApertura)
                 .buscaPorUsuarioCierre(idUsuarioCierre != null)
-                .usuarioCierre(usuarioCierre)
+                .idUsuarioCierre(idUsuarioCierre)
                 .build();
         return cajaService.getSaldoSistemaCajas(criteria);
     }
@@ -214,12 +202,12 @@ public class CajaController {
                 .buscaPorFecha((desde != null) && (hasta != null))
                 .fechaDesde(fechaDesde.getTime())
                 .fechaHasta(fechaHasta.getTime())
-                .empresa(empresaService.getEmpresaPorId(idEmpresa))
+                .idEmpresa(idEmpresa)
                 .cantidadDeRegistros(0)
                 .buscaPorUsuarioApertura(idUsuarioApertura != null)
-                .usuarioApertura(usuarioApertura)
+                .idUsuarioApertura(idUsuarioApertura)
                 .buscaPorUsuarioCierre(idUsuarioCierre != null)
-                .usuarioCierre(usuarioCierre)
+                .idUsuarioCierre(idUsuarioCierre)
                 .build();
         return cajaService.getSaldoRealCajas(criteria);
     }

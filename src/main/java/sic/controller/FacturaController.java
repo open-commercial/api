@@ -156,10 +156,6 @@ public class FacturaController {
             fechaDesde.setTimeInMillis(desde);            
             fechaHasta.setTimeInMillis(hasta);
         }
-        Proveedor proveedor = null;
-        if (idProveedor != null) {
-            proveedor = proveedorService.getProveedorPorId(idProveedor);
-        }
         if (tamanio == null || tamanio <= 0) {
             tamanio = TAMANIO_PAGINA_DEFAULT;
         }
@@ -168,12 +164,12 @@ public class FacturaController {
         }
         Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, "fecha"));
         BusquedaFacturaCompraCriteria criteria = BusquedaFacturaCompraCriteria.builder()
-                                                 .empresa(empresaService.getEmpresaPorId(idEmpresa))
+                                                 .idEmpresa(idEmpresa)
                                                  .buscaPorFecha((desde != null) && (hasta != null))
                                                  .fechaDesde(fechaDesde.getTime())
                                                  .fechaHasta(fechaHasta.getTime())
                                                  .buscaPorProveedor(idProveedor != null)
-                                                 .proveedor(proveedor)
+                                                 .idProveedor(idProveedor)
                                                  .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
                                                  .numSerie((nroSerie != null) ? nroSerie : 0)
                                                  .numFactura((nroFactura != null) ? nroFactura : 0)
@@ -184,7 +180,7 @@ public class FacturaController {
                                                  .build();
         return facturaService.buscarFacturaCompra(criteria);
     }
-    
+
     @GetMapping("/facturas/venta/busqueda/criteria")
     @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
@@ -207,18 +203,6 @@ public class FacturaController {
             fechaDesde.setTimeInMillis(desde);
             fechaHasta.setTimeInMillis(hasta);
         }
-        Cliente cliente = new Cliente();
-        if (idCliente != null) {
-            cliente = clienteService.getClientePorId(idCliente);
-        }
-        Usuario usuario = new Usuario();
-        if (idUsuario != null) {
-            usuario = usuarioService.getUsuarioPorId(idUsuario);
-        }
-        Usuario viajante = new Usuario();
-        if (idViajante != null) {
-            viajante = usuarioService.getUsuarioPorId(idViajante);
-        }
         if (tamanio == null || tamanio <= 0) {
             tamanio = TAMANIO_PAGINA_DEFAULT;
         }
@@ -227,16 +211,16 @@ public class FacturaController {
         }
         Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, "fecha"));
         BusquedaFacturaVentaCriteria criteria = BusquedaFacturaVentaCriteria.builder()
-                .empresa(empresaService.getEmpresaPorId(idEmpresa))
+                .idEmpresa(idEmpresa)
                 .buscaPorFecha((desde != null) && (hasta != null))
                 .fechaDesde(fechaDesde.getTime())
                 .fechaHasta(fechaHasta.getTime())
                 .buscaCliente(idCliente != null)
-                .cliente(cliente)
+                .idCliente(idCliente)
                 .buscaUsuario(idUsuario != null)
-                .usuario(usuario)
+                .idUsuario(idUsuario)
                 .buscaViajante(idViajante != null)
-                .viajante(viajante)
+                .idViajante(idViajante)
                 .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
                 .numSerie((nroSerie != null) ? nroSerie : 0)
                 .numFactura((nroFactura != null) ? nroFactura : 0)
@@ -341,29 +325,17 @@ public class FacturaController {
             fechaDesde.setTimeInMillis(desde);
             fechaHasta.setTimeInMillis(hasta);
         }
-        Cliente cliente = new Cliente();
-        if (idCliente != null) {
-            cliente = clienteService.getClientePorId(idCliente);
-        }
-        Usuario usuario = new Usuario();
-        if (idUsuario != null) {
-            usuario = usuarioService.getUsuarioPorId(idUsuario);
-        }
-        Usuario viajante = new Usuario();
-        if (idViajante != null) {
-            viajante = usuarioService.getUsuarioPorId(idViajante);
-        }
         BusquedaFacturaVentaCriteria criteria = BusquedaFacturaVentaCriteria.builder()
-                                                 .empresa(empresaService.getEmpresaPorId(idEmpresa))
+                                                 .idEmpresa(idEmpresa)
                                                  .buscaPorFecha((desde != null) && (hasta != null))
                                                  .fechaDesde(fechaDesde.getTime())
                                                  .fechaHasta(fechaHasta.getTime())
                                                  .buscaCliente(idCliente != null)
-                                                 .cliente(cliente)
+                                                 .idCliente(idCliente)
                                                  .buscaUsuario(idUsuario != null)
-                                                 .usuario(usuario)
+                                                 .idUsuario(idUsuario)
                                                  .buscaViajante(idViajante != null)
-                                                 .viajante(viajante)
+                                                 .idViajante(idViajante)
                                                  .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
                                                  .numSerie((nroSerie != null)? nroSerie : 0)
                                                  .numFactura((nroFactura != null) ? nroFactura : 0)
@@ -394,19 +366,15 @@ public class FacturaController {
             fechaDesde.setTimeInMillis(desde);            
             fechaHasta.setTimeInMillis(hasta);
         }
-        Proveedor proveedor = null;
-        if (idProveedor != null) {
-            proveedor = proveedorService.getProveedorPorId(idProveedor);
-        }
         BusquedaFacturaCompraCriteria criteria = BusquedaFacturaCompraCriteria.builder()
-                                                 .empresa(empresaService.getEmpresaPorId(idEmpresa))
+                                                 .idEmpresa(idEmpresa)
                                                  .buscaPorFecha((desde != null) && (hasta != null))
                                                  .fechaDesde(fechaDesde.getTime())
                                                  .fechaHasta(fechaHasta.getTime())
                                                  .buscaPorProveedor(idProveedor != null)
-                                                 .proveedor(proveedor)
+                                                 .idProveedor(idProveedor)
                                                  .buscaPorTipoComprobante(tipoDeComprobante != null)
-                                                 .tipoComprobante((tipoDeComprobante != null) ? tipoDeComprobante : null)
+                                                 .tipoComprobante(tipoDeComprobante)
                                                  .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
                                                  .numSerie((nroSerie != null) ? nroSerie : 0)
                                                  .numFactura((nroFactura != null) ? nroFactura : 0)
@@ -435,29 +403,17 @@ public class FacturaController {
             fechaDesde.setTimeInMillis(desde);
             fechaHasta.setTimeInMillis(hasta);
         }
-        Cliente cliente = new Cliente();
-        if (idCliente != null) {
-            cliente = clienteService.getClientePorId(idCliente);
-        }
-        Usuario usuario = new Usuario();
-        if (idUsuario != null) {
-            usuario = usuarioService.getUsuarioPorId(idUsuario);
-        }
-        Usuario viajante = new Usuario();
-        if (idViajante != null) {
-            viajante = usuarioService.getUsuarioPorId(idViajante);
-        }
         BusquedaFacturaVentaCriteria criteria = BusquedaFacturaVentaCriteria.builder()
-                                                .empresa(empresaService.getEmpresaPorId(idEmpresa))
+                                                .idEmpresa(idEmpresa)
                                                 .buscaPorFecha((desde != null) && (hasta != null))
                                                 .fechaDesde(fechaDesde.getTime())
                                                 .fechaHasta(fechaHasta.getTime())
                                                 .buscaCliente(idCliente != null)
-                                                .cliente(cliente)
+                                                .idCliente(idCliente)
                                                 .buscaUsuario(idUsuario != null)
-                                                .usuario(usuario)
+                                                .idUsuario(idUsuario)
                                                 .buscaViajante(idViajante != null)
-                                                .viajante(viajante)
+                                                .idViajante(idViajante)
                                                 .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
                                                 .numSerie((nroSerie != null) ? nroSerie : 0)
                                                 .numFactura((nroFactura != null) ? nroFactura : 0)
@@ -488,19 +444,15 @@ public class FacturaController {
             fechaDesde.setTimeInMillis(desde);            
             fechaHasta.setTimeInMillis(hasta);
         }
-        Proveedor proveedor = null;
-        if (idProveedor != null) {
-            proveedor = proveedorService.getProveedorPorId(idProveedor);
-        }
         BusquedaFacturaCompraCriteria criteria = BusquedaFacturaCompraCriteria.builder()
-                                                 .empresa(empresaService.getEmpresaPorId(idEmpresa))
+                                                 .idEmpresa(idEmpresa)
                                                  .buscaPorFecha((desde != null) && (hasta != null))
                                                  .fechaDesde(fechaDesde.getTime())
                                                  .fechaHasta(fechaHasta.getTime())
                                                  .buscaPorProveedor(idProveedor != null)
-                                                 .proveedor(proveedor)
+                                                 .idProveedor(idProveedor)
                                                  .buscaPorTipoComprobante(tipoDeComprobante != null)
-                                                 .tipoComprobante((tipoDeComprobante != null) ? tipoDeComprobante : null)
+                                                 .tipoComprobante(tipoDeComprobante)
                                                  .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
                                                  .numSerie((nroSerie != null) ? nroSerie : 0)
                                                  .numFactura((nroFactura != null) ? nroFactura : 0)
@@ -529,29 +481,17 @@ public class FacturaController {
             fechaDesde.setTimeInMillis(desde);
             fechaHasta.setTimeInMillis(hasta);
         }
-        Cliente cliente = new Cliente();
-        if (idCliente != null) {
-            cliente = clienteService.getClientePorId(idCliente);
-        }
-        Usuario usuario = new Usuario();
-        if (idUsuario != null) {
-            usuario = usuarioService.getUsuarioPorId(idUsuario);
-        }
-        Usuario viajante = new Usuario();
-        if (idViajante != null) {
-            viajante = usuarioService.getUsuarioPorId(idViajante);
-        }
         BusquedaFacturaVentaCriteria criteria = BusquedaFacturaVentaCriteria.builder()
-                                                 .empresa(empresaService.getEmpresaPorId(idEmpresa))
+                                                 .idEmpresa(idEmpresa)
                                                  .buscaPorFecha((desde != null) && (hasta != null))
                                                  .fechaDesde(fechaDesde.getTime())
                                                  .fechaHasta(fechaHasta.getTime())
                                                  .buscaCliente(idCliente != null)
-                                                 .cliente(cliente)
+                                                 .idCliente(idCliente)
                                                  .buscaUsuario(idUsuario != null)
-                                                 .usuario(usuario)
+                                                 .idUsuario(idUsuario)
                                                  .buscaViajante(idViajante != null)
-                                                 .viajante(viajante)
+                                                 .idViajante(idViajante)
                                                  .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
                                                  .numSerie((nroSerie != null)? nroSerie : 0)
                                                  .numFactura((nroFactura != null) ? nroFactura : 0)

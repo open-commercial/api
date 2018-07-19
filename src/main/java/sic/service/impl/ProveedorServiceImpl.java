@@ -54,37 +54,32 @@ public class ProveedorServiceImpl implements IProveedorService {
 
     @Override
     public List<Proveedor> buscarProveedores(BusquedaProveedorCriteria criteria) {
-        //Empresa
-        if (criteria.getEmpresa() == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
         QProveedor qproveedor = QProveedor.proveedor;
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qproveedor.empresa.eq(criteria.getEmpresa()).and(qproveedor.eliminado.eq(false)));
+        builder.and(qproveedor.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qproveedor.eliminado.eq(false)));
          //Razon Social
-        if (criteria.isBuscaPorRazonSocial() == true) {
+        if (criteria.isBuscaPorRazonSocial()) {
             builder.and(this.buildPredicadoRazonSocial(criteria.getRazonSocial(), qproveedor));
         }
         //Id_Fiscal
-        if (criteria.isBuscaPorId_Fiscal() == true) {
+        if (criteria.isBuscaPorId_Fiscal()) {
             builder.and(qproveedor.idFiscal.eq(criteria.getIdFiscal()));
         }
         //Codigo
-        if (criteria.isBuscaPorCodigo() == true) {
+        if (criteria.isBuscaPorCodigo()) {
             builder.and(qproveedor.codigo.eq(criteria.getCodigo()));
         }
         //Localidad
-        if (criteria.isBuscaPorLocalidad() == true) {
-            builder.and(qproveedor.localidad.eq(criteria.getLocalidad()));
+        if (criteria.isBuscaPorLocalidad()) {
+            builder.and(qproveedor.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
         }
         //Provincia
-        if (criteria.isBuscaPorProvincia() == true) {
-            builder.and(qproveedor.localidad.provincia.eq(criteria.getProvincia()));
+        if (criteria.isBuscaPorProvincia()) {
+            builder.and(qproveedor.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
         }
         //Pais
-        if (criteria.isBuscaPorPais() == true) {
-            builder.and(qproveedor.localidad.provincia.pais.eq(criteria.getPais()));
+        if (criteria.isBuscaPorPais()) {
+            builder.and(qproveedor.localidad.provincia.pais.id_Pais.eq(criteria.getIdPais()));
         }
         List<Proveedor> proveedores = new ArrayList<>();
         proveedorRepository.findAll(builder, new Sort(Sort.Direction.ASC, "razonSocial")).iterator().forEachRemaining(proveedores::add);

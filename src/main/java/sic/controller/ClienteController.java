@@ -77,14 +77,6 @@ public class ClienteController {
       @RequestParam(required = false) Integer tamanio,
       @RequestParam(required = false, defaultValue = "true") boolean conSaldo,
       @RequestHeader("Authorization") String token) {
-    Usuario viajante = null;
-    if (idViajante != null) viajante = usuarioService.getUsuarioPorId(idViajante);
-    Pais pais = null;
-    if (idPais != null) pais = paisService.getPaisPorId(idPais);
-    Provincia provincia = null;
-    if (idProvincia != null) provincia = provinciaService.getProvinciaPorId(idProvincia);
-    Localidad localidad = null;
-    if (idLocalidad != null) localidad = localidadService.getLocalidadPorId(idLocalidad);
     int TAMANIO_PAGINA_DEFAULT = 50;
     if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
     if (pagina == null || pagina < 0) pagina = 0;
@@ -99,14 +91,14 @@ public class ClienteController {
             .buscaPorId_Fiscal(idFiscal != null)
             .idFiscal(idFiscal)
             .buscaPorViajante(idViajante != null)
-            .viajante(viajante)
+            .idViajante(idViajante)
             .buscaPorPais(idPais != null)
-            .pais(pais)
+            .idPais(idPais)
             .buscaPorProvincia(idProvincia != null)
-            .provincia(provincia)
+            .idProvincia(idProvincia)
             .buscaPorLocalidad(idLocalidad != null)
-            .localidad(localidad)
-            .empresa(empresaService.getEmpresaPorId(idEmpresa))
+            .idLocalidad(idLocalidad)
+            .idEmpresa(idEmpresa)
             .pageable(pageable)
             .conSaldo(conSaldo)
             .build();
@@ -237,6 +229,6 @@ public class ClienteController {
   public Cliente getClientePorIdUsuario(
       @PathVariable long idUsuario, @PathVariable long idEmpresa) {
     return clienteService.getClientePorIdUsuarioYidEmpresa(
-        idUsuario, empresaService.getEmpresaPorId(idEmpresa));
+        idUsuario, idEmpresa);
   }
 }

@@ -29,7 +29,7 @@ public interface IClienteService {
 
   Cliente getClientePorIdPedido(long idPedido);
 
-  Cliente getClientePorIdUsuarioYidEmpresa(long idUsuario, Empresa empresa);
+  Cliente getClientePorIdUsuarioYidEmpresa(long idUsuario, long idEmpresa);
 
   int desvincularClienteDeViajante(long idViajante);
 

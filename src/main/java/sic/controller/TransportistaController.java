@@ -65,25 +65,13 @@ public class TransportistaController {
                                                    @RequestParam(value = "nombre", required = false) String nombre,
                                                    @RequestParam(value = "idPais", required = false) Long idPais,
                                                    @RequestParam(value = "idProvincia", required = false) Long idProvincia,
-                                                   @RequestParam(value = "idLocalidad", required = false) Long idLocalidad) { 
-        Pais pais = null;
-        if (idPais != null) {
-            pais = paisService.getPaisPorId(idPais);
-        }
-        Provincia provincia = null;
-        if (idProvincia != null) {
-            provincia = provinciaService.getProvinciaPorId(idProvincia);
-        }
-        Localidad localidad = null;
-        if (idLocalidad != null) {
-            localidad = localidadService.getLocalidadPorId(idLocalidad);
-        }
+                                                   @RequestParam(value = "idLocalidad", required = false) Long idLocalidad) {
         BusquedaTransportistaCriteria criteria = new BusquedaTransportistaCriteria(
                                                      (nombre != null),nombre,
-                                                     (idPais != null), pais,
-                                                     (idProvincia != null), provincia,
-                                                     (idLocalidad != null),localidad,
-                                                     empresaService.getEmpresaPorId(idEmpresa));
+                                                     (idPais != null), idPais,
+                                                     (idProvincia != null), idProvincia,
+                                                     (idLocalidad != null),idLocalidad,
+                                                     idEmpresa);
         return transportistaService.buscarTransportistas(criteria);       
     }
     

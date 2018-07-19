@@ -177,32 +177,17 @@ public class PedidoServiceImpl implements IPedidoService {
             cal.set(Calendar.SECOND, 59);
             criteria.setFechaHasta(cal.getTime());
         }
-        //Empresa
-        if (criteria.getEmpresa() == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
-        //Cliente
-        if (criteria.isBuscaCliente() && criteria.getCliente() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_cliente_vacio_razonSocial"));
-        }
-        //Usuario
-        if (criteria.isBuscaUsuario() && criteria.getUsuario() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_usuario_vacio_nombre"));
-        }
         QPedido qpedido = QPedido.pedido;
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qpedido.empresa.eq(criteria.getEmpresa()).and(qpedido.eliminado.eq(false)));       
+        builder.and(qpedido.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qpedido.eliminado.eq(false)));
         if (criteria.isBuscaPorFecha()) {
             FormatterFechaHora formateadorFecha = new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
             DateExpression<Date> fDesde = Expressions.dateTemplate(Date.class, "convert({0}, datetime)", formateadorFecha.format(criteria.getFechaDesde()));
             DateExpression<Date> fHasta = Expressions.dateTemplate(Date.class, "convert({0}, datetime)", formateadorFecha.format(criteria.getFechaHasta()));            
             builder.and(qpedido.fecha.between(fDesde, fHasta));
         }
-        if (criteria.isBuscaCliente()) builder.and(qpedido.cliente.eq(criteria.getCliente()));
-        if (criteria.isBuscaUsuario()) builder.and(qpedido.usuario.eq(criteria.getUsuario()));
+        if (criteria.isBuscaCliente()) builder.and(qpedido.cliente.id_Cliente.eq(criteria.getIdCliente()));
+        if (criteria.isBuscaUsuario()) builder.and(qpedido.usuario.id_Usuario.eq(criteria.getIdUsuario()));
         if (criteria.isBuscaPorNroPedido()) builder.and(qpedido.nroPedido.eq(criteria.getNroPedido()));
         if (criteria.isBuscaPorEstadoPedido()) builder.and(qpedido.estado.eq(criteria.getEstadoPedido()));
         Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
@@ -218,7 +203,7 @@ public class PedidoServiceImpl implements IPedidoService {
                     case COMPRADOR:
                         Cliente clienteRelacionado =
                                 clienteService.getClientePorIdUsuarioYidEmpresa(
-                                        idUsuarioLoggedIn, criteria.getEmpresa());
+                                        idUsuarioLoggedIn, criteria.getIdEmpresa());
                         if (clienteRelacionado != null) {
                             rsPredicate.or(qpedido.cliente.eq(clienteRelacionado));
                         }

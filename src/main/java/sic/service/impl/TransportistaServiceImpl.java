@@ -55,29 +55,24 @@ public class TransportistaServiceImpl implements ITransportistaService {
 
     @Override
     public List<Transportista> buscarTransportistas(BusquedaTransportistaCriteria criteria) {
-        //Empresa
-        if (criteria.getEmpresa() == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
         QTransportista qtransportista = QTransportista.transportista;
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qtransportista.empresa.eq(criteria.getEmpresa()).and(qtransportista.eliminado.eq(false)));
+        builder.and(qtransportista.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qtransportista.eliminado.eq(false)));
         //Nombre
-        if (criteria.isBuscarPorNombre() == true) {
+        if (criteria.isBuscarPorNombre()) {
             builder.and(this.buildPredicadoNombre(criteria.getNombre(), qtransportista));
         }
         //Localidad
-        if (criteria.isBuscarPorLocalidad() == true) {
-            builder.and(qtransportista.localidad.eq(criteria.getLocalidad()));
+        if (criteria.isBuscarPorLocalidad()) {
+            builder.and(qtransportista.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
         }
         //Provincia
-        if (criteria.isBuscarPorProvincia() == true) {
-            builder.and(qtransportista.localidad.provincia.eq(criteria.getProvincia()));
+        if (criteria.isBuscarPorProvincia()) {
+            builder.and(qtransportista.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
         }
         //Pais
-        if (criteria.isBuscarPorPais() == true) {
-            builder.and(qtransportista.localidad.provincia.pais.eq(criteria.getPais()));
+        if (criteria.isBuscarPorPais()) {
+            builder.and(qtransportista.localidad.provincia.pais.id_Pais.eq(criteria.getIdPais()));
         }
         List<Transportista> list = new ArrayList<>();
         transportistaRepository.findAll(builder, new Sort(Sort.Direction.ASC, "nombre")).iterator().forEachRemaining(list::add);
