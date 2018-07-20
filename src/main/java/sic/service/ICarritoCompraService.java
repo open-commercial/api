@@ -7,18 +7,19 @@ import sic.modelo.ItemCarritoCompra;
 
 public interface ICarritoCompraService {
 
-    BigDecimal getTotal(long idUsuario);
+  BigDecimal getTotal(long idUsuario);
 
-    BigDecimal getCantArticulos(long idUsuario);
-    
-    long getCantRenglones(long idUsuario);
+  BigDecimal getCantArticulos(long idUsuario);
 
-    Page<ItemCarritoCompra> getAllItemsDelUsuario(long idUsuario, Pageable pageable);
+  long getCantRenglones(long idUsuario);
 
-    void eliminarItem(long idUsuario, long idProducto);
+  Page<ItemCarritoCompra> getAllItemsDelUsuario(long idUsuario, Pageable pageable);
 
-    void eliminarTodosLosItems(long idUsuario);
+  void eliminarItem(long idUsuario, long idProducto);
 
-    void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad);
+  void eliminarTodosLosItems(long idUsuario);
 
+  void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad);
+
+  void modificarCantidadItem(long idUsuario, long idProducto, BigDecimal cantidad);
 }

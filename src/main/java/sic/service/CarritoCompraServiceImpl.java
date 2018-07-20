@@ -1,7 +1,9 @@
 package sic.service;
 
 import java.math.BigDecimal;
-import java.util.logging.Logger;
+import java.util.ResourceBundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,82 +13,105 @@ import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Producto;
 import sic.modelo.Usuario;
 import sic.repository.CarritoCompraRepository;
+import javax.persistence.EntityNotFoundException;
 
 @Service
 @Transactional
 public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
-    private final CarritoCompraRepository carritoCompraRepository;
-    private final IUsuarioService usuarioService;
-    private final IProductoService productoService;    
-    private static final Logger LOGGER = Logger.getLogger(CarritoCompraServiceImpl.class.getPackage().getName());
+  private final CarritoCompraRepository carritoCompraRepository;
+  private final IUsuarioService usuarioService;
+  private final IProductoService productoService;
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
-    public CarritoCompraServiceImpl(CarritoCompraRepository carritoCompraRepository, IUsuarioService usuarioService,
-            IProductoService productoService) {
-        this.carritoCompraRepository = carritoCompraRepository;
-        this.usuarioService = usuarioService;
-        this.productoService = productoService;
-    }
+  @Autowired
+  public CarritoCompraServiceImpl(
+      CarritoCompraRepository carritoCompraRepository,
+      IUsuarioService usuarioService,
+      IProductoService productoService) {
+    this.carritoCompraRepository = carritoCompraRepository;
+    this.usuarioService = usuarioService;
+    this.productoService = productoService;
+  }
 
-    @Override
-    public Page<ItemCarritoCompra> getAllItemsDelUsuario(long idUsuario, Pageable pageable) {
-        return carritoCompraRepository.findAllByUsuario(usuarioService.getUsuarioPorId(idUsuario), pageable);
-    }
+  @Override
+  public Page<ItemCarritoCompra> getAllItemsDelUsuario(long idUsuario, Pageable pageable) {
+    return carritoCompraRepository.findAllByUsuario(
+        usuarioService.getUsuarioPorId(idUsuario), pageable);
+  }
 
-    @Override
-    public BigDecimal getTotal(long idUsuario) {
-        BigDecimal total = carritoCompraRepository.calcularTotal(idUsuario);
-        if (total == null) {
-            return BigDecimal.ZERO;
-        } else {
-            return total;
-        }        
+  @Override
+  public BigDecimal getTotal(long idUsuario) {
+    BigDecimal total = carritoCompraRepository.calcularTotal(idUsuario);
+    if (total == null) {
+      return BigDecimal.ZERO;
+    } else {
+      return total;
     }
+  }
 
-    @Override
-    public BigDecimal getCantArticulos(long idUsuario) {
-        BigDecimal cantArticulos = carritoCompraRepository.getCantArticulos(idUsuario);
-        if (cantArticulos == null) {
-            return BigDecimal.ZERO;
-        } else {
-            return cantArticulos;
-        }
+  @Override
+  public BigDecimal getCantArticulos(long idUsuario) {
+    BigDecimal cantArticulos = carritoCompraRepository.getCantArticulos(idUsuario);
+    if (cantArticulos == null) {
+      return BigDecimal.ZERO;
+    } else {
+      return cantArticulos;
     }
-    
-    @Override
-    public long getCantRenglones(long idUsuario) {
-        return carritoCompraRepository.getCantRenglones(idUsuario);
-    }
+  }
 
-    @Override
-    public void eliminarItem(long idUsuario, long idProducto) {
-        carritoCompraRepository.eliminarItem(idUsuario, idProducto);
-    }
+  @Override
+  public long getCantRenglones(long idUsuario) {
+    return carritoCompraRepository.getCantRenglones(idUsuario);
+  }
 
-    @Override
-    public void eliminarTodosLosItems(long idUsuario) {
-        carritoCompraRepository.eliminarTodosLosItems(idUsuario);
-    }
+  @Override
+  public void eliminarItem(long idUsuario, long idProducto) {
+    carritoCompraRepository.eliminarItem(idUsuario, idProducto);
+  }
 
-    @Override
-    public void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad) {
-        Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
-        Producto producto = productoService.getProductoPorId(idProducto);
-        ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(usuario, producto);
-        if (item == null) {
-            BigDecimal importe = producto.getPrecioLista().multiply(cantidad);
-            carritoCompraRepository.save(new ItemCarritoCompra(null, cantidad, producto, importe, usuario));
-        } else {
-            BigDecimal nuevaCantidad = item.getCantidad().add(cantidad);
-            if (nuevaCantidad.compareTo(BigDecimal.ZERO) < 0) {
-                item.setCantidad(BigDecimal.ZERO);    
-            } else {
-                item.setCantidad(nuevaCantidad);    
-            }            
-            item.setImporte(producto.getPrecioLista().multiply(nuevaCantidad));
-            carritoCompraRepository.save(item);
-        }
-    }
+  @Override
+  public void eliminarTodosLosItems(long idUsuario) {
+    carritoCompraRepository.eliminarTodosLosItems(idUsuario);
+  }
 
+  @Override
+  public void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad) {
+    Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
+    Producto producto = productoService.getProductoPorId(idProducto);
+    ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(usuario, producto);
+    if (item == null) {
+      BigDecimal importe = producto.getPrecioLista().multiply(cantidad);
+      carritoCompraRepository.save(
+          new ItemCarritoCompra(null, cantidad, producto, importe, usuario));
+    } else {
+      BigDecimal nuevaCantidad = item.getCantidad().add(cantidad);
+      if (nuevaCantidad.compareTo(BigDecimal.ZERO) < 0) {
+        item.setCantidad(BigDecimal.ZERO);
+      } else {
+        item.setCantidad(nuevaCantidad);
+      }
+      item.setImporte(producto.getPrecioLista().multiply(nuevaCantidad));
+      carritoCompraRepository.save(item);
+    }
+  }
+
+  @Override
+  public void modificarCantidadItem(long idUsuario, long idProducto, BigDecimal cantidad) {
+    Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
+    Producto producto = productoService.getProductoPorId(idProducto);
+    ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(usuario, producto);
+    if (item != null) {
+      if (cantidad.compareTo(BigDecimal.ZERO) < 0) {
+        item.setCantidad(BigDecimal.ZERO);
+      } else {
+        item.setCantidad(cantidad);
+      }
+      item.setImporte(producto.getPrecioLista().multiply(cantidad));
+      carritoCompraRepository.save(item);
+    } else {
+      throw new EntityNotFoundException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_item_no_existente"));
+    }
+  }
 }
