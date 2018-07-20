@@ -34,8 +34,8 @@ public class PedidoServiceImpl implements IPedidoService {
     private final IFacturaService facturaService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
-    private final static BigDecimal CIEN = new BigDecimal("100");
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private static final BigDecimal CIEN = new BigDecimal("100");
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
     public PedidoServiceImpl(IFacturaService facturaService, PedidoRepository pedidoRepository,
@@ -118,8 +118,11 @@ public class PedidoServiceImpl implements IPedidoService {
         BigDecimal porcentajeDescuento;
         BigDecimal totalActual = BigDecimal.ZERO;
         for (RenglonPedido renglonPedido : this.getRenglonesDelPedido(pedido.getId_Pedido())) {
-            porcentajeDescuento = BigDecimal.ONE.subtract(renglonPedido.getDescuento_porcentaje().divide(CIEN, 15, RoundingMode.HALF_UP));
-            renglonPedido.setSubTotal(renglonPedido.getProducto().getPrecioLista().multiply(renglonPedido.getCantidad()).multiply(porcentajeDescuento));
+            porcentajeDescuento = BigDecimal.ONE.subtract(renglonPedido.getDescuento_porcentaje()
+                    .divide(CIEN, 15, RoundingMode.HALF_UP));
+            renglonPedido.setSubTotal(renglonPedido.getProducto().getPrecioLista()
+                    .multiply(renglonPedido.getCantidad())
+                    .multiply(porcentajeDescuento));
             totalActual = totalActual.add(renglonPedido.getSubTotal());
         }
         pedido.setTotalActual(totalActual);
@@ -153,14 +156,14 @@ public class PedidoServiceImpl implements IPedidoService {
         pedido.setEstado(EstadoPedido.ABIERTO);
         this.validarPedido(TipoDeOperacion.ALTA , pedido);
         pedido = pedidoRepository.save(pedido);
-        LOGGER.warn("El Pedido " + pedido + " se guardó correctamente.");
+        logger.warn("El Pedido " + pedido + " se guardó correctamente.");
         return pedido;
     }
 
     @Override
     public Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
         //Fecha
-        if (criteria.isBuscaPorFecha() & (criteria.getFechaDesde() == null | criteria.getFechaHasta() == null)) {
+        if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_pedido_fechas_busqueda_invalidas"));
         }
@@ -177,32 +180,17 @@ public class PedidoServiceImpl implements IPedidoService {
             cal.set(Calendar.SECOND, 59);
             criteria.setFechaHasta(cal.getTime());
         }
-        //Empresa
-        if (criteria.getEmpresa() == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
-        //Cliente
-        if (criteria.isBuscaCliente() && criteria.getCliente() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_cliente_vacio_razonSocial"));
-        }
-        //Usuario
-        if (criteria.isBuscaUsuario() && criteria.getUsuario() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_usuario_vacio_nombre"));
-        }
         QPedido qpedido = QPedido.pedido;
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qpedido.empresa.eq(criteria.getEmpresa()).and(qpedido.eliminado.eq(false)));       
+        builder.and(qpedido.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qpedido.eliminado.eq(false)));
         if (criteria.isBuscaPorFecha()) {
             FormatterFechaHora formateadorFecha = new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
             DateExpression<Date> fDesde = Expressions.dateTemplate(Date.class, "convert({0}, datetime)", formateadorFecha.format(criteria.getFechaDesde()));
             DateExpression<Date> fHasta = Expressions.dateTemplate(Date.class, "convert({0}, datetime)", formateadorFecha.format(criteria.getFechaHasta()));            
             builder.and(qpedido.fecha.between(fDesde, fHasta));
         }
-        if (criteria.isBuscaCliente()) builder.and(qpedido.cliente.eq(criteria.getCliente()));
-        if (criteria.isBuscaUsuario()) builder.and(qpedido.usuario.eq(criteria.getUsuario()));
+        if (criteria.isBuscaCliente()) builder.and(qpedido.cliente.id_Cliente.eq(criteria.getIdCliente()));
+        if (criteria.isBuscaUsuario()) builder.and(qpedido.usuario.id_Usuario.eq(criteria.getIdUsuario()));
         if (criteria.isBuscaPorNroPedido()) builder.and(qpedido.nroPedido.eq(criteria.getNroPedido()));
         if (criteria.isBuscaPorEstadoPedido()) builder.and(qpedido.estado.eq(criteria.getEstadoPedido()));
         Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
@@ -218,7 +206,7 @@ public class PedidoServiceImpl implements IPedidoService {
                     case COMPRADOR:
                         Cliente clienteRelacionado =
                                 clienteService.getClientePorIdUsuarioYidEmpresa(
-                                        idUsuarioLoggedIn, criteria.getEmpresa());
+                                        idUsuarioLoggedIn, criteria.getIdEmpresa());
                         if (clienteRelacionado != null) {
                             rsPredicate.or(qpedido.cliente.eq(clienteRelacionado));
                         }
@@ -287,7 +275,7 @@ public class PedidoServiceImpl implements IPedidoService {
             try {
                 params.put("logo", new ImageIcon(ImageIO.read(new URL(pedido.getEmpresa().getLogo()))).getImage());
             } catch (IOException ex) {
-                LOGGER.error(ex.getMessage());
+                logger.error(ex.getMessage());
                 throw new ServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_empresa_404_logo"), ex);
             }
@@ -297,7 +285,7 @@ public class PedidoServiceImpl implements IPedidoService {
         try {
             return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
-            LOGGER.error(ex.getMessage());
+            logger.error(ex.getMessage());
             throw new ServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_error_reporte"), ex);
         }

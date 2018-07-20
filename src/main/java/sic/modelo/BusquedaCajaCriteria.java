@@ -16,12 +16,12 @@ public class BusquedaCajaCriteria {
     private boolean buscaPorFecha;
     private Date fechaDesde;
     private Date fechaHasta;
-    private Empresa empresa;
+    private Long idEmpresa;
     private int cantidadDeRegistros;
     private boolean buscaPorUsuarioApertura;
-    private Usuario usuarioApertura;
+    private Long idUsuarioApertura;
     private boolean buscaPorUsuarioCierre;
-    private Usuario usuarioCierre;
+    private Long idUsuarioCierre;
     private Pageable pageable;
     
 }

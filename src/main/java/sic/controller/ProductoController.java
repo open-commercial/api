@@ -32,20 +32,10 @@ import sic.service.*;
 public class ProductoController {
 
     private final IProductoService productoService;
-    private final IEmpresaService empresaService;
-    private final IRubroService rubroService;
-    private final IProveedorService proveedorService;
-    private final IMedidaService medidaService;
 
     @Autowired
-    public ProductoController(IProductoService productoService, IEmpresaService empresaService,
-                              IRubroService rubroService, IProveedorService proveedorService,
-                              IMedidaService medidaService) {
+    public ProductoController(IProductoService productoService) {
         this.productoService = productoService;
-        this.empresaService = empresaService;
-        this.rubroService = rubroService;
-        this.proveedorService = proveedorService;
-        this.medidaService = medidaService;
     }
 
     @GetMapping("/productos/{idProducto}")
@@ -60,7 +50,7 @@ public class ProductoController {
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Producto getProductoPorCodigo(@RequestParam long idEmpresa,
                                          @RequestParam String codigo) {
-        return productoService.getProductoPorCodigo(codigo, empresaService.getEmpresaPorId(idEmpresa));
+        return productoService.getProductoPorCodigo(codigo, idEmpresa);
     }
 
     @GetMapping("/productos/valor-stock/criteria")
@@ -74,21 +64,17 @@ public class ProductoController {
                                          @RequestParam(required = false) Integer cantidadRegistros,
                                          @RequestParam(required = false) boolean soloFantantes,
                                          @RequestParam(required = false) Boolean visibilidad) {
-        Rubro rubro = null;
-        if (idRubro != null) rubro = rubroService.getRubroPorId(idRubro);
-        Proveedor proveedor = null;
-        if (idProveedor != null) proveedor = proveedorService.getProveedorPorId(idProveedor);
         if (cantidadRegistros == null) cantidadRegistros = 0;
         BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder()
                 .buscarPorCodigo((codigo!=null))
                 .codigo(codigo)
                 .buscarPorDescripcion(descripcion!=null)
                 .descripcion(descripcion)
-                .buscarPorRubro(rubro!=null)
-                .rubro(rubro)
-                .buscarPorProveedor(proveedor!=null)
-                .proveedor(proveedor)
-                .empresa(empresaService.getEmpresaPorId(idEmpresa))
+                .buscarPorRubro(idRubro!=null)
+                .idRubro(idRubro)
+                .buscarPorProveedor(idProveedor!=null)
+                .idProveedor(idProveedor)
+                .idEmpresa(idEmpresa)
                 .cantRegistros(cantidadRegistros)
                 .listarSoloFaltantes(soloFantantes)
                 .buscaPorVisibilidad(visibilidad!=null)
@@ -110,10 +96,6 @@ public class ProductoController {
                                           @RequestParam(required = false) Integer pagina,
                                           @RequestParam(required = false) Integer tamanio) {
         final int TAMANIO_PAGINA_DEFAULT = 50;
-        Rubro rubro = null;
-        if (idRubro != null) rubro = rubroService.getRubroPorId(idRubro);
-        Proveedor proveedor = null;
-        if (idProveedor != null) proveedor = proveedorService.getProveedorPorId(idProveedor);
         if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
         if (pagina == null || pagina < 0) pagina = 0;
         Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "descripcion"));
@@ -122,11 +104,11 @@ public class ProductoController {
                 .codigo(codigo)
                 .buscarPorDescripcion(descripcion!=null && !descripcion.isEmpty())
                 .descripcion(descripcion)
-                .buscarPorRubro(rubro!=null)
-                .rubro(rubro)
-                .buscarPorProveedor(proveedor!=null)
-                .proveedor(proveedor)
-                .empresa(empresaService.getEmpresaPorId(idEmpresa))
+                .buscarPorRubro(idRubro!=null)
+                .idRubro(idRubro)
+                .buscarPorProveedor(idProveedor!=null)
+                .idProveedor(idProveedor)
+                .idEmpresa(idEmpresa)
                 .listarSoloFaltantes(soloFantantes)
                 .buscaPorVisibilidad(publicos!=null)
                 .publico(publicos)
@@ -151,11 +133,7 @@ public class ProductoController {
                            @RequestParam Long idProveedor,
                            @RequestParam Long idEmpresa) {
         if (productoService.getProductoPorId(producto.getId_Producto()) != null) {
-            producto.setMedida(medidaService.getMedidaPorId(idMedida));
-            producto.setRubro(rubroService.getRubroPorId(idRubro));
-            producto.setProveedor(proveedorService.getProveedorPorId(idProveedor));
-            producto.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-            productoService.actualizar(producto);
+            productoService.actualizar(producto, idMedida, idRubro, idProveedor, idEmpresa);
         }
     }
 
@@ -167,11 +145,7 @@ public class ProductoController {
                             @RequestParam Long idRubro,
                             @RequestParam Long idProveedor,
                             @RequestParam Long idEmpresa) {
-        producto.setMedida(medidaService.getMedidaPorId(idMedida));
-        producto.setRubro(rubroService.getRubroPorId(idRubro));
-        producto.setProveedor(proveedorService.getProveedorPorId(idProveedor));
-        producto.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-        return productoService.guardar(producto);
+        return productoService.guardar(producto, idMedida, idRubro, idProveedor, idEmpresa);
     }
 
   @PutMapping("/productos/multiples")
@@ -212,12 +186,6 @@ public class ProductoController {
           ResourceBundle.getBundle("Mensajes")
               .getString("mensaje_modificar_producto_no_permitido"));
     }
-    Medida medida = null;
-    if (idMedida != null) medida = medidaService.getMedidaPorId(idMedida);
-    Rubro rubro = null;
-    if (idRubro != null) rubro = rubroService.getRubroPorId(idRubro);
-    Proveedor proveedor = null;
-    if (idProveedor != null) proveedor = proveedorService.getProveedorPorId(idProveedor);
     productoService.actualizarMultiples(
         idProducto,
         actualizaPrecios,
@@ -233,11 +201,11 @@ public class ProductoController {
         precioLista,
         precioVentaPublico,
         (idMedida != null),
-        medida,
+        idMedida,
         (idRubro != null),
-        rubro,
+        idRubro,
         (idProveedor != null),
-        proveedor,
+        idProveedor,
         (publico != null),
         publico);
   }
@@ -265,21 +233,16 @@ public class ProductoController {
                                                     @RequestParam(value = "idProveedor", required = false) Long idProveedor,
                                                     @RequestParam(value = "soloFaltantes", required = false) boolean soloFantantes,
                                                     @RequestParam(required = false) String formato) {
-        Rubro rubro = null;
-        if (idRubro != null) rubro = rubroService.getRubroPorId(idRubro);
-        Proveedor proveedor = null;
-        if (idProveedor != null) proveedor = proveedorService.getProveedorPorId(idProveedor);
-        Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
         BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder()
                 .buscarPorCodigo((codigo != null))
                 .codigo(codigo)
                 .buscarPorDescripcion(descripcion != null)
                 .descripcion(descripcion)
-                .buscarPorRubro(idRubro != null)
-                .rubro(rubro)
-                .buscarPorProveedor(proveedor != null)
-                .proveedor(proveedor)
-                .empresa(empresa)
+                .buscarPorRubro(idRubro!=null)
+                .idRubro(idRubro)
+                .buscarPorProveedor(idProveedor!=null)
+                .idProveedor(idProveedor)
+                .idEmpresa(idEmpresa)
                 .cantRegistros(0)
                 .listarSoloFaltantes(soloFantantes)
                 .pageable(null)
@@ -290,14 +253,14 @@ public class ProductoController {
                 headers.setContentType(new MediaType("application", "vnd.ms-excel"));
                 headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
                 headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-                byte[] reporteXls = productoService.getListaDePreciosPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa, formato);
+                byte[] reporteXls = productoService.getListaDePreciosPorEmpresa(productoService.buscarProductos(criteria).getContent(), idEmpresa, formato);
                 headers.setContentLength(reporteXls.length);
                 return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
             case "pdf":
                 headers.setContentType(MediaType.APPLICATION_PDF);
                 headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
                 headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-                byte[] reportePDF = productoService.getListaDePreciosPorEmpresa(productoService.buscarProductos(criteria).getContent(), empresa, formato);
+                byte[] reportePDF = productoService.getListaDePreciosPorEmpresa(productoService.buscarProductos(criteria).getContent(), idEmpresa, formato);
                 return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
             default:
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")

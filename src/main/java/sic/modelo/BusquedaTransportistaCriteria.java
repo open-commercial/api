@@ -12,10 +12,10 @@ public class BusquedaTransportistaCriteria {
     private boolean buscarPorNombre;
     private String nombre;
     private boolean buscarPorPais;
-    private Pais pais;
+    private Long idPais;
     private boolean buscarPorProvincia;
-    private Provincia provincia;
+    private Long idProvincia;
     private boolean buscarPorLocalidad;
-    private Localidad localidad;
-    private Empresa empresa;
+    private Long idLocalidad;
+    private Long idEmpresa;
 }

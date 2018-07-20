@@ -23,7 +23,7 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
 
     @Override
     public BigDecimal calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria) {
-        String query = "SELECT SUM(f.total) FROM FacturaCompra f WHERE f.empresa = :empresa AND f.eliminada = false";
+        String query = "SELECT SUM(f.total) FROM FacturaCompra f WHERE f.empresa.id_Empresa = :idEmpresa AND f.eliminada = false";
         //Fecha Factura
         if (criteria.isBuscaPorFecha()) {
             FormatterFechaHora formateadorFecha = new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
@@ -31,7 +31,7 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
         }
         //Proveedor
         if (criteria.isBuscaPorProveedor()) {
-            query += " AND f.proveedor = " + criteria.getProveedor().getId_Proveedor();
+            query += " AND f.proveedor = " + criteria.getIdProveedor();
         }
         //Tipo de Factura
         if (criteria.isBuscaPorTipoComprobante()) {
@@ -43,7 +43,7 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
         }
         query += " ORDER BY f.fecha DESC";
         TypedQuery<BigDecimal> typedQuery = em.createQuery(query, BigDecimal.class);
-        typedQuery.setParameter("empresa", criteria.getEmpresa());
+        typedQuery.setParameter("idEmpresa", criteria.getIdEmpresa());
         //si es 0, recupera TODOS los registros
         if (criteria.getCantRegistros() != 0) {
             typedQuery.setMaxResults(criteria.getCantRegistros());
@@ -53,7 +53,7 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
 
     @Override
     public BigDecimal calcularIVACompra(BusquedaFacturaCompraCriteria criteria, TipoDeComprobante[] tipoComprobante) {
-        String query = "SELECT SUM(f.iva_105_neto + f.iva_21_neto) FROM FacturaCompra f WHERE f.empresa = :empresa AND f.eliminada = false";
+        String query = "SELECT SUM(f.iva_105_neto + f.iva_21_neto) FROM FacturaCompra f WHERE f.empresa.id_Empresa = :idEmpresa AND f.eliminada = false";
         //Fecha Factura
         if (criteria.isBuscaPorFecha()) {
             FormatterFechaHora formateadorFecha = new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
@@ -62,7 +62,7 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
         }
         //Proveedor
         if (criteria.isBuscaPorProveedor()) {
-            query += " AND f.proveedor = " + criteria.getProveedor().getId_Proveedor();
+            query += " AND f.proveedor = " + criteria.getIdProveedor();
         }
         //Tipo de Factura
         if (criteria.isBuscaPorTipoComprobante()) {
@@ -82,7 +82,7 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
         }
         query += " ORDER BY f.fecha DESC";
         TypedQuery<BigDecimal> typedQuery = em.createQuery(query, BigDecimal.class);
-        typedQuery.setParameter("empresa", criteria.getEmpresa());
+        typedQuery.setParameter("idEmpresa", criteria.getIdEmpresa());
         //si es 0, recupera TODOS los registros
         if (criteria.getCantRegistros() != 0) {
             typedQuery.setMaxResults(criteria.getCantRegistros());
@@ -94,7 +94,7 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
     public Page<FacturaCompra> buscarFacturasCompra(BusquedaFacturaCompraCriteria criteria) {
         String queryCount = "SELECT COUNT(f)";
         String queryData = "SELECT f ";
-        String query = "FROM FacturaCompra f WHERE f.empresa = :empresa AND f.eliminada = false";
+        String query = "FROM FacturaCompra f WHERE f.empresa.id_Empresa = :idEmpresa AND f.eliminada = false";
         //Fecha Factura
         if (criteria.isBuscaPorFecha()) {
             FormatterFechaHora formateadorFecha = new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
@@ -103,7 +103,7 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
         }
         //Proveedor
         if (criteria.isBuscaPorProveedor()) {
-            query += " AND f.proveedor = " + criteria.getProveedor().getId_Proveedor();
+            query += " AND f.proveedor = " + criteria.getIdProveedor();
         }
         //Tipo de Factura
         if (criteria.isBuscaPorTipoComprobante()) {
@@ -120,12 +120,12 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
             queryData += query + " ORDER BY f.fecha DESC";
         }  
         TypedQuery<FacturaCompra> typedQueryData = em.createQuery(queryData, FacturaCompra.class);        
-        typedQueryData.setParameter("empresa", criteria.getEmpresa());
+        typedQueryData.setParameter("idEmpresa", criteria.getIdEmpresa());
         typedQueryData.setFirstResult(criteria.getPageable().getOffset());
         typedQueryData.setMaxResults(criteria.getPageable().getPageSize());
         List<FacturaCompra> facturas = typedQueryData.getResultList();        
         TypedQuery<Long> typedQueryCount = em.createQuery(queryCount, Long.class);
-        typedQueryCount.setParameter("empresa", criteria.getEmpresa());
+        typedQueryCount.setParameter("idEmpresa", criteria.getIdEmpresa());
         long total = typedQueryCount.getSingleResult();
         return new PageImpl<>(facturas, criteria.getPageable(), total);
     }

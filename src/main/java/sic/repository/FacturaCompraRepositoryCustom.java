@@ -7,11 +7,11 @@ import sic.modelo.FacturaCompra;
 import sic.modelo.TipoDeComprobante;
 
 public interface FacturaCompraRepositoryCustom {
-    
-    BigDecimal calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria);
 
-    BigDecimal calcularIVACompra(BusquedaFacturaCompraCriteria criteria, TipoDeComprobante[] tipoComprobante);
+  BigDecimal calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria);
 
-    Page<FacturaCompra> buscarFacturasCompra(BusquedaFacturaCompraCriteria criteria);
+  BigDecimal calcularIVACompra(
+      BusquedaFacturaCompraCriteria criteria, TipoDeComprobante[] tipoComprobante);
 
+  Page<FacturaCompra> buscarFacturasCompra(BusquedaFacturaCompraCriteria criteria);
 }

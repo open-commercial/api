@@ -165,54 +165,61 @@ public class CajaServiceImpl implements ICajaService {
         return cajaRepository.findAll(getBuilder(criteria), pageable);
     }
 
-    private BooleanBuilder getBuilder(BusquedaCajaCriteria criteria) {
-        //Empresa
-        if (criteria.getEmpresa() == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
-        //Fecha
-        if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_caja_fechas_invalidas"));
-        }
-        if (criteria.isBuscaPorFecha()) {
-            Calendar cal = new GregorianCalendar();
-            cal.setTime(criteria.getFechaDesde());
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            criteria.setFechaDesde(cal.getTime());
-            cal.setTime(criteria.getFechaHasta());
-            cal.set(Calendar.HOUR_OF_DAY, 23);
-            cal.set(Calendar.MINUTE, 59);
-            cal.set(Calendar.SECOND, 59);
-            criteria.setFechaHasta(cal.getTime());
-        }
-        if (criteria.getEmpresa() == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
-        QCaja qcaja = QCaja.caja;
-        BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qcaja.empresa.id_Empresa.eq(criteria.getEmpresa().getId_Empresa()).and(qcaja.eliminada.eq(false)));
-        if (criteria.isBuscaPorUsuarioApertura() && !criteria.isBuscaPorUsuarioCierre()) {
-            builder.and(qcaja.usuarioAbreCaja.eq(criteria.getUsuarioApertura()));
-        }
-        if (criteria.isBuscaPorUsuarioCierre() && !criteria.isBuscaPorUsuarioApertura()) {
-            builder.and(qcaja.usuarioCierraCaja.eq(criteria.getUsuarioCierre()));
-        }
-        if (criteria.isBuscaPorUsuarioCierre() && criteria.isBuscaPorUsuarioApertura()) {
-            builder.and(qcaja.usuarioAbreCaja.eq(criteria.getUsuarioApertura()).and(qcaja.usuarioCierraCaja.eq(criteria.getUsuarioCierre())));
-        }
-        if (criteria.isBuscaPorFecha()) {
-            FormatterFechaHora formateadorFecha = new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
-            DateExpression<Date> fDesde = Expressions.dateTemplate(Date.class, "convert({0}, datetime)", formateadorFecha.format(criteria.getFechaDesde()));
-            DateExpression<Date> fHasta = Expressions.dateTemplate(Date.class, "convert({0}, datetime)", formateadorFecha.format(criteria.getFechaHasta()));
-            builder.and(qcaja.fechaApertura.between(fDesde, fHasta));
-        }
-        return builder;
+  private BooleanBuilder getBuilder(BusquedaCajaCriteria criteria) {
+    // Fecha
+    if (criteria.isBuscaPorFecha()
+        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_caja_fechas_invalidas"));
     }
+    if (criteria.isBuscaPorFecha()) {
+      Calendar cal = new GregorianCalendar();
+      cal.setTime(criteria.getFechaDesde());
+      cal.set(Calendar.HOUR_OF_DAY, 0);
+      cal.set(Calendar.MINUTE, 0);
+      cal.set(Calendar.SECOND, 0);
+      criteria.setFechaDesde(cal.getTime());
+      cal.setTime(criteria.getFechaHasta());
+      cal.set(Calendar.HOUR_OF_DAY, 23);
+      cal.set(Calendar.MINUTE, 59);
+      cal.set(Calendar.SECOND, 59);
+      criteria.setFechaHasta(cal.getTime());
+    }
+    QCaja qcaja = QCaja.caja;
+    BooleanBuilder builder = new BooleanBuilder();
+    builder.and(
+        qcaja.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qcaja.eliminada.eq(false)));
+    if (criteria.isBuscaPorUsuarioApertura() && !criteria.isBuscaPorUsuarioCierre()) {
+      builder.and(qcaja.usuarioAbreCaja.id_Usuario.eq(criteria.getIdUsuarioApertura()));
+    }
+    if (criteria.isBuscaPorUsuarioCierre() && !criteria.isBuscaPorUsuarioApertura()) {
+      builder.and(qcaja.usuarioCierraCaja.id_Usuario.eq(criteria.getIdUsuarioCierre()));
+    }
+    if (criteria.isBuscaPorUsuarioCierre() && criteria.isBuscaPorUsuarioApertura()) {
+      builder.and(
+          qcaja
+              .usuarioAbreCaja
+              .id_Usuario
+              .eq(criteria.getIdUsuarioApertura())
+              .and(qcaja.usuarioCierraCaja.id_Usuario.eq(criteria.getIdUsuarioCierre())));
+    }
+    if (criteria.isBuscaPorFecha()) {
+      FormatterFechaHora formateadorFecha =
+          new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      DateExpression<Date> fDesde =
+          Expressions.dateTemplate(
+              Date.class,
+              "convert({0}, datetime)",
+              formateadorFecha.format(criteria.getFechaDesde()));
+      DateExpression<Date> fHasta =
+          Expressions.dateTemplate(
+              Date.class,
+              "convert({0}, datetime)",
+              formateadorFecha.format(criteria.getFechaHasta()));
+      builder.and(qcaja.fechaApertura.between(fDesde, fHasta));
+    }
+    return builder;
+  }
 
     @Override
     @Transactional

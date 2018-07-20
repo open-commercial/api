@@ -61,7 +61,7 @@ public class FacturaServiceImpl implements IFacturaService {
     private static final BigDecimal IVA_21 = new BigDecimal("21");
     private static final BigDecimal IVA_105 = new BigDecimal("10.5");
     private static final BigDecimal CIEN = new BigDecimal("100");
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     @Lazy
@@ -227,8 +227,8 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     @Override
-    public List<RenglonFactura> getRenglonesDeLaFacturaModificadosParaCredito(Long id_Factura) {
-        return notaService.getRenglonesFacturaModificadosParaNotaCredito(id_Factura);
+    public List<RenglonFactura> getRenglonesDeLaFacturaModificadosParaCredito(Long idFactura) {
+        return notaService.getRenglonesFacturaModificadosParaNotaCredito(idFactura);
     }
 
     @Override
@@ -238,11 +238,6 @@ public class FacturaServiceImpl implements IFacturaService {
 
     @Override
     public Page<FacturaCompra> buscarFacturaCompra(BusquedaFacturaCompraCriteria criteria) {
-        //Empresa
-        if (criteria.getEmpresa() == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
         //Fecha de Factura
         if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -260,22 +255,12 @@ public class FacturaServiceImpl implements IFacturaService {
             cal.set(Calendar.MINUTE, 59);
             cal.set(Calendar.SECOND, 59);
             criteria.setFechaHasta(cal.getTime());
-        }
-        //Proveedor
-        if (criteria.isBuscaPorProveedor() && criteria.getProveedor() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_proveedor_vacio"));
         }
         return facturaCompraRepository.buscarFacturasCompra(criteria);
     }
 
     @Override
     public Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
-        //Empresa
-        if(criteria.getEmpresa() == null ) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
         //Fecha de Factura
         if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -293,20 +278,6 @@ public class FacturaServiceImpl implements IFacturaService {
             cal.set(Calendar.MINUTE, 59);
             cal.set(Calendar.SECOND, 59);
             criteria.setFechaHasta(cal.getTime());
-        }
-        //Cliente
-        if (criteria.isBuscaCliente() && criteria.getCliente() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_cliente_vacio"));
-        }
-        //Usuario
-        if (criteria.isBuscaUsuario() && criteria.getUsuario() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_usuario_vacio"));
-        }
-        if (criteria.isBuscaViajante() && criteria.getViajante() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_viajante_vacio"));
         }
         return facturaVentaRepository.findAll(this.getBuilder(criteria, idUsuarioLoggedIn), criteria.getPageable());
     }
@@ -318,7 +289,7 @@ public class FacturaServiceImpl implements IFacturaService {
         qFacturaVenta
             .empresa
             .id_Empresa
-            .eq(criteria.getEmpresa().getId_Empresa())
+            .eq(criteria.getIdEmpresa())
             .and(qFacturaVenta.eliminada.eq(false)));
     // Fecha
     if (criteria.isBuscaPorFecha()) {
@@ -336,12 +307,12 @@ public class FacturaServiceImpl implements IFacturaService {
               formateadorFecha.format(criteria.getFechaHasta()));
       builder.and(qFacturaVenta.fecha.between(fDesde, fHasta));
     }
-    if (criteria.isBuscaCliente()) builder.and(qFacturaVenta.cliente.eq(criteria.getCliente()));
+    if (criteria.isBuscaCliente()) builder.and(qFacturaVenta.cliente.id_Cliente.eq(criteria.getIdCliente()));
     if (criteria.isBuscaPorTipoComprobante())
       builder.and(qFacturaVenta.tipoComprobante.eq(criteria.getTipoComprobante()));
-    if (criteria.isBuscaUsuario()) builder.and(qFacturaVenta.usuario.eq(criteria.getUsuario()));
+    if (criteria.isBuscaUsuario()) builder.and(qFacturaVenta.usuario.id_Usuario.eq(criteria.getIdUsuario()));
     if (criteria.isBuscaViajante())
-      builder.and(qFacturaVenta.cliente.viajante.eq(criteria.getViajante()));
+      builder.and(qFacturaVenta.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaPorNumeroFactura())
       builder
           .and(qFacturaVenta.numSerie.eq(criteria.getNumSerie()))
@@ -361,7 +332,7 @@ public class FacturaServiceImpl implements IFacturaService {
           case COMPRADOR:
             Cliente clienteRelacionado =
                 clienteService.getClientePorIdUsuarioYidEmpresa(
-                    idUsuarioLoggedIn, criteria.getEmpresa());
+                    idUsuarioLoggedIn, criteria.getIdEmpresa());
             if (clienteRelacionado != null) {
               rsPredicate.or(qFacturaVenta.cliente.eq(clienteRelacionado));
             } else {
@@ -412,7 +383,7 @@ public class FacturaServiceImpl implements IFacturaService {
       List<Factura> facturasParaRelacionarAlPedido = new ArrayList<>(facturasProcesadas);
       pedido.setFacturas(facturasParaRelacionarAlPedido);
       pedidoService.actualizar(pedido);
-      facturasProcesadas.forEach(f -> LOGGER.warn("La Factura " + f + " se guardó correctamente."));
+      facturasProcesadas.forEach(f -> logger.warn("La Factura " + f + " se guardó correctamente."));
       pedidoService.actualizarEstadoPedido(pedido);
     } else {
       facturasProcesadas = new ArrayList<>();
@@ -422,7 +393,7 @@ public class FacturaServiceImpl implements IFacturaService {
           this.cuentaCorrienteService.asentarEnCuentaCorriente(
               facturaGuardada, TipoDeOperacion.ALTA);
         facturasProcesadas.add(facturaGuardada);
-        LOGGER.warn("La Factura " + facturaGuardada + " se guardó correctamente.");
+        logger.warn("La Factura " + facturaGuardada + " se guardó correctamente.");
         if (recibos != null) {
           recibos.forEach(reciboService::guardar);
         }
@@ -479,9 +450,8 @@ public class FacturaServiceImpl implements IFacturaService {
 
     private HashMap<Long, BigDecimal> getIdsProductosYCantidades(Factura factura) {
         HashMap<Long, BigDecimal> idsYCantidades = new HashMap<>();
-        factura.getRenglones().forEach(r -> {
-            idsYCantidades.put(r.getId_ProductoItem(), r.getCantidad());
-        });
+        factura.getRenglones().forEach(r ->
+            idsYCantidades.put(r.getId_ProductoItem(), r.getCantidad()));
         return idsYCantidades;
     }
 
@@ -700,11 +670,6 @@ public class FacturaServiceImpl implements IFacturaService {
 
     @Override
     public BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
-        //Empresa
-        if(criteria.getEmpresa() == null ) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
         //Fecha de Factura
         if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -722,20 +687,6 @@ public class FacturaServiceImpl implements IFacturaService {
             cal.set(Calendar.MINUTE, 59);
             cal.set(Calendar.SECOND, 59);
             criteria.setFechaHasta(cal.getTime());
-        }
-        //Cliente
-        if (criteria.isBuscaCliente() && criteria.getCliente() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_cliente_vacio"));
-        }
-        //Usuario
-        if (criteria.isBuscaUsuario() && criteria.getUsuario() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_usuario_vacio"));
-        }
-        if (criteria.isBuscaViajante() && criteria.getViajante() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_viajante_vacio"));
         }
         BigDecimal totalFacturado = facturaVentaRepository.calcularTotalFacturadoVenta(this.getBuilder(criteria,idUsuarioLoggedIn));
         return (totalFacturado != null? totalFacturado : BigDecimal.ZERO);
@@ -749,11 +700,6 @@ public class FacturaServiceImpl implements IFacturaService {
 
     @Override
     public BigDecimal  calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria) {
-        //Empresa
-        if (criteria.getEmpresa() == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
         //Fecha de Factura
         if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -771,22 +717,12 @@ public class FacturaServiceImpl implements IFacturaService {
             cal.set(Calendar.MINUTE, 59);
             cal.set(Calendar.SECOND, 59);
             criteria.setFechaHasta(cal.getTime());
-        }
-        //Proveedor
-        if (criteria.isBuscaPorProveedor() && criteria.getProveedor() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_proveedor_vacio"));
         }
         return facturaCompraRepository.calcularTotalFacturadoCompra(criteria);
     }
 
     @Override
     public BigDecimal calcularIvaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
-        //Empresa
-        if(criteria.getEmpresa() == null ) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
         //Fecha de Factura
         if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -804,20 +740,6 @@ public class FacturaServiceImpl implements IFacturaService {
             cal.set(Calendar.MINUTE, 59);
             cal.set(Calendar.SECOND, 59);
             criteria.setFechaHasta(cal.getTime());
-        }
-        //Cliente
-        if (criteria.isBuscaCliente() && criteria.getCliente() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_cliente_vacio"));
-        }
-        //Usuario
-        if (criteria.isBuscaUsuario() && criteria.getUsuario() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_usuario_vacio"));
-        }
-        if (criteria.isBuscaViajante() && criteria.getViajante() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_viajante_vacio"));
         }
         TipoDeComprobante[] tipoFactura = {TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B};
         BigDecimal ivaVenta = facturaVentaRepository.calcularIVAVenta(this.getBuilder(criteria, idUsuarioLoggedIn), tipoFactura);
@@ -826,11 +748,6 @@ public class FacturaServiceImpl implements IFacturaService {
 
     @Override
     public BigDecimal calcularIvaCompra(BusquedaFacturaCompraCriteria criteria) {
-        //Empresa
-        if (criteria.getEmpresa() == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
         //Fecha de Factura
         if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -848,11 +765,6 @@ public class FacturaServiceImpl implements IFacturaService {
             cal.set(Calendar.MINUTE, 59);
             cal.set(Calendar.SECOND, 59);
             criteria.setFechaHasta(cal.getTime());
-        }
-        //Proveedor
-        if (criteria.isBuscaPorProveedor() && criteria.getProveedor() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_proveedor_vacio"));
         }
         TipoDeComprobante[] tipoFactura = {TipoDeComprobante.FACTURA_A};
         return facturaCompraRepository.calcularIVACompra(criteria, tipoFactura);
@@ -860,11 +772,6 @@ public class FacturaServiceImpl implements IFacturaService {
 
     @Override
     public BigDecimal calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
-        //Empresa
-        if (criteria.getEmpresa() == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
         //Fecha de Factura
         if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -883,34 +790,26 @@ public class FacturaServiceImpl implements IFacturaService {
             cal.set(Calendar.SECOND, 59);
             criteria.setFechaHasta(cal.getTime());
         }
-        //Cliente
-        if (criteria.isBuscaCliente() && criteria.getCliente() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_cliente_vacio"));
-        }
-        //Usuario
-        if (criteria.isBuscaUsuario() && criteria.getUsuario() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_usuario_vacio"));
-        }
-        if (criteria.isBuscaViajante() && criteria.getViajante() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_viajante_vacio"));
-        }
         BigDecimal gananciaTotal = facturaVentaRepository.calcularGananciaTotal(this.getBuilder(criteria,idUsuarioLoggedIn));
         return (gananciaTotal != null? gananciaTotal : BigDecimal.ZERO);
     }
 
     @Override
-    public BigDecimal calcularIVANetoRenglon(Movimiento movimiento, TipoDeComprobante tipo, Producto producto, BigDecimal descuento_porcentaje) {
+    public BigDecimal calcularIVANetoRenglon(Movimiento movimiento, TipoDeComprobante tipo, Producto producto, BigDecimal descuentoPorcentaje) {
         BigDecimal resultado = BigDecimal.ZERO;
         if (movimiento == Movimiento.COMPRA) {
             if (tipo == TipoDeComprobante.FACTURA_A || tipo == TipoDeComprobante.FACTURA_B) {
-                resultado = producto.getPrecioCosto().multiply(BigDecimal.ONE.subtract(descuento_porcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)).multiply(producto.getIva_porcentaje().divide(CIEN, 15, RoundingMode.HALF_UP)));
+                resultado = producto.getPrecioCosto()
+                        .multiply(BigDecimal.ONE.subtract(descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))
+                                .multiply(producto.getIva_porcentaje()
+                                        .divide(CIEN, 15, RoundingMode.HALF_UP)));
             }
         } else if (movimiento == Movimiento.VENTA) {
             if (tipo == TipoDeComprobante.FACTURA_A || tipo == TipoDeComprobante.FACTURA_B || tipo == TipoDeComprobante.PRESUPUESTO) {
-                resultado = producto.getPrecioVentaPublico().multiply(BigDecimal.ONE.subtract(descuento_porcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)).multiply(producto.getIva_porcentaje().divide(CIEN, 15, RoundingMode.HALF_UP)));
+                resultado = producto.getPrecioVentaPublico()
+                        .multiply(BigDecimal.ONE.subtract(descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))
+                                .multiply(producto.getIva_porcentaje()
+                                        .divide(CIEN, 15, RoundingMode.HALF_UP)));
             }
         }
         return resultado;
@@ -937,13 +836,17 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     @Override
-    public BigDecimal calcularImpInternoNeto(Movimiento movimiento, Producto producto, BigDecimal descuento_neto) {
+    public BigDecimal calcularImpInternoNeto(Movimiento movimiento, Producto producto, BigDecimal descuentoNeto) {
         BigDecimal resultado = BigDecimal.ZERO;
         if (movimiento == Movimiento.COMPRA) {
-            resultado = producto.getPrecioCosto().subtract(descuento_neto).multiply(producto.getImpuestoInterno_porcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
+            resultado = producto.getPrecioCosto().subtract(descuentoNeto)
+                    .multiply(producto.getImpuestoInterno_porcentaje())
+                    .divide(CIEN, 15, RoundingMode.HALF_UP);
         }
         if (movimiento == Movimiento.VENTA) {
-            resultado = producto.getPrecioVentaPublico().subtract(descuento_neto).multiply(producto.getImpuestoInterno_porcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
+            resultado = producto.getPrecioVentaPublico().subtract(descuentoNeto)
+                    .multiply(producto.getImpuestoInterno_porcentaje())
+                    .divide(CIEN, 15, RoundingMode.HALF_UP);
         }
         return resultado;
     }
@@ -995,8 +898,8 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     @Override
-    public BigDecimal calcularImporte(BigDecimal cantidad, BigDecimal precioUnitario, BigDecimal descuento_neto) {
-        return (precioUnitario.subtract(descuento_neto)).multiply(cantidad);
+    public BigDecimal calcularImporte(BigDecimal cantidad, BigDecimal precioUnitario, BigDecimal descuentoNeto) {
+        return (precioUnitario.subtract(descuentoNeto)).multiply(cantidad);
     }
 
     @Override
@@ -1029,7 +932,7 @@ public class FacturaServiceImpl implements IFacturaService {
             try {
                 params.put("logo", new ImageIcon(ImageIO.read(new URL(factura.getEmpresa().getLogo()))).getImage());
             } catch (IOException ex) {
-                LOGGER.error(ex.getMessage());
+                logger.error(ex.getMessage());
                 throw new ServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_empresa_404_logo"), ex);
             }
@@ -1039,7 +942,7 @@ public class FacturaServiceImpl implements IFacturaService {
          try {
             return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
-            LOGGER.error(ex.getMessage());
+            logger.error(ex.getMessage());
             throw new ServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_error_reporte"), ex);
         }

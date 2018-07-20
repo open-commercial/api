@@ -19,14 +19,14 @@ public class BusquedaClienteCriteria {
     private boolean buscaPorId_Fiscal;
     private String idFiscal;
     private boolean buscaPorViajante;
-    private Usuario viajante;
+    private Long idViajante;
     private boolean buscaPorPais;
-    private Pais pais;
+    private Long idPais;
     private boolean buscaPorProvincia;
-    private Provincia provincia;
+    private Long idProvincia;
     private boolean buscaPorLocalidad;
-    private Localidad localidad;
-    private Empresa empresa;
+    private Long idLocalidad;
+    private Long idEmpresa;
     private Pageable pageable;
     private boolean conSaldo;
 }

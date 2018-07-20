@@ -31,7 +31,6 @@ public class PedidoController {
     private final IEmpresaService empresaService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
-    private final int TAMANIO_PAGINA_DEFAULT = 50;
 
     @Value("${SIC_JWT_KEY}")
     private String secretkey;
@@ -105,15 +104,13 @@ public class PedidoController {
                                           @RequestParam(required = false) Integer pagina,
                                           @RequestParam(required = false) Integer tamanio,
                                           @RequestHeader("Authorization") String token) {
-        Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
+        final int TAMANIO_PAGINA_DEFAULT = 50;
         Calendar fechaDesde = Calendar.getInstance();
         Calendar fechaHasta = Calendar.getInstance();
         if ((desde != null) && (hasta != null)) {
             fechaDesde.setTimeInMillis(desde);            
             fechaHasta.setTimeInMillis(hasta);
         }
-        Usuario usuario = null;
-        if (idUsuario != null) usuario = usuarioService.getUsuarioPorId(idUsuario);
         Cliente cliente = null;
         if (idCliente != null) cliente = clienteService.getClientePorId(idCliente);
         if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
@@ -124,14 +121,14 @@ public class PedidoController {
                                                                 .fechaDesde(fechaDesde.getTime())
                                                                 .fechaHasta(fechaHasta.getTime())
                                                                 .buscaCliente(cliente != null)
-                                                                .cliente(cliente)
+                                                                .idCliente(idCliente)
                                                                 .buscaUsuario(idUsuario != null)
-                                                                .usuario(usuario)
+                                                                .idUsuario(idUsuario)
                                                                 .buscaPorNroPedido(nroPedido != null)
                                                                 .nroPedido((nroPedido != null) ? nroPedido : 0)
                                                                 .buscaPorEstadoPedido(estadoPedido != null)
                                                                 .estadoPedido(estadoPedido)
-                                                                .empresa(empresa)
+                                                                .idEmpresa(idEmpresa)
                                                                 .pageable(pageable)
                                                                 .build();
         Claims claims =

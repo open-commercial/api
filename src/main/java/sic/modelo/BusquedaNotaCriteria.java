@@ -16,9 +16,9 @@ public class BusquedaNotaCriteria {
     private boolean buscaPorFecha;
     private Date fechaDesde;
     private Date fechaHasta;
-    private Empresa empresa;
+    private Long idEmpresa;
     private int cantidadDeRegistros;
-    private Cliente cliente;
+    private Long idCliente;
     private Pageable pageable;
     
 }

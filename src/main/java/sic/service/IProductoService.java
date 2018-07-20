@@ -16,7 +16,7 @@ import sic.modelo.Rubro;
 
 public interface IProductoService {
 
-  void actualizar(Producto producto);
+  void actualizar(Producto productoPorActualizar, Long idMedida, Long idRubro, Long idProveedor, Long idEmpresa);
 
   void actualizarStock(
       HashMap<Long, BigDecimal> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento);
@@ -50,7 +50,7 @@ public interface IProductoService {
 
   void eliminarMultiplesProductos(long[] idProducto);
 
-  Producto getProductoPorCodigo(String codigo, Empresa empresa);
+  Producto getProductoPorCodigo(String codigo, long idEmpresa);
 
   Producto getProductoPorDescripcion(String descripcion, Empresa empresa);
 
@@ -58,9 +58,9 @@ public interface IProductoService {
 
   BigDecimal calcularValorStock(BusquedaProductoCriteria criteria);
 
-  byte[] getListaDePreciosPorEmpresa(List<Producto> productos, Empresa empresa, String formato);
+  byte[] getListaDePreciosPorEmpresa(List<Producto> productos, long idEmpresa, String formato);
 
-  Producto guardar(Producto producto);
+  Producto guardar(Producto producto, long idMedida, long idRubro, long idProveedor, long idEmpresa);
 
   List<Producto> actualizarMultiples(
       long[] idProducto,
@@ -77,11 +77,11 @@ public interface IProductoService {
       BigDecimal precioLista,
       BigDecimal precioVentaPublico,
       boolean checkMedida,
-      Medida medida,
+      Long idMedida,
       boolean checkRubro,
-      Rubro rubro,
+      Long idRubro,
       boolean checkProveedor,
-      Proveedor proveedor,
+      Long idProveedor,
       boolean checkVisibilidad,
       Boolean publico);
 }
