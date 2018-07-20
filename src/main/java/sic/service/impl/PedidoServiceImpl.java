@@ -34,8 +34,8 @@ public class PedidoServiceImpl implements IPedidoService {
     private final IFacturaService facturaService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
-    private final static BigDecimal CIEN = new BigDecimal("100");
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private static final BigDecimal CIEN = new BigDecimal("100");
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
     public PedidoServiceImpl(IFacturaService facturaService, PedidoRepository pedidoRepository,
@@ -118,8 +118,11 @@ public class PedidoServiceImpl implements IPedidoService {
         BigDecimal porcentajeDescuento;
         BigDecimal totalActual = BigDecimal.ZERO;
         for (RenglonPedido renglonPedido : this.getRenglonesDelPedido(pedido.getId_Pedido())) {
-            porcentajeDescuento = BigDecimal.ONE.subtract(renglonPedido.getDescuento_porcentaje().divide(CIEN, 15, RoundingMode.HALF_UP));
-            renglonPedido.setSubTotal(renglonPedido.getProducto().getPrecioLista().multiply(renglonPedido.getCantidad()).multiply(porcentajeDescuento));
+            porcentajeDescuento = BigDecimal.ONE.subtract(renglonPedido.getDescuento_porcentaje()
+                    .divide(CIEN, 15, RoundingMode.HALF_UP));
+            renglonPedido.setSubTotal(renglonPedido.getProducto().getPrecioLista()
+                    .multiply(renglonPedido.getCantidad())
+                    .multiply(porcentajeDescuento));
             totalActual = totalActual.add(renglonPedido.getSubTotal());
         }
         pedido.setTotalActual(totalActual);
@@ -153,14 +156,14 @@ public class PedidoServiceImpl implements IPedidoService {
         pedido.setEstado(EstadoPedido.ABIERTO);
         this.validarPedido(TipoDeOperacion.ALTA , pedido);
         pedido = pedidoRepository.save(pedido);
-        LOGGER.warn("El Pedido " + pedido + " se guardó correctamente.");
+        logger.warn("El Pedido " + pedido + " se guardó correctamente.");
         return pedido;
     }
 
     @Override
     public Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
         //Fecha
-        if (criteria.isBuscaPorFecha() & (criteria.getFechaDesde() == null | criteria.getFechaHasta() == null)) {
+        if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_pedido_fechas_busqueda_invalidas"));
         }
@@ -272,7 +275,7 @@ public class PedidoServiceImpl implements IPedidoService {
             try {
                 params.put("logo", new ImageIcon(ImageIO.read(new URL(pedido.getEmpresa().getLogo()))).getImage());
             } catch (IOException ex) {
-                LOGGER.error(ex.getMessage());
+                logger.error(ex.getMessage());
                 throw new ServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_empresa_404_logo"), ex);
             }
@@ -282,7 +285,7 @@ public class PedidoServiceImpl implements IPedidoService {
         try {
             return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
-            LOGGER.error(ex.getMessage());
+            logger.error(ex.getMessage());
             throw new ServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_error_reporte"), ex);
         }

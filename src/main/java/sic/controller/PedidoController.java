@@ -31,7 +31,6 @@ public class PedidoController {
     private final IEmpresaService empresaService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
-    private final int TAMANIO_PAGINA_DEFAULT = 50;
 
     @Value("${SIC_JWT_KEY}")
     private String secretkey;
@@ -105,6 +104,7 @@ public class PedidoController {
                                           @RequestParam(required = false) Integer pagina,
                                           @RequestParam(required = false) Integer tamanio,
                                           @RequestHeader("Authorization") String token) {
+        final int TAMANIO_PAGINA_DEFAULT = 50;
         Calendar fechaDesde = Calendar.getInstance();
         Calendar fechaHasta = Calendar.getInstance();
         if ((desde != null) && (hasta != null)) {

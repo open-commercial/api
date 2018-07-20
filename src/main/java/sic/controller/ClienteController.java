@@ -22,8 +22,6 @@ public class ClienteController {
 
   private final IClienteService clienteService;
   private final IEmpresaService empresaService;
-  private final IPaisService paisService;
-  private final IProvinciaService provinciaService;
   private final ILocalidadService localidadService;
   private final IUsuarioService usuarioService;
   private final ICondicionIVAService condicionIVAService;
@@ -35,15 +33,11 @@ public class ClienteController {
   public ClienteController(
       IClienteService clienteService,
       IEmpresaService empresaService,
-      IPaisService paisService,
-      IProvinciaService provinciaService,
       ILocalidadService localidadService,
       IUsuarioService usuarioService,
       ICondicionIVAService condicionIVAService) {
     this.clienteService = clienteService;
     this.empresaService = empresaService;
-    this.paisService = paisService;
-    this.provinciaService = provinciaService;
     this.localidadService = localidadService;
     this.usuarioService = usuarioService;
     this.condicionIVAService = condicionIVAService;
@@ -77,7 +71,7 @@ public class ClienteController {
       @RequestParam(required = false) Integer tamanio,
       @RequestParam(required = false, defaultValue = "true") boolean conSaldo,
       @RequestHeader("Authorization") String token) {
-    int TAMANIO_PAGINA_DEFAULT = 50;
+    final int TAMANIO_PAGINA_DEFAULT = 50;
     if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
     if (pagina == null || pagina < 0) pagina = 0;
     Pageable pageable =
@@ -228,7 +222,6 @@ public class ClienteController {
   })
   public Cliente getClientePorIdUsuario(
       @PathVariable long idUsuario, @PathVariable long idEmpresa) {
-    return clienteService.getClientePorIdUsuarioYidEmpresa(
-        idUsuario, idEmpresa);
+    return clienteService.getClientePorIdUsuarioYidEmpresa(idUsuario, idEmpresa);
   }
 }

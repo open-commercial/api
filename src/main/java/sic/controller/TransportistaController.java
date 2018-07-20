@@ -16,83 +16,90 @@ import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.service.IEmpresaService;
-import sic.service.ILocalidadService;
-import sic.service.IPaisService;
-import sic.service.IProvinciaService;
 import sic.service.ITransportistaService;
 
 @RestController
 @RequestMapping("/api/v1")
 public class TransportistaController {
-    
-    private final ITransportistaService transportistaService;
-    private final IEmpresaService empresaService;
-    private final IPaisService paisService;
-    private final IProvinciaService provinciaService;
-    private final ILocalidadService localidadService;
-    
-    @Autowired
-    public TransportistaController(ITransportistaService transportistaService, IEmpresaService empresaService,
-                                   IPaisService paisService, IProvinciaService provinciaService,
-                                   ILocalidadService localidadService) {
-        this.transportistaService = transportistaService;
-        this.empresaService = empresaService;
-        this.paisService = paisService;
-        this.provinciaService = provinciaService;
-        this.localidadService = localidadService;
+
+  private final ITransportistaService transportistaService;
+  private final IEmpresaService empresaService;
+
+  @Autowired
+  public TransportistaController(
+      ITransportistaService transportistaService, IEmpresaService empresaService) {
+    this.transportistaService = transportistaService;
+    this.empresaService = empresaService;
+  }
+
+  @GetMapping("/transportistas/{idTransportista}")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public Transportista getTransportistaPorId(@PathVariable long idTransportista) {
+    return transportistaService.getTransportistaPorId(idTransportista);
+  }
+
+  @PutMapping("/transportistas")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public void actualizar(@RequestBody Transportista transportista) {
+    if (transportistaService.getTransportistaPorId(transportista.getId_Transportista()) != null) {
+      transportistaService.actualizar(transportista);
     }
-    
-    @GetMapping("/transportistas/{idTransportista}")
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public Transportista getTransportistaPorId(@PathVariable long idTransportista) {
-        return transportistaService.getTransportistaPorId(idTransportista);
-    }
-    
-    @PutMapping("/transportistas")
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public void actualizar(@RequestBody Transportista transportista) {
-        if (transportistaService.getTransportistaPorId(transportista.getId_Transportista()) != null) {
-            transportistaService.actualizar(transportista);
-        }
-    }
-    
-    @GetMapping("/transportistas/busqueda/criteria") 
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
-    public List<Transportista> buscarTransportista(@RequestParam(value = "idEmpresa") long idEmpresa,
-                                                   @RequestParam(value = "nombre", required = false) String nombre,
-                                                   @RequestParam(value = "idPais", required = false) Long idPais,
-                                                   @RequestParam(value = "idProvincia", required = false) Long idProvincia,
-                                                   @RequestParam(value = "idLocalidad", required = false) Long idLocalidad) {
-        BusquedaTransportistaCriteria criteria = new BusquedaTransportistaCriteria(
-                                                     (nombre != null),nombre,
-                                                     (idPais != null), idPais,
-                                                     (idProvincia != null), idProvincia,
-                                                     (idLocalidad != null),idLocalidad,
-                                                     idEmpresa);
-        return transportistaService.buscarTransportistas(criteria);       
-    }
-    
-    @DeleteMapping("/transportistas/{idTransportista}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-    public void eliminar(@PathVariable long idTransportista) {
-        transportistaService.eliminar(idTransportista);
-    }
-    
-    @GetMapping("/transportistas/empresas/{idEmpresa}")
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
-    public List<Transportista> getTransportistas(@PathVariable long idEmpresa) {
-        return transportistaService.getTransportistas(empresaService.getEmpresaPorId(idEmpresa));
-    }
-    
-    @PostMapping("/transportistas")
-    @ResponseStatus(HttpStatus.OK)
-    public Transportista guardar(@RequestBody Transportista transportista) {
-        return transportistaService.guardar(transportista);
-    }
-    
+  }
+
+  @GetMapping("/transportistas/busqueda/criteria")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public List<Transportista> buscarTransportista(
+      @RequestParam long idEmpresa,
+      @RequestParam(required = false) String nombre,
+      @RequestParam(required = false) Long idPais,
+      @RequestParam(required = false) Long idProvincia,
+      @RequestParam(required = false) Long idLocalidad) {
+    BusquedaTransportistaCriteria criteria =
+        new BusquedaTransportistaCriteria(
+            (nombre != null),
+            nombre,
+            (idPais != null),
+            idPais,
+            (idProvincia != null),
+            idProvincia,
+            (idLocalidad != null),
+            idLocalidad,
+            idEmpresa);
+    return transportistaService.buscarTransportistas(criteria);
+  }
+
+  @DeleteMapping("/transportistas/{idTransportista}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
+  public void eliminar(@PathVariable long idTransportista) {
+    transportistaService.eliminar(idTransportista);
+  }
+
+  @GetMapping("/transportistas/empresas/{idEmpresa}")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public List<Transportista> getTransportistas(@PathVariable long idEmpresa) {
+    return transportistaService.getTransportistas(empresaService.getEmpresaPorId(idEmpresa));
+  }
+
+  @PostMapping("/transportistas")
+  @ResponseStatus(HttpStatus.OK)
+  public Transportista guardar(@RequestBody Transportista transportista) {
+    return transportistaService.guardar(transportista);
+  }
 }

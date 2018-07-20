@@ -81,11 +81,11 @@ public class CajaController {
     @GetMapping("/cajas/busqueda/criteria")
     @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public Page<Caja> getCajasCriteria(@RequestParam(value = "idEmpresa") long idEmpresa,
-                                       @RequestParam(value = "desde", required = false) Long desde,
-                                       @RequestParam(value = "hasta", required = false) Long hasta,
-                                       @RequestParam(value = "idUsuarioApertura", required = false) Long idUsuarioApertura,
-                                       @RequestParam(value = "idUsuarioCierre", required = false) Long idUsuarioCierre,
+    public Page<Caja> getCajasCriteria(@RequestParam long idEmpresa,
+                                       @RequestParam(required = false) Long desde,
+                                       @RequestParam(required = false) Long hasta,
+                                       @RequestParam(required = false) Long idUsuarioApertura,
+                                       @RequestParam(required = false) Long idUsuarioCierre,
                                        @RequestParam(required = false) Integer pagina,
                                        @RequestParam(required = false) Integer tamanio) {
         Calendar fechaDesde = Calendar.getInstance();            

@@ -39,7 +39,7 @@ import sic.repository.ProductoRepository;
 public class ProductoServiceImpl implements IProductoService {
 
   private final ProductoRepository productoRepository;
-  private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final IEmpresaService empresaService;
   private final IRubroService rubroService;
@@ -176,43 +176,43 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   private BooleanBuilder getBuilder(BusquedaProductoCriteria criteria) {
-    QProducto qproducto = QProducto.producto;
+    QProducto qProducto = QProducto.producto;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
-        qproducto
+        qProducto
             .empresa
             .id_Empresa
             .eq(criteria.getIdEmpresa())
-            .and(qproducto.eliminado.eq(false)));
+            .and(qProducto.eliminado.eq(false)));
     if (criteria.isBuscarPorCodigo() && criteria.isBuscarPorDescripcion())
       builder.and(
-          qproducto
+          qProducto
               .codigo
               .containsIgnoreCase(criteria.getCodigo())
-              .or(this.buildPredicadoDescripcion(criteria.getDescripcion(), qproducto)));
+              .or(this.buildPredicadoDescripcion(criteria.getDescripcion(), qProducto)));
     else {
       if (criteria.isBuscarPorCodigo())
-        builder.and(qproducto.codigo.containsIgnoreCase(criteria.getCodigo()));
+        builder.and(qProducto.codigo.containsIgnoreCase(criteria.getCodigo()));
       if (criteria.isBuscarPorDescripcion())
-        builder.and(this.buildPredicadoDescripcion(criteria.getDescripcion(), qproducto));
+        builder.and(this.buildPredicadoDescripcion(criteria.getDescripcion(), qProducto));
     }
     if (criteria.isBuscarPorRubro())
-      builder.and(qproducto.rubro.id_Rubro.eq(criteria.getIdRubro()));
+      builder.and(qProducto.rubro.id_Rubro.eq(criteria.getIdRubro()));
     if (criteria.isBuscarPorProveedor())
-      builder.and(qproducto.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
+      builder.and(qProducto.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
     if (criteria.isListarSoloFaltantes())
-      builder.and(qproducto.cantidad.loe(qproducto.cantMinima)).and(qproducto.ilimitado.eq(false));
+      builder.and(qProducto.cantidad.loe(qProducto.cantMinima)).and(qProducto.ilimitado.eq(false));
     if (criteria.isBuscaPorVisibilidad())
-      if (criteria.getPublico()) builder.and(qproducto.publico.isTrue());
-      else builder.and(qproducto.publico.isFalse());
+      if (criteria.getPublico()) builder.and(qProducto.publico.isTrue());
+      else builder.and(qProducto.publico.isFalse());
     return builder;
   }
 
-  private BooleanBuilder buildPredicadoDescripcion(String descripcion, QProducto qproducto) {
+  private BooleanBuilder buildPredicadoDescripcion(String descripcion, QProducto qProducto) {
     String[] terminos = descripcion.split(" ");
     BooleanBuilder descripcionProducto = new BooleanBuilder();
     for (String termino : terminos) {
-      descripcionProducto.and(qproducto.descripcion.containsIgnoreCase(termino));
+      descripcionProducto.and(qProducto.descripcion.containsIgnoreCase(termino));
     }
     return descripcionProducto;
   }
@@ -221,9 +221,7 @@ public class ProductoServiceImpl implements IProductoService {
   @Transactional
   public Producto guardar(
       Producto producto, long idMedida, long idRubro, long idProveedor, long idEmpresa) {
-    if (producto.getCodigo() == null) {
-      producto.setCodigo("");
-    }
+    if (producto.getCodigo() == null) producto.setCodigo("");
     producto.setMedida(medidaService.getMedidaPorId(idMedida));
     producto.setRubro(rubroService.getRubroPorId(idRubro));
     producto.setProveedor(proveedorService.getProveedorPorId(idProveedor));
@@ -232,7 +230,7 @@ public class ProductoServiceImpl implements IProductoService {
     producto.setFechaAlta(new Date());
     producto.setFechaUltimaModificacion(new Date());
     producto = productoRepository.save(producto);
-    LOGGER.warn("El Producto " + producto + " se guardó correctamente.");
+    logger.warn("El Producto " + producto + " se guardó correctamente.");
     return producto;
   }
 
@@ -258,7 +256,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
     productoPorActualizar.setFechaUltimaModificacion(new Date());
     productoRepository.save(productoPorActualizar);
-    LOGGER.warn("El Producto " + productoPorActualizar + " se modificó correctamente.");
+    logger.warn("El Producto " + productoPorActualizar + " se modificó correctamente.");
   }
 
   @Override
@@ -270,14 +268,13 @@ public class ProductoServiceImpl implements IProductoService {
             entry -> {
               Producto producto = productoRepository.findById(entry.getKey());
               if (producto == null) {
-                LOGGER.warn("Se intenta actualizar el stock de un producto eliminado.");
+                logger.warn("Se intenta actualizar el stock de un producto eliminado.");
               }
               if (producto != null && !producto.isIlimitado()) {
                 if (movimiento.equals(Movimiento.VENTA)) {
                   if (operacion == TipoDeOperacion.ALTA) {
                     producto.setCantidad(producto.getCantidad().subtract(entry.getValue()));
                   }
-
                   if (operacion == TipoDeOperacion.ELIMINACION
                       || operacion == TipoDeOperacion.ACTUALIZACION) {
                     producto.setCantidad(producto.getCantidad().add(entry.getValue()));
@@ -286,7 +283,6 @@ public class ProductoServiceImpl implements IProductoService {
                   if (operacion == TipoDeOperacion.ALTA) {
                     producto.setCantidad(producto.getCantidad().add(entry.getValue()));
                   }
-
                   if (operacion == TipoDeOperacion.ELIMINACION) {
                     BigDecimal result = producto.getCantidad().subtract(entry.getValue());
                     if (result.compareTo(BigDecimal.ZERO) < 0) {
@@ -331,8 +327,8 @@ public class ProductoServiceImpl implements IProductoService {
       BigDecimal gananciaPorcentaje,
       BigDecimal impuestoInternoNeto,
       BigDecimal impuestoInternoPorcentaje,
-      BigDecimal IVANeto,
-      BigDecimal IVAPorcentaje,
+      BigDecimal ivaNeto,
+      BigDecimal ivaPorcentaje,
       BigDecimal precioCosto,
       BigDecimal precioLista,
       BigDecimal precioVentaPublico,
@@ -382,8 +378,8 @@ public class ProductoServiceImpl implements IProductoService {
         p.setGanancia_porcentaje(gananciaPorcentaje);
         p.setGanancia_neto(gananciaNeto);
         p.setPrecioVentaPublico(precioVentaPublico);
-        p.setIva_porcentaje(IVAPorcentaje);
-        p.setIva_neto(IVANeto);
+        p.setIva_porcentaje(ivaPorcentaje);
+        p.setIva_neto(ivaNeto);
         p.setImpuestoInterno_porcentaje(impuestoInternoPorcentaje);
         p.setImpuestoInterno_neto(impuestoInternoNeto);
         p.setPrecioLista(precioLista);
@@ -404,7 +400,7 @@ public class ProductoServiceImpl implements IProductoService {
       this.validarOperacion(TipoDeOperacion.ACTUALIZACION, p);
     }
     productoRepository.save(productos);
-    LOGGER.warn("Los Productos " + productos + " se modificaron correctamente.");
+    logger.warn("Los Productos " + productos + " se modificaron correctamente.");
     return productos;
   }
 
@@ -420,10 +416,10 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public Producto getProductoPorCodigo(String codigo, long idEmpresa) {
-    Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
     if (codigo.isEmpty()) {
       return null;
     } else {
+      Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
       return productoRepository.findByCodigoAndEmpresaAndEliminado(codigo, empresa, false);
     }
   }
@@ -540,11 +536,11 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public BigDecimal calcularPrecioLista(
-      BigDecimal PVP, BigDecimal ivaPorcentaje, BigDecimal impInternoPorcentaje) {
-    BigDecimal resulIVA = PVP.multiply(ivaPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP));
+      BigDecimal pvp, BigDecimal ivaPorcentaje, BigDecimal impInternoPorcentaje) {
+    BigDecimal resulIVA = pvp.multiply(ivaPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP));
     BigDecimal resultImpInterno =
-        PVP.multiply(impInternoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP));
-    return PVP.add(resulIVA).add(resultImpInterno);
+        pvp.multiply(impInternoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP));
+    return pvp.add(resulIVA).add(resultImpInterno);
   }
 
   @Override
@@ -560,7 +556,7 @@ public class ProductoServiceImpl implements IProductoService {
       try {
         params.put("logo", new ImageIcon(ImageIO.read(new URL(empresa.getLogo()))).getImage());
       } catch (IOException ex) {
-        LOGGER.error(ex.getMessage());
+        logger.error(ex.getMessage());
         throw new ServiceException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_empresa_404_logo"), ex);
       }
@@ -571,7 +567,7 @@ public class ProductoServiceImpl implements IProductoService {
         try {
           return xlsReportToArray(JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
-          LOGGER.error(ex.getMessage());
+          logger.error(ex.getMessage());
           throw new ServiceException(
               ResourceBundle.getBundle("Mensajes").getString("mensaje_error_reporte"), ex);
         }
@@ -580,7 +576,7 @@ public class ProductoServiceImpl implements IProductoService {
           return JasperExportManager.exportReportToPdf(
               JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
-          LOGGER.error(ex.getMessage());
+          logger.error(ex.getMessage());
           throw new ServiceException(
               ResourceBundle.getBundle("Mensajes").getString("mensaje_error_reporte"), ex);
         }
@@ -603,11 +599,11 @@ public class ProductoServiceImpl implements IProductoService {
       bytes = out.toByteArray();
       out.close();
     } catch (JRException ex) {
-      LOGGER.error(ex.getMessage());
+      logger.error(ex.getMessage());
       throw new ServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_error_reporte"), ex);
     } catch (IOException ex) {
-      LOGGER.error(ex.getMessage());
+      logger.error(ex.getMessage());
     }
     return bytes;
   }
