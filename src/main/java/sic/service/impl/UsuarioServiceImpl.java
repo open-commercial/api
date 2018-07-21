@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.controller.ForbiddenException;
 import sic.modelo.*;
 import sic.service.IClienteService;
 import sic.service.IUsuarioService;
@@ -243,10 +244,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public void actualizar(Usuario usuario, long idUsuarioLoggedIn) {
-    Usuario usuarioLoggedIn = this.getUsuarioPorId(idUsuarioLoggedIn);
-    boolean usuarioSeModificaASiMismo = usuarioLoggedIn.getId_Usuario() == usuario.getId_Usuario();
-    if (usuarioSeModificaASiMismo || usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
+  public void actualizar(Usuario usuario, Usuario usuarioLoggedIn) {
       this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario);
       if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
         usuario.setRoles(usuarioLoggedIn.getRoles());
@@ -263,12 +261,11 @@ public class UsuarioServiceImpl implements IUsuarioService {
       if (!usuario.getRoles().contains(Rol.COMPRADOR)) {
         this.clienteService.desvincularClienteDeComprador(usuario.getId_Usuario());
       }
-      if (usuarioSeModificaASiMismo) {
+      if (usuarioLoggedIn.getId_Usuario() == usuario.getId_Usuario()) {
         usuario.setToken(usuarioLoggedIn.getToken());
       }
-    }
-    usuarioRepository.save(usuario);
-    LOGGER.warn("El Usuario " + usuario + " se actualizó correctamente.");
+      usuarioRepository.save(usuario);
+      LOGGER.warn("El Usuario " + usuario + " se actualizó correctamente.");
   }
 
   @Override

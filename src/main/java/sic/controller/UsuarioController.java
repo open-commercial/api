@@ -1,6 +1,8 @@
 package sic.controller;
 
 import java.util.List;
+import java.util.ResourceBundle;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,12 +83,25 @@ public class UsuarioController {
 
   @PutMapping("/usuarios")
   @ResponseStatus(HttpStatus.OK)
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VIAJANTE, Rol.VENDEDOR, Rol.COMPRADOR})
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VIAJANTE,
+    Rol.VENDEDOR,
+    Rol.COMPRADOR
+  })
   public void actualizar(
       @RequestBody Usuario usuario, @RequestHeader("Authorization") String token) {
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    usuarioService.actualizar(usuario, (int) claims.get("idUsuario"));
+    Usuario usuarioLoggedIn = this.getUsuarioPorId((int) claims.get("idUsuario"));
+    boolean usuarioSeModificaASiMismo = usuarioLoggedIn.getId_Usuario() == usuario.getId_Usuario();
+    if (usuarioSeModificaASiMismo || usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
+      usuarioService.actualizar(usuario, usuarioLoggedIn);
+    } else {
+      throw new ForbiddenException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+    }
   }
 
   @PutMapping("/usuarios/{idUsuario}/empresas/{idEmpresaPredeterminada}")
