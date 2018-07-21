@@ -120,11 +120,11 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
     if (criteria.isBuscarPorRol() && !criteria.getRoles().isEmpty()) {
       BooleanBuilder rsPredicate = new BooleanBuilder();
-      List<Rol> rolesDeUsuario = this.getUsuarioPorId(idUsuarioLoggedIn).getRoles();
-      if (rolesDeUsuario.contains(Rol.VIAJANTE)
-          && !rolesDeUsuario.contains(Rol.ADMINISTRADOR)
-          && !rolesDeUsuario.contains(Rol.ENCARGADO)
-          && !rolesDeUsuario.contains(Rol.VENDEDOR)) {
+      List<Rol> rolesDeUsuarioLoggedIn = this.getUsuarioPorId(idUsuarioLoggedIn).getRoles();
+      if (rolesDeUsuarioLoggedIn.contains(Rol.VIAJANTE)
+          && !rolesDeUsuarioLoggedIn.contains(Rol.ADMINISTRADOR)
+          && !rolesDeUsuarioLoggedIn.contains(Rol.ENCARGADO)
+          && !rolesDeUsuarioLoggedIn.contains(Rol.VENDEDOR)) {
         for (Rol rol : criteria.getRoles()) {
           switch (rol) {
             case VIAJANTE:
