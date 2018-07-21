@@ -246,9 +246,11 @@ public class UsuarioServiceImpl implements IUsuarioService {
   public void actualizar(Usuario usuario, long idUsuarioLoggedIn) {
     Usuario usuarioLoggedIn = this.getUsuarioPorId(idUsuarioLoggedIn);
     boolean usuarioSeModificaASiMismo = usuarioLoggedIn.getId_Usuario() == usuario.getId_Usuario();
-    if ((usuarioSeModificaASiMismo && usuarioLoggedIn.getRoles().contains(Rol.COMPRADOR))
-        || usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
+    if (usuarioSeModificaASiMismo || usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
       this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario);
+      if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
+        usuario.setRoles(usuarioLoggedIn.getRoles());
+      }
       if (usuario.getPassword().isEmpty()) {
         Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
         usuario.setPassword(usuarioGuardado.getPassword());

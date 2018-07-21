@@ -81,7 +81,7 @@ public class UsuarioController {
 
   @PutMapping("/usuarios")
   @ResponseStatus(HttpStatus.OK)
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.COMPRADOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VIAJANTE, Rol.VENDEDOR, Rol.COMPRADOR})
   public void actualizar(
       @RequestBody Usuario usuario, @RequestHeader("Authorization") String token) {
     Claims claims =
