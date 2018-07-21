@@ -244,22 +244,26 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public void actualizar(Usuario usuario, long idUsuarioLoggedIn) {
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario);
-    if (usuario.getPassword().isEmpty()) {
-      Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
-      usuario.setPassword(usuarioGuardado.getPassword());
-    } else {
-      usuario.setPassword(this.encriptarConMD5(usuario.getPassword()));
-    }
-    if (!usuario.getRoles().contains(Rol.VIAJANTE)) {
-      this.clienteService.desvincularClienteDeViajante(usuario.getId_Usuario());
-    }
-    if (!usuario.getRoles().contains(Rol.COMPRADOR)) {
-      this.clienteService.desvincularClienteDeComprador(usuario.getId_Usuario());
-    }
     Usuario usuarioLoggedIn = this.getUsuarioPorId(idUsuarioLoggedIn);
-    if (usuarioLoggedIn.getId_Usuario() == usuario.getId_Usuario()) {
-      usuario.setToken(usuarioLoggedIn.getToken());
+    boolean usuarioSeModificaASiMismo = usuarioLoggedIn.getId_Usuario() == usuario.getId_Usuario();
+    if ((usuarioSeModificaASiMismo && usuarioLoggedIn.getRoles().contains(Rol.COMPRADOR))
+        || usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
+      this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario);
+      if (usuario.getPassword().isEmpty()) {
+        Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
+        usuario.setPassword(usuarioGuardado.getPassword());
+      } else {
+        usuario.setPassword(this.encriptarConMD5(usuario.getPassword()));
+      }
+      if (!usuario.getRoles().contains(Rol.VIAJANTE)) {
+        this.clienteService.desvincularClienteDeViajante(usuario.getId_Usuario());
+      }
+      if (!usuario.getRoles().contains(Rol.COMPRADOR)) {
+        this.clienteService.desvincularClienteDeComprador(usuario.getId_Usuario());
+      }
+      if (usuarioSeModificaASiMismo) {
+        usuario.setToken(usuarioLoggedIn.getToken());
+      }
     }
     usuarioRepository.save(usuario);
     LOGGER.warn("El Usuario " + usuario + " se actualizó correctamente.");
