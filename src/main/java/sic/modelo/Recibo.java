@@ -27,7 +27,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 @EqualsAndHashCode(of = {"numSerie", "numRecibo", "empresa", "fecha"})
-@JsonIgnoreProperties({"formaDePago", "empresa", "cliente", "usuario"})
+@JsonIgnoreProperties({"formaDePago", "empresa", "cliente", "usuario", "proveedor"})
 public class Recibo implements Serializable {
 
     @Id
@@ -70,10 +70,8 @@ public class Recibo implements Serializable {
     @Column(precision = 25, scale = 15)
     private BigDecimal monto;
 
-    @JsonGetter("formaDePago")
-    public String getNombreFormaDePago() {
-        return formaDePago.getNombre();
-    }
+    @JsonGetter("nombreFormaDePago")
+    public String getNombreFormaDePago() { return formaDePago.getNombre();  }
 
     @JsonGetter("nombreEmpresa")
     public String getNombreEmpresa() {
