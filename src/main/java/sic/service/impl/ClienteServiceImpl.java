@@ -225,6 +225,7 @@ public class ClienteServiceImpl implements IClienteService {
   public Cliente guardar(Cliente cliente) {
     cliente.setFechaAlta(new Date());
     cliente.setEliminado(false);
+    cliente.setNroCliente(this.calcularNroDeCliente(cliente.getEmpresa()));
     this.validarOperacion(TipoDeOperacion.ALTA, cliente);
     CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
     cuentaCorrienteCliente.setCliente(cliente);
@@ -305,4 +306,19 @@ public class ClienteServiceImpl implements IClienteService {
   public int desvincularClienteDeComprador(long idCliente) {
     return clienteRepository.desvincularClienteDeComprador(idCliente);
   }
+
+  @Override
+  public long calcularNroDeCliente(Empresa empresa) {
+    long min = 1L;
+    long max = 99999L; // 5 digitos
+    long randomLong = 0L;
+    boolean esRepetido = true;
+    while (esRepetido) {
+      randomLong = min + (long) (Math.random() * (max - min));
+      Cliente c = clienteRepository.findByNroClienteAndEmpresaAndEliminado(randomLong, empresa, false);
+      if (c == null) esRepetido = false;
+    }
+    return randomLong;
+  }
+
 }

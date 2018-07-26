@@ -35,4 +35,6 @@ public interface IClienteService {
 
   int desvincularClienteDeComprador(long idCliente);
 
+  long calcularNroDeCliente(Empresa empresa);
+
 }
