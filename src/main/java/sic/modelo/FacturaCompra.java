@@ -19,7 +19,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@JsonIgnoreProperties({"proveedor", "transportista", "empresa", "pedido"})
+@JsonIgnoreProperties({"proveedor", "usuario", "transportista", "empresa", "pedido"})
 public class FacturaCompra extends Factura implements Serializable {
 
     @ManyToOne
@@ -28,7 +28,7 @@ public class FacturaCompra extends Factura implements Serializable {
     
     public FacturaCompra() {}
 
-    public FacturaCompra(long id_Factura, Date fecha, TipoDeComprobante tipoComprobante, long numSerie,
+    public FacturaCompra(long id_Factura, Usuario usuario, Date fecha, TipoDeComprobante tipoComprobante, long numSerie,
             long numFactura, Date fechaVencimiento, Pedido pedido, Transportista transportista, 
             List<RenglonFactura> renglones, BigDecimal subTotal,
             BigDecimal recargo_porcentaje, BigDecimal recargo_neto, BigDecimal descuento_porcentaje,
@@ -36,7 +36,7 @@ public class FacturaCompra extends Factura implements Serializable {
             BigDecimal impuestoInterno_neto, BigDecimal total, String observaciones, Empresa empresa, boolean eliminada,
             long CAE, Date vencimientoCAE, Proveedor proveedor, long numSerieAfip, long numFacturaAfip) {
         
-        super(id_Factura, fecha, tipoComprobante, numSerie, numFactura, fechaVencimiento, 
+        super(id_Factura, usuario, fecha, tipoComprobante, numSerie, numFactura, fechaVencimiento,
                 pedido, transportista, renglones, subTotal, recargo_porcentaje,
                 recargo_neto, descuento_porcentaje, descuento_neto, subTotal_neto, iva_105_neto,
                 iva_21_neto, impuestoInterno_neto, total, observaciones, empresa, eliminada,

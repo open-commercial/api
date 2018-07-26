@@ -59,6 +59,10 @@ public abstract class Factura implements Serializable {
     @GeneratedValue
     private long id_Factura;
 
+    @ManyToOne
+    @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
+    private Usuario usuario;
+
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date fecha;
@@ -143,6 +147,11 @@ public abstract class Factura implements Serializable {
     @JsonGetter("nombreEmpresa")
     public String getNombreEmpresa() {
         return empresa.getNombre();
+    }
+
+    @JsonGetter("nombreUsuario")
+    public String getNombreUsuario() {
+        return usuario.getNombre() + " " + usuario.getApellido() + " (" + usuario.getUsername() + ")";
     }
     
 }

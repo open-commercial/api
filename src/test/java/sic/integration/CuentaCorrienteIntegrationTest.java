@@ -514,6 +514,7 @@ public class CuentaCorrienteIntegrationTest {
         restTemplate.postForObject(apiPrefix + "/facturas/compra?"
                 + "idProveedor=" + proveedor.getId_Proveedor()
                 + "&idEmpresa=" + empresa.getId_Empresa()
+                + "&idUsuario=" + credencial.getId_Usuario()
                 + "&idTransportista=" + transportista.getId_Transportista(), facturaCompraB, FacturaCompraDTO[].class);
         uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=15,8";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {}).getBody().isEmpty());
@@ -578,6 +579,7 @@ public class CuentaCorrienteIntegrationTest {
         facturasCompra[0] = restTemplate.postForObject(apiPrefix + "/facturas/compra?"
                 + "idProveedor=" + proveedor.getId_Proveedor()
                 + "&idEmpresa=" + empresa.getId_Empresa()
+                + "&idUsuario=" + credencial.getId_Usuario()
                 + "&idTransportista=" + transportista.getId_Transportista(), facturaCompraB, FacturaCompra[].class)[0];     
         List<RenglonNotaCredito> renglonesNotaCredito = Arrays.asList(restTemplate.getForObject(apiPrefix + "/notas/renglon/credito/producto?"
                 + "tipoDeComprobante=" + facturasCompra[0].getTipoComprobante().name()
