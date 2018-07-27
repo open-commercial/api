@@ -76,6 +76,11 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
+  public boolean existeClienteRelacionado(Usuario usuario, Empresa empresa) {
+    return clienteRepository.existsByCredencialAndEmpresaAndEliminado(usuario, empresa, false);
+  }
+
+  @Override
   @Transactional
   public void setClientePredeterminado(Cliente cliente) {
     Cliente clientePredeterminadoAnterior =
@@ -302,7 +307,7 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public int desvincularClienteDeComprador(long idCliente) {
-    return clienteRepository.desvincularClienteDeComprador(idCliente);
+  public int desvincularClienteDeUsuario(long idUsuario) {
+    return clienteRepository.desvincularClienteDeUsuario(idUsuario);
   }
 }

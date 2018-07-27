@@ -7,6 +7,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.Cliente;
 import sic.modelo.Empresa;
+import sic.modelo.Usuario;
 
 public interface ClienteRepository
     extends PagingAndSortingRepository<Cliente, Long>, QueryDslPredicateExecutor<Cliente> {
@@ -43,6 +44,10 @@ public interface ClienteRepository
 
   @Modifying
   @Query(
-      "UPDATE Cliente c SET c.credencial = null WHERE c.credencial.id_Usuario = :idUsuarioComprador")
-  int desvincularClienteDeComprador(@Param("idUsuarioComprador") long idUsuarioComprador);
+      "UPDATE Cliente c SET c.credencial = null WHERE c.credencial.id_Usuario = :idUsuario")
+  int desvincularClienteDeUsuario(@Param("idUsuario") long idUsuario);
+
+  boolean existsByCredencialAndEmpresaAndEliminado(
+    Usuario credencial, Empresa empresa, boolean eliminado);
+
 }

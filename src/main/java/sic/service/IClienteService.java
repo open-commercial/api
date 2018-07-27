@@ -21,6 +21,8 @@ public interface IClienteService {
 
   boolean existeClientePredeterminado(Empresa empresa);
 
+  boolean existeClienteRelacionado(Usuario usuario, Empresa empresa);
+
   void setClientePredeterminado(Cliente cliente);
 
   Cliente guardar(Cliente cliente);
@@ -33,6 +35,6 @@ public interface IClienteService {
 
   int desvincularClienteDeViajante(long idViajante);
 
-  int desvincularClienteDeComprador(long idCliente);
+  int desvincularClienteDeUsuario(long idCliente);
 
 }
