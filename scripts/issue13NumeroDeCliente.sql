@@ -5,7 +5,7 @@
  UPDATE 
      cliente 
  SET 
-	cliente.nroCliente = cliente.id_Cliente;
+	cliente.nroCliente = FLOOR(rand(cliente.id_Cliente) * (99999 - 10000 + 1)) + 10000;
  
  SET SQL_SAFE_UPDATES = 1;
 
