@@ -47,7 +47,4 @@ public interface ClienteRepository
       "UPDATE Cliente c SET c.credencial = null WHERE c.credencial.id_Usuario = :idUsuario")
   int desvincularClienteDeUsuario(@Param("idUsuario") long idUsuario);
 
-  boolean existsByCredencialAndEmpresaAndEliminado(
-    Usuario credencial, Empresa empresa, boolean eliminado);
-
 }

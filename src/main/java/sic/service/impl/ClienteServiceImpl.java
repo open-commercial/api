@@ -76,11 +76,6 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public boolean existeClienteRelacionado(Usuario usuario, Empresa empresa) {
-    return clienteRepository.existsByCredencialAndEmpresaAndEliminado(usuario, empresa, false);
-  }
-
-  @Override
   @Transactional
   public void setClientePredeterminado(Cliente cliente) {
     Cliente clientePredeterminadoAnterior =

@@ -115,15 +115,6 @@ public class ClienteController {
     return clienteService.existeClientePredeterminado(empresaService.getEmpresaPorId(idEmpresa));
   }
 
-  @GetMapping("/clientes/existe-cliente-relacionado/usuario/{idUsuario}/empresas/{idEmpresa}")
-  @ResponseStatus(HttpStatus.OK)
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public boolean existeClienteRelacionadoAUsuario(@PathVariable long idEmpresa,
-                                                  @PathVariable long idUsuario) {
-    return clienteService.existeClienteRelacionado(
-        usuarioService.getUsuarioPorId(idUsuario), empresaService.getEmpresaPorId(idEmpresa));
-  }
-
   @DeleteMapping("/clientes/{idCliente}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)

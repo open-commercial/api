@@ -21,8 +21,6 @@ public interface IClienteService {
 
   boolean existeClientePredeterminado(Empresa empresa);
 
-  boolean existeClienteRelacionado(Usuario usuario, Empresa empresa);
-
   void setClientePredeterminado(Cliente cliente);
 
   Cliente guardar(Cliente cliente);
