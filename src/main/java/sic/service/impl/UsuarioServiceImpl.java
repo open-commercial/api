@@ -263,7 +263,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
         this.clienteService.desvincularClienteDeViajante(usuario.getId_Usuario());
       }
       if (!usuario.getRoles().contains(Rol.COMPRADOR)) {
-        this.clienteService.desvincularClienteDeComprador(usuario.getId_Usuario());
+        this.clienteService.desvincularClienteDeCredencial(usuario.getId_Usuario());
       }
       if (usuarioLoggedIn.getId_Usuario() == usuario.getId_Usuario()) {
         usuario.setToken(usuarioLoggedIn.getToken());
@@ -289,11 +289,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
   @Override
   public void eliminar(long idUsuario) {
     Usuario usuario = this.getUsuarioPorId(idUsuario);
-    if (usuario == null) {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_no_existente"));
-    }
     this.validarOperacion(TipoDeOperacion.ELIMINACION, usuario);
+    clienteService.desvincularClienteDeCredencial(idUsuario);
     usuario.setEliminado(true);
     usuarioRepository.save(usuario);
     logger.warn("El Usuario " + usuario + " se eliminó correctamente.");

@@ -26,23 +26,19 @@ public interface ClienteRepository
       Empresa empresa, boolean predeterminado, boolean eliminado);
 
   @Query(
-      "SELECT c FROM Pedido p INNER JOIN p.cliente c "
-          + "WHERE p.id_Pedido = :idPedido AND c.eliminado = false")
+      "SELECT c FROM Pedido p INNER JOIN p.cliente c WHERE p.id_Pedido = :idPedido AND c.eliminado = false")
   Cliente findClienteByIdPedido(@Param("idPedido") long idPedido);
 
   @Query(
-      "SELECT c FROM Cliente c "
-          + "WHERE c.credencial.id_Usuario = :idUsuario AND c.empresa.id_Empresa = :idEmpresa "
-          + "AND c.eliminado = false")
+      "SELECT c FROM Cliente c WHERE c.credencial.id_Usuario = :idUsuario AND c.empresa.id_Empresa = :idEmpresa AND c.eliminado = false")
   Cliente findClienteByIdUsuarioYidEmpresa(
       @Param("idUsuario") long idUsuario, @Param("idEmpresa") long idEmpresa);
 
   @Modifying
-  @Query("UPDATE Cliente c SET c.viajante = null WHERE c.viajante.id_Usuario = :idViajante")
-  int desvincularClienteDeViajante(@Param("idViajante") long idViajante);
+  @Query("UPDATE Cliente c SET c.viajante = null WHERE c.viajante.id_Usuario = :idUsuarioViajante")
+  int desvincularClienteDeViajante(@Param("idUsuarioViajante") long idUsuarioViajante);
 
   @Modifying
-  @Query(
-      "UPDATE Cliente c SET c.credencial = null WHERE c.credencial.id_Usuario = :idUsuarioComprador")
-  int desvincularClienteDeComprador(@Param("idUsuarioComprador") long idUsuarioComprador);
+  @Query("UPDATE Cliente c SET c.credencial = null WHERE c.credencial.id_Usuario = :idUsuarioCredencial")
+  int desvincularClienteDeCredencial(@Param("idUsuarioCredencial") long idUsuarioCredencial);
 }

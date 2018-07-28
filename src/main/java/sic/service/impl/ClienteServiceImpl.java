@@ -27,7 +27,7 @@ public class ClienteServiceImpl implements IClienteService {
   private final ClienteRepository clienteRepository;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IUsuarioService usuarioService;
-  private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
   public ClienteServiceImpl(
@@ -244,7 +244,7 @@ public class ClienteServiceImpl implements IClienteService {
     }
     cliente = clienteRepository.save(cliente);
     cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);
-    LOGGER.warn("El Cliente " + cliente + " se guardó correctamente.");
+    logger.warn("El Cliente " + cliente + " se guardó correctamente.");
     return cliente;
   }
 
@@ -270,7 +270,7 @@ public class ClienteServiceImpl implements IClienteService {
       }
     }
     clienteRepository.save(clientePorActualizar);
-    LOGGER.warn("El Cliente " + clientePorActualizar + " se actualizó correctamente.");
+    logger.warn("El Cliente " + clientePorActualizar + " se actualizó correctamente.");
   }
 
   @Override
@@ -283,7 +283,7 @@ public class ClienteServiceImpl implements IClienteService {
     }
     cliente.setEliminado(true);
     clienteRepository.save(cliente);
-    LOGGER.warn("El Cliente " + cliente + " se eliminó correctamente.");
+    logger.warn("El Cliente " + cliente + " se eliminó correctamente.");
   }
 
   @Override
@@ -297,12 +297,12 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public int desvincularClienteDeViajante(long idViajante) {
-    return clienteRepository.desvincularClienteDeViajante(idViajante);
+  public int desvincularClienteDeViajante(long idUsuarioViajante) {
+    return clienteRepository.desvincularClienteDeViajante(idUsuarioViajante);
   }
 
   @Override
-  public int desvincularClienteDeComprador(long idCliente) {
-    return clienteRepository.desvincularClienteDeComprador(idCliente);
+  public int desvincularClienteDeCredencial(long idUsuarioCliente) {
+    return clienteRepository.desvincularClienteDeCredencial(idUsuarioCliente);
   }
 }
