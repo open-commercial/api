@@ -8,7 +8,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
-import javax.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -49,13 +48,7 @@ public class AuthController {
 
   @PostMapping("/login")
   public String login(@RequestBody Credencial credencial) {
-    Usuario usuario;
-    try {
-      usuario = usuarioService.autenticarUsuario(credencial);
-    } catch (EntityNotFoundException ex) {
-      throw new UnauthorizedException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_logInInvalido"), ex);
-    }
+    Usuario usuario = usuarioService.autenticarUsuario(credencial);
     String token = this.generarToken(usuario.getId_Usuario(), usuario.getRoles());
     usuarioService.actualizarToken(token, usuario.getId_Usuario());
     return token;

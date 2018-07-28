@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.controller.UnauthorizedException;
 import sic.modelo.*;
 import sic.service.IClienteService;
 import sic.service.IUsuarioService;
@@ -75,8 +76,12 @@ public class UsuarioServiceImpl implements IUsuarioService {
             credencial.getUsername(),
             this.encriptarConMD5(credencial.getPassword()));
     if (usuario == null) {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_no_existente"));
+      throw new UnauthorizedException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_logInInvalido"));
+    }
+    if (!usuario.isHabilitado()) {
+      throw new UnauthorizedException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_no_habilitado"));
     }
     return usuario;
   }
