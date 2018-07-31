@@ -194,6 +194,9 @@ public class ClienteController {
     } else {
       clientePorActualizar.setCredencial(null);
     }
+    clientePorActualizar.setNroCliente(clientePersistido.getNroCliente());
+    clientePorActualizar.setFechaAlta(clientePersistido.getFechaAlta());
+    clientePorActualizar.setEliminado(clientePersistido.isEliminado());
     clienteService.actualizar(clientePorActualizar, clientePersistido);
   }
 
