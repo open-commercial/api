@@ -71,7 +71,9 @@ public class Recibo implements Serializable {
     private BigDecimal monto;
 
     @JsonGetter("nombreFormaDePago")
-    public String getNombreFormaDePago() { return formaDePago.getNombre();  }
+    public String getNombreFormaDePago() {
+        return formaDePago.getNombre();
+    }
 
     @JsonGetter("nombreEmpresa")
     public String getNombreEmpresa() {
