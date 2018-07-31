@@ -31,9 +31,9 @@ public interface IClienteService {
 
   Cliente getClientePorIdUsuarioYidEmpresa(long idUsuario, long idEmpresa);
 
-  int desvincularClienteDeViajante(long idViajante);
+  int desvincularClienteDeViajante(long idUsuarioViajante);
 
-  int desvincularClienteDeComprador(long idCliente);
+  int desvincularClienteDeCredencial(long idUsuarioCliente);
 
   long calcularNroDeCliente(Empresa empresa);
 

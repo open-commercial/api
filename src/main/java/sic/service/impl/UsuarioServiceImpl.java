@@ -15,7 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.controller.ForbiddenException;
+import sic.controller.UnauthorizedException;
 import sic.modelo.*;
 import sic.service.IClienteService;
 import sic.service.IUsuarioService;
@@ -31,7 +31,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   private final UsuarioRepository usuarioRepository;
   private final IEmpresaService empresaService;
   private final IClienteService clienteService;
-  private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
   @Lazy
@@ -76,8 +76,12 @@ public class UsuarioServiceImpl implements IUsuarioService {
             credencial.getUsername(),
             this.encriptarConMD5(credencial.getPassword()));
     if (usuario == null) {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_no_existente"));
+      throw new UnauthorizedException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_logInInvalido"));
+    }
+    if (!usuario.isHabilitado()) {
+      throw new UnauthorizedException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_no_habilitado"));
     }
     return usuario;
   }
@@ -259,13 +263,13 @@ public class UsuarioServiceImpl implements IUsuarioService {
         this.clienteService.desvincularClienteDeViajante(usuario.getId_Usuario());
       }
       if (!usuario.getRoles().contains(Rol.COMPRADOR)) {
-        this.clienteService.desvincularClienteDeComprador(usuario.getId_Usuario());
+        this.clienteService.desvincularClienteDeCredencial(usuario.getId_Usuario());
       }
       if (usuarioLoggedIn.getId_Usuario() == usuario.getId_Usuario()) {
         usuario.setToken(usuarioLoggedIn.getToken());
       }
       usuarioRepository.save(usuario);
-      LOGGER.warn("El Usuario " + usuario + " se actualizó correctamente.");
+      logger.warn("El Usuario " + usuario + " se actualizó correctamente.");
   }
 
   @Override
@@ -278,21 +282,18 @@ public class UsuarioServiceImpl implements IUsuarioService {
     this.validarOperacion(TipoDeOperacion.ALTA, usuario);
     usuario.setPassword(this.encriptarConMD5(usuario.getPassword()));
     usuario = usuarioRepository.save(usuario);
-    LOGGER.warn("El Usuario " + usuario + " se guardó correctamente.");
+    logger.warn("El Usuario " + usuario + " se guardó correctamente.");
     return usuario;
   }
 
   @Override
   public void eliminar(long idUsuario) {
     Usuario usuario = this.getUsuarioPorId(idUsuario);
-    if (usuario == null) {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_no_existente"));
-    }
     this.validarOperacion(TipoDeOperacion.ELIMINACION, usuario);
+    clienteService.desvincularClienteDeCredencial(idUsuario);
     usuario.setEliminado(true);
     usuarioRepository.save(usuario);
-    LOGGER.warn("El Usuario " + usuario + " se eliminó correctamente.");
+    logger.warn("El Usuario " + usuario + " se eliminó correctamente.");
   }
 
   @Override
