@@ -87,7 +87,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria, long idUsuarioLoggedIn) {
+  public Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria) {
     QUsuario qUsuario = QUsuario.usuario;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.isBuscaPorApellido()) {
@@ -124,40 +124,23 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
     if (criteria.isBuscarPorRol() && !criteria.getRoles().isEmpty()) {
       BooleanBuilder rsPredicate = new BooleanBuilder();
-      List<Rol> rolesDeUsuarioLoggedIn = this.getUsuarioPorId(idUsuarioLoggedIn).getRoles();
-      if (rolesDeUsuarioLoggedIn.contains(Rol.VIAJANTE)
-          && !rolesDeUsuarioLoggedIn.contains(Rol.ADMINISTRADOR)
-          && !rolesDeUsuarioLoggedIn.contains(Rol.ENCARGADO)
-          && !rolesDeUsuarioLoggedIn.contains(Rol.VENDEDOR)) {
-        for (Rol rol : criteria.getRoles()) {
-          switch (rol) {
-            case VIAJANTE:
-              rsPredicate.or(qUsuario.id_Usuario.eq(idUsuarioLoggedIn));
-              break;
-            default:
-              rsPredicate.or(qUsuario.id_Usuario.eq(0L));
-              break;
-          }
-        }
-      } else {
-        for (Rol rol : criteria.getRoles()) {
-          switch (rol) {
-            case ADMINISTRADOR:
-              rsPredicate.or(qUsuario.roles.contains(Rol.ADMINISTRADOR));
-              break;
-            case ENCARGADO:
-              rsPredicate.or(qUsuario.roles.contains(Rol.ENCARGADO));
-              break;
-            case VENDEDOR:
-              rsPredicate.or(qUsuario.roles.contains(Rol.VENDEDOR));
-              break;
-            case VIAJANTE:
-              rsPredicate.or(qUsuario.roles.contains(Rol.VIAJANTE));
-              break;
-            case COMPRADOR:
-              rsPredicate.or(qUsuario.roles.contains(Rol.COMPRADOR));
-              break;
-          }
+      for (Rol rol : criteria.getRoles()) {
+        switch (rol) {
+          case ADMINISTRADOR:
+            rsPredicate.or(qUsuario.roles.contains(Rol.ADMINISTRADOR));
+            break;
+          case ENCARGADO:
+            rsPredicate.or(qUsuario.roles.contains(Rol.ENCARGADO));
+            break;
+          case VENDEDOR:
+            rsPredicate.or(qUsuario.roles.contains(Rol.VENDEDOR));
+            break;
+          case VIAJANTE:
+            rsPredicate.or(qUsuario.roles.contains(Rol.VIAJANTE));
+            break;
+          case COMPRADOR:
+            rsPredicate.or(qUsuario.roles.contains(Rol.COMPRADOR));
+            break;
         }
       }
       builder.and(rsPredicate);
