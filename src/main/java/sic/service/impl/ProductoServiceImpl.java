@@ -86,28 +86,25 @@ public class ProductoServiceImpl implements IProductoService {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_producto_duplicado_descripcion"));
     }
-    if (operacion.equals(TipoDeOperacion.ACTUALIZACION)) {
-      if (productoDuplicado != null
-          && productoDuplicado.getId_Producto() != producto.getId_Producto()) {
+    if (operacion.equals(TipoDeOperacion.ACTUALIZACION) && productoDuplicado != null
+          && productoDuplicado.getId_Producto() != producto.getId_Producto())
         throw new BusinessServiceException(
             ResourceBundle.getBundle("Mensajes")
                 .getString("mensaje_producto_duplicado_descripcion"));
-      }
-    }
     // Calculos
-    Double[] IVAs = {10.5, 21.0, 0.0};
-    if (!Arrays.asList(IVAs).contains(producto.getIva_porcentaje().doubleValue())) {
+    Double[] iva = {10.5, 21.0, 0.0};
+    if (!Arrays.asList(iva).contains(producto.getIva_porcentaje().doubleValue())) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes")
               .getString("mensaje_producto_ganancia_neta_incorrecta"));
     }
     if (producto
             .getGanancia_neto()
-            .setScale(3, RoundingMode.DOWN)
+            .setScale(3, RoundingMode.HALF_UP)
             .compareTo(
                 this.calcularGananciaNeto(
                         producto.getPrecioCosto(), producto.getGanancia_porcentaje())
-                    .setScale(3, RoundingMode.DOWN))
+                    .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes")
@@ -115,10 +112,10 @@ public class ProductoServiceImpl implements IProductoService {
     }
     if (producto
             .getPrecioVentaPublico()
-            .setScale(3, RoundingMode.DOWN)
+            .setScale(3, RoundingMode.HALF_UP)
             .compareTo(
                 this.calcularPVP(producto.getPrecioCosto(), producto.getGanancia_porcentaje())
-                    .setScale(3, RoundingMode.DOWN))
+                    .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes")
@@ -126,11 +123,11 @@ public class ProductoServiceImpl implements IProductoService {
     }
     if (producto
             .getImpuestoInterno_neto()
-            .setScale(3, RoundingMode.DOWN)
+            .setScale(3, RoundingMode.HALF_UP)
             .compareTo(
                 this.calcularImpInternoNeto(
                         producto.getPrecioVentaPublico(), producto.getImpuestoInterno_porcentaje())
-                    .setScale(3, RoundingMode.DOWN))
+                    .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes")
@@ -138,23 +135,23 @@ public class ProductoServiceImpl implements IProductoService {
     }
     if (producto
             .getIva_neto()
-            .setScale(3, RoundingMode.DOWN)
+            .setScale(3, RoundingMode.HALF_UP)
             .compareTo(
                 this.calcularIVANeto(producto.getPrecioVentaPublico(), producto.getIva_porcentaje())
-                    .setScale(3, RoundingMode.DOWN))
+                    .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_producto_iva_neto_incorrecto"));
     }
     if (producto
             .getPrecioLista()
-            .setScale(3, RoundingMode.DOWN)
+            .setScale(3, RoundingMode.HALF_UP)
             .compareTo(
                 this.calcularPrecioLista(
                         producto.getPrecioVentaPublico(),
                         producto.getIva_porcentaje(),
                         producto.getImpuestoInterno_porcentaje())
-                    .setScale(3, RoundingMode.DOWN))
+                    .setScale(3,  RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes")
