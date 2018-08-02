@@ -117,7 +117,14 @@ public class ClienteServiceImpl implements IClienteService {
       }
       builder.or(idPredicate);
     }
-    if (criteria.isBuscarPorNroDeCliente()) builder.or(qCliente.nroCliente.eq(criteria.getNroDeCliente()));
+    if (criteria.isBuscarPorNroDeCliente()) {
+      String[] terminos = criteria.getNroDeCliente().split(" ");
+      BooleanBuilder nroClientePredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        nroClientePredicate.and(qCliente.nroCliente.containsIgnoreCase(termino));
+      }
+      builder.or(nroClientePredicate);
+    }
     if (criteria.isBuscaPorViajante()) builder.and(qCliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaPorLocalidad()) builder.and(qCliente.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
@@ -309,17 +316,18 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public long calcularNroDeCliente(Empresa empresa) {
+  public String calcularNroDeCliente(Empresa empresa) {
     long min = 1L;
     long max = 99999L; // 5 digitos
     long randomLong = 0L;
     boolean esRepetido = true;
     while (esRepetido) {
       randomLong = min + (long) (Math.random() * (max - min));
-      Cliente c = clienteRepository.findByNroClienteAndEmpresaAndEliminado(randomLong, empresa, false);
+      String strinLong = Long.toString(randomLong);
+      Cliente c = clienteRepository.findByNroClienteAndEmpresaAndEliminado(strinLong, empresa, false);
       if (c == null) esRepetido = false;
     }
-    return randomLong;
+    return Long.toString(randomLong);
   }
 
 }

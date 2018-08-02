@@ -27,7 +27,7 @@ public class BusquedaClienteCriteria {
     private boolean buscaPorLocalidad;
     private Long idLocalidad;
     private boolean buscarPorNroDeCliente;
-    private Long nroDeCliente;
+    private String nroDeCliente;
     private Long idEmpresa;
     private Pageable pageable;
     private boolean conSaldo;

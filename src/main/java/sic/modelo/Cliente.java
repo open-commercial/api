@@ -37,7 +37,7 @@ public class Cliente implements Serializable {
     @GeneratedValue
     private long id_Cliente;
 
-    private long nroCliente;
+    private String nroCliente;
 
     @Column(nullable = false)
     private String razonSocial;

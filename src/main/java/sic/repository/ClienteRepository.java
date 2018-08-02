@@ -42,6 +42,6 @@ public interface ClienteRepository
   @Query("UPDATE Cliente c SET c.credencial = null WHERE c.credencial.id_Usuario = :idUsuarioCredencial")
   int desvincularClienteDeCredencial(@Param("idUsuarioCredencial") long idUsuarioCredencial);
 
-  Cliente findByNroClienteAndEmpresaAndEliminado(long nroCliente, Empresa empresa, boolean eliminado);
+  Cliente findByNroClienteAndEmpresaAndEliminado(String nroCliente, Empresa empresa, boolean eliminado);
 
 }
