@@ -122,11 +122,13 @@ public class FacturaController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public List<FacturaCompra> guardarFacturaCompra(
       @RequestBody FacturaCompra fc,
+      @RequestParam Long idUsuario,
       @RequestParam Long idEmpresa,
       @RequestParam Long idProveedor,
       @RequestParam Long idTransportista) {
     fc.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     fc.setProveedor(proveedorService.getProveedorPorId(idProveedor));
+    fc.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
     fc.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
     List<FacturaCompra> facturas = new ArrayList<>();
     facturas.add(fc);
