@@ -117,14 +117,7 @@ public class ClienteServiceImpl implements IClienteService {
       }
       builder.or(idPredicate);
     }
-    if (criteria.isBuscarPorNroDeCliente()) {
-      String[] terminos = criteria.getNroDeCliente().split(" ");
-      BooleanBuilder nroClientePredicate = new BooleanBuilder();
-      for (String termino : terminos) {
-        nroClientePredicate.and(qCliente.nroCliente.containsIgnoreCase(termino));
-      }
-      builder.or(nroClientePredicate);
-    }
+    if (criteria.isBuscarPorNroDeCliente()) builder.or(qCliente.nroCliente.containsIgnoreCase(criteria.getNroDeCliente()));
     if (criteria.isBuscaPorViajante()) builder.and(qCliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaPorLocalidad()) builder.and(qCliente.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
@@ -146,9 +139,10 @@ public class ClienteServiceImpl implements IClienteService {
                 this.getClientePorIdUsuarioYidEmpresa(idUsuarioLoggedIn, criteria.getIdEmpresa());
             if (clienteRelacionado != null) {
               rsPredicate.or(qCliente.eq(clienteRelacionado));
-            } else {
-              rsPredicate.or(qCliente.isNull());
             }
+            break;
+          default:
+            rsPredicate.or(qCliente.isNull());
             break;
         }
       }
