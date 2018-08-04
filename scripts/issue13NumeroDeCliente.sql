@@ -1,4 +1,4 @@
- ALTER TABLE cliente ADD column nroCliente bigint(20) not null after id_Cliente;
+ ALTER TABLE cliente ADD column nroCliente VARCHAR(255) after id_Cliente;
 
  SET SQL_SAFE_UPDATES = 0;
 

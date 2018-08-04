@@ -60,6 +60,7 @@ public class ClienteController {
   @ResponseStatus(HttpStatus.OK)
   public Page<Cliente> buscarConCriteria(
       @RequestParam Long idEmpresa,
+      @RequestParam(required = false) String nroCliente,
       @RequestParam(required = false) String razonSocial,
       @RequestParam(required = false) String nombreFantasia,
       @RequestParam(required = false) String idFiscal,
@@ -92,6 +93,8 @@ public class ClienteController {
             .idProvincia(idProvincia)
             .buscaPorLocalidad(idLocalidad != null)
             .idLocalidad(idLocalidad)
+            .buscarPorNroDeCliente(nroCliente != null)
+            .nroDeCliente(nroCliente)
             .idEmpresa(idEmpresa)
             .pageable(pageable)
             .conSaldo(conSaldo)

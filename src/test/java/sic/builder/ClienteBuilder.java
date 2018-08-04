@@ -7,7 +7,7 @@ import sic.modelo.*;
 public class ClienteBuilder {
 
   private long id_Cliente = 0L;
-  private long nroCliente = 00001L;
+  private String nroCliente = "00001";
   private String razonSocial = "Construcciones S.A.";
   private String nombreFantasia = "Servimetal";
   private String direccion = "Perugorria 2421";
@@ -56,7 +56,7 @@ public class ClienteBuilder {
     return this;
   }
 
-  public ClienteBuilder withNroCliente(long nroCliente) {
+  public ClienteBuilder withNroCliente(String nroCliente) {
     this.nroCliente = nroCliente;
     return this;
   }
