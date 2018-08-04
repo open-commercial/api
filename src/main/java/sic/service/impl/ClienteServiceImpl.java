@@ -310,8 +310,8 @@ public class ClienteServiceImpl implements IClienteService {
     boolean esRepetido = true;
     while (esRepetido) {
       randomLong = min + (long) (Math.random() * (max - min));
-      String strinLong = Long.toString(randomLong);
-      Cliente c = clienteRepository.findByNroClienteAndEmpresaAndEliminado(strinLong, empresa, false);
+      String nroCliente = Long.toString(randomLong);
+      Cliente c = clienteRepository.findByNroClienteAndEmpresaAndEliminado(nroCliente, empresa, false);
       if (c == null) esRepetido = false;
     }
     return Long.toString(randomLong);
