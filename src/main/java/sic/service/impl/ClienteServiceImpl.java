@@ -109,14 +109,7 @@ public class ClienteServiceImpl implements IClienteService {
       }
       builder.or(nfPredicate);
     }
-    if (criteria.isBuscaPorId_Fiscal()) {
-      String[] terminos = criteria.getIdFiscal().split(" ");
-      BooleanBuilder idPredicate = new BooleanBuilder();
-      for (String termino : terminos) {
-        idPredicate.and(qCliente.idFiscal.containsIgnoreCase(termino));
-      }
-      builder.or(idPredicate);
-    }
+    if (criteria.isBuscaPorId_Fiscal()) builder.or(qCliente.idFiscal.containsIgnoreCase(criteria.getIdFiscal()));
     if (criteria.isBuscarPorNroDeCliente()) builder.or(qCliente.nroCliente.containsIgnoreCase(criteria.getNroDeCliente()));
     if (criteria.isBuscaPorViajante()) builder.and(qCliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaPorLocalidad()) builder.and(qCliente.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
