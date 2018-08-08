@@ -56,7 +56,7 @@ public class ProvinciaController {
     
     @GetMapping("/provincias/paises/{idPais}")
     @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.VIAJANTE})
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public List<Provincia> getProvinciasDelPais(@PathVariable long idPais) {
         return provinciaService.getProvinciasDelPais(paisService.getPaisPorId(idPais));
     }

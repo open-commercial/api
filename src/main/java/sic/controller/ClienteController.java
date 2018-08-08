@@ -127,7 +127,7 @@ public class ClienteController {
 
   @PostMapping("/clientes")
   @ResponseStatus(HttpStatus.CREATED)
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
   public Cliente guardar(
       @RequestBody Cliente cliente,
       @RequestParam Long idCondicionIVA,
@@ -154,7 +154,7 @@ public class ClienteController {
 
   @PutMapping("/clientes")
   @ResponseStatus(HttpStatus.OK)
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
   public void actualizar(
       @RequestBody Cliente clientePorActualizar,
       @RequestParam(required = false) Long idCondicionIVA,
