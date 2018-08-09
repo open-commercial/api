@@ -236,11 +236,15 @@ public class ClienteServiceImpl implements IClienteService {
                 ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_cliente_credencial_no_valida"),
                 clienteYaAsignado.getRazonSocial()));
+      } else {
+        if (!cliente.getCredencial().getRoles().contains(Rol.COMPRADOR)) {
+          cliente.getCredencial().getRoles().add(Rol.COMPRADOR);
+        }
       }
     }
     cliente = clienteRepository.save(cliente);
     cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);
-    logger.warn("El Cliente " + cliente + " se guardó correctamente.");
+    logger.warn("El Cliente {} se guardó correctamente.", cliente);
     return cliente;
   }
 
@@ -263,10 +267,14 @@ public class ClienteServiceImpl implements IClienteService {
                 ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_cliente_credencial_no_valida"),
                 clienteYaAsignado.getRazonSocial()));
+      } else {
+        if (!clientePorActualizar.getCredencial().getRoles().contains(Rol.COMPRADOR)) {
+          clientePorActualizar.getCredencial().getRoles().add(Rol.COMPRADOR);
+        }
       }
     }
     clienteRepository.save(clientePorActualizar);
-    logger.warn("El Cliente " + clientePorActualizar + " se actualizó correctamente.");
+    logger.warn("El Cliente {} se actualizó correctamente.", clientePorActualizar);
   }
 
   @Override

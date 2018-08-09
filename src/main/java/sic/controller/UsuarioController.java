@@ -2,7 +2,6 @@ package sic.controller;
 
 import java.util.List;
 import java.util.ResourceBundle;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +49,7 @@ public class UsuarioController {
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) Integer tamanio,
       @RequestParam(required = false) List<Rol> roles) {
-    int TAMANIO_PAGINA_DEFAULT = 50;
+    final int TAMANIO_PAGINA_DEFAULT = 50;
     if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
     if (pagina == null || pagina < 0) pagina = 0;
     Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "nombre"));
