@@ -1,5 +1,6 @@
 package sic.controller;
 
+import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.List;
 
@@ -57,7 +58,24 @@ public class PedidoController {
     public List<RenglonPedido> getRenglonesDelPedido(@PathVariable long idPedido) {
         return pedidoService.getRenglonesDelPedido(idPedido);
     }
-    
+
+
+    @GetMapping("/pedidos/renglon")
+    @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
+    public RenglonPedido calcularRenglonPedido(@RequestParam long idProducto,
+                                               @RequestParam BigDecimal cantidad,
+                                               @RequestParam BigDecimal descuentoPorcentaje){
+        return pedidoService.calcularRenglonPedido(idProducto, cantidad, descuentoPorcentaje);
+    }
+
+    @GetMapping("/pedidos/renglones")
+    @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
+    public List<RenglonPedido> convertirRenglonesPedidoARenglonesFactura(@RequestParam List<RenglonFactura> renglonesFactura) {
+        return pedidoService.convertirRenglonesFacturaEnRenglonesPedido(renglonesFactura);
+    }
+
     @PutMapping("/pedidos")
     @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
@@ -84,7 +102,7 @@ public class PedidoController {
     public Pedido guardar(@RequestParam Long idEmpresa,
                           @RequestParam Long idUsuario,
                           @RequestParam Long idCliente,
-                          @RequestBody Pedido pedido) {
+                          @RequestBody Pedido pedido) { //PedidoDTO
         pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
         pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
         pedido.setCliente(clienteService.getClientePorId(idCliente));

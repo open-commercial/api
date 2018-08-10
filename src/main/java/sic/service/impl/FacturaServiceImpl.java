@@ -949,7 +949,7 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     @Override
-    public List<RenglonFactura> convertirRenglonesPedidoEnRenglonesFactura(Pedido pedido, TipoDeComprobante tipoDeComprobante) {
+    public List<RenglonFactura> getRenglonesPedidoParaFacturar(Pedido pedido, TipoDeComprobante tipoDeComprobante) {
         List<RenglonFactura> renglonesRestantes = new ArrayList<>();
         HashMap<Long, RenglonFactura> renglonesDeFacturas = pedidoService.getRenglonesFacturadosDelPedido(pedido.getId_Pedido());
         if (renglonesDeFacturas != null) {
@@ -1203,4 +1203,15 @@ public class FacturaServiceImpl implements IFacturaService {
                 cantidad, idProductoItem, descuentoPorcentaje, dividir);
     }
 
+  @Override
+  public List<RenglonFactura> convertirRenglonesPedidoARenglonesFactura(
+      List<RenglonPedido> renglonesDelPedido,
+      TipoDeComprobante tipoDeComprobante,
+      Movimiento movimiento) {
+      List<RenglonFactura> renglonesFactura = new ArrayList<>();
+    renglonesDelPedido.forEach(renglonDelPedido ->
+      renglonesFactura.add(this.calcularRenglon(tipoDeComprobante, movimiento, renglonDelPedido.getCantidad(),
+        renglonDelPedido.getIdProducto(), renglonDelPedido.getDescuento_porcentaje(), false)));
+    return renglonesFactura;
+  }
 }

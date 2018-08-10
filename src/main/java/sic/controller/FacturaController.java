@@ -314,8 +314,18 @@ public class FacturaController {
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
     public List<RenglonFactura> getRenglonesPedidoParaFacturar(@PathVariable long idPedido,
                                                                @RequestParam TipoDeComprobante tipoDeComprobante) {
-        return facturaService.convertirRenglonesPedidoEnRenglonesFactura(pedidoService.getPedidoPorId(idPedido), tipoDeComprobante);
-    } 
+        return facturaService.getRenglonesPedidoParaFacturar(pedidoService.getPedidoPorId(idPedido), tipoDeComprobante);
+    }
+
+  @GetMapping("/facturas/renglones")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
+  public List<RenglonFactura> convertirRenglonesPedidoARenglonesFactura(@RequestParam List<RenglonPedido> renglonesPedido,
+                                                                        @RequestParam TipoDeComprobante tipoDeComprobante,
+                                                                        @RequestParam Movimiento movimiento) {
+      return facturaService.convertirRenglonesPedidoARenglonesFactura(renglonesPedido, tipoDeComprobante, movimiento);
+  }
+
     
     @GetMapping("/facturas/renglon")
     @ResponseStatus(HttpStatus.OK)

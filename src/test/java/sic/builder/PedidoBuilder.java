@@ -32,10 +32,8 @@ public class PedidoBuilder {
             RenglonPedidoDTO renglon2 = new RenglonPedidoBuilder()
                                             .withCantidad(BigDecimal.ONE)
                                             .withIdRenglonPedido(90L)
-                                            .withProducto(new ProductoBuilder()
-                                                .withId_Producto(77L)
-                                                .withDescripcion("Pack 6 Vasos")
-                                                .build())
+                                            .withIdProducto(77L)
+                                            .withDescripcion("Pack 6 Vasos")
                                             .build();
             List<RenglonPedidoDTO> renglonesPedido = new ArrayList<>();
             renglonesPedido.add(renglon1);

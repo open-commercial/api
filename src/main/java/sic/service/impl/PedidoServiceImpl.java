@@ -34,16 +34,19 @@ public class PedidoServiceImpl implements IPedidoService {
     private final IFacturaService facturaService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
+    private final IProductoService productoService;
     private static final BigDecimal CIEN = new BigDecimal("100");
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
     public PedidoServiceImpl(IFacturaService facturaService, PedidoRepository pedidoRepository,
-                             IUsuarioService usuarioService, IClienteService clienteService) {
+                             IUsuarioService usuarioService, IClienteService clienteService,
+                             IProductoService productoService) {
         this.facturaService = facturaService;
         this.pedidoRepository = pedidoRepository;
         this.usuarioService = usuarioService;
         this.clienteService = clienteService;
+        this.productoService = productoService;
     }
 
     @Override
@@ -290,5 +293,50 @@ public class PedidoServiceImpl implements IPedidoService {
                     .getString("mensaje_error_reporte"), ex);
         }
     }
-  
+
+    @Override
+    public BigDecimal calcularDescuentoNeto(BigDecimal precioUnitario, BigDecimal descuentoPorcentaje) {
+        BigDecimal resultado = BigDecimal.ZERO;
+        if (descuentoPorcentaje != BigDecimal.ZERO) {
+            resultado = precioUnitario.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+        }
+        return resultado;
+    }
+
+    @Override
+    public BigDecimal calcularSubTotal(BigDecimal cantidad, BigDecimal precioUnitario, BigDecimal descuentoNeto) {
+        return (precioUnitario.subtract(descuentoNeto)).multiply(cantidad);
+    }
+
+  @Override
+  public RenglonPedido calcularRenglonPedido(
+      long idProducto, BigDecimal cantidad, BigDecimal descuentoPorcentaje) {
+    RenglonPedido nuevoRenglon = new RenglonPedido();
+    Producto productoDelRenglon = productoService.getProductoPorId(idProducto);
+    nuevoRenglon.setProducto(productoDelRenglon);
+    nuevoRenglon.setCantidad(cantidad);
+    nuevoRenglon.setDescuento_porcentaje(descuentoPorcentaje);
+    nuevoRenglon.setDescuento_neto(
+        this.calcularDescuentoNeto(
+            nuevoRenglon.getProducto().getPrecioLista(), descuentoPorcentaje));
+    nuevoRenglon.setSubTotal(
+        this.calcularSubTotal(
+            nuevoRenglon.getCantidad(),
+            nuevoRenglon.getProducto().getPrecioLista(),
+            nuevoRenglon.getDescuento_neto()));
+    return nuevoRenglon;
+  }
+
+  @Override
+  public List<RenglonPedido> convertirRenglonesFacturaEnRenglonesPedido(
+      List<RenglonFactura> renglonesFactura) {
+    List<RenglonPedido> renglonesPedido = new ArrayList<>();
+    renglonesFactura.forEach(rengonFactura -> renglonesPedido.add(
+      this.calcularRenglonPedido(
+        rengonFactura.getId_ProductoItem(),
+        rengonFactura.getCantidad(),
+        rengonFactura.getDescuento_porcentaje())));
+    return renglonesPedido;
+  }
+
 }

@@ -423,34 +423,14 @@ public class FacturacionIntegrationTest {
                 productoDos, ProductoDTO.class);
         String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
-        RenglonFactura renglonUno = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
-                + "idProducto=" + productoUno.getId_Producto()
-                + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_B
-                + "&movimiento=" + Movimiento.VENTA
-                + "&cantidad=5" 
-                + "&descuentoPorcentaje=15",
-                RenglonFactura.class);        
-        RenglonPedidoDTO renglonPedidoUno = new RenglonPedidoBuilder()
-                .withCantidad(renglonUno.getCantidad())
-                .withDescuentoPorcentaje(renglonUno.getDescuento_porcentaje())
-                .withDescuentoNeto(renglonUno.getDescuento_neto())
-                .withProducto(productoUno)
-                .withSubTotal(renglonUno.getImporte())
-                .build();                
-        RenglonFactura renglonDos = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
-                + "idProducto=" + productoDos.getId_Producto()
-                + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_B 
-                + "&movimiento=" + Movimiento.VENTA
-                + "&cantidad=2"
-                + "&descuentoPorcentaje=0",
-                RenglonFactura.class);
-        RenglonPedidoDTO renglonPedidoDos = new RenglonPedidoBuilder()
-                .withCantidad(renglonDos.getCantidad())
-                .withDescuentoPorcentaje(renglonDos.getDescuento_porcentaje())
-                .withDescuentoNeto(renglonDos.getDescuento_neto())
-                .withProducto(productoDos)
-                .withSubTotal(renglonDos.getImporte())
-                .build();             
+        RenglonPedidoDTO renglonPedidoUno = restTemplate.getForObject(apiPrefix + "/pedidos/renglon?"
+            + "idProducto=" + productoUno.getId_Producto()
+            + "&cantidad=5"
+            + "&descuentoPorcentaje=15", RenglonPedidoDTO.class);
+        RenglonPedidoDTO renglonPedidoDos = restTemplate.getForObject(apiPrefix + "/pedidos/renglon?"
+          + "idProducto=" + productoDos.getId_Producto()
+          + "&cantidad=2"
+          + "&descuentoPorcentaje=0", RenglonPedidoDTO.class);
         List<RenglonPedidoDTO> renglonesPedido = new ArrayList<>();
         renglonesPedido.add(renglonPedidoUno);
         renglonesPedido.add(renglonPedidoDos);
