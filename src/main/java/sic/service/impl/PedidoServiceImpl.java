@@ -70,6 +70,12 @@ public class PedidoServiceImpl implements IPedidoService {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_pedido_renglones_vacio"));
         }
+        for (RenglonPedido r : pedido.getRenglones()) {
+          if (r.getProducto() == null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_pedido_renglon_sin_producto"));
+          }
+        }
         if (pedido.getEmpresa() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_pedido_empresa_vacia"));

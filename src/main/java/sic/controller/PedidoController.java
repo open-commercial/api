@@ -69,10 +69,10 @@ public class PedidoController {
         return pedidoService.calcularRenglonPedido(idProducto, cantidad, descuentoPorcentaje);
     }
 
-    @GetMapping("/pedidos/renglones")
+    @PostMapping("/pedidos/renglones")
     @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
-    public List<RenglonPedido> convertirRenglonesPedidoARenglonesFactura(@RequestParam List<RenglonFactura> renglonesFactura) {
+    public List<RenglonPedido> convertirRenglonesPedidoARenglonesFactura(@RequestBody List<RenglonFactura> renglonesFactura) {
         return pedidoService.convertirRenglonesFacturaEnRenglonesPedido(renglonesFactura);
     }
 
