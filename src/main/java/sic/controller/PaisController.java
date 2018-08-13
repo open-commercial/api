@@ -17,7 +17,6 @@ import sic.modelo.Pais;
 import sic.modelo.Rol;
 import sic.service.IPaisService;
 
-
 @RestController
 @RequestMapping("/api/v1")
 public class PaisController {
@@ -61,7 +60,7 @@ public class PaisController {
     
     @GetMapping("/paises")
     @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.VIAJANTE})
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public List<Pais> getPaises() {
         return paisService.getPaises();
     }

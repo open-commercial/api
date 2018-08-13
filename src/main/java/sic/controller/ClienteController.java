@@ -60,6 +60,7 @@ public class ClienteController {
   @ResponseStatus(HttpStatus.OK)
   public Page<Cliente> buscarConCriteria(
       @RequestParam Long idEmpresa,
+      @RequestParam(required = false) String nroCliente,
       @RequestParam(required = false) String razonSocial,
       @RequestParam(required = false) String nombreFantasia,
       @RequestParam(required = false) String idFiscal,
@@ -92,6 +93,8 @@ public class ClienteController {
             .idProvincia(idProvincia)
             .buscaPorLocalidad(idLocalidad != null)
             .idLocalidad(idLocalidad)
+            .buscarPorNroDeCliente(nroCliente != null)
+            .nroDeCliente(nroCliente)
             .idEmpresa(idEmpresa)
             .pageable(pageable)
             .conSaldo(conSaldo)
@@ -124,43 +127,81 @@ public class ClienteController {
 
   @PostMapping("/clientes")
   @ResponseStatus(HttpStatus.CREATED)
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
   public Cliente guardar(
       @RequestBody Cliente cliente,
       @RequestParam Long idCondicionIVA,
       @RequestParam Long idLocalidad,
       @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long idUsuarioViajante,
-      @RequestParam(required = false) Long idUsuarioCredencial) {
+      @RequestParam(required = false) Long idViajante,
+      @RequestParam(required = false) Long idCredencial,
+      @RequestHeader("Authorization") String token) {
+    if (idCredencial != null) {
+      Claims claims =
+          Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+      long idUsuarioLoggedIn = (int) claims.get("idUsuario");
+      Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+      if (idCredencial != idUsuarioLoggedIn
+          && !usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
+        throw new ForbiddenException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+      } else {
+        Usuario usuarioCredencial = usuarioService.getUsuarioPorId(idCredencial);
+        cliente.setCredencial(usuarioCredencial);
+      }
+    }
     cliente.setCondicionIVA(condicionIVAService.getCondicionIVAPorId(idCondicionIVA));
     cliente.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
     cliente.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    if (idUsuarioViajante != null) {
-        cliente.setViajante(usuarioService.getUsuarioPorId(idUsuarioViajante));
-    }
-    if (idUsuarioCredencial != null) {
-      Usuario usuarioCredencial = usuarioService.getUsuarioPorId(idUsuarioCredencial);
-      if (!usuarioCredencial.getRoles().contains(Rol.COMPRADOR))
-        throw new ForbiddenException(
-            ResourceBundle.getBundle("Mensajes")
-                .getString("mensaje_usuario_credencial_no_comprador"));
-      cliente.setCredencial(usuarioCredencial);
+    if (idViajante != null) {
+      cliente.setViajante(usuarioService.getUsuarioPorId(idViajante));
     }
     return clienteService.guardar(cliente);
   }
 
   @PutMapping("/clientes")
   @ResponseStatus(HttpStatus.OK)
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
   public void actualizar(
       @RequestBody Cliente clientePorActualizar,
       @RequestParam(required = false) Long idCondicionIVA,
       @RequestParam(required = false) Long idLocalidad,
       @RequestParam(required = false) Long idEmpresa,
-      @RequestParam(required = false) Long idUsuarioViajante,
-      @RequestParam(required = false) Long idUsuarioCredencial) {
+      @RequestParam(required = false) Long idViajante,
+      @RequestParam(required = false) Long idCredencial,
+      @RequestHeader("Authorization") String token) {
     Cliente clientePersistido =
         clienteService.getClientePorId(clientePorActualizar.getId_Cliente());
+    if (idCredencial != null) {
+      Claims claims =
+              Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+      long idUsuarioLoggedIn = (int) claims.get("idUsuario");
+      Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+      if (idCredencial != idUsuarioLoggedIn
+              && clientePersistido.getCredencial() != null
+              && clientePersistido.getCredencial().getId_Usuario() != idCredencial
+              && !usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
+        throw new ForbiddenException(
+                ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+      } else {
+        Usuario usuarioCredencial = usuarioService.getUsuarioPorId(idCredencial);
+        clientePorActualizar.setCredencial(usuarioCredencial);
+      }
+    } else {
+      clientePorActualizar.setCredencial(null);
+    }
     if (idCondicionIVA != null) {
       clientePorActualizar.setCondicionIVA(
           condicionIVAService.getCondicionIVAPorId(idCondicionIVA));
@@ -179,20 +220,10 @@ public class ClienteController {
     }
     clientePorActualizar.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
     clientePorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    if (idUsuarioViajante != null) {
-      clientePorActualizar.setViajante(usuarioService.getUsuarioPorId(idUsuarioViajante));
+    if (idViajante != null) {
+      clientePorActualizar.setViajante(usuarioService.getUsuarioPorId(idViajante));
     } else {
       clientePorActualizar.setViajante(null);
-    }
-    if (idUsuarioCredencial != null) {
-      Usuario usuarioCredencial = usuarioService.getUsuarioPorId(idUsuarioCredencial);
-      if (!usuarioCredencial.getRoles().contains(Rol.COMPRADOR))
-        throw new ForbiddenException(
-            ResourceBundle.getBundle("Mensajes")
-                .getString("mensaje_usuario_credencial_no_comprador"));
-      clientePorActualizar.setCredencial(usuarioCredencial);
-    } else {
-      clientePorActualizar.setCredencial(null);
     }
     clientePorActualizar.setNroCliente(clientePersistido.getNroCliente());
     clientePorActualizar.setFechaAlta(clientePersistido.getFechaAlta());

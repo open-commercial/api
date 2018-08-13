@@ -1,4 +1,4 @@
-package sic;
+package sic.interceptor;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

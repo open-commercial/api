@@ -26,10 +26,6 @@ public class FacturaVenta extends Factura implements Serializable {
     @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
     private Cliente cliente;
 
-    @ManyToOne
-    @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
-    private Usuario usuario;
-
     public FacturaVenta() {}
 
     public FacturaVenta(Cliente cliente, Usuario usuario, long id_Factura, Date fecha,
@@ -40,23 +36,17 @@ public class FacturaVenta extends Factura implements Serializable {
             BigDecimal impuestoInterno_neto, BigDecimal total, String observaciones, Empresa empresa,
             boolean eliminada, long CAE, Date vencimientoCAE, long numSerieAfip, long numFacturaAfip) {
         
-        super(id_Factura, fecha, tipoComprobante, numSerie, numFactura, fechaVencimiento, 
+        super(id_Factura, usuario, fecha, tipoComprobante, numSerie, numFactura, fechaVencimiento,
                 pedido, transportista, renglones, subTotal, recargo_porcentaje, 
                 recargo_neto, descuento_porcentaje, descuento_neto, subTotal_neto, 
                 iva_105_neto, iva_21_neto, impuestoInterno_neto, total, observaciones,
                 empresa, eliminada, CAE, vencimientoCAE, numSerieAfip, numFacturaAfip);
         this.cliente = cliente;
-        this.usuario = usuario;
     }
     
     @JsonGetter("razonSocialCliente")
     public String getRazonSocialCliente() {
         return cliente.getRazonSocial();
-    }    
-    
-    @JsonGetter("nombreUsuario")
-    public String getNombreUsuario() {
-        return usuario.getNombre() + " " + usuario.getApellido() + " (" + usuario.getUsername() + ")";
     }
 
 }

@@ -4,17 +4,13 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import sic.modelo.Empresa;
-import sic.modelo.FacturaCompra;
-import sic.modelo.Pedido;
-import sic.modelo.Proveedor;
-import sic.modelo.RenglonFactura;
-import sic.modelo.TipoDeComprobante;
-import sic.modelo.Transportista;
+
+import sic.modelo.*;
 
 public class FacturaCompraBuilder {
     
     private long id_Factura = 0L;
+    private Usuario usuario = new UsuarioBuilder().build();
     private Date fecha = new Date();
     private TipoDeComprobante tipoFactura = TipoDeComprobante.FACTURA_A;
     private long numSerie = 0;
@@ -58,7 +54,7 @@ public class FacturaCompraBuilder {
             renglonesFactura.add(renglon2);
             this.renglones = renglonesFactura;
         }
-        FacturaCompra factura = new FacturaCompra(id_Factura, fecha, tipoFactura, 
+        FacturaCompra factura = new FacturaCompra(id_Factura, usuario, fecha, tipoFactura,
                 numSerie, numFactura, fechaVencimiento, pedido, transportista, renglones,
                 subTotal, recargo_porcentaje, recargo_neto, descuento_porcentaje, descuento_neto,
                 subTotal_neto, iva_105_neto, iva_21_neto, impuestoInterno_neto, total, observaciones,
@@ -68,6 +64,11 @@ public class FacturaCompraBuilder {
     
     public FacturaCompraBuilder withId_Factura(long idFactura) {
         this.id_Factura = idFactura;
+        return this;
+    }
+
+    public FacturaCompraBuilder withUsuario(Usuario usuario) {
+        this.usuario = usuario;
         return this;
     }
     

@@ -2,7 +2,6 @@ package sic.controller;
 
 import java.util.List;
 import java.util.ResourceBundle;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +40,7 @@ public class UsuarioController {
 
   @GetMapping("/usuarios/busqueda/criteria")
   @ResponseStatus(HttpStatus.OK)
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VIAJANTE, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Page<Usuario> buscarUsuarios(
       @RequestParam(required = false) String username,
       @RequestParam(required = false) String nombre,
@@ -49,9 +48,8 @@ public class UsuarioController {
       @RequestParam(required = false) String email,
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) Integer tamanio,
-      @RequestParam(required = false) List<Rol> roles,
-      @RequestHeader("Authorization") String token) {
-    int TAMANIO_PAGINA_DEFAULT = 50;
+      @RequestParam(required = false) List<Rol> roles) {
+    final int TAMANIO_PAGINA_DEFAULT = 50;
     if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
     if (pagina == null || pagina < 0) pagina = 0;
     Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "nombre"));
@@ -69,9 +67,7 @@ public class UsuarioController {
             .roles(roles)
             .pageable(pageable)
             .build();
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    return usuarioService.buscarUsuarios(criteria, (int) claims.get("idUsuario"));
+    return usuarioService.buscarUsuarios(criteria);
   }
 
   @PostMapping("/usuarios")
