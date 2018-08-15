@@ -50,17 +50,17 @@ public class RenglonPedido implements Serializable {
     return producto.getId_Producto();
   }
 
-  @JsonGetter("codigo")
+  @JsonGetter("codigoProducto")
   public String getCodigo() {
     return producto.getCodigo();
   }
 
-  @JsonGetter("descripcion")
+  @JsonGetter("descripcionProducto")
   public String getDescripcion() {
     return producto.getDescripcion();
   }
 
-  @JsonGetter("precioDeLista")
+  @JsonGetter("precioDeListaProducto")
   public BigDecimal getPrecioDeLista() {
     return producto.getPrecioLista();
   }
