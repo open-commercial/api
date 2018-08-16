@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -20,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
@@ -34,16 +36,19 @@ public class PedidoServiceImpl implements IPedidoService {
     private final IFacturaService facturaService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
+    private final ICorreoElectronicoService correoElectronicoService;
     private static final BigDecimal CIEN = new BigDecimal("100");
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
     public PedidoServiceImpl(IFacturaService facturaService, PedidoRepository pedidoRepository,
-                             IUsuarioService usuarioService, IClienteService clienteService) {
+                             IUsuarioService usuarioService, IClienteService clienteService,
+                             ICorreoElectronicoService correoElectronicoService) {
         this.facturaService = facturaService;
         this.pedidoRepository = pedidoRepository;
         this.usuarioService = usuarioService;
         this.clienteService = clienteService;
+        this.correoElectronicoService = correoElectronicoService;
     }
 
     @Override
@@ -157,6 +162,19 @@ public class PedidoServiceImpl implements IPedidoService {
         this.validarPedido(TipoDeOperacion.ALTA , pedido);
         pedido = pedidoRepository.save(pedido);
         logger.warn("El Pedido " + pedido + " se guardó correctamente.");
+        String emailCliente = pedido.getCliente().getEmail();
+        if (emailCliente != null && !emailCliente.isEmpty() ) {
+            try {
+            correoElectronicoService.sendMailWhitAttachment(emailCliente, "Nuevo Pedido Ingresado", MessageFormat.format(
+                    ResourceBundle.getBundle("Mensajes")
+                            .getString("mensaje_correo_enviado"),
+                    pedido.getCliente().getRazonSocial(), "Pedido Nº " + pedido.getNroPedido()),
+                    this.getReportePedido(pedido), "Reporte");
+                logger.warn("El mail del pedido {} se envió correctamente.", pedido);
+            } catch (MailException ex) {
+                logger.info(ex.getMessage());
+            }
+        }
         return pedido;
     }
 
