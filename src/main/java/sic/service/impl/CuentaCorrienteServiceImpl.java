@@ -7,9 +7,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.util.*;
 import javax.imageio.ImageIO;
-import javax.persistence.EntityNotFoundException;
 import javax.swing.*;
-
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -53,27 +51,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                 this.cuentaCorrienteClienteRepository = cuentaCorrienteClienteRepository;
                 this.cuentaCorrienteProveedorRepository = cuentaCorrienteProveedorRepository;
                 this.renglonCuentaCorrienteService = renglonCuentaCorrienteService;
-    }
-
-    @Override
-    public void eliminar(Long idCuentaCorriente) {
-        CuentaCorriente cuentaCorriente = this.getCuentaCorrientePorID(idCuentaCorriente);
-        if (cuentaCorriente == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_cuenta_corriente_no_existente"));
-        }
-        cuentaCorriente.setEliminada(true);
-        this.cuentaCorrienteRepository.save(cuentaCorriente);
-    }
-
-    @Override
-    public CuentaCorriente getCuentaCorrientePorID(Long idCuentaCorriente) {
-        CuentaCorriente cuentaCorriente = cuentaCorrienteRepository.findById(idCuentaCorriente);
-        if (cuentaCorriente == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_cuenta_corriente_no_existente"));
-        }
-        return cuentaCorriente;
     }
 
     @Override

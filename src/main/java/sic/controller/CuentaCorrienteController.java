@@ -10,7 +10,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,14 +42,7 @@ public class CuentaCorrienteController {
     this.proveedorService = proveedorService;
   }
 
-  @DeleteMapping("/cuentas-corrientes/{idCuentaCorriente}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-  public void eliminar(@PathVariable Long idCuentaCorriente) {
-    cuentaCorrienteService.eliminar(idCuentaCorriente);
-  }
-
-  @GetMapping("/cuentas-corrientes/clientes/{idCliente}")
+  @GetMapping("/cuentas-corriente/clientes/{idCliente}")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
@@ -64,7 +56,7 @@ public class CuentaCorrienteController {
         clienteService.getClientePorId(idCliente));
   }
 
-  @GetMapping("/cuentas-corrientes/proveedores/{idProveedor}")
+  @GetMapping("/cuentas-corriente/proveedores/{idProveedor}")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
@@ -78,7 +70,7 @@ public class CuentaCorrienteController {
         proveedorService.getProveedorPorId(idProveedor));
   }
 
-  @GetMapping("/cuentas-corrientes/clientes/{idCliente}/saldo")
+  @GetMapping("/cuentas-corriente/clientes/{idCliente}/saldo")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
@@ -93,7 +85,7 @@ public class CuentaCorrienteController {
         .getSaldo();
   }
 
-  @GetMapping("/cuentas-corrientes/proveedores/{idProveedor}/saldo")
+  @GetMapping("/cuentas-corriente/proveedores/{idProveedor}/saldo")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
@@ -108,7 +100,7 @@ public class CuentaCorrienteController {
         .getSaldo();
   }
 
-  @GetMapping("/cuentas-corrientes/{idCuentaCorriente}/renglones")
+  @GetMapping("/cuentas-corriente/{idCuentaCorriente}/renglones")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
@@ -127,7 +119,7 @@ public class CuentaCorrienteController {
     return cuentaCorrienteService.getRenglonesCuentaCorriente(idCuentaCorriente, pageable);
   }
 
-  @GetMapping("/cuentas-corrientes/clientes/{idCliente}/reporte")
+  @GetMapping("/cuentas-corriente/clientes/{idCliente}/reporte")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,

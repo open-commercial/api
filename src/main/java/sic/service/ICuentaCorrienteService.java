@@ -8,34 +8,33 @@ import sic.modelo.*;
 
 public interface ICuentaCorrienteService {
 
-      void eliminar(Long idCuentaCorriente);
+  CuentaCorrienteCliente getCuentaCorrientePorCliente(Cliente cliente);
 
-      CuentaCorriente getCuentaCorrientePorID(Long idCuentaCorriente);
-      
-      CuentaCorrienteCliente getCuentaCorrientePorCliente(Cliente cliente);
-      
-      CuentaCorrienteProveedor getCuentaCorrientePorProveedor(Proveedor proveedor);
+  CuentaCorrienteProveedor getCuentaCorrientePorProveedor(Proveedor proveedor);
 
-      CuentaCorrienteCliente guardarCuentaCorrienteCliente(CuentaCorrienteCliente cuentaCorrienteCliente);
-      
-      CuentaCorrienteProveedor guardarCuentaCorrienteProveedor(CuentaCorrienteProveedor cuentaCorrienteProveedor);
+  CuentaCorrienteCliente guardarCuentaCorrienteCliente(
+      CuentaCorrienteCliente cuentaCorrienteCliente);
 
-      void validarCuentaCorriente(CuentaCorriente cuentaCorriente);
-  
-      BigDecimal getSaldoCuentaCorriente(long idCuentaCorriente);
-      
-      Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Pageable pageable); 
-      
-      void asentarEnCuentaCorriente(FacturaVenta facturaVenta, TipoDeOperacion tipo);
-      
-      void asentarEnCuentaCorriente(FacturaCompra facturaCompra, TipoDeOperacion tipo);
-      
-      void asentarEnCuentaCorriente(Nota nota, TipoDeOperacion tipo);
+  CuentaCorrienteProveedor guardarCuentaCorrienteProveedor(
+      CuentaCorrienteProveedor cuentaCorrienteProveedor);
 
-      void asentarEnCuentaCorriente(Recibo recibo, TipoDeOperacion tipo);
-      
-      Date getFechaUltimoMovimiento(long idCuentaCorriente);
+  void validarCuentaCorriente(CuentaCorriente cuentaCorriente);
 
-      byte[] getReporteCuentaCorrienteCliente(CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page, String formato);
+  BigDecimal getSaldoCuentaCorriente(long idCuentaCorriente);
 
+  Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(
+      long idCuentaCorriente, Pageable pageable);
+
+  void asentarEnCuentaCorriente(FacturaVenta facturaVenta, TipoDeOperacion tipo);
+
+  void asentarEnCuentaCorriente(FacturaCompra facturaCompra, TipoDeOperacion tipo);
+
+  void asentarEnCuentaCorriente(Nota nota, TipoDeOperacion tipo);
+
+  void asentarEnCuentaCorriente(Recibo recibo, TipoDeOperacion tipo);
+
+  Date getFechaUltimoMovimiento(long idCuentaCorriente);
+
+  byte[] getReporteCuentaCorrienteCliente(
+      CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page, String formato);
 }
