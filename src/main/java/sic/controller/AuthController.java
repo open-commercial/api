@@ -10,10 +10,12 @@ import java.util.List;
 import java.util.ResourceBundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import sic.modelo.Credencial;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
+import sic.modelo.modeloDTO.RecoveryPasswordDTO;
 import sic.service.IUsuarioService;
 
 @RestController
@@ -65,5 +67,28 @@ public class AuthController {
     }
     long idUsuario = (int) claims.get("idUsuario");
     usuarioService.actualizarToken("", idUsuario);
+  }
+
+  @GetMapping("/password-recovery")
+  @ResponseStatus(HttpStatus.OK)
+  public void recuperarPassword(
+          @RequestParam String email,
+          @RequestHeader(value = "Host") String host) {
+    usuarioService.crearYEnviarEmailDeRecuperacion(email, host);
+  }
+
+  @PostMapping("/password-recovery")
+  public String generarTokenTemporal(@RequestBody RecoveryPasswordDTO recoveryPasswordDTO) {
+    String token = "";
+    Usuario usuario = usuarioService.getUsuarioPorPasswordRecoveryKeyAndIdUsuario(recoveryPasswordDTO.getKey(), recoveryPasswordDTO.getId());
+    if (usuario != null) {
+      token = this.generarToken(usuario.getId_Usuario(), usuario.getRoles());
+      usuarioService.actualizarToken(token, usuario.getId_Usuario());
+      usuarioService.actualizarPasswordRecoveryKey(null, recoveryPasswordDTO.getId());
+    } else {
+      throw new UnauthorizedException(
+              ResourceBundle.getBundle("Mensajes").getString("mensaje_error_passwordRecoveryKey"));
+    }
+    return token;
   }
 }

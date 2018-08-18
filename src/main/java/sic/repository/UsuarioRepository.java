@@ -27,11 +27,21 @@ public interface UsuarioRepository
 
   Usuario findByUsernameAndEliminado(String username, boolean eliminado);
 
-  Usuario findByEmailAndEliminado(String email, boolean eliminado);
+  Usuario findByEmailAndEliminadoAndHabilitado(String email, boolean eliminado, boolean habilitado);
+
+  @Query(
+          "SELECT u FROM Usuario u "
+                  + "WHERE u.passwordRecoveryKey = ?1 AND u.id_Usuario = ?2 "
+                  + "AND u.eliminado = false AND u.habilitado = true")
+  Usuario findByPasswordRecoveryKeyAndIdUsuarioAndEliminadoAndHabilitado(String passwordRecoveryKey, long idUsuario);
 
   @Modifying
   @Query("UPDATE Usuario u SET u.token = ?1 WHERE u.id_Usuario = ?2")
   int updateToken(String token, long idUsuario);
+
+  @Modifying
+  @Query("UPDATE Usuario u SET u.passwordRecoveryKey = ?1 WHERE u.id_Usuario = ?2")
+  int updatePasswordRecoveryKey(String passwordRecoveryKey, long idUsuario);
 
   @Modifying
   @Query(

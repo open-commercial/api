@@ -2,10 +2,12 @@ package sic.service.impl;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import com.querydsl.core.BooleanBuilder;
+import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.controller.UnauthorizedException;
 import sic.modelo.*;
-import sic.service.IClienteService;
-import sic.service.IUsuarioService;
-import sic.service.BusinessServiceException;
+import sic.service.*;
 import sic.util.Validator;
 import sic.repository.UsuarioRepository;
-import sic.service.IEmpresaService;
 
 @Service
 @Transactional
@@ -31,6 +30,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   private final UsuarioRepository usuarioRepository;
   private final IEmpresaService empresaService;
   private final IClienteService clienteService;
+  private final ICorreoElectronicoService correoElectronicoService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
@@ -38,10 +38,12 @@ public class UsuarioServiceImpl implements IUsuarioService {
   public UsuarioServiceImpl(
       UsuarioRepository usuarioRepository,
       IEmpresaService empresaService,
-      IClienteService clienteService) {
+      IClienteService clienteService,
+      ICorreoElectronicoService correoElectronicoService) {
     this.usuarioRepository = usuarioRepository;
     this.empresaService = empresaService;
     this.clienteService = clienteService;
+    this.correoElectronicoService = correoElectronicoService;
   }
 
   public String encriptarConMD5(String password) {
@@ -66,6 +68,11 @@ public class UsuarioServiceImpl implements IUsuarioService {
           ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_no_existente"));
     }
     return usuario;
+  }
+
+  @Override
+  public Usuario getUsuarioPorPasswordRecoveryKeyAndIdUsuario(String passwordRecoveryKey, long idUsuario) {
+      return usuarioRepository.findByPasswordRecoveryKeyAndIdUsuarioAndEliminadoAndHabilitado(passwordRecoveryKey, idUsuario);
   }
 
   @Override
@@ -190,7 +197,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
             ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_duplicado_username"));
       }
       // email
-      if (usuarioRepository.findByEmailAndEliminado(usuario.getEmail(), false) != null) {
+      if (usuarioRepository.findByEmailAndEliminadoAndHabilitado(usuario.getEmail(), false, true) != null) {
         throw new BusinessServiceException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_duplicado_email"));
       }
@@ -204,7 +211,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
             ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_duplicado_username"));
       }
       // email
-      usuarioGuardado = usuarioRepository.findByEmailAndEliminado(usuario.getEmail(), false);
+      usuarioGuardado = usuarioRepository.findByEmailAndEliminadoAndHabilitado(usuario.getEmail(), false, true);
       if (usuarioGuardado != null && usuarioGuardado.getId_Usuario() != usuario.getId_Usuario()) {
         throw new BusinessServiceException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_duplicado_email"));
@@ -258,6 +265,29 @@ public class UsuarioServiceImpl implements IUsuarioService {
   @Override
   public void actualizarToken(String token, long idUsuario) {
     usuarioRepository.updateToken(token, idUsuario);
+  }
+
+  @Override
+  public void actualizarPasswordRecoveryKey(String passwordRecoveryKey, long idUsuario) {
+    usuarioRepository.updatePasswordRecoveryKey(passwordRecoveryKey, idUsuario);
+  }
+
+  @Override
+  @Transactional
+  public void crearYEnviarEmailDeRecuperacion(String Email, String host) {
+    Usuario usuario = usuarioRepository.findByEmailAndEliminadoAndHabilitado(Email, false, true);
+    if (usuario != null) {
+      String passwordRecoveryKey = RandomStringUtils.random(250, true, true);
+      this.actualizarPasswordRecoveryKey(passwordRecoveryKey, usuario.getId_Usuario());
+      correoElectronicoService.sendMail(
+          usuario.getEmail(),
+          "Recuperación de contraseña",
+          MessageFormat.format(
+              ResourceBundle.getBundle("Mensajes").getString("mensaje_correo_recuperacion"),
+              host,
+              passwordRecoveryKey,
+              usuario.getId_Usuario()));
+    }
   }
 
   @Override

@@ -30,7 +30,8 @@ public class App extends WebMvcConfigurerAdapter {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor())
                 .addPathPatterns("/api/**")
-                .excludePathPatterns("/api/*/login");
+                .excludePathPatterns("/api/*/login")
+                .excludePathPatterns("/api/*/password-recovery");
     }
 
     @Bean

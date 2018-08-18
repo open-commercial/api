@@ -55,7 +55,7 @@ public class Usuario implements Serializable {
     
     private long idEmpresaPredeterminada;
 
-    private long passwordRecoveryKey;
+    private String passwordRecoveryKey;
     
     @ElementCollection(targetClass = Rol.class)
     @CollectionTable(name="rol", joinColumns = @JoinColumn(name = "id_Usuario"))

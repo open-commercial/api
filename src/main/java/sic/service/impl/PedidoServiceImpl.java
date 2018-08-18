@@ -170,7 +170,7 @@ public class PedidoServiceImpl implements IPedidoService {
                             .getString("mensaje_correo_enviado"),
                     pedido.getCliente().getRazonSocial(), "Pedido Nº " + pedido.getNroPedido()),
                     this.getReportePedido(pedido), "Reporte");
-                logger.warn("El mail del pedido {} se envió correctamente.", pedido);
+                logger.warn("El mail del pedido {} se envió.", pedido);
             } catch (MailException ex) {
                 logger.info(ex.getMessage());
             }
