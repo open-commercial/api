@@ -10,6 +10,8 @@ import org.springframework.data.repository.query.Param;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
 
+import java.util.Date;
+
 public interface UsuarioRepository
     extends PagingAndSortingRepository<Usuario, Long>, QueryDslPredicateExecutor<Usuario> {
 
@@ -40,8 +42,8 @@ public interface UsuarioRepository
   int updateToken(String token, long idUsuario);
 
   @Modifying
-  @Query("UPDATE Usuario u SET u.passwordRecoveryKey = ?1 WHERE u.id_Usuario = ?2")
-  int updatePasswordRecoveryKey(String passwordRecoveryKey, long idUsuario);
+  @Query("UPDATE Usuario u SET u.passwordRecoveryKey = ?1, u.passwordRecoveryKeyExpireDate = ?2 WHERE u.id_Usuario = ?3")
+  int updatePasswordRecoveryKey(String passwordRecoveryKey, Date passwordRecoveryKeyExpireDate, long idUsuario);
 
   @Modifying
   @Query(

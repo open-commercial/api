@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -81,7 +83,7 @@ public class AuthController {
   public String generarTokenTemporal(@RequestBody RecoveryPasswordDTO recoveryPasswordDTO) {
     String token = "";
     Usuario usuario = usuarioService.getUsuarioPorPasswordRecoveryKeyAndIdUsuario(recoveryPasswordDTO.getKey(), recoveryPasswordDTO.getId());
-    if (usuario != null) {
+    if (usuario != null && (new Date()).before(usuario.getPasswordRecoveryKeyExpireDate())) {
       token = this.generarToken(usuario.getId_Usuario(), usuario.getRoles());
       usuarioService.actualizarToken(token, usuario.getId_Usuario());
       usuarioService.actualizarPasswordRecoveryKey(null, recoveryPasswordDTO.getId());

@@ -1,7 +1,9 @@
 package sic.builder;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
@@ -16,13 +18,15 @@ public class UsuarioBuilder {
     private String email = "daenerys@gmail.com";
     private String token = "yJhbGci1NiIsInR5cCI6IkpXVCJ9.eyJub21icmUiOiJjZWNpbGlvIn0.MCfaorSC7Wdc8rSW7BJizasfzsm";
     private String passwordRecoveryKey = "";
+    private Date passwordRecoveryKeyExpireDate = new Date();
     private List<Rol> roles = new ArrayList<>(Arrays.asList(Rol.ADMINISTRADOR));
     private boolean habilitado = true;
     private boolean eliminado = false;
     private long idEmpresa = 0l;
     
     public Usuario build() {
-        return new Usuario(id_Usuario, username, password, nombre, apellido, email, token, idEmpresa, passwordRecoveryKey, roles, habilitado, eliminado);
+        return new Usuario(id_Usuario, username, password, nombre, apellido, email, token, idEmpresa, passwordRecoveryKey,
+                passwordRecoveryKeyExpireDate, roles, habilitado, eliminado);
     }
 
     public UsuarioBuilder withId_Usuario(long idUsuario) {
@@ -67,6 +71,11 @@ public class UsuarioBuilder {
     
     public UsuarioBuilder withPasswordRecoveryKey(String passwordRecoveryKey) {
         this.passwordRecoveryKey = passwordRecoveryKey;
+        return this;
+    }
+
+    public UsuarioBuilder withPasswordRecoveryKeyExpireDate(Date passwordRecoveryKeyExpireDate) {
+        this.passwordRecoveryKeyExpireDate = passwordRecoveryKeyExpireDate;
         return this;
     }
     

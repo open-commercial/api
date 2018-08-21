@@ -3,6 +3,9 @@ package sic.service.impl;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
@@ -269,7 +272,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public void actualizarPasswordRecoveryKey(String passwordRecoveryKey, long idUsuario) {
-    usuarioRepository.updatePasswordRecoveryKey(passwordRecoveryKey, idUsuario);
+    usuarioRepository.updatePasswordRecoveryKey(passwordRecoveryKey,
+            Date.from(LocalDateTime.now().plusHours(3L).atZone(ZoneId.systemDefault()).toInstant()), idUsuario);
   }
 
   @Override
@@ -294,6 +298,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   public Usuario guardar(Usuario usuario) {
     this.validarOperacion(TipoDeOperacion.ALTA, usuario);
     usuario.setPassword(this.encriptarConMD5(usuario.getPassword()));
+    usuario.setPasswordRecoveryKeyExpireDate(new Date());
     usuario = usuarioRepository.save(usuario);
     logger.warn("El Usuario " + usuario + " se guardó correctamente.");
     return usuario;
