@@ -26,12 +26,12 @@ public class PedidoDTO implements Serializable {
     private long nroPedido;    
     private Date fecha;    
     private Date fechaVencimiento;    
-    private String observaciones;    
+    private String observaciones;
     private String nombreEmpresa;
-    private boolean eliminado;    
-    private String razonSocialCliente;  
-    private String nombreUsuario;        
-    private List<Factura> facturas;        
+    private boolean eliminado;
+    private String razonSocialCliente;
+    private String nombreUsuario;
+    private List<FacturaDTO> facturas;
     private List<RenglonPedidoDTO> renglones;
     private BigDecimal totalEstimado;
     private BigDecimal totalActual;

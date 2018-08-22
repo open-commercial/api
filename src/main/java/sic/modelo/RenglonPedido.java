@@ -45,7 +45,7 @@ public class RenglonPedido implements Serializable {
   @Column(precision = 25, scale = 15)
   private BigDecimal subTotal;
 
-  @JsonGetter("idProducto")
+  @JsonGetter("id_Producto")
   public Long getIdProducto() {
     return producto.getId_Producto();
   }

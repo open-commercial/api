@@ -7,7 +7,6 @@ import sic.modelo.dto.RenglonPedidoDTO;
 public class RenglonPedidoBuilder {
     
     private long id_RenglonPedido = 0L;
-    private ProductoDTO producto = new ProductoBuilder().build();
     private long idProducto = 1L;
     private String codigo = "ABC123";
     private String descripcion = "Cinta adhesiva doble faz 3M";
@@ -18,17 +17,12 @@ public class RenglonPedidoBuilder {
     private BigDecimal subTotal = new BigDecimal("363");
     
     public RenglonPedidoDTO build() {
-        return new RenglonPedidoDTO(id_RenglonPedido, producto, idProducto, codigo, descripcion, precioDeLista,
+        return new RenglonPedidoDTO(id_RenglonPedido, idProducto, codigo, descripcion, precioDeLista,
           cantidad, descuento_porcentaje, descuento_neto, subTotal);
     }
     
     public RenglonPedidoBuilder withIdRenglonPedido(long idRenglonPedido) {
         this.id_RenglonPedido = idRenglonPedido;
-        return this;
-    }
-
-    public RenglonPedidoBuilder withProducto(ProductoDTO producto) {
-        this.producto = producto;
         return this;
     }
     

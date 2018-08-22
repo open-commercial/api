@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import sic.modelo.EstadoPedido;
-import sic.modelo.Factura;
+import sic.modelo.dto.FacturaDTO;
 import sic.modelo.dto.PedidoDTO;
 import sic.modelo.dto.RenglonPedidoDTO;
 
@@ -20,7 +20,7 @@ public class PedidoBuilder {
     private boolean eliminado = false;
     private String razonSocialCliente = "Construcciones S.A.";
     private String nombreUsuario = "Daenerys Targaryen";
-    private List<Factura> facturas;
+    private List<FacturaDTO> facturas;
     private List<RenglonPedidoDTO> renglones;
     private BigDecimal totalEstimado = new BigDecimal("544.5");
     private BigDecimal totalActual = new BigDecimal("544.5");
@@ -68,7 +68,6 @@ public class PedidoBuilder {
         this.observaciones = observaciones;
         return this;
     }
-
     public PedidoBuilder withNombreEmpresa(String nombreEmpresa) {
         this.nombreEmpresa = nombreEmpresa;
         return this;
@@ -89,7 +88,7 @@ public class PedidoBuilder {
         return this;
     }
 
-    public PedidoBuilder withFacturas(List<Factura> facturas) {
+    public PedidoBuilder withFacturas(List<FacturaDTO> facturas) {
         this.facturas = facturas;
         return this;
     }

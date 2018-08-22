@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import sic.modelo.Producto;
 
 @Data
 @EqualsAndHashCode(of = "producto")
@@ -15,11 +14,10 @@ import sic.modelo.Producto;
 public class RenglonPedidoDTO implements Serializable {
 
     private long id_RenglonPedido;
-    private ProductoDTO producto;
-    private long idProducto;
-    private String codigo;
-    private String descripcion;
-    private BigDecimal precioDeLista;
+    private long id_Producto;
+    private String codigoProducto;
+    private String descripcionProducto;
+    private BigDecimal precioDeListaProducto;
     private BigDecimal cantidad;
     private BigDecimal descuento_porcentaje;
     private BigDecimal descuento_neto;
