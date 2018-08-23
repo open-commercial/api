@@ -18,7 +18,7 @@ public interface IUsuarioService {
 
   void actualizarPasswordRecoveryKey(String passwordRecoveryKey, long idUsuario);
 
-  void crearYEnviarEmailDeRecuperacion(String Email, String host);
+  void enviarEmailDeRecuperacion(String Email, String host);
 
   void eliminar(long idUsuario);
 

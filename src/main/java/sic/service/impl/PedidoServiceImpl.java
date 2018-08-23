@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
@@ -153,30 +152,30 @@ public class PedidoServiceImpl implements IPedidoService {
         return facturaService.getFacturasDelPedido(idPedido);
     }
 
-    @Override
-    @Transactional
-    public Pedido guardar(Pedido pedido) {
-        pedido.setFecha(new Date());
-        pedido.setNroPedido(this.calcularNumeroPedido(pedido.getEmpresa()));
-        pedido.setEstado(EstadoPedido.ABIERTO);
-        this.validarPedido(TipoDeOperacion.ALTA , pedido);
-        pedido = pedidoRepository.save(pedido);
-        logger.warn("El Pedido " + pedido + " se guardó correctamente.");
-        String emailCliente = pedido.getCliente().getEmail();
-        if (emailCliente != null && !emailCliente.isEmpty() ) {
-            try {
-            correoElectronicoService.sendMailWhitAttachment(emailCliente, "Nuevo Pedido Ingresado", MessageFormat.format(
-                    ResourceBundle.getBundle("Mensajes")
-                            .getString("mensaje_correo_enviado"),
-                    pedido.getCliente().getRazonSocial(), "Pedido Nº " + pedido.getNroPedido()),
-                    this.getReportePedido(pedido), "Reporte");
-                logger.warn("El mail del pedido {} se envió.", pedido);
-            } catch (MailException ex) {
-                logger.info(ex.getMessage());
-            }
-        }
-        return pedido;
+  @Override
+  @Transactional
+  public Pedido guardar(Pedido pedido) {
+    pedido.setFecha(new Date());
+    pedido.setNroPedido(this.calcularNumeroPedido(pedido.getEmpresa()));
+    pedido.setEstado(EstadoPedido.ABIERTO);
+    this.validarPedido(TipoDeOperacion.ALTA, pedido);
+    pedido = pedidoRepository.save(pedido);
+    logger.warn("El Pedido {} se guardó correctamente.", pedido);
+    String emailCliente = pedido.getCliente().getEmail();
+    if (emailCliente != null && !emailCliente.isEmpty()) {
+      correoElectronicoService.enviarMailConAdjunto(
+          emailCliente,
+          "Nuevo Pedido Ingresado",
+          MessageFormat.format(
+              ResourceBundle.getBundle("Mensajes").getString("mensaje_correo_enviado"),
+              pedido.getCliente().getRazonSocial(),
+              "Pedido Nº " + pedido.getNroPedido()),
+          this.getReportePedido(pedido),
+          "Reporte");
+      logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
+    return pedido;
+  }
 
     @Override
     public Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {

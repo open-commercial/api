@@ -277,13 +277,22 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
+  public int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada) {
+    if (empresaService.getEmpresaPorId(idEmpresaPredeterminada) == null) {
+      throw new EntityNotFoundException(
+              ResourceBundle.getBundle("Mensajes").getString("mensaje_empresa_no_existente"));
+    }
+    return usuarioRepository.updateIdEmpresa(idUsuario, idEmpresaPredeterminada);
+  }
+
+  @Override
   @Transactional
-  public void crearYEnviarEmailDeRecuperacion(String Email, String host) {
-    Usuario usuario = usuarioRepository.findByEmailAndEliminadoAndHabilitado(Email, false, true);
+  public void enviarEmailDeRecuperacion(String email, String host) {
+    Usuario usuario = usuarioRepository.findByEmailAndEliminadoAndHabilitado(email, false, true);
     if (usuario != null) {
       String passwordRecoveryKey = RandomStringUtils.random(250, true, true);
       this.actualizarPasswordRecoveryKey(passwordRecoveryKey, usuario.getId_Usuario());
-      correoElectronicoService.sendMail(
+      correoElectronicoService.enviarMail(
           usuario.getEmail(),
           "Recuperación de contraseña",
           MessageFormat.format(
@@ -298,9 +307,9 @@ public class UsuarioServiceImpl implements IUsuarioService {
   public Usuario guardar(Usuario usuario) {
     this.validarOperacion(TipoDeOperacion.ALTA, usuario);
     usuario.setPassword(this.encriptarConMD5(usuario.getPassword()));
-    usuario.setPasswordRecoveryKeyExpireDate(new Date());
+    usuario.setPasswordRecoveryKeyExpirationDate(new Date());
     usuario = usuarioRepository.save(usuario);
-    logger.warn("El Usuario " + usuario + " se guardó correctamente.");
+    logger.warn("El Usuario {} se guardó correctamente.", usuario);
     return usuario;
   }
 
@@ -313,13 +322,5 @@ public class UsuarioServiceImpl implements IUsuarioService {
     usuarioRepository.save(usuario);
     logger.warn("El Usuario " + usuario + " se eliminó correctamente.");
   }
-
-  @Override
-  public int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada) {
-    if (empresaService.getEmpresaPorId(idEmpresaPredeterminada) == null) {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_empresa_no_existente"));
-    }
-    return usuarioRepository.updateIdEmpresa(idUsuario, idEmpresaPredeterminada);
-  }
+  
 }

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RecoveryPasswordDTO {
 
-    String key;
-    long id;
+    private String key;
+    private long id;
 
 }

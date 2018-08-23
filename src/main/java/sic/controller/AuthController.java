@@ -5,7 +5,6 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
-import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -74,22 +73,23 @@ public class AuthController {
   @GetMapping("/password-recovery")
   @ResponseStatus(HttpStatus.OK)
   public void recuperarPassword(
-          @RequestParam String email,
-          @RequestHeader(value = "Host") String host) {
-    usuarioService.crearYEnviarEmailDeRecuperacion(email, host);
+      @RequestParam String email, @RequestHeader(value = "Host") String host) {
+    usuarioService.enviarEmailDeRecuperacion(email, host);
   }
 
   @PostMapping("/password-recovery")
   public String generarTokenTemporal(@RequestBody RecoveryPasswordDTO recoveryPasswordDTO) {
-    String token = "";
-    Usuario usuario = usuarioService.getUsuarioPorPasswordRecoveryKeyAndIdUsuario(recoveryPasswordDTO.getKey(), recoveryPasswordDTO.getId());
-    if (usuario != null && (new Date()).before(usuario.getPasswordRecoveryKeyExpireDate())) {
+    String token;
+    Usuario usuario =
+        usuarioService.getUsuarioPorPasswordRecoveryKeyAndIdUsuario(
+            recoveryPasswordDTO.getKey(), recoveryPasswordDTO.getId());
+    if (usuario != null && (new Date()).before(usuario.getPasswordRecoveryKeyExpirationDate())) {
       token = this.generarToken(usuario.getId_Usuario(), usuario.getRoles());
       usuarioService.actualizarToken(token, usuario.getId_Usuario());
       usuarioService.actualizarPasswordRecoveryKey(null, recoveryPasswordDTO.getId());
     } else {
       throw new UnauthorizedException(
-              ResourceBundle.getBundle("Mensajes").getString("mensaje_error_passwordRecoveryKey"));
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_error_passwordRecoveryKey"));
     }
     return token;
   }

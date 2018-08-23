@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,7 +19,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"username", "email"})
 @ToString(exclude = {"roles", "password"})
-@JsonIgnoreProperties({"token", "passwordRecoveryKey", "passwordRecoveryKeyExpireDate", "eliminado"})
+@JsonIgnoreProperties({"token", "passwordRecoveryKey", "passwordRecoveryKeyExpirationDate", "eliminado"})
 public class Usuario implements Serializable {
 
     @Id
@@ -52,7 +51,7 @@ public class Usuario implements Serializable {
 
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date passwordRecoveryKeyExpireDate;
+    private Date passwordRecoveryKeyExpirationDate;
     
     @ElementCollection(targetClass = Rol.class)
     @CollectionTable(name="rol", joinColumns = @JoinColumn(name = "id_Usuario"))
