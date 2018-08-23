@@ -3,17 +3,9 @@ package sic.modelo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Table;
+import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -27,7 +19,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"username", "email"})
 @ToString(exclude = {"roles", "password"})
-@JsonIgnoreProperties({"token", "passwordRecoveryKey", "eliminado"})
+@JsonIgnoreProperties({"token", "passwordRecoveryKey", "passwordRecoveryKeyExpirationDate", "eliminado"})
 public class Usuario implements Serializable {
 
     @Id
@@ -55,7 +47,11 @@ public class Usuario implements Serializable {
     
     private long idEmpresaPredeterminada;
 
-    private long passwordRecoveryKey;
+    private String passwordRecoveryKey;
+
+    @Column(nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date passwordRecoveryKeyExpirationDate;
     
     @ElementCollection(targetClass = Rol.class)
     @CollectionTable(name="rol", joinColumns = @JoinColumn(name = "id_Usuario"))
