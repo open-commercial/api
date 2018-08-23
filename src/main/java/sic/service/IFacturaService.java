@@ -1,21 +1,14 @@
 package sic.service;
 
 import java.math.BigDecimal;
-import java.util.Date;
-
 import sic.modelo.*;
-
 import java.util.List;
 import org.springframework.data.domain.Page;
 
 public interface IFacturaService {
     
     Factura getFacturaPorId(Long id_Factura);
-        
-    Long getCAEById(long idFactura);
-    
-    BigDecimal getTotalById(long idFactura);
-    
+
     List<Factura> getFacturasDelPedido(Long idPedido);
 
     TipoDeComprobante[] getTipoFacturaCompra(Empresa empresa, Proveedor proveedor);
@@ -59,8 +52,6 @@ public interface IFacturaService {
     BigDecimal calcularTotal(BigDecimal subTotal_bruto, BigDecimal iva105_neto, BigDecimal iva21_neto);
 
     BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
-    
-    BigDecimal getSaldoFacturasVentaSegunClienteYEmpresa(long empresa, long cliente, Date hasta);
 
     BigDecimal calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria);
 
@@ -93,10 +84,5 @@ public interface IFacturaService {
       long idProducto,
       BigDecimal descuentoPorcentaje,
       boolean dividiendoRenglonFactura);
-
-  List<RenglonFactura> convertirRenglonesPedidoARenglonesFactura(
-      List<RenglonPedido> renglonesDelPedido,
-      TipoDeComprobante tipoDeComprobante,
-      Movimiento movimiento);
 
 }

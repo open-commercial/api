@@ -165,7 +165,7 @@ public class PedidoServiceImpl implements IPedidoService {
         pedido.setEstado(EstadoPedido.ABIERTO);
         this.validarPedido(TipoDeOperacion.ALTA , pedido);
         pedido = pedidoRepository.save(pedido);
-        logger.warn("El Pedido " + pedido + " se guardó correctamente.");
+        logger.warn("El Pedido {} se guardó correctamente.", pedido);
         return pedido;
     }
 
@@ -253,11 +253,12 @@ public class PedidoServiceImpl implements IPedidoService {
     }
 
     @Override
-    public HashMap<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido) {
+    public Map<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido) {
         List<RenglonFactura> renglonesDeFacturas = new ArrayList<>();
         this.getFacturasDelPedido(nroPedido).forEach(f ->
             f.getRenglones().forEach(r -> renglonesDeFacturas.add(facturaService.calcularRenglon(f.getTipoComprobante(),
-                        Movimiento.VENTA, r.getCantidad(), r.getId_ProductoItem(), r.getDescuento_porcentaje(),false)))
+                    Movimiento.VENTA, r.getCantidad(), r.getId_ProductoItem(),
+                    r.getDescuento_porcentaje(),false)))
         );
         HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
         if (!renglonesDeFacturas.isEmpty()) {
@@ -303,7 +304,7 @@ public class PedidoServiceImpl implements IPedidoService {
     @Override
     public BigDecimal calcularDescuentoNeto(BigDecimal precioUnitario, BigDecimal descuentoPorcentaje) {
         BigDecimal resultado = BigDecimal.ZERO;
-        if (descuentoPorcentaje != BigDecimal.ZERO) {
+        if (descuentoPorcentaje.compareTo(BigDecimal.ZERO) != 0) {
             resultado = precioUnitario.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
         }
         return resultado;
@@ -318,8 +319,7 @@ public class PedidoServiceImpl implements IPedidoService {
   public RenglonPedido calcularRenglonPedido(
       long idProducto, BigDecimal cantidad, BigDecimal descuentoPorcentaje) {
     RenglonPedido nuevoRenglon = new RenglonPedido();
-    Producto productoDelRenglon = productoService.getProductoPorId(idProducto);
-    nuevoRenglon.setProducto(productoDelRenglon);
+    nuevoRenglon.setProducto(productoService.getProductoPorId(idProducto));
     nuevoRenglon.setCantidad(cantidad);
     nuevoRenglon.setDescuento_porcentaje(descuentoPorcentaje);
     nuevoRenglon.setDescuento_neto(

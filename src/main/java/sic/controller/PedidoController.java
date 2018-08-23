@@ -76,7 +76,7 @@ public class PedidoController {
     @PostMapping("/pedidos/renglones")
     @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
-    public List<RenglonPedido> convertirRenglonesPedidoARenglonesFactura(@RequestBody List<RenglonFactura> renglonesFactura) {
+    public List<RenglonPedido> convertirRenglonesFacturaEnRenglonesPedido(@RequestBody List<RenglonFactura> renglonesFactura) {
         return pedidoService.convertirRenglonesFacturaEnRenglonesPedido(renglonesFactura);
     }
 
@@ -102,6 +102,7 @@ public class PedidoController {
     }
 
   @PostMapping("/pedidos")
+  @ResponseStatus(HttpStatus.CREATED)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -109,7 +110,6 @@ public class PedidoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  @ResponseStatus(HttpStatus.CREATED)
   public Pedido guardar(
       @RequestParam Long idEmpresa,
       @RequestParam Long idUsuario,

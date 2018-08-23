@@ -9,9 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -27,7 +25,9 @@ import lombok.ToString;
 @ToString
 public class RenglonPedido implements Serializable {
 
-  @Id @GeneratedValue private long id_RenglonPedido;
+  @Id
+  @GeneratedValue
+  private long id_RenglonPedido;
 
   @ManyToOne
   @JoinColumn(name = "id_Producto", referencedColumnName = "id_Producto")

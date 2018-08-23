@@ -1,8 +1,9 @@
 package sic.service;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 
@@ -24,7 +25,7 @@ public interface IPedidoService {
 
   List<Factura> getFacturasDelPedido(long id);
 
-  HashMap<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido);
+  Map<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido);
 
   List<RenglonPedido> getRenglonesDelPedido(Long idPedido);
 

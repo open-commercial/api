@@ -1,25 +1,21 @@
 package sic.service;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import sic.modelo.TipoDeOperacion;
 import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.Page;
 import sic.modelo.BusquedaProductoCriteria;
 import sic.modelo.Empresa;
-import sic.modelo.Medida;
 import sic.modelo.Movimiento;
 import sic.modelo.Producto;
-import sic.modelo.Proveedor;
-import sic.modelo.Rubro;
 
 public interface IProductoService {
 
   void actualizar(Producto productoPorActualizar, Long idMedida, Long idRubro, Long idProveedor, Long idEmpresa);
 
   void actualizarStock(
-      HashMap<Long, BigDecimal> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento);
+      Map<Long, BigDecimal> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento);
 
   Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
 
