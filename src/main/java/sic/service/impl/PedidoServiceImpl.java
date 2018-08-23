@@ -24,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
+import sic.repository.RenglonPedidoRepository;
 import sic.service.*;
 import sic.repository.PedidoRepository;
 import sic.util.FormatterFechaHora;
@@ -32,6 +33,7 @@ import sic.util.FormatterFechaHora;
 public class PedidoServiceImpl implements IPedidoService {
 
     private final PedidoRepository pedidoRepository;
+    private final RenglonPedidoRepository renglonPedidoRepository;
     private final IFacturaService facturaService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
@@ -41,10 +43,12 @@ public class PedidoServiceImpl implements IPedidoService {
     
     @Autowired
     public PedidoServiceImpl(IFacturaService facturaService, PedidoRepository pedidoRepository,
+                             RenglonPedidoRepository renglonPedidoRepository,
                              IUsuarioService usuarioService, IClienteService clienteService,
                              ICorreoElectronicoService correoElectronicoService) {
         this.facturaService = facturaService;
         this.pedidoRepository = pedidoRepository;
+        this.renglonPedidoRepository = renglonPedidoRepository;
         this.usuarioService = usuarioService;
         this.clienteService = clienteService;
         this.correoElectronicoService = correoElectronicoService;
@@ -257,7 +261,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
     @Override
     public List<RenglonPedido> getRenglonesDelPedido(Long idPedido) {
-        return this.getPedidoPorId(idPedido).getRenglones();
+        return renglonPedidoRepository.findByIdPedido(idPedido);
     }
 
     @Override
