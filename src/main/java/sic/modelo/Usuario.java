@@ -49,7 +49,6 @@ public class Usuario implements Serializable {
 
     private String passwordRecoveryKey;
 
-    @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date passwordRecoveryKeyExpirationDate;
     

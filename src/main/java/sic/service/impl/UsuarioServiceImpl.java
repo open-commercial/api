@@ -309,7 +309,6 @@ public class UsuarioServiceImpl implements IUsuarioService {
   public Usuario guardar(Usuario usuario) {
     this.validarOperacion(TipoDeOperacion.ALTA, usuario);
     usuario.setPassword(this.encriptarConMD5(usuario.getPassword()));
-    usuario.setPasswordRecoveryKeyExpirationDate(new Date());
     usuario = usuarioRepository.save(usuario);
     logger.warn("El Usuario {} se guardó correctamente.", usuario);
     return usuario;
