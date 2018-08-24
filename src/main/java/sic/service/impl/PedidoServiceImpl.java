@@ -23,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
+import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.service.*;
 import sic.repository.PedidoRepository;
 import sic.util.FormatterFechaHora;
@@ -334,14 +335,14 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public List<RenglonPedido> convertirRenglonesFacturaEnRenglonesPedido(
-      List<RenglonFactura> renglonesFactura) {
+  public List<RenglonPedido> calcularRenglonesPedido(
+      List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO) {
     List<RenglonPedido> renglonesPedido = new ArrayList<>();
-    renglonesFactura.forEach(rengonFactura -> renglonesPedido.add(
+      nuevosRenglonesPedidoDTO.forEach(nuevoRenglonesPedidoDTO -> renglonesPedido.add(
       this.calcularRenglonPedido(
-        rengonFactura.getId_ProductoItem(),
-        rengonFactura.getCantidad(),
-        rengonFactura.getDescuento_porcentaje())));
+         nuevoRenglonesPedidoDTO.getIdProductoItem(),
+         nuevoRenglonesPedidoDTO.getCantidad(),
+         nuevoRenglonesPedidoDTO.getDescuentoPorcentaje())));
     return renglonesPedido;
   }
 

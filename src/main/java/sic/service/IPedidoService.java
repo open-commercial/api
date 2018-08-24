@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
+import sic.modelo.dto.NuevoRenglonPedidoDTO;
 
 public interface IPedidoService {
 
@@ -38,7 +39,7 @@ public interface IPedidoService {
       BigDecimal cantidad,
       BigDecimal descuentoPorcentaje);
 
-  List<RenglonPedido> convertirRenglonesFacturaEnRenglonesPedido(List<RenglonFactura> renglonesFactura);
+  List<RenglonPedido> calcularRenglonesPedido(List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO);
 
   BigDecimal calcularDescuentoNeto(BigDecimal precioUnitario, BigDecimal descuentoPorcentaje);
 

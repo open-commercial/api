@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.modelo.dto.PedidoDTO;
 import sic.service.*;
 
@@ -64,20 +65,11 @@ public class PedidoController {
     }
 
 
-    @GetMapping("/pedidos/renglon")
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
-    public RenglonPedido calcularRenglonPedido(@RequestParam long idProducto,
-                                               @RequestParam BigDecimal cantidad,
-                                               @RequestParam BigDecimal descuentoPorcentaje){
-        return pedidoService.calcularRenglonPedido(idProducto, cantidad, descuentoPorcentaje);
-    }
-
     @PostMapping("/pedidos/renglones")
     @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
-    public List<RenglonPedido> convertirRenglonesFacturaEnRenglonesPedido(@RequestBody List<RenglonFactura> renglonesFactura) {
-        return pedidoService.convertirRenglonesFacturaEnRenglonesPedido(renglonesFactura);
+    public List<RenglonPedido> calcularRenglonesPedido(@RequestBody List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO) {
+        return pedidoService.calcularRenglonesPedido(nuevosRenglonesPedidoDTO);
     }
 
     @PutMapping("/pedidos")
