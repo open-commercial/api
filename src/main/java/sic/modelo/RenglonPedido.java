@@ -9,6 +9,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.DecimalMin;
+
 import com.fasterxml.jackson.annotation.JsonGetter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -34,15 +36,19 @@ public class RenglonPedido implements Serializable {
   private Producto producto;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_producto_cantidad_negativa}")
   private BigDecimal cantidad;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_renglon_descuento_porcentaje_negativo}")
   private BigDecimal descuento_porcentaje;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_renglon_descuento_neto_negativo}")
   private BigDecimal descuento_neto;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_renglon_subTotal_negativo}")
   private BigDecimal subTotal;
 
   @JsonGetter("id_Producto")
