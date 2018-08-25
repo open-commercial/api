@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @Builder
 public class NuevoRenglonPedidoDTO {
 
-    long idProductoItem;
+    private long idProductoItem;
     private BigDecimal cantidad;
     private BigDecimal descuentoPorcentaje;
 
