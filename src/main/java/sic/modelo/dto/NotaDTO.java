@@ -8,8 +8,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import sic.builder.EmpresaBuilder;
-import sic.modelo.Empresa;
 import sic.modelo.Nota;
 import sic.modelo.TipoDeComprobante;
 
@@ -26,7 +24,7 @@ public abstract class NotaDTO implements Serializable {
     private boolean eliminada = false;
     private TipoDeComprobante tipoComprobante;
     private Date fecha;
-    private Empresa empresa = new EmpresaBuilder().build();
+    private EmpresaDTO empresa = EmpresaDTO.builder().build();
     private UsuarioDTO usuario = UsuarioDTO.builder().build();
     private String motivo = "Nota por default";
     private BigDecimal subTotalBruto = new BigDecimal("6500"); 

@@ -3,6 +3,7 @@ package sic.controller;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
-import sic.modelo.RenglonPedido;
+import sic.modelo.dto.PedidoDTO;
 import sic.service.ICarritoCompraService;
 import sic.service.IClienteService;
 import sic.service.IEmpresaService;
@@ -28,6 +29,7 @@ public class CarritoCompraController {
   private final IEmpresaService empresaService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
+  private final ModelMapper modelMapper;
 
   @Autowired
   public CarritoCompraController(
@@ -35,12 +37,14 @@ public class CarritoCompraController {
       IPedidoService pedidoService,
       IEmpresaService empresaService,
       IUsuarioService usuarioService,
-      IClienteService clienteService) {
+      IClienteService clienteService,
+      ModelMapper modelMapper) {
     this.carritoCompraService = carritoCompraService;
     this.pedidoService = pedidoService;
     this.empresaService = empresaService;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
+    this.modelMapper = modelMapper;
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}")
@@ -115,7 +119,8 @@ public class CarritoCompraController {
       @RequestParam Long idEmpresa,
       @RequestParam Long idUsuario,
       @RequestParam Long idCliente,
-      @RequestBody Pedido pedido) {
+      @RequestBody PedidoDTO pedidoDTO) {
+    Pedido pedido = modelMapper.map(pedidoDTO, Pedido.class);
     pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
     pedido.setCliente(clienteService.getClientePorId(idCliente));
@@ -129,13 +134,8 @@ public class CarritoCompraController {
             pedido
                 .getRenglones()
                 .add(
-                    new RenglonPedido(
-                        0,
-                        i.getProducto(),
-                        i.getCantidad(),
-                        BigDecimal.ZERO,
-                        BigDecimal.ZERO,
-                        i.getImporte())));
+                    pedidoService.calcularRenglonPedido(
+                        i.getProducto().getId_Producto(), i.getCantidad(), BigDecimal.ZERO)));
     Pedido p = pedidoService.guardar(pedido);
     carritoCompraService.eliminarTodosLosItems(idUsuario);
     return p;

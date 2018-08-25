@@ -5,6 +5,7 @@ import java.util.List;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -18,10 +19,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
-import sic.service.IClienteService;
-import sic.service.IEmpresaService;
-import sic.service.IPedidoService;
-import sic.service.IUsuarioService;
+import sic.modelo.dto.NuevoRenglonPedidoDTO;
+import sic.modelo.dto.PedidoDTO;
+import sic.service.*;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -31,17 +31,22 @@ public class PedidoController {
     private final IEmpresaService empresaService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
+    private final IProductoService productoService;
+    private final ModelMapper modelMapper;
 
     @Value("${SIC_JWT_KEY}")
     private String secretkey;
 
     @Autowired
     public PedidoController(IPedidoService pedidoService, IEmpresaService empresaService,
-                            IUsuarioService usuarioService, IClienteService clienteService) {
+                            IUsuarioService usuarioService, IClienteService clienteService,
+                            IProductoService productoService, ModelMapper modelMapper) {
         this.pedidoService = pedidoService;
         this.empresaService = empresaService;
         this.usuarioService = usuarioService;
         this.clienteService = clienteService;
+        this.productoService = productoService;
+        this.modelMapper = modelMapper;
     }
     
     @GetMapping("/pedidos/{idPedido}")
@@ -57,14 +62,23 @@ public class PedidoController {
     public List<RenglonPedido> getRenglonesDelPedido(@PathVariable long idPedido) {
         return pedidoService.getRenglonesDelPedido(idPedido);
     }
-    
+
+
+    @PostMapping("/pedidos/renglones")
+    @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
+    public List<RenglonPedido> calcularRenglonesPedido(@RequestBody List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO) {
+        return pedidoService.calcularRenglonesPedido(nuevosRenglonesPedidoDTO);
+    }
+
     @PutMapping("/pedidos")
     @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public void actualizar(@RequestParam Long idEmpresa,
                            @RequestParam Long idUsuario,
                            @RequestParam Long idCliente,
-                           @RequestBody Pedido pedido) {
+                           @RequestBody PedidoDTO pedidoDTO) {
+        Pedido pedido = modelMapper.map(pedidoDTO, Pedido.class);
         pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
         pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
         pedido.setCliente(clienteService.getClientePorId(idCliente));
@@ -77,20 +91,35 @@ public class PedidoController {
         }
         pedidoService.actualizar(pedido);        
     }
-    
-    @PostMapping("/pedidos")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
-    @ResponseStatus(HttpStatus.CREATED)
-    public Pedido guardar(@RequestParam Long idEmpresa,
-                          @RequestParam Long idUsuario,
-                          @RequestParam Long idCliente,
-                          @RequestBody Pedido pedido) {
-        pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-        pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-        pedido.setCliente(clienteService.getClientePorId(idCliente));
-        return pedidoService.guardar(pedido);
-    }
-    
+
+  @PostMapping("/pedidos")
+  @ResponseStatus(HttpStatus.CREATED)
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public Pedido guardar(
+      @RequestParam Long idEmpresa,
+      @RequestParam Long idUsuario,
+      @RequestParam Long idCliente,
+      @RequestBody PedidoDTO pedidoDTO) {
+    Pedido pedido = modelMapper.map(pedidoDTO, Pedido.class);
+    pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
+    pedido.setCliente(clienteService.getClientePorId(idCliente));
+    pedido
+        .getRenglones()
+        .forEach(
+            renglonPedido ->
+                renglonPedido.setProducto(
+                    productoService.getProductoPorId(
+                        renglonPedido.getProducto().getId_Producto())));
+    return pedidoService.guardar(pedido);
+  }
+
     @GetMapping("/pedidos/busqueda/criteria")
     @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})

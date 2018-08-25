@@ -1,33 +1,14 @@
 package sic.service;
 
 import java.math.BigDecimal;
-import java.util.Date;
-
-import sic.modelo.Movimiento;
+import sic.modelo.*;
 import java.util.List;
 import org.springframework.data.domain.Page;
-import sic.modelo.BusquedaFacturaCompraCriteria;
-import sic.modelo.BusquedaFacturaVentaCriteria;
-import sic.modelo.Cliente;
-import sic.modelo.Empresa;
-import sic.modelo.Factura;
-import sic.modelo.FacturaCompra;
-import sic.modelo.FacturaVenta;
-import sic.modelo.Pedido;
-import sic.modelo.Producto;
-import sic.modelo.Proveedor;
-import sic.modelo.Recibo;
-import sic.modelo.RenglonFactura;
-import sic.modelo.TipoDeComprobante;
 
 public interface IFacturaService {
     
     Factura getFacturaPorId(Long id_Factura);
-        
-    Long getCAEById(long idFactura);
-    
-    BigDecimal getTotalById(long idFactura);
-    
+
     List<Factura> getFacturasDelPedido(Long idPedido);
 
     TipoDeComprobante[] getTipoFacturaCompra(Empresa empresa, Proveedor proveedor);
@@ -71,8 +52,6 @@ public interface IFacturaService {
     BigDecimal calcularTotal(BigDecimal subTotal_bruto, BigDecimal iva105_neto, BigDecimal iva21_neto);
 
     BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
-    
-    BigDecimal getSaldoFacturasVentaSegunClienteYEmpresa(long empresa, long cliente, Date hasta);
 
     BigDecimal calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria);
 
@@ -94,10 +73,16 @@ public interface IFacturaService {
 
     List<FacturaVenta> dividirFactura(FacturaVenta factura, int[] indices);
 
-    List<RenglonFactura> convertirRenglonesPedidoEnRenglonesFactura(Pedido pedido, TipoDeComprobante tipoDeComprobante);
+    List<RenglonFactura> getRenglonesPedidoParaFacturar(Pedido pedido, TipoDeComprobante tipoDeComprobante);
 
     boolean pedidoTotalmenteFacturado(Pedido pedido);
-    
-    RenglonFactura calcularRenglon(TipoDeComprobante tipoDeComprobante, Movimiento movimiento, BigDecimal cantidad, long idProducto, BigDecimal descuentoPorcentaje, boolean dividiendoRenglonFactura);
+
+  RenglonFactura calcularRenglon(
+      TipoDeComprobante tipoDeComprobante,
+      Movimiento movimiento,
+      BigDecimal cantidad,
+      long idProducto,
+      BigDecimal descuentoPorcentaje,
+      boolean dividiendoRenglonFactura);
 
 }

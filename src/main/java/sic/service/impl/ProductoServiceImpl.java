@@ -258,7 +258,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public void actualizarStock(
-      HashMap<Long, BigDecimal> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento) {
+      Map<Long, BigDecimal> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento) {
     idsYCantidades
         .entrySet()
         .forEach(

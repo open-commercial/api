@@ -34,33 +34,15 @@ import sic.builder.ProveedorBuilder;
 import sic.builder.RubroBuilder;
 import sic.builder.TransportistaBuilder;
 import sic.builder.UsuarioBuilder;
-import sic.modelo.CondicionIVA;
-import sic.modelo.Credencial;
-import sic.modelo.Empresa;
-import sic.modelo.FacturaVenta;
-import sic.modelo.FormaDePago;
-import sic.modelo.Localidad;
-import sic.modelo.Medida;
-import sic.modelo.Movimiento;
-import sic.modelo.Pais;
-import sic.modelo.Proveedor;
-import sic.modelo.Provincia;
-import sic.modelo.RenglonFactura;
-import sic.modelo.Rol;
-import sic.modelo.Rubro;
-import sic.modelo.TipoDeComprobante;
-import sic.modelo.Transportista;
-import sic.modelo.Usuario;
+import sic.modelo.*;
 import sic.modelo.dto.*;
 import sic.repository.UsuarioRepository;
 import sic.builder.RenglonPedidoBuilder;
-import sic.modelo.EstadoPedido;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
-import sic.modelo.Producto;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -423,37 +405,18 @@ public class FacturacionIntegrationTest {
                 productoDos, ProductoDTO.class);
         String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
-        RenglonFactura renglonUno = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
-                + "idProducto=" + productoUno.getId_Producto()
-                + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_B
-                + "&movimiento=" + Movimiento.VENTA
-                + "&cantidad=5" 
-                + "&descuentoPorcentaje=15",
-                RenglonFactura.class);        
-        RenglonPedidoDTO renglonPedidoUno = new RenglonPedidoBuilder()
-                .withCantidad(renglonUno.getCantidad())
-                .withDescuentoPorcentaje(renglonUno.getDescuento_porcentaje())
-                .withDescuentoNeto(renglonUno.getDescuento_neto())
-                .withProducto(productoUno)
-                .withSubTotal(renglonUno.getImporte())
-                .build();                
-        RenglonFactura renglonDos = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
-                + "idProducto=" + productoDos.getId_Producto()
-                + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_B 
-                + "&movimiento=" + Movimiento.VENTA
-                + "&cantidad=2"
-                + "&descuentoPorcentaje=0",
-                RenglonFactura.class);
-        RenglonPedidoDTO renglonPedidoDos = new RenglonPedidoBuilder()
-                .withCantidad(renglonDos.getCantidad())
-                .withDescuentoPorcentaje(renglonDos.getDescuento_porcentaje())
-                .withDescuentoNeto(renglonDos.getDescuento_neto())
-                .withProducto(productoDos)
-                .withSubTotal(renglonDos.getImporte())
-                .build();             
-        List<RenglonPedidoDTO> renglonesPedido = new ArrayList<>();
-        renglonesPedido.add(renglonPedidoUno);
-        renglonesPedido.add(renglonPedidoDos);
+        List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList();
+        renglonesPedidoDTO.add(NuevoRenglonPedidoDTO.builder()
+                .idProductoItem(productoUno.getId_Producto())
+                .cantidad(new BigDecimal("5"))
+                .descuentoPorcentaje(new BigDecimal("15"))
+                .build());
+        renglonesPedidoDTO.add(NuevoRenglonPedidoDTO.builder()
+                .idProductoItem(productoDos.getId_Producto())
+                .cantidad(new BigDecimal("2"))
+                .descuentoPorcentaje(BigDecimal.ZERO)
+                .build());
+        List<RenglonPedidoDTO> renglonesPedido = Arrays.asList(restTemplate.postForObject(apiPrefix + "/pedidos/renglones", renglonesPedidoDTO, RenglonPedidoDTO[].class));
         BigDecimal subTotal = BigDecimal.ZERO;
         for (RenglonPedidoDTO renglon : renglonesPedido) {
             subTotal = subTotal.add(renglon.getSubTotal());

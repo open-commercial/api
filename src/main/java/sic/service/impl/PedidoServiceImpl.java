@@ -24,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
+import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.repository.RenglonPedidoRepository;
 import sic.service.*;
 import sic.repository.PedidoRepository;
@@ -37,20 +38,25 @@ public class PedidoServiceImpl implements IPedidoService {
     private final IFacturaService facturaService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
+    private final IProductoService productoService;
     private final ICorreoElectronicoService correoElectronicoService;
     private static final BigDecimal CIEN = new BigDecimal("100");
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
-    public PedidoServiceImpl(IFacturaService facturaService, PedidoRepository pedidoRepository,
-                             RenglonPedidoRepository renglonPedidoRepository,
-                             IUsuarioService usuarioService, IClienteService clienteService,
+    public PedidoServiceImpl(IFacturaService facturaService,
+                             PedidoRepository pedidoRepository,
+                             RenglonPedidoRepository renglonPedidoRepository,                             
+                             IUsuarioService usuarioService,
+                             IClienteService clienteService,
+                             IProductoService productoService,
                              ICorreoElectronicoService correoElectronicoService) {
         this.facturaService = facturaService;
         this.pedidoRepository = pedidoRepository;
         this.renglonPedidoRepository = renglonPedidoRepository;
         this.usuarioService = usuarioService;
         this.clienteService = clienteService;
+        this.productoService = productoService;
         this.correoElectronicoService = correoElectronicoService;
     }
 
@@ -74,6 +80,12 @@ public class PedidoServiceImpl implements IPedidoService {
         if (pedido.getRenglones() == null || pedido.getRenglones().isEmpty()) {  
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_pedido_renglones_vacio"));
+        }
+        for (RenglonPedido r : pedido.getRenglones()) {
+          if (r.getProducto() == null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_pedido_renglon_sin_producto"));
+          }
         }
         if (pedido.getEmpresa() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -265,11 +277,12 @@ public class PedidoServiceImpl implements IPedidoService {
     }
 
     @Override
-    public HashMap<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido) {
+    public Map<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido) {
         List<RenglonFactura> renglonesDeFacturas = new ArrayList<>();
         this.getFacturasDelPedido(nroPedido).forEach(f ->
             f.getRenglones().forEach(r -> renglonesDeFacturas.add(facturaService.calcularRenglon(f.getTipoComprobante(),
-                        Movimiento.VENTA, r.getCantidad(), r.getId_ProductoItem(), r.getDescuento_porcentaje(),false)))
+                    Movimiento.VENTA, r.getCantidad(), r.getId_ProductoItem(),
+                    r.getDescuento_porcentaje(),false)))
         );
         HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
         if (!renglonesDeFacturas.isEmpty()) {
@@ -311,5 +324,49 @@ public class PedidoServiceImpl implements IPedidoService {
                     .getString("mensaje_error_reporte"), ex);
         }
     }
-  
+
+    @Override
+    public BigDecimal calcularDescuentoNeto(BigDecimal precioUnitario, BigDecimal descuentoPorcentaje) {
+        BigDecimal resultado = BigDecimal.ZERO;
+        if (descuentoPorcentaje.compareTo(BigDecimal.ZERO) != 0) {
+            resultado = precioUnitario.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+        }
+        return resultado;
+    }
+
+    @Override
+    public BigDecimal calcularSubTotal(BigDecimal cantidad, BigDecimal precioUnitario, BigDecimal descuentoNeto) {
+        return (precioUnitario.subtract(descuentoNeto)).multiply(cantidad);
+    }
+
+  @Override
+  public RenglonPedido calcularRenglonPedido(
+      long idProducto, BigDecimal cantidad, BigDecimal descuentoPorcentaje) {
+    RenglonPedido nuevoRenglon = new RenglonPedido();
+    nuevoRenglon.setProducto(productoService.getProductoPorId(idProducto));
+    nuevoRenglon.setCantidad(cantidad);
+    nuevoRenglon.setDescuento_porcentaje(descuentoPorcentaje);
+    nuevoRenglon.setDescuento_neto(
+        this.calcularDescuentoNeto(
+            nuevoRenglon.getProducto().getPrecioLista(), descuentoPorcentaje));
+    nuevoRenglon.setSubTotal(
+        this.calcularSubTotal(
+            nuevoRenglon.getCantidad(),
+            nuevoRenglon.getProducto().getPrecioLista(),
+            nuevoRenglon.getDescuento_neto()));
+    return nuevoRenglon;
+  }
+
+  @Override
+  public List<RenglonPedido> calcularRenglonesPedido(
+      List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO) {
+    List<RenglonPedido> renglonesPedido = new ArrayList<>();
+      nuevosRenglonesPedidoDTO.forEach(nuevoRenglonesPedidoDTO -> renglonesPedido.add(
+      this.calcularRenglonPedido(
+         nuevoRenglonesPedidoDTO.getIdProductoItem(),
+         nuevoRenglonesPedidoDTO.getCantidad(),
+         nuevoRenglonesPedidoDTO.getDescuentoPorcentaje())));
+    return renglonesPedido;
+  }
+
 }

@@ -278,7 +278,10 @@ public class CuentaCorrienteIntegrationTest {
         .compareTo(BigDecimal.ZERO) == 0);
         NotaDebitoClienteDTO notaDebitoCliente = new NotaDebitoClienteDTO();
         notaDebitoCliente.setCliente(cliente);
-        notaDebitoCliente.setEmpresa(empresa);
+        EmpresaDTO empresaDTO = EmpresaDTO.builder()
+          .id_Empresa(empresa.getId_Empresa())
+          .build();
+        notaDebitoCliente.setEmpresa(empresaDTO);
         List<RenglonNotaDebito> renglonesCalculados = Arrays.asList(restTemplate.getForObject(apiPrefix + "/notas/renglon/debito/recibo/1?monto=100&ivaPorcentaje=21", RenglonNotaDebito[].class));
         notaDebitoCliente.setRenglonesNotaDebito(renglonesCalculados);
         notaDebitoCliente.setIva105Neto(BigDecimal.ZERO);
@@ -586,7 +589,10 @@ public class CuentaCorrienteIntegrationTest {
                 + "&cantidad=5&idRenglonFactura=3", RenglonNotaCredito[].class));       
         NotaCreditoProveedorDTO notaCreditoProveedor = new NotaCreditoProveedorDTO();
         notaCreditoProveedor.setRenglonesNotaCredito(renglonesNotaCredito);
-        notaCreditoProveedor.setEmpresa(empresa);
+        EmpresaDTO empresaDTO = EmpresaDTO.builder()
+          .id_Empresa(empresa.getId_Empresa())
+          .build();
+        notaCreditoProveedor.setEmpresa(empresaDTO);
         notaCreditoProveedor.setFecha(new Date());
         notaCreditoProveedor.setModificaStock(true);
         notaCreditoProveedor.setSubTotal(restTemplate.getForObject(apiPrefix + "/notas/credito/sub-total?importe="
@@ -637,7 +643,7 @@ public class CuentaCorrienteIntegrationTest {
         assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(3).getSaldo() == 4992.5);       
         NotaDebitoProveedorDTO notaDebito = new NotaDebitoProveedorDTO();
         notaDebito.setCAE(0L);
-        notaDebito.setEmpresa(empresa);
+        notaDebito.setEmpresa(empresaDTO);
         notaDebito.setFecha(new Date());
         List<RenglonNotaDebito> renglonesCalculados = Arrays.asList(
                 restTemplate.getForObject(apiPrefix + "/notas/renglon/debito/recibo/3?monto=1000&ivaPorcentaje=21",
@@ -937,7 +943,10 @@ public class CuentaCorrienteIntegrationTest {
         NotaDebitoClienteDTO notaDebito = new NotaDebitoClienteDTO();
         notaDebito.setCAE(0L);
         notaDebito.setCliente(cliente);
-        notaDebito.setEmpresa(empresa);
+        EmpresaDTO empresaDTO = EmpresaDTO.builder()
+          .id_Empresa(empresa.getId_Empresa())
+          .build();
+        notaDebito.setEmpresa(empresaDTO);
         notaDebito.setFecha(new Date());
         List<RenglonNotaDebito> renglonesCalculados = Arrays.asList(restTemplate.getForObject(apiPrefix + "/notas/renglon/debito/recibo/2?monto=1000&ivaPorcentaje=21", RenglonNotaDebito[].class));
         notaDebito.setRenglonesNotaDebito(renglonesCalculados);

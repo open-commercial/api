@@ -1,39 +1,48 @@
 package sic.service;
 
-import java.util.HashMap;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.data.domain.Page;
-import sic.modelo.BusquedaPedidoCriteria;
-import sic.modelo.Empresa;
-import sic.modelo.Factura;
-import sic.modelo.Pedido;
-import sic.modelo.RenglonFactura;
-import sic.modelo.RenglonPedido;
+import sic.modelo.*;
+import sic.modelo.dto.NuevoRenglonPedidoDTO;
 
 public interface IPedidoService {
 
-    Pedido getPedidoPorId(Long id);
-            
-    void actualizar(Pedido pedido);
+  Pedido getPedidoPorId(Long id);
 
-    Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn);
+  void actualizar(Pedido pedido);
 
-    long calcularNumeroPedido(Empresa empresa);
-    
-    Pedido actualizarEstadoPedido(Pedido pedido);
+  Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn);
 
-    Pedido calcularTotalActualDePedido(Pedido pedido);
+  long calcularNumeroPedido(Empresa empresa);
 
-    boolean eliminar(long idPedido);
+  Pedido actualizarEstadoPedido(Pedido pedido);
 
-    List<Factura> getFacturasDelPedido(long id);
+  Pedido calcularTotalActualDePedido(Pedido pedido);
 
-    HashMap<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido);
+  boolean eliminar(long idPedido);
 
-    List<RenglonPedido> getRenglonesDelPedido(Long idPedido);
+  List<Factura> getFacturasDelPedido(long id);
 
-    byte[] getReportePedido(Pedido pedido);
+  Map<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido);
 
-    Pedido guardar(Pedido pedido);
+  List<RenglonPedido> getRenglonesDelPedido(Long idPedido);
+
+  byte[] getReportePedido(Pedido pedido);
+
+  Pedido guardar(Pedido pedido);
+
+  RenglonPedido calcularRenglonPedido(
+      long idProducto,
+      BigDecimal cantidad,
+      BigDecimal descuentoPorcentaje);
+
+  List<RenglonPedido> calcularRenglonesPedido(List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO);
+
+  BigDecimal calcularDescuentoNeto(BigDecimal precioUnitario, BigDecimal descuentoPorcentaje);
+
+  BigDecimal calcularSubTotal(BigDecimal cantidad, BigDecimal precioUnitario, BigDecimal descuentoNeto);
 
 }
