@@ -10,9 +10,15 @@ public interface IUsuarioService {
 
   Usuario getUsuarioPorId(Long idUsuario);
 
+  Usuario getUsuarioPorPasswordRecoveryKeyAndIdUsuario(String passwordRecoveryKey, long idUsuario);
+
   void actualizar(Usuario usuario, Usuario usuarioLoggedIn);
 
   void actualizarToken(String token, long idUsuario);
+
+  void actualizarPasswordRecoveryKey(String passwordRecoveryKey, long idUsuario);
+
+  void enviarEmailDeRecuperacion(String Email, String host);
 
   void eliminar(long idUsuario);
 

@@ -7,6 +7,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -18,6 +19,7 @@ import sic.service.impl.AfipWebServiceSOAPClient;
 
 @SpringBootApplication
 @EnableScheduling
+@EnableAsync
 public class App extends WebMvcConfigurerAdapter {
 
     @Bean
@@ -29,7 +31,8 @@ public class App extends WebMvcConfigurerAdapter {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor())
                 .addPathPatterns("/api/**")
-                .excludePathPatterns("/api/*/login");
+                .excludePathPatterns("/api/*/login")
+                .excludePathPatterns("/api/*/password-recovery");
     }
 
     @Bean

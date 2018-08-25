@@ -1,11 +1,10 @@
-SET sql_mode = '';
-SELECT sic.renglonfactura.codigoItem, sic.renglonfactura.descripcionItem, sic.medida.nombre as 'Unidad de Medida',
-SUM(sic.renglonfactura.cantidad) AS 'cantidad', SUM(sic.renglonfactura.importe) as 'importe'
-FROM sic.renglonfactura inner join sic.facturaventa on sic.renglonfactura.id_Factura = sic.facturaventa.id_Factura 
-inner join sic.factura on sic.facturaventa.id_Factura = sic.factura.id_Factura
-inner join sic.producto on sic.renglonfactura.id_ProductoItem = sic.producto.id_Producto
-inner join sic.medida on sic.producto.id_Medida = sic.medida.id_Medida
-where sic.factura.eliminada = false
-GROUP BY sic.renglonfactura.codigoItem
-order by cantidad desc
+SELECT renglonfactura.codigoItem, renglonfactura.descripcionItem, medida.nombre as 'medida',
+  SUM(renglonfactura.cantidad) AS 'cantidad', SUM(renglonfactura.importe) as 'importe'
+FROM renglonfactura inner join facturaventa on renglonfactura.id_Factura = facturaventa.id_Factura
+  inner join factura on facturaventa.id_Factura = factura.id_Factura
+  inner join producto on renglonfactura.id_ProductoItem = producto.id_Producto
+  inner join medida on producto.id_Medida = medida.id_Medida
+WHERE factura.eliminada = false
+GROUP BY renglonfactura.codigoItem, renglonfactura.descripcionItem, medida.nombre
+ORDER BY cantidad desc
 limit 0,500;

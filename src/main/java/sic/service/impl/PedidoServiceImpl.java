@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
+import sic.repository.RenglonPedidoRepository;
 import sic.service.*;
 import sic.repository.PedidoRepository;
 import sic.util.FormatterFechaHora;
@@ -32,22 +34,30 @@ import sic.util.FormatterFechaHora;
 public class PedidoServiceImpl implements IPedidoService {
 
     private final PedidoRepository pedidoRepository;
+    private final RenglonPedidoRepository renglonPedidoRepository;
     private final IFacturaService facturaService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
     private final IProductoService productoService;
+    private final ICorreoElectronicoService correoElectronicoService;
     private static final BigDecimal CIEN = new BigDecimal("100");
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
-    public PedidoServiceImpl(IFacturaService facturaService, PedidoRepository pedidoRepository,
-                             IUsuarioService usuarioService, IClienteService clienteService,
-                             IProductoService productoService) {
+    public PedidoServiceImpl(IFacturaService facturaService,
+                             PedidoRepository pedidoRepository,
+                             RenglonPedidoRepository renglonPedidoRepository,                             
+                             IUsuarioService usuarioService,
+                             IClienteService clienteService,
+                             IProductoService productoService,
+                             ICorreoElectronicoService correoElectronicoService) {
         this.facturaService = facturaService;
         this.pedidoRepository = pedidoRepository;
+        this.renglonPedidoRepository = renglonPedidoRepository;
         this.usuarioService = usuarioService;
         this.clienteService = clienteService;
         this.productoService = productoService;
+        this.correoElectronicoService = correoElectronicoService;
     }
 
     @Override
@@ -158,17 +168,30 @@ public class PedidoServiceImpl implements IPedidoService {
         return facturaService.getFacturasDelPedido(idPedido);
     }
 
-    @Override
-    @Transactional
-    public Pedido guardar(Pedido pedido) {
-        pedido.setFecha(new Date());
-        pedido.setNroPedido(this.calcularNumeroPedido(pedido.getEmpresa()));
-        pedido.setEstado(EstadoPedido.ABIERTO);
-        this.validarPedido(TipoDeOperacion.ALTA , pedido);
-        pedido = pedidoRepository.save(pedido);
-        logger.warn("El Pedido {} se guardó correctamente.", pedido);
-        return pedido;
+  @Override
+  @Transactional
+  public Pedido guardar(Pedido pedido) {
+    pedido.setFecha(new Date());
+    pedido.setNroPedido(this.calcularNumeroPedido(pedido.getEmpresa()));
+    pedido.setEstado(EstadoPedido.ABIERTO);
+    this.validarPedido(TipoDeOperacion.ALTA, pedido);
+    pedido = pedidoRepository.save(pedido);
+    logger.warn("El Pedido {} se guardó correctamente.", pedido);
+    String emailCliente = pedido.getCliente().getEmail();
+    if (emailCliente != null && !emailCliente.isEmpty()) {
+      correoElectronicoService.enviarMailConAdjunto(
+          emailCliente,
+          "Nuevo Pedido Ingresado",
+          MessageFormat.format(
+              ResourceBundle.getBundle("Mensajes").getString("mensaje_correo_enviado"),
+              pedido.getCliente().getRazonSocial(),
+              "Pedido Nº " + pedido.getNroPedido()),
+          this.getReportePedido(pedido),
+          "Reporte");
+      logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
+    return pedido;
+  }
 
     @Override
     public Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
@@ -250,7 +273,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
     @Override
     public List<RenglonPedido> getRenglonesDelPedido(Long idPedido) {
-        return this.getPedidoPorId(idPedido).getRenglones();
+        return renglonPedidoRepository.findByIdPedido(idPedido);
     }
 
     @Override
