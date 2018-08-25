@@ -3,7 +3,6 @@ package sic.controller;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,9 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
-import sic.modelo.RenglonPedido;
 import sic.modelo.dto.PedidoDTO;
-import sic.modelo.dto.RenglonPedidoDTO;
 import sic.service.ICarritoCompraService;
 import sic.service.IClienteService;
 import sic.service.IEmpresaService;
