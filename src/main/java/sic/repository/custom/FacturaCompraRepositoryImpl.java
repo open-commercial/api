@@ -90,44 +90,63 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
         return (typedQuery.getSingleResult() == null) ? BigDecimal.ZERO : typedQuery.getSingleResult();
     }
 
-    @Override
-    public Page<FacturaCompra> buscarFacturasCompra(BusquedaFacturaCompraCriteria criteria) {
-        String queryCount = "SELECT COUNT(f)";
-        String queryData = "SELECT f ";
-        String query = "FROM FacturaCompra f WHERE f.empresa.id_Empresa = :idEmpresa AND f.eliminada = false";
-        //Fecha Factura
-        if (criteria.isBuscaPorFecha()) {
-            FormatterFechaHora formateadorFecha = new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
-            query += " AND f.fecha BETWEEN '" + formateadorFecha.format(criteria.getFechaDesde())
-                    + "' AND '" + formateadorFecha.format(criteria.getFechaHasta()) + "'";
-        }
-        //Proveedor
-        if (criteria.isBuscaPorProveedor()) {
-            query += " AND f.proveedor = " + criteria.getIdProveedor();
-        }
-        //Tipo de Factura
-        if (criteria.isBuscaPorTipoComprobante()) {
-            query += " AND f.tipoComprobante = " + "\'" + criteria.getTipoComprobante() + "\'";
-        }
-        //Nro de Factura
-        if (criteria.isBuscaPorNumeroFactura()) {
-            query += " AND f.numSerie = " + criteria.getNumSerie() + " AND f.numFactura = " + criteria.getNumFactura();
-        }
-        queryCount += query;
-        if (criteria.getPageable().getSort().getOrderFor("fecha").getDirection() == Sort.Direction.ASC) {//name().equals("ASC")) {
-            queryData += query + " ORDER BY f.fecha ASC";
-        } else {
-            queryData += query + " ORDER BY f.fecha DESC";
-        }  
-        TypedQuery<FacturaCompra> typedQueryData = em.createQuery(queryData, FacturaCompra.class);        
-        typedQueryData.setParameter("idEmpresa", criteria.getIdEmpresa());
-        typedQueryData.setFirstResult(criteria.getPageable().getOffset());
-        typedQueryData.setMaxResults(criteria.getPageable().getPageSize());
-        List<FacturaCompra> facturas = typedQueryData.getResultList();        
-        TypedQuery<Long> typedQueryCount = em.createQuery(queryCount, Long.class);
-        typedQueryCount.setParameter("idEmpresa", criteria.getIdEmpresa());
-        long total = typedQueryCount.getSingleResult();
-        return new PageImpl<>(facturas, criteria.getPageable(), total);
+  @Override
+  public Page<FacturaCompra> buscarFacturasCompra(BusquedaFacturaCompraCriteria criteria) {
+    String queryCount = "SELECT COUNT(f)";
+    String queryData = "SELECT f ";
+    String query =
+        "FROM FacturaCompra f WHERE f.empresa.id_Empresa = :idEmpresa AND f.eliminada = false";
+    // Fecha Factura
+    if (criteria.isBuscaPorFecha()) {
+      FormatterFechaHora formateadorFecha =
+          new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      query +=
+          " AND f.fecha BETWEEN '"
+              + formateadorFecha.format(criteria.getFechaDesde())
+              + "' AND '"
+              + formateadorFecha.format(criteria.getFechaHasta())
+              + "'";
     }
-
+    // Proveedor
+    if (criteria.isBuscaPorProveedor()) {
+      query += " AND f.proveedor = " + criteria.getIdProveedor();
+    }
+    // Tipo de Factura
+    if (criteria.isBuscaPorTipoComprobante()) {
+      query += " AND f.tipoComprobante = " + "\'" + criteria.getTipoComprobante() + "\'";
+    }
+    // Nro de Factura
+    if (criteria.isBuscaPorNumeroFactura()) {
+      query +=
+          " AND f.numSerie = "
+              + criteria.getNumSerie()
+              + " AND f.numFactura = "
+              + criteria.getNumFactura();
+    }
+    queryCount += query;
+    if (criteria.getPageable().getSort().getOrderFor("fecha") != null) {
+      if (criteria.getPageable().getSort().getOrderFor("fecha").getDirection()
+          == Sort.Direction.ASC) {
+        queryData += query + " ORDER BY f.fecha ASC";
+      } else {
+        queryData += query + " ORDER BY f.fecha DESC";
+      }
+    } else if (criteria.getPageable().getSort().getOrderFor("total") != null){
+        if (criteria.getPageable().getSort().getOrderFor("total").getDirection()
+                == Sort.Direction.ASC) {
+            queryData += query + " ORDER BY f.total ASC";
+        } else {
+            queryData += query + " ORDER BY f.total DESC";
+        }
+    }
+    TypedQuery<FacturaCompra> typedQueryData = em.createQuery(queryData, FacturaCompra.class);
+    typedQueryData.setParameter("idEmpresa", criteria.getIdEmpresa());
+    typedQueryData.setFirstResult(criteria.getPageable().getOffset());
+    typedQueryData.setMaxResults(criteria.getPageable().getPageSize());
+    List<FacturaCompra> facturas = typedQueryData.getResultList();
+    TypedQuery<Long> typedQueryCount = em.createQuery(queryCount, Long.class);
+    typedQueryCount.setParameter("idEmpresa", criteria.getIdEmpresa());
+    long total = typedQueryCount.getSingleResult();
+    return new PageImpl<>(facturas, criteria.getPageable(), total);
+  }
 }

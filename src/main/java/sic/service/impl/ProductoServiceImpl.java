@@ -161,15 +161,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public Page<Producto> buscarProductos(BusquedaProductoCriteria criteria) {
-    int pageNumber = 0;
-    int pageSize = Integer.MAX_VALUE;
-    if (criteria.getPageable() != null) {
-      pageNumber = criteria.getPageable().getPageNumber();
-      pageSize = criteria.getPageable().getPageSize();
-    }
-    Pageable pageable =
-        new PageRequest(pageNumber, pageSize, new Sort(Sort.Direction.ASC, "descripcion"));
-    return productoRepository.findAll(this.getBuilder(criteria), pageable);
+    return productoRepository.findAll(this.getBuilder(criteria), criteria.getPageable());
   }
 
   private BooleanBuilder getBuilder(BusquedaProductoCriteria criteria) {
