@@ -93,17 +93,17 @@ public class ProductoServiceImpl implements IProductoService {
                 .getString("mensaje_producto_duplicado_descripcion"));
     // Calculos
     Double[] iva = {10.5, 21.0, 0.0};
-    if (!Arrays.asList(iva).contains(producto.getIva_porcentaje().doubleValue())) {
+    if (!Arrays.asList(iva).contains(producto.getIvaPorcentaje().doubleValue())) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes")
               .getString("mensaje_producto_ganancia_neta_incorrecta"));
     }
     if (producto
-            .getGanancia_neto()
+            .getGananciaNeto()
             .setScale(3, RoundingMode.HALF_UP)
             .compareTo(
                 this.calcularGananciaNeto(
-                        producto.getPrecioCosto(), producto.getGanancia_porcentaje())
+                        producto.getPrecioCosto(), producto.getGananciaPorcentaje())
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
@@ -114,7 +114,7 @@ public class ProductoServiceImpl implements IProductoService {
             .getPrecioVentaPublico()
             .setScale(3, RoundingMode.HALF_UP)
             .compareTo(
-                this.calcularPVP(producto.getPrecioCosto(), producto.getGanancia_porcentaje())
+                this.calcularPVP(producto.getPrecioCosto(), producto.getGananciaPorcentaje())
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
@@ -122,11 +122,11 @@ public class ProductoServiceImpl implements IProductoService {
               .getString("mensaje_precio_venta_publico_incorrecto"));
     }
     if (producto
-            .getImpuestoInterno_neto()
+            .getImpuestoInternoNeto()
             .setScale(3, RoundingMode.HALF_UP)
             .compareTo(
                 this.calcularImpInternoNeto(
-                        producto.getPrecioVentaPublico(), producto.getImpuestoInterno_porcentaje())
+                        producto.getPrecioVentaPublico(), producto.getImpuestoInternoPorcentaje())
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
@@ -134,10 +134,10 @@ public class ProductoServiceImpl implements IProductoService {
               .getString("mensaje_producto_impuesto_interno_neto_incorrecto"));
     }
     if (producto
-            .getIva_neto()
+            .getIvaNeto()
             .setScale(3, RoundingMode.HALF_UP)
             .compareTo(
-                this.calcularIVANeto(producto.getPrecioVentaPublico(), producto.getIva_porcentaje())
+                this.calcularIVANeto(producto.getPrecioVentaPublico(), producto.getIvaPorcentaje())
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
@@ -149,8 +149,8 @@ public class ProductoServiceImpl implements IProductoService {
             .compareTo(
                 this.calcularPrecioLista(
                         producto.getPrecioVentaPublico(),
-                        producto.getIva_porcentaje(),
-                        producto.getImpuestoInterno_porcentaje())
+                        producto.getIvaPorcentaje(),
+                        producto.getImpuestoInternoPorcentaje())
                     .setScale(3,  RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
@@ -364,21 +364,21 @@ public class ProductoServiceImpl implements IProductoService {
       }
       if (checkPrecios) {
         p.setPrecioCosto(precioCosto);
-        p.setGanancia_porcentaje(gananciaPorcentaje);
-        p.setGanancia_neto(gananciaNeto);
+        p.setGananciaPorcentaje(gananciaPorcentaje);
+        p.setGananciaNeto(gananciaNeto);
         p.setPrecioVentaPublico(precioVentaPublico);
-        p.setIva_porcentaje(ivaPorcentaje);
-        p.setIva_neto(ivaNeto);
-        p.setImpuestoInterno_porcentaje(impuestoInternoPorcentaje);
-        p.setImpuestoInterno_neto(impuestoInternoNeto);
+        p.setIvaPorcentaje(ivaPorcentaje);
+        p.setIvaNeto(ivaNeto);
+        p.setImpuestoInternoPorcentaje(impuestoInternoPorcentaje);
+        p.setImpuestoInternoNeto(impuestoInternoNeto);
         p.setPrecioLista(precioLista);
       }
       if (checkDescuentoRecargoPorcentaje) {
         p.setPrecioCosto(p.getPrecioCosto().multiply(multiplicador));
-        p.setGanancia_neto(p.getGanancia_neto().multiply(multiplicador));
+        p.setGananciaNeto(p.getGananciaNeto().multiply(multiplicador));
         p.setPrecioVentaPublico(p.getPrecioVentaPublico().multiply(multiplicador));
-        p.setIva_neto(p.getIva_neto().multiply(multiplicador));
-        p.setImpuestoInterno_neto(p.getImpuestoInterno_neto().multiply(multiplicador));
+        p.setIvaNeto(p.getIvaNeto().multiply(multiplicador));
+        p.setImpuestoInternoNeto(p.getImpuestoInternoNeto().multiply(multiplicador));
         p.setPrecioLista(p.getPrecioLista().multiply(multiplicador));
         p.setFechaUltimaModificacion(new Date());
       }
