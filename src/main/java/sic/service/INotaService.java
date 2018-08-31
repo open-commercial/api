@@ -2,16 +2,9 @@ package sic.service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import sic.modelo.Factura;
-import sic.modelo.FacturaCompra;
-import sic.modelo.FacturaVenta;
-import sic.modelo.Nota;
-import sic.modelo.NotaCredito;
-import sic.modelo.Recibo;
-import sic.modelo.RenglonFactura;
-import sic.modelo.RenglonNotaCredito;
-import sic.modelo.RenglonNotaDebito;
-import sic.modelo.TipoDeComprobante;
+
+import org.springframework.data.domain.Page;
+import sic.modelo.*;
 
 public interface INotaService {
 
@@ -25,21 +18,17 @@ public interface INotaService {
 
     Nota getNotaPorId(Long idNota);
     
-    Long getCAEById(Long idNota);
-    
-    BigDecimal getTotalById(Long idNota);
-    
     Factura getFacturaNotaCredito(Long idNota);
-    
-    FacturaVenta getFacturaNotaCreditoCliente(Long idNota);
-    
-    FacturaCompra getFacturaNotaCreditoProveedor(Long idNota);
     
     boolean existeNotaDebitoPorRecibo(Recibo recibo);
     
     boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta);
 
     List<NotaCredito> getNotasCreditoPorFactura(Long idFactura);
+
+    Page<NotaCreditoCliente> buscarNotaCreditoCliente(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+
+    Page<NotaCreditoProveedor> buscarNotaCreditoProveedor(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
 
     long getSiguienteNumeroNotaDebitoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
 

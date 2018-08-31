@@ -13,6 +13,10 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.DateExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -21,31 +25,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.Cliente;
-import sic.modelo.ComprobanteAFIP;
-import sic.modelo.ConfiguracionDelSistema;
-import sic.modelo.Empresa;
-import sic.modelo.Factura;
-import sic.modelo.FacturaCompra;
-import sic.modelo.FacturaVenta;
-import sic.modelo.Movimiento;
-import sic.modelo.Nota;
-import sic.modelo.NotaCredito;
-import sic.modelo.NotaCreditoCliente;
-import sic.modelo.NotaCreditoProveedor;
-import sic.modelo.NotaDebito;
-import sic.modelo.NotaDebitoCliente;
-import sic.modelo.NotaDebitoProveedor;
-import sic.modelo.Proveedor;
-import sic.modelo.Recibo;
-import sic.modelo.RenglonFactura;
-import sic.modelo.RenglonNotaCredito;
-import sic.modelo.RenglonNotaDebito;
-import sic.modelo.TipoDeComprobante;
-import sic.modelo.TipoDeOperacion;
-import sic.modelo.Usuario;
+import sic.modelo.*;
 import sic.repository.NotaCreditoClienteRepository;
 import sic.repository.NotaCreditoProveedorRepository;
 import sic.service.*;
@@ -113,17 +96,6 @@ public class NotaServiceImpl implements INotaService {
     }
     
     @Override
-    public Long getCAEById(Long idNota) {
-        return notaRepository.getCAEById(idNota);
-    }
-    
-    @Override
-    public BigDecimal getTotalById(Long idNota) { 
-        BigDecimal total = notaRepository.getTotalById(idNota);
-        return (total != null) ? total : BigDecimal.ZERO;
-    }
-    
-    @Override
     public Factura getFacturaNotaCredito(Long idNota) {
         NotaCredito nota = this.notaCreditoClienteRepository.getById(idNota);
         if (nota instanceof NotaCreditoCliente) {
@@ -131,16 +103,6 @@ public class NotaServiceImpl implements INotaService {
         } else {
             return ((NotaCreditoProveedor) nota).getFacturaCompra();
         }
-    }
-
-    @Override
-    public FacturaVenta getFacturaNotaCreditoCliente(Long idNota) {
-        return this.notaCreditoClienteRepository.getById(idNota).getFacturaVenta();
-    }
-    
-    @Override
-    public FacturaCompra getFacturaNotaCreditoProveedor(Long idNota) {
-        return this.notaCreditoProveedorRepository.getById(idNota).getFacturaCompra();
     }
     
     @Override
@@ -170,6 +132,113 @@ public class NotaServiceImpl implements INotaService {
         }
         return notasCredito;
     }
+
+  @Override
+  public Page<NotaCreditoCliente> buscarNotaCreditoCliente(
+      BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
+    return notaCreditoClienteRepository.findAll(
+        this.getBuilderNotaCreditoCliente(criteria, idUsuarioLoggedIn), criteria.getPageable());
+  }
+
+  @Override
+  public Page<NotaCreditoProveedor> buscarNotaCreditoProveedor(
+      BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
+    return notaCreditoProveedorRepository.findAll(
+        this.getBuilderNotaCreditoProveedor(criteria), criteria.getPageable());
+  }
+
+  private BooleanBuilder getBuilderNotaCreditoCliente(
+      BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
+    QNotaCreditoCliente qNotaCreditoCliente = QNotaCreditoCliente.notaCreditoCliente;
+    BooleanBuilder builder = new BooleanBuilder();
+    builder.and(
+        qNotaCreditoCliente
+            .empresa
+            .id_Empresa
+            .eq(criteria.getIdEmpresa())
+            .and(qNotaCreditoCliente.eliminada.eq(false)));
+    // Fecha
+    if (criteria.isBuscaPorFecha()) {
+      FormatterFechaHora formateadorFecha =
+          new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      DateExpression<Date> fDesde =
+          Expressions.dateTemplate(
+              Date.class,
+              "convert({0}, datetime)",
+              formateadorFecha.format(criteria.getFechaDesde()));
+      DateExpression<Date> fHasta =
+          Expressions.dateTemplate(
+              Date.class,
+              "convert({0}, datetime)",
+              formateadorFecha.format(criteria.getFechaHasta()));
+      builder.and(qNotaCreditoCliente.fecha.between(fDesde, fHasta));
+    }
+    if (criteria.isBuscaPorCliente())
+      builder.and(qNotaCreditoCliente.cliente.id_Cliente.eq(criteria.getIdCliente()));
+    if (criteria.isBuscaPorNumeroNota())
+      builder
+          .and(qNotaCreditoCliente.serie.eq(criteria.getNumSerie()))
+          .and(qNotaCreditoCliente.nroNota.eq(criteria.getNumNota()));
+    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    BooleanBuilder rsPredicate = new BooleanBuilder();
+    if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
+        && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
+        && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
+      for (Rol rol : usuarioLogueado.getRoles()) {
+        switch (rol) {
+          case VIAJANTE:
+            rsPredicate.or(qNotaCreditoCliente.cliente.viajante.eq(usuarioLogueado));
+            break;
+          case COMPRADOR:
+            Cliente clienteRelacionado =
+                clienteService.getClientePorIdUsuarioYidEmpresa(
+                    idUsuarioLoggedIn, criteria.getIdEmpresa());
+            if (clienteRelacionado != null) {
+              rsPredicate.or(qNotaCreditoCliente.cliente.eq(clienteRelacionado));
+            } else {
+              rsPredicate.or(qNotaCreditoCliente.cliente.isNull());
+            }
+            break;
+        }
+      }
+      builder.and(rsPredicate);
+    }
+    return builder;
+  }
+
+  private BooleanBuilder getBuilderNotaCreditoProveedor(BusquedaNotaCriteria criteria) {
+    QNotaCreditoProveedor qNotaCreditoProveedor = QNotaCreditoProveedor.notaCreditoProveedor;
+    BooleanBuilder builder = new BooleanBuilder();
+    builder.and(
+        qNotaCreditoProveedor
+            .empresa
+            .id_Empresa
+            .eq(criteria.getIdEmpresa())
+            .and(qNotaCreditoProveedor.eliminada.eq(false)));
+    // Fecha
+    if (criteria.isBuscaPorFecha()) {
+      FormatterFechaHora formateadorFecha =
+          new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      DateExpression<Date> fDesde =
+          Expressions.dateTemplate(
+              Date.class,
+              "convert({0}, datetime)",
+              formateadorFecha.format(criteria.getFechaDesde()));
+      DateExpression<Date> fHasta =
+          Expressions.dateTemplate(
+              Date.class,
+              "convert({0}, datetime)",
+              formateadorFecha.format(criteria.getFechaHasta()));
+      builder.and(qNotaCreditoProveedor.fecha.between(fDesde, fHasta));
+    }
+    if (criteria.isBuscaPorProveedor())
+      builder.and(qNotaCreditoProveedor.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
+    if (criteria.isBuscaPorNumeroNota())
+      builder
+          .and(qNotaCreditoProveedor.serie.eq(criteria.getNumSerie()))
+          .and(qNotaCreditoProveedor.nroNota.eq(criteria.getNumNota()));
+    return builder;
+  }
 
     @Override
     public List<RenglonFactura> getRenglonesFacturaModificadosParaNotaCredito(long idFactura) {
