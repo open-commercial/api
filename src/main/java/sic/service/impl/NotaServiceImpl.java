@@ -175,6 +175,10 @@ public class NotaServiceImpl implements INotaService {
     }
     if (criteria.isBuscaPorCliente())
       builder.and(qNotaCreditoCliente.cliente.id_Cliente.eq(criteria.getIdCliente()));
+    if (criteria.isBuscaUsuario())
+      builder.and(qNotaCreditoCliente.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+    if (criteria.isBuscaPorTipoComprobante())
+      builder.and(qNotaCreditoCliente.tipoComprobante.eq(criteria.getTipoComprobante()));
     if (criteria.isBuscaPorNumeroNota())
       builder
           .and(qNotaCreditoCliente.serie.eq(criteria.getNumSerie()))
@@ -233,6 +237,8 @@ public class NotaServiceImpl implements INotaService {
     }
     if (criteria.isBuscaPorProveedor())
       builder.and(qNotaCreditoProveedor.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
+    if (criteria.isBuscaPorTipoComprobante())
+      builder.and(qNotaCreditoProveedor.tipoComprobante.eq(criteria.getTipoComprobante()));
     if (criteria.isBuscaPorNumeroNota())
       builder
           .and(qNotaCreditoProveedor.serie.eq(criteria.getNumSerie()))

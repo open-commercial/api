@@ -21,8 +21,10 @@ public class BusquedaNotaCriteria {
     private boolean buscaPorNumeroNota;
     private long numSerie;
     private long numNota;
-    private boolean buscaNotaCredito;
-    private boolean buscaNotaDebito;
+    private boolean buscaPorTipoComprobante;
+    private TipoDeComprobante tipoComprobante;
+    private boolean buscaUsuario;
+    private Long idUsuario;
     private boolean buscaPorProveedor;
     private Long idProveedor;
     private boolean buscaPorCliente;
