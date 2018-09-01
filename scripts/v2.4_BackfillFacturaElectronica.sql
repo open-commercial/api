@@ -4,8 +4,8 @@ use sic;
 SET SQL_SAFE_UPDATES=0;
 update factura inner join renglonfactura on factura.id_Factura = renglonfactura.id_Factura
 set
-renglonfactura.iva_neto = (((100 * renglonfactura.precioUnitario) / (100 + (renglonfactura.iva_porcentaje))) 
-* (renglonfactura.iva_porcentaje / 100)) * (1 - (renglonfactura.descuento_porcentaje / 100))
+renglonfactura.ivaNeto = (((100 * renglonfactura.precioUnitario) / (100 + (renglonfactura.ivaPorcentaje)))
+* (renglonfactura.ivaPorcentaje / 100)) * (1 - (renglonfactura.descuento_porcentaje / 100))
 where factura.tipoComprobante = "FACTURA_B"; 
 SET SQL_SAFE_UPDATES=0;
 COMMIT;
@@ -43,9 +43,9 @@ START TRANSACTION;
 use sic;
 SET SQL_SAFE_UPDATES=0;
 update factura as C
-inner join (select factura.id_Factura, sum(renglonfactura.cantidad * renglonfactura.iva_neto) as acum 
+inner join (select factura.id_Factura, sum(renglonfactura.cantidad * renglonfactura.ivaNeto) as acum
 from factura inner join renglonfactura on factura.id_Factura = renglonfactura.id_Factura
-where renglonfactura.iva_porcentaje = 21 
+where renglonfactura.ivaPorcentaje = 21
 and (factura.tipoComprobante = "FACTURA_B" or factura.tipoComprobante = "FACTURA_C")
 group by factura.id_Factura
 ) as A on C.id_Factura = A.id_Factura
@@ -58,9 +58,9 @@ START TRANSACTION;
 use sic;
 SET SQL_SAFE_UPDATES=0;
 update factura as C
- inner join (select factura.id_Factura, sum(renglonfactura.cantidad * renglonfactura.iva_neto) as acum 
+ inner join (select factura.id_Factura, sum(renglonfactura.cantidad * renglonfactura.ivaNeto) as acum
 from factura inner join renglonfactura on factura.id_Factura = renglonfactura.id_Factura
-where renglonfactura.iva_porcentaje = 10.5 
+where renglonfactura.ivaPorcentaje = 10.5
 and (factura.tipoComprobante = "FACTURA_B" or factura.tipoComprobante = "FACTURA_C")
 group by factura.id_Factura
 ) as A on C.id_Factura = A.id_Factura

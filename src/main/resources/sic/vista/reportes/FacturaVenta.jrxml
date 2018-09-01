@@ -18,7 +18,7 @@
 	<field name="precioUnitario" class="java.math.BigDecimal"/>
 	<field name="descuento_porcentaje" class="java.math.BigDecimal"/>
 	<field name="importe" class="java.math.BigDecimal"/>
-	<field name="iva_porcentaje" class="java.math.BigDecimal"/>
+	<field name="ivaPorcentaje" class="java.math.BigDecimal"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>

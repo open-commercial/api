@@ -217,13 +217,13 @@ public class ProductoIntegrationTest {
         productoUno.getPrecioCosto().compareTo(new BigDecimal("110")) == 0);
     assertTrue(
         "La ganacia neta no sufrió el cambio esperado.",
-        productoUno.getGanancia_neto().compareTo(new BigDecimal("990")) == 0);
+        productoUno.getGananciaNeto().compareTo(new BigDecimal("990")) == 0);
     assertTrue(
         "El pvp no sufrió el cambio esperado.",
         productoUno.getPrecioVentaPublico().compareTo(new BigDecimal("1100")) == 0);
     assertTrue(
         "El IVA neto no sufrió el cambio esperado.",
-        productoUno.getIva_neto().compareTo(new BigDecimal("231")) == 0);
+        productoUno.getIvaNeto().compareTo(new BigDecimal("231")) == 0);
     assertTrue(
         "El precio de lista no sufrió el cambio esperado.",
         productoUno.getPrecioLista().compareTo(new BigDecimal("1331")) == 0);
@@ -232,13 +232,13 @@ public class ProductoIntegrationTest {
         productoDos.getPrecioCosto().compareTo(new BigDecimal("110")) == 0);
     assertTrue(
         "La ganacia neta no sufrió el cambio esperado.",
-        productoDos.getGanancia_neto().compareTo(new BigDecimal("990")) == 0);
+        productoDos.getGananciaNeto().compareTo(new BigDecimal("990")) == 0);
     assertTrue(
         "El pvp no sufrió no sufrió el cambio esperado.",
         productoDos.getPrecioVentaPublico().compareTo(new BigDecimal("1100")) == 0);
     assertTrue(
         "El IVA neto no sufrió el cambio esperado.",
-        productoDos.getIva_neto().compareTo(new BigDecimal("115.5")) == 0);
+        productoDos.getIvaNeto().compareTo(new BigDecimal("115.5")) == 0);
     assertTrue(
         "El precio de lista no sufrió el cambio esperado.",
         productoDos.getPrecioLista().compareTo(new BigDecimal("1215.5")) == 0);
