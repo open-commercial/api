@@ -2,7 +2,6 @@ package sic.service;
 
 import java.math.BigDecimal;
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 
@@ -46,6 +45,8 @@ public interface INotaService {
     
     List<RenglonFactura> getRenglonesFacturaModificadosParaNotaCredito(long idFactura);
 
+    TipoDeComprobante[] getTipoNota(Empresa empresa);
+
     void eliminarNota(long[] idNota);
 
     BigDecimal calcularTotalNota(List<RenglonNotaCredito> renglonesNota);
@@ -69,7 +70,5 @@ public interface INotaService {
     BigDecimal calcularTotalCredito(BigDecimal subTotal_bruto, BigDecimal iva105_neto, BigDecimal iva21_neto);
     
     BigDecimal calcularTotalDebito(BigDecimal subTotal_bruto, BigDecimal iva21_neto, BigDecimal montoNoGravado);
-    
-    BigDecimal calcularTotalCreditoClientePorFacturaVenta(FacturaVenta factura);
     
 }

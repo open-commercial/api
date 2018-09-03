@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.service.IEmpresaService;
 import sic.service.INotaService;
 import sic.service.IReciboService;
 
@@ -28,15 +29,17 @@ public class NotaController {
     
     private final INotaService notaService;
     private final IReciboService reciboService;
+    private final IEmpresaService empresaService;
     private static final int TAMANIO_PAGINA_DEFAULT = 50;
 
     @Value("${SIC_JWT_KEY}")
     private String secretkey;
 
     @Autowired
-    public NotaController(INotaService notaService, IReciboService reciboService) {
+    public NotaController(INotaService notaService, IReciboService reciboService, IEmpresaService empresaService) {
         this.notaService = notaService;
         this.reciboService = reciboService;
+        this.empresaService = empresaService;
     }
 
     @GetMapping("/notas/{idNota}")
@@ -191,7 +194,14 @@ public class NotaController {
                 Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
         return notaService.buscarNotaCreditoProveedor(criteria, (int) claims.get("idUsuario"));
     }
-    
+
+    @GetMapping("/notas/tipos/empresas/{idEmpresa}")
+    @ResponseStatus(HttpStatus.OK)
+    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+    public TipoDeComprobante[] getTipoNota(@PathVariable long idEmpresa) {
+        return notaService.getTipoNota(empresaService.getEmpresaPorId(idEmpresa));
+    }
+
     @PostMapping("/notas/credito/empresa/{idEmpresa}/cliente/{idCliente}/usuario/{idUsuario}/factura/{idFactura}")
     @ResponseStatus(HttpStatus.CREATED)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})

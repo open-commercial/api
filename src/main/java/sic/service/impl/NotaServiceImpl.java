@@ -270,6 +270,28 @@ public class NotaServiceImpl implements INotaService {
         return renglonesFactura;
     }
 
+  @Override
+  public TipoDeComprobante[] getTipoNota(Empresa empresa) {
+    // cuando la Empresa discrimina IVA
+    if (empresa.getCondicionIVA().isDiscriminaIVA()) {
+      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[5];
+      tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_A;
+      tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_B;
+      tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_X;
+      tiposPermitidos[3] = TipoDeComprobante.NOTA_CREDITO_Y;
+      tiposPermitidos[4] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
+      return tiposPermitidos;
+    } else {
+      // cuando la Empresa NO discrimina IVA
+      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
+      tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_B;
+      tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_X;
+      tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_Y;
+      tiposPermitidos[3] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
+      return tiposPermitidos;
+    }
+  }
+
     @Override
     public long getSiguienteNumeroNotaDebitoCliente(Long idEmpresa, TipoDeComprobante tipoDeComprobante) {
         Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
@@ -957,12 +979,6 @@ public class NotaServiceImpl implements INotaService {
     @Override
     public BigDecimal calcularTotalDebito(BigDecimal subTotalBruto, BigDecimal iva21Neto, BigDecimal montoNoGravado) {
         return subTotalBruto.add(iva21Neto).add(montoNoGravado);
-    }
-
-    @Override
-    public BigDecimal calcularTotalCreditoClientePorFacturaVenta(FacturaVenta facturaVenta) {
-        BigDecimal credito = notaCreditoClienteRepository.getTotalNotasCreditoPorFacturaVenta(facturaVenta);
-        return (credito == null) ? BigDecimal.ZERO : credito;
     }
    
 }
