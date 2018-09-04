@@ -27,7 +27,15 @@ public interface INotaService {
 
     Page<NotaCreditoCliente> buscarNotaCreditoCliente(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
 
-    Page<NotaCreditoProveedor> buscarNotaCreditoProveedor(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+    Page<NotaCreditoProveedor> buscarNotaCreditoProveedor(BusquedaNotaCriteria criteria);
+
+    Page<NotaDebitoCliente> buscarNotaDebitoCliente(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+
+    Page<NotaDebitoProveedor> buscarNotaDebitoProveedor(BusquedaNotaCriteria criteria);
+
+    TipoDeComprobante[] getTipoNotaCredito(Empresa empresa);
+
+    TipoDeComprobante[] getTipoNotaDebito(Empresa empresa);
 
     long getSiguienteNumeroNotaDebitoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
 
@@ -44,8 +52,6 @@ public interface INotaService {
     List<RenglonNotaDebito> getRenglonesDeNotaDebitoProveedor(Long idNota);
     
     List<RenglonFactura> getRenglonesFacturaModificadosParaNotaCredito(long idFactura);
-
-    TipoDeComprobante[] getTipoNota(Empresa empresa);
 
     void eliminarNota(long[] idNota);
 
