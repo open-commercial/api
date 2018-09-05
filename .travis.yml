@@ -4,4 +4,9 @@ cache:
   directories:
   - $HOME/.m2
 env:  
-  - SIC_AFIP_ENV="testing" BUCKET_NAME="" AWS_ACCESS_KEY_ID="" AWS_SECRET_ACCESS_KEY="" AWS_DEFAULT_REGION="" SIC_MAIL_USERNAME="test@yopmail.com" SIC_MAIL_ENV="testing"
+  - SIC_AFIP_ENV="testing" BUCKET_NAME="" AWS_ACCESS_KEY_ID="" AWS_SECRET_ACCESS_KEY="" AWS_DEFAULT_REGION="" SIC_MAIL_USERNAME="test@yopmail.com" SIC_MAIL_ENV="testing"  
+addons:
+  sonarcloud:
+    organization: "globo-technology"
+script:  
+  - sonar-scanner
