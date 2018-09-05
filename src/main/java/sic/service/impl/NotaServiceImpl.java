@@ -5,12 +5,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
@@ -358,11 +353,123 @@ public class NotaServiceImpl implements INotaService {
     return builder;
   }
 
+  @Override
+  public BigDecimal calcularTotalNotaCreditoCliente(
+      BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
+    if (criteria.isBuscaPorFecha()
+        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_factura_fechas_busqueda_invalidas")); // cambiar mensaje
+    }
+    if (criteria.isBuscaPorFecha()) {
+      Calendar cal = new GregorianCalendar();
+      cal.setTime(criteria.getFechaDesde());
+      cal.set(Calendar.HOUR_OF_DAY, 0);
+      cal.set(Calendar.MINUTE, 0);
+      cal.set(Calendar.SECOND, 0);
+      criteria.setFechaDesde(cal.getTime());
+      cal.setTime(criteria.getFechaHasta());
+      cal.set(Calendar.HOUR_OF_DAY, 23);
+      cal.set(Calendar.MINUTE, 59);
+      cal.set(Calendar.SECOND, 59);
+      criteria.setFechaHasta(cal.getTime());
+    }
+    BigDecimal totalNotaCreditoCliente =
+        notaCreditoClienteRepository.calcularTotalNotaCreditoCliente(
+            this.getBuilderNotaCreditoCliente(criteria, idUsuarioLoggedIn));
+    return (totalNotaCreditoCliente != null ? totalNotaCreditoCliente : BigDecimal.ZERO);
+  }
+
+  @Override
+  public BigDecimal calcularIVANotaCreditoCliente(
+      BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
+    if (criteria.isBuscaPorFecha()
+        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_factura_fechas_busqueda_invalidas")); // cambiar mensaje
+    }
+    if (criteria.isBuscaPorFecha()) {
+      Calendar cal = new GregorianCalendar();
+      cal.setTime(criteria.getFechaDesde());
+      cal.set(Calendar.HOUR_OF_DAY, 0);
+      cal.set(Calendar.MINUTE, 0);
+      cal.set(Calendar.SECOND, 0);
+      criteria.setFechaDesde(cal.getTime());
+      cal.setTime(criteria.getFechaHasta());
+      cal.set(Calendar.HOUR_OF_DAY, 23);
+      cal.set(Calendar.MINUTE, 59);
+      cal.set(Calendar.SECOND, 59);
+      criteria.setFechaHasta(cal.getTime());
+    }
+    TipoDeComprobante[] tipoNota = {
+      TipoDeComprobante.NOTA_CREDITO_A, TipoDeComprobante.NOTA_CREDITO_B
+    };
+    BigDecimal ivaNotaCreditoCliente =
+        notaCreditoClienteRepository.calcularIVANotaCreditoCliente(
+            this.getBuilderNotaCreditoCliente(criteria, idUsuarioLoggedIn), tipoNota);
+    return (ivaNotaCreditoCliente != null ? ivaNotaCreditoCliente : BigDecimal.ZERO);
+  }
+
+  @Override
+  public BigDecimal calcularTotalNotaCreditoProveedor(
+      BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
+    if (criteria.isBuscaPorFecha()
+        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_factura_fechas_busqueda_invalidas")); // cambiar mensaje
+    }
+    if (criteria.isBuscaPorFecha()) {
+      Calendar cal = new GregorianCalendar();
+      cal.setTime(criteria.getFechaDesde());
+      cal.set(Calendar.HOUR_OF_DAY, 0);
+      cal.set(Calendar.MINUTE, 0);
+      cal.set(Calendar.SECOND, 0);
+      criteria.setFechaDesde(cal.getTime());
+      cal.setTime(criteria.getFechaHasta());
+      cal.set(Calendar.HOUR_OF_DAY, 23);
+      cal.set(Calendar.MINUTE, 59);
+      cal.set(Calendar.SECOND, 59);
+      criteria.setFechaHasta(cal.getTime());
+    }
+    BigDecimal totalNotaCreditoProveedor =
+        notaCreditoProveedorRepository.calcularTotalNotaCreditoProveedor(
+            this.getBuilderNotaCreditoProveedor(criteria));
+        return (totalNotaCreditoProveedor != null? totalNotaCreditoProveedor : BigDecimal.ZERO);
+    }
+
+    @Override
+    public BigDecimal calcularIVANotaCreditoProveedor(
+            BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
+        if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_factura_fechas_busqueda_invalidas")); // cambiar mensaje
+        }
+        if (criteria.isBuscaPorFecha()) {
+            Calendar cal = new GregorianCalendar();
+            cal.setTime(criteria.getFechaDesde());
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            criteria.setFechaDesde(cal.getTime());
+            cal.setTime(criteria.getFechaHasta());
+            cal.set(Calendar.HOUR_OF_DAY, 23);
+            cal.set(Calendar.MINUTE, 59);
+            cal.set(Calendar.SECOND, 59);
+            criteria.setFechaHasta(cal.getTime());
+        }
+        TipoDeComprobante[] tipoNota = {TipoDeComprobante.NOTA_CREDITO_A, TipoDeComprobante.NOTA_CREDITO_B};
+        BigDecimal ivaNotaCreditoProveedor = notaCreditoProveedorRepository.calcularIVANotaCreditoProveedor(this.getBuilderNotaCreditoProveedor(criteria), tipoNota);
+        return (ivaNotaCreditoProveedor != null? ivaNotaCreditoProveedor : BigDecimal.ZERO);
+    }
+
     @Override
     public List<RenglonFactura> getRenglonesFacturaModificadosParaNotaCredito(long idFactura) {
         HashMap<Long, BigDecimal> listaCantidadesProductosUnificados = new HashMap<>();
         this.getNotasCreditoPorFactura(idFactura).forEach(n -> {
-            ((NotaCredito) n).getRenglonesNotaCredito().forEach(rnc -> {
+            n.getRenglonesNotaCredito().forEach(rnc -> {
                 if (listaCantidadesProductosUnificados.containsKey(rnc.getIdProductoItem())) {
                     listaCantidadesProductosUnificados.put(rnc.getIdProductoItem(),
                             listaCantidadesProductosUnificados.get(rnc.getIdProductoItem()).add(rnc.getCantidad()));

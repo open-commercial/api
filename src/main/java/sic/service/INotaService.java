@@ -3,6 +3,7 @@ package sic.service;
 import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.data.domain.Page;
+import com.querydsl.core.BooleanBuilder;
 import sic.modelo.*;
 
 public interface INotaService {
@@ -32,6 +33,14 @@ public interface INotaService {
     Page<NotaDebitoCliente> buscarNotaDebitoCliente(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
 
     Page<NotaDebitoProveedor> buscarNotaDebitoProveedor(BusquedaNotaCriteria criteria);
+
+    BigDecimal calcularTotalNotaCreditoCliente(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+
+    BigDecimal calcularIVANotaCreditoCliente(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+
+    BigDecimal calcularTotalNotaCreditoProveedor(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+
+    BigDecimal calcularIVANotaCreditoProveedor(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
 
     TipoDeComprobante[] getTipoNotaCredito(Empresa empresa);
 

@@ -9,7 +9,7 @@ import sic.modelo.NotaCredito;
 import sic.modelo.NotaCreditoCliente;
 import sic.modelo.TipoDeComprobante;
 
-public interface NotaCreditoClienteRepository extends NotaCreditoRepository<NotaCreditoCliente>, QueryDslPredicateExecutor<NotaCreditoCliente> {
+public interface NotaCreditoClienteRepository extends NotaCreditoRepository<NotaCreditoCliente>, NotaCreditoClienteRepositoryCustom, QueryDslPredicateExecutor<NotaCreditoCliente> {
     
     List<NotaCredito> findAllByFacturaVentaAndEliminada(FacturaVenta factura, boolean eliminada);
     
