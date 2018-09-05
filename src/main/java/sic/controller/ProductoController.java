@@ -3,7 +3,6 @@ package sic.controller;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.ResourceBundle;
-
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -32,57 +31,45 @@ import sic.service.*;
 @RequestMapping("/api/v1")
 public class ProductoController {
 
-    private final IProductoService productoService;
+  private final IProductoService productoService;
 
-    @Autowired
-    public ProductoController(IProductoService productoService) {
-        this.productoService = productoService;
-    }
+  @Autowired
+  public ProductoController(IProductoService productoService) {
+    this.productoService = productoService;
+  }
 
-    @GetMapping("/productos/{idProducto}")
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
-    public Producto getProductoPorId(@PathVariable long idProducto) {
-        return productoService.getProductoPorId(idProducto);
-    }
+  @GetMapping("/productos/{idProducto}")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public Producto getProductoPorId(@PathVariable long idProducto) {
+    return productoService.getProductoPorId(idProducto);
+  }
 
-    @GetMapping("/productos/busqueda")
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
-    public Producto getProductoPorCodigo(@RequestParam long idEmpresa,
-                                         @RequestParam String codigo) {
-        return productoService.getProductoPorCodigo(codigo, idEmpresa);
-    }
+  @JsonView(Views.Public.class)
+  @GetMapping("/public/productos/{idProducto}")
+  @ResponseStatus(HttpStatus.OK)
+  public Producto getProductoPorIdPublic(@PathVariable long idProducto) {
+    return productoService.getProductoPorId(idProducto);
+  }
 
-    @GetMapping("/productos/valor-stock/criteria")
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public BigDecimal calcularValorStock(@RequestParam long idEmpresa,
-                                         @RequestParam(required = false) String codigo,
-                                         @RequestParam(required = false) String descripcion,
-                                         @RequestParam(required = false) Long idRubro,
-                                         @RequestParam(required = false) Long idProveedor,
-                                         @RequestParam(required = false) Integer cantidadRegistros,
-                                         @RequestParam(required = false) boolean soloFantantes,
-                                         @RequestParam(required = false) Boolean visibilidad) {
-        if (cantidadRegistros == null) cantidadRegistros = 0;
-        BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder()
-                .buscarPorCodigo((codigo!=null))
-                .codigo(codigo)
-                .buscarPorDescripcion(descripcion!=null)
-                .descripcion(descripcion)
-                .buscarPorRubro(idRubro!=null)
-                .idRubro(idRubro)
-                .buscarPorProveedor(idProveedor!=null)
-                .idProveedor(idProveedor)
-                .idEmpresa(idEmpresa)
-                .cantRegistros(cantidadRegistros)
-                .listarSoloFaltantes(soloFantantes)
-                .buscaPorVisibilidad(visibilidad!=null)
-                .publico(visibilidad)
-                .build();
-        return productoService.calcularValorStock(criteria);
-    }
+  @GetMapping("/productos/busqueda")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public Producto getProductoPorCodigo(@RequestParam long idEmpresa, @RequestParam String codigo) {
+    return productoService.getProductoPorCodigo(codigo, idEmpresa);
+  }
 
   @GetMapping("/productos/busqueda/criteria")
   @ResponseStatus(HttpStatus.OK)
@@ -199,36 +186,38 @@ public class ProductoController {
     return productoService.buscarProductos(criteria);
   }
 
-    @DeleteMapping("/productos")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
-    public void eliminarMultiplesProductos(@RequestParam long[] idProducto) {
-        productoService.eliminarMultiplesProductos(idProducto);
-    }
+  @DeleteMapping("/productos")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
+  public void eliminarMultiplesProductos(@RequestParam long[] idProducto) {
+    productoService.eliminarMultiplesProductos(idProducto);
+  }
 
-    @PutMapping("/productos")
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public void actualizar(@RequestBody Producto producto,
-                           @RequestParam Long idMedida,
-                           @RequestParam Long idRubro,
-                           @RequestParam Long idProveedor,
-                           @RequestParam Long idEmpresa) {
-        if (productoService.getProductoPorId(producto.getId_Producto()) != null) {
-            productoService.actualizar(producto, idMedida, idRubro, idProveedor, idEmpresa);
-        }
+  @PutMapping("/productos")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public void actualizar(
+      @RequestBody Producto producto,
+      @RequestParam Long idMedida,
+      @RequestParam Long idRubro,
+      @RequestParam Long idProveedor,
+      @RequestParam Long idEmpresa) {
+    if (productoService.getProductoPorId(producto.getId_Producto()) != null) {
+      productoService.actualizar(producto, idMedida, idRubro, idProveedor, idEmpresa);
     }
+  }
 
-    @PostMapping("/productos")
-    @ResponseStatus(HttpStatus.CREATED)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public Producto guardar(@RequestBody Producto producto,
-                            @RequestParam Long idMedida,
-                            @RequestParam Long idRubro,
-                            @RequestParam Long idProveedor,
-                            @RequestParam Long idEmpresa) {
-        return productoService.guardar(producto, idMedida, idRubro, idProveedor, idEmpresa);
-    }
+  @PostMapping("/productos")
+  @ResponseStatus(HttpStatus.CREATED)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public Producto guardar(
+      @RequestBody Producto producto,
+      @RequestParam Long idMedida,
+      @RequestParam Long idRubro,
+      @RequestParam Long idProveedor,
+      @RequestParam Long idEmpresa) {
+    return productoService.guardar(producto, idMedida, idRubro, idProveedor, idEmpresa);
+  }
 
   @PutMapping("/productos/multiples")
   @ResponseStatus(HttpStatus.OK)
@@ -292,63 +281,119 @@ public class ProductoController {
         publico);
   }
 
-    @GetMapping("/productos/disponibilidad-stock")
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
-    public Map<Long, BigDecimal> verificarDisponibilidadStock(long[] idProducto, BigDecimal[] cantidad) {
-        return productoService.getProductosSinStockDisponible(idProducto, cantidad);
+  @GetMapping("/productos/valor-stock/criteria")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public BigDecimal calcularValorStock(
+      @RequestParam long idEmpresa,
+      @RequestParam(required = false) String codigo,
+      @RequestParam(required = false) String descripcion,
+      @RequestParam(required = false) Long idRubro,
+      @RequestParam(required = false) Long idProveedor,
+      @RequestParam(required = false) Integer cantidadRegistros,
+      @RequestParam(required = false) boolean soloFantantes,
+      @RequestParam(required = false) Boolean visibilidad) {
+    if (cantidadRegistros == null) cantidadRegistros = 0;
+    BusquedaProductoCriteria criteria =
+        BusquedaProductoCriteria.builder()
+            .buscarPorCodigo((codigo != null))
+            .codigo(codigo)
+            .buscarPorDescripcion(descripcion != null)
+            .descripcion(descripcion)
+            .buscarPorRubro(idRubro != null)
+            .idRubro(idRubro)
+            .buscarPorProveedor(idProveedor != null)
+            .idProveedor(idProveedor)
+            .idEmpresa(idEmpresa)
+            .cantRegistros(cantidadRegistros)
+            .listarSoloFaltantes(soloFantantes)
+            .buscaPorVisibilidad(visibilidad != null)
+            .publico(visibilidad)
+            .build();
+    return productoService.calcularValorStock(criteria);
+  }
+
+  @GetMapping("/productos/disponibilidad-stock")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public Map<Long, BigDecimal> verificarDisponibilidadStock(
+      long[] idProducto, BigDecimal[] cantidad) {
+    return productoService.getProductosSinStockDisponible(idProducto, cantidad);
+  }
+
+  @GetMapping("/productos/cantidad-venta-minima")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  @ResponseStatus(HttpStatus.OK)
+  public Map<Long, BigDecimal> verificarCantidadVentaMinima(
+      long[] idProducto, BigDecimal[] cantidad) {
+    return productoService.getProductosNoCumplenCantidadVentaMinima(idProducto, cantidad);
+  }
+
+  @GetMapping("/productos/reporte/criteria")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public ResponseEntity<byte[]> getListaDePrecios(
+      @RequestParam(value = "idEmpresa") long idEmpresa,
+      @RequestParam(value = "codigo", required = false) String codigo,
+      @RequestParam(value = "descripcion", required = false) String descripcion,
+      @RequestParam(value = "idRubro", required = false) Long idRubro,
+      @RequestParam(value = "idProveedor", required = false) Long idProveedor,
+      @RequestParam(value = "soloFaltantes", required = false) boolean soloFantantes,
+      @RequestParam(required = false) String formato) {
+    BusquedaProductoCriteria criteria =
+        BusquedaProductoCriteria.builder()
+            .buscarPorCodigo((codigo != null))
+            .codigo(codigo)
+            .buscarPorDescripcion(descripcion != null)
+            .descripcion(descripcion)
+            .buscarPorRubro(idRubro != null)
+            .idRubro(idRubro)
+            .buscarPorProveedor(idProveedor != null)
+            .idProveedor(idProveedor)
+            .idEmpresa(idEmpresa)
+            .cantRegistros(0)
+            .listarSoloFaltantes(soloFantantes)
+            .pageable(null)
+            .build();
+    HttpHeaders headers = new HttpHeaders();
+    switch (formato) {
+      case "xlsx":
+        headers.setContentType(new MediaType("application", "vnd.ms-excel"));
+        headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+        byte[] reporteXls =
+            productoService.getListaDePreciosPorEmpresa(
+                productoService.buscarProductos(criteria).getContent(), idEmpresa, formato);
+        headers.setContentLength(reporteXls.length);
+        return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
+      case "pdf":
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+        byte[] reportePDF =
+            productoService.getListaDePreciosPorEmpresa(
+                productoService.buscarProductos(criteria).getContent(), idEmpresa, formato);
+        return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+      default:
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_formato_no_valido"));
     }
-
-    @GetMapping("/productos/cantidad-venta-minima")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
-    @ResponseStatus(HttpStatus.OK)
-    public Map<Long, BigDecimal> verificarCantidadVentaMinima(long[] idProducto, BigDecimal[] cantidad) {
-        return productoService.getProductosNoCumplenCantidadVentaMinima(idProducto, cantidad);
-    }
-
-    @GetMapping("/productos/reporte/criteria")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
-    public ResponseEntity<byte[]> getListaDePrecios(@RequestParam(value = "idEmpresa") long idEmpresa,
-                                                    @RequestParam(value = "codigo", required = false) String codigo,
-                                                    @RequestParam(value = "descripcion", required = false) String descripcion,
-                                                    @RequestParam(value = "idRubro", required = false) Long idRubro,
-                                                    @RequestParam(value = "idProveedor", required = false) Long idProveedor,
-                                                    @RequestParam(value = "soloFaltantes", required = false) boolean soloFantantes,
-                                                    @RequestParam(required = false) String formato) {
-        BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder()
-                .buscarPorCodigo((codigo != null))
-                .codigo(codigo)
-                .buscarPorDescripcion(descripcion != null)
-                .descripcion(descripcion)
-                .buscarPorRubro(idRubro!=null)
-                .idRubro(idRubro)
-                .buscarPorProveedor(idProveedor!=null)
-                .idProveedor(idProveedor)
-                .idEmpresa(idEmpresa)
-                .cantRegistros(0)
-                .listarSoloFaltantes(soloFantantes)
-                .pageable(null)
-                .build();
-        HttpHeaders headers = new HttpHeaders();
-        switch (formato) {
-            case "xlsx":
-                headers.setContentType(new MediaType("application", "vnd.ms-excel"));
-                headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
-                headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-                byte[] reporteXls = productoService.getListaDePreciosPorEmpresa(productoService.buscarProductos(criteria).getContent(), idEmpresa, formato);
-                headers.setContentLength(reporteXls.length);
-                return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
-            case "pdf":
-                headers.setContentType(MediaType.APPLICATION_PDF);
-                headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
-                headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-                byte[] reportePDF = productoService.getListaDePreciosPorEmpresa(productoService.buscarProductos(criteria).getContent(), idEmpresa, formato);
-                return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
-            default:
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_formato_no_valido"));
-        }
-
-    }
-
+  }
 }
