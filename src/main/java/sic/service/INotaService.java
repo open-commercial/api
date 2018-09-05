@@ -38,9 +38,17 @@ public interface INotaService {
 
     BigDecimal calcularIVANotaCreditoCliente(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
 
-    BigDecimal calcularTotalNotaCreditoProveedor(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+    BigDecimal calcularTotalNotaCreditoProveedor(BusquedaNotaCriteria criteria);
 
-    BigDecimal calcularIVANotaCreditoProveedor(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+    BigDecimal calcularIVANotaCreditoProveedor(BusquedaNotaCriteria criteria);
+
+    BigDecimal calcularTotalNotaDebitoCliente(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+
+    BigDecimal calcularIVANotaDebitoCliente(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+
+    BigDecimal calcularTotalNotaDebitoProveedor(BusquedaNotaCriteria criteria);
+
+    BigDecimal calcularIVANotaDebitoProveedor(BusquedaNotaCriteria criteria);
 
     TipoDeComprobante[] getTipoNotaCredito(Empresa empresa);
 

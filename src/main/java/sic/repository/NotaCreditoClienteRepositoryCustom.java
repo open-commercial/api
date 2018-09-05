@@ -6,8 +6,8 @@ import java.math.BigDecimal;
 
 public interface NotaCreditoClienteRepositoryCustom {
 
-    BigDecimal calcularTotalNotaCreditoCliente(BooleanBuilder builder);
+  BigDecimal calcularTotalNotaCreditoCliente(BooleanBuilder builder);
 
-    BigDecimal calcularIVANotaCreditoCliente(BooleanBuilder builder, TipoDeComprobante[] tipoComprobante);
-
+  BigDecimal calcularIVANotaCreditoCliente(
+      BooleanBuilder builder, TipoDeComprobante[] tipoComprobante);
 }

@@ -2,12 +2,14 @@ package sic.repository;
 
 import com.querydsl.core.BooleanBuilder;
 import sic.modelo.TipoDeComprobante;
+
 import java.math.BigDecimal;
 
-public interface NotaCreditoProveedorRepositoryCustom {
+public interface NotaDebitoClienteRepositoryCustom {
 
-  BigDecimal calcularTotalNotaCreditoProveedor(BooleanBuilder builder);
+  BigDecimal calcularTotalNotaDebitoCliente(BooleanBuilder builder);
 
-  BigDecimal calcularIVANotaCreditoProveedor(
+  BigDecimal calcularIVANotaDebitoCliente(
       BooleanBuilder builder, TipoDeComprobante[] tipoComprobante);
+
 }

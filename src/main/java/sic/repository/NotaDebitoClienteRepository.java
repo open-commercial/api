@@ -7,7 +7,7 @@ import sic.modelo.NotaDebitoCliente;
 import sic.modelo.Recibo;
 import sic.modelo.TipoDeComprobante;
 
-public interface NotaDebitoClienteRepository extends NotaDebitoRepository<NotaDebitoCliente>, QueryDslPredicateExecutor<NotaDebitoCliente> {
+public interface NotaDebitoClienteRepository extends NotaDebitoRepository<NotaDebitoCliente>, NotaDebitoClienteRepositoryCustom, QueryDslPredicateExecutor<NotaDebitoCliente> {
     
     @Query("SELECT max(ndc.nroNota) FROM NotaDebitoCliente ndc WHERE ndc.tipoComprobante = :tipoComprobante AND ndc.serie = :serie AND ndc.empresa.id_Empresa = :idEmpresa")
     Long buscarMayorNumNotaDebitoClienteSegunTipo(@Param("tipoComprobante") TipoDeComprobante tipoComprobante, @Param("serie") long serie, @Param("idEmpresa") long idEmpresa);

@@ -360,7 +360,7 @@ public class NotaServiceImpl implements INotaService {
         && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_factura_fechas_busqueda_invalidas")); // cambiar mensaje
+              .getString("mensaje_nota_fechas_busqueda_invalidas"));
     }
     if (criteria.isBuscaPorFecha()) {
       Calendar cal = new GregorianCalendar();
@@ -414,6 +414,93 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public BigDecimal calcularTotalNotaCreditoProveedor(
+      BusquedaNotaCriteria criteria) {
+    if (criteria.isBuscaPorFecha()
+        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_nota_fechas_busqueda_invalidas"));
+    }
+    if (criteria.isBuscaPorFecha()) {
+      Calendar cal = new GregorianCalendar();
+      cal.setTime(criteria.getFechaDesde());
+      cal.set(Calendar.HOUR_OF_DAY, 0);
+      cal.set(Calendar.MINUTE, 0);
+      cal.set(Calendar.SECOND, 0);
+      criteria.setFechaDesde(cal.getTime());
+      cal.setTime(criteria.getFechaHasta());
+      cal.set(Calendar.HOUR_OF_DAY, 23);
+      cal.set(Calendar.MINUTE, 59);
+      cal.set(Calendar.SECOND, 59);
+      criteria.setFechaHasta(cal.getTime());
+    }
+    BigDecimal totalNotaCreditoProveedor =
+        notaCreditoProveedorRepository.calcularTotalNotaCreditoProveedor(
+            this.getBuilderNotaCreditoProveedor(criteria));
+    return (totalNotaCreditoProveedor != null ? totalNotaCreditoProveedor : BigDecimal.ZERO);
+  }
+
+  @Override
+  public BigDecimal calcularIVANotaCreditoProveedor(
+      BusquedaNotaCriteria criteria) {
+    if (criteria.isBuscaPorFecha()
+        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_factura_fechas_busqueda_invalidas")); // cambiar mensaje
+    }
+    if (criteria.isBuscaPorFecha()) {
+      Calendar cal = new GregorianCalendar();
+      cal.setTime(criteria.getFechaDesde());
+      cal.set(Calendar.HOUR_OF_DAY, 0);
+      cal.set(Calendar.MINUTE, 0);
+      cal.set(Calendar.SECOND, 0);
+      criteria.setFechaDesde(cal.getTime());
+      cal.setTime(criteria.getFechaHasta());
+      cal.set(Calendar.HOUR_OF_DAY, 23);
+      cal.set(Calendar.MINUTE, 59);
+      cal.set(Calendar.SECOND, 59);
+      criteria.setFechaHasta(cal.getTime());
+    }
+    TipoDeComprobante[] tipoNota = {
+      TipoDeComprobante.NOTA_CREDITO_A, TipoDeComprobante.NOTA_CREDITO_B
+    };
+    BigDecimal ivaNotaCreditoProveedor =
+        notaCreditoProveedorRepository.calcularIVANotaCreditoProveedor(
+            this.getBuilderNotaCreditoProveedor(criteria), tipoNota);
+    return (ivaNotaCreditoProveedor != null ? ivaNotaCreditoProveedor : BigDecimal.ZERO);
+  }
+
+  @Override
+  public BigDecimal calcularTotalNotaDebitoCliente(
+      BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
+    if (criteria.isBuscaPorFecha()
+        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_nota_fechas_busqueda_invalidas"));
+    }
+    if (criteria.isBuscaPorFecha()) {
+      Calendar cal = new GregorianCalendar();
+      cal.setTime(criteria.getFechaDesde());
+      cal.set(Calendar.HOUR_OF_DAY, 0);
+      cal.set(Calendar.MINUTE, 0);
+      cal.set(Calendar.SECOND, 0);
+      criteria.setFechaDesde(cal.getTime());
+      cal.setTime(criteria.getFechaHasta());
+      cal.set(Calendar.HOUR_OF_DAY, 23);
+      cal.set(Calendar.MINUTE, 59);
+      cal.set(Calendar.SECOND, 59);
+      criteria.setFechaHasta(cal.getTime());
+    }
+    BigDecimal totalNotaCreditoCliente =
+        notaDebitoClienteRepository.calcularTotalNotaDebitoCliente(
+            this.getBuilderNotaDebitoCliente(criteria, idUsuarioLoggedIn));
+    return (totalNotaCreditoCliente != null ? totalNotaCreditoCliente : BigDecimal.ZERO);
+  }
+
+  @Override
+  public BigDecimal calcularIVANotaDebitoCliente(
       BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
     if (criteria.isBuscaPorFecha()
         && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
@@ -434,36 +521,71 @@ public class NotaServiceImpl implements INotaService {
       cal.set(Calendar.SECOND, 59);
       criteria.setFechaHasta(cal.getTime());
     }
-    BigDecimal totalNotaCreditoProveedor =
-        notaCreditoProveedorRepository.calcularTotalNotaCreditoProveedor(
-            this.getBuilderNotaCreditoProveedor(criteria));
-        return (totalNotaCreditoProveedor != null? totalNotaCreditoProveedor : BigDecimal.ZERO);
-    }
+    TipoDeComprobante[] tipoNota = {
+      TipoDeComprobante.NOTA_DEBITO_A, TipoDeComprobante.NOTA_DEBITO_B
+    };
+    BigDecimal ivaNotaCreditoCliente =
+        notaDebitoClienteRepository.calcularIVANotaDebitoCliente(
+            this.getBuilderNotaDebitoCliente(criteria, idUsuarioLoggedIn), tipoNota);
+    return (ivaNotaCreditoCliente != null ? ivaNotaCreditoCliente : BigDecimal.ZERO);
+  }
 
-    @Override
-    public BigDecimal calcularIVANotaCreditoProveedor(
-            BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
-        if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_fechas_busqueda_invalidas")); // cambiar mensaje
-        }
-        if (criteria.isBuscaPorFecha()) {
-            Calendar cal = new GregorianCalendar();
-            cal.setTime(criteria.getFechaDesde());
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            criteria.setFechaDesde(cal.getTime());
-            cal.setTime(criteria.getFechaHasta());
-            cal.set(Calendar.HOUR_OF_DAY, 23);
-            cal.set(Calendar.MINUTE, 59);
-            cal.set(Calendar.SECOND, 59);
-            criteria.setFechaHasta(cal.getTime());
-        }
-        TipoDeComprobante[] tipoNota = {TipoDeComprobante.NOTA_CREDITO_A, TipoDeComprobante.NOTA_CREDITO_B};
-        BigDecimal ivaNotaCreditoProveedor = notaCreditoProveedorRepository.calcularIVANotaCreditoProveedor(this.getBuilderNotaCreditoProveedor(criteria), tipoNota);
-        return (ivaNotaCreditoProveedor != null? ivaNotaCreditoProveedor : BigDecimal.ZERO);
+  @Override
+  public BigDecimal calcularTotalNotaDebitoProveedor(BusquedaNotaCriteria criteria) {
+    if (criteria.isBuscaPorFecha()
+        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_nota_fechas_busqueda_invalidas"));
     }
+    if (criteria.isBuscaPorFecha()) {
+      Calendar cal = new GregorianCalendar();
+      cal.setTime(criteria.getFechaDesde());
+      cal.set(Calendar.HOUR_OF_DAY, 0);
+      cal.set(Calendar.MINUTE, 0);
+      cal.set(Calendar.SECOND, 0);
+      criteria.setFechaDesde(cal.getTime());
+      cal.setTime(criteria.getFechaHasta());
+      cal.set(Calendar.HOUR_OF_DAY, 23);
+      cal.set(Calendar.MINUTE, 59);
+      cal.set(Calendar.SECOND, 59);
+      criteria.setFechaHasta(cal.getTime());
+    }
+    BigDecimal totalNotaDebitoProveedor =
+        notaDebitoProveedorRepository.calcularTotalNotaDebitoProveedor(
+            this.getBuilderNotaDebitoProveedor(criteria));
+    return (totalNotaDebitoProveedor != null ? totalNotaDebitoProveedor : BigDecimal.ZERO);
+  }
+
+  @Override
+  public BigDecimal calcularIVANotaDebitoProveedor(BusquedaNotaCriteria criteria) {
+    if (criteria.isBuscaPorFecha()
+        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_factura_fechas_busqueda_invalidas")); // cambiar mensaje
+    }
+    if (criteria.isBuscaPorFecha()) {
+      Calendar cal = new GregorianCalendar();
+      cal.setTime(criteria.getFechaDesde());
+      cal.set(Calendar.HOUR_OF_DAY, 0);
+      cal.set(Calendar.MINUTE, 0);
+      cal.set(Calendar.SECOND, 0);
+      criteria.setFechaDesde(cal.getTime());
+      cal.setTime(criteria.getFechaHasta());
+      cal.set(Calendar.HOUR_OF_DAY, 23);
+      cal.set(Calendar.MINUTE, 59);
+      cal.set(Calendar.SECOND, 59);
+      criteria.setFechaHasta(cal.getTime());
+    }
+    TipoDeComprobante[] tipoNota = {
+      TipoDeComprobante.NOTA_DEBITO_A, TipoDeComprobante.NOTA_DEBITO_B
+    };
+    BigDecimal ivaNotaDebitoProveedor =
+        notaDebitoProveedorRepository.calcularIVANotaDebitoProveedor(
+            this.getBuilderNotaDebitoProveedor(criteria), tipoNota);
+    return (ivaNotaDebitoProveedor != null ? ivaNotaDebitoProveedor : BigDecimal.ZERO);
+  }
 
     @Override
     public List<RenglonFactura> getRenglonesFacturaModificadosParaNotaCredito(long idFactura) {
