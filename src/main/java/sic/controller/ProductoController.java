@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -104,6 +105,61 @@ public class ProductoController {
       @RequestParam(required = false) Integer tamanio,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido) {
+    return this.buscar(
+        idEmpresa,
+        codigo,
+        descripcion,
+        idRubro,
+        idProveedor,
+        soloFantantes,
+        publicos,
+        pagina,
+        tamanio,
+        ordenarPor,
+        sentido);
+  }
+
+  @JsonView(Views.Public.class)
+  @GetMapping("/public/productos/busqueda/criteria")
+  @ResponseStatus(HttpStatus.OK)
+  public Page<Producto> buscarProductosPublic(
+      @RequestParam long idEmpresa,
+      @RequestParam(required = false) String codigo,
+      @RequestParam(required = false) String descripcion,
+      @RequestParam(required = false) Long idRubro,
+      @RequestParam(required = false) Long idProveedor,
+      @RequestParam(required = false) boolean soloFantantes,
+      @RequestParam(required = false) Boolean publicos,
+      @RequestParam(required = false) Integer pagina,
+      @RequestParam(required = false) Integer tamanio,
+      @RequestParam(required = false) String ordenarPor,
+      @RequestParam(required = false) String sentido) {
+    return this.buscar(
+        idEmpresa,
+        codigo,
+        descripcion,
+        idRubro,
+        idProveedor,
+        soloFantantes,
+        publicos,
+        pagina,
+        tamanio,
+        ordenarPor,
+        sentido);
+  }
+
+  private Page<Producto> buscar(
+      long idEmpresa,
+      String codigo,
+      String descripcion,
+      Long idRubro,
+      Long idProveedor,
+      boolean soloFantantes,
+      Boolean publicos,
+      Integer pagina,
+      Integer tamanio,
+      String ordenarPor,
+      String sentido) {
     final int TAMANIO_PAGINA_DEFAULT = 50;
     if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
     if (pagina == null || pagina < 0) pagina = 0;

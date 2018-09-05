@@ -16,12 +16,15 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.validator.constraints.NotEmpty;
+import sic.controller.Views;
 
 @Entity
 @Table(name = "producto")
@@ -35,16 +38,20 @@ public class Producto implements Serializable {
 
     @Id
     @GeneratedValue
+    @JsonView(Views.Public.class)
     private long id_Producto;
 
+    @JsonView(Views.Public.class)
     private String codigo;
 
     @NotNull(message = "{mensaje_producto_vacio_descripcion}")
     @NotEmpty(message = "{mensaje_producto_vacio_descripcion}")
+    @JsonView(Views.Public.class)
     private String descripcion;
 
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", message = "{mensaje_producto_cantidad_negativa}")
+    @JsonView(Views.Public.class)
     private BigDecimal cantidad;
 
     @Column(precision = 25, scale = 15)
@@ -53,6 +60,7 @@ public class Producto implements Serializable {
 
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_cantidadVentaMinima_invalida}")
+    @JsonView(Views.Public.class)
     private BigDecimal ventaMinima;
 
     @ManyToOne
@@ -94,6 +102,7 @@ public class Producto implements Serializable {
 
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", message = "{mensaje_producto_precioLista_negativo}")
+    @JsonView(Views.Public.class)
     private BigDecimal precioLista;
 
     @ManyToOne
@@ -135,11 +144,13 @@ public class Producto implements Serializable {
     private boolean eliminado;
 
     @JsonGetter("nombreMedida")
+    @JsonView(Views.Public.class)
     public String getNombreMedida() {
         return medida.getNombre();
     }
 
     @JsonGetter("nombreRubro")
+    @JsonView(Views.Public.class)
     public String getNombreRubro() {
         return rubro.getNombre();
     }
