@@ -287,12 +287,13 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   @Transactional
-  public void enviarEmailDeRecuperacion(String email, String host) {
+  public void enviarEmailDeRecuperacion(long idEmpresa, String email, String host) {
     Usuario usuario = usuarioRepository.findByEmailAndEliminadoAndHabilitado(email, false, true);
     if (usuario != null) {
       String passwordRecoveryKey = RandomStringUtils.random(250, true, true);
       this.actualizarPasswordRecoveryKey(passwordRecoveryKey, usuario.getId_Usuario());
-      correoElectronicoService.enviarMail(
+      correoElectronicoService.enviarMailPorEmpresa(
+          idEmpresa,
           usuario.getEmail(),
           "Recuperación de contraseña",
           MessageFormat.format(

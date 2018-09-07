@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.validator.constraints.Email;
 
 @Entity
 @Table(name = "configuraciondelsistema")
@@ -26,23 +27,31 @@ public class ConfiguracionDelSistema implements Serializable {
     private boolean usarFacturaVentaPreImpresa;
 
     private int cantidadMaximaDeRenglonesEnFactura;
-    
+
     private boolean facturaElectronicaHabilitada;
-    
+
     @Lob
     private byte[] certificadoAfip;
-    
+
     private String firmanteCertificadoAfip;
-    
+
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String passwordCertificadoAfip;
-    
+
     private int nroPuntoDeVentaAfip;
 
     @Column(length = 1000)
     private String tokenWSAA;
 
     private String signTokenWSAA;
+
+    private boolean emailSenderHabilitado;
+
+    @Email
+    private String emailUsername;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String emailPassword;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaGeneracionTokenWSAA;

@@ -16,16 +16,32 @@ public class ConfiguracionDelSistemaBuilder {
     private int nroPuntoDeVentaAfip = 1;
     private String tokenWSAA = null;
     private String signTokenWSAA = null;
+    private boolean emailSenderHabilitado = true;
+    private String emailUserName = "test@mail.com";
+    private String emailPassword = "password";
     private Date fechaGeneracionTokenWSAA = null;
     private Date fechaVencimientoTokenWSAA = null;
     private Empresa empresa = new EmpresaBuilder().build();
 
-    public ConfiguracionDelSistema build() {
-        return new ConfiguracionDelSistema(id_ConfiguracionDelSistema, usarFacturaVentaPreImpresa,
-                cantidadMaximaDeRenglonesEnFactura, facturaElectronicaHabilitada, null,
-                firmanteCertificadoAfip, passwordCertificadoAfip, nroPuntoDeVentaAfip, tokenWSAA, signTokenWSAA,
-                fechaGeneracionTokenWSAA, fechaVencimientoTokenWSAA, empresa);
-    }
+  public ConfiguracionDelSistema build() {
+    return new ConfiguracionDelSistema(
+        id_ConfiguracionDelSistema,
+        usarFacturaVentaPreImpresa,
+        cantidadMaximaDeRenglonesEnFactura,
+        facturaElectronicaHabilitada,
+        null,
+        firmanteCertificadoAfip,
+        passwordCertificadoAfip,
+        nroPuntoDeVentaAfip,
+        tokenWSAA,
+        signTokenWSAA,
+        emailSenderHabilitado,
+        emailUserName,
+        emailPassword,
+        fechaGeneracionTokenWSAA,
+        fechaVencimientoTokenWSAA,
+        empresa);
+  }
 
     public ConfiguracionDelSistemaBuilder withIdConfiguracionDelSistema(long idCds) {
         this.id_ConfiguracionDelSistema = idCds;
@@ -74,6 +90,21 @@ public class ConfiguracionDelSistemaBuilder {
 
     public ConfiguracionDelSistemaBuilder withSignTokenWSAA(String signTokenWSAA) {
         this.signTokenWSAA = signTokenWSAA;
+        return this;
+    }
+
+    public ConfiguracionDelSistemaBuilder withEmailSenderHabilitado(boolean emailSenderHabilitado) {
+      this.emailSenderHabilitado = emailSenderHabilitado;
+      return this;
+    }
+
+    public ConfiguracionDelSistemaBuilder withEmailUserName(String emailUserName) {
+        this.emailUserName = emailUserName;
+        return this;
+    }
+
+    public ConfiguracionDelSistemaBuilder withEmailPassword(String emailPassword) {
+        this.emailPassword = emailPassword;
         return this;
     }
 

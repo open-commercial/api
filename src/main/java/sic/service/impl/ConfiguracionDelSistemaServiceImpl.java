@@ -17,34 +17,34 @@ import sic.service.BusinessServiceException;
 @Service
 public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSistemaService {
 
-    private final ConfiguracionDelSistemaRepository configuracionRepository; 
+    private final ConfiguracionDelSistemaRepository configuracionRepository;
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     public ConfiguracionDelSistemaServiceImpl(ConfiguracionDelSistemaRepository configuracionRepository) {
-        this.configuracionRepository = configuracionRepository;           
+        this.configuracionRepository = configuracionRepository;
     }
 
     @Override
     public ConfiguracionDelSistema getConfiguracionDelSistemaPorId(long id_ConfiguracionDelSistema) {
-        ConfiguracionDelSistema cds = configuracionRepository.findOne(id_ConfiguracionDelSistema); 
+        ConfiguracionDelSistema cds = configuracionRepository.findOne(id_ConfiguracionDelSistema);
         if (cds == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_cds_no_existente"));
         }
-        return cds;        
+        return cds;
     }
 
     @Override
-    public ConfiguracionDelSistema getConfiguracionDelSistemaPorEmpresa(Empresa empresa) {        
-        return configuracionRepository.findByEmpresa(empresa);        
+    public ConfiguracionDelSistema getConfiguracionDelSistemaPorEmpresa(Empresa empresa) {
+        return configuracionRepository.findByEmpresa(empresa);
     }
 
     @Override
     @Transactional
-    public ConfiguracionDelSistema guardar(ConfiguracionDelSistema cds) {    
+    public ConfiguracionDelSistema guardar(ConfiguracionDelSistema cds) {
         this.validarCds(TipoDeOperacion.ALTA, cds);
-        cds = configuracionRepository.save(cds);        
+        cds = configuracionRepository.save(cds);
         LOGGER.warn("La Configuracion del Sistema " + cds + " se guardó correctamente." );
         return cds;
     }
@@ -56,9 +56,12 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
         if (cds.getPasswordCertificadoAfip() != null) {
             cds.setPasswordCertificadoAfip(cds.getPasswordCertificadoAfip());
         }
+        if (cds.getEmailPassword() != null) {
+            cds.setEmailPassword(cds.getEmailPassword());
+        }
         configuracionRepository.save(cds);
     }
-    
+
     @Override
     @Transactional
     public void eliminar(ConfiguracionDelSistema cds) {
@@ -67,28 +70,38 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
 
     @Override
     public void validarCds(TipoDeOperacion tipoOperacion, ConfiguracionDelSistema cds) {
-        if (tipoOperacion.equals(TipoDeOperacion.ACTUALIZACION) && cds.isFacturaElectronicaHabilitada()) {
-            if (cds.getPasswordCertificadoAfip().equals("")) {
-                cds.setPasswordCertificadoAfip(this.getConfiguracionDelSistemaPorId(
-                        cds.getId_ConfiguracionDelSistema()).getPasswordCertificadoAfip());
+        if (tipoOperacion.equals(TipoDeOperacion.ACTUALIZACION)) {
+            if (cds.isFacturaElectronicaHabilitada() || cds.isEmailSenderHabilitado()) {
+                ConfiguracionDelSistema cdsRecuperado =
+                        this.getConfiguracionDelSistemaPorId(cds.getId_ConfiguracionDelSistema());
+                if (cds.isFacturaElectronicaHabilitada() && cds.getPasswordCertificadoAfip().equals("")) {
+                    cds.setPasswordCertificadoAfip(cdsRecuperado.getPasswordCertificadoAfip());
+                }
+                if (cds.isEmailSenderHabilitado() && cds.getEmailPassword().equals("")) {
+                    cds.setEmailPassword(cds.getEmailPassword());
+                }
             }
+        } else if (tipoOperacion.equals(TipoDeOperacion.ALTA)
+                && cds.isEmailSenderHabilitado()
+                && !cds.getEmailPassword().equals("")) {
+            cds.setEmailPassword(cds.getEmailPassword());
         }
         if (cds.isFacturaElectronicaHabilitada()) {
             if (cds.getCertificadoAfip() == null) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_cds_certificado_vacio"));
+                throw new BusinessServiceException(
+                        ResourceBundle.getBundle("Mensajes").getString("mensaje_cds_certificado_vacio"));
             }
             if (cds.getFirmanteCertificadoAfip().isEmpty()) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_cds_firmante_vacio"));
+                throw new BusinessServiceException(
+                        ResourceBundle.getBundle("Mensajes").getString("mensaje_cds_firmante_vacio"));
             }
             if (cds.getPasswordCertificadoAfip() == null || cds.getPasswordCertificadoAfip().isEmpty()) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_cds_password_vacio"));
+                throw new BusinessServiceException(
+                        ResourceBundle.getBundle("Mensajes").getString("mensaje_cds_password_vacio"));
             }
             if (cds.getNroPuntoDeVentaAfip() <= 0) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_cds_punto_venta_invalido"));
+                throw new BusinessServiceException(
+                        ResourceBundle.getBundle("Mensajes").getString("mensaje_cds_punto_venta_invalido"));
             }
         }
     }
@@ -98,8 +111,8 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
         return configuracionRepository.getCantidadMaximaDeRenglones(idEmpresa);
     }
 
-  @Override
-  public boolean isFacturaElectronicaHabilitada(long idEmpresa) {
-    return configuracionRepository.isFacturaElectronicaHabilitada(idEmpresa);
-  }
+    @Override
+    public boolean isFacturaElectronicaHabilitada(long idEmpresa) {
+        return configuracionRepository.isFacturaElectronicaHabilitada(idEmpresa);
+    }
 }

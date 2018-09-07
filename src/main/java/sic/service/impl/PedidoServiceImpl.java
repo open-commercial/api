@@ -179,7 +179,8 @@ public class PedidoServiceImpl implements IPedidoService {
     logger.warn("El Pedido {} se guardó correctamente.", pedido);
     String emailCliente = pedido.getCliente().getEmail();
     if (emailCliente != null && !emailCliente.isEmpty()) {
-      correoElectronicoService.enviarMailConAdjunto(
+      correoElectronicoService.enviarMailConAdjuntoPorEmpresa(
+          pedido.getEmpresa().getId_Empresa(),
           emailCliente,
           "Nuevo Pedido Ingresado",
           MessageFormat.format(
