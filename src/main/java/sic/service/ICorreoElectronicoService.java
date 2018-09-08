@@ -2,9 +2,8 @@ package sic.service;
 
 public interface ICorreoElectronicoService {
 
-  void enviarMail(String toEmail, String subject, String message);
-
-  void enviarMailConAdjunto(
+  void enviarMailPorEmpresa(
+      long idEmpresa,
       String toEmail,
       String subject,
       String mensaje,

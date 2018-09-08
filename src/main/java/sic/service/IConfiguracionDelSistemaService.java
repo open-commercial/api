@@ -10,7 +10,7 @@ public interface IConfiguracionDelSistemaService {
 
     ConfiguracionDelSistema getConfiguracionDelSistemaPorEmpresa(Empresa empresa);
 
-    ConfiguracionDelSistema getConfiguracionDelSistemaPorId(long id_ConfiguracionDelSistema);
+    ConfiguracionDelSistema getConfiguracionDelSistemaPorId(long idConfiguracionDelSistema);
 
     ConfiguracionDelSistema guardar(ConfiguracionDelSistema cds);
     

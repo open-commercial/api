@@ -72,10 +72,11 @@ public class AuthController {
 
   @GetMapping("/password-recovery")
   @ResponseStatus(HttpStatus.OK)
-  public void recuperarPassword(@RequestParam String email, HttpServletRequest request) {
+  public void recuperarPassword(
+      @RequestParam String email, @RequestParam long idEmpresa, HttpServletRequest request) {
     String origin = request.getHeader("Origin");
     if (origin == null) origin = request.getHeader("Host");
-    usuarioService.enviarEmailDeRecuperacion(email, origin);
+    usuarioService.enviarEmailDeRecuperacion(idEmpresa, email, origin);
   }
 
   @PostMapping("/password-recovery")

@@ -287,19 +287,22 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   @Transactional
-  public void enviarEmailDeRecuperacion(String email, String host) {
+  public void enviarEmailDeRecuperacion(long idEmpresa, String email, String host) {
     Usuario usuario = usuarioRepository.findByEmailAndEliminadoAndHabilitado(email, false, true);
     if (usuario != null) {
       String passwordRecoveryKey = RandomStringUtils.random(250, true, true);
       this.actualizarPasswordRecoveryKey(passwordRecoveryKey, usuario.getId_Usuario());
-      correoElectronicoService.enviarMail(
+      correoElectronicoService.enviarMailPorEmpresa(
+          idEmpresa,
           usuario.getEmail(),
           "Recuperación de contraseña",
           MessageFormat.format(
               ResourceBundle.getBundle("Mensajes").getString("mensaje_correo_recuperacion"),
               host,
               passwordRecoveryKey,
-              usuario.getId_Usuario()));
+              usuario.getId_Usuario()),
+          null,
+          null);
     } else
       throw new ServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_correo_no_existente"));
