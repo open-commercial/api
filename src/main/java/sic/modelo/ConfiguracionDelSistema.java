@@ -47,7 +47,7 @@ public class ConfiguracionDelSistema implements Serializable {
 
     private boolean emailSenderHabilitado;
 
-    @Email
+    @Email(message = "{mensaje_cds_email_invalido}")
     private String emailUsername;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

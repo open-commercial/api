@@ -18,7 +18,7 @@ import sic.service.BusinessServiceException;
 public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSistemaService {
 
     private final ConfiguracionDelSistemaRepository configuracionRepository;
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     public ConfiguracionDelSistemaServiceImpl(ConfiguracionDelSistemaRepository configuracionRepository) {
@@ -26,8 +26,8 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
     }
 
     @Override
-    public ConfiguracionDelSistema getConfiguracionDelSistemaPorId(long id_ConfiguracionDelSistema) {
-        ConfiguracionDelSistema cds = configuracionRepository.findOne(id_ConfiguracionDelSistema);
+    public ConfiguracionDelSistema getConfiguracionDelSistemaPorId(long idConfiguracionDelSistema) {
+        ConfiguracionDelSistema cds = configuracionRepository.findOne(idConfiguracionDelSistema);
         if (cds == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_cds_no_existente"));
@@ -45,7 +45,7 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
     public ConfiguracionDelSistema guardar(ConfiguracionDelSistema cds) {
         this.validarCds(TipoDeOperacion.ALTA, cds);
         cds = configuracionRepository.save(cds);
-        LOGGER.warn("La Configuracion del Sistema " + cds + " se guardó correctamente." );
+        logger.warn("La Configuracion del Sistema {} se guardó correctamente.", cds);
         return cds;
     }
 

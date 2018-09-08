@@ -9,7 +9,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
@@ -17,7 +16,6 @@ import javax.mail.util.ByteArrayDataSource;
 import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Transport;
-
 import sic.modelo.ConfiguracionDelSistema;
 import sic.service.IConfiguracionDelSistemaService;
 import sic.service.ICorreoElectronicoService;
@@ -40,29 +38,28 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
   @Override
   @Async
   public void enviarMailPorEmpresa(
-          long idEmpresa,
-          String toEmail,
-          String subject,
-          String mensaje,
-          byte[] byteArray,
-          String attachmentDescription) {
+      long idEmpresa,
+      String toEmail,
+      String subject,
+      String mensaje,
+      byte[] byteArray,
+      String attachmentDescription) {
     if (mailEnv.equals("production")) {
       Properties props = new Properties();
-      props.put("mail.smtp.host", "smtp.gmail.com"); // SMTP Host
-      props.put("mail.smtp.port", "587"); // TLS Port
-      props.put("mail.smtp.auth", "true"); // enable authentication
-      props.put("mail.smtp.starttls.enable", "true"); // enable STARTTLS
-      // create Authenticator object to pass in Session.getInstance argument
+      props.put("mail.smtp.host", "smtp.gmail.com");
+      props.put("mail.smtp.port", "587");
+      props.put("mail.smtp.auth", "true");
+      props.put("mail.smtp.starttls.enable", "true");
       try {
         Authenticator auth =
-                new Authenticator() {
-                  // override the getPasswordAuthentication method
-                  protected PasswordAuthentication getPasswordAuthentication() {
-                    ConfiguracionDelSistema cds = configuracionDelSistemaService
-                            .getConfiguracionDelSistemaPorId(idEmpresa);
-                    return new PasswordAuthentication(cds.getEmailUsername(), cds.getEmailPassword());
-                  }
-                };
+            new Authenticator() {
+              @Override
+              protected PasswordAuthentication getPasswordAuthentication() {
+                ConfiguracionDelSistema cds =
+                    configuracionDelSistemaService.getConfiguracionDelSistemaPorId(idEmpresa);
+                return new PasswordAuthentication(cds.getEmailUsername(), cds.getEmailPassword());
+              }
+            };
         Session session = Session.getInstance(props, auth);
         MimeMessage message = new MimeMessage(session);
         SimpleMailMessage mailMessage = new SimpleMailMessage();
@@ -70,7 +67,8 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
         mailMessage.setSubject(subject);
         mailMessage.setText(mensaje);
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        helper.setFrom(configuracionDelSistemaService
+        helper.setFrom(
+            configuracionDelSistemaService
                 .getConfiguracionDelSistemaPorId(idEmpresa)
                 .getEmailUsername());
         helper.setTo(mailMessage.getTo());
@@ -81,7 +79,7 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
           helper.addAttachment(attachmentDescription, bds);
         }
         Transport.send(helper.getMimeMessage());
-      } catch (MessagingException | MailException  ex) {
+      } catch (MessagingException | MailException ex) {
         logger.error(ex.getMessage(), ex);
       }
     } else {
