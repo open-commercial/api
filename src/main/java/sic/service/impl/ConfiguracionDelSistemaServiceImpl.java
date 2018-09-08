@@ -78,7 +78,7 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
                     cds.setPasswordCertificadoAfip(cdsRecuperado.getPasswordCertificadoAfip());
                 }
                 if (cds.isEmailSenderHabilitado() && cds.getEmailPassword().equals("")) {
-                    cds.setEmailPassword(cds.getEmailPassword());
+                    cds.setEmailPassword(cdsRecuperado.getEmailPassword());
                 }
             }
         } else if (tipoOperacion.equals(TipoDeOperacion.ALTA)
