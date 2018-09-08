@@ -39,40 +39,7 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
 
   @Override
   @Async
-  public void enviarMailPorEmpresa(long idEmpresa, String toEmail, String subject, String message) {
-    if (mailEnv.equals("production")) {
-      Properties props = new Properties();
-      props.put("mail.smtp.host", "smtp.gmail.com"); // SMTP Host
-      props.put("mail.smtp.port", "587"); // TLS Port
-      props.put("mail.smtp.auth", "true"); // enable authentication
-      props.put("mail.smtp.starttls.enable", "true"); // enable STARTTLS
-      ConfiguracionDelSistema cds = configuracionDelSistemaService
-              .getConfiguracionDelSistemaPorId(idEmpresa);
-      Authenticator auth =
-          new Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-              return new PasswordAuthentication(cds.getEmailUsername(), cds.getEmailPassword());
-            }
-          };
-      Session session = Session.getInstance(props, auth);
-      MimeMessage mimeMessage = new MimeMessage(session);
-      SimpleMailMessage mailMessage = new SimpleMailMessage();
-      mailMessage.setTo(toEmail);
-      mailMessage.setSubject(subject);
-      mailMessage.setText(message);
-      try {
-        Transport.send(mimeMessage);
-      } catch (MessagingException | MailException ex) {
-        logger.error(ex.getMessage(), ex);
-      }
-    } else {
-      logger.warn("Mail environment = {}, el mail NO se envió.", mailEnv);
-    }
-  }
-
-  @Override
-  @Async
-  public void enviarMailConAdjuntoPorEmpresa(
+  public void enviarMailPorEmpresa(
           long idEmpresa,
           String toEmail,
           String subject,
@@ -109,8 +76,10 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
         helper.setTo(mailMessage.getTo());
         helper.setSubject(mailMessage.getSubject());
         helper.setText(mailMessage.getText());
-        ByteArrayDataSource bds = new ByteArrayDataSource(byteArray, "application/pdf");
-        helper.addAttachment(attachmentDescription, bds);
+        if (byteArray != null) {
+          ByteArrayDataSource bds = new ByteArrayDataSource(byteArray, "application/pdf");
+          helper.addAttachment(attachmentDescription, bds);
+        }
         Transport.send(helper.getMimeMessage());
       } catch (MessagingException | MailException  ex) {
         logger.error(ex.getMessage(), ex);

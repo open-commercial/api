@@ -300,7 +300,9 @@ public class UsuarioServiceImpl implements IUsuarioService {
               ResourceBundle.getBundle("Mensajes").getString("mensaje_correo_recuperacion"),
               host,
               passwordRecoveryKey,
-              usuario.getId_Usuario()));
+              usuario.getId_Usuario()),
+          null,
+          null);
     } else
       throw new ServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_correo_no_existente"));
