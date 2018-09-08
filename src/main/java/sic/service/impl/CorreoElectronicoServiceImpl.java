@@ -27,7 +27,7 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
   @Value("${SIC_MAIL_ENV}")
   private String mailEnv;
 
-  private IConfiguracionDelSistemaService configuracionDelSistemaService;
+  private final IConfiguracionDelSistemaService configuracionDelSistemaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
@@ -44,7 +44,8 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
       String mensaje,
       byte[] byteArray,
       String attachmentDescription) {
-    if (mailEnv.equals("production")) {
+    ConfiguracionDelSistema cds = configuracionDelSistemaService.getConfiguracionDelSistemaPorId(idEmpresa);
+    if (mailEnv.equals("production") && cds.isFacturaElectronicaHabilitada()) {
       Properties props = new Properties();
       props.put("mail.smtp.host", "smtp.gmail.com");
       props.put("mail.smtp.port", "587");
@@ -55,8 +56,6 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
             new Authenticator() {
               @Override
               protected PasswordAuthentication getPasswordAuthentication() {
-                ConfiguracionDelSistema cds =
-                    configuracionDelSistemaService.getConfiguracionDelSistemaPorId(idEmpresa);
                 return new PasswordAuthentication(cds.getEmailUsername(), cds.getEmailPassword());
               }
             };

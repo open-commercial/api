@@ -104,6 +104,16 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
                         ResourceBundle.getBundle("Mensajes").getString("mensaje_cds_punto_venta_invalido"));
             }
         }
+        if (cds.isEmailSenderHabilitado()) {
+            if (cds.getEmailUsername() == null || cds.getEmailUsername().isEmpty()) {
+                throw new BusinessServiceException(
+                        ResourceBundle.getBundle("Mensajes").getString("mensaje_cds_email_vacio"));
+            }
+            if (cds.getEmailPassword() == null || cds.getEmailPassword().isEmpty()) {
+                throw new BusinessServiceException(
+                        ResourceBundle.getBundle("Mensajes").getString("mensaje_cds_email_password_vacio"));
+            }
+        }
     }
 
     @Override
