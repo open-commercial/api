@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import sic.modelo.Credencial;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
-import sic.modelo.modeloDTO.RecoveryPasswordDTO;
+import sic.modelo.dto.RecoveryPasswordDTO;
 import sic.service.IUsuarioService;
 
 @RestController
