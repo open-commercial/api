@@ -23,12 +23,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true, exclude = "renglonesNotaDebito")
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-@JsonSubTypes({
-  @JsonSubTypes.Type(value = NotaDebitoCliente.class), 
-  @JsonSubTypes.Type(value = NotaDebitoProveedor.class)
-})
-public abstract class NotaDebito extends Nota implements Serializable {
+public class NotaDebito extends Nota implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "idNota")
@@ -42,16 +37,28 @@ public abstract class NotaDebito extends Nota implements Serializable {
     @ManyToOne
     @JoinColumn(name = "idRecibo", referencedColumnName = "idRecibo")
     private Recibo recibo;
-    
+
     public NotaDebito() {}
 
     public NotaDebito(long idNota, long serie, long nroNota, boolean eliminada,
-            TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa, Usuario usuario, String motivo, List<RenglonNotaDebito> renglones, 
-            BigDecimal subTotalBruto, BigDecimal iva21Neto, BigDecimal iva105Neto, BigDecimal total, BigDecimal montoNoGravado, long CAE, 
-            Date vencimientoCAE, long numSerieAfip, long numNotaAfip, Recibo recibo) {
+                           TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa, Usuario usuario, Cliente cliente, String motivo, List<RenglonNotaDebito> renglones,
+                           BigDecimal subTotalBruto, BigDecimal iva21Neto, BigDecimal iva105Neto, BigDecimal total, BigDecimal montoNoGravado, long CAE,
+                           Date vencimientoCAE, long numSerieAfip, long numNotaAfip, Recibo recibo) {
 
-        super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, usuario,
-              motivo, subTotalBruto, iva21Neto, iva105Neto, total, CAE, vencimientoCAE, numSerieAfip, numNotaAfip);
+        super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, usuario, cliente, null, null, null,
+                motivo, subTotalBruto, iva21Neto, iva105Neto, total, CAE, vencimientoCAE, numSerieAfip, numNotaAfip);
+        this.montoNoGravado = montoNoGravado;
+        this.renglonesNotaDebito = renglones;
+        this.recibo = recibo;
+    }
+
+    public NotaDebito(long idNota, long serie, long nroNota, boolean eliminada,
+                      TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa, Usuario usuario, Proveedor proveedor, String motivo, List<RenglonNotaDebito> renglones,
+                      BigDecimal subTotalBruto, BigDecimal iva21Neto, BigDecimal iva105Neto, BigDecimal total, BigDecimal montoNoGravado, long CAE,
+                      Date vencimientoCAE, long numSerieAfip, long numNotaAfip, Recibo recibo) {
+
+        super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, usuario, null, null, proveedor, null,
+                motivo, subTotalBruto, iva21Neto, iva105Neto, total, CAE, vencimientoCAE, numSerieAfip, numNotaAfip);
         this.montoNoGravado = montoNoGravado;
         this.renglonesNotaDebito = renglones;
         this.recibo = recibo;

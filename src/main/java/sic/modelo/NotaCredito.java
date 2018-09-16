@@ -22,11 +22,6 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true, exclude = "renglonesNotaCredito")
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-@JsonSubTypes({
-  @JsonSubTypes.Type(value = NotaCreditoCliente.class),
-  @JsonSubTypes.Type(value = NotaCreditoProveedor.class), 
-})
 public abstract class NotaCredito extends Nota implements Serializable {
     
     @Column(nullable = false)
@@ -57,11 +52,22 @@ public abstract class NotaCredito extends Nota implements Serializable {
 
     public NotaCredito(long idNota, long serie, long nroNota, boolean eliminada,
             TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa,
-            Usuario usuario, String motivo, List<RenglonNotaCredito> renglones, BigDecimal subTotalBruto, BigDecimal iva21Neto,
+            Usuario usuario, Cliente cliente, FacturaVenta facturaVenta, String motivo, List<RenglonNotaCredito> renglones, BigDecimal subTotalBruto, BigDecimal iva21Neto,
             BigDecimal iva105Neto, BigDecimal total, long CAE, Date vencimientoCAE,
             long numSerieAfip, long numFacturaAfip) {
 
-        super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, usuario, motivo,
+        super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, usuario, cliente, facturaVenta, null, null, motivo,
+                subTotalBruto, iva21Neto, iva105Neto, total, CAE, vencimientoCAE, numSerieAfip, numFacturaAfip);
+        this.renglonesNotaCredito = renglones;
+    }
+
+    public NotaCredito(long idNota, long serie, long nroNota, boolean eliminada,
+                       TipoDeComprobante tipoDeComprobante, Date fecha, Empresa empresa,
+                       Usuario usuario, Proveedor proveedor, FacturaCompra facturaCompra, String motivo, List<RenglonNotaCredito> renglones, BigDecimal subTotalBruto, BigDecimal iva21Neto,
+                       BigDecimal iva105Neto, BigDecimal total, long CAE, Date vencimientoCAE,
+                       long numSerieAfip, long numFacturaAfip) {
+
+        super(idNota, serie, nroNota, eliminada, tipoDeComprobante, fecha, empresa, usuario, null, null, proveedor, facturaCompra, motivo,
                 subTotalBruto, iva21Neto, iva105Neto, total, CAE, vencimientoCAE, numSerieAfip, numFacturaAfip);
         this.renglonesNotaCredito = renglones;
     }

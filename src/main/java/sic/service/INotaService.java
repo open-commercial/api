@@ -47,13 +47,9 @@ public interface INotaService {
 
     TipoDeComprobante[] getTipoNotaCliente(Long idCliente, Long idEmpresa);
 
-    List<RenglonNotaCredito> getRenglonesDeNotaCreditoCliente(Long idNota);
+    List<RenglonNotaCredito> getRenglonesDeNotaCredito(Long idNota);
 
-    List<RenglonNotaDebito> getRenglonesDeNotaDebitoCliente(Long idNota);
-    
-    List<RenglonNotaCredito> getRenglonesDeNotaCreditoProveedor(Long idNota);
-
-    List<RenglonNotaDebito> getRenglonesDeNotaDebitoProveedor(Long idNota);
+    List<RenglonNotaDebito> getRenglonesDeNotaDebito(Long idNota);
     
     List<RenglonFactura> getRenglonesFacturaModificadosParaNotaCredito(long idFactura);
 

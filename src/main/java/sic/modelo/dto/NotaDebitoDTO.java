@@ -1,6 +1,5 @@
 package sic.modelo.dto;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
@@ -11,11 +10,7 @@ import sic.modelo.RenglonNotaDebito;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@JsonSubTypes({
-    @JsonSubTypes.Type(value = NotaDebitoClienteDTO.class, name = "NotaDebitoCliente"), 
-    @JsonSubTypes.Type(value = NotaDebitoProveedorDTO.class, name = "NotaDebitoProveedor")
-})
-public abstract class NotaDebitoDTO extends NotaDTO implements Serializable {
+public class NotaDebitoDTO extends NotaDTO implements Serializable {
     
     private List<RenglonNotaDebito> renglonesNotaDebito;
     private BigDecimal montoNoGravado;

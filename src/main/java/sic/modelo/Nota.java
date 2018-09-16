@@ -1,24 +1,12 @@
 package sic.modelo;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -32,6 +20,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"fecha", "tipoComprobante", "serie", "nroNota", "empresa"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idNota", scope = Nota.class)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = NotaCredito.class),
+        @JsonSubTypes.Type(value = NotaDebito.class)
+})
 public abstract class Nota implements Serializable {
     
     @JsonGetter(value = "type")
@@ -66,6 +59,24 @@ public abstract class Nota implements Serializable {
     @ManyToOne
     @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
     private Usuario usuario;
+
+    @ManyToOne
+    @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
+    private Cliente cliente;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "id_Factura", insertable=false, updatable=false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private FacturaVenta facturaVenta;
+
+    @ManyToOne
+    @JoinColumn(name = "id_Proveedor", referencedColumnName = "id_Proveedor")
+    private Proveedor proveedor;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "id_Factura", insertable=false, updatable=false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private FacturaCompra facturaCompra;
     
     @Column(nullable = false)
     private String motivo;

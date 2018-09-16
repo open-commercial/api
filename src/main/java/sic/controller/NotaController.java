@@ -2,6 +2,8 @@ package sic.controller;
 
 import java.math.BigDecimal;
 import java.util.List;
+
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.dto.NotaDebitoDTO;
 import sic.service.INotaService;
 import sic.service.IReciboService;
 
@@ -27,11 +30,13 @@ public class NotaController {
     
     private final INotaService notaService;
     private final IReciboService reciboService;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public NotaController(INotaService notaService, IReciboService reciboService) {
+    public NotaController(INotaService notaService, IReciboService reciboService, ModelMapper modelMapper) {
         this.notaService = notaService;
         this.reciboService = reciboService;
+        this.modelMapper = modelMapper;
     }
 
     @GetMapping("/notas/{idNota}")
@@ -63,32 +68,18 @@ public class NotaController {
         return notaService.getTipoNotaCliente(idCliente, idEmpresa);
     }
     
-    @GetMapping("/notas/renglones/credito/clientes/{idNotaCredito}")
+    @GetMapping("/notas/renglones/credito/{idNotaCredito}")
     @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public List<RenglonNotaCredito> getRenglonesDeNotaCreditoCliente(@PathVariable long idNotaCredito) {
-        return notaService.getRenglonesDeNotaCreditoCliente(idNotaCredito);
+        return notaService.getRenglonesDeNotaCredito(idNotaCredito);
     }
-    
-    @GetMapping("/notas/renglones/debito/clientes/{idNotaDebito}")
+
+    @GetMapping("/notas/renglones/debito/{idNotaDebito}")
     @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public List<RenglonNotaDebito> getRenglonesDeNotaDebitoCliente(@PathVariable long idNotaDebito) {
-        return notaService.getRenglonesDeNotaDebitoCliente(idNotaDebito);
-    }
-    
-    @GetMapping("/notas/renglones/credito/proveedores/{idNotaCredito}")
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public List<RenglonNotaCredito> getRenglonesDeNotaCreditoProveedor(@PathVariable long idNotaCredito) {
-        return notaService.getRenglonesDeNotaCreditoProveedor(idNotaCredito);
-    }
-    
-    @GetMapping("/notas/renglones/debito/proveedores/{idNotaDebito}")
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public List<RenglonNotaDebito> getRenglonesDeNotaDebitoProveedor(@PathVariable long idNotaDebito) {
-        return notaService.getRenglonesDeNotaDebitoProveedor(idNotaDebito);
+        return notaService.getRenglonesDeNotaDebito(idNotaDebito);
     }
     
     @PostMapping("/notas/credito/empresa/{idEmpresa}/cliente/{idCliente}/usuario/{idUsuario}/factura/{idFactura}")
@@ -106,14 +97,15 @@ public class NotaController {
     @PostMapping("/notas/debito/empresa/{idEmpresa}/cliente/{idCliente}/usuario/{idUsuario}/recibo/{idRecibo}")
     @ResponseStatus(HttpStatus.CREATED)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-    public Nota guardarNotaDebitoCliente(@RequestBody NotaDebito nota,
+    public Nota guardarNotaDebitoCliente(@RequestBody NotaDebitoDTO notaDebitoDTO,
                                   @PathVariable long idEmpresa,
                                   @PathVariable long idCliente,
                                   @PathVariable long idUsuario,
                                   @PathVariable long idRecibo) {
+        NotaDebito nota = modelMapper.map(notaDebitoDTO, NotaDebito.class);
         return notaService.guardarNotaCliente(nota, idEmpresa, idCliente, idUsuario, idRecibo, null, false);
     }
-    
+
     @PostMapping("/notas/credito/empresa/{idEmpresa}/proveedor/{idProveedor}/usuario/{idUsuario}/factura/{idFactura}")
     @ResponseStatus(HttpStatus.CREATED)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
