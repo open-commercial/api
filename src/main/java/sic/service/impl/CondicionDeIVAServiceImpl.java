@@ -25,9 +25,9 @@ public class CondicionDeIVAServiceImpl implements ICondicionIVAService {
     public CondicionDeIVAServiceImpl(CondicionIVARepository condicionIVARepository) {        
         this.condicionIVARepository = condicionIVARepository;        
     }
-    
+
     @Override
-    public CondicionIVA getCondicionIVAPorId(long idCondicionIVA) { 
+    public CondicionIVA getCondicionIVAPorId(long idCondicionIVA) {
         CondicionIVA condicionIVA = condicionIVARepository.findById(idCondicionIVA);
         if (condicionIVA == null) {
             throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")

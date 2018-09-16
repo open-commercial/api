@@ -7,6 +7,7 @@ import sic.modelo.*;
 public class ClienteBuilder {
 
   private long id_Cliente = 0L;
+  private TipoDeCliente tipoDeCliente = TipoDeCliente.EMPRESA;
   private String nroCliente = "00001";
   private String razonSocial = "Construcciones S.A.";
   private String nombreFantasia = "Servimetal";
@@ -18,7 +19,7 @@ public class ClienteBuilder {
   private String telSecundario = "379 4852498";
   private Localidad localidad = new LocalidadBuilder().build();
   private String contacto = "Facundo Pastore";
-  private Date fechaAlta = new Date(1458010800000L); // 15-03-2016;;
+  private Date fechaAlta = new Date(1458010800000L); // 15-03-2016;
   private Empresa empresa = new EmpresaBuilder().build();
   private Usuario viajante = new UsuarioBuilder().build();
   private Usuario credencial = new UsuarioBuilder().build();
@@ -30,6 +31,7 @@ public class ClienteBuilder {
   public Cliente build() {
     return new Cliente(
         id_Cliente,
+        tipoDeCliente,
         nroCliente,
         razonSocial,
         nombreFantasia,
@@ -53,6 +55,11 @@ public class ClienteBuilder {
 
   public ClienteBuilder withId_Cliente(long id_Cliente) {
     this.id_Cliente = id_Cliente;
+    return this;
+  }
+
+  public ClienteBuilder withTipoDeCliente(TipoDeCliente tipoDeCliente) {
+    this.tipoDeCliente = tipoDeCliente;
     return this;
   }
 

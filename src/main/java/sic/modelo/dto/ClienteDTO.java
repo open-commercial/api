@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import sic.modelo.TipoDeCliente;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -16,6 +17,7 @@ import java.util.Date;
 public class ClienteDTO implements Serializable {
 
   private long id_Cliente;
+  private TipoDeCliente tipoDeCliente;
   private String razonSocial;
   private String nombreFantasia;
   private String direccion;

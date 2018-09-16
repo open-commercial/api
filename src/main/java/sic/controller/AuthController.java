@@ -5,19 +5,17 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import sic.modelo.Credencial;
-import sic.modelo.Rol;
-import sic.modelo.Usuario;
+import sic.modelo.*;
 import sic.modelo.dto.RecoveryPasswordDTO;
+import sic.modelo.dto.RegistracionClienteAndUsuarioDTO;
 import sic.service.IUsuarioService;
+import sic.service.ServiceException;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -94,5 +92,27 @@ public class AuthController {
           ResourceBundle.getBundle("Mensajes").getString("mensaje_error_passwordRecoveryKey"));
     }
     return token;
+  }
+
+  @PostMapping("/registracion")
+  public void registrarse(
+      @RequestBody RegistracionClienteAndUsuarioDTO registracionClienteAndUsuarioDTO) {
+    Usuario nuevoUsuario = new Usuario();
+    nuevoUsuario.setHabilitado(false);
+    nuevoUsuario.setNombre(registracionClienteAndUsuarioDTO.getNombre());
+    nuevoUsuario.setApellido(registracionClienteAndUsuarioDTO.getApellido());
+    nuevoUsuario.setEmail(registracionClienteAndUsuarioDTO.getEmail());
+    nuevoUsuario.setPassword(registracionClienteAndUsuarioDTO.getPassword());
+    nuevoUsuario.setRoles(Collections.singletonList(Rol.COMPRADOR));
+    Cliente nuevoCliente = new Cliente();
+    if (registracionClienteAndUsuarioDTO.getTipoDeCliente() == TipoDeCliente.EMPRESA) {
+      nuevoCliente.setRazonSocial(registracionClienteAndUsuarioDTO.getRazonSocial());
+
+    } else if (registracionClienteAndUsuarioDTO.getTipoDeCliente() == TipoDeCliente.PERSONA) {
+      nuevoCliente.setRazonSocial(
+          registracionClienteAndUsuarioDTO.getNombre()
+              + " "
+              + registracionClienteAndUsuarioDTO.getApellido());
+    }
   }
 }

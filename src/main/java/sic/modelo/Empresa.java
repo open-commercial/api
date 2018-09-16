@@ -2,15 +2,8 @@ package sic.modelo;
 
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -42,6 +35,12 @@ public class Empresa implements Serializable {
     @ManyToOne
     @JoinColumn(name = "id_CondicionIVA", referencedColumnName = "id_CondicionIVA")
     private CondicionIVA condicionIVA;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private CategoriaIVA categoriaIVA;
+
+    private String idFiscal;
 
     private long cuip;
 

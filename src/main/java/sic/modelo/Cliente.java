@@ -6,17 +6,8 @@ import com.querydsl.core.annotations.QueryInit;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
+import javax.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -37,6 +28,10 @@ public class Cliente implements Serializable {
     @GeneratedValue
     private long id_Cliente;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private TipoDeCliente tipoDeCliente;
+
     private String nroCliente;
 
     @Column(nullable = false)
@@ -49,6 +44,10 @@ public class Cliente implements Serializable {
     @ManyToOne
     @JoinColumn(name = "id_CondicionIVA", referencedColumnName = "id_CondicionIVA")
     private CondicionIVA condicionIVA;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private CategoriaIVA categoriaIVA;
 
     private String idFiscal;
 

@@ -4,14 +4,8 @@ import com.querydsl.core.annotations.QueryInit;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -45,6 +39,9 @@ public class Proveedor implements Serializable {
     private CondicionIVA condicionIVA;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private CategoriaIVA categoriaIVA;
+
     private String idFiscal;
 
     @Column(nullable = false)
