@@ -404,46 +404,59 @@ public class NotaServiceImpl implements INotaService {
         }
     }
 
-    @Override
-    @Transactional
-    public Nota guardarNotaCliente(Nota nota, long idEmpresa, long idCliente, long idUsuario, Long idRecibo, Long idFactura, boolean modificarStock) {
-        this.validarNota(nota, idEmpresa, idUsuario);
-        nota.setSerie(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(nota.getEmpresa()).getNroPuntoDeVentaAfip());
-        Cliente cliente = clienteService.getClientePorId(idCliente);
-        nota.setCliente(cliente);
-        if (cliente == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_cliente_no_existente"));
-        }
-        if (nota instanceof NotaCredito) {
-            if (nota.getCliente() != null && nota.getFacturaVenta() != null) {
-                Factura factura = facturaService.getFacturaPorId(idFactura);
-                NotaCredito notaCredito = (NotaCredito) nota;
-                if (factura instanceof FacturaVenta) {
-                    notaCredito.setFacturaVenta((FacturaVenta) factura);
-                } else {
-                    throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                            .getString("mensaje_nota_de_credito_cliente_error_factura"));
-                }
-                notaCredito.setTipoComprobante(this.getTipoDeNotaCreditoSegunFactura(notaCredito.getFacturaVenta()));
-                notaCredito.setNroNota(this.getSiguienteNumeroNotaCreditoCliente(idEmpresa, nota.getTipoComprobante()));
-                notaCredito.setModificaStock(modificarStock);
-                notaCredito.setCliente(cliente);
-                if (modificarStock) {
-                    this.actualizarStock(notaCredito.getRenglonesNotaCredito(), TipoDeOperacion.ACTUALIZACION);
-                }
-                this.validarCalculosCredito(notaCredito);
-                nota = notaCreditoRepository.save(notaCredito);
-                this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ALTA);
-                LOGGER.warn("La Nota " + notaCredito + " se guardó correctamente.");
-                return nota;
-
-            }
-        } else if (nota.getCliente() != null && nota.getFacturaVenta() == null) {
-            nota = this.guardarNotaDebitoCliente((NotaDebito) nota, idRecibo, idEmpresa, cliente);
-        }
-        return nota;
+  @Override
+  @Transactional
+  public Nota guardarNotaCliente(
+      Nota nota,
+      long idEmpresa,
+      long idCliente,
+      long idUsuario,
+      Long idRecibo,
+      Long idFactura,
+      boolean modificarStock) {
+    this.validarNota(nota, idEmpresa, idUsuario);
+    nota.setSerie(
+        configuracionDelSistemaService
+            .getConfiguracionDelSistemaPorEmpresa(nota.getEmpresa())
+            .getNroPuntoDeVentaAfip());
+    Cliente cliente = clienteService.getClientePorId(idCliente);
+    nota.setCliente(cliente);
+    if (cliente == null) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_no_existente"));
     }
+    if (nota instanceof NotaCredito) {
+      Factura factura = facturaService.getFacturaPorId(idFactura);
+      NotaCredito notaCredito = (NotaCredito) nota;
+      if (factura instanceof FacturaVenta) {
+        notaCredito.setFacturaVenta((FacturaVenta) factura);
+      } else {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes")
+                .getString("mensaje_nota_de_credito_cliente_error_factura"));
+      }
+      if (nota.getCliente() != null && nota.getFacturaVenta() != null) {
+        notaCredito.setTipoComprobante(
+            this.getTipoDeNotaCreditoSegunFactura(notaCredito.getFacturaVenta()));
+        notaCredito.setNroNota(
+            this.getSiguienteNumeroNotaCreditoCliente(idEmpresa, nota.getTipoComprobante()));
+        notaCredito.setModificaStock(modificarStock);
+        notaCredito.setCliente(cliente);
+        if (modificarStock) {
+          this.actualizarStock(
+              notaCredito.getRenglonesNotaCredito(), TipoDeOperacion.ACTUALIZACION);
+        }
+        this.validarCalculosCredito(notaCredito);
+        nota = notaCreditoRepository.save(notaCredito);
+        this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ALTA);
+        LOGGER.warn("La Nota " + notaCredito + " se guardó correctamente.");
+        return nota;
+      }
+    } else if (nota.getCliente() != null && nota.getFacturaVenta() == null) {
+      nota = this.guardarNotaDebitoCliente((NotaDebito) nota, idRecibo, idEmpresa, cliente);
+    }
+    return nota;
+  }
 
     private NotaDebito guardarNotaDebitoCliente(NotaDebito notaDebitoCliente, long idRecibo, long idEmpresa, Cliente cliente) {
         notaDebitoCliente.setCliente(cliente);
@@ -457,42 +470,54 @@ public class NotaServiceImpl implements INotaService {
         LOGGER.warn("La Nota " + notaDebitoCliente + " se guardó correctamente.");
         return notaDebitoCliente;
     }
-    
-    @Override
-    @Transactional
-    public Nota guardarNotaProveedor(Nota nota, long idEmpresa, long idProveedor, long idUsuario, Long idRecibo, Long idFactura, boolean modificarStock) {
-        this.validarNota(nota, idEmpresa, idUsuario);
-        Proveedor proveedor = proveedorService.getProveedorPorId(idProveedor);
-        if (proveedor == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_proveedor_no_existente"));
-        }
-        if (nota.getProveedor() != null && nota.getFacturaCompra() != null) {
-            Factura factura = facturaService.getFacturaPorId(idFactura);
-            NotaCredito notaCreditoProveedor = (NotaCredito) nota;
-            if (factura instanceof FacturaCompra) {
-                notaCreditoProveedor.setFacturaCompra((FacturaCompra) factura);
-            } else {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_nota_de_credito_cliente_error_factura"));
-            }
-            notaCreditoProveedor.setTipoComprobante(this.getTipoDeNotaCreditoSegunFactura(notaCreditoProveedor.getFacturaCompra()));
-            notaCreditoProveedor.setModificaStock(modificarStock);
-            notaCreditoProveedor.setProveedor(proveedor);
-            if (modificarStock) { 
-                this.actualizarStock(notaCreditoProveedor.getRenglonesNotaCredito(), TipoDeOperacion.ELIMINACION);
-            }
-            this.validarCalculosCredito(notaCreditoProveedor);
-            nota = notaCreditoRepository.save(notaCreditoProveedor);
-            this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ALTA);
-            LOGGER.warn("La Nota " + notaCreditoProveedor + " se guardó correctamente.");
-            nota = notaCreditoProveedor;
-        } else if (nota.getProveedor() != null && nota.getFacturaCompra() == null) {
-            this.guardarNotaDebitoProveedor((NotaDebito) nota, idRecibo, proveedor);
-        }
-        return nota;
+
+  @Override
+  @Transactional
+  public Nota guardarNotaProveedor(
+      Nota nota,
+      long idEmpresa,
+      long idProveedor,
+      long idUsuario,
+      Long idRecibo,
+      Long idFactura,
+      boolean modificarStock) {
+    this.validarNota(nota, idEmpresa, idUsuario);
+    Proveedor proveedor = proveedorService.getProveedorPorId(idProveedor);
+    if (proveedor == null) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_no_existente"));
+    } else {
+        nota.setProveedor(proveedor);
     }
-       
+    if (idFactura != null) {
+      Factura factura = facturaService.getFacturaPorId(idFactura);
+      if (factura instanceof FacturaCompra) {
+        nota.setFacturaCompra((FacturaCompra) factura);
+      } else {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes")
+                .getString("mensaje_nota_de_debito_proveedor_error_factura"));
+      }
+    }
+    if (nota.getProveedor() != null && nota.getFacturaCompra() != null) {
+      nota.setTipoComprobante(this.getTipoDeNotaCreditoSegunFactura(nota.getFacturaCompra()));
+      NotaCredito notaCreditoProveedor = (NotaCredito) nota;
+      notaCreditoProveedor.setModificaStock(modificarStock);
+      if (modificarStock) {
+        this.actualizarStock(
+            notaCreditoProveedor.getRenglonesNotaCredito(), TipoDeOperacion.ELIMINACION);
+      }
+      this.validarCalculosCredito(notaCreditoProveedor);
+      nota = notaCreditoRepository.save(notaCreditoProveedor);
+      this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ALTA);
+      LOGGER.warn("La Nota " + notaCreditoProveedor + " se guardó correctamente.");
+      nota = notaCreditoProveedor;
+    } else if (nota.getProveedor() != null && nota.getFacturaCompra() == null) {
+      this.guardarNotaDebitoProveedor((NotaDebito) nota, idRecibo, proveedor);
+    }
+    return nota;
+  }
+
     private NotaDebito guardarNotaDebitoProveedor(NotaDebito notaDebitoProveedor, Long idRecibo, Proveedor proveedor) {
         notaDebitoProveedor.setProveedor(proveedor);
         notaDebitoProveedor.setRecibo(reciboService.getById(idRecibo));

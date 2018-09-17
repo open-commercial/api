@@ -277,11 +277,6 @@ public class CuentaCorrienteIntegrationTest {
                 restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class)
         .compareTo(BigDecimal.ZERO) == 0);
         NotaDebitoDTO notaDebitoCliente = new NotaDebitoDTO();
-        //notaDebitoCliente.setCliente(cliente);
-//        EmpresaDTO empresaDTO = EmpresaDTO.builder()
-//          .id_Empresa(empresa.getId_Empresa())
-//          .build();
-       // notaDebitoCliente.setEmpresa(empresaDTO);
         List<RenglonNotaDebito> renglonesCalculados = Arrays.asList(restTemplate.getForObject(apiPrefix + "/notas/renglon/debito/recibo/1?monto=100&ivaPorcentaje=21", RenglonNotaDebito[].class));
         notaDebitoCliente.setRenglonesNotaDebito(renglonesCalculados);
         notaDebitoCliente.setIva105Neto(BigDecimal.ZERO);
@@ -290,7 +285,6 @@ public class CuentaCorrienteIntegrationTest {
         notaDebitoCliente.setMotivo("Test alta nota debito - Cheque rechazado");
         notaDebitoCliente.setSubTotalBruto(new BigDecimal("100"));
         notaDebitoCliente.setTotal(new BigDecimal("6113.5"));
-        //notaDebitoCliente.setUsuario(credencial);
         restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/cliente/1/usuario/1/recibo/1", notaDebitoCliente, Nota.class);
         restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
@@ -348,7 +342,8 @@ public class CuentaCorrienteIntegrationTest {
         notaCredito.setTotal(restTemplate.getForObject(apiPrefix + "/notas/credito/total?subTotalBruto=" + notaCredito.getSubTotalBruto()
                 + "&iva21Neto=" + notaCredito.getIva21Neto()
                 + "&iva105Neto=" + notaCredito.getIva105Neto(), BigDecimal.class));
-        restTemplate.postForObject(apiPrefix + "/notas/credito/empresa/1/cliente/1/usuario/1/factura/1?modificarStock=true", notaCredito, NotaCredito.class);
+        notaCredito.setMotivo("Devolución");
+        restTemplate.postForObject(apiPrefix + "/notas/credito/empresa/1/cliente/1/usuario/1/factura/1?modificarStock=true", notaCredito, Nota.class);
         restTemplate.getForObject(apiPrefix + "/notas/2/reporte", byte[].class);
         uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,4";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {}).getBody().isEmpty());
@@ -630,7 +625,8 @@ public class CuentaCorrienteIntegrationTest {
                 + "&iva105Neto=" + notaCreditoProveedor.getIva105Neto(), BigDecimal.class));
         notaCreditoProveedor.setTotal(restTemplate.getForObject(apiPrefix + "/notas/credito/total?subTotalBruto=" + notaCreditoProveedor.getSubTotalBruto()
                 + "&iva21Neto=" + notaCreditoProveedor.getIva21Neto()
-                + "&iva105Neto=" + notaCreditoProveedor.getIva105Neto(), BigDecimal.class));      
+                + "&iva105Neto=" + notaCreditoProveedor.getIva105Neto(), BigDecimal.class));
+        notaCreditoProveedor.setMotivo("Devolución");
         restTemplate.postForObject(apiPrefix + "/notas/credito/empresa/1/proveedor/1/usuario/1/factura/2?modificarStock=true", notaCreditoProveedor, NotaCredito.class);
         renglonesCuentaCorriente = restTemplate
                 .exchange(apiPrefix + "/cuentas-corriente/1/renglones"

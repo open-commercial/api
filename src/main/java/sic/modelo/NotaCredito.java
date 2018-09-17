@@ -22,7 +22,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true, exclude = "renglonesNotaCredito")
-public abstract class NotaCredito extends Nota implements Serializable {
+public class NotaCredito extends Nota implements Serializable {
     
     @Column(nullable = false)
     private boolean modificaStock;

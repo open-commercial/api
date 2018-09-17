@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.dto.NotaCreditoDTO;
 import sic.modelo.dto.NotaDebitoDTO;
 import sic.service.INotaService;
 import sic.service.IReciboService;
@@ -85,12 +86,13 @@ public class NotaController {
     @PostMapping("/notas/credito/empresa/{idEmpresa}/cliente/{idCliente}/usuario/{idUsuario}/factura/{idFactura}")
     @ResponseStatus(HttpStatus.CREATED)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-    public Nota guardarNotaCreditoCliente(@RequestBody NotaCredito nota,
+    public Nota guardarNotaCreditoCliente(@RequestBody NotaCreditoDTO notaCreditoDTO,
                                    @PathVariable long idEmpresa,
                                    @PathVariable long idCliente,
                                    @PathVariable long idUsuario,
                                    @PathVariable long idFactura, 
                                    @RequestParam boolean modificarStock) {
+        NotaCredito nota = modelMapper.map(notaCreditoDTO, NotaCredito.class);
         return notaService.guardarNotaCliente(nota, idEmpresa, idCliente, idUsuario, null, idFactura, modificarStock);
     }
     
@@ -109,23 +111,25 @@ public class NotaController {
     @PostMapping("/notas/credito/empresa/{idEmpresa}/proveedor/{idProveedor}/usuario/{idUsuario}/factura/{idFactura}")
     @ResponseStatus(HttpStatus.CREATED)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public Nota guardarNotaCreditoProveedor(@RequestBody NotaCredito nota,
+    public Nota guardarNotaCreditoProveedor(@RequestBody NotaCreditoDTO notaCreditoDTO,
                                    @PathVariable long idEmpresa,
                                    @PathVariable long idProveedor,
                                    @PathVariable long idUsuario,
                                    @PathVariable long idFactura, 
                                    @RequestParam boolean modificarStock) {
+        NotaCredito nota = modelMapper.map(notaCreditoDTO, NotaCredito.class);
         return notaService.guardarNotaProveedor(nota, idEmpresa, idProveedor, idUsuario, null, idFactura, modificarStock);
     }
     
     @PostMapping("/notas/debito/empresa/{idEmpresa}/proveedor/{idProveedor}/usuario/{idUsuario}/recibo/{idRecibo}")
     @ResponseStatus(HttpStatus.CREATED)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public Nota guardarNotaDebitoProveedor(@RequestBody NotaDebito nota,
+    public Nota guardarNotaDebitoProveedor(@RequestBody NotaDebitoDTO notaDebitoDTO,
                                   @PathVariable long idEmpresa,
                                   @PathVariable long idProveedor,
                                   @PathVariable long idUsuario,
                                   @PathVariable long idRecibo) {
+        NotaDebito nota = modelMapper.map(notaDebitoDTO, NotaDebito.class);
         return notaService.guardarNotaProveedor(nota, idEmpresa, idProveedor, idUsuario, idRecibo, null, false);
     }
 
