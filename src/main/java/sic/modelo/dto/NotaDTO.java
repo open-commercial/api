@@ -22,36 +22,13 @@ import sic.modelo.TipoDeComprobante;
 })
 public abstract class NotaDTO implements Serializable {
 
-  //    private Long idNota = 0L;
-  //    private long serie = 0;
-  //    private long nroNota = 1;
-  //    private boolean eliminada = false;
-  //    private TipoDeComprobante tipoComprobante;
-  //    private Date fecha;
-  //    private EmpresaDTO empresa = EmpresaDTO.builder().build();
-  //    private UsuarioDTO usuario = UsuarioDTO.builder().build();
-  //    private ClienteDTO cliente;
-  //    private FacturaVentaDTO facturaVenta;
-  //    private ProveedorDTO proveedor;
-  //    private FacturaCompraDTO facturaCompra;
-  //    private String motivo = "Nota por default";
-  //    private BigDecimal subTotalBruto = new BigDecimal("6500");
-  //    private BigDecimal iva21Neto = new BigDecimal("1365");
-  //    private BigDecimal iva105Neto = BigDecimal.ZERO;
-  //    private BigDecimal total = new BigDecimal("7865");
-  //    private long CAE = 0L;
-  //    private Date vencimientoCAE = new Date();
-  //    private long numSerieAfip = 0L;
-  //    private long numNotaAfip= 0L;
-  //
-
   private Long idNota;
   private long serie;
   private long nroNota;
   private boolean eliminada;
   private TipoDeComprobante tipoComprobante;
   private Date fecha;
-  private EmpresaDTO empresa;
+  private EmpresaDTO empresa; // cambiar por como está en la api
   private UsuarioDTO usuario;
   private ClienteDTO cliente;
   private FacturaVentaDTO facturaVenta;
@@ -66,4 +43,5 @@ public abstract class NotaDTO implements Serializable {
   private Date vencimientoCAE;
   private long numSerieAfip;
   private long numNotaAfip;
+
 }

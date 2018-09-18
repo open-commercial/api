@@ -1,4 +1,4 @@
-package sic.modelo;
+package sic.modelo;        //renglonNota.setImporteNeto(this.calcularImporteRenglon(BigDecimal.ZERO, renglonNota.getImporteBruto(), BigDecimal.ONE));
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;

@@ -12,8 +12,6 @@ public interface NotaCreditoRepository extends NotaRepository<NotaCredito> , Que
     
     @Query("SELECT nc FROM NotaCredito nc WHERE nc.idNota = :idNotaCredito AND nc.eliminada = false")
     NotaCredito getById(@Param("idNotaCredito") long idNotaCredito);
-    
-    NotaCredito findTopByEmpresaAndTipoComprobanteAndSerieOrderByNroNotaDesc(Empresa empresa, TipoDeComprobante tipoComprobante, long serie);
 
     List<NotaCredito> findAllByFacturaVentaAndEliminada(FacturaVenta factura, boolean eliminada);
 
@@ -22,18 +20,11 @@ public interface NotaCreditoRepository extends NotaRepository<NotaCredito> , Que
             "AND nc.cliente IS NOT null")
     Long buscarMayorNumNotaCreditoClienteSegunTipo(@Param("tipoComprobante") TipoDeComprobante tipoComprobante, @Param("serie") long serie, @Param("idEmpresa") long idEmpresa);
 
-    @Query("SELECT max(nc.nroNota) FROM NotaCredito nc " +
-            "WHERE nc.tipoComprobante = :tipoComprobante AND nc.serie = :serie AND nc.empresa.id_Empresa = :idEmpresa " +
-            "AND nc.proveedor IS NOT null")
-    Long buscarMayorNumNotaCreditoProveedorSegunTipo(@Param("tipoComprobante") TipoDeComprobante tipoComprobante, @Param("serie") long serie, @Param("idEmpresa") long idEmpresa);
-
     @Query("SELECT SUM(nc.total) FROM NotaCredito nc WHERE nc.facturaVenta = :facturaVenta AND nc.eliminada = false")
     BigDecimal getTotalNotasCreditoPorFacturaVenta(@Param("facturaVenta") FacturaVenta facturaVenta);
 
     boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta, boolean eliminada);
 
     List<NotaCredito> findAllByFacturaCompraAndEliminada(FacturaCompra factura, boolean eliminada);
-
-    boolean existsByFacturaCompraAndEliminada(FacturaCompra facturaCompra, boolean eliminada);
     
 }

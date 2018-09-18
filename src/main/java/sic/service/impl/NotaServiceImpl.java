@@ -449,7 +449,7 @@ public class NotaServiceImpl implements INotaService {
         this.validarCalculosCredito(notaCredito);
         nota = notaCreditoRepository.save(notaCredito);
         this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ALTA);
-        LOGGER.warn("La Nota " + notaCredito + " se guardó correctamente.");
+        LOGGER.warn("La Nota {} se guardó correctamente.", notaCredito);
         return nota;
       }
     } else if (nota.getCliente() != null && nota.getFacturaVenta() == null) {
@@ -819,7 +819,6 @@ public class NotaServiceImpl implements INotaService {
         renglonNota.setImporteBruto(renglonNota.getMonto());
         renglonNota.setIvaPorcentaje(BigDecimal.ZERO);
         renglonNota.setIvaNeto(BigDecimal.ZERO);
-        renglonNota.setImporteNeto(this.calcularImporteRenglon(BigDecimal.ZERO, renglonNota.getImporteBruto(), BigDecimal.ONE));
         renglonesNota.add(renglonNota);
         renglonNota = new RenglonNotaDebito();
         renglonNota.setDescripcion("Gasto Administrativo");
@@ -827,13 +826,13 @@ public class NotaServiceImpl implements INotaService {
         renglonNota.setIvaPorcentaje(ivaPorcentaje);
         renglonNota.setIvaNeto(monto.multiply(ivaPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)));
         renglonNota.setImporteBruto(monto);
-        renglonNota.setImporteNeto(this.calcularImporteRenglon(renglonNota.getIvaNeto(), renglonNota.getImporteBruto(), BigDecimal.ONE));
+        renglonNota.setImporteNeto(this.calcularImporteRenglon(renglonNota.getIvaNeto(), renglonNota.getImporteBruto()));
         renglonesNota.add(renglonNota);
         return renglonesNota;
     }
 
-    private BigDecimal calcularImporteRenglon(BigDecimal ivaNeto, BigDecimal subTotalBrutoRenglon, BigDecimal cantidad) {
-        return ivaNeto.multiply(cantidad).add(subTotalBrutoRenglon);
+    private BigDecimal calcularImporteRenglon(BigDecimal ivaNeto, BigDecimal subTotalBrutoRenglon) {
+        return ivaNeto.add(subTotalBrutoRenglon);
     }
     
     @Override
