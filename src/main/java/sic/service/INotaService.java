@@ -2,16 +2,9 @@ package sic.service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import sic.modelo.Factura;
-import sic.modelo.FacturaCompra;
-import sic.modelo.FacturaVenta;
-import sic.modelo.Nota;
-import sic.modelo.NotaCredito;
-import sic.modelo.Recibo;
-import sic.modelo.RenglonFactura;
-import sic.modelo.RenglonNotaCredito;
-import sic.modelo.RenglonNotaDebito;
-import sic.modelo.TipoDeComprobante;
+
+import org.springframework.data.domain.Page;
+import sic.modelo.*;
 
 public interface INotaService {
 
@@ -24,6 +17,8 @@ public interface INotaService {
     byte[] getReporteNota(Nota nota);
 
     Nota getNotaPorId(Long idNota);
+
+    Page<Nota> buscarNotas(BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn);
     
     Long getCAEById(Long idNota);
     
@@ -46,6 +41,8 @@ public interface INotaService {
     long getSiguienteNumeroNotaCreditoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
 
     TipoDeComprobante[] getTipoNotaCliente(Long idCliente, Long idEmpresa);
+
+    TipoDeComprobante[] getTiposNota(Empresa empresa);
 
     List<RenglonNotaCredito> getRenglonesDeNotaCredito(Long idNota);
 

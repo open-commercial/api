@@ -28,11 +28,14 @@ public abstract class NotaDTO implements Serializable {
   private boolean eliminada;
   private TipoDeComprobante tipoComprobante;
   private Date fecha;
-  private EmpresaDTO empresa; // cambiar por como está en la api
+  private long idEmpresa;
+  private String nombreEmpresa;
   private UsuarioDTO usuario;
-  private ClienteDTO cliente;
+  private long idCliente;
+  private String razonSocialCliente;
   private FacturaVentaDTO facturaVenta;
-  private ProveedorDTO proveedor;
+  private long idProveedor;
+  private String razonSocialProveedor;
   private FacturaCompraDTO facturaCompra;
   private String motivo;
   private BigDecimal subTotalBruto;

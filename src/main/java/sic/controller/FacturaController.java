@@ -276,7 +276,7 @@ public class FacturaController {
   private Pageable getPageable(int pagina, int tamanio, String ordenarPor, String sentido) {
     String ordenDefault = "fecha";
     if (ordenarPor == null || sentido == null) {
-      return new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenDefault));
+      return new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenDefault));
     } else {
       switch (sentido) {
         case "ASC":

@@ -1,27 +1,28 @@
 package sic.controller;
 
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.List;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.dto.NotaCreditoDTO;
 import sic.modelo.dto.NotaDebitoDTO;
+import sic.service.IEmpresaService;
 import sic.service.INotaService;
 import sic.service.IReciboService;
 
@@ -31,12 +32,19 @@ public class NotaController {
 
     private final INotaService notaService;
     private final IReciboService reciboService;
+    private final IEmpresaService empresaService;
     private final ModelMapper modelMapper;
+    private static final int TAMANIO_PAGINA_DEFAULT = 50;
+
+    @Value("${SIC_JWT_KEY}")
+    private String secretkey;
 
     @Autowired
-    public NotaController(INotaService notaService, IReciboService reciboService, ModelMapper modelMapper) {
+    public NotaController(INotaService notaService, IReciboService reciboService,
+                          IEmpresaService empresaService, ModelMapper modelMapper) {
         this.notaService = notaService;
         this.reciboService = reciboService;
+        this.empresaService = empresaService;
         this.modelMapper = modelMapper;
     }
 
@@ -46,6 +54,143 @@ public class NotaController {
     public Nota getNota(@PathVariable long idNota) {
         return notaService.getNotaPorId(idNota);
     }
+
+  @GetMapping("/notas/ventas/busqueda/criteria")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public Page<Nota> buscarNotasVenta(
+      @RequestParam Long idEmpresa,
+      @RequestParam(required = false) Long desde,
+      @RequestParam(required = false) Long hasta,
+      @RequestParam(required = false) Long idCliente,
+      @RequestParam(required = false) Integer nroSerie,
+      @RequestParam(required = false) Integer nroNota,
+      @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
+      @RequestParam(required = false) Long idUsuario,
+      @RequestParam(required = false) Integer pagina,
+      @RequestParam(required = false) Integer tamanio,
+      @RequestParam(required = false) String ordenarPor,
+      @RequestParam(required = false) String sentido,
+      @RequestHeader("Authorization") String token) {
+    Calendar fechaDesde = Calendar.getInstance();
+    Calendar fechaHasta = Calendar.getInstance();
+    if ((desde != null) && (hasta != null)) {
+      fechaDesde.setTimeInMillis(desde);
+      fechaHasta.setTimeInMillis(hasta);
+    }
+    if (tamanio == null || tamanio <= 0) {
+      tamanio = TAMANIO_PAGINA_DEFAULT;
+    }
+    if (pagina == null || pagina < 0) {
+      pagina = 0;
+    }
+    BusquedaNotaCriteria criteria =
+        BusquedaNotaCriteria.builder()
+            .idEmpresa(idEmpresa)
+            .buscaPorFecha((desde != null) && (hasta != null))
+            .fechaDesde(fechaDesde.getTime())
+            .fechaHasta(fechaHasta.getTime())
+            .buscaVentas(true)
+            .buscaCliente(idCliente != null)
+            .idCliente(idCliente)
+            .buscaUsuario(idUsuario != null)
+            .idUsuario(idUsuario)
+            .buscaPorNumeroNota((nroSerie != null) && (nroNota != null))
+            .numSerie((nroSerie != null) ? nroSerie : 0)
+            .numNota((nroNota != null) ? nroNota : 0)
+            .buscaPorTipoComprobante(tipoDeComprobante != null)
+            .tipoComprobante(tipoDeComprobante)
+            .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
+            .build();
+    Claims claims =
+        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    return notaService.buscarNotas(criteria, (int) claims.get("idUsuario"));
+  }
+
+  @GetMapping("/notas/compras/busqueda/criteria")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR
+  })
+  public Page<Nota> buscarNotasCompra(
+      @RequestParam Long idEmpresa,
+      @RequestParam(required = false) Long desde,
+      @RequestParam(required = false) Long hasta,
+      @RequestParam(required = false) Long idProveedor,
+      @RequestParam(required = false) Integer nroSerie,
+      @RequestParam(required = false) Integer nroNota,
+      @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
+      @RequestParam(required = false) Long idUsuario,
+      @RequestParam(required = false) Integer pagina,
+      @RequestParam(required = false) Integer tamanio,
+      @RequestParam(required = false) String ordenarPor,
+      @RequestParam(required = false) String sentido,
+      @RequestHeader("Authorization") String token) {
+    Calendar fechaDesde = Calendar.getInstance();
+    Calendar fechaHasta = Calendar.getInstance();
+    if ((desde != null) && (hasta != null)) {
+      fechaDesde.setTimeInMillis(desde);
+      fechaHasta.setTimeInMillis(hasta);
+    }
+    if (tamanio == null || tamanio <= 0) {
+      tamanio = TAMANIO_PAGINA_DEFAULT;
+    }
+    if (pagina == null || pagina < 0) {
+      pagina = 0;
+    }
+    BusquedaNotaCriteria criteria =
+        BusquedaNotaCriteria.builder()
+            .idEmpresa(idEmpresa)
+            .buscaPorFecha((desde != null) && (hasta != null))
+            .fechaDesde(fechaDesde.getTime())
+            .fechaHasta(fechaHasta.getTime())
+            .buscaCompras(true)
+            .buscaProveedor(idProveedor != null)
+            .idCliente(idProveedor)
+            .buscaUsuario(idUsuario != null)
+            .idUsuario(idUsuario)
+            .buscaPorNumeroNota((nroSerie != null) && (nroNota != null))
+            .numSerie((nroSerie != null) ? nroSerie : 0)
+            .numNota((nroNota != null) ? nroNota : 0)
+            .buscaPorTipoComprobante(tipoDeComprobante != null)
+            .tipoComprobante(tipoDeComprobante)
+            .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
+            .build();
+    Claims claims =
+        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    return notaService.buscarNotas(criteria, (int) claims.get("idUsuario"));
+  }
+
+  private Pageable getPageable(int pagina, int tamanio, String ordenarPor, String sentido) {
+    String ordenDefault = "fecha";
+    if (ordenarPor == null || sentido == null) {
+      return new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
+    }
+  }
+
+  @GetMapping("/notas/tipos/empresas/{idEmpresa}")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public TipoDeComprobante[] getTipoNotaCredito(@PathVariable long idEmpresa) {
+    return notaService.getTiposNota(empresaService.getEmpresaPorId(idEmpresa));
+  }
 
     @GetMapping("/notas/{idNota}/facturas")
     @ResponseStatus(HttpStatus.OK)

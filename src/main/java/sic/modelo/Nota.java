@@ -67,7 +67,7 @@ public abstract class Nota implements Serializable {
   private Cliente cliente;
 
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-  @JoinColumn(name = "id_Factura", insertable = false, updatable = false)
+  @JoinColumn(name = "id_FacturaVenta")
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private FacturaVenta facturaVenta;
 
@@ -76,7 +76,7 @@ public abstract class Nota implements Serializable {
   private Proveedor proveedor;
 
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-  @JoinColumn(name = "id_Factura", insertable = false, updatable = false)
+  @JoinColumn(name = "id_FacturaCompra")
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private FacturaCompra facturaCompra;
 
@@ -123,10 +123,10 @@ public abstract class Nota implements Serializable {
     }
   }
 
-  @JsonGetter("nombreCliente")
-  public String getNombreCliente() {
+  @JsonGetter("razonSocialCliente")
+  public String getRazonSocialCliente() {
     if (cliente != null) {
-      return cliente.getRazonSocial() + " " + cliente.getNombreFantasia();
+      return cliente.getRazonSocial();
     } else {
       return null;
     }
@@ -141,8 +141,8 @@ public abstract class Nota implements Serializable {
     }
   }
 
-  @JsonGetter("nombreProveedor")
-  public String getNombreProveedor() {
+  @JsonGetter("razonSocialProveedor")
+  public String getRazanSocialProveedor() {
     if (proveedor != null) {
       return proveedor.getRazonSocial();
     } else {
