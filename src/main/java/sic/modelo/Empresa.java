@@ -13,54 +13,45 @@ import lombok.ToString;
 @Entity
 @Table(name = "empresa")
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(of = {"nombre"})
 @ToString
 public class Empresa implements Serializable {
 
-    @Id
-    @GeneratedValue
-    private long id_Empresa;
+  @Id @GeneratedValue private long id_Empresa;
 
-    @Column(nullable = false)
-    private String nombre;
+  @Column(nullable = false)
+  private String nombre;
 
-    @Column(nullable = false)
-    private String lema;
+  @Column(nullable = false)
+  private String lema;
 
-    @Column(nullable = false)
-    private String direccion;
+  @Column(nullable = false)
+  private String direccion;
 
-    @ManyToOne
-    @JoinColumn(name = "id_CondicionIVA", referencedColumnName = "id_CondicionIVA")
-    private CondicionIVA condicionIVA;
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private CategoriaIVA categoriaIVA;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private CategoriaIVA categoriaIVA;
+  private Long idFiscal;
 
-    private String idFiscal;
+  private Long ingresosBrutos;
 
-    private long cuip;
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date fechaInicioActividad;
 
-    private long ingresosBrutos;
+  @Column(nullable = false)
+  private String email;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fechaInicioActividad;
+  @Column(nullable = false)
+  private String telefono;
 
-    @Column(nullable = false)
-    private String email;
+  @ManyToOne
+  @JoinColumn(name = "id_Localidad", referencedColumnName = "id_Localidad")
+  private Localidad localidad;
 
-    @Column(nullable = false)
-    private String telefono;
+  private String logo;
 
-    @ManyToOne
-    @JoinColumn(name = "id_Localidad", referencedColumnName = "id_Localidad")
-    private Localidad localidad;
-    
-    private String logo;
-
-    private boolean eliminada;
-
+  private boolean eliminada;
 }

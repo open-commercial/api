@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.5.0.final using JasperReports Library version 6.5.0  -->
+<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="FacturaVenta" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e47a212f-3954-4de9-aca2-5bd71a6098c5">
 	<property name="ireport.zoom" value="3.0"/>
 	<property name="ireport.x" value="0"/>
@@ -18,7 +18,6 @@
 	<field name="precioUnitario" class="java.math.BigDecimal"/>
 	<field name="descuento_porcentaje" class="java.math.BigDecimal"/>
 	<field name="importe" class="java.math.BigDecimal"/>
-	<field name="ivaPorcentaje" class="java.math.BigDecimal"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -90,7 +89,10 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getEmpresa().getCondicionIVA().getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getEmpresa().getCategoriaIVA().toString().equals("RESPONSABLE_INSCRIPTO") ? "Responsable Inscripto" :
+$P{facturaVenta}.getEmpresa().getCategoriaIVA().toString().equals("EXENTO") ? "Exento" :
+$P{facturaVenta}.getEmpresa().getCategoriaIVA().toString().equals("CONSUMIDOR_FINAL") ? "Consumidor Final" :
+$P{facturaVenta}.getEmpresa().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" : ""]]></textFieldExpression>
 			</textField>
 			<line>
 				<reportElement x="0" y="175" width="555" height="1" uuid="bbd9e748-9b14-42c1-b03e-08e8289d6627"/>
@@ -113,7 +115,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getEmpresa().getCuip()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getEmpresa().getIdFiscal() == null ? "" : $P{facturaVenta}.getEmpresa().getIdFiscal()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="459" y="60" width="96" height="15" uuid="4630ada4-f911-45f3-bf8d-1026e289cc77">
@@ -125,7 +127,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getEmpresa().getIngresosBrutos()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getEmpresa().getIngresosBrutos() == null ? "" : $P{facturaVenta}.getEmpresa().getIngresosBrutos()]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
 				<reportElement x="459" y="75" width="96" height="15" uuid="71f82348-4ecf-4a46-9fcc-3681e588c04e">
@@ -312,7 +314,10 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getCliente().getCondicionIVA().getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getCliente().getCategoriaIVA().toString().equals("RESPONSABLE_INSCRIPTO") ? "Responsable Inscripto" :
+$P{facturaVenta}.getCliente().getCategoriaIVA().toString().equals("EXENTO") ? "Exento" :
+$P{facturaVenta}.getCliente().getCategoriaIVA().toString().equals("CONSUMIDOR_FINAL") ? "Consumidor Final" :
+$P{facturaVenta}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" : ""]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="221" width="50" height="15" uuid="f0b344fb-6370-43de-819b-3c1edd682fe1">
@@ -339,7 +344,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getCliente().getIdFiscal()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getCliente().getIdFiscal() == null ? "" : $P{facturaVenta}.getCliente().getIdFiscal()]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement mode="Transparent" x="360" y="45" width="99" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="9e7dfcda-5c8c-4987-88c2-2b820976c1bf">

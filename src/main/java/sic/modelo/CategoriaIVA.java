@@ -1,5 +1,9 @@
 package sic.modelo;
 
+import sic.service.BusinessServiceException;
+
+import java.util.ResourceBundle;
+
 public enum CategoriaIVA {
   RESPONSABLE_INSCRIPTO,
   EXENTO,
@@ -17,7 +21,8 @@ public enum CategoriaIVA {
       case MONOTRIBUTO:
         return false;
       default:
-        return false; // throw new exception
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_categoriaIVA_invalida"));
     }
   }
 }

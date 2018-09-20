@@ -20,7 +20,6 @@ import sic.util.Validator;
 import sic.repository.EmpresaRepository;
 import sic.service.IAmazonService;
 import sic.service.IConfiguracionDelSistemaService;
-import sic.service.IUsuarioService;
 import sic.util.BASE64DecodedMultipartFile;
 
 @Service
@@ -62,14 +61,14 @@ public class EmpresaServiceImpl implements IEmpresaService {
     }
 
     @Override
-    public Empresa getEmpresaPorCUIP(long cuip) {
-        return empresaRepository.findByCuipAndEliminada(cuip, false);
+    public Empresa getEmpresaPorIdFiscal(Long idFiscal) {
+        return empresaRepository.findByIdFiscalAndEliminada(idFiscal, false);
     }
 
     private void validarOperacion(TipoDeOperacion operacion, Empresa empresa) {
         //Entrada de Datos
-        if (empresa.getEmail() != null && empresa.getEmail().equals("") == false) {
-            if (Validator.esEmailValido(empresa.getEmail()) == false) {
+        if (empresa.getEmail() != null && !empresa.getEmail().equals("")) {
+            if (!Validator.esEmailValido(empresa.getEmail())) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_empresa_email_invalido"));
             }
@@ -83,10 +82,6 @@ public class EmpresaServiceImpl implements IEmpresaService {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_empresa_vacio_direccion"));
         }
-        if (empresa.getCondicionIVA() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_vacio_condicionIVA"));
-        }
         if (empresa.getLocalidad() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_empresa_vacio_localidad"));
@@ -94,24 +89,24 @@ public class EmpresaServiceImpl implements IEmpresaService {
         //Duplicados
         //Nombre
         Empresa empresaDuplicada = this.getEmpresaPorNombre(empresa.getNombre());
-        if (operacion.equals(TipoDeOperacion.ALTA) && empresaDuplicada != null) {
+        if (operacion == TipoDeOperacion.ALTA && empresaDuplicada != null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_empresa_duplicado_nombre"));
         }
-        if (operacion.equals(TipoDeOperacion.ACTUALIZACION)) {
+        if (operacion == TipoDeOperacion.ACTUALIZACION) {
             if (empresaDuplicada != null && empresaDuplicada.getId_Empresa() != empresa.getId_Empresa()) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_empresa_duplicado_nombre"));
             }
         }
-        //CUIP
-        empresaDuplicada = this.getEmpresaPorCUIP(empresa.getCuip());
-        if (operacion.equals(TipoDeOperacion.ALTA) && empresaDuplicada != null && empresa.getCuip() != 0) {
+        //ID Fiscal
+        empresaDuplicada = this.getEmpresaPorIdFiscal(empresa.getIdFiscal());
+        if (operacion == TipoDeOperacion.ALTA && empresaDuplicada != null && empresa.getIdFiscal() != null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_empresa_duplicado_cuip"));
         }
-        if (operacion.equals(TipoDeOperacion.ACTUALIZACION)) {
-            if (empresaDuplicada != null && empresaDuplicada.getId_Empresa() != empresa.getId_Empresa() && empresa.getCuip() != 0) {
+        if (operacion == TipoDeOperacion.ACTUALIZACION) {
+            if (empresaDuplicada != null && empresaDuplicada.getId_Empresa() != empresa.getId_Empresa() && empresa.getIdFiscal() != null) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_empresa_duplicado_cuip"));
             }

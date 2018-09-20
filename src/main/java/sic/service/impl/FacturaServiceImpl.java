@@ -110,8 +110,8 @@ public class FacturaServiceImpl implements IFacturaService {
     @Override
     public TipoDeComprobante[] getTipoFacturaCompra(Empresa empresa, Proveedor proveedor) {
         //cuando la Empresa discrimina IVA
-        if (empresa.getCondicionIVA().isDiscriminaIVA()) {
-            if (proveedor.getCondicionIVA().isDiscriminaIVA()) {
+        if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())) {
+            if (CategoriaIVA.discriminaIVA(proveedor.getCategoriaIVA())) {
                 //cuando la Empresa discrimina IVA y el Proveedor tambien
                 TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
                 tiposPermitidos[0] = TipoDeComprobante.FACTURA_A;
@@ -129,7 +129,7 @@ public class FacturaServiceImpl implements IFacturaService {
             }
         } else {
             //cuando la Empresa NO discrimina IVA
-            if (proveedor.getCondicionIVA().isDiscriminaIVA()) {
+            if (CategoriaIVA.discriminaIVA(proveedor.getCategoriaIVA())) {
                 //cuando Empresa NO discrimina IVA y el Proveedor SI
                 TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
                 tiposPermitidos[0] = TipoDeComprobante.FACTURA_B;
@@ -150,8 +150,8 @@ public class FacturaServiceImpl implements IFacturaService {
     @Override
     public TipoDeComprobante[] getTipoFacturaVenta(Empresa empresa, Cliente cliente) {
         //cuando la Empresa discrimina IVA
-        if (empresa.getCondicionIVA().isDiscriminaIVA()) {
-            if (cliente.getCondicionIVA().isDiscriminaIVA()) {
+        if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())) {
+            if (CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
                 //cuando la Empresa discrimina IVA y el Cliente tambien
                 TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
                 tiposPermitidos[0] = TipoDeComprobante.FACTURA_A;
@@ -170,7 +170,7 @@ public class FacturaServiceImpl implements IFacturaService {
             }
         } else {
             //cuando la Empresa NO discrimina IVA
-            if (cliente.getCondicionIVA().isDiscriminaIVA()) {
+            if (CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
                 //cuando Empresa NO discrimina IVA y el Cliente SI
                 TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
                 tiposPermitidos[0] = TipoDeComprobante.FACTURA_C;
@@ -192,7 +192,7 @@ public class FacturaServiceImpl implements IFacturaService {
 
     @Override
     public TipoDeComprobante[] getTiposFacturaSegunEmpresa(Empresa empresa) {
-        if (empresa.getCondicionIVA().isDiscriminaIVA()) {
+        if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())) {
             TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[5];
             tiposPermitidos[0] = TipoDeComprobante.FACTURA_A;
             tiposPermitidos[1] = TipoDeComprobante.FACTURA_B;

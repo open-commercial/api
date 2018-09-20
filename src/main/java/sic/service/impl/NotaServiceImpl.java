@@ -23,29 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.Cliente;
-import sic.modelo.ComprobanteAFIP;
-import sic.modelo.ConfiguracionDelSistema;
-import sic.modelo.Empresa;
-import sic.modelo.Factura;
-import sic.modelo.FacturaCompra;
-import sic.modelo.FacturaVenta;
-import sic.modelo.Movimiento;
-import sic.modelo.Nota;
-import sic.modelo.NotaCredito;
-import sic.modelo.NotaCreditoCliente;
-import sic.modelo.NotaCreditoProveedor;
-import sic.modelo.NotaDebito;
-import sic.modelo.NotaDebitoCliente;
-import sic.modelo.NotaDebitoProveedor;
-import sic.modelo.Proveedor;
-import sic.modelo.Recibo;
-import sic.modelo.RenglonFactura;
-import sic.modelo.RenglonNotaCredito;
-import sic.modelo.RenglonNotaDebito;
-import sic.modelo.TipoDeComprobante;
-import sic.modelo.TipoDeOperacion;
-import sic.modelo.Usuario;
+import sic.modelo.*;
 import sic.repository.NotaCreditoClienteRepository;
 import sic.repository.NotaCreditoProveedorRepository;
 import sic.service.*;
@@ -211,37 +189,39 @@ public class NotaServiceImpl implements INotaService {
         return (numeroNota == null) ? 1 : numeroNota + 1;
     }
 
-    @Override
-    public TipoDeComprobante[] getTipoNotaCliente(Long idCliente, Long idEmpresa) {
-        Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
-        Cliente cliente = clienteService.getClientePorId(idCliente);
-        if (empresa.getCondicionIVA().isDiscriminaIVA() && cliente.getCondicionIVA().isDiscriminaIVA()) {
-            TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[6];
-            tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_A;
-            tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_X;
-            tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
-            tiposPermitidos[3] = TipoDeComprobante.NOTA_DEBITO_A;
-            tiposPermitidos[4] = TipoDeComprobante.NOTA_DEBITO_X;
-            tiposPermitidos[5] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
-            return tiposPermitidos;
-        } else if (empresa.getCondicionIVA().isDiscriminaIVA() && !cliente.getCondicionIVA().isDiscriminaIVA()) {
-            TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[6];
-            tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_B;
-            tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_X;
-            tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
-            tiposPermitidos[3] = TipoDeComprobante.NOTA_DEBITO_B;
-            tiposPermitidos[4] = TipoDeComprobante.NOTA_DEBITO_X;
-            tiposPermitidos[5] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
-            return tiposPermitidos;
-        } else {
-            TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
-            tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_X;
-            tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
-            tiposPermitidos[2] = TipoDeComprobante.NOTA_DEBITO_X;
-            tiposPermitidos[3] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
-            return tiposPermitidos;
-        }
+  @Override
+  public TipoDeComprobante[] getTipoNotaCliente(Long idCliente, Long idEmpresa) {
+    Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
+    Cliente cliente = clienteService.getClientePorId(idCliente);
+    if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())
+        && CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
+      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[6];
+      tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_A;
+      tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_X;
+      tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
+      tiposPermitidos[3] = TipoDeComprobante.NOTA_DEBITO_A;
+      tiposPermitidos[4] = TipoDeComprobante.NOTA_DEBITO_X;
+      tiposPermitidos[5] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
+      return tiposPermitidos;
+    } else if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())
+        && !CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
+      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[6];
+      tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_B;
+      tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_X;
+      tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
+      tiposPermitidos[3] = TipoDeComprobante.NOTA_DEBITO_B;
+      tiposPermitidos[4] = TipoDeComprobante.NOTA_DEBITO_X;
+      tiposPermitidos[5] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
+      return tiposPermitidos;
+    } else {
+      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
+      tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_X;
+      tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
+      tiposPermitidos[2] = TipoDeComprobante.NOTA_DEBITO_X;
+      tiposPermitidos[3] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
+      return tiposPermitidos;
     }
+  }
 
     @Override
     public List<RenglonNotaCredito> getRenglonesDeNotaCreditoCliente(Long idNota) {

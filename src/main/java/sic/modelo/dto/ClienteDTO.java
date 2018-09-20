@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import sic.modelo.CategoriaIVA;
 import sic.modelo.TipoDeCliente;
 
 import java.io.Serializable;
@@ -21,8 +22,7 @@ public class ClienteDTO implements Serializable {
   private String razonSocial;
   private String nombreFantasia;
   private String direccion;
-  private Long idCondicionIVA;
-  private String nombreCondicionIVA;
+  private CategoriaIVA categoriaIVA;
   private String idFiscal;
   private String email;
   private String telPrimario;

@@ -12,8 +12,8 @@ public class ClienteBuilder {
   private String razonSocial = "Construcciones S.A.";
   private String nombreFantasia = "Servimetal";
   private String direccion = "Perugorria 2421";
-  private CondicionIVA condicionIVA = new CondicionIVABuilder().build();
-  private String idFiscal = "23248527419";
+  private CategoriaIVA categoriaIVA = CategoriaIVA.RESPONSABLE_INSCRIPTO;
+  private Long idFiscal = 23248527419L;
   private String email = "servimetal@hotmail.com";
   private String telPrimario = "379 4587114";
   private String telSecundario = "379 4852498";
@@ -36,7 +36,7 @@ public class ClienteBuilder {
         razonSocial,
         nombreFantasia,
         direccion,
-        condicionIVA,
+        categoriaIVA,
         idFiscal,
         email,
         telPrimario,
@@ -83,12 +83,12 @@ public class ClienteBuilder {
     return this;
   }
 
-  public ClienteBuilder withCondicionIVA(CondicionIVA condicionIVA) {
-    this.condicionIVA = condicionIVA;
+  public ClienteBuilder withCategoriaIVA(CategoriaIVA categoriaIVA) {
+    this.categoriaIVA = categoriaIVA;
     return this;
   }
 
-  public ClienteBuilder withIdFiscal(String idFiscal) {
+  public ClienteBuilder withIdFiscal(Long idFiscal) {
     this.idFiscal = idFiscal;
     return this;
   }

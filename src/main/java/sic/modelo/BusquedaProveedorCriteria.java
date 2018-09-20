@@ -13,8 +13,8 @@ public class BusquedaProveedorCriteria {
     private String codigo;
     private boolean buscaPorRazonSocial;
     private String razonSocial;
-    private boolean buscaPorId_Fiscal;
-    private String idFiscal;
+    private boolean buscaPorIdFiscal;
+    private Long idFiscal;
     private boolean buscaPorPais;
     private Long idPais;
     private boolean buscaPorProvincia;

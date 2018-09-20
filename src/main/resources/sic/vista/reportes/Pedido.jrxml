@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.5.0.final using JasperReports Library version 6.5.0  -->
+<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="FacturaVenta" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e47a212f-3954-4de9-aca2-5bd71a6098c5">
 	<property name="ireport.zoom" value="3.0"/>
 	<property name="ireport.x" value="0"/>
@@ -72,7 +72,10 @@
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{pedido}.getEmpresa().getCondicionIVA().getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{pedido}.getEmpresa().getCategoriaIVA().toString().equals("RESPONSABLE_INSCRIPTO") ? "Responsable Inscripto" :
+$P{pedido}.getEmpresa().getCategoriaIVA().toString().equals("EXENTO") ? "Exento" :
+$P{pedido}.getEmpresa().getCategoriaIVA().toString().equals("CONSUMIDOR_FINAL") ? "Consumidor Final" :
+$P{pedido}.getEmpresa().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" : ""]]></textFieldExpression>
 			</textField>
 			<line>
 				<reportElement x="1" y="175" width="552" height="1" uuid="bbd9e748-9b14-42c1-b03e-08e8289d6627"/>
@@ -88,7 +91,7 @@
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{pedido}.getEmpresa().getCuip()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{pedido}.getEmpresa().getIdFiscal() == null ? "" : $P{pedido}.getEmpresa().getIdFiscal()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="459" y="60" width="96" height="15" uuid="4630ada4-f911-45f3-bf8d-1026e289cc77">
@@ -97,7 +100,7 @@
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{pedido}.getEmpresa().getIngresosBrutos()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{pedido}.getEmpresa().getIngresosBrutos() == null ? "" : $P{pedido}.getEmpresa().getIngresosBrutos()]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
 				<reportElement x="459" y="75" width="96" height="15" uuid="71f82348-4ecf-4a46-9fcc-3681e588c04e">
@@ -261,7 +264,10 @@
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{pedido}.getCliente().getCondicionIVA().getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{pedido}.getCliente().getCategoriaIVA().toString().equals("RESPONSABLE_INSCRIPTO") ? "Responsable Inscripto" :
+$P{pedido}.getCliente().getCategoriaIVA().toString().equals("EXENTO") ? "Exento" :
+$P{pedido}.getCliente().getCategoriaIVA().toString().equals("CONSUMIDOR_FINAL") ? "Consumidor Final" :
+$P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" : ""]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="239" width="60" height="15" uuid="51a9dcb6-382b-4787-81c9-485fdbfc18e7">
@@ -279,7 +285,7 @@
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{pedido}.getCliente().getIdFiscal()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{pedido}.getCliente().getIdFiscal() == null ? "" : $P{pedido}.getCliente().getIdFiscal()]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>

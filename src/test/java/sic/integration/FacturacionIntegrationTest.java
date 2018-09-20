@@ -23,8 +23,6 @@ import org.springframework.web.client.RestClientResponseException;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.springframework.test.annotation.DirtiesContext;
-import sic.builder.ClienteBuilder;
-import sic.builder.CondicionIVABuilder;
 import sic.builder.EmpresaBuilder;
 import sic.builder.FormaDePagoBuilder;
 import sic.builder.LocalidadBuilder;
@@ -37,7 +35,6 @@ import sic.builder.UsuarioBuilder;
 import sic.modelo.*;
 import sic.modelo.dto.*;
 import sic.repository.UsuarioRepository;
-import sic.builder.RenglonPedidoBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -103,12 +100,9 @@ public class FacturacionIntegrationTest {
         Localidad localidad = new LocalidadBuilder().build();
         localidad.getProvincia().setPais(restTemplate.postForObject(apiPrefix + "/paises", localidad.getProvincia().getPais(), Pais.class));
         localidad.setProvincia(restTemplate.postForObject(apiPrefix + "/provincias", localidad.getProvincia(), Provincia.class));
-        CondicionIVA condicionIVA = new CondicionIVABuilder().build();
         localidad = restTemplate.postForObject(apiPrefix + "/localidades", localidad, Localidad.class);
-        condicionIVA = restTemplate.postForObject(apiPrefix + "/condiciones-iva", condicionIVA, CondicionIVA.class);
         Empresa empresa = new EmpresaBuilder()
                 .withLocalidad(localidad)
-                .withCondicionIVA(condicionIVA)
                 .build();
         empresa = restTemplate.postForObject(apiPrefix + "/empresas", empresa, Empresa.class);
         FormaDePago formaDePago = new FormaDePagoBuilder()
@@ -136,10 +130,11 @@ public class FacturacionIntegrationTest {
                 .withRol(new ArrayList<>(Arrays.asList(Rol.VIAJANTE)))
                 .build();
         ClienteDTO cliente = ClienteDTO.builder()
+                .tipoDeCliente(TipoDeCliente.EMPRESA)
+                .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
                 .razonSocial("Peter Parker")
                 .build();
         cliente = restTemplate.postForObject(apiPrefix + "/clientes?idEmpresa=" + empresa.getId_Empresa()
-                        + "&idCondicionIVA=" + condicionIVA.getId_CondicionIVA()
                         + "&idLocalidad=" + localidad.getId_Localidad()
                         + "&idUsuarioViajante=" + viajante.getId_Usuario()
                         + "&idUsuarioCredencial=" + credencial.getId_Usuario(),
@@ -153,7 +148,6 @@ public class FacturacionIntegrationTest {
         medida = restTemplate.postForObject(apiPrefix + "/medidas", medida, Medida.class);
         Proveedor proveedor = new ProveedorBuilder().withEmpresa(empresa)
                 .withLocalidad(empresa.getLocalidad())
-                .withCondicionIVA(empresa.getCondicionIVA())
                 .build();
         proveedor = restTemplate.postForObject(apiPrefix + "/proveedores", proveedor, Proveedor.class);
         Rubro rubro = new RubroBuilder().withEmpresa(empresa).build();
@@ -323,12 +317,9 @@ public class FacturacionIntegrationTest {
         Localidad localidad = new LocalidadBuilder().build();
         localidad.getProvincia().setPais(restTemplate.postForObject(apiPrefix + "/paises", localidad.getProvincia().getPais(), Pais.class));
         localidad.setProvincia(restTemplate.postForObject(apiPrefix + "/provincias", localidad.getProvincia(), Provincia.class));
-        CondicionIVA condicionIVA = new CondicionIVABuilder().build();
         localidad = restTemplate.postForObject(apiPrefix + "/localidades", localidad, Localidad.class);
-        condicionIVA = restTemplate.postForObject(apiPrefix + "/condiciones-iva", condicionIVA, CondicionIVA.class);
         Empresa empresa = new EmpresaBuilder()
                 .withLocalidad(localidad)
-                .withCondicionIVA(condicionIVA)
                 .build();
         empresa = restTemplate.postForObject(apiPrefix + "/empresas", empresa, Empresa.class);
         FormaDePago formaDePago = new FormaDePagoBuilder()
@@ -348,10 +339,11 @@ public class FacturacionIntegrationTest {
                 .build();
         credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
         ClienteDTO cliente = ClienteDTO.builder()
+                .tipoDeCliente(TipoDeCliente.EMPRESA)
+                .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
                 .razonSocial("Peter Parker")
                 .build();
         cliente = restTemplate.postForObject(apiPrefix + "/clientes?idEmpresa=" + empresa.getId_Empresa()
-                        + "&idCondicionIVA=" + condicionIVA.getId_CondicionIVA()
                         + "&idLocalidad=" + localidad.getId_Localidad()
                         + "&idUsuarioCredencial=" + credencial.getId_Usuario(),
                 cliente, ClienteDTO.class);
@@ -364,7 +356,6 @@ public class FacturacionIntegrationTest {
         medida = restTemplate.postForObject(apiPrefix + "/medidas", medida, Medida.class);
         Proveedor proveedor = new ProveedorBuilder().withEmpresa(empresa)
                 .withLocalidad(empresa.getLocalidad())
-                .withCondicionIVA(empresa.getCondicionIVA())
                 .build();
         proveedor = restTemplate.postForObject(apiPrefix + "/proveedores", proveedor, Proveedor.class);
         Rubro rubro = new RubroBuilder().withEmpresa(empresa).build();
