@@ -177,10 +177,10 @@ public class ClienteServiceImpl implements IClienteService {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_razonSocial"));
     }
-    if (cliente.getLocalidad() == null) {
+    /*if (cliente.getLocalidad() == null) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_localidad"));
-    }
+    }*/
     if (cliente.getEmpresa() == null) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_empresa"));
@@ -224,7 +224,7 @@ public class ClienteServiceImpl implements IClienteService {
   public Cliente guardar(Cliente cliente) {
     cliente.setFechaAlta(new Date());
     cliente.setEliminado(false);
-    cliente.setNroCliente(this.calcularNroDeCliente(cliente.getEmpresa()));
+    cliente.setNroCliente(this.generarNroDeCliente(cliente.getEmpresa()));
     this.validarOperacion(TipoDeOperacion.ALTA, cliente);
     CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
     cuentaCorrienteCliente.setCliente(cliente);
@@ -315,7 +315,7 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public String calcularNroDeCliente(Empresa empresa) {
+  public String generarNroDeCliente(Empresa empresa) {
     long min = 1L;
     long max = 99999L; // 5 digitos
     long randomLong = 0L;

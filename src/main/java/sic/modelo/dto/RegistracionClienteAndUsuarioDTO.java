@@ -13,12 +13,12 @@ import java.io.Serializable;
 @Builder
 public class RegistracionClienteAndUsuarioDTO implements Serializable {
 
-    private TipoDeCliente tipoDeCliente;
-    private String nombre;
-    private String apellido;
-    private String email;
-    private String idFiscal;
-    private String razonSocial;
-    private String password;
-
+  private TipoDeCliente tipoDeCliente;
+  private String nombre;
+  private String apellido;
+  private String email;
+  private String idFiscal;
+  private String razonSocial;
+  private String password;
+  private long idEmpresa;
 }

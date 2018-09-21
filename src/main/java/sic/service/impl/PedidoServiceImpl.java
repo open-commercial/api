@@ -150,7 +150,7 @@ public class PedidoServiceImpl implements IPedidoService {
     }
 
   @Override
-  public long calcularNumeroPedido(Empresa empresa) {
+  public long generarNumeroPedido(Empresa empresa) {
     long min = 1L;
     long max = 9999999999L; // 10 digitos
     long randomLong = 0L;
@@ -172,7 +172,7 @@ public class PedidoServiceImpl implements IPedidoService {
   @Transactional
   public Pedido guardar(Pedido pedido) {
     pedido.setFecha(new Date());
-    pedido.setNroPedido(this.calcularNumeroPedido(pedido.getEmpresa()));
+    pedido.setNroPedido(this.generarNumeroPedido(pedido.getEmpresa()));
     pedido.setEstado(EstadoPedido.ABIERTO);
     this.validarPedido(TipoDeOperacion.ALTA, pedido);
     pedido = pedidoRepository.save(pedido);

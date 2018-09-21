@@ -35,5 +35,5 @@ public interface IClienteService {
 
   int desvincularClienteDeCredencial(long idUsuarioCliente);
 
-  String calcularNroDeCliente(Empresa empresa);
+  String generarNroDeCliente(Empresa empresa);
 }

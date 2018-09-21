@@ -10,20 +10,41 @@ import sic.service.IRegistracionService;
 import sic.service.IUsuarioService;
 
 @Service
+@Transactional
 public class RegistracionServiceImpl implements IRegistracionService {
 
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
 
   @Autowired
-  public RegistracionServiceImpl(IUsuarioService usuarioService, IClienteService clienteService) {
+  public RegistracionServiceImpl(IUsuarioService usuarioService,
+                                 IClienteService clienteService) {
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
   }
 
   @Override
-  @Transactional
   public void crearCuentaConClienteAndUsuario(Cliente cliente, Usuario usuario) {
+    usuario.setUsername(this.generarUsername(usuario.getNombre(), usuario.getApellido()));
+    Usuario credencial = usuarioService.guardar(usuario);
+    cliente.setCredencial(credencial);
+    clienteService.guardar(cliente);
+    //send email
+  }
 
+  @Override
+  public String generarUsername(String nombre, String apellido) {
+    long min = 1L;
+    long max = 999L; // 3 digitos
+    long randomLong = 0L;
+    boolean esRepetido = true;
+    String nuevoUsername = "";
+    while (esRepetido) {
+      randomLong = min + (long) (Math.random() * (max - min));
+      nuevoUsername = nombre + apellido + Long.toString(randomLong);
+      Usuario u = usuarioService.getUsuarioPorUsername(nuevoUsername);
+      if (u == null) esRepetido = false;
+    }
+    return nuevoUsername.toLowerCase();
   }
 }

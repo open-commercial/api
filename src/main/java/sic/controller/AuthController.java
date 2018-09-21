@@ -14,21 +14,28 @@ import org.springframework.web.bind.annotation.*;
 import sic.modelo.*;
 import sic.modelo.dto.RecoveryPasswordDTO;
 import sic.modelo.dto.RegistracionClienteAndUsuarioDTO;
+import sic.service.IEmpresaService;
+import sic.service.IRegistracionService;
 import sic.service.IUsuarioService;
-import sic.service.ServiceException;
 
 @RestController
 @RequestMapping("/api/v1")
 public class AuthController {
 
   private final IUsuarioService usuarioService;
+  private final IEmpresaService empresaService;
+  private final IRegistracionService registracionService;
 
   @Value("${SIC_JWT_KEY}")
   private String secretkey;
 
   @Autowired
-  public AuthController(IUsuarioService usuarioService) {
+  public AuthController(IUsuarioService usuarioService,
+                        IEmpresaService empresaService,
+                        IRegistracionService registracionService) {
     this.usuarioService = usuarioService;
+    this.empresaService = empresaService;
+    this.registracionService = registracionService;
   }
 
   private String generarToken(long idUsuario, List<Rol> rolesDeUsuario) {
@@ -105,14 +112,19 @@ public class AuthController {
     nuevoUsuario.setPassword(registracionClienteAndUsuarioDTO.getPassword());
     nuevoUsuario.setRoles(Collections.singletonList(Rol.COMPRADOR));
     Cliente nuevoCliente = new Cliente();
-    if (registracionClienteAndUsuarioDTO.getTipoDeCliente() == TipoDeCliente.EMPRESA) {
+    nuevoCliente.setTipoDeCliente(registracionClienteAndUsuarioDTO.getTipoDeCliente());
+    nuevoCliente.setEmail(registracionClienteAndUsuarioDTO.getEmail());
+    nuevoCliente.setEmpresa(empresaService.getEmpresaPorId(registracionClienteAndUsuarioDTO.getIdEmpresa()));
+    if (nuevoCliente.getTipoDeCliente() == TipoDeCliente.EMPRESA) {
       nuevoCliente.setRazonSocial(registracionClienteAndUsuarioDTO.getRazonSocial());
-
-    } else if (registracionClienteAndUsuarioDTO.getTipoDeCliente() == TipoDeCliente.PERSONA) {
+      nuevoCliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
+    } else if (nuevoCliente.getTipoDeCliente() == TipoDeCliente.PERSONA) {
       nuevoCliente.setRazonSocial(
           registracionClienteAndUsuarioDTO.getNombre()
               + " "
               + registracionClienteAndUsuarioDTO.getApellido());
+      nuevoCliente.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
     }
+    this.registracionService.crearCuentaConClienteAndUsuario(nuevoCliente, nuevoUsuario);
   }
 }

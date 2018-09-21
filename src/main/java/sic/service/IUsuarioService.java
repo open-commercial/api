@@ -1,14 +1,13 @@
 package sic.service;
 
 import org.springframework.data.domain.Page;
-import sic.modelo.BusquedaUsuarioCriteria;
-import sic.modelo.Credencial;
-import sic.modelo.Rol;
-import sic.modelo.Usuario;
+import sic.modelo.*;
 
 public interface IUsuarioService {
 
   Usuario getUsuarioPorId(Long idUsuario);
+
+  Usuario getUsuarioPorUsername(String username);
 
   Usuario getUsuarioPorPasswordRecoveryKeyAndIdUsuario(String passwordRecoveryKey, long idUsuario);
 
@@ -25,6 +24,8 @@ public interface IUsuarioService {
   Usuario autenticarUsuario(Credencial credencial);
 
   Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria);
+
+  void validarOperacion(TipoDeOperacion operacion, Usuario usuario);
 
   Usuario guardar(Usuario usuario);
 

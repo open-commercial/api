@@ -29,7 +29,7 @@ public interface UsuarioRepository
 
   Usuario findByUsernameAndEliminado(String username, boolean eliminado);
 
-  Usuario findByEmailAndEliminadoAndHabilitado(String email, boolean eliminado, boolean habilitado);
+  Usuario findByEmailAndEliminado(String email, boolean eliminado);
 
   @Query(
       "SELECT u FROM Usuario u "
