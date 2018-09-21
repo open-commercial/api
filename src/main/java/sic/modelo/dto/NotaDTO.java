@@ -13,7 +13,7 @@ import sic.modelo.Nota;
 import sic.modelo.TipoDeComprobante;
 
 @Data
-@EqualsAndHashCode(of = {"fecha", "tipoComprobante", "serie", "nroNota", "empresa"})
+@EqualsAndHashCode(of = {"fecha", "tipoComprobante", "serie", "nroNota"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idNota", scope = Nota.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
