@@ -2,16 +2,9 @@ package sic.service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import sic.modelo.Factura;
-import sic.modelo.FacturaCompra;
-import sic.modelo.FacturaVenta;
-import sic.modelo.Nota;
-import sic.modelo.NotaCredito;
-import sic.modelo.Recibo;
-import sic.modelo.RenglonFactura;
-import sic.modelo.RenglonNotaCredito;
-import sic.modelo.RenglonNotaDebito;
-import sic.modelo.TipoDeComprobante;
+import org.springframework.data.domain.Page;
+import com.querydsl.core.BooleanBuilder;
+import sic.modelo.*;
 
 public interface INotaService {
 
@@ -25,21 +18,41 @@ public interface INotaService {
 
     Nota getNotaPorId(Long idNota);
     
-    Long getCAEById(Long idNota);
-    
-    BigDecimal getTotalById(Long idNota);
-    
     Factura getFacturaNotaCredito(Long idNota);
-    
-    FacturaVenta getFacturaNotaCreditoCliente(Long idNota);
-    
-    FacturaCompra getFacturaNotaCreditoProveedor(Long idNota);
     
     boolean existeNotaDebitoPorRecibo(Recibo recibo);
     
     boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta);
 
     List<NotaCredito> getNotasCreditoPorFactura(Long idFactura);
+
+    Page<NotaCreditoCliente> buscarNotaCreditoCliente(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+
+    Page<NotaCreditoProveedor> buscarNotaCreditoProveedor(BusquedaNotaCriteria criteria);
+
+    Page<NotaDebitoCliente> buscarNotaDebitoCliente(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+
+    Page<NotaDebitoProveedor> buscarNotaDebitoProveedor(BusquedaNotaCriteria criteria);
+
+    BigDecimal calcularTotalNotaCreditoCliente(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+
+    BigDecimal calcularIVANotaCreditoCliente(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+
+    BigDecimal calcularTotalNotaCreditoProveedor(BusquedaNotaCriteria criteria);
+
+    BigDecimal calcularIVANotaCreditoProveedor(BusquedaNotaCriteria criteria);
+
+    BigDecimal calcularTotalNotaDebitoCliente(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+
+    BigDecimal calcularIVANotaDebitoCliente(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+
+    BigDecimal calcularTotalNotaDebitoProveedor(BusquedaNotaCriteria criteria);
+
+    BigDecimal calcularIVANotaDebitoProveedor(BusquedaNotaCriteria criteria);
+
+    TipoDeComprobante[] getTipoNotaCredito(Empresa empresa);
+
+    TipoDeComprobante[] getTipoNotaDebito(Empresa empresa);
 
     long getSiguienteNumeroNotaDebitoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
 
@@ -80,7 +93,5 @@ public interface INotaService {
     BigDecimal calcularTotalCredito(BigDecimal subTotal_bruto, BigDecimal iva105_neto, BigDecimal iva21_neto);
     
     BigDecimal calcularTotalDebito(BigDecimal subTotal_bruto, BigDecimal iva21_neto, BigDecimal montoNoGravado);
-    
-    BigDecimal calcularTotalCreditoClientePorFacturaVenta(FacturaVenta factura);
     
 }
