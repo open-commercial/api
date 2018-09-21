@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import sic.modelo.Nota;
 
 public interface NotaRepository<T extends Nota>
-    extends PagingAndSortingRepository<T, Long>, QueryDslPredicateExecutor<T>, NotaRepositoryCustom<T, Long> {
+    extends PagingAndSortingRepository<T, Long>, QueryDslPredicateExecutor<T> {
 
   @Query("SELECT n FROM Nota n WHERE n.idNota= :idNota AND n.eliminada = false")
   Nota findById(@Param("idNota") long idNota);

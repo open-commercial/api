@@ -409,10 +409,10 @@ public class NotaController {
         return notaService.calcularTotalDebito(subTotalBruto, iva21Neto, montoNoGravado);
     }
 
-  @GetMapping("/notas/ventas/total/criteria")
+  @GetMapping("/notas/ventas/total-credito/criteria")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal getTotalNotasVenta(
+  public BigDecimal getTotalNotasVentaCredito(
       @RequestParam Long idEmpresa,
       @RequestParam(required = false) Long desde,
       @RequestParam(required = false) Long hasta,
@@ -458,10 +458,62 @@ public class NotaController {
             .build();
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    return notaService.calcularTotalNotas(criteria, (int) claims.get("idUsuario"));
+    return notaService.calcularTotalCredito(criteria, (int) claims.get("idUsuario"));
   }
 
-  @GetMapping("/notas/credito/ventas/total-iva/criteria")
+  @GetMapping("/notas/ventas/total-debito/criteria")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public BigDecimal getTotalNotasVentaDebito(
+      @RequestParam Long idEmpresa,
+      @RequestParam(required = false) Long desde,
+      @RequestParam(required = false) Long hasta,
+      @RequestParam(required = false) Long idCliente,
+      @RequestParam(required = false) Integer nroSerie,
+      @RequestParam(required = false) Integer nroNota,
+      @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
+      @RequestParam(required = false) Long idUsuario,
+      @RequestParam(required = false) Integer pagina,
+      @RequestParam(required = false) Integer tamanio,
+      @RequestParam(required = false) String ordenarPor,
+      @RequestParam(required = false) String sentido,
+      @RequestHeader("Authorization") String token) {
+    Calendar fechaDesde = Calendar.getInstance();
+    Calendar fechaHasta = Calendar.getInstance();
+    if ((desde != null) && (hasta != null)) {
+      fechaDesde.setTimeInMillis(desde);
+      fechaHasta.setTimeInMillis(hasta);
+    }
+    if (tamanio == null || tamanio <= 0) {
+      tamanio = TAMANIO_PAGINA_DEFAULT;
+    }
+    if (pagina == null || pagina < 0) {
+      pagina = 0;
+    }
+    BusquedaNotaCriteria criteria =
+        BusquedaNotaCriteria.builder()
+            .idEmpresa(idEmpresa)
+            .buscaPorFecha((desde != null) && (hasta != null))
+            .fechaDesde(fechaDesde.getTime())
+            .fechaHasta(fechaHasta.getTime())
+            .buscaVentas(true)
+            .buscaCliente(idCliente != null)
+            .idCliente(idCliente)
+            .buscaUsuario(idUsuario != null)
+            .idUsuario(idUsuario)
+            .buscaPorNumeroNota((nroSerie != null) && (nroNota != null))
+            .numSerie((nroSerie != null) ? nroSerie : 0)
+            .numNota((nroNota != null) ? nroNota : 0)
+            .buscaPorTipoComprobante(tipoDeComprobante != null)
+            .tipoComprobante(tipoDeComprobante)
+            .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
+            .build();
+    Claims claims =
+        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    return notaService.calcularTotalDebito(criteria, (int) claims.get("idUsuario"));
+  }
+
+  @GetMapping("/notas/ventas/total-iva-credito/criteria")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getTotalIvaCreditoVentas(
@@ -510,10 +562,10 @@ public class NotaController {
             .build();
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    return notaService.calcularIVANotasCredito(criteria, (int) claims.get("idUsuario"));
+    return notaService.calcularTotalIVACredito(criteria, (int) claims.get("idUsuario"));
   }
 
-  @GetMapping("/notas/debito/ventas/total-iva/criteria")
+  @GetMapping("/notas/ventas/total-iva-debito/criteria")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getTotalIvaDebitoVentas(
@@ -562,13 +614,13 @@ public class NotaController {
             .build();
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    return notaService.calcularIVANotasDebito(criteria, (int) claims.get("idUsuario"));
+    return notaService.calcularTotalIVADebito(criteria, (int) claims.get("idUsuario"));
   }
 
-  @GetMapping("/notas/compras/total/criteria")
+  @GetMapping("/notas/compras/total-credito/criteria")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal getTotalNotasCompra(
+  public BigDecimal getTotalCompraCredito(
       @RequestParam Long idEmpresa,
       @RequestParam(required = false) Long desde,
       @RequestParam(required = false) Long hasta,
@@ -614,10 +666,62 @@ public class NotaController {
             .build();
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    return notaService.calcularTotalNotas(criteria, (int) claims.get("idUsuario"));
+    return notaService.calcularTotalCredito(criteria, (int) claims.get("idUsuario"));
   }
 
-  @GetMapping("/notas/credito/compras/total-iva/criteria")
+  @GetMapping("/notas/compras/total-debito/criteria")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public BigDecimal getTotalCompraDebito(
+      @RequestParam Long idEmpresa,
+      @RequestParam(required = false) Long desde,
+      @RequestParam(required = false) Long hasta,
+      @RequestParam(required = false) Long idProveedor,
+      @RequestParam(required = false) Integer nroSerie,
+      @RequestParam(required = false) Integer nroNota,
+      @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
+      @RequestParam(required = false) Long idUsuario,
+      @RequestParam(required = false) Integer pagina,
+      @RequestParam(required = false) Integer tamanio,
+      @RequestParam(required = false) String ordenarPor,
+      @RequestParam(required = false) String sentido,
+      @RequestHeader("Authorization") String token) {
+    Calendar fechaDesde = Calendar.getInstance();
+    Calendar fechaHasta = Calendar.getInstance();
+    if ((desde != null) && (hasta != null)) {
+      fechaDesde.setTimeInMillis(desde);
+      fechaHasta.setTimeInMillis(hasta);
+    }
+    if (tamanio == null || tamanio <= 0) {
+      tamanio = TAMANIO_PAGINA_DEFAULT;
+    }
+    if (pagina == null || pagina < 0) {
+      pagina = 0;
+    }
+    BusquedaNotaCriteria criteria =
+        BusquedaNotaCriteria.builder()
+            .idEmpresa(idEmpresa)
+            .buscaPorFecha((desde != null) && (hasta != null))
+            .fechaDesde(fechaDesde.getTime())
+            .fechaHasta(fechaHasta.getTime())
+            .buscaCompras(true)
+            .buscaProveedor(idProveedor != null)
+            .idCliente(idProveedor)
+            .buscaUsuario(idUsuario != null)
+            .idUsuario(idUsuario)
+            .buscaPorNumeroNota((nroSerie != null) && (nroNota != null))
+            .numSerie((nroSerie != null) ? nroSerie : 0)
+            .numNota((nroNota != null) ? nroNota : 0)
+            .buscaPorTipoComprobante(tipoDeComprobante != null)
+            .tipoComprobante(tipoDeComprobante)
+            .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
+            .build();
+    Claims claims =
+        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    return notaService.calcularTotalDebito(criteria, (int) claims.get("idUsuario"));
+  }
+
+  @GetMapping("/notas/compras/total-iva-credito/criteria")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getTotalIvaCreditoCompras(
@@ -666,10 +770,10 @@ public class NotaController {
             .build();
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    return notaService.calcularIVANotasCredito(criteria, (int) claims.get("idUsuario"));
+    return notaService.calcularTotalIVACredito(criteria, (int) claims.get("idUsuario"));
   }
 
-  @GetMapping("/notas/debito/compras/total-iva/criteria")
+  @GetMapping("/notas/compras/total-iva-debito/criteria")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getTotalIvaDebitoCompras(
@@ -718,6 +822,6 @@ public class NotaController {
             .build();
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    return notaService.calcularIVANotasDebito(criteria, (int) claims.get("idUsuario"));
+    return notaService.calcularTotalIVADebito(criteria, (int) claims.get("idUsuario"));
   }
 }

@@ -8,7 +8,7 @@ import sic.modelo.*;
 import java.math.BigDecimal;
 import java.util.List;
 
-public interface NotaCreditoRepository extends NotaRepository<NotaCredito> , QueryDslPredicateExecutor<NotaCredito> {
+public interface NotaCreditoRepository extends NotaRepository<NotaCredito> , QueryDslPredicateExecutor<NotaCredito>, NotaCreditoRepositoryCustom {
     
     @Query("SELECT nc FROM NotaCredito nc WHERE nc.idNota = :idNotaCredito AND nc.eliminada = false")
     NotaCredito getById(@Param("idNotaCredito") long idNotaCredito);

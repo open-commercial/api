@@ -113,10 +113,10 @@ public class NotaServiceImpl implements INotaService {
           cal.set(Calendar.SECOND, 59);
           busquedaNotaCriteria.setFechaHasta(cal.getTime());
       }
-      return notaRepository.findAll(this.getBuilder(busquedaNotaCriteria, idUsuarioLoggedIn), busquedaNotaCriteria.getPageable());
+      return notaRepository.findAll(this.getBuilderNota(busquedaNotaCriteria, idUsuarioLoggedIn), busquedaNotaCriteria.getPageable());
   }
 
-  private BooleanBuilder getBuilder(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
+  private BooleanBuilder getBuilderNota(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
     QNota qNota = QNota.nota;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
@@ -139,7 +139,8 @@ public class NotaServiceImpl implements INotaService {
               formateadorFecha.format(criteria.getFechaHasta()));
       builder.and(qNota.fecha.between(fDesde, fHasta));
     }
-      if (criteria.isBuscaUsuario()) builder.and(qNota.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+    if (criteria.isBuscaUsuario())
+      builder.and(qNota.usuario.id_Usuario.eq(criteria.getIdUsuario()));
     if (criteria.isBuscaCliente())
       builder.and(qNota.cliente.id_Cliente.eq(criteria.getIdCliente()));
     if (criteria.isBuscaProveedor())
@@ -168,6 +169,130 @@ public class NotaServiceImpl implements INotaService {
               rsPredicate.or(qNota.cliente.eq(clienteRelacionado));
             } else {
               rsPredicate.or(qNota.cliente.isNull());
+            }
+            break;
+        }
+      }
+      builder.and(rsPredicate);
+    }
+    return builder;
+  }
+
+  private BooleanBuilder getBuilderNotaCredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
+    QNotaCredito qNotaCredito = QNotaCredito.notaCredito;
+    BooleanBuilder builder = new BooleanBuilder();
+    builder.and(
+        qNotaCredito.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qNotaCredito.eliminada.eq(false)));
+    if (criteria.isBuscaVentas()) builder.and(qNotaCredito.cliente.isNotNull());
+    if (criteria.isBuscaCompras()) builder.and(qNotaCredito.proveedor.isNotNull());
+    // Fecha
+    if (criteria.isBuscaPorFecha()) {
+      FormatterFechaHora formateadorFecha =
+          new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      DateExpression<Date> fDesde =
+          Expressions.dateTemplate(
+              Date.class,
+              "convert({0}, datetime)",
+              formateadorFecha.format(criteria.getFechaDesde()));
+      DateExpression<Date> fHasta =
+          Expressions.dateTemplate(
+              Date.class,
+              "convert({0}, datetime)",
+              formateadorFecha.format(criteria.getFechaHasta()));
+      builder.and(qNotaCredito.fecha.between(fDesde, fHasta));
+    }
+    if (criteria.isBuscaUsuario())
+      builder.and(qNotaCredito.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+    if (criteria.isBuscaCliente())
+      builder.and(qNotaCredito.cliente.id_Cliente.eq(criteria.getIdCliente()));
+    if (criteria.isBuscaProveedor())
+      builder.and(qNotaCredito.proveedor.id_Proveedor.eq(criteria.getIdCliente()));
+    if (criteria.isBuscaPorTipoComprobante())
+      builder.and(qNotaCredito.tipoComprobante.eq(criteria.getTipoComprobante()));
+    if (criteria.isBuscaPorNumeroNota())
+      builder
+          .and(qNotaCredito.serie.eq(criteria.getNumSerie()))
+          .and(qNotaCredito.nroNota.eq(criteria.getNumNota()));
+    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    BooleanBuilder rsPredicate = new BooleanBuilder();
+    if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
+        && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
+        && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
+      for (Rol rol : usuarioLogueado.getRoles()) {
+        switch (rol) {
+          case VIAJANTE:
+            rsPredicate.or(qNotaCredito.cliente.viajante.eq(usuarioLogueado));
+            break;
+          case COMPRADOR:
+            Cliente clienteRelacionado =
+                clienteService.getClientePorIdUsuarioYidEmpresa(
+                    idUsuarioLoggedIn, criteria.getIdEmpresa());
+            if (clienteRelacionado != null) {
+              rsPredicate.or(qNotaCredito.cliente.eq(clienteRelacionado));
+            } else {
+              rsPredicate.or(qNotaCredito.cliente.isNull());
+            }
+            break;
+        }
+      }
+      builder.and(rsPredicate);
+    }
+    return builder;
+  }
+
+  private BooleanBuilder getBuilderNotaDebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
+    QNotaDebito qNotaCredito = QNotaDebito.notaDebito;
+    BooleanBuilder builder = new BooleanBuilder();
+    builder.and(
+        qNotaCredito.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qNotaCredito.eliminada.eq(false)));
+    if (criteria.isBuscaVentas()) builder.and(qNotaCredito.cliente.isNotNull());
+    if (criteria.isBuscaCompras()) builder.and(qNotaCredito.proveedor.isNotNull());
+    // Fecha
+    if (criteria.isBuscaPorFecha()) {
+      FormatterFechaHora formateadorFecha =
+          new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      DateExpression<Date> fDesde =
+          Expressions.dateTemplate(
+              Date.class,
+              "convert({0}, datetime)",
+              formateadorFecha.format(criteria.getFechaDesde()));
+      DateExpression<Date> fHasta =
+          Expressions.dateTemplate(
+              Date.class,
+              "convert({0}, datetime)",
+              formateadorFecha.format(criteria.getFechaHasta()));
+      builder.and(qNotaCredito.fecha.between(fDesde, fHasta));
+    }
+    if (criteria.isBuscaUsuario())
+      builder.and(qNotaCredito.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+    if (criteria.isBuscaCliente())
+      builder.and(qNotaCredito.cliente.id_Cliente.eq(criteria.getIdCliente()));
+    if (criteria.isBuscaProveedor())
+      builder.and(qNotaCredito.proveedor.id_Proveedor.eq(criteria.getIdCliente()));
+    if (criteria.isBuscaPorTipoComprobante())
+      builder.and(qNotaCredito.tipoComprobante.eq(criteria.getTipoComprobante()));
+    if (criteria.isBuscaPorNumeroNota())
+      builder
+          .and(qNotaCredito.serie.eq(criteria.getNumSerie()))
+          .and(qNotaCredito.nroNota.eq(criteria.getNumNota()));
+    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    BooleanBuilder rsPredicate = new BooleanBuilder();
+    if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
+        && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
+        && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
+      for (Rol rol : usuarioLogueado.getRoles()) {
+        switch (rol) {
+          case VIAJANTE:
+            rsPredicate.or(qNotaCredito.cliente.viajante.eq(usuarioLogueado));
+            break;
+          case COMPRADOR:
+            Cliente clienteRelacionado =
+                clienteService.getClientePorIdUsuarioYidEmpresa(
+                    idUsuarioLoggedIn, criteria.getIdEmpresa());
+            if (clienteRelacionado != null) {
+              rsPredicate.or(qNotaCredito.cliente.eq(clienteRelacionado));
+            } else {
+              rsPredicate.or(qNotaCredito.cliente.isNull());
             }
             break;
         }
@@ -980,7 +1105,7 @@ public class NotaServiceImpl implements INotaService {
     }
 
   @Override
-  public BigDecimal calcularTotalNotas(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
+  public BigDecimal calcularTotalCredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
     if (criteria.isBuscaPorFecha()
         && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
       throw new BusinessServiceException(
@@ -999,14 +1124,13 @@ public class NotaServiceImpl implements INotaService {
       cal.set(Calendar.SECOND, 59);
       criteria.setFechaHasta(cal.getTime());
     }
-    BigDecimal totalNotaCreditoCliente =
-        notaRepository.calcularTotalNotas(this.getBuilder(criteria, idUsuarioLoggedIn));
-    return (totalNotaCreditoCliente != null ? totalNotaCreditoCliente : BigDecimal.ZERO);
+    BigDecimal totalNotaCredito =
+        notaCreditoRepository.calcularTotalCredito(this.getBuilderNotaCredito(criteria, idUsuarioLoggedIn));
+    return (totalNotaCredito != null ? totalNotaCredito : BigDecimal.ZERO);
   }
 
   @Override
-  public BigDecimal calcularIVANotas(
-      BusquedaNotaCriteria criteria, long idUsuarioLoggedIn, TipoDeComprobante[] tipoNotas) {
+  public BigDecimal calcularTotalDebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
     if (criteria.isBuscaPorFecha()
         && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
       throw new BusinessServiceException(
@@ -1025,26 +1149,66 @@ public class NotaServiceImpl implements INotaService {
       cal.set(Calendar.SECOND, 59);
       criteria.setFechaHasta(cal.getTime());
     }
-    BigDecimal ivaNotaCreditoCliente =
-        notaRepository.calcularIVANotas(this.getBuilder(criteria, idUsuarioLoggedIn), tipoNotas);
-    return (ivaNotaCreditoCliente != null ? ivaNotaCreditoCliente : BigDecimal.ZERO);
+    BigDecimal totalNotaDebito =
+        notaDebitoRepository.calcularTotalDebito(this.getBuilderNotaDebito(criteria, idUsuarioLoggedIn));
+    return (totalNotaDebito != null ? totalNotaDebito : BigDecimal.ZERO);
   }
 
   @Override
-  public BigDecimal calcularIVANotasCredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
-    return this.calcularIVANotas(
-        criteria,
-        idUsuarioLoggedIn,
-        new TipoDeComprobante[] {
-          TipoDeComprobante.NOTA_CREDITO_A, TipoDeComprobante.NOTA_CREDITO_B
-        });
+  public BigDecimal calcularTotalIVACredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
+    if (criteria.isBuscaPorFecha()
+        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_fechas_busqueda_invalidas"));
+    }
+    if (criteria.isBuscaPorFecha()) {
+      Calendar cal = new GregorianCalendar();
+      cal.setTime(criteria.getFechaDesde());
+      cal.set(Calendar.HOUR_OF_DAY, 0);
+      cal.set(Calendar.MINUTE, 0);
+      cal.set(Calendar.SECOND, 0);
+      criteria.setFechaDesde(cal.getTime());
+      cal.setTime(criteria.getFechaHasta());
+      cal.set(Calendar.HOUR_OF_DAY, 23);
+      cal.set(Calendar.MINUTE, 59);
+      cal.set(Calendar.SECOND, 59);
+      criteria.setFechaHasta(cal.getTime());
+    }
+    BigDecimal ivaNotaCredito =
+        notaCreditoRepository.calcularIVACredito(
+            this.getBuilderNotaCredito(criteria, idUsuarioLoggedIn),
+            new TipoDeComprobante[] {
+              TipoDeComprobante.NOTA_CREDITO_A, TipoDeComprobante.NOTA_CREDITO_B
+            });
+    return (ivaNotaCredito != null ? ivaNotaCredito : BigDecimal.ZERO);
   }
 
   @Override
-  public BigDecimal calcularIVANotasDebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
-    return this.calcularIVANotas(
-        criteria,
-        idUsuarioLoggedIn,
-        new TipoDeComprobante[] {TipoDeComprobante.NOTA_DEBITO_A, TipoDeComprobante.NOTA_DEBITO_B});
+  public BigDecimal calcularTotalIVADebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
+    if (criteria.isBuscaPorFecha()
+        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_fechas_busqueda_invalidas"));
+    }
+    if (criteria.isBuscaPorFecha()) {
+      Calendar cal = new GregorianCalendar();
+      cal.setTime(criteria.getFechaDesde());
+      cal.set(Calendar.HOUR_OF_DAY, 0);
+      cal.set(Calendar.MINUTE, 0);
+      cal.set(Calendar.SECOND, 0);
+      criteria.setFechaDesde(cal.getTime());
+      cal.setTime(criteria.getFechaHasta());
+      cal.set(Calendar.HOUR_OF_DAY, 23);
+      cal.set(Calendar.MINUTE, 59);
+      cal.set(Calendar.SECOND, 59);
+      criteria.setFechaHasta(cal.getTime());
+    }
+    BigDecimal ivaNotaDebito =
+        notaDebitoRepository.calcularIVADebito(
+            this.getBuilderNotaDebito(criteria, idUsuarioLoggedIn),
+            new TipoDeComprobante[] {
+              TipoDeComprobante.NOTA_DEBITO_A, TipoDeComprobante.NOTA_DEBITO_B
+            });
+    return (ivaNotaDebito != null ? ivaNotaDebito : BigDecimal.ZERO);
   }
 }

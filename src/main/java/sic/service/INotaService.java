@@ -76,12 +76,12 @@ public interface INotaService {
     
     BigDecimal calcularTotalCreditoClientePorFacturaVenta(FacturaVenta factura);
 
-    BigDecimal calcularTotalNotas(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+    BigDecimal calcularTotalCredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
 
-    BigDecimal calcularIVANotas(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn, TipoDeComprobante[] tipoNotas);
+    BigDecimal calcularTotalDebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
 
-    BigDecimal calcularIVANotasCredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+    BigDecimal calcularTotalIVACredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
 
-    BigDecimal calcularIVANotasDebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+    BigDecimal calcularTotalIVADebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
     
 }
