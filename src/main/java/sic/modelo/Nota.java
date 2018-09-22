@@ -146,7 +146,7 @@ public abstract class Nota implements Serializable {
   }
 
   @JsonGetter("razonSocialProveedor")
-  public String getRazanSocialProveedor() {
+  public String getRazonSocialProveedor() {
     if (proveedor != null) {
       return proveedor.getRazonSocial();
     } else {
@@ -173,7 +173,7 @@ public abstract class Nota implements Serializable {
   }
 
   @JsonGetter("idUsuario")
-  public Long getIdUsuario() {
+  public Long getIdRecibo() {
     return usuario.getId_Usuario();
   }
 

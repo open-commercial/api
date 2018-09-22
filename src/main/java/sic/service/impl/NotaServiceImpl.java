@@ -49,7 +49,7 @@ public class NotaServiceImpl implements INotaService {
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
   private static final BigDecimal CIEN = new BigDecimal("100");
-  private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
   @Lazy
@@ -720,7 +720,7 @@ public class NotaServiceImpl implements INotaService {
     this.validarCalculosCredito(notaCredito);
     notaCredito = notaCreditoRepository.save(notaCredito);
     this.cuentaCorrienteService.asentarEnCuentaCorriente(notaCredito, TipoDeOperacion.ALTA);
-    LOGGER.warn("La Nota {} se guardó correctamente.", notaCredito);
+    logger.warn("La Nota {} se guardó correctamente.", notaCredito);
     return notaCredito;
   }
 
@@ -744,7 +744,7 @@ public class NotaServiceImpl implements INotaService {
     this.validarCalculosDebito(notaDebito);
     notaDebito = notaDebitoRepository.save(notaDebito);
     cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito, TipoDeOperacion.ALTA);
-    LOGGER.warn("La Nota " + notaDebito + " se guardó correctamente.");
+    logger.warn("La Nota " + notaDebito + " se guardó correctamente.");
     return notaDebito;
   }
 
@@ -921,7 +921,7 @@ public class NotaServiceImpl implements INotaService {
         params.put(
             "logo", new ImageIcon(ImageIO.read(new URL(nota.getEmpresa().getLogo()))).getImage());
       } catch (IOException ex) {
-        LOGGER.error(ex.getMessage());
+        logger.error(ex.getMessage());
         throw new ServiceException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_empresa_404_logo"), ex);
       }
@@ -930,7 +930,7 @@ public class NotaServiceImpl implements INotaService {
       return JasperExportManager.exportReportToPdf(
           JasperFillManager.fillReport(isFileReport, params, ds));
     } catch (JRException ex) {
-      LOGGER.error(ex.getMessage());
+      logger.error(ex.getMessage());
       throw new ServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_error_reporte"), ex);
     }
@@ -962,7 +962,7 @@ public class NotaServiceImpl implements INotaService {
         nota.setEliminada(true);
         this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ELIMINACION);
         notaRepository.save(nota);
-        LOGGER.warn("La Nota {} se eliminó correctamente.", nota);
+        logger.warn("La Nota {} se eliminó correctamente.", nota);
       }
     }
   }
