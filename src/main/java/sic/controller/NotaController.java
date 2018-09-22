@@ -3,6 +3,7 @@ package sic.controller;
 import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -22,9 +23,7 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.dto.NotaCreditoDTO;
 import sic.modelo.dto.NotaDebitoDTO;
-import sic.service.IEmpresaService;
-import sic.service.INotaService;
-import sic.service.IReciboService;
+import sic.service.*;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -33,6 +32,10 @@ public class NotaController {
     private final INotaService notaService;
     private final IReciboService reciboService;
     private final IEmpresaService empresaService;
+    private final IClienteService clienteService;
+    private final IProveedorService proveedorService;
+    private final IUsuarioService usuarioService;
+    private final IFacturaService facturaService;
     private final ModelMapper modelMapper;
     private static final int TAMANIO_PAGINA_DEFAULT = 50;
 
@@ -41,10 +44,16 @@ public class NotaController {
 
     @Autowired
     public NotaController(INotaService notaService, IReciboService reciboService,
-                          IEmpresaService empresaService, ModelMapper modelMapper) {
+                          IEmpresaService empresaService, IClienteService clienteService,
+                          IProveedorService proveedorService, IUsuarioService usuarioService,
+                          IFacturaService facturaService, ModelMapper modelMapper) {
         this.notaService = notaService;
         this.reciboService = reciboService;
         this.empresaService = empresaService;
+        this.clienteService = clienteService;
+        this.proveedorService = proveedorService;
+        this.usuarioService = usuarioService;
+        this.facturaService = facturaService;
         this.modelMapper = modelMapper;
     }
 
@@ -55,7 +64,7 @@ public class NotaController {
         return notaService.getNotaPorId(idNota);
     }
 
-  @GetMapping("/notas/ventas/busqueda/criteria")
+  @GetMapping("/notas/busqueda/criteria")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
@@ -64,7 +73,7 @@ public class NotaController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public Page<Nota> buscarNotasVenta(
+  public Page<Nota> buscarNotas(
       @RequestParam Long idEmpresa,
       @RequestParam(required = false) Long desde,
       @RequestParam(required = false) Long hasta,
@@ -73,6 +82,7 @@ public class NotaController {
       @RequestParam(required = false) Integer nroNota,
       @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
       @RequestParam(required = false) Long idUsuario,
+      @RequestParam(required = false) Movimiento movimiento,
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) Integer tamanio,
       @RequestParam(required = false) String ordenarPor,
@@ -96,65 +106,9 @@ public class NotaController {
             .buscaPorFecha((desde != null) && (hasta != null))
             .fechaDesde(fechaDesde.getTime())
             .fechaHasta(fechaHasta.getTime())
-            .buscaVentas(true)
+            .movimiento(movimiento)
             .buscaCliente(idCliente != null)
             .idCliente(idCliente)
-            .buscaUsuario(idUsuario != null)
-            .idUsuario(idUsuario)
-            .buscaPorNumeroNota((nroSerie != null) && (nroNota != null))
-            .numSerie((nroSerie != null) ? nroSerie : 0)
-            .numNota((nroNota != null) ? nroNota : 0)
-            .buscaPorTipoComprobante(tipoDeComprobante != null)
-            .tipoComprobante(tipoDeComprobante)
-            .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
-            .build();
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    return notaService.buscarNotas(criteria, (int) claims.get("idUsuario"));
-  }
-
-  @GetMapping("/notas/compras/busqueda/criteria")
-  @ResponseStatus(HttpStatus.OK)
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR
-  })
-  public Page<Nota> buscarNotasCompra(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) Integer nroSerie,
-      @RequestParam(required = false) Integer nroNota,
-      @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-      @RequestParam(required = false) Long idUsuario,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) Integer tamanio,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido,
-      @RequestHeader("Authorization") String token) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if ((desde != null) && (hasta != null)) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    if (tamanio == null || tamanio <= 0) {
-      tamanio = TAMANIO_PAGINA_DEFAULT;
-    }
-    if (pagina == null || pagina < 0) {
-      pagina = 0;
-    }
-    BusquedaNotaCriteria criteria =
-        BusquedaNotaCriteria.builder()
-            .idEmpresa(idEmpresa)
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .buscaCompras(true)
-            .buscaProveedor(idProveedor != null)
-            .idCliente(idProveedor)
             .buscaUsuario(idUsuario != null)
             .idUsuario(idUsuario)
             .buscaPorNumeroNota((nroSerie != null) && (nroNota != null))
@@ -229,65 +183,63 @@ public class NotaController {
     }
 
   @PostMapping(
-      "/notas/credito/empresa/{idEmpresa}/cliente/{idCliente}/usuario/{idUsuario}/factura/{idFactura}")
+      "/notas/credito/empresa/{idEmpresa}/usuario/{idUsuario}/factura/{idFactura}")
   @ResponseStatus(HttpStatus.CREATED)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Nota guardarNotaCreditoCliente(
+  public Nota guardarNotaCredito(
       @RequestBody NotaCreditoDTO notaCreditoDTO,
       @PathVariable long idEmpresa,
-      @PathVariable long idCliente,
+      @RequestParam Movimiento movimiento,
+      @RequestParam(required = false) Long idCliente,
+      @RequestParam(required = false) Long idProveedor,
       @PathVariable long idUsuario,
       @PathVariable long idFactura,
       @RequestParam boolean modificarStock) {
     NotaCredito nota = modelMapper.map(notaCreditoDTO, NotaCredito.class);
-    return notaService.guardarNotaCliente(
-        nota, idEmpresa, idCliente, idUsuario, null, idFactura, modificarStock);
+    nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    Factura factura = facturaService.getFacturaPorId(idFactura);
+    if (movimiento.equals(Movimiento.VENTA) && idCliente != null && factura instanceof FacturaVenta) {
+      nota.setCliente(clienteService.getClientePorId(idCliente));
+      nota.setFacturaVenta((FacturaVenta) factura);
+    } else if (movimiento.equals(Movimiento.COMPRA) && idProveedor != null && factura instanceof FacturaCompra) {
+      nota.setProveedor(proveedorService.getProveedorPorId(idProveedor));
+      nota.setFacturaCompra((FacturaCompra) factura);
+    } else
+      throw new ForbiddenException(
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_usuario_rol_no_valido")); // cambiar mensaje
+    nota.setMovimiento(movimiento);
+    nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
+    nota.setModificaStock(modificarStock);
+    return notaService.guardarNotaCredito(nota);
   }
 
   @PostMapping(
-      "/notas/debito/empresa/{idEmpresa}/cliente/{idCliente}/usuario/{idUsuario}/recibo/{idRecibo}")
+      "/notas/debito/empresa/{idEmpresa}/usuario/{idUsuario}/recibo/{idRecibo}")
   @ResponseStatus(HttpStatus.CREATED)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Nota guardarNotaDebitoCliente(
+  public Nota guardarNotaDebito(
       @RequestBody NotaDebitoDTO notaDebitoDTO,
       @PathVariable long idEmpresa,
-      @PathVariable long idCliente,
+      @RequestParam Movimiento movimiento,
+      @RequestParam(required = false) Long idCliente,
+      @RequestParam(required = false) Long idProveedor,
       @PathVariable long idUsuario,
       @PathVariable long idRecibo) {
     NotaDebito nota = modelMapper.map(notaDebitoDTO, NotaDebito.class);
-    return notaService.guardarNotaCliente(
-        nota, idEmpresa, idCliente, idUsuario, idRecibo, null, false);
-  }
-
-  @PostMapping(
-      "/notas/credito/empresa/{idEmpresa}/proveedor/{idProveedor}/usuario/{idUsuario}/factura/{idFactura}")
-  @ResponseStatus(HttpStatus.CREATED)
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public Nota guardarNotaCreditoProveedor(
-      @RequestBody NotaCreditoDTO notaCreditoDTO,
-      @PathVariable long idEmpresa,
-      @PathVariable long idProveedor,
-      @PathVariable long idUsuario,
-      @PathVariable long idFactura,
-      @RequestParam boolean modificarStock) {
-    NotaCredito nota = modelMapper.map(notaCreditoDTO, NotaCredito.class);
-    return notaService.guardarNotaProveedor(
-        nota, idEmpresa, idProveedor, idUsuario, null, idFactura, modificarStock);
-  }
-
-  @PostMapping(
-      "/notas/debito/empresa/{idEmpresa}/proveedor/{idProveedor}/usuario/{idUsuario}/recibo/{idRecibo}")
-  @ResponseStatus(HttpStatus.CREATED)
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public Nota guardarNotaDebitoProveedor(
-      @RequestBody NotaDebitoDTO notaDebitoDTO,
-      @PathVariable long idEmpresa,
-      @PathVariable long idProveedor,
-      @PathVariable long idUsuario,
-      @PathVariable long idRecibo) {
-    NotaDebito nota = modelMapper.map(notaDebitoDTO, NotaDebito.class);
-    return notaService.guardarNotaProveedor(
-        nota, idEmpresa, idProveedor, idUsuario, idRecibo, null, false);
+    nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    if (movimiento.equals(Movimiento.VENTA) && idCliente != null) {
+      nota.setCliente(clienteService.getClientePorId(idCliente));
+    } else if (movimiento.equals(Movimiento.COMPRA) && idProveedor != null) {
+      nota.setProveedor(proveedorService.getProveedorPorId(idProveedor));
+    } else
+      throw new ForbiddenException(
+        ResourceBundle.getBundle("Mensajes")
+          .getString("mensaje_usuario_rol_no_valido")); // cambiar mensaje
+    nota.setMovimiento(movimiento);
+    nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
+    nota.setRecibo(reciboService.getById(idRecibo));
+    return notaService.guardarNotaDebito(nota);
   }
 
     @GetMapping("/notas/{idNota}/reporte")
@@ -409,10 +361,10 @@ public class NotaController {
         return notaService.calcularTotalDebito(subTotalBruto, iva21Neto, montoNoGravado);
     }
 
-  @GetMapping("/notas/ventas/total-credito/criteria")
+  @GetMapping("/notas/total-credito/criteria")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal getTotalNotasVentaCredito(
+  public BigDecimal getTotalNotasCredito(
       @RequestParam Long idEmpresa,
       @RequestParam(required = false) Long desde,
       @RequestParam(required = false) Long hasta,
@@ -420,6 +372,7 @@ public class NotaController {
       @RequestParam(required = false) Integer nroSerie,
       @RequestParam(required = false) Integer nroNota,
       @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
+      @RequestParam(required = false) Movimiento movimiento,
       @RequestParam(required = false) Long idUsuario,
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) Integer tamanio,
@@ -444,7 +397,7 @@ public class NotaController {
             .buscaPorFecha((desde != null) && (hasta != null))
             .fechaDesde(fechaDesde.getTime())
             .fechaHasta(fechaHasta.getTime())
-            .buscaVentas(true)
+            .movimiento(movimiento)
             .buscaCliente(idCliente != null)
             .idCliente(idCliente)
             .buscaUsuario(idUsuario != null)
@@ -461,10 +414,10 @@ public class NotaController {
     return notaService.calcularTotalCredito(criteria, (int) claims.get("idUsuario"));
   }
 
-  @GetMapping("/notas/ventas/total-debito/criteria")
+  @GetMapping("/notas/total-debito/criteria")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal getTotalNotasVentaDebito(
+  public BigDecimal getTotalNotasDebito(
       @RequestParam Long idEmpresa,
       @RequestParam(required = false) Long desde,
       @RequestParam(required = false) Long hasta,
@@ -472,6 +425,7 @@ public class NotaController {
       @RequestParam(required = false) Integer nroSerie,
       @RequestParam(required = false) Integer nroNota,
       @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
+      @RequestParam(required = false) Movimiento movimiento,
       @RequestParam(required = false) Long idUsuario,
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) Integer tamanio,
@@ -496,7 +450,7 @@ public class NotaController {
             .buscaPorFecha((desde != null) && (hasta != null))
             .fechaDesde(fechaDesde.getTime())
             .fechaHasta(fechaHasta.getTime())
-            .buscaVentas(true)
+            .movimiento(movimiento)
             .buscaCliente(idCliente != null)
             .idCliente(idCliente)
             .buscaUsuario(idUsuario != null)
@@ -513,10 +467,10 @@ public class NotaController {
     return notaService.calcularTotalDebito(criteria, (int) claims.get("idUsuario"));
   }
 
-  @GetMapping("/notas/ventas/total-iva-credito/criteria")
+  @GetMapping("/notas/total-iva-credito/criteria")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal getTotalIvaCreditoVentas(
+  public BigDecimal getTotalIvaCredito(
       @RequestParam Long idEmpresa,
       @RequestParam(required = false) Long desde,
       @RequestParam(required = false) Long hasta,
@@ -524,6 +478,7 @@ public class NotaController {
       @RequestParam(required = false) Integer nroSerie,
       @RequestParam(required = false) Integer nroNota,
       @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
+      @RequestParam(required = false) Movimiento movimiento,
       @RequestParam(required = false) Long idUsuario,
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) Integer tamanio,
@@ -548,7 +503,7 @@ public class NotaController {
             .buscaPorFecha((desde != null) && (hasta != null))
             .fechaDesde(fechaDesde.getTime())
             .fechaHasta(fechaHasta.getTime())
-            .buscaVentas(true)
+            .movimiento(movimiento)
             .buscaCliente(idCliente != null)
             .idCliente(idCliente)
             .buscaUsuario(idUsuario != null)
@@ -565,10 +520,10 @@ public class NotaController {
     return notaService.calcularTotalIVACredito(criteria, (int) claims.get("idUsuario"));
   }
 
-  @GetMapping("/notas/ventas/total-iva-debito/criteria")
+  @GetMapping("/notas/total-iva-debito/criteria")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal getTotalIvaDebitoVentas(
+  public BigDecimal getTotalIvaDebito(
       @RequestParam Long idEmpresa,
       @RequestParam(required = false) Long desde,
       @RequestParam(required = false) Long hasta,
@@ -576,6 +531,7 @@ public class NotaController {
       @RequestParam(required = false) Integer nroSerie,
       @RequestParam(required = false) Integer nroNota,
       @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
+      @RequestParam(required = false) Movimiento movimiento,
       @RequestParam(required = false) Long idUsuario,
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) Integer tamanio,
@@ -600,217 +556,9 @@ public class NotaController {
             .buscaPorFecha((desde != null) && (hasta != null))
             .fechaDesde(fechaDesde.getTime())
             .fechaHasta(fechaHasta.getTime())
-            .buscaVentas(true)
+            .movimiento(movimiento)
             .buscaCliente(idCliente != null)
             .idCliente(idCliente)
-            .buscaUsuario(idUsuario != null)
-            .idUsuario(idUsuario)
-            .buscaPorNumeroNota((nroSerie != null) && (nroNota != null))
-            .numSerie((nroSerie != null) ? nroSerie : 0)
-            .numNota((nroNota != null) ? nroNota : 0)
-            .buscaPorTipoComprobante(tipoDeComprobante != null)
-            .tipoComprobante(tipoDeComprobante)
-            .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
-            .build();
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    return notaService.calcularTotalIVADebito(criteria, (int) claims.get("idUsuario"));
-  }
-
-  @GetMapping("/notas/compras/total-credito/criteria")
-  @ResponseStatus(HttpStatus.OK)
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal getTotalCompraCredito(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) Integer nroSerie,
-      @RequestParam(required = false) Integer nroNota,
-      @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-      @RequestParam(required = false) Long idUsuario,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) Integer tamanio,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido,
-      @RequestHeader("Authorization") String token) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if ((desde != null) && (hasta != null)) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    if (tamanio == null || tamanio <= 0) {
-      tamanio = TAMANIO_PAGINA_DEFAULT;
-    }
-    if (pagina == null || pagina < 0) {
-      pagina = 0;
-    }
-    BusquedaNotaCriteria criteria =
-        BusquedaNotaCriteria.builder()
-            .idEmpresa(idEmpresa)
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .buscaCompras(true)
-            .buscaProveedor(idProveedor != null)
-            .idCliente(idProveedor)
-            .buscaUsuario(idUsuario != null)
-            .idUsuario(idUsuario)
-            .buscaPorNumeroNota((nroSerie != null) && (nroNota != null))
-            .numSerie((nroSerie != null) ? nroSerie : 0)
-            .numNota((nroNota != null) ? nroNota : 0)
-            .buscaPorTipoComprobante(tipoDeComprobante != null)
-            .tipoComprobante(tipoDeComprobante)
-            .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
-            .build();
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    return notaService.calcularTotalCredito(criteria, (int) claims.get("idUsuario"));
-  }
-
-  @GetMapping("/notas/compras/total-debito/criteria")
-  @ResponseStatus(HttpStatus.OK)
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal getTotalCompraDebito(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) Integer nroSerie,
-      @RequestParam(required = false) Integer nroNota,
-      @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-      @RequestParam(required = false) Long idUsuario,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) Integer tamanio,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido,
-      @RequestHeader("Authorization") String token) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if ((desde != null) && (hasta != null)) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    if (tamanio == null || tamanio <= 0) {
-      tamanio = TAMANIO_PAGINA_DEFAULT;
-    }
-    if (pagina == null || pagina < 0) {
-      pagina = 0;
-    }
-    BusquedaNotaCriteria criteria =
-        BusquedaNotaCriteria.builder()
-            .idEmpresa(idEmpresa)
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .buscaCompras(true)
-            .buscaProveedor(idProveedor != null)
-            .idCliente(idProveedor)
-            .buscaUsuario(idUsuario != null)
-            .idUsuario(idUsuario)
-            .buscaPorNumeroNota((nroSerie != null) && (nroNota != null))
-            .numSerie((nroSerie != null) ? nroSerie : 0)
-            .numNota((nroNota != null) ? nroNota : 0)
-            .buscaPorTipoComprobante(tipoDeComprobante != null)
-            .tipoComprobante(tipoDeComprobante)
-            .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
-            .build();
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    return notaService.calcularTotalDebito(criteria, (int) claims.get("idUsuario"));
-  }
-
-  @GetMapping("/notas/compras/total-iva-credito/criteria")
-  @ResponseStatus(HttpStatus.OK)
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal getTotalIvaCreditoCompras(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) Integer nroSerie,
-      @RequestParam(required = false) Integer nroNota,
-      @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-      @RequestParam(required = false) Long idUsuario,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) Integer tamanio,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido,
-      @RequestHeader("Authorization") String token) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if ((desde != null) && (hasta != null)) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    if (tamanio == null || tamanio <= 0) {
-      tamanio = TAMANIO_PAGINA_DEFAULT;
-    }
-    if (pagina == null || pagina < 0) {
-      pagina = 0;
-    }
-    BusquedaNotaCriteria criteria =
-        BusquedaNotaCriteria.builder()
-            .idEmpresa(idEmpresa)
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .buscaCompras(true)
-            .buscaProveedor(idProveedor != null)
-            .idCliente(idProveedor)
-            .buscaUsuario(idUsuario != null)
-            .idUsuario(idUsuario)
-            .buscaPorNumeroNota((nroSerie != null) && (nroNota != null))
-            .numSerie((nroSerie != null) ? nroSerie : 0)
-            .numNota((nroNota != null) ? nroNota : 0)
-            .buscaPorTipoComprobante(tipoDeComprobante != null)
-            .tipoComprobante(tipoDeComprobante)
-            .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
-            .build();
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    return notaService.calcularTotalIVACredito(criteria, (int) claims.get("idUsuario"));
-  }
-
-  @GetMapping("/notas/compras/total-iva-debito/criteria")
-  @ResponseStatus(HttpStatus.OK)
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal getTotalIvaDebitoCompras(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) Integer nroSerie,
-      @RequestParam(required = false) Integer nroNota,
-      @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-      @RequestParam(required = false) Long idUsuario,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) Integer tamanio,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido,
-      @RequestHeader("Authorization") String token) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if ((desde != null) && (hasta != null)) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    if (tamanio == null || tamanio <= 0) {
-      tamanio = TAMANIO_PAGINA_DEFAULT;
-    }
-    if (pagina == null || pagina < 0) {
-      pagina = 0;
-    }
-    BusquedaNotaCriteria criteria =
-        BusquedaNotaCriteria.builder()
-            .idEmpresa(idEmpresa)
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .buscaCompras(true)
-            .buscaProveedor(idProveedor != null)
-            .idCliente(idProveedor)
             .buscaUsuario(idUsuario != null)
             .idUsuario(idUsuario)
             .buscaPorNumeroNota((nroSerie != null) && (nroNota != null))

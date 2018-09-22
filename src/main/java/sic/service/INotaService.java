@@ -8,9 +8,9 @@ import sic.modelo.*;
 
 public interface INotaService {
 
-    Nota guardarNotaCliente(Nota nota, long idEmpresa, long idCliente, long idUsuario, Long idRecibo, Long idFactura, boolean modificarStock);
-    
-    Nota guardarNotaProveedor(Nota nota, long idEmpresa, long idProveedor, long idUsuario, Long idRecibo, Long idFactura, boolean modificarStock);
+    Nota guardarNotaCredito(NotaCredito nota);
+
+    Nota guardarNotaDebito(NotaDebito nota);
 
     Nota autorizarNota(Nota nota);
     

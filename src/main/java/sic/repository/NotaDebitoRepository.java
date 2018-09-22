@@ -1,11 +1,10 @@
 package sic.repository;
 
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.*;
 
-public interface NotaDebitoRepository extends NotaRepository<NotaDebito>, QueryDslPredicateExecutor<NotaDebito>, NotaDebitoRepositoryCustom {
+public interface NotaDebitoRepository extends NotaRepository<NotaDebito>, NotaDebitoRepositoryCustom {
 
     @Query("SELECT nd FROM NotaDebito nd WHERE nd.idNota= :idNotaDebito AND nd.eliminada = false")
     NotaDebito getById(@Param("idNotaDebito") long idNotaDebito);

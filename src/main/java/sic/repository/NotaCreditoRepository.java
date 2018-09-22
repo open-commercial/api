@@ -1,14 +1,13 @@
 package sic.repository;
 
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.*;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-public interface NotaCreditoRepository extends NotaRepository<NotaCredito> , QueryDslPredicateExecutor<NotaCredito>, NotaCreditoRepositoryCustom {
+public interface NotaCreditoRepository extends NotaRepository<NotaCredito>, NotaCreditoRepositoryCustom {
     
     @Query("SELECT nc FROM NotaCredito nc WHERE nc.idNota = :idNotaCredito AND nc.eliminada = false")
     NotaCredito getById(@Param("idNotaCredito") long idNotaCredito);

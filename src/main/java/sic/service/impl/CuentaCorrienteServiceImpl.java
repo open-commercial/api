@@ -220,9 +220,9 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     
     private CuentaCorriente getCuentaCorrientePorNota(Nota nota) {
         CuentaCorriente cc = null;
-        if (nota.getCliente() != null) {
+        if (nota.getMovimiento().equals(Movimiento.VENTA)) {
             cc = this.getCuentaCorrientePorCliente(nota.getCliente());
-        } else if (nota.getProveedor() != null) {
+        } else if (nota.getMovimiento().equals(Movimiento.COMPRA)) {
             cc = this.getCuentaCorrientePorProveedor(nota.getProveedor());
         }
         return cc;

@@ -411,6 +411,7 @@ CREATE TABLE `nota` (
   `iva105Neto` decimal(25,15) DEFAULT NULL,
   `iva21Neto` decimal(25,15) DEFAULT NULL,
   `motivo` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `movimiento` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `nroNota` bigint(20) NOT NULL,
   `numNotaAfip` bigint(20) NOT NULL,
   `numSerieAfip` bigint(20) NOT NULL,
@@ -888,4 +889,4 @@ CREATE TABLE `usuario` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-09-21 20:58:34
+-- Dump completed on 2018-09-22  1:38:22

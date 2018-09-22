@@ -23,8 +23,7 @@ public class BusquedaNotaCriteria {
     private long numNota;
     private boolean buscaPorTipoComprobante;
     private TipoDeComprobante tipoComprobante;
-    private boolean buscaVentas;
-    private boolean buscaCompras;
+    private Movimiento movimiento;
     private boolean buscaUsuario;
     private Long idUsuario;
     private boolean buscaProveedor;

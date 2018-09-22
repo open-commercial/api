@@ -28,7 +28,7 @@ import lombok.NoArgsConstructor;
   @JsonSubTypes.Type(value = NotaCredito.class),
   @JsonSubTypes.Type(value = NotaDebito.class)
 })
-@JsonIgnoreProperties({"cliente", "facturaVenta", "proveedor", "facturaCompra"})
+@JsonIgnoreProperties({"cliente", "empresa", "usuario","facturaVenta", "proveedor", "facturaCompra"})
 public abstract class Nota implements Serializable {
 
   @JsonGetter(value = "type")
@@ -79,6 +79,10 @@ public abstract class Nota implements Serializable {
   @JoinColumn(name = "id_FacturaCompra")
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private FacturaCompra facturaCompra;
+
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private Movimiento movimiento;
 
   @Column(nullable = false)
   private String motivo;
