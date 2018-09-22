@@ -38,7 +38,6 @@ public class NotaServiceImpl implements INotaService {
   private final NotaDebitoRepository notaDebitoRepository;
   private final IFacturaService facturaService;
   private final IClienteService clienteService;
-  private final IProveedorService proveedorService;
   private final IEmpresaService empresaService;
   private final IUsuarioService usuarioService;
   private final IProductoService productoService;
@@ -60,7 +59,6 @@ public class NotaServiceImpl implements INotaService {
       NotaDebitoRepository notaDebitoRepository,
       IFacturaService facturaService,
       IClienteService clienteService,
-      IProveedorService proveedorService,
       IUsuarioService usuarioService,
       IProductoService productoService,
       IEmpresaService empresaService,
@@ -74,7 +72,6 @@ public class NotaServiceImpl implements INotaService {
     this.notaDebitoRepository = notaDebitoRepository;
     this.facturaService = facturaService;
     this.clienteService = clienteService;
-    this.proveedorService = proveedorService;
     this.usuarioService = usuarioService;
     this.empresaService = empresaService;
     this.productoService = productoService;
@@ -1100,19 +1097,31 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
-  public BigDecimal calcularSubTotalCredito(BigDecimal[] importe) {
-    return facturaService.calcularSubTotal(importe);
+  public BigDecimal calcularSubTotalCredito(BigDecimal[] importes) {
+    BigDecimal resultado = BigDecimal.ZERO;
+    for (BigDecimal importe : importes) {
+      resultado = resultado.add(importe);
+    }
+    return resultado;
   }
 
   @Override
   public BigDecimal calcularDecuentoNetoCredito(
       BigDecimal subTotal, BigDecimal descuentoPorcentaje) {
-    return facturaService.calcularDescuentoNeto(subTotal, descuentoPorcentaje);
+    BigDecimal resultado = BigDecimal.ZERO;
+    if (descuentoPorcentaje.compareTo(BigDecimal.ZERO) != 0) {
+      resultado = subTotal.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+    }
+    return resultado;
   }
 
   @Override
   public BigDecimal calcularRecargoNetoCredito(BigDecimal subTotal, BigDecimal recargoPorcentaje) {
-    return facturaService.calcularDescuentoNeto(subTotal, recargoPorcentaje);
+    BigDecimal resultado = BigDecimal.ZERO;
+    if (recargoPorcentaje.compareTo(BigDecimal.ZERO) != 0) {
+      resultado = subTotal.multiply(recargoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+    }
+    return resultado;
   }
 
   @Override
@@ -1153,7 +1162,7 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public BigDecimal calcularTotalCredito(
       BigDecimal subTotalBruto, BigDecimal iva105Neto, BigDecimal iva21Neto) {
-    return facturaService.calcularTotal(subTotalBruto, iva105Neto, iva21Neto);
+    return subTotalBruto.add(iva105Neto).add(iva21Neto);
   }
 
   @Override
