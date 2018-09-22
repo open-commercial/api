@@ -5,7 +5,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import sic.modelo.Recibo;
 import sic.modelo.RenglonNotaDebito;
 
 @Data
@@ -14,7 +13,7 @@ public class NotaDebitoDTO extends NotaDTO implements Serializable {
     
     private List<RenglonNotaDebito> renglonesNotaDebito;
     private BigDecimal montoNoGravado;
-    private Recibo recibo;    
+    private long idRecibo;
     private boolean pagada;
     
 }

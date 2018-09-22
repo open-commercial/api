@@ -1,5 +1,7 @@
 package sic.modelo;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -21,6 +23,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true, exclude = "renglonesNotaDebito")
+@JsonIgnoreProperties({"recibo"})
 public class NotaDebito extends Nota implements Serializable {
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -140,5 +143,10 @@ public class NotaDebito extends Nota implements Serializable {
     this.montoNoGravado = montoNoGravado;
     this.renglonesNotaDebito = renglones;
     this.recibo = recibo;
+  }
+
+  @JsonGetter("idRecibo")
+  public Long getIdUsuario() {
+    return recibo.getIdRecibo();
   }
 }

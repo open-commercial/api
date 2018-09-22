@@ -171,4 +171,14 @@ public abstract class Nota implements Serializable {
       return null;
     }
   }
+
+  @JsonGetter("idUsuario")
+  public Long getIdUsuario() {
+    return usuario.getId_Usuario();
+  }
+
+  @JsonGetter("nombreUsuario")
+  public String getNombreCredencial() {
+    return usuario.getNombre() + " " + usuario.getApellido() + " (" + usuario.getUsername() + ")";
+  }
 }
