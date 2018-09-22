@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `ykcojs0liv7ir9od` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci */;
-USE `ykcojs0liv7ir9od`;
 -- MySQL dump 10.13  Distrib 5.7.23, for Linux (x86_64)
 --
 -- Host: localhost    Database: ykcojs0liv7ir9od
@@ -890,4 +888,4 @@ CREATE TABLE `usuario` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-09-21 19:02:26
+-- Dump completed on 2018-09-21 20:58:34
