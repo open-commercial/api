@@ -88,17 +88,6 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
-  public Long getCAEById(Long idNota) {
-    return notaRepository.getCAEById(idNota);
-  }
-
-  @Override
-  public BigDecimal getTotalById(Long idNota) {
-    BigDecimal total = notaRepository.getTotalById(idNota);
-    return (total != null) ? total : BigDecimal.ZERO;
-  }
-
-  @Override
   public Page<Nota> buscarNotas(BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn) {
     // Fecha de Nota
     if (busquedaNotaCriteria.isBuscaPorFecha()
@@ -331,16 +320,6 @@ public class NotaServiceImpl implements INotaService {
   public Factura getFacturaNotaCredito(Long idNota) {
     NotaCredito nota = this.notaCreditoRepository.getById(idNota);
     return (nota.getFacturaVenta() != null ? nota.getFacturaVenta() : nota.getFacturaCompra());
-  }
-
-  @Override
-  public FacturaVenta getFacturaNotaCreditoCliente(Long idNota) {
-    return this.notaCreditoRepository.getById(idNota).getFacturaVenta();
-  }
-
-  @Override
-  public FacturaCompra getFacturaNotaCreditoProveedor(Long idNota) {
-    return this.notaCreditoRepository.getById(idNota).getFacturaCompra();
   }
 
   @Override
@@ -1169,12 +1148,6 @@ public class NotaServiceImpl implements INotaService {
   public BigDecimal calcularTotalDebito(
       BigDecimal subTotalBruto, BigDecimal iva21Neto, BigDecimal montoNoGravado) {
     return subTotalBruto.add(iva21Neto).add(montoNoGravado);
-  }
-
-  @Override
-  public BigDecimal calcularTotalCreditoClientePorFacturaVenta(FacturaVenta facturaVenta) {
-    BigDecimal credito = notaCreditoRepository.getTotalNotasCreditoPorFacturaVenta(facturaVenta);
-    return (credito == null) ? BigDecimal.ZERO : credito;
   }
 
   @Override

@@ -2,86 +2,91 @@ package sic.service;
 
 import java.math.BigDecimal;
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 
 public interface INotaService {
 
-    Nota guardarNotaCredito(NotaCredito nota);
+  Nota guardarNotaCredito(NotaCredito nota);
 
-    Nota guardarNotaDebito(NotaDebito nota);
+  Nota guardarNotaDebito(NotaDebito nota);
 
-    Nota autorizarNota(Nota nota);
-    
-    byte[] getReporteNota(Nota nota);
+  Nota autorizarNota(Nota nota);
 
-    Nota getNotaPorId(Long idNota);
+  byte[] getReporteNota(Nota nota);
 
-    Page<Nota> buscarNotas(BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn);
-    
-    Long getCAEById(Long idNota);
-    
-    BigDecimal getTotalById(Long idNota);
-    
-    Factura getFacturaNotaCredito(Long idNota);
-    
-    FacturaVenta getFacturaNotaCreditoCliente(Long idNota);
-    
-    FacturaCompra getFacturaNotaCreditoProveedor(Long idNota);
-    
-    boolean existeNotaDebitoPorRecibo(Recibo recibo);
-    
-    boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta);
+  Nota getNotaPorId(Long idNota);
 
-    List<NotaCredito> getNotasCreditoPorFactura(Long idFactura);
+  Page<Nota> buscarNotas(BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn);
 
-    long getSiguienteNumeroNotaDebitoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
+  Factura getFacturaNotaCredito(Long idNota);
 
-    long getSiguienteNumeroNotaCreditoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
+  boolean existeNotaDebitoPorRecibo(Recibo recibo);
 
-    TipoDeComprobante[] getTipoNotaCliente(Long idCliente, Long idEmpresa);
+  boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta);
 
-    TipoDeComprobante[] getTiposNota(Empresa empresa);
+  List<NotaCredito> getNotasCreditoPorFactura(Long idFactura);
 
-    List<RenglonNotaCredito> getRenglonesDeNotaCredito(Long idNota);
+  long getSiguienteNumeroNotaDebitoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
 
-    List<RenglonNotaDebito> getRenglonesDeNotaDebito(Long idNota);
-    
-    List<RenglonFactura> getRenglonesFacturaModificadosParaNotaCredito(long idFactura);
+  long getSiguienteNumeroNotaCreditoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
 
-    void eliminarNota(long[] idNota);
+  TipoDeComprobante[] getTipoNotaCliente(Long idCliente, Long idEmpresa);
 
-    BigDecimal calcularTotalNota(List<RenglonNotaCredito> renglonesNota);
+  TipoDeComprobante[] getTiposNota(Empresa empresa);
 
-    BigDecimal getIvaNetoNota(Long idNota);
+  List<RenglonNotaCredito> getRenglonesDeNotaCredito(Long idNota);
 
-    List<RenglonNotaCredito> calcularRenglonCredito(TipoDeComprobante tipo, BigDecimal[] cantidad, long[] idRenglonFactura);
+  List<RenglonNotaDebito> getRenglonesDeNotaDebito(Long idNota);
 
-    List<RenglonNotaDebito> calcularRenglonDebito(long idRecibo, BigDecimal monto, BigDecimal ivaPorcentaje);
+  List<RenglonFactura> getRenglonesFacturaModificadosParaNotaCredito(long idFactura);
 
-    BigDecimal calcularSubTotalCredito(BigDecimal[] importesBrutos);
+  void eliminarNota(long[] idNota);
 
-    BigDecimal calcularDecuentoNetoCredito(BigDecimal subTotal, BigDecimal descuentoPorcentaje);
+  BigDecimal calcularTotalNota(List<RenglonNotaCredito> renglonesNota);
 
-    BigDecimal calcularRecargoNetoCredito(BigDecimal subTotal, BigDecimal recargoPorcentaje);
+  BigDecimal getIvaNetoNota(Long idNota);
 
-    BigDecimal calcularSubTotalBrutoCredito(TipoDeComprobante tipoDeComprobante, BigDecimal subTotal, BigDecimal recargoNeto, BigDecimal descuentoNeto, BigDecimal iva105_neto, BigDecimal iva21_neto);
+  List<RenglonNotaCredito> calcularRenglonCredito(
+      TipoDeComprobante tipo, BigDecimal[] cantidad, long[] idRenglonFactura);
 
-    BigDecimal calcularIVANetoCredito(TipoDeComprobante tipoDeComprobante, BigDecimal[] cantidades, BigDecimal[] ivaPorcentajeRenglones, BigDecimal[] ivaNetoRenglones, BigDecimal ivaPorcentaje, BigDecimal descuentoPorcentaje, BigDecimal recargoPorcentaje);
+  List<RenglonNotaDebito> calcularRenglonDebito(
+      long idRecibo, BigDecimal monto, BigDecimal ivaPorcentaje);
 
-    BigDecimal calcularTotalCredito(BigDecimal subTotal_bruto, BigDecimal iva105_neto, BigDecimal iva21_neto);
-    
-    BigDecimal calcularTotalDebito(BigDecimal subTotal_bruto, BigDecimal iva21_neto, BigDecimal montoNoGravado);
-    
-    BigDecimal calcularTotalCreditoClientePorFacturaVenta(FacturaVenta factura);
+  BigDecimal calcularSubTotalCredito(BigDecimal[] importesBrutos);
 
-    BigDecimal calcularTotalCredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+  BigDecimal calcularDecuentoNetoCredito(BigDecimal subTotal, BigDecimal descuentoPorcentaje);
 
-    BigDecimal calcularTotalDebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+  BigDecimal calcularRecargoNetoCredito(BigDecimal subTotal, BigDecimal recargoPorcentaje);
 
-    BigDecimal calcularTotalIVACredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+  BigDecimal calcularSubTotalBrutoCredito(
+      TipoDeComprobante tipoDeComprobante,
+      BigDecimal subTotal,
+      BigDecimal recargoNeto,
+      BigDecimal descuentoNeto,
+      BigDecimal iva105Neto,
+      BigDecimal iva21Neto);
 
-    BigDecimal calcularTotalIVADebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
-    
+  BigDecimal calcularIVANetoCredito(
+      TipoDeComprobante tipoDeComprobante,
+      BigDecimal[] cantidades,
+      BigDecimal[] ivaPorcentajeRenglones,
+      BigDecimal[] ivaNetoRenglones,
+      BigDecimal ivaPorcentaje,
+      BigDecimal descuentoPorcentaje,
+      BigDecimal recargoPorcentaje);
+
+  BigDecimal calcularTotalCredito(
+      BigDecimal subTotalBruto, BigDecimal iva105Neto, BigDecimal iva21Neto);
+
+  BigDecimal calcularTotalDebito(
+      BigDecimal subTotalBruto, BigDecimal iva21Neto, BigDecimal montoNoGravado);
+
+  BigDecimal calcularTotalCredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+
+  BigDecimal calcularTotalDebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+
+  BigDecimal calcularTotalIVACredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+
+  BigDecimal calcularTotalIVADebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
 }

@@ -239,9 +239,7 @@ public class NotaController {
     NotaCredito nota = modelMapper.map(notaCreditoDTO, NotaCredito.class);
     nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     Factura factura = facturaService.getFacturaPorId(idFactura);
-    if (movimiento == Movimiento.VENTA
-        && idCliente != null
-        && factura instanceof FacturaVenta) {
+    if (movimiento == Movimiento.VENTA && idCliente != null && factura instanceof FacturaVenta) {
       nota.setCliente(clienteService.getClientePorId(idCliente));
       nota.setFacturaVenta((FacturaVenta) factura);
     } else if (movimiento == Movimiento.COMPRA
@@ -251,8 +249,7 @@ public class NotaController {
       nota.setFacturaCompra((FacturaCompra) factura);
     } else {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_movimiento_no_valido"));
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_movimiento_no_valido"));
     }
     nota.setMovimiento(movimiento);
     nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
@@ -279,8 +276,7 @@ public class NotaController {
       nota.setProveedor(proveedorService.getProveedorPorId(idProveedor));
     } else {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_movimiento_no_valido"));
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_movimiento_no_valido"));
     }
     nota.setMovimiento(movimiento);
     nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
