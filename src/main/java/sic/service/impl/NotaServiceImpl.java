@@ -200,9 +200,9 @@ public class NotaServiceImpl implements INotaService {
             .eq(criteria.getIdEmpresa())
             .and(qNotaCredito.eliminada.eq(false)));
     if (criteria.getMovimiento().equals(Movimiento.VENTA))
-      builder.and(qNotaCredito.cliente.isNotNull());
+      builder.and(qNotaCredito.movimiento.eq(Movimiento.VENTA));
     if (criteria.getMovimiento().equals(Movimiento.COMPRA))
-      builder.and(qNotaCredito.proveedor.isNotNull());
+      builder.and(qNotaCredito.movimiento.eq(Movimiento.COMPRA));
     // Fecha
     if (criteria.isBuscaPorFecha()) {
       FormatterFechaHora formateadorFecha =

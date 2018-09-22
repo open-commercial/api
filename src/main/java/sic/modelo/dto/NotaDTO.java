@@ -7,18 +7,23 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import sic.modelo.Nota;
 import sic.modelo.TipoDeComprobante;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(of = {"fecha", "tipoComprobante", "serie", "nroNota"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idNota", scope = Nota.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = FacturaCompraDTO.class, name = "NotaCredito"),
-        @JsonSubTypes.Type(value = FacturaVentaDTO.class, name = "NotaDebito"),
+        @JsonSubTypes.Type(value = NotaCreditoDTO.class, name = "NotaCredito"),
+        @JsonSubTypes.Type(value = NotaDebitoDTO.class, name = "NotaDebito"),
 })
 public abstract class NotaDTO implements Serializable {
 
@@ -33,10 +38,10 @@ public abstract class NotaDTO implements Serializable {
   private UsuarioDTO usuario;
   private long idCliente;
   private String razonSocialCliente;
-  private FacturaVentaDTO facturaVenta;
+  private long idFacturaVenta;
   private long idProveedor;
   private String razonSocialProveedor;
-  private FacturaCompraDTO facturaCompra;
+  private long idFacturaCompra;
   private String motivo;
   private BigDecimal subTotalBruto;
   private BigDecimal iva21Neto;
