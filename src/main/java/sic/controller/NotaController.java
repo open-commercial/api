@@ -239,20 +239,20 @@ public class NotaController {
     NotaCredito nota = modelMapper.map(notaCreditoDTO, NotaCredito.class);
     nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     Factura factura = facturaService.getFacturaPorId(idFactura);
-    if (movimiento.equals(Movimiento.VENTA)
+    if (movimiento == Movimiento.VENTA
         && idCliente != null
         && factura instanceof FacturaVenta) {
       nota.setCliente(clienteService.getClientePorId(idCliente));
       nota.setFacturaVenta((FacturaVenta) factura);
-    } else if (movimiento.equals(Movimiento.COMPRA)
+    } else if (movimiento == Movimiento.COMPRA
         && idProveedor != null
         && factura instanceof FacturaCompra) {
       nota.setProveedor(proveedorService.getProveedorPorId(idProveedor));
       nota.setFacturaCompra((FacturaCompra) factura);
     } else {
-      throw new ForbiddenException(
+      throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_usuario_rol_no_valido")); // cambiar mensaje
+              .getString("mensaje_movimiento_no_valido"));
     }
     nota.setMovimiento(movimiento);
     nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
@@ -273,14 +273,14 @@ public class NotaController {
       @PathVariable long idRecibo) {
     NotaDebito nota = modelMapper.map(notaDebitoDTO, NotaDebito.class);
     nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    if (movimiento.equals(Movimiento.VENTA) && idCliente != null) {
+    if (movimiento == Movimiento.VENTA && idCliente != null) {
       nota.setCliente(clienteService.getClientePorId(idCliente));
-    } else if (movimiento.equals(Movimiento.COMPRA) && idProveedor != null) {
+    } else if (movimiento == Movimiento.COMPRA && idProveedor != null) {
       nota.setProveedor(proveedorService.getProveedorPorId(idProveedor));
     } else {
-      throw new ForbiddenException(
+      throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_usuario_rol_no_valido")); // cambiar mensaje
+              .getString("mensaje_movimiento_no_valido"));
     }
     nota.setMovimiento(movimiento);
     nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
