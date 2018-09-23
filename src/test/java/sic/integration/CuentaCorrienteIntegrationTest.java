@@ -584,9 +584,6 @@ public class CuentaCorrienteIntegrationTest {
                 + "&cantidad=5&idRenglonFactura=3", RenglonNotaCredito[].class));       
         NotaCreditoDTO notaCreditoProveedor = new NotaCreditoDTO();
         notaCreditoProveedor.setRenglonesNotaCredito(renglonesNotaCredito);
-        EmpresaDTO empresaDTO = EmpresaDTO.builder()
-          .id_Empresa(empresa.getId_Empresa())
-          .build();
         notaCreditoProveedor.setFecha(new Date());
         notaCreditoProveedor.setModificaStock(true);
         notaCreditoProveedor.setSubTotal(restTemplate.getForObject(apiPrefix + "/notas/credito/sub-total?importe="
@@ -662,6 +659,25 @@ public class CuentaCorrienteIntegrationTest {
         assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(2).getSaldo() == 1000.0);
         assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(3).getSaldo() == 6992.5);
         assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(4).getSaldo() == 4992.5);
+        restTemplate.delete(apiPrefix + "/notas/?idsNota=2");
+        renglonesCuentaCorriente = restTemplate
+                .exchange(apiPrefix + "/cuentas-corriente/1/renglones"
+                                + "?pagina=" + 0 + "&tamanio=" + 50, HttpMethod.GET, null,
+                        new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {
+                        }).getBody().getContent();
+        assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(0).getSaldo() == 5114.0);
+        assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(1).getSaldo() == 1000.0);
+        assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(2).getSaldo() == 6992.5);
+        assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(3).getSaldo() == 4992.5);
+        restTemplate.delete(apiPrefix + "/notas/?idsNota=1");
+        renglonesCuentaCorriente = restTemplate
+                .exchange(apiPrefix + "/cuentas-corriente/1/renglones"
+                                + "?pagina=" + 0 + "&tamanio=" + 50, HttpMethod.GET, null,
+                        new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {
+                        }).getBody().getContent();
+        assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(0).getSaldo() == 1000.0);
+        assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(1).getSaldo() == 6992.5);
+        assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(2).getSaldo() == 4992.5);
     }
     
     @Test

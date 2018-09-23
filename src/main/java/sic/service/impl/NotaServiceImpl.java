@@ -680,19 +680,20 @@ public class NotaServiceImpl implements INotaService {
   @Transactional
   public Nota guardarNotaCredito(NotaCredito notaCredito) {
     this.validarNota(notaCredito);
-    notaCredito.setSerie(
-        configuracionDelSistemaService
-            .getConfiguracionDelSistemaPorEmpresa(notaCredito.getEmpresa())
-            .getNroPuntoDeVentaAfip());
-    if (notaCredito.getMovimiento().equals(Movimiento.VENTA))
+    if (notaCredito.getMovimiento().equals(Movimiento.VENTA)) {
       notaCredito.setTipoComprobante(
           this.getTipoDeNotaCreditoSegunFactura(notaCredito.getFacturaVenta()));
-    else
+      notaCredito.setSerie(
+          configuracionDelSistemaService
+              .getConfiguracionDelSistemaPorEmpresa(notaCredito.getEmpresa())
+              .getNroPuntoDeVentaAfip());
+      notaCredito.setNroNota(
+          this.getSiguienteNumeroNotaCreditoCliente(
+              notaCredito.getIdEmpresa(), notaCredito.getTipoComprobante()));
+    } else if (notaCredito.getMovimiento().equals(Movimiento.COMPRA)) {
       notaCredito.setTipoComprobante(
           this.getTipoDeNotaCreditoSegunFactura(notaCredito.getFacturaCompra()));
-    notaCredito.setNroNota(
-        this.getSiguienteNumeroNotaCreditoCliente(
-            notaCredito.getIdEmpresa(), notaCredito.getTipoComprobante()));
+    }
     if (notaCredito.isModificaStock()) {
       this.actualizarStock(notaCredito.getRenglonesNotaCredito(), TipoDeOperacion.ACTUALIZACION);
     }
@@ -707,23 +708,28 @@ public class NotaServiceImpl implements INotaService {
   @Transactional
   public NotaDebito guardarNotaDebito(NotaDebito notaDebito) {
     this.validarNota(notaDebito);
-    if (notaDebito.getMovimiento().equals(Movimiento.VENTA))
+    if (notaDebito.getMovimiento().equals(Movimiento.VENTA)) {
       notaDebito.setTipoComprobante(
           this.getTipoDeNotaDebito(
               this.facturaService
                   .getTipoFacturaVenta(notaDebito.getEmpresa(), notaDebito.getCliente())[0]));
-    else if (notaDebito.getMovimiento().equals(Movimiento.COMPRA))
+      notaDebito.setSerie(
+          configuracionDelSistemaService
+              .getConfiguracionDelSistemaPorEmpresa(notaDebito.getEmpresa())
+              .getNroPuntoDeVentaAfip());
+      notaDebito.setNroNota(
+          this.getSiguienteNumeroNotaDebitoCliente(
+              notaDebito.getIdEmpresa(), notaDebito.getTipoComprobante()));
+    } else if (notaDebito.getMovimiento().equals(Movimiento.COMPRA)) {
       notaDebito.setTipoComprobante(
           this.getTipoDeNotaDebito(
               this.facturaService
                   .getTipoFacturaCompra(notaDebito.getEmpresa(), notaDebito.getProveedor())[0]));
-    notaDebito.setNroNota(
-        this.getSiguienteNumeroNotaDebitoCliente(
-            notaDebito.getIdEmpresa(), notaDebito.getTipoComprobante()));
+    }
     this.validarCalculosDebito(notaDebito);
     notaDebito = notaDebitoRepository.save(notaDebito);
     cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito, TipoDeOperacion.ALTA);
-    logger.warn("La Nota " + notaDebito + " se guardó correctamente.");
+    logger.warn("La Nota {} se guardó correctamente.", notaDebito);
     return notaDebito;
   }
 
@@ -926,13 +932,13 @@ public class NotaServiceImpl implements INotaService {
             throw new BusinessServiceException(
                 ResourceBundle.getBundle("Mensajes").getString("mensaje_eliminar_nota_aprobada"));
           }
-          if (nota.getFacturaVenta() != null) {
+          if (nota instanceof NotaCredito) {
             NotaCredito nc = (NotaCredito) nota;
             if (nc.isModificaStock()) {
               this.actualizarStock(nc.getRenglonesNotaCredito(), TipoDeOperacion.ALTA);
             }
           }
-        } else if (nota.getMovimiento().equals(Movimiento.COMPRA)) {
+        } else if (nota.getMovimiento().equals(Movimiento.COMPRA) && nota instanceof NotaCredito) {
           NotaCredito nc = (NotaCredito) nota;
           if (nc.isModificaStock()) {
             this.actualizarStock(nc.getRenglonesNotaCredito(), TipoDeOperacion.ACTUALIZACION);

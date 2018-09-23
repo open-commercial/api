@@ -28,7 +28,7 @@ import lombok.NoArgsConstructor;
   @JsonSubTypes.Type(value = NotaCredito.class),
   @JsonSubTypes.Type(value = NotaDebito.class)
 })
-@JsonIgnoreProperties({"cliente", "empresa", "usuario","facturaVenta", "proveedor", "facturaCompra"})
+@JsonIgnoreProperties({"cliente", "empresa", "usuario","facturaVenta", "proveedor", "facturaCompra", "recibo"})
 public abstract class Nota implements Serializable {
 
   @JsonGetter(value = "type")
@@ -173,12 +173,12 @@ public abstract class Nota implements Serializable {
   }
 
   @JsonGetter("idUsuario")
-  public Long getIdRecibo() {
+  public Long getIdUsuario() {
     return usuario.getId_Usuario();
   }
 
   @JsonGetter("nombreUsuario")
-  public String getNombreCredencial() {
+  public String getNombreUsuario() {
     return usuario.getNombre() + " " + usuario.getApellido() + " (" + usuario.getUsername() + ")";
   }
 }

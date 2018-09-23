@@ -23,7 +23,6 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true, exclude = "renglonesNotaDebito")
-@JsonIgnoreProperties({"recibo"})
 public class NotaDebito extends Nota implements Serializable {
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -146,7 +145,7 @@ public class NotaDebito extends Nota implements Serializable {
   }
 
   @JsonGetter("idRecibo")
-  public Long getIdRecibo() {
+  public Long getIdUsuario() {
     return recibo.getIdRecibo();
   }
 }
