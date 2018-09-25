@@ -63,20 +63,6 @@ public class ClienteServiceImplTest {
   }
 
   @Test
-  public void shouldValidarOperacionWhenLocalidadEsNull() {
-    thrown.expect(BusinessServiceException.class);
-    thrown.expectMessage(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_localidad"));
-    clienteServiceImpl.validarOperacion(
-        TipoDeOperacion.ELIMINACION,
-        new ClienteBuilder()
-            .withEmail("soporte@gmail.com")
-            .withRazonSocial("Ferreteria Julian")
-            .withLocalidad(null)
-            .build());
-  }
-
-  @Test
   public void shouldValidarOperacionWhenEmpresaEsNull() {
     thrown.expect(BusinessServiceException.class);
     thrown.expectMessage(
