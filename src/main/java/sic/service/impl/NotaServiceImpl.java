@@ -780,49 +780,37 @@ public class NotaServiceImpl implements INotaService {
   private TipoDeComprobante getTipoDeNotaDebito(TipoDeComprobante tipo) {
     switch (tipo) {
       case FACTURA_A:
-        tipo = TipoDeComprobante.NOTA_DEBITO_A;
-        break;
+        return TipoDeComprobante.NOTA_DEBITO_A;
       case FACTURA_B:
-        tipo = TipoDeComprobante.NOTA_DEBITO_B;
-        break;
+        return TipoDeComprobante.NOTA_DEBITO_B;
       case FACTURA_X:
-        tipo = TipoDeComprobante.NOTA_DEBITO_X;
-        break;
+        return TipoDeComprobante.NOTA_DEBITO_X;
       case FACTURA_Y:
-        tipo = TipoDeComprobante.NOTA_DEBITO_Y;
-        break;
+        return TipoDeComprobante.NOTA_DEBITO_Y;
       case PRESUPUESTO:
-        tipo = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
-        break;
+        return TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
+      default:
+        throw new ServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_tipo_no_valido"));
     }
-    return tipo;
   }
 
   private TipoDeComprobante getTipoDeComprobanteFacturaSegunNotaCredito(NotaCredito notaCredito) {
-    TipoDeComprobante tipo = null;
-    if (notaCredito.getTipoComprobante() != null) {
-      switch (notaCredito.getTipoComprobante()) {
-        case NOTA_CREDITO_A:
-          tipo = TipoDeComprobante.FACTURA_A;
-          break;
-        case NOTA_CREDITO_B:
-          tipo = TipoDeComprobante.FACTURA_B;
-          break;
-        case NOTA_CREDITO_X:
-          tipo = TipoDeComprobante.FACTURA_X;
-          break;
-        case NOTA_CREDITO_Y:
-          tipo = TipoDeComprobante.FACTURA_X;
-          break;
-        case NOTA_CREDITO_PRESUPUESTO:
-          tipo = TipoDeComprobante.PRESUPUESTO;
-          break;
-        default:
-          throw new ServiceException(
-              ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_tipo_no_valido"));
-      }
+    switch (notaCredito.getTipoComprobante()) {
+      case NOTA_CREDITO_A:
+        return TipoDeComprobante.FACTURA_A;
+      case NOTA_CREDITO_B:
+        return TipoDeComprobante.FACTURA_B;
+      case NOTA_CREDITO_X:
+        return TipoDeComprobante.FACTURA_X;
+      case NOTA_CREDITO_Y:
+        return TipoDeComprobante.FACTURA_X;
+      case NOTA_CREDITO_PRESUPUESTO:
+        return TipoDeComprobante.PRESUPUESTO;
+      default:
+        throw new ServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_tipo_no_valido"));
     }
-    return tipo;
   }
 
   private TipoDeComprobante getTipoDeNotaCreditoSegunFactura(Factura factura) {
