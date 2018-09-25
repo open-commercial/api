@@ -119,9 +119,9 @@ public class NotaServiceImpl implements INotaService {
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
         qNota.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qNota.eliminada.eq(false)));
-    if (criteria.getMovimiento().equals(Movimiento.VENTA))
+    if (criteria.getMovimiento() == Movimiento.VENTA)
       builder.and(qNota.movimiento.eq(Movimiento.VENTA));
-    if (criteria.getMovimiento().equals(Movimiento.COMPRA))
+    if (criteria.getMovimiento() == Movimiento.COMPRA)
       builder.and(qNota.movimiento.eq(Movimiento.COMPRA));
     // Fecha
     if (criteria.isBuscaPorFecha()) {
@@ -188,9 +188,9 @@ public class NotaServiceImpl implements INotaService {
             .id_Empresa
             .eq(criteria.getIdEmpresa())
             .and(qNotaCredito.eliminada.eq(false)));
-    if (criteria.getMovimiento().equals(Movimiento.VENTA))
+    if (criteria.getMovimiento() == Movimiento.VENTA)
       builder.and(qNotaCredito.movimiento.eq(Movimiento.VENTA));
-    if (criteria.getMovimiento().equals(Movimiento.COMPRA))
+    if (criteria.getMovimiento() == Movimiento.COMPRA)
       builder.and(qNotaCredito.movimiento.eq(Movimiento.COMPRA));
     // Fecha
     if (criteria.isBuscaPorFecha()) {
@@ -257,9 +257,9 @@ public class NotaServiceImpl implements INotaService {
             .id_Empresa
             .eq(criteria.getIdEmpresa())
             .and(qNotDebito.eliminada.eq(false)));
-    if (criteria.getMovimiento().equals(Movimiento.VENTA))
+    if (criteria.getMovimiento() == Movimiento.VENTA)
       builder.and(qNotDebito.movimiento.eq(Movimiento.VENTA));
-    if (criteria.getMovimiento().equals(Movimiento.COMPRA))
+    if (criteria.getMovimiento() == Movimiento.COMPRA)
       builder.and(qNotDebito.movimiento.eq(Movimiento.COMPRA));
     // Fecha
     if (criteria.isBuscaPorFecha()) {
@@ -317,13 +317,13 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
-  public Factura getFacturaNotaCredito(Long idNota) {
+  public Factura getFacturaDeLaNotaCredito(Long idNota) {
     NotaCredito nota = this.notaCreditoRepository.getById(idNota);
     return (nota.getFacturaVenta() != null ? nota.getFacturaVenta() : nota.getFacturaCompra());
   }
 
   @Override
-  public boolean existeNotaDebitoPorRecibo(Recibo recibo) {
+  public boolean existsNotaDebitoPorRecibo(Recibo recibo) {
     return notaDebitoRepository.existsByReciboAndEliminada(recibo, false);
   }
 
@@ -486,7 +486,7 @@ public class NotaServiceImpl implements INotaService {
 
   private void validarNota(Nota nota) {
     if (nota.getFecha() != null) {
-      if (nota instanceof NotaCredito && nota.getMovimiento().equals(Movimiento.VENTA)) {
+      if (nota instanceof NotaCredito && nota.getMovimiento() == Movimiento.VENTA) {
         if (nota.getFecha().compareTo(nota.getFacturaVenta().getFecha()) <= 0) {
           throw new BusinessServiceException(
               ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_fecha_incorrecta"));
@@ -495,7 +495,7 @@ public class NotaServiceImpl implements INotaService {
           throw new BusinessServiceException(
               ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_cliente_CAE"));
         }
-      } else if (nota instanceof NotaCredito && nota.getMovimiento().equals(Movimiento.COMPRA)) {
+      } else if (nota instanceof NotaCredito && nota.getMovimiento() == Movimiento.COMPRA) {
         if (nota.getFecha().compareTo(nota.getFacturaCompra().getFecha()) <= 0) {
           throw new BusinessServiceException(
               ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_fecha_incorrecta"));
@@ -861,7 +861,7 @@ public class NotaServiceImpl implements INotaService {
     ClassLoader classLoader = NotaServiceImpl.class.getClassLoader();
     InputStream isFileReport;
     JRBeanCollectionDataSource ds;
-    Map params = new HashMap();
+    Map<String, Object> params = new HashMap<>();
     if (nota instanceof NotaCredito) {
       isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/NotaCredito.jasper");
       List<RenglonNotaCredito> renglones = this.getRenglonesDeNotaCredito(nota.getIdNota());
@@ -927,7 +927,7 @@ public class NotaServiceImpl implements INotaService {
     for (long idNota : idsNota) {
       Nota nota = this.getNotaPorId(idNota);
       if (nota != null) {
-        if (nota.getMovimiento().equals(Movimiento.VENTA)) {
+        if (nota.getMovimiento() == Movimiento.VENTA) {
           if (nota.getCAE() != 0L) {
             throw new BusinessServiceException(
                 ResourceBundle.getBundle("Mensajes").getString("mensaje_eliminar_nota_aprobada"));
@@ -938,7 +938,7 @@ public class NotaServiceImpl implements INotaService {
               this.actualizarStock(nc.getRenglonesNotaCredito(), TipoDeOperacion.ALTA);
             }
           }
-        } else if (nota.getMovimiento().equals(Movimiento.COMPRA) && nota instanceof NotaCredito) {
+        } else if (nota.getMovimiento() == Movimiento.COMPRA && nota instanceof NotaCredito) {
           NotaCredito nc = (NotaCredito) nota;
           if (nc.isModificaStock()) {
             this.actualizarStock(nc.getRenglonesNotaCredito(), TipoDeOperacion.ACTUALIZACION);
@@ -1071,14 +1071,9 @@ public class NotaServiceImpl implements INotaService {
     renglonNota.setIvaPorcentaje(ivaPorcentaje);
     renglonNota.setIvaNeto(monto.multiply(ivaPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)));
     renglonNota.setImporteBruto(monto);
-    renglonNota.setImporteNeto(
-        this.calcularImporteRenglon(renglonNota.getIvaNeto(), renglonNota.getImporteBruto()));
+    renglonNota.setImporteNeto(renglonNota.getIvaNeto().add(renglonNota.getImporteBruto()));
     renglonesNota.add(renglonNota);
     return renglonesNota;
-  }
-
-  private BigDecimal calcularImporteRenglon(BigDecimal ivaNeto, BigDecimal subTotalBrutoRenglon) {
-    return ivaNeto.add(subTotalBrutoRenglon);
   }
 
   @Override

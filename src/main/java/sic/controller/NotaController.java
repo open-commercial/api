@@ -167,7 +167,7 @@ public class NotaController {
     Rol.COMPRADOR
   })
   public Factura getFacturaNotaCredito(@PathVariable long idNota) {
-    return notaService.getFacturaNotaCredito(idNota);
+    return notaService.getFacturaDeLaNotaCredito(idNota);
   }
 
   @GetMapping("/notas/debito/recibo/{idRecibo}/existe")
@@ -180,7 +180,7 @@ public class NotaController {
     Rol.COMPRADOR
   })
   public boolean existeNotaDebitoRecibo(@PathVariable long idRecibo) {
-    return notaService.existeNotaDebitoPorRecibo(reciboService.getById(idRecibo));
+    return notaService.existsNotaDebitoPorRecibo(reciboService.getById(idRecibo));
   }
 
   @GetMapping("/notas/tipos")

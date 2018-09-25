@@ -148,7 +148,7 @@ public class ReciboServiceImpl implements IReciboService {
     @Transactional
     public void eliminar(long idRecibo) {
         Recibo r = reciboRepository.findById(idRecibo);
-        if (!notaService.existeNotaDebitoPorRecibo(r)) {
+        if (!notaService.existsNotaDebitoPorRecibo(r)) {
             r.setEliminado(true);
             this.cuentaCorrienteService.asentarEnCuentaCorriente(r, TipoDeOperacion.ELIMINACION);
             this.actualizarCajaPorEliminacionDeRecibo(r);

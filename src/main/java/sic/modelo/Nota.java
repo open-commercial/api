@@ -173,7 +173,7 @@ public abstract class Nota implements Serializable {
   }
 
   @JsonGetter("idUsuario")
-  public Long getIdUsuario() {
+  public Long getIdRecibo() {
     return usuario.getId_Usuario();
   }
 

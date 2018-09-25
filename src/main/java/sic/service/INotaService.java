@@ -19,9 +19,9 @@ public interface INotaService {
 
   Page<Nota> buscarNotas(BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn);
 
-  Factura getFacturaNotaCredito(Long idNota);
+  Factura getFacturaDeLaNotaCredito(Long idNota);
 
-  boolean existeNotaDebitoPorRecibo(Recibo recibo);
+  boolean existsNotaDebitoPorRecibo(Recibo recibo);
 
   boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta);
 

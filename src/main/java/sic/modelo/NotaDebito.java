@@ -1,7 +1,6 @@
 package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -145,7 +144,7 @@ public class NotaDebito extends Nota implements Serializable {
   }
 
   @JsonGetter("idRecibo")
-  public Long getIdUsuario() {
+  public Long getIdRecibo() {
     return recibo.getIdRecibo();
   }
 }
