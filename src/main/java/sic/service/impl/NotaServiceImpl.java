@@ -519,7 +519,7 @@ public class NotaServiceImpl implements INotaService {
 
   private void validarCalculosCredito(NotaCredito notaCredito) {
     TipoDeComprobante tipoDeComprobanteDeFacturaRelacionada =
-        this.getTipoDeComprobanteFacturaSegunNotaCredito(notaCredito);
+        this.getTipoDeComprobanteFacturaSegunNotaCredito(notaCredito.getTipoComprobante());
     List<RenglonNotaCredito> renglonesNotaCredito = notaCredito.getRenglonesNotaCredito();
     BigDecimal subTotal = BigDecimal.ZERO;
     BigDecimal[] importes = new BigDecimal[renglonesNotaCredito.size()];
@@ -677,7 +677,8 @@ public class NotaServiceImpl implements INotaService {
     this.validarNota(notaCredito);
     if (notaCredito.getMovimiento().equals(Movimiento.VENTA)) {
       notaCredito.setTipoComprobante(
-          this.getTipoDeNotaCreditoSegunFactura(notaCredito.getFacturaVenta()));
+          this.getTipoDeNotaCreditoSegunFactura(
+              notaCredito.getFacturaVenta().getTipoComprobante()));
       notaCredito.setSerie(
           configuracionDelSistemaService
               .getConfiguracionDelSistemaPorEmpresa(notaCredito.getEmpresa())
@@ -687,7 +688,8 @@ public class NotaServiceImpl implements INotaService {
               notaCredito.getIdEmpresa(), notaCredito.getTipoComprobante()));
     } else if (notaCredito.getMovimiento().equals(Movimiento.COMPRA)) {
       notaCredito.setTipoComprobante(
-          this.getTipoDeNotaCreditoSegunFactura(notaCredito.getFacturaCompra()));
+          this.getTipoDeNotaCreditoSegunFactura(
+              notaCredito.getFacturaCompra().getTipoComprobante()));
     }
     if (notaCredito.isModificaStock()) {
       this.actualizarStock(notaCredito.getRenglonesNotaCredito(), TipoDeOperacion.ACTUALIZACION);
@@ -795,8 +797,8 @@ public class NotaServiceImpl implements INotaService {
     }
   }
 
-  private TipoDeComprobante getTipoDeComprobanteFacturaSegunNotaCredito(NotaCredito notaCredito) {
-    switch (notaCredito.getTipoComprobante()) {
+  private TipoDeComprobante getTipoDeComprobanteFacturaSegunNotaCredito(TipoDeComprobante tipo) {
+    switch (tipo) {
       case NOTA_CREDITO_A:
         return TipoDeComprobante.FACTURA_A;
       case NOTA_CREDITO_B:
@@ -813,29 +815,22 @@ public class NotaServiceImpl implements INotaService {
     }
   }
 
-  private TipoDeComprobante getTipoDeNotaCreditoSegunFactura(Factura factura) {
-    TipoDeComprobante tipo = null;
-    switch (factura.getTipoComprobante()) {
+  private TipoDeComprobante getTipoDeNotaCreditoSegunFactura(TipoDeComprobante tipo) {
+    switch (tipo) {
       case FACTURA_A:
-        tipo = TipoDeComprobante.NOTA_CREDITO_A;
-        break;
+        return TipoDeComprobante.NOTA_CREDITO_A;
       case FACTURA_B:
-        tipo = TipoDeComprobante.NOTA_CREDITO_B;
-        break;
+        return TipoDeComprobante.NOTA_CREDITO_B;
       case FACTURA_X:
-        tipo = TipoDeComprobante.NOTA_CREDITO_X;
-        break;
+        return TipoDeComprobante.NOTA_CREDITO_X;
       case FACTURA_Y:
-        tipo = TipoDeComprobante.NOTA_CREDITO_Y;
-        break;
+        return TipoDeComprobante.NOTA_CREDITO_Y;
       case PRESUPUESTO:
-        tipo = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
-        break;
+        return TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
       default:
         throw new ServiceException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_tipo_no_valido"));
     }
-    return tipo;
   }
 
   private void actualizarStock(
