@@ -1,20 +1,14 @@
 package sic.repository.custom;
 
 import java.math.BigDecimal;
-import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import sic.modelo.*;
 import sic.repository.FacturaVentaRepositoryCustom;
-import sic.util.FormatterFechaHora;
 
 @Repository
 public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom {

@@ -1,13 +1,8 @@
 package sic.modelo;
 
-/**
- * Describe las distintas operaciones comerciales que se pueden realizar.
- */
+/** Describe las distintas operaciones comerciales que se pueden realizar. */
 public enum Movimiento {
-
-    COMPRA,
-    
-    VENTA,
-    
-    PEDIDO;
+  COMPRA,
+  VENTA,
+  PEDIDO;
 }

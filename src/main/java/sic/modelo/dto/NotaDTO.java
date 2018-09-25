@@ -1,39 +1,55 @@
 package sic.modelo.dto;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import sic.modelo.Nota;
 import sic.modelo.TipoDeComprobante;
 
 @Data
-@EqualsAndHashCode(of = {"fecha", "tipoComprobante", "serie", "nroNota", "empresa"})
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(of = {"fecha", "tipoComprobante", "serie", "nroNota"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idNota", scope = Nota.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = NotaCreditoDTO.class, name = "NotaCredito"),
+        @JsonSubTypes.Type(value = NotaDebitoDTO.class, name = "NotaDebito"),
+})
 public abstract class NotaDTO implements Serializable {
-    
-    
-    private Long idNota = 0L;
-    private long serie = 0;
-    private long nroNota = 1;    
-    private boolean eliminada = false;
-    private TipoDeComprobante tipoComprobante;
-    private Date fecha;
-    private EmpresaDTO empresa = EmpresaDTO.builder().build();
-    private UsuarioDTO usuario = UsuarioDTO.builder().build();
-    private String motivo = "Nota por default";
-    private BigDecimal subTotalBruto = new BigDecimal("6500"); 
-    private BigDecimal iva21Neto = new BigDecimal("1365");     
-    private BigDecimal iva105Neto = BigDecimal.ZERO;
-    private BigDecimal total = new BigDecimal("7865");    
-    private long CAE = 0L;
-    private Date vencimientoCAE = new Date();   
-    private long numSerieAfip = 0L;
-    private long numFacturaAfip= 0L;
-    
+
+  private Long idNota;
+  private long serie;
+  private long nroNota;
+  private boolean eliminada;
+  private TipoDeComprobante tipoComprobante;
+  private Date fecha;
+  private long idEmpresa;
+  private String nombreEmpresa;
+  private UsuarioDTO usuario;
+  private long idCliente;
+  private String razonSocialCliente;
+  private long idFacturaVenta;
+  private long idProveedor;
+  private String razonSocialProveedor;
+  private long idFacturaCompra;
+  private String motivo;
+  private BigDecimal subTotalBruto;
+  private BigDecimal iva21Neto;
+  private BigDecimal iva105Neto;
+  private BigDecimal total;
+  private long CAE;
+  private Date vencimientoCAE;
+  private long numSerieAfip;
+  private long numNotaAfip;
+
 }

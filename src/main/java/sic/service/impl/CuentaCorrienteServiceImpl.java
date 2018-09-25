@@ -58,7 +58,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         cuentaCorrienteCliente.setFechaApertura(cuentaCorrienteCliente.getCliente().getFechaAlta());
         this.validarCuentaCorriente(cuentaCorrienteCliente);
         cuentaCorrienteCliente = cuentaCorrienteClienteRepository.save(cuentaCorrienteCliente);
-        LOGGER.warn("La Cuenta Corriente Cliente " + cuentaCorrienteCliente + " se guardó correctamente." );
+        LOGGER.warn("La Cuenta Corriente Cliente {} se guardó correctamente.", cuentaCorrienteCliente);
         return cuentaCorrienteCliente;
     }
     
@@ -67,7 +67,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         cuentaCorrienteProveedor.setFechaApertura(new Date());
         this.validarCuentaCorriente(cuentaCorrienteProveedor);
         cuentaCorrienteProveedor = cuentaCorrienteProveedorRepository.save(cuentaCorrienteProveedor);
-        LOGGER.warn("La Cuenta Corriente Proveedor " + cuentaCorrienteProveedor + " se guardó correctamente." );
+        LOGGER.warn("La Cuenta Corriente Proveedor {} se guardó correctamente.", cuentaCorrienteProveedor);
         return cuentaCorrienteProveedor;
     }
 
@@ -147,12 +147,12 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             cc.getRenglones().add(rcc);
             rcc.setCuentaCorriente(cc);
             this.renglonCuentaCorrienteService.guardar(rcc);
-            LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
+            LOGGER.warn("El renglon {} se guardó correctamente.", rcc );
         }
         if (tipo == TipoDeOperacion.ELIMINACION) {
             RenglonCuentaCorriente rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeFactura(facturaVenta, false);
             rcc.setEliminado(true);
-            LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
+            LOGGER.warn("El renglon {} se eliminó correctamente.", rcc );
         }
     }
     
@@ -173,65 +173,54 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             cc.getRenglones().add(rcc);
             rcc.setCuentaCorriente(cc);
             this.renglonCuentaCorrienteService.guardar(rcc);
-            LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
+            LOGGER.warn("El renglon {} se guardó correctamente.", rcc );
         }
         if (tipo == TipoDeOperacion.ELIMINACION) {
             RenglonCuentaCorriente rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeFactura(facturaCompra, false);
             rcc.setEliminado(true);
-            LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
+            LOGGER.warn("El renglon {} se eliminó correctamente.",  rcc);
         }
     }
 
-    @Override
-    @Transactional
-    public void asentarEnCuentaCorriente(Nota nota, TipoDeOperacion tipo) {
-        if (tipo == TipoDeOperacion.ALTA) {
-            RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
-            rcc.setTipoComprobante(nota.getTipoComprobante());
-            rcc.setSerie(nota.getSerie());
-            rcc.setNumero(nota.getNroNota());
-            if (nota instanceof NotaCredito) {
-                rcc.setMonto(nota.getTotal());
-                rcc.setDescripcion(nota.getMotivo()); 
-            }
-            if (nota instanceof NotaDebito) {
-                rcc.setMonto(nota.getTotal().negate());
-                String descripcion = "";
-                if (((NotaDebito) nota).getRecibo() != null) {
-                    descripcion = ((NotaDebito) nota).getRecibo().getConcepto();
-                }           
-                rcc.setDescripcion(descripcion);
-            }
-            rcc.setNota(nota); 
-            rcc.setFecha(nota.getFecha());
-            rcc.setIdMovimiento(nota.getIdNota());
-            CuentaCorriente cc = this.getCuentaCorrientePorNota(nota);
-            cc.getRenglones().add(rcc);
-            rcc.setCuentaCorriente(cc);
-            this.renglonCuentaCorrienteService.guardar(rcc);
-            LOGGER.warn("El renglon " + rcc + " se guardó correctamente." );
-        }
-        if (tipo == TipoDeOperacion.ELIMINACION) {
-            RenglonCuentaCorriente rcc = this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeNota(nota, false);
-            rcc.setEliminado(true);
-            LOGGER.warn("El renglon " + rcc + " se eliminó correctamente." );
-        }
+  @Override
+  @Transactional
+  public void asentarEnCuentaCorriente(Nota nota, TipoDeOperacion tipo) {
+    if (tipo == TipoDeOperacion.ALTA) {
+      RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
+      rcc.setTipoComprobante(nota.getTipoComprobante());
+      rcc.setSerie(nota.getSerie());
+      rcc.setNumero(nota.getNroNota());
+      if (nota instanceof NotaCredito) {
+        rcc.setMonto(nota.getTotal());
+      }
+      if (nota instanceof NotaDebito) {
+        rcc.setMonto(nota.getTotal().negate());
+      }
+      rcc.setDescripcion(nota.getMotivo());
+      rcc.setNota(nota);
+      rcc.setFecha(nota.getFecha());
+      rcc.setIdMovimiento(nota.getIdNota());
+      if (nota.getMovimiento() == Movimiento.COMPRA) rcc.setCAE(nota.getCAE());
+      CuentaCorriente cc = this.getCuentaCorrientePorNota(nota);
+      cc.getRenglones().add(rcc);
+      rcc.setCuentaCorriente(cc);
+      this.renglonCuentaCorrienteService.guardar(rcc);
+      LOGGER.warn("El renglon {} se guardó correctamente.", rcc);
     }
-    
+    if (tipo == TipoDeOperacion.ELIMINACION) {
+      RenglonCuentaCorriente rcc =
+          this.renglonCuentaCorrienteService.getRenglonCuentaCorrienteDeNota(nota, false);
+      rcc.setEliminado(true);
+      LOGGER.warn("El renglon {} se eliminó correctamente.", rcc);
+    }
+  }
+
     private CuentaCorriente getCuentaCorrientePorNota(Nota nota) {
         CuentaCorriente cc = null;
-        if (nota instanceof NotaCreditoCliente || nota instanceof NotaDebitoCliente) {
-            if (nota instanceof NotaCreditoCliente) {
-                cc = this.getCuentaCorrientePorCliente(((NotaCreditoCliente) nota).getCliente());
-            } else {
-                cc = this.getCuentaCorrientePorCliente(((NotaDebitoCliente) nota).getCliente());
-            }
-        } else if (nota instanceof NotaCreditoProveedor || nota instanceof NotaDebitoProveedor) {
-            if (nota instanceof NotaCreditoProveedor) {
-                cc = this.getCuentaCorrientePorProveedor(((NotaCreditoProveedor) nota).getProveedor());
-            } else {
-                cc = this.getCuentaCorrientePorProveedor(((NotaDebitoProveedor) nota).getProveedor());
-            }
+        if (nota.getMovimiento().equals(Movimiento.VENTA)) {
+            cc = this.getCuentaCorrientePorCliente(nota.getCliente());
+        } else if (nota.getMovimiento().equals(Movimiento.COMPRA)) {
+            cc = this.getCuentaCorrientePorProveedor(nota.getProveedor());
         }
         return cc;
     }

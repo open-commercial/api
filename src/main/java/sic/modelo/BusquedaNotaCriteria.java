@@ -18,6 +18,17 @@ public class BusquedaNotaCriteria {
     private Date fechaHasta;
     private Long idEmpresa;
     private int cantidadDeRegistros;
+    private boolean buscaPorNumeroNota;
+    private long numSerie;
+    private long numNota;
+    private boolean buscaPorTipoComprobante;
+    private TipoDeComprobante tipoComprobante;
+    private Movimiento movimiento;
+    private boolean buscaUsuario;
+    private Long idUsuario;
+    private boolean buscaProveedor;
+    private Long idProveedor;
+    private boolean buscaCliente;
     private Long idCliente;
     private Pageable pageable;
     
