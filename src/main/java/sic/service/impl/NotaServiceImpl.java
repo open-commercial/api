@@ -485,28 +485,20 @@ public class NotaServiceImpl implements INotaService {
   }
 
   private void validarNota(Nota nota) {
-    if (nota.getFecha() != null) {
-      if (nota instanceof NotaCredito && nota.getMovimiento() == Movimiento.VENTA) {
-        if (nota.getFecha().compareTo(nota.getFacturaVenta().getFecha()) <= 0) {
-          throw new BusinessServiceException(
-              ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_fecha_incorrecta"));
-        }
-        if (nota.getCAE() != 0L) {
-          throw new BusinessServiceException(
-              ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_cliente_CAE"));
-        }
-      } else if (nota instanceof NotaCredito && nota.getMovimiento() == Movimiento.COMPRA) {
-        if (nota.getFecha().compareTo(nota.getFacturaCompra().getFecha()) <= 0) {
-          throw new BusinessServiceException(
-              ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_fecha_incorrecta"));
-        }
-        if (nota.getCAE() != 0L) {
-          throw new BusinessServiceException(
-              ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_cliente_CAE"));
-        }
+    if (nota instanceof NotaCredito && nota.getMovimiento().equals(Movimiento.VENTA)) {
+      if (nota.getFecha().compareTo(nota.getFacturaVenta().getFecha()) <= 0) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_fecha_incorrecta"));
       }
-    } else {
-      nota.setFecha(new Date());
+      if (nota.getCAE() != 0L) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_cliente_CAE"));
+      }
+    } else if (nota instanceof NotaCredito && nota.getMovimiento().equals(Movimiento.COMPRA)) {
+      if (nota.getFecha().compareTo(nota.getFacturaCompra().getFecha()) <= 0) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_fecha_incorrecta"));
+      }
     }
     if (nota.getMotivo() == null || nota.getMotivo().isEmpty()) {
       throw new BusinessServiceException(
@@ -679,6 +671,9 @@ public class NotaServiceImpl implements INotaService {
   @Override
   @Transactional
   public Nota guardarNotaCredito(NotaCredito notaCredito) {
+    if (notaCredito.getFecha() == null) {
+      notaCredito.setFecha(new Date());
+    }
     this.validarNota(notaCredito);
     if (notaCredito.getMovimiento().equals(Movimiento.VENTA)) {
       notaCredito.setTipoComprobante(
@@ -707,6 +702,9 @@ public class NotaServiceImpl implements INotaService {
   @Override
   @Transactional
   public NotaDebito guardarNotaDebito(NotaDebito notaDebito) {
+    if (notaDebito.getFecha() == null) {
+      notaDebito.setFecha(new Date());
+    }
     this.validarNota(notaDebito);
     if (notaDebito.getMovimiento().equals(Movimiento.VENTA)) {
       notaDebito.setTipoComprobante(
@@ -819,6 +817,9 @@ public class NotaServiceImpl implements INotaService {
         case NOTA_CREDITO_PRESUPUESTO:
           tipo = TipoDeComprobante.PRESUPUESTO;
           break;
+        default:
+          throw new ServiceException(
+              ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_tipo_no_valido"));
       }
     }
     return tipo;
@@ -842,6 +843,9 @@ public class NotaServiceImpl implements INotaService {
       case PRESUPUESTO:
         tipo = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
         break;
+      default:
+        throw new ServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_tipo_no_valido"));
     }
     return tipo;
   }
@@ -1064,6 +1068,7 @@ public class NotaServiceImpl implements INotaService {
     renglonNota.setImporteBruto(renglonNota.getMonto());
     renglonNota.setIvaPorcentaje(BigDecimal.ZERO);
     renglonNota.setIvaNeto(BigDecimal.ZERO);
+    renglonNota.setImporteNeto(r.getMonto());
     renglonesNota.add(renglonNota);
     renglonNota = new RenglonNotaDebito();
     renglonNota.setDescripcion("Gasto Administrativo");
