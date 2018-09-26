@@ -82,32 +82,32 @@ public class Cliente implements Serializable {
 
   @JsonGetter("idLocalidad")
   public Long getIdLocalidad() {
-    return localidad.getId_Localidad();
+    return (localidad != null) ? localidad.getId_Localidad() : null;
   }
 
   @JsonGetter("nombreLocalidad")
   public String getNombreLocalidad() {
-    return localidad.getNombre();
+    return (localidad != null) ? localidad.getNombre() : null;
   }
 
   @JsonGetter("idProvincia")
   public Long getIdProvincia() {
-    return localidad.getProvincia().getId_Provincia();
+    return (localidad != null) ? localidad.getProvincia().getId_Provincia() : null;
   }
 
   @JsonGetter("nombreProvincia")
   public String getNombreProvincia() {
-    return localidad.getProvincia().getNombre();
+    return (localidad != null) ? localidad.getProvincia().getNombre() : null;
   }
 
   @JsonGetter("idPais")
   public Long getIdPais() {
-    return localidad.getProvincia().getPais().getId_Pais();
+    return (localidad != null) ? localidad.getProvincia().getPais().getId_Pais() : null;
   }
 
   @JsonGetter("nombrePais")
   public String getNombrePais() {
-    return localidad.getProvincia().getPais().getNombre();
+    return (localidad != null) ? localidad.getProvincia().getPais().getNombre() : null;
   }
 
   @JsonGetter("idEmpresa")

@@ -169,7 +169,7 @@ public class ClienteController {
         cliente.setCredencial(usuarioCredencial);
       }
     }
-    cliente.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
+    if (idLocalidad != null) cliente.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
     cliente.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     if (idViajante != null) {
       cliente.setViajante(usuarioService.getUsuarioPorId(idViajante));
@@ -216,14 +216,13 @@ public class ClienteController {
     if (idLocalidad != null) {
       clientePorActualizar.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
     } else {
-      clientePorActualizar.setLocalidad(clientePersistido.getLocalidad());
+      clientePorActualizar.setLocalidad(null);
     }
     if (idEmpresa != null) {
       clientePorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     } else {
       clientePorActualizar.setEmpresa(clientePersistido.getEmpresa());
     }
-    clientePorActualizar.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
     clientePorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     if (idViajante != null) {
       clientePorActualizar.setViajante(usuarioService.getUsuarioPorId(idViajante));

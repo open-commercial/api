@@ -158,11 +158,11 @@ public class ClienteServiceImpl implements IClienteService {
   @Override
   public void validarOperacion(TipoDeOperacion operacion, Cliente cliente) {
     // Entrada de Datos
-    if (cliente.getEmail() != null && !cliente.getEmail().equals("")) {
-      if (!Validator.esEmailValido(cliente.getEmail())) {
-        throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_email_invalido"));
-      }
+    if (cliente.getEmail() != null
+        && !cliente.getEmail().equals("")
+        && !Validator.esEmailValido(cliente.getEmail())) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_email_invalido"));
     }
     // Requeridos
     if (cliente.getTipoDeCliente() == null) {
@@ -177,10 +177,10 @@ public class ClienteServiceImpl implements IClienteService {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_razonSocial"));
     }
-    /*if (cliente.getLocalidad() == null) {
+    if (Validator.esVacio(cliente.getTelefono())) {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_localidad"));
-    }*/
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_telefono"));
+    }
     if (cliente.getEmpresa() == null) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_empresa"));
@@ -190,13 +190,13 @@ public class ClienteServiceImpl implements IClienteService {
     if (cliente.getIdFiscal() != null) {
       Cliente clienteDuplicado =
           this.getClientePorIdFiscal(cliente.getIdFiscal(), cliente.getEmpresa());
-      if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
+      if (operacion == TipoDeOperacion.ACTUALIZACION
           && clienteDuplicado != null
           && clienteDuplicado.getId_Cliente() != cliente.getId_Cliente()) {
         throw new BusinessServiceException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_duplicado_idFiscal"));
       }
-      if (operacion.equals(TipoDeOperacion.ALTA)
+      if (operacion == TipoDeOperacion.ALTA
           && clienteDuplicado != null
           && cliente.getIdFiscal() != null) {
         throw new BusinessServiceException(
@@ -206,16 +206,15 @@ public class ClienteServiceImpl implements IClienteService {
     // Razon Social
     Cliente clienteDuplicado =
         this.getClientePorRazonSocial(cliente.getRazonSocial(), cliente.getEmpresa());
-    if (operacion.equals(TipoDeOperacion.ALTA) && clienteDuplicado != null) {
+    if (operacion == TipoDeOperacion.ALTA && clienteDuplicado != null) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_duplicado_razonSocial"));
     }
-    if (operacion.equals(TipoDeOperacion.ACTUALIZACION)) {
-      if (clienteDuplicado != null && clienteDuplicado.getId_Cliente() != cliente.getId_Cliente()) {
-        throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes")
-                .getString("mensaje_cliente_duplicado_razonSocial"));
-      }
+    if (operacion == TipoDeOperacion.ACTUALIZACION
+        && clienteDuplicado != null
+        && clienteDuplicado.getId_Cliente() != cliente.getId_Cliente()) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_duplicado_razonSocial"));
     }
   }
 
