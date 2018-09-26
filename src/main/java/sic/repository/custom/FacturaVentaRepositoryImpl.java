@@ -16,12 +16,17 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
     @PersistenceContext
     private EntityManager em;
 
-    @Override
-    public BigDecimal calcularTotalFacturadoVenta(BooleanBuilder builder) {
-        QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
-        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
-        return queryFactory.select(qFacturaVenta.total.sum()).from(qFacturaVenta).where(builder).fetch().get(0);
-    }
+  @Override
+  public BigDecimal calcularTotalFacturadoVenta(BooleanBuilder builder) {
+    QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
+    JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+    return queryFactory
+        .select(qFacturaVenta.total.sum())
+        .from(qFacturaVenta)
+        .where(builder)
+        .fetch()
+        .get(0);
+  }
 
   @Override
   public BigDecimal calcularIVAVenta(BooleanBuilder builder, TipoDeComprobante[] tipoComprobantes) {

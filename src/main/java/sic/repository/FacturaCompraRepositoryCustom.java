@@ -1,17 +1,13 @@
 package sic.repository;
 
 import java.math.BigDecimal;
-import org.springframework.data.domain.Page;
-import sic.modelo.BusquedaFacturaCompraCriteria;
-import sic.modelo.FacturaCompra;
+
+import com.querydsl.core.BooleanBuilder;
 import sic.modelo.TipoDeComprobante;
 
 public interface FacturaCompraRepositoryCustom {
 
-  BigDecimal calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria);
+  BigDecimal calcularTotalFacturadoCompra(BooleanBuilder builder);
 
-  BigDecimal calcularIVACompra(
-      BusquedaFacturaCompraCriteria criteria, TipoDeComprobante[] tipoComprobante);
-
-  Page<FacturaCompra> buscarFacturasCompra(BusquedaFacturaCompraCriteria criteria);
+  BigDecimal calcularIVACompra(BooleanBuilder builder, TipoDeComprobante[] tipoComprobante);
 }
