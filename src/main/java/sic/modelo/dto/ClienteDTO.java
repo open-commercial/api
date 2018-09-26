@@ -25,8 +25,7 @@ public class ClienteDTO implements Serializable {
   private CategoriaIVA categoriaIVA;
   private String idFiscal;
   private String email;
-  private String telPrimario;
-  private String telSecundario;
+  private String telefono;
   private Long idLocalidad;
   private String nombreLocalidad;
   private Long idProvincia;

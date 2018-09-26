@@ -128,6 +128,7 @@ public class CuentaCorrienteIntegrationTest {
                 .tipoDeCliente(TipoDeCliente.EMPRESA)
                 .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
                 .razonSocial("Peter Parker")
+                .telefono("379123452")
                 .build();
         cliente = restTemplate.postForObject(apiPrefix + "/clientes?idEmpresa=" + empresa.getId_Empresa()
                         + "&idLocalidad=" + localidad.getId_Localidad()
@@ -693,6 +694,7 @@ public class CuentaCorrienteIntegrationTest {
                 .tipoDeCliente(TipoDeCliente.EMPRESA)
                 .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
                 .razonSocial("Peter Parker")
+                .telefono("3791234532")
                 .build();
         cliente = restTemplate.postForObject(apiPrefix + "/clientes?idEmpresa=" + empresa.getId_Empresa()
                         + "&idLocalidad=" + localidad.getId_Localidad()

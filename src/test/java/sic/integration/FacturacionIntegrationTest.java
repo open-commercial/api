@@ -133,6 +133,7 @@ public class FacturacionIntegrationTest {
                 .tipoDeCliente(TipoDeCliente.EMPRESA)
                 .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
                 .razonSocial("Peter Parker")
+                .telefono("379423122")
                 .build();
         cliente = restTemplate.postForObject(apiPrefix + "/clientes?idEmpresa=" + empresa.getId_Empresa()
                         + "&idLocalidad=" + localidad.getId_Localidad()
@@ -342,6 +343,7 @@ public class FacturacionIntegrationTest {
                 .tipoDeCliente(TipoDeCliente.EMPRESA)
                 .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
                 .razonSocial("Peter Parker")
+                .telefono("379423122")
                 .build();
         cliente = restTemplate.postForObject(apiPrefix + "/clientes?idEmpresa=" + empresa.getId_Empresa()
                         + "&idLocalidad=" + localidad.getId_Localidad()
