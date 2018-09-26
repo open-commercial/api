@@ -150,8 +150,8 @@ public class ClienteController {
   })
   public Cliente guardar(
       @RequestBody Cliente cliente,
-      @RequestParam Long idLocalidad,
       @RequestParam Long idEmpresa,
+      @RequestParam(required = false) Long idLocalidad,
       @RequestParam(required = false) Long idViajante,
       @RequestParam(required = false) Long idCredencial,
       @RequestHeader("Authorization") String token) {
