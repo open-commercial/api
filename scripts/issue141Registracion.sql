@@ -15,7 +15,7 @@ ALTER TABLE empresa ADD idFiscal BIGINT(20) NULL DEFAULT NULL AFTER id_Empresa;
 ALTER TABLE empresa CHANGE COLUMN ingresosBrutos ingresosBrutos BIGINT(20) NULL;
 
 SET SQL_SAFE_UPDATES = 0;
-UPDATE empresa SET idFiscal = cuip; 
+UPDATE empresa SET idFiscal = cuip;
 SET SQL_SAFE_UPDATES = 1;
 
 ALTER TABLE empresa DROP COLUMN cuip;
@@ -41,7 +41,7 @@ WHERE proveedor.id_CondicionIVA in (1,12,10,11);
 ALTER TABLE empresa
   DROP foreign key FKoe8ihwidpastxfeneq5k4vs07,
   DROP COLUMN empresa.id_CondicionIVA;
-  
+
 ALTER TABLE cliente
   DROP foreign key FKm5l8c91knfxk0w27btt6x3vro,
   DROP COLUMN cliente.id_CondicionIVA;
@@ -55,20 +55,21 @@ DROP TABLE condicioniva;
 -----------------------------------------
 
 -- PROVEEDORES
+
+-- QUITAR NotNull
+ALTER TABLE proveedor CHANGE COLUMN idFiscal idFiscal VARCHAR(255) CHARACTER SET 'utf8' NULL;
+
 SET SQL_SAFE_UPDATES = 0;
 UPDATE proveedor SET idFiscal = replace(idFiscal, '-', '');
 SET SQL_SAFE_UPDATES = 1;
 
 SET SQL_SAFE_UPDATES = 0;
-update proveedor set idFiscal = null 
+update proveedor set idFiscal = null
 where idFiscal = '';
 SET SQL_SAFE_UPDATES = 1;
 
--- QUITAR NotNull
-ALTER TABLE proveedor CHANGE COLUMN idFiscal idFiscal VARCHAR(255) CHARACTER SET 'utf8' NULL;
 -- CAMBIAR DE TIPO
 ALTER TABLE proveedor CHANGE COLUMN idFiscal idFiscal BIGINT(20) NULL DEFAULT NULL;
-
 
 -- CLIENTES
 ALTER TABLE cliente ADD COLUMN tipoDeCliente VARCHAR(255) NOT NULL AFTER nroCliente;
@@ -78,7 +79,7 @@ UPDATE cliente SET tipoDeCliente = CASE
     WHEN cliente.categoriaIVA = "RESPONSABLE_INSCRIPTO" THEN "EMPRESA"
     WHEN cliente.categoriaIVA = "EXENTO" THEN "EMPRESA"
     WHEN cliente.categoriaIVA = "CONSUMIDOR_FINAL" THEN "PERSONA"
-    WHEN cliente.categoriaIVA = "MONOTRIBUTO" THEN "PERSONA"        
+    WHEN cliente.categoriaIVA = "MONOTRIBUTO" THEN "PERSONA"
     ELSE "CONSUMIDOR_FINAL"
     END
 WHERE cliente.categoriaIVA in ("RESPONSABLE_INSCRIPTO","EXENTO","CONSUMIDOR_FINAL","MONOTRIBUTO");
@@ -89,7 +90,7 @@ UPDATE cliente SET idFiscal = replace(idFiscal, '-', '');
 SET SQL_SAFE_UPDATES = 1;
 
 SET SQL_SAFE_UPDATES = 0;
-update cliente set idFiscal = null 
+update cliente set idFiscal = null
 where idFiscal = '';
 SET SQL_SAFE_UPDATES = 1;
 
@@ -100,6 +101,8 @@ SET SQL_SAFE_UPDATES = 1;
 -- CAMBIAR DE TIPO
 ALTER TABLE cliente CHANGE COLUMN idFiscal idFiscal BIGINT(20) NULL DEFAULT NULL;
 
+-- QUITA LA COLUMN DE TEL SECUNDARIO
+ALTER TABLE cliente DROP COLUMN telSecundario;
 
-
-
+-- CAMBIA EL NOMBRE DE LA COLUM TELEFONO
+ALTER TABLE cliente CHANGE COLUMN `telPrimario` `telefono` VARCHAR(255) CHARACTER SET 'utf8' NULL DEFAULT NULL;

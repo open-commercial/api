@@ -15,8 +15,7 @@ public class ClienteBuilder {
   private CategoriaIVA categoriaIVA = CategoriaIVA.RESPONSABLE_INSCRIPTO;
   private Long idFiscal = 23248527419L;
   private String email = "servimetal@hotmail.com";
-  private String telPrimario = "379 4587114";
-  private String telSecundario = "379 4852498";
+  private String telefono = "3794587114";
   private Localidad localidad = new LocalidadBuilder().build();
   private String contacto = "Facundo Pastore";
   private Date fechaAlta = new Date(1458010800000L); // 15-03-2016;
@@ -39,8 +38,7 @@ public class ClienteBuilder {
         categoriaIVA,
         idFiscal,
         email,
-        telPrimario,
-        telSecundario,
+        telefono,
         localidad,
         contacto,
         fechaAlta,
@@ -98,13 +96,8 @@ public class ClienteBuilder {
     return this;
   }
 
-  public ClienteBuilder withTelPrimario(String telPrimario) {
-    this.telPrimario = telPrimario;
-    return this;
-  }
-
-  public ClienteBuilder withTelSecundario(String telSecundario) {
-    this.telSecundario = telSecundario;
+  public ClienteBuilder withTelefono(String telefono) {
+    this.telefono = telefono;
     return this;
   }
 

@@ -47,9 +47,7 @@ public class Cliente implements Serializable {
 
   private String email;
 
-  private String telPrimario;
-
-  private String telSecundario;
+  private String telefono;
 
   @ManyToOne
   @JoinColumn(name = "id_Localidad", referencedColumnName = "id_Localidad")

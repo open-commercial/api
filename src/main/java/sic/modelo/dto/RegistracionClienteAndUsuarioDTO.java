@@ -17,6 +17,7 @@ public class RegistracionClienteAndUsuarioDTO implements Serializable {
   private String nombre;
   private String apellido;
   private String email;
+  private String telefono;
   private String idFiscal;
   private String razonSocial;
   private String password;
