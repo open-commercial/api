@@ -36,8 +36,10 @@ public class RegistracionServiceImpl implements IRegistracionService {
   public String generarUsername(String nombre, String apellido) {
     long min = 1L;
     long max = 999L; // 3 digitos
-    long randomLong = 0L;
+    long randomLong;
     boolean esRepetido = true;
+    nombre = nombre.replaceAll("\\s+","");
+    apellido = apellido.replaceAll("\\s+","");
     String nuevoUsername = "";
     while (esRepetido) {
       randomLong = min + (long) (Math.random() * (max - min));

@@ -185,11 +185,9 @@ public class UsuarioServiceImpl implements IUsuarioService {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_invalido_email"));
     }
-    if (operacion == TipoDeOperacion.ALTA) {
-      if (Validator.esVacio(usuario.getPassword())) {
-        throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_vacio_password"));
-      }
+    if (operacion == TipoDeOperacion.ALTA && Validator.esVacio(usuario.getPassword())) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_vacio_password"));
     }
     if (usuario.getRoles().isEmpty()) {
       throw new BusinessServiceException(
@@ -251,6 +249,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   @Override
   public void actualizar(Usuario usuario, Usuario usuarioLoggedIn) {
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario);
+    usuario.setUsername(usuario.getUsername().toLowerCase());
     if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
       usuario.setRoles(usuarioLoggedIn.getRoles());
     }
@@ -270,7 +269,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
       usuario.setToken(usuarioLoggedIn.getToken());
     }
     usuarioRepository.save(usuario);
-    logger.warn("El Usuario " + usuario + " se actualizó correctamente.");
+    logger.warn("El Usuario {} se actualizó correctamente.", usuario);
   }
 
   @Override
@@ -321,6 +320,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   @Override
   public Usuario guardar(Usuario usuario) {
     this.validarOperacion(TipoDeOperacion.ALTA, usuario);
+    usuario.setUsername(usuario.getUsername().toLowerCase());
     usuario.setPassword(this.encriptarConMD5(usuario.getPassword()));
     usuario = usuarioRepository.save(usuario);
     logger.warn("El Usuario {} se guardó correctamente.", usuario);

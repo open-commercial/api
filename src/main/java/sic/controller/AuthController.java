@@ -111,8 +111,10 @@ public class AuthController {
     nuevoUsuario.setEmail(registracionClienteAndUsuarioDTO.getEmail());
     nuevoUsuario.setPassword(registracionClienteAndUsuarioDTO.getPassword());
     nuevoUsuario.setRoles(Collections.singletonList(Rol.COMPRADOR));
+    nuevoUsuario.setIdEmpresaPredeterminada(registracionClienteAndUsuarioDTO.getIdEmpresa());
     Cliente nuevoCliente = new Cliente();
     nuevoCliente.setTipoDeCliente(registracionClienteAndUsuarioDTO.getTipoDeCliente());
+    nuevoCliente.setTelefono(registracionClienteAndUsuarioDTO.getTelefono());
     nuevoCliente.setEmail(registracionClienteAndUsuarioDTO.getEmail());
     nuevoCliente.setEmpresa(empresaService.getEmpresaPorId(registracionClienteAndUsuarioDTO.getIdEmpresa()));
     if (nuevoCliente.getTipoDeCliente() == TipoDeCliente.EMPRESA) {
