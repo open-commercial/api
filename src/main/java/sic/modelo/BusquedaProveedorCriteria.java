@@ -1,12 +1,15 @@
 package sic.modelo;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Pageable;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class BusquedaProveedorCriteria {
 
     private boolean buscaPorCodigo;
@@ -22,6 +25,7 @@ public class BusquedaProveedorCriteria {
     private boolean buscaPorLocalidad;
     private Long idLocalidad;
     private Long idEmpresa;
-    private int cantRegistros;
+    private Pageable pageable;
+    private boolean conSaldo;
 
 }

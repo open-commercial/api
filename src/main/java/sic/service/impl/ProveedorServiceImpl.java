@@ -2,6 +2,8 @@ package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
 import java.util.ArrayList;
+
+import org.springframework.data.domain.Page;
 import sic.modelo.BusquedaProveedorCriteria;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -52,36 +54,47 @@ public class ProveedorServiceImpl implements IProveedorService {
         return proveedorRepository.findAllByAndEmpresaAndEliminadoOrderByRazonSocialAsc(empresa, false);
     }
 
-    @Override
-    public List<Proveedor> buscarProveedores(BusquedaProveedorCriteria criteria) {
-        QProveedor qProveedor = QProveedor.proveedor;
-        BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qProveedor.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qProveedor.eliminado.eq(false)));
-        if (criteria.isBuscaPorRazonSocial()) builder.and(this.buildPredicadoRazonSocial(criteria.getRazonSocial(), qProveedor));
-        if (criteria.isBuscaPorId_Fiscal()) builder.and(qProveedor.idFiscal.eq(criteria.getIdFiscal()));
-        if (criteria.isBuscaPorCodigo()) builder.and(qProveedor.codigo.eq(criteria.getCodigo()));
-        if (criteria.isBuscaPorLocalidad()) builder.and(qProveedor.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
-        if (criteria.isBuscaPorProvincia()) builder.and(qProveedor.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
-        if (criteria.isBuscaPorPais()) builder.and(qProveedor.localidad.provincia.pais.id_Pais.eq(criteria.getIdPais()));
-        List<Proveedor> proveedores = new ArrayList<>();
-        proveedorRepository.findAll(builder, new Sort(Sort.Direction.ASC, "razonSocial"))
-                .iterator().forEachRemaining(proveedores::add);
-        proveedores.forEach(p -> {
-            CuentaCorriente cc = cuentaCorrienteService.getCuentaCorrientePorProveedor(p);
-            p.setSaldoCuentaCorriente(cc.getSaldo());
-            p.setFechaUltimoMovimiento(cc.getFechaUltimoMovimiento());
-        });
-        return proveedores;
+  @Override
+  public Page<Proveedor> buscarProveedores(BusquedaProveedorCriteria criteria) {
+    QProveedor qProveedor = QProveedor.proveedor;
+    BooleanBuilder builder = new BooleanBuilder();
+    if (criteria.isBuscaPorRazonSocial()) {
+      String[] terminos = criteria.getRazonSocial().split(" ");
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        rsPredicate.and(qProveedor.razonSocial.containsIgnoreCase(termino));
+      }
+      builder.or(rsPredicate);
     }
-    
-    private BooleanBuilder buildPredicadoRazonSocial(String razonSocial, QProveedor qproveedor) {
-        String[] terminos = razonSocial.split(" ");
-        BooleanBuilder predicadoRazonSocial = new BooleanBuilder();
-        for (String termino : terminos) {
-            predicadoRazonSocial.and(qproveedor.razonSocial.containsIgnoreCase(termino));
-        }
-        return predicadoRazonSocial;
+    if (criteria.isBuscaPorId_Fiscal())
+      builder.or(qProveedor.idFiscal.containsIgnoreCase(criteria.getIdFiscal()));
+    if (criteria.isBuscaPorCodigo())
+      builder.or(qProveedor.codigo.containsIgnoreCase(criteria.getCodigo()));
+    if (criteria.isBuscaPorLocalidad())
+      builder.and(qProveedor.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
+    if (criteria.isBuscaPorProvincia())
+      builder.and(qProveedor.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
+    if (criteria.isBuscaPorPais())
+      builder.and(qProveedor.localidad.provincia.pais.id_Pais.eq(criteria.getIdPais()));
+    builder.and(
+        qProveedor
+            .empresa
+            .id_Empresa
+            .eq(criteria.getIdEmpresa())
+            .and(qProveedor.eliminado.eq(false)));
+    Page<Proveedor> proveedores = proveedorRepository.findAll(builder, criteria.getPageable());
+    if (criteria.isConSaldo()) {
+      proveedores
+          .getContent()
+          .forEach(
+              p -> {
+                CuentaCorriente cc = cuentaCorrienteService.getCuentaCorrientePorProveedor(p);
+                p.setSaldoCuentaCorriente(cc.getSaldo());
+                p.setFechaUltimoMovimiento(cc.getFechaUltimoMovimiento());
+              });
     }
+    return proveedores;
+  }
 
     @Override
     public Proveedor getProveedorPorCodigo(String codigo, Empresa empresa) {
