@@ -128,7 +128,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				<textFieldExpression><![CDATA[$P{notaDebito}.getEmpresa().getFechaInicioActividad()]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="130" width="279" height="15" uuid="81a6cfa3-8121-462d-93a4-c72dfceb31f6">
+				<reportElement x="0" y="130" width="555" height="15" uuid="81a6cfa3-8121-462d-93a4-c72dfceb31f6">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
 $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
@@ -136,18 +136,9 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaDebito}.getEmpresa().getLocalidad().getNombre()]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="279" y="130" width="276" height="15" uuid="17a89659-8435-427a-8fc8-aa08625440aa">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ||
-$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font size="8" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{notaDebito}.getEmpresa().getLocalidad().getProvincia().getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaDebito}.getEmpresa().getLocalidad() != null) 
+? $P{notaDebito}.getEmpresa().getLocalidad().getNombre() + " " + $P{notaDebito}.getEmpresa().getLocalidad().getProvincia().getNombre() + " " + $P{notaDebito}.getEmpresa().getLocalidad().getProvincia().getPais().getNombre()
+: ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="160" width="279" height="15" uuid="0ac9e3dd-2252-49da-8d4a-ae5da578c748">
@@ -267,22 +258,15 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				<textFieldExpression><![CDATA[$P{notaDebito}.getCliente().getDireccion()]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="50" y="206" width="250" height="15" uuid="e0084cc3-1c80-4007-9e51-4ee7c9be1c7f">
+				<reportElement x="50" y="206" width="505" height="15" uuid="e0084cc3-1c80-4007-9e51-4ee7c9be1c7f">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaDebito}.getCliente().getLocalidad().getNombre()]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="300" y="206" width="255" height="15" uuid="174ed8dc-2ef0-4278-a184-5abcd73c3e36">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{notaDebito}.getCliente().getLocalidad().getProvincia().getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaDebito}.getCliente().getLocalidad() != null) 
+? $P{notaDebito}.getCliente().getLocalidad().getNombre() + " " + $P{notaDebito}.getCliente().getLocalidad().getProvincia().getNombre() + " " + $P{notaDebito}.getCliente().getLocalidad().getProvincia().getPais().getNombre()
+: ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="50" y="221" width="505" height="15" uuid="cb8691ce-a678-4cf1-a2c7-4938068372c4">

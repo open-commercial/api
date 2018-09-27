@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="NotaCredito" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e47a212f-3954-4de9-aca2-5bd71a6098c5">
 	<property name="ireport.zoom" value="3.0"/>
 	<property name="ireport.x" value="0"/>
@@ -86,7 +86,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getEmpresa().getCondicionIVA().getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getEmpresa().getCategoriaIVA()]]></textFieldExpression>
 			</textField>
 			<line>
 				<reportElement x="0" y="175" width="555" height="1" uuid="bbd9e748-9b14-42c1-b03e-08e8289d6627"/>
@@ -107,7 +107,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getEmpresa().getCuip()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getEmpresa().getIdFiscal()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="459" y="60" width="96" height="15" uuid="4630ada4-f911-45f3-bf8d-1026e289cc77">
@@ -132,7 +132,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textFieldExpression><![CDATA[$P{notaCredito}.getEmpresa().getFechaInicioActividad()]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="130" width="279" height="15" uuid="81a6cfa3-8121-462d-93a4-c72dfceb31f6">
+				<reportElement x="0" y="130" width="555" height="15" uuid="81a6cfa3-8121-462d-93a4-c72dfceb31f6">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
 $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
@@ -140,18 +140,9 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getEmpresa().getLocalidad().getNombre()]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="279" y="130" width="276" height="15" uuid="17a89659-8435-427a-8fc8-aa08625440aa">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font size="8" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getEmpresa().getLocalidad().getProvincia().getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaCredito}.getEmpresa().getLocalidad() != null) 
+? $P{notaCredito}.getEmpresa().getLocalidad().getNombre() + " " + $P{notaCredito}.getEmpresa().getLocalidad().getProvincia().getNombre() + " " + $P{notaCredito}.getEmpresa().getLocalidad().getProvincia().getPais().getNombre()
+: ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="160" width="279" height="15" uuid="0ac9e3dd-2252-49da-8d4a-ae5da578c748">
@@ -271,22 +262,15 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textFieldExpression><![CDATA[$P{notaCredito}.getCliente().getDireccion()]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="50" y="206" width="250" height="15" uuid="e0084cc3-1c80-4007-9e51-4ee7c9be1c7f">
+				<reportElement x="50" y="206" width="505" height="15" uuid="e0084cc3-1c80-4007-9e51-4ee7c9be1c7f">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getCliente().getLocalidad().getNombre()]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="300" y="206" width="255" height="15" uuid="174ed8dc-2ef0-4278-a184-5abcd73c3e36">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getCliente().getLocalidad().getProvincia().getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaCredito}.getCliente().getLocalidad() != null) 
+? $P{notaCredito}.getCliente().getLocalidad().getNombre() + " " + $P{notaCredito}.getCliente().getLocalidad().getProvincia().getNombre() + " " + $P{notaCredito}.getCliente().getLocalidad().getProvincia().getPais().getNombre()
+: ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="50" y="221" width="505" height="15" uuid="cb8691ce-a678-4cf1-a2c7-4938068372c4">
@@ -295,7 +279,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getCliente().getCondicionIVA().getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getCliente().getCategoriaIVA()]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="221" width="50" height="15" uuid="f0b344fb-6370-43de-819b-3c1edd682fe1">
