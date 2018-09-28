@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -40,6 +39,7 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
   public void enviarMailPorEmpresa(
       long idEmpresa,
       String toEmail,
+      String bbc,
       String subject,
       String mensaje,
       byte[] byteArray,
@@ -61,18 +61,15 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
             };
         Session session = Session.getInstance(props, auth);
         MimeMessage message = new MimeMessage(session);
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(toEmail);
-        mailMessage.setSubject(subject);
-        mailMessage.setText(mensaje);
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setFrom(
             configuracionDelSistemaService
                 .getConfiguracionDelSistemaPorId(idEmpresa)
                 .getEmailUsername());
-        helper.setTo(mailMessage.getTo());
-        helper.setSubject(mailMessage.getSubject());
-        helper.setText(mailMessage.getText());
+        helper.setTo(toEmail);
+        helper.setBcc(bbc);
+        helper.setSubject(subject);
+        helper.setText(mensaje);
         if (byteArray != null) {
           ByteArrayDataSource bds = new ByteArrayDataSource(byteArray, "application/pdf");
           helper.addAttachment(attachmentDescription, bds);
@@ -82,7 +79,7 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
         logger.error(ex.getMessage(), ex);
       }
     } else {
-      logger.warn("Mail environment = {}, el mail NO se envió.", mailEnv);
+      logger.error("Mail environment = {}, el mail NO se envió.", mailEnv);
     }
   }
 }

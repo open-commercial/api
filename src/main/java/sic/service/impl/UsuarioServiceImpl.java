@@ -74,8 +74,15 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public Usuario getUsuarioPorPasswordRecoveryKeyAndIdUsuario(String passwordRecoveryKey, long idUsuario) {
-      return usuarioRepository.findByPasswordRecoveryKeyAndIdUsuarioAndEliminadoAndHabilitado(passwordRecoveryKey, idUsuario);
+  public Usuario getUsuarioPorUsername(String username) {
+    return this.usuarioRepository.findByUsernameAndEliminado(username, false);
+  }
+
+  @Override
+  public Usuario getUsuarioPorPasswordRecoveryKeyAndIdUsuario(
+      String passwordRecoveryKey, long idUsuario) {
+    return usuarioRepository.findByPasswordRecoveryKeyAndIdUsuarioAndEliminadoAndHabilitado(
+        passwordRecoveryKey, idUsuario);
   }
 
   @Override
@@ -159,7 +166,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
     return usuarioRepository.findAll(builder, criteria.getPageable());
   }
 
-  private void validarOperacion(TipoDeOperacion operacion, Usuario usuario) {
+  @Override
+  public void validarOperacion(TipoDeOperacion operacion, Usuario usuario) {
     // Requeridos
     if (Validator.esVacio(usuario.getNombre())) {
       throw new BusinessServiceException(
@@ -177,11 +185,9 @@ public class UsuarioServiceImpl implements IUsuarioService {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_invalido_email"));
     }
-    if (operacion == TipoDeOperacion.ALTA) {
-      if (Validator.esVacio(usuario.getPassword())) {
-        throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_vacio_password"));
-      }
+    if (operacion == TipoDeOperacion.ALTA && Validator.esVacio(usuario.getPassword())) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_vacio_password"));
     }
     if (usuario.getRoles().isEmpty()) {
       throw new BusinessServiceException(
@@ -200,7 +206,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
             ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_duplicado_username"));
       }
       // email
-      if (usuarioRepository.findByEmailAndEliminadoAndHabilitado(usuario.getEmail(), false, true) != null) {
+      if (usuarioRepository.findByEmailAndEliminado(usuario.getEmail(), false) != null) {
         throw new BusinessServiceException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_duplicado_email"));
       }
@@ -214,7 +220,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
             ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_duplicado_username"));
       }
       // email
-      usuarioGuardado = usuarioRepository.findByEmailAndEliminadoAndHabilitado(usuario.getEmail(), false, true);
+      usuarioGuardado = usuarioRepository.findByEmailAndEliminado(usuario.getEmail(), false);
       if (usuarioGuardado != null && usuarioGuardado.getId_Usuario() != usuario.getId_Usuario()) {
         throw new BusinessServiceException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_duplicado_email"));
@@ -242,27 +248,28 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public void actualizar(Usuario usuario, Usuario usuarioLoggedIn) {
-      this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario);
-      if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
-        usuario.setRoles(usuarioLoggedIn.getRoles());
-      }
-      if (usuario.getPassword().isEmpty()) {
-        Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
-        usuario.setPassword(usuarioGuardado.getPassword());
-      } else {
-        usuario.setPassword(this.encriptarConMD5(usuario.getPassword()));
-      }
-      if (!usuario.getRoles().contains(Rol.VIAJANTE)) {
-        this.clienteService.desvincularClienteDeViajante(usuario.getId_Usuario());
-      }
-      if (!usuario.getRoles().contains(Rol.COMPRADOR)) {
-        this.clienteService.desvincularClienteDeCredencial(usuario.getId_Usuario());
-      }
-      if (usuarioLoggedIn.getId_Usuario() == usuario.getId_Usuario()) {
-        usuario.setToken(usuarioLoggedIn.getToken());
-      }
-      usuarioRepository.save(usuario);
-      logger.warn("El Usuario " + usuario + " se actualizó correctamente.");
+    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario);
+    usuario.setUsername(usuario.getUsername().toLowerCase());
+    if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
+      usuario.setRoles(usuarioLoggedIn.getRoles());
+    }
+    if (usuario.getPassword().isEmpty()) {
+      Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
+      usuario.setPassword(usuarioGuardado.getPassword());
+    } else {
+      usuario.setPassword(this.encriptarConMD5(usuario.getPassword()));
+    }
+    if (!usuario.getRoles().contains(Rol.VIAJANTE)) {
+      this.clienteService.desvincularClienteDeViajante(usuario.getId_Usuario());
+    }
+    if (!usuario.getRoles().contains(Rol.COMPRADOR)) {
+      this.clienteService.desvincularClienteDeCredencial(usuario.getId_Usuario());
+    }
+    if (usuarioLoggedIn.getId_Usuario() == usuario.getId_Usuario()) {
+      usuario.setToken(usuarioLoggedIn.getToken());
+    }
+    usuarioRepository.save(usuario);
+    logger.warn("El Usuario {} se actualizó correctamente.", usuario);
   }
 
   @Override
@@ -272,45 +279,49 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public void actualizarPasswordRecoveryKey(String passwordRecoveryKey, long idUsuario) {
-    usuarioRepository.updatePasswordRecoveryKey(passwordRecoveryKey,
-            Date.from(LocalDateTime.now().plusHours(3L).atZone(ZoneId.systemDefault()).toInstant()), idUsuario);
+    usuarioRepository.updatePasswordRecoveryKey(
+        passwordRecoveryKey,
+        Date.from(LocalDateTime.now().plusHours(3L).atZone(ZoneId.systemDefault()).toInstant()),
+        idUsuario);
   }
 
   @Override
   public int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada) {
     if (empresaService.getEmpresaPorId(idEmpresaPredeterminada) == null) {
       throw new EntityNotFoundException(
-              ResourceBundle.getBundle("Mensajes").getString("mensaje_empresa_no_existente"));
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_empresa_no_existente"));
     }
     return usuarioRepository.updateIdEmpresa(idUsuario, idEmpresaPredeterminada);
   }
 
   @Override
-  @Transactional
   public void enviarEmailDeRecuperacion(long idEmpresa, String email, String host) {
-    Usuario usuario = usuarioRepository.findByEmailAndEliminadoAndHabilitado(email, false, true);
-    if (usuario != null) {
-      String passwordRecoveryKey = RandomStringUtils.random(250, true, true);
-      this.actualizarPasswordRecoveryKey(passwordRecoveryKey, usuario.getId_Usuario());
-      correoElectronicoService.enviarMailPorEmpresa(
-          idEmpresa,
-          usuario.getEmail(),
-          "Recuperación de contraseña",
-          MessageFormat.format(
-              ResourceBundle.getBundle("Mensajes").getString("mensaje_correo_recuperacion"),
-              host,
-              passwordRecoveryKey,
-              usuario.getId_Usuario()),
-          null,
-          null);
-    } else
+    Usuario usuario = usuarioRepository.findByEmailAndEliminado(email, false);
+    if (usuario == null || !usuario.isHabilitado()) {
       throw new ServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_correo_no_existente"));
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_correo_no_existente_or_deshabilitado"));
+    }
+    String passwordRecoveryKey = RandomStringUtils.random(250, true, true);
+    this.actualizarPasswordRecoveryKey(passwordRecoveryKey, usuario.getId_Usuario());
+    correoElectronicoService.enviarMailPorEmpresa(
+        idEmpresa,
+        usuario.getEmail(),
+        null,
+        "Recuperación de contraseña",
+        MessageFormat.format(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_correo_recuperacion"),
+            host,
+            passwordRecoveryKey,
+            usuario.getId_Usuario()),
+        null,
+        null);
   }
 
   @Override
   public Usuario guardar(Usuario usuario) {
     this.validarOperacion(TipoDeOperacion.ALTA, usuario);
+    usuario.setUsername(usuario.getUsername().toLowerCase());
     usuario.setPassword(this.encriptarConMD5(usuario.getPassword()));
     usuario = usuarioRepository.save(usuario);
     logger.warn("El Usuario {} se guardó correctamente.", usuario);
@@ -326,5 +337,4 @@ public class UsuarioServiceImpl implements IUsuarioService {
     usuarioRepository.save(usuario);
     logger.warn("El Usuario " + usuario + " se eliminó correctamente.");
   }
-  
 }

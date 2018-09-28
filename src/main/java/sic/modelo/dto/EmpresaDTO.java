@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import sic.modelo.CategoriaIVA;
 
 import java.util.Date;
 
@@ -17,7 +18,7 @@ public class EmpresaDTO {
   private String nombre;
   private String lema;
   private String direccion;
-  private CondicionIVADTO condicionIVA;
+  private CategoriaIVA categoriaIVA;
   private long cuip;
   private long ingresosBrutos;
   private Date fechaInicioActividad;

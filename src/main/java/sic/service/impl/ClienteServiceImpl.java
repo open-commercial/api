@@ -55,7 +55,7 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public Cliente getClientePorIdFiscal(String idFiscal, Empresa empresa) {
+  public Cliente getClientePorIdFiscal(Long idFiscal, Empresa empresa) {
     return clienteRepository.findByIdFiscalAndEmpresaAndEliminado(idFiscal, empresa, false);
   }
 
@@ -109,7 +109,7 @@ public class ClienteServiceImpl implements IClienteService {
       }
       builder.or(nfPredicate);
     }
-    if (criteria.isBuscaPorId_Fiscal()) builder.or(qCliente.idFiscal.containsIgnoreCase(criteria.getIdFiscal()));
+    if (criteria.isBuscaPorIdFiscal()) builder.or(qCliente.idFiscal.eq(criteria.getIdFiscal()));
     if (criteria.isBuscarPorNroDeCliente()) builder.or(qCliente.nroCliente.containsIgnoreCase(criteria.getNroDeCliente()));
     if (criteria.isBuscaPorViajante()) builder.and(qCliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaPorLocalidad()) builder.and(qCliente.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
@@ -158,24 +158,28 @@ public class ClienteServiceImpl implements IClienteService {
   @Override
   public void validarOperacion(TipoDeOperacion operacion, Cliente cliente) {
     // Entrada de Datos
-    if (cliente.getEmail() != null && !cliente.getEmail().equals("")) {
-      if (!Validator.esEmailValido(cliente.getEmail())) {
-        throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_email_invalido"));
-      }
+    if (cliente.getEmail() != null
+        && !cliente.getEmail().equals("")
+        && !Validator.esEmailValido(cliente.getEmail())) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_email_invalido"));
     }
     // Requeridos
+    if (cliente.getTipoDeCliente() == null) {
+      throw new BusinessServiceException(
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_tipoDeCliente"));
+    }
+    if (cliente.getCategoriaIVA() == null) {
+      throw new BusinessServiceException(
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_categoriaIVA"));
+    }
     if (Validator.esVacio(cliente.getRazonSocial())) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_razonSocial"));
     }
-    if (cliente.getCondicionIVA() == null) {
+    if (Validator.esVacio(cliente.getTelefono())) {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_condicionIVA"));
-    }
-    if (cliente.getLocalidad() == null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_localidad"));
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_telefono"));
     }
     if (cliente.getEmpresa() == null) {
       throw new BusinessServiceException(
@@ -183,18 +187,18 @@ public class ClienteServiceImpl implements IClienteService {
     }
     // Duplicados
     // ID Fiscal
-    if (cliente.getIdFiscal() != null && !cliente.getIdFiscal().equals("")) {
+    if (cliente.getIdFiscal() != null) {
       Cliente clienteDuplicado =
           this.getClientePorIdFiscal(cliente.getIdFiscal(), cliente.getEmpresa());
-      if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
+      if (operacion == TipoDeOperacion.ACTUALIZACION
           && clienteDuplicado != null
           && clienteDuplicado.getId_Cliente() != cliente.getId_Cliente()) {
         throw new BusinessServiceException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_duplicado_idFiscal"));
       }
-      if (operacion.equals(TipoDeOperacion.ALTA)
+      if (operacion == TipoDeOperacion.ALTA
           && clienteDuplicado != null
-          && !cliente.getIdFiscal().equals("")) {
+          && cliente.getIdFiscal() != null) {
         throw new BusinessServiceException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_duplicado_idFiscal"));
       }
@@ -202,16 +206,15 @@ public class ClienteServiceImpl implements IClienteService {
     // Razon Social
     Cliente clienteDuplicado =
         this.getClientePorRazonSocial(cliente.getRazonSocial(), cliente.getEmpresa());
-    if (operacion.equals(TipoDeOperacion.ALTA) && clienteDuplicado != null) {
+    if (operacion == TipoDeOperacion.ALTA && clienteDuplicado != null) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_duplicado_razonSocial"));
     }
-    if (operacion.equals(TipoDeOperacion.ACTUALIZACION)) {
-      if (clienteDuplicado != null && clienteDuplicado.getId_Cliente() != cliente.getId_Cliente()) {
-        throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes")
-                .getString("mensaje_cliente_duplicado_razonSocial"));
-      }
+    if (operacion == TipoDeOperacion.ACTUALIZACION
+        && clienteDuplicado != null
+        && clienteDuplicado.getId_Cliente() != cliente.getId_Cliente()) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_duplicado_razonSocial"));
     }
   }
 
@@ -220,7 +223,7 @@ public class ClienteServiceImpl implements IClienteService {
   public Cliente guardar(Cliente cliente) {
     cliente.setFechaAlta(new Date());
     cliente.setEliminado(false);
-    cliente.setNroCliente(this.calcularNroDeCliente(cliente.getEmpresa()));
+    cliente.setNroCliente(this.generarNroDeCliente(cliente.getEmpresa()));
     this.validarOperacion(TipoDeOperacion.ALTA, cliente);
     CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
     cuentaCorrienteCliente.setCliente(cliente);
@@ -311,7 +314,7 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public String calcularNroDeCliente(Empresa empresa) {
+  public String generarNroDeCliente(Empresa empresa) {
     long min = 1L;
     long max = 99999L; // 5 digitos
     long randomLong = 0L;

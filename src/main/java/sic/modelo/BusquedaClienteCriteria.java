@@ -16,8 +16,8 @@ public class BusquedaClienteCriteria {
     private String razonSocial;
     private boolean buscaPorNombreFantasia;
     private String nombreFantasia;
-    private boolean buscaPorId_Fiscal;
-    private String idFiscal;
+    private boolean buscaPorIdFiscal;
+    private Long idFiscal;
     private boolean buscaPorViajante;
     private Long idViajante;
     private boolean buscaPorPais;

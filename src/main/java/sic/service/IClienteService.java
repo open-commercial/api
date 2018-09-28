@@ -13,7 +13,7 @@ public interface IClienteService {
 
   Cliente getClientePorId(long idCliente);
 
-  Cliente getClientePorIdFiscal(String idFiscal, Empresa empresa);
+  Cliente getClientePorIdFiscal(Long idFiscal, Empresa empresa);
 
   Cliente getClientePorRazonSocial(String razonSocial, Empresa empresa);
 
@@ -35,6 +35,5 @@ public interface IClienteService {
 
   int desvincularClienteDeCredencial(long idUsuarioCliente);
 
-  String calcularNroDeCliente(Empresa empresa);
-
+  String generarNroDeCliente(Empresa empresa);
 }

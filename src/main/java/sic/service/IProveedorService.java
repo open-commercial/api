@@ -6,23 +6,22 @@ import sic.modelo.Empresa;
 import sic.modelo.Proveedor;
 
 public interface IProveedorService {
-    
-    Proveedor getProveedorPorId(Long id_Proveedor);
 
-    void actualizar(Proveedor proveedor);
+  Proveedor getProveedorPorId(Long id_Proveedor);
 
-    List<Proveedor> buscarProveedores(BusquedaProveedorCriteria criteria);
+  void actualizar(Proveedor proveedor);
 
-    void eliminar(long idProveedor);
+  List<Proveedor> buscarProveedores(BusquedaProveedorCriteria criteria);
 
-    Proveedor getProveedorPorCodigo(String codigo, Empresa empresa);
+  void eliminar(long idProveedor);
 
-    Proveedor getProveedorPorId_Fiscal(String id_Fiscal, Empresa empresa);
+  Proveedor getProveedorPorCodigo(String codigo, Empresa empresa);
 
-    Proveedor getProveedorPorRazonSocial(String razonSocial, Empresa empresa);
+  Proveedor getProveedorPorIdFiscal(Long idFiscal, Empresa empresa);
 
-    List<Proveedor> getProveedores(Empresa empresa);
+  Proveedor getProveedorPorRazonSocial(String razonSocial, Empresa empresa);
 
-    Proveedor guardar(Proveedor proveedor);
-    
+  List<Proveedor> getProveedores(Empresa empresa);
+
+  Proveedor guardar(Proveedor proveedor);
 }

@@ -63,7 +63,7 @@ public class AfipServiceImpl implements IAfipService {
     if (fechaVencimientoToken != null && fechaVencimientoToken.after(new Date())) {
       feAuthRequest.setToken(cds.getTokenWSAA());
       feAuthRequest.setSign(cds.getSignTokenWSAA());
-      feAuthRequest.setCuit(empresa.getCuip());
+      feAuthRequest.setCuit(empresa.getIdFiscal());
       return feAuthRequest;
     } else {
       byte[] p12file = cds.getCertificadoAfip();
@@ -87,7 +87,7 @@ public class AfipServiceImpl implements IAfipService {
         String signTokenWSAA = tokenDoc.valueOf("/loginTicketResponse/credentials/sign");
         feAuthRequest.setToken(tokenWSAA);
         feAuthRequest.setSign(signTokenWSAA);
-        feAuthRequest.setCuit(empresa.getCuip());
+        feAuthRequest.setCuit(empresa.getIdFiscal());
         cds.setTokenWSAA(tokenWSAA);
         cds.setSignTokenWSAA(signTokenWSAA);
         String generationTime = tokenDoc.valueOf("/loginTicketResponse/header/generationTime");
@@ -214,23 +214,24 @@ public class AfipServiceImpl implements IAfipService {
         FECAERequest fecaeRequest = new FECAERequest();        
         FECAECabRequest cabecera = new FECAECabRequest();
         FECAEDetRequest detalle = new FECAEDetRequest();        
-        // CbteTipo = 1: Factura A, 2: Nota de Débito A, 3: Nota de Crédito A, 6: Factura B, 7: Nota de Débito B, 8: Nota de Crédito B. 11: Factura C
+        // CbteTipo = 1: Factura A, 2: Nota de Débito A, 3: Nota de Crédito A, 6: Factura B, 7: Nota de Débito B
+        // 8: Nota de Crédito B. 11: Factura C
         // DocTipo = 80: CUIT, 86: CUIL, 96: DNI, 99: Doc.(Otro)
         switch (comprobante.getTipoComprobante()) {
             case FACTURA_A:
                 cabecera.setCbteTipo(1);
                 detalle.setDocTipo(80);
-                detalle.setDocNro(Long.valueOf(comprobante.getCliente().getIdFiscal().replace("-", "")));
+                detalle.setDocNro(comprobante.getCliente().getIdFiscal());
                 break;
             case NOTA_DEBITO_A:
                 cabecera.setCbteTipo(2);
                 detalle.setDocTipo(80);
-                detalle.setDocNro(Long.valueOf(comprobante.getCliente().getIdFiscal().replace("-", "")));
+                detalle.setDocNro(comprobante.getCliente().getIdFiscal());
                 break;
             case NOTA_CREDITO_A:
                 cabecera.setCbteTipo(3);
                 detalle.setDocTipo(80);
-                detalle.setDocNro(Long.valueOf(comprobante.getCliente().getIdFiscal().replace("-", "")));
+                detalle.setDocNro(comprobante.getCliente().getIdFiscal());
                 break;
             case FACTURA_B:
                 cabecera.setCbteTipo(6);
@@ -239,11 +240,12 @@ public class AfipServiceImpl implements IAfipService {
                     detalle.setDocTipo(99);
                     detalle.setDocNro(0);
                 } else {
-                    if (comprobante.getCliente().getIdFiscal().equals("")) {
-                        throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_sin_idFiscal_error"));
+                    if (comprobante.getCliente().getIdFiscal() == null) {
+                        throw new BusinessServiceException(
+                          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_sin_idFiscal_error"));
                     }
                     detalle.setDocTipo(80);
-                    detalle.setDocNro(Long.valueOf(comprobante.getCliente().getIdFiscal().replace("-", "")));
+                    detalle.setDocNro(comprobante.getCliente().getIdFiscal());
                 }
                 break;
             case NOTA_DEBITO_B:
@@ -253,11 +255,12 @@ public class AfipServiceImpl implements IAfipService {
                     detalle.setDocTipo(99);
                     detalle.setDocNro(0);
                 } else {
-                    if (comprobante.getCliente().getIdFiscal().equals("")) {
-                        throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_sin_idFiscal_error"));
+                    if (comprobante.getCliente().getIdFiscal() == null) {
+                        throw new BusinessServiceException(
+                          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_sin_idFiscal_error"));
                     }
                     detalle.setDocTipo(80);
-                    detalle.setDocNro(Long.valueOf(comprobante.getCliente().getIdFiscal().replace("-", "")));
+                    detalle.setDocNro(comprobante.getCliente().getIdFiscal());
                 }
                 break;
             case NOTA_CREDITO_B:
@@ -267,11 +270,12 @@ public class AfipServiceImpl implements IAfipService {
                     detalle.setDocTipo(99);
                     detalle.setDocNro(0);
                 } else {
-                    if (comprobante.getCliente().getIdFiscal().equals("")) {
-                        throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_sin_idFiscal_error"));
+                    if (comprobante.getCliente().getIdFiscal() == null) {
+                        throw new BusinessServiceException(
+                          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_sin_idFiscal_error"));
                     }
                     detalle.setDocTipo(80);
-                    detalle.setDocNro(Long.valueOf(comprobante.getCliente().getIdFiscal().replace("-", "")));
+                    detalle.setDocNro(comprobante.getCliente().getIdFiscal());
                 }
                 break;
             case FACTURA_C:
@@ -280,7 +284,8 @@ public class AfipServiceImpl implements IAfipService {
                 detalle.setDocNro(0);
                 break;
             default:
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_comprobanteAFIP_invalido"));
+                throw new BusinessServiceException(
+                  ResourceBundle.getBundle("Mensajes").getString("mensaje_comprobanteAFIP_invalido"));
         }
         cabecera.setCantReg(1); // Cantidad de registros del detalle del comprobante o lote de comprobantes de ingreso
         cabecera.setPtoVta(nroPuntoDeVentaAfip); // Punto de Venta del comprobante que se está informando. Si se informa más de un comprobante, todos deben corresponder al mismo punto de venta

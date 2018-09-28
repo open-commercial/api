@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.5.0.final using JasperReports Library version 6.5.0  -->
+<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="FacturaVenta" pageWidth="595" pageHeight="420" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="380" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e47a212f-3954-4de9-aca2-5bd71a6098c5">
 	<property name="ireport.zoom" value="3.0"/>
 	<property name="ireport.x" value="0"/>
@@ -86,7 +86,7 @@
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{recibo}.getEmpresa().getCondicionIVA().getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{recibo}.getEmpresa().getCategoriaIVA()]]></textFieldExpression>
 			</textField>
 			<line>
 				<reportElement x="0" y="175" width="555" height="1" uuid="bbd9e748-9b14-42c1-b03e-08e8289d6627"/>
@@ -102,7 +102,7 @@
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{recibo}.getEmpresa().getCuip()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{recibo}.getEmpresa().getIdFiscal()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="459" y="60" width="96" height="15" uuid="4630ada4-f911-45f3-bf8d-1026e289cc77">
@@ -123,22 +123,15 @@
 				<textFieldExpression><![CDATA[$P{recibo}.getEmpresa().getFechaInicioActividad()]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="130" width="279" height="15" uuid="81a6cfa3-8121-462d-93a4-c72dfceb31f6">
+				<reportElement x="0" y="130" width="555" height="15" uuid="81a6cfa3-8121-462d-93a4-c72dfceb31f6">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{recibo}.getEmpresa().getLocalidad().getNombre()]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="279" y="130" width="276" height="15" uuid="17a89659-8435-427a-8fc8-aa08625440aa">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement>
-					<font size="8" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{recibo}.getEmpresa().getLocalidad().getProvincia().getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{recibo}.getEmpresa().getLocalidad() != null) 
+? $P{recibo}.getEmpresa().getLocalidad().getNombre() + " " + $P{recibo}.getEmpresa().getLocalidad().getProvincia().getNombre() + " " + $P{recibo}.getEmpresa().getLocalidad().getProvincia().getPais().getNombre()
+: ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="160" width="279" height="15" uuid="0ac9e3dd-2252-49da-8d4a-ae5da578c748">

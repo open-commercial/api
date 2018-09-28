@@ -9,17 +9,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import static org.mockito.Mockito.when;
 import org.springframework.test.context.junit4.SpringRunner;
-import sic.builder.ClienteBuilder;
 import sic.builder.EmpresaBuilder;
 import sic.builder.RenglonNotaCreditoBuilder;
-import sic.modelo.Cliente;
-import sic.modelo.CondicionIVA;
-import sic.modelo.Empresa;
-import sic.modelo.RenglonNotaCredito;
-import sic.modelo.TipoDeComprobante;
+import sic.modelo.*;
 
 @RunWith(SpringRunner.class)
 public class NotaServiceImplTest {
@@ -36,10 +30,8 @@ public class NotaServiceImplTest {
     @Test
     public void shouldGetTipoNotaWhenEmpresaYClienteDiscriminanIVA() {
         Empresa empresa = new EmpresaBuilder().build();
-        CondicionIVA condicionIVA = new CondicionIVA();
-        condicionIVA.setDiscriminaIVA(true);
         Cliente cliente = new Cliente();
-        cliente.setCondicionIVA(condicionIVA);
+        cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
         when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
         when(clienteService.getClientePorId(1L)).thenReturn(cliente);
         TipoDeComprobante[] expResult = {TipoDeComprobante.NOTA_CREDITO_A,
@@ -55,13 +47,8 @@ public class NotaServiceImplTest {
     @Test
     public void shouldGetTipoNotaWhenEmpresaDiscriminaYClienteNoIVA() {
         Empresa empresa = new EmpresaBuilder().build();
-        CondicionIVA condicionIVA = new CondicionIVA();
-        condicionIVA.setDiscriminaIVA(false);
         Cliente cliente = new Cliente();
-        cliente.setCondicionIVA(condicionIVA);
-        CondicionIVA condicionIVAqueDiscrimina = Mockito.mock(CondicionIVA.class);
-        when(condicionIVAqueDiscrimina.isDiscriminaIVA()).thenReturn(Boolean.FALSE);
-        cliente.setCondicionIVA(condicionIVAqueDiscrimina);
+        cliente.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
         when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
         when(clienteService.getClientePorId(1L)).thenReturn(cliente);
         TipoDeComprobante[] expResult = {TipoDeComprobante.NOTA_CREDITO_B,
@@ -77,13 +64,9 @@ public class NotaServiceImplTest {
     @Test
     public void shouldGetTipoNotaWhenEmpresaNoDiscriminaYClienteSiIVA() {
         Empresa empresa = new EmpresaBuilder().build();
-        CondicionIVA condicionIVA = new CondicionIVA();
-        condicionIVA.setDiscriminaIVA(true);
         Cliente cliente = new Cliente();
-        cliente.setCondicionIVA(condicionIVA);
-        CondicionIVA condicionIVAqueDiscrimina = Mockito.mock(CondicionIVA.class);
-        when(condicionIVAqueDiscrimina.isDiscriminaIVA()).thenReturn(Boolean.FALSE);
-        empresa.setCondicionIVA(condicionIVAqueDiscrimina);
+        cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
+        empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
         when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
         when(clienteService.getClientePorId(1L)).thenReturn(cliente);
         TipoDeComprobante[] expResult = {TipoDeComprobante.NOTA_CREDITO_X,
@@ -99,13 +82,9 @@ public class NotaServiceImplTest {
         Empresa empresa = new EmpresaBuilder()
                           .withId_Empresa(1L)
                           .build();
-        CondicionIVA condicionIVA = new CondicionIVA();
-        condicionIVA.setDiscriminaIVA(false);
         Cliente cliente = new Cliente();
-        cliente.setCondicionIVA(condicionIVA);
-        CondicionIVA condicionIVAqueDiscrimina = Mockito.mock(CondicionIVA.class);
-        when(condicionIVAqueDiscrimina.isDiscriminaIVA()).thenReturn(Boolean.FALSE);
-        empresa.setCondicionIVA(condicionIVAqueDiscrimina);
+        cliente.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+        empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
         when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
         when(clienteService.getClientePorId(1L)).thenReturn(cliente);
         TipoDeComprobante[] expResult = {TipoDeComprobante.NOTA_CREDITO_X,

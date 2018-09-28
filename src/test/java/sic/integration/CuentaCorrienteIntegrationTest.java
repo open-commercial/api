@@ -31,7 +31,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
-import sic.builder.CondicionIVABuilder;
 import sic.builder.EmpresaBuilder;
 import sic.builder.FormaDePagoBuilder;
 import sic.builder.LocalidadBuilder;
@@ -104,12 +103,9 @@ public class CuentaCorrienteIntegrationTest {
         Localidad localidad = new LocalidadBuilder().build();
         localidad.getProvincia().setPais(restTemplate.postForObject(apiPrefix + "/paises", localidad.getProvincia().getPais(), Pais.class));
         localidad.setProvincia(restTemplate.postForObject(apiPrefix + "/provincias", localidad.getProvincia(), Provincia.class));
-        CondicionIVA condicionIVA = new CondicionIVABuilder().build();
-        condicionIVA = restTemplate.postForObject(apiPrefix + "/condiciones-iva", condicionIVA, CondicionIVA.class);
         localidad = restTemplate.postForObject(apiPrefix + "/localidades", localidad, Localidad.class);
         Empresa empresa = new EmpresaBuilder()
                 .withLocalidad(localidad)
-                .withCondicionIVA(condicionIVA)
                 .build();
         empresa = restTemplate.postForObject(apiPrefix + "/empresas", empresa, Empresa.class);
         FormaDePago formaDePago = new FormaDePagoBuilder()
@@ -129,10 +125,12 @@ public class CuentaCorrienteIntegrationTest {
                 .build();
         credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
         ClienteDTO cliente = ClienteDTO.builder()
+                .tipoDeCliente(TipoDeCliente.EMPRESA)
+                .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
                 .razonSocial("Peter Parker")
+                .telefono("379123452")
                 .build();
         cliente = restTemplate.postForObject(apiPrefix + "/clientes?idEmpresa=" + empresa.getId_Empresa()
-                        + "&idCondicionIVA=" + condicionIVA.getId_CondicionIVA()
                         + "&idLocalidad=" + localidad.getId_Localidad()
                         + "&idUsuarioCredencial=" + credencial.getId_Usuario(),
                 cliente, ClienteDTO.class);
@@ -145,7 +143,6 @@ public class CuentaCorrienteIntegrationTest {
         medida = restTemplate.postForObject(apiPrefix + "/medidas", medida, Medida.class);
         Proveedor proveedor = new ProveedorBuilder().withEmpresa(empresa)
                 .withLocalidad(empresa.getLocalidad())
-                .withCondicionIVA(empresa.getCondicionIVA())
                 .build();
         proveedor = restTemplate.postForObject(apiPrefix + "/proveedores", proveedor, Proveedor.class);
         Rubro rubro = new RubroBuilder().withEmpresa(empresa).build();
@@ -261,7 +258,8 @@ public class CuentaCorrienteIntegrationTest {
                 restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class)
         .compareTo(new BigDecimal("-5992.5")) == 0);
         List<FacturaVenta> facturasRecuperadas = restTemplate
-                .exchange(apiPrefix + "/facturas/venta/busqueda/criteria?idEmpresa=1&tipoFactura=B&nroSerie=0&nroFactura=1", HttpMethod.GET, null,
+                .exchange(apiPrefix + "/facturas/venta/busqueda/criteria?idEmpresa=1&tipoFactura=B&nroSerie=0&nroFactura=1",
+                  HttpMethod.GET, null,
                         new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {
                 })
                 .getBody().getContent();
@@ -277,7 +275,8 @@ public class CuentaCorrienteIntegrationTest {
                 restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class)
         .compareTo(BigDecimal.ZERO) == 0);
         NotaDebitoDTO notaDebitoCliente = new NotaDebitoDTO();
-        List<RenglonNotaDebito> renglonesCalculados = Arrays.asList(restTemplate.getForObject(apiPrefix + "/notas/renglon/debito/recibo/1?monto=100&ivaPorcentaje=21", RenglonNotaDebito[].class));
+        List<RenglonNotaDebito> renglonesCalculados = Arrays.asList(restTemplate.getForObject(
+          apiPrefix + "/notas/renglon/debito/recibo/1?monto=100&ivaPorcentaje=21", RenglonNotaDebito[].class));
         notaDebitoCliente.setRenglonesNotaDebito(renglonesCalculados);
         notaDebitoCliente.setIva105Neto(BigDecimal.ZERO);
         notaDebitoCliente.setIva21Neto(new BigDecimal("21"));
@@ -285,6 +284,7 @@ public class CuentaCorrienteIntegrationTest {
         notaDebitoCliente.setMotivo("Test alta nota debito - Cheque rechazado");
         notaDebitoCliente.setSubTotalBruto(new BigDecimal("100"));
         notaDebitoCliente.setTotal(new BigDecimal("6113.5"));
+        notaDebitoCliente.setUsuario(credencial);
         restTemplate.postForObject(apiPrefix + "/notas/debito/empresa/1/usuario/1/recibo/1?idCliente=1&movimiento=VENTA", notaDebitoCliente, Nota.class);
         restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
@@ -371,12 +371,9 @@ public class CuentaCorrienteIntegrationTest {
         Localidad localidad = new LocalidadBuilder().build();
         localidad.getProvincia().setPais(restTemplate.postForObject(apiPrefix + "/paises", localidad.getProvincia().getPais(), Pais.class));
         localidad.setProvincia(restTemplate.postForObject(apiPrefix + "/provincias", localidad.getProvincia(), Provincia.class));
-        CondicionIVA condicionIVA = new CondicionIVABuilder().build();
-        condicionIVA = restTemplate.postForObject(apiPrefix + "/condiciones-iva", condicionIVA, CondicionIVA.class);
         localidad = restTemplate.postForObject(apiPrefix + "/localidades", localidad, Localidad.class);
         Empresa empresa = new EmpresaBuilder()
                 .withLocalidad(localidad)
-                .withCondicionIVA(condicionIVA)
                 .build();
         empresa = restTemplate.postForObject(apiPrefix + "/empresas", empresa, Empresa.class);
         FormaDePago formaDePago = new FormaDePagoBuilder()
@@ -405,7 +402,6 @@ public class CuentaCorrienteIntegrationTest {
         Proveedor proveedor = new ProveedorBuilder()
                 .withEmpresa(empresa)
                 .withLocalidad(empresa.getLocalidad())
-                .withCondicionIVA(empresa.getCondicionIVA())
                 .build();
         proveedor = restTemplate.postForObject(apiPrefix + "/proveedores", proveedor, Proveedor.class);
         Rubro rubro = new RubroBuilder().withEmpresa(empresa).build();
@@ -686,12 +682,9 @@ public class CuentaCorrienteIntegrationTest {
         Localidad localidad = new LocalidadBuilder().build();
         localidad.getProvincia().setPais(restTemplate.postForObject(apiPrefix + "/paises", localidad.getProvincia().getPais(), Pais.class));
         localidad.setProvincia(restTemplate.postForObject(apiPrefix + "/provincias", localidad.getProvincia(), Provincia.class));
-        CondicionIVA condicionIVA = new CondicionIVABuilder().build();
-        condicionIVA = restTemplate.postForObject(apiPrefix + "/condiciones-iva", condicionIVA, CondicionIVA.class);
         localidad = restTemplate.postForObject(apiPrefix + "/localidades", localidad, Localidad.class);
         Empresa empresa = new EmpresaBuilder()
                 .withLocalidad(localidad)
-                .withCondicionIVA(condicionIVA)
                 .build();
         empresa = restTemplate.postForObject(apiPrefix + "/empresas", empresa, Empresa.class);
         FormaDePago formaDePago = new FormaDePagoBuilder()
@@ -711,10 +704,12 @@ public class CuentaCorrienteIntegrationTest {
                 .build();
         credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
         ClienteDTO cliente = ClienteDTO.builder()
+                .tipoDeCliente(TipoDeCliente.EMPRESA)
+                .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
                 .razonSocial("Peter Parker")
+                .telefono("3791234532")
                 .build();
         cliente = restTemplate.postForObject(apiPrefix + "/clientes?idEmpresa=" + empresa.getId_Empresa()
-                        + "&idCondicionIVA=" + condicionIVA.getId_CondicionIVA()
                         + "&idLocalidad=" + localidad.getId_Localidad()
                         + "&idUsuarioCredencial=" + credencial.getId_Usuario(),
                 cliente, ClienteDTO.class);
@@ -727,7 +722,6 @@ public class CuentaCorrienteIntegrationTest {
         medida = restTemplate.postForObject(apiPrefix + "/medidas", medida, Medida.class);
         Proveedor proveedor = new ProveedorBuilder().withEmpresa(empresa)
                 .withLocalidad(empresa.getLocalidad())
-                .withCondicionIVA(empresa.getCondicionIVA())
                 .build();
         proveedor = restTemplate.postForObject(apiPrefix + "/proveedores", proveedor, Proveedor.class);
         Rubro rubro = new RubroBuilder().withEmpresa(empresa).build();
@@ -952,9 +946,6 @@ public class CuentaCorrienteIntegrationTest {
         assertEquals(TipoDeComprobante.FACTURA_B, facturaVentaB.getTipoComprobante());
         NotaDebitoDTO notaDebito = new NotaDebitoDTO();
         notaDebito.setCAE(0L);
-        EmpresaDTO empresaDTO = EmpresaDTO.builder()
-          .id_Empresa(empresa.getId_Empresa())
-          .build();
         notaDebito.setFecha(new Date());
         List<RenglonNotaDebito> renglonesCalculados = Arrays.asList(restTemplate.getForObject(apiPrefix + "/notas/renglon/debito/recibo/2?monto=1000&ivaPorcentaje=21", RenglonNotaDebito[].class));
         notaDebito.setRenglonesNotaDebito(renglonesCalculados);

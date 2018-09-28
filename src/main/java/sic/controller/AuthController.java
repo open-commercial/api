@@ -5,18 +5,17 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import sic.modelo.Credencial;
-import sic.modelo.Rol;
-import sic.modelo.Usuario;
+import sic.modelo.*;
 import sic.modelo.dto.RecoveryPasswordDTO;
+import sic.modelo.dto.RegistracionClienteAndUsuarioDTO;
+import sic.service.IEmpresaService;
+import sic.service.IRegistracionService;
 import sic.service.IUsuarioService;
 
 @RestController
@@ -24,13 +23,19 @@ import sic.service.IUsuarioService;
 public class AuthController {
 
   private final IUsuarioService usuarioService;
+  private final IEmpresaService empresaService;
+  private final IRegistracionService registracionService;
 
   @Value("${SIC_JWT_KEY}")
   private String secretkey;
 
   @Autowired
-  public AuthController(IUsuarioService usuarioService) {
+  public AuthController(IUsuarioService usuarioService,
+                        IEmpresaService empresaService,
+                        IRegistracionService registracionService) {
     this.usuarioService = usuarioService;
+    this.empresaService = empresaService;
+    this.registracionService = registracionService;
   }
 
   private String generarToken(long idUsuario, List<Rol> rolesDeUsuario) {
@@ -94,5 +99,34 @@ public class AuthController {
           ResourceBundle.getBundle("Mensajes").getString("mensaje_error_passwordRecoveryKey"));
     }
     return token;
+  }
+
+  @PostMapping("/registracion")
+  public void registrarse(
+      @RequestBody RegistracionClienteAndUsuarioDTO registracionClienteAndUsuarioDTO) {
+    Usuario nuevoUsuario = new Usuario();
+    nuevoUsuario.setHabilitado(false);
+    nuevoUsuario.setNombre(registracionClienteAndUsuarioDTO.getNombre());
+    nuevoUsuario.setApellido(registracionClienteAndUsuarioDTO.getApellido());
+    nuevoUsuario.setEmail(registracionClienteAndUsuarioDTO.getEmail());
+    nuevoUsuario.setPassword(registracionClienteAndUsuarioDTO.getPassword());
+    nuevoUsuario.setRoles(Collections.singletonList(Rol.COMPRADOR));
+    nuevoUsuario.setIdEmpresaPredeterminada(registracionClienteAndUsuarioDTO.getIdEmpresa());
+    Cliente nuevoCliente = new Cliente();
+    nuevoCliente.setTipoDeCliente(registracionClienteAndUsuarioDTO.getTipoDeCliente());
+    nuevoCliente.setTelefono(registracionClienteAndUsuarioDTO.getTelefono());
+    nuevoCliente.setEmail(registracionClienteAndUsuarioDTO.getEmail());
+    nuevoCliente.setEmpresa(empresaService.getEmpresaPorId(registracionClienteAndUsuarioDTO.getIdEmpresa()));
+    if (nuevoCliente.getTipoDeCliente() == TipoDeCliente.EMPRESA) {
+      nuevoCliente.setRazonSocial(registracionClienteAndUsuarioDTO.getRazonSocial());
+      nuevoCliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
+    } else if (nuevoCliente.getTipoDeCliente() == TipoDeCliente.PERSONA) {
+      nuevoCliente.setRazonSocial(
+          registracionClienteAndUsuarioDTO.getNombre()
+              + " "
+              + registracionClienteAndUsuarioDTO.getApellido());
+      nuevoCliente.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
+    }
+    this.registracionService.crearCuentaConClienteAndUsuario(nuevoCliente, nuevoUsuario);
   }
 }
