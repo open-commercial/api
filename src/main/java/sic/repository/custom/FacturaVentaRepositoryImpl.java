@@ -12,9 +12,8 @@ import sic.repository.FacturaVentaRepositoryCustom;
 
 @Repository
 public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom {
-    
-    @PersistenceContext
-    private EntityManager em;
+
+  @PersistenceContext private EntityManager em;
 
   @Override
   public BigDecimal calcularTotalFacturadoVenta(BooleanBuilder builder) {
@@ -45,14 +44,17 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
         .get(0);
   }
 
-    @Override
-    public BigDecimal calcularGananciaTotal(BooleanBuilder builder) {
-        QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
-        QRenglonFactura qRenglonFactura = QRenglonFactura.renglonFactura;
-        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
-        return queryFactory.select(qRenglonFactura.ganancia_neto.multiply(qRenglonFactura.cantidad).sum())
-                .from(qFacturaVenta).leftJoin(qFacturaVenta.renglones, qRenglonFactura)
-                .where(builder).fetch().get(0);
-    }
-
+  @Override
+  public BigDecimal calcularGananciaTotal(BooleanBuilder builder) {
+    QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
+    QRenglonFactura qRenglonFactura = QRenglonFactura.renglonFactura;
+    JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+    return queryFactory
+        .select(qRenglonFactura.ganancia_neto.multiply(qRenglonFactura.cantidad).sum())
+        .from(qFacturaVenta)
+        .leftJoin(qFacturaVenta.renglones, qRenglonFactura)
+        .where(builder)
+        .fetch()
+        .get(0);
+  }
 }

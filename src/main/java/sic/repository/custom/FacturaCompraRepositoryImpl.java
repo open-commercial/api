@@ -14,8 +14,7 @@ import sic.repository.FacturaCompraRepositoryCustom;
 @Repository
 public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCustom {
 
-    @PersistenceContext
-    private EntityManager em;
+  @PersistenceContext private EntityManager em;
 
   @Override
   public BigDecimal calcularTotalFacturadoCompra(BooleanBuilder builder) {
