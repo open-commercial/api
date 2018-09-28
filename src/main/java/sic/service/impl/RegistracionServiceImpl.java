@@ -1,13 +1,19 @@
 package sic.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Cliente;
 import sic.modelo.Usuario;
 import sic.service.IClienteService;
+import sic.service.ICorreoElectronicoService;
 import sic.service.IRegistracionService;
 import sic.service.IUsuarioService;
+
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
 
 @Service
 @Transactional
@@ -15,12 +21,17 @@ public class RegistracionServiceImpl implements IRegistracionService {
 
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
+  private final ICorreoElectronicoService correoElectronicoService;
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Autowired
   public RegistracionServiceImpl(IUsuarioService usuarioService,
-                                 IClienteService clienteService) {
+                                 IClienteService clienteService,
+                                 ICorreoElectronicoService correoElectronicoService) {
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
+    this.correoElectronicoService = correoElectronicoService;
   }
 
   @Override
@@ -29,7 +40,21 @@ public class RegistracionServiceImpl implements IRegistracionService {
     Usuario credencial = usuarioService.guardar(usuario);
     cliente.setCredencial(credencial);
     clienteService.guardar(cliente);
-    //send email
+    correoElectronicoService.enviarMailPorEmpresa(
+        cliente.getEmpresa().getId_Empresa(),
+        usuario.getEmail(),
+        cliente.getEmpresa().getEmail(),
+        "Registración de cuenta nueva",
+        MessageFormat.format(
+            RESOURCE_BUNDLE.getString("mensaje_correo_registracion"),
+            usuario.getNombre() + " " + usuario.getApellido(),
+            cliente.getTipoDeCliente(),
+            cliente.getRazonSocial(),
+            cliente.getTelefono(),
+            usuario.getUsername()),
+        null,
+        null);
+    logger.warn("El mail de registración para el usuario {} se envió.", usuario.getUsername());
   }
 
   @Override

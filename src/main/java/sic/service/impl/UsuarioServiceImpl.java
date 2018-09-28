@@ -307,6 +307,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
     correoElectronicoService.enviarMailPorEmpresa(
         idEmpresa,
         usuario.getEmail(),
+        null,
         "Recuperación de contraseña",
         MessageFormat.format(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_correo_recuperacion"),
