@@ -2,6 +2,10 @@ package sic.controller;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,30 +61,56 @@ public class ProveedorController {
   @GetMapping("/proveedores/busqueda/criteria")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public List<Proveedor> buscarProveedores(
+  public Page<Proveedor> buscarProveedores(
       @RequestParam(value = "idEmpresa") long idEmpresa,
       @RequestParam(required = false) String codigo,
       @RequestParam(required = false) String razonSocial,
       @RequestParam(required = false) Long idFiscal,
       @RequestParam(required = false) Long idPais,
       @RequestParam(required = false) Long idProvincia,
-      @RequestParam(required = false) Long idLocalidad) {
+      @RequestParam(required = false) Long idLocalidad,
+      @RequestParam(required = false) Integer pagina,
+      @RequestParam(required = false) Integer tamanio,
+      @RequestParam(required = false, defaultValue = "true") boolean conSaldo,
+      @RequestParam(required = false) String ordenarPor,
+      @RequestParam(required = false) String sentido) {
+    final int TAMANIO_PAGINA_DEFAULT = 50;
+    if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
+    if (pagina == null || pagina < 0) pagina = 0;
+    Pageable pageable;
+    if (ordenarPor == null || sentido == null) {
+      pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "razonSocial"));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenarPor));
+          break;
+        case "DESC":
+          pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenarPor));
+          break;
+        default:
+          pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "razonSocial"));
+          break;
+      }
+    }
     BusquedaProveedorCriteria criteria =
-        new BusquedaProveedorCriteria(
-            (codigo != null),
-            codigo,
-            (razonSocial != null),
-            razonSocial,
-            (idFiscal != null),
-            idFiscal,
-            (idPais != null),
-            idPais,
-            (idProvincia != null),
-            idProvincia,
-            (idLocalidad != null),
-            idLocalidad,
-            idEmpresa,
-            0);
+        BusquedaProveedorCriteria.builder()
+            .buscaPorCodigo(codigo != null)
+            .codigo(codigo)
+            .buscaPorRazonSocial(razonSocial != null)
+            .razonSocial(razonSocial)
+            .buscaPorIdFiscal(idFiscal != null)
+            .idFiscal(idFiscal)
+            .buscaPorPais(idPais != null)
+            .idPais(idPais)
+            .buscaPorProvincia(idProvincia != null)
+            .idProvincia(idProvincia)
+            .buscaPorLocalidad(idLocalidad != null)
+            .idLocalidad(idLocalidad)
+            .idEmpresa(idEmpresa)
+            .pageable(pageable)
+            .conSaldo(conSaldo)
+            .build();
     return proveedorService.buscarProveedores(criteria);
   }
 

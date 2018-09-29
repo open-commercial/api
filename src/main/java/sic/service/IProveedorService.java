@@ -1,6 +1,8 @@
 package sic.service;
 
 import java.util.List;
+
+import org.springframework.data.domain.Page;
 import sic.modelo.BusquedaProveedorCriteria;
 import sic.modelo.Empresa;
 import sic.modelo.Proveedor;
@@ -11,7 +13,7 @@ public interface IProveedorService {
 
   void actualizar(Proveedor proveedor);
 
-  List<Proveedor> buscarProveedores(BusquedaProveedorCriteria criteria);
+  Page<Proveedor> buscarProveedores(BusquedaProveedorCriteria criteria);
 
   void eliminar(long idProveedor);
 
@@ -24,4 +26,5 @@ public interface IProveedorService {
   List<Proveedor> getProveedores(Empresa empresa);
 
   Proveedor guardar(Proveedor proveedor);
+  
 }
