@@ -99,7 +99,7 @@ public class ProveedorController {
             .codigo(codigo)
             .buscaPorRazonSocial(razonSocial != null)
             .razonSocial(razonSocial)
-            .buscaPorId_Fiscal(idFiscal != null)
+            .buscaPorIdFiscal(idFiscal != null)
             .idFiscal(idFiscal)
             .buscaPorPais(idPais != null)
             .idPais(idPais)
