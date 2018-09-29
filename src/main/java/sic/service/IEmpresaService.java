@@ -4,20 +4,20 @@ import java.util.List;
 import sic.modelo.Empresa;
 
 public interface IEmpresaService {
-    
-    Empresa getEmpresaPorId(Long id_Empresa);
 
-    void actualizar(Empresa empresa);
+  Empresa getEmpresaPorId(Long id_Empresa);
 
-    void eliminar(Long idEmpresa);    
+  void actualizar(Empresa empresa);
 
-    Empresa getEmpresaPorCUIP(long cuip);
+  void eliminar(Long idEmpresa);
 
-    Empresa getEmpresaPorNombre(String nombre);
+  Empresa getEmpresaPorIdFiscal(Long idFiscal);
 
-    List<Empresa> getEmpresas();
+  Empresa getEmpresaPorNombre(String nombre);
 
-    Empresa guardar(Empresa empresa);    
-    
-    String guardarLogo(byte[] imagen);
+  List<Empresa> getEmpresas();
+
+  Empresa guardar(Empresa empresa);
+
+  String guardarLogo(byte[] imagen);
 }

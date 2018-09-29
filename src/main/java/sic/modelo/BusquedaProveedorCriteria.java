@@ -11,13 +11,13 @@ import org.springframework.data.domain.Pageable;
 @NoArgsConstructor
 @Builder
 public class BusquedaProveedorCriteria {
-
+  
   private boolean buscaPorCodigo;
   private String codigo;
   private boolean buscaPorRazonSocial;
   private String razonSocial;
   private boolean buscaPorIdFiscal;
-  private String idFiscal;
+  private Long idFiscal;
   private boolean buscaPorPais;
   private Long idPais;
   private boolean buscaPorProvincia;

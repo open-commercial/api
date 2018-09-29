@@ -6,15 +6,14 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.Empresa;
 
-public interface EmpresaRepository extends PagingAndSortingRepository<Empresa, Long>{
-    
-      @Query("SELECT e FROM Empresa e WHERE e.id_Empresa = :idEmpresa AND e.eliminada = false")
-      Empresa findById(@Param("idEmpresa") long idEmpresa);
-    
-      Empresa findByCuipAndEliminada(long cuip, boolean eliminada);
+public interface EmpresaRepository extends PagingAndSortingRepository<Empresa, Long> {
 
-      Empresa findByNombreIsAndEliminadaOrderByNombreAsc(String nombre, boolean eliminada);
+  @Query("SELECT e FROM Empresa e WHERE e.id_Empresa = :idEmpresa AND e.eliminada = false")
+  Empresa findById(@Param("idEmpresa") long idEmpresa);
 
-      List<Empresa> findAllByAndEliminadaOrderByNombreAsc(boolean eliminada); 
-    
+  Empresa findByIdFiscalAndEliminada(Long idFiscal, boolean eliminada);
+
+  Empresa findByNombreIsAndEliminadaOrderByNombreAsc(String nombre, boolean eliminada);
+
+  List<Empresa> findAllByAndEliminadaOrderByNombreAsc(boolean eliminada);
 }

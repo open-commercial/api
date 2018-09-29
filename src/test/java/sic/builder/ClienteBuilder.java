@@ -7,18 +7,18 @@ import sic.modelo.*;
 public class ClienteBuilder {
 
   private long id_Cliente = 0L;
+  private TipoDeCliente tipoDeCliente = TipoDeCliente.EMPRESA;
   private String nroCliente = "00001";
   private String razonSocial = "Construcciones S.A.";
   private String nombreFantasia = "Servimetal";
   private String direccion = "Perugorria 2421";
-  private CondicionIVA condicionIVA = new CondicionIVABuilder().build();
-  private String idFiscal = "23248527419";
+  private CategoriaIVA categoriaIVA = CategoriaIVA.RESPONSABLE_INSCRIPTO;
+  private Long idFiscal = 23248527419L;
   private String email = "servimetal@hotmail.com";
-  private String telPrimario = "379 4587114";
-  private String telSecundario = "379 4852498";
+  private String telefono = "3794587114";
   private Localidad localidad = new LocalidadBuilder().build();
   private String contacto = "Facundo Pastore";
-  private Date fechaAlta = new Date(1458010800000L); // 15-03-2016;;
+  private Date fechaAlta = new Date(1458010800000L); // 15-03-2016;
   private Empresa empresa = new EmpresaBuilder().build();
   private Usuario viajante = new UsuarioBuilder().build();
   private Usuario credencial = new UsuarioBuilder().build();
@@ -30,15 +30,15 @@ public class ClienteBuilder {
   public Cliente build() {
     return new Cliente(
         id_Cliente,
+        tipoDeCliente,
         nroCliente,
         razonSocial,
         nombreFantasia,
         direccion,
-        condicionIVA,
+        categoriaIVA,
         idFiscal,
         email,
-        telPrimario,
-        telSecundario,
+        telefono,
         localidad,
         contacto,
         fechaAlta,
@@ -53,6 +53,11 @@ public class ClienteBuilder {
 
   public ClienteBuilder withId_Cliente(long id_Cliente) {
     this.id_Cliente = id_Cliente;
+    return this;
+  }
+
+  public ClienteBuilder withTipoDeCliente(TipoDeCliente tipoDeCliente) {
+    this.tipoDeCliente = tipoDeCliente;
     return this;
   }
 
@@ -76,12 +81,12 @@ public class ClienteBuilder {
     return this;
   }
 
-  public ClienteBuilder withCondicionIVA(CondicionIVA condicionIVA) {
-    this.condicionIVA = condicionIVA;
+  public ClienteBuilder withCategoriaIVA(CategoriaIVA categoriaIVA) {
+    this.categoriaIVA = categoriaIVA;
     return this;
   }
 
-  public ClienteBuilder withIdFiscal(String idFiscal) {
+  public ClienteBuilder withIdFiscal(Long idFiscal) {
     this.idFiscal = idFiscal;
     return this;
   }
@@ -91,13 +96,8 @@ public class ClienteBuilder {
     return this;
   }
 
-  public ClienteBuilder withTelPrimario(String telPrimario) {
-    this.telPrimario = telPrimario;
-    return this;
-  }
-
-  public ClienteBuilder withTelSecundario(String telSecundario) {
-    this.telSecundario = telSecundario;
+  public ClienteBuilder withTelefono(String telefono) {
+    this.telefono = telefono;
     return this;
   }
 

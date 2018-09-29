@@ -37,7 +37,7 @@ public class ProveedorServiceImpl implements IProveedorService {
       ICuentaCorrienteService cuentaCorrienteService) {
     this.proveedorRepository = proveedorRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
-  }
+  }    
 
   @Override
   public Proveedor getProveedorPorId(Long idProveedor) {

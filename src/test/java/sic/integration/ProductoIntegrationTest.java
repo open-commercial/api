@@ -109,14 +109,10 @@ public class ProductoIntegrationTest {
     localidad.setProvincia(
         restTemplate.postForObject(
             apiPrefix + "/provincias", localidad.getProvincia(), Provincia.class));
-    CondicionIVA condicionIVA = new CondicionIVABuilder().build();
     Empresa empresa =
         new EmpresaBuilder()
             .withLocalidad(
                 restTemplate.postForObject(apiPrefix + "/localidades", localidad, Localidad.class))
-            .withCondicionIVA(
-                restTemplate.postForObject(
-                    apiPrefix + "/condiciones-iva", condicionIVA, CondicionIVA.class))
             .build();
     empresa = restTemplate.postForObject(apiPrefix + "/empresas", empresa, Empresa.class);
     FormaDePago formaDePago =
@@ -133,7 +129,6 @@ public class ProductoIntegrationTest {
         new ProveedorBuilder()
             .withEmpresa(empresa)
             .withLocalidad(empresa.getLocalidad())
-            .withCondicionIVA(empresa.getCondicionIVA())
             .build();
     proveedor = restTemplate.postForObject(apiPrefix + "/proveedores", proveedor, Proveedor.class);
     Rubro rubro = new RubroBuilder().withEmpresa(empresa).build();

@@ -24,7 +24,6 @@ public class ClienteController {
   private final IEmpresaService empresaService;
   private final ILocalidadService localidadService;
   private final IUsuarioService usuarioService;
-  private final ICondicionIVAService condicionIVAService;
 
   @Value("${SIC_JWT_KEY}")
   private String secretkey;
@@ -34,13 +33,11 @@ public class ClienteController {
       IClienteService clienteService,
       IEmpresaService empresaService,
       ILocalidadService localidadService,
-      IUsuarioService usuarioService,
-      ICondicionIVAService condicionIVAService) {
+      IUsuarioService usuarioService) {
     this.clienteService = clienteService;
     this.empresaService = empresaService;
     this.localidadService = localidadService;
     this.usuarioService = usuarioService;
-    this.condicionIVAService = condicionIVAService;
   }
 
   @GetMapping("/clientes/{idCliente}")
@@ -63,7 +60,7 @@ public class ClienteController {
       @RequestParam(required = false) String nroCliente,
       @RequestParam(required = false) String razonSocial,
       @RequestParam(required = false) String nombreFantasia,
-      @RequestParam(required = false) String idFiscal,
+      @RequestParam(required = false) Long idFiscal,
       @RequestParam(required = false) Long idViajante,
       @RequestParam(required = false) Long idPais,
       @RequestParam(required = false) Long idProvincia,
@@ -100,7 +97,7 @@ public class ClienteController {
             .razonSocial(razonSocial)
             .buscaPorNombreFantasia(nombreFantasia != null)
             .nombreFantasia(nombreFantasia)
-            .buscaPorId_Fiscal(idFiscal != null)
+            .buscaPorIdFiscal(idFiscal != null)
             .idFiscal(idFiscal)
             .buscaPorViajante(idViajante != null)
             .idViajante(idViajante)
@@ -153,9 +150,8 @@ public class ClienteController {
   })
   public Cliente guardar(
       @RequestBody Cliente cliente,
-      @RequestParam Long idCondicionIVA,
-      @RequestParam Long idLocalidad,
       @RequestParam Long idEmpresa,
+      @RequestParam(required = false) Long idLocalidad,
       @RequestParam(required = false) Long idViajante,
       @RequestParam(required = false) Long idCredencial,
       @RequestHeader("Authorization") String token) {
@@ -173,8 +169,7 @@ public class ClienteController {
         cliente.setCredencial(usuarioCredencial);
       }
     }
-    cliente.setCondicionIVA(condicionIVAService.getCondicionIVAPorId(idCondicionIVA));
-    cliente.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
+    if (idLocalidad != null) cliente.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
     cliente.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     if (idViajante != null) {
       cliente.setViajante(usuarioService.getUsuarioPorId(idViajante));
@@ -193,7 +188,6 @@ public class ClienteController {
   })
   public void actualizar(
       @RequestBody Cliente clientePorActualizar,
-      @RequestParam(required = false) Long idCondicionIVA,
       @RequestParam(required = false) Long idLocalidad,
       @RequestParam(required = false) Long idEmpresa,
       @RequestParam(required = false) Long idViajante,
@@ -219,23 +213,16 @@ public class ClienteController {
     } else {
       clientePorActualizar.setCredencial(null);
     }
-    if (idCondicionIVA != null) {
-      clientePorActualizar.setCondicionIVA(
-          condicionIVAService.getCondicionIVAPorId(idCondicionIVA));
-    } else {
-      clientePorActualizar.setCondicionIVA(clientePersistido.getCondicionIVA());
-    }
     if (idLocalidad != null) {
       clientePorActualizar.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
     } else {
-      clientePorActualizar.setLocalidad(clientePersistido.getLocalidad());
+      clientePorActualizar.setLocalidad(null);
     }
     if (idEmpresa != null) {
       clientePorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     } else {
       clientePorActualizar.setEmpresa(clientePersistido.getEmpresa());
     }
-    clientePorActualizar.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
     clientePorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     if (idViajante != null) {
       clientePorActualizar.setViajante(usuarioService.getUsuarioPorId(idViajante));

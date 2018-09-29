@@ -41,6 +41,7 @@ public class App extends WebMvcConfigurerAdapter {
                 .addPathPatterns("/api/**")
                 .excludePathPatterns("/api/*/login")
                 .excludePathPatterns("/api/*/password-recovery")
+                .excludePathPatterns("/api/*/registracion")
                 .excludePathPatterns("/api/*/public/**");
     }
 
@@ -107,3 +108,4 @@ public class App extends WebMvcConfigurerAdapter {
     }
 
 }
+

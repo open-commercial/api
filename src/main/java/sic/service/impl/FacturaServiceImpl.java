@@ -110,8 +110,8 @@ public class FacturaServiceImpl implements IFacturaService {
     @Override
     public TipoDeComprobante[] getTipoFacturaCompra(Empresa empresa, Proveedor proveedor) {
         //cuando la Empresa discrimina IVA
-        if (empresa.getCondicionIVA().isDiscriminaIVA()) {
-            if (proveedor.getCondicionIVA().isDiscriminaIVA()) {
+        if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())) {
+            if (CategoriaIVA.discriminaIVA(proveedor.getCategoriaIVA())) {
                 //cuando la Empresa discrimina IVA y el Proveedor tambien
                 TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
                 tiposPermitidos[0] = TipoDeComprobante.FACTURA_A;
@@ -129,7 +129,7 @@ public class FacturaServiceImpl implements IFacturaService {
             }
         } else {
             //cuando la Empresa NO discrimina IVA
-            if (proveedor.getCondicionIVA().isDiscriminaIVA()) {
+            if (CategoriaIVA.discriminaIVA(proveedor.getCategoriaIVA())) {
                 //cuando Empresa NO discrimina IVA y el Proveedor SI
                 TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
                 tiposPermitidos[0] = TipoDeComprobante.FACTURA_B;
@@ -150,8 +150,8 @@ public class FacturaServiceImpl implements IFacturaService {
     @Override
     public TipoDeComprobante[] getTipoFacturaVenta(Empresa empresa, Cliente cliente) {
         //cuando la Empresa discrimina IVA
-        if (empresa.getCondicionIVA().isDiscriminaIVA()) {
-            if (cliente.getCondicionIVA().isDiscriminaIVA()) {
+        if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())) {
+            if (CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
                 //cuando la Empresa discrimina IVA y el Cliente tambien
                 TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
                 tiposPermitidos[0] = TipoDeComprobante.FACTURA_A;
@@ -170,7 +170,7 @@ public class FacturaServiceImpl implements IFacturaService {
             }
         } else {
             //cuando la Empresa NO discrimina IVA
-            if (cliente.getCondicionIVA().isDiscriminaIVA()) {
+            if (CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
                 //cuando Empresa NO discrimina IVA y el Cliente SI
                 TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
                 tiposPermitidos[0] = TipoDeComprobante.FACTURA_C;
@@ -192,7 +192,7 @@ public class FacturaServiceImpl implements IFacturaService {
 
     @Override
     public TipoDeComprobante[] getTiposFacturaSegunEmpresa(Empresa empresa) {
-        if (empresa.getCondicionIVA().isDiscriminaIVA()) {
+        if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())) {
             TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[5];
             tiposPermitidos[0] = TipoDeComprobante.FACTURA_A;
             tiposPermitidos[1] = TipoDeComprobante.FACTURA_B;
@@ -245,7 +245,7 @@ public class FacturaServiceImpl implements IFacturaService {
             cal.set(Calendar.SECOND, 59);
             criteria.setFechaHasta(cal.getTime());
         }
-        return facturaCompraRepository.buscarFacturasCompra(criteria);
+        return facturaCompraRepository.findAll(this.getBuilderCompra(criteria), criteria.getPageable());
     }
 
     @Override
@@ -268,10 +268,46 @@ public class FacturaServiceImpl implements IFacturaService {
             cal.set(Calendar.SECOND, 59);
             criteria.setFechaHasta(cal.getTime());
         }
-        return facturaVentaRepository.findAll(this.getBuilder(criteria, idUsuarioLoggedIn), criteria.getPageable());
+        return facturaVentaRepository.findAll(this.getBuilderVenta(criteria, idUsuarioLoggedIn), criteria.getPageable());
     }
 
-  private BooleanBuilder getBuilder(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
+  private BooleanBuilder getBuilderCompra(BusquedaFacturaCompraCriteria criteria) {
+    QFacturaCompra qFacturaCompra = QFacturaCompra.facturaCompra;
+    BooleanBuilder builder = new BooleanBuilder();
+    builder.and(
+        qFacturaCompra
+            .empresa
+            .id_Empresa
+            .eq(criteria.getIdEmpresa())
+            .and(qFacturaCompra.eliminada.eq(false)));
+    // Fecha
+    if (criteria.isBuscaPorFecha()) {
+      FormatterFechaHora formateadorFecha =
+          new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      DateExpression<Date> fDesde =
+          Expressions.dateTemplate(
+              Date.class,
+              "convert({0}, datetime)",
+              formateadorFecha.format(criteria.getFechaDesde()));
+      DateExpression<Date> fHasta =
+          Expressions.dateTemplate(
+              Date.class,
+              "convert({0}, datetime)",
+              formateadorFecha.format(criteria.getFechaHasta()));
+      builder.and(qFacturaCompra.fecha.between(fDesde, fHasta));
+    }
+    if (criteria.isBuscaPorProveedor())
+      builder.and(qFacturaCompra.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
+    if (criteria.isBuscaPorTipoComprobante())
+      builder.and(qFacturaCompra.tipoComprobante.eq(criteria.getTipoComprobante()));
+    if (criteria.isBuscaPorNumeroFactura())
+      builder
+          .and(qFacturaCompra.numSerie.eq(criteria.getNumSerie()))
+          .and(qFacturaCompra.numFactura.eq(criteria.getNumFactura()));
+    return builder;
+  }
+
+  private BooleanBuilder getBuilderVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
     QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
@@ -296,10 +332,12 @@ public class FacturaServiceImpl implements IFacturaService {
               formateadorFecha.format(criteria.getFechaHasta()));
       builder.and(qFacturaVenta.fecha.between(fDesde, fHasta));
     }
-    if (criteria.isBuscaCliente()) builder.and(qFacturaVenta.cliente.id_Cliente.eq(criteria.getIdCliente()));
+    if (criteria.isBuscaCliente())
+      builder.and(qFacturaVenta.cliente.id_Cliente.eq(criteria.getIdCliente()));
     if (criteria.isBuscaPorTipoComprobante())
       builder.and(qFacturaVenta.tipoComprobante.eq(criteria.getTipoComprobante()));
-    if (criteria.isBuscaUsuario()) builder.and(qFacturaVenta.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+    if (criteria.isBuscaUsuario())
+      builder.and(qFacturaVenta.usuario.id_Usuario.eq(criteria.getIdUsuario()));
     if (criteria.isBuscaViajante())
       builder.and(qFacturaVenta.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaPorNumeroFactura())
@@ -677,7 +715,7 @@ public class FacturaServiceImpl implements IFacturaService {
             cal.set(Calendar.SECOND, 59);
             criteria.setFechaHasta(cal.getTime());
         }
-        BigDecimal totalFacturado = facturaVentaRepository.calcularTotalFacturadoVenta(this.getBuilder(criteria,idUsuarioLoggedIn));
+        BigDecimal totalFacturado = facturaVentaRepository.calcularTotalFacturadoVenta(this.getBuilderVenta(criteria,idUsuarioLoggedIn));
         return (totalFacturado != null? totalFacturado : BigDecimal.ZERO);
     }
 
@@ -701,7 +739,7 @@ public class FacturaServiceImpl implements IFacturaService {
             cal.set(Calendar.SECOND, 59);
             criteria.setFechaHasta(cal.getTime());
         }
-        return facturaCompraRepository.calcularTotalFacturadoCompra(criteria);
+        return facturaCompraRepository.calcularTotalFacturadoCompra(this.getBuilderCompra(criteria));
     }
 
     @Override
@@ -725,7 +763,7 @@ public class FacturaServiceImpl implements IFacturaService {
             criteria.setFechaHasta(cal.getTime());
         }
         TipoDeComprobante[] tipoFactura = {TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B};
-        BigDecimal ivaVenta = facturaVentaRepository.calcularIVAVenta(this.getBuilder(criteria, idUsuarioLoggedIn), tipoFactura);
+        BigDecimal ivaVenta = facturaVentaRepository.calcularIVAVenta(this.getBuilderVenta(criteria, idUsuarioLoggedIn), tipoFactura);
         return (ivaVenta != null? ivaVenta : BigDecimal.ZERO);
     }
 
@@ -750,7 +788,7 @@ public class FacturaServiceImpl implements IFacturaService {
             criteria.setFechaHasta(cal.getTime());
         }
         TipoDeComprobante[] tipoFactura = {TipoDeComprobante.FACTURA_A};
-        return facturaCompraRepository.calcularIVACompra(criteria, tipoFactura);
+        return facturaCompraRepository.calcularIVACompra(this.getBuilderCompra(criteria), tipoFactura);
     }
 
     @Override
@@ -773,7 +811,7 @@ public class FacturaServiceImpl implements IFacturaService {
             cal.set(Calendar.SECOND, 59);
             criteria.setFechaHasta(cal.getTime());
         }
-        BigDecimal gananciaTotal = facturaVentaRepository.calcularGananciaTotal(this.getBuilder(criteria,idUsuarioLoggedIn));
+        BigDecimal gananciaTotal = facturaVentaRepository.calcularGananciaTotal(this.getBuilderVenta(criteria,idUsuarioLoggedIn));
         return (gananciaTotal != null? gananciaTotal : BigDecimal.ZERO);
     }
 

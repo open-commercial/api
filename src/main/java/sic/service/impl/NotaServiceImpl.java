@@ -8,7 +8,6 @@ import java.net.URL;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
-
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.DateExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -333,6 +332,40 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
+  public TipoDeComprobante[] getTipoNotaCliente(Long idCliente, Long idEmpresa) {
+    Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
+    Cliente cliente = clienteService.getClientePorId(idCliente);
+    if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())
+        && CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
+      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[6];
+      tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_A;
+      tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_X;
+      tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
+      tiposPermitidos[3] = TipoDeComprobante.NOTA_DEBITO_A;
+      tiposPermitidos[4] = TipoDeComprobante.NOTA_DEBITO_X;
+      tiposPermitidos[5] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
+      return tiposPermitidos;
+    } else if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())
+        && !CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
+      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[6];
+      tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_B;
+      tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_X;
+      tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
+      tiposPermitidos[3] = TipoDeComprobante.NOTA_DEBITO_B;
+      tiposPermitidos[4] = TipoDeComprobante.NOTA_DEBITO_X;
+      tiposPermitidos[5] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
+      return tiposPermitidos;
+    } else {
+      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
+      tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_X;
+      tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
+      tiposPermitidos[2] = TipoDeComprobante.NOTA_DEBITO_X;
+      tiposPermitidos[3] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
+      return tiposPermitidos;
+    }
+  }
+
+  @Override
   public List<NotaCredito> getNotasCreditoPorFactura(Long idFactura) {
     List<NotaCredito> notasCredito = new ArrayList<>();
     Factura factura = facturaService.getFacturaPorId(idFactura);
@@ -410,43 +443,9 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
-  public TipoDeComprobante[] getTipoNotaCliente(Long idCliente, Long idEmpresa) {
-    Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
-    Cliente cliente = clienteService.getClientePorId(idCliente);
-    if (empresa.getCondicionIVA().isDiscriminaIVA()
-        && cliente.getCondicionIVA().isDiscriminaIVA()) {
-      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[6];
-      tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_A;
-      tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_X;
-      tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
-      tiposPermitidos[3] = TipoDeComprobante.NOTA_DEBITO_A;
-      tiposPermitidos[4] = TipoDeComprobante.NOTA_DEBITO_X;
-      tiposPermitidos[5] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
-      return tiposPermitidos;
-    } else if (empresa.getCondicionIVA().isDiscriminaIVA()
-        && !cliente.getCondicionIVA().isDiscriminaIVA()) {
-      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[6];
-      tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_B;
-      tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_X;
-      tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
-      tiposPermitidos[3] = TipoDeComprobante.NOTA_DEBITO_B;
-      tiposPermitidos[4] = TipoDeComprobante.NOTA_DEBITO_X;
-      tiposPermitidos[5] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
-      return tiposPermitidos;
-    } else {
-      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
-      tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_X;
-      tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
-      tiposPermitidos[2] = TipoDeComprobante.NOTA_DEBITO_X;
-      tiposPermitidos[3] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
-      return tiposPermitidos;
-    }
-  }
-
-  @Override
   public TipoDeComprobante[] getTiposNota(Empresa empresa) {
     // cuando la Empresa discrimina IVA
-    if (empresa.getCondicionIVA().isDiscriminaIVA()) {
+    if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())) {
       TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[10];
       tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_A;
       tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_B;

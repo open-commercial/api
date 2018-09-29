@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import sic.modelo.CategoriaIVA;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -19,7 +20,7 @@ public class ProveedorDTO implements Serializable {
   private String codigo;
   private String razonSocial;
   private String direccion;
-  private CondicionIVADTO condicionIVA;
+  private CategoriaIVA categoriaIVA;
   private String idFiscal;
   private String telPrimario;
   private String telSecundario;

@@ -2,15 +2,8 @@ package sic.modelo;
 
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,48 +13,45 @@ import lombok.ToString;
 @Entity
 @Table(name = "empresa")
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(of = {"nombre"})
 @ToString
 public class Empresa implements Serializable {
 
-    @Id
-    @GeneratedValue
-    private long id_Empresa;
+  @Id @GeneratedValue private long id_Empresa;
 
-    @Column(nullable = false)
-    private String nombre;
+  @Column(nullable = false)
+  private String nombre;
 
-    @Column(nullable = false)
-    private String lema;
+  @Column(nullable = false)
+  private String lema;
 
-    @Column(nullable = false)
-    private String direccion;
+  @Column(nullable = false)
+  private String direccion;
 
-    @ManyToOne
-    @JoinColumn(name = "id_CondicionIVA", referencedColumnName = "id_CondicionIVA")
-    private CondicionIVA condicionIVA;
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private CategoriaIVA categoriaIVA;
 
-    private long cuip;
+  private Long idFiscal;
 
-    private long ingresosBrutos;
+  private Long ingresosBrutos;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fechaInicioActividad;
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date fechaInicioActividad;
 
-    @Column(nullable = false)
-    private String email;
+  @Column(nullable = false)
+  private String email;
 
-    @Column(nullable = false)
-    private String telefono;
+  @Column(nullable = false)
+  private String telefono;
 
-    @ManyToOne
-    @JoinColumn(name = "id_Localidad", referencedColumnName = "id_Localidad")
-    private Localidad localidad;
-    
-    private String logo;
+  @ManyToOne
+  @JoinColumn(name = "id_Localidad", referencedColumnName = "id_Localidad")
+  private Localidad localidad;
 
-    private boolean eliminada;
+  private String logo;
 
+  private boolean eliminada;
 }

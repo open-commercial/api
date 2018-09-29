@@ -9,7 +9,7 @@ import sic.modelo.Proveedor;
 
 public interface IProveedorService {
 
-  Proveedor getProveedorPorId(Long idProveedor);
+  Proveedor getProveedorPorId(Long id_Proveedor);
 
   void actualizar(Proveedor proveedor);
 
@@ -19,11 +19,12 @@ public interface IProveedorService {
 
   Proveedor getProveedorPorCodigo(String codigo, Empresa empresa);
 
-  Proveedor getProveedorPorIdFiscal(String idFiscal, Empresa empresa);
+  Proveedor getProveedorPorIdFiscal(Long idFiscal, Empresa empresa);
 
   Proveedor getProveedorPorRazonSocial(String razonSocial, Empresa empresa);
 
   List<Proveedor> getProveedores(Empresa empresa);
 
   Proveedor guardar(Proveedor proveedor);
+  
 }
