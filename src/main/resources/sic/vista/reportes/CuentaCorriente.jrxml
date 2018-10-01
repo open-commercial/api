@@ -76,7 +76,7 @@ $P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("MON
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getEmpresa().getIdFiscal()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getEmpresa().getIdFiscal() == null ? "" : $P{cuentaCorrienteCliente}.getEmpresa().getIdFiscal()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="710" y="15" width="96" height="15" uuid="4630ada4-f911-45f3-bf8d-1026e289cc77">
@@ -213,7 +213,7 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getCliente().getIdFiscal()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getCliente().getIdFiscal() == null ? "" : $P{cuentaCorrienteCliente}.getCliente().getIdFiscal()]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement mode="Transparent" x="611" y="0" width="99" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="9e7dfcda-5c8c-4987-88c2-2b820976c1bf"/>

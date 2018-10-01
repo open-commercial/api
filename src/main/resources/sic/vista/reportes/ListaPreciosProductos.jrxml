@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ListaPreciosProductos" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="608c624e-e655-4a3f-bb85-9c440082766b">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
@@ -71,28 +71,26 @@
 				<textElement>
 					<font size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{empresa}.getCondicionIVA().getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{empresa}.getCategoriaIVA().toString().equals("RESPONSABLE_INSCRIPTO") ? "Responsable Inscripto" :
+$P{empresa}.getCategoriaIVA().toString().equals("EXENTO") ? "Exento" :
+$P{empresa}.getCategoriaIVA().toString().equals("CONSUMIDOR_FINAL") ? "Consumidor Final" :
+$P{empresa}.getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" : ""]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="168" y="74" width="162" height="20" uuid="c2839fc3-1937-402f-bc03-ef5f0f0b9ce4"/>
+				<reportElement x="168" y="74" width="370" height="20" uuid="c2839fc3-1937-402f-bc03-ef5f0f0b9ce4"/>
 				<textElement>
 					<font size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{empresa}.getLocalidad().getNombre()]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="330" y="74" width="208" height="20" uuid="621942fa-787c-4b5b-b28c-075e4085be85"/>
-				<textElement>
-					<font size="12"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{empresa}.getLocalidad().getProvincia().getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{empresa}.getLocalidad() != null) 
+? $P{empresa}.getLocalidad().getNombre() + " " + $P{empresa}.getLocalidad().getProvincia().getNombre() + " " + $P{empresa}.getLocalidad().getProvincia().getPais().getNombre()
+: ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="168" y="114" width="162" height="20" uuid="bf12b167-4c5f-4a38-a849-46625cef8b3d"/>
 				<textElement>
 					<font size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{empresa}.getCuip()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{empresa}.getIdFiscal() == null ? "" : $P{empresa}.getIdFiscal()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="330" y="114" width="208" height="20" uuid="1ccacee4-e578-4d10-9f0e-07e373e9ec3b"/>
