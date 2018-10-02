@@ -7,10 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Cliente;
 import sic.modelo.Usuario;
-import sic.service.IClienteService;
-import sic.service.ICorreoElectronicoService;
-import sic.service.IRegistracionService;
-import sic.service.IUsuarioService;
+import sic.service.*;
 
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
@@ -22,16 +19,20 @@ public class RegistracionServiceImpl implements IRegistracionService {
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
   private final ICorreoElectronicoService correoElectronicoService;
+  private final IConfiguracionDelSistemaService configuracionDelSistemaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Autowired
-  public RegistracionServiceImpl(IUsuarioService usuarioService,
-                                 IClienteService clienteService,
-                                 ICorreoElectronicoService correoElectronicoService) {
+  public RegistracionServiceImpl(
+      IUsuarioService usuarioService,
+      IClienteService clienteService,
+      ICorreoElectronicoService correoElectronicoService,
+      IConfiguracionDelSistemaService cds) {
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
     this.correoElectronicoService = correoElectronicoService;
+    this.configuracionDelSistemaService = cds;
   }
 
   @Override
@@ -43,7 +44,9 @@ public class RegistracionServiceImpl implements IRegistracionService {
     correoElectronicoService.enviarMailPorEmpresa(
         cliente.getEmpresa().getId_Empresa(),
         usuario.getEmail(),
-        cliente.getEmpresa().getEmail(),
+        configuracionDelSistemaService
+            .getConfiguracionDelSistemaPorEmpresa(cliente.getEmpresa())
+            .getEmailUsername(),
         "Registración de cuenta nueva",
         MessageFormat.format(
             RESOURCE_BUNDLE.getString("mensaje_correo_registracion"),
@@ -63,8 +66,8 @@ public class RegistracionServiceImpl implements IRegistracionService {
     long max = 999L; // 3 digitos
     long randomLong;
     boolean esRepetido = true;
-    nombre = nombre.replaceAll("\\s+","");
-    apellido = apellido.replaceAll("\\s+","");
+    nombre = nombre.replaceAll("\\s+", "");
+    apellido = apellido.replaceAll("\\s+", "");
     String nuevoUsername = "";
     while (esRepetido) {
       randomLong = min + (long) (Math.random() * (max - min));

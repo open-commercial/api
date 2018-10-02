@@ -16,8 +16,11 @@ import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Transport;
 import sic.modelo.ConfiguracionDelSistema;
+import sic.modelo.Empresa;
 import sic.service.IConfiguracionDelSistemaService;
 import sic.service.ICorreoElectronicoService;
+import sic.service.IEmpresaService;
+
 import java.util.Properties;
 
 @Service
@@ -27,11 +30,15 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
   private String mailEnv;
 
   private final IConfiguracionDelSistemaService configuracionDelSistemaService;
+  private final IEmpresaService empresaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
-  public CorreoElectronicoServiceImpl(IConfiguracionDelSistemaService configuracionDelSistemaService) {
+  public CorreoElectronicoServiceImpl(
+      IConfiguracionDelSistemaService configuracionDelSistemaService,
+      IEmpresaService empresaService) {
     this.configuracionDelSistemaService = configuracionDelSistemaService;
+    this.empresaService = empresaService;
   }
 
   @Override
@@ -44,8 +51,10 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
       String mensaje,
       byte[] byteArray,
       String attachmentDescription) {
-    ConfiguracionDelSistema cds = configuracionDelSistemaService.getConfiguracionDelSistemaPorId(idEmpresa);
-    if (mailEnv.equals("production") && cds.isFacturaElectronicaHabilitada()) {
+    Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
+    ConfiguracionDelSistema cds =
+        configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa);
+    if (mailEnv.equals("production") && cds.isEmailSenderHabilitado()) {
       Properties props = new Properties();
       props.put("mail.smtp.host", "smtp.gmail.com");
       props.put("mail.smtp.port", "587");
