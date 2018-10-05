@@ -25,7 +25,7 @@ import sic.service.IUsuarioService;
 public class AuthController {
 
   private static String urlRecaptcha = "https://www.google.com/recaptcha/api/siteverify";
-  private static String secretWord = "6LeyXnEUAAAAALRgGfcfHmdA0W4xbxf4BWyzKFo5";
+  private static String secretWord = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe";
   private final IUsuarioService usuarioService;
   private final IEmpresaService empresaService;
   private final IRegistracionService registracionService;
