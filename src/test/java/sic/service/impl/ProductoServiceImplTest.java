@@ -60,21 +60,11 @@ public class ProductoServiceImplTest {
     }
     
     @Test
-    public void shouldCalcularImpInterno_Neto() {
-        BigDecimal pvp = new BigDecimal("24.68");
-        BigDecimal impuestoInternoPorcentaje = new BigDecimal("10");
-        BigDecimal resultadoEsperado = new BigDecimal("2.468000000000000");
-        BigDecimal resultadoObtenido = productoService.calcularImpInternoNeto(pvp, impuestoInternoPorcentaje);
-        assertEquals(resultadoEsperado, resultadoObtenido);
-    }
-    
-    @Test
     public void shouldCalcularPrecioLista() {
         BigDecimal pvp = new BigDecimal("24.68");
         BigDecimal ivaPorcentaje = new BigDecimal("21");
-        BigDecimal impuestoInternoPorcentaje = new BigDecimal("10");
-        BigDecimal resultadoEsperado = new BigDecimal("32.33080000000000000");
-        BigDecimal resultadoObtenido = productoService.calcularPrecioLista(pvp, ivaPorcentaje, impuestoInternoPorcentaje);
+        BigDecimal resultadoEsperado = new BigDecimal("29.86280000000000000");
+        BigDecimal resultadoObtenido = productoService.calcularPrecioLista(pvp, ivaPorcentaje);
         assertEquals(resultadoEsperado, resultadoObtenido);
     }
 

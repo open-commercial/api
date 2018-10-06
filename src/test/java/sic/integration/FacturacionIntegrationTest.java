@@ -131,6 +131,7 @@ public class FacturacionIntegrationTest {
                 .build();
         ClienteDTO cliente = ClienteDTO.builder()
                 .tipoDeCliente(TipoDeCliente.EMPRESA)
+                .bonificacion(BigDecimal.TEN)
                 .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
                 .razonSocial("Peter Parker")
                 .telefono("379423122")
@@ -296,8 +297,6 @@ public class FacturacionIntegrationTest {
         assertTrue("La ganancia neta no es la esperada", renglonesDeFacturaRecuperada[0].getGanancia_neto().compareTo(renglones.get(0).getGanancia_neto()) == 0);
         assertTrue("La ganancia porcentaje no es la esperada", renglonesDeFacturaRecuperada[0].getGanancia_porcentaje().compareTo(renglones.get(0).getGanancia_porcentaje()) == 0);
         assertTrue("El importe no es el esperado", renglonesDeFacturaRecuperada[0].getImporte().compareTo(renglones.get(0).getImporte()) == 0);
-        assertTrue("El impuesto neto no es el esperado", renglonesDeFacturaRecuperada[0].getImpuesto_neto().compareTo(renglones.get(0).getImpuesto_neto()) == 0);
-        assertTrue("El impuesto porcentaje no es el esperado", renglonesDeFacturaRecuperada[0].getImpuesto_porcentaje().compareTo(renglones.get(0).getImpuesto_porcentaje()) == 0);
         assertTrue("El iva neto no es el esperado", renglonesDeFacturaRecuperada[0].getIva_neto().compareTo(renglones.get(0).getIva_neto()) == 0);
         assertTrue("El iva porcentaje no es el esperado", renglonesDeFacturaRecuperada[0].getIva_porcentaje().compareTo(renglones.get(0).getIva_porcentaje()) == 0);
         assertTrue("El precio unitario no es el esperado", renglonesDeFacturaRecuperada[0].getPrecioUnitario().compareTo(renglones.get(0).getPrecioUnitario()) == 0);
@@ -341,6 +340,7 @@ public class FacturacionIntegrationTest {
         credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
         ClienteDTO cliente = ClienteDTO.builder()
                 .tipoDeCliente(TipoDeCliente.EMPRESA)
+                .bonificacion(BigDecimal.TEN)
                 .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
                 .razonSocial("Peter Parker")
                 .telefono("379423122")

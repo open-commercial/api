@@ -45,6 +45,14 @@ public class RenglonFactura implements Serializable {
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", message = "{mensaje_renglon_precio_unitario_negativo}")
     private BigDecimal precioUnitario;
+
+    @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_renglon_descuento_porcentaje_negativo}")
+    private BigDecimal bonificacionPorcentaje;
+
+    @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_renglon_descuento_neto_negativo}")
+    private BigDecimal bonificacionNeta;
     
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", message = "{mensaje_renglon_descuento_porcentaje_negativo}")
@@ -61,14 +69,6 @@ public class RenglonFactura implements Serializable {
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", message = "{mensaje_renglon_iva_neto_negativo}")
     private BigDecimal iva_neto;
-    
-    @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_renglon_impuesto_porcentaje_negativo}")
-    private BigDecimal impuesto_porcentaje;
-    
-    @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_renglon_impuesto_neto_negativo}")
-    private BigDecimal impuesto_neto;
     
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", message = "{mensaje_renglon_ganancia_porcentaje_negativa}")

@@ -93,14 +93,6 @@ public class Producto implements Serializable {
     private BigDecimal ivaNeto;
 
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_producto_ImpInternoPorcentaje_negativo}")
-    private BigDecimal impuestoInternoPorcentaje;
-
-    @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_producto_ImpInternoNeto_negativo}")
-    private BigDecimal impuestoInternoNeto;
-
-    @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", message = "{mensaje_producto_precioLista_negativo}")
     @JsonView(Views.Public.class)
     private BigDecimal precioLista;

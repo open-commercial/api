@@ -126,6 +126,7 @@ public class CuentaCorrienteIntegrationTest {
         credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
         ClienteDTO cliente = ClienteDTO.builder()
                 .tipoDeCliente(TipoDeCliente.EMPRESA)
+                .bonificacion(BigDecimal.TEN)
                 .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
                 .razonSocial("Peter Parker")
                 .telefono("379123452")
@@ -705,6 +706,7 @@ public class CuentaCorrienteIntegrationTest {
         credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
         ClienteDTO cliente = ClienteDTO.builder()
                 .tipoDeCliente(TipoDeCliente.EMPRESA)
+                .bonificacion(BigDecimal.TEN)
                 .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
                 .razonSocial("Peter Parker")
                 .telefono("3791234532")

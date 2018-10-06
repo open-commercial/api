@@ -354,8 +354,9 @@ public class FacturaController {
                                           @RequestParam TipoDeComprobante tipoDeComprobante,
                                           @RequestParam Movimiento movimiento,
                                           @RequestParam BigDecimal cantidad, 
-                                          @RequestParam BigDecimal descuentoPorcentaje) {
-        return facturaService.calcularRenglon(tipoDeComprobante, movimiento, cantidad, idProducto, descuentoPorcentaje, false);
+                                          @RequestParam BigDecimal descuentoPorcentaje,
+                                          @RequestParam(required = false) Long idCliente) {
+        return facturaService.calcularRenglon(tipoDeComprobante, movimiento, cantidad, idProducto, idCliente, descuentoPorcentaje, false);
     }
         
     @GetMapping("/facturas/total-facturado-venta/criteria")

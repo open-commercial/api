@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.*;
+import javax.validation.constraints.DecimalMin;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,6 +30,9 @@ public class Cliente implements Serializable {
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private TipoDeCliente tipoDeCliente;
+
+  @DecimalMin(value = "0", message = "{mensaje_cliente_bonificacion_negativa}")
+  private BigDecimal bonificacion;
 
   private String nroCliente;
 

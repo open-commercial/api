@@ -163,10 +163,10 @@ public class PedidoServiceImpl implements IPedidoService {
     return randomLong;
   }
 
-    @Override
-    public List<Factura> getFacturasDelPedido(long idPedido) {
-        return facturaService.getFacturasDelPedido(idPedido);
-    }
+  @Override
+  public List<Factura> getFacturasDelPedido(long idPedido) {
+    return facturaService.getFacturasDelPedido(idPedido);
+  }
 
   @Override
   @Transactional
@@ -283,7 +283,9 @@ public class PedidoServiceImpl implements IPedidoService {
         List<RenglonFactura> renglonesDeFacturas = new ArrayList<>();
         this.getFacturasDelPedido(nroPedido).forEach(f ->
             f.getRenglones().forEach(r -> renglonesDeFacturas.add(facturaService.calcularRenglon(f.getTipoComprobante(),
-                    Movimiento.VENTA, r.getCantidad(), r.getId_ProductoItem(),
+                    Movimiento.VENTA, r.getCantidad(), r.getId_ProductoItem(),(f instanceof FacturaVenta)
+                            ? ((FacturaVenta) f).getCliente().getId_Cliente()
+                            : null,
                     r.getDescuento_porcentaje(),false)))
         );
         HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();

@@ -102,10 +102,11 @@ public class FacturaServiceImpl implements IFacturaService {
         return factura;
     }
 
-    @Override
-    public List<Factura> getFacturasDelPedido(Long idPedido) {
-        return facturaRepository.findAllByPedidoAndEliminada(pedidoService.getPedidoPorId(idPedido), false);
-    }
+  @Override
+  public List<Factura> getFacturasDelPedido(Long idPedido) {
+    return facturaVentaRepository.findAllByPedidoAndEliminada(
+        pedidoService.getPedidoPorId(idPedido), false);
+  }
 
     @Override
     public TipoDeComprobante[] getTipoFacturaCompra(Empresa empresa, Proveedor proveedor) {
@@ -637,7 +638,7 @@ public class FacturaServiceImpl implements IFacturaService {
     @Override
     public BigDecimal calcularDescuentoNeto(BigDecimal importe, BigDecimal descuentoPorcentaje) {
         BigDecimal resultado = BigDecimal.ZERO;
-        if (descuentoPorcentaje != BigDecimal.ZERO) {
+        if (descuentoPorcentaje.compareTo(BigDecimal.ZERO) != 0) {
             resultado = importe.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
         }
         return resultado;
@@ -646,7 +647,7 @@ public class FacturaServiceImpl implements IFacturaService {
     @Override
     public BigDecimal calcularRecargoNeto(BigDecimal subtotal, BigDecimal recargoPorcentaje) {
         BigDecimal resultado = BigDecimal.ZERO;
-        if (recargoPorcentaje != BigDecimal.ZERO) {
+        if (recargoPorcentaje.compareTo(BigDecimal.ZERO) != 0) {
             resultado = subtotal.multiply(recargoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
         }
         return resultado;
@@ -857,53 +858,36 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     @Override
-    public BigDecimal calcularImpInternoNeto(Movimiento movimiento, Producto producto, BigDecimal descuentoNeto) {
-        BigDecimal resultado = BigDecimal.ZERO;
-        if (movimiento == Movimiento.COMPRA) {
-            resultado = producto.getPrecioCosto().subtract(descuentoNeto)
-                    .multiply(producto.getImpuestoInternoPorcentaje())
-                    .divide(CIEN, 15, RoundingMode.HALF_UP);
-        }
-        if (movimiento == Movimiento.VENTA) {
-            resultado = producto.getPrecioVentaPublico().subtract(descuentoNeto)
-                    .multiply(producto.getImpuestoInternoPorcentaje())
-                    .divide(CIEN, 15, RoundingMode.HALF_UP);
-        }
-        return resultado;
-    }
-
-    @Override
-    public BigDecimal calcularPrecioUnitario(Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto) {
+    public BigDecimal calcularPrecioUnitario(Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto, BigDecimal bonificacionPorcentaje) {
         BigDecimal iva_resultado;
-        BigDecimal impInterno_resultado;
+        BigDecimal bonificacionResultado;
         BigDecimal resultado = BigDecimal.ZERO;
         if (movimiento == Movimiento.COMPRA) {
             if (tipoDeComprobante.equals(TipoDeComprobante.FACTURA_A) || tipoDeComprobante.equals(TipoDeComprobante.FACTURA_X)) {
                 resultado = producto.getPrecioCosto();
             } else {
                 iva_resultado = producto.getPrecioCosto().multiply(producto.getIvaPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
-                impInterno_resultado = producto.getPrecioCosto().multiply(producto.getImpuestoInternoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
-                resultado = producto.getPrecioCosto().add(iva_resultado).add(impInterno_resultado);
+                resultado = producto.getPrecioCosto().add(iva_resultado);
             }
         }
         if (movimiento == Movimiento.VENTA) {
             switch (tipoDeComprobante) {
                 case FACTURA_A:
                 case FACTURA_X:
-                    resultado = producto.getPrecioVentaPublico();
+                    resultado = producto.getPrecioVentaPublico().add(producto.getPrecioVentaPublico().multiply(bonificacionPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP));
                     break;
                 case FACTURA_Y:
                     iva_resultado = producto.getIvaPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP).divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP).multiply(producto.getPrecioVentaPublico());
-                    impInterno_resultado = producto.getPrecioVentaPublico().multiply(producto.getImpuestoInternoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
-                    resultado = producto.getPrecioVentaPublico().add(iva_resultado).add(impInterno_resultado);
+                    bonificacionResultado = producto.getPrecioVentaPublico().multiply(bonificacionPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+                    resultado = producto.getPrecioVentaPublico().add(iva_resultado).add(bonificacionResultado);
                     break;
                 default:
-                    resultado = producto.getPrecioLista();
+                    resultado = producto.getPrecioLista().add(producto.getPrecioLista().multiply(bonificacionPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP));
                     break;
             }
         }
         if (movimiento == Movimiento.PEDIDO) {
-            resultado = producto.getPrecioLista();
+            resultado = producto.getPrecioLista().add(producto.getPrecioLista().multiply(bonificacionPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP));
         }
         return resultado;
     }
@@ -979,17 +963,17 @@ public class FacturaServiceImpl implements IFacturaService {
                     if (r.getCantidad().compareTo(renglonesDeFacturas.get(r.getProducto().getId_Producto()).getCantidad()) > 0) {
                         renglonesRestantes.add(this.calcularRenglon(tipoDeComprobante,
                                 Movimiento.VENTA, r.getCantidad().subtract(renglonesDeFacturas.get(r.getProducto().getId_Producto()).getCantidad()),
-                                r.getProducto().getId_Producto(), r.getDescuento_porcentaje(), false));
+                                r.getProducto().getId_Producto(), pedido.getCliente().getId_Cliente(), r.getDescuento_porcentaje(), false));
                     }
                 } else {
                     renglonesRestantes.add(this.calcularRenglon(tipoDeComprobante, Movimiento.VENTA,
-                            r.getCantidad(), r.getProducto().getId_Producto(), r.getDescuento_porcentaje(), false));
+                            r.getCantidad(), r.getProducto().getId_Producto(), pedido.getCliente().getId_Cliente(), r.getDescuento_porcentaje(), false));
                 }
             });
         } else {
             pedido.getRenglones().forEach(r ->
                 renglonesRestantes.add(this.calcularRenglon(tipoDeComprobante, Movimiento.VENTA,
-                        r.getCantidad(), r.getProducto().getId_Producto(),
+                        r.getCantidad(), r.getProducto().getId_Producto(), pedido.getCliente().getId_Cliente(),
                         r.getDescuento_porcentaje(), false))
             );
         }
@@ -1014,7 +998,7 @@ public class FacturaServiceImpl implements IFacturaService {
 
     @Override
     public RenglonFactura calcularRenglon(TipoDeComprobante tipoDeComprobante, Movimiento movimiento,
-            BigDecimal cantidad, long idProducto, BigDecimal descuentoPorcentaje, boolean dividiendoRenglonFactura) {
+                                          BigDecimal cantidad, long idProducto, Long idCliente, BigDecimal descuentoPorcentaje, boolean dividiendoRenglonFactura) {
         Producto producto = productoService.getProductoPorId(idProducto);
         /*if (dividiendoRenglonFactura == false && cantidad < producto.getVentaMinima()
                 && (movimiento == Movimiento.VENTA || movimiento == Movimiento.PEDIDO)) {
@@ -1027,7 +1011,11 @@ public class FacturaServiceImpl implements IFacturaService {
         nuevoRenglon.setDescripcionItem(producto.getDescripcion());
         nuevoRenglon.setMedidaItem(producto.getMedida().getNombre());
         nuevoRenglon.setCantidad(cantidad);
-        nuevoRenglon.setPrecioUnitario(this.calcularPrecioUnitario(movimiento, tipoDeComprobante, producto));
+        BigDecimal bonificacion = BigDecimal.ZERO;
+        if (idCliente != null) {
+           bonificacion = clienteService.getClientePorId(idCliente).getBonificacion();
+        }
+        nuevoRenglon.setPrecioUnitario(this.calcularPrecioUnitario(movimiento, tipoDeComprobante, producto, bonificacion));
         if (descuentoPorcentaje.compareTo(CIEN) > 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_descuento_mayor_cien"));
@@ -1039,8 +1027,6 @@ public class FacturaServiceImpl implements IFacturaService {
             nuevoRenglon.setIva_porcentaje(producto.getIvaPorcentaje().divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP));
         }
         nuevoRenglon.setIva_neto(this.calcularIVANetoRenglon(movimiento, tipoDeComprobante, producto, nuevoRenglon.getDescuento_porcentaje()));
-        nuevoRenglon.setImpuesto_porcentaje(producto.getImpuestoInternoPorcentaje());
-        nuevoRenglon.setImpuesto_neto(this.calcularImpInternoNeto(movimiento, producto, nuevoRenglon.getDescuento_neto()));
         nuevoRenglon.setGanancia_porcentaje(producto.getGananciaPorcentaje());
         nuevoRenglon.setGanancia_neto(producto.getGananciaNeto());
         nuevoRenglon.setImporte(this.calcularImporte(cantidad, nuevoRenglon.getPrecioUnitario(), nuevoRenglon.getDescuento_neto()));
@@ -1165,7 +1151,7 @@ public class FacturaServiceImpl implements IFacturaService {
                     cantidadProductosRenglonFacturaSinIVA = BigDecimal.ZERO;
                 }
                 RenglonFactura nuevoRenglonSinIVA = this.calcularRenglon(TipoDeComprobante.FACTURA_X, Movimiento.VENTA,
-                            cantidadProductosRenglonFacturaSinIVA, renglon.getId_ProductoItem(),
+                            cantidadProductosRenglonFacturaSinIVA, renglon.getId_ProductoItem(), facturaSinIVA.getCliente().getId_Cliente(),
                             renglon.getDescuento_porcentaje(), true);
                 if (nuevoRenglonSinIVA.getCantidad().compareTo(BigDecimal.ZERO) != 0) {
                     renglonesSinIVA.add(nuevoRenglonSinIVA);
@@ -1201,18 +1187,18 @@ public class FacturaServiceImpl implements IFacturaService {
                         cantidadProductosRenglonFacturaConIVA = renglon.getCantidad().divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP).setScale(0, RoundingMode.CEILING);
                     }
                     renglonesConIVA.add(crearRenglonConIVA(facturaConIVA.getTipoComprobante(),
-                            cantidadProductosRenglonFacturaConIVA, renglon.getId_ProductoItem(), renglon.getDescuento_porcentaje(), true));
+                            cantidadProductosRenglonFacturaConIVA, renglon.getId_ProductoItem(), facturaConIVA.getCliente().getId_Cliente(), renglon.getDescuento_porcentaje(), true));
                     renglonMarcado++;
                     numeroDeRenglon++;
                 } else {
                     numeroDeRenglon++;
                     renglonesConIVA.add(crearRenglonConIVA(facturaConIVA.getTipoComprobante(),
-                            renglon.getCantidad(), renglon.getId_ProductoItem(), renglon.getDescuento_porcentaje(), false));
+                            renglon.getCantidad(), renglon.getId_ProductoItem(), facturaConIVA.getCliente().getId_Cliente(), renglon.getDescuento_porcentaje(), false));
                 }
             } else {
                 numeroDeRenglon++;
                 renglonesConIVA.add(crearRenglonConIVA(facturaConIVA.getTipoComprobante(),
-                        renglon.getCantidad(), renglon.getId_ProductoItem(), renglon.getDescuento_porcentaje(), false));
+                        renglon.getCantidad(), renglon.getId_ProductoItem(), facturaConIVA.getCliente().getId_Cliente(), renglon.getDescuento_porcentaje(), false));
             }
         }
         facturaConIVA.setRenglones(renglonesConIVA);
@@ -1220,9 +1206,9 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     private RenglonFactura crearRenglonConIVA(TipoDeComprobante tipoDeComprobante,
-            BigDecimal cantidad, long idProductoItem, BigDecimal descuentoPorcentaje, boolean dividir) {
+            BigDecimal cantidad, long idProductoItem, long idCliente, BigDecimal descuentoPorcentaje, boolean dividir) {
         return this.calcularRenglon(tipoDeComprobante, Movimiento.VENTA,
-                cantidad, idProductoItem, descuentoPorcentaje, dividir);
+                cantidad, idProductoItem, idCliente, descuentoPorcentaje, dividir);
     }
 
 }
