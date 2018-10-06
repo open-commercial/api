@@ -24,25 +24,29 @@ import sic.service.IUsuarioService;
 @RequestMapping("/api/v1")
 public class AuthController {
 
-  private static String urlRecaptcha = "https://www.google.com/recaptcha/api/siteverify";
-  private static String secretWord = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe";
   private final IUsuarioService usuarioService;
   private final IEmpresaService empresaService;
   private final IRegistracionService registracionService;
+  private final RestTemplate restTemplate;
+  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+  private static final String URL_RECAPTCHA = "https://www.google.com/recaptcha/api/siteverify";
 
   @Value("${SIC_JWT_KEY}")
   private String secretkey;
 
-  @Autowired
-  RestTemplate restTemplate;
+  @Value("${RECAPTCHA_SECRET_KEY}")
+  private String recaptchaSecretkey;
 
   @Autowired
-  public AuthController(IUsuarioService usuarioService,
-                        IEmpresaService empresaService,
-                        IRegistracionService registracionService) {
+  public AuthController(
+      IUsuarioService usuarioService,
+      IEmpresaService empresaService,
+      IRegistracionService registracionService,
+      RestTemplate restTemplate) {
     this.usuarioService = usuarioService;
     this.empresaService = empresaService;
     this.registracionService = registracionService;
+    this.restTemplate = restTemplate;
   }
 
   private String generarToken(long idUsuario, List<Rol> rolesDeUsuario) {
@@ -62,21 +66,11 @@ public class AuthController {
   }
 
   @PostMapping("/login")
-  public String login(
-      @RequestBody Credencial credencial,
-      @RequestParam("g-recaptcha-response") String captchaResponse) {
-    String params = "?secret=" + secretWord + "&response=" + captchaResponse;
-    ReCaptchaResponse reCaptchaResponse =
-        restTemplate
-            .exchange(urlRecaptcha + params, HttpMethod.POST, null, ReCaptchaResponse.class)
-            .getBody();
-    if (reCaptchaResponse.isSuccess()) {
-      Usuario usuario = usuarioService.autenticarUsuario(credencial);
-      String token = this.generarToken(usuario.getId_Usuario(), usuario.getRoles());
-      usuarioService.actualizarToken(token, usuario.getId_Usuario());
-      return token;
-    }
-    return ResourceBundle.getBundle("Mensajes").getString("mensaje_recaptcha_no_valido");
+  public String login(@RequestBody Credencial credencial) {
+    Usuario usuario = usuarioService.autenticarUsuario(credencial);
+    String token = this.generarToken(usuario.getId_Usuario(), usuario.getRoles());
+    usuarioService.actualizarToken(token, usuario.getId_Usuario());
+    return token;
   }
 
   @PutMapping("/logout")
@@ -86,7 +80,7 @@ public class AuthController {
       claims = Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
     } catch (JwtException ex) {
       throw new UnauthorizedException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_error_token_vacio_invalido"), ex);
+          RESOURCE_BUNDLE.getString("mensaje_error_token_vacio_invalido"), ex);
     }
     long idUsuario = (int) claims.get("idUsuario");
     usuarioService.actualizarToken("", idUsuario);
@@ -102,40 +96,30 @@ public class AuthController {
   }
 
   @PostMapping("/password-recovery")
-  public String generarTokenTemporal(
-      @RequestBody RecoveryPasswordDTO recoveryPasswordDTO,
-      @RequestParam("g-recaptcha-response") String captchaResponse) {
-    String params = "?secret=" + secretWord + "&response=" + captchaResponse;
-    ReCaptchaResponse reCaptchaResponse =
-        restTemplate
-            .exchange(urlRecaptcha + params, HttpMethod.POST, null, ReCaptchaResponse.class)
-            .getBody();
-    if (reCaptchaResponse.isSuccess()) {
-      String token;
-      Usuario usuario =
-          usuarioService.getUsuarioPorPasswordRecoveryKeyAndIdUsuario(
-              recoveryPasswordDTO.getKey(), recoveryPasswordDTO.getId());
-      if (usuario != null && (new Date()).before(usuario.getPasswordRecoveryKeyExpirationDate())) {
-        token = this.generarToken(usuario.getId_Usuario(), usuario.getRoles());
-        usuarioService.actualizarToken(token, usuario.getId_Usuario());
-        usuarioService.actualizarPasswordRecoveryKey(null, recoveryPasswordDTO.getId());
-      } else {
-        throw new UnauthorizedException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_error_passwordRecoveryKey"));
-      }
-      return token;
+  public String generarTokenTemporal(@RequestBody RecoveryPasswordDTO recoveryPasswordDTO) {
+    String token;
+    Usuario usuario =
+        usuarioService.getUsuarioPorPasswordRecoveryKeyAndIdUsuario(
+            recoveryPasswordDTO.getKey(), recoveryPasswordDTO.getId());
+    if (usuario != null && (new Date()).before(usuario.getPasswordRecoveryKeyExpirationDate())) {
+      token = this.generarToken(usuario.getId_Usuario(), usuario.getRoles());
+      usuarioService.actualizarToken(token, usuario.getId_Usuario());
+      usuarioService.actualizarPasswordRecoveryKey(null, recoveryPasswordDTO.getId());
+    } else {
+      throw new UnauthorizedException(
+          RESOURCE_BUNDLE.getString("mensaje_error_passwordRecoveryKey"));
     }
-    return ResourceBundle.getBundle("Mensajes").getString("mensaje_recaptcha_no_valido");
+    return token;
   }
 
   @PostMapping("/registracion")
   public void registrarse(
       @RequestBody RegistracionClienteAndUsuarioDTO registracionClienteAndUsuarioDTO,
-      @RequestParam("g-recaptcha-response") String captchaResponse) {
-    String params = "?secret=" + secretWord + "&response=" + captchaResponse;
+      @RequestParam("g-recaptcha-response") String recaptcha) {
+    String params = "?secret=" + recaptchaSecretkey + "&response=" + recaptcha;
     ReCaptchaResponse reCaptchaResponse =
         restTemplate
-            .exchange(urlRecaptcha + params, HttpMethod.POST, null, ReCaptchaResponse.class)
+            .exchange(URL_RECAPTCHA + params, HttpMethod.POST, null, ReCaptchaResponse.class)
             .getBody();
     if (reCaptchaResponse.isSuccess()) {
       Usuario nuevoUsuario = new Usuario();
@@ -163,6 +147,8 @@ public class AuthController {
         nuevoCliente.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
       }
       this.registracionService.crearCuentaConClienteAndUsuario(nuevoCliente, nuevoUsuario);
+    } else {
+      throw new UnauthorizedException(RESOURCE_BUNDLE.getString("mensaje_recaptcha_no_valido"));
     }
   }
 }

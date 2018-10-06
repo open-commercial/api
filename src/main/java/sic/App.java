@@ -106,7 +106,7 @@ public class App extends WebMvcConfigurerAdapter {
 
     @Bean
     public RestTemplate restTemplate() {
-        return  new RestTemplate();
+        return new RestTemplate();
     }
 
     public static void main(String[] args) {
