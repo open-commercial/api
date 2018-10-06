@@ -1,6 +1,7 @@
 package sic.controller;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -350,46 +351,61 @@ public class ProductoController {
     Rol.COMPRADOR
   })
   public ResponseEntity<byte[]> getListaDePrecios(
-      @RequestParam(value = "idEmpresa") long idEmpresa,
-      @RequestParam(value = "codigo", required = false) String codigo,
-      @RequestParam(value = "descripcion", required = false) String descripcion,
-      @RequestParam(value = "idRubro", required = false) Long idRubro,
-      @RequestParam(value = "idProveedor", required = false) Long idProveedor,
-      @RequestParam(value = "soloFaltantes", required = false) boolean soloFantantes,
+      @RequestParam long idEmpresa,
+      @RequestParam(required = false) String codigo,
+      @RequestParam(required = false) String descripcion,
+      @RequestParam(required = false) Long idRubro,
+      @RequestParam(required = false) Long idProveedor,
+      @RequestParam(required = false) boolean soloFantantes,
+      @RequestParam(required = false) Boolean publicos,
+      @RequestParam(required = false) String ordenarPor,
+      @RequestParam(required = false) String sentido,
       @RequestParam(required = false) String formato) {
-    BusquedaProductoCriteria criteria =
-        BusquedaProductoCriteria.builder()
-            .buscarPorCodigo((codigo != null))
-            .codigo(codigo)
-            .buscarPorDescripcion(descripcion != null)
-            .descripcion(descripcion)
-            .buscarPorRubro(idRubro != null)
-            .idRubro(idRubro)
-            .buscarPorProveedor(idProveedor != null)
-            .idProveedor(idProveedor)
-            .idEmpresa(idEmpresa)
-            .cantRegistros(0)
-            .listarSoloFaltantes(soloFantantes)
-            .pageable(null)
-            .build();
     HttpHeaders headers = new HttpHeaders();
+    List<Producto> productos;
     switch (formato) {
       case "xlsx":
         headers.setContentType(new MediaType("application", "vnd.ms-excel"));
         headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+        productos =
+            this.buscar(
+                    idEmpresa,
+                    codigo,
+                    descripcion,
+                    idRubro,
+                    idProveedor,
+                    soloFantantes,
+                    publicos,
+                    0,
+                    Integer.MAX_VALUE,
+                    ordenarPor,
+                    sentido)
+                .getContent();
         byte[] reporteXls =
-            productoService.getListaDePreciosPorEmpresa(
-                productoService.buscarProductos(criteria).getContent(), idEmpresa, formato);
+            productoService.getListaDePreciosPorEmpresa(productos, idEmpresa, formato);
         headers.setContentLength(reporteXls.length);
         return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
       case "pdf":
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+        productos =
+            this.buscar(
+                    idEmpresa,
+                    codigo,
+                    descripcion,
+                    idRubro,
+                    idProveedor,
+                    soloFantantes,
+                    publicos,
+                    0,
+                    Integer.MAX_VALUE,
+                    ordenarPor,
+                    sentido)
+                .getContent();
         byte[] reportePDF =
-            productoService.getListaDePreciosPorEmpresa(
-                productoService.buscarProductos(criteria).getContent(), idEmpresa, formato);
+            productoService.getListaDePreciosPorEmpresa(productos, idEmpresa, formato);
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
       default:
         throw new BusinessServiceException(
