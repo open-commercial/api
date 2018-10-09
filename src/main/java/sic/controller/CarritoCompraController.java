@@ -54,12 +54,8 @@ public class CarritoCompraController {
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) Integer tamanio) {
     final int TAMANIO_PAGINA_DEFAULT = 10;
-    if (tamanio == null || tamanio <= 0) {
-      tamanio = TAMANIO_PAGINA_DEFAULT;
-    }
-    if (pagina == null || pagina < 0) {
-      pagina = 0;
-    }
+    if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
+    if (pagina == null || pagina < 0) pagina = 0;
     Pageable pageable =
         new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
     return carritoCompraService.getAllItemsDelUsuario(idUsuario, pageable);
@@ -80,13 +76,13 @@ public class CarritoCompraController {
   @DeleteMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void eliminarItem(@PathVariable long idUsuario, @PathVariable long idProducto) {
-    carritoCompraService.eliminarItem(idUsuario, idProducto);
+    carritoCompraService.eliminarItemDelUsuario(idUsuario, idProducto);
   }
 
   @DeleteMapping("/carrito-compra/usuarios/{idUsuario}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void eliminarTodosLosItems(@PathVariable long idUsuario) {
-    carritoCompraService.eliminarTodosLosItems(idUsuario);
+    carritoCompraService.eliminarTodosLosItemsDelUsuario(idUsuario);
   }
 
   @PostMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
@@ -137,7 +133,7 @@ public class CarritoCompraController {
                     pedidoService.calcularRenglonPedido(
                         i.getProducto().getId_Producto(), i.getCantidad(), BigDecimal.ZERO)));
     Pedido p = pedidoService.guardar(pedido);
-    carritoCompraService.eliminarTodosLosItems(idUsuario);
+    carritoCompraService.eliminarTodosLosItemsDelUsuario(idUsuario);
     return p;
   }
 }

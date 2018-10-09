@@ -8,6 +8,7 @@ import java.io.IOException;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.export.*;
+import org.springframework.context.annotation.Lazy;
 import sic.modelo.*;
 
 import java.io.InputStream;
@@ -26,9 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.service.*;
@@ -45,19 +43,23 @@ public class ProductoServiceImpl implements IProductoService {
   private final IRubroService rubroService;
   private final IProveedorService proveedorService;
   private final IMedidaService medidaService;
+  private final ICarritoCompraService carritoCompraService;
 
   @Autowired
+  @Lazy
   public ProductoServiceImpl(
       ProductoRepository productoRepository,
       IEmpresaService empresaService,
       IRubroService rubroService,
       IProveedorService proveedorService,
-      IMedidaService medidaService) {
+      IMedidaService medidaService,
+      ICarritoCompraService carritoCompraService) {
     this.productoRepository = productoRepository;
     this.empresaService = empresaService;
     this.rubroService = rubroService;
     this.proveedorService = proveedorService;
     this.medidaService = medidaService;
+    this.carritoCompraService = carritoCompraService;
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
@@ -299,6 +301,7 @@ public class ProductoServiceImpl implements IProductoService {
         throw new EntityNotFoundException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_producto_no_existente"));
       }
+      carritoCompraService.eliminarItem(i);
       producto.setEliminado(true);
       productos.add(producto);
     }

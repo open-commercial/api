@@ -36,8 +36,10 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   @Override
   public Page<ItemCarritoCompra> getAllItemsDelUsuario(long idUsuario, Pageable pageable) {
-    return carritoCompraRepository.findAllByUsuario(
+    Page<ItemCarritoCompra> items = carritoCompraRepository.findAllByUsuario(
         usuarioService.getUsuarioPorId(idUsuario), pageable);
+    items.forEach(i -> i.setImporte(i.getProducto().getPrecioLista().multiply(i.getCantidad())));
+    return items;
   }
 
   @Override
@@ -66,13 +68,18 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   }
 
   @Override
-  public void eliminarItem(long idUsuario, long idProducto) {
-    carritoCompraRepository.eliminarItem(idUsuario, idProducto);
+  public void eliminarItemDelUsuario(long idUsuario, long idProducto) {
+    carritoCompraRepository.eliminarItemDelUsuario(idUsuario, idProducto);
   }
 
   @Override
-  public void eliminarTodosLosItems(long idUsuario) {
-    carritoCompraRepository.eliminarTodosLosItems(idUsuario);
+  public void eliminarItem(long idProducto) {
+    carritoCompraRepository.eliminarItem(idProducto);
+  }
+
+  @Override
+  public void eliminarTodosLosItemsDelUsuario(long idUsuario) {
+    carritoCompraRepository.eliminarTodosLosItemsDelUsuario(idUsuario);
   }
 
   @Override
@@ -82,8 +89,9 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(usuario, producto);
     if (item == null) {
       BigDecimal importe = producto.getPrecioLista().multiply(cantidad);
-      carritoCompraRepository.save(
+      ItemCarritoCompra itemCC = carritoCompraRepository.save(
           new ItemCarritoCompra(null, cantidad, producto, importe, usuario));
+      logger.warn("Nuevo item de carrito de compra agregado: {}", itemCC);
     } else {
       BigDecimal nuevaCantidad = item.getCantidad().add(cantidad);
       if (nuevaCantidad.compareTo(BigDecimal.ZERO) < 0) {
@@ -92,7 +100,8 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
         item.setCantidad(nuevaCantidad);
       }
       item.setImporte(producto.getPrecioLista().multiply(nuevaCantidad));
-      carritoCompraRepository.save(item);
+      ItemCarritoCompra itemCC = carritoCompraRepository.save(item);
+      logger.warn("Item de carrito de compra modificado: {}", itemCC);
     }
   }
 
