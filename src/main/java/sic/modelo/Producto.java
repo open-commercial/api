@@ -5,15 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 
@@ -51,8 +43,11 @@ public class Producto implements Serializable {
 
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", message = "{mensaje_producto_cantidad_negativa}")
-    @JsonView(Views.Public.class)
     private BigDecimal cantidad;
+
+    @Transient
+    @JsonView(Views.Public.class)
+    private boolean hayStock;
 
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", message = "{mensaje_producto_cantidadMinima_negativa}")
