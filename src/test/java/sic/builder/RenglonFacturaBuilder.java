@@ -12,21 +12,18 @@ public class RenglonFacturaBuilder {
     private String medidaItem = "UNIDAD";
     private BigDecimal cantidad = BigDecimal.ONE;
     private BigDecimal precioUnitario = new BigDecimal("1300");
-    private BigDecimal bonificacionPorcentaje = BigDecimal.ZERO;
-    private BigDecimal bonificacionNeta = BigDecimal.ZERO;
-    private BigDecimal descuento_porcentaje = BigDecimal.ZERO;
-    private BigDecimal descuento_neto = BigDecimal.ZERO;
-    private BigDecimal iva_porcentaje = new BigDecimal("21.00");
-    private BigDecimal iva_neto = new BigDecimal("273");
-    private BigDecimal ganancia_porcentaje = new BigDecimal("30");
-    private BigDecimal ganancia_neto = new BigDecimal("300");
+    private BigDecimal descuentoPorcentaje = BigDecimal.ZERO;
+    private BigDecimal descuentoNeto = BigDecimal.ZERO;
+    private BigDecimal ivaPorcentaje = new BigDecimal("21.00");
+    private BigDecimal ivaNeto = new BigDecimal("273");
+    private BigDecimal gananciaPorcentaje = new BigDecimal("30");
+    private BigDecimal gananciaNeto = new BigDecimal("300");
     private BigDecimal importe = new BigDecimal("1573");
     
     public RenglonFactura build() {
         return new RenglonFactura(id_RenglonFactura, id_ProductoItem, codigoItem, 
-                descripcionItem, medidaItem, cantidad, precioUnitario, bonificacionPorcentaje,
-                bonificacionNeta, descuento_porcentaje, descuento_neto, iva_porcentaje, iva_neto,
-                ganancia_porcentaje, ganancia_neto, importe);
+                descripcionItem, medidaItem, cantidad, precioUnitario, descuentoPorcentaje,
+                descuentoNeto, ivaPorcentaje, ivaNeto,gananciaPorcentaje, gananciaNeto, importe);
     }
     
     public RenglonFacturaBuilder withId_Transportista(long idRenglonFactura) {
@@ -64,43 +61,33 @@ public class RenglonFacturaBuilder {
         return this;
     }
 
-    public RenglonFacturaBuilder withBonificacionPorcentaje(BigDecimal bonificacionPorcentaje) {
-        this.bonificacionPorcentaje = bonificacionPorcentaje;
-        return this;
-    }
-
-    public RenglonFacturaBuilder withBonificacionNeta(BigDecimal bonificacionNeta) {
-        this.bonificacionNeta = bonificacionNeta;
-        return this;
-    }
-    
     public RenglonFacturaBuilder withDescuentoPorcentaje(BigDecimal descuentoPorcentaje) {
-        this.descuento_porcentaje = descuentoPorcentaje;
+        this.descuentoPorcentaje = descuentoPorcentaje;
         return this;
     }
     
     public RenglonFacturaBuilder withDescuentoNeto(BigDecimal descuentoNeto) {
-        this.descuento_neto = descuentoNeto;
+        this.descuentoNeto = descuentoNeto;
         return this;
     }
     
     public RenglonFacturaBuilder withIVAPorcentaje(BigDecimal ivaPorcentaje) {
-        this.iva_porcentaje = ivaPorcentaje;
+        this.ivaPorcentaje = ivaPorcentaje;
         return this;
     }
     
     public RenglonFacturaBuilder withIVAneto(BigDecimal ivaNeto) {
-        this.iva_neto = ivaNeto;
+        this.ivaNeto = ivaNeto;
         return this;
     }
     
     public RenglonFacturaBuilder withGananciaPorcentaje(BigDecimal gananciaPorcentaje) {
-        this.ganancia_porcentaje = gananciaPorcentaje;
+        this.gananciaPorcentaje = gananciaPorcentaje;
         return this;
     }
     
     public RenglonFacturaBuilder withGananciaNeto(BigDecimal gananciaNeto) {
-        this.ganancia_neto = gananciaNeto;
+        this.gananciaNeto = gananciaNeto;
         return this;
     }
     

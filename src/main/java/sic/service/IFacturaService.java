@@ -45,8 +45,6 @@ public interface IFacturaService {
 
     BigDecimal calcularIvaNetoFactura(TipoDeComprobante tipo, BigDecimal[] cantidades, BigDecimal[] ivaPorcentajeRenglones, BigDecimal[] ivaNetoRenglones, BigDecimal ivaPorcentaje, BigDecimal porcentajeDescuento, BigDecimal porcentajeRecargo);
 
-    BigDecimal calcularImpInternoNeto(TipoDeComprobante tipoDeComprobante, BigDecimal descuento_porcentaje, BigDecimal recargo_porcentaje, BigDecimal[] importes, BigDecimal[] impuestoPorcentajes);
-
     BigDecimal calcularTotal(BigDecimal subTotal_bruto, BigDecimal iva105_neto, BigDecimal iva21_neto);
 
     BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
@@ -61,7 +59,7 @@ public interface IFacturaService {
 
     BigDecimal calcularIVANetoRenglon(Movimiento movimiento, TipoDeComprobante tipo, Producto producto, BigDecimal descuento_porcentaje);
 
-    BigDecimal calcularPrecioUnitario(Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto, BigDecimal bonificacionPorcentaje);
+    BigDecimal calcularPrecioUnitario(Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto);
 
     long calcularNumeroFacturaVenta(TipoDeComprobante tipoDeComprobante, long serie, long idEmpresa);
 
@@ -80,7 +78,6 @@ public interface IFacturaService {
       Movimiento movimiento,
       BigDecimal cantidad,
       long idProducto,
-      Long idCliente,
       BigDecimal descuentoPorcentaje,
       boolean dividiendoRenglonFactura);
 

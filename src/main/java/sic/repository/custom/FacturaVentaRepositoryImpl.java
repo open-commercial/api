@@ -37,7 +37,7 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
     }
     builder.and(rsPredicate);
     return queryFactory
-        .select(qFacturaVenta.iva_105_neto.add(qFacturaVenta.iva_21_neto).sum())
+        .select(qFacturaVenta.iva105Neto.add(qFacturaVenta.iva21Neto).sum())
         .from(qFacturaVenta)
         .where(builder)
         .fetch()
@@ -50,7 +50,7 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
     QRenglonFactura qRenglonFactura = QRenglonFactura.renglonFactura;
     JPAQueryFactory queryFactory = new JPAQueryFactory(em);
     return queryFactory
-        .select(qRenglonFactura.ganancia_neto.multiply(qRenglonFactura.cantidad).sum())
+        .select(qRenglonFactura.gananciaNeto.multiply(qRenglonFactura.cantidad).sum())
         .from(qFacturaVenta)
         .leftJoin(qFacturaVenta.renglones, qRenglonFactura)
         .where(builder)

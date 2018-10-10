@@ -177,122 +177,122 @@ public class FacturaServiceImplTest {
     assertArrayEquals(expResult, result);
   }
 
-//  @Test
-//  public void shouldDividirFactura() {
-//    when(facturaVentaRepository.buscarMayorNumFacturaSegunTipo(
-//            TipoDeComprobante.FACTURA_X, 1L, new EmpresaBuilder().build().getId_Empresa()))
-//        .thenReturn(1L);
-//    when(facturaVentaRepository.buscarMayorNumFacturaSegunTipo(
-//            TipoDeComprobante.FACTURA_A, 1L, new EmpresaBuilder().build().getId_Empresa()))
-//        .thenReturn(1L);
-//    RenglonFactura renglon1 = Mockito.mock(RenglonFactura.class);
-//    RenglonFactura renglon2 = Mockito.mock(RenglonFactura.class);
-//    RenglonFactura renglon3 = Mockito.mock(RenglonFactura.class);
-//    RenglonFactura renglon4 = Mockito.mock(RenglonFactura.class);
-//    RenglonFactura renglon5 = Mockito.mock(RenglonFactura.class);
-//    RenglonFactura renglon6 = Mockito.mock(RenglonFactura.class);
-//    Producto producto = Mockito.mock(Producto.class);
-//    when(producto.getId_Producto()).thenReturn(1L);
-//    when(producto.getCodigo()).thenReturn("1");
-//    when(producto.getDescripcion()).thenReturn("producto test");
-//    Medida medida = Mockito.mock(Medida.class);
-//    when(producto.getMedida()).thenReturn(medida);
-//    when(producto.getPrecioVentaPublico()).thenReturn(BigDecimal.ONE);
-//    when(producto.getIvaPorcentaje()).thenReturn(new BigDecimal("21.00"));
-//    when(producto.getPrecioLista()).thenReturn(BigDecimal.ONE);
-//    when(productoService.getProductoPorId(1L)).thenReturn(producto);
-//    when(renglon1.getId_ProductoItem()).thenReturn(1L);
-//    when(renglon1.getIva_neto()).thenReturn(new BigDecimal("21"));
-//    when(renglon1.getDescuento_porcentaje()).thenReturn(BigDecimal.ZERO);
-//    when(renglon1.getCantidad()).thenReturn(new BigDecimal("4.00"));
-//    when(renglon2.getId_ProductoItem()).thenReturn(1L);
-//    when(renglon2.getIva_neto()).thenReturn(new BigDecimal("10.5"));
-//    when(renglon2.getDescuento_porcentaje()).thenReturn(BigDecimal.ZERO);
-//    when(renglon2.getCantidad()).thenReturn(new BigDecimal("7.00"));
-//    when(renglon3.getId_ProductoItem()).thenReturn(1L);
-//    when(renglon3.getIva_neto()).thenReturn(new BigDecimal("21"));
-//    when(renglon3.getDescuento_porcentaje()).thenReturn(BigDecimal.ZERO);
-//    when(renglon3.getCantidad()).thenReturn(new BigDecimal("12.8"));
-//    when(renglon4.getId_ProductoItem()).thenReturn(1L);
-//    when(renglon4.getIva_neto()).thenReturn(new BigDecimal("21"));
-//    when(renglon4.getDescuento_porcentaje()).thenReturn(BigDecimal.ZERO);
-//    when(renglon4.getCantidad()).thenReturn(new BigDecimal("1.2"));
-//    when(renglon5.getId_ProductoItem()).thenReturn(1L);
-//    when(renglon5.getIva_neto()).thenReturn(new BigDecimal("21"));
-//    when(renglon5.getDescuento_porcentaje()).thenReturn(BigDecimal.ZERO);
-//    when(renglon5.getCantidad()).thenReturn(new BigDecimal("0.8"));
-//    when(renglon6.getId_ProductoItem()).thenReturn(1L);
-//    when(renglon6.getIva_neto()).thenReturn(new BigDecimal("21"));
-//    when(renglon6.getDescuento_porcentaje()).thenReturn(BigDecimal.ZERO);
-//    when(renglon6.getCantidad()).thenReturn(new BigDecimal("9.3"));
-//    List<RenglonFactura> renglones = new ArrayList<>();
-//    renglones.add(renglon1);
-//    renglones.add(renglon2);
-//    renglones.add(renglon3);
-//    renglones.add(renglon6); // no participa de la division
-//    renglones.add(renglon4);
-//    renglones.add(renglon5); // no participa de la division
-//    FacturaVenta factura = new FacturaVenta();
-//    factura.setDescuento_porcentaje(BigDecimal.ZERO);
-//    factura.setRecargo_porcentaje(BigDecimal.ZERO);
-//    factura.setRenglones(renglones);
-//    factura.setFecha(new Date());
-//    factura.setTransportista(new TransportistaBuilder().build());
-//    factura.setEmpresa(new EmpresaBuilder().build());
-//    factura.setCliente(new ClienteBuilder().build());
-//    Usuario usuario = new Usuario();
-//    usuario.setNombre("Marian Jhons  help");
-//    factura.setUsuario(usuario);
-//    factura.setTipoComprobante(TipoDeComprobante.FACTURA_A);
-//    int[] indices = {0, 1, 2, 4};
-//    int cantidadDeFacturasEsperadas = 2;
-//    int cantidadDeRenglonesEsperadosFX = 4;
-//    int cantidadDeRenglonesEsperadosFA = 6;
-//    List<FacturaVenta> result = facturaService.dividirFactura(factura, indices);
-//    assertEquals(cantidadDeFacturasEsperadas, result.size());
-//    assertEquals(cantidadDeRenglonesEsperadosFX, result.get(0).getRenglones().size());
-//    assertEquals(cantidadDeRenglonesEsperadosFA, result.get(1).getRenglones().size());
-//    BigDecimal cantidadPrimerRenglonFacturaX = result.get(0).getRenglones().get(0).getCantidad();
-//    BigDecimal cantidadSegundoRenglonFacturaX = result.get(0).getRenglones().get(1).getCantidad();
-//    BigDecimal cantidadTercerRenglonFacturaX = result.get(0).getRenglones().get(2).getCantidad();
-//    BigDecimal cantidadCuartoRenglonFacturaX = result.get(0).getRenglones().get(3).getCantidad();
-//    BigDecimal cantidadPrimerRenglonFacturaA = result.get(1).getRenglones().get(0).getCantidad();
-//    BigDecimal cantidadSegundoRenglonFacturaA = result.get(1).getRenglones().get(1).getCantidad();
-//    BigDecimal cantidadTercerRenglonFacturaA = result.get(1).getRenglones().get(2).getCantidad();
-//    BigDecimal cantidadCuartoRenglonFacturaA = result.get(1).getRenglones().get(3).getCantidad();
-//    BigDecimal cantidadQuintoRenglonFacturaA = result.get(1).getRenglones().get(4).getCantidad();
-//    BigDecimal cantidadSextoRenglonFacturaA = result.get(1).getRenglones().get(5).getCantidad();
-//    assertTrue(
-//        "Las cantidades no son las esperadas",
-//        cantidadPrimerRenglonFacturaA.compareTo(new BigDecimal("2")) == 0);
-//    assertTrue(
-//        "Las cantidades no son las esperadas",
-//        cantidadSegundoRenglonFacturaA.compareTo(new BigDecimal("4")) == 0);
-//    assertTrue(
-//        "Las cantidades no son las esperadas",
-//        cantidadTercerRenglonFacturaA.compareTo(new BigDecimal("6.4")) == 0);
-//    assertTrue(
-//        "Las cantidades no son las esperadas",
-//        cantidadCuartoRenglonFacturaA.compareTo(new BigDecimal("9.3")) == 0);
-//    assertTrue(
-//        "Las cantidades no son las esperadas",
-//        cantidadQuintoRenglonFacturaA.compareTo(new BigDecimal("0.6")) == 0);
-//    assertTrue(
-//        "Las cantidades no son las esperadas",
-//        cantidadSextoRenglonFacturaA.compareTo(new BigDecimal("0.8")) == 0);
-//    assertTrue(
-//        "Las cantidades no son las esperadas",
-//        cantidadPrimerRenglonFacturaX.compareTo(new BigDecimal("2")) == 0);
-//    assertTrue(
-//        "Las cantidades no son las esperadas",
-//        cantidadSegundoRenglonFacturaX.compareTo(new BigDecimal("3")) == 0);
-//    assertTrue(
-//        "Las cantidades no son las esperadas",
-//        cantidadTercerRenglonFacturaX.compareTo(new BigDecimal("6.4")) == 0);
-//    assertTrue(
-//        "Las cantidades no son las esperadas",
-//        cantidadCuartoRenglonFacturaX.compareTo(new BigDecimal("0.6")) == 0);
-//  }
+  @Test
+  public void shouldDividirFactura() {
+    when(facturaVentaRepository.buscarMayorNumFacturaSegunTipo(
+            TipoDeComprobante.FACTURA_X, 1L, new EmpresaBuilder().build().getId_Empresa()))
+        .thenReturn(1L);
+    when(facturaVentaRepository.buscarMayorNumFacturaSegunTipo(
+            TipoDeComprobante.FACTURA_A, 1L, new EmpresaBuilder().build().getId_Empresa()))
+        .thenReturn(1L);
+    RenglonFactura renglon1 = Mockito.mock(RenglonFactura.class);
+    RenglonFactura renglon2 = Mockito.mock(RenglonFactura.class);
+    RenglonFactura renglon3 = Mockito.mock(RenglonFactura.class);
+    RenglonFactura renglon4 = Mockito.mock(RenglonFactura.class);
+    RenglonFactura renglon5 = Mockito.mock(RenglonFactura.class);
+    RenglonFactura renglon6 = Mockito.mock(RenglonFactura.class);
+    Producto producto = Mockito.mock(Producto.class);
+    when(producto.getId_Producto()).thenReturn(1L);
+    when(producto.getCodigo()).thenReturn("1");
+    when(producto.getDescripcion()).thenReturn("producto test");
+    Medida medida = Mockito.mock(Medida.class);
+    when(producto.getMedida()).thenReturn(medida);
+    when(producto.getPrecioVentaPublico()).thenReturn(BigDecimal.ONE);
+    when(producto.getIvaPorcentaje()).thenReturn(new BigDecimal("21.00"));
+    when(producto.getPrecioLista()).thenReturn(BigDecimal.ONE);
+    when(productoService.getProductoPorId(1L)).thenReturn(producto);
+    when(renglon1.getIdProductoItem()).thenReturn(1L);
+    when(renglon1.getIvaNeto()).thenReturn(new BigDecimal("21"));
+    when(renglon1.getDescuentoPorcentaje()).thenReturn(BigDecimal.ZERO);
+    when(renglon1.getCantidad()).thenReturn(new BigDecimal("4.00"));
+    when(renglon2.getIdProductoItem()).thenReturn(1L);
+    when(renglon2.getIvaNeto()).thenReturn(new BigDecimal("10.5"));
+    when(renglon2.getDescuentoPorcentaje()).thenReturn(BigDecimal.ZERO);
+    when(renglon2.getCantidad()).thenReturn(new BigDecimal("7.00"));
+    when(renglon3.getIdProductoItem()).thenReturn(1L);
+    when(renglon3.getIvaNeto()).thenReturn(new BigDecimal("21"));
+    when(renglon3.getDescuentoPorcentaje()).thenReturn(BigDecimal.ZERO);
+    when(renglon3.getCantidad()).thenReturn(new BigDecimal("12.8"));
+    when(renglon4.getIdProductoItem()).thenReturn(1L);
+    when(renglon4.getIvaNeto()).thenReturn(new BigDecimal("21"));
+    when(renglon4.getDescuentoPorcentaje()).thenReturn(BigDecimal.ZERO);
+    when(renglon4.getCantidad()).thenReturn(new BigDecimal("1.2"));
+    when(renglon5.getIdProductoItem()).thenReturn(1L);
+    when(renglon5.getIvaNeto()).thenReturn(new BigDecimal("21"));
+    when(renglon5.getDescuentoPorcentaje()).thenReturn(BigDecimal.ZERO);
+    when(renglon5.getCantidad()).thenReturn(new BigDecimal("0.8"));
+    when(renglon6.getIdProductoItem()).thenReturn(1L);
+    when(renglon6.getIvaNeto()).thenReturn(new BigDecimal("21"));
+    when(renglon6.getDescuentoPorcentaje()).thenReturn(BigDecimal.ZERO);
+    when(renglon6.getCantidad()).thenReturn(new BigDecimal("9.3"));
+    List<RenglonFactura> renglones = new ArrayList<>();
+    renglones.add(renglon1);
+    renglones.add(renglon2);
+    renglones.add(renglon3);
+    renglones.add(renglon6); // no participa de la division
+    renglones.add(renglon4);
+    renglones.add(renglon5); // no participa de la division
+    FacturaVenta factura = new FacturaVenta();
+    factura.setDescuentoPorcentaje(BigDecimal.ZERO);
+    factura.setRecargoPorcentaje(BigDecimal.ZERO);
+    factura.setRenglones(renglones);
+    factura.setFecha(new Date());
+    factura.setTransportista(new TransportistaBuilder().build());
+    factura.setEmpresa(new EmpresaBuilder().build());
+    //factura.setCliente(new ClienteBuilder().withId_Cliente(1L).build());
+    Usuario usuario = new Usuario();
+    usuario.setNombre("Marian Jhons  help");
+    factura.setUsuario(usuario);
+    factura.setTipoComprobante(TipoDeComprobante.FACTURA_A);
+    int[] indices = {0, 1, 2, 4};
+    int cantidadDeFacturasEsperadas = 2;
+    int cantidadDeRenglonesEsperadosFX = 4;
+    int cantidadDeRenglonesEsperadosFA = 6;
+    List<FacturaVenta> result = facturaService.dividirFactura(factura, indices);
+    assertEquals(cantidadDeFacturasEsperadas, result.size());
+    assertEquals(cantidadDeRenglonesEsperadosFX, result.get(0).getRenglones().size());
+    assertEquals(cantidadDeRenglonesEsperadosFA, result.get(1).getRenglones().size());
+    BigDecimal cantidadPrimerRenglonFacturaX = result.get(0).getRenglones().get(0).getCantidad();
+    BigDecimal cantidadSegundoRenglonFacturaX = result.get(0).getRenglones().get(1).getCantidad();
+    BigDecimal cantidadTercerRenglonFacturaX = result.get(0).getRenglones().get(2).getCantidad();
+    BigDecimal cantidadCuartoRenglonFacturaX = result.get(0).getRenglones().get(3).getCantidad();
+    BigDecimal cantidadPrimerRenglonFacturaA = result.get(1).getRenglones().get(0).getCantidad();
+    BigDecimal cantidadSegundoRenglonFacturaA = result.get(1).getRenglones().get(1).getCantidad();
+    BigDecimal cantidadTercerRenglonFacturaA = result.get(1).getRenglones().get(2).getCantidad();
+    BigDecimal cantidadCuartoRenglonFacturaA = result.get(1).getRenglones().get(3).getCantidad();
+    BigDecimal cantidadQuintoRenglonFacturaA = result.get(1).getRenglones().get(4).getCantidad();
+    BigDecimal cantidadSextoRenglonFacturaA = result.get(1).getRenglones().get(5).getCantidad();
+    assertTrue(
+        "Las cantidades no son las esperadas",
+        cantidadPrimerRenglonFacturaA.compareTo(new BigDecimal("2")) == 0);
+    assertTrue(
+        "Las cantidades no son las esperadas",
+        cantidadSegundoRenglonFacturaA.compareTo(new BigDecimal("4")) == 0);
+    assertTrue(
+        "Las cantidades no son las esperadas",
+        cantidadTercerRenglonFacturaA.compareTo(new BigDecimal("6.4")) == 0);
+    assertTrue(
+        "Las cantidades no son las esperadas",
+        cantidadCuartoRenglonFacturaA.compareTo(new BigDecimal("9.3")) == 0);
+    assertTrue(
+        "Las cantidades no son las esperadas",
+        cantidadQuintoRenglonFacturaA.compareTo(new BigDecimal("0.6")) == 0);
+    assertTrue(
+        "Las cantidades no son las esperadas",
+        cantidadSextoRenglonFacturaA.compareTo(new BigDecimal("0.8")) == 0);
+    assertTrue(
+        "Las cantidades no son las esperadas",
+        cantidadPrimerRenglonFacturaX.compareTo(new BigDecimal("2")) == 0);
+    assertTrue(
+        "Las cantidades no son las esperadas",
+        cantidadSegundoRenglonFacturaX.compareTo(new BigDecimal("3")) == 0);
+    assertTrue(
+        "Las cantidades no son las esperadas",
+        cantidadTercerRenglonFacturaX.compareTo(new BigDecimal("6.4")) == 0);
+    assertTrue(
+        "Las cantidades no son las esperadas",
+        cantidadCuartoRenglonFacturaX.compareTo(new BigDecimal("0.6")) == 0);
+  }
 
   // Calculos
   @Test
@@ -374,16 +374,16 @@ public class FacturaServiceImplTest {
   public void shouldCalcularIva_netoWhenLaFacturaEsA() {
     RenglonFactura renglon1 = new RenglonFactura();
     renglon1.setCantidad(new BigDecimal("12"));
-    renglon1.setIva_porcentaje(new BigDecimal("21"));
-    renglon1.setIva_neto(new BigDecimal("125.5"));
+    renglon1.setIvaPorcentaje(new BigDecimal("21"));
+    renglon1.setIvaNeto(new BigDecimal("125.5"));
     RenglonFactura renglon2 = new RenglonFactura();
     renglon2.setCantidad(new BigDecimal("8"));
-    renglon2.setIva_porcentaje(new BigDecimal("21"));
-    renglon2.setIva_neto(new BigDecimal("240.2"));
+    renglon2.setIvaPorcentaje(new BigDecimal("21"));
+    renglon2.setIvaNeto(new BigDecimal("240.2"));
     RenglonFactura renglon3 = new RenglonFactura();
     renglon3.setCantidad(new BigDecimal("4"));
-    renglon3.setIva_porcentaje(new BigDecimal("10.5"));
-    renglon3.setIva_neto(new BigDecimal("110.5"));
+    renglon3.setIvaPorcentaje(new BigDecimal("10.5"));
+    renglon3.setIvaNeto(new BigDecimal("110.5"));
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglon1);
     renglones.add(renglon2);
@@ -396,8 +396,8 @@ public class FacturaServiceImplTest {
     int i = 0;
     for (RenglonFactura r : renglones) {
       cantidades[i] = r.getCantidad();
-      ivaPorcentajes[i] = r.getIva_porcentaje();
-      ivaNetos[i] = r.getIva_neto();
+      ivaPorcentajes[i] = r.getIvaPorcentaje();
+      ivaNetos[i] = r.getIvaNeto();
       i++;
     }
     assertTrue(
@@ -419,19 +419,19 @@ public class FacturaServiceImplTest {
   public void shouldCalcularIva_netoWhenLaFacturaEsX() {
     RenglonFactura renglon1 = new RenglonFactura();
     renglon1.setImporte(new BigDecimal("5.601"));
-    renglon1.setIva_porcentaje(BigDecimal.ZERO);
+    renglon1.setIvaPorcentaje(BigDecimal.ZERO);
     renglon1.setCantidad(BigDecimal.ONE);
-    renglon1.setIva_neto(new BigDecimal("1.17621"));
+    renglon1.setIvaNeto(new BigDecimal("1.17621"));
     RenglonFactura renglon2 = new RenglonFactura();
     renglon2.setImporte(new BigDecimal("18.052"));
-    renglon2.setIva_porcentaje(BigDecimal.ZERO);
+    renglon2.setIvaPorcentaje(BigDecimal.ZERO);
     renglon2.setCantidad(BigDecimal.ONE);
-    renglon2.setIva_neto(new BigDecimal("3.79092"));
+    renglon2.setIvaNeto(new BigDecimal("3.79092"));
     RenglonFactura renglon3 = new RenglonFactura();
     renglon3.setImporte(new BigDecimal("10.011"));
-    renglon3.setIva_porcentaje(BigDecimal.ZERO);
+    renglon3.setIvaPorcentaje(BigDecimal.ZERO);
     renglon3.setCantidad(BigDecimal.ONE);
-    renglon3.setIva_neto(new BigDecimal("2.10231"));
+    renglon3.setIvaNeto(new BigDecimal("2.10231"));
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglon1);
     renglones.add(renglon2);
@@ -443,8 +443,8 @@ public class FacturaServiceImplTest {
     int i = 0;
     for (RenglonFactura r : renglones) {
       cantidades[i] = r.getCantidad();
-      ivaPorcentajes[i] = r.getIva_porcentaje();
-      ivaNetos[i] = r.getIva_neto();
+      ivaPorcentajes[i] = r.getIvaPorcentaje();
+      ivaNetos[i] = r.getIvaNeto();
       i++;
     }
     assertTrue(

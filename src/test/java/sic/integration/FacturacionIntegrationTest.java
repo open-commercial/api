@@ -205,12 +205,12 @@ public class FacturacionIntegrationTest {
                 + "&descuentoPorcentaje=0",
                 RenglonFactura.class);                
         assertTrue("El precio unitario no es el correcto", renglonUno.getPrecioUnitario().compareTo(new BigDecimal("1210")) == 0);
-        assertTrue("El descuento neto no es correcto", renglonUno.getDescuento_neto().compareTo(new BigDecimal("242")) == 0);
-        assertTrue("El iva neto no es el correcto", renglonUno.getIva_neto().compareTo(new BigDecimal("168")) == 0);
+        assertTrue("El descuento neto no es correcto", renglonUno.getDescuentoNeto().compareTo(new BigDecimal("242")) == 0);
+        assertTrue("El iva neto no es el correcto", renglonUno.getIvaNeto().compareTo(new BigDecimal("168")) == 0);
         assertTrue("El importe no es correcto", renglonUno.getImporte().compareTo(new BigDecimal("4840")) == 0);
         assertTrue("El precio unitario no es correcto", renglonDos.getPrecioUnitario().compareTo(new BigDecimal("1105")) == 0);
-        assertTrue("El descuento neto no es correcto", renglonDos.getDescuento_neto().compareTo(BigDecimal.ZERO) == 0);
-        assertTrue("El iva neto no es correcto", renglonDos.getIva_neto().compareTo(new BigDecimal("105")) == 0);
+        assertTrue("El descuento neto no es correcto", renglonDos.getDescuentoNeto().compareTo(BigDecimal.ZERO) == 0);
+        assertTrue("El iva neto no es correcto", renglonDos.getIvaNeto().compareTo(new BigDecimal("105")) == 0);
         assertTrue("El importe no es correcto", renglonDos.getImporte().compareTo(new BigDecimal("2210")) == 0);
         List<RenglonFactura> renglones = new ArrayList<>();
         renglones.add(renglonUno);
@@ -224,8 +224,8 @@ public class FacturacionIntegrationTest {
         for (RenglonFactura renglon : renglones) {
             subTotal = subTotal.add(renglon.getImporte());
             cantidades[indice] = renglon.getCantidad();
-            ivaPorcentajeRenglones[indice] = renglon.getIva_porcentaje();
-            ivaNetoRenglones[indice] = renglon.getIva_neto();
+            ivaPorcentajeRenglones[indice] = renglon.getIvaPorcentaje();
+            ivaNetoRenglones[indice] = renglon.getIvaNeto();
             indice++;
         }
         assertTrue("El subtotal no es correcto", subTotal.compareTo(new BigDecimal("7050")) == 0);
@@ -257,13 +257,13 @@ public class FacturacionIntegrationTest {
         facturaVentaB.setTipoComprobante(TipoDeComprobante.FACTURA_B);
         facturaVentaB.setRenglones(renglones);
         facturaVentaB.setSubTotal(subTotal);
-        facturaVentaB.setRecargo_porcentaje(recargoPorcentaje);
-        facturaVentaB.setRecargo_neto(recargo_neto);
-        facturaVentaB.setDescuento_porcentaje(descuentoPorcentaje);
-        facturaVentaB.setDescuento_neto(descuento_neto);
-        facturaVentaB.setSubTotal_bruto(subTotalBruto);
-        facturaVentaB.setIva_105_neto(iva_105_netoFactura);
-        facturaVentaB.setIva_21_neto(iva_21_netoFactura);        
+        facturaVentaB.setRecargoPorcentaje(recargoPorcentaje);
+        facturaVentaB.setRecargoNeto(recargo_neto);
+        facturaVentaB.setDescuentoPorcentaje(descuentoPorcentaje);
+        facturaVentaB.setDescuentoNeto(descuento_neto);
+        facturaVentaB.setSubTotalBruto(subTotalBruto);
+        facturaVentaB.setIva105Neto(iva_105_netoFactura);
+        facturaVentaB.setIva21Neto(iva_21_netoFactura);
         facturaVentaB.setTotal(total);        
         restTemplate.postForObject(apiPrefix + "/facturas/venta?"
                 + "idCliente=" + cliente.getId_Cliente()
@@ -281,24 +281,24 @@ public class FacturacionIntegrationTest {
         assertEquals(facturaVentaB.getNombreEmpresa(), "Globo Corporation");
         assertEquals(facturaVentaB.getTipoComprobante(), facturasRecuperadas.get(0).getTipoComprobante());      
         assertTrue("El sub total no es el esperado", facturasRecuperadas.get(0).getSubTotal().compareTo(facturaVentaB.getSubTotal()) == 0);
-        assertTrue("El recargo neto no es el esperado", facturasRecuperadas.get(0).getRecargo_neto().compareTo(facturaVentaB.getRecargo_neto()) == 0);
-        assertTrue("El total no es el esperado", facturasRecuperadas.get(0).getSubTotal_bruto().compareTo(facturaVentaB.getSubTotal_bruto()) == 0);
-        assertTrue("El iva 10.5 no es el esperado", facturasRecuperadas.get(0).getIva_105_neto().compareTo(facturaVentaB.getIva_105_neto()) == 0);
-        assertTrue("El iva 21 no es el esperado", facturasRecuperadas.get(0).getIva_21_neto().compareTo(facturaVentaB.getIva_21_neto()) == 0);
-        assertTrue("El impuesto interno no es el esperado", facturasRecuperadas.get(0).getImpuestoInterno_neto().compareTo(facturaVentaB.getImpuestoInterno_neto()) == 0);
+        assertTrue("El recargo neto no es el esperado", facturasRecuperadas.get(0).getRecargoNeto().compareTo(facturaVentaB.getRecargoNeto()) == 0);
+        assertTrue("El total no es el esperado", facturasRecuperadas.get(0).getSubTotalBruto().compareTo(facturaVentaB.getSubTotalBruto()) == 0);
+        assertTrue("El iva 10.5 no es el esperado", facturasRecuperadas.get(0).getIva105Neto().compareTo(facturaVentaB.getIva105Neto()) == 0);
+        assertTrue("El iva 21 no es el esperado", facturasRecuperadas.get(0).getIva21Neto().compareTo(facturaVentaB.getIva21Neto()) == 0);
+        assertTrue("El impuesto interno no es el esperado", facturasRecuperadas.get(0).getImpuestoInternoNeto().compareTo(facturaVentaB.getImpuestoInternoNeto()) == 0);
         assertTrue("El total no es el esperado", facturasRecuperadas.get(0).getTotal().compareTo(facturaVentaB.getTotal()) == 0);
         RenglonFactura[] renglonesDeFacturaRecuperada = restTemplate.getForObject(apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getId_Factura() + "/renglones", RenglonFactura[].class);
         if (renglonesDeFacturaRecuperada.length != 2) {
             Assert.fail("La factura no deberia tener mas de dos renglones");
         }
         assertTrue("La cantidad no es la esperada", renglonesDeFacturaRecuperada[0].getCantidad().compareTo(renglones.get(0).getCantidad()) == 0);
-        assertTrue("El descuento neto no es el esperado", renglonesDeFacturaRecuperada[0].getDescuento_neto().compareTo(renglones.get(0).getDescuento_neto()) == 0);
-        assertTrue("El descuento porcentaje no es el esperado", renglonesDeFacturaRecuperada[0].getDescuento_porcentaje().compareTo(renglones.get(0).getDescuento_porcentaje()) == 0);
-        assertTrue("La ganancia neta no es la esperada", renglonesDeFacturaRecuperada[0].getGanancia_neto().compareTo(renglones.get(0).getGanancia_neto()) == 0);
-        assertTrue("La ganancia porcentaje no es la esperada", renglonesDeFacturaRecuperada[0].getGanancia_porcentaje().compareTo(renglones.get(0).getGanancia_porcentaje()) == 0);
+        assertTrue("El descuento neto no es el esperado", renglonesDeFacturaRecuperada[0].getDescuentoNeto().compareTo(renglones.get(0).getDescuentoNeto()) == 0);
+        assertTrue("El descuento porcentaje no es el esperado", renglonesDeFacturaRecuperada[0].getDescuentoPorcentaje().compareTo(renglones.get(0).getDescuentoPorcentaje()) == 0);
+        assertTrue("La ganancia neta no es la esperada", renglonesDeFacturaRecuperada[0].getGananciaNeto().compareTo(renglones.get(0).getGananciaNeto()) == 0);
+        assertTrue("La ganancia porcentaje no es la esperada", renglonesDeFacturaRecuperada[0].getGananciaPorcentaje().compareTo(renglones.get(0).getGananciaPorcentaje()) == 0);
         assertTrue("El importe no es el esperado", renglonesDeFacturaRecuperada[0].getImporte().compareTo(renglones.get(0).getImporte()) == 0);
-        assertTrue("El iva neto no es el esperado", renglonesDeFacturaRecuperada[0].getIva_neto().compareTo(renglones.get(0).getIva_neto()) == 0);
-        assertTrue("El iva porcentaje no es el esperado", renglonesDeFacturaRecuperada[0].getIva_porcentaje().compareTo(renglones.get(0).getIva_porcentaje()) == 0);
+        assertTrue("El iva neto no es el esperado", renglonesDeFacturaRecuperada[0].getIvaNeto().compareTo(renglones.get(0).getIvaNeto()) == 0);
+        assertTrue("El iva porcentaje no es el esperado", renglonesDeFacturaRecuperada[0].getIvaPorcentaje().compareTo(renglones.get(0).getIvaPorcentaje()) == 0);
         assertTrue("El precio unitario no es el esperado", renglonesDeFacturaRecuperada[0].getPrecioUnitario().compareTo(renglones.get(0).getPrecioUnitario()) == 0);
         assertEquals(renglonesDeFacturaRecuperada[0].getCodigoItem(), renglones.get(0).getCodigoItem());
         assertEquals(renglonesDeFacturaRecuperada[0].getDescripcionItem(), renglones.get(0).getDescripcionItem());
@@ -427,8 +427,8 @@ public class FacturacionIntegrationTest {
         RenglonPedidoDTO[] renglonesDelPedido = restTemplate.getForObject(apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido() + "/renglones", RenglonPedidoDTO[].class);
         for (int i = 0; i < renglonesDelPedido.length; i++) {
             assertTrue("La cantidad no es la esperada", renglonesPedido.get(i).getCantidad().compareTo(renglonesDelPedido[i].getCantidad()) == 0);
-            assertTrue("El descuento neto no es el esperado", renglonesPedido.get(i).getDescuento_neto().compareTo(renglonesDelPedido[i].getDescuento_neto()) == 0);
-            assertTrue("El descuento porcentaje no es el esperado", renglonesPedido.get(i).getDescuento_porcentaje().compareTo(renglonesDelPedido[i].getDescuento_porcentaje()) == 0);
+            assertTrue("El descuento neto no es el esperado", renglonesPedido.get(i).getDescuentoNeto().compareTo(renglonesDelPedido[i].getDescuentoNeto()) == 0);
+            assertTrue("El descuento porcentaje no es el esperado", renglonesPedido.get(i).getDescuentoPorcentaje().compareTo(renglonesDelPedido[i].getDescuentoPorcentaje()) == 0);
             assertTrue("La sub total no es el esperado", renglonesPedido.get(i).getSubTotal().compareTo(renglonesDelPedido[i].getSubTotal()) == 0);
         }
         RenglonFactura[] renglonesParaFacturar = restTemplate.getForObject(apiPrefix + "/facturas/renglones/pedidos/" + pedidoRecuperado.getId_Pedido()
@@ -440,10 +440,10 @@ public class FacturacionIntegrationTest {
         assertTrue("El recargo neto no es el esperado" + recargo_neto.doubleValue(), recargo_neto.compareTo(new BigDecimal("850")) == 0);
         BigDecimal iva_105_netoFactura = BigDecimal.ZERO;
         BigDecimal iva_21_netoFactura = BigDecimal.ZERO;
-        if (renglonesParaFacturar[0].getIva_porcentaje().compareTo(IVA_105) == 0) {
-            iva_105_netoFactura = iva_105_netoFactura.add(renglonesParaFacturar[0].getCantidad().multiply(renglonesParaFacturar[0].getIva_neto()));
-        } else if (renglonesParaFacturar[0].getIva_porcentaje().compareTo(IVA_21) == 0) {
-            iva_21_netoFactura = iva_21_netoFactura.add(renglonesParaFacturar[0].getCantidad().multiply(renglonesParaFacturar[0].getIva_neto()));
+        if (renglonesParaFacturar[0].getIvaPorcentaje().compareTo(IVA_105) == 0) {
+            iva_105_netoFactura = iva_105_netoFactura.add(renglonesParaFacturar[0].getCantidad().multiply(renglonesParaFacturar[0].getIvaNeto()));
+        } else if (renglonesParaFacturar[0].getIvaPorcentaje().compareTo(IVA_21) == 0) {
+            iva_21_netoFactura = iva_21_netoFactura.add(renglonesParaFacturar[0].getCantidad().multiply(renglonesParaFacturar[0].getIvaNeto()));
         }
         assertTrue("El iva 10.5 neto no es el esperado", iva_105_netoFactura.compareTo(BigDecimal.ZERO) == 0);
         assertTrue("El iva 21 neto no es el esperado", iva_21_netoFactura.compareTo(new BigDecimal("1785")) == 0);
@@ -457,10 +457,10 @@ public class FacturacionIntegrationTest {
         renglones.add(renglonesParaFacturar[0]);
         facturaVentaA.setRenglones(renglones);
         facturaVentaA.setSubTotal(subTotal);
-        facturaVentaA.setRecargo_neto(recargo_neto);
-        facturaVentaA.setSubTotal_bruto(subTotalBruto);
-        facturaVentaA.setIva_105_neto(iva_105_netoFactura);
-        facturaVentaA.setIva_21_neto(iva_21_netoFactura);        
+        facturaVentaA.setRecargoNeto(recargo_neto);
+        facturaVentaA.setSubTotalBruto(subTotalBruto);
+        facturaVentaA.setIva105Neto(iva_105_netoFactura);
+        facturaVentaA.setIva21Neto(iva_21_netoFactura);
         facturaVentaA.setTotal(total);
         facturaVentaA.setFecha(new Date());
         restTemplate.postForObject(apiPrefix + "/facturas/venta?idPedido=" + pedidoRecuperado.getId_Pedido()
@@ -482,7 +482,7 @@ public class FacturacionIntegrationTest {
         assertEquals(EstadoPedido.ACTIVO, pedidoRecuperado.getEstado());
         renglonesDelPedido = restTemplate.getForObject(apiPrefix + "/pedidos/"+ pedidoRecuperado.getId_Pedido() +"/renglones", RenglonPedidoDTO[].class);
         assertTrue("La cantidad no es la esperada", renglones.get(0).getCantidad().compareTo(renglonesDelPedido[0].getCantidad()) == 0);
-        assertTrue("El descuento porcentaje no es el esperado", renglones.get(0).getDescuento_porcentaje().compareTo(renglonesDelPedido[0].getDescuento_porcentaje()) == 0);                
+        assertTrue("El descuento porcentaje no es el esperado", renglones.get(0).getDescuentoPorcentaje().compareTo(renglonesDelPedido[0].getDescuentoPorcentaje()) == 0);
         renglonesParaFacturar = restTemplate.getForObject(apiPrefix + "/facturas/renglones/pedidos/" + pedidoRecuperado.getId_Pedido()
                 + "?tipoDeComprobante=" + TipoDeComprobante.FACTURA_B, RenglonFactura[].class); 
         subTotal = renglonesParaFacturar[0].getImporte();
@@ -491,12 +491,12 @@ public class FacturacionIntegrationTest {
         assertTrue("El recargo neto no es la esperado", recargo_neto.compareTo(new BigDecimal("442")) == 0);
         iva_105_netoFactura = BigDecimal.ZERO;
         iva_21_netoFactura = BigDecimal.ZERO;
-        if (renglonesParaFacturar[0].getIva_porcentaje().compareTo(IVA_105) == 0) {
-            iva_105_netoFactura = iva_105_netoFactura.add(renglonesParaFacturar[0].getCantidad().multiply((renglonesParaFacturar[0].getIva_neto()
-                    .add(renglonesParaFacturar[0].getIva_neto().multiply(recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))))));
-        } else if (renglonesParaFacturar[0].getIva_porcentaje().compareTo(IVA_21) == 0) {
-            iva_21_netoFactura = iva_21_netoFactura.add(renglonesParaFacturar[0].getCantidad().multiply((renglonesParaFacturar[0].getIva_neto()
-                    .add(renglonesParaFacturar[0].getIva_neto().multiply(recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))))));
+        if (renglonesParaFacturar[0].getIvaPorcentaje().compareTo(IVA_105) == 0) {
+            iva_105_netoFactura = iva_105_netoFactura.add(renglonesParaFacturar[0].getCantidad().multiply((renglonesParaFacturar[0].getIvaNeto()
+                    .add(renglonesParaFacturar[0].getIvaNeto().multiply(recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))))));
+        } else if (renglonesParaFacturar[0].getIvaPorcentaje().compareTo(IVA_21) == 0) {
+            iva_21_netoFactura = iva_21_netoFactura.add(renglonesParaFacturar[0].getCantidad().multiply((renglonesParaFacturar[0].getIvaNeto()
+                    .add(renglonesParaFacturar[0].getIvaNeto().multiply(recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))))));
         }
         assertTrue("El iva 10.5 neto no es la esperado", iva_105_netoFactura.compareTo(new BigDecimal("462")) == 0);
         assertTrue("El iva 21 neto no es la esperado", iva_21_netoFactura.compareTo(BigDecimal.ZERO) == 0);
@@ -510,11 +510,11 @@ public class FacturacionIntegrationTest {
         renglones.add(renglonesParaFacturar[0]);
         facturaVentaB.setRenglones(renglones);
         facturaVentaB.setSubTotal(subTotal);
-        facturaVentaB.setRecargo_porcentaje(recargoPorcentaje);
-        facturaVentaB.setRecargo_neto(recargo_neto);
-        facturaVentaB.setSubTotal_bruto(subTotalBruto);
-        facturaVentaB.setIva_105_neto(iva_105_netoFactura);
-        facturaVentaB.setIva_21_neto(iva_21_netoFactura);        
+        facturaVentaB.setRecargoPorcentaje(recargoPorcentaje);
+        facturaVentaB.setRecargoNeto(recargo_neto);
+        facturaVentaB.setSubTotalBruto(subTotalBruto);
+        facturaVentaB.setIva105Neto(iva_105_netoFactura);
+        facturaVentaB.setIva21Neto(iva_21_netoFactura);
         facturaVentaB.setTotal(total);
         facturaVentaB.setFecha(new Date());
         restTemplate.postForObject(apiPrefix + "/facturas/venta?idPedido=" + pedidoRecuperado.getId_Pedido()
@@ -528,8 +528,8 @@ public class FacturacionIntegrationTest {
                 new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {
         }).getBody().getContent();            
         assertTrue("La cantidad no es la esperada", renglones.get(0).getCantidad().compareTo(renglonesDelPedido[1].getCantidad()) == 0); 
-        assertTrue("El porcentaje de descuento no es la esperado", renglones.get(0).getDescuento_porcentaje().compareTo(renglonesDelPedido[1].getDescuento_porcentaje()) == 0);  
-        assertTrue("El descuento no es el esperado", renglones.get(0).getDescuento_neto().compareTo(renglonesDelPedido[1].getDescuento_neto()) == 0); 
+        assertTrue("El porcentaje de descuento no es la esperado", renglones.get(0).getDescuentoPorcentaje().compareTo(renglonesDelPedido[1].getDescuentoPorcentaje()) == 0);
+        assertTrue("El descuento no es el esperado", renglones.get(0).getDescuentoNeto().compareTo(renglonesDelPedido[1].getDescuentoNeto()) == 0);
         assertEquals(2, facturasRecuperadas.size(), 0);        
         pedidoRecuperado = restTemplate.getForObject(apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
         assertEquals(EstadoPedido.CERRADO, pedidoRecuperado.getEstado());

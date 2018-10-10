@@ -9,10 +9,13 @@
 	<parameter name="nroComprobante" class="java.lang.String"/>
 	<parameter name="logo" class="java.awt.Image"/>
 	<parameter name="preImpresa" class="java.lang.Boolean"/>
-	<field name="producto" class="sic.modelo.Producto"/>
 	<field name="cantidad" class="java.math.BigDecimal"/>
-	<field name="descuento_porcentaje" class="java.math.BigDecimal"/>
+	<field name="descuentoPorcentaje" class="java.math.BigDecimal"/>
 	<field name="subTotal" class="java.math.BigDecimal"/>
+	<field name="codigoItem" class="java.lang.Long"/>
+	<field name="descripcionItem" class="java.lang.String"/>
+	<field name="precioUnitario" class="java.math.BigDecimal"/>
+	<field name="medidaItem" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -364,7 +367,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				<textElement verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{producto}.getCodigo()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{codigoItem}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="">
 				<reportElement x="75" y="0" width="242" height="15" uuid="f2bfc27d-700e-40b7-a73b-6303c546d09a">
@@ -376,7 +379,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				<textElement verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{producto}.getDescripcion()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{descripcionItem}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="317" y="0" width="41" height="15" uuid="5dc407ad-61c0-4c06-bc77-1ab3136f8e40">
@@ -394,7 +397,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{producto}.getPrecioLista().doubleValue()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{precioUnitario}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="468" y="0" width="32" height="15" uuid="f3e07bc2-0b6a-4759-80ae-837e9ad074b8">
@@ -403,7 +406,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{descuento_porcentaje}.doubleValue()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{descuentoPorcentaje}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00">
 				<reportElement x="500" y="0" width="55" height="15" uuid="e044f181-0b15-492c-bf20-af4d406e94db">
@@ -421,7 +424,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{producto}.getMedida().getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{medidaItem}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

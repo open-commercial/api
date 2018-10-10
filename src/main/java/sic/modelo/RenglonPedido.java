@@ -31,9 +31,20 @@ public class RenglonPedido implements Serializable {
   @GeneratedValue
   private long id_RenglonPedido;
 
-  @ManyToOne
-  @JoinColumn(name = "id_Producto", referencedColumnName = "id_Producto")
-  private Producto producto;
+  private long idProductoItem;
+
+  @Column(nullable = false)
+  private String codigoItem;
+
+  @Column(nullable = false)
+  private String descripcionItem;
+
+  @Column(nullable = false)
+  private String medidaItem;
+
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_renglon_precio_unitario_negativo}")
+  private BigDecimal precioUnitario;
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_producto_cantidad_negativa}")
@@ -41,11 +52,11 @@ public class RenglonPedido implements Serializable {
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_renglon_descuento_porcentaje_negativo}")
-  private BigDecimal descuento_porcentaje;
+  private BigDecimal descuentoPorcentaje;
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_renglon_descuento_neto_negativo}")
-  private BigDecimal descuento_neto;
+  private BigDecimal descuentoNeto;
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_renglon_subTotal_negativo}")
@@ -53,22 +64,22 @@ public class RenglonPedido implements Serializable {
 
   @JsonGetter("id_Producto")
   public Long getIdProducto() {
-    return producto.getId_Producto();
+    return idProductoItem;
   }
 
   @JsonGetter("codigoProducto")
   public String getCodigo() {
-    return producto.getCodigo();
+    return codigoItem;
   }
 
   @JsonGetter("descripcionProducto")
   public String getDescripcion() {
-    return producto.getDescripcion();
+    return descripcionItem;
   }
 
   @JsonGetter("precioDeListaProducto")
   public BigDecimal getPrecioDeLista() {
-    return producto.getPrecioLista();
+    return precioUnitario;
   }
   
 }

@@ -110,13 +110,6 @@ public class PedidoController {
     pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
     pedido.setCliente(clienteService.getClientePorId(idCliente));
-    pedido
-        .getRenglones()
-        .forEach(
-            renglonPedido ->
-                renglonPedido.setProducto(
-                    productoService.getProductoPorId(
-                        renglonPedido.getProducto().getId_Producto())));
     return pedidoService.guardar(pedido);
   }
 

@@ -81,12 +81,6 @@ public class PedidoServiceImpl implements IPedidoService {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_pedido_renglones_vacio"));
         }
-        for (RenglonPedido r : pedido.getRenglones()) {
-          if (r.getProducto() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_pedido_renglon_sin_producto"));
-          }
-        }
         if (pedido.getEmpresa() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_pedido_empresa_vacia"));
@@ -138,9 +132,9 @@ public class PedidoServiceImpl implements IPedidoService {
         BigDecimal porcentajeDescuento;
         BigDecimal totalActual = BigDecimal.ZERO;
         for (RenglonPedido renglonPedido : this.getRenglonesDelPedido(pedido.getId_Pedido())) {
-            porcentajeDescuento = BigDecimal.ONE.subtract(renglonPedido.getDescuento_porcentaje()
+            porcentajeDescuento = BigDecimal.ONE.subtract(renglonPedido.getDescuentoPorcentaje()
                     .divide(CIEN, 15, RoundingMode.HALF_UP));
-            renglonPedido.setSubTotal(renglonPedido.getProducto().getPrecioLista()
+            renglonPedido.setSubTotal(renglonPedido.getPrecioUnitario()
                     .multiply(renglonPedido.getCantidad())
                     .multiply(porcentajeDescuento));
             totalActual = totalActual.add(renglonPedido.getSubTotal());
@@ -278,30 +272,42 @@ public class PedidoServiceImpl implements IPedidoService {
         return renglonPedidoRepository.findByIdPedido(idPedido);
     }
 
-    @Override
-    public Map<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido) {
-        List<RenglonFactura> renglonesDeFacturas = new ArrayList<>();
-        this.getFacturasDelPedido(nroPedido).forEach(f ->
-            f.getRenglones().forEach(r -> renglonesDeFacturas.add(facturaService.calcularRenglon(f.getTipoComprobante(),
-                    Movimiento.VENTA, r.getCantidad(), r.getId_ProductoItem(),(f instanceof FacturaVenta)
-                            ? ((FacturaVenta) f).getCliente().getId_Cliente()
-                            : null,
-                    r.getDescuento_porcentaje(),false)))
-        );
-        HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
-        if (!renglonesDeFacturas.isEmpty()) {
-            renglonesDeFacturas.forEach(r -> {
-                if (listaRenglonesUnificados.containsKey(r.getId_ProductoItem())) {
-                    listaRenglonesUnificados.get(r.getId_ProductoItem())
-                            .setCantidad(listaRenglonesUnificados
-                                    .get(r.getId_ProductoItem()).getCantidad().add(r.getCantidad()));
-                } else {
-                    listaRenglonesUnificados.put(r.getId_ProductoItem(), r);
-                }
-            });
-        }
-        return listaRenglonesUnificados;
+  @Override
+  public Map<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido) {
+    List<RenglonFactura> renglonesDeFacturas = new ArrayList<>();
+    this.getFacturasDelPedido(nroPedido)
+        .forEach(
+            f ->
+                f.getRenglones()
+                    .forEach(
+                        r ->
+                            renglonesDeFacturas.add(
+                                facturaService.calcularRenglon(
+                                    f.getTipoComprobante(),
+                                    Movimiento.VENTA,
+                                    r.getCantidad(),
+                                    r.getIdProductoItem(),
+                                    r.getDescuentoPorcentaje(),
+                                    false))));
+    HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
+    if (!renglonesDeFacturas.isEmpty()) {
+      renglonesDeFacturas.forEach(
+          r -> {
+            if (listaRenglonesUnificados.containsKey(r.getIdProductoItem())) {
+              listaRenglonesUnificados
+                  .get(r.getIdProductoItem())
+                  .setCantidad(
+                      listaRenglonesUnificados
+                          .get(r.getIdProductoItem())
+                          .getCantidad()
+                          .add(r.getCantidad()));
+            } else {
+              listaRenglonesUnificados.put(r.getIdProductoItem(), r);
+            }
+          });
     }
+    return listaRenglonesUnificados;
+  }
 
     @Override
     public byte[] getReportePedido(Pedido pedido) {
@@ -347,17 +353,22 @@ public class PedidoServiceImpl implements IPedidoService {
   public RenglonPedido calcularRenglonPedido(
       long idProducto, BigDecimal cantidad, BigDecimal descuentoPorcentaje) {
     RenglonPedido nuevoRenglon = new RenglonPedido();
-    nuevoRenglon.setProducto(productoService.getProductoPorId(idProducto));
+    Producto producto = productoService.getProductoPorId(idProducto);
+    nuevoRenglon.setIdProductoItem(producto.getId_Producto());
     nuevoRenglon.setCantidad(cantidad);
-    nuevoRenglon.setDescuento_porcentaje(descuentoPorcentaje);
-    nuevoRenglon.setDescuento_neto(
+    nuevoRenglon.setCodigoItem(producto.getCodigo());
+    nuevoRenglon.setDescripcionItem(producto.getDescripcion());
+    nuevoRenglon.setMedidaItem(producto.getMedida().getNombre());
+    nuevoRenglon.setPrecioUnitario(producto.getPrecioLista());
+    nuevoRenglon.setDescuentoPorcentaje(descuentoPorcentaje);
+    nuevoRenglon.setDescuentoNeto(
         this.calcularDescuentoNeto(
-            nuevoRenglon.getProducto().getPrecioLista(), descuentoPorcentaje));
+                producto.getPrecioLista(), descuentoPorcentaje));
     nuevoRenglon.setSubTotal(
         this.calcularSubTotal(
             nuevoRenglon.getCantidad(),
-            nuevoRenglon.getProducto().getPrecioLista(),
-            nuevoRenglon.getDescuento_neto()));
+                producto.getPrecioLista(),
+            nuevoRenglon.getDescuentoNeto()));
     return nuevoRenglon;
   }
 
