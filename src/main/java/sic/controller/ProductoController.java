@@ -56,7 +56,13 @@ public class ProductoController {
   @GetMapping("/public/productos/{idProducto}")
   @ResponseStatus(HttpStatus.OK)
   public Producto getProductoPorIdPublic(@PathVariable long idProducto) {
-    return productoService.getProductoPorId(idProducto);
+    Producto producto = productoService.getProductoPorId(idProducto);
+    if (producto.getCantidad().compareTo(BigDecimal.ZERO) > 0) {
+      producto.setHayStock(true);
+    } else {
+      producto.setHayStock(false);
+    }
+    return producto;
   }
 
   @GetMapping("/productos/busqueda")
