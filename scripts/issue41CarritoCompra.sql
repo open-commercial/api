@@ -1,0 +1,1 @@
+ALTER TABLE itemcarritocompra DROP COLUMN importe;

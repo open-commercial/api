@@ -15,9 +15,11 @@ public interface ICarritoCompraService {
 
   Page<ItemCarritoCompra> getAllItemsDelUsuario(long idUsuario, Pageable pageable);
 
-  void eliminarItem(long idUsuario, long idProducto);
+  void eliminarItemDelUsuario(long idUsuario, long idProducto);
 
-  void eliminarTodosLosItems(long idUsuario);
+  void eliminarItem(long idProducto);
+
+  void eliminarTodosLosItemsDelUsuario(long idUsuario);
 
   void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad);
 

@@ -11,26 +11,37 @@ import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Producto;
 import sic.modelo.Usuario;
 
-public interface CarritoCompraRepository extends PagingAndSortingRepository<ItemCarritoCompra, Long> {
+public interface CarritoCompraRepository
+    extends PagingAndSortingRepository<ItemCarritoCompra, Long> {
 
-    Page<ItemCarritoCompra> findAllByUsuario(Usuario usuario, Pageable pageable);
+  Page<ItemCarritoCompra> findAllByUsuario(Usuario usuario, Pageable pageable);
 
-    @Query("SELECT SUM(icc.importe) FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario")
-    BigDecimal calcularTotal(@Param("idUsuario") long idUsuario);
+  @Query(
+      "SELECT SUM(icc.cantidad * p.precioLista) "
+          + "FROM ItemCarritoCompra icc INNER JOIN icc.producto p "
+          + "WHERE icc.usuario.id_Usuario = :idUsuario")
+  BigDecimal calcularTotal(@Param("idUsuario") long idUsuario);
 
-    @Query("SELECT SUM(icc.cantidad) FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario")
-    BigDecimal getCantArticulos(@Param("idUsuario") long idUsuario);
-    
-    @Query("SELECT COUNT(icc) FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario")
-    Long getCantRenglones(@Param("idUsuario") long idUsuario);
+  @Query(
+      "SELECT SUM(icc.cantidad) FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario")
+  BigDecimal getCantArticulos(@Param("idUsuario") long idUsuario);
 
-    @Modifying
-    @Query("DELETE FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario AND icc.producto.id_Producto = :idProducto")
-    void eliminarItem(@Param("idUsuario") long idUsuario, @Param("idProducto") long idProducto);
-    
-    @Modifying
-    @Query("DELETE FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario")
-    void eliminarTodosLosItems(@Param("idUsuario") long idUsuario);
-    
-    ItemCarritoCompra findByUsuarioAndProducto(Usuario usuario, Producto producto);
+  @Query("SELECT COUNT(icc) FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario")
+  Long getCantRenglones(@Param("idUsuario") long idUsuario);
+
+  @Modifying
+  @Query(
+    "DELETE FROM ItemCarritoCompra icc WHERE icc.producto.id_Producto = :idProducto")
+  void eliminarItem(@Param("idProducto") long idProducto);
+
+  @Modifying
+  @Query(
+      "DELETE FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario AND icc.producto.id_Producto = :idProducto")
+  void eliminarItemDelUsuario(@Param("idUsuario") long idUsuario, @Param("idProducto") long idProducto);
+
+  @Modifying
+  @Query("DELETE FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario")
+  void eliminarTodosLosItemsDelUsuario(@Param("idUsuario") long idUsuario);
+
+  ItemCarritoCompra findByUsuarioAndProducto(Usuario usuario, Producto producto);
 }
