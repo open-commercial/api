@@ -1,5 +1,6 @@
 package sic.modelo;
 
+import lombok.Builder;
 import lombok.Data;
 import sic.modelo.dto.RenglonPedidoDTO;
 
@@ -8,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 @Data
+@Builder
 public class NuevoPedidoDTO {
 
   private Date fechaVencimiento;

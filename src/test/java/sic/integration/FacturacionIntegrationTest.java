@@ -413,11 +413,14 @@ public class FacturacionIntegrationTest {
         BigDecimal subTotal = BigDecimal.ZERO;
         for (RenglonPedidoDTO renglon : renglonesPedido) {
             subTotal = subTotal.add(renglon.getSubTotal());
-        }    
-        PedidoDTO pedido = new PedidoDTO();    
-        pedido.setRenglones(renglonesPedido);
-        pedido.setTotalEstimado(subTotal);
-        pedido.setObservaciones("Pedido Test");
+        }
+        BigDecimal recargoNeto = BigDecimal.ZERO;
+
+        NuevoPedidoDTO nuevoPedidoDTO = NuevoPedidoDTO.builder().
+//        PedidoDTO pedido = new PedidoDTO();
+//        pedido.setRenglones(renglonesPedido);
+//        pedido.setTotalEstimado(subTotal);
+//        pedido.setObservaciones("Pedido Test");
         PedidoDTO pedidoRecuperado = restTemplate.postForObject(apiPrefix + "/pedidos?idEmpresa=" + empresa.getId_Empresa()
                 + "&idCliente=" + cliente.getId_Cliente()
                 + "&idUsuario=" + credencial.getId_Usuario(), pedido, PedidoDTO.class);

@@ -123,9 +123,41 @@ public class PedidoServiceImpl implements IPedidoService {
     }
     if (pedido.getSubTotal().compareTo(CalculosComprobante.calcularSubTotal(importes)) != 0) {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_factura_sub_total_no_valido"));
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_sub_total_no_valido"));
     }
+    if (pedido
+            .getRecargoNeto()
+            .compareTo(
+                CalculosComprobante.calcularProporcion(
+                    pedido.getSubTotal(), pedido.getRecargoPorcentaje()))
+        != 0) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_recargo_no_valido"));
     }
+    if (pedido
+            .getDescuentoNeto()
+            .compareTo(
+                CalculosComprobante.calcularProporcion(
+                    pedido.getSubTotal(), pedido.getDescuentoPorcentaje()))
+        != 0) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_recargo_no_valido"));
+    }
+    if (pedido
+            .getTotalEstimado()
+            .compareTo(
+                CalculosComprobante.calcularSubTotalBruto(
+                    false,
+                    pedido.getSubTotal(),
+                    pedido.getRecargoNeto(),
+                    pedido.getDescuentoNeto(),
+                    null,
+                    null))
+        != 0) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_total_estimado_no_valido"));
+    }
+  }
 
     @Override
     public Pedido actualizarEstadoPedido(Pedido pedido) {
@@ -180,6 +212,9 @@ public class PedidoServiceImpl implements IPedidoService {
     pedido.setFecha(new Date());
     pedido.setNroPedido(this.generarNumeroPedido(pedido.getEmpresa()));
     pedido.setEstado(EstadoPedido.ABIERTO);
+    if (pedido.getObservaciones() == null || pedido.getObservaciones().equals("")) {
+      pedido.setObservaciones("Los precios se encuentran sujetos a modificaciones.");
+    }
     this.validarPedido(TipoDeOperacion.ALTA, pedido);
     pedido = pedidoRepository.save(pedido);
     logger.warn("El Pedido {} se guardó correctamente.", pedido);

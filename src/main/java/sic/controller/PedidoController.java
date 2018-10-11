@@ -110,11 +110,7 @@ public class PedidoController {
       @RequestBody NuevoPedidoDTO nuevoPedidoDTO) {
     Pedido pedido = new Pedido();
     pedido.setFechaVencimiento(nuevoPedidoDTO.getFechaVencimiento());
-    if (pedido.getObservaciones() == null || pedido.getObservaciones().equals("")) {
-      pedido.setObservaciones("Los precios se encuentran sujetos a modificaciones.");
-    } else {
-      pedido.setObservaciones(nuevoPedidoDTO.getObservaciones());
-    }
+    pedido.setObservaciones(nuevoPedidoDTO.getObservaciones());
     Type listType = new TypeToken<List<RenglonPedido>>() {}.getType();
     pedido.setRenglones(modelMapper.map(nuevoPedidoDTO.getRenglones(), listType));
     pedido.setSubTotal(nuevoPedidoDTO.getSubTotal());
