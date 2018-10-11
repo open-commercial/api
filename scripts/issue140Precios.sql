@@ -1,5 +1,5 @@
--- SELECT * FROM factura;
-ALTER TABLE cliente add column bonificacion Decimal(25,15);
+
+ALTER TABLE cliente add column bonificacion Decimal(25,15) default 0.0 not null;
 ALTER TABLE factura CHANGE descuento_neto descuentoNeto Decimal(25,15);
 ALTER TABLE factura CHANGE descuento_porcentaje descuentoPorcentaje Decimal(25,15);
 ALTER TABLE factura CHANGE impuestoInterno_neto impuestoInternoNeto Decimal(25,15);
@@ -49,5 +49,5 @@ renglonpedido.precioUnitario = renglonpedido.subTotal / renglonpedido.cantidad
 where renglonpedido.cantidad > 0;  -- Buscar los comprobantes con cantidades negativas y corregirlos
 SET SQL_SAFE_UPDATES=1;
 
-ALTER TABLE renglonpedido DROP foreign key FKtjjxjf88fwccfduk8hhf7q3pd;
-ALTER TABLE renglonpedido DROP COLUMN renglonpedido.id_Pedido;
+ALTER TABLE renglonpedido DROP foreign key FKfxncx6f7eg8swxchd6sllrssa;
+ALTER TABLE renglonpedido DROP COLUMN renglonpedido.id_Producto;

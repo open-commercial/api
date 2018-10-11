@@ -5,6 +5,8 @@ import java.math.RoundingMode;
 
 public class CalculosComprobante {
 
+  private CalculosComprobante() {}
+
   private static final BigDecimal CIEN = new BigDecimal("100");
 
   public static BigDecimal calcularSubTotal(BigDecimal[] importes) {
