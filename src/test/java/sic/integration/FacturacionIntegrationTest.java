@@ -414,18 +414,25 @@ public class FacturacionIntegrationTest {
         for (RenglonPedidoDTO renglon : renglonesPedido) {
             subTotal = subTotal.add(renglon.getSubTotal());
         }
-        BigDecimal recargoNeto = BigDecimal.ZERO;
-
-        NuevoPedidoDTO nuevoPedidoDTO = NuevoPedidoDTO.builder().
-//        PedidoDTO pedido = new PedidoDTO();
-//        pedido.setRenglones(renglonesPedido);
-//        pedido.setTotalEstimado(subTotal);
-//        pedido.setObservaciones("Pedido Test");
+        BigDecimal recargoNeto = subTotal.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
+        BigDecimal descuentoNeto = subTotal.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
+        BigDecimal total = subTotal.add(recargoNeto).subtract(descuentoNeto);
+        NuevoPedidoDTO nuevoPedidoDTO = NuevoPedidoDTO
+          .builder().descuentoNeto(descuentoNeto)
+          .descuentoPorcentaje(new BigDecimal("15"))
+          .recargoNeto(recargoNeto)
+          .recargoPorcentaje(new BigDecimal("5"))
+          .fechaVencimiento(new Date())
+          .observaciones("Nuevo Pedido Test")
+          .renglones(renglonesPedido)
+          .subTotal(subTotal)
+          .total(total)
+          .build();
         PedidoDTO pedidoRecuperado = restTemplate.postForObject(apiPrefix + "/pedidos?idEmpresa=" + empresa.getId_Empresa()
                 + "&idCliente=" + cliente.getId_Cliente()
-                + "&idUsuario=" + credencial.getId_Usuario(), pedido, PedidoDTO.class);
-        assertTrue("El total estimado no es el esperado", pedidoRecuperado.getTotalEstimado().compareTo(pedido.getTotalEstimado()) == 0);
-        assertEquals(pedido.getObservaciones(), pedidoRecuperado.getObservaciones());
+                + "&idUsuario=" + credencial.getId_Usuario(), nuevoPedidoDTO, PedidoDTO.class);
+        assertTrue("El total estimado no es el esperado", pedidoRecuperado.getTotalEstimado().compareTo(nuevoPedidoDTO.getTotal()) == 0);
+        assertEquals(nuevoPedidoDTO.getObservaciones(), pedidoRecuperado.getObservaciones());
         assertEquals(pedidoRecuperado.getEstado(), EstadoPedido.ABIERTO);
         RenglonPedidoDTO[] renglonesDelPedido = restTemplate.getForObject(apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido() + "/renglones", RenglonPedidoDTO[].class);
         for (int i = 0; i < renglonesDelPedido.length; i++) {
@@ -452,7 +459,7 @@ public class FacturacionIntegrationTest {
         assertTrue("El iva 21 neto no es el esperado", iva_21_netoFactura.compareTo(new BigDecimal("1785")) == 0);
         BigDecimal subTotalBruto = subTotal.add(recargo_neto);
         assertTrue("El sub total bruto no es el esperado", subTotalBruto.compareTo(new BigDecimal("9350")) == 0);
-        BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
+        total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
         assertTrue("El total no es el esperado", total.compareTo(new BigDecimal("11135")) == 0);
         FacturaVentaDTO facturaVentaA = new FacturaVentaDTO();
         facturaVentaA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
@@ -485,7 +492,8 @@ public class FacturacionIntegrationTest {
         assertEquals(EstadoPedido.ACTIVO, pedidoRecuperado.getEstado());
         renglonesDelPedido = restTemplate.getForObject(apiPrefix + "/pedidos/"+ pedidoRecuperado.getId_Pedido() +"/renglones", RenglonPedidoDTO[].class);
         assertTrue("La cantidad no es la esperada", renglones.get(0).getCantidad().compareTo(renglonesDelPedido[0].getCantidad()) == 0);
-        assertTrue("El descuento porcentaje no es el esperado", renglones.get(0).getDescuentoPorcentaje().compareTo(renglonesDelPedido[0].getDescuentoPorcentaje()) == 0);
+        assertTrue("El descuento porcentaje no es el esperado", renglones.get(0).getDescuentoPorcentaje().compareTo(renglonesDelPedido[0]
+          .getDescuentoPorcentaje()) == 0);
         renglonesParaFacturar = restTemplate.getForObject(apiPrefix + "/facturas/renglones/pedidos/" + pedidoRecuperado.getId_Pedido()
                 + "?tipoDeComprobante=" + TipoDeComprobante.FACTURA_B, RenglonFactura[].class); 
         subTotal = renglonesParaFacturar[0].getImporte();
