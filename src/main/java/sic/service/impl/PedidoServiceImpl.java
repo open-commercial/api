@@ -121,41 +121,53 @@ public class PedidoServiceImpl implements IPedidoService {
       importes[i] = renglon.getSubTotal();
       i++;
     }
-    if (pedido.getSubTotal().compareTo(CalculosComprobante.calcularSubTotal(importes)) != 0) {
+    if (pedido
+            .getSubTotal()
+            .setScale(2, RoundingMode.HALF_UP)
+            .compareTo(
+                CalculosComprobante.calcularSubTotal(importes).setScale(2, RoundingMode.HALF_UP))
+        != 0) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_sub_total_no_valido"));
     }
     if (pedido
             .getRecargoNeto()
+            .setScale(2, RoundingMode.HALF_UP)
             .compareTo(
                 CalculosComprobante.calcularProporcion(
-                    pedido.getSubTotal(), pedido.getRecargoPorcentaje()))
+                        pedido.getSubTotal(), pedido.getRecargoPorcentaje())
+                    .setScale(2, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_recargo_no_valido"));
     }
     if (pedido
             .getDescuentoNeto()
+            .setScale(2, RoundingMode.HALF_UP)
             .compareTo(
                 CalculosComprobante.calcularProporcion(
-                    pedido.getSubTotal(), pedido.getDescuentoPorcentaje()))
+                        pedido.getSubTotal(), pedido.getDescuentoPorcentaje())
+                    .setScale(2, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_recargo_no_valido"));
     }
     if (pedido
             .getTotalEstimado()
+            .setScale(2, RoundingMode.HALF_UP)
             .compareTo(
                 CalculosComprobante.calcularSubTotalBruto(
-                    false,
-                    pedido.getSubTotal(),
-                    pedido.getRecargoNeto(),
-                    pedido.getDescuentoNeto(),
-                    null,
-                    null))
+                        false,
+                        pedido.getSubTotal(),
+                        pedido.getRecargoNeto(),
+                        pedido.getDescuentoNeto(),
+                        null,
+                        null)
+                    .setScale(2, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_total_estimado_no_valido"));
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_pedido_total_estimado_no_valido"));
     }
   }
 
