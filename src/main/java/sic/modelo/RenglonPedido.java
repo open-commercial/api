@@ -9,7 +9,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.DecimalMin;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -57,25 +56,5 @@ public class RenglonPedido implements Serializable {
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_renglon_subTotal_negativo}")
   private BigDecimal subTotal;
-
-  @JsonGetter("id_Producto")
-  public Long getIdProducto() {
-    return idProductoItem;
-  }
-
-  @JsonGetter("codigoProducto")
-  public String getCodigo() {
-    return codigoItem;
-  }
-
-  @JsonGetter("descripcionProducto")
-  public String getDescripcion() {
-    return descripcionItem;
-  }
-
-  @JsonGetter("precioDeListaProducto")
-  public BigDecimal getPrecioDeLista() {
-    return precioUnitario;
-  }
   
 }

@@ -28,6 +28,13 @@ ALTER TABLE renglonpedido add column descripcionItem varchar(255);
 ALTER TABLE renglonpedido add column medidaItem varchar(255);
 ALTER TABLE renglonpedido add column precioUnitario Decimal(25,15);
 ALTER TABLE renglonpedido add column precioDeLista Decimal(25,15);
+-- Pedido  
+ALTER TABLE pedido add column subTotal Decimal(25,15);
+ALTER TABLE pedido add column recargoPorcentaje Decimal(25,15);
+ALTER TABLE pedido add column recargoNeto Decimal(25,15);
+ALTER TABLE pedido add column descuentoPorcentaje Decimal(25,15);
+ALTER TABLE pedido add column descuentoNeto Decimal(25,15);
+
 
 SET SQL_SAFE_UPDATES=0;
 update producto 

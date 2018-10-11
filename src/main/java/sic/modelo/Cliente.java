@@ -15,6 +15,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "cliente")
@@ -33,6 +34,7 @@ public class Cliente implements Serializable {
   private TipoDeCliente tipoDeCliente;
 
   @Column(precision = 25, scale = 15)
+  @ColumnDefault("'0.0'")
   @DecimalMin(value = "0", message = "{mensaje_cliente_bonificacion_negativa}")
   @DecimalMax(value = "100", message = "{mensaje_cliente_bonificacion_superior_al_cien_porciento}")
   private BigDecimal bonificacion;

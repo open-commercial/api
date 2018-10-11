@@ -935,11 +935,11 @@ public class FacturaServiceImpl implements IFacturaService {
           .getRenglones()
           .forEach(
               r -> {
-                if (renglonesDeFacturas.containsKey(r.getIdProducto())) {
+                if (renglonesDeFacturas.containsKey(r.getIdProductoItem())) {
                   if (r.getCantidad()
                           .compareTo(
                               renglonesDeFacturas
-                                  .get(r.getIdProducto())
+                                  .get(r.getIdProductoItem())
                                   .getCantidad())
                       > 0) {
                     renglonesRestantes.add(
@@ -949,9 +949,9 @@ public class FacturaServiceImpl implements IFacturaService {
                             r.getCantidad()
                                 .subtract(
                                     renglonesDeFacturas
-                                        .get(r.getIdProducto())
+                                        .get(r.getIdProductoItem())
                                         .getCantidad()),
-                            r.getIdProducto(),
+                            r.getIdProductoItem(),
                             r.getDescuentoPorcentaje(),
                             false));
                   }
@@ -961,7 +961,7 @@ public class FacturaServiceImpl implements IFacturaService {
                           tipoDeComprobante,
                           Movimiento.VENTA,
                           r.getCantidad(),
-                          r.getIdProducto(),
+                          r.getIdProductoItem(),
                           r.getDescuentoPorcentaje(),
                           false));
                 }
@@ -976,7 +976,7 @@ public class FacturaServiceImpl implements IFacturaService {
                           tipoDeComprobante,
                           Movimiento.VENTA,
                           r.getCantidad(),
-                          r.getIdProducto(),
+                          r.getIdProductoItem(),
                           r.getDescuentoPorcentaje(),
                           false)));
     }
@@ -989,8 +989,8 @@ public class FacturaServiceImpl implements IFacturaService {
         Map<Long, RenglonFactura> renglonesDeFacturas = pedidoService.getRenglonesFacturadosDelPedido(pedido.getId_Pedido());
         if (!renglonesDeFacturas.isEmpty()) {
             for (RenglonPedido r : pedido.getRenglones()) {
-                if (renglonesDeFacturas.containsKey(r.getIdProducto())) {
-                    facturado = (r.getCantidad().compareTo(renglonesDeFacturas.get(r.getIdProducto()).getCantidad()) < 1);
+                if (renglonesDeFacturas.containsKey(r.getIdProductoItem())) {
+                    facturado = (r.getCantidad().compareTo(renglonesDeFacturas.get(r.getIdProductoItem()).getCantidad()) < 1);
                 } else {
                     return false;
                 }
