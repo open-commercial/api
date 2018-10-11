@@ -105,9 +105,19 @@ public class PedidoController {
       @RequestParam Long idEmpresa,
       @RequestParam Long idUsuario,
       @RequestParam Long idCliente,
-      @RequestBody PedidoDTO pedidoDTO) {
-    Pedido pedido = modelMapper.map(pedidoDTO, Pedido.class);
-    pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa)); //setear los atributos que faltan
+      @RequestBody NuevoPedidoDTO nuevoPedidoDTO) {
+    Pedido pedido = new Pedido();
+    pedido.setFechaVencimiento(nuevoPedidoDTO.getFechaVencimiento());
+    pedido.setObservaciones(nuevoPedidoDTO.getObservaciones());
+    pedido.setRenglones(nuevoPedidoDTO.getRenglones());
+    pedido.setSubTotal(nuevoPedidoDTO.getSubTotal());
+    pedido.setRecargoPorcentaje(nuevoPedidoDTO.getRecargoPorcentaje());
+    pedido.setRecargoNeto(nuevoPedidoDTO.getRecargoNeto());
+    pedido.setDescuentoPorcentaje(nuevoPedidoDTO.getDescuentoPorcentaje());
+    pedido.setDescuentoNeto(nuevoPedidoDTO.getDescuentoNeto());
+    pedido.setTotalEstimado(nuevoPedidoDTO.getTotal());
+    pedido.setTotalActual(nuevoPedidoDTO.getTotal());
+    pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
     pedido.setCliente(clienteService.getClientePorId(idCliente));
     return pedidoService.guardar(pedido);

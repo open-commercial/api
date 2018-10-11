@@ -28,6 +28,7 @@ import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.repository.RenglonPedidoRepository;
 import sic.service.*;
 import sic.repository.PedidoRepository;
+import sic.util.CalculosComprobante;
 import sic.util.FormatterFechaHora;
 
 @Service
@@ -112,7 +113,18 @@ public class PedidoServiceImpl implements IPedidoService {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_pedido_no_existente"));
             }
-        }        
+        }
+    // calculos
+    BigDecimal[] importes = new BigDecimal[pedido.getRenglones().size()];
+    int i = 0;
+    for (RenglonPedido renglon : pedido.getRenglones()) {
+      importes[i] = renglon.getSubTotal();
+      i++;
+    }
+    if (pedido.getSubTotal().compareTo(CalculosComprobante.calcularSubTotal(importes)) != 0) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_factura_sub_total_no_valido"));
+    }
     }
 
     @Override
