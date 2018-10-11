@@ -183,21 +183,23 @@ public class PedidoServiceImpl implements IPedidoService {
         return pedido;
     }
 
-    @Override
-    public Pedido calcularTotalActualDePedido(Pedido pedido) {
-        BigDecimal porcentajeDescuento;
-        BigDecimal totalActual = BigDecimal.ZERO;
-        for (RenglonPedido renglonPedido : this.getRenglonesDelPedido(pedido.getId_Pedido())) {
-            porcentajeDescuento = BigDecimal.ONE.subtract(renglonPedido.getDescuentoPorcentaje()
-                    .divide(CIEN, 15, RoundingMode.HALF_UP));
-            renglonPedido.setSubTotal(renglonPedido.getPrecioUnitario() // debe cambiar para consultar con el producto y no sacar el precio del renglon.
-                    .multiply(renglonPedido.getCantidad())
-                    .multiply(porcentajeDescuento));
-            totalActual = totalActual.add(renglonPedido.getSubTotal());
-        }
-        pedido.setTotalActual(totalActual);
-        return pedido;
+  @Override
+  public Pedido calcularTotalActualDePedido(Pedido pedido) {
+    BigDecimal porcentajeDescuento;
+    BigDecimal totalActual = BigDecimal.ZERO;
+    for (RenglonPedido renglonPedido : this.getRenglonesDelPedido(pedido.getId_Pedido())) {
+      porcentajeDescuento =
+          BigDecimal.ONE.subtract(
+              renglonPedido.getDescuentoPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP));
+      BigDecimal precioUnitario =
+          productoService.getProductoPorId(renglonPedido.getIdProductoItem()).getPrecioLista();
+      renglonPedido.setSubTotal(
+          precioUnitario.multiply(renglonPedido.getCantidad()).multiply(porcentajeDescuento));
+      totalActual = totalActual.add(renglonPedido.getSubTotal());
     }
+    pedido.setTotalActual(totalActual);
+    return pedido;
+  }
 
   @Override
   public long generarNumeroPedido(Empresa empresa) {

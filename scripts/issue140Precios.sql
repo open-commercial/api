@@ -1,5 +1,5 @@
 
-ALTER TABLE cliente add column bonificacion Decimal(25,15) default 0.0 not null;
+ALTER TABLE cliente add column bonificacion Decimal(25,15) default 0 not null;
 ALTER TABLE factura CHANGE descuento_neto descuentoNeto Decimal(25,15);
 ALTER TABLE factura CHANGE descuento_porcentaje descuentoPorcentaje Decimal(25,15);
 ALTER TABLE factura CHANGE impuestoInterno_neto impuestoInternoNeto Decimal(25,15);
