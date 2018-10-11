@@ -1,6 +1,7 @@
 package sic.modelo;
 
 import lombok.Data;
+import sic.modelo.dto.RenglonPedidoDTO;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -11,7 +12,7 @@ public class NuevoPedidoDTO {
 
   private Date fechaVencimiento;
   private String observaciones;
-  private List<RenglonPedido> renglones;
+  private List<RenglonPedidoDTO> renglones;
   private BigDecimal subTotal;
   private BigDecimal recargoPorcentaje;
   private BigDecimal recargoNeto;

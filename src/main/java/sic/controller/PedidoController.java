@@ -1,11 +1,13 @@
 package sic.controller;
 
+import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.List;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -108,8 +110,13 @@ public class PedidoController {
       @RequestBody NuevoPedidoDTO nuevoPedidoDTO) {
     Pedido pedido = new Pedido();
     pedido.setFechaVencimiento(nuevoPedidoDTO.getFechaVencimiento());
-    pedido.setObservaciones(nuevoPedidoDTO.getObservaciones());
-    pedido.setRenglones(nuevoPedidoDTO.getRenglones());
+    if (pedido.getObservaciones() == null || pedido.getObservaciones().equals("")) {
+      pedido.setObservaciones("Los precios se encuentran sujetos a modificaciones.");
+    } else {
+      pedido.setObservaciones(nuevoPedidoDTO.getObservaciones());
+    }
+    Type listType = new TypeToken<List<RenglonPedido>>() {}.getType();
+    pedido.setRenglones(modelMapper.map(nuevoPedidoDTO.getRenglones(), listType));
     pedido.setSubTotal(nuevoPedidoDTO.getSubTotal());
     pedido.setRecargoPorcentaje(nuevoPedidoDTO.getRecargoPorcentaje());
     pedido.setRecargoNeto(nuevoPedidoDTO.getRecargoNeto());
