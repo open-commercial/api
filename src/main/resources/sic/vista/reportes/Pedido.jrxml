@@ -12,7 +12,7 @@
 	<field name="cantidad" class="java.math.BigDecimal"/>
 	<field name="descuentoPorcentaje" class="java.math.BigDecimal"/>
 	<field name="subTotal" class="java.math.BigDecimal"/>
-	<field name="codigoItem" class="java.lang.Long"/>
+	<field name="codigoItem" class="java.lang.String"/>
 	<field name="descripcionItem" class="java.lang.String"/>
 	<field name="precioUnitario" class="java.math.BigDecimal"/>
 	<field name="medidaItem" class="java.lang.String"/>
@@ -367,7 +367,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				<textElement verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{codigoItem}.doubleValue()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{codigoItem}]]></textFieldExpression>
 			</textField>
 			<textField pattern="">
 				<reportElement x="75" y="0" width="242" height="15" uuid="f2bfc27d-700e-40b7-a73b-6303c546d09a">
