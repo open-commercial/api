@@ -107,7 +107,7 @@ public class PedidoController {
       @RequestParam Long idCliente,
       @RequestBody PedidoDTO pedidoDTO) {
     Pedido pedido = modelMapper.map(pedidoDTO, Pedido.class);
-    pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa)); //setear los atributos que faltan
     pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
     pedido.setCliente(clienteService.getClientePorId(idCliente));
     return pedidoService.guardar(pedido);

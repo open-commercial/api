@@ -646,7 +646,7 @@ public class FacturaServiceImpl implements IFacturaService {
 
     @Override
     public BigDecimal calcularRecargoNeto(BigDecimal subtotal, BigDecimal recargoPorcentaje) {
-        BigDecimal resultado = BigDecimal.ZERO;
+        BigDecimal resultado = BigDecimal.ZERO; // calcular proporción, reemplaza a los dos.
         if (recargoPorcentaje.compareTo(BigDecimal.ZERO) != 0) {
             resultado = subtotal.multiply(recargoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
         }
@@ -656,7 +656,7 @@ public class FacturaServiceImpl implements IFacturaService {
     @Override
     public BigDecimal calcularSubTotalBruto(TipoDeComprobante tipo, BigDecimal subTotal,
             BigDecimal recargoNeto, BigDecimal descuentoNeto, BigDecimal iva105Neto, BigDecimal iva21Neto) {
-
+// antes de llamar al calculo, pasar un boolean "quitarIVA"
         BigDecimal resultado = subTotal.add(recargoNeto).subtract(descuentoNeto);
         if (tipo == TipoDeComprobante.FACTURA_B || tipo == TipoDeComprobante.PRESUPUESTO) {
             resultado = resultado.subtract(iva105Neto.add(iva21Neto));
