@@ -197,21 +197,36 @@ public class ClienteController {
         clienteService.getClientePorId(clientePorActualizar.getId_Cliente());
     if (idCredencial != null) {
       Claims claims =
-              Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+          Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
       Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
       if (idCredencial != idUsuarioLoggedIn
-              && clientePersistido.getCredencial() != null
-              && clientePersistido.getCredencial().getId_Usuario() != idCredencial
-              && !usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
+          && clientePersistido.getCredencial() != null
+          && clientePersistido.getCredencial().getId_Usuario() != idCredencial
+          && !usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
         throw new ForbiddenException(
-                ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
       } else {
         Usuario usuarioCredencial = usuarioService.getUsuarioPorId(idCredencial);
         clientePorActualizar.setCredencial(usuarioCredencial);
       }
     } else {
       clientePorActualizar.setCredencial(null);
+    }
+    if (clientePorActualizar.getBonificacion() != null
+        && clientePersistido.getBonificacion().compareTo(clientePorActualizar.getBonificacion())
+            != 0) {
+      Claims claims =
+          Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+      long idUsuarioLoggedIn = (int) claims.get("idUsuario");
+      Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+      if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
+          && !usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)) {
+        throw new ForbiddenException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+      }
+    } else {
+      clientePorActualizar.setBonificacion(clientePersistido.getBonificacion());
     }
     if (idLocalidad != null) {
       clientePorActualizar.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));

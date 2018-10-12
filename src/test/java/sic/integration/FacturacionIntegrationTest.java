@@ -552,4 +552,174 @@ public class FacturacionIntegrationTest {
         assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
     }
 
+    @Test
+    public void testModificarPedido() {
+        token = restTemplate.postForEntity(apiPrefix + "/login", new Credencial("test", "test"), String.class).getBody();
+        Localidad localidad = new LocalidadBuilder().build();
+        localidad.getProvincia().setPais(restTemplate.postForObject(apiPrefix + "/paises", localidad.getProvincia().getPais(), Pais.class));
+        localidad.setProvincia(restTemplate.postForObject(apiPrefix + "/provincias", localidad.getProvincia(), Provincia.class));
+        localidad = restTemplate.postForObject(apiPrefix + "/localidades", localidad, Localidad.class);
+        Empresa empresa = new EmpresaBuilder()
+                .withLocalidad(localidad)
+                .build();
+        empresa = restTemplate.postForObject(apiPrefix + "/empresas", empresa, Empresa.class);
+        FormaDePago formaDePago = new FormaDePagoBuilder()
+                .withAfectaCaja(false)
+                .withEmpresa(empresa)
+                .withPredeterminado(true)
+                .withNombre("Efectivo")
+                .build();
+        formaDePago = restTemplate.postForObject(apiPrefix + "/formas-de-pago", formaDePago, FormaDePago.class);
+        UsuarioDTO credencial = UsuarioDTO.builder()
+                .username("marce")
+                .password("marce123")
+                .nombre("Marcelo")
+                .apellido("Rockefeller")
+                .email("marce.r@gmail.com")
+                .roles(new ArrayList<>(Arrays.asList(Rol.COMPRADOR)))
+                .build();
+        credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
+        ClienteDTO cliente = ClienteDTO.builder()
+                .tipoDeCliente(TipoDeCliente.EMPRESA)
+                .bonificacion(BigDecimal.TEN)
+                .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+                .razonSocial("Peter Parker")
+                .telefono("379423122")
+                .build();
+        cliente = restTemplate.postForObject(apiPrefix + "/clientes?idEmpresa=" + empresa.getId_Empresa()
+                        + "&idLocalidad=" + localidad.getId_Localidad()
+                        + "&idUsuarioCredencial=" + credencial.getId_Usuario(),
+                cliente, ClienteDTO.class);
+        Transportista transportista = new TransportistaBuilder()
+                .withEmpresa(empresa)
+                .withLocalidad(empresa.getLocalidad())
+                .build();
+        transportista = restTemplate.postForObject(apiPrefix + "/transportistas", transportista, Transportista.class);
+        Medida medida = new MedidaBuilder().withEmpresa(empresa).build();
+        medida = restTemplate.postForObject(apiPrefix + "/medidas", medida, Medida.class);
+        Proveedor proveedor = new ProveedorBuilder().withEmpresa(empresa)
+                .withLocalidad(empresa.getLocalidad())
+                .build();
+        proveedor = restTemplate.postForObject(apiPrefix + "/proveedores", proveedor, Proveedor.class);
+        Rubro rubro = new RubroBuilder().withEmpresa(empresa).build();
+        rubro = restTemplate.postForObject(apiPrefix + "/rubros", rubro, Rubro.class);
+        ProductoDTO productoUno = new ProductoBuilder()
+                .withCodigo("1")
+                .withDescripcion("uno")
+                .withCantidad(BigDecimal.TEN)
+                .withVentaMinima(BigDecimal.ONE)
+                .withPrecioCosto(new BigDecimal("200"))
+                .withGanancia_porcentaje(new BigDecimal("900"))
+                .withGanancia_neto(new BigDecimal("1800"))
+                .withPrecioVentaPublico(new BigDecimal("2000"))
+                .withIva_porcentaje(new BigDecimal("21.0"))
+                .withIva_neto(new BigDecimal("420"))
+                .withPrecioLista(new BigDecimal("2420"))
+                .build();
+        ProductoDTO productoDos = new ProductoBuilder()
+                .withCodigo("2")
+                .withDescripcion("dos")
+                .withCantidad(new BigDecimal("6"))
+                .withVentaMinima(BigDecimal.ONE)
+                .withPrecioCosto(new BigDecimal("200"))
+                .withGanancia_porcentaje(new BigDecimal("900"))
+                .withGanancia_neto(new BigDecimal("1800"))
+                .withPrecioVentaPublico(new BigDecimal("2000"))
+                .withIva_porcentaje(new BigDecimal("10.5"))
+                .withIva_neto(new BigDecimal("210"))
+                .withPrecioLista(new BigDecimal("2210"))
+                .build();
+        productoUno = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
+                        + "&idProveedor=" + proveedor.getId_Proveedor()
+                        + "&idEmpresa=" + empresa.getId_Empresa(),
+                productoUno, ProductoDTO.class);
+        productoDos = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
+                        + "&idProveedor=" + proveedor.getId_Proveedor()
+                        + "&idEmpresa=" + empresa.getId_Empresa(),
+                productoDos, ProductoDTO.class);
+        String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
+        Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
+        List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList();
+        renglonesPedidoDTO.add(NuevoRenglonPedidoDTO.builder()
+                .idProductoItem(productoUno.getId_Producto())
+                .cantidad(new BigDecimal("5"))
+                .descuentoPorcentaje(new BigDecimal("15"))
+                .build());
+        renglonesPedidoDTO.add(NuevoRenglonPedidoDTO.builder()
+                .idProductoItem(productoDos.getId_Producto())
+                .cantidad(new BigDecimal("2"))
+                .descuentoPorcentaje(BigDecimal.ZERO)
+                .build());
+        List<RenglonPedidoDTO> renglonesPedido = Arrays.asList(restTemplate.postForObject(apiPrefix + "/pedidos/renglones", renglonesPedidoDTO, RenglonPedidoDTO[].class));
+        BigDecimal subTotal = BigDecimal.ZERO;
+        for (RenglonPedidoDTO renglon : renglonesPedido) {
+            subTotal = subTotal.add(renglon.getSubTotal());
+        }
+        BigDecimal recargoNeto = subTotal.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
+        BigDecimal descuentoNeto = subTotal.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
+        BigDecimal total = subTotal.add(recargoNeto).subtract(descuentoNeto);
+        NuevoPedidoDTO nuevoPedidoDTO = NuevoPedidoDTO
+                .builder().descuentoNeto(descuentoNeto)
+                .descuentoPorcentaje(new BigDecimal("15"))
+                .recargoNeto(recargoNeto)
+                .recargoPorcentaje(new BigDecimal("5"))
+                .fechaVencimiento(new Date())
+                .observaciones("Nuevo Pedido Test")
+                .renglones(renglonesPedido)
+                .subTotal(subTotal)
+                .total(total)
+                .build();
+        PedidoDTO pedidoRecuperado = restTemplate.postForObject(apiPrefix + "/pedidos?idEmpresa=" + empresa.getId_Empresa()
+                + "&idCliente=" + cliente.getId_Cliente()
+                + "&idUsuario=" + credencial.getId_Usuario(), nuevoPedidoDTO, PedidoDTO.class);
+        assertTrue("El total estimado no es el esperado", pedidoRecuperado.getTotalEstimado().compareTo(nuevoPedidoDTO.getTotal()) == 0);
+        assertEquals(nuevoPedidoDTO.getObservaciones(), pedidoRecuperado.getObservaciones());
+        assertEquals(pedidoRecuperado.getEstado(), EstadoPedido.ABIERTO);
+        ProductoDTO productoTres = new ProductoBuilder()
+                .withCodigo("3")
+                .withDescripcion("tres")
+                .withCantidad(new BigDecimal("9"))
+                .withVentaMinima(BigDecimal.ONE)
+                .withPrecioCosto(new BigDecimal("300"))
+                .withGanancia_porcentaje(new BigDecimal("900"))
+                .withGanancia_neto(new BigDecimal("2700"))
+                .withPrecioVentaPublico(new BigDecimal("3000"))
+                .withIva_porcentaje(new BigDecimal("10.5"))
+                .withIva_neto(new BigDecimal("315"))
+                .withPrecioLista(new BigDecimal("3315"))
+                .build();
+        productoTres = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
+                        + "&idProveedor=" + proveedor.getId_Proveedor()
+                        + "&idEmpresa=" + empresa.getId_Empresa(),
+                productoTres, ProductoDTO.class);
+        renglonesPedidoDTO = new ArrayList();
+        renglonesPedidoDTO.add(NuevoRenglonPedidoDTO.builder()
+                .idProductoItem(productoTres.getId_Producto())
+                .cantidad(new BigDecimal("7"))
+                .descuentoPorcentaje(new BigDecimal("18"))
+                .build());
+        renglonesPedido = Arrays.asList(restTemplate.postForObject(apiPrefix + "/pedidos/renglones", renglonesPedidoDTO, RenglonPedidoDTO[].class));
+        subTotal = BigDecimal.ZERO;
+        for (RenglonPedidoDTO renglon : renglonesPedido) {
+            subTotal = subTotal.add(renglon.getSubTotal());
+        }
+        recargoNeto = subTotal.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
+        descuentoNeto = subTotal.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
+        total = subTotal.add(recargoNeto).subtract(descuentoNeto);
+        pedidoRecuperado.setSubTotal(subTotal);
+        pedidoRecuperado.setRecargoNeto(recargoNeto);
+        pedidoRecuperado.setDescuentoNeto(descuentoNeto);
+        pedidoRecuperado.setTotalActual(total);
+        pedidoRecuperado.setTotalEstimado(total);
+        pedidoRecuperado.setRenglones(renglonesPedido);
+        pedidoRecuperado.setObservaciones("Cambiando las observaciones del pedido");
+        restTemplate.put(apiPrefix + "/pedidos?idEmpresa=" + empresa.getId_Empresa()
+                + "&idCliente=" + cliente.getId_Cliente()
+                + "&idUsuario=" + credencial.getId_Usuario(), pedidoRecuperado);
+        pedidoRecuperado = restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoDTO.class);
+        assertTrue("El total estimado no es el esperado", pedidoRecuperado.getTotalEstimado().compareTo(total) == 0);
+        assertEquals("Cambiando las observaciones del pedido", pedidoRecuperado.getObservaciones());
+        assertEquals(pedidoRecuperado.getEstado(), EstadoPedido.ABIERTO);
+    }
+
 }
