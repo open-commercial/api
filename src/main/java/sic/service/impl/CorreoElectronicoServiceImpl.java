@@ -17,11 +17,12 @@ import javax.mail.PasswordAuthentication;
 import javax.mail.Transport;
 import sic.modelo.ConfiguracionDelSistema;
 import sic.modelo.Empresa;
+import sic.service.BusinessServiceException;
 import sic.service.IConfiguracionDelSistemaService;
 import sic.service.ICorreoElectronicoService;
 import sic.service.IEmpresaService;
-
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 @Service
 public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
@@ -32,6 +33,7 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
   private final IConfiguracionDelSistemaService configuracionDelSistemaService;
   private final IEmpresaService empresaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Autowired
   public CorreoElectronicoServiceImpl(
@@ -76,7 +78,7 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
                 .getConfiguracionDelSistemaPorId(idEmpresa)
                 .getEmailUsername());
         helper.setTo(toEmail);
-        helper.setBcc(bbc);
+        if (bbc != null && !bbc.isEmpty()) helper.setBcc(bbc);
         helper.setSubject(subject);
         helper.setText(mensaje);
         if (byteArray != null) {
@@ -85,7 +87,8 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
         }
         Transport.send(helper.getMimeMessage());
       } catch (MessagingException | MailException ex) {
-        logger.error(ex.getMessage(), ex);
+        throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_correo_error"), ex);
       }
     } else {
       logger.error("Mail environment = {}, el mail NO se envió.", mailEnv);

@@ -182,7 +182,7 @@ public class PedidoServiceImpl implements IPedidoService {
       correoElectronicoService.enviarMailPorEmpresa(
           pedido.getEmpresa().getId_Empresa(),
           emailCliente,
-          null,
+          "",
           "Nuevo Pedido Ingresado",
           MessageFormat.format(
               ResourceBundle.getBundle("Mensajes").getString("mensaje_correo_pedido_recibido"),
