@@ -114,9 +114,8 @@ public class AuthController {
 
   @PostMapping("/registracion")
   public void registrarse(
-      @RequestBody RegistracionClienteAndUsuarioDTO registracionClienteAndUsuarioDTO,
-      @RequestParam("g-recaptcha-response") String recaptcha) {
-    String params = "?secret=" + recaptchaSecretkey + "&response=" + recaptcha;
+      @RequestBody RegistracionClienteAndUsuarioDTO registracionClienteAndUsuarioDTO) {
+    String params = "?secret=" + recaptchaSecretkey + "&response=" + registracionClienteAndUsuarioDTO.getRecaptcha();
     ReCaptchaResponse reCaptchaResponse =
         restTemplate
             .exchange(URL_RECAPTCHA + params, HttpMethod.POST, null, ReCaptchaResponse.class)

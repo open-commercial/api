@@ -22,4 +22,5 @@ public class RegistracionClienteAndUsuarioDTO implements Serializable {
   private String razonSocial;
   private String password;
   private long idEmpresa;
+  private String recaptcha;
 }
