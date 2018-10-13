@@ -35,7 +35,6 @@ ALTER TABLE pedido add column recargoNeto Decimal(25,15);
 ALTER TABLE pedido add column descuentoPorcentaje Decimal(25,15);
 ALTER TABLE pedido add column descuentoNeto Decimal(25,15);
 
-
 SET SQL_SAFE_UPDATES=0;
 update producto 
 inner join renglonpedido on producto.id_Producto = renglonpedido.id_Producto
@@ -48,6 +47,21 @@ renglonpedido.medidaItem = medida.nombre,
 renglonpedido.precioUnitario = renglonpedido.subTotal / renglonpedido.cantidad
 where renglonpedido.cantidad > 0;  -- Buscar los comprobantes con cantidades negativas y corregirlos
 SET SQL_SAFE_UPDATES=1;
+
+-- SET SQL_SAFE_UPDATES=0;
+-- update producto 
+-- inner join renglonpedido on producto.id_Producto = renglonpedido.id_Producto
+-- inner join medida on producto.id_Medida = medida.id_Medida
+-- set
+-- renglonpedido.idProductoItem = producto.id_Producto,
+-- renglonpedido.codigoItem = producto.codigo,
+-- renglonpedido.descripcionItem = producto.descripcion,
+-- renglonpedido.medidaItem = medida.nombre,
+-- renglonpedido.precioUnitario = 0,
+-- renglonpedido.subTotal = 0,
+-- renglonpedido.cantidad = 0
+-- where renglonpedido.cantidad <= 0;  
+-- SET SQL_SAFE_UPDATES=1;
 
 ALTER TABLE renglonpedido DROP foreign key FKfxncx6f7eg8swxchd6sllrssa;
 ALTER TABLE renglonpedido DROP COLUMN renglonpedido.id_Producto;
