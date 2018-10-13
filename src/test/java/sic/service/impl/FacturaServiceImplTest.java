@@ -17,6 +17,7 @@ import sic.builder.EmpresaBuilder;
 import sic.builder.TransportistaBuilder;
 import sic.modelo.*;
 import sic.repository.FacturaVentaRepository;
+import sic.util.CalculosComprobante;
 
 @RunWith(SpringRunner.class)
 public class FacturaServiceImplTest {
@@ -315,15 +316,15 @@ public class FacturaServiceImplTest {
     }
     assertTrue(
         "El subtotal no es el esperado",
-        facturaService.calcularSubTotal(importes).doubleValue() == 33.664);
+        CalculosComprobante.calcularSubTotal(importes).doubleValue() == 33.664);
   }
 
   @Test
   public void shouldCacularDescuentoNeto() {
     assertTrue(
         "El descuento neto no es el esperado",
-        facturaService
-                .calcularDescuentoNeto(new BigDecimal("78.255"), new BigDecimal("15.045"))
+        CalculosComprobante
+                .calcularProporcion(new BigDecimal("78.255"), new BigDecimal("15.045"))
                 .doubleValue()
             == 11.773464750000000);
   }
@@ -332,8 +333,8 @@ public class FacturaServiceImplTest {
   public void shouldCalcularRecargoNeto() {
     assertTrue(
         "El recargo neto no es el esperado",
-        facturaService
-                .calcularRecargoNeto(new BigDecimal("78.122"), new BigDecimal("15.502"))
+        CalculosComprobante
+                .calcularProporcion(new BigDecimal("78.122"), new BigDecimal("15.502"))
                 .doubleValue()
             == 12.11047244);
   }
@@ -342,9 +343,9 @@ public class FacturaServiceImplTest {
   public void shouldCalcularSubTotalBrutoFacturaA() {
     assertTrue(
         "El sub total bruto no es el esperado",
-        facturaService
+        CalculosComprobante
                 .calcularSubTotalBruto(
-                    TipoDeComprobante.FACTURA_A,
+                    false,
                     new BigDecimal("225.025"),
                     new BigDecimal("10.454"),
                     new BigDecimal("15.002"),
@@ -358,9 +359,9 @@ public class FacturaServiceImplTest {
   public void shouldCalcularSubTotalBrutoFacturaB() {
     assertTrue(
         "El sub total bruto no es el esperado",
-        facturaService
+        CalculosComprobante
                 .calcularSubTotalBruto(
-                    TipoDeComprobante.FACTURA_B,
+                    true,
                     new BigDecimal("1205.5"),
                     new BigDecimal("80.5"),
                     new BigDecimal("111.05"),
@@ -466,8 +467,7 @@ public class FacturaServiceImplTest {
   public void shouldCalcularTotal() {
     assertTrue(
         "El total no es el esperado",
-        facturaService
-                .calcularTotal(
+        CalculosComprobante.calcularTotal(
                     new BigDecimal("350.451"), new BigDecimal("10.753"), new BigDecimal("25.159"))
                 .doubleValue()
             == 386.363);
@@ -540,156 +540,152 @@ public class FacturaServiceImplTest {
             == 0);
   }
 
-//  @Test
-//  public void shouldCalcularPrecioUnitarioWhenEsUnaVentaConFacturaA() {
-//    Producto producto = new Producto();
-//    producto.setPrecioCosto(new BigDecimal("100"));
-//    producto.setPrecioVentaPublico(new BigDecimal("121"));
-//    producto.setIvaPorcentaje(new BigDecimal("21"));
-//    assertTrue(
-//        "El precio unitario no es el esperado",
-//        facturaService
-//                .calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_A, producto)
-//                .compareTo(new BigDecimal("121"))
-//            == 0);
-//  }
-//
-//  @Test
-//  public void shouldCalcularPrecioUnitarioWhenEsUnaVentaConFacturaX() {
-//    Producto producto = new Producto();
-//    producto.setPrecioCosto(new BigDecimal("100"));
-//    producto.setPrecioVentaPublico(new BigDecimal("121"));
-//    producto.setIvaPorcentaje(new BigDecimal("21"));
-//    assertTrue(
-//        "El precio unitario no es el esperado",
-//        facturaService
-//                .calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_X, producto)
-//                .compareTo(new BigDecimal("121"))
-//            == 0);
-//  }
-//
-//  @Test
-//  public void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaA() {
-//    Producto producto = new Producto();
-//    producto.setPrecioCosto(new BigDecimal("100"));
-//    producto.setPrecioVentaPublico(new BigDecimal("121"));
-//    producto.setIvaPorcentaje(new BigDecimal("21"));
-//    assertTrue(
-//        "El precio unitario no es el esperado",
-//        facturaService
-//                .calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_A, producto)
-//                .compareTo(new BigDecimal("100"))
-//            == 0);
-//  }
-//
-//  @Test
-//  public void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaX() {
-//    Producto producto = new Producto();
-//    producto.setPrecioCosto(new BigDecimal("100"));
-//    producto.setPrecioVentaPublico(new BigDecimal("121"));
-//    producto.setIvaPorcentaje(new BigDecimal("21"));
-//    assertTrue(
-//        "El precio unitario no es el esperado",
-//        facturaService
-//                .calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_X, producto)
-//                .compareTo(new BigDecimal("100"))
-//            == 0);
-//  }
-//
-//  @Test
-//  public void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaB() {
-//    Producto producto = new Producto();
-//    producto.setPrecioCosto(new BigDecimal("100"));
-//    producto.setPrecioVentaPublico(new BigDecimal("121"));
-//    producto.setIvaPorcentaje(new BigDecimal("21"));
-//    producto.setImpuestoInternoPorcentaje(BigDecimal.ZERO);
-//    assertTrue(
-//        "El precio unitario no es el esperado",
-//        facturaService
-//                .calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_B, producto)
-//                .compareTo(new BigDecimal("121"))
-//            == 0);
-//  }
-//
-//  @Test
-//  public void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaC() {
-//    Producto producto = new Producto();
-//    producto.setPrecioCosto(new BigDecimal("100"));
-//    producto.setPrecioVentaPublico(new BigDecimal("121"));
-//    producto.setIvaPorcentaje(new BigDecimal("21"));
-//    producto.setImpuestoInternoPorcentaje(BigDecimal.ZERO);
-//    assertTrue(
-//        "El precio unitario no es el esperado",
-//        facturaService
-//                .calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_C, producto)
-//                .compareTo(new BigDecimal("121"))
-//            == 0);
-//  }
-//
-//  @Test
-//  public void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaY() {
-//    Producto producto = new Producto();
-//    producto.setPrecioCosto(new BigDecimal("100"));
-//    producto.setPrecioVentaPublico(new BigDecimal("121"));
-//    producto.setIvaPorcentaje(new BigDecimal("21"));
-//    producto.setImpuestoInternoPorcentaje(BigDecimal.ZERO);
-//    assertTrue(
-//        "El precio unitario no es el esperado",
-//        facturaService
-//                .calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_Y, producto)
-//                .compareTo(new BigDecimal("121"))
-//            == 0);
-//  }
-//
-//  @Test
-//  public void shouldCalcularPrecioUnitarioWhenEsUnaVentaConFacturaB() {
-//    Producto producto = new Producto();
-//    producto.setPrecioCosto(new BigDecimal("100"));
-//    producto.setGananciaNeto(new BigDecimal("100"));
-//    producto.setIvaPorcentaje(new BigDecimal("21"));
-//    producto.setIvaNeto(new BigDecimal("42"));
-//    producto.setPrecioVentaPublico(new BigDecimal("200"));
-//    producto.setPrecioLista(new BigDecimal("242"));
-//    assertTrue(
-//        "El precio unitario no es el esperado",
-//        facturaService
-//                .calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_B, producto)
-//                .compareTo(new BigDecimal("242"))
-//            == 0);
-//  }
-//
-//  @Test
-//  public void shouldCalcularPrecioUnitarioWhenEsUnaVentaConFacturaC() {
-//    Producto producto = new Producto();
-//    producto.setPrecioCosto(new BigDecimal("100"));
-//    producto.setGananciaNeto(new BigDecimal("100"));
-//    producto.setIvaPorcentaje(new BigDecimal("21"));
-//    producto.setIvaNeto(new BigDecimal("42"));
-//    producto.setPrecioVentaPublico(new BigDecimal("200"));
-//    producto.setPrecioLista(new BigDecimal("242"));
-//    assertTrue(
-//        "El precio unitario no es el esperado",
-//        facturaService
-//                .calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_C, producto)
-//                .compareTo(new BigDecimal("242"))
-//            == 0);
-//  }
-//
-//  @Test
-//  public void shouldCalcularPrecioUnitarioWhenVentaYFacturaY() {
-//    Producto producto = new Producto();
-//    producto.setPrecioCosto(new BigDecimal("100"));
-//    producto.setGananciaNeto(new BigDecimal("100"));
-//    producto.setIvaPorcentaje(new BigDecimal("21"));
-//    producto.setIvaNeto(new BigDecimal("42"));
-//    producto.setPrecioVentaPublico(new BigDecimal("200"));
-//    producto.setPrecioLista(new BigDecimal("242"));
-//    producto.setImpuestoInternoPorcentaje(BigDecimal.ZERO);
-//    assertTrue(
-//        "El precio unitario no es el esperado",
-//        facturaService
-//                .calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_Y, producto)
-//                .compareTo(new BigDecimal("221"))
-//            == 0);
-//  }
+  @Test
+  public void shouldCalcularPrecioUnitarioWhenEsUnaVentaConFacturaA() {
+    Producto producto = new Producto();
+    producto.setPrecioCosto(new BigDecimal("100"));
+    producto.setPrecioVentaPublico(new BigDecimal("121"));
+    producto.setIvaPorcentaje(new BigDecimal("21"));
+    assertTrue(
+        "El precio unitario no es el esperado",
+        facturaService
+                .calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_A, producto)
+                .compareTo(new BigDecimal("121"))
+            == 0);
+  }
+
+  @Test
+  public void shouldCalcularPrecioUnitarioWhenEsUnaVentaConFacturaX() {
+    Producto producto = new Producto();
+    producto.setPrecioCosto(new BigDecimal("100"));
+    producto.setPrecioVentaPublico(new BigDecimal("121"));
+    producto.setIvaPorcentaje(new BigDecimal("21"));
+    assertTrue(
+        "El precio unitario no es el esperado",
+        facturaService
+                .calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_X, producto)
+                .compareTo(new BigDecimal("121"))
+            == 0);
+  }
+
+  @Test
+  public void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaA() {
+    Producto producto = new Producto();
+    producto.setPrecioCosto(new BigDecimal("100"));
+    producto.setPrecioVentaPublico(new BigDecimal("121"));
+    producto.setIvaPorcentaje(new BigDecimal("21"));
+    assertTrue(
+        "El precio unitario no es el esperado",
+        facturaService
+                .calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_A, producto)
+                .compareTo(new BigDecimal("100"))
+            == 0);
+  }
+
+  @Test
+  public void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaX() {
+    Producto producto = new Producto();
+    producto.setPrecioCosto(new BigDecimal("100"));
+    producto.setPrecioVentaPublico(new BigDecimal("121"));
+    producto.setIvaPorcentaje(new BigDecimal("21"));
+    assertTrue(
+        "El precio unitario no es el esperado",
+        facturaService
+                .calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_X, producto)
+                .compareTo(new BigDecimal("100"))
+            == 0);
+  }
+
+  @Test
+  public void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaB() {
+    Producto producto = new Producto();
+    producto.setPrecioCosto(new BigDecimal("100"));
+    producto.setPrecioVentaPublico(new BigDecimal("121"));
+    producto.setIvaPorcentaje(new BigDecimal("21"));
+    assertTrue(
+        "El precio unitario no es el esperado",
+        facturaService
+                .calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_B, producto)
+                .compareTo(new BigDecimal("121"))
+            == 0);
+  }
+
+  @Test
+  public void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaC() {
+    Producto producto = new Producto();
+    producto.setPrecioCosto(new BigDecimal("100"));
+    producto.setPrecioVentaPublico(new BigDecimal("121"));
+    producto.setIvaPorcentaje(new BigDecimal("21"));
+    assertTrue(
+        "El precio unitario no es el esperado",
+        facturaService
+                .calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_C, producto)
+                .compareTo(new BigDecimal("121"))
+            == 0);
+  }
+
+  @Test
+  public void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaY() {
+    Producto producto = new Producto();
+    producto.setPrecioCosto(new BigDecimal("100"));
+    producto.setPrecioVentaPublico(new BigDecimal("121"));
+    producto.setIvaPorcentaje(new BigDecimal("21"));
+    assertTrue(
+        "El precio unitario no es el esperado",
+        facturaService
+                .calcularPrecioUnitario(Movimiento.COMPRA, TipoDeComprobante.FACTURA_Y, producto)
+                .compareTo(new BigDecimal("121"))
+            == 0);
+  }
+
+  @Test
+  public void shouldCalcularPrecioUnitarioWhenEsUnaVentaConFacturaB() {
+    Producto producto = new Producto();
+    producto.setPrecioCosto(new BigDecimal("100"));
+    producto.setGananciaNeto(new BigDecimal("100"));
+    producto.setIvaPorcentaje(new BigDecimal("21"));
+    producto.setIvaNeto(new BigDecimal("42"));
+    producto.setPrecioVentaPublico(new BigDecimal("200"));
+    producto.setPrecioLista(new BigDecimal("242"));
+    assertTrue(
+        "El precio unitario no es el esperado",
+        facturaService
+                .calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_B, producto)
+                .compareTo(new BigDecimal("242"))
+            == 0);
+  }
+
+  @Test
+  public void shouldCalcularPrecioUnitarioWhenEsUnaVentaConFacturaC() {
+    Producto producto = new Producto();
+    producto.setPrecioCosto(new BigDecimal("100"));
+    producto.setGananciaNeto(new BigDecimal("100"));
+    producto.setIvaPorcentaje(new BigDecimal("21"));
+    producto.setIvaNeto(new BigDecimal("42"));
+    producto.setPrecioVentaPublico(new BigDecimal("200"));
+    producto.setPrecioLista(new BigDecimal("242"));
+    assertTrue(
+        "El precio unitario no es el esperado",
+        facturaService
+                .calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_C, producto)
+                .compareTo(new BigDecimal("242"))
+            == 0);
+  }
+
+  @Test
+  public void shouldCalcularPrecioUnitarioWhenVentaYFacturaY() {
+    Producto producto = new Producto();
+    producto.setPrecioCosto(new BigDecimal("100"));
+    producto.setGananciaNeto(new BigDecimal("100"));
+    producto.setIvaPorcentaje(new BigDecimal("21"));
+    producto.setIvaNeto(new BigDecimal("42"));
+    producto.setPrecioVentaPublico(new BigDecimal("200"));
+    producto.setPrecioLista(new BigDecimal("242"));
+    assertTrue(
+        "El precio unitario no es el esperado",
+        facturaService
+                .calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_Y, producto)
+                .compareTo(new BigDecimal("221"))
+            == 0);
+  }
 }
