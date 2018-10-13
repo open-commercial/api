@@ -563,13 +563,6 @@ public class FacturacionIntegrationTest {
                 .withLocalidad(localidad)
                 .build();
         empresa = restTemplate.postForObject(apiPrefix + "/empresas", empresa, Empresa.class);
-        FormaDePago formaDePago = new FormaDePagoBuilder()
-                .withAfectaCaja(false)
-                .withEmpresa(empresa)
-                .withPredeterminado(true)
-                .withNombre("Efectivo")
-                .build();
-        formaDePago = restTemplate.postForObject(apiPrefix + "/formas-de-pago", formaDePago, FormaDePago.class);
         UsuarioDTO credencial = UsuarioDTO.builder()
                 .username("marce")
                 .password("marce123")
@@ -594,7 +587,6 @@ public class FacturacionIntegrationTest {
                 .withEmpresa(empresa)
                 .withLocalidad(empresa.getLocalidad())
                 .build();
-        transportista = restTemplate.postForObject(apiPrefix + "/transportistas", transportista, Transportista.class);
         Medida medida = new MedidaBuilder().withEmpresa(empresa).build();
         medida = restTemplate.postForObject(apiPrefix + "/medidas", medida, Medida.class);
         Proveedor proveedor = new ProveedorBuilder().withEmpresa(empresa)
@@ -639,7 +631,7 @@ public class FacturacionIntegrationTest {
                 productoDos, ProductoDTO.class);
         String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
-        List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList();
+        List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
         renglonesPedidoDTO.add(NuevoRenglonPedidoDTO.builder()
                 .idProductoItem(productoUno.getId_Producto())
                 .cantidad(new BigDecimal("5"))
@@ -692,7 +684,7 @@ public class FacturacionIntegrationTest {
                         + "&idProveedor=" + proveedor.getId_Proveedor()
                         + "&idEmpresa=" + empresa.getId_Empresa(),
                 productoTres, ProductoDTO.class);
-        renglonesPedidoDTO = new ArrayList();
+        renglonesPedidoDTO = new ArrayList<>();
         renglonesPedidoDTO.add(NuevoRenglonPedidoDTO.builder()
                 .idProductoItem(productoTres.getId_Producto())
                 .cantidad(new BigDecimal("7"))
