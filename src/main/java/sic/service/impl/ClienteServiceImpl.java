@@ -28,6 +28,7 @@ public class ClienteServiceImpl implements IClienteService {
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IUsuarioService usuarioService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Autowired
   public ClienteServiceImpl(
@@ -43,15 +44,9 @@ public class ClienteServiceImpl implements IClienteService {
   public Cliente getClientePorId(long idCliente) {
     Cliente cliente = clienteRepository.findOne(idCliente);
     if (cliente == null) {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_no_existente"));
+      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_cliente_no_existente"));
     }
     return cliente;
-  }
-
-  @Override
-  public Cliente getClientePorRazonSocial(String razonSocial, Empresa empresa) {
-    return clienteRepository.findByRazonSocialAndEmpresaAndEliminado(razonSocial, empresa, false);
   }
 
   @Override
@@ -65,7 +60,7 @@ public class ClienteServiceImpl implements IClienteService {
         clienteRepository.findByEmpresaAndPredeterminadoAndEliminado(empresa, true, false);
     if (cliente == null) {
       throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_sin_predeterminado"));
+          RESOURCE_BUNDLE.getString("mensaje_cliente_sin_predeterminado"));
     }
     return cliente;
   }
@@ -110,9 +105,12 @@ public class ClienteServiceImpl implements IClienteService {
       builder.or(nfPredicate);
     }
     if (criteria.isBuscaPorIdFiscal()) builder.or(qCliente.idFiscal.eq(criteria.getIdFiscal()));
-    if (criteria.isBuscarPorNroDeCliente()) builder.or(qCliente.nroCliente.containsIgnoreCase(criteria.getNroDeCliente()));
-    if (criteria.isBuscaPorViajante()) builder.and(qCliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
-    if (criteria.isBuscaPorLocalidad()) builder.and(qCliente.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
+    if (criteria.isBuscarPorNroDeCliente())
+      builder.or(qCliente.nroCliente.containsIgnoreCase(criteria.getNroDeCliente()));
+    if (criteria.isBuscaPorViajante())
+      builder.and(qCliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
+    if (criteria.isBuscaPorLocalidad())
+      builder.and(qCliente.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
       builder.and(qCliente.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
     if (criteria.isBuscaPorPais())
@@ -141,7 +139,8 @@ public class ClienteServiceImpl implements IClienteService {
       }
       builder.and(rsPredicate);
     }
-    builder.and(qCliente.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qCliente.eliminado.eq(false)));
+    builder.and(
+        qCliente.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qCliente.eliminado.eq(false)));
     Page<Cliente> page = clienteRepository.findAll(builder, criteria.getPageable());
     if (criteria.isConSaldo()) {
       page.getContent()
@@ -162,28 +161,28 @@ public class ClienteServiceImpl implements IClienteService {
         && !cliente.getEmail().equals("")
         && !Validator.esEmailValido(cliente.getEmail())) {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_email_invalido"));
+          RESOURCE_BUNDLE.getString("mensaje_cliente_email_invalido"));
     }
     // Requeridos
     if (cliente.getTipoDeCliente() == null) {
       throw new BusinessServiceException(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_tipoDeCliente"));
+          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_tipoDeCliente"));
     }
     if (cliente.getCategoriaIVA() == null) {
       throw new BusinessServiceException(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_categoriaIVA"));
+          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_categoriaIVA"));
     }
     if (Validator.esVacio(cliente.getRazonSocial())) {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_razonSocial"));
+          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_razonSocial"));
     }
     if (Validator.esVacio(cliente.getTelefono())) {
       throw new BusinessServiceException(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_telefono"));
+          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_telefono"));
     }
     if (cliente.getEmpresa() == null) {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_empresa"));
+          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_empresa"));
     }
     // Duplicados
     // ID Fiscal
@@ -194,27 +193,14 @@ public class ClienteServiceImpl implements IClienteService {
           && clienteDuplicado != null
           && clienteDuplicado.getId_Cliente() != cliente.getId_Cliente()) {
         throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_duplicado_idFiscal"));
+            RESOURCE_BUNDLE.getString("mensaje_cliente_duplicado_idFiscal"));
       }
       if (operacion == TipoDeOperacion.ALTA
           && clienteDuplicado != null
           && cliente.getIdFiscal() != null) {
         throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_duplicado_idFiscal"));
+            RESOURCE_BUNDLE.getString("mensaje_cliente_duplicado_idFiscal"));
       }
-    }
-    // Razon Social
-    Cliente clienteDuplicado =
-        this.getClientePorRazonSocial(cliente.getRazonSocial(), cliente.getEmpresa());
-    if (operacion == TipoDeOperacion.ALTA && clienteDuplicado != null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_duplicado_razonSocial"));
-    }
-    if (operacion == TipoDeOperacion.ACTUALIZACION
-        && clienteDuplicado != null
-        && clienteDuplicado.getId_Cliente() != cliente.getId_Cliente()) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_duplicado_razonSocial"));
     }
   }
 
@@ -236,8 +222,7 @@ public class ClienteServiceImpl implements IClienteService {
       if (clienteYaAsignado != null) {
         throw new BusinessServiceException(
             MessageFormat.format(
-                ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_cliente_credencial_no_valida"),
+                RESOURCE_BUNDLE.getString("mensaje_cliente_credencial_no_valida"),
                 clienteYaAsignado.getRazonSocial()));
       } else {
         if (!cliente.getCredencial().getRoles().contains(Rol.COMPRADOR)) {
@@ -267,8 +252,7 @@ public class ClienteServiceImpl implements IClienteService {
           && clienteYaAsignado.getId_Cliente() != clientePorActualizar.getId_Cliente()) {
         throw new BusinessServiceException(
             MessageFormat.format(
-                ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_cliente_credencial_no_valida"),
+                RESOURCE_BUNDLE.getString("mensaje_cliente_credencial_no_valida"),
                 clienteYaAsignado.getRazonSocial()));
       } else {
         if (!clientePorActualizar.getCredencial().getRoles().contains(Rol.COMPRADOR)) {
@@ -285,12 +269,11 @@ public class ClienteServiceImpl implements IClienteService {
   public void eliminar(long idCliente) {
     Cliente cliente = this.getClientePorId(idCliente);
     if (cliente == null) {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_no_existente"));
+      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_cliente_no_existente"));
     }
     cliente.setEliminado(true);
     clienteRepository.save(cliente);
-    logger.warn("El Cliente " + cliente + " se eliminó correctamente.");
+    logger.warn("El Cliente {} se eliminó correctamente.", cliente);
   }
 
   @Override
@@ -322,10 +305,10 @@ public class ClienteServiceImpl implements IClienteService {
     while (esRepetido) {
       randomLong = min + (long) (Math.random() * (max - min));
       String nroCliente = Long.toString(randomLong);
-      Cliente c = clienteRepository.findByNroClienteAndEmpresaAndEliminado(nroCliente, empresa, false);
+      Cliente c =
+          clienteRepository.findByNroClienteAndEmpresaAndEliminado(nroCliente, empresa, false);
       if (c == null) esRepetido = false;
     }
     return Long.toString(randomLong);
   }
-
 }

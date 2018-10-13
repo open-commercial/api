@@ -15,8 +15,6 @@ public interface IClienteService {
 
   Cliente getClientePorIdFiscal(Long idFiscal, Empresa empresa);
 
-  Cliente getClientePorRazonSocial(String razonSocial, Empresa empresa);
-
   Cliente getClientePredeterminado(Empresa empresa);
 
   boolean existeClientePredeterminado(Empresa empresa);
