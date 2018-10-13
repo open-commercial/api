@@ -34,6 +34,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.service.*;
+import sic.util.CalculosComprobante;
 import sic.util.FormatterFechaHora;
 import sic.util.Validator;
 import sic.repository.FacturaVentaRepository;
@@ -554,17 +555,27 @@ public class FacturaServiceImpl implements IFacturaService {
             importes[i] = renglon.getImporte();
             i++;
         }
-        if (factura.getSubTotal().compareTo(this.calcularSubTotal(importes)) != 0) {
+        if (factura.getSubTotal().compareTo(CalculosComprobante.calcularSubTotal(importes)) != 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_sub_total_no_valido"));
         }
         //SubTotalBruto
-        if (factura.getSubTotalBruto().compareTo(this.calcularSubTotalBruto(factura.getTipoComprobante(),
-                factura.getSubTotal(), factura.getRecargoNeto(), factura.getDescuentoNeto(),
-                factura.getIva105Neto(), factura.getIva21Neto())) != 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_sub_total_bruto_no_valido"));
-        }
+    if (factura
+            .getSubTotalBruto()
+            .compareTo(
+                CalculosComprobante.calcularSubTotalBruto(
+                    (factura.getTipoComprobante() == TipoDeComprobante.FACTURA_B
+                        || factura.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO),
+                    factura.getSubTotal(),
+                    factura.getRecargoNeto(),
+                    factura.getDescuentoNeto(),
+                    factura.getIva105Neto(),
+                    factura.getIva21Neto()))
+        != 0) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_factura_sub_total_bruto_no_valido"));
+    }
         //IVA
         i = 0;
         if (factura.getTipoComprobante() == TipoDeComprobante.FACTURA_A || factura.getTipoComprobante() == TipoDeComprobante.FACTURA_B
@@ -592,7 +603,7 @@ public class FacturaServiceImpl implements IFacturaService {
             }
         }
         //Total
-        BigDecimal total = this.calcularTotal(factura.getSubTotalBruto(), factura.getIva105Neto(), factura.getIva21Neto());
+        BigDecimal total = CalculosComprobante.calcularTotal(factura.getSubTotalBruto(), factura.getIva105Neto(), factura.getIva21Neto());
         if (factura.getTotal().compareTo(total) != 0 || factura.getTotal().compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_factura_total_no_valido"));
@@ -624,49 +635,6 @@ public class FacturaServiceImpl implements IFacturaService {
         fv.setNumFacturaAfip(comprobante.getNumFacturaAfip());
         renglonCuentaCorrienteService.updateCAEFactura(fv.getId_Factura(), comprobante.getCAE());
         return fv;
-    }
-
-    @Override
-    public BigDecimal calcularSubTotal(BigDecimal[] importes) {
-        BigDecimal resultado = BigDecimal.ZERO;
-        for (BigDecimal importe : importes) {
-            resultado = resultado.add(importe);
-        }
-        return resultado;
-    }
-
-    @Override
-    public BigDecimal calcularDescuentoNeto(BigDecimal importe, BigDecimal descuentoPorcentaje) {
-        BigDecimal resultado = BigDecimal.ZERO;
-        if (descuentoPorcentaje.compareTo(BigDecimal.ZERO) != 0) {
-            resultado = importe.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
-        }
-        return resultado;
-    }
-
-    @Override
-    public BigDecimal calcularRecargoNeto(BigDecimal subtotal, BigDecimal recargoPorcentaje) {
-        BigDecimal resultado = BigDecimal.ZERO; // calcular proporción, reemplaza a los dos.
-        if (recargoPorcentaje.compareTo(BigDecimal.ZERO) != 0) {
-            resultado = subtotal.multiply(recargoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
-        }
-        return resultado;
-    }
-
-    @Override
-    public BigDecimal calcularSubTotalBruto(TipoDeComprobante tipo, BigDecimal subTotal,
-            BigDecimal recargoNeto, BigDecimal descuentoNeto, BigDecimal iva105Neto, BigDecimal iva21Neto) {
-// antes de llamar al calculo, pasar un boolean "quitarIVA"
-        BigDecimal resultado = subTotal.add(recargoNeto).subtract(descuentoNeto);
-        if (tipo == TipoDeComprobante.FACTURA_B || tipo == TipoDeComprobante.PRESUPUESTO) {
-            resultado = resultado.subtract(iva105Neto.add(iva21Neto));
-        }
-        return resultado;
-    }
-
-    @Override
-    public BigDecimal calcularTotal(BigDecimal subTotalBruto, BigDecimal iva105Neto, BigDecimal iva21Neto) {
-        return subTotalBruto.add(iva105Neto).add(iva21Neto);
     }
 
     @Override
@@ -1020,7 +988,7 @@ public class FacturaServiceImpl implements IFacturaService {
                     .getString("mensaje_descuento_mayor_cien"));
         }
         nuevoRenglon.setDescuentoPorcentaje(descuentoPorcentaje);
-        nuevoRenglon.setDescuentoNeto(this.calcularDescuentoNeto(nuevoRenglon.getPrecioUnitario(), descuentoPorcentaje));
+        nuevoRenglon.setDescuentoNeto(CalculosComprobante.calcularProporcion(nuevoRenglon.getPrecioUnitario(), descuentoPorcentaje));
         nuevoRenglon.setIvaPorcentaje(producto.getIvaPorcentaje());
         if (tipoDeComprobante.equals(TipoDeComprobante.FACTURA_Y)) {
             nuevoRenglon.setIvaPorcentaje(producto.getIvaPorcentaje().divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP));
@@ -1079,16 +1047,17 @@ public class FacturaServiceImpl implements IFacturaService {
             ivaNetoRenglones[indice] = renglon.getIvaNeto();
             indice++;
         }
-        facturaSinIVA.setSubTotal(this.calcularSubTotal(importes));
-        facturaSinIVA.setDescuentoNeto(this.calcularDescuentoNeto(facturaSinIVA.getSubTotal(), facturaSinIVA.getDescuentoPorcentaje()));
-        facturaSinIVA.setRecargoNeto(this.calcularRecargoNeto(facturaSinIVA.getSubTotal(), facturaSinIVA.getRecargoPorcentaje()));
+        facturaSinIVA.setSubTotal(CalculosComprobante.calcularSubTotal(importes));
+        facturaSinIVA.setDescuentoNeto(CalculosComprobante.calcularProporcion(facturaSinIVA.getSubTotal(), facturaSinIVA.getDescuentoPorcentaje()));
+        facturaSinIVA.setRecargoNeto(CalculosComprobante.calcularProporcion(facturaSinIVA.getSubTotal(), facturaSinIVA.getRecargoPorcentaje()));
         facturaSinIVA.setIva105Neto(this.calcularIvaNetoFactura(facturaSinIVA.getTipoComprobante(), cantidades,
                 ivaPorcentajeRenglones, ivaNetoRenglones, IVA_105, facturaADividir.getDescuentoPorcentaje(), facturaADividir.getRecargoPorcentaje()));
         facturaSinIVA.setIva21Neto(this.calcularIvaNetoFactura(facturaSinIVA.getTipoComprobante(), cantidades,
                 ivaPorcentajeRenglones, ivaNetoRenglones, IVA_21, facturaADividir.getDescuentoPorcentaje(), facturaADividir.getRecargoPorcentaje()));
-        facturaSinIVA.setSubTotalBruto(this.calcularSubTotalBruto(facturaSinIVA.getTipoComprobante(), facturaSinIVA.getSubTotal(),
+        facturaSinIVA.setSubTotalBruto(CalculosComprobante.calcularSubTotalBruto((facturaSinIVA.getTipoComprobante() == TipoDeComprobante.FACTURA_B
+            || facturaSinIVA.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO), facturaSinIVA.getSubTotal(),
                 facturaSinIVA.getRecargoNeto(), facturaSinIVA.getDescuentoNeto(), facturaSinIVA.getIva105Neto(), facturaSinIVA.getIva21Neto()));
-        facturaSinIVA.setTotal(this.calcularTotal(facturaSinIVA.getSubTotalBruto(), facturaSinIVA.getIva105Neto(), facturaSinIVA.getIva21Neto()));
+        facturaSinIVA.setTotal(CalculosComprobante.calcularTotal(facturaSinIVA.getSubTotalBruto(), facturaSinIVA.getIva105Neto(), facturaSinIVA.getIva21Neto()));
         facturaSinIVA.setObservaciones(facturaADividir.getObservaciones());
         facturaSinIVA.setEmpresa(facturaADividir.getEmpresa());
         facturaSinIVA.setEliminada(facturaADividir.isEliminada());
@@ -1115,16 +1084,17 @@ public class FacturaServiceImpl implements IFacturaService {
             ivaNetoRenglones[indice] = renglon.getIvaNeto();
             indice++;
         }
-        facturaConIVA.setSubTotal(this.calcularSubTotal(importes));
-        facturaConIVA.setDescuentoNeto(this.calcularDescuentoNeto(facturaConIVA.getSubTotal(), facturaConIVA.getDescuentoPorcentaje()));
-        facturaConIVA.setRecargoNeto(this.calcularRecargoNeto(facturaConIVA.getSubTotal(), facturaConIVA.getRecargoPorcentaje()));
+        facturaConIVA.setSubTotal(CalculosComprobante.calcularSubTotal(importes));
+        facturaConIVA.setDescuentoNeto(CalculosComprobante.calcularProporcion(facturaConIVA.getSubTotal(), facturaConIVA.getDescuentoPorcentaje()));
+        facturaConIVA.setRecargoNeto(CalculosComprobante.calcularProporcion(facturaConIVA.getSubTotal(), facturaConIVA.getRecargoPorcentaje()));
         facturaConIVA.setIva105Neto(this.calcularIvaNetoFactura(facturaConIVA.getTipoComprobante(), cantidades,
                 ivaPorcentajeRenglones, ivaNetoRenglones, IVA_105, facturaADividir.getDescuentoPorcentaje(), facturaADividir.getRecargoPorcentaje()));
         facturaConIVA.setIva21Neto(this.calcularIvaNetoFactura(facturaConIVA.getTipoComprobante(), cantidades,
                 ivaPorcentajeRenglones, ivaNetoRenglones, IVA_21, facturaADividir.getDescuentoPorcentaje(), facturaADividir.getRecargoPorcentaje()));
-        facturaConIVA.setSubTotalBruto(this.calcularSubTotalBruto(facturaConIVA.getTipoComprobante(), facturaConIVA.getSubTotal(),
+        facturaConIVA.setSubTotalBruto(CalculosComprobante.calcularSubTotalBruto((facturaConIVA.getTipoComprobante() == TipoDeComprobante.FACTURA_B
+            || facturaConIVA.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO), facturaConIVA.getSubTotal(),
                 facturaConIVA.getRecargoNeto(), facturaConIVA.getDescuentoNeto(), facturaConIVA.getIva105Neto(), facturaConIVA.getIva21Neto()));
-        facturaConIVA.setTotal(this.calcularTotal(facturaConIVA.getSubTotalBruto(), facturaConIVA.getIva105Neto(), facturaConIVA.getIva21Neto()));
+        facturaConIVA.setTotal(CalculosComprobante.calcularTotal(facturaConIVA.getSubTotalBruto(), facturaConIVA.getIva105Neto(), facturaConIVA.getIva21Neto()));
         facturaConIVA.setObservaciones(facturaADividir.getObservaciones());
         facturaConIVA.setEmpresa(facturaADividir.getEmpresa());
         facturaConIVA.setEliminada(facturaADividir.isEliminada());

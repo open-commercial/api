@@ -35,17 +35,7 @@ public interface IFacturaService {
     
     FacturaVenta autorizarFacturaVenta(FacturaVenta fv);
 
-    BigDecimal calcularSubTotal(BigDecimal[] importes);
-
-    BigDecimal calcularDescuentoNeto(BigDecimal subtotal, BigDecimal descuento_porcentaje);
-
-    BigDecimal calcularRecargoNeto(BigDecimal subtotal, BigDecimal recargo_porcentaje);
-
-    BigDecimal calcularSubTotalBruto(TipoDeComprobante tipoDeComprobante, BigDecimal subTotal, BigDecimal recargoNeto, BigDecimal descuentoNeto, BigDecimal iva105Neto, BigDecimal iva21Neto);
-
     BigDecimal calcularIvaNetoFactura(TipoDeComprobante tipo, BigDecimal[] cantidades, BigDecimal[] ivaPorcentajeRenglones, BigDecimal[] ivaNetoRenglones, BigDecimal ivaPorcentaje, BigDecimal porcentajeDescuento, BigDecimal porcentajeRecargo);
-
-    BigDecimal calcularTotal(BigDecimal subTotal_bruto, BigDecimal iva105_neto, BigDecimal iva21_neto);
 
     BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
 
