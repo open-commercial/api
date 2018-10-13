@@ -1,11 +1,13 @@
 package sic.controller;
 
+import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.List;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -105,18 +107,22 @@ public class PedidoController {
       @RequestParam Long idEmpresa,
       @RequestParam Long idUsuario,
       @RequestParam Long idCliente,
-      @RequestBody PedidoDTO pedidoDTO) {
-    Pedido pedido = modelMapper.map(pedidoDTO, Pedido.class);
+      @RequestBody NuevoPedidoDTO nuevoPedidoDTO) {
+    Pedido pedido = new Pedido();
+    pedido.setFechaVencimiento(nuevoPedidoDTO.getFechaVencimiento());
+    pedido.setObservaciones(nuevoPedidoDTO.getObservaciones());
+    Type listType = new TypeToken<List<RenglonPedido>>() {}.getType();
+    pedido.setRenglones(modelMapper.map(nuevoPedidoDTO.getRenglones(), listType));
+    pedido.setSubTotal(nuevoPedidoDTO.getSubTotal());
+    pedido.setRecargoPorcentaje(nuevoPedidoDTO.getRecargoPorcentaje());
+    pedido.setRecargoNeto(nuevoPedidoDTO.getRecargoNeto());
+    pedido.setDescuentoPorcentaje(nuevoPedidoDTO.getDescuentoPorcentaje());
+    pedido.setDescuentoNeto(nuevoPedidoDTO.getDescuentoNeto());
+    pedido.setTotalEstimado(nuevoPedidoDTO.getTotal());
+    pedido.setTotalActual(nuevoPedidoDTO.getTotal());
     pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
     pedido.setCliente(clienteService.getClientePorId(idCliente));
-    pedido
-        .getRenglones()
-        .forEach(
-            renglonPedido ->
-                renglonPedido.setProducto(
-                    productoService.getProductoPorId(
-                        renglonPedido.getProducto().getId_Producto())));
     return pedidoService.guardar(pedido);
   }
 

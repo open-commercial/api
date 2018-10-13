@@ -37,12 +37,10 @@ public interface IProductoService {
 
   BigDecimal calcularIVANeto(BigDecimal precioCosto, BigDecimal iva_porcentaje);
 
-  BigDecimal calcularImpInternoNeto(BigDecimal precioCosto, BigDecimal impInterno_porcentaje);
-
   BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal ganancia_porcentaje);
 
   BigDecimal calcularPrecioLista(
-      BigDecimal PVP, BigDecimal iva_porcentaje, BigDecimal impInterno_porcentaje);
+      BigDecimal PVP, BigDecimal iva_porcentaje);
 
   void eliminarMultiplesProductos(long[] idProducto);
 

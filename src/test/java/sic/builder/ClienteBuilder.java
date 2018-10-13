@@ -8,6 +8,7 @@ public class ClienteBuilder {
 
   private long id_Cliente = 0L;
   private TipoDeCliente tipoDeCliente = TipoDeCliente.EMPRESA;
+  private BigDecimal bonificacion = BigDecimal.TEN;
   private String nroCliente = "00001";
   private String razonSocial = "Construcciones S.A.";
   private String nombreFantasia = "Servimetal";
@@ -31,6 +32,7 @@ public class ClienteBuilder {
     return new Cliente(
         id_Cliente,
         tipoDeCliente,
+        bonificacion,
         nroCliente,
         razonSocial,
         nombreFantasia,
@@ -53,6 +55,11 @@ public class ClienteBuilder {
 
   public ClienteBuilder withId_Cliente(long id_Cliente) {
     this.id_Cliente = id_Cliente;
+    return this;
+  }
+
+  public ClienteBuilder withBonificacion(BigDecimal bonificacion) {
+    this.bonificacion = bonificacion;
     return this;
   }
 

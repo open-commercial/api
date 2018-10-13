@@ -28,6 +28,7 @@ import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.repository.RenglonPedidoRepository;
 import sic.service.*;
 import sic.repository.PedidoRepository;
+import sic.util.CalculosComprobante;
 import sic.util.FormatterFechaHora;
 
 @Service
@@ -81,12 +82,6 @@ public class PedidoServiceImpl implements IPedidoService {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_pedido_renglones_vacio"));
         }
-        for (RenglonPedido r : pedido.getRenglones()) {
-          if (r.getProducto() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_pedido_renglon_sin_producto"));
-          }
-        }
         if (pedido.getEmpresa() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_pedido_empresa_vacia"));
@@ -118,8 +113,63 @@ public class PedidoServiceImpl implements IPedidoService {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_pedido_no_existente"));
             }
-        }        
+        }
+    // calculos
+    BigDecimal[] importes = new BigDecimal[pedido.getRenglones().size()];
+    int i = 0;
+    for (RenglonPedido renglon : pedido.getRenglones()) {
+      importes[i] = renglon.getSubTotal();
+      i++;
     }
+    if (pedido
+            .getSubTotal()
+            .setScale(2, RoundingMode.HALF_UP)
+            .compareTo(
+                CalculosComprobante.calcularSubTotal(importes).setScale(2, RoundingMode.HALF_UP))
+        != 0) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_sub_total_no_valido"));
+    }
+    if (pedido
+            .getRecargoNeto()
+            .setScale(2, RoundingMode.HALF_UP)
+            .compareTo(
+                CalculosComprobante.calcularProporcion(
+                        pedido.getSubTotal(), pedido.getRecargoPorcentaje())
+                    .setScale(2, RoundingMode.HALF_UP))
+        != 0) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_recargo_no_valido"));
+    }
+    if (pedido
+            .getDescuentoNeto()
+            .setScale(2, RoundingMode.HALF_UP)
+            .compareTo(
+                CalculosComprobante.calcularProporcion(
+                        pedido.getSubTotal(), pedido.getDescuentoPorcentaje())
+                    .setScale(2, RoundingMode.HALF_UP))
+        != 0) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_recargo_no_valido"));
+    }
+    if (pedido
+            .getTotalEstimado()
+            .setScale(2, RoundingMode.HALF_UP)
+            .compareTo(
+                CalculosComprobante.calcularSubTotalBruto(
+                        false,
+                        pedido.getSubTotal(),
+                        pedido.getRecargoNeto(),
+                        pedido.getDescuentoNeto(),
+                        null,
+                        null)
+                    .setScale(2, RoundingMode.HALF_UP))
+        != 0) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_pedido_total_estimado_no_valido"));
+    }
+  }
 
     @Override
     public Pedido actualizarEstadoPedido(Pedido pedido) {
@@ -133,21 +183,22 @@ public class PedidoServiceImpl implements IPedidoService {
         return pedido;
     }
 
-    @Override
-    public Pedido calcularTotalActualDePedido(Pedido pedido) {
-        BigDecimal porcentajeDescuento;
-        BigDecimal totalActual = BigDecimal.ZERO;
-        for (RenglonPedido renglonPedido : this.getRenglonesDelPedido(pedido.getId_Pedido())) {
-            porcentajeDescuento = BigDecimal.ONE.subtract(renglonPedido.getDescuento_porcentaje()
-                    .divide(CIEN, 15, RoundingMode.HALF_UP));
-            renglonPedido.setSubTotal(renglonPedido.getProducto().getPrecioLista()
-                    .multiply(renglonPedido.getCantidad())
-                    .multiply(porcentajeDescuento));
-            totalActual = totalActual.add(renglonPedido.getSubTotal());
-        }
-        pedido.setTotalActual(totalActual);
-        return pedido;
+  @Override
+  public Pedido calcularTotalActualDePedido(Pedido pedido) {
+    BigDecimal porcentajeDescuento;
+    BigDecimal totalActual = BigDecimal.ZERO;
+    for (RenglonPedido renglonPedido : this.getRenglonesDelPedido(pedido.getId_Pedido())) {
+      BigDecimal precioUnitario =
+          productoService.getProductoPorId(renglonPedido.getIdProductoItem()).getPrecioLista();
+      renglonPedido.setSubTotal(precioUnitario.multiply(renglonPedido.getCantidad()));
+      totalActual = totalActual.add(renglonPedido.getSubTotal());
     }
+    porcentajeDescuento =
+        BigDecimal.ONE.subtract(
+            pedido.getDescuentoPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP));
+    pedido.setTotalActual(totalActual.multiply(porcentajeDescuento));
+    return pedido;
+  }
 
   @Override
   public long generarNumeroPedido(Empresa empresa) {
@@ -163,10 +214,10 @@ public class PedidoServiceImpl implements IPedidoService {
     return randomLong;
   }
 
-    @Override
-    public List<Factura> getFacturasDelPedido(long idPedido) {
-        return facturaService.getFacturasDelPedido(idPedido);
-    }
+  @Override
+  public List<Factura> getFacturasDelPedido(long idPedido) {
+    return facturaService.getFacturasDelPedido(idPedido);
+  }
 
   @Override
   @Transactional
@@ -174,6 +225,9 @@ public class PedidoServiceImpl implements IPedidoService {
     pedido.setFecha(new Date());
     pedido.setNroPedido(this.generarNumeroPedido(pedido.getEmpresa()));
     pedido.setEstado(EstadoPedido.ABIERTO);
+    if (pedido.getObservaciones() == null || pedido.getObservaciones().equals("")) {
+      pedido.setObservaciones("Los precios se encuentran sujetos a modificaciones.");
+    }
     this.validarPedido(TipoDeOperacion.ALTA, pedido);
     pedido = pedidoRepository.save(pedido);
     logger.warn("El Pedido {} se guardó correctamente.", pedido);
@@ -278,28 +332,42 @@ public class PedidoServiceImpl implements IPedidoService {
         return renglonPedidoRepository.findByIdPedido(idPedido);
     }
 
-    @Override
-    public Map<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido) {
-        List<RenglonFactura> renglonesDeFacturas = new ArrayList<>();
-        this.getFacturasDelPedido(nroPedido).forEach(f ->
-            f.getRenglones().forEach(r -> renglonesDeFacturas.add(facturaService.calcularRenglon(f.getTipoComprobante(),
-                    Movimiento.VENTA, r.getCantidad(), r.getId_ProductoItem(),
-                    r.getDescuento_porcentaje(),false)))
-        );
-        HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
-        if (!renglonesDeFacturas.isEmpty()) {
-            renglonesDeFacturas.forEach(r -> {
-                if (listaRenglonesUnificados.containsKey(r.getId_ProductoItem())) {
-                    listaRenglonesUnificados.get(r.getId_ProductoItem())
-                            .setCantidad(listaRenglonesUnificados
-                                    .get(r.getId_ProductoItem()).getCantidad().add(r.getCantidad()));
-                } else {
-                    listaRenglonesUnificados.put(r.getId_ProductoItem(), r);
-                }
-            });
-        }
-        return listaRenglonesUnificados;
+  @Override
+  public Map<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido) {
+    List<RenglonFactura> renglonesDeFacturas = new ArrayList<>();
+    this.getFacturasDelPedido(nroPedido)
+        .forEach(
+            f ->
+                f.getRenglones()
+                    .forEach(
+                        r ->
+                            renglonesDeFacturas.add(
+                                facturaService.calcularRenglon(
+                                    f.getTipoComprobante(),
+                                    Movimiento.VENTA,
+                                    r.getCantidad(),
+                                    r.getIdProductoItem(),
+                                    r.getDescuentoPorcentaje(),
+                                    false))));
+    HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
+    if (!renglonesDeFacturas.isEmpty()) {
+      renglonesDeFacturas.forEach(
+          r -> {
+            if (listaRenglonesUnificados.containsKey(r.getIdProductoItem())) {
+              listaRenglonesUnificados
+                  .get(r.getIdProductoItem())
+                  .setCantidad(
+                      listaRenglonesUnificados
+                          .get(r.getIdProductoItem())
+                          .getCantidad()
+                          .add(r.getCantidad()));
+            } else {
+              listaRenglonesUnificados.put(r.getIdProductoItem(), r);
+            }
+          });
     }
+    return listaRenglonesUnificados;
+  }
 
     @Override
     public byte[] getReportePedido(Pedido pedido) {
@@ -345,17 +413,22 @@ public class PedidoServiceImpl implements IPedidoService {
   public RenglonPedido calcularRenglonPedido(
       long idProducto, BigDecimal cantidad, BigDecimal descuentoPorcentaje) {
     RenglonPedido nuevoRenglon = new RenglonPedido();
-    nuevoRenglon.setProducto(productoService.getProductoPorId(idProducto));
+    Producto producto = productoService.getProductoPorId(idProducto);
+    nuevoRenglon.setIdProductoItem(producto.getId_Producto());
     nuevoRenglon.setCantidad(cantidad);
-    nuevoRenglon.setDescuento_porcentaje(descuentoPorcentaje);
-    nuevoRenglon.setDescuento_neto(
+    nuevoRenglon.setCodigoItem(producto.getCodigo());
+    nuevoRenglon.setDescripcionItem(producto.getDescripcion());
+    nuevoRenglon.setMedidaItem(producto.getMedida().getNombre());
+    nuevoRenglon.setPrecioUnitario(producto.getPrecioLista());
+    nuevoRenglon.setDescuentoPorcentaje(descuentoPorcentaje);
+    nuevoRenglon.setDescuentoNeto(
         this.calcularDescuentoNeto(
-            nuevoRenglon.getProducto().getPrecioLista(), descuentoPorcentaje));
+                producto.getPrecioLista(), descuentoPorcentaje));
     nuevoRenglon.setSubTotal(
         this.calcularSubTotal(
             nuevoRenglon.getCantidad(),
-            nuevoRenglon.getProducto().getPrecioLista(),
-            nuevoRenglon.getDescuento_neto()));
+                producto.getPrecioLista(),
+            nuevoRenglon.getDescuentoNeto()));
     return nuevoRenglon;
   }
 

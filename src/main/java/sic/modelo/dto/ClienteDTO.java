@@ -19,6 +19,7 @@ public class ClienteDTO implements Serializable {
 
   private long id_Cliente;
   private TipoDeCliente tipoDeCliente;
+  private BigDecimal bonificacion;
   private String razonSocial;
   private String nombreFantasia;
   private String direccion;

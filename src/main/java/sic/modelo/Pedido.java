@@ -80,6 +80,21 @@ public class Pedido implements Serializable {
     private List<RenglonPedido> renglones;
 
     @Column(precision = 25, scale = 15)
+    private BigDecimal subTotal;
+
+    @Column(precision = 25, scale = 15)
+    private BigDecimal recargoPorcentaje;
+
+    @Column(precision = 25, scale = 15)
+    private BigDecimal recargoNeto;
+
+    @Column(precision = 25, scale = 15)
+    private BigDecimal descuentoPorcentaje;
+
+    @Column(precision = 25, scale = 15)
+    private BigDecimal descuentoNeto;
+
+    @Column(precision = 25, scale = 15)
     private BigDecimal totalEstimado;
 
     @Column(precision = 25, scale = 15)

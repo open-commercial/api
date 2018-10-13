@@ -19,9 +19,7 @@ public class ProductoBuilder {
     private BigDecimal precioVentaPublico = new BigDecimal("150");
     private BigDecimal iva_porcentaje = new BigDecimal("21");
     private BigDecimal iva_neto = new BigDecimal("31.5");
-    private BigDecimal impuestoInterno_porcentaje = BigDecimal.ZERO;
-    private BigDecimal impuestoInterno_neto = BigDecimal.ZERO;
-    private BigDecimal precioLista = new BigDecimal("181.5");    
+    private BigDecimal precioLista = new BigDecimal("181.5");
     private String nombreRubro = "Ferreteria";
     private boolean ilimitado = false;
     private boolean publico = true;
@@ -37,10 +35,9 @@ public class ProductoBuilder {
     
     public ProductoDTO build() {
         return new ProductoDTO(id_Producto, codigo, descripcion, cantidad, cantMinima, ventaMinima, nombreMedida,
-                precioCosto, ganancia_porcentaje, ganancia_neto, precioVentaPublico,
-                iva_porcentaje, iva_neto, impuestoInterno_porcentaje, impuestoInterno_neto, precioLista,
-                nombreRubro, ilimitado, fechaUltimaModificacion, estanteria, estante, razonSocialProveedor, nota,
-                fechaAlta, fechaVencimiento, nombreEmpresa, eliminado);
+                precioCosto, ganancia_porcentaje, ganancia_neto, precioVentaPublico, iva_porcentaje, iva_neto,
+                precioLista, nombreRubro, ilimitado, fechaUltimaModificacion, estanteria, estante, razonSocialProveedor,
+                nota, fechaAlta, fechaVencimiento, nombreEmpresa, eliminado);
     }
     
     public ProductoBuilder withId_Producto(Long id_Producto) {
@@ -107,17 +104,7 @@ public class ProductoBuilder {
         this.iva_neto = iva_neto;
         return this;
     }
-    
-    public ProductoBuilder withImpuestoInterno_porcentaje(BigDecimal impuestoInterno_porcentaje) {
-        this.impuestoInterno_porcentaje = impuestoInterno_porcentaje;
-        return this;
-    }
-    
-    public ProductoBuilder withImpuestoInterno_neto(BigDecimal impuestoInterno_neto) {
-        this.impuestoInterno_neto = impuestoInterno_neto;
-        return this;
-    }
-    
+
     public ProductoBuilder withPrecioLista(BigDecimal precioLista) {
         this.precioLista = precioLista;
         return this;

@@ -22,6 +22,11 @@ public class PedidoBuilder {
     private String nombreUsuario = "Daenerys Targaryen";
     private List<FacturaDTO> facturas;
     private List<RenglonPedidoDTO> renglones;
+    private BigDecimal subTotal = new BigDecimal("544.5");;
+    private BigDecimal recargoPorcentaje = BigDecimal.ZERO;
+    private BigDecimal recargoNeto = BigDecimal.ZERO;
+    private BigDecimal descuentoPorcentaje = BigDecimal.ZERO;
+    private BigDecimal descuentoNeto = BigDecimal.ZERO;
     private BigDecimal totalEstimado = new BigDecimal("544.5");
     private BigDecimal totalActual = new BigDecimal("544.5");
     private EstadoPedido estado = EstadoPedido.ABIERTO;
@@ -40,9 +45,27 @@ public class PedidoBuilder {
             renglonesPedido.add(renglon2);
             this.renglones = renglonesPedido;
         }
-        return new PedidoDTO(id_Pedido, nroPedido, fecha, fechaVencimiento, observaciones, nombreEmpresa,
-                eliminado, razonSocialCliente, nombreUsuario, facturas, renglones, totalEstimado, totalActual, estado);
-    }
+    return new PedidoDTO(
+        id_Pedido,
+        nroPedido,
+        fecha,
+        fechaVencimiento,
+        observaciones,
+        nombreEmpresa,
+        eliminado,
+        razonSocialCliente,
+        nombreUsuario,
+        facturas,
+        renglones,
+        subTotal,
+        recargoPorcentaje,
+        recargoNeto,
+        descuentoPorcentaje,
+        descuentoNeto,
+        totalEstimado,
+        totalActual,
+        estado);
+  }
 
     public PedidoBuilder withIdPedido(long idPedido) {
         this.id_Pedido = idPedido;

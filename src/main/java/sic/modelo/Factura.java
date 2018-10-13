@@ -95,28 +95,28 @@ public abstract class Factura implements Serializable {
     private BigDecimal subTotal;
     
     @Column(precision = 25, scale = 15)
-    private BigDecimal recargo_porcentaje;
+    private BigDecimal recargoPorcentaje;
     
     @Column(precision = 25, scale = 15)
-    private BigDecimal recargo_neto;
+    private BigDecimal recargoNeto;
     
     @Column(precision = 25, scale = 15)
-    private BigDecimal descuento_porcentaje;
+    private BigDecimal descuentoPorcentaje;
     
     @Column(precision = 25, scale = 15)
-    private BigDecimal descuento_neto;
+    private BigDecimal descuentoNeto;
     
     @Column(precision = 25, scale = 15)
-    private BigDecimal subTotal_bruto;
+    private BigDecimal subTotalBruto;
     
     @Column(precision = 25, scale = 15)
-    private BigDecimal iva_105_neto;
+    private BigDecimal iva105Neto;
     
     @Column(precision = 25, scale = 15)
-    private BigDecimal iva_21_neto;
+    private BigDecimal iva21Neto;
     
     @Column(precision = 25, scale = 15)
-    private BigDecimal impuestoInterno_neto;
+    private BigDecimal impuestoInternoNeto;
     
     @Column(precision = 25, scale = 15)
     private BigDecimal total;

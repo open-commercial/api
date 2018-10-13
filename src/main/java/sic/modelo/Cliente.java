@@ -7,6 +7,9 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.*;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,6 +32,12 @@ public class Cliente implements Serializable {
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private TipoDeCliente tipoDeCliente;
+
+  @Column(precision = 25, scale = 15)
+  @NotNull(message = "{mensaje_cliente_vacio_bonificacion}")
+  @DecimalMin(value = "0", message = "{mensaje_cliente_bonificacion_negativa}")
+  @DecimalMax(value = "100", message = "{mensaje_cliente_bonificacion_superior_al_cien_porciento}")
+  private BigDecimal bonificacion;
 
   private String nroCliente;
 

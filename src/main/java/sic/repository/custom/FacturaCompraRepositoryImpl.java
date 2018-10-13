@@ -39,7 +39,7 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
     }
     builder.and(rsPredicate);
     return queryFactory
-        .select(qFacturaCompra.iva_105_neto.add(qFacturaCompra.iva_21_neto).sum())
+        .select(qFacturaCompra.iva105Neto.add(qFacturaCompra.iva21Neto).sum())
         .from(qFacturaCompra)
         .where(builder)
         .fetch()

@@ -124,18 +124,6 @@ public class ProductoServiceImpl implements IProductoService {
               .getString("mensaje_precio_venta_publico_incorrecto"));
     }
     if (producto
-            .getImpuestoInternoNeto()
-            .setScale(3, RoundingMode.HALF_UP)
-            .compareTo(
-                this.calcularImpInternoNeto(
-                        producto.getPrecioVentaPublico(), producto.getImpuestoInternoPorcentaje())
-                    .setScale(3, RoundingMode.HALF_UP))
-        != 0) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_producto_impuesto_interno_neto_incorrecto"));
-    }
-    if (producto
             .getIvaNeto()
             .setScale(3, RoundingMode.HALF_UP)
             .compareTo(
@@ -151,8 +139,7 @@ public class ProductoServiceImpl implements IProductoService {
             .compareTo(
                 this.calcularPrecioLista(
                         producto.getPrecioVentaPublico(),
-                        producto.getIvaPorcentaje(),
-                        producto.getImpuestoInternoPorcentaje())
+                        producto.getIvaPorcentaje())
                     .setScale(3,  RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
@@ -372,8 +359,6 @@ public class ProductoServiceImpl implements IProductoService {
         p.setPrecioVentaPublico(precioVentaPublico);
         p.setIvaPorcentaje(ivaPorcentaje);
         p.setIvaNeto(ivaNeto);
-        p.setImpuestoInternoPorcentaje(impuestoInternoPorcentaje);
-        p.setImpuestoInternoNeto(impuestoInternoNeto);
         p.setPrecioLista(precioLista);
       }
       if (checkDescuentoRecargoPorcentaje) {
@@ -381,7 +366,6 @@ public class ProductoServiceImpl implements IProductoService {
         p.setGananciaNeto(p.getGananciaNeto().multiply(multiplicador));
         p.setPrecioVentaPublico(p.getPrecioVentaPublico().multiply(multiplicador));
         p.setIvaNeto(p.getIvaNeto().multiply(multiplicador));
-        p.setImpuestoInternoNeto(p.getImpuestoInternoNeto().multiply(multiplicador));
         p.setPrecioLista(p.getPrecioLista().multiply(multiplicador));
         p.setFechaUltimaModificacion(new Date());
       }
@@ -522,17 +506,10 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public BigDecimal calcularImpInternoNeto(BigDecimal pvp, BigDecimal impInternoPorcentaje) {
-    return pvp.multiply(impInternoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
-  }
-
-  @Override
   public BigDecimal calcularPrecioLista(
-      BigDecimal pvp, BigDecimal ivaPorcentaje, BigDecimal impInternoPorcentaje) {
+      BigDecimal pvp, BigDecimal ivaPorcentaje) {
     BigDecimal resulIVA = pvp.multiply(ivaPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP));
-    BigDecimal resultImpInterno =
-        pvp.multiply(impInternoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP));
-    return pvp.add(resulIVA).add(resultImpInterno);
+    return pvp.add(resulIVA);
   }
 
   @Override

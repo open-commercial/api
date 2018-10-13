@@ -126,6 +126,7 @@ public class CuentaCorrienteIntegrationTest {
         credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
         ClienteDTO cliente = ClienteDTO.builder()
                 .tipoDeCliente(TipoDeCliente.EMPRESA)
+                .bonificacion(BigDecimal.TEN)
                 .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
                 .razonSocial("Peter Parker")
                 .telefono("379123452")
@@ -211,8 +212,8 @@ public class CuentaCorrienteIntegrationTest {
         for (RenglonFactura renglon : renglones) {
             subTotal = subTotal.add(renglon.getImporte());
             cantidades[indice] = renglon.getCantidad();
-            ivaPorcentajeRenglones[indice] = renglon.getIva_porcentaje();
-            ivaNetoRenglones[indice] = renglon.getIva_neto();
+            ivaPorcentajeRenglones[indice] = renglon.getIvaPorcentaje();
+            ivaNetoRenglones[indice] = renglon.getIvaNeto();
             indice++;
         }
         BigDecimal descuentoPorcentaje = new BigDecimal("25");
@@ -239,13 +240,13 @@ public class CuentaCorrienteIntegrationTest {
         facturaVentaB.setTipoComprobante(TipoDeComprobante.FACTURA_B);
         facturaVentaB.setRenglones(renglones);
         facturaVentaB.setSubTotal(subTotal);
-        facturaVentaB.setRecargo_porcentaje(recargoPorcentaje);
-        facturaVentaB.setRecargo_neto(recargo_neto);
-        facturaVentaB.setDescuento_porcentaje(descuentoPorcentaje);
-        facturaVentaB.setDescuento_neto(descuento_neto);
-        facturaVentaB.setSubTotal_bruto(subTotalBruto);
-        facturaVentaB.setIva_105_neto(iva_105_netoFactura);
-        facturaVentaB.setIva_21_neto(iva_21_netoFactura);
+        facturaVentaB.setRecargoPorcentaje(recargoPorcentaje);
+        facturaVentaB.setRecargoNeto(recargo_neto);
+        facturaVentaB.setDescuentoPorcentaje(descuentoPorcentaje);
+        facturaVentaB.setDescuentoNeto(descuento_neto);
+        facturaVentaB.setSubTotalBruto(subTotalBruto);
+        facturaVentaB.setIva105Neto(iva_105_netoFactura);
+        facturaVentaB.setIva21Neto(iva_21_netoFactura);
         facturaVentaB.setTotal(total);
         restTemplate.postForObject(apiPrefix + "/facturas/venta?"
                 + "idCliente=" + cliente.getId_Cliente()
@@ -308,11 +309,11 @@ public class CuentaCorrienteIntegrationTest {
         notaCredito.setRenglonesNotaCredito(renglonesNotaCredito);
         notaCredito.setSubTotal(restTemplate.getForObject(apiPrefix + "/notas/credito/sub-total?importe="
                 + renglonesNotaCredito.get(0).getImporteNeto(), BigDecimal.class));
-        notaCredito.setRecargoPorcentaje(facturasRecuperadas.get(0).getRecargo_porcentaje());
+        notaCredito.setRecargoPorcentaje(facturasRecuperadas.get(0).getRecargoPorcentaje());
         notaCredito.setRecargoNeto(restTemplate.getForObject(apiPrefix + "/notas/credito/recargo-neto?subTotal="
                 + notaCredito.getSubTotal()
                 + "&recargoPorcentaje=" + notaCredito.getRecargoPorcentaje(), BigDecimal.class));
-        notaCredito.setDescuentoPorcentaje(facturasRecuperadas.get(0).getDescuento_porcentaje());
+        notaCredito.setDescuentoPorcentaje(facturasRecuperadas.get(0).getDescuentoPorcentaje());
         notaCredito.setDescuentoNeto(restTemplate.getForObject(apiPrefix + "/notas/credito/descuento-neto?subTotal="
                 + notaCredito.getSubTotal()
                 + "&descuentoPorcentaje=" + notaCredito.getDescuentoPorcentaje(), BigDecimal.class));
@@ -322,16 +323,16 @@ public class CuentaCorrienteIntegrationTest {
                 + "&ivaPorcentajeRenglones=" + renglonesNotaCredito.get(0).getIvaPorcentaje()
                 + "&ivaNetoRenglones=" + renglonesNotaCredito.get(0).getIvaNeto()
                 + "&ivaPorcentaje=21"
-                + "&descuentoPorcentaje=" + facturasRecuperadas.get(0).getDescuento_porcentaje()
-                + "&recargoPorcentaje=" + facturasRecuperadas.get(0).getRecargo_porcentaje(), BigDecimal.class));
+                + "&descuentoPorcentaje=" + facturasRecuperadas.get(0).getDescuentoPorcentaje()
+                + "&recargoPorcentaje=" + facturasRecuperadas.get(0).getRecargoPorcentaje(), BigDecimal.class));
         notaCredito.setIva105Neto(restTemplate.getForObject(apiPrefix + "/notas/credito/iva-neto?"
                 + "tipoDeComprobante=" + facturasRecuperadas.get(0).getTipoComprobante().name()
                 + "&cantidades=" + renglonesNotaCredito.get(0).getCantidad()
                 + "&ivaPorcentajeRenglones=" + renglonesNotaCredito.get(0).getIvaPorcentaje()
                 + "&ivaNetoRenglones=" + renglonesNotaCredito.get(0).getIvaNeto()
                 + "&ivaPorcentaje=10.5"
-                + "&descuentoPorcentaje=" + facturasRecuperadas.get(0).getDescuento_porcentaje()
-                + "&recargoPorcentaje=" + facturasRecuperadas.get(0).getRecargo_porcentaje(), BigDecimal.class));
+                + "&descuentoPorcentaje=" + facturasRecuperadas.get(0).getDescuentoPorcentaje()
+                + "&recargoPorcentaje=" + facturasRecuperadas.get(0).getRecargoPorcentaje(), BigDecimal.class));
         notaCredito.setSubTotalBruto(restTemplate.getForObject(apiPrefix + "/notas/credito/sub-total-bruto?"
                 + "tipoDeComprobante=" + facturasRecuperadas.get(0).getTipoComprobante().name()
                 + "&subTotal=" + notaCredito.getSubTotal()
@@ -470,8 +471,8 @@ public class CuentaCorrienteIntegrationTest {
         for (RenglonFactura renglon : renglones) {
             subTotal = subTotal.add(renglon.getImporte());
             cantidades[indice] = renglon.getCantidad();
-            ivaPorcentajeRenglones[indice] = renglon.getIva_porcentaje();
-            ivaNetoRenglones[indice] = renglon.getIva_neto();
+            ivaPorcentajeRenglones[indice] = renglon.getIvaPorcentaje();
+            ivaNetoRenglones[indice] = renglon.getIvaNeto();
             indice++;
         }
         BigDecimal descuentoPorcentaje = new BigDecimal("25");
@@ -497,13 +498,13 @@ public class CuentaCorrienteIntegrationTest {
         facturaCompraB.setTipoComprobante(TipoDeComprobante.FACTURA_B);
         facturaCompraB.setRenglones(renglones);
         facturaCompraB.setSubTotal(subTotal);
-        facturaCompraB.setRecargo_porcentaje(recargoPorcentaje);
-        facturaCompraB.setRecargo_neto(recargo_neto);
-        facturaCompraB.setDescuento_porcentaje(descuentoPorcentaje);
-        facturaCompraB.setDescuento_neto(descuento_neto);
-        facturaCompraB.setSubTotal_bruto(subTotalBruto);
-        facturaCompraB.setIva_105_neto(iva_105_netoFactura);
-        facturaCompraB.setIva_21_neto(iva_21_netoFactura);
+        facturaCompraB.setRecargoPorcentaje(recargoPorcentaje);
+        facturaCompraB.setRecargoNeto(recargo_neto);
+        facturaCompraB.setDescuentoPorcentaje(descuentoPorcentaje);
+        facturaCompraB.setDescuentoNeto(descuento_neto);
+        facturaCompraB.setSubTotalBruto(subTotalBruto);
+        facturaCompraB.setIva105Neto(iva_105_netoFactura);
+        facturaCompraB.setIva21Neto(iva_21_netoFactura);
         facturaCompraB.setTotal(total);
         restTemplate.postForObject(apiPrefix + "/facturas/compra?"
                 + "idProveedor=" + proveedor.getId_Proveedor()
@@ -584,11 +585,11 @@ public class CuentaCorrienteIntegrationTest {
         notaCreditoProveedor.setModificaStock(true);
         notaCreditoProveedor.setSubTotal(restTemplate.getForObject(apiPrefix + "/notas/credito/sub-total?importe="
                 + renglonesNotaCredito.get(0).getImporteNeto(), BigDecimal.class));
-        notaCreditoProveedor.setRecargoPorcentaje(facturasCompra[0].getRecargo_porcentaje());
+        notaCreditoProveedor.setRecargoPorcentaje(facturasCompra[0].getRecargoPorcentaje());
         notaCreditoProveedor.setRecargoNeto(restTemplate.getForObject(apiPrefix + "/notas/credito/recargo-neto?subTotal="
                 + notaCreditoProveedor.getSubTotal()
                 + "&recargoPorcentaje=" + notaCreditoProveedor.getRecargoPorcentaje(), BigDecimal.class));
-        notaCreditoProveedor.setDescuentoPorcentaje(facturasCompra[0].getDescuento_porcentaje());
+        notaCreditoProveedor.setDescuentoPorcentaje(facturasCompra[0].getDescuentoPorcentaje());
         notaCreditoProveedor.setDescuentoNeto(restTemplate.getForObject(apiPrefix + "/notas/credito/descuento-neto?subTotal="
                 + notaCreditoProveedor.getSubTotal()
                 + "&descuentoPorcentaje=" + notaCreditoProveedor.getDescuentoPorcentaje(), BigDecimal.class));
@@ -598,16 +599,16 @@ public class CuentaCorrienteIntegrationTest {
                 + "&ivaPorcentajeRenglones=" + renglonesNotaCredito.get(0).getIvaPorcentaje()
                 + "&ivaNetoRenglones=" + renglonesNotaCredito.get(0).getIvaNeto()
                 + "&ivaPorcentaje=21"
-                + "&descuentoPorcentaje=" + facturasCompra[0].getDescuento_porcentaje()
-                + "&recargoPorcentaje=" + facturasCompra[0].getRecargo_porcentaje(), BigDecimal.class));
+                + "&descuentoPorcentaje=" + facturasCompra[0].getDescuentoPorcentaje()
+                + "&recargoPorcentaje=" + facturasCompra[0].getRecargoPorcentaje(), BigDecimal.class));
         notaCreditoProveedor.setIva105Neto(restTemplate.getForObject(apiPrefix + "/notas/credito/iva-neto?"
                 + "tipoDeComprobante=" + facturasCompra[0].getTipoComprobante().name()
                 + "&cantidades=" + renglonesNotaCredito.get(0).getCantidad()
                 + "&ivaPorcentajeRenglones=" + renglonesNotaCredito.get(0).getIvaPorcentaje()
                 + "&ivaNetoRenglones=" + renglonesNotaCredito.get(0).getIvaNeto()
                 + "&ivaPorcentaje=10.5"
-                + "&descuentoPorcentaje=" + facturasCompra[0].getDescuento_porcentaje()
-                + "&recargoPorcentaje=" + facturasCompra[0].getRecargo_porcentaje(), BigDecimal.class));
+                + "&descuentoPorcentaje=" + facturasCompra[0].getDescuentoPorcentaje()
+                + "&recargoPorcentaje=" + facturasCompra[0].getRecargoPorcentaje(), BigDecimal.class));
         notaCreditoProveedor.setSubTotalBruto(restTemplate.getForObject(apiPrefix + "/notas/credito/sub-total-bruto?"
                 + "tipoDeComprobante=" + facturasCompra[0].getTipoComprobante().name()
                 + "&subTotal=" + notaCreditoProveedor.getSubTotal()
@@ -705,6 +706,7 @@ public class CuentaCorrienteIntegrationTest {
         credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
         ClienteDTO cliente = ClienteDTO.builder()
                 .tipoDeCliente(TipoDeCliente.EMPRESA)
+                .bonificacion(BigDecimal.TEN)
                 .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
                 .razonSocial("Peter Parker")
                 .telefono("3791234532")
@@ -786,8 +788,8 @@ public class CuentaCorrienteIntegrationTest {
         for (RenglonFactura renglon : renglones) {
             subTotal = subTotal.add(renglon.getImporte()); 
             cantidades[indice] = renglon.getCantidad();
-            ivaPorcentajeRenglones[indice] = renglon.getIva_porcentaje();
-            ivaNetoRenglones[indice] = renglon.getIva_neto();
+            ivaPorcentajeRenglones[indice] = renglon.getIvaPorcentaje();
+            ivaNetoRenglones[indice] = renglon.getIvaNeto();
             indice++;
         }
         BigDecimal descuentoPorcentaje = new BigDecimal("25");
@@ -812,13 +814,13 @@ public class CuentaCorrienteIntegrationTest {
         facturaVentaB.setTipoComprobante(TipoDeComprobante.FACTURA_B);
         facturaVentaB.setRenglones(renglones);
         facturaVentaB.setSubTotal(subTotal);
-        facturaVentaB.setRecargo_porcentaje(recargoPorcentaje);
-        facturaVentaB.setRecargo_neto(recargo_neto);
-        facturaVentaB.setDescuento_porcentaje(descuentoPorcentaje);
-        facturaVentaB.setDescuento_neto(descuento_neto);
-        facturaVentaB.setSubTotal_bruto(subTotalBruto);
-        facturaVentaB.setIva_105_neto(iva_105_netoFactura);
-        facturaVentaB.setIva_21_neto(iva_21_netoFactura);
+        facturaVentaB.setRecargoPorcentaje(recargoPorcentaje);
+        facturaVentaB.setRecargoNeto(recargo_neto);
+        facturaVentaB.setDescuentoPorcentaje(descuentoPorcentaje);
+        facturaVentaB.setDescuentoNeto(descuento_neto);
+        facturaVentaB.setSubTotalBruto(subTotalBruto);
+        facturaVentaB.setIva105Neto(iva_105_netoFactura);
+        facturaVentaB.setIva21Neto(iva_21_netoFactura);
         facturaVentaB.setTotal(total);
         restTemplate.postForObject(apiPrefix + "/facturas/venta?"
                 + "idCliente=" + cliente.getId_Cliente()
@@ -886,8 +888,8 @@ public class CuentaCorrienteIntegrationTest {
         for (RenglonFactura renglon : renglones) {
             subTotal = subTotal.add(renglon.getImporte());
             cantidades[indice] = renglon.getCantidad();
-            ivaPorcentajeRenglones[indice] = renglon.getIva_porcentaje();
-            ivaNetoRenglones[indice] = renglon.getIva_neto();
+            ivaPorcentajeRenglones[indice] = renglon.getIvaPorcentaje();
+            ivaNetoRenglones[indice] = renglon.getIvaNeto();
             indice++;
         }
         descuentoPorcentaje = new BigDecimal("25");
@@ -912,13 +914,13 @@ public class CuentaCorrienteIntegrationTest {
         facturaVentaX.setTipoComprobante(TipoDeComprobante.FACTURA_X);
         facturaVentaX.setRenglones(renglones);
         facturaVentaX.setSubTotal(subTotal);
-        facturaVentaX.setRecargo_porcentaje(recargoPorcentaje);
-        facturaVentaX.setRecargo_neto(recargo_neto);
-        facturaVentaX.setDescuento_porcentaje(descuentoPorcentaje);
-        facturaVentaX.setDescuento_neto(descuento_neto);
-        facturaVentaX.setSubTotal_bruto(subTotalBruto);
-        facturaVentaX.setIva_105_neto(iva_105_netoFactura);
-        facturaVentaX.setIva_21_neto(iva_21_netoFactura);
+        facturaVentaX.setRecargoPorcentaje(recargoPorcentaje);
+        facturaVentaX.setRecargoNeto(recargo_neto);
+        facturaVentaX.setDescuentoPorcentaje(descuentoPorcentaje);
+        facturaVentaX.setDescuentoNeto(descuento_neto);
+        facturaVentaX.setSubTotalBruto(subTotalBruto);
+        facturaVentaX.setIva105Neto(iva_105_netoFactura);
+        facturaVentaX.setIva21Neto(iva_21_netoFactura);
         facturaVentaX.setTotal(total);
         restTemplate.postForObject(apiPrefix + "/facturas/venta?"
                 + "idCliente=" + cliente.getId_Cliente()

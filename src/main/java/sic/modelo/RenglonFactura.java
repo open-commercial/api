@@ -19,7 +19,7 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = {"id_ProductoItem", "codigoItem"})
+@EqualsAndHashCode(of = {"idProductoItem", "codigoItem"})
 @ToString
 public class RenglonFactura implements Serializable {
 
@@ -27,7 +27,7 @@ public class RenglonFactura implements Serializable {
     @GeneratedValue
     private long id_RenglonFactura;
 
-    private long id_ProductoItem;
+    private long idProductoItem;
 
     @Column(nullable = false)
     private String codigoItem;
@@ -48,35 +48,27 @@ public class RenglonFactura implements Serializable {
     
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", message = "{mensaje_renglon_descuento_porcentaje_negativo}")
-    private BigDecimal descuento_porcentaje;
+    private BigDecimal descuentoPorcentaje;
     
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", message = "{mensaje_renglon_descuento_neto_negativo}")
-    private BigDecimal descuento_neto;
+    private BigDecimal descuentoNeto;
     
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", message = "{mensaje_renglon_iva_porcentaje_negativo}")
-    private BigDecimal iva_porcentaje;
+    private BigDecimal ivaPorcentaje;
     
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", message = "{mensaje_renglon_iva_neto_negativo}")
-    private BigDecimal iva_neto;
-    
-    @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_renglon_impuesto_porcentaje_negativo}")
-    private BigDecimal impuesto_porcentaje;
-    
-    @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_renglon_impuesto_neto_negativo}")
-    private BigDecimal impuesto_neto;
+    private BigDecimal ivaNeto;
     
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", message = "{mensaje_renglon_ganancia_porcentaje_negativa}")
-    private BigDecimal ganancia_porcentaje;
+    private BigDecimal gananciaPorcentaje;
     
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", message = "{mensaje_renglon_ganancia_neta_negativa}")
-    private BigDecimal ganancia_neto;
+    private BigDecimal gananciaNeto;
     
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", message = "{mensaje_renglon_importe_negativo}")

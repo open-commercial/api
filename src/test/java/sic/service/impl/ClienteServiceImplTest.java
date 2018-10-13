@@ -112,48 +112,4 @@ public class ClienteServiceImplTest {
         .thenReturn(cliente);
     clienteServiceImpl.validarOperacion(TipoDeOperacion.ACTUALIZACION, clienteDuplicado);
   }
-
-  @Test
-  public void shouldValidarOperacionWhenRazonSocialDuplicadaEnAlta() {
-    thrown.expect(BusinessServiceException.class);
-    thrown.expectMessage(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_duplicado_razonSocial"));
-    Cliente cliente =
-        new ClienteBuilder()
-            .withEmail("soporte@gmail.com")
-            .withRazonSocial("Ferreteria Julian")
-            .withLocalidad(new LocalidadBuilder().build())
-            .withEmpresa(new EmpresaBuilder().build())
-            .withIdFiscal(23111111119L)
-            .withId_Cliente(Long.MIN_VALUE)
-            .build();
-    Cliente clienteDuplicado =
-        new ClienteBuilder()
-            .withEmail("soporte@gmail.com")
-            .withRazonSocial("Ferreteria Julian")
-            .withLocalidad(new LocalidadBuilder().build())
-            .withEmpresa(new EmpresaBuilder().build())
-            .withIdFiscal(23111111119L)
-            .withId_Cliente(Long.MIN_VALUE)
-            .build();
-    when(clienteRepository.findByRazonSocialAndEmpresaAndEliminado(
-            cliente.getRazonSocial(), cliente.getEmpresa(), false))
-        .thenReturn(cliente);
-    clienteServiceImpl.validarOperacion(TipoDeOperacion.ALTA, clienteDuplicado);
-  }
-
-  @Test
-  public void shouldValidarOperacionWhenRazonSocialDuplicadaEnActualizacion() {
-    thrown.expect(BusinessServiceException.class);
-    thrown.expectMessage(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_duplicado_razonSocial"));
-    Cliente cliente =
-        new ClienteBuilder().withId_Cliente(2L).withRazonSocial("Ferreteria Julian").build();
-    Cliente clienteDuplicado =
-        new ClienteBuilder().withId_Cliente(4L).withRazonSocial("Ferreteria Julian").build();
-    when(clienteRepository.findByRazonSocialAndEmpresaAndEliminado(
-            cliente.getRazonSocial(), cliente.getEmpresa(), false))
-        .thenReturn(cliente);
-    clienteServiceImpl.validarOperacion(TipoDeOperacion.ACTUALIZACION, clienteDuplicado);
-  }
 }

@@ -1,24 +1,25 @@
 package sic.builder;
 
 import java.math.BigDecimal;
-import sic.modelo.dto.ProductoDTO;
+
 import sic.modelo.dto.RenglonPedidoDTO;
 
 public class RenglonPedidoBuilder {
     
     private long id_RenglonPedido = 0L;
-    private long idProducto = 1L;
-    private String codigo = "ABC123";
-    private String descripcion = "Cinta adhesiva doble faz 3M";
-    private BigDecimal precioDeLista = new BigDecimal("181.5");
+    private long idProductoItem = 1L;
+    private String codigoItem = "ABC123";
+    private String descripcionItem = "Cinta adhesiva doble faz 3M";
+    private String medidaItem = "Metro";
+    private BigDecimal precioUnitario = new BigDecimal("181.5");
     private BigDecimal cantidad = new BigDecimal("2");
-    private BigDecimal descuento_porcentaje = BigDecimal.ZERO;
-    private BigDecimal descuento_neto = BigDecimal.ZERO;
+    private BigDecimal descuentoPorcentaje = BigDecimal.ZERO;
+    private BigDecimal descuentoNeto = BigDecimal.ZERO;
     private BigDecimal subTotal = new BigDecimal("363");
-    
+
     public RenglonPedidoDTO build() {
-        return new RenglonPedidoDTO(id_RenglonPedido, idProducto, codigo, descripcion, precioDeLista,
-          cantidad, descuento_porcentaje, descuento_neto, subTotal);
+        return new RenglonPedidoDTO(id_RenglonPedido, idProductoItem, codigoItem, descripcionItem, medidaItem,
+                precioUnitario, cantidad, descuentoPorcentaje, descuentoNeto, subTotal);
     }
     
     public RenglonPedidoBuilder withIdRenglonPedido(long idRenglonPedido) {
@@ -27,22 +28,22 @@ public class RenglonPedidoBuilder {
     }
     
     public RenglonPedidoBuilder withIdProducto(long idProducto) {
-        this.idProducto = idProducto;
+        this.idProductoItem = idProducto;
         return this;
     }
 
     public RenglonPedidoBuilder withCodigo(String codigo) {
-        this.codigo = codigo;
+        this.codigoItem = codigo;
         return this;
     }
 
     public RenglonPedidoBuilder withDescripcion(String descripcion) {
-        this.descripcion = descripcion;
+        this.descripcionItem = descripcion;
         return this;
     }
 
     public RenglonPedidoBuilder withPrecioDeLista(BigDecimal precioDeLista) {
-        this.precioDeLista = precioDeLista;
+        this.precioUnitario = precioDeLista;
         return this;
     }
 
@@ -52,12 +53,12 @@ public class RenglonPedidoBuilder {
     }
 
     public RenglonPedidoBuilder withDescuentoPorcentaje(BigDecimal descuento_porcentaje) {
-        this.descuento_porcentaje = descuento_porcentaje;
+        this.descuentoPorcentaje = descuento_porcentaje;
         return this;
     }
 
     public RenglonPedidoBuilder withDescuentoNeto(BigDecimal descuentoNeto) {
-        this.descuento_neto = descuentoNeto;
+        this.descuentoNeto = descuentoNeto;
         return this;
     }
 

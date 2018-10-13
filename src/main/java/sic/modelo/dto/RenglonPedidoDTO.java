@@ -13,13 +13,14 @@ import lombok.NoArgsConstructor;
 public class RenglonPedidoDTO implements Serializable {
 
     private long id_RenglonPedido;
-    private long id_Producto;
-    private String codigoProducto;
-    private String descripcionProducto;
-    private BigDecimal precioDeListaProducto;
+    private long idProductoItem;
+    private String codigoItem;
+    private String descripcionItem;
+    private String medidaItem;
+    private BigDecimal precioUnitario;
     private BigDecimal cantidad;
-    private BigDecimal descuento_porcentaje;
-    private BigDecimal descuento_neto;
+    private BigDecimal descuentoPorcentaje;
+    private BigDecimal descuentoNeto;
     private BigDecimal subTotal;
 
 }

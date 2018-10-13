@@ -404,10 +404,10 @@ public class NotaServiceImpl implements INotaService {
     if (!listaCantidadesProductosUnificados.isEmpty()) {
       renglonesFactura.forEach(
           rf -> {
-            if (listaCantidadesProductosUnificados.containsKey(rf.getId_ProductoItem())) {
+            if (listaCantidadesProductosUnificados.containsKey(rf.getIdProductoItem())) {
               rf.setCantidad(
                   rf.getCantidad()
-                      .subtract(listaCantidadesProductosUnificados.get(rf.getId_ProductoItem())));
+                      .subtract(listaCantidadesProductosUnificados.get(rf.getIdProductoItem())));
             }
           });
     }
@@ -984,36 +984,36 @@ public class NotaServiceImpl implements INotaService {
                   + renglonFactura.getDescripcionItem());
         }
         renglonNota = new RenglonNotaCredito();
-        renglonNota.setIdProductoItem(renglonFactura.getId_ProductoItem());
+        renglonNota.setIdProductoItem(renglonFactura.getIdProductoItem());
         renglonNota.setCodigoItem(renglonFactura.getCodigoItem());
         renglonNota.setDescripcionItem(renglonFactura.getDescripcionItem());
         renglonNota.setMedidaItem(renglonFactura.getMedidaItem());
         renglonNota.setCantidad(cantidad[i]);
         renglonNota.setPrecioUnitario(renglonFactura.getPrecioUnitario());
-        renglonNota.setDescuentoPorcentaje(renglonFactura.getDescuento_porcentaje());
+        renglonNota.setDescuentoPorcentaje(renglonFactura.getDescuentoPorcentaje());
         renglonNota.setDescuentoNeto(
             renglonFactura
-                .getDescuento_porcentaje()
+                .getDescuentoPorcentaje()
                 .divide(CIEN, 15, RoundingMode.HALF_UP)
                 .multiply(renglonNota.getPrecioUnitario()));
-        renglonNota.setGananciaPorcentaje(renglonFactura.getGanancia_porcentaje());
+        renglonNota.setGananciaPorcentaje(renglonFactura.getGananciaPorcentaje());
         renglonNota.setGananciaNeto(
             renglonNota
                 .getGananciaPorcentaje()
                 .divide(CIEN, 15, RoundingMode.HALF_UP)
                 .multiply(renglonNota.getPrecioUnitario()));
-        renglonNota.setIvaPorcentaje(renglonFactura.getIva_porcentaje());
+        renglonNota.setIvaPorcentaje(renglonFactura.getIvaPorcentaje());
         if (tipo.equals(TipoDeComprobante.FACTURA_Y)) {
           renglonNota.setIvaPorcentaje(
               renglonFactura
-                  .getIva_porcentaje()
+                  .getIvaPorcentaje()
                   .divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP));
         }
         renglonNota.setIvaNeto(
             (tipo == TipoDeComprobante.FACTURA_A
                     || tipo == TipoDeComprobante.FACTURA_B
                     || tipo == TipoDeComprobante.PRESUPUESTO)
-                ? renglonFactura.getIva_neto()
+                ? renglonFactura.getIvaNeto()
                 : BigDecimal.ZERO);
         renglonNota.setImporte(renglonNota.getPrecioUnitario().multiply(cantidad[i]));
         renglonNota.setImporteBruto(

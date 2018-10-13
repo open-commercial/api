@@ -12,7 +12,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import sic.modelo.EstadoPedido;
-import sic.modelo.Factura;
 
 @Data
 @AllArgsConstructor
@@ -33,7 +32,13 @@ public class PedidoDTO implements Serializable {
     private String nombreUsuario;
     private List<FacturaDTO> facturas;
     private List<RenglonPedidoDTO> renglones;
+    private BigDecimal subTotal;
+    private BigDecimal recargoPorcentaje;
+    private BigDecimal recargoNeto;
+    private BigDecimal descuentoPorcentaje;
+    private BigDecimal descuentoNeto;
     private BigDecimal totalEstimado;
     private BigDecimal totalActual;
     private EstadoPedido estado;
+
 }

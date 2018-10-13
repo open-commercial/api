@@ -25,8 +25,6 @@ public class ProductoDTO implements Serializable {
   private BigDecimal precioVentaPublico = new BigDecimal("150");
   private BigDecimal ivaPorcentaje = new BigDecimal("21");
   private BigDecimal ivaNeto = new BigDecimal("31.5");
-  private BigDecimal impuestoInternoPorcentaje = BigDecimal.ZERO;
-  private BigDecimal impuestoInternoNeto = BigDecimal.ZERO;
   private BigDecimal precioLista = new BigDecimal("181.5");
   private String nombreRubro = "Ferreteria";
   private boolean ilimitado = false;
