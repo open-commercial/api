@@ -190,7 +190,14 @@ public class PedidoServiceImpl implements IPedidoService {
     for (RenglonPedido renglonPedido : this.getRenglonesDelPedido(pedido.getId_Pedido())) {
       BigDecimal precioUnitario =
           productoService.getProductoPorId(renglonPedido.getIdProductoItem()).getPrecioLista();
-      renglonPedido.setSubTotal(precioUnitario.multiply(renglonPedido.getCantidad()));
+      renglonPedido.setSubTotal(
+          precioUnitario
+              .multiply(renglonPedido.getCantidad())
+              .multiply(
+                  BigDecimal.ONE.subtract(
+                      renglonPedido
+                          .getDescuentoPorcentaje()
+                          .divide(CIEN, 15, RoundingMode.HALF_UP))));
       totalActual = totalActual.add(renglonPedido.getSubTotal());
     }
     porcentajeDescuento =
