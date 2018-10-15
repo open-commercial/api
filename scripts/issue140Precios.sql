@@ -36,6 +36,16 @@ ALTER TABLE pedido add column descuentoPorcentaje Decimal(25,15);
 ALTER TABLE pedido add column descuentoNeto Decimal(25,15);
 
 SET SQL_SAFE_UPDATES=0;
+update pedido 
+set
+pedido.subTotal = pedido.totalEstimado,
+pedido.recargoPorcentaje = 0,
+pedido.recargoNeto = 0,
+pedido.descuentoPorcentaje = 0,
+pedido.descuentoNeto = 0;
+SET SQL_SAFE_UPDATES=1;
+
+SET SQL_SAFE_UPDATES=0;
 update producto 
 inner join renglonpedido on producto.id_Producto = renglonpedido.id_Producto
 inner join medida on producto.id_Medida = medida.id_Medida
