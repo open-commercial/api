@@ -197,7 +197,7 @@ $P{pedido}.getEmpresa().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				<text><![CDATA[Nombre:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="60" y="179" width="495" height="15" uuid="a07a159d-b6fd-42bc-9024-8a31a442aa8a">
+				<reportElement x="60" y="179" width="219" height="15" uuid="a07a159d-b6fd-42bc-9024-8a31a442aa8a">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -275,6 +275,23 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{pedido}.getCliente().getIdFiscal() == null ? "" : $P{pedido}.getCliente().getIdFiscal()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="279" y="179" width="51" height="15" uuid="e8ab02ca-636c-4e5d-8db1-27dca937d548">
+					<property name="local_mesure_unitheight" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nº Cliente:]]></text>
+			</staticText>
+			<textField evaluationTime="Report">
+				<reportElement x="330" y="179" width="225" height="15" uuid="499c310c-7c09-4722-ae37-3fa323cd78ac"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{pedido}.getCliente().getNroCliente()]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>

@@ -250,7 +250,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<text><![CDATA[Nombre:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="50" y="176" width="505" height="15" uuid="a07a159d-b6fd-42bc-9024-8a31a442aa8a">
+				<reportElement x="50" y="176" width="229" height="15" uuid="a07a159d-b6fd-42bc-9024-8a31a442aa8a">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -368,6 +368,23 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				</textElement>
 				<text><![CDATA[Inicio Actividades:]]></text>
 			</staticText>
+			<staticText>
+				<reportElement x="279" y="176" width="51" height="15" uuid="8d1e8e81-2a47-4810-a0b3-47346f68e67f">
+					<property name="local_mesure_unitheight" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nº Cliente:]]></text>
+			</staticText>
+			<textField evaluationTime="Report">
+				<reportElement x="330" y="176" width="225" height="15" uuid="2ee2c80b-e550-4b98-86e0-b0bb673881d7"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getCliente().getNroCliente()]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<columnHeader>

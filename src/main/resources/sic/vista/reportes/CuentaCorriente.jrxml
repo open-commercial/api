@@ -340,6 +340,23 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 			<line>
 				<reportElement x="0" y="284" width="800" height="3" uuid="11ca4359-6606-44e0-bf65-0eb1f4a2a410"/>
 			</line>
+			<staticText>
+				<reportElement x="310" y="176" width="51" height="15" uuid="a1b4c49f-2f13-4c9b-8962-f1915a69e42c">
+					<property name="local_mesure_unitheight" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nº Cliente:]]></text>
+			</staticText>
+			<textField evaluationTime="Report">
+				<reportElement x="361" y="176" width="194" height="15" uuid="c8819140-7e75-47f9-b411-13241d6b59b8"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getCliente().getNroCliente()]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<detail>

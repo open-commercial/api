@@ -231,7 +231,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				<text><![CDATA[Nombre:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="50" y="176" width="505" height="15" uuid="a07a159d-b6fd-42bc-9024-8a31a442aa8a">
+				<reportElement x="50" y="176" width="229" height="15" uuid="a07a159d-b6fd-42bc-9024-8a31a442aa8a">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -352,6 +352,23 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 					<font size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[NOTA DEBITO]]></text>
+			</staticText>
+			<textField evaluationTime="Report">
+				<reportElement x="330" y="176" width="225" height="15" uuid="08b83b2d-afdb-4760-8ab4-40396af49848"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getCliente().getNroCliente()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="279" y="176" width="51" height="15" uuid="5d93a5f0-486d-4d07-a820-c8339c0116d7">
+					<property name="local_mesure_unitheight" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nº Cliente:]]></text>
 			</staticText>
 		</band>
 	</title>

@@ -235,7 +235,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<text><![CDATA[Nombre:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="50" y="176" width="505" height="15" uuid="a07a159d-b6fd-42bc-9024-8a31a442aa8a">
+				<reportElement x="50" y="176" width="229" height="15" uuid="a07a159d-b6fd-42bc-9024-8a31a442aa8a">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -357,6 +357,23 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				</textElement>
 				<text><![CDATA[NOTA CREDITO]]></text>
 			</staticText>
+			<staticText>
+				<reportElement x="279" y="176" width="51" height="15" uuid="383b0683-64ea-464d-9d75-2310fc825dd5">
+					<property name="local_mesure_unitheight" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nº Cliente:]]></text>
+			</staticText>
+			<textField evaluationTime="Report">
+				<reportElement x="330" y="176" width="225" height="15" uuid="6d7e2b2c-9a5f-4b6c-918c-94ac95a12028"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getCliente().getNroCliente()]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<columnHeader>
