@@ -41,7 +41,6 @@ public class NotaServiceImpl implements INotaService {
   private final IUsuarioService usuarioService;
   private final IProductoService productoService;
   private final ICuentaCorrienteService cuentaCorrienteService;
-  private final IRenglonCuentaCorrienteService renglonCuentaCorrienteService;
   private final IReciboService reciboService;
   private final IConfiguracionDelSistemaService configuracionDelSistemaService;
   private final IAfipService afipService;
@@ -62,7 +61,6 @@ public class NotaServiceImpl implements INotaService {
       IProductoService productoService,
       IEmpresaService empresaService,
       ICuentaCorrienteService cuentaCorrienteService,
-      IRenglonCuentaCorrienteService renglonCuentaCorrienteService,
       IReciboService reciboService,
       IConfiguracionDelSistemaService cds,
       IAfipService afipService) {
@@ -75,7 +73,6 @@ public class NotaServiceImpl implements INotaService {
     this.empresaService = empresaService;
     this.productoService = productoService;
     this.cuentaCorrienteService = cuentaCorrienteService;
-    this.renglonCuentaCorrienteService = renglonCuentaCorrienteService;
     this.reciboService = reciboService;
     this.configuracionDelSistemaService = cds;
     this.afipService = afipService;
@@ -770,7 +767,7 @@ public class NotaServiceImpl implements INotaService {
       nota.setVencimientoCAE(comprobante.getVencimientoCAE());
       nota.setNumSerieAfip(comprobante.getNumSerieAfip());
       nota.setNumNotaAfip(comprobante.getNumFacturaAfip());
-      renglonCuentaCorrienteService.updateCAENota(nota.getIdNota(), comprobante.getCAE());
+      cuentaCorrienteService.updateCAENota(nota.getIdNota(), comprobante.getCAE());
     } else {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_comprobanteAFIP_invalido"));

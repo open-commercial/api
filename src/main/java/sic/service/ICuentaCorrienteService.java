@@ -37,4 +37,16 @@ public interface ICuentaCorrienteService {
 
   byte[] getReporteCuentaCorrienteCliente(
       CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page, String formato);
+
+  RenglonCuentaCorriente guardar(RenglonCuentaCorriente renglonCuentaCorriente);
+
+  RenglonCuentaCorriente getRenglonCuentaCorrienteDeFactura(Factura factura, boolean eliminado);
+
+  RenglonCuentaCorriente getRenglonCuentaCorrienteDeNota(Nota nota, boolean eliminado);
+
+  RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(Recibo recibo, boolean eliminado);
+
+  int updateCAEFactura(long idFactura, long CAE);
+
+  int updateCAENota(long idNota, long CAE);
 }
