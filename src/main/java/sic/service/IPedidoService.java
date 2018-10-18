@@ -35,14 +35,12 @@ public interface IPedidoService {
   Pedido guardar(Pedido pedido);
 
   RenglonPedido calcularRenglonPedido(
-      long idProducto,
-      BigDecimal cantidad,
-      BigDecimal descuentoPorcentaje);
+    long idProducto,
+    BigDecimal cantidad,
+    BigDecimal descuentoPorcentaje);
 
   List<RenglonPedido> calcularRenglonesPedido(List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO);
 
   BigDecimal calcularDescuentoNeto(BigDecimal precioUnitario, BigDecimal descuentoPorcentaje);
-
-  BigDecimal calcularSubTotal(BigDecimal cantidad, BigDecimal precioUnitario, BigDecimal descuentoNeto);
 
 }

@@ -477,7 +477,7 @@ public class FacturaServiceImplTest {
   public void shouldCalcularImporte() {
     assertTrue(
         "El importe no es el esperado",
-        facturaService
+        CalculosComprobante
                 .calcularImporte(new BigDecimal("10"), new BigDecimal("10"), BigDecimal.ONE)
                 .doubleValue()
             == 90);

@@ -842,11 +842,6 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     @Override
-    public BigDecimal calcularImporte(BigDecimal cantidad, BigDecimal precioUnitario, BigDecimal descuentoNeto) {
-        return (precioUnitario.subtract(descuentoNeto)).multiply(cantidad);
-    }
-
-    @Override
     public byte[] getReporteFacturaVenta(Factura factura) {
         ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
         InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/FacturaVenta.jasper");
@@ -996,7 +991,7 @@ public class FacturaServiceImpl implements IFacturaService {
         nuevoRenglon.setIvaNeto(this.calcularIVANetoRenglon(movimiento, tipoDeComprobante, producto, nuevoRenglon.getDescuentoPorcentaje()));
         nuevoRenglon.setGananciaPorcentaje(producto.getGananciaPorcentaje());
         nuevoRenglon.setGananciaNeto(producto.getGananciaNeto());
-        nuevoRenglon.setImporte(this.calcularImporte(cantidad, nuevoRenglon.getPrecioUnitario(), nuevoRenglon.getDescuentoNeto()));
+        nuevoRenglon.setImporte(CalculosComprobante.calcularImporte(cantidad, nuevoRenglon.getPrecioUnitario(), nuevoRenglon.getDescuentoNeto()));
         return nuevoRenglon;
     }
 

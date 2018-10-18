@@ -1,74 +1,77 @@
 package sic.service;
 
 import java.math.BigDecimal;
+
 import sic.modelo.*;
+
 import java.util.List;
+
 import org.springframework.data.domain.Page;
 
 public interface IFacturaService {
-    
-    Factura getFacturaPorId(Long id_Factura);
 
-    List<Factura> getFacturasDelPedido(Long idPedido);
+  Factura getFacturaPorId(Long idFactura);
 
-    TipoDeComprobante[] getTipoFacturaCompra(Empresa empresa, Proveedor proveedor);
+  List<Factura> getFacturasDelPedido(Long idPedido);
 
-    TipoDeComprobante[] getTipoFacturaVenta(Empresa empresa, Cliente cliente);
+  TipoDeComprobante[] getTipoFacturaCompra(Empresa empresa, Proveedor proveedor);
 
-    TipoDeComprobante[] getTiposFacturaSegunEmpresa(Empresa empresa);
+  TipoDeComprobante[] getTipoFacturaVenta(Empresa empresa, Cliente cliente);
 
-    List<RenglonFactura> getRenglonesDeLaFactura(Long id_Factura);
-    
-    List<RenglonFactura> getRenglonesDeLaFacturaModificadosParaCredito(Long id_Factura);
-    
-    RenglonFactura getRenglonFactura(Long idRenglonFactura);
- 
-    Page<FacturaCompra> buscarFacturaCompra(BusquedaFacturaCompraCriteria criteria);
+  TipoDeComprobante[] getTiposFacturaSegunEmpresa(Empresa empresa);
 
-    Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
-           
-    List<FacturaVenta> guardar(List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos);
+  List<RenglonFactura> getRenglonesDeLaFactura(Long idFactura);
 
-    List<FacturaCompra> guardar(List<FacturaCompra> facturas);
+  List<RenglonFactura> getRenglonesDeLaFacturaModificadosParaCredito(Long idFactura);
 
-    void eliminar(long[] idFactura);
-    
-    FacturaVenta autorizarFacturaVenta(FacturaVenta fv);
+  RenglonFactura getRenglonFactura(Long idRenglonFactura);
 
-    BigDecimal calcularIvaNetoFactura(TipoDeComprobante tipo, BigDecimal[] cantidades, BigDecimal[] ivaPorcentajeRenglones, BigDecimal[] ivaNetoRenglones, BigDecimal ivaPorcentaje, BigDecimal porcentajeDescuento, BigDecimal porcentajeRecargo);
+  Page<FacturaCompra> buscarFacturaCompra(BusquedaFacturaCompraCriteria criteria);
 
-    BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
+  Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
 
-    BigDecimal calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria);
+  List<FacturaVenta> guardar(List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos);
 
-    BigDecimal calcularIvaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
+  List<FacturaCompra> guardar(List<FacturaCompra> facturas);
 
-    BigDecimal calcularIvaCompra(BusquedaFacturaCompraCriteria criteria);
+  void eliminar(long[] idFactura);
 
-    BigDecimal calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
+  FacturaVenta autorizarFacturaVenta(FacturaVenta fv);
 
-    BigDecimal calcularIVANetoRenglon(Movimiento movimiento, TipoDeComprobante tipo, Producto producto, BigDecimal descuento_porcentaje);
+  BigDecimal calcularIvaNetoFactura(TipoDeComprobante tipo, BigDecimal[] cantidades,
+                                    BigDecimal[] ivaPorcentajeRenglones, BigDecimal[] ivaNetoRenglones, BigDecimal ivaPorcentaje, BigDecimal porcentajeDescuento, BigDecimal porcentajeRecargo);
 
-    BigDecimal calcularPrecioUnitario(Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto);
+  BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
 
-    long calcularNumeroFacturaVenta(TipoDeComprobante tipoDeComprobante, long serie, long idEmpresa);
+  BigDecimal calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria);
 
-    BigDecimal calcularImporte(BigDecimal cantidad, BigDecimal precioUnitario, BigDecimal descuento_neto);    
+  BigDecimal calcularIvaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
 
-    byte[] getReporteFacturaVenta(Factura factura);
+  BigDecimal calcularIvaCompra(BusquedaFacturaCompraCriteria criteria);
 
-    List<FacturaVenta> dividirFactura(FacturaVenta factura, int[] indices);
+  BigDecimal calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
 
-    List<RenglonFactura> getRenglonesPedidoParaFacturar(Pedido pedido, TipoDeComprobante tipoDeComprobante);
+  BigDecimal calcularIVANetoRenglon(Movimiento movimiento, TipoDeComprobante tipo,
+                                    Producto producto, BigDecimal descuentoPorcentaje);
 
-    boolean pedidoTotalmenteFacturado(Pedido pedido);
+  BigDecimal calcularPrecioUnitario(Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto);
+
+  long calcularNumeroFacturaVenta(TipoDeComprobante tipoDeComprobante, long serie, long idEmpresa);
+
+  byte[] getReporteFacturaVenta(Factura factura);
+
+  List<FacturaVenta> dividirFactura(FacturaVenta factura, int[] indices);
+
+  List<RenglonFactura> getRenglonesPedidoParaFacturar(Pedido pedido, TipoDeComprobante tipoDeComprobante);
+
+  boolean pedidoTotalmenteFacturado(Pedido pedido);
 
   RenglonFactura calcularRenglon(
-      TipoDeComprobante tipoDeComprobante,
-      Movimiento movimiento,
-      BigDecimal cantidad,
-      long idProducto,
-      BigDecimal descuentoPorcentaje,
-      boolean dividiendoRenglonFactura);
+    TipoDeComprobante tipoDeComprobante,
+    Movimiento movimiento,
+    BigDecimal cantidad,
+    long idProducto,
+    BigDecimal descuentoPorcentaje,
+    boolean dividiendoRenglonFactura);
 
 }

@@ -5,9 +5,14 @@ import java.math.RoundingMode;
 
 public class CalculosComprobante {
 
-  private CalculosComprobante() {}
+  private CalculosComprobante() {
+  }
 
   private static final BigDecimal CIEN = new BigDecimal("100");
+
+  public static BigDecimal calcularImporte(BigDecimal cantidad, BigDecimal precioUnitario, BigDecimal descuentoNeto) {
+    return (precioUnitario.subtract(descuentoNeto)).multiply(cantidad);
+  }
 
   public static BigDecimal calcularSubTotal(BigDecimal[] importes) {
     BigDecimal resultado = BigDecimal.ZERO;
@@ -26,12 +31,12 @@ public class CalculosComprobante {
   }
 
   public static BigDecimal calcularSubTotalBruto(
-      boolean quitarIVA,
-      BigDecimal subTotal,
-      BigDecimal recargoNeto,
-      BigDecimal descuentoNeto,
-      BigDecimal iva105Neto,
-      BigDecimal iva21Neto) {
+    boolean quitarIVA,
+    BigDecimal subTotal,
+    BigDecimal recargoNeto,
+    BigDecimal descuentoNeto,
+    BigDecimal iva105Neto,
+    BigDecimal iva21Neto) {
     BigDecimal resultado = subTotal.add(recargoNeto).subtract(descuentoNeto);
     if (quitarIVA) {
       resultado = resultado.subtract(iva105Neto.add(iva21Neto));
@@ -40,7 +45,7 @@ public class CalculosComprobante {
   }
 
   public static BigDecimal calcularTotal(
-      BigDecimal subTotalBruto, BigDecimal iva105Neto, BigDecimal iva21Neto) {
+    BigDecimal subTotalBruto, BigDecimal iva105Neto, BigDecimal iva21Neto) {
     return subTotalBruto.add(iva105Neto).add(iva21Neto);
   }
 }
