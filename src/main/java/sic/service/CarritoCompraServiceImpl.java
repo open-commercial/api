@@ -43,8 +43,8 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   }
 
   @Override
-  public BigDecimal getTotal(long idUsuario) {
-    BigDecimal total = carritoCompraRepository.calcularTotal(idUsuario);
+  public BigDecimal getSubtotal(long idUsuario) {
+    BigDecimal total = carritoCompraRepository.calcularSubtotal(idUsuario);
     if (total == null) {
       return BigDecimal.ZERO;
     } else {
