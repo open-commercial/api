@@ -56,7 +56,6 @@ public class FacturaServiceImpl implements IFacturaService {
     private final ICuentaCorrienteService cuentaCorrienteService;
     private final IAfipService afipService;
     private final IReciboService reciboService;
-    private final IRenglonCuentaCorrienteService renglonCuentaCorrienteService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
     private static final BigDecimal IVA_21 = new BigDecimal("21");
@@ -75,7 +74,6 @@ public class FacturaServiceImpl implements IFacturaService {
                               IPedidoService pedidoService, INotaService notaService,
                               ICuentaCorrienteService cuentaCorrienteService,
                               IAfipService afipService, IReciboService reciboService,
-                              IRenglonCuentaCorrienteService renglonCuentaCorrienteService,
                               IUsuarioService usuarioService, IClienteService clienteService) {
         this.facturaRepository = facturaRepository;
         this.facturaVentaRepository = facturaVentaRepository;
@@ -88,7 +86,6 @@ public class FacturaServiceImpl implements IFacturaService {
         this.cuentaCorrienteService = cuentaCorrienteService;
         this.afipService = afipService;
         this.reciboService = reciboService;
-        this.renglonCuentaCorrienteService = renglonCuentaCorrienteService;
         this.usuarioService = usuarioService;
         this.clienteService = clienteService;
     }
@@ -633,7 +630,7 @@ public class FacturaServiceImpl implements IFacturaService {
         fv.setVencimientoCAE(comprobante.getVencimientoCAE());
         fv.setNumSerieAfip(comprobante.getNumSerieAfip());
         fv.setNumFacturaAfip(comprobante.getNumFacturaAfip());
-        renglonCuentaCorrienteService.updateCAEFactura(fv.getId_Factura(), comprobante.getCAE());
+        cuentaCorrienteService.updateCAEFactura(fv.getId_Factura(), comprobante.getCAE());
         return fv;
     }
 
