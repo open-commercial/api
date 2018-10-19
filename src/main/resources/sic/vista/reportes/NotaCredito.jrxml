@@ -235,14 +235,14 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<text><![CDATA[Nombre:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="50" y="176" width="229" height="15" uuid="a07a159d-b6fd-42bc-9024-8a31a442aa8a">
+				<reportElement x="50" y="176" width="505" height="15" uuid="a07a159d-b6fd-42bc-9024-8a31a442aa8a">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getCliente().getRazonSocial()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getCliente().getRazonSocial() + "  (" + $P{notaCredito}.getCliente().getNroCliente() + ")"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="191" width="50" height="15" uuid="07575dbb-0de5-4177-afb0-35b170670748">
@@ -296,15 +296,6 @@ $P{notaCredito}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") 
 				</textElement>
 				<text><![CDATA[I.V.A.:]]></text>
 			</staticText>
-			<staticText>
-				<reportElement x="0" y="236" width="50" height="15" uuid="51a9dcb6-382b-4787-81c9-485fdbfc18e7">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Left">
-					<font size="8" isBold="true"/>
-				</textElement>
-				<text><![CDATA[CUIT:]]></text>
-			</staticText>
 			<textField>
 				<reportElement x="50" y="236" width="505" height="15" uuid="b25bf8b1-128a-4e0e-8b8b-3790a4aefb4a">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -357,22 +348,12 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				</textElement>
 				<text><![CDATA[NOTA CREDITO]]></text>
 			</staticText>
-			<staticText>
-				<reportElement x="279" y="176" width="51" height="15" uuid="383b0683-64ea-464d-9d75-2310fc825dd5">
-					<property name="local_mesure_unitheight" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Left">
+			<textField>
+				<reportElement x="0" y="236" width="50" height="15" uuid="9e20c3e6-5cc3-4396-adbd-8ecbf14cca71"/>
+				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Nº Cliente:]]></text>
-			</staticText>
-			<textField evaluationTime="Report">
-				<reportElement x="330" y="176" width="225" height="15" uuid="6d7e2b2c-9a5f-4b6c-918c-94ac95a12028"/>
-				<textElement textAlignment="Left" verticalAlignment="Top">
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getCliente().getNroCliente()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaCredito}.getCliente().getTipoDeCliente() == sic.modelo.TipoDeCliente.EMPRESA) ? "CUIT:" : "DNI:"]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>

@@ -231,14 +231,14 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				<text><![CDATA[Nombre:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="50" y="176" width="229" height="15" uuid="a07a159d-b6fd-42bc-9024-8a31a442aa8a">
+				<reportElement x="50" y="176" width="505" height="15" uuid="a07a159d-b6fd-42bc-9024-8a31a442aa8a">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaDebito}.getCliente().getRazonSocial()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaDebito}.getCliente().getRazonSocial() + "  (" + $P{notaDebito}.getCliente().getNroCliente() + ")"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="191" width="50" height="15" uuid="07575dbb-0de5-4177-afb0-35b170670748">
@@ -292,15 +292,6 @@ $P{notaDebito}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ?
 				</textElement>
 				<text><![CDATA[I.V.A.:]]></text>
 			</staticText>
-			<staticText>
-				<reportElement x="0" y="236" width="50" height="15" uuid="51a9dcb6-382b-4787-81c9-485fdbfc18e7">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Left">
-					<font size="8" isBold="true"/>
-				</textElement>
-				<text><![CDATA[CUIT:]]></text>
-			</staticText>
 			<textField>
 				<reportElement x="50" y="236" width="505" height="15" uuid="b25bf8b1-128a-4e0e-8b8b-3790a4aefb4a">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -353,23 +344,13 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				</textElement>
 				<text><![CDATA[NOTA DEBITO]]></text>
 			</staticText>
-			<textField evaluationTime="Report">
-				<reportElement x="330" y="176" width="225" height="15" uuid="08b83b2d-afdb-4760-8ab4-40396af49848"/>
-				<textElement textAlignment="Left" verticalAlignment="Top">
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{notaDebito}.getCliente().getNroCliente()]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="279" y="176" width="51" height="15" uuid="5d93a5f0-486d-4d07-a820-c8339c0116d7">
-					<property name="local_mesure_unitheight" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Left">
+			<textField>
+				<reportElement x="0" y="236" width="50" height="15" uuid="138325d8-82b3-438d-a5d5-08398245d3b0"/>
+				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Nº Cliente:]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA[($P{notaDebito}.getCliente().getTipoDeCliente() == sic.modelo.TipoDeCliente.EMPRESA) ? "CUIT:" : "DNI:"]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<columnHeader>
