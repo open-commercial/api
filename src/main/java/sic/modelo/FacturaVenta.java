@@ -43,7 +43,12 @@ public class FacturaVenta extends Factura implements Serializable {
                 empresa, eliminada, CAE, vencimientoCAE, numSerieAfip, numFacturaAfip);
         this.cliente = cliente;
     }
-    
+
+    @JsonGetter("idCliente")
+    public Long getIdCliente() {
+        return cliente.getId_Cliente();
+    }
+
     @JsonGetter("razonSocialCliente")
     public String getRazonSocialCliente() {
         return cliente.getRazonSocial();

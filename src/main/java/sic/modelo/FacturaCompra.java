@@ -42,8 +42,13 @@ public class FacturaCompra extends Factura implements Serializable {
                 iva_21_neto, impuestoInterno_neto, total, observaciones, empresa, eliminada,
                 CAE, vencimientoCAE, numSerieAfip, numFacturaAfip);
         this.proveedor = proveedor;
-    } 
-    
+    }
+
+    @JsonGetter("idProveedor")
+    public Long getIdProveedor() {
+        return proveedor.getId_Proveedor();
+    }
+
     @JsonGetter("razonSocialProveedor")
     public String getRazonSocialProveedor() {
         return proveedor.getRazonSocial();
