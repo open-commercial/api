@@ -1,5 +1,6 @@
 ALTER TABLE factura add column shadow bit(1);
 ALTER TABLE nota add column shadow bit(1);
+ALTER TABLE pedido add column shadow bit(1);
 
 SET SQL_SAFE_UPDATES=0;
 
@@ -26,5 +27,9 @@ or nota.tipoComprobante = "NOTA_CREDITO_PRESUPUESTO"
 or nota.tipoComprobante = "NOTA_DEBITO_X"
 or nota.tipoComprobante = "NOTA_DEBITO_Y"
 or nota.tipoComprobante = "NOTA_DEBITO_PRESUPUESTO";
+
+update pedido
+set pedido.eliminado = true
+where date(pedido.fecha) < "2018-10-01"; 
 
 SET SQL_SAFE_UPDATES=1;
