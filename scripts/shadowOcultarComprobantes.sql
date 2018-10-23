@@ -10,6 +10,9 @@ factura.shadow = factura.eliminada;
 update nota
 set
 nota.shadow = nota.eliminada;
+update pedido
+set
+pedido.shadow = pedido.eliminado;
 
 update factura
 set
