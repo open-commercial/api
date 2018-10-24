@@ -105,35 +105,37 @@ public class PedidoServiceImpl implements IPedidoService {
     }
     if (pedido
       .getSubTotal()
-      .setScale(3, RoundingMode.HALF_UP)
+      .toBigInteger()
       .compareTo(
-        CalculosComprobante.calcularSubTotal(importes).setScale(3, RoundingMode.HALF_UP))
+        CalculosComprobante.calcularSubTotal(importes).toBigInteger())
       != 0) {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_sub_total_no_valido"));
     }
     if (pedido
       .getRecargoNeto()
-      .setScale(3, RoundingMode.HALF_UP)
+      .toBigInteger()
       .compareTo(
         CalculosComprobante.calcularProporcion(
-          pedido.getSubTotal(), pedido.getRecargoPorcentaje())
-          .setScale(3, RoundingMode.HALF_UP))
+          pedido.getSubTotal(),
+          pedido.getRecargoPorcentaje())
+          .toBigInteger())
       != 0) {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_recargo_no_valido"));
     }
     if (pedido
       .getDescuentoNeto()
-      .setScale(3, RoundingMode.HALF_UP)
+      .toBigInteger()
       .compareTo(
         CalculosComprobante.calcularProporcion(
-          pedido.getSubTotal(), pedido.getDescuentoPorcentaje())
-          .setScale(3, RoundingMode.HALF_UP))
+          pedido.getSubTotal(),
+          pedido.getDescuentoPorcentaje())
+          .toBigInteger())
       != 0) {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_recargo_no_valido"));
     }
     if (pedido
       .getTotalEstimado()
-      .setScale(3, RoundingMode.HALF_UP)
+      .toBigInteger()
       .compareTo(
         CalculosComprobante.calcularSubTotalBruto(
           false,
@@ -142,7 +144,7 @@ public class PedidoServiceImpl implements IPedidoService {
           pedido.getDescuentoNeto(),
           null,
           null)
-          .setScale(3, RoundingMode.HALF_UP))
+          .toBigInteger())
       != 0) {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_total_estimado_no_valido"));
     }
