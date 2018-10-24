@@ -547,19 +547,19 @@ public class FacturaServiceImpl implements IFacturaService {
                         .getString("mensaje_factura_venta_CAE"));
             }
         }
-        //Calculos
-        //SubTotal
-        BigDecimal[] importes = new BigDecimal[factura.getRenglones().size()];
-        int i = 0;
-        for (RenglonFactura renglon : factura.getRenglones()) {
-            importes[i] = renglon.getImporte();
-            i++;
-        }
-        if (factura.getSubTotal().compareTo(CalculosComprobante.calcularSubTotal(importes)) != 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_sub_total_no_valido"));
-        }
-        //SubTotalBruto
+    // Calculos
+    // SubTotal
+    BigDecimal[] importes = new BigDecimal[factura.getRenglones().size()];
+    int i = 0;
+    for (RenglonFactura renglon : factura.getRenglones()) {
+      importes[i] = renglon.getImporte();
+      i++;
+    }
+    if (factura.getSubTotal().compareTo(CalculosComprobante.calcularSubTotal(importes)) != 0) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_factura_sub_total_no_valido"));
+    }
+    // SubTotalBruto
     if (factura
             .getSubTotalBruto()
             .compareTo(
@@ -576,38 +576,56 @@ public class FacturaServiceImpl implements IFacturaService {
           ResourceBundle.getBundle("Mensajes")
               .getString("mensaje_factura_sub_total_bruto_no_valido"));
     }
-        //IVA
-        i = 0;
-        if (factura.getTipoComprobante() == TipoDeComprobante.FACTURA_A || factura.getTipoComprobante() == TipoDeComprobante.FACTURA_B
-                || factura.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
-            BigDecimal[] ivaPorcentajes = new BigDecimal[factura.getRenglones().size()];
-            BigDecimal[] ivaNetos = new BigDecimal[factura.getRenglones().size()];
-            BigDecimal[] cantidades = new BigDecimal[factura.getRenglones().size()];
-            for (RenglonFactura renglon : factura.getRenglones()) {
-                ivaPorcentajes[i] = renglon.getIvaPorcentaje();
-                ivaNetos[i] = renglon.getIvaNeto();
-                cantidades[i] = renglon.getCantidad();
-                i++;
-            }
-            BigDecimal ivaNeto21 = this.calcularIvaNetoFactura(factura.getTipoComprobante(), cantidades, ivaPorcentajes, ivaNetos,
-                    IVA_21, factura.getDescuentoPorcentaje(), factura.getRecargoPorcentaje());
-            BigDecimal ivaNeto105 = this.calcularIvaNetoFactura(factura.getTipoComprobante(), cantidades, ivaPorcentajes, ivaNetos,
-                    IVA_105, factura.getDescuentoPorcentaje(), factura.getRecargoPorcentaje());
-            if (factura.getIva21Neto().compareTo(ivaNeto21) != 0) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_factura_iva21_no_valido"));
-            }
-            if (factura.getIva105Neto().compareTo(ivaNeto105) != 0) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_factura_iva105_no_valido"));
-            }
-        }
-        //Total
-        BigDecimal total = CalculosComprobante.calcularTotal(factura.getSubTotalBruto(), factura.getIva105Neto(), factura.getIva21Neto());
-        if (factura.getTotal().compareTo(total) != 0 || factura.getTotal().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_total_no_valido"));
-        }
+    // IVA
+    i = 0;
+    if (factura.getTipoComprobante() == TipoDeComprobante.FACTURA_A
+        || factura.getTipoComprobante() == TipoDeComprobante.FACTURA_B
+        || factura.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
+      BigDecimal[] ivaPorcentajes = new BigDecimal[factura.getRenglones().size()];
+      BigDecimal[] ivaNetos = new BigDecimal[factura.getRenglones().size()];
+      BigDecimal[] cantidades = new BigDecimal[factura.getRenglones().size()];
+      for (RenglonFactura renglon : factura.getRenglones()) {
+        ivaPorcentajes[i] = renglon.getIvaPorcentaje();
+        ivaNetos[i] = renglon.getIvaNeto();
+        cantidades[i] = renglon.getCantidad();
+        i++;
+      }
+      BigDecimal ivaNeto21 =
+          this.calcularIvaNetoFactura(
+              factura.getTipoComprobante(),
+              cantidades,
+              ivaPorcentajes,
+              ivaNetos,
+              IVA_21,
+              factura.getDescuentoPorcentaje(),
+              factura.getRecargoPorcentaje());
+      BigDecimal ivaNeto105 =
+          this.calcularIvaNetoFactura(
+              factura.getTipoComprobante(),
+              cantidades,
+              ivaPorcentajes,
+              ivaNetos,
+              IVA_105,
+              factura.getDescuentoPorcentaje(),
+              factura.getRecargoPorcentaje());
+      if (factura.getIva21Neto().compareTo(ivaNeto21) != 0) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_factura_iva21_no_valido"));
+      }
+      if (factura.getIva105Neto().compareTo(ivaNeto105) != 0) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_factura_iva105_no_valido"));
+      }
+    }
+    // Total
+    BigDecimal total =
+        CalculosComprobante.calcularTotal(
+            factura.getSubTotalBruto(), factura.getIva105Neto(), factura.getIva21Neto());
+    if (factura.getTotal().compareTo(total) != 0
+        || factura.getTotal().compareTo(BigDecimal.ZERO) < 0) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_factura_total_no_valido"));
+    }
     }
 
     @Override
