@@ -431,26 +431,6 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Map<Long, BigDecimal> getProductosNoCumplenCantidadVentaMinima(
-      long[] idProducto, BigDecimal[] cantidad) {
-    Map<Long, BigDecimal> productos = new HashMap<>();
-    int longitudIds = idProducto.length;
-    int longitudCantidades = cantidad.length;
-    if (longitudIds == longitudCantidades) {
-      for (int i = 0; i < longitudIds; i++) {
-        Producto p = this.getProductoPorId(idProducto[i]);
-        if (p.getVentaMinima().compareTo(cantidad[i]) > 0) {
-          productos.put(p.getId_Producto(), cantidad[i]);
-        }
-      }
-    } else {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_error_logitudes_arrays"));
-    }
-    return productos;
-  }
-
-  @Override
   public BigDecimal calcularGananciaPorcentaje(
       BigDecimal precioDeListaNuevo,
       BigDecimal precioDeListaAnterior,
