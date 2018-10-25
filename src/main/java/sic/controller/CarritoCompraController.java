@@ -1,7 +1,6 @@
 package sic.controller;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import sic.modelo.Cliente;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
-import sic.modelo.dto.OrdenDeCompraDTO;
 import sic.service.ICarritoCompraService;
 import sic.service.IClienteService;
 import sic.service.IEmpresaService;
@@ -70,10 +68,7 @@ public class CarritoCompraController {
   @ResponseStatus(HttpStatus.OK)
   public BigDecimal getTotal(@PathVariable long idUsuario,
                              @PathVariable long idEmpresa) {
-    Cliente cliente = clienteService.getClientePorIdUsuarioYidEmpresa(idUsuario, idEmpresa);
-    BigDecimal subtotal = carritoCompraService.getSubtotal(idUsuario);
-    BigDecimal bonificacionNeta = subtotal.multiply(cliente.getBonificacion()).divide(new BigDecimal(100), RoundingMode.HALF_UP);
-    return subtotal.subtract(bonificacionNeta);
+    return carritoCompraService.getTotal(idUsuario, idEmpresa);
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/cantidad-articulos")
@@ -124,19 +119,20 @@ public class CarritoCompraController {
     @RequestParam Long idEmpresa,
     @RequestParam Long idUsuario,
     @RequestParam Long idCliente,
-    @RequestBody OrdenDeCompraDTO ordenDeCompraDTO) {
+    @RequestBody String observaciones) {
+    Cliente cliente = clienteService.getClientePorId(idCliente);
     Pedido pedido = new Pedido();
-    pedido.setObservaciones(ordenDeCompraDTO.getObservaciones());
-    pedido.setSubTotal(ordenDeCompraDTO.getSubTotal());
-    pedido.setRecargoPorcentaje(ordenDeCompraDTO.getRecargoPorcentaje());
-    pedido.setRecargoNeto(ordenDeCompraDTO.getRecargoNeto());
-    pedido.setDescuentoPorcentaje(ordenDeCompraDTO.getDescuentoPorcentaje());
-    pedido.setDescuentoNeto(ordenDeCompraDTO.getDescuentoNeto());
-    pedido.setTotalActual(ordenDeCompraDTO.getTotal());
-    pedido.setTotalEstimado(ordenDeCompraDTO.getTotal());
+    pedido.setObservaciones(observaciones);
+    pedido.setSubTotal(carritoCompraService.getSubtotal(idUsuario));
+    pedido.setRecargoPorcentaje(BigDecimal.ZERO);
+    pedido.setRecargoNeto(BigDecimal.ZERO);
+    pedido.setDescuentoPorcentaje(cliente.getBonificacion());
+    pedido.setDescuentoNeto(carritoCompraService.getBonificacionNeta(idUsuario, cliente.getBonificacion()));
+    pedido.setTotalActual(carritoCompraService.getTotal(idUsuario, idEmpresa));
+    pedido.setTotalEstimado(pedido.getTotalActual());
     pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    pedido.setCliente(clienteService.getClientePorId(idCliente));
+    pedido.setCliente(cliente);
     Pageable pageable =
       new PageRequest(0, Integer.MAX_VALUE, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
     List<ItemCarritoCompra> items =
