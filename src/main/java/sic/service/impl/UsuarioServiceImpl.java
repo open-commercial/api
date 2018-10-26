@@ -253,7 +253,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
     if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
       usuario.setRoles(usuarioLoggedIn.getRoles());
     }
-    if (usuario.getPassword().isEmpty()) {
+    if (usuario.getPassword() == null || usuario.getPassword().isEmpty()) {
       Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
       usuario.setPassword(usuarioGuardado.getPassword());
     } else {

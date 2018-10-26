@@ -128,25 +128,7 @@ public class CompraIntegrationTest {
             .email("marce.r@gmail.com")
             .roles(new ArrayList<>(Arrays.asList(Rol.COMPRADOR)))
             .build();
-    credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
-    //        ClienteDTO cliente =
-    //                ClienteDTO.builder()
-    //                        .tipoDeCliente(TipoDeCliente.EMPRESA)
-    //                        .bonificacion(BigDecimal.TEN)
-    //                        .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-    //                        .razonSocial("Peter Parker")
-    //                        .telefono("379123452")
-    //                        .build();
-    //        restTemplate.postForObject(
-    //                apiPrefix
-    //                        + "/clientes?idEmpresa="
-    //                        + empresa.getId_Empresa()
-    //                        + "&idLocalidad="
-    //                        + localidad.getId_Localidad()
-    //                        + "&idUsuarioCredencial="
-    //                        + credencial.getId_Usuario(),
-    //                cliente,
-    //                ClienteDTO.class);
+    restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
     Transportista transportista =
         new TransportistaBuilder()
             .withEmpresa(empresa)
