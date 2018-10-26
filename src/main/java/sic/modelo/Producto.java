@@ -54,9 +54,9 @@ public class Producto implements Serializable {
     private BigDecimal cantMinima;
 
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_cantidadVentaMinima_invalida}")
+    @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_cantidad_bulto_invalida}")
     @JsonView(Views.Public.class)
-    private BigDecimal ventaMinima;
+    private BigDecimal bulto;
 
     @ManyToOne
     @JoinColumn(name = "id_Medida", referencedColumnName = "id_Medida")

@@ -334,20 +334,6 @@ public class ProductoController {
     return productoService.getProductosSinStockDisponible(idProducto, cantidad);
   }
 
-  @GetMapping("/productos/cantidad-venta-minima")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
-  @ResponseStatus(HttpStatus.OK)
-  public Map<Long, BigDecimal> verificarCantidadVentaMinima(
-      long[] idProducto, BigDecimal[] cantidad) {
-    return productoService.getProductosNoCumplenCantidadVentaMinima(idProducto, cantidad);
-  }
-
   @GetMapping("/productos/reporte/criteria")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
