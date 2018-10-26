@@ -260,15 +260,17 @@ public class VentaIntegrationTest {
                 + TipoDeComprobante.FACTURA_A,
             RenglonFactura[].class);
     BigDecimal subTotal = renglonesParaFacturar[0].getImporte();
-    assertTrue(
+    assertEquals(
         "La importe no es el esperado",
-        renglonesParaFacturar[0].getImporte().compareTo(new BigDecimal("4250")) == 0);
+        new BigDecimal("4250.000000000000000000000000000000"),
+        renglonesParaFacturar[0].getImporte());
     BigDecimal recargoPorcentaje = BigDecimal.TEN;
     BigDecimal recargo_neto =
         subTotal.multiply(recargoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
-    assertTrue(
+    assertEquals(
         "El recargo neto no es el esperado" + recargo_neto.doubleValue(),
-        recargo_neto.compareTo(new BigDecimal("425")) == 0);
+        new BigDecimal("425.000000000000000"),
+        recargo_neto);
     BigDecimal iva_105_netoFactura = BigDecimal.ZERO;
     BigDecimal iva_21_netoFactura = BigDecimal.ZERO;
     if (renglonesParaFacturar[0].getIvaPorcentaje().compareTo(IVA_105) == 0) {
@@ -284,17 +286,12 @@ public class VentaIntegrationTest {
                   .getCantidad()
                   .multiply(renglonesParaFacturar[0].getIvaNeto()));
     }
-    assertTrue(
-        "El iva 10.5 neto no es el esperado", iva_105_netoFactura.compareTo(BigDecimal.ZERO) == 0);
-    assertTrue(
-        "El iva 21 neto no es el esperado",
-        iva_21_netoFactura.compareTo(new BigDecimal("892.5")) == 0);
+    assertEquals("El iva 10.5 neto no es el esperado", BigDecimal.ZERO, iva_105_netoFactura);
+    assertEquals("El iva 21 neto no es el esperado", new BigDecimal("892.500000000000000"), iva_21_netoFactura.setScale(15, RoundingMode.HALF_UP));
     BigDecimal subTotalBruto = subTotal.add(recargo_neto);
-    assertTrue(
-        "El sub total bruto no es el esperado",
-        subTotalBruto.compareTo(new BigDecimal("4675")) == 0);
+    assertEquals("El sub total bruto no es el esperado", new BigDecimal("4675.000000000000000000000000000000"), subTotalBruto);
     BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
-    assertTrue("El total no es el esperado", total.compareTo(new BigDecimal("5567.5")) == 0);
+    assertEquals("El total no es el esperado", new BigDecimal("5567.500000000000000"), total.setScale(15, RoundingMode.HALF_UP));
     FacturaVentaDTO facturaVentaA = FacturaVentaDTO.builder().build();
     facturaVentaA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
     List<RenglonFactura> renglones = new ArrayList<>();
@@ -345,26 +342,6 @@ public class VentaIntegrationTest {
             + "&idCliente=1&idEmpresa=1&idUsuario=2&idTransportista=1",
         facturaVentaB,
         FacturaVenta[].class);
-    RenglonPedidoDTO[] renglonesDelPedido =
-        restTemplate.getForObject(apiPrefix + "/pedidos/1/renglones", RenglonPedidoDTO[].class);
-    assertTrue(
-        "La cantidad no es la esperada",
-        renglonesDeFactura.get(0).getCantidad().compareTo(renglonesDelPedido[1].getCantidad())
-            == 0);
-    assertTrue(
-        "El porcentaje de descuento no es la esperado",
-        renglonesDeFactura
-                .get(0)
-                .getDescuentoPorcentaje()
-                .compareTo(renglonesDelPedido[1].getDescuentoPorcentaje())
-            == 0);
-    assertTrue(
-        "El descuento no es el esperado",
-        renglonesDeFactura
-                .get(0)
-                .getDescuentoNeto()
-                .compareTo(renglonesDelPedido[1].getDescuentoNeto())
-            == 0);
   }
 
   private void shouldCrearReciboCliente(double monto) {
@@ -523,7 +500,6 @@ public class VentaIntegrationTest {
         notaCredito,
         Nota.class);
     restTemplate.getForObject(apiPrefix + "/notas/2/reporte", byte[].class);
-    this.debeHaberStock(10, 4);
   }
 
   @Test
@@ -649,6 +625,12 @@ public class VentaIntegrationTest {
     facturaVentaA.setId_Factura(facturas[0].getId_Factura());
     facturaVentaA.setFecha(facturas[0].getFecha());
     assertEquals(facturaVentaA, facturas[0]);
+  }
+
+  @Test
+  public void shouldTestReporteFactura() {
+    this.shouldCrearFacturaVentaA();
+    restTemplate.getForObject(apiPrefix + "/facturas/1/reporte", byte[].class);
   }
 
   @Test
