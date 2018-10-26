@@ -617,6 +617,13 @@ public class FacturaServiceImpl implements IFacturaService {
             ResourceBundle.getBundle("Mensajes").getString("mensaje_factura_iva105_no_valido"));
       }
     }
+    if ((factura.getTipoComprobante() == TipoDeComprobante.FACTURA_X
+            || factura.getTipoComprobante() == TipoDeComprobante.FACTURA_C)
+        && (factura.getIva21Neto().compareTo(BigDecimal.ZERO) != 0
+            || factura.getIva105Neto().compareTo(BigDecimal.ZERO) != 0)) {
+        throw new BusinessServiceException(
+                ResourceBundle.getBundle("Mensajes").getString("mensaje_factura_iva_no_valido"));
+    }
     // Total
     BigDecimal total =
         CalculosComprobante.calcularTotal(

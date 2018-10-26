@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
+@Builder
 public class FacturaVentaDTO extends FacturaDTO implements Serializable {
 
       private String razonSocialCliente = "Construcciones S.A.";

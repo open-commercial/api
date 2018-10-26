@@ -205,10 +205,10 @@ public class ProductoController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(
       @RequestBody Producto producto,
-      @RequestParam Long idMedida,
-      @RequestParam Long idRubro,
-      @RequestParam Long idProveedor,
-      @RequestParam Long idEmpresa) {
+      @RequestParam(required = false) Long idMedida,
+      @RequestParam(required = false)  Long idRubro,
+      @RequestParam(required = false)  Long idProveedor,
+      @RequestParam(required = false)  Long idEmpresa) {
     if (productoService.getProductoPorId(producto.getId_Producto()) != null) {
       productoService.actualizar(producto, idMedida, idRubro, idProveedor, idEmpresa);
     }

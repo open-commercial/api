@@ -162,10 +162,10 @@ public class CompraIntegrationTest {
     restTemplate.postForObject(apiPrefix + "/rubros", rubro, Rubro.class);
   }
 
-  private void shouldCrearPorductos(String[] codigos) {
+  private void shouldCrearPorductos() {
     ProductoDTO productoUno =
         new ProductoBuilder()
-            .withCodigo(codigos[0])
+            .withCodigo(RandomStringUtils.random(10, false, true))
             .withDescripcion(RandomStringUtils.random(10, true, false))
             .withCantidad(BigDecimal.TEN)
             .withVentaMinima(BigDecimal.ONE)
@@ -179,7 +179,7 @@ public class CompraIntegrationTest {
             .build();
     ProductoDTO productoDos =
         new ProductoBuilder()
-            .withCodigo(codigos[1])
+            .withCodigo(RandomStringUtils.random(10, false, true))
             .withDescripcion(RandomStringUtils.random(10, true, false))
             .withCantidad(new BigDecimal("6"))
             .withVentaMinima(BigDecimal.ONE)
@@ -220,20 +220,13 @@ public class CompraIntegrationTest {
             + empresa.getId_Empresa(),
         productoDos,
         ProductoDTO.class);
-    this.debeHaberStock(1l, 10, 2l, 6);
+    this.debeHaberStock(10,6);
   }
 
-  private void debeHaberStock(
-      long idProductoUno,
-      double cantidadProductoUno,
-      long idProductoDos,
-      double cantidadProductoDos) {
+  private void debeHaberStock(double cantidadProductoUno, double cantidadProductoDos) {
     String uri =
         apiPrefix
-            + "/productos/disponibilidad-stock?idProducto="
-            + idProductoUno
-            + ","
-            + idProductoDos
+            + "/productos/disponibilidad-stock?idProducto=1,2"
             + "&cantidad="
             + cantidadProductoUno
             + ","
@@ -248,115 +241,106 @@ public class CompraIntegrationTest {
 
   @Test
   public void shouldCrearFacturaCompraA() {
-      this.shouldCrearPorductos(new String[]{"4","6"});
-      RenglonFactura renglonUno =
-              restTemplate.getForObject(
-                      apiPrefix
-                              + "/facturas/renglon?"
-                              + "idProducto=1"
-                              + "&tipoDeComprobante="
-                              + TipoDeComprobante.FACTURA_A
-                              + "&movimiento="
-                              + Movimiento.COMPRA
-                              + "&cantidad=5"
-                              + "&descuentoPorcentaje=20",
-                      RenglonFactura.class);
-      RenglonFactura renglonDos =
-              restTemplate.getForObject(
-                      apiPrefix
-                              + "/facturas/renglon?"
-                              + "idProducto=2"
-                              + "&tipoDeComprobante="
-                              + TipoDeComprobante.FACTURA_A
-                              + "&movimiento="
-                              + Movimiento.COMPRA
-                              + "&cantidad=2"
-                              + "&descuentoPorcentaje=0",
-                      RenglonFactura.class);
-      List<RenglonFactura> renglones = new ArrayList<>();
-      renglones.add(renglonUno);
-      renglones.add(renglonDos);
-      int size = renglones.size();
-      BigDecimal[] cantidades = new BigDecimal[size];
-      BigDecimal[] ivaPorcentajeRenglones = new BigDecimal[size];
-      BigDecimal[] ivaNetoRenglones = new BigDecimal[size];
-      int indice = 0;
-      BigDecimal subTotal = BigDecimal.ZERO;
-      for (RenglonFactura renglon : renglones) {
-          subTotal = subTotal.add(renglon.getImporte());
-          cantidades[indice] = renglon.getCantidad();
-          ivaPorcentajeRenglones[indice] = renglon.getIvaPorcentaje();
-          ivaNetoRenglones[indice] = renglon.getIvaNeto();
-          indice++;
+    this.shouldCrearPorductos();
+    RenglonFactura renglonUno =
+        restTemplate.getForObject(
+            apiPrefix
+                + "/facturas/renglon?"
+                + "idProducto=1"
+                + "&tipoDeComprobante="
+                + TipoDeComprobante.FACTURA_A
+                + "&movimiento="
+                + Movimiento.COMPRA
+                + "&cantidad=4"
+                + "&descuentoPorcentaje=20",
+            RenglonFactura.class);
+    RenglonFactura renglonDos =
+        restTemplate.getForObject(
+            apiPrefix
+                + "/facturas/renglon?"
+                + "idProducto=2"
+                + "&tipoDeComprobante="
+                + TipoDeComprobante.FACTURA_A
+                + "&movimiento="
+                + Movimiento.COMPRA
+                + "&cantidad=3"
+                + "&descuentoPorcentaje=0",
+            RenglonFactura.class);
+    List<RenglonFactura> renglones = new ArrayList<>();
+    renglones.add(renglonUno);
+    renglones.add(renglonDos);
+    int size = renglones.size();
+    BigDecimal[] cantidades = new BigDecimal[size];
+    BigDecimal[] ivaPorcentajeRenglones = new BigDecimal[size];
+    BigDecimal[] ivaNetoRenglones = new BigDecimal[size];
+    int indice = 0;
+    BigDecimal subTotal = BigDecimal.ZERO;
+    for (RenglonFactura renglon : renglones) {
+      subTotal = subTotal.add(renglon.getImporte());
+      cantidades[indice] = renglon.getCantidad();
+      ivaPorcentajeRenglones[indice] = renglon.getIvaPorcentaje();
+      ivaNetoRenglones[indice] = renglon.getIvaNeto();
+      indice++;
+    }
+    BigDecimal descuentoPorcentaje = new BigDecimal("25");
+    BigDecimal recargoPorcentaje = BigDecimal.TEN;
+    BigDecimal descuento_neto =
+        subTotal.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+    BigDecimal recargo_neto =
+        subTotal.multiply(recargoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+    indice = cantidades.length;
+    BigDecimal iva_105_netoFactura = BigDecimal.ZERO;
+    BigDecimal iva_21_netoFactura = BigDecimal.ZERO;
+    for (int i = 0; i < indice; i++) {
+      if (ivaPorcentajeRenglones[i].compareTo(IVA_105) == 0) {
+        iva_105_netoFactura =
+            iva_105_netoFactura.add(
+                cantidades[i].multiply(
+                    ivaNetoRenglones[i]
+                        .subtract(
+                            ivaNetoRenglones[i].multiply(
+                                descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
+                        .add(
+                            ivaNetoRenglones[i].multiply(
+                                recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
+      } else if (ivaPorcentajeRenglones[i].compareTo(IVA_21) == 0) {
+        iva_21_netoFactura =
+            iva_21_netoFactura.add(
+                cantidades[i].multiply(
+                    ivaNetoRenglones[i]
+                        .subtract(
+                            ivaNetoRenglones[i].multiply(
+                                descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
+                        .add(
+                            ivaNetoRenglones[i].multiply(
+                                recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
       }
-      BigDecimal descuentoPorcentaje = new BigDecimal("25");
-      BigDecimal recargoPorcentaje = BigDecimal.TEN;
-      BigDecimal descuento_neto =
-              subTotal.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
-      BigDecimal recargo_neto =
-              subTotal.multiply(recargoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
-      indice = cantidades.length;
-      BigDecimal iva_105_netoFactura = BigDecimal.ZERO;
-      BigDecimal iva_21_netoFactura = BigDecimal.ZERO;
-      for (int i = 0; i < indice; i++) {
-          if (ivaPorcentajeRenglones[i].compareTo(IVA_105) == 0) {
-              iva_105_netoFactura =
-                      iva_105_netoFactura.add(
-                              cantidades[i].multiply(
-                                      ivaNetoRenglones[i]
-                                              .subtract(
-                                                      ivaNetoRenglones[i].multiply(
-                                                              descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
-                                              .add(
-                                                      ivaNetoRenglones[i].multiply(
-                                                              recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
-          } else if (ivaPorcentajeRenglones[i].compareTo(IVA_21) == 0) {
-              iva_21_netoFactura =
-                      iva_21_netoFactura.add(
-                              cantidades[i].multiply(
-                                      ivaNetoRenglones[i]
-                                              .subtract(
-                                                      ivaNetoRenglones[i].multiply(
-                                                              descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
-                                              .add(
-                                                      ivaNetoRenglones[i].multiply(
-                                                              recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
-          }
-      }
-      BigDecimal subTotalBruto =
-              subTotal
-                      .add(recargo_neto)
-                      .subtract(descuento_neto);
-      BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
-      FacturaCompraDTO facturaCompraA = new FacturaCompraDTO();
-      facturaCompraA.setFecha(new Date());
-      facturaCompraA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
-      facturaCompraA.setRenglones(renglones);
-      facturaCompraA.setSubTotal(subTotal);
-      facturaCompraA.setRecargoPorcentaje(recargoPorcentaje);
-      facturaCompraA.setRecargoNeto(recargo_neto);
-      facturaCompraA.setDescuentoPorcentaje(descuentoPorcentaje);
-      facturaCompraA.setDescuentoNeto(descuento_neto);
-      facturaCompraA.setSubTotalBruto(subTotalBruto);
-      facturaCompraA.setIva105Neto(iva_105_netoFactura);
-      facturaCompraA.setIva21Neto(iva_21_netoFactura);
-      facturaCompraA.setTotal(total);
-      restTemplate.postForObject(
-              apiPrefix + "/facturas/compra?" + "idProveedor=1&idEmpresa=1&idUsuario=2&idTransportista=1",
-              facturaCompraA,
-              FacturaCompraDTO[].class);
-      String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=1,2&cantidad=15,8";
-      Assert.assertTrue(
-              restTemplate
-                      .exchange(
-                              uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {})
-                      .getBody()
-                      .isEmpty());
+    }
+    BigDecimal subTotalBruto = subTotal.add(recargo_neto).subtract(descuento_neto);
+    BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
+    FacturaCompraDTO facturaCompraA = new FacturaCompraDTO();
+    facturaCompraA.setFecha(new Date());
+    facturaCompraA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
+    facturaCompraA.setRenglones(renglones);
+    facturaCompraA.setSubTotal(subTotal);
+    facturaCompraA.setRecargoPorcentaje(recargoPorcentaje);
+    facturaCompraA.setRecargoNeto(recargo_neto);
+    facturaCompraA.setDescuentoPorcentaje(descuentoPorcentaje);
+    facturaCompraA.setDescuentoNeto(descuento_neto);
+    facturaCompraA.setSubTotalBruto(subTotalBruto);
+    facturaCompraA.setIva105Neto(iva_105_netoFactura);
+    facturaCompraA.setIva21Neto(iva_21_netoFactura);
+    facturaCompraA.setTotal(total);
+    restTemplate.postForObject(
+        apiPrefix + "/facturas/compra?" + "idProveedor=1&idEmpresa=1&idUsuario=2&idTransportista=1",
+        facturaCompraA,
+        FacturaCompraDTO[].class);
+    this.debeHaberStock(14,9);
   }
 
   @Test
   public void shouldCrearFacturaCompraB() {
-    this.shouldCrearPorductos(new String[] {"4", "6"});
+    this.shouldCrearPorductos();
     RenglonFactura renglonUno =
         restTemplate.getForObject(
             apiPrefix
@@ -454,18 +438,12 @@ public class CompraIntegrationTest {
         apiPrefix + "/facturas/compra?" + "idProveedor=1&idEmpresa=1&idUsuario=2&idTransportista=1",
         facturaCompraB,
         FacturaCompraDTO[].class);
-    String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=1,2&cantidad=15,8";
-    Assert.assertTrue(
-        restTemplate
-            .exchange(
-                uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {})
-            .getBody()
-            .isEmpty());
+    this.debeHaberStock(15,8);
   }
 
   @Test
   public void shouldCrearFacturaCompraC() {
-    this.shouldCrearPorductos(new String[] {"4", "6"});
+    this.shouldCrearPorductos();
     RenglonFactura renglonUno =
         restTemplate.getForObject(
             apiPrefix
@@ -475,7 +453,7 @@ public class CompraIntegrationTest {
                 + TipoDeComprobante.FACTURA_C
                 + "&movimiento="
                 + Movimiento.COMPRA
-                + "&cantidad=5"
+                + "&cantidad=3"
                 + "&descuentoPorcentaje=20",
             RenglonFactura.class);
     RenglonFactura renglonDos =
@@ -487,7 +465,7 @@ public class CompraIntegrationTest {
                 + TipoDeComprobante.FACTURA_C
                 + "&movimiento="
                 + Movimiento.COMPRA
-                + "&cantidad=2"
+                + "&cantidad=1"
                 + "&descuentoPorcentaje=0",
             RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
@@ -563,18 +541,12 @@ public class CompraIntegrationTest {
         apiPrefix + "/facturas/compra?" + "idProveedor=1&idEmpresa=1&idUsuario=2&idTransportista=1",
         facturaCompraC,
         FacturaCompraDTO[].class);
-    String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=1,2&cantidad=15,8";
-    Assert.assertTrue(
-        restTemplate
-            .exchange(
-                uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {})
-            .getBody()
-            .isEmpty());
+    this.debeHaberStock(13,7);
   }
 
   @Test
   public void shouldCrearFacturaCompraX() {
-    this.shouldCrearPorductos(new String[] {"4", "6"});
+    this.shouldCrearPorductos();
     RenglonFactura renglonUno =
         restTemplate.getForObject(
             apiPrefix
@@ -672,122 +644,110 @@ public class CompraIntegrationTest {
         apiPrefix + "/facturas/compra?" + "idProveedor=1&idEmpresa=1&idUsuario=2&idTransportista=1",
         facturaCompraX,
         FacturaCompraDTO[].class);
-    String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=1,2&cantidad=15,8";
-    Assert.assertTrue(
-        restTemplate
-            .exchange(
-                uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {})
-            .getBody()
-            .isEmpty());
+    this.debeHaberStock(15,8);
   }
 
-  private void shouldCrearFacturaCompraB(String[] codigosProducto) {
-    this.shouldCrearPorductos(codigosProducto);
-    RenglonFactura renglonUno =
-        restTemplate.getForObject(
-            apiPrefix
-                + "/facturas/renglon?"
-                + "idProducto=1"
-                + "&tipoDeComprobante="
-                + TipoDeComprobante.FACTURA_B
-                + "&movimiento="
-                + Movimiento.COMPRA
-                + "&cantidad=5"
-                + "&descuentoPorcentaje=20",
-            RenglonFactura.class);
-    RenglonFactura renglonDos =
-        restTemplate.getForObject(
-            apiPrefix
-                + "/facturas/renglon?"
-                + "idProducto=2"
-                + "&tipoDeComprobante="
-                + TipoDeComprobante.FACTURA_B
-                + "&movimiento="
-                + Movimiento.COMPRA
-                + "&cantidad=2"
-                + "&descuentoPorcentaje=0",
-            RenglonFactura.class);
-    List<RenglonFactura> renglones = new ArrayList<>();
-    renglones.add(renglonUno);
-    renglones.add(renglonDos);
-    int size = renglones.size();
-    BigDecimal[] cantidades = new BigDecimal[size];
-    BigDecimal[] ivaPorcentajeRenglones = new BigDecimal[size];
-    BigDecimal[] ivaNetoRenglones = new BigDecimal[size];
-    int indice = 0;
-    BigDecimal subTotal = BigDecimal.ZERO;
-    for (RenglonFactura renglon : renglones) {
-      subTotal = subTotal.add(renglon.getImporte());
-      cantidades[indice] = renglon.getCantidad();
-      ivaPorcentajeRenglones[indice] = renglon.getIvaPorcentaje();
-      ivaNetoRenglones[indice] = renglon.getIvaNeto();
-      indice++;
-    }
-    BigDecimal descuentoPorcentaje = new BigDecimal("25");
-    BigDecimal recargoPorcentaje = BigDecimal.TEN;
-    BigDecimal descuento_neto =
-        subTotal.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal recargo_neto =
-        subTotal.multiply(recargoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
-    indice = cantidades.length;
-    BigDecimal iva_105_netoFactura = BigDecimal.ZERO;
-    BigDecimal iva_21_netoFactura = BigDecimal.ZERO;
-    for (int i = 0; i < indice; i++) {
-      if (ivaPorcentajeRenglones[i].compareTo(IVA_105) == 0) {
-        iva_105_netoFactura =
-            iva_105_netoFactura.add(
-                cantidades[i].multiply(
-                    ivaNetoRenglones[i]
-                        .subtract(
-                            ivaNetoRenglones[i].multiply(
-                                descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
-                        .add(
-                            ivaNetoRenglones[i].multiply(
-                                recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
-      } else if (ivaPorcentajeRenglones[i].compareTo(IVA_21) == 0) {
-        iva_21_netoFactura =
-            iva_21_netoFactura.add(
-                cantidades[i].multiply(
-                    ivaNetoRenglones[i]
-                        .subtract(
-                            ivaNetoRenglones[i].multiply(
-                                descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
-                        .add(
-                            ivaNetoRenglones[i].multiply(
-                                recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
+  @Test
+  public void shouldCrearFacturaCompraPresupuesto() {
+      this.shouldCrearPorductos();
+      RenglonFactura renglonUno =
+              restTemplate.getForObject(
+                      apiPrefix
+                              + "/facturas/renglon?"
+                              + "idProducto=1"
+                              + "&tipoDeComprobante="
+                              + TipoDeComprobante.PRESUPUESTO
+                              + "&movimiento="
+                              + Movimiento.COMPRA
+                              + "&cantidad=5"
+                              + "&descuentoPorcentaje=20",
+                      RenglonFactura.class);
+      RenglonFactura renglonDos =
+              restTemplate.getForObject(
+                      apiPrefix
+                              + "/facturas/renglon?"
+                              + "idProducto=2"
+                              + "&tipoDeComprobante="
+                              + TipoDeComprobante.PRESUPUESTO
+                              + "&movimiento="
+                              + Movimiento.COMPRA
+                              + "&cantidad=2"
+                              + "&descuentoPorcentaje=0",
+                      RenglonFactura.class);
+      List<RenglonFactura> renglones = new ArrayList<>();
+      renglones.add(renglonUno);
+      renglones.add(renglonDos);
+      int size = renglones.size();
+      BigDecimal[] cantidades = new BigDecimal[size];
+      BigDecimal[] ivaPorcentajeRenglones = new BigDecimal[size];
+      BigDecimal[] ivaNetoRenglones = new BigDecimal[size];
+      int indice = 0;
+      BigDecimal subTotal = BigDecimal.ZERO;
+      for (RenglonFactura renglon : renglones) {
+          subTotal = subTotal.add(renglon.getImporte());
+          cantidades[indice] = renglon.getCantidad();
+          ivaPorcentajeRenglones[indice] = renglon.getIvaPorcentaje();
+          ivaNetoRenglones[indice] = renglon.getIvaNeto();
+          indice++;
       }
-    }
-    BigDecimal subTotalBruto =
-        subTotal
-            .add(recargo_neto)
-            .subtract(descuento_neto)
-            .subtract(iva_105_netoFactura.add(iva_21_netoFactura));
-    BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
-    FacturaCompraDTO facturaCompraB = new FacturaCompraDTO();
-    facturaCompraB.setFecha(new Date());
-    facturaCompraB.setTipoComprobante(TipoDeComprobante.FACTURA_B);
-    facturaCompraB.setRenglones(renglones);
-    facturaCompraB.setSubTotal(subTotal);
-    facturaCompraB.setRecargoPorcentaje(recargoPorcentaje);
-    facturaCompraB.setRecargoNeto(recargo_neto);
-    facturaCompraB.setDescuentoPorcentaje(descuentoPorcentaje);
-    facturaCompraB.setDescuentoNeto(descuento_neto);
-    facturaCompraB.setSubTotalBruto(subTotalBruto);
-    facturaCompraB.setIva105Neto(iva_105_netoFactura);
-    facturaCompraB.setIva21Neto(iva_21_netoFactura);
-    facturaCompraB.setTotal(total);
-    restTemplate.postForObject(
-        apiPrefix + "/facturas/compra?" + "idProveedor=1&idEmpresa=1&idUsuario=2&idTransportista=1",
-        facturaCompraB,
-        FacturaCompraDTO[].class);
-
-    String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=1,2&cantidad=15,8";
-    Assert.assertTrue(
-        restTemplate
-            .exchange(
-                uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {})
-            .getBody()
-            .isEmpty());
+      BigDecimal descuentoPorcentaje = new BigDecimal("25");
+      BigDecimal recargoPorcentaje = BigDecimal.TEN;
+      BigDecimal descuento_neto =
+              subTotal.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+      BigDecimal recargo_neto =
+              subTotal.multiply(recargoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+      indice = cantidades.length;
+      BigDecimal iva_105_netoFactura = BigDecimal.ZERO;
+      BigDecimal iva_21_netoFactura = BigDecimal.ZERO;
+      for (int i = 0; i < indice; i++) {
+          if (ivaPorcentajeRenglones[i].compareTo(IVA_105) == 0) {
+              iva_105_netoFactura =
+                      iva_105_netoFactura.add(
+                              cantidades[i].multiply(
+                                      ivaNetoRenglones[i]
+                                              .subtract(
+                                                      ivaNetoRenglones[i].multiply(
+                                                              descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
+                                              .add(
+                                                      ivaNetoRenglones[i].multiply(
+                                                              recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
+          } else if (ivaPorcentajeRenglones[i].compareTo(IVA_21) == 0) {
+              iva_21_netoFactura =
+                      iva_21_netoFactura.add(
+                              cantidades[i].multiply(
+                                      ivaNetoRenglones[i]
+                                              .subtract(
+                                                      ivaNetoRenglones[i].multiply(
+                                                              descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
+                                              .add(
+                                                      ivaNetoRenglones[i].multiply(
+                                                              recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
+          }
+      }
+      BigDecimal subTotalBruto =
+              subTotal
+                      .add(recargo_neto)
+                      .subtract(descuento_neto)
+                      .subtract(iva_105_netoFactura.add(iva_21_netoFactura));
+      BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
+      FacturaCompraDTO facturaCompraB = new FacturaCompraDTO();
+      facturaCompraB.setFecha(new Date());
+      facturaCompraB.setTipoComprobante(TipoDeComprobante.PRESUPUESTO);
+      facturaCompraB.setRenglones(renglones);
+      facturaCompraB.setSubTotal(subTotal);
+      facturaCompraB.setRecargoPorcentaje(recargoPorcentaje);
+      facturaCompraB.setRecargoNeto(recargo_neto);
+      facturaCompraB.setDescuentoPorcentaje(descuentoPorcentaje);
+      facturaCompraB.setDescuentoNeto(descuento_neto);
+      facturaCompraB.setSubTotalBruto(subTotalBruto);
+      facturaCompraB.setIva105Neto(iva_105_netoFactura);
+      facturaCompraB.setIva21Neto(iva_21_netoFactura);
+      facturaCompraB.setTotal(total);
+      restTemplate.postForObject(
+              apiPrefix + "/facturas/compra?" + "idProveedor=1&idEmpresa=1&idUsuario=2&idTransportista=1",
+              facturaCompraB,
+              FacturaCompraDTO[].class);
+      this.debeHaberStock(15,8);
   }
 
   private void shouldCrearReciboProveedor(double monto) {
@@ -937,7 +897,7 @@ public class CompraIntegrationTest {
 
   @Test
   public void shouldTestSaldoCuentaCorrienteProveedor() {
-    this.shouldCrearFacturaCompraB(new String[] {"1", "2"});
+    this.shouldCrearFacturaCompraB();
     assertTrue(
         "El saldo de la cuenta corriente no es el esperado",
         restTemplate
@@ -985,7 +945,16 @@ public class CompraIntegrationTest {
                     apiPrefix + "/cuentas-corriente/proveedores/1/saldo", BigDecimal.class)
                 .compareTo(new BigDecimal("699.25"))
             == 0);
-    this.debeHaberStock(1l, 10, 2l, 6);
+  }
+
+  @Test
+  public void shouldTestSaldoParcialCuentaCorrienteProveedor() {
+    this.shouldCrearFacturaCompraB();
+    this.shouldCrearReciboProveedor(599.25);
+    restTemplate.delete(apiPrefix + "/recibos/1");
+    this.shouldCrearReciboProveedor(499.25);
+    this.shouldCrearReciboProveedor(200);
+    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
     List<RenglonCuentaCorriente> renglonesCuentaCorriente =
         restTemplate
             .exchange(
@@ -1001,7 +970,7 @@ public class CompraIntegrationTest {
     assertTrue(
         "El saldo parcial del renglon no es el esperado",
         renglonesCuentaCorriente.get(1).getSaldo() == 499.25);
-    this.shouldCrearFacturaCompraB(new String[] {"3", "4"});
+    this.shouldCrearFacturaCompraB();
     this.shouldCearNotaCreditoProveedor(TipoDeComprobante.FACTURA_B, 3l, 5);
     renglonesCuentaCorriente =
         restTemplate
@@ -1091,5 +1060,4 @@ public class CompraIntegrationTest {
         "El saldo parcial del renglon no es el esperado",
         renglonesCuentaCorriente.get(2).getSaldo() == 499.25);
   }
-
 }
