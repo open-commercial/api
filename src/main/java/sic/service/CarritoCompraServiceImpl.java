@@ -66,8 +66,8 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   }
 
   @Override
-  public BigDecimal getTotal(long idUsuario, long idEmpresa) {
-    Cliente cliente = clienteService.getClientePorIdUsuarioYidEmpresa(idUsuario, idEmpresa);
+  public BigDecimal getTotal(long idUsuario, long idCliente) {
+    Cliente cliente = clienteService.getClientePorId(idCliente);
     BigDecimal subtotal = this.getSubtotal(idUsuario);
     return subtotal.subtract(this.getBonificacionNeta(idUsuario, cliente.getBonificacion()));
   }

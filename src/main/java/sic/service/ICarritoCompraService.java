@@ -12,7 +12,7 @@ public interface ICarritoCompraService {
 
   BigDecimal getBonificacionNeta(long idUsuario, BigDecimal porcentajeBonificacion);
 
-  BigDecimal getTotal(long idUsuario, long idEmpresa);
+  BigDecimal getTotal(long idUsuario, long idCliente);
 
   BigDecimal getCantArticulos(long idUsuario);
 

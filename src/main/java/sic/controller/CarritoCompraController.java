@@ -64,11 +64,11 @@ public class CarritoCompraController {
     return carritoCompraService.getSubtotal(idUsuario);
   }
 
-  @GetMapping("/carrito-compra/usuarios/{idUsuario}/empresas/{idEmpresa}/total")
+  @GetMapping("/carrito-compra/usuarios/{idUsuario}/clientes/{idCliente}/total")
   @ResponseStatus(HttpStatus.OK)
   public BigDecimal getTotal(@PathVariable long idUsuario,
-                             @PathVariable long idEmpresa) {
-    return carritoCompraService.getTotal(idUsuario, idEmpresa);
+                             @PathVariable long idCliente) {
+    return carritoCompraService.getTotal(idUsuario, idCliente);
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/cantidad-articulos")
@@ -128,7 +128,7 @@ public class CarritoCompraController {
     pedido.setRecargoNeto(BigDecimal.ZERO);
     pedido.setDescuentoPorcentaje(cliente.getBonificacion());
     pedido.setDescuentoNeto(carritoCompraService.getBonificacionNeta(idUsuario, cliente.getBonificacion()));
-    pedido.setTotalActual(carritoCompraService.getTotal(idUsuario, idEmpresa));
+    pedido.setTotalActual(carritoCompraService.getTotal(idUsuario, idCliente));
     pedido.setTotalEstimado(pedido.getTotalActual());
     pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
