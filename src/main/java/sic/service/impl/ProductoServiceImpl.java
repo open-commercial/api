@@ -70,7 +70,7 @@ public class ProductoServiceImpl implements IProductoService {
           this.getProductoPorCodigo(producto.getCodigo(), producto.getEmpresa().getId_Empresa());
       if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
           && productoDuplicado != null
-          && productoDuplicado.getId_Producto() != producto.getId_Producto()) {
+          && productoDuplicado.getIdProducto() != producto.getIdProducto()) {
         throw new BusinessServiceException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_producto_duplicado_codigo"));
       }
@@ -89,7 +89,7 @@ public class ProductoServiceImpl implements IProductoService {
           ResourceBundle.getBundle("Mensajes").getString("mensaje_producto_duplicado_descripcion"));
     }
     if (operacion.equals(TipoDeOperacion.ACTUALIZACION) && productoDuplicado != null
-          && productoDuplicado.getId_Producto() != producto.getId_Producto())
+          && productoDuplicado.getIdProducto() != producto.getIdProducto())
         throw new BusinessServiceException(
             ResourceBundle.getBundle("Mensajes")
                 .getString("mensaje_producto_duplicado_descripcion"));
@@ -220,7 +220,7 @@ public class ProductoServiceImpl implements IProductoService {
       Long idRubro,
       Long idProveedor,
       Long idEmpresa) {
-    Producto productoPersistido = this.getProductoPorId(productoPorActualizar.getId_Producto());
+    Producto productoPersistido = this.getProductoPorId(productoPorActualizar.getIdProducto());
     if (idMedida != null) productoPorActualizar.setMedida(medidaService.getMedidaPorId(idMedida));
     else productoPorActualizar.setMedida(productoPersistido.getMedida());
     if (idRubro != null) productoPorActualizar.setRubro(rubroService.getRubroPorId(idRubro));
@@ -420,7 +420,7 @@ public class ProductoServiceImpl implements IProductoService {
       for (int i = 0; i < longitudIds; i++) {
         Producto p = this.getProductoPorId(idProducto[i]);
         if (!p.isIlimitado() && p.getCantidad().compareTo(cantidad[i]) < 0) {
-          productos.put(p.getId_Producto(), cantidad[i]);
+          productos.put(p.getIdProducto(), cantidad[i]);
         }
       }
     } else {
@@ -555,5 +555,10 @@ public class ProductoServiceImpl implements IProductoService {
       logger.error(ex.getMessage());
     }
     return bytes;
+  }
+
+  @Override
+  public List<Producto> getMultiplesProductosPorId(List<Long> idsProductos) {
+    return productoRepository.findByIdProductoIn(idsProductos);
   }
 }

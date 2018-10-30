@@ -317,7 +317,7 @@ CREATE TABLE `itemcarritocompra` (
   `id_Producto` bigint(20) DEFAULT NULL,
   `id_Usuario` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`idItemCarritoCompra`),
-  KEY `FKep0mqpdc2511a4kxjov4kowoa` (`id_Producto`),
+  KEY `FKep0mqpdc2511a4kxjov4kowoa` (`idProducto`),
   KEY `FK34ynexhgbnkf26hhcfy9wmcni` (`id_Usuario`),
   CONSTRAINT `FK34ynexhgbnkf26hhcfy9wmcni` FOREIGN KEY (`id_Usuario`) REFERENCES `usuario` (`id_Usuario`),
   CONSTRAINT `FKep0mqpdc2511a4kxjov4kowoa` FOREIGN KEY (`id_Producto`) REFERENCES `producto` (`id_Producto`)
@@ -741,7 +741,7 @@ CREATE TABLE `renglonpedido` (
   `id_Producto` bigint(20) DEFAULT NULL,
   `id_Pedido` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id_RenglonPedido`),
-  KEY `FKfxncx6f7eg8swxchd6sllrssa` (`id_Producto`),
+  KEY `FKfxncx6f7eg8swxchd6sllrssa` (`idProducto`),
   KEY `FKtjjxjf88fwccfduk8hhf7q3pd` (`id_Pedido`),
   CONSTRAINT `FKfxncx6f7eg8swxchd6sllrssa` FOREIGN KEY (`id_Producto`) REFERENCES `producto` (`id_Producto`),
   CONSTRAINT `FKtjjxjf88fwccfduk8hhf7q3pd` FOREIGN KEY (`id_Pedido`) REFERENCES `pedido` (`id_Pedido`)

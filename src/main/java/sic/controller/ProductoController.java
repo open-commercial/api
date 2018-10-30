@@ -209,7 +209,7 @@ public class ProductoController {
       @RequestParam Long idRubro,
       @RequestParam Long idProveedor,
       @RequestParam Long idEmpresa) {
-    if (productoService.getProductoPorId(producto.getId_Producto()) != null) {
+    if (productoService.getProductoPorId(producto.getIdProducto()) != null) {
       productoService.actualizar(producto, idMedida, idRubro, idProveedor, idEmpresa);
     }
   }

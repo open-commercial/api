@@ -45,7 +45,7 @@ public interface IProductoService {
 
   Producto getProductoPorDescripcion(String descripcion, Empresa empresa);
 
-  Producto getProductoPorId(long id_Producto);
+  Producto getProductoPorId(long idProducto);
 
   BigDecimal calcularValorStock(BusquedaProductoCriteria criteria);
 
@@ -75,4 +75,7 @@ public interface IProductoService {
       Long idProveedor,
       boolean checkVisibilidad,
       Boolean publico);
+
+  List<Producto> getMultiplesProductosPorId(List<Long> idsProductos);
+
 }

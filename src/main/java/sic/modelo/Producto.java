@@ -31,7 +31,7 @@ public class Producto implements Serializable {
     @Id
     @GeneratedValue
     @JsonView(Views.Public.class)
-    private long id_Producto;
+    private long idProducto;
 
     @JsonView(Views.Public.class)
     private String codigo;

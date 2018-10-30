@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProductoDTO implements Serializable {
 
-  private Long id_Producto = 0L;
+  private Long idProducto = 0L;
   private String codigo = "ABC123";
   private String descripcion = "Cinta adhesiva doble faz 3M";
   private BigDecimal cantidad = BigDecimal.TEN;

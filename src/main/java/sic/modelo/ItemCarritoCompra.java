@@ -26,7 +26,7 @@ public class ItemCarritoCompra implements Serializable {
   private BigDecimal cantidad;
 
   @ManyToOne
-  @JoinColumn(name = "id_Producto", referencedColumnName = "id_Producto")
+  @JoinColumn(name = "idProducto", referencedColumnName = "idProducto")
   private Producto producto;
 
   @Transient private BigDecimal importe;

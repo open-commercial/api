@@ -135,7 +135,7 @@ public class CarritoCompraController {
                 .getRenglones()
                 .add(
                     pedidoService.calcularRenglonPedido(
-                        i.getProducto().getId_Producto(), i.getCantidad(), BigDecimal.ZERO)));
+                        i.getProducto().getIdProducto(), i.getCantidad(), BigDecimal.ZERO)));
     Pedido p = pedidoService.guardar(pedido);
     carritoCompraService.eliminarTodosLosItemsDelUsuario(idUsuario);
     return p;

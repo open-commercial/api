@@ -184,17 +184,17 @@ public class CuentaCorrienteIntegrationTest {
                         + "&idProveedor=" + proveedor.getId_Proveedor()
                         + "&idEmpresa=" + empresa.getId_Empresa(),
                 productoDos, ProductoDTO.class);
-        String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
+        String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getIdProducto() + "," + productoDos.getIdProducto() + "&cantidad=10,6";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {}).getBody().isEmpty());
         RenglonFactura renglonUno = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
-                + "idProducto=" + productoUno.getId_Producto()
+                + "idProducto=" + productoUno.getIdProducto()
                 + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_B
                 + "&movimiento=" + Movimiento.VENTA
                 + "&cantidad=5"
                 + "&descuentoPorcentaje=20",
                 RenglonFactura.class);
         RenglonFactura renglonDos = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
-                + "idProducto=" + productoDos.getId_Producto()
+                + "idProducto=" + productoDos.getIdProducto()
                 + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_B
                 + "&movimiento=" + Movimiento.VENTA
                 + "&cantidad=2"
@@ -253,7 +253,7 @@ public class CuentaCorrienteIntegrationTest {
                 + "&idEmpresa=" + empresa.getId_Empresa()
                 + "&idUsuario=" + credencial.getId_Usuario()
                 + "&idTransportista=" + transportista.getId_Transportista(), facturaVentaB, FacturaVenta[].class);
-        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=5,4";
+        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getIdProducto() + "," + productoDos.getIdProducto() + "&cantidad=5,4";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {}).getBody().isEmpty());
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
                 restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class)
@@ -346,7 +346,7 @@ public class CuentaCorrienteIntegrationTest {
         notaCredito.setMotivo("Devolución");
         restTemplate.postForObject(apiPrefix + "/notas/credito/empresa/1/usuario/1/factura/1?idCliente=1&movimiento=VENTA&modificarStock=true", notaCredito, Nota.class);
         restTemplate.getForObject(apiPrefix + "/notas/2/reporte", byte[].class);
-        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,4";
+        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getIdProducto() + "," + productoDos.getIdProducto() + "&cantidad=10,4";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {}).getBody().isEmpty());
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
                 restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class)
@@ -362,7 +362,7 @@ public class CuentaCorrienteIntegrationTest {
         assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(3).getSaldo() == 0);
         assertTrue("El saldo parcial del renglon no es el esperado", renglonesCuentaCorriente.get(4).getSaldo() == -5992.5);
         restTemplate.delete(apiPrefix + "/notas?idsNota=2");
-        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=5,4";
+        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getIdProducto() + "," + productoDos.getIdProducto() + "&cantidad=5,4";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {}).getBody().isEmpty());
     }
 
@@ -443,17 +443,17 @@ public class CuentaCorrienteIntegrationTest {
                 + "&idProveedor=" + proveedor.getId_Proveedor()
                 + "&idEmpresa=" + empresa.getId_Empresa(),
                 productoDos, ProductoDTO.class);        
-        String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
+        String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getIdProducto() + "," + productoDos.getIdProducto() + "&cantidad=10,6";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {}).getBody().isEmpty());
         RenglonFactura renglonUno = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
-                + "idProducto=" + productoUno.getId_Producto()
+                + "idProducto=" + productoUno.getIdProducto()
                 + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_B
                 + "&movimiento=" + Movimiento.VENTA
                 + "&cantidad=5"
                 + "&descuentoPorcentaje=20",
                 RenglonFactura.class);
         RenglonFactura renglonDos = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
-                + "idProducto=" + productoDos.getId_Producto()
+                + "idProducto=" + productoDos.getIdProducto()
                 + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_B
                 + "&movimiento=" + Movimiento.VENTA
                 + "&cantidad=2"
@@ -511,7 +511,7 @@ public class CuentaCorrienteIntegrationTest {
                 + "&idEmpresa=" + empresa.getId_Empresa()
                 + "&idUsuario=" + credencial.getId_Usuario()
                 + "&idTransportista=" + transportista.getId_Transportista(), facturaCompraB, FacturaCompraDTO[].class);
-        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=15,8";
+        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getIdProducto() + "," + productoDos.getIdProducto() + "&cantidad=15,8";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {}).getBody().isEmpty());
         assertTrue("El saldo de la cuenta corriente no es el esperado",
                 restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1/saldo", BigDecimal.class)
@@ -561,7 +561,7 @@ public class CuentaCorrienteIntegrationTest {
         assertTrue("El saldo de la cuenta corriente no es el esperado", 
                 restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1/saldo", BigDecimal.class)
         .compareTo(new BigDecimal("6992.5")) == 0);
-        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
+        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getIdProducto() + "," + productoDos.getIdProducto() + "&cantidad=10,6";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {}).getBody().isEmpty());
         List<RenglonCuentaCorriente> renglonesCuentaCorriente = restTemplate
                 .exchange(apiPrefix + "/cuentas-corriente/1/renglones"
@@ -760,17 +760,17 @@ public class CuentaCorrienteIntegrationTest {
         productoDos = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
                 + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
                 productoDos, ProductoDTO.class);
-        String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
+        String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getIdProducto() + "," + productoDos.getIdProducto() + "&cantidad=10,6";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {}).getBody().isEmpty());
         RenglonFactura renglonUno = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
-                + "idProducto=" + productoUno.getId_Producto()
+                + "idProducto=" + productoUno.getIdProducto()
                 + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_B
                 + "&movimiento=" + Movimiento.VENTA
                 + "&cantidad=5"
                 + "&descuentoPorcentaje=20",
                 RenglonFactura.class);
         RenglonFactura renglonDos = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
-                + "idProducto=" + productoDos.getId_Producto()
+                + "idProducto=" + productoDos.getIdProducto()
                 + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_B
                 + "&movimiento=" + Movimiento.VENTA
                 + "&cantidad=2"
@@ -860,17 +860,17 @@ public class CuentaCorrienteIntegrationTest {
         productoCuatro = restTemplate.postForObject(apiPrefix + "/productos?idMedida=" + medida.getId_Medida() + "&idRubro=" + rubro.getId_Rubro()
                 + "&idProveedor=" + proveedor.getId_Proveedor() + "&idEmpresa=" + empresa.getId_Empresa(),
                 productoCuatro, ProductoDTO.class);
-        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoTres.getId_Producto() + "," + productoCuatro.getId_Producto() + "&cantidad=5,2";
+        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoTres.getIdProducto() + "," + productoCuatro.getIdProducto() + "&cantidad=5,2";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {}).getBody().isEmpty());
         RenglonFactura renglonTres = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
-                + "idProducto=" + productoTres.getId_Producto()
+                + "idProducto=" + productoTres.getIdProducto()
                 + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_X
                 + "&movimiento=" + Movimiento.VENTA
                 + "&cantidad=5"
                 + "&descuentoPorcentaje=20",
                 RenglonFactura.class);
         RenglonFactura renglonCuatro = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
-                + "idProducto=" + productoCuatro.getId_Producto()
+                + "idProducto=" + productoCuatro.getIdProducto()
                 + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_X
                 + "&movimiento=" + Movimiento.VENTA
                 + "&cantidad=2"

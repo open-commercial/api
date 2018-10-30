@@ -71,7 +71,7 @@ public class ProductoServiceImplTest {
     @Test
     public void shouldGetProductosSinStockDisponible() {
         Producto producto = new Producto();
-        producto.setId_Producto(1);
+        producto.setIdProducto(1);
         producto.setCantidad(BigDecimal.TEN);
         producto.setIlimitado(false);
         when(productoRepository.findOne(1L)).thenReturn(producto);

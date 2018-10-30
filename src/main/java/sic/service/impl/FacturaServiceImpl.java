@@ -969,7 +969,7 @@ public class FacturaServiceImpl implements IFacturaService {
                     .getString("mensaje_producto_cantidad_menor_a_minima"));
         }*/
         RenglonFactura nuevoRenglon = new RenglonFactura();
-        nuevoRenglon.setIdProductoItem(producto.getId_Producto());
+        nuevoRenglon.setIdProductoItem(producto.getIdProducto());
         nuevoRenglon.setCodigoItem(producto.getCodigo());
         nuevoRenglon.setDescripcionItem(producto.getDescripcion());
         nuevoRenglon.setMedidaItem(producto.getMedida().getNombre());
