@@ -835,7 +835,7 @@ public class StockIntegrationTest {
     productoUno.setFechaAlta(productoRecuperado.getFechaAlta());
     productoUno.setId_Producto(productoRecuperado.getId_Producto());
     productoUno.setFechaUltimaModificacion(productoRecuperado.getFechaUltimaModificacion());
-    assertEquals(productoUno, productoRecuperado);
+    assertEquals(productoUno.hashCode(), productoRecuperado.hashCode());
   }
 
   @Test
