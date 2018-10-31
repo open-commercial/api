@@ -40,8 +40,8 @@ public class ProductoBuilder {
                 nota, fechaAlta, fechaVencimiento, nombreEmpresa, eliminado);
     }
     
-    public ProductoBuilder withId_Producto(Long id_Producto) {
-        this.idProducto = id_Producto;
+    public ProductoBuilder withId_Producto(Long idProducto) {
+        this.idProducto = idProducto;
         return this;
     }
     

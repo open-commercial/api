@@ -10,7 +10,7 @@ import java.util.List;
 public interface RenglonPedidoRepository extends PagingAndSortingRepository<RenglonPedido, Long> {
 
     @Query("SELECT rp FROM Pedido p INNER JOIN p.renglones rp"
-            + " WHERE p.id_Pedido = :idPedido AND p.eliminado = false")
+            + " WHERE p.id_Pedido = :idPedido AND p.eliminado = false order by rp.idProductoItem asc")
     List<RenglonPedido> findByIdPedido(@Param("idPedido") long idPedido);
     
 }

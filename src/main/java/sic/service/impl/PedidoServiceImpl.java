@@ -176,10 +176,11 @@ public class PedidoServiceImpl implements IPedidoService {
     BigDecimal porcentajeDescuento;
     BigDecimal totalActual = BigDecimal.ZERO;
     List<Long> idsProductos = new ArrayList<>();
-    this.getRenglonesDelPedido(pedido.getId_Pedido()).forEach( r -> idsProductos.add(r.getIdProductoItem()));
+    List<RenglonPedido> renglonesDelPedido = this.getRenglonesDelPedido(pedido.getId_Pedido());
+    renglonesDelPedido.forEach(r -> idsProductos.add(r.getIdProductoItem()));
     List<Producto> productos = productoService.getMultiplesProductosPorId(idsProductos);
-    int i = 1;
-    for (RenglonPedido renglonPedido : this.getRenglonesDelPedido(pedido.getId_Pedido())) {
+    int i = 0;
+    for (RenglonPedido renglonPedido : renglonesDelPedido) {
       BigDecimal precioUnitario = productos.get(i).getPrecioLista();
       renglonPedido.setSubTotal(
           precioUnitario
@@ -193,8 +194,8 @@ public class PedidoServiceImpl implements IPedidoService {
       i++;
     }
     porcentajeDescuento =
-      BigDecimal.ONE.subtract(
-        pedido.getDescuentoPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP));
+        BigDecimal.ONE.subtract(
+            pedido.getDescuentoPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP));
     pedido.setTotalActual(totalActual.multiply(porcentajeDescuento));
     return pedido;
   }
