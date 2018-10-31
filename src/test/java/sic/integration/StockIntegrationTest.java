@@ -822,20 +822,16 @@ public class StockIntegrationTest {
     ProductoDTO productoRecuperado =
         restTemplate.postForObject(
             apiPrefix
-                + "/productos?idMedida="
-                + medida.getId_Medida()
-                + "&idRubro="
-                + rubro.getId_Rubro()
-                + "&idProveedor="
-                + proveedor.getId_Proveedor()
-                + "&idEmpresa="
-                + empresa.getId_Empresa(),
+                + "/productos?idMedida=" + medida.getId_Medida()
+                + "&idRubro=" + rubro.getId_Rubro()
+                + "&idProveedor=" + proveedor.getId_Proveedor()
+                + "&idEmpresa=" + empresa.getId_Empresa(),
             productoUno,
             ProductoDTO.class);
     productoUno.setFechaAlta(productoRecuperado.getFechaAlta());
     productoUno.setId_Producto(productoRecuperado.getId_Producto());
     productoUno.setFechaUltimaModificacion(productoRecuperado.getFechaUltimaModificacion());
-    assertEquals(productoUno.hashCode(), productoRecuperado.hashCode());
+    assertEquals(productoUno, productoRecuperado);
   }
 
   @Test
