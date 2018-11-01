@@ -105,37 +105,37 @@ public class PedidoServiceImpl implements IPedidoService {
     }
     if (pedido
       .getSubTotal()
-      .toBigInteger()
       .compareTo(
-        CalculosComprobante.calcularSubTotal(importes).toBigInteger())
+        CalculosComprobante.calcularSubTotal(importes))
       != 0) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_sub_total_no_valido"));
+      String mensaje = RESOURCE_BUNDLE.getString("mensaje_pedido_sub_total_no_valido");
+      logger.error(mensaje);
+      throw new BusinessServiceException(mensaje);
     }
     if (pedido
       .getRecargoNeto()
-      .toBigInteger()
       .compareTo(
         CalculosComprobante.calcularProporcion(
           pedido.getSubTotal(),
-          pedido.getRecargoPorcentaje())
-          .toBigInteger())
+          pedido.getRecargoPorcentaje()))
       != 0) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_recargo_no_valido"));
+      String mensaje = RESOURCE_BUNDLE.getString("mensaje_pedido_recargo_no_valido");
+      logger.error(mensaje);
+      throw new BusinessServiceException(mensaje);
     }
     if (pedido
       .getDescuentoNeto()
-      .toBigInteger()
       .compareTo(
         CalculosComprobante.calcularProporcion(
           pedido.getSubTotal(),
-          pedido.getDescuentoPorcentaje())
-          .toBigInteger())
+          pedido.getDescuentoPorcentaje()))
       != 0) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_recargo_no_valido"));
+      String mensaje = RESOURCE_BUNDLE.getString("mensaje_pedido_recargo_no_valido");
+      logger.error(mensaje);
+      throw new BusinessServiceException(mensaje);
     }
     if (pedido
       .getTotalEstimado()
-      .toBigInteger()
       .compareTo(
         CalculosComprobante.calcularSubTotalBruto(
           false,
@@ -143,10 +143,11 @@ public class PedidoServiceImpl implements IPedidoService {
           pedido.getRecargoNeto(),
           pedido.getDescuentoNeto(),
           null,
-          null)
-          .toBigInteger())
+          null))
       != 0) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_total_estimado_no_valido"));
+      String mensaje = RESOURCE_BUNDLE.getString("mensaje_pedido_total_estimado_no_valido");
+      logger.error(mensaje);
+      throw new BusinessServiceException(mensaje);
     }
   }
 
