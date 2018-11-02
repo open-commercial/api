@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 import sic.modelo.RenglonNotaCredito;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = {"renglonesNotaCredito"})
 public class NotaCreditoDTO extends NotaDTO implements Serializable {
     
     private boolean modificaStock = true;
