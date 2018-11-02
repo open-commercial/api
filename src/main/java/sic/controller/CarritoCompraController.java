@@ -119,7 +119,7 @@ public class CarritoCompraController {
     @RequestParam Long idEmpresa,
     @RequestParam Long idUsuario,
     @RequestParam Long idCliente,
-    @RequestBody String observaciones) {
+    @RequestBody(required = false) String observaciones) {
     Cliente cliente = clienteService.getClientePorId(idCliente);
     Pedido pedido = new Pedido();
     pedido.setObservaciones(observaciones);
