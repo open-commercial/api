@@ -559,6 +559,6 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public List<Producto> getMultiplesProductosPorId(List<Long> idsProductos) {
-    return productoRepository.findByIdProductoIn(idsProductos);
+    return productoRepository.findByIdProductoInOrderByIdProductoAsc(idsProductos);
   }
 }
