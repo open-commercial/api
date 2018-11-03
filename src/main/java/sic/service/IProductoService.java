@@ -23,9 +23,6 @@ public interface IProductoService {
 
   Map<Long, BigDecimal> getProductosSinStockDisponible(long[] idProducto, BigDecimal[] cantidad);
 
-  Map<Long, BigDecimal> getProductosNoCumplenCantidadVentaMinima(
-      long[] idProducto, BigDecimal[] cantidad);
-
   BigDecimal calcularGananciaPorcentaje(
       BigDecimal precioDeListaNuevo,
       BigDecimal precioDeListaAnterior,
