@@ -48,11 +48,29 @@ public class UsuarioController {
       @RequestParam(required = false) String email,
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) Integer tamanio,
+      @RequestParam(required = false) String ordenarPor,
+      @RequestParam(required = false) String sentido,
       @RequestParam(required = false) List<Rol> roles) {
     final int TAMANIO_PAGINA_DEFAULT = 50;
     if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
     if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "nombre"));
+    Pageable pageable;
+    if (ordenarPor == null || sentido == null) {
+      pageable =
+        new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "nombre"));
+    } else {
+      switch (sentido) {
+        case "ASC" : pageable =
+          new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenarPor));
+          break;
+        case "DESC" : pageable =
+          new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenarPor));
+          break;
+        default: pageable =
+          new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "nombre"));
+          break;
+      }
+    }
     BusquedaUsuarioCriteria criteria =
         BusquedaUsuarioCriteria.builder()
             .buscarPorNombreDeUsuario(username != null)
