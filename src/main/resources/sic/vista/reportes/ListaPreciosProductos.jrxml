@@ -27,9 +27,6 @@
 	<field name="precioLista" class="java.math.BigDecimal">
 		<fieldDescription><![CDATA[precioLista]]></fieldDescription>
 	</field>
-	<field name="ventaMinima" class="java.math.BigDecimal">
-		<fieldDescription><![CDATA[ventaMinima]]></fieldDescription>
-	</field>
 	<group name="Rubro">
 		<groupExpression><![CDATA[$F{rubro}]]></groupExpression>
 	</group>
@@ -92,13 +89,6 @@ $P{empresa}.getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" :
 				</textElement>
 				<textFieldExpression><![CDATA[$P{empresa}.getIdFiscal() == null ? "" : $P{empresa}.getIdFiscal()]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="330" y="114" width="208" height="20" uuid="1ccacee4-e578-4d10-9f0e-07e373e9ec3b"/>
-				<textElement>
-					<font size="12"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{empresa}.getEmail()]]></textFieldExpression>
-			</textField>
 			<staticText>
 				<reportElement x="0" y="150" width="555" height="25" uuid="ff46f7f7-85b2-4514-afda-a8394f7c5111"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -120,7 +110,7 @@ $P{empresa}.getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" :
 				<text><![CDATA[Código]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="80" y="175" width="270" height="16" uuid="ed30d880-1bf1-4eb5-b02a-7e89ca2dca0a"/>
+				<reportElement x="80" y="175" width="340" height="16" uuid="ed30d880-1bf1-4eb5-b02a-7e89ca2dca0a"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -158,19 +148,6 @@ $P{empresa}.getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" :
 				</textElement>
 				<text><![CDATA[Medida]]></text>
 			</staticText>
-			<staticText>
-				<reportElement x="350" y="175" width="70" height="16" uuid="6e9b0802-f1cf-41bb-9c44-be21915727e0"/>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font isBold="true"/>
-				</textElement>
-				<text><![CDATA[Venta Min.]]></text>
-			</staticText>
 		</band>
 	</title>
 	<detail>
@@ -181,7 +158,7 @@ $P{empresa}.getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" :
 				<textFieldExpression><![CDATA[$F{codigo}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="80" y="0" width="270" height="20" uuid="711ae2af-b035-46a2-a2e5-425295ca3e78"/>
+				<reportElement x="80" y="0" width="340" height="20" uuid="711ae2af-b035-46a2-a2e5-425295ca3e78"/>
 				<textElement verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
 			</textField>
@@ -194,11 +171,6 @@ $P{empresa}.getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" :
 				<reportElement x="420" y="0" width="60" height="20" uuid="009f171c-19d7-4c35-a69b-3fe1a41fe09a"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{medida}.getNombre()]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="350" y="0" width="70" height="20" uuid="6051dd90-cb6a-484c-9e8b-e95ebbff97f2"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$F{ventaMinima}.doubleValue()]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
