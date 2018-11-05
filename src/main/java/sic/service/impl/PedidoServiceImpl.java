@@ -97,7 +97,7 @@ public class PedidoServiceImpl implements IPedidoService {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_no_existente"));
     }
     // Calculos
-    BigDecimal[] importes = new BigDecimal[pedido.getRenglones().size()];
+    /*BigDecimal[] importes = new BigDecimal[pedido.getRenglones().size()];
     int i = 0;
     for (RenglonPedido renglon : pedido.getRenglones()) {
       importes[i] = renglon.getSubTotal();
@@ -148,7 +148,7 @@ public class PedidoServiceImpl implements IPedidoService {
       String mensaje = RESOURCE_BUNDLE.getString("mensaje_pedido_total_estimado_no_valido");
       logger.error(mensaje);
       throw new BusinessServiceException(mensaje);
-    }
+    }*/
   }
 
   @Override
