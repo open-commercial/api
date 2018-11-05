@@ -369,7 +369,7 @@ public class PedidoServiceImpl implements IPedidoService {
     InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Pedido.jasper");
     Map<String, Object> params = new HashMap<>();
     params.put("pedido", pedido);
-    if (!pedido.getEmpresa().getLogo().isEmpty()) {
+    if (pedido.getEmpresa().getLogo() != null && !pedido.getEmpresa().getLogo().isEmpty()) {
       try {
         params.put("logo", new ImageIcon(ImageIO.read(new URL(pedido.getEmpresa().getLogo()))).getImage());
       } catch (IOException ex) {

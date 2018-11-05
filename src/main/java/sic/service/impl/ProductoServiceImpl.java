@@ -501,7 +501,7 @@ public class ProductoServiceImpl implements IProductoService {
         classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");
     Map<String, Object> params = new HashMap<>();
     params.put("empresa", empresa);
-    if (!empresa.getLogo().isEmpty()) {
+    if (empresa.getLogo() != null && !empresa.getLogo().isEmpty()) {
       try {
         params.put("logo", new ImageIcon(ImageIO.read(new URL(empresa.getLogo()))).getImage());
       } catch (IOException ex) {

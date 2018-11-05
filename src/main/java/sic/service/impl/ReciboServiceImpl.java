@@ -220,7 +220,7 @@ public class ReciboServiceImpl implements IReciboService {
     InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Recibo.jasper");
     Map<String, Object> params = new HashMap<>();
     params.put("recibo", recibo);
-    if (!recibo.getEmpresa().getLogo().isEmpty()) {
+    if (recibo.getEmpresa().getLogo() != null && !recibo.getEmpresa().getLogo().isEmpty()) {
       try {
         params.put(
             "logo", new ImageIcon(ImageIO.read(new URL(recibo.getEmpresa().getLogo()))).getImage());

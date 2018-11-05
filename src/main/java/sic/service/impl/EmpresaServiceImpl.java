@@ -136,27 +136,6 @@ public class EmpresaServiceImpl implements IEmpresaService {
   @Transactional
   public void actualizar(Empresa empresa) {
     validarOperacion(TipoDeOperacion.ACTUALIZACION, empresa);
-    Empresa empresaGuardada = this.getEmpresaPorId(empresa.getId_Empresa());
-    if (empresa.getCategoriaIVA() == null)
-      empresa.setCategoriaIVA(empresaGuardada.getCategoriaIVA());
-    if (empresa.getDireccion() == null || empresa.getDireccion().isEmpty())
-      empresa.setDireccion(empresaGuardada.getDireccion());
-    if (empresa.getEmail() == null || empresa.getEmail().isEmpty())
-      empresa.setEmail(empresaGuardada.getEmail());
-    if (empresa.getFechaInicioActividad() == null)
-      empresa.setFechaInicioActividad(empresaGuardada.getFechaInicioActividad());
-    if (empresa.getIdFiscal() == null) empresa.setIdFiscal(empresaGuardada.getIdFiscal());
-    if (empresa.getIngresosBrutos() == null)
-      empresa.setIngresosBrutos(empresaGuardada.getIngresosBrutos());
-    if (empresa.getLema() == null || empresa.getLema().isEmpty())
-      empresa.setLema(empresaGuardada.getLema());
-    if (empresa.getLogo() == null || empresa.getLogo().isEmpty())
-      empresa.setLogo(empresaGuardada.getLogo());
-    if (empresa.getLocalidad() == null) empresa.setLocalidad(empresaGuardada.getLocalidad());
-    if (empresa.getNombre() == null || empresa.getNombre().isEmpty())
-      empresa.setNombre(empresaGuardada.getNombre());
-    if (empresa.getTelefono() == null || empresa.getTelefono().isEmpty())
-      empresa.setTelefono(empresaGuardada.getTelefono());
     empresaRepository.save(empresa);
   }
 

@@ -295,7 +295,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                 .getContent());
     Map<String, Object> params = new HashMap<>();
     params.put("cuentaCorrienteCliente", cuentaCorrienteCliente);
-    if (!cuentaCorrienteCliente.getEmpresa().getLogo().isEmpty()) {
+    if (cuentaCorrienteCliente.getEmpresa().getLogo() != null && !cuentaCorrienteCliente.getEmpresa().getLogo().isEmpty()) {
       try {
         params.put(
             "logo",
