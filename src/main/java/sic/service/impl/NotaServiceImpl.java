@@ -884,7 +884,7 @@ public class NotaServiceImpl implements INotaService {
       params.put("serie", nota.getSerie());
       params.put("nroNota", nota.getNroNota());
     }
-    if (!nota.getEmpresa().getLogo().isEmpty()) {
+    if (nota.getEmpresa().getLogo() != null && !nota.getEmpresa().getLogo().isEmpty()) {
       try {
         params.put(
             "logo", new ImageIcon(ImageIO.read(new URL(nota.getEmpresa().getLogo()))).getImage());
