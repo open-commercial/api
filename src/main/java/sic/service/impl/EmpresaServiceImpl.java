@@ -132,12 +132,12 @@ public class EmpresaServiceImpl implements IEmpresaService {
         return empresa;
     }
 
-    @Override
-    @Transactional
-    public void actualizar(Empresa empresa) {
-        validarOperacion(TipoDeOperacion.ACTUALIZACION, empresa);
-        empresaRepository.save(empresa);
-    }
+  @Override
+  @Transactional
+  public void actualizar(Empresa empresa) {
+    validarOperacion(TipoDeOperacion.ACTUALIZACION, empresa);
+    empresaRepository.save(empresa);
+  }
 
     @Override
     @Transactional

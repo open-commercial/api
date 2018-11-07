@@ -1,6 +1,7 @@
 package sic.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ResourceBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.modelo.Cliente;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Producto;
 import sic.modelo.Usuario;
@@ -21,6 +23,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   private final CarritoCompraRepository carritoCompraRepository;
   private final IUsuarioService usuarioService;
+  private final IClienteService clienteService;
   private final IProductoService productoService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -28,9 +31,11 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   public CarritoCompraServiceImpl(
       CarritoCompraRepository carritoCompraRepository,
       IUsuarioService usuarioService,
+      IClienteService clienteService,
       IProductoService productoService) {
     this.carritoCompraRepository = carritoCompraRepository;
     this.usuarioService = usuarioService;
+    this.clienteService = clienteService;
     this.productoService = productoService;
   }
 
@@ -43,13 +48,28 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   }
 
   @Override
-  public BigDecimal getTotal(long idUsuario) {
-    BigDecimal total = carritoCompraRepository.calcularTotal(idUsuario);
+  public BigDecimal getSubtotal(long idUsuario) {
+    BigDecimal total = carritoCompraRepository.calcularSubtotal(idUsuario);
     if (total == null) {
       return BigDecimal.ZERO;
     } else {
       return total;
     }
+  }
+
+  @Override
+  public BigDecimal getBonificacionNeta(long idUsuario, BigDecimal porcentajeBonificacion) {
+    BigDecimal subtotal = this.getSubtotal(idUsuario);
+    return subtotal
+      .multiply(porcentajeBonificacion)
+      .divide(new BigDecimal(100), RoundingMode.HALF_UP);
+  }
+
+  @Override
+  public BigDecimal getTotal(long idUsuario, long idCliente) {
+    Cliente cliente = clienteService.getClientePorId(idCliente);
+    BigDecimal subtotal = this.getSubtotal(idUsuario);
+    return subtotal.subtract(this.getBonificacionNeta(idUsuario, cliente.getBonificacion()));
   }
 
   @Override

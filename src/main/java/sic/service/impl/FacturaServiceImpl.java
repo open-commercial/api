@@ -864,7 +864,7 @@ public class FacturaServiceImpl implements IFacturaService {
             params.put("nroSerie", factura.getNumSerie());
             params.put("nroFactura", factura.getNumFactura());
         }
-        if (!factura.getEmpresa().getLogo().isEmpty()) {
+        if (factura.getEmpresa().getLogo() != null && !factura.getEmpresa().getLogo().isEmpty()) {
             try {
                 params.put("logo", new ImageIcon(ImageIO.read(new URL(factura.getEmpresa().getLogo()))).getImage());
             } catch (IOException ex) {
