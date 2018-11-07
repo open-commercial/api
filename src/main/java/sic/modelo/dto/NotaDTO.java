@@ -18,7 +18,7 @@ import sic.modelo.TipoDeComprobante;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"fecha", "tipoComprobante", "serie", "nroNota"})
+@EqualsAndHashCode(of = {"tipoComprobante", "serie", "nroNota", "nombreEmpresa"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idNota", scope = Nota.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({

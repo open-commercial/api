@@ -1,9 +1,6 @@
 package sic.modelo.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import sic.modelo.Rol;
 import java.io.Serializable;
 import java.util.List;
@@ -11,6 +8,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(of = {"username", "email", "roles"})
 @Builder
 public class UsuarioDTO implements Serializable {
 

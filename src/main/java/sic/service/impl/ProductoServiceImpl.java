@@ -382,7 +382,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public Producto getProductoPorId(long idProducto) {
-    Producto producto = productoRepository.findOne(idProducto);
+    Producto producto = productoRepository.findById(idProducto);
     if (producto == null) {
       throw new EntityNotFoundException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_producto_no_existente"));

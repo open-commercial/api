@@ -8,13 +8,14 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import sic.modelo.RenglonFactura;
 import sic.modelo.TipoDeComprobante;
 
 @Data
-@EqualsAndHashCode(of = {"fecha", "tipoComprobante", "numSerie", "numFactura", "nombreEmpresa"})
+@EqualsAndHashCode(of = {"tipoComprobante", "numSerie", "numFactura", "nombreEmpresa"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Factura", scope = FacturaDTO.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({

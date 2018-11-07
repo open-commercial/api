@@ -5,11 +5,13 @@ import java.math.BigDecimal;
 import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(of = {"codigo", "descripcion", "eliminado"})
 public class ProductoDTO implements Serializable {
 
   private Long idProducto = 0L;
