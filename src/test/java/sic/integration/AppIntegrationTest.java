@@ -624,7 +624,7 @@ public class AppIntegrationTest {
         apiPrefix
           + "/facturas/renglon?"
           + "idProducto="
-          + productoUno.getId_Producto()
+          + productoUno.getIdProducto()
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_A
           + "&movimiento="
@@ -637,7 +637,7 @@ public class AppIntegrationTest {
         apiPrefix
           + "/facturas/renglon?"
           + "idProducto="
-          + productoDos.getId_Producto()
+          + productoDos.getIdProducto()
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_A
           + "&movimiento="
@@ -753,7 +753,7 @@ public class AppIntegrationTest {
         apiPrefix
           + "/facturas/renglon?"
           + "idProducto="
-          + productoUno.getId_Producto()
+          + productoUno.getIdProducto()
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_B
           + "&movimiento="
@@ -766,7 +766,7 @@ public class AppIntegrationTest {
         apiPrefix
           + "/facturas/renglon?"
           + "idProducto="
-          + productoDos.getId_Producto()
+          + productoDos.getIdProducto()
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_B
           + "&movimiento="
@@ -880,7 +880,7 @@ public class AppIntegrationTest {
         apiPrefix
           + "/facturas/renglon?"
           + "idProducto="
-          + productoUno.getId_Producto()
+          + productoUno.getIdProducto()
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_C
           + "&movimiento="
@@ -893,7 +893,7 @@ public class AppIntegrationTest {
         apiPrefix
           + "/facturas/renglon?"
           + "idProducto="
-          + productoDos.getId_Producto()
+          + productoDos.getIdProducto()
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_C
           + "&movimiento="
@@ -1007,7 +1007,7 @@ public class AppIntegrationTest {
         apiPrefix
           + "/facturas/renglon?"
           + "idProducto="
-          + productoUno.getId_Producto()
+          + productoUno.getIdProducto()
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_X
           + "&movimiento="
@@ -1020,7 +1020,7 @@ public class AppIntegrationTest {
         apiPrefix
           + "/facturas/renglon?"
           + "idProducto="
-          + productoDos.getId_Producto()
+          + productoDos.getIdProducto()
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_X
           + "&movimiento="
@@ -1092,7 +1092,7 @@ public class AppIntegrationTest {
         apiPrefix
           + "/facturas/renglon?"
           + "idProducto="
-          + productoUno.getId_Producto()
+          + productoUno.getIdProducto()
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_Y
           + "&movimiento="
@@ -1105,7 +1105,7 @@ public class AppIntegrationTest {
         apiPrefix
           + "/facturas/renglon?"
           + "idProducto="
-          + productoDos.getId_Producto()
+          + productoDos.getIdProducto()
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_Y
           + "&movimiento="
@@ -1219,7 +1219,7 @@ public class AppIntegrationTest {
         apiPrefix
           + "/facturas/renglon?"
           + "idProducto="
-          + productoUno.getId_Producto()
+          + productoUno.getIdProducto()
           + "&tipoDeComprobante="
           + TipoDeComprobante.PRESUPUESTO
           + "&movimiento="
@@ -1232,7 +1232,7 @@ public class AppIntegrationTest {
         apiPrefix
           + "/facturas/renglon?"
           + "idProducto="
-          + productoDos.getId_Producto()
+          + productoDos.getIdProducto()
           + "&tipoDeComprobante="
           + TipoDeComprobante.PRESUPUESTO
           + "&movimiento="
@@ -1894,9 +1894,9 @@ public class AppIntegrationTest {
     String uri =
       apiPrefix
         + "/productos/disponibilidad-stock?idProducto="
-        + productoUno.getId_Producto()
+        + productoUno.getIdProducto()
         + ","
-        + productoDos.getId_Producto()
+        + productoDos.getIdProducto()
         + "&cantidad=10,6";
     Assert.assertTrue(
       restTemplate
@@ -1989,7 +1989,7 @@ public class AppIntegrationTest {
         productoUno,
         ProductoDTO.class);
     productoUno.setFechaAlta(productoRecuperado.getFechaAlta());
-    productoUno.setId_Producto(productoRecuperado.getId_Producto());
+    productoUno.setIdProducto(productoRecuperado.getIdProducto());
     productoUno.setFechaUltimaModificacion(productoRecuperado.getFechaUltimaModificacion());
     assertEquals(productoUno, productoRecuperado);
   }
@@ -2070,7 +2070,7 @@ public class AppIntegrationTest {
         apiPrefix
           + "/facturas/renglon?"
           + "idProducto="
-          + productoUno.getId_Producto()
+          + productoUno.getIdProducto()
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_A
           + "&movimiento="
@@ -2083,7 +2083,7 @@ public class AppIntegrationTest {
         apiPrefix
           + "/facturas/renglon?"
           + "idProducto="
-          + productoDos.getId_Producto()
+          + productoDos.getIdProducto()
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_A
           + "&movimiento="
