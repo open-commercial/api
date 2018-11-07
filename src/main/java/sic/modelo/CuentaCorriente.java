@@ -64,8 +64,7 @@ public abstract class CuentaCorriente implements Serializable {
     @Column(precision = 25, scale = 15)
     @ColumnDefault("0")
     private BigDecimal saldo;
-    
-    @Transient
+
     private Date fechaUltimoMovimiento;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "cuentaCorriente")

@@ -109,11 +109,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   public CuentaCorrienteCliente getCuentaCorrientePorCliente(Cliente cliente) {
-    CuentaCorrienteCliente cc =
-        cuentaCorrienteClienteRepository.findByClienteAndEmpresaAndEliminada(
+    return cuentaCorrienteClienteRepository.findByClienteAndEmpresaAndEliminada(
             cliente, cliente.getEmpresa(), false);
-    cc.setFechaUltimoMovimiento(this.getFechaUltimoMovimiento(cc.getIdCuentaCorriente()));
-    return cc;
   }
 
   @Override
@@ -138,6 +135,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       CuentaCorriente cc = this.getCuentaCorrientePorCliente(facturaVenta.getCliente());
       cc.getRenglones().add(rcc);
       cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));
+      cc.setFechaUltimoMovimiento(facturaVenta.getFecha());
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
       LOGGER.warn(
@@ -147,9 +145,18 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
       RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeFactura(facturaVenta, false);
-      rcc.setEliminado(true);
       CuentaCorriente cc = this.getCuentaCorrientePorCliente(facturaVenta.getCliente());
       cc.setSaldo(cc.getSaldo().add(rcc.getMonto().negate()));
+
+      this.cambiarFechaUltimoComprobante(cc, rcc);
+//      List<RenglonCuentaCorriente> ultimosDosMovimientos = this.getUltimosDosMovimientos(cc);
+//      if(ultimosDosMovimientos.size() == 2 && ultimosDosMovimientos.get(0).getIdRenglonCuentaCorriente().equals(rcc.getIdRenglonCuentaCorriente())) {
+//        cc.setFechaUltimoMovimiento(ultimosDosMovimientos.get(1).getFecha());
+//      } else {
+//        cc.setFechaUltimoMovimiento(null);
+//      }
+      rcc.setEliminado(true);
+
       LOGGER.warn(
           ResourceBundle.getBundle("Mensajes")
               .getString("mensaje_reglon_cuenta_corriente_eliminado"),
@@ -182,9 +189,10 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
       RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeFactura(facturaCompra, false);
-      rcc.setEliminado(true);
       CuentaCorriente cc = this.getCuentaCorrientePorProveedor(facturaCompra.getProveedor());
       cc.setSaldo(cc.getSaldo().add(rcc.getMonto().negate()));
+      this.cambiarFechaUltimoComprobante(cc, rcc);
+      rcc.setEliminado(true);
       LOGGER.warn(
           ResourceBundle.getBundle("Mensajes")
               .getString("mensaje_reglon_cuenta_corriente_eliminado"),
@@ -223,15 +231,16 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
           rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
-      RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeNota(nota, false);
-      rcc.setEliminado(true);
       CuentaCorriente cc = this.getCuentaCorrientePorNota(nota);
+      RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeNota(nota, false);
       if (nota instanceof NotaCredito) {
         cc.setSaldo(cc.getSaldo().subtract(rcc.getMonto()));
       }
       if (nota instanceof NotaDebito) {
         cc.setSaldo(cc.getSaldo().subtract(rcc.getMonto()));
       }
+      this.cambiarFechaUltimoComprobante(cc, rcc);
+      rcc.setEliminado(true);
       LOGGER.warn(
           ResourceBundle.getBundle("Mensajes")
               .getString("mensaje_reglon_cuenta_corriente_eliminado"),
@@ -283,8 +292,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
           rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
-      rcc = this.getRenglonCuentaCorrienteDeRecibo(recibo, false);
-      rcc.setEliminado(true);
       CuentaCorriente cc = null;
       if (recibo.getCliente() != null) {
         cc = this.getCuentaCorrientePorCliente(recibo.getCliente());
@@ -297,10 +304,22 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                         .getString("mensaje_cuenta_corriente_no_existente"));
       }
       cc.setSaldo(cc.getSaldo().subtract(recibo.getMonto()));
+      rcc = this.getRenglonCuentaCorrienteDeRecibo(recibo, false);
+      this.cambiarFechaUltimoComprobante(cc, rcc);
+      rcc.setEliminado(true);
       LOGGER.warn(
           ResourceBundle.getBundle("Mensajes")
               .getString("mensaje_reglon_cuenta_corriente_eliminado"),
           rcc);
+    }
+  }
+
+  private void cambiarFechaUltimoComprobante(CuentaCorriente cc, RenglonCuentaCorriente rcc) {
+    List<RenglonCuentaCorriente> ultimosDosMovimientos = this.getUltimosDosMovimientos(cc);
+    if(ultimosDosMovimientos.size() == 2 && ultimosDosMovimientos.get(0).getIdRenglonCuentaCorriente().equals(rcc.getIdRenglonCuentaCorriente())) {
+      cc.setFechaUltimoMovimiento(ultimosDosMovimientos.get(1).getFecha());
+    } else {
+      cc.setFechaUltimoMovimiento(null);
     }
   }
 
@@ -405,8 +424,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   }
 
   @Override
-  public Date getFechaUltimoMovimiento(long idCuentaCorriente) {
-    return renglonCuentaCorrienteRepository.getFechaUltimoMovimiento(idCuentaCorriente);
+  public List<RenglonCuentaCorriente> getUltimosDosMovimientos(CuentaCorriente cuentaCorriente) {
+    return renglonCuentaCorrienteRepository.findTop2ByAndCuentaCorrienteAndEliminadoOrderByIdRenglonCuentaCorrienteDesc(cuentaCorriente, false);
   }
 
   @Override

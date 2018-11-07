@@ -1,9 +1,10 @@
 package sic.service;
 
-import java.util.Date;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import sic.modelo.*;
+
+import java.util.List;
 
 public interface ICuentaCorrienteService {
 
@@ -30,10 +31,10 @@ public interface ICuentaCorrienteService {
 
   void asentarEnCuentaCorriente(Recibo recibo, TipoDeOperacion tipo);
 
-  Date getFechaUltimoMovimiento(long idCuentaCorriente);
-
   byte[] getReporteCuentaCorrienteCliente(
       CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page, String formato);
+
+  List<RenglonCuentaCorriente> getUltimosDosMovimientos(CuentaCorriente cuentaCorriente);
 
   RenglonCuentaCorriente guardar(RenglonCuentaCorriente renglonCuentaCorriente);
 
