@@ -10,15 +10,15 @@ import sic.modelo.Producto;
 import java.util.List;
 
 public interface ProductoRepository extends PagingAndSortingRepository<Producto, Long>,
-        QueryDslPredicateExecutor<Producto>, ProductoRepositoryCustom {
+  QueryDslPredicateExecutor<Producto>, ProductoRepositoryCustom {
 
-    @Query("SELECT p FROM Producto p WHERE p.idProducto = :idProducto AND p.eliminado = false")
-    Producto findById(@Param("idProducto") long idProducto);
-    
-    Producto findByCodigoAndEmpresaAndEliminado(String codigo, Empresa empresa, boolean eliminado);
+  @Query("SELECT p FROM Producto p WHERE p.idProducto = :idProducto AND p.eliminado = false")
+  Producto findById(@Param("idProducto") long idProducto);
 
-    Producto findByDescripcionAndEmpresaAndEliminado(String descripcion, Empresa empresa, boolean eliminado);
+  Producto findByCodigoAndEmpresaAndEliminado(String codigo, Empresa empresa, boolean eliminado);
 
-    List<Producto> findByIdProductoInOrderByIdProductoAsc(List<Long> idsProductos);
-    
+  Producto findByDescripcionAndEmpresaAndEliminado(String descripcion, Empresa empresa, boolean eliminado);
+
+  List<Producto> findByIdProductoInOrderByIdProductoAsc(List<Long> idsProductos);
+
 }
