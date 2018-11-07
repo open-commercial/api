@@ -1,6 +1,5 @@
 package sic.service;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,8 +18,6 @@ public interface ICuentaCorrienteService {
       CuentaCorrienteProveedor cuentaCorrienteProveedor);
 
   void validarCuentaCorriente(CuentaCorriente cuentaCorriente);
-
-  BigDecimal getSaldoCuentaCorriente(long idCuentaCorriente);
 
   Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(
       long idCuentaCorriente, Pageable pageable);

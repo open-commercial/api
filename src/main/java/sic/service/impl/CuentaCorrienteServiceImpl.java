@@ -3,7 +3,6 @@ package sic.service.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.net.URL;
 import java.util.*;
 import javax.imageio.ImageIO;
@@ -113,19 +112,14 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     CuentaCorrienteCliente cc =
         cuentaCorrienteClienteRepository.findByClienteAndEmpresaAndEliminada(
             cliente, cliente.getEmpresa(), false);
-    cc.setSaldo(this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente()));
     cc.setFechaUltimoMovimiento(this.getFechaUltimoMovimiento(cc.getIdCuentaCorriente()));
     return cc;
   }
 
   @Override
   public CuentaCorrienteProveedor getCuentaCorrientePorProveedor(Proveedor proveedor) {
-    CuentaCorrienteProveedor cc =
-        cuentaCorrienteProveedorRepository.findByProveedorAndEmpresaAndEliminada(
+    return cuentaCorrienteProveedorRepository.findByProveedorAndEmpresaAndEliminada(
             proveedor, proveedor.getEmpresa(), false);
-    cc.setSaldo(this.getSaldoCuentaCorriente(cc.getIdCuentaCorriente()));
-    cc.setFechaUltimoMovimiento(this.getFechaUltimoMovimiento(cc.getIdCuentaCorriente()));
-    return cc;
   }
 
   @Override
@@ -143,6 +137,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       rcc.setMonto(facturaVenta.getTotal().negate());
       CuentaCorriente cc = this.getCuentaCorrientePorCliente(facturaVenta.getCliente());
       cc.getRenglones().add(rcc);
+      cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
       LOGGER.warn(
@@ -153,6 +148,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     if (tipo == TipoDeOperacion.ELIMINACION) {
       RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeFactura(facturaVenta, false);
       rcc.setEliminado(true);
+      CuentaCorriente cc = this.getCuentaCorrientePorCliente(facturaVenta.getCliente());
+      cc.setSaldo(cc.getSaldo().add(rcc.getMonto().negate()));
       LOGGER.warn(
           ResourceBundle.getBundle("Mensajes")
               .getString("mensaje_reglon_cuenta_corriente_eliminado"),
@@ -175,6 +172,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       rcc.setMonto(facturaCompra.getTotal().negate());
       CuentaCorriente cc = this.getCuentaCorrientePorProveedor(facturaCompra.getProveedor());
       cc.getRenglones().add(rcc);
+      cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
       LOGGER.warn(
@@ -185,6 +183,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     if (tipo == TipoDeOperacion.ELIMINACION) {
       RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeFactura(facturaCompra, false);
       rcc.setEliminado(true);
+      CuentaCorriente cc = this.getCuentaCorrientePorProveedor(facturaCompra.getProveedor());
+      cc.setSaldo(cc.getSaldo().add(rcc.getMonto().negate()));
       LOGGER.warn(
           ResourceBundle.getBundle("Mensajes")
               .getString("mensaje_reglon_cuenta_corriente_eliminado"),
@@ -200,18 +200,20 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       rcc.setTipoComprobante(nota.getTipoComprobante());
       rcc.setSerie(nota.getSerie());
       rcc.setNumero(nota.getNroNota());
+      CuentaCorriente cc = this.getCuentaCorrientePorNota(nota);
       if (nota instanceof NotaCredito) {
         rcc.setMonto(nota.getTotal());
+        cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));
       }
       if (nota instanceof NotaDebito) {
         rcc.setMonto(nota.getTotal().negate());
+        cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));
       }
       rcc.setDescripcion(nota.getMotivo());
       rcc.setNota(nota);
       rcc.setFecha(nota.getFecha());
       rcc.setIdMovimiento(nota.getIdNota());
       if (nota.getMovimiento() == Movimiento.COMPRA) rcc.setCAE(nota.getCAE());
-      CuentaCorriente cc = this.getCuentaCorrientePorNota(nota);
       cc.getRenglones().add(rcc);
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
@@ -223,6 +225,13 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     if (tipo == TipoDeOperacion.ELIMINACION) {
       RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeNota(nota, false);
       rcc.setEliminado(true);
+      CuentaCorriente cc = this.getCuentaCorrientePorNota(nota);
+      if (nota instanceof NotaCredito) {
+        cc.setSaldo(cc.getSaldo().subtract(rcc.getMonto()));
+      }
+      if (nota instanceof NotaDebito) {
+        cc.setSaldo(cc.getSaldo().subtract(rcc.getMonto()));
+      }
       LOGGER.warn(
           ResourceBundle.getBundle("Mensajes")
               .getString("mensaje_reglon_cuenta_corriente_eliminado"),
@@ -265,6 +274,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                 .getString("mensaje_cuenta_corriente_no_existente"));
       }
       cc.getRenglones().add(rcc);
+      cc.setSaldo(cc.getSaldo().add(recibo.getMonto()));
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
       LOGGER.warn(
@@ -275,6 +285,18 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     if (tipo == TipoDeOperacion.ELIMINACION) {
       rcc = this.getRenglonCuentaCorrienteDeRecibo(recibo, false);
       rcc.setEliminado(true);
+      CuentaCorriente cc = null;
+      if (recibo.getCliente() != null) {
+        cc = this.getCuentaCorrientePorCliente(recibo.getCliente());
+      } else if (recibo.getProveedor() != null) {
+        cc = this.getCuentaCorrientePorProveedor(recibo.getProveedor());
+      }
+      if (null == cc) {
+        throw new BusinessServiceException(
+                ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_cuenta_corriente_no_existente"));
+      }
+      cc.setSaldo(cc.getSaldo().subtract(recibo.getMonto()));
       LOGGER.warn(
           ResourceBundle.getBundle("Mensajes")
               .getString("mensaje_reglon_cuenta_corriente_eliminado"),
@@ -380,12 +402,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       long idCuentaCorriente, Pageable page) {
     return renglonCuentaCorrienteRepository.findAllByCuentaCorrienteAndEliminado(
         idCuentaCorriente, page);
-  }
-
-  @Override
-  public BigDecimal getSaldoCuentaCorriente(long idCuentaCorriente) {
-    BigDecimal saldo = renglonCuentaCorrienteRepository.getSaldoCuentaCorriente(idCuentaCorriente);
-    return (saldo != null) ? saldo : BigDecimal.ZERO;
   }
 
   @Override

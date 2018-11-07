@@ -28,6 +28,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "cuentacorriente")
@@ -59,8 +60,9 @@ public abstract class CuentaCorriente implements Serializable {
     @ManyToOne
     @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
     private Empresa empresa;
-    
-    @Transient
+
+    @Column(precision = 25, scale = 15)
+    @ColumnDefault("0")
     private BigDecimal saldo;
     
     @Transient
