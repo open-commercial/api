@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.when;
 import org.springframework.test.context.junit4.SpringRunner;
-import sic.builder.ClienteBuilder;
 import sic.builder.EmpresaBuilder;
 import sic.builder.TransportistaBuilder;
 import sic.modelo.*;
@@ -193,7 +192,7 @@ public class FacturaServiceImplTest {
     RenglonFactura renglon5 = Mockito.mock(RenglonFactura.class);
     RenglonFactura renglon6 = Mockito.mock(RenglonFactura.class);
     Producto producto = Mockito.mock(Producto.class);
-    when(producto.getId_Producto()).thenReturn(1L);
+    when(producto.getIdProducto()).thenReturn(1L);
     when(producto.getCodigo()).thenReturn("1");
     when(producto.getDescripcion()).thenReturn("producto test");
     Medida medida = Mockito.mock(Medida.class);

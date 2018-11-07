@@ -4,7 +4,7 @@ SUM(sic.renglonpedido.cantidad) AS 'cantidad', SUM(sic.renglonpedido.importe) as
 FROM sic.renglonpedido 
 inner join sic.pedido on sic.pedido.id_Pedido = sic.renglonpedido.id_Factura 
 -- inner join sic.factura on sic.facturaventa.id_Factura = sic.factura.id_Factura
--- inner join sic.producto on sic.renglonfactura.id_ProductoItem = sic.producto.id_Producto
+-- inner join sic.producto on sic.renglonfactura.id_ProductoItem = sic.producto.idProducto
 inner join sic.rubro on sic.producto.id_Rubro = sic.rubro.id_Rubro
 -- inner join sic.medida on sic.producto.id_Medida = sic.medida.id_Medida
 where sic.factura.eliminada = false

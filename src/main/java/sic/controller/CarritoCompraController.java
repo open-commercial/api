@@ -138,13 +138,13 @@ public class CarritoCompraController {
     List<ItemCarritoCompra> items =
       carritoCompraService.getAllItemsDelUsuario(idUsuario, pageable).getContent();
     pedido.setRenglones(new ArrayList<>());
-    items.forEach(
-      i ->
-        pedido
-          .getRenglones()
-          .add(
-            pedidoService.calcularRenglonPedido(
-              i.getProducto().getId_Producto(), i.getCantidad(), BigDecimal.ZERO)));
+    items.forEach(     
+        i ->
+            pedido
+                .getRenglones()
+                .add(
+                    pedidoService.calcularRenglonPedido(
+                        i.getProducto().getIdProducto(), i.getCantidad(), BigDecimal.ZERO)));  
     Pedido p = pedidoService.guardar(pedido);
     carritoCompraService.eliminarTodosLosItemsDelUsuario(idUsuario);
     return p;

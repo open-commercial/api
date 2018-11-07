@@ -31,12 +31,12 @@ public interface CarritoCompraRepository
 
   @Modifying
   @Query(
-    "DELETE FROM ItemCarritoCompra icc WHERE icc.producto.id_Producto = :idProducto")
+    "DELETE FROM ItemCarritoCompra icc WHERE icc.producto.idProducto = :idProducto")
   void eliminarItem(@Param("idProducto") long idProducto);
 
   @Modifying
   @Query(
-      "DELETE FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario AND icc.producto.id_Producto = :idProducto")
+      "DELETE FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario AND icc.producto.idProducto = :idProducto")
   void eliminarItemDelUsuario(@Param("idUsuario") long idUsuario, @Param("idProducto") long idProducto);
 
   @Modifying

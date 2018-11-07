@@ -176,22 +176,27 @@ public class PedidoServiceImpl implements IPedidoService {
   public Pedido calcularTotalActualDePedido(Pedido pedido) {
     BigDecimal porcentajeDescuento;
     BigDecimal totalActual = BigDecimal.ZERO;
-    for (RenglonPedido renglonPedido : this.getRenglonesDelPedido(pedido.getId_Pedido())) {
-      BigDecimal precioUnitario =
-        productoService.getProductoPorId(renglonPedido.getIdProductoItem()).getPrecioLista();
+    List<Long> idsProductos = new ArrayList<>();
+    List<RenglonPedido> renglonesDelPedido = this.getRenglonesDelPedido(pedido.getId_Pedido());
+    renglonesDelPedido.forEach(r -> idsProductos.add(r.getIdProductoItem()));
+    List<Producto> productos = productoService.getMultiplesProductosPorId(idsProductos);
+    int i = 0;
+    for (RenglonPedido renglonPedido : renglonesDelPedido) {
+      BigDecimal precioUnitario = productos.get(i).getPrecioLista();
       renglonPedido.setSubTotal(
-        precioUnitario
-          .multiply(renglonPedido.getCantidad())
-          .multiply(
-            BigDecimal.ONE.subtract(
-              renglonPedido
-                .getDescuentoPorcentaje()
-                .divide(CIEN, 15, RoundingMode.HALF_UP))));
+          precioUnitario
+              .multiply(renglonPedido.getCantidad())
+              .multiply(
+                  BigDecimal.ONE.subtract(
+                      renglonPedido
+                          .getDescuentoPorcentaje()
+                          .divide(CIEN, 15, RoundingMode.HALF_UP))));
       totalActual = totalActual.add(renglonPedido.getSubTotal());
+      i++;
     }
     porcentajeDescuento =
-      BigDecimal.ONE.subtract(
-        pedido.getDescuentoPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP));
+        BigDecimal.ONE.subtract(
+            pedido.getDescuentoPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP));
     pedido.setTotalActual(totalActual.multiply(porcentajeDescuento));
     return pedido;
   }
@@ -401,7 +406,7 @@ public class PedidoServiceImpl implements IPedidoService {
     long idProducto, BigDecimal cantidad, BigDecimal descuentoPorcentaje) {
     RenglonPedido nuevoRenglon = new RenglonPedido();
     Producto producto = productoService.getProductoPorId(idProducto);
-    nuevoRenglon.setIdProductoItem(producto.getId_Producto());
+    nuevoRenglon.setIdProductoItem(producto.getIdProducto());
     nuevoRenglon.setCantidad(cantidad);
     nuevoRenglon.setCodigoItem(producto.getCodigo());
     nuevoRenglon.setDescripcionItem(producto.getDescripcion());

@@ -188,17 +188,17 @@ public class FacturacionIntegrationTest {
                 + "&idProveedor=" + proveedor.getId_Proveedor()
                 + "&idEmpresa=" + empresa.getId_Empresa(),
                 productoDos, ProductoDTO.class);
-        String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
+        String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getIdProducto() + "," + productoDos.getIdProducto() + "&cantidad=10,6";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
         RenglonFactura renglonUno = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
-                + "idProducto=" + productoUno.getId_Producto()
+                + "idProducto=" + productoUno.getIdProducto()
                 + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_B
                 + "&movimiento=" + Movimiento.VENTA
                 + "&cantidad=5" 
                 + "&descuentoPorcentaje=20",
                 RenglonFactura.class);
         RenglonFactura renglonDos = restTemplate.getForObject(apiPrefix + "/facturas/renglon?"
-                + "idProducto=" + productoDos.getId_Producto()
+                + "idProducto=" + productoDos.getIdProducto()
                 + "&tipoDeComprobante=" + TipoDeComprobante.FACTURA_B 
                 + "&movimiento=" + Movimiento.VENTA
                 + "&cantidad=2" 
@@ -304,10 +304,10 @@ public class FacturacionIntegrationTest {
         assertEquals(renglonesDeFacturaRecuperada[0].getDescripcionItem(), renglones.get(0).getDescripcionItem());
         assertEquals(renglonesDeFacturaRecuperada[0].getMedidaItem(), renglones.get(0).getMedidaItem());
         restTemplate.getForObject(apiPrefix + "/facturas/"+ facturasRecuperadas.get(0).getId_Factura() + "/reporte", byte[].class);
-        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=5,4";
+        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getIdProducto() + "," + productoDos.getIdProducto() + "&cantidad=5,4";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
         restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
+        uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getIdProducto() + "," + productoDos.getIdProducto() + "&cantidad=10,6";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
     }
     
@@ -396,16 +396,16 @@ public class FacturacionIntegrationTest {
                 + "&idProveedor=" + proveedor.getId_Proveedor()
                 + "&idEmpresa=" + empresa.getId_Empresa(),
                 productoDos, ProductoDTO.class);
-        String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
+        String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getIdProducto() + "," + productoDos.getIdProducto() + "&cantidad=10,6";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
         List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList();
         renglonesPedidoDTO.add(NuevoRenglonPedidoDTO.builder()
-                .idProductoItem(productoUno.getId_Producto())
+                .idProductoItem(productoUno.getIdProducto())
                 .cantidad(new BigDecimal("5"))
                 .descuentoPorcentaje(new BigDecimal("15"))
                 .build());
         renglonesPedidoDTO.add(NuevoRenglonPedidoDTO.builder()
-                .idProductoItem(productoDos.getId_Producto())
+                .idProductoItem(productoDos.getIdProducto())
                 .cantidad(new BigDecimal("2"))
                 .descuentoPorcentaje(BigDecimal.ZERO)
                 .build());
@@ -629,16 +629,16 @@ public class FacturacionIntegrationTest {
                         + "&idProveedor=" + proveedor.getId_Proveedor()
                         + "&idEmpresa=" + empresa.getId_Empresa(),
                 productoDos, ProductoDTO.class);
-        String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getId_Producto() + "," + productoDos.getId_Producto() + "&cantidad=10,6";
+        String uri = apiPrefix + "/productos/disponibilidad-stock?idProducto=" + productoUno.getIdProducto() + "," + productoDos.getIdProducto() + "&cantidad=10,6";
         Assert.assertTrue(restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Double, Producto>>() {}).getBody().isEmpty());
         List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
         renglonesPedidoDTO.add(NuevoRenglonPedidoDTO.builder()
-                .idProductoItem(productoUno.getId_Producto())
+                .idProductoItem(productoUno.getIdProducto())
                 .cantidad(new BigDecimal("5"))
                 .descuentoPorcentaje(new BigDecimal("15"))
                 .build());
         renglonesPedidoDTO.add(NuevoRenglonPedidoDTO.builder()
-                .idProductoItem(productoDos.getId_Producto())
+                .idProductoItem(productoDos.getIdProducto())
                 .cantidad(new BigDecimal("2"))
                 .descuentoPorcentaje(BigDecimal.ZERO)
                 .build());
@@ -686,7 +686,7 @@ public class FacturacionIntegrationTest {
                 productoTres, ProductoDTO.class);
         renglonesPedidoDTO = new ArrayList<>();
         renglonesPedidoDTO.add(NuevoRenglonPedidoDTO.builder()
-                .idProductoItem(productoTres.getId_Producto())
+                .idProductoItem(productoTres.getIdProducto())
                 .cantidad(new BigDecimal("7"))
                 .descuentoPorcentaje(new BigDecimal("18"))
                 .build());

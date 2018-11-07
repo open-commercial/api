@@ -3,7 +3,7 @@ SUM(renglonfactura.cantidad) AS 'cantidad', SUM(renglonfactura.importe) as 'impo
 
 FROM factura INNER JOIN facturaventa ON factura.id_Factura = facturaventa.id_Factura
 INNER JOIN renglonfactura ON renglonfactura.id_Factura = facturaventa.id_Factura
-INNER JOIN producto ON producto.id_Producto = renglonfactura.id_ProductoItem
+INNER JOIN producto ON producto.idProducto = renglonfactura.id_ProductoItem
 INNER JOIN medida ON medida.id_Medida = producto.id_Medida
 
 WHERE factura.eliminada = false AND factura.id_Empresa = 1

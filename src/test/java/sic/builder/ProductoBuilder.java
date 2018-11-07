@@ -6,7 +6,7 @@ import sic.modelo.dto.ProductoDTO;
 
 public class ProductoBuilder {
 
-    private Long id_Producto = 0L;
+    private Long idProducto = 0L;
     private String codigo = "ABC123";
     private String descripcion = "Cinta adhesiva doble faz 3M";
     private BigDecimal cantidad = BigDecimal.TEN;
@@ -34,14 +34,14 @@ public class ProductoBuilder {
     private boolean eliminado = false;
     
     public ProductoDTO build() {
-        return new ProductoDTO(id_Producto, codigo, descripcion, cantidad, cantMinima, ventaMinima, nombreMedida,
+        return new ProductoDTO(idProducto, codigo, descripcion, cantidad, cantMinima, ventaMinima, nombreMedida,
                 precioCosto, ganancia_porcentaje, ganancia_neto, precioVentaPublico, iva_porcentaje, iva_neto,
                 precioLista, nombreRubro, ilimitado, fechaUltimaModificacion, estanteria, estante, razonSocialProveedor,
                 nota, fechaAlta, fechaVencimiento, nombreEmpresa, eliminado);
     }
     
-    public ProductoBuilder withId_Producto(Long id_Producto) {
-        this.id_Producto = id_Producto;
+    public ProductoBuilder withId_Producto(Long idProducto) {
+        this.idProducto = idProducto;
         return this;
     }
     

@@ -47,10 +47,10 @@ SET SQL_SAFE_UPDATES=1;
 
 SET SQL_SAFE_UPDATES=0;
 update producto 
-inner join renglonpedido on producto.id_Producto = renglonpedido.id_Producto
+inner join renglonpedido on producto.idProducto = renglonpedido.idProducto
 inner join medida on producto.id_Medida = medida.id_Medida
 set
-renglonpedido.idProductoItem = producto.id_Producto,
+renglonpedido.idProductoItem = producto.idProducto,
 renglonpedido.codigoItem = producto.codigo,
 renglonpedido.descripcionItem = producto.descripcion,
 renglonpedido.medidaItem = medida.nombre,
@@ -60,10 +60,10 @@ SET SQL_SAFE_UPDATES=1;
 
 -- SET SQL_SAFE_UPDATES=0;
 -- update producto 
--- inner join renglonpedido on producto.id_Producto = renglonpedido.id_Producto
+-- inner join renglonpedido on producto.idProducto = renglonpedido.idProducto
 -- inner join medida on producto.id_Medida = medida.id_Medida
 -- set
--- renglonpedido.idProductoItem = producto.id_Producto,
+-- renglonpedido.idProductoItem = producto.idProducto,
 -- renglonpedido.codigoItem = producto.codigo,
 -- renglonpedido.descripcionItem = producto.descripcion,
 -- renglonpedido.medidaItem = medida.nombre,
@@ -74,4 +74,4 @@ SET SQL_SAFE_UPDATES=1;
 -- SET SQL_SAFE_UPDATES=1;
 
 ALTER TABLE renglonpedido DROP foreign key FKfxncx6f7eg8swxchd6sllrssa;
-ALTER TABLE renglonpedido DROP COLUMN renglonpedido.id_Producto;
+ALTER TABLE renglonpedido DROP COLUMN renglonpedido.idProducto;

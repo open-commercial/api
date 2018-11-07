@@ -190,9 +190,9 @@ public class ProductoIntegrationTest {
     String uri =
         apiPrefix
             + "/productos/disponibilidad-stock?idProducto="
-            + productoUno.getId_Producto()
+            + productoUno.getIdProducto()
             + ","
-            + productoDos.getId_Producto()
+            + productoDos.getIdProducto()
             + "&cantidad=10,6";
     Assert.assertTrue(
         restTemplate
