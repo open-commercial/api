@@ -147,16 +147,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeFactura(facturaVenta, false);
       CuentaCorriente cc = this.getCuentaCorrientePorCliente(facturaVenta.getCliente());
       cc.setSaldo(cc.getSaldo().add(rcc.getMonto().negate()));
-
       this.cambiarFechaUltimoComprobante(cc, rcc);
-//      List<RenglonCuentaCorriente> ultimosDosMovimientos = this.getUltimosDosMovimientos(cc);
-//      if(ultimosDosMovimientos.size() == 2 && ultimosDosMovimientos.get(0).getIdRenglonCuentaCorriente().equals(rcc.getIdRenglonCuentaCorriente())) {
-//        cc.setFechaUltimoMovimiento(ultimosDosMovimientos.get(1).getFecha());
-//      } else {
-//        cc.setFechaUltimoMovimiento(null);
-//      }
       rcc.setEliminado(true);
-
       LOGGER.warn(
           ResourceBundle.getBundle("Mensajes")
               .getString("mensaje_reglon_cuenta_corriente_eliminado"),
