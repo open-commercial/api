@@ -100,11 +100,11 @@ public class PedidoServiceImpl implements IPedidoService {
     /*BigDecimal[] importes = new BigDecimal[pedido.getRenglones().size()];
     int i = 0;
     for (RenglonPedido renglon : pedido.getRenglones()) {
-      importes[i] = renglon.getSubTotal();
+      importes[i] = renglon.getImporte();
       i++;
     }
     if (pedido
-      .getSubTotal()
+      .getImporte()
       .compareTo(
         CalculosComprobante.calcularSubTotal(importes))
       != 0) {
@@ -116,7 +116,7 @@ public class PedidoServiceImpl implements IPedidoService {
       .getRecargoNeto()
       .compareTo(
         CalculosComprobante.calcularProporcion(
-          pedido.getSubTotal(),
+          pedido.getImporte(),
           pedido.getRecargoPorcentaje()))
       != 0) {
       String mensaje = RESOURCE_BUNDLE.getString("mensaje_pedido_recargo_no_valido");
@@ -127,7 +127,7 @@ public class PedidoServiceImpl implements IPedidoService {
       .getDescuentoNeto()
       .compareTo(
         CalculosComprobante.calcularProporcion(
-          pedido.getSubTotal(),
+          pedido.getImporte(),
           pedido.getDescuentoPorcentaje()))
       != 0) {
       String mensaje = RESOURCE_BUNDLE.getString("mensaje_pedido_recargo_no_valido");
@@ -139,7 +139,7 @@ public class PedidoServiceImpl implements IPedidoService {
       .compareTo(
         CalculosComprobante.calcularSubTotalBruto(
           false,
-          pedido.getSubTotal(),
+          pedido.getImporte(),
           pedido.getRecargoNeto(),
           pedido.getDescuentoNeto(),
           null,
@@ -183,7 +183,7 @@ public class PedidoServiceImpl implements IPedidoService {
     int i = 0;
     for (RenglonPedido renglonPedido : renglonesDelPedido) {
       BigDecimal precioUnitario = productos.get(i).getPrecioLista();
-      renglonPedido.setSubTotal(
+      renglonPedido.setImporte(
           precioUnitario
               .multiply(renglonPedido.getCantidad())
               .multiply(
@@ -191,7 +191,7 @@ public class PedidoServiceImpl implements IPedidoService {
                       renglonPedido
                           .getDescuentoPorcentaje()
                           .divide(CIEN, 15, RoundingMode.HALF_UP))));
-      totalActual = totalActual.add(renglonPedido.getSubTotal());
+      totalActual = totalActual.add(renglonPedido.getImporte());
       i++;
     }
     porcentajeDescuento =
@@ -416,7 +416,7 @@ public class PedidoServiceImpl implements IPedidoService {
     nuevoRenglon.setDescuentoNeto(
       this.calcularDescuentoNeto(
         producto.getPrecioLista(), descuentoPorcentaje));
-    nuevoRenglon.setSubTotal(
+    nuevoRenglon.setImporte(
       CalculosComprobante.calcularImporte(
         nuevoRenglon.getCantidad(),
         producto.getPrecioLista(),
