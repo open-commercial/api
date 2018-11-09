@@ -1967,6 +1967,7 @@ public class AppIntegrationTest {
   }
 
   @Test
+  @Ignore
   public void shouldModificarProducto() {
     this.shouldCrearProducto();
     ProductoDTO productoAModificar =

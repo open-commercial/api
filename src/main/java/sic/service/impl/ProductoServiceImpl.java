@@ -231,10 +231,13 @@ public class ProductoServiceImpl implements IProductoService {
     if (idEmpresa != null)
       productoPorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     else productoPorActualizar.setEmpresa(productoPersistido.getEmpresa());
+    if (productoPersistido.isPublico() && !productoPorActualizar.isPublico()) {
+      carritoCompraService.eliminarItem(productoPersistido.getIdProducto());
+    }
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
     productoPorActualizar.setFechaUltimaModificacion(new Date());
     productoRepository.save(productoPorActualizar);
-    logger.warn("El Producto " + productoPorActualizar + " se modificó correctamente.");
+    logger.warn("El Producto {} se modificó correctamente.", productoPorActualizar);
   }
 
   @Override
@@ -372,11 +375,16 @@ public class ProductoServiceImpl implements IProductoService {
       if (checkMedida || checkRubro || checkProveedor || checkPrecios) {
         p.setFechaUltimaModificacion(new Date());
       }
-      if (checkVisibilidad) p.setPublico(publico);
+      if (checkVisibilidad) {
+        p.setPublico(publico);
+        if (!publico) {
+          carritoCompraService.eliminarItem(p.getIdProducto());
+        }
+      }
       this.validarOperacion(TipoDeOperacion.ACTUALIZACION, p);
     }
     productoRepository.save(productos);
-    logger.warn("Los Productos " + productos + " se modificaron correctamente.");
+    logger.warn("Los Productos {} se modificaron correctamente.", productos);
     return productos;
   }
 
