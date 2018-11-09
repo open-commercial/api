@@ -2960,31 +2960,31 @@ public class AppIntegrationTest {
     ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1", CuentaCorriente.class);
     assertEquals("La fecha del ultimo movimiento no es la esperada", reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
   }
-//
-//  @Test
-//  public void shouldActualizarFechaUltimaModificacionCuentaCorrienteProveedor() {
-//    this.shouldCrearFacturaCompraB();
-//    CuentaCorriente ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
-//    FacturaCompraDTO facturaCompraDTO = restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaCompraDTO.class);
-//    assertEquals("La fecha del ultimo movimiento no es la esperada", facturaCompraDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
-//    this.shouldCrearReciboProveedor(599.25);
-//    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
-//    ReciboDTO reciboDTO = restTemplate.getForObject(apiPrefix + "/recibos/1", ReciboDTO.class);
-//    assertEquals("La fecha del ultimo movimiento no es la esperada", reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
-//    restTemplate.delete(apiPrefix + "/recibos/1");
-//    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
-//    assertEquals("La fecha del ultimo movimiento no es la esperada", facturaCompraDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
-//    this.shouldCrearReciboProveedor(499.25);
-//    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
-//    reciboDTO = restTemplate.getForObject(apiPrefix + "/recibos/2", ReciboDTO.class);
-//    assertEquals("La fecha del ultimo movimiento no es la esperada", reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
-//    this.shouldCrearReciboProveedor(200);
-//    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
-//    reciboDTO = restTemplate.getForObject(apiPrefix + "/recibos/3", ReciboDTO.class);
-//    assertEquals("La fecha del ultimo movimiento no es la esperada", reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
-//    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-//    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
-//    assertEquals("La fecha del ultimo movimiento no es la esperada", reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
-//  }
+
+  @Test
+  public void shouldActualizarFechaUltimaModificacionCuentaCorrienteProveedor() {
+    shouldCrearFacturaCompraB();
+    CuentaCorriente ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
+    FacturaCompraDTO facturaCompraDTO = restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaCompraDTO.class);
+    assertEquals("La fecha del ultimo movimiento no es la esperada", facturaCompraDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+    shouldCrearReciboProveedor(599.25);
+    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
+    ReciboDTO reciboDTO = restTemplate.getForObject(apiPrefix + "/recibos/1", ReciboDTO.class);
+    assertEquals("La fecha del ultimo movimiento no es la esperada", reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+    restTemplate.delete(apiPrefix + "/recibos/1");
+    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
+    assertEquals("La fecha del ultimo movimiento no es la esperada", facturaCompraDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+    shouldCrearReciboProveedor(499.25);
+    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
+    reciboDTO = restTemplate.getForObject(apiPrefix + "/recibos/2", ReciboDTO.class);
+    assertEquals("La fecha del ultimo movimiento no es la esperada", reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+    shouldCrearReciboProveedor(200);
+    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
+    reciboDTO = restTemplate.getForObject(apiPrefix + "/recibos/3", ReciboDTO.class);
+    assertEquals("La fecha del ultimo movimiento no es la esperada", reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
+    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
+    assertEquals("La fecha del ultimo movimiento no es la esperada", reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+  }
 
 }
