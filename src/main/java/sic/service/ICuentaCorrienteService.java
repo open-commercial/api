@@ -1,10 +1,10 @@
 package sic.service;
 
-import java.math.BigDecimal;
-import java.util.Date;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import sic.modelo.*;
+
+import java.util.List;
 
 public interface ICuentaCorrienteService {
 
@@ -20,8 +20,6 @@ public interface ICuentaCorrienteService {
 
   void validarCuentaCorriente(CuentaCorriente cuentaCorriente);
 
-  BigDecimal getSaldoCuentaCorriente(long idCuentaCorriente);
-
   Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(
       long idCuentaCorriente, Pageable pageable);
 
@@ -33,10 +31,10 @@ public interface ICuentaCorrienteService {
 
   void asentarEnCuentaCorriente(Recibo recibo, TipoDeOperacion tipo);
 
-  Date getFechaUltimoMovimiento(long idCuentaCorriente);
-
   byte[] getReporteCuentaCorrienteCliente(
       CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page, String formato);
+
+  List<RenglonCuentaCorriente> getUltimosDosMovimientos(CuentaCorriente cuentaCorriente);
 
   RenglonCuentaCorriente guardar(RenglonCuentaCorriente renglonCuentaCorriente);
 
