@@ -26,16 +26,16 @@ public class CuentaCorrienteCliente extends CuentaCorriente implements Serializa
     @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
     private Cliente cliente;
 
-    @JsonGetter("razonSocialCliente")
-    public String getRazonSocialCliente() {
-        return cliente.getRazonSocial();
+    @JsonGetter("nombreFiscalCliente")
+    public String getNombreFiscalCliente() {
+        return cliente.getNombreFiscal();
     }
 
     public CuentaCorrienteCliente() {}
 
     public CuentaCorrienteCliente(long idCuentaCorriente, boolean eliminada, Date fechaApertura, Empresa empresa,
-            BigDecimal saldo, Date fechaUltimoMovimiento, List<RenglonCuentaCorriente> renglones, Cliente cliente) {    
-        
+            BigDecimal saldo, Date fechaUltimoMovimiento, List<RenglonCuentaCorriente> renglones, Cliente cliente) {
+
         super(idCuentaCorriente, eliminada, fechaApertura, empresa, saldo, fechaUltimoMovimiento, renglones);
         this.cliente = cliente;
     }

@@ -18,12 +18,12 @@ public class MovimientoCaja implements Comparable<MovimientoCaja> {
     public MovimientoCaja(Recibo recibo) {
         this.idMovimiento = recibo.getIdRecibo();
         this.tipoComprobante = TipoDeComprobante.RECIBO;
-        String razonSocial = ((recibo.getRazonSocialCliente().isEmpty()) ? recibo.getRazonSocialProveedor() : recibo.getRazonSocialCliente());
+        String razonSocial = ((recibo.getNombreFiscalCliente().isEmpty()) ? recibo.getRazonSocialProveedor() : recibo.getNombreFiscalCliente());
         this.concepto = "Recibo Nº " + recibo.getNumSerie() + " - " + recibo.getNumRecibo()
-                + " del " + ((recibo.getRazonSocialCliente().isEmpty()) ? "Proveedor: " : "Cliente: ")
+                + " del " + ((recibo.getNombreFiscalCliente().isEmpty()) ? "Proveedor: " : "Cliente: ")
                 + razonSocial;
         this.fecha = recibo.getFecha();
-        this.monto = recibo.getRazonSocialCliente().isEmpty() ? recibo.getMonto().negate() : recibo.getMonto();
+        this.monto = recibo.getNombreFiscalCliente().isEmpty() ? recibo.getMonto().negate() : recibo.getMonto();
     }
 
     public MovimientoCaja(Gasto gasto) {

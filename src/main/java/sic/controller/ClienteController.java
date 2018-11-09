@@ -58,7 +58,7 @@ public class ClienteController {
   public Page<Cliente> buscarConCriteria(
       @RequestParam Long idEmpresa,
       @RequestParam(required = false) String nroCliente,
-      @RequestParam(required = false) String razonSocial,
+      @RequestParam(required = false) String nombreFiscal,
       @RequestParam(required = false) String nombreFantasia,
       @RequestParam(required = false) Long idFiscal,
       @RequestParam(required = false) Long idViajante,
@@ -77,7 +77,7 @@ public class ClienteController {
     Pageable pageable;
     if (ordenarPor == null || sentido == null) {
       pageable =
-          new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "razonSocial"));
+          new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "nombreFiscal"));
     } else {
       switch (sentido) {
         case "ASC" : pageable =
@@ -87,14 +87,14 @@ public class ClienteController {
                 new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenarPor));
           break;
         default: pageable =
-                new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "razonSocial"));
+                new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "nombreFiscal"));
         break;
       }
     }
     BusquedaClienteCriteria criteria =
         BusquedaClienteCriteria.builder()
-            .buscaPorRazonSocial(razonSocial != null)
-            .razonSocial(razonSocial)
+            .buscaPorNombreFiscal(nombreFiscal != null)
+            .nombreFiscal(nombreFiscal)
             .buscaPorNombreFantasia(nombreFantasia != null)
             .nombreFantasia(nombreFantasia)
             .buscaPorIdFiscal(idFiscal != null)

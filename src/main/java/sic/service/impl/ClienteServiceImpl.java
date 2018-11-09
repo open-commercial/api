@@ -89,11 +89,11 @@ public class ClienteServiceImpl implements IClienteService {
   public Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long idUsuarioLoggedIn) {
     QCliente qCliente = QCliente.cliente;
     BooleanBuilder builder = new BooleanBuilder();
-    if (criteria.isBuscaPorRazonSocial()) {
-      String[] terminos = criteria.getRazonSocial().split(" ");
+    if (criteria.isBuscaPorNombreFiscal()) {
+      String[] terminos = criteria.getNombreFiscal().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
-        rsPredicate.and(qCliente.razonSocial.containsIgnoreCase(termino));
+        rsPredicate.and(qCliente.nombreFiscal.containsIgnoreCase(termino));
       }
       builder.or(rsPredicate);
     }
@@ -165,17 +165,13 @@ public class ClienteServiceImpl implements IClienteService {
           RESOURCE_BUNDLE.getString("mensaje_cliente_email_invalido"));
     }
     // Requeridos
-    if (cliente.getTipoDeCliente() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_tipoDeCliente"));
-    }
     if (cliente.getCategoriaIVA() == null) {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_categoriaIVA"));
     }
-    if (Validator.esVacio(cliente.getRazonSocial())) {
+    if (Validator.esVacio(cliente.getNombreFiscal())) {
       throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_razonSocial"));
+          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_nombreFiscal"));
     }
     if (Validator.esVacio(cliente.getTelefono())) {
       throw new BusinessServiceException(
@@ -225,7 +221,7 @@ public class ClienteServiceImpl implements IClienteService {
         throw new BusinessServiceException(
             MessageFormat.format(
                 RESOURCE_BUNDLE.getString("mensaje_cliente_credencial_no_valida"),
-                clienteYaAsignado.getRazonSocial()));
+                clienteYaAsignado.getNombreFiscal()));
       } else {
         if (!cliente.getCredencial().getRoles().contains(Rol.COMPRADOR)) {
           cliente.getCredencial().getRoles().add(Rol.COMPRADOR);
@@ -256,7 +252,7 @@ public class ClienteServiceImpl implements IClienteService {
         throw new BusinessServiceException(
             MessageFormat.format(
                 RESOURCE_BUNDLE.getString("mensaje_cliente_credencial_no_valida"),
-                clienteYaAsignado.getRazonSocial()));
+                clienteYaAsignado.getNombreFiscal()));
       } else {
         if (!clientePorActualizar.getCredencial().getRoles().contains(Rol.COMPRADOR)) {
           clientePorActualizar.getCredencial().getRoles().add(Rol.COMPRADOR);
