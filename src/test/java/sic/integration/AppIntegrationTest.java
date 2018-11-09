@@ -25,6 +25,8 @@ import sic.builder.*;
 import sic.modelo.*;
 import sic.modelo.dto.*;
 import sic.repository.UsuarioRepository;
+import sic.service.IPedidoService;
+import sic.service.IProductoService;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -42,6 +44,12 @@ public class AppIntegrationTest {
 
   @Autowired
   private UsuarioRepository usuarioRepository;
+
+  @Autowired
+  private IProductoService productoService;
+
+  @Autowired
+  private IPedidoService pedidoService;
 
   @Autowired
   private TestRestTemplate restTemplate;
@@ -2958,4 +2966,15 @@ public class AppIntegrationTest {
     assertEquals("La fecha del ultimo movimiento no es la esperada", reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
   }
 
+  @Test
+  public void shouldTestGetMultiplesProductosPorIdEnOrden() {
+    this.shouldCrearPedido();
+    List<Long> idsProductos = new ArrayList<>();
+    idsProductos.add(1L);
+    idsProductos.add(2L);
+    List<Producto> productos = productoService.getMultiplesProductosPorId(idsProductos);
+    List<RenglonPedido> renglones = pedidoService.getRenglonesDelPedido(1L);
+    assertEquals("Los ids no coinciden", productos.get(0).getIdProducto(), renglones.get(0).getIdProductoItem());
+    assertEquals("Los ids no coinciden", productos.get(1).getIdProducto(), renglones.get(1).getIdProductoItem());
+  }
 }
