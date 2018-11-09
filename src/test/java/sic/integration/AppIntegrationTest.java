@@ -715,7 +715,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTestReporteFactura() {
+  public void shouldReporteFactura() {
     this.shouldCrearFacturaVentaA();
     restTemplate.getForObject(apiPrefix + "/facturas/1/reporte", byte[].class);
   }
@@ -2010,7 +2010,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTestStockVenta() {
+  public void shouldStockVenta() {
     this.shouldCrearFacturaVentaA();
     this.checkDisponibilidadStock(4, 3);
     restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
@@ -2029,7 +2029,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTestStockCompra() {
+  public void shouldStockCompra() {
     this.shouldCrearFacturaCompraA();
     this.checkDisponibilidadStock(14, 9);
     restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
@@ -2038,7 +2038,7 @@ public class AppIntegrationTest {
 
   @Ignore
   @Test
-  public void shouldTestBajaFacturaCompraCuandoLaCantidadEsNegativa() {
+  public void shouldBajaFacturaCompraCuandoLaCantidadEsNegativa() {
     this.shouldCrearFacturaCompraA();
     this.checkDisponibilidadStock(14, 9);
     ProductoDTO productoUno =
@@ -2292,7 +2292,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTestStockNotaCreditoVenta() {
+  public void shouldStockNotaCreditoVenta() {
     this.shouldCrearNotaCreditoVenta();
     this.checkDisponibilidadStock(10, 4);
   }
@@ -2410,13 +2410,13 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTestStockNotaCreditoCompra() {
+  public void shouldStockNotaCreditoCompra() {
     this.shouldCrearNotaCreditoCompra();
     this.checkDisponibilidadStock(10, 6);
   }
 
   @Test
-  public void shouldTestSaldoCuentaCorrienteCliente() {
+  public void shouldSaldoCuentaCorrienteCliente() {
     this.shouldCrearFacturaVentaB();
     assertEquals(
       "El saldo de la cuenta corriente no es el esperado",
@@ -2450,7 +2450,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTestSaldoParcialCuentaCorrienteCliente() {
+  public void shouldSaldoParcialCuentaCorrienteCliente() {
     this.shouldCrearFacturaVentaB();
     this.crearReciboParaCliente(5992.5);
     this.crearNotaDebitoParaCliente();
@@ -2646,7 +2646,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTestTransicionDeEstadosDeUnPedido() {
+  public void shouldTransicionDeEstadosDeUnPedido() {
     this.shouldCrearPedido();
     this.crearFacturaTipoADePedido();
     PedidoDTO pedidoRecuperado =
@@ -2689,7 +2689,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTestSaldoCuentaCorrienteProveedor() {
+  public void shouldSaldoCuentaCorrienteProveedor() {
     this.shouldCrearFacturaCompraB();
     assertTrue(
       "El saldo de la cuenta corriente no es el esperado",
@@ -2741,7 +2741,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTestSaldoParcialCuentaCorrienteProveedor() {
+  public void shouldSaldoParcialCuentaCorrienteProveedor() {
     this.shouldCrearFacturaCompraB();
     this.crearReciboParaProveedor(599.25);
     restTemplate.delete(apiPrefix + "/recibos/1");
@@ -2967,7 +2967,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTestGetMultiplesProductosPorIdEnOrden() {
+  public void shouldGetMultiplesProductosPorIdEnOrden() {
     this.shouldCrearPedido();
     List<Long> idsProductos = new ArrayList<>();
     idsProductos.add(1L);
