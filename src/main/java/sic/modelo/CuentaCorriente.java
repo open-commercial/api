@@ -22,13 +22,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "cuentacorriente")
@@ -62,7 +60,6 @@ public abstract class CuentaCorriente implements Serializable {
     private Empresa empresa;
 
     @Column(precision = 25, scale = 15)
-    @ColumnDefault("0")
     private BigDecimal saldo;
 
     @Temporal(TemporalType.TIMESTAMP)

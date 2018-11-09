@@ -1,4 +1,3 @@
-SELECT * FROM cuentacorriente;
 alter table cuentacorriente add column saldo decimal(25,15),
 add column fechaUltimoMovimiento datetime;
 
