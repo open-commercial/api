@@ -18,8 +18,9 @@ public class ProductoDTO implements Serializable {
   private String codigo = "ABC123";
   private String descripcion = "Cinta adhesiva doble faz 3M";
   private BigDecimal cantidad = BigDecimal.TEN;
+  private boolean hayStock = true;
   private BigDecimal cantMinima = new BigDecimal("2");
-  private BigDecimal ventaMinima = BigDecimal.ZERO;
+  private BigDecimal bulto = BigDecimal.ONE;
   private String nombreMedida = "Unidad";
   private BigDecimal precioCosto = new BigDecimal("100");
   private BigDecimal gananciaPorcentaje = new BigDecimal("50");
@@ -30,6 +31,7 @@ public class ProductoDTO implements Serializable {
   private BigDecimal precioLista = new BigDecimal("181.5");
   private String nombreRubro = "Ferreteria";
   private boolean ilimitado = false;
+  private boolean publico = true;
   private Date fechaUltimaModificacion = new Date(1463540400000L); // 18-05-2016
   private String estanteria = "A";
   private String estante = "1";

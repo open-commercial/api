@@ -12,7 +12,7 @@ import sic.modelo.Producto;
 
 public interface IProductoService {
 
-  void actualizar(Producto productoPorActualizar, Long idMedida, Long idRubro, Long idProveedor, Long idEmpresa);
+  void actualizar(Producto productoPorActualizar);
 
   void actualizarStock(
       Map<Long, BigDecimal> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento);
