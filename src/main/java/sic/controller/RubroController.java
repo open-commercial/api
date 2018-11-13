@@ -1,6 +1,8 @@
 package sic.controller;
 
 import java.util.List;
+
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,56 +17,68 @@ import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Rol;
 import sic.modelo.Rubro;
+import sic.modelo.dto.RubroDTO;
 import sic.service.IEmpresaService;
 import sic.service.IRubroService;
 
 @RestController
 @RequestMapping("/api/v1")
 public class RubroController {
-    
-    private final IRubroService rubroService;
-    private final IEmpresaService empresaService;
-    
-    @Autowired
-    public RubroController(IRubroService rubroService, IEmpresaService empresaService) {
-        this.rubroService = rubroService;
-        this.empresaService = empresaService;
+
+  private final IRubroService rubroService;
+  private final IEmpresaService empresaService;
+  private final ModelMapper modelMapper;
+
+  @Autowired
+  public RubroController(
+      IRubroService rubroService, IEmpresaService empresaService, ModelMapper modelMapper) {
+    this.rubroService = rubroService;
+    this.empresaService = empresaService;
+    this.modelMapper = modelMapper;
+  }
+
+  @GetMapping("/rubros/{idRubro}")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public Rubro getRubroPorId(@PathVariable long idRubro) {
+    return rubroService.getRubroPorId(idRubro);
+  }
+
+  @PutMapping("/rubros")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public void actualizar(@RequestBody RubroDTO rubroDTO) {
+    Rubro rubro = modelMapper.map(rubroDTO, Rubro.class);
+    if (rubroService.getRubroPorId(rubro.getId_Rubro()) != null) {
+      rubroService.actualizar(rubro);
     }
-    
-    @GetMapping("/rubros/{idRubro}")
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public Rubro getRubroPorId(@PathVariable long idRubro) {
-        return rubroService.getRubroPorId(idRubro);
-    }
-    
-    @PutMapping("/rubros")
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public void actualizar(@RequestBody Rubro rubro) { 
-        if (rubroService.getRubroPorId(rubro.getId_Rubro()) != null) {
-           rubroService.actualizar(rubro);
-        }
-    }
-    
-    @DeleteMapping("/rubros/{idRubro}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-    public void eliminar(@PathVariable long idRubro) {
-        rubroService.eliminar(idRubro);       
-    }
-    
-    @PostMapping("/rubros")
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public Rubro guardar(@RequestBody Rubro rubro) {
-        return rubroService.guardar(rubro);
-    }
-    
-    @GetMapping("/rubros/empresas/{idEmpresa}")
-    @ResponseStatus(HttpStatus.OK)
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
-    public List<Rubro> getRubros(@PathVariable long idEmpresa) {
-        return rubroService.getRubros(empresaService.getEmpresaPorId(idEmpresa));
-    }
+  }
+
+  @DeleteMapping("/rubros/{idRubro}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
+  public void eliminar(@PathVariable long idRubro) {
+    rubroService.eliminar(idRubro);
+  }
+
+  @PostMapping("/rubros")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public Rubro guardar(@RequestBody RubroDTO rubroDTO) {
+      Rubro rubro = modelMapper.map(rubroDTO, Rubro.class);
+    return rubroService.guardar(rubro);
+  }
+
+  @GetMapping("/rubros/empresas/{idEmpresa}")
+  @ResponseStatus(HttpStatus.OK)
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public List<Rubro> getRubros(@PathVariable long idEmpresa) {
+    return rubroService.getRubros(empresaService.getEmpresaPorId(idEmpresa));
+  }
 }
