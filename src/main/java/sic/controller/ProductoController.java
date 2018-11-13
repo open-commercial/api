@@ -244,11 +244,12 @@ public class ProductoController {
   @ResponseStatus(HttpStatus.CREATED)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Producto guardar(
-      @RequestBody Producto producto,
+      @RequestBody ProductoDTO productoDTO,
       @RequestParam Long idMedida,
       @RequestParam Long idRubro,
       @RequestParam Long idProveedor,
       @RequestParam Long idEmpresa) {
+    Producto producto = modelMapper.map(productoDTO, Producto.class);
     return productoService.guardar(producto, idMedida, idRubro, idProveedor, idEmpresa);
   }
 
