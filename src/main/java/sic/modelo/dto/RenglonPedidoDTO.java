@@ -21,6 +21,6 @@ public class RenglonPedidoDTO implements Serializable {
     private BigDecimal cantidad;
     private BigDecimal descuentoPorcentaje;
     private BigDecimal descuentoNeto;
-    private BigDecimal subTotal;
+    private BigDecimal importe;
 
 }

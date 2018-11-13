@@ -521,7 +521,7 @@ public class NotaServiceImpl implements INotaService {
     BigDecimal[] importes = new BigDecimal[renglonesNotaCredito.size()];
     int i = 0;
     int sizeRenglonesCredito = renglonesNotaCredito.size();
-    // IVA - subTotal
+    // IVA - importe
     BigDecimal iva21 = BigDecimal.ZERO;
     BigDecimal iva105 = BigDecimal.ZERO;
     if (notaCredito.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_A
