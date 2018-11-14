@@ -673,10 +673,9 @@ public class AppIntegrationTest {
   @Test
   public void shouldCrearCredencialConRolComprador() { // guardar un usuario sin un cliente relacionado. Cambiar el nombre de este test. usar un recaptcha particular para saltar el recaptcha.
     Cliente cliente = new ClienteBuilder()
-      .withTipoDeCliente(TipoDeCliente.PERSONA)
       .withBonificacion(BigDecimal.ZERO)
       .withNroCliente("00002")
-      .withRazonSocial("")
+      .withNombreFiscal("")
       .withNombreFantasia("Sansa Stark")
       .withDireccion("the wall")
       .withCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -687,7 +686,7 @@ public class AppIntegrationTest {
       .withContacto("Ayra Stark")
       .withFechaAlta(new Date())
       .withEmpresa(restTemplate.getForObject(apiPrefix + "/empresas/1", Empresa.class))
-      .withRazonSocial("Winter is comming")
+      .withNombreFiscal("Winter is comming")
       .withViajante(null)
       .build();
     ArrayList<Rol> roles = new ArrayList<>();
