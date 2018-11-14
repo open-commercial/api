@@ -108,9 +108,9 @@ public class Pedido implements Serializable {
         return empresa.getNombre();
     }
     
-    @JsonGetter("razonSocialCliente")
-    public String getRazonSocialCliente() {
-        return cliente.getRazonSocial();
+    @JsonGetter("nombreFiscalCliente")
+    public String getNombreFiscalCliente() {
+        return cliente.getNombreFiscal();
     }
     
     @JsonGetter("nombreUsuario")

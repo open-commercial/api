@@ -143,7 +143,7 @@ $P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("MON
 				<textElement verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getCliente().getRazonSocial() + "  (" + $P{cuentaCorrienteCliente}.getCliente().getNroCliente() + ")"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getCliente().getNombreFiscal() + "  (" + $P{cuentaCorrienteCliente}.getCliente().getNroCliente() + ")"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement positionType="FixRelativeToBottom" x="0" y="191" width="50" height="15" uuid="07575dbb-0de5-4177-afb0-35b170670748">
@@ -234,7 +234,7 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				<text><![CDATA[Inicio Actividades:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="302" y="-5" width="230" height="25" uuid="fcdd23d2-56f9-4d85-ac55-bb24a80541be"/>
+				<reportElement x="302" y="0" width="230" height="25" uuid="fcdd23d2-56f9-4d85-ac55-bb24a80541be"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="16" isBold="true" isUnderline="false"/>
 				</textElement>
@@ -336,7 +336,7 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				<textElement verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{cuentaCorrienteCliente}.getCliente().getTipoDeCliente() == sic.modelo.TipoDeCliente.EMPRESA) ? "CUIT:" : "DNI:"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("CONSUMIDOR_FINAL") ? "DNI" : "CUIT"]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>

@@ -580,10 +580,9 @@ public class AppIntegrationTest {
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
     ClienteDTO cliente =
       ClienteDTO.builder()
-        .tipoDeCliente(TipoDeCliente.EMPRESA)
         .bonificacion(BigDecimal.TEN)
         .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-        .razonSocial("Peter Parker")
+        .nombreFiscal("Peter Parker")
         .telefono("379123452")
         .build();
     restTemplate.postForObject(
@@ -814,7 +813,7 @@ public class AppIntegrationTest {
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
     FacturaVentaDTO facturaVentaA =
       FacturaVentaDTO.builder()
-        .razonSocialCliente(cliente.getRazonSocial())
+        .nombreFiscalCliente(cliente.getNombreFiscal())
         .nombreUsuario("test test (test)")
         .build();
     facturaVentaA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
@@ -942,7 +941,7 @@ public class AppIntegrationTest {
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", Cliente.class);
     FacturaVentaDTO facturaVentaB =
       FacturaVentaDTO.builder()
-        .razonSocialCliente(cliente.getRazonSocial())
+        .nombreFiscalCliente(cliente.getNombreFiscal())
         .nombreUsuario("test test (test)")
         .build();
     facturaVentaB.setTipoComprobante(TipoDeComprobante.FACTURA_B);
@@ -1069,7 +1068,7 @@ public class AppIntegrationTest {
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", Cliente.class);
     FacturaVentaDTO facturaVentaC =
       FacturaVentaDTO.builder()
-        .razonSocialCliente(cliente.getRazonSocial())
+        .nombreFiscalCliente(cliente.getNombreFiscal())
         .nombreUsuario("test test (test)")
         .build();
     facturaVentaC.setTipoComprobante(TipoDeComprobante.FACTURA_C);
@@ -1154,7 +1153,7 @@ public class AppIntegrationTest {
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", Cliente.class);
     FacturaVentaDTO facturaVentaX =
       FacturaVentaDTO.builder()
-        .razonSocialCliente(cliente.getRazonSocial())
+        .nombreFiscalCliente(cliente.getNombreFiscal())
         .nombreUsuario("test test (test)")
         .build();
     facturaVentaX.setTipoComprobante(TipoDeComprobante.FACTURA_X);
@@ -1281,7 +1280,7 @@ public class AppIntegrationTest {
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", Cliente.class);
     FacturaVentaDTO facturaVentaY =
       FacturaVentaDTO.builder()
-        .razonSocialCliente(cliente.getRazonSocial())
+        .nombreFiscalCliente(cliente.getNombreFiscal())
         .nombreUsuario("test test (test)")
         .build();
     facturaVentaY.setTipoComprobante(TipoDeComprobante.FACTURA_Y);
@@ -1408,7 +1407,7 @@ public class AppIntegrationTest {
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", Cliente.class);
     FacturaVentaDTO facturaVentaPresupuesto =
       FacturaVentaDTO.builder()
-        .razonSocialCliente(cliente.getRazonSocial())
+        .nombreFiscalCliente(cliente.getNombreFiscal())
         .nombreUsuario("test test (test)")
         .build();
     facturaVentaPresupuesto.setTipoComprobante(TipoDeComprobante.PRESUPUESTO);
@@ -2301,7 +2300,7 @@ public class AppIntegrationTest {
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
     FacturaVentaDTO facturaVentaA =
       FacturaVentaDTO.builder()
-        .razonSocialCliente(cliente.getRazonSocial())
+        .nombreFiscalCliente(cliente.getNombreFiscal())
         .nombreUsuario("test test (test)")
         .build();
     facturaVentaA.setTipoComprobante(TipoDeComprobante.FACTURA_A);

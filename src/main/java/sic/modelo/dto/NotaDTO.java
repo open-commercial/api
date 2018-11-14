@@ -37,7 +37,7 @@ public abstract class NotaDTO implements Serializable {
   private String nombreEmpresa;
   private UsuarioDTO usuario;
   private long idCliente;
-  private String razonSocialCliente;
+  private String nombreFiscalCliente;
   private long idFacturaVenta;
   private long idProveedor;
   private String razonSocialProveedor;

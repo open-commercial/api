@@ -58,7 +58,7 @@ public class ClienteServiceImplTest {
         new ClienteBuilder()
             .withCategoriaIVA(null)
             .withEmail("soporte@gmail.com")
-            .withRazonSocial("Ferreteria Julian")
+            .withNombreFiscal("Ferreteria Julian")
             .build());
   }
 
@@ -70,7 +70,7 @@ public class ClienteServiceImplTest {
     Cliente cliente =
         new ClienteBuilder()
             .withEmail("soporte@gmail.com")
-            .withRazonSocial("Ferreteria Julian")
+            .withNombreFiscal("Ferreteria Julian")
             .withLocalidad(new LocalidadBuilder().build())
             .withEmpresa(null)
             .build();
@@ -98,13 +98,13 @@ public class ClienteServiceImplTest {
     Cliente cliente =
         new ClienteBuilder()
             .withId_Cliente(7L)
-            .withRazonSocial("Merceria los dos botones")
+            .withNombreFiscal("Merceria los dos botones")
             .withIdFiscal(23111111119L)
             .build();
     Cliente clienteDuplicado =
         new ClienteBuilder()
             .withId_Cliente(2L)
-            .withRazonSocial("Merceria los dos botones")
+            .withNombreFiscal("Merceria los dos botones")
             .withIdFiscal(23111111119L)
             .build();
     when(clienteRepository.findByIdFiscalAndEmpresaAndEliminado(

@@ -28,7 +28,7 @@ public class PedidoDTO implements Serializable {
     private String observaciones;
     private String nombreEmpresa;
     private boolean eliminado;
-    private String razonSocialCliente;
+    private String nombreFiscalCliente;
     private String nombreUsuario;
     private List<FacturaDTO> facturas;
     private List<RenglonPedidoDTO> renglones;

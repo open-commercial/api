@@ -7,10 +7,9 @@ import sic.modelo.*;
 public class ClienteBuilder {
 
   private long id_Cliente = 0L;
-  private TipoDeCliente tipoDeCliente = TipoDeCliente.EMPRESA;
   private BigDecimal bonificacion = BigDecimal.TEN;
   private String nroCliente = "00001";
-  private String razonSocial = "Construcciones S.A.";
+  private String nombreFiscal = "Construcciones S.A.";
   private String nombreFantasia = "Servimetal";
   private String direccion = "Perugorria 2421";
   private CategoriaIVA categoriaIVA = CategoriaIVA.RESPONSABLE_INSCRIPTO;
@@ -31,10 +30,9 @@ public class ClienteBuilder {
   public Cliente build() {
     return new Cliente(
         id_Cliente,
-        tipoDeCliente,
         bonificacion,
         nroCliente,
-        razonSocial,
+        nombreFiscal,
         nombreFantasia,
         direccion,
         categoriaIVA,
@@ -63,18 +61,13 @@ public class ClienteBuilder {
     return this;
   }
 
-  public ClienteBuilder withTipoDeCliente(TipoDeCliente tipoDeCliente) {
-    this.tipoDeCliente = tipoDeCliente;
-    return this;
-  }
-
   public ClienteBuilder withNroCliente(String nroCliente) {
     this.nroCliente = nroCliente;
     return this;
   }
 
-  public ClienteBuilder withRazonSocial(String razonSocial) {
-    this.razonSocial = razonSocial;
+  public ClienteBuilder withNombreFiscal(String nombreFiscal) {
+    this.nombreFiscal = nombreFiscal;
     return this;
   }
 

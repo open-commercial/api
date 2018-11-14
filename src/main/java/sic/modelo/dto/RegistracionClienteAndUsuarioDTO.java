@@ -4,7 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import sic.modelo.TipoDeCliente;
+import sic.modelo.CategoriaIVA;
+
 import java.io.Serializable;
 
 @Data
@@ -13,13 +14,12 @@ import java.io.Serializable;
 @Builder
 public class RegistracionClienteAndUsuarioDTO implements Serializable {
 
-  private TipoDeCliente tipoDeCliente;
   private String nombre;
   private String apellido;
-  private String email;
   private String telefono;
-  private String idFiscal;
-  private String razonSocial;
+  private String email;
+  private CategoriaIVA categoriaIVA;
+  private String nombreFiscal;
   private String password;
   private long idEmpresa;
   private String recaptcha;

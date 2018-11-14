@@ -20,7 +20,7 @@ public class ReciboDTO implements Serializable {
   private String concepto = "Recibo Test";
   private String nombreFormaDePago = "Efectivo";
   private String nombreEmpresa = "Globo De Oro";
-  private String razonSocialCliente = "Construcciones S.A.";
+  private String nombreFiscalCliente = "Construcciones S.A.";
   private String razonSocialProveedor = "";
   private String nombreUsuario = "test";
   private double monto = 15000;
