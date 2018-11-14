@@ -33,7 +33,6 @@ public class PedidoController {
     private final IEmpresaService empresaService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
-    private final IProductoService productoService;
     private final ModelMapper modelMapper;
 
     @Value("${SIC_JWT_KEY}")
@@ -42,12 +41,11 @@ public class PedidoController {
     @Autowired
     public PedidoController(IPedidoService pedidoService, IEmpresaService empresaService,
                             IUsuarioService usuarioService, IClienteService clienteService,
-                            IProductoService productoService, ModelMapper modelMapper) {
+                            ModelMapper modelMapper) {
         this.pedidoService = pedidoService;
         this.empresaService = empresaService;
         this.usuarioService = usuarioService;
         this.clienteService = clienteService;
-        this.productoService = productoService;
         this.modelMapper = modelMapper;
     }
     

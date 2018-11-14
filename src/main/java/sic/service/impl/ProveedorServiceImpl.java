@@ -4,6 +4,8 @@ import com.querydsl.core.BooleanBuilder;
 
 import org.springframework.data.domain.Page;
 import sic.modelo.BusquedaProveedorCriteria;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
@@ -192,10 +194,11 @@ public class ProveedorServiceImpl implements IProveedorService {
     if (proveedor.getCodigo() == null) proveedor.setCodigo("");
     this.validarOperacion(TipoDeOperacion.ALTA, proveedor);
     proveedor = proveedorRepository.save(proveedor);
-    CuentaCorrienteProveedor cuentaCorrienteCliente = new CuentaCorrienteProveedor();
-    cuentaCorrienteCliente.setProveedor(proveedor);
-    cuentaCorrienteCliente.setEmpresa(proveedor.getEmpresa());
-    cuentaCorrienteService.guardarCuentaCorrienteProveedor(cuentaCorrienteCliente);
+    CuentaCorrienteProveedor cuentaCorrienteProveedor = new CuentaCorrienteProveedor();
+    cuentaCorrienteProveedor.setProveedor(proveedor);
+    cuentaCorrienteProveedor.setEmpresa(proveedor.getEmpresa());
+    cuentaCorrienteProveedor.setSaldo(BigDecimal.ZERO);
+    cuentaCorrienteService.guardarCuentaCorrienteProveedor(cuentaCorrienteProveedor);
     logger.warn("El Proveedor {} se guardó correctamente.", proveedor);
     return proveedor;
   }

@@ -25,6 +25,9 @@ import sic.builder.*;
 import sic.modelo.*;
 import sic.modelo.dto.*;
 import sic.repository.UsuarioRepository;
+import sic.service.IPedidoService;
+import sic.service.IProductoService;
+import sic.service.IRegistracionService;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -42,6 +45,15 @@ public class AppIntegrationTest {
 
   @Autowired
   private UsuarioRepository usuarioRepository;
+
+  @Autowired
+  private IProductoService productoService;
+
+  @Autowired
+  private IPedidoService pedidoService;
+
+  @Autowired
+  private IRegistracionService registracionService;
 
   @Autowired
   private TestRestTemplate restTemplate;
@@ -519,26 +531,43 @@ public class AppIntegrationTest {
       restTemplate
         .postForEntity(apiPrefix + "/login", new Credencial("test", "test"), String.class)
         .getBody();
-    Localidad localidad = new LocalidadBuilder().build();
-    localidad
-      .getProvincia()
-      .setPais(
-        restTemplate.postForObject(
-          apiPrefix + "/paises", localidad.getProvincia().getPais(), Pais.class));
-    localidad.setProvincia(
-      restTemplate.postForObject(
-        apiPrefix + "/provincias", localidad.getProvincia(), Provincia.class));
-    localidad = restTemplate.postForObject(apiPrefix + "/localidades", localidad, Localidad.class);
-    Empresa empresa = new EmpresaBuilder().withLocalidad(localidad).build();
-    empresa = restTemplate.postForObject(apiPrefix + "/empresas", empresa, Empresa.class);
-    FormaDePago formaDePago =
-      new FormaDePagoBuilder()
-        .withAfectaCaja(false)
-        .withEmpresa(empresa)
-        .withPredeterminado(true)
-        .withNombre("Efectivo")
+    PaisDTO paisDTO = PaisDTO.builder().nombre("Argentina").build();
+    PaisDTO paisGuardado =
+      restTemplate.postForObject(apiPrefix + "/paises", paisDTO, PaisDTO.class);
+    ProvinciaDTO provinciaDTO =
+      ProvinciaDTO.builder().nombre("Corrientes").pais(paisGuardado).build();
+    ProvinciaDTO provinciaGuardada =
+      restTemplate.postForObject(apiPrefix + "/provincias", provinciaDTO, ProvinciaDTO.class);
+    LocalidadDTO localidadDTO =
+      LocalidadDTO.builder()
+        .nombre("Corrientes")
+        .provincia(provinciaGuardada)
+        .codigoPostal("3400")
         .build();
-    restTemplate.postForObject(apiPrefix + "/formas-de-pago", formaDePago, FormaDePago.class);
+    localidadDTO =
+      restTemplate.postForObject(apiPrefix + "/localidades", localidadDTO, LocalidadDTO.class);
+    EmpresaDTO empresaDTO = EmpresaDTO.builder()
+      .nombre("Globo Corporation")
+      .localidad(localidadDTO)
+      .lema("Enjoy the life")
+      .direccion("Viamonte 542")
+      .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+      .idFiscal(23154587589L)
+      .ingresosBrutos(123456789L)
+      .fechaInicioActividad(new Date(539924400000L))
+      .email("support@globocorporation.com")
+      .telefono("379 4895549")
+      .localidad(localidadDTO)
+      .build();
+    empresaDTO = restTemplate.postForObject(apiPrefix + "/empresas", empresaDTO, EmpresaDTO.class);
+    FormaDePagoDTO formaDePago =
+      FormaDePagoDTO.builder()
+        .afectaCaja(true)
+        .empresa(empresaDTO)
+        .nombre("Efectivo")
+        .predeterminado(true)
+        .build();
+    restTemplate.postForObject(apiPrefix + "/formas-de-pago", formaDePago, FormaDePagoDTO.class);
     UsuarioDTO credencial =
       UsuarioDTO.builder()
         .username("marce")
@@ -559,40 +588,148 @@ public class AppIntegrationTest {
         .build();
     restTemplate.postForObject(
       apiPrefix
-        + "/clientes?idEmpresa=" + empresa.getId_Empresa()
-        + "&idLocalidad=" + localidad.getId_Localidad()
+        + "/clientes?idEmpresa=" + empresaDTO.getId_Empresa()
+        + "&idLocalidad=" + localidadDTO.getId_Localidad()
         + "&idUsuarioCredencial=" + credencial.getId_Usuario(),
       cliente,
       ClienteDTO.class);
-    Transportista transportista =
-      new TransportistaBuilder()
-        .withEmpresa(empresa)
-        .withLocalidad(empresa.getLocalidad())
-        .build();
-    restTemplate.postForObject(apiPrefix + "/transportistas", transportista, Transportista.class);
-    Medida medidaMetro = new MedidaBuilder().withEmpresa(empresa).build();
-    Medida medidaKilo = new MedidaBuilder().withNombre("Kilo").withEmpresa(empresa).build();
-    restTemplate.postForObject(apiPrefix + "/medidas", medidaMetro, Medida.class);
-    restTemplate.postForObject(apiPrefix + "/medidas", medidaKilo, Medida.class);
-    Proveedor proveedor =
-      new ProveedorBuilder().withEmpresa(empresa).withLocalidad(empresa.getLocalidad()).build();
-    restTemplate.postForObject(apiPrefix + "/proveedores", proveedor, Proveedor.class);
-    Rubro rubro = new RubroBuilder().withEmpresa(empresa).build();
-    restTemplate.postForObject(apiPrefix + "/rubros", rubro, Rubro.class);
+    TransportistaDTO transportistaDTO = TransportistaDTO.builder()
+      .empresa(empresaDTO)
+      .localidad(empresaDTO.getLocalidad())
+      .nombre("Correo OCA")
+      .direccion("Ruta 12")
+      .web("pedidos@oca.com.ar")
+      .telefono("379 5402356")
+      .eliminado(false)
+      .build();
+    restTemplate.postForObject(apiPrefix + "/transportistas", transportistaDTO, TransportistaDTO.class);
+    MedidaDTO medidaMetro = MedidaDTO.builder()
+      .nombre("Metro")
+      .empresa(empresaDTO)
+      .build();
+    MedidaDTO medidaKilo = MedidaDTO.builder()
+      .nombre("Kilo")
+      .empresa(empresaDTO)
+      .build();
+    restTemplate.postForObject(apiPrefix + "/medidas", medidaMetro, MedidaDTO.class);
+    restTemplate.postForObject(apiPrefix + "/medidas", medidaKilo, MedidaDTO.class);
+    ProveedorDTO proveedorDTO = ProveedorDTO.builder()
+      .codigo("ABC123")
+      .razonSocial("Chamaco S.R.L.")
+      .direccion("La Rioja 2047")
+      .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+      .idFiscal(23127895679L)
+      .telPrimario("379 4356778")
+      .telSecundario("379 4894514")
+      .contacto("Raul Gamez")
+      .email("chamacosrl@gmail.com")
+      .web("www.chamacosrl.com.ar")
+      .localidad(localidadDTO)
+      .empresa(empresaDTO)
+      .eliminado(false)
+      .saldoCuentaCorriente(BigDecimal.ZERO)
+      .build();
+    restTemplate.postForObject(apiPrefix + "/proveedores", proveedorDTO, Proveedor.class);
+    RubroDTO rubro = RubroDTO.builder()
+      .nombre("Ferreteria")
+      .empresa(empresaDTO)
+      .eliminado(false)
+      .build();
+    restTemplate.postForObject(apiPrefix + "/rubros", rubro, RubroDTO.class);
   }
 
-  // shouldCrearProductoConIva21
-  // shouldCrearProductoConIva105
-  // shouldCrearPaisProvinciaLocalidad
-  // shouldCrearFormaDePagoEfectivoQueAfectaCaja
-  // shouldCrearCredencialConRolComprador
-  // shouldCrearEmpresaResponsableInscripto
+  @Test
+  public void shouldCrearPaisProvinciaLocalidad() {
+    PaisDTO paisDTO = PaisDTO.builder().nombre("Poniente").build();
+    PaisDTO paisGuardado =
+        restTemplate.postForObject(apiPrefix + "/paises", paisDTO, PaisDTO.class);
+    ProvinciaDTO provinciaDTO =
+        ProvinciaDTO.builder().nombre("Westeros").pais(paisGuardado).build();
+    ProvinciaDTO provinciaGuardada =
+        restTemplate.postForObject(apiPrefix + "/provincias", provinciaDTO, ProvinciaDTO.class);
+    LocalidadDTO localidadDTO =
+        LocalidadDTO.builder()
+            .nombre("Rocadragón")
+            .provincia(provinciaGuardada)
+            .codigoPostal("77889")
+            .build();
+    LocalidadDTO localidadGuardada =
+        restTemplate.postForObject(apiPrefix + "/localidades", localidadDTO, LocalidadDTO.class);
+    assertEquals(localidadDTO, localidadGuardada);
+    assertEquals(localidadDTO.getProvincia(), provinciaGuardada);
+    assertEquals(localidadDTO.getProvincia().getPais(), paisGuardado);
+  }
+
+  @Test
+  public void shouldCrearFormaDePagoChequeQueAfectaCaja() {
+    FormaDePagoDTO formaDePagoDTO = FormaDePagoDTO.builder()
+      .nombre("Cheque")
+      .afectaCaja(true)
+      .empresa(restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class))
+      .build();
+    FormaDePagoDTO formaDePagoRecuperada = restTemplate.postForObject(apiPrefix + "/formas-de-pago", formaDePagoDTO, FormaDePagoDTO.class);
+    assertEquals(formaDePagoDTO, formaDePagoRecuperada);
+  }
+
+  @Test
+  public void shouldCrearCredencialConRolComprador() { // guardar un usuario sin un cliente relacionado. Cambiar el nombre de este test. usar un recaptcha particular para saltar el recaptcha.
+    Cliente cliente = new ClienteBuilder()
+      .withTipoDeCliente(TipoDeCliente.PERSONA)
+      .withBonificacion(BigDecimal.ZERO)
+      .withNroCliente("00002")
+      .withRazonSocial("")
+      .withNombreFantasia("Sansa Stark")
+      .withDireccion("the wall")
+      .withCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+      .withIdFiscal(45887759314L)
+      .withEmail("sansa@got.com")
+      .withTelefono("415789966")
+      .withLocalidad(restTemplate.getForObject(apiPrefix + "/localidades/1", Localidad.class))
+      .withContacto("Ayra Stark")
+      .withFechaAlta(new Date())
+      .withEmpresa(restTemplate.getForObject(apiPrefix + "/empresas/1", Empresa.class))
+      .withRazonSocial("Winter is comming")
+      .withViajante(null)
+      .build();
+    ArrayList<Rol> roles = new ArrayList<>();
+    roles.add(Rol.COMPRADOR);
+    Usuario usuario = new UsuarioBuilder()
+      .withUsername("sansa")
+      .withPassword("caraDeMala")
+      .withNombre("Sansa")
+      .withApellido("Stark")
+      .withEmail("sansa@got.com")
+      .withRol(roles)
+      .withHabilitado(true)
+      .withidEmpresa(1L)
+      .build();
+    registracionService.crearCuentaConClienteAndUsuario(cliente, usuario);
+    restTemplate.postForObject(apiPrefix + "/login", new Credencial(usuario.getUsername(), "caraDeMala"), String.class);
+  }
+
+  @Test
+  public void shouldCrearEmpresaResponsableInscripto() {
+    EmpresaDTO empresaNueva = EmpresaDTO.builder()
+      .localidad(restTemplate.getForObject(apiPrefix + "/localidades/1", LocalidadDTO.class))
+      .telefono("3795221144")
+      .email("empresa@nueva.com")
+      .fechaInicioActividad(new Date())
+      .ingresosBrutos(21112244L)
+      .idFiscal(7488521665766L)
+      .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+      .direccion("Junin casi costanera")
+      .lema("Hoy no se fía, mañana si.")
+      .nombre("La gran idea")
+      .build();
+    EmpresaDTO empresaGuardada = restTemplate.postForObject(apiPrefix + "/empresas", empresaNueva, EmpresaDTO.class);
+    assertEquals(empresaNueva, empresaGuardada);
+  }
+
   // shouldCrearClienteResponsableInscripto
   // shouldCrearTransportista
   // shouldCrearMedida
   // shouldCrearRubro
   // shouldCrearProveedorResponsableInscripto
-
 
   @Test
   public void shouldCrearFacturaVentaA() {
@@ -708,7 +845,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTestReporteFactura() {
+  public void shouldReporteFactura() {
     this.shouldCrearFacturaVentaA();
     restTemplate.getForObject(apiPrefix + "/facturas/1/reporte", byte[].class);
   }
@@ -1927,7 +2064,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldCrearProducto() {
+  public void shouldCrearProductoConIva21() {
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     Rubro rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", Rubro.class);
     ProveedorDTO proveedor =
@@ -1964,12 +2101,56 @@ public class AppIntegrationTest {
     productoUno.setIdProducto(productoRecuperado.getIdProducto());
     productoUno.setFechaUltimaModificacion(productoRecuperado.getFechaUltimaModificacion());
     assertEquals(productoUno, productoRecuperado);
+    assertEquals(new BigDecimal("21.0"), productoRecuperado.getIvaPorcentaje());
+    assertEquals(new BigDecimal("210"), productoRecuperado.getIvaNeto());
+  }
+
+  @Test
+  public void shouldCrearProductoConIva105() {
+    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    Rubro rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", Rubro.class);
+    ProveedorDTO proveedor =
+      restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
+    Medida medida = restTemplate.getForObject(apiPrefix + "/medidas/1", Medida.class);
+    ProductoDTO productoUno =
+      new ProductoBuilder()
+        .withCodigo(RandomStringUtils.random(10, false, true))
+        .withDescripcion(RandomStringUtils.random(10, true, false))
+        .withCantidad(BigDecimal.TEN)
+        .withVentaMinima(BigDecimal.ONE)
+        .withPrecioCosto(CIEN)
+        .withGanancia_porcentaje(new BigDecimal("900"))
+        .withGanancia_neto(new BigDecimal("900"))
+        .withPrecioVentaPublico(new BigDecimal("1000"))
+        .withIva_porcentaje(new BigDecimal("10.5"))
+        .withIva_neto(new BigDecimal("105"))
+        .withPrecioLista(new BigDecimal("1105"))
+        .withNombreEmpresa(empresa.getNombre())
+        .withRazonSocialProveedor(proveedor.getRazonSocial())
+        .withNombreRubro(rubro.getNombre())
+        .withNombreMedida(medida.getNombre())
+        .build();
+    ProductoDTO productoRecuperado =
+      restTemplate.postForObject(
+        apiPrefix
+          + "/productos?idMedida=" + medida.getId_Medida()
+          + "&idRubro=" + rubro.getId_Rubro()
+          + "&idProveedor=" + proveedor.getId_Proveedor()
+          + "&idEmpresa=" + empresa.getId_Empresa(),
+        productoUno,
+        ProductoDTO.class);
+    productoUno.setFechaAlta(productoRecuperado.getFechaAlta());
+    productoUno.setIdProducto(productoRecuperado.getIdProducto());
+    productoUno.setFechaUltimaModificacion(productoRecuperado.getFechaUltimaModificacion());
+    assertEquals(productoUno, productoRecuperado);
+    assertEquals(new BigDecimal("10.5"), productoRecuperado.getIvaPorcentaje());
+    assertEquals(new BigDecimal("105"), productoRecuperado.getIvaNeto());
   }
 
   @Test
   @Ignore
   public void shouldModificarProducto() {
-    this.shouldCrearProducto();
+    this.shouldCrearProductoConIva21();
     ProductoDTO productoAModificar =
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     productoAModificar.setDescripcion("PRODUCTO MODIFICADO.");
@@ -1982,7 +2163,7 @@ public class AppIntegrationTest {
 
   @Test
   public void shouldEliminarProducto() {
-    this.shouldCrearProducto();
+    this.shouldCrearProductoConIva21();
     restTemplate.delete(apiPrefix + "/productos?idProducto=1");
     try {
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
@@ -2003,7 +2184,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTestStockVenta() {
+  public void shouldStockVenta() {
     this.shouldCrearFacturaVentaA();
     this.checkDisponibilidadStock(4, 3);
     restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
@@ -2022,7 +2203,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTestStockCompra() {
+  public void shouldStockCompra() {
     this.shouldCrearFacturaCompraA();
     this.checkDisponibilidadStock(14, 9);
     restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
@@ -2031,7 +2212,7 @@ public class AppIntegrationTest {
 
   @Ignore
   @Test
-  public void shouldTestBajaFacturaCompraCuandoLaCantidadEsNegativa() {
+  public void shouldBajaFacturaCompraCuandoLaCantidadEsNegativa() {
     this.shouldCrearFacturaCompraA();
     this.checkDisponibilidadStock(14, 9);
     ProductoDTO productoUno =
@@ -2285,7 +2466,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTestStockNotaCreditoVenta() {
+  public void shouldStockNotaCreditoVenta() {
     this.shouldCrearNotaCreditoVenta();
     this.checkDisponibilidadStock(10, 4);
   }
@@ -2403,13 +2584,13 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTestStockNotaCreditoCompra() {
+  public void shouldStockNotaCreditoCompra() {
     this.shouldCrearNotaCreditoCompra();
     this.checkDisponibilidadStock(10, 6);
   }
 
   @Test
-  public void shouldTestSaldoCuentaCorrienteCliente() {
+  public void shouldSaldoCuentaCorrienteCliente() {
     this.shouldCrearFacturaVentaB();
     assertEquals(
       "El saldo de la cuenta corriente no es el esperado",
@@ -2443,7 +2624,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTestSaldoParcialCuentaCorrienteCliente() {
+  public void shouldSaldoParcialCuentaCorrienteCliente() {
     this.shouldCrearFacturaVentaB();
     this.crearReciboParaCliente(5992.5);
     this.crearNotaDebitoParaCliente();
@@ -2501,15 +2682,15 @@ public class AppIntegrationTest {
       Arrays.asList(
         restTemplate.postForObject(
           apiPrefix + "/pedidos/renglones", renglonesPedidoDTO, RenglonPedidoDTO[].class));
-    BigDecimal subTotal = BigDecimal.ZERO;
+    BigDecimal importe = BigDecimal.ZERO;
     for (RenglonPedidoDTO renglon : renglonesPedido) {
-      subTotal = subTotal.add(renglon.getSubTotal()).setScale(5, RoundingMode.HALF_UP);
+      importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
     }
     BigDecimal recargoNeto =
-      subTotal.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
+      importe.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal descuentoNeto =
-      subTotal.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal total = subTotal.add(recargoNeto).subtract(descuentoNeto);
+      importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
+    BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
     NuevoPedidoDTO nuevoPedidoDTO =
       NuevoPedidoDTO.builder()
         .descuentoNeto(descuentoNeto)
@@ -2519,7 +2700,7 @@ public class AppIntegrationTest {
         .fechaVencimiento(new Date())
         .observaciones("Nuevo Pedido Test")
         .renglones(renglonesPedido)
-        .subTotal(subTotal)
+        .subTotal(importe)
         .total(total)
         .build();
     PedidoDTO pedidoRecuperado =
@@ -2572,15 +2753,15 @@ public class AppIntegrationTest {
       Arrays.asList(
         restTemplate.postForObject(
           apiPrefix + "/pedidos/renglones", renglonesPedidoDTO, RenglonPedidoDTO[].class));
-    BigDecimal subTotal = BigDecimal.ZERO;
+    BigDecimal importe = BigDecimal.ZERO;
     for (RenglonPedidoDTO renglon : renglonesPedido) {
-      subTotal = subTotal.add(renglon.getSubTotal());
+      importe = importe.add(renglon.getImporte());
     }
     BigDecimal recargoNeto =
-      subTotal.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
+      importe.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal descuentoNeto =
-      subTotal.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal total = subTotal.add(recargoNeto).subtract(descuentoNeto);
+      importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
+    BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
     NuevoPedidoDTO nuevoPedidoDTO =
       NuevoPedidoDTO.builder()
         .descuentoNeto(descuentoNeto)
@@ -2590,7 +2771,7 @@ public class AppIntegrationTest {
         .fechaVencimiento(new Date())
         .observaciones("Nuevo Pedido Test")
         .renglones(renglonesPedido)
-        .subTotal(subTotal)
+        .subTotal(importe)
         .total(total)
         .build();
     PedidoDTO pedidoRecuperado =
@@ -2616,14 +2797,14 @@ public class AppIntegrationTest {
       Arrays.asList(
         restTemplate.postForObject(
           apiPrefix + "/pedidos/renglones", renglonesPedidoDTO, RenglonPedidoDTO[].class));
-    subTotal = BigDecimal.ZERO;
+    importe = BigDecimal.ZERO;
     for (RenglonPedidoDTO renglon : renglonesPedido) {
-      subTotal = subTotal.add(renglon.getSubTotal());
+      importe = importe.add(renglon.getImporte());
     }
-    recargoNeto = subTotal.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    descuentoNeto = subTotal.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    total = subTotal.add(recargoNeto).subtract(descuentoNeto);
-    pedidoRecuperado.setSubTotal(subTotal);
+    recargoNeto = importe.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
+    descuentoNeto = importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
+    total = importe.add(recargoNeto).subtract(descuentoNeto);
+    pedidoRecuperado.setSubTotal(importe);
     pedidoRecuperado.setRecargoNeto(recargoNeto);
     pedidoRecuperado.setDescuentoNeto(descuentoNeto);
     pedidoRecuperado.setTotalActual(total);
@@ -2639,7 +2820,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTestTransicionDeEstadosDeUnPedido() {
+  public void shouldTransicionDeEstadosDeUnPedido() {
     this.shouldCrearPedido();
     this.crearFacturaTipoADePedido();
     PedidoDTO pedidoRecuperado =
@@ -2682,7 +2863,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTestSaldoCuentaCorrienteProveedor() {
+  public void shouldSaldoCuentaCorrienteProveedor() {
     this.shouldCrearFacturaCompraB();
     assertTrue(
       "El saldo de la cuenta corriente no es el esperado",
@@ -2734,7 +2915,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTestSaldoParcialCuentaCorrienteProveedor() {
+  public void shouldSaldoParcialCuentaCorrienteProveedor() {
     this.shouldCrearFacturaCompraB();
     this.crearReciboParaProveedor(599.25);
     restTemplate.delete(apiPrefix + "/recibos/1");
@@ -2903,4 +3084,71 @@ public class AppIntegrationTest {
     }
   }
 
+  @Test
+  public void shouldActualizarFechaUltimaModificacionCuentaCorrienteCliente() {
+    shouldCrearFacturaVentaB();
+    CuentaCorriente ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1", CuentaCorriente.class);
+    FacturaVentaDTO facturaVentaDTO = restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaVentaDTO.class);
+    assertEquals("La fecha del ultimo movimiento no es la esperada", facturaVentaDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+    this.crearReciboParaCliente(5992.5);
+    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1", CuentaCorriente.class);
+    ReciboDTO reciboDTO = restTemplate.getForObject(apiPrefix + "/recibos/1", ReciboDTO.class);
+    assertEquals("La fecha del ultimo movimiento no es la esperada", reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+    this.crearNotaDebitoParaCliente();
+    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1", CuentaCorriente.class);
+    NotaDebitoDTO notaDebitoDTO = restTemplate.getForObject(apiPrefix + "/notas/1", NotaDebitoDTO.class);
+    assertEquals("La fecha del ultimo movimiento no es la esperada", notaDebitoDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+    this.crearReciboParaCliente(6113.5);
+    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1", CuentaCorriente.class);
+    reciboDTO = restTemplate.getForObject(apiPrefix + "/recibos/2", ReciboDTO.class);
+    assertEquals("La fecha del ultimo movimiento no es la esperada", reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+    this.crearNotaCreditoParaCliente();
+    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1", CuentaCorriente.class);
+    NotaCreditoDTO notaCreditoDTO = restTemplate.getForObject(apiPrefix + "/notas/2", NotaCreditoDTO.class);
+    assertEquals("La fecha del ultimo movimiento no es la esperada", notaCreditoDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+    restTemplate.delete(apiPrefix + "/notas?idsNota=2");
+    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1", CuentaCorriente.class);
+    assertEquals("La fecha del ultimo movimiento no es la esperada", reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
+    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1", CuentaCorriente.class);
+    assertEquals("La fecha del ultimo movimiento no es la esperada", reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+  }
+
+  @Test
+  public void shouldActualizarFechaUltimaModificacionCuentaCorrienteProveedor() {
+    shouldCrearFacturaCompraB();
+    CuentaCorriente ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
+    FacturaCompraDTO facturaCompraDTO = restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaCompraDTO.class);
+    assertEquals("La fecha del ultimo movimiento no es la esperada", facturaCompraDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+    this.crearReciboParaProveedor(599.25);
+    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
+    ReciboDTO reciboDTO = restTemplate.getForObject(apiPrefix + "/recibos/1", ReciboDTO.class);
+    assertEquals("La fecha del ultimo movimiento no es la esperada", reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+    restTemplate.delete(apiPrefix + "/recibos/1");
+    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
+    assertEquals("La fecha del ultimo movimiento no es la esperada", facturaCompraDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+    this.crearReciboParaProveedor(499.25);
+    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
+    reciboDTO = restTemplate.getForObject(apiPrefix + "/recibos/2", ReciboDTO.class);
+    assertEquals("La fecha del ultimo movimiento no es la esperada", reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+    this.crearReciboParaProveedor(200);
+    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
+    reciboDTO = restTemplate.getForObject(apiPrefix + "/recibos/3", ReciboDTO.class);
+    assertEquals("La fecha del ultimo movimiento no es la esperada", reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
+    ccCliente = restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
+    assertEquals("La fecha del ultimo movimiento no es la esperada", reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+  }
+
+  @Test
+  public void shouldGetMultiplesProductosPorIdEnOrden() {
+    this.shouldCrearPedido();
+    List<Long> idsProductos = new ArrayList<>();
+    idsProductos.add(1L);
+    idsProductos.add(2L);
+    List<Producto> productos = productoService.getMultiplesProductosPorId(idsProductos);
+    List<RenglonPedido> renglones = pedidoService.getRenglonesDelPedido(1L);
+    assertEquals("Los ids no coinciden", productos.get(0).getIdProducto(), renglones.get(0).getIdProductoItem());
+    assertEquals("Los ids no coinciden", productos.get(1).getIdProducto(), renglones.get(1).getIdProductoItem());
+  }
 }

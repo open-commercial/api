@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.Date;
 
 @Data
 @AllArgsConstructor
@@ -14,6 +15,7 @@ public class ReciboDTO implements Serializable {
   private Long idRecibo = 0L;
   private long serie = 1L;
   private long nroRecibo = 1L;
+  private Date fecha;
   private boolean eliminado = false;
   private String concepto = "Recibo Test";
   private String nombreFormaDePago = "Efectivo";

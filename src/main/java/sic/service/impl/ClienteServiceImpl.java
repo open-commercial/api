@@ -217,6 +217,7 @@ public class ClienteServiceImpl implements IClienteService {
     cuentaCorrienteCliente.setCliente(cliente);
     cuentaCorrienteCliente.setEmpresa(cliente.getEmpresa());
     cuentaCorrienteCliente.setFechaApertura(cliente.getFechaAlta());
+    cuentaCorrienteCliente.setSaldo(BigDecimal.ZERO);
     if (cliente.getCredencial() != null) {
       Cliente clienteYaAsignado =
           this.getClientePorIdUsuarioYidEmpresa(
