@@ -181,6 +181,10 @@ public class ClienteServiceImpl implements IClienteService {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_empresa"));
     }
+    if (cliente.getCredencial() == null) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_credencial"));
+    }
     // Duplicados
     // ID Fiscal
     if (cliente.getIdFiscal() != null) {

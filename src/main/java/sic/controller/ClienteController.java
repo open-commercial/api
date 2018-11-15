@@ -153,7 +153,7 @@ public class ClienteController {
       @RequestParam Long idEmpresa,
       @RequestParam(required = false) Long idLocalidad,
       @RequestParam(required = false) Long idViajante,
-      @RequestParam(required = false) Long idCredencial,
+      @RequestParam Long idCredencial,
       @RequestHeader("Authorization") String token) {
     if (idCredencial != null) {
       Claims claims =
