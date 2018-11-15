@@ -1,9 +1,6 @@
 package sic.modelo.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import sic.modelo.CategoriaIVA;
 
 import java.io.Serializable;
@@ -11,6 +8,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
+@EqualsAndHashCode(exclude = {"id_Cliente", "idEmpresa", "nombreEmpresa", "fechaAlta"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

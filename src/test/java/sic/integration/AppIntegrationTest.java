@@ -3,7 +3,6 @@ package sic.integration;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.*;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -287,15 +286,16 @@ public class AppIntegrationTest {
         .getBody()
         .getContent();
     List<RenglonNotaCredito> renglonesNotaCredito =
-      Arrays.asList(
-        restTemplate.getForObject(
-          apiPrefix
-            + "/notas/renglon/credito/producto?"
-            + "tipoDeComprobante=" + facturasRecuperadas.get(0).getTipoComprobante().name()
-            + "&cantidad=5"
-            + "&idRenglonFactura=1",
-          RenglonNotaCredito[].class));
-    NotaCreditoDTO notaCredito = new NotaCreditoDTO();
+        Arrays.asList(
+            restTemplate.getForObject(
+                apiPrefix
+                    + "/notas/renglon/credito/producto?"
+                    + "tipoDeComprobante="
+                    + facturasRecuperadas.get(0).getTipoComprobante().name()
+                    + "&cantidad=5"
+                    + "&idRenglonFactura=1",
+                RenglonNotaCredito[].class));
+    NotaCreditoDTO notaCredito = NotaCreditoDTO.builder().build();
     notaCredito.setRenglonesNotaCredito(renglonesNotaCredito);
     notaCredito.setSubTotal(
       restTemplate.getForObject(
@@ -417,7 +417,7 @@ public class AppIntegrationTest {
             + "&cantidad=5"
             + "&idRenglonFactura=3",
           RenglonNotaCredito[].class));
-    NotaCreditoDTO notaCreditoProveedor = new NotaCreditoDTO();
+    NotaCreditoDTO notaCreditoProveedor = NotaCreditoDTO.builder().build();
     notaCreditoProveedor.setRenglonesNotaCredito(renglonesNotaCredito);
     notaCreditoProveedor.setFecha(new Date());
     notaCreditoProveedor.setModificaStock(true);
@@ -731,11 +731,83 @@ public class AppIntegrationTest {
     assertEquals(empresaNueva, empresaGuardada);
   }
 
-  // shouldCrearClienteResponsableInscripto
-  // shouldCrearTransportista
-  // shouldCrearMedida
-  // shouldCrearRubro
-  // shouldCrearProveedorResponsableInscripto
+  @Test
+  public void shouldCrearClienteResponsableInscripto() {
+    ClienteDTO cliente = ClienteDTO.builder()
+      .bonificacion(BigDecimal.TEN)
+      .nombreFiscal("Juan Fernando Cañete")
+      .nombreFantasia("Menos mal que estamos nosotros.")
+      .direccion("Av siempre viva 12345")
+      .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+      .idFiscal(1244557L)
+      .email("caniete@yahoo.com.br")
+      .telefono("3785663322")
+      .contacto("Ramon el hermano de Juan")
+      .build();
+    ClienteDTO clienteRecuperado = restTemplate.postForObject(apiPrefix + "/clientes?idEmpresa=1", cliente, ClienteDTO.class);
+    assertEquals(cliente, clienteRecuperado);
+    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    assertEquals(empresa.getNombre(), clienteRecuperado.getNombreEmpresa());
+  }
+
+  @Test
+  public void shouldCrearTransportista() {
+    LocalidadDTO localidad = restTemplate.getForObject(apiPrefix + "/localidades/1", LocalidadDTO.class);
+    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    TransportistaDTO transportista = TransportistaDTO.builder()
+      .telefono("78946551122")
+      .web("Ronollega.com")
+      .direccion("Ruta 13 km 1313")
+      .nombre("Transporte Segu Ronollega")
+      .localidad(localidad)
+      .empresa(empresa)
+      .build();
+    TransportistaDTO transportistaRecuperado = restTemplate.postForObject(apiPrefix + "/transportistas", transportista, TransportistaDTO.class);
+    assertEquals(transportista, transportistaRecuperado);
+  }
+
+  @Test
+  public void shouldCrearMedida() {
+    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    MedidaDTO medida = MedidaDTO.builder()
+      .nombre("Longitud de Plank")
+      .empresa(empresa)
+      .build();
+    MedidaDTO medidaRecuperada = restTemplate.postForObject(apiPrefix + "/medidas", medida, MedidaDTO.class);
+    assertEquals(medida, medidaRecuperada);
+  }
+
+  @Test
+  public void shouldCrearRubro() {
+    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    RubroDTO rubro = RubroDTO.builder()
+      .empresa(empresa)
+      .nombre("Reparación de Ovnis")
+      .build();
+    RubroDTO rubroRecuperado = restTemplate.postForObject(apiPrefix + "/rubros", rubro, RubroDTO.class);
+    assertEquals(rubro, rubroRecuperado);
+  }
+
+  @Test
+  public void shouldCrearProveedorResponsableInscripto() {
+    LocalidadDTO localidad = restTemplate.getForObject(apiPrefix + "/localidades/1", LocalidadDTO.class);
+    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    ProveedorDTO proveedor = ProveedorDTO.builder()
+      .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+      .codigo("555888")
+      .contacto("Ricardo")
+      .direccion("Doctor Migraña")
+      .email("ricardodelbarrio@gmail.com")
+      .localidad(localidad)
+      .empresa(empresa)
+      .telPrimario("4512778851")
+      .telSecundario("784551122")
+      .web("")
+      .razonSocial("Migral Compuesto")
+      .build();
+    ProveedorDTO proveedorRecuperado = restTemplate.postForObject(apiPrefix + "/proveedores", proveedor, ProveedorDTO.class);
+    assertEquals(proveedor, proveedorRecuperado);
+  }
 
   @Test
   public void shouldCrearFacturaVentaA() {
@@ -2436,7 +2508,7 @@ public class AppIntegrationTest {
             + "&idRenglonFactura=1",
           RenglonNotaCredito[].class));
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    NotaCreditoDTO notaCredito = new NotaCreditoDTO();
+    NotaCreditoDTO notaCredito = NotaCreditoDTO.builder().build();
     notaCredito.setNombreEmpresa(empresa.getNombre());
     notaCredito.setTipoComprobante(TipoDeComprobante.NOTA_CREDITO_B);
     notaCredito.setRenglonesNotaCredito(renglonesNotaCredito);
@@ -2527,7 +2599,8 @@ public class AppIntegrationTest {
           + "&iva105Neto="
           + notaCredito.getIva105Neto(),
         BigDecimal.class));
-    notaCredito.setMotivo("Devolución");//nota credito venta
+    notaCredito.setMotivo("Devolución - Nota crédito venta");
+    notaCredito.setModificaStock(true);
     NotaCreditoDTO notaGuardada = restTemplate.postForObject(
       apiPrefix
         + "/notas/credito/empresa/1/usuario/1/factura/1?idCliente=1&movimiento=VENTA&modificarStock=true",
@@ -2558,7 +2631,7 @@ public class AppIntegrationTest {
             + "&idRenglonFactura=1",
           RenglonNotaCredito[].class));
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    NotaCreditoDTO notaCreditoProveedor = new NotaCreditoDTO();
+    NotaCreditoDTO notaCreditoProveedor = NotaCreditoDTO.builder().build();
     notaCreditoProveedor.setTipoComprobante(TipoDeComprobante.NOTA_CREDITO_B);
     notaCreditoProveedor.setNombreEmpresa(empresa.getNombre());
     notaCreditoProveedor.setRenglonesNotaCredito(renglonesNotaCredito);
