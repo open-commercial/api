@@ -19,7 +19,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@JsonIgnoreProperties({"cliente", "empresa"})
+@JsonIgnoreProperties({"empresa"})
 public class CuentaCorrienteCliente extends CuentaCorriente implements Serializable {
 
     @OneToOne

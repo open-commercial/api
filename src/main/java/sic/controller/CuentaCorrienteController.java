@@ -2,20 +2,20 @@ package sic.controller;
 
 import java.math.BigDecimal;
 import java.util.ResourceBundle;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.service.BusinessServiceException;
@@ -32,6 +32,9 @@ public class CuentaCorrienteController {
   private final IClienteService clienteService;
   private static final int TAMANIO_PAGINA_DEFAULT = 50;
 
+  @Value("${SIC_JWT_KEY}")
+  private String secretkey;
+
   @Autowired
   public CuentaCorrienteController(
       ICuentaCorrienteService cuentaCorrienteService,
@@ -40,6 +43,71 @@ public class CuentaCorrienteController {
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.clienteService = clienteService;
     this.proveedorService = proveedorService;
+  }
+
+  @GetMapping("/cuentas-corriente/clientes/criteria")
+  @ResponseStatus(HttpStatus.OK)
+  public Page<CuentaCorrienteCliente> buscarConCriteria(
+    @RequestParam Long idEmpresa,
+    @RequestParam(required = false) String nroCliente,
+    @RequestParam(required = false) String nombreFiscal,
+    @RequestParam(required = false) String nombreFantasia,
+    @RequestParam(required = false) Long idFiscal,
+    @RequestParam(required = false) Long idViajante,
+    @RequestParam(required = false) Long idPais,
+    @RequestParam(required = false) Long idProvincia,
+    @RequestParam(required = false) Long idLocalidad,
+    @RequestParam(required = false) Integer pagina,
+    @RequestParam(required = false) Integer tamanio,
+    @RequestParam(required = false, defaultValue = "true") boolean conSaldo,
+    @RequestParam(required = false) String ordenarPor,
+    @RequestParam(required = false) String sentido,
+    @RequestHeader("Authorization") String token) {
+    final int TAMANIO_PAGINA_DEFAULT = 50;
+    if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
+    if (pagina == null || pagina < 0) pagina = 0;
+    Pageable pageable;
+    if (ordenarPor == null || sentido == null) {
+      pageable =
+        new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "cliente.nombreFiscal"));
+    } else {
+      switch (sentido) {
+        case "ASC" : pageable =
+          new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "cliente." + ordenarPor));
+          break;
+        case "DESC" : pageable =
+          new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenarPor));
+          break;
+        default: pageable =
+          new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "cliente.nombreFiscal"));
+          break;
+      }
+    }
+    BusquedaCuentaCorrienteClienteCriteria criteria =
+      BusquedaCuentaCorrienteClienteCriteria.builder()
+        .buscaPorNombreFiscal(nombreFiscal != null)
+        .nombreFiscal(nombreFiscal)
+        .buscaPorNombreFantasia(nombreFantasia != null)
+        .nombreFantasia(nombreFantasia)
+        .buscaPorIdFiscal(idFiscal != null)
+        .idFiscal(idFiscal)
+        .buscaPorViajante(idViajante != null)
+        .idViajante(idViajante)
+        .buscaPorPais(idPais != null)
+        .idPais(idPais)
+        .buscaPorProvincia(idProvincia != null)
+        .idProvincia(idProvincia)
+        .buscaPorLocalidad(idLocalidad != null)
+        .idLocalidad(idLocalidad)
+        .buscarPorNroDeCliente(nroCliente != null)
+        .nroDeCliente(nroCliente)
+        .idEmpresa(idEmpresa)
+        .pageable(pageable)
+        .build();
+    Claims claims =
+      Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    return cuentaCorrienteService.buscarCuentaCorrienteCliente(criteria, (int) claims.get("idUsuario"));
+
   }
 
   @GetMapping("/cuentas-corriente/clientes/{idCliente}")

@@ -81,10 +81,6 @@ public class Cliente implements Serializable {
 
   private boolean predeterminado;
 
-  @Transient private BigDecimal saldoCuentaCorriente;
-
-  @Transient private Date fechaUltimoMovimiento;
-
   @JsonGetter("idLocalidad")
   public Long getIdLocalidad() {
     return (localidad != null) ? localidad.getId_Localidad() : null;

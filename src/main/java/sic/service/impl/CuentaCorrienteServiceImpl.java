@@ -7,6 +7,8 @@ import java.net.URL;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+
+import com.querydsl.core.BooleanBuilder;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -38,6 +40,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   private final CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository;
   private final CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository;
   private final RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository;
+  private final IUsuarioService usuarioService;
+  private final IClienteService clienteService;
   private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
@@ -47,12 +51,15 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       CuentaCorrienteRepository cuentaCorrienteRepository,
       CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository,
       CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository,
-      RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository) {
+      RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository,
+      IUsuarioService usuarioService, IClienteService clienteService) {
 
     this.cuentaCorrienteRepository = cuentaCorrienteRepository;
     this.cuentaCorrienteClienteRepository = cuentaCorrienteClienteRepository;
     this.cuentaCorrienteProveedorRepository = cuentaCorrienteProveedorRepository;
     this.renglonCuentaCorrienteRepository = renglonCuentaCorrienteRepository;
+    this.usuarioService = usuarioService;
+    this.clienteService = clienteService;
   }
 
   @Override
@@ -104,6 +111,81 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       throw new BusinessServiceException(
               RESOURCE_BUNDLE.getString("mensaje_cuenta_corriente_duplicada"));
     }
+  }
+
+  @Override
+  public Page<CuentaCorrienteCliente> buscarCuentaCorrienteCliente(
+      BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn) {
+    QCuentaCorrienteCliente qCuentaCorrienteCliente =
+        QCuentaCorrienteCliente.cuentaCorrienteCliente;
+    BooleanBuilder builder = new BooleanBuilder();
+    if (criteria.isBuscaPorNombreFiscal()) {
+      String[] terminos = criteria.getNombreFiscal().split(" ");
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        rsPredicate.and(qCuentaCorrienteCliente.cliente.nombreFiscal.containsIgnoreCase(termino));
+      }
+      builder.or(rsPredicate);
+    }
+    if (criteria.isBuscaPorNombreFantasia()) {
+      String[] terminos = criteria.getNombreFantasia().split(" ");
+      BooleanBuilder nfPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        nfPredicate.and(qCuentaCorrienteCliente.cliente.nombreFantasia.containsIgnoreCase(termino));
+      }
+      builder.or(nfPredicate);
+    }
+    if (criteria.isBuscaPorIdFiscal())
+      builder.or(qCuentaCorrienteCliente.cliente.idFiscal.eq(criteria.getIdFiscal()));
+    if (criteria.isBuscarPorNroDeCliente())
+      builder.or(
+          qCuentaCorrienteCliente.cliente.nroCliente.containsIgnoreCase(
+              criteria.getNroDeCliente()));
+    if (criteria.isBuscaPorViajante())
+      builder.and(qCuentaCorrienteCliente.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
+    if (criteria.isBuscaPorLocalidad())
+      builder.and(
+          qCuentaCorrienteCliente.cliente.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
+    if (criteria.isBuscaPorProvincia())
+      builder.and(
+          qCuentaCorrienteCliente.cliente.localidad.provincia.id_Provincia.eq(
+              criteria.getIdProvincia()));
+    if (criteria.isBuscaPorPais())
+      builder.and(
+          qCuentaCorrienteCliente.cliente.localidad.provincia.pais.id_Pais.eq(
+              criteria.getIdPais()));
+    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
+        && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
+        && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (Rol rol : usuarioLogueado.getRoles()) {
+        switch (rol) {
+          case VIAJANTE:
+            rsPredicate.or(qCuentaCorrienteCliente.cliente.viajante.eq(usuarioLogueado));
+            break;
+          case COMPRADOR:
+            Cliente clienteRelacionado =
+                clienteService.getClientePorIdUsuarioYidEmpresa(
+                    idUsuarioLoggedIn, criteria.getIdEmpresa());
+            if (clienteRelacionado != null) {
+              rsPredicate.or(qCuentaCorrienteCliente.cliente.eq(clienteRelacionado));
+            }
+            break;
+          default:
+            rsPredicate.or(qCuentaCorrienteCliente.cliente.isNull());
+            break;
+        }
+      }
+      builder.and(rsPredicate);
+    }
+    builder.and(
+        qCuentaCorrienteCliente
+            .empresa
+            .id_Empresa
+            .eq(criteria.getIdEmpresa())
+            .and(qCuentaCorrienteCliente.eliminada.eq(false)));
+    return cuentaCorrienteClienteRepository.findAll(builder, criteria.getPageable());
   }
 
   @Override

@@ -30,5 +30,4 @@ public class BusquedaClienteCriteria {
     private String nroDeCliente;
     private Long idEmpresa;
     private Pageable pageable;
-    private boolean conSaldo;
 }
