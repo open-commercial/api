@@ -15,7 +15,7 @@ import sic.modelo.RenglonFactura;
 import sic.modelo.TipoDeComprobante;
 
 @Data
-@EqualsAndHashCode(of = {"tipoComprobante", "numSerie", "numFactura", "nombreEmpresa"})
+@EqualsAndHashCode(exclude = {"id_Factura", "fecha", "numSerie", "numFactura", "nombreTransportista", "renglones", "nombreEmpresa", "nombreUsuario"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Factura", scope = FacturaDTO.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
@@ -23,26 +23,27 @@ import sic.modelo.TipoDeComprobante;
    @JsonSubTypes.Type(value = FacturaVentaDTO.class, name = "FacturaVenta"),    
 })
 public abstract class FacturaDTO implements Serializable {
-    
-    private long id_Factura = 0L;
+
+    private long id_Factura;
     private Date fecha;
-    private TipoDeComprobante tipoComprobante = TipoDeComprobante.FACTURA_A;
-    private long numSerie = 0;
-    private long numFactura = 1;
-    private Date fechaVencimiento;    
-    private String nombreTransportista = "Correo OCA";
+    private TipoDeComprobante tipoComprobante;
+    private long numSerie;
+    private long numFactura;
+    private Date fechaVencimiento;
+    private String nombreTransportista;
     private List<RenglonFactura> renglones;
-    private BigDecimal subTotal = new BigDecimal("6500");
-    private BigDecimal recargoPorcentaje = BigDecimal.ZERO;
-    private BigDecimal recargoNeto = BigDecimal.ZERO;
-    private BigDecimal descuentoPorcentaje = BigDecimal.ZERO;
-    private BigDecimal descuentoNeto = BigDecimal.ZERO;
-    private BigDecimal subTotalBruto = new BigDecimal("6500");
-    private BigDecimal iva105Neto = BigDecimal.ZERO;
-    private BigDecimal iva21Neto = new BigDecimal("1365");
-    private BigDecimal impuestoInternoNeto = BigDecimal.ZERO;
-    private BigDecimal total = new BigDecimal("7865");
-    private String observaciones = "Factura por Default";
-    private String nombreEmpresa = "Globo Corporation";
-    private boolean eliminada = false;
+    private BigDecimal subTotal;
+    private BigDecimal recargoPorcentaje;
+    private BigDecimal recargoNeto;
+    private BigDecimal descuentoPorcentaje;
+    private BigDecimal descuentoNeto;
+    private BigDecimal subTotalBruto;
+    private BigDecimal iva105Neto;
+    private BigDecimal iva21Neto;
+    private BigDecimal impuestoInternoNeto;
+    private BigDecimal total;
+    private String observaciones;
+    private String nombreEmpresa;
+    private String nombreUsuario;
+    private boolean eliminada;
 }
