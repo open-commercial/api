@@ -119,7 +119,7 @@ public class ProductoController {
       @RequestParam(required = false) String descripcion,
       @RequestParam(required = false) Integer pagina) {
     return this.buscar(
-        idEmpresa, codigo, descripcion, null, null, false, true, pagina, null, null, null);
+        idEmpresa, codigo, descripcion, null, null, false, null, pagina, null, null, null);
   }
 
   private Page<Producto> buscar(
@@ -276,10 +276,8 @@ public class ProductoController {
       @RequestParam(required = false) String descripcion,
       @RequestParam(required = false) Long idRubro,
       @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) Integer cantidadRegistros,
       @RequestParam(required = false) boolean soloFantantes,
-      @RequestParam(required = false) Boolean visibilidad) {
-    if (cantidadRegistros == null) cantidadRegistros = 0;
+      @RequestParam(required = false) Boolean publicos) {
     BusquedaProductoCriteria criteria =
         BusquedaProductoCriteria.builder()
             .buscarPorCodigo((codigo != null))
@@ -291,10 +289,9 @@ public class ProductoController {
             .buscarPorProveedor(idProveedor != null)
             .idProveedor(idProveedor)
             .idEmpresa(idEmpresa)
-            .cantRegistros(cantidadRegistros)
             .listarSoloFaltantes(soloFantantes)
-            .buscaPorVisibilidad(visibilidad != null)
-            .publico(visibilidad)
+            .buscaPorVisibilidad(publicos != null)
+            .publico(publicos)
             .build();
     return productoService.calcularValorStock(criteria);
   }
