@@ -33,6 +33,7 @@ import sic.service.*;
 public class ProductoController {
 
   private final IProductoService productoService;
+  private static final int TAMANIO_PAGINA_DEFAULT = 50;
 
   @Autowired
   public ProductoController(IProductoService productoService) {
@@ -57,11 +58,8 @@ public class ProductoController {
   @ResponseStatus(HttpStatus.OK)
   public Producto getProductoPorIdPublic(@PathVariable long idProducto) {
     Producto producto = productoService.getProductoPorId(idProducto);
-    if (producto.getCantidad().compareTo(BigDecimal.ZERO) > 0) {
-      producto.setHayStock(true);
-    } else {
-      producto.setHayStock(false);
-    }
+    if (producto.getCantidad().compareTo(BigDecimal.ZERO) > 0) producto.setHayStock(true);
+    else producto.setHayStock(false);
     return producto;
   }
 
@@ -96,7 +94,6 @@ public class ProductoController {
       @RequestParam(required = false) boolean soloFantantes,
       @RequestParam(required = false) Boolean publicos,
       @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) Integer tamanio,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido) {
     return this.buscar(
@@ -108,7 +105,7 @@ public class ProductoController {
         soloFantantes,
         publicos,
         pagina,
-        tamanio,
+        null,
         ordenarPor,
         sentido);
   }
@@ -120,26 +117,9 @@ public class ProductoController {
       @RequestParam long idEmpresa,
       @RequestParam(required = false) String codigo,
       @RequestParam(required = false) String descripcion,
-      @RequestParam(required = false) Long idRubro,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) boolean soloFantantes,
-      @RequestParam(required = false) Boolean publicos,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) Integer tamanio,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido) {
+      @RequestParam(required = false) Integer pagina) {
     return this.buscar(
-        idEmpresa,
-        codigo,
-        descripcion,
-        idRubro,
-        idProveedor,
-        soloFantantes,
-        publicos,
-        pagina,
-        tamanio,
-        ordenarPor,
-        sentido);
+        idEmpresa, codigo, descripcion, null, null, false, true, pagina, null, null, null);
   }
 
   private Page<Producto> buscar(
@@ -154,7 +134,6 @@ public class ProductoController {
       Integer tamanio,
       String ordenarPor,
       String sentido) {
-    final int TAMANIO_PAGINA_DEFAULT = 50;
     if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
     if (pagina == null || pagina < 0) pagina = 0;
     String ordenDefault = "descripcion";

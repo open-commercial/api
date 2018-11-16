@@ -238,6 +238,7 @@ public class ClienteServiceImpl implements IClienteService {
   @Override
   @Transactional
   public void actualizar(Cliente clientePorActualizar, Cliente clientePersistido) {
+    clientePorActualizar.setNroCliente(clientePersistido.getNroCliente());
     clientePorActualizar.setFechaAlta(clientePersistido.getFechaAlta());
     clientePorActualizar.setPredeterminado(clientePersistido.isPredeterminado());
     clientePorActualizar.setEliminado(clientePersistido.isEliminado());
