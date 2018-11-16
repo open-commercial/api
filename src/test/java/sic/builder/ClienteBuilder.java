@@ -24,8 +24,6 @@ public class ClienteBuilder {
   private Usuario credencial = new UsuarioBuilder().build();
   private boolean eliminado = false;
   private boolean predeterminado = false;
-  private BigDecimal saldoCuentaCorriente = BigDecimal.ZERO;
-  private Date fechaUltimoMovimiento = new Date();
 
   public Cliente build() {
     return new Cliente(
@@ -46,9 +44,7 @@ public class ClienteBuilder {
         viajante,
         credencial,
         eliminado,
-        predeterminado,
-        saldoCuentaCorriente,
-        fechaUltimoMovimiento);
+        predeterminado);
   }
 
   public ClienteBuilder withId_Cliente(long id_Cliente) {
@@ -138,16 +134,6 @@ public class ClienteBuilder {
 
   public ClienteBuilder withPredeterminado(boolean predeterminado) {
     this.predeterminado = predeterminado;
-    return this;
-  }
-
-  public ClienteBuilder whitSaldoCuentaCorriente(BigDecimal saldoCuentaCorriente) {
-    this.saldoCuentaCorriente = saldoCuentaCorriente;
-    return this;
-  }
-
-  public ClienteBuilder withFechaUltimoMovimiento(Date fechaUltimoMovimiento) {
-    this.fechaUltimoMovimiento = fechaUltimoMovimiento;
     return this;
   }
 }

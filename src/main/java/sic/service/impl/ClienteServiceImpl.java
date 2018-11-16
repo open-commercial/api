@@ -271,6 +271,7 @@ public class ClienteServiceImpl implements IClienteService {
     if (cliente == null) {
       throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_cliente_no_existente"));
     }
+    cuentaCorrienteService.eliminarCuentaCorrienteCliente(idCliente);
     cliente.setEliminado(true);
     clienteRepository.save(cliente);
     logger.warn("El Cliente {} se eliminó correctamente.", cliente);

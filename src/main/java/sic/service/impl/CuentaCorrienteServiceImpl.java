@@ -114,6 +114,11 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   }
 
   @Override
+  public void eliminarCuentaCorrienteCliente(long idCliente) {
+    cuentaCorrienteClienteRepository.eliminarCuentaCorrienteCliente(idCliente);
+  }
+
+  @Override
   public Page<CuentaCorrienteCliente> buscarCuentaCorrienteCliente(
       BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn) {
     QCuentaCorrienteCliente qCuentaCorrienteCliente =

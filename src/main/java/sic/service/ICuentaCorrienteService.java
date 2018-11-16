@@ -20,6 +20,8 @@ public interface ICuentaCorrienteService {
 
   void validarCuentaCorriente(CuentaCorriente cuentaCorriente);
 
+  void eliminarCuentaCorrienteCliente(long idCliente);
+
   Page<CuentaCorrienteCliente> buscarCuentaCorrienteCliente(BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn);
 
   Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(

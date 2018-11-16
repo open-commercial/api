@@ -1,10 +1,7 @@
 package sic.modelo;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -43,7 +40,13 @@ import lombok.ToString;
   @JsonSubTypes.Type(value = CuentaCorrienteProveedor.class) 
 })
 public abstract class CuentaCorriente implements Serializable {
-    
+
+    // bug: https://jira.spring.io/browse/DATAREST-304
+    @JsonGetter(value = "type")
+    public String getType() {
+        return this.getClass().getSimpleName();
+    }
+
     @Id
     @GeneratedValue
     @Column(name = "id_cuenta_corriente")
