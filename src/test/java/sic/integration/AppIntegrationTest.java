@@ -597,7 +597,7 @@ public class AppIntegrationTest {
       apiPrefix
         + "/clientes?idEmpresa=" + empresaDTO.getId_Empresa()
         + "&idLocalidad=" + localidadDTO.getId_Localidad()
-        + "&idUsuarioCredencial=" + credencial.getId_Usuario(),
+        + "&idCredencial=" + credencial.getId_Usuario(),
       cliente,
       ClienteDTO.class);
     TransportistaDTO transportistaDTO = TransportistaDTO.builder()
@@ -744,7 +744,17 @@ public class AppIntegrationTest {
       .telefono("3785663322")
       .contacto("Ramon el hermano de Juan")
       .build();
-    ClienteDTO clienteRecuperado = restTemplate.postForObject(apiPrefix + "/clientes?idEmpresa=1", cliente, ClienteDTO.class);
+    UsuarioDTO credencial =
+      UsuarioDTO.builder()
+        .username("elenanocañete")
+        .password("siempredebarrio")
+        .nombre("Juan")
+        .apellido("Cañete")
+        .email("caniete@yahoo.com.br")
+        .roles(new ArrayList<>(Collections.singletonList(Rol.COMPRADOR)))
+        .build();
+    credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
+    ClienteDTO clienteRecuperado = restTemplate.postForObject(apiPrefix + "/clientes?idEmpresa=1&idCredencial=" + credencial.getId_Usuario(), cliente, ClienteDTO.class);
     assertEquals(cliente, clienteRecuperado);
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     assertEquals(empresa.getNombre(), clienteRecuperado.getNombreEmpresa());
