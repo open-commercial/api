@@ -10,8 +10,9 @@ public class ProductoBuilder {
     private String codigo = "ABC123";
     private String descripcion = "Cinta adhesiva doble faz 3M";
     private BigDecimal cantidad = BigDecimal.TEN;
+    private boolean hayStock = true;
     private BigDecimal cantMinima = new BigDecimal("2");    
-    private BigDecimal ventaMinima = BigDecimal.ZERO;
+    private BigDecimal bulto = BigDecimal.ONE;
     private String nombreMedida = "Unidad";
     private BigDecimal precioCosto = new BigDecimal("100");
     private BigDecimal ganancia_porcentaje = new BigDecimal("50");
@@ -34,9 +35,9 @@ public class ProductoBuilder {
     private boolean eliminado = false;
     
     public ProductoDTO build() {
-        return new ProductoDTO(idProducto, codigo, descripcion, cantidad, cantMinima, ventaMinima, nombreMedida,
+        return new ProductoDTO(idProducto, codigo, descripcion, cantidad, hayStock, cantMinima, bulto, nombreMedida,
                 precioCosto, ganancia_porcentaje, ganancia_neto, precioVentaPublico, iva_porcentaje, iva_neto,
-                precioLista, nombreRubro, ilimitado, fechaUltimaModificacion, estanteria, estante, razonSocialProveedor,
+                precioLista, nombreRubro, ilimitado, publico, fechaUltimaModificacion, estanteria, estante, razonSocialProveedor,
                 nota, fechaAlta, fechaVencimiento, nombreEmpresa, eliminado);
     }
     
@@ -59,14 +60,19 @@ public class ProductoBuilder {
         this.cantidad = cantidad;
         return this;
     }
+
+    public ProductoBuilder whitHayStock(boolean hayStock) {
+        this.hayStock = hayStock;
+        return this;
+    }
     
     public ProductoBuilder withCantMinima(BigDecimal cantMinima) {
         this.cantMinima = cantMinima;
         return this;
     }
     
-    public ProductoBuilder withVentaMinima(BigDecimal ventaMinima) {
-        this.ventaMinima = ventaMinima;
+    public ProductoBuilder withBulto(BigDecimal bulto) {
+        this.bulto = bulto;
         return this;
     }
     

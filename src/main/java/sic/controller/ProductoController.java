@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import com.fasterxml.jackson.annotation.JsonView;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.dto.ProductoDTO;
 import sic.service.*;
 
 @RestController
@@ -33,11 +35,27 @@ import sic.service.*;
 public class ProductoController {
 
   private final IProductoService productoService;
+  private final IMedidaService medidaService;
+  private final IRubroService rubroService;
+  private final IProveedorService proveedorService;
+  private final IEmpresaService empresaService;
+  private final ModelMapper modelMapper;
   private static final int TAMANIO_PAGINA_DEFAULT = 50;
 
   @Autowired
-  public ProductoController(IProductoService productoService) {
+  public ProductoController(
+      IProductoService productoService,
+      IMedidaService medidaService,
+      IRubroService rubroService,
+      IProveedorService proveedorService,
+      IEmpresaService empresaService,
+      ModelMapper modelMapper) {
     this.productoService = productoService;
+    this.medidaService = medidaService;
+    this.rubroService = rubroService;
+    this.proveedorService = proveedorService;
+    this.empresaService = empresaService;
+    this.modelMapper = modelMapper;
   }
 
   @GetMapping("/productos/{idProducto}")
@@ -183,13 +201,25 @@ public class ProductoController {
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(
-      @RequestBody Producto producto,
-      @RequestParam Long idMedida,
-      @RequestParam Long idRubro,
-      @RequestParam Long idProveedor,
-      @RequestParam Long idEmpresa) {
-    if (productoService.getProductoPorId(producto.getIdProducto()) != null) {
-      productoService.actualizar(producto, idMedida, idRubro, idProveedor, idEmpresa);
+      @RequestBody ProductoDTO productoDTO,
+      @RequestParam(required = false) Long idMedida,
+      @RequestParam(required = false) Long idRubro,
+      @RequestParam(required = false) Long idProveedor,
+      @RequestParam(required = false) Long idEmpresa) {
+    Producto productoPorActualizar = modelMapper.map(productoDTO, Producto.class);
+    Producto productoPersistido =
+        productoService.getProductoPorId(productoPorActualizar.getIdProducto());
+    if (productoPersistido != null) {
+      if (idMedida != null) productoPorActualizar.setMedida(medidaService.getMedidaPorId(idMedida));
+      else productoPorActualizar.setMedida(productoPersistido.getMedida());
+      if (idRubro != null) productoPorActualizar.setRubro(rubroService.getRubroPorId(idRubro));
+      else productoPorActualizar.setRubro(productoPersistido.getRubro());
+      if (idProveedor != null) productoPorActualizar.setProveedor(proveedorService.getProveedorPorId(idProveedor));
+      else productoPorActualizar.setProveedor(productoPersistido.getProveedor());
+      if (idEmpresa != null)
+        productoPorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+      else productoPorActualizar.setEmpresa(productoPersistido.getEmpresa());
+      productoService.actualizar(productoPorActualizar, productoPersistido);
     }
   }
 
@@ -197,12 +227,17 @@ public class ProductoController {
   @ResponseStatus(HttpStatus.CREATED)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Producto guardar(
-      @RequestBody Producto producto,
+      @RequestBody ProductoDTO productoDTO,
       @RequestParam Long idMedida,
       @RequestParam Long idRubro,
       @RequestParam Long idProveedor,
       @RequestParam Long idEmpresa) {
-    return productoService.guardar(producto, idMedida, idRubro, idProveedor, idEmpresa);
+    Producto producto = modelMapper.map(productoDTO, Producto.class);
+    producto.setMedida(medidaService.getMedidaPorId(idMedida));
+    producto.setRubro(rubroService.getRubroPorId(idRubro));
+    producto.setProveedor(proveedorService.getProveedorPorId(idProveedor));
+    producto.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    return productoService.guardar(producto);
   }
 
   @PutMapping("/productos/multiples")

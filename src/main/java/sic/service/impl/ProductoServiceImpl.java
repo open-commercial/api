@@ -193,45 +193,24 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public Producto guardar(
-      Producto producto, long idMedida, long idRubro, long idProveedor, long idEmpresa) {
+  public Producto guardar(Producto producto) {
     if (producto.getCodigo() == null) producto.setCodigo("");
-    producto.setMedida(medidaService.getMedidaPorId(idMedida));
-    producto.setRubro(rubroService.getRubroPorId(idRubro));
-    producto.setProveedor(proveedorService.getProveedorPorId(idProveedor));
-    producto.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    this.validarOperacion(TipoDeOperacion.ALTA, producto);
     producto.setFechaAlta(new Date());
     producto.setFechaUltimaModificacion(new Date());
+    producto.setEliminado(false);
+    this.validarOperacion(TipoDeOperacion.ALTA, producto);
     producto = productoRepository.save(producto);
-    logger.warn("El Producto " + producto + " se guardó correctamente.");
+    logger.warn("El Producto {} se guardó correctamente.", producto);
     return producto;
   }
 
   @Override
   @Transactional
-  public void actualizar(
-      Producto productoPorActualizar,
-      Long idMedida,
-      Long idRubro,
-      Long idProveedor,
-      Long idEmpresa) {
-    Producto productoPersistido = this.getProductoPorId(productoPorActualizar.getIdProducto());
-    if (idMedida != null) productoPorActualizar.setMedida(medidaService.getMedidaPorId(idMedida));
-    else productoPorActualizar.setMedida(productoPersistido.getMedida());
-    if (idRubro != null) productoPorActualizar.setRubro(rubroService.getRubroPorId(idRubro));
-    else productoPorActualizar.setRubro(productoPersistido.getRubro());
-    if (idProveedor != null)
-      productoPorActualizar.setProveedor(proveedorService.getProveedorPorId(idProveedor));
-    else productoPorActualizar.setProveedor(productoPersistido.getProveedor());
-    if (idEmpresa != null)
-      productoPorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    else productoPorActualizar.setEmpresa(productoPersistido.getEmpresa());
-    if (productoPersistido.isPublico() && !productoPorActualizar.isPublico()) {
-      carritoCompraService.eliminarItem(productoPersistido.getIdProducto());
-    }
+  public void actualizar(Producto productoPorActualizar, Producto productoPersistido) {
+    productoPorActualizar.setEliminado(productoPersistido.isEliminado());
+    productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
+    productoPorActualizar.setFechaUltimaModificacion(new Date());           
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
-    productoPorActualizar.setFechaUltimaModificacion(new Date());
     productoRepository.save(productoPorActualizar);
     logger.warn("El Producto {} se modificó correctamente.", productoPorActualizar);
   }

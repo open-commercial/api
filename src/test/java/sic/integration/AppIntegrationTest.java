@@ -69,7 +69,7 @@ public class AppIntegrationTest {
         .withCodigo(RandomStringUtils.random(10, false, true))
         .withDescripcion(RandomStringUtils.random(10, true, false))
         .withCantidad(BigDecimal.TEN)
-        .withVentaMinima(BigDecimal.ONE)
+        .withBulto(BigDecimal.ONE)
         .withPrecioCosto(CIEN)
         .withGanancia_porcentaje(new BigDecimal("900"))
         .withGanancia_neto(new BigDecimal("900"))
@@ -83,7 +83,7 @@ public class AppIntegrationTest {
         .withCodigo(RandomStringUtils.random(10, false, true))
         .withDescripcion(RandomStringUtils.random(10, true, false))
         .withCantidad(new BigDecimal("6"))
-        .withVentaMinima(BigDecimal.ONE)
+        .withBulto(BigDecimal.ONE)
         .withPrecioCosto(CIEN)
         .withGanancia_porcentaje(new BigDecimal("900"))
         .withGanancia_neto(new BigDecimal("900"))
@@ -2123,7 +2123,7 @@ public class AppIntegrationTest {
         .withCodigo("1")
         .withDescripcion("uno")
         .withCantidad(BigDecimal.TEN)
-        .withVentaMinima(BigDecimal.ONE)
+        .withBulto(BigDecimal.ONE)
         .withPrecioCosto(CIEN)
         .withGanancia_porcentaje(new BigDecimal("900"))
         .withGanancia_neto(new BigDecimal("900"))
@@ -2137,7 +2137,7 @@ public class AppIntegrationTest {
         .withCodigo("2")
         .withDescripcion("dos")
         .withCantidad(new BigDecimal("6"))
-        .withVentaMinima(BigDecimal.ONE)
+        .withBulto(BigDecimal.ONE)
         .withPrecioCosto(CIEN)
         .withGanancia_porcentaje(new BigDecimal("900"))
         .withGanancia_neto(new BigDecimal("900"))
@@ -2231,7 +2231,7 @@ public class AppIntegrationTest {
         .withCodigo(RandomStringUtils.random(10, false, true))
         .withDescripcion(RandomStringUtils.random(10, true, false))
         .withCantidad(BigDecimal.TEN)
-        .withVentaMinima(BigDecimal.ONE)
+        .withBulto(BigDecimal.ONE)
         .withPrecioCosto(CIEN)
         .withGanancia_porcentaje(new BigDecimal("900"))
         .withGanancia_neto(new BigDecimal("900"))
@@ -2273,7 +2273,6 @@ public class AppIntegrationTest {
         .withCodigo(RandomStringUtils.random(10, false, true))
         .withDescripcion(RandomStringUtils.random(10, true, false))
         .withCantidad(BigDecimal.TEN)
-        .withVentaMinima(BigDecimal.ONE)
         .withPrecioCosto(CIEN)
         .withGanancia_porcentaje(new BigDecimal("900"))
         .withGanancia_neto(new BigDecimal("900"))
@@ -2304,7 +2303,6 @@ public class AppIntegrationTest {
   }
 
   @Test
-  @Ignore
   public void shouldModificarProducto() {
     this.shouldCrearProductoConIva21();
     ProductoDTO productoAModificar =

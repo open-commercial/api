@@ -12,7 +12,7 @@ import sic.modelo.Producto;
 
 public interface IProductoService {
 
-  void actualizar(Producto productoPorActualizar, Long idMedida, Long idRubro, Long idProveedor, Long idEmpresa);
+  void actualizar(Producto productoPorActualizar, Producto productoPersistido);
 
   void actualizarStock(
       Map<Long, BigDecimal> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento);
@@ -51,7 +51,7 @@ public interface IProductoService {
 
   byte[] getListaDePreciosPorEmpresa(List<Producto> productos, long idEmpresa, String formato);
 
-  Producto guardar(Producto producto, long idMedida, long idRubro, long idProveedor, long idEmpresa);
+  Producto guardar(Producto producto);
 
   List<Producto> actualizarMultiples(
       long[] idProducto,

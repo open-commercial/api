@@ -988,7 +988,7 @@ public class FacturaServiceImpl implements IFacturaService {
     public RenglonFactura calcularRenglon(TipoDeComprobante tipoDeComprobante, Movimiento movimiento,
                                           BigDecimal cantidad, long idProducto, BigDecimal descuentoPorcentaje, boolean dividiendoRenglonFactura) {
         Producto producto = productoService.getProductoPorId(idProducto);
-        /*if (dividiendoRenglonFactura == false && cantidad < producto.getVentaMinima()
+        /*if (dividiendoRenglonFactura == false && cantidad < producto.getBulto()
                 && (movimiento == Movimiento.VENTA || movimiento == Movimiento.PEDIDO)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_producto_cantidad_menor_a_minima"));
