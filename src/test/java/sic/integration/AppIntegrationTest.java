@@ -2273,7 +2273,6 @@ public class AppIntegrationTest {
         .withCodigo(RandomStringUtils.random(10, false, true))
         .withDescripcion(RandomStringUtils.random(10, true, false))
         .withCantidad(BigDecimal.TEN)
-        .withVentaMinima(BigDecimal.ONE)
         .withPrecioCosto(CIEN)
         .withGanancia_porcentaje(new BigDecimal("900"))
         .withGanancia_neto(new BigDecimal("900"))
