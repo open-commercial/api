@@ -42,7 +42,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   private final RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
-  private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Autowired
@@ -68,7 +68,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     cuentaCorrienteCliente.setFechaApertura(cuentaCorrienteCliente.getCliente().getFechaAlta());
     this.validarCuentaCorriente(cuentaCorrienteCliente);
     cuentaCorrienteCliente = cuentaCorrienteClienteRepository.save(cuentaCorrienteCliente);
-    LOGGER.warn("La Cuenta Corriente Cliente {} se guardó correctamente.", cuentaCorrienteCliente);
+    logger.warn("La Cuenta Corriente Cliente {} se guardó correctamente.", cuentaCorrienteCliente);
     return cuentaCorrienteCliente;
   }
 
@@ -78,7 +78,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     cuentaCorrienteProveedor.setFechaApertura(new Date());
     this.validarCuentaCorriente(cuentaCorrienteProveedor);
     cuentaCorrienteProveedor = cuentaCorrienteProveedorRepository.save(cuentaCorrienteProveedor);
-    LOGGER.warn(
+    logger.warn(
         "La Cuenta Corriente Proveedor {} se guardó correctamente.", cuentaCorrienteProveedor);
     return cuentaCorrienteProveedor;
   }
@@ -224,7 +224,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.setFechaUltimoMovimiento(facturaVenta.getFecha());
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      LOGGER.warn(
+      logger.warn(
               RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
@@ -233,7 +233,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.setSaldo(cc.getSaldo().add(rcc.getMonto().negate()));
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      LOGGER.warn(
+      logger.warn(
               RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_eliminado"), rcc);
     }
   }
@@ -257,7 +257,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.setFechaUltimoMovimiento(facturaCompra.getFecha());
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      LOGGER.warn(
+      logger.warn(
               RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
@@ -266,7 +266,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.setSaldo(cc.getSaldo().add(rcc.getMonto().negate()));
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      LOGGER.warn(
+      logger.warn(
               RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_eliminado"), rcc);
     }
   }
@@ -296,7 +296,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.getRenglones().add(rcc);
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      LOGGER.warn(
+      logger.warn(
               RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
@@ -305,7 +305,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.setSaldo(cc.getSaldo().subtract(rcc.getMonto()));
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      LOGGER.warn(
+      logger.warn(
               RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_eliminado"), rcc);
     }
   }
@@ -348,7 +348,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.setFechaUltimoMovimiento(recibo.getFecha());
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      LOGGER.warn(
+      logger.warn(
               RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
@@ -366,7 +366,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       rcc = this.getRenglonCuentaCorrienteDeRecibo(recibo, false);
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      LOGGER.warn(
+      logger.warn(
               RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_eliminado"), rcc);
     }
   }
@@ -400,7 +400,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             new ImageIcon(ImageIO.read(new URL(cuentaCorrienteCliente.getEmpresa().getLogo())))
                 .getImage());
       } catch (IOException ex) {
-        LOGGER.error(ex.getMessage());
+        logger.error(ex.getMessage());
         throw new ServiceException(
                 RESOURCE_BUNDLE.getString("mensaje_empresa_404_logo"), ex);
       }
@@ -410,7 +410,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         try {
           return xlsReportToArray(JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
-          LOGGER.error(ex.getMessage());
+          logger.error(ex.getMessage());
           throw new ServiceException(
                   RESOURCE_BUNDLE.getString("mensaje_error_reporte"), ex);
         }
@@ -419,7 +419,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
           return JasperExportManager.exportReportToPdf(
                   JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
-          LOGGER.error(ex.getMessage());
+          logger.error(ex.getMessage());
           throw new ServiceException(
                   RESOURCE_BUNDLE.getString("mensaje_error_reporte"), ex);
         }
@@ -442,11 +442,11 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       bytes = out.toByteArray();
       out.close();
     } catch (JRException ex) {
-      LOGGER.error(ex.getMessage());
+      logger.error(ex.getMessage());
       throw new ServiceException(
               RESOURCE_BUNDLE.getString("mensaje_error_reporte"), ex);
     } catch (IOException ex) {
-      LOGGER.error(ex.getMessage());
+      logger.error(ex.getMessage());
     }
     return bytes;
   }
