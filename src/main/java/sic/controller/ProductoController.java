@@ -137,7 +137,7 @@ public class ProductoController {
       @RequestParam(required = false) String descripcion,
       @RequestParam(required = false) Integer pagina) {
     return this.buscar(
-        idEmpresa, codigo, descripcion, null, null, false, null, pagina, null, null, null);
+        idEmpresa, codigo, descripcion, null, null, false, true, pagina, null, null, null);
   }
 
   private Page<Producto> buscar(

@@ -211,6 +211,9 @@ public class ProductoServiceImpl implements IProductoService {
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
     productoPorActualizar.setFechaUltimaModificacion(new Date());           
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
+    if (productoPersistido.isPublico() && !productoPorActualizar.isPublico()) {
+      carritoCompraService.eliminarItem(productoPersistido.getIdProducto());
+    }
     productoRepository.save(productoPorActualizar);
     logger.warn("El Producto {} se modificó correctamente.", productoPorActualizar);
   }
