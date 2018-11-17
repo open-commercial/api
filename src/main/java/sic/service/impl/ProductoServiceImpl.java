@@ -210,9 +210,10 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public void actualizar(Producto productoPorActualizar) {
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
+  public void actualizar(Producto productoPorActualizar, Producto productoPersistido) {
+    productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
     productoPorActualizar.setFechaUltimaModificacion(new Date());
+    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
     productoRepository.save(productoPorActualizar);
     logger.warn("El Producto {} se modificó correctamente.", productoPorActualizar);
   }

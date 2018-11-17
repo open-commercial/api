@@ -235,8 +235,7 @@ public class ProductoController {
       if (idEmpresa != null)
         productoPorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
       else productoPorActualizar.setEmpresa(productoPersistido.getEmpresa());
-      productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
-      productoService.actualizar(productoPorActualizar);
+      productoService.actualizar(productoPorActualizar, productoPersistido);
     }
   }
 

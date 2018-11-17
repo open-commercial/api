@@ -244,9 +244,6 @@ public class ClienteController {
     } else {
       clientePorActualizar.setViajante(null);
     }
-    clientePorActualizar.setNroCliente(clientePersistido.getNroCliente());
-    clientePorActualizar.setFechaAlta(clientePersistido.getFechaAlta());
-    clientePorActualizar.setEliminado(clientePersistido.isEliminado());
     clienteService.actualizar(clientePorActualizar, clientePersistido);
   }
 
