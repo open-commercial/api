@@ -22,16 +22,12 @@ import lombok.ToString;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"razonSocial", "idFiscal", "empresa"})
+@EqualsAndHashCode(of = {"nombreFiscal", "idFiscal", "empresa"})
 @ToString
 @JsonIgnoreProperties({"localidad", "empresa", "viajante", "credencial", "eliminado"})
 public class Cliente implements Serializable {
 
   @Id @GeneratedValue private long id_Cliente;
-
-  @Column(nullable = false)
-  @Enumerated(EnumType.STRING)
-  private TipoDeCliente tipoDeCliente;
 
   @Column(precision = 25, scale = 15)
   @NotNull(message = "{mensaje_cliente_vacio_bonificacion}")
@@ -42,7 +38,7 @@ public class Cliente implements Serializable {
   private String nroCliente;
 
   @Column(nullable = false)
-  private String razonSocial;
+  private String nombreFiscal;
 
   private String nombreFantasia;
 
@@ -84,10 +80,6 @@ public class Cliente implements Serializable {
   private boolean eliminado;
 
   private boolean predeterminado;
-
-  @Transient private BigDecimal saldoCuentaCorriente;
-
-  @Transient private Date fechaUltimoMovimiento;
 
   @JsonGetter("idLocalidad")
   public Long getIdLocalidad() {

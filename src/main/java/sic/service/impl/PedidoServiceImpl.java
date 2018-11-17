@@ -240,7 +240,7 @@ public class PedidoServiceImpl implements IPedidoService {
         "",
         "Nuevo Pedido Ingresado",
         MessageFormat.format(RESOURCE_BUNDLE.getString("mensaje_correo_pedido_recibido"),
-          pedido.getCliente().getRazonSocial(),
+          pedido.getCliente().getNombreFiscal(),
           "Pedido Nº " + pedido.getNroPedido()),
         this.getReportePedido(pedido),
         "Reporte");

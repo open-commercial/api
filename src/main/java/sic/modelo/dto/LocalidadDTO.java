@@ -1,11 +1,9 @@
 package sic.modelo.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
+@EqualsAndHashCode(exclude = {"id_Localidad"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

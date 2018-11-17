@@ -1,6 +1,8 @@
 package sic.controller;
 
 import java.util.List;
+
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.dto.TransportistaDTO;
 import sic.service.IEmpresaService;
 import sic.service.ITransportistaService;
 
@@ -24,12 +27,15 @@ public class TransportistaController {
 
   private final ITransportistaService transportistaService;
   private final IEmpresaService empresaService;
+  private final ModelMapper modelMapper;
 
   @Autowired
   public TransportistaController(
-      ITransportistaService transportistaService, IEmpresaService empresaService) {
+      ITransportistaService transportistaService, IEmpresaService empresaService,
+      ModelMapper modelMapper) {
     this.transportistaService = transportistaService;
     this.empresaService = empresaService;
+    this.modelMapper = modelMapper;
   }
 
   @GetMapping("/transportistas/{idTransportista}")
@@ -42,7 +48,8 @@ public class TransportistaController {
   @PutMapping("/transportistas")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public void actualizar(@RequestBody Transportista transportista) {
+  public void actualizar(@RequestBody TransportistaDTO transportistaDTO) {
+    Transportista transportista = modelMapper.map(transportistaDTO, Transportista.class);
     if (transportistaService.getTransportistaPorId(transportista.getId_Transportista()) != null) {
       transportistaService.actualizar(transportista);
     }
@@ -99,7 +106,8 @@ public class TransportistaController {
 
   @PostMapping("/transportistas")
   @ResponseStatus(HttpStatus.OK)
-  public Transportista guardar(@RequestBody Transportista transportista) {
+  public Transportista guardar(@RequestBody TransportistaDTO transportistaDTO) {
+    Transportista transportista = modelMapper.map(transportistaDTO, Transportista.class);
     return transportistaService.guardar(transportista);
   }
 }

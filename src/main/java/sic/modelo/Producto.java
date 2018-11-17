@@ -28,128 +28,133 @@ import sic.controller.Views;
 @JsonIgnoreProperties({"medida", "rubro", "proveedor", "empresa"})
 public class Producto implements Serializable {
 
-    @Id
-    @GeneratedValue
-    @JsonView(Views.Public.class)
-    private long idProducto;
+  @Id
+  @GeneratedValue
+  @JsonView(Views.Public.class)
+  private long idProducto;
 
-    @JsonView(Views.Public.class)
-    private String codigo;
+  @JsonView(Views.Public.class)
+  private String codigo;
 
-    @NotNull(message = "{mensaje_producto_vacio_descripcion}")
-    @NotEmpty(message = "{mensaje_producto_vacio_descripcion}")
-    @JsonView(Views.Public.class)
-    private String descripcion;
+  @NotNull(message = "{mensaje_producto_vacio_descripcion}")
+  @NotEmpty(message = "{mensaje_producto_vacio_descripcion}")
+  @JsonView(Views.Public.class)
+  private String descripcion;
 
-    @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_producto_cantidad_negativa}")
-    private BigDecimal cantidad;
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_producto_cantidad_negativa}")
+  private BigDecimal cantidad;
 
-    @Transient
-    @JsonView(Views.Public.class)
-    private boolean hayStock;
+  @Transient
+  @JsonView(Views.Public.class)
+  private boolean hayStock;
 
-    @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_producto_cantidadMinima_negativa}")
-    private BigDecimal cantMinima;
+  @Transient
+  @JsonView(Views.Public.class)
+  private BigDecimal precioBonificado;
 
-    @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_cantidad_bulto_invalida}")
-    @JsonView(Views.Public.class)
-    private BigDecimal bulto;
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_producto_cantidadMinima_negativa}")
+  private BigDecimal cantMinima;
 
-    @ManyToOne
-    @JoinColumn(name = "id_Medida", referencedColumnName = "id_Medida")
-    @NotNull(message = "{mensaje_producto_vacio_medida}")
-    private Medida medida;
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(
+      value = "0",
+      inclusive = false,
+      message = "{mensaje_producto_cantidad_bulto_invalida}")
+  @JsonView(Views.Public.class)
+  private BigDecimal bulto;
 
-    @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_producto_precioCosto_negativo}")
-    private BigDecimal precioCosto;
+  @ManyToOne
+  @JoinColumn(name = "id_Medida", referencedColumnName = "id_Medida")
+  @NotNull(message = "{mensaje_producto_vacio_medida}")
+  private Medida medida;
 
-    @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_producto_gananciaPorcentaje_negativo}")
-    private BigDecimal gananciaPorcentaje;
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_producto_precioCosto_negativo}")
+  private BigDecimal precioCosto;
 
-    @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_producto_gananciaNeto_negativo}")
-    private BigDecimal gananciaNeto;
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_producto_gananciaPorcentaje_negativo}")
+  private BigDecimal gananciaPorcentaje;
 
-    @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_producto_venta_publico_negativo}")
-    private BigDecimal precioVentaPublico;
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_producto_gananciaNeto_negativo}")
+  private BigDecimal gananciaNeto;
 
-    @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_producto_IVAPorcentaje_negativo}")
-    private BigDecimal ivaPorcentaje;
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_producto_venta_publico_negativo}")
+  private BigDecimal precioVentaPublico;
 
-    @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_producto_IVANeto_negativo}")
-    private BigDecimal ivaNeto;
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_producto_IVAPorcentaje_negativo}")
+  private BigDecimal ivaPorcentaje;
 
-    @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_producto_precioLista_negativo}")
-    @JsonView(Views.Public.class)
-    private BigDecimal precioLista;
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_producto_IVANeto_negativo}")
+  private BigDecimal ivaNeto;
 
-    @ManyToOne
-    @JoinColumn(name = "id_Rubro", referencedColumnName = "id_Rubro")
-    @NotNull(message = "{mensaje_producto_vacio_rubro}")
-    private Rubro rubro;
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_producto_precioLista_negativo}")
+  @JsonView(Views.Public.class)
+  private BigDecimal precioLista;
 
-    private boolean ilimitado;
+  @ManyToOne
+  @JoinColumn(name = "id_Rubro", referencedColumnName = "id_Rubro")
+  @NotNull(message = "{mensaje_producto_vacio_rubro}")
+  private Rubro rubro;
 
-    private boolean publico;
+  private boolean ilimitado;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fechaUltimaModificacion;
+  private boolean publico;
 
-    private String estanteria;
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date fechaUltimaModificacion;
 
-    private String estante;
+  private String estanteria;
 
-    @ManyToOne
-    @JoinColumn(name = "id_Proveedor", referencedColumnName = "id_Proveedor")
-    @NotNull(message = "{mensaje_producto_vacio_proveedor}")
-    private Proveedor proveedor;
+  private String estante;
 
-    @NotNull(message = "{mensaje_producto_vacio_nota}")
-    private String nota;
+  @ManyToOne
+  @JoinColumn(name = "id_Proveedor", referencedColumnName = "id_Proveedor")
+  @NotNull(message = "{mensaje_producto_vacio_proveedor}")
+  private Proveedor proveedor;
 
-    @Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fechaAlta;
+  @NotNull(message = "{mensaje_producto_vacio_nota}")
+  private String nota;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fechaVencimiento;
+  @Column(nullable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date fechaAlta;
 
-    @ManyToOne
-    @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-    @NotNull(message = "{mensaje_producto_vacio_empresa}")
-    private Empresa empresa;
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date fechaVencimiento;
 
-    private boolean eliminado;
+  @ManyToOne
+  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+  @NotNull(message = "{mensaje_producto_vacio_empresa}")
+  private Empresa empresa;
 
-    @JsonGetter("nombreMedida")
-    @JsonView(Views.Public.class)
-    public String getNombreMedida() {
-        return medida.getNombre();
-    }
+  private boolean eliminado;
 
-    @JsonGetter("nombreRubro")
-    @JsonView(Views.Public.class)
-    public String getNombreRubro() {
-        return rubro.getNombre();
-    }
+  @JsonGetter("nombreMedida")
+  @JsonView(Views.Public.class)
+  public String getNombreMedida() {
+    return medida.getNombre();
+  }
 
-    @JsonGetter("razonSocialProveedor")
-    public String getRazonSocialProveedor() {
-        return proveedor.getRazonSocial();
-    }
+  @JsonGetter("nombreRubro")
+  public String getNombreRubro() {
+    return rubro.getNombre();
+  }
 
-    @JsonGetter("nombreEmpresa")
-    public String getNombreEmpresa() {
-        return empresa.getNombre();
-    }
+  @JsonGetter("razonSocialProveedor")
+  public String getRazonSocialProveedor() {
+    return proveedor.getRazonSocial();
+  }
 
+  @JsonGetter("nombreEmpresa")
+  public String getNombreEmpresa() {
+    return empresa.getNombre();
+  }
 }

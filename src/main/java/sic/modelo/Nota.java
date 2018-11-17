@@ -127,10 +127,10 @@ public abstract class Nota implements Serializable {
     }
   }
 
-  @JsonGetter("razonSocialCliente")
-  public String getRazonSocialCliente() {
+  @JsonGetter("nombreFiscalCliente")
+  public String getNombreFiscalCliente() {
     if (cliente != null) {
-      return cliente.getRazonSocial();
+      return cliente.getNombreFiscal();
     } else {
       return null;
     }

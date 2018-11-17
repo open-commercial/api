@@ -51,8 +51,8 @@ public class RegistracionServiceImpl implements IRegistracionService {
         MessageFormat.format(
             RESOURCE_BUNDLE.getString("mensaje_correo_registracion"),
             usuario.getNombre() + " " + usuario.getApellido(),
-            cliente.getTipoDeCliente(),
-            cliente.getRazonSocial(),
+            cliente.getCategoriaIVA(),
+            cliente.getNombreFiscal(),
             cliente.getTelefono(),
             usuario.getUsername()),
         null,

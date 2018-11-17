@@ -58,7 +58,7 @@ public class ClienteController {
   public Page<Cliente> buscarConCriteria(
       @RequestParam Long idEmpresa,
       @RequestParam(required = false) String nroCliente,
-      @RequestParam(required = false) String razonSocial,
+      @RequestParam(required = false) String nombreFiscal,
       @RequestParam(required = false) String nombreFantasia,
       @RequestParam(required = false) Long idFiscal,
       @RequestParam(required = false) Long idViajante,
@@ -67,7 +67,6 @@ public class ClienteController {
       @RequestParam(required = false) Long idLocalidad,
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) Integer tamanio,
-      @RequestParam(required = false, defaultValue = "true") boolean conSaldo,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
       @RequestHeader("Authorization") String token) {
@@ -77,7 +76,7 @@ public class ClienteController {
     Pageable pageable;
     if (ordenarPor == null || sentido == null) {
       pageable =
-          new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "razonSocial"));
+          new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "nombreFiscal"));
     } else {
       switch (sentido) {
         case "ASC" : pageable =
@@ -87,14 +86,14 @@ public class ClienteController {
                 new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenarPor));
           break;
         default: pageable =
-                new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "razonSocial"));
+                new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "nombreFiscal"));
         break;
       }
     }
     BusquedaClienteCriteria criteria =
         BusquedaClienteCriteria.builder()
-            .buscaPorRazonSocial(razonSocial != null)
-            .razonSocial(razonSocial)
+            .buscaPorNombreFiscal(nombreFiscal != null)
+            .nombreFiscal(nombreFiscal)
             .buscaPorNombreFantasia(nombreFantasia != null)
             .nombreFantasia(nombreFantasia)
             .buscaPorIdFiscal(idFiscal != null)
@@ -111,7 +110,6 @@ public class ClienteController {
             .nroDeCliente(nroCliente)
             .idEmpresa(idEmpresa)
             .pageable(pageable)
-            .conSaldo(conSaldo)
             .build();
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
@@ -153,7 +151,7 @@ public class ClienteController {
       @RequestParam Long idEmpresa,
       @RequestParam(required = false) Long idLocalidad,
       @RequestParam(required = false) Long idViajante,
-      @RequestParam(required = false) Long idCredencial,
+      @RequestParam Long idCredencial,
       @RequestHeader("Authorization") String token) {
     if (idCredencial != null) {
       Claims claims =

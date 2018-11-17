@@ -1,6 +1,6 @@
 package sic.service.impl;
 
-import sic.modelo.ConfiguracionDelSistema;
+import sic.modelo.*;
 import sic.service.IAfipService;
 import afip.wsaa.wsdl.LoginCms;
 import afip.wsfe.wsdl.AlicIva;
@@ -32,9 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ws.client.WebServiceClientException;
-import sic.modelo.ComprobanteAFIP;
-import sic.modelo.Empresa;
-import sic.modelo.TipoDeComprobante;
 import sic.service.BusinessServiceException;
 import sic.service.IConfiguracionDelSistemaService;
 import sic.service.ServiceException;
@@ -249,22 +246,23 @@ public class AfipServiceImpl implements IAfipService {
     FECAECabRequest cabecera = new FECAECabRequest();
     FECAEDetRequest detalle = new FECAEDetRequest();
     // CbteTipo = 1: Factura A, 2: Nota de Débito A, 3: Nota de Crédito A, 6: Factura B,
-    // 7: Nota de Débito B 8: Nota de Crédito B. 11: Factura C
+    //    7: Nota de Débito B 8: Nota de Crédito B. 11: Factura C
     // DocTipo = 80: CUIT, 86: CUIL, 96: DNI, 99: Doc.(Otro)
+    int docTipo = (comprobante.getCliente().getCategoriaIVA() == CategoriaIVA.CONSUMIDOR_FINAL) ? 96 : 80;
     switch (comprobante.getTipoComprobante()) {
       case FACTURA_A:
         cabecera.setCbteTipo(1);
-        detalle.setDocTipo(80);
+        detalle.setDocTipo(docTipo);
         detalle.setDocNro(comprobante.getCliente().getIdFiscal());
         break;
       case NOTA_DEBITO_A:
         cabecera.setCbteTipo(2);
-        detalle.setDocTipo(80);
+        detalle.setDocTipo(docTipo);
         detalle.setDocNro(comprobante.getCliente().getIdFiscal());
         break;
       case NOTA_CREDITO_A:
         cabecera.setCbteTipo(3);
-        detalle.setDocTipo(80);
+        detalle.setDocTipo(docTipo);
         detalle.setDocNro(comprobante.getCliente().getIdFiscal());
         break;
       case FACTURA_B:
@@ -278,7 +276,7 @@ public class AfipServiceImpl implements IAfipService {
             throw new BusinessServiceException(
                 RESOURCE_BUNDLE.getString("mensaje_cliente_sin_idFiscal_error"));
           }
-          detalle.setDocTipo(80);
+          detalle.setDocTipo(docTipo);
           detalle.setDocNro(comprobante.getCliente().getIdFiscal());
         }
         break;
@@ -293,7 +291,7 @@ public class AfipServiceImpl implements IAfipService {
             throw new BusinessServiceException(
                 RESOURCE_BUNDLE.getString("mensaje_cliente_sin_idFiscal_error"));
           }
-          detalle.setDocTipo(80);
+          detalle.setDocTipo(docTipo);
           detalle.setDocNro(comprobante.getCliente().getIdFiscal());
         }
         break;
@@ -308,7 +306,7 @@ public class AfipServiceImpl implements IAfipService {
             throw new BusinessServiceException(
                 RESOURCE_BUNDLE.getString("mensaje_cliente_sin_idFiscal_error"));
           }
-          detalle.setDocTipo(80);
+          detalle.setDocTipo(docTipo);
           detalle.setDocNro(comprobante.getCliente().getIdFiscal());
         }
         break;

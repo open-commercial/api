@@ -1,30 +1,26 @@
 package sic.modelo.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import sic.modelo.CategoriaIVA;
-import sic.modelo.TipoDeCliente;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
+@EqualsAndHashCode(exclude = {"id_Cliente", "idEmpresa", "nombreEmpresa", "fechaAlta", "idCredencial", "nombreCredencial"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class ClienteDTO implements Serializable {
 
   private long id_Cliente;
-  private TipoDeCliente tipoDeCliente;
   private BigDecimal bonificacion;
-  private String razonSocial;
+  private String nombreFiscal;
   private String nombreFantasia;
   private String direccion;
   private CategoriaIVA categoriaIVA;
-  private String idFiscal;
+  private Long idFiscal;
   private String email;
   private String telefono;
   private Long idLocalidad;

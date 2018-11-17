@@ -43,5 +43,9 @@ public interface CarritoCompraRepository
   @Query("DELETE FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario")
   void eliminarTodosLosItemsDelUsuario(@Param("idUsuario") long idUsuario);
 
+  @Modifying
+  @Query("DELETE FROM ItemCarritoCompra icc WHERE icc.producto.idProducto = :idProducto")
+  void eliminarTodosLosItemsDelProducto(@Param("idProducto") long idProducto);
+
   ItemCarritoCompra findByUsuarioAndProducto(Usuario usuario, Producto producto);
 }

@@ -7,10 +7,9 @@ import sic.modelo.*;
 public class ClienteBuilder {
 
   private long id_Cliente = 0L;
-  private TipoDeCliente tipoDeCliente = TipoDeCliente.EMPRESA;
   private BigDecimal bonificacion = BigDecimal.TEN;
   private String nroCliente = "00001";
-  private String razonSocial = "Construcciones S.A.";
+  private String nombreFiscal = "Construcciones S.A.";
   private String nombreFantasia = "Servimetal";
   private String direccion = "Perugorria 2421";
   private CategoriaIVA categoriaIVA = CategoriaIVA.RESPONSABLE_INSCRIPTO;
@@ -25,16 +24,13 @@ public class ClienteBuilder {
   private Usuario credencial = new UsuarioBuilder().build();
   private boolean eliminado = false;
   private boolean predeterminado = false;
-  private BigDecimal saldoCuentaCorriente = BigDecimal.ZERO;
-  private Date fechaUltimoMovimiento = new Date();
 
   public Cliente build() {
     return new Cliente(
         id_Cliente,
-        tipoDeCliente,
         bonificacion,
         nroCliente,
-        razonSocial,
+        nombreFiscal,
         nombreFantasia,
         direccion,
         categoriaIVA,
@@ -48,9 +44,7 @@ public class ClienteBuilder {
         viajante,
         credencial,
         eliminado,
-        predeterminado,
-        saldoCuentaCorriente,
-        fechaUltimoMovimiento);
+        predeterminado);
   }
 
   public ClienteBuilder withId_Cliente(long id_Cliente) {
@@ -63,18 +57,13 @@ public class ClienteBuilder {
     return this;
   }
 
-  public ClienteBuilder withTipoDeCliente(TipoDeCliente tipoDeCliente) {
-    this.tipoDeCliente = tipoDeCliente;
-    return this;
-  }
-
   public ClienteBuilder withNroCliente(String nroCliente) {
     this.nroCliente = nroCliente;
     return this;
   }
 
-  public ClienteBuilder withRazonSocial(String razonSocial) {
-    this.razonSocial = razonSocial;
+  public ClienteBuilder withNombreFiscal(String nombreFiscal) {
+    this.nombreFiscal = nombreFiscal;
     return this;
   }
 
@@ -145,16 +134,6 @@ public class ClienteBuilder {
 
   public ClienteBuilder withPredeterminado(boolean predeterminado) {
     this.predeterminado = predeterminado;
-    return this;
-  }
-
-  public ClienteBuilder whitSaldoCuentaCorriente(BigDecimal saldoCuentaCorriente) {
-    this.saldoCuentaCorriente = saldoCuentaCorriente;
-    return this;
-  }
-
-  public ClienteBuilder withFechaUltimoMovimiento(Date fechaUltimoMovimiento) {
-    this.fechaUltimoMovimiento = fechaUltimoMovimiento;
     return this;
   }
 }

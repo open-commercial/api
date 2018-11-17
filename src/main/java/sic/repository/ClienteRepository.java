@@ -16,9 +16,6 @@ public interface ClienteRepository
 
   Cliente findByIdFiscalAndEmpresaAndEliminado(Long idFiscal, Empresa empresa, boolean eliminado);
 
-  Cliente findByRazonSocialAndEmpresaAndEliminado(
-      String razonSocial, Empresa empresa, boolean eliminado);
-
   Cliente findByEmpresaAndPredeterminadoAndEliminado(
       Empresa empresa, boolean predeterminado, boolean eliminado);
 

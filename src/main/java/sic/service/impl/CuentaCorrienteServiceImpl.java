@@ -7,6 +7,8 @@ import java.net.URL;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+
+import com.querydsl.core.BooleanBuilder;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -38,7 +40,9 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   private final CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository;
   private final CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository;
   private final RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository;
-  private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+  private final IUsuarioService usuarioService;
+  private final IClienteService clienteService;
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Autowired
@@ -47,12 +51,15 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       CuentaCorrienteRepository cuentaCorrienteRepository,
       CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository,
       CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository,
-      RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository) {
+      RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository,
+      IUsuarioService usuarioService, IClienteService clienteService) {
 
     this.cuentaCorrienteRepository = cuentaCorrienteRepository;
     this.cuentaCorrienteClienteRepository = cuentaCorrienteClienteRepository;
     this.cuentaCorrienteProveedorRepository = cuentaCorrienteProveedorRepository;
     this.renglonCuentaCorrienteRepository = renglonCuentaCorrienteRepository;
+    this.usuarioService = usuarioService;
+    this.clienteService = clienteService;
   }
 
   @Override
@@ -61,7 +68,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     cuentaCorrienteCliente.setFechaApertura(cuentaCorrienteCliente.getCliente().getFechaAlta());
     this.validarCuentaCorriente(cuentaCorrienteCliente);
     cuentaCorrienteCliente = cuentaCorrienteClienteRepository.save(cuentaCorrienteCliente);
-    LOGGER.warn("La Cuenta Corriente Cliente {} se guardó correctamente.", cuentaCorrienteCliente);
+    logger.warn("La Cuenta Corriente Cliente {} se guardó correctamente.", cuentaCorrienteCliente);
     return cuentaCorrienteCliente;
   }
 
@@ -71,7 +78,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     cuentaCorrienteProveedor.setFechaApertura(new Date());
     this.validarCuentaCorriente(cuentaCorrienteProveedor);
     cuentaCorrienteProveedor = cuentaCorrienteProveedorRepository.save(cuentaCorrienteProveedor);
-    LOGGER.warn(
+    logger.warn(
         "La Cuenta Corriente Proveedor {} se guardó correctamente.", cuentaCorrienteProveedor);
     return cuentaCorrienteProveedor;
   }
@@ -107,6 +114,86 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   }
 
   @Override
+  public void eliminarCuentaCorrienteCliente(long idCliente) {
+    cuentaCorrienteClienteRepository.eliminarCuentaCorrienteCliente(idCliente);
+  }
+
+  @Override
+  public Page<CuentaCorrienteCliente> buscarCuentaCorrienteCliente(
+      BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn) {
+    QCuentaCorrienteCliente qCuentaCorrienteCliente =
+        QCuentaCorrienteCliente.cuentaCorrienteCliente;
+    BooleanBuilder builder = new BooleanBuilder();
+    if (criteria.isBuscaPorNombreFiscal()) {
+      String[] terminos = criteria.getNombreFiscal().split(" ");
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        rsPredicate.and(qCuentaCorrienteCliente.cliente.nombreFiscal.containsIgnoreCase(termino));
+      }
+      builder.or(rsPredicate);
+    }
+    if (criteria.isBuscaPorNombreFantasia()) {
+      String[] terminos = criteria.getNombreFantasia().split(" ");
+      BooleanBuilder nfPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        nfPredicate.and(qCuentaCorrienteCliente.cliente.nombreFantasia.containsIgnoreCase(termino));
+      }
+      builder.or(nfPredicate);
+    }
+    if (criteria.isBuscaPorIdFiscal())
+      builder.or(qCuentaCorrienteCliente.cliente.idFiscal.eq(criteria.getIdFiscal()));
+    if (criteria.isBuscarPorNroDeCliente())
+      builder.or(
+          qCuentaCorrienteCliente.cliente.nroCliente.containsIgnoreCase(
+              criteria.getNroDeCliente()));
+    if (criteria.isBuscaPorViajante())
+      builder.and(qCuentaCorrienteCliente.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
+    if (criteria.isBuscaPorLocalidad())
+      builder.and(
+          qCuentaCorrienteCliente.cliente.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
+    if (criteria.isBuscaPorProvincia())
+      builder.and(
+          qCuentaCorrienteCliente.cliente.localidad.provincia.id_Provincia.eq(
+              criteria.getIdProvincia()));
+    if (criteria.isBuscaPorPais())
+      builder.and(
+          qCuentaCorrienteCliente.cliente.localidad.provincia.pais.id_Pais.eq(
+              criteria.getIdPais()));
+    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
+        && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
+        && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (Rol rol : usuarioLogueado.getRoles()) {
+        switch (rol) {
+          case VIAJANTE:
+            rsPredicate.or(qCuentaCorrienteCliente.cliente.viajante.eq(usuarioLogueado));
+            break;
+          case COMPRADOR:
+            Cliente clienteRelacionado =
+                clienteService.getClientePorIdUsuarioYidEmpresa(
+                    idUsuarioLoggedIn, criteria.getIdEmpresa());
+            if (clienteRelacionado != null) {
+              rsPredicate.or(qCuentaCorrienteCliente.cliente.eq(clienteRelacionado));
+            }
+            break;
+          default:
+            rsPredicate.or(qCuentaCorrienteCliente.cliente.isNull());
+            break;
+        }
+      }
+      builder.and(rsPredicate);
+    }
+    builder.and(
+        qCuentaCorrienteCliente
+            .empresa
+            .id_Empresa
+            .eq(criteria.getIdEmpresa())
+            .and(qCuentaCorrienteCliente.eliminada.eq(false)));
+    return cuentaCorrienteClienteRepository.findAll(builder, criteria.getPageable());
+  }
+
+  @Override
   public CuentaCorrienteCliente getCuentaCorrientePorCliente(Cliente cliente) {
     return cuentaCorrienteClienteRepository.findByClienteAndEmpresaAndEliminada(
             cliente, cliente.getEmpresa(), false);
@@ -137,7 +224,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.setFechaUltimoMovimiento(facturaVenta.getFecha());
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      LOGGER.warn(
+      logger.warn(
               RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
@@ -146,7 +233,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.setSaldo(cc.getSaldo().add(rcc.getMonto().negate()));
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      LOGGER.warn(
+      logger.warn(
               RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_eliminado"), rcc);
     }
   }
@@ -170,7 +257,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.setFechaUltimoMovimiento(facturaCompra.getFecha());
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      LOGGER.warn(
+      logger.warn(
               RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
@@ -179,7 +266,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.setSaldo(cc.getSaldo().add(rcc.getMonto().negate()));
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      LOGGER.warn(
+      logger.warn(
               RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_eliminado"), rcc);
     }
   }
@@ -209,7 +296,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.getRenglones().add(rcc);
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      LOGGER.warn(
+      logger.warn(
               RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
@@ -218,7 +305,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.setSaldo(cc.getSaldo().subtract(rcc.getMonto()));
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      LOGGER.warn(
+      logger.warn(
               RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_eliminado"), rcc);
     }
   }
@@ -261,7 +348,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.setFechaUltimoMovimiento(recibo.getFecha());
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      LOGGER.warn(
+      logger.warn(
               RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
@@ -279,7 +366,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       rcc = this.getRenglonCuentaCorrienteDeRecibo(recibo, false);
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      LOGGER.warn(
+      logger.warn(
               RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_eliminado"), rcc);
     }
   }
@@ -313,7 +400,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             new ImageIcon(ImageIO.read(new URL(cuentaCorrienteCliente.getEmpresa().getLogo())))
                 .getImage());
       } catch (IOException ex) {
-        LOGGER.error(ex.getMessage());
+        logger.error(ex.getMessage());
         throw new ServiceException(
                 RESOURCE_BUNDLE.getString("mensaje_empresa_404_logo"), ex);
       }
@@ -323,7 +410,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         try {
           return xlsReportToArray(JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
-          LOGGER.error(ex.getMessage());
+          logger.error(ex.getMessage());
           throw new ServiceException(
                   RESOURCE_BUNDLE.getString("mensaje_error_reporte"), ex);
         }
@@ -332,7 +419,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
           return JasperExportManager.exportReportToPdf(
                   JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
-          LOGGER.error(ex.getMessage());
+          logger.error(ex.getMessage());
           throw new ServiceException(
                   RESOURCE_BUNDLE.getString("mensaje_error_reporte"), ex);
         }
@@ -355,11 +442,11 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       bytes = out.toByteArray();
       out.close();
     } catch (JRException ex) {
-      LOGGER.error(ex.getMessage());
+      logger.error(ex.getMessage());
       throw new ServiceException(
               RESOURCE_BUNDLE.getString("mensaje_error_reporte"), ex);
     } catch (IOException ex) {
-      LOGGER.error(ex.getMessage());
+      logger.error(ex.getMessage());
     }
     return bytes;
   }

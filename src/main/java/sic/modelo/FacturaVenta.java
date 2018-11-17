@@ -49,9 +49,9 @@ public class FacturaVenta extends Factura implements Serializable {
         return cliente.getId_Cliente();
     }
 
-    @JsonGetter("razonSocialCliente")
-    public String getRazonSocialCliente() {
-        return cliente.getRazonSocial();
+    @JsonGetter("nombreFiscalCliente")
+    public String getNombreFiscalCliente() {
+        return cliente.getNombreFiscal();
     }
 
 }

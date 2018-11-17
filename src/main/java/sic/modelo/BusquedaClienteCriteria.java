@@ -12,8 +12,8 @@ import org.springframework.data.domain.Pageable;
 @Builder
 public class BusquedaClienteCriteria {
 
-    private boolean buscaPorRazonSocial;
-    private String razonSocial;
+    private boolean buscaPorNombreFiscal;
+    private String nombreFiscal;
     private boolean buscaPorNombreFantasia;
     private String nombreFantasia;
     private boolean buscaPorIdFiscal;
@@ -30,5 +30,4 @@ public class BusquedaClienteCriteria {
     private String nroDeCliente;
     private Long idEmpresa;
     private Pageable pageable;
-    private boolean conSaldo;
 }

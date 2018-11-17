@@ -18,7 +18,7 @@ public class PedidoBuilder {
     private String observaciones = "Los precios se encuentran sujetos a modificaciones.";
     private String nombreEmpresa = "Globo Corporation";
     private boolean eliminado = false;
-    private String razonSocialCliente = "Construcciones S.A.";
+    private String nombreFiscalCliente = "Construcciones S.A.";
     private String nombreUsuario = "Daenerys Targaryen";
     private List<FacturaDTO> facturas;
     private List<RenglonPedidoDTO> renglones;
@@ -53,7 +53,7 @@ public class PedidoBuilder {
         observaciones,
         nombreEmpresa,
         eliminado,
-        razonSocialCliente,
+        nombreFiscalCliente,
         nombreUsuario,
         facturas,
         renglones,
@@ -101,8 +101,8 @@ public class PedidoBuilder {
         return this;
     }
 
-    public PedidoBuilder withRazonSocialCliente(String razonSocialCliente) {
-        this.razonSocialCliente = razonSocialCliente;
+    public PedidoBuilder withNombreFiscalCliente(String nombreFiscalCliente) {
+        this.nombreFiscalCliente = nombreFiscalCliente;
         return this;
     }
 

@@ -1,9 +1,6 @@
 package sic.modelo.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import sic.modelo.CategoriaIVA;
 
 import java.io.Serializable;
@@ -11,6 +8,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
+@EqualsAndHashCode(exclude = {"id_Proveedor"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -21,7 +19,7 @@ public class ProveedorDTO implements Serializable {
   private String razonSocial;
   private String direccion;
   private CategoriaIVA categoriaIVA;
-  private String idFiscal;
+  private Long idFiscal;
   private String telPrimario;
   private String telSecundario;
   private String contacto;

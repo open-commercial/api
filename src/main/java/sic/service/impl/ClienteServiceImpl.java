@@ -89,11 +89,11 @@ public class ClienteServiceImpl implements IClienteService {
   public Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long idUsuarioLoggedIn) {
     QCliente qCliente = QCliente.cliente;
     BooleanBuilder builder = new BooleanBuilder();
-    if (criteria.isBuscaPorRazonSocial()) {
-      String[] terminos = criteria.getRazonSocial().split(" ");
+    if (criteria.isBuscaPorNombreFiscal()) {
+      String[] terminos = criteria.getNombreFiscal().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
-        rsPredicate.and(qCliente.razonSocial.containsIgnoreCase(termino));
+        rsPredicate.and(qCliente.nombreFiscal.containsIgnoreCase(termino));
       }
       builder.or(rsPredicate);
     }
@@ -142,17 +142,7 @@ public class ClienteServiceImpl implements IClienteService {
     }
     builder.and(
         qCliente.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qCliente.eliminado.eq(false)));
-    Page<Cliente> page = clienteRepository.findAll(builder, criteria.getPageable());
-    if (criteria.isConSaldo()) {
-      page.getContent()
-          .forEach(
-              c -> {
-                CuentaCorriente cc = cuentaCorrienteService.getCuentaCorrientePorCliente(c);
-                c.setSaldoCuentaCorriente(cc.getSaldo());
-                c.setFechaUltimoMovimiento(cc.getFechaUltimoMovimiento());
-              });
-    }
-    return page;
+    return clienteRepository.findAll(builder, criteria.getPageable());
   }
 
   @Override
@@ -165,17 +155,13 @@ public class ClienteServiceImpl implements IClienteService {
           RESOURCE_BUNDLE.getString("mensaje_cliente_email_invalido"));
     }
     // Requeridos
-    if (cliente.getTipoDeCliente() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_tipoDeCliente"));
-    }
     if (cliente.getCategoriaIVA() == null) {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_categoriaIVA"));
     }
-    if (Validator.esVacio(cliente.getRazonSocial())) {
+    if (Validator.esVacio(cliente.getNombreFiscal())) {
       throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_razonSocial"));
+          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_nombreFiscal"));
     }
     if (Validator.esVacio(cliente.getTelefono())) {
       throw new BusinessServiceException(
@@ -184,6 +170,10 @@ public class ClienteServiceImpl implements IClienteService {
     if (cliente.getEmpresa() == null) {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_empresa"));
+    }
+    if (cliente.getCredencial() == null) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_credencial"));
     }
     // Duplicados
     // ID Fiscal
@@ -226,7 +216,7 @@ public class ClienteServiceImpl implements IClienteService {
         throw new BusinessServiceException(
             MessageFormat.format(
                 RESOURCE_BUNDLE.getString("mensaje_cliente_credencial_no_valida"),
-                clienteYaAsignado.getRazonSocial()));
+                clienteYaAsignado.getNombreFiscal()));
       } else {
         if (!cliente.getCredencial().getRoles().contains(Rol.COMPRADOR)) {
           cliente.getCredencial().getRoles().add(Rol.COMPRADOR);
@@ -242,6 +232,7 @@ public class ClienteServiceImpl implements IClienteService {
   @Override
   @Transactional
   public void actualizar(Cliente clientePorActualizar, Cliente clientePersistido) {
+    clientePorActualizar.setNroCliente(clientePersistido.getNroCliente());
     clientePorActualizar.setFechaAlta(clientePersistido.getFechaAlta());
     clientePorActualizar.setPredeterminado(clientePersistido.isPredeterminado());
     clientePorActualizar.setEliminado(clientePersistido.isEliminado());
@@ -257,7 +248,7 @@ public class ClienteServiceImpl implements IClienteService {
         throw new BusinessServiceException(
             MessageFormat.format(
                 RESOURCE_BUNDLE.getString("mensaje_cliente_credencial_no_valida"),
-                clienteYaAsignado.getRazonSocial()));
+                clienteYaAsignado.getNombreFiscal()));
       } else {
         if (!clientePorActualizar.getCredencial().getRoles().contains(Rol.COMPRADOR)) {
           clientePorActualizar.getCredencial().getRoles().add(Rol.COMPRADOR);
@@ -275,6 +266,7 @@ public class ClienteServiceImpl implements IClienteService {
     if (cliente == null) {
       throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_cliente_no_existente"));
     }
+    cuentaCorrienteService.eliminarCuentaCorrienteCliente(idCliente);
     cliente.setEliminado(true);
     clienteRepository.save(cliente);
     logger.warn("El Cliente {} se eliminó correctamente.", cliente);

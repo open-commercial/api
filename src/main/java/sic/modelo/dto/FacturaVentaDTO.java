@@ -7,11 +7,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
-@EqualsAndHashCode(callSuper = true, exclude = {"razonSocialCliente", "nombreUsuario"})
+@EqualsAndHashCode(callSuper = true, exclude = {"nombreFiscalCliente"})
 @Builder
 public class FacturaVentaDTO extends FacturaDTO implements Serializable {
 
-      private String razonSocialCliente;
-      private String nombreUsuario;
+      private String nombreFiscalCliente;
 
 }

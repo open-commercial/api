@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
@@ -115,7 +116,11 @@ public class AuthController {
   @PostMapping("/registracion")
   public void registrarse(
       @RequestBody RegistracionClienteAndUsuarioDTO registracionClienteAndUsuarioDTO) {
-    String params = "?secret=" + recaptchaSecretkey + "&response=" + registracionClienteAndUsuarioDTO.getRecaptcha();
+    String params =
+        "?secret="
+            + recaptchaSecretkey
+            + "&response="
+            + registracionClienteAndUsuarioDTO.getRecaptcha();
     ReCaptchaResponse reCaptchaResponse =
         restTemplate
             .exchange(URL_RECAPTCHA + params, HttpMethod.POST, null, ReCaptchaResponse.class)
@@ -130,20 +135,22 @@ public class AuthController {
       nuevoUsuario.setRoles(Collections.singletonList(Rol.COMPRADOR));
       nuevoUsuario.setIdEmpresaPredeterminada(registracionClienteAndUsuarioDTO.getIdEmpresa());
       Cliente nuevoCliente = new Cliente();
-      nuevoCliente.setTipoDeCliente(registracionClienteAndUsuarioDTO.getTipoDeCliente());
       nuevoCliente.setTelefono(registracionClienteAndUsuarioDTO.getTelefono());
       nuevoCliente.setEmail(registracionClienteAndUsuarioDTO.getEmail());
       nuevoCliente.setEmpresa(
           empresaService.getEmpresaPorId(registracionClienteAndUsuarioDTO.getIdEmpresa()));
-      if (nuevoCliente.getTipoDeCliente() == TipoDeCliente.EMPRESA) {
-        nuevoCliente.setRazonSocial(registracionClienteAndUsuarioDTO.getRazonSocial());
-        nuevoCliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
-      } else if (nuevoCliente.getTipoDeCliente() == TipoDeCliente.PERSONA) {
-        nuevoCliente.setRazonSocial(
+      CategoriaIVA categoriaIVA = registracionClienteAndUsuarioDTO.getCategoriaIVA();
+      if (categoriaIVA == CategoriaIVA.CONSUMIDOR_FINAL) {
+        nuevoCliente.setNombreFiscal(
             registracionClienteAndUsuarioDTO.getNombre()
                 + " "
                 + registracionClienteAndUsuarioDTO.getApellido());
         nuevoCliente.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
+      } else if (categoriaIVA == CategoriaIVA.RESPONSABLE_INSCRIPTO
+          || categoriaIVA == CategoriaIVA.MONOTRIBUTO
+          || categoriaIVA == CategoriaIVA.EXENTO) {
+        nuevoCliente.setNombreFiscal(registracionClienteAndUsuarioDTO.getNombreFiscal());
+        nuevoCliente.setCategoriaIVA(categoriaIVA);
       }
       this.registracionService.crearCuentaConClienteAndUsuario(nuevoCliente, nuevoUsuario);
     } else {

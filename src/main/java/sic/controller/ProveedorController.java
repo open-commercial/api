@@ -1,6 +1,8 @@
 package sic.controller;
 
 import java.util.List;
+
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.dto.ProveedorDTO;
 import sic.service.IEmpresaService;
 import sic.service.IProveedorService;
 
@@ -28,11 +31,14 @@ public class ProveedorController {
 
   private final IProveedorService proveedorService;
   private final IEmpresaService empresaService;
+  private final ModelMapper modelMapper;
 
   @Autowired
-  public ProveedorController(IProveedorService proveedorService, IEmpresaService empresaService) {
+  public ProveedorController(IProveedorService proveedorService, IEmpresaService empresaService,
+                             ModelMapper modelMapper) {
     this.proveedorService = proveedorService;
     this.empresaService = empresaService;
+    this.modelMapper = modelMapper;
   }
 
   @GetMapping("/proveedores/{idProveedor}")
@@ -45,14 +51,16 @@ public class ProveedorController {
   @PostMapping("/proveedores")
   @ResponseStatus(HttpStatus.CREATED)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public Proveedor guardar(@RequestBody Proveedor proveedor) {
+  public Proveedor guardar(@RequestBody ProveedorDTO proveedorDTO) {
+    Proveedor proveedor = modelMapper.map(proveedorDTO, Proveedor.class);
     return proveedorService.guardar(proveedor);
   }
 
   @PutMapping("/proveedores")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public void actualizar(@RequestBody Proveedor proveedor) {
+  public void actualizar(@RequestBody ProveedorDTO proveedorDTO) {
+    Proveedor proveedor = modelMapper.map(proveedorDTO, Proveedor.class);
     if (proveedorService.getProveedorPorId(proveedor.getId_Proveedor()) != null) {
       proveedorService.actualizar(proveedor);
     }

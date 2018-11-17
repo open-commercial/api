@@ -209,7 +209,7 @@ public class ProductoServiceImpl implements IProductoService {
   public void actualizar(Producto productoPorActualizar, Producto productoPersistido) {
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
-    productoPorActualizar.setFechaUltimaModificacion(new Date());
+    productoPorActualizar.setFechaUltimaModificacion(new Date());           
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
     productoRepository.save(productoPorActualizar);
     logger.warn("El Producto {} se modificó correctamente.", productoPorActualizar);
@@ -348,7 +348,10 @@ public class ProductoServiceImpl implements IProductoService {
       if (checkMedida || checkRubro || checkProveedor || checkPrecios) {
         p.setFechaUltimaModificacion(new Date());
       }
-      if (checkVisibilidad) p.setPublico(publico);
+      if (checkVisibilidad) {
+        p.setPublico(publico);
+        if (!publico) carritoCompraService.eliminarItem(p.getIdProducto());
+      }
       this.validarOperacion(TipoDeOperacion.ACTUALIZACION, p);
     }
     productoRepository.save(productos);
@@ -461,8 +464,7 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public BigDecimal calcularPrecioLista(
-      BigDecimal pvp, BigDecimal ivaPorcentaje) {
+  public BigDecimal calcularPrecioLista(BigDecimal pvp, BigDecimal ivaPorcentaje) {
     BigDecimal resulIVA = pvp.multiply(ivaPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP));
     return pvp.add(resulIVA);
   }
