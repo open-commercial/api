@@ -45,7 +45,7 @@ public class CuentaCorrienteController {
     this.proveedorService = proveedorService;
   }
 
-  @GetMapping("/cuentas-corriente/clientes/criteria")
+  @GetMapping("/cuentas-corriente/clientes/busqueda/criteria")
   @ResponseStatus(HttpStatus.OK)
   public Page<CuentaCorrienteCliente> buscarConCriteria(
     @RequestParam Long idEmpresa,
