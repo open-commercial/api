@@ -193,16 +193,12 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public Producto guardar(
-      Producto producto, long idMedida, long idRubro, long idProveedor, long idEmpresa) {
+  public Producto guardar(Producto producto) {
     if (producto.getCodigo() == null) producto.setCodigo("");
-    producto.setMedida(medidaService.getMedidaPorId(idMedida));
-    producto.setRubro(rubroService.getRubroPorId(idRubro));
-    producto.setProveedor(proveedorService.getProveedorPorId(idProveedor));
-    producto.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    this.validarOperacion(TipoDeOperacion.ALTA, producto);
     producto.setFechaAlta(new Date());
     producto.setFechaUltimaModificacion(new Date());
+    producto.setEliminado(false);
+    this.validarOperacion(TipoDeOperacion.ALTA, producto);
     producto = productoRepository.save(producto);
     logger.warn("El Producto {} se guardó correctamente.", producto);
     return producto;
@@ -211,6 +207,7 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   @Transactional
   public void actualizar(Producto productoPorActualizar, Producto productoPersistido) {
+    productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
     productoPorActualizar.setFechaUltimaModificacion(new Date());
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);

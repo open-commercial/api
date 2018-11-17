@@ -51,7 +51,7 @@ public interface IProductoService {
 
   byte[] getListaDePreciosPorEmpresa(List<Producto> productos, long idEmpresa, String formato);
 
-  Producto guardar(Producto producto, long idMedida, long idRubro, long idProveedor, long idEmpresa);
+  Producto guardar(Producto producto);
 
   List<Producto> actualizarMultiples(
       long[] idProducto,

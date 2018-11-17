@@ -42,8 +42,13 @@ public class ProductoController {
   private final ModelMapper modelMapper;
 
   @Autowired
-  public ProductoController(IProductoService productoService, ModelMapper modelMapper, IMedidaService medidaService,
-                            IRubroService rubroService, IProveedorService proveedorService, IEmpresaService empresaService) {
+  public ProductoController(
+      IProductoService productoService,
+      IMedidaService medidaService,
+      IRubroService rubroService,
+      IProveedorService proveedorService,
+      IEmpresaService empresaService,
+      ModelMapper modelMapper) {
     this.productoService = productoService;
     this.medidaService = medidaService;
     this.rubroService = rubroService;
@@ -249,7 +254,11 @@ public class ProductoController {
       @RequestParam Long idProveedor,
       @RequestParam Long idEmpresa) {
     Producto producto = modelMapper.map(productoDTO, Producto.class);
-    return productoService.guardar(producto, idMedida, idRubro, idProveedor, idEmpresa);
+    producto.setMedida(medidaService.getMedidaPorId(idMedida));
+    producto.setRubro(rubroService.getRubroPorId(idRubro));
+    producto.setProveedor(proveedorService.getProveedorPorId(idProveedor));
+    producto.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    return productoService.guardar(producto);
   }
 
   @PutMapping("/productos/multiples")
