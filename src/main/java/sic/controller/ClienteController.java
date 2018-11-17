@@ -67,7 +67,6 @@ public class ClienteController {
       @RequestParam(required = false) Long idLocalidad,
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) Integer tamanio,
-      @RequestParam(required = false, defaultValue = "true") boolean conSaldo,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
       @RequestHeader("Authorization") String token) {
@@ -111,7 +110,6 @@ public class ClienteController {
             .nroDeCliente(nroCliente)
             .idEmpresa(idEmpresa)
             .pageable(pageable)
-            .conSaldo(conSaldo)
             .build();
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();

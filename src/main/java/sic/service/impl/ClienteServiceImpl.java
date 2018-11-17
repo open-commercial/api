@@ -142,17 +142,7 @@ public class ClienteServiceImpl implements IClienteService {
     }
     builder.and(
         qCliente.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qCliente.eliminado.eq(false)));
-    Page<Cliente> page = clienteRepository.findAll(builder, criteria.getPageable());
-    if (criteria.isConSaldo()) {
-      page.getContent()
-          .forEach(
-              c -> {
-                CuentaCorriente cc = cuentaCorrienteService.getCuentaCorrientePorCliente(c);
-                c.setSaldoCuentaCorriente(cc.getSaldo());
-                c.setFechaUltimoMovimiento(cc.getFechaUltimoMovimiento());
-              });
-    }
-    return page;
+    return clienteRepository.findAll(builder, criteria.getPageable());
   }
 
   @Override
@@ -276,6 +266,7 @@ public class ClienteServiceImpl implements IClienteService {
     if (cliente == null) {
       throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_cliente_no_existente"));
     }
+    cuentaCorrienteService.eliminarCuentaCorrienteCliente(idCliente);
     cliente.setEliminado(true);
     clienteRepository.save(cliente);
     logger.warn("El Cliente {} se eliminó correctamente.", cliente);

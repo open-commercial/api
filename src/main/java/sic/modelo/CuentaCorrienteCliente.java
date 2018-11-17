@@ -1,6 +1,5 @@
 package sic.modelo;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -19,17 +18,12 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@JsonIgnoreProperties({"cliente", "empresa"})
+@JsonIgnoreProperties({"empresa"})
 public class CuentaCorrienteCliente extends CuentaCorriente implements Serializable {
 
     @OneToOne
     @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
     private Cliente cliente;
-
-    @JsonGetter("nombreFiscalCliente")
-    public String getNombreFiscalCliente() {
-        return cliente.getNombreFiscal();
-    }
 
     public CuentaCorrienteCliente() {}
 
