@@ -143,15 +143,6 @@ public class ClienteServiceImpl implements IClienteService {
     builder.and(
         qCliente.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qCliente.eliminado.eq(false)));
     Page<Cliente> page = clienteRepository.findAll(builder, criteria.getPageable());
-//    if (criteria.isConSaldo()) {
-//      page.getContent()
-//          .forEach(
-//              c -> {
-//                CuentaCorriente cc = cuentaCorrienteService.getCuentaCorrientePorCliente(c);
-//                c.setSaldoCuentaCorriente(cc.getSaldo());
-//                c.setFechaUltimoMovimiento(cc.getFechaUltimoMovimiento());
-//              });
-//    }
     return page;
   }
 
