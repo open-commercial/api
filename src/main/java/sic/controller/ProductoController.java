@@ -1,30 +1,20 @@
 package sic.controller;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
+
 import com.fasterxml.jackson.annotation.JsonView;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.dto.ProductoDTO;
@@ -39,8 +29,12 @@ public class ProductoController {
   private final IRubroService rubroService;
   private final IProveedorService proveedorService;
   private final IEmpresaService empresaService;
+  private final IClienteService clienteService;
   private final ModelMapper modelMapper;
   private static final int TAMANIO_PAGINA_DEFAULT = 50;
+
+  @Value("${SIC_JWT_KEY}")
+  private String secretkey;
 
   @Autowired
   public ProductoController(
@@ -49,12 +43,14 @@ public class ProductoController {
       IRubroService rubroService,
       IProveedorService proveedorService,
       IEmpresaService empresaService,
+      IClienteService clienteService,
       ModelMapper modelMapper) {
     this.productoService = productoService;
     this.medidaService = medidaService;
     this.rubroService = rubroService;
     this.proveedorService = proveedorService;
     this.empresaService = empresaService;
+    this.clienteService = clienteService;
     this.modelMapper = modelMapper;
   }
 
@@ -67,18 +63,23 @@ public class ProductoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public Producto getProductoPorId(@PathVariable long idProducto) {
-    return productoService.getProductoPorId(idProducto);
+  public Producto getProductoPorId(
+      @PathVariable long idProducto, @RequestHeader("Authorization") String token) {
+    Claims claims =
+        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    Producto producto = productoService.getProductoPorId(idProducto);
+    Cliente cliente =
+        clienteService.getClientePorIdUsuarioYidEmpresa(
+            (int) claims.get("idUsuario"), producto.getEmpresa().getId_Empresa());
+    Page<Producto> productos = productoService.getProductosConPrecioBonificado(new PageImpl<>(Collections.singletonList(producto)), cliente);
+    return productos.getContent().get(0);
   }
 
   @JsonView(Views.Public.class)
   @GetMapping("/public/productos/{idProducto}")
   @ResponseStatus(HttpStatus.OK)
   public Producto getProductoPorIdPublic(@PathVariable long idProducto) {
-    Producto producto = productoService.getProductoPorId(idProducto);
-    if (producto.getCantidad().compareTo(BigDecimal.ZERO) > 0) producto.setHayStock(true);
-    else producto.setHayStock(false);
-    return producto;
+    return productoService.getProductoPorId(idProducto);
   }
 
   @GetMapping("/productos/busqueda")
@@ -113,8 +114,13 @@ public class ProductoController {
       @RequestParam(required = false) Boolean publicos,
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido) {
-    return this.buscar(
+      @RequestParam(required = false) String sentido,
+      @RequestHeader("Authorization") String token) {
+    Claims claims =
+      Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    Cliente cliente =
+        clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idEmpresa);
+    Page<Producto> productos = this.buscar(
         idEmpresa,
         codigo,
         descripcion,
@@ -126,6 +132,7 @@ public class ProductoController {
         null,
         ordenarPor,
         sentido);
+    return productoService.getProductosConPrecioBonificado(productos, cliente);
   }
 
   @JsonView(Views.Public.class)
@@ -251,8 +258,6 @@ public class ProductoController {
       @RequestParam(required = false) Long idProveedor,
       @RequestParam(required = false) BigDecimal gananciaNeto,
       @RequestParam(required = false) BigDecimal gananciaPorcentaje,
-      @RequestParam(defaultValue = "0", required = false) BigDecimal impuestoInternoNeto,
-      @RequestParam(defaultValue = "0", required = false) BigDecimal impuestoInternoPorcentaje,
       @RequestParam(required = false) BigDecimal IVANeto,
       @RequestParam(required = false) BigDecimal IVAPorcentaje,
       @RequestParam(required = false) BigDecimal precioCosto,
@@ -262,8 +267,6 @@ public class ProductoController {
     boolean actualizaPrecios = false;
     if (gananciaNeto != null
         && gananciaPorcentaje != null
-        && impuestoInternoNeto != null
-        && impuestoInternoPorcentaje != null
         && IVANeto != null
         && IVAPorcentaje != null
         && precioCosto != null
@@ -285,8 +288,6 @@ public class ProductoController {
         descuentoRecargoPorcentaje,
         gananciaNeto,
         gananciaPorcentaje,
-        impuestoInternoNeto,
-        impuestoInternoPorcentaje,
         IVANeto,
         IVAPorcentaje,
         precioCosto,
