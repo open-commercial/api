@@ -125,7 +125,7 @@ public class AuthController {
             + "&response="
             + registracionClienteAndUsuarioDTO.getRecaptcha();
     boolean recaptchaIsSuccess;
-    if (registracionClienteAndUsuarioDTO.getRecaptcha().equals("5036391AsDf@")) {
+    if (registracionClienteAndUsuarioDTO.getRecaptcha().equals(recaptchaTestKey)) {
       recaptchaIsSuccess = true;
     } else {
       ReCaptchaResponse reCaptchaResponse =
