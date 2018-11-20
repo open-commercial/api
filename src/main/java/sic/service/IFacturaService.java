@@ -62,7 +62,7 @@ public interface IFacturaService {
 
   List<FacturaVenta> dividirFactura(FacturaVenta factura, int[] indices);
 
-  List<RenglonFactura> getRenglonesPedidoParaFacturar(Pedido pedido, TipoDeComprobante tipoDeComprobante);
+  List<RenglonFactura> getRenglonesPedidoParaFacturar(long idPedido, TipoDeComprobante tipoDeComprobante);
 
   boolean pedidoTotalmenteFacturado(Pedido pedido);
 

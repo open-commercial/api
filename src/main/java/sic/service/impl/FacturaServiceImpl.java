@@ -911,59 +911,50 @@ public class FacturaServiceImpl implements IFacturaService {
 
   @Override
   public List<RenglonFactura> getRenglonesPedidoParaFacturar(
-      Pedido pedido, TipoDeComprobante tipoDeComprobante) {
+      long idPedido, TipoDeComprobante tipoDeComprobante) {
     List<RenglonFactura> renglonesRestantes = new ArrayList<>();
+    List<RenglonPedido> renglonesPedido = pedidoService.getRenglonesDelPedido(idPedido);
     Map<Long, RenglonFactura> renglonesDeFacturas =
-        pedidoService.getRenglonesFacturadosDelPedido(pedido.getId_Pedido());
+        pedidoService.getRenglonesFacturadosDelPedido(idPedido);
     if (renglonesDeFacturas != null) {
-      pedido
-          .getRenglones()
-          .forEach(
-              r -> {
-                if (renglonesDeFacturas.containsKey(r.getIdProductoItem())) {
-                  if (r.getCantidad()
-                          .compareTo(
-                              renglonesDeFacturas
-                                  .get(r.getIdProductoItem())
-                                  .getCantidad())
-                      > 0) {
-                    renglonesRestantes.add(
-                        this.calcularRenglon(
-                            tipoDeComprobante,
-                            Movimiento.VENTA,
-                            r.getCantidad()
-                                .subtract(
-                                    renglonesDeFacturas
-                                        .get(r.getIdProductoItem())
-                                        .getCantidad()),
-                            r.getIdProductoItem(),
-                            r.getDescuentoPorcentaje(),
-                            false));
-                  }
-                } else {
-                  renglonesRestantes.add(
-                      this.calcularRenglon(
-                          tipoDeComprobante,
-                          Movimiento.VENTA,
-                          r.getCantidad(),
-                          r.getIdProductoItem(),
-                          r.getDescuentoPorcentaje(),
-                          false));
-                }
-              });
+      renglonesPedido.forEach(
+          r -> {
+            if (renglonesDeFacturas.containsKey(r.getIdProductoItem())) {
+              if (r.getCantidad()
+                      .compareTo(renglonesDeFacturas.get(r.getIdProductoItem()).getCantidad())
+                  > 0) {
+                renglonesRestantes.add(
+                    this.calcularRenglon(
+                        tipoDeComprobante,
+                        Movimiento.VENTA,
+                        r.getCantidad()
+                            .subtract(renglonesDeFacturas.get(r.getIdProductoItem()).getCantidad()),
+                        r.getIdProductoItem(),
+                        r.getDescuentoPorcentaje(),
+                        false));
+              }
+            } else {
+              renglonesRestantes.add(
+                  this.calcularRenglon(
+                      tipoDeComprobante,
+                      Movimiento.VENTA,
+                      r.getCantidad(),
+                      r.getIdProductoItem(),
+                      r.getDescuentoPorcentaje(),
+                      false));
+            }
+          });
     } else {
-      pedido
-          .getRenglones()
-          .forEach(
-              r ->
-                  renglonesRestantes.add(
-                      this.calcularRenglon(
-                          tipoDeComprobante,
-                          Movimiento.VENTA,
-                          r.getCantidad(),
-                          r.getIdProductoItem(),
-                          r.getDescuentoPorcentaje(),
-                          false)));
+      renglonesPedido.forEach(
+          r ->
+              renglonesRestantes.add(
+                  this.calcularRenglon(
+                      tipoDeComprobante,
+                      Movimiento.VENTA,
+                      r.getCantidad(),
+                      r.getIdProductoItem(),
+                      r.getDescuentoPorcentaje(),
+                      false)));
     }
     return renglonesRestantes;
   }
