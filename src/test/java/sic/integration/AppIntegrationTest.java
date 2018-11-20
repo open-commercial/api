@@ -5,6 +5,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
@@ -57,6 +58,9 @@ public class AppIntegrationTest {
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
   private static final BigDecimal CIEN = new BigDecimal("100");
+
+  @Value("${RECAPTCHA_TEST_KEY}")
+  private String recaptchaTestKey;
 
   private void crearProductos() {
     ProductoDTO productoUno =
@@ -739,12 +743,8 @@ public class AppIntegrationTest {
     assertEquals(formaDePagoDTO, formaDePagoRecuperada);
   }
 
-  // guardar un usuario sin un cliente relacionado.
-  // Cambiar el nombre de este test. usar un recaptcha
-  // particular para saltar el recaptcha.
-
   @Test
-  public void shouldCrearCredencialConRolComprador() {
+  public void shouldCrearCuentaConClienteAndUsuario() {
     Cliente cliente =
         new ClienteBuilder()
             .withBonificacion(BigDecimal.ZERO)
@@ -779,6 +779,22 @@ public class AppIntegrationTest {
     registracionService.crearCuentaConClienteAndUsuario(cliente, usuario);
     restTemplate.postForObject(
         apiPrefix + "/login", new Credencial(usuario.getUsername(), "caraDeMala"), String.class);
+  }
+
+  @Test
+  public void shouldCrearCredencialConRolComprador() {
+    RegistracionClienteAndUsuarioDTO nuevoCliente = RegistracionClienteAndUsuarioDTO.builder()
+      .apellido("Stark")
+      .nombre("Sansa")
+      .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+      .idEmpresa(1L)
+      .email("sansa@got.com")
+      .telefono("415789966")
+      .password("caraDeMala")
+      .recaptcha(recaptchaTestKey)
+      .nombreFiscal("theRedWolf")
+      .build();
+    restTemplate.postForObject(apiPrefix + "/registracion", nuevoCliente, Void.class);
   }
 
   @Test
