@@ -2,14 +2,13 @@ package sic.modelo.dto;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+
+import lombok.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class RenglonPedidoDTO implements Serializable {
 
     private long id_RenglonPedido;

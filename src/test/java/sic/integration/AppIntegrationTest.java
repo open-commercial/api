@@ -1030,7 +1030,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldReporteFactura() {
+  public void shouldEmitirReporteFactura() {
     this.shouldCrearFacturaVentaA();
     restTemplate.getForObject(apiPrefix + "/facturas/1/reporte", byte[].class);
   }
@@ -2469,7 +2469,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldStockVenta() {
+  public void shouldVerificarStockVenta() {
     this.shouldCrearFacturaVentaA();
     this.checkDisponibilidadStock(4, 3);
     restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
@@ -2488,7 +2488,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldStockCompra() {
+  public void shouldVerificarStockCompra() {
     this.shouldCrearFacturaCompraA();
     this.checkDisponibilidadStock(14, 9);
     restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
@@ -2750,7 +2750,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldStockNotaCreditoVenta() {
+  public void shouldVerificarStockNotaCreditoVenta() {
     this.shouldCrearNotaCreditoVenta();
     this.checkDisponibilidadStock(10, 4);
   }
@@ -2869,13 +2869,13 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldStockNotaCreditoCompra() {
+  public void shouldVerificarStockNotaCreditoCompra() {
     this.shouldCrearNotaCreditoCompra();
     this.checkDisponibilidadStock(10, 6);
   }
 
   @Test
-  public void shouldSaldoCuentaCorrienteCliente() {
+  public void shouldComprobarSaldoCuentaCorrienteCliente() {
     this.shouldCrearFacturaVentaB();
     assertEquals(
         new BigDecimal("-5992.500000000000000"),
@@ -2904,7 +2904,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldSaldoParcialCuentaCorrienteCliente() {
+  public void shouldComprobarSaldoParcialCuentaCorrienteCliente() {
     this.shouldCrearFacturaVentaB();
     this.crearReciboParaCliente(5992.5);
     this.crearNotaDebitoParaCliente();
@@ -3079,7 +3079,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTransicionDeEstadosDeUnPedido() {
+  public void shouldVerificarTransicionDeEstadosDeUnPedido() {
     this.shouldCrearPedido();
     this.crearFacturaTipoADePedido();
     PedidoDTO pedidoRecuperado =
@@ -3121,7 +3121,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldSaldoCuentaCorrienteProveedor() {
+  public void shouldComprobarSaldoCuentaCorrienteProveedor() {
     this.shouldCrearFacturaCompraB();
     assertEquals(
         new BigDecimal("-599.250000000000000"),
@@ -3157,7 +3157,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldSaldoParcialCuentaCorrienteProveedor() {
+  public void shouldComprobarSaldoParcialCuentaCorrienteProveedor() {
     this.shouldCrearFacturaCompraB();
     this.crearReciboParaProveedor(599.25);
     restTemplate.delete(apiPrefix + "/recibos/1");
