@@ -21,7 +21,6 @@ import sic.modelo.*;
 import sic.service.IClienteService;
 import sic.service.IEmpresaService;
 import sic.service.IFacturaService;
-import sic.service.IPedidoService;
 import sic.service.IProveedorService;
 import sic.service.IUsuarioService;
 import sic.service.IReciboService;
@@ -36,29 +35,31 @@ public class FacturaController {
     private final IProveedorService proveedorService;
     private final IClienteService clienteService;
     private final IUsuarioService usuarioService;
-    private final IPedidoService pedidoService;
     private final ITransportistaService transportistaService;
     private final IReciboService reciboService;
     private static final int TAMANIO_PAGINA_DEFAULT = 50;
 
     @Value("${SIC_JWT_KEY}")
     private String secretkey;
-    
-    @Autowired
-    public FacturaController(IFacturaService facturaService, IEmpresaService empresaService,
-                             IProveedorService proveedorService, IClienteService clienteService,
-                             IUsuarioService usuarioService, IPedidoService pedidoService,
-                             ITransportistaService transportistaService, IReciboService reciboService) {
-        this.facturaService = facturaService;
-        this.empresaService = empresaService;
-        this.proveedorService = proveedorService;
-        this.clienteService = clienteService;
-        this.usuarioService = usuarioService;
-        this.pedidoService = pedidoService;    
-        this.transportistaService = transportistaService;
-        this.reciboService = reciboService;
-    }
-    
+
+  @Autowired
+  public FacturaController(
+      IFacturaService facturaService,
+      IEmpresaService empresaService,
+      IProveedorService proveedorService,
+      IClienteService clienteService,
+      IUsuarioService usuarioService,
+      ITransportistaService transportistaService,
+      IReciboService reciboService) {
+    this.facturaService = facturaService;
+    this.empresaService = empresaService;
+    this.proveedorService = proveedorService;
+    this.clienteService = clienteService;
+    this.usuarioService = usuarioService;
+    this.transportistaService = transportistaService;
+    this.reciboService = reciboService;
+  }
+
     @GetMapping("/facturas/{idFactura}")
     @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
@@ -344,7 +345,7 @@ public class FacturaController {
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
     public List<RenglonFactura> getRenglonesPedidoParaFacturar(@PathVariable long idPedido,
                                                                @RequestParam TipoDeComprobante tipoDeComprobante) {
-        return facturaService.getRenglonesPedidoParaFacturar(pedidoService.getPedidoPorId(idPedido), tipoDeComprobante);
+        return facturaService.getRenglonesPedidoParaFacturar(idPedido, tipoDeComprobante);
     }
 
     @GetMapping("/facturas/renglon")
