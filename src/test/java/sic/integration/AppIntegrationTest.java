@@ -782,6 +782,7 @@ public class AppIntegrationTest {
   }
 
   @Test
+  @Ignore
   public void shouldCrearCredencialConRolComprador() {
     RegistracionClienteAndUsuarioDTO nuevoCliente = RegistracionClienteAndUsuarioDTO.builder()
       .apellido("Stark")
