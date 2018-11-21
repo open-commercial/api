@@ -744,46 +744,8 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldCrearCuentaConClienteAndUsuario() {
-    Cliente cliente =
-        new ClienteBuilder()
-            .withBonificacion(BigDecimal.ZERO)
-            .withNroCliente("00002")
-            .withNombreFiscal("")
-            .withNombreFantasia("Sansa Stark")
-            .withDireccion("the wall")
-            .withCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-            .withIdFiscal(45887759314L)
-            .withEmail("sansa@got.com")
-            .withTelefono("415789966")
-            .withLocalidad(restTemplate.getForObject(apiPrefix + "/localidades/1", Localidad.class))
-            .withContacto("Ayra Stark")
-            .withFechaAlta(new Date())
-            .withEmpresa(restTemplate.getForObject(apiPrefix + "/empresas/1", Empresa.class))
-            .withNombreFiscal("Winter is comming")
-            .withViajante(null)
-            .build();
-    ArrayList<Rol> roles = new ArrayList<>();
-    roles.add(Rol.COMPRADOR);
-    Usuario usuario =
-        new UsuarioBuilder()
-            .withUsername("sansa")
-            .withPassword("caraDeMala")
-            .withNombre("Sansa")
-            .withApellido("Stark")
-            .withEmail("sansa@got.com")
-            .withRol(roles)
-            .withHabilitado(true)
-            .withidEmpresa(1L)
-            .build();
-    registracionService.crearCuentaConClienteAndUsuario(cliente, usuario);
-    restTemplate.postForObject(
-        apiPrefix + "/login", new Credencial(usuario.getUsername(), "caraDeMala"), String.class);
-  }
-
-  @Test
-  public void shouldCrearCredencialConRolComprador() {
-    RegistracionClienteAndUsuarioDTO nuevoCliente = RegistracionClienteAndUsuarioDTO.builder()
+  public void shouldRegistrarNuevaCuentaComoResponsableInscripto() {
+    RegistracionClienteAndUsuarioDTO registro = RegistracionClienteAndUsuarioDTO.builder()
       .apellido("Stark")
       .nombre("Sansa")
       .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -794,7 +756,7 @@ public class AppIntegrationTest {
       .recaptcha(recaptchaTestKey)
       .nombreFiscal("theRedWolf")
       .build();
-    restTemplate.postForObject(apiPrefix + "/registracion", nuevoCliente, Void.class);
+    restTemplate.postForObject(apiPrefix + "/registracion", registro, Void.class);
   }
 
   @Test
