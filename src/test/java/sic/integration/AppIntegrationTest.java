@@ -47,8 +47,6 @@ public class AppIntegrationTest {
 
   @Autowired private IPedidoService pedidoService;
 
-  @Autowired private IRegistracionService registracionService;
-
   @Autowired private TestRestTemplate restTemplate;
 
   private String token;
