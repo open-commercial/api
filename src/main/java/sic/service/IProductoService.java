@@ -78,4 +78,6 @@ public interface IProductoService {
 
   List<Producto> getMultiplesProductosPorId(List<Long> idsProductos);
 
+  void subirImagenProducto(long idProducto, byte[] imagen);
+
 }

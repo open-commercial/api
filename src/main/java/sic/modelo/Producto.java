@@ -137,6 +137,8 @@ public class Producto implements Serializable {
 
   private boolean eliminado;
 
+  private String URLImagenProducto;
+
   @JsonGetter("nombreMedida")
   @JsonView(Views.Public.class)
   public String getNombreMedida() {

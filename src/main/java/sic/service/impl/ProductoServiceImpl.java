@@ -1,5 +1,9 @@
 package sic.service.impl;
 
+import com.cloudinary.Cloudinary;
+// import com.cloudinary.Singleton;
+import com.cloudinary.Transformation;
+import com.cloudinary.utils.ObjectUtils;
 import com.querydsl.core.BooleanBuilder;
 
 import java.io.ByteArrayOutputStream;
@@ -8,7 +12,9 @@ import java.io.IOException;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.export.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.web.multipart.MultipartFile;
 import sic.modelo.*;
 
 import java.io.InputStream;
@@ -30,6 +36,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.service.*;
+import sic.util.BASE64DecodedMultipartFile;
 import sic.util.Validator;
 import sic.repository.ProductoRepository;
 
@@ -45,6 +52,9 @@ public class ProductoServiceImpl implements IProductoService {
   private final IMedidaService medidaService;
   private final ICarritoCompraService carritoCompraService;
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+
+  @Value("${CLOUDINARY_URL}")
+  private String cloudinaryUrl;
 
   @Autowired
   @Lazy
@@ -536,4 +546,36 @@ public class ProductoServiceImpl implements IProductoService {
   public List<Producto> getMultiplesProductosPorId(List<Long> idsProductos) {
     return productoRepository.findByIdProductoInOrderByIdProductoAsc(idsProductos);
   }
+
+  @Override
+  public void subirImagenProducto(long idProducto, byte[] imagen) {
+    Producto producto = this.getProductoPorId(idProducto);
+    try {
+      String filename = String.valueOf(new Date().getTime());
+      MultipartFile imagenProducto = new BASE64DecodedMultipartFile(imagen, filename);
+//
+//      SingletonManager manager = new SingletonManager();
+//      manager.setCloudinary(someCloudinaryInstance);
+//      manager.init();
+//
+
+
+
+      Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
+      Map uploadResult = cloudinary.uploader().upload(imagenProducto,  ObjectUtils.asMap(
+        "public_id", "sample_id",
+        "transformation", new Transformation().crop("limit").width(40).height(40),
+        "eager", Arrays.asList(
+          new Transformation().width(200).height(200)
+            .crop("thumb").gravity("face").radius(20)
+            .effect("sepia"),
+          new Transformation().width(100).height(150)
+            .crop("fit").fetchFormat("png")
+        )));
+      producto.setURLImagenProducto(uploadResult.get("url").toString());
+    } catch (IOException ex) {
+      System.out.print(ex);
+    }
+  }
+
 }

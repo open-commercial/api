@@ -415,4 +415,11 @@ public class ProductoController {
             ResourceBundle.getBundle("Mensajes").getString("mensaje_formato_no_valido"));
     }
   }
+
+  @PostMapping("/productos/{idProducto}/imagen")
+  @ResponseStatus(HttpStatus.CREATED)
+  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
+  public void uploadImagen(@PathVariable long idProducto, @RequestBody byte[] imagen) {
+    productoService.subirImagenProducto(idProducto, imagen);
+  }
 }
