@@ -2,7 +2,6 @@ package sic.controller;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Medida;
@@ -32,14 +30,12 @@ public class MedidaController {
     }
     
     @GetMapping("/medidas/{idMedida}")
-    @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Medida getMedidaPorId(@PathVariable long idMedida) {
         return medidaService.getMedidaPorId(idMedida);
     }
     
     @PutMapping("/medidas")
-    @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void actualizar(@RequestBody Medida medida) {
         if (medidaService.getMedidaPorId(medida.getId_Medida()) != null) {
@@ -48,21 +44,18 @@ public class MedidaController {
     }
     
     @DeleteMapping("/medidas/{idMedida}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
     public void eliminar(@PathVariable long idMedida) {
         medidaService.eliminar(idMedida);
     }
     
     @PostMapping("/medidas")
-    @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Medida guardar(@RequestBody Medida medida) {
         return medidaService.guardar(medida);
     }
     
     @GetMapping("/medidas/empresas/{idEmpresa}")
-    @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public List<Medida> getMedidas(@PathVariable long idEmpresa) {
         return medidaService.getUnidadMedidas(empresaService.getEmpresaPorId(idEmpresa));

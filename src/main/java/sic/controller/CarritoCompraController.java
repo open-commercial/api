@@ -9,7 +9,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import sic.modelo.Cliente;
 import sic.modelo.ItemCarritoCompra;
@@ -45,7 +44,6 @@ public class CarritoCompraController {
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}")
-  @ResponseStatus(HttpStatus.OK)
   public Page<ItemCarritoCompra> getAllItemsDelUsuario(
     @PathVariable long idUsuario,
     @RequestParam(required = false) Integer pagina,
@@ -59,38 +57,32 @@ public class CarritoCompraController {
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/subtotal")
-  @ResponseStatus(HttpStatus.OK)
   public BigDecimal getSubtotal(@PathVariable long idUsuario) {
     return carritoCompraService.getSubtotal(idUsuario);
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/clientes/{idCliente}/total")
-  @ResponseStatus(HttpStatus.OK)
   public BigDecimal getTotal(@PathVariable long idUsuario,
                              @PathVariable long idCliente) {
     return carritoCompraService.getTotal(idUsuario, idCliente);
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/cantidad-articulos")
-  @ResponseStatus(HttpStatus.OK)
   public BigDecimal getCantArticulos(@PathVariable long idUsuario) {
     return carritoCompraService.getCantArticulos(idUsuario);
   }
 
   @DeleteMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   public void eliminarItem(@PathVariable long idUsuario, @PathVariable long idProducto) {
     carritoCompraService.eliminarItemDelUsuario(idUsuario, idProducto);
   }
 
   @DeleteMapping("/carrito-compra/usuarios/{idUsuario}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   public void eliminarTodosLosItems(@PathVariable long idUsuario) {
     carritoCompraService.eliminarTodosLosItemsDelUsuario(idUsuario);
   }
 
   @PostMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   public void agregarOrModificarItem(
     @PathVariable long idUsuario,
     @PathVariable long idProducto,
@@ -99,7 +91,6 @@ public class CarritoCompraController {
   }
 
   @PutMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   public void modificarCantidadItem(
     @PathVariable long idUsuario,
     @PathVariable long idProducto,
@@ -108,13 +99,11 @@ public class CarritoCompraController {
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/cantidad-renglones")
-  @ResponseStatus(HttpStatus.OK)
   public long getCantRenglones(@PathVariable long idUsuario) {
     return carritoCompraService.getCantRenglones(idUsuario);
   }
 
   @PostMapping("/carrito-compra")
-  @ResponseStatus(HttpStatus.CREATED)
   public Pedido generarPedidoConItemsDelCarrito(
     @RequestParam Long idEmpresa,
     @RequestParam Long idUsuario,

@@ -63,7 +63,6 @@ public class NotaController {
   }
 
   @GetMapping("/notas/{idNota}")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -76,7 +75,6 @@ public class NotaController {
   }
 
   @GetMapping("/notas/busqueda/criteria")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -151,14 +149,12 @@ public class NotaController {
   }
 
   @GetMapping("/notas/tipos/empresas/{idEmpresa}")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public TipoDeComprobante[] getTipoNotaCredito(@PathVariable long idEmpresa) {
     return notaService.getTiposNota(empresaService.getEmpresaPorId(idEmpresa));
   }
 
   @GetMapping("/notas/{idNota}/facturas")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -171,7 +167,6 @@ public class NotaController {
   }
 
   @GetMapping("/notas/debito/recibo/{idRecibo}/existe")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -184,7 +179,6 @@ public class NotaController {
   }
 
   @GetMapping("/notas/tipos")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -198,7 +192,6 @@ public class NotaController {
   }
 
   @GetMapping("/notas/renglones/credito/{idNotaCredito}")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -212,7 +205,6 @@ public class NotaController {
   }
 
   @GetMapping("/notas/renglones/debito/{idNotaDebito}")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -225,7 +217,6 @@ public class NotaController {
   }
 
   @PostMapping("/notas/credito/empresa/{idEmpresa}/usuario/{idUsuario}/factura/{idFactura}")
-  @ResponseStatus(HttpStatus.CREATED)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Nota guardarNotaCredito(
       @RequestBody NotaCreditoDTO notaCreditoDTO,
@@ -258,7 +249,6 @@ public class NotaController {
   }
 
   @PostMapping("/notas/debito/empresa/{idEmpresa}/usuario/{idUsuario}/recibo/{idRecibo}")
-  @ResponseStatus(HttpStatus.CREATED)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Nota guardarNotaDebito(
       @RequestBody NotaDebitoDTO notaDebitoDTO,
@@ -285,7 +275,6 @@ public class NotaController {
   }
 
   @GetMapping("/notas/{idNota}/reporte")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -308,28 +297,24 @@ public class NotaController {
   }
 
   @PostMapping("/notas/{idNota}/autorizacion")
-  @ResponseStatus(HttpStatus.CREATED)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Nota autorizarNota(@PathVariable long idNota) {
     return notaService.autorizarNota(notaService.getNotaPorId(idNota));
   }
 
   @DeleteMapping("/notas")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void eliminarNota(@RequestParam long[] idsNota) {
     notaService.eliminarNota(idsNota);
   }
 
   @GetMapping("/notas/{idNota}/iva-neto")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getIvaNetoNota(@PathVariable long idNota) {
     return notaService.getIvaNetoNota(idNota);
   }
 
   @GetMapping("/notas/renglon/credito/producto")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public List<RenglonNotaCredito> calcularRenglonNotaCreditoProducto(
       @RequestParam TipoDeComprobante tipoDeComprobante,
@@ -339,7 +324,6 @@ public class NotaController {
   }
 
   @GetMapping("/notas/renglon/debito/recibo/{idRecibo}")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public List<RenglonNotaDebito> calcularRenglonNotaDebito(
       @PathVariable long idRecibo,
@@ -349,14 +333,12 @@ public class NotaController {
   }
 
   @GetMapping("/notas/credito/sub-total")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal calcularSubTotalCredito(@RequestParam BigDecimal[] importe) {
     return notaService.calcularSubTotalCredito(importe);
   }
 
   @GetMapping("/notas/credito/descuento-neto")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal calcularDescuentoNetoCredito(
       @RequestParam BigDecimal subTotal, @RequestParam BigDecimal descuentoPorcentaje) {
@@ -364,7 +346,6 @@ public class NotaController {
   }
 
   @GetMapping("/notas/credito/recargo-neto")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal calcularRecargoNetoCredito(
       @RequestParam BigDecimal subTotal, @RequestParam BigDecimal recargoPorcentaje) {
@@ -372,7 +353,6 @@ public class NotaController {
   }
 
   @GetMapping("/notas/credito/iva-neto")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal calcularIVANetoCredito(
       @RequestParam TipoDeComprobante tipoDeComprobante,
@@ -393,7 +373,6 @@ public class NotaController {
   }
 
   @GetMapping("/notas/credito/sub-total-bruto")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal calcularSubTotalBrutoCredito(
       TipoDeComprobante tipoDeComprobante,
@@ -407,7 +386,6 @@ public class NotaController {
   }
 
   @GetMapping("/notas/credito/total")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal calcularTotalCredito(
       @RequestParam BigDecimal subTotalBruto,
@@ -417,7 +395,6 @@ public class NotaController {
   }
 
   @GetMapping("/notas/debito/total")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal calcularTotalDebito(
       BigDecimal subTotalBruto, BigDecimal iva21Neto, BigDecimal montoNoGravado) {
@@ -425,7 +402,6 @@ public class NotaController {
   }
 
   @GetMapping("/notas/total-credito/criteria")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getTotalNotasCredito(
       @RequestParam Long idEmpresa,
@@ -478,7 +454,6 @@ public class NotaController {
   }
 
   @GetMapping("/notas/total-debito/criteria")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getTotalNotasDebito(
       @RequestParam Long idEmpresa,
@@ -531,7 +506,6 @@ public class NotaController {
   }
 
   @GetMapping("/notas/total-iva-credito/criteria")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getTotalIvaCredito(
       @RequestParam Long idEmpresa,
@@ -584,7 +558,6 @@ public class NotaController {
   }
 
   @GetMapping("/notas/total-iva-debito/criteria")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getTotalIvaDebito(
       @RequestParam Long idEmpresa,

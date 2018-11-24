@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
@@ -41,7 +40,6 @@ public class ClienteController {
   }
 
   @GetMapping("/clientes/{idCliente}")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -54,7 +52,6 @@ public class ClienteController {
   }
 
   @GetMapping("/clientes/busqueda/criteria")
-  @ResponseStatus(HttpStatus.OK)
   public Page<Cliente> buscarConCriteria(
       @RequestParam Long idEmpresa,
       @RequestParam(required = false) String nroCliente,
@@ -117,28 +114,24 @@ public class ClienteController {
   }
 
   @GetMapping("/clientes/predeterminado/empresas/{idEmpresa}")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Cliente getClientePredeterminado(@PathVariable long idEmpresa) {
     return clienteService.getClientePredeterminado(empresaService.getEmpresaPorId(idEmpresa));
   }
 
   @GetMapping("/clientes/existe-predeterminado/empresas/{idEmpresa}")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public boolean existeClientePredeterminado(@PathVariable long idEmpresa) {
     return clienteService.existeClientePredeterminado(empresaService.getEmpresaPorId(idEmpresa));
   }
 
   @DeleteMapping("/clientes/{idCliente}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void eliminar(@PathVariable long idCliente) {
     clienteService.eliminar(idCliente);
   }
 
   @PostMapping("/clientes")
-  @ResponseStatus(HttpStatus.CREATED)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -176,7 +169,6 @@ public class ClienteController {
   }
 
   @PutMapping("/clientes")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -246,21 +238,18 @@ public class ClienteController {
   }
 
   @PutMapping("/clientes/{idCliente}/predeterminado")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void setClientePredeterminado(@PathVariable long idCliente) {
     clienteService.setClientePredeterminado(clienteService.getClientePorId(idCliente));
   }
 
   @GetMapping("/clientes/pedidos/{idPedido}")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public Cliente getClientePorIdPedido(@PathVariable long idPedido) {
     return clienteService.getClientePorIdPedido(idPedido);
   }
 
   @GetMapping("/clientes/usuarios/{idUsuario}/empresas/{idEmpresa}")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,

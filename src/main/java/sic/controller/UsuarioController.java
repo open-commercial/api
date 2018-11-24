@@ -10,7 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.BusquedaUsuarioCriteria;
@@ -33,13 +32,11 @@ public class UsuarioController {
   }
 
   @GetMapping("/usuarios/{idUsuario}")
-  @ResponseStatus(HttpStatus.OK)
   public Usuario getUsuarioPorId(@PathVariable long idUsuario) {
     return usuarioService.getUsuarioPorId(idUsuario);
   }
 
   @GetMapping("/usuarios/busqueda/criteria")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Page<Usuario> buscarUsuarios(
       @RequestParam(required = false) String username,
@@ -89,14 +86,12 @@ public class UsuarioController {
   }
 
   @PostMapping("/usuarios")
-  @ResponseStatus(HttpStatus.CREATED)
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public Usuario guardar(@RequestBody Usuario usuario) {
     return usuarioService.guardar(usuario);
   }
 
   @PutMapping("/usuarios")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -119,14 +114,12 @@ public class UsuarioController {
   }
 
   @PutMapping("/usuarios/{idUsuario}/empresas/{idEmpresaPredeterminada}")
-  @ResponseStatus(HttpStatus.OK)
   public void actualizarIdEmpresaDeUsuario(
       @PathVariable long idUsuario, @PathVariable long idEmpresaPredeterminada) {
     usuarioService.actualizarIdEmpresaDeUsuario(idUsuario, idEmpresaPredeterminada);
   }
 
   @DeleteMapping("/usuarios/{idUsuario}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void eliminar(@PathVariable long idUsuario) {
     usuarioService.eliminar(idUsuario);
