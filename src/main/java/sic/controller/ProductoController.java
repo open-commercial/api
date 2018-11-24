@@ -240,6 +240,14 @@ public class ProductoController {
     return productoService.guardar(producto);
   }
 
+  @PutMapping("/productos/imagenes")
+  @ResponseStatus(HttpStatus.CREATED)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public void enlazarImagenes(
+          @RequestParam long[] idProducto, @RequestParam String urlImagen) {
+     productoService.actualizarUrlImagen(idProducto, urlImagen);
+  }
+
   @PutMapping("/productos/multiples")
   @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
@@ -414,12 +422,5 @@ public class ProductoController {
         throw new BusinessServiceException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_formato_no_valido"));
     }
-  }
-
-  @PostMapping("/productos/{idProducto}/imagen")
-  @ResponseStatus(HttpStatus.CREATED)
-  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-  public void uploadImagen(@PathVariable long idProducto, @RequestBody byte[] imagen) {
-    productoService.subirImagenProducto(idProducto, imagen);
   }
 }

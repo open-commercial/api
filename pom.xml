@@ -103,11 +103,6 @@
             <artifactId>cloudinary-http44</artifactId>
             <version>LATEST</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>com.cloudinary</groupId>-->
-            <!--<artifactId>cloudinary-taglib</artifactId>-->
-            <!--<version>LATEST</version>-->
-        <!--</dependency>-->
         <!-- SPRING -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
