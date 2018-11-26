@@ -48,6 +48,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final IProveedorService proveedorService;
   private final IMedidaService medidaService;
   private final ICarritoCompraService carritoCompraService;
+  private final IPhotoVideoUploader photoVideoUploader;
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Value("${CLOUDINARY_URL}")
@@ -61,13 +62,15 @@ public class ProductoServiceImpl implements IProductoService {
       IRubroService rubroService,
       IProveedorService proveedorService,
       IMedidaService medidaService,
-      ICarritoCompraService carritoCompraService) {
+      ICarritoCompraService carritoCompraService,
+      IPhotoVideoUploader photoVideoUploader) {
     this.productoRepository = productoRepository;
     this.empresaService = empresaService;
     this.rubroService = rubroService;
     this.proveedorService = proveedorService;
     this.medidaService = medidaService;
     this.carritoCompraService = carritoCompraService;
+    this.photoVideoUploader = photoVideoUploader;
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
@@ -370,19 +373,17 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public void actualizarUrlImagen(
-          long[] idProducto,
-          String urlImagen) {
-    if (Validator.tieneDuplicados(idProducto)) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_error_ids_duplicados"));
-    }
-    List<Producto> productos = new ArrayList<>();
-    for (long i : idProducto) {
-      productos.add(this.getProductoPorId(i));
-    }
-    productos.forEach(p -> p.setUrlImagenProducto(urlImagen));
-    productoRepository.save(productos);
-    logger.warn("Las imagenes de los Productos {} se modificaron correctamente.", productos);
+  @Transactional
+  public void subirImagenProducto(long idProducto, byte[] imagen) {
+    String urlImagen = photoVideoUploader.subirImagen(Producto.class.getSimpleName() + idProducto, imagen);
+    productoRepository.actualizarUrlImagen(idProducto, urlImagen);
+  }
+
+  @Override
+  @Transactional
+  public void eliminarImagenProducto(long idProducto) {
+    photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + idProducto);
+    productoRepository.actualizarUrlImagen(idProducto, null);
   }
 
   @Override

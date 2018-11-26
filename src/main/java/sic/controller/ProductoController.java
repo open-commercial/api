@@ -240,12 +240,19 @@ public class ProductoController {
     return productoService.guardar(producto);
   }
 
-  @PutMapping("/productos/imagenes")
+  @PutMapping("/productos/{idProducto}/imagenes")
   @ResponseStatus(HttpStatus.CREATED)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public void enlazarImagenes(
-          @RequestParam long[] idProducto, @RequestParam String urlImagen) {
-     productoService.actualizarUrlImagen(idProducto, urlImagen);
+  public void subirImagen(
+          @PathVariable long idProducto, @RequestBody byte[] imagen) {
+    productoService.subirImagenProducto(idProducto, imagen);
+  }
+
+  @DeleteMapping("/productos/{idProducto}/imagenes")
+  @ResponseStatus(HttpStatus.CREATED)
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public void borrarImagen(@PathVariable long idProducto) {
+    productoService.eliminarImagenProducto(idProducto);
   }
 
   @PutMapping("/productos/multiples")
