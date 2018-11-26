@@ -1,0 +1,1 @@
+alter table producto add column urlImagenProducto varchar(255) after eliminado;
