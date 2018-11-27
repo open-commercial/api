@@ -24,6 +24,7 @@ public class ItemCarritoCompra implements Serializable {
 
   @Id @GeneratedValue private Long idItemCarritoCompra;
 
+  @JsonView(Views.Public.class)
   @Column(precision = 25, scale = 15)
   private BigDecimal cantidad;
 
@@ -32,7 +33,9 @@ public class ItemCarritoCompra implements Serializable {
   @JoinColumn(name = "idProducto", referencedColumnName = "idProducto")
   private Producto producto;
 
-  @Transient private BigDecimal importe;
+  @JsonView(Views.Public.class)
+  @Transient
+  private BigDecimal importe;
 
   @ManyToOne
   @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
