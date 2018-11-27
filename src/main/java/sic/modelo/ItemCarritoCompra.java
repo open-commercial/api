@@ -5,11 +5,13 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import sic.controller.Views;
 
 @Entity
 @Table(name = "itemcarritocompra")
@@ -25,6 +27,7 @@ public class ItemCarritoCompra implements Serializable {
   @Column(precision = 25, scale = 15)
   private BigDecimal cantidad;
 
+  @JsonView(Views.Public.class)
   @ManyToOne
   @JoinColumn(name = "idProducto", referencedColumnName = "idProducto")
   private Producto producto;

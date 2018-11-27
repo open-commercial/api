@@ -14,6 +14,7 @@ import sic.modelo.Cliente;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Producto;
 import sic.modelo.Usuario;
+import sic.modelo.dto.CarritoCompraDTO;
 import sic.repository.CarritoCompraRepository;
 import javax.persistence.EntityNotFoundException;
 
@@ -40,51 +41,31 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   }
 
   @Override
+  public CarritoCompraDTO getCarritoCompra(long idUsuario, long idCliente) {
+    CarritoCompraDTO carritoCompraDTO = new CarritoCompraDTO();
+    BigDecimal cantArticulos = carritoCompraRepository.getCantArticulos(idUsuario);
+    carritoCompraDTO.setCantRenglones(carritoCompraRepository.getCantRenglones(idUsuario));
+    if (cantArticulos == null) cantArticulos = BigDecimal.ZERO;
+    carritoCompraDTO.setCantArticulos(cantArticulos);
+    BigDecimal subtotal = carritoCompraRepository.calcularSubtotal(idUsuario);
+    if (subtotal == null) subtotal = BigDecimal.ZERO;
+    carritoCompraDTO.setSubtotal(subtotal);
+    Cliente cliente = clienteService.getClientePorId(idCliente);
+    carritoCompraDTO.setBonificacionPorcentaje(cliente.getBonificacion());
+    carritoCompraDTO.setBonificacionNeto(
+        subtotal
+            .multiply(cliente.getBonificacion())
+            .divide(new BigDecimal(100), RoundingMode.HALF_UP));
+    carritoCompraDTO.setTotal(subtotal.subtract(carritoCompraDTO.getBonificacionNeto()));
+    return carritoCompraDTO;
+  }
+
+  @Override
   public Page<ItemCarritoCompra> getAllItemsDelUsuario(long idUsuario, Pageable pageable) {
     Page<ItemCarritoCompra> items = carritoCompraRepository.findAllByUsuario(
         usuarioService.getUsuarioPorId(idUsuario), pageable);
     items.forEach(i -> i.setImporte(i.getProducto().getPrecioLista().multiply(i.getCantidad())));
     return items;
-  }
-
-  @Override
-  public BigDecimal getSubtotal(long idUsuario) {
-    BigDecimal total = carritoCompraRepository.calcularSubtotal(idUsuario);
-    if (total == null) {
-      return BigDecimal.ZERO;
-    } else {
-      return total;
-    }
-  }
-
-  @Override
-  public BigDecimal getBonificacionNeta(long idUsuario, BigDecimal porcentajeBonificacion) {
-    BigDecimal subtotal = this.getSubtotal(idUsuario);
-    return subtotal
-      .multiply(porcentajeBonificacion)
-      .divide(new BigDecimal(100), RoundingMode.HALF_UP);
-  }
-
-  @Override
-  public BigDecimal getTotal(long idUsuario, long idCliente) {
-    Cliente cliente = clienteService.getClientePorId(idCliente);
-    BigDecimal subtotal = this.getSubtotal(idUsuario);
-    return subtotal.subtract(this.getBonificacionNeta(idUsuario, cliente.getBonificacion()));
-  }
-
-  @Override
-  public BigDecimal getCantArticulos(long idUsuario) {
-    BigDecimal cantArticulos = carritoCompraRepository.getCantArticulos(idUsuario);
-    if (cantArticulos == null) {
-      return BigDecimal.ZERO;
-    } else {
-      return cantArticulos;
-    }
-  }
-
-  @Override
-  public long getCantRenglones(long idUsuario) {
-    return carritoCompraRepository.getCantRenglones(idUsuario);
   }
 
   @Override
