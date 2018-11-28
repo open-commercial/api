@@ -23,6 +23,6 @@ public interface ProductoRepository extends PagingAndSortingRepository<Producto,
   List<Producto> findByIdProductoInOrderByIdProductoAsc(List<Long> idsProductos);
 
   @Modifying
-  @Query("UPDATE Producto p SET p.urlImagenProducto = :urlImagenProducto WHERE p.idProducto = :idProducto")
-  int actualizarUrlImagen(@Param("idProducto") long idProducto, @Param("urlImagenProducto") String urlImagenProducto);
+  @Query("UPDATE Producto p SET p.urlImagen = :urlImagen WHERE p.idProducto = :idProducto")
+  int actualizarUrlImagen(@Param("idProducto") long idProducto, @Param("urlImagen") String urlImagen);
 }

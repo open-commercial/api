@@ -241,7 +241,6 @@ public class ProductoController {
   }
 
   @PutMapping("/productos/{idProducto}/imagenes")
-  @ResponseStatus(HttpStatus.CREATED)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void subirImagen(
           @PathVariable long idProducto, @RequestBody byte[] imagen) {
@@ -249,7 +248,6 @@ public class ProductoController {
   }
 
   @DeleteMapping("/productos/{idProducto}/imagenes")
-  @ResponseStatus(HttpStatus.CREATED)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void borrarImagen(@PathVariable long idProducto) {
     productoService.eliminarImagenProducto(idProducto);

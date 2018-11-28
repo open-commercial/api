@@ -2,9 +2,7 @@ package sic.service;
 
 public interface IPhotoVideoUploader {
 
-    String subirImagen(String nombreImagen, byte[] imagen);
+  String subirImagen(String nombreImagen, byte[] imagen);
 
-    void borrarImagen(String publicId);
-
-
+  void borrarImagen(String publicId);
 }

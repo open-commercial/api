@@ -1,8 +1,5 @@
 package sic.service.impl;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.Transformation;
-import com.cloudinary.utils.ObjectUtils;
 import com.querydsl.core.BooleanBuilder;
 
 import java.io.*;
@@ -17,8 +14,6 @@ import sic.modelo.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -50,9 +45,6 @@ public class ProductoServiceImpl implements IProductoService {
   private final ICarritoCompraService carritoCompraService;
   private final IPhotoVideoUploader photoVideoUploader;
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
-
-  @Value("${CLOUDINARY_URL}")
-  private String cloudinaryUrl;
 
   @Autowired
   @Lazy
