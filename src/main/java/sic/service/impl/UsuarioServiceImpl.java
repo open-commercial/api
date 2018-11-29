@@ -35,6 +35,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   private final IClienteService clienteService;
   private final ICorreoElectronicoService correoElectronicoService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Autowired
   @Lazy
@@ -67,8 +68,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   public Usuario getUsuarioPorId(Long idUsuario) {
     Usuario usuario = usuarioRepository.findById(idUsuario);
     if (usuario == null) {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_no_existente"));
+      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_usuario_no_existente"));
     }
     return usuario;
   }
@@ -93,12 +93,10 @@ public class UsuarioServiceImpl implements IUsuarioService {
             credencial.getUsername(),
             this.encriptarConMD5(credencial.getPassword()));
     if (usuario == null) {
-      throw new UnauthorizedException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_logInInvalido"));
+      throw new UnauthorizedException(RESOURCE_BUNDLE.getString("mensaje_usuario_logInInvalido"));
     }
     if (!usuario.isHabilitado()) {
-      throw new UnauthorizedException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_no_habilitado"));
+      throw new UnauthorizedException(RESOURCE_BUNDLE.getString("mensaje_usuario_no_habilitado"));
     }
     return usuario;
   }
@@ -170,12 +168,11 @@ public class UsuarioServiceImpl implements IUsuarioService {
   public void validarOperacion(TipoDeOperacion operacion, Usuario usuario) {
     // Requeridos
     if (Validator.esVacio(usuario.getNombre())) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_vacio_nombre"));
+      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_usuario_vacio_nombre"));
     }
     if (Validator.esVacio(usuario.getApellido())) {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_vacio_apellido"));
+          RESOURCE_BUNDLE.getString("mensaje_usuario_vacio_apellido"));
     }
     if (Validator.esVacio(usuario.getUsername())) {
       throw new BusinessServiceException(
@@ -183,32 +180,32 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
     if (!Validator.esEmailValido(usuario.getEmail())) {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_invalido_email"));
+          RESOURCE_BUNDLE.getString("mensaje_usuario_invalido_email"));
     }
     if (operacion == TipoDeOperacion.ALTA && Validator.esVacio(usuario.getPassword())) {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_vacio_password"));
+          RESOURCE_BUNDLE.getString("mensaje_usuario_vacio_password"));
     }
     if (usuario.getRoles().isEmpty()) {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_no_selecciono_rol"));
+          RESOURCE_BUNDLE.getString("mensaje_usuario_no_selecciono_rol"));
     }
     // Username sin espacios en blanco
     if (usuario.getUsername().contains(" ")) {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_username_con_espacios"));
+          RESOURCE_BUNDLE.getString("mensaje_usuario_username_con_espacios"));
     }
     // Duplicados
     if (operacion == TipoDeOperacion.ALTA) {
       // username
       if (usuarioRepository.findByUsernameAndEliminado(usuario.getUsername(), false) != null) {
         throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_duplicado_username"));
+            RESOURCE_BUNDLE.getString("mensaje_usuario_duplicado_username"));
       }
       // email
       if (usuarioRepository.findByEmailAndEliminado(usuario.getEmail(), false) != null) {
         throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_duplicado_email"));
+            RESOURCE_BUNDLE.getString("mensaje_usuario_duplicado_email"));
       }
     }
     if (operacion == TipoDeOperacion.ACTUALIZACION) {
@@ -217,13 +214,13 @@ public class UsuarioServiceImpl implements IUsuarioService {
           usuarioRepository.findByUsernameAndEliminado(usuario.getUsername(), false);
       if (usuarioGuardado != null && usuarioGuardado.getId_Usuario() != usuario.getId_Usuario()) {
         throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_duplicado_username"));
+            RESOURCE_BUNDLE.getString("mensaje_usuario_duplicado_username"));
       }
       // email
       usuarioGuardado = usuarioRepository.findByEmailAndEliminado(usuario.getEmail(), false);
       if (usuarioGuardado != null && usuarioGuardado.getId_Usuario() != usuario.getId_Usuario()) {
         throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_duplicado_email"));
+            RESOURCE_BUNDLE.getString("mensaje_usuario_duplicado_email"));
       }
     }
     // Ultimo usuario administrador
@@ -235,7 +232,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
       if (administradores.size() == 1
           && administradores.get(0).getId_Usuario() == usuario.getId_Usuario()) {
         throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_ultimoAdmin"));
+            RESOURCE_BUNDLE.getString("mensaje_usuario_ultimoAdmin"));
       }
     }
   }
@@ -288,8 +285,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   @Override
   public int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada) {
     if (empresaService.getEmpresaPorId(idEmpresaPredeterminada) == null) {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_empresa_no_existente"));
+      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_empresa_no_existente"));
     }
     return usuarioRepository.updateIdEmpresa(idUsuario, idEmpresaPredeterminada);
   }
@@ -299,8 +295,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
     Usuario usuario = usuarioRepository.findByEmailAndEliminado(email, false);
     if (usuario == null || !usuario.isHabilitado()) {
       throw new ServiceException(
-          ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_correo_no_existente_or_deshabilitado"));
+          RESOURCE_BUNDLE.getString("mensaje_correo_no_existente_or_deshabilitado"));
     }
     String passwordRecoveryKey = RandomStringUtils.random(250, true, true);
     this.actualizarPasswordRecoveryKey(passwordRecoveryKey, usuario.getId_Usuario());
@@ -310,7 +305,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
         "",
         "Recuperación de contraseña",
         MessageFormat.format(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_correo_recuperacion"),
+            RESOURCE_BUNDLE.getString("mensaje_correo_recuperacion"),
             host,
             passwordRecoveryKey,
             usuario.getId_Usuario()),
@@ -332,9 +327,14 @@ public class UsuarioServiceImpl implements IUsuarioService {
   public void eliminar(long idUsuario) {
     Usuario usuario = this.getUsuarioPorId(idUsuario);
     this.validarOperacion(TipoDeOperacion.ELIMINACION, usuario);
-    clienteService.desvincularClienteDeCredencial(idUsuario);
+    Cliente clienteVinculado = clienteService.getClientePorCredencial(usuario);
+    if (clienteVinculado != null)
+      throw new BusinessServiceException(
+          MessageFormat.format(
+              RESOURCE_BUNDLE.getString("mensaje_usuario_eliminar_con_credencial"),
+              clienteVinculado.getNombreFiscal()));
     usuario.setEliminado(true);
     usuarioRepository.save(usuario);
-    logger.warn("El Usuario " + usuario + " se eliminó correctamente.");
+    logger.warn("El Usuario {} se eliminó correctamente.", usuario);
   }
 }

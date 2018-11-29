@@ -294,6 +294,11 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
+  public Cliente getClientePorCredencial(Usuario usuarioCredencial) {
+    return clienteRepository.findByCredencialAndEliminado(usuarioCredencial, false);
+  }
+
+  @Override
   public String generarNroDeCliente(Empresa empresa) {
     long min = 1L;
     long max = 99999L; // 5 digitos
