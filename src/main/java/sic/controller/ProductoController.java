@@ -41,6 +41,7 @@ public class ProductoController {
   private final IEmpresaService empresaService;
   private final ModelMapper modelMapper;
   private static final int TAMANIO_PAGINA_DEFAULT = 50;
+  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Autowired
   public ProductoController(
@@ -240,10 +241,12 @@ public class ProductoController {
     return productoService.guardar(producto);
   }
 
-  @PutMapping("/productos/{idProducto}/imagenes")
+  @PostMapping("/productos/{idProducto}/imagenes")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public void subirImagen(
-          @PathVariable long idProducto, @RequestBody byte[] imagen) {
+  public void subirImagen(@PathVariable long idProducto, @RequestBody byte[] imagen) {
+    if (imagen.length > 1024000L)
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_error_tamanio_no_valido"));
     productoService.subirImagenProducto(idProducto, imagen);
   }
 

@@ -1,6 +1,5 @@
 package sic.service.impl;
 
-import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
@@ -145,8 +144,8 @@ public class EmpresaServiceImpl implements IEmpresaService {
         empresaRepository.save(empresa);
     }
 
-    @Override
-    public String guardarLogo(byte[] imagen) {
-        return photoVideoUploader.subirImagen(String.valueOf(new Date().getTime()), imagen);
-    }
+  @Override
+  public String guardarLogo(long idEmpresa, byte[] imagen) {
+    return photoVideoUploader.subirImagen(Empresa.class.getSimpleName() + idEmpresa, imagen);
+  }
 }

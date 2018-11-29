@@ -19,5 +19,5 @@ public interface IEmpresaService {
 
   Empresa guardar(Empresa empresa);
 
-  String guardarLogo(byte[] imagen);
+  String guardarLogo(long idEmpresa, byte[] imagen);
 }

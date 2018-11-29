@@ -27,8 +27,6 @@ public class PhotoVideoUploaderImpl implements IPhotoVideoUploader {
 
   @Override
   public String subirImagen(String nombreImagen, byte[] imagen) {
-    if (imagen.length > 1024000L) throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_error_tamanio_no_valido"));
     String urlImagen;
     try {
       Path path = Files.createTempFile("imagen-file", ".jpg");
