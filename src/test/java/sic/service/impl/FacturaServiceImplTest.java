@@ -93,7 +93,6 @@ public class FacturaServiceImplTest {
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_A,
       TipoDeComprobante.FACTURA_X,
-      TipoDeComprobante.FACTURA_Y,
       TipoDeComprobante.PRESUPUESTO
     };
     TipoDeComprobante[] result = facturaService.getTipoFacturaVenta(empresa, cliente);
@@ -109,7 +108,6 @@ public class FacturaServiceImplTest {
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_B,
       TipoDeComprobante.FACTURA_X,
-      TipoDeComprobante.FACTURA_Y,
       TipoDeComprobante.PRESUPUESTO
     };
     TipoDeComprobante[] result = facturaService.getTipoFacturaVenta(empresa, cliente);
@@ -125,7 +123,6 @@ public class FacturaServiceImplTest {
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_C,
       TipoDeComprobante.FACTURA_X,
-      TipoDeComprobante.FACTURA_Y,
       TipoDeComprobante.PRESUPUESTO
     };
     TipoDeComprobante[] result = facturaService.getTipoFacturaVenta(empresa, cliente);
@@ -141,7 +138,6 @@ public class FacturaServiceImplTest {
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_C,
       TipoDeComprobante.FACTURA_X,
-      TipoDeComprobante.FACTURA_Y,
       TipoDeComprobante.PRESUPUESTO
     };
     TipoDeComprobante[] result = facturaService.getTipoFacturaVenta(empresa, cliente);

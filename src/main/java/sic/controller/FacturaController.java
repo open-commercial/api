@@ -308,7 +308,7 @@ public class FacturaController {
             || rolesDeUsuario.contains(Rol.COMPRADOR)) {
       return new TipoDeComprobante[] {TipoDeComprobante.PEDIDO};
     }
-    return null;
+    return new TipoDeComprobante[0];
   }
 
     @GetMapping("/facturas/tipos/empresas/{idEmpresa}")
