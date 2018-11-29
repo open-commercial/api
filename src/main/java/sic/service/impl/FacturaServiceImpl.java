@@ -325,6 +325,8 @@ public class FacturaServiceImpl implements IFacturaService {
           .and(qFacturaVenta.numFactura.eq(criteria.getNumFactura()));
     if (criteria.isBuscarPorPedido())
       builder.and(qFacturaVenta.pedido.nroPedido.eq(criteria.getNroPedido()));
+    if (criteria.isBuscaPoridProducto())
+      builder.and(qFacturaVenta.renglones.any().idProductoItem.eq(criteria.getIdProducto()));
     Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
     BooleanBuilder rsPredicate = new BooleanBuilder();
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)

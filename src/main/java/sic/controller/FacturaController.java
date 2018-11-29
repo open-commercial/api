@@ -222,6 +222,7 @@ public class FacturaController {
       @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
       @RequestParam(required = false) Long idUsuario,
       @RequestParam(required = false) Long nroPedido,
+      @RequestParam(required = false) Long idProducto,
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) Integer tamanio,
       @RequestParam(required = false) String ordenarPor,
@@ -256,6 +257,8 @@ public class FacturaController {
             .numFactura((nroFactura != null) ? nroFactura : 0)
             .buscarPorPedido(nroPedido != null)
             .nroPedido((nroPedido != null) ? nroPedido : 0)
+            .buscaPoridProducto(idProducto != null)
+            .idProducto(idProducto)
             .buscaPorTipoComprobante(tipoDeComprobante != null)
             .tipoComprobante(tipoDeComprobante)
             .cantRegistros(0)
