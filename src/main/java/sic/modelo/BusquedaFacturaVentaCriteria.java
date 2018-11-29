@@ -30,7 +30,7 @@ public class BusquedaFacturaVentaCriteria {
     private boolean buscarPorPedido;
     private long nroPedido;
     private boolean buscaPoridProducto;
-    private long idProducto;
+    private Long idProducto;
     private Long idEmpresa;
     private int cantRegistros;
     private Pageable pageable;
