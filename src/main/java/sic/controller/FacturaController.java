@@ -161,17 +161,18 @@ public class FacturaController {
   @GetMapping("/facturas/compra/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Page<FacturaCompra> buscarFacturaCompra(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) Integer nroSerie,
-      @RequestParam(required = false) Integer nroFactura,
-      @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) Integer tamanio,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido) {
+    @RequestParam Long idEmpresa,
+    @RequestParam(required = false) Long desde,
+    @RequestParam(required = false) Long hasta,
+    @RequestParam(required = false) Long idProveedor,
+    @RequestParam(required = false) Integer nroSerie,
+    @RequestParam(required = false) Integer nroFactura,
+    @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
+    @RequestParam(required = false) Long idProducto,
+    @RequestParam(required = false) Integer pagina,
+    @RequestParam(required = false) Integer tamanio,
+    @RequestParam(required = false) String ordenarPor,
+    @RequestParam(required = false) String sentido) {
     Calendar fechaDesde = Calendar.getInstance();
     Calendar fechaHasta = Calendar.getInstance();
     if ((desde != null) && (hasta != null)) {
@@ -185,21 +186,23 @@ public class FacturaController {
       pagina = 0;
     }
     BusquedaFacturaCompraCriteria criteria =
-        BusquedaFacturaCompraCriteria.builder()
-            .idEmpresa(idEmpresa)
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .buscaPorProveedor(idProveedor != null)
-            .idProveedor(idProveedor)
-            .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
-            .numSerie((nroSerie != null) ? nroSerie : 0)
-            .numFactura((nroFactura != null) ? nroFactura : 0)
-            .buscaPorTipoComprobante(tipoDeComprobante != null)
-            .tipoComprobante(tipoDeComprobante)
-            .cantRegistros(0)
-            .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
-            .build();
+      BusquedaFacturaCompraCriteria.builder()
+        .idEmpresa(idEmpresa)
+        .buscaPorFecha((desde != null) && (hasta != null))
+        .fechaDesde(fechaDesde.getTime())
+        .fechaHasta(fechaHasta.getTime())
+        .buscaPorProveedor(idProveedor != null)
+        .idProveedor(idProveedor)
+        .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
+        .numSerie((nroSerie != null) ? nroSerie : 0)
+        .numFactura((nroFactura != null) ? nroFactura : 0)
+        .buscaPoridProducto(idProducto != null)
+        .idProducto(idProducto)
+        .buscaPorTipoComprobante(tipoDeComprobante != null)
+        .tipoComprobante(tipoDeComprobante)
+        .cantRegistros(0)
+        .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
+        .build();
     return facturaService.buscarFacturaCompra(criteria);
   }
 
@@ -212,22 +215,22 @@ public class FacturaController {
     Rol.COMPRADOR
   })
   public Page<FacturaVenta> buscarFacturaVenta(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) Long idCliente,
-      @RequestParam(required = false) Integer nroSerie,
-      @RequestParam(required = false) Integer nroFactura,
-      @RequestParam(required = false) Long idViajante,
-      @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-      @RequestParam(required = false) Long idUsuario,
-      @RequestParam(required = false) Long nroPedido,
-      @RequestParam(required = false) Long idProducto,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) Integer tamanio,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido,
-      @RequestHeader("Authorization") String token) {
+    @RequestParam Long idEmpresa,
+    @RequestParam(required = false) Long desde,
+    @RequestParam(required = false) Long hasta,
+    @RequestParam(required = false) Long idCliente,
+    @RequestParam(required = false) Integer nroSerie,
+    @RequestParam(required = false) Integer nroFactura,
+    @RequestParam(required = false) Long idViajante,
+    @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
+    @RequestParam(required = false) Long idUsuario,
+    @RequestParam(required = false) Long nroPedido,
+    @RequestParam(required = false) Long idProducto,
+    @RequestParam(required = false) Integer pagina,
+    @RequestParam(required = false) Integer tamanio,
+    @RequestParam(required = false) String ordenarPor,
+    @RequestParam(required = false) String sentido,
+    @RequestHeader("Authorization") String token) {
     Calendar fechaDesde = Calendar.getInstance();
     Calendar fechaHasta = Calendar.getInstance();
     if ((desde != null) && (hasta != null)) {
@@ -241,31 +244,31 @@ public class FacturaController {
       pagina = 0;
     }
     BusquedaFacturaVentaCriteria criteria =
-        BusquedaFacturaVentaCriteria.builder()
-            .idEmpresa(idEmpresa)
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .buscaCliente(idCliente != null)
-            .idCliente(idCliente)
-            .buscaUsuario(idUsuario != null)
-            .idUsuario(idUsuario)
-            .buscaViajante(idViajante != null)
-            .idViajante(idViajante)
-            .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
-            .numSerie((nroSerie != null) ? nroSerie : 0)
-            .numFactura((nroFactura != null) ? nroFactura : 0)
-            .buscarPorPedido(nroPedido != null)
-            .nroPedido((nroPedido != null) ? nroPedido : 0)
-            .buscaPoridProducto(idProducto != null)
-            .idProducto(idProducto)
-            .buscaPorTipoComprobante(tipoDeComprobante != null)
-            .tipoComprobante(tipoDeComprobante)
-            .cantRegistros(0)
-            .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
-            .build();
+      BusquedaFacturaVentaCriteria.builder()
+        .idEmpresa(idEmpresa)
+        .buscaPorFecha((desde != null) && (hasta != null))
+        .fechaDesde(fechaDesde.getTime())
+        .fechaHasta(fechaHasta.getTime())
+        .buscaCliente(idCliente != null)
+        .idCliente(idCliente)
+        .buscaUsuario(idUsuario != null)
+        .idUsuario(idUsuario)
+        .buscaViajante(idViajante != null)
+        .idViajante(idViajante)
+        .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
+        .numSerie((nroSerie != null) ? nroSerie : 0)
+        .numFactura((nroFactura != null) ? nroFactura : 0)
+        .buscarPorPedido(nroPedido != null)
+        .nroPedido((nroPedido != null) ? nroPedido : 0)
+        .buscaPoridProducto(idProducto != null)
+        .idProducto(idProducto)
+        .buscaPorTipoComprobante(tipoDeComprobante != null)
+        .tipoComprobante(tipoDeComprobante)
+        .cantRegistros(0)
+        .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
+        .build();
     Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+      Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
     return facturaService.buscarFacturaVenta(criteria, (int) claims.get("idUsuario"));
   }
 

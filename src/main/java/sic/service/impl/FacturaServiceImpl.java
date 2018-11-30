@@ -279,6 +279,8 @@ public class FacturaServiceImpl implements IFacturaService {
       builder.and(qFacturaCompra.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
     if (criteria.isBuscaPorTipoComprobante())
       builder.and(qFacturaCompra.tipoComprobante.eq(criteria.getTipoComprobante()));
+    if (criteria.isBuscaPoridProducto())
+      builder.and(qFacturaCompra.renglones.any().idProductoItem.eq(criteria.getIdProducto()));
     if (criteria.isBuscaPorNumeroFactura())
       builder
           .and(qFacturaCompra.numSerie.eq(criteria.getNumSerie()))
