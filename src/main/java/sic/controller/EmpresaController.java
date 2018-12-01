@@ -1,6 +1,7 @@
 package sic.controller;
 
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Empresa;
 import sic.modelo.Rol;
 import sic.modelo.dto.EmpresaDTO;
+import sic.service.BusinessServiceException;
 import sic.service.IEmpresaService;
 
 @RestController
@@ -24,6 +26,7 @@ public class EmpresaController {
 
   public final IEmpresaService empresaService;
   private final ModelMapper modelMapper;
+  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Autowired
   public EmpresaController(IEmpresaService empresaService, ModelMapper modelMapper) {
@@ -76,9 +79,12 @@ public class EmpresaController {
     empresaService.eliminar(idEmpresa);
   }
 
-  @PostMapping("/empresas/logo")
+  @PostMapping("/empresas/{idEmpresa}/logo")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-  public String uploadLogo(@RequestBody byte[] imagen) {
-    return empresaService.guardarLogo(imagen);
+  public String uploadLogo(@PathVariable long idEmpresa, @RequestBody byte[] imagen) {
+    if (imagen.length > 1024000L)
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_error_tamanio_no_valido"));
+    return empresaService.guardarLogo(idEmpresa, imagen);
   }
 }

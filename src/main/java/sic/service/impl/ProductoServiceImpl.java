@@ -2,8 +2,7 @@ package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
@@ -11,7 +10,6 @@ import net.sf.jasperreports.export.*;
 import org.springframework.context.annotation.Lazy;
 import sic.modelo.*;
 
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
@@ -44,6 +42,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final IProveedorService proveedorService;
   private final IMedidaService medidaService;
   private final ICarritoCompraService carritoCompraService;
+  private final IPhotoVideoUploader photoVideoUploader;
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Autowired
@@ -54,13 +53,15 @@ public class ProductoServiceImpl implements IProductoService {
       IRubroService rubroService,
       IProveedorService proveedorService,
       IMedidaService medidaService,
-      ICarritoCompraService carritoCompraService) {
+      ICarritoCompraService carritoCompraService,
+      IPhotoVideoUploader photoVideoUploader) {
     this.productoRepository = productoRepository;
     this.empresaService = empresaService;
     this.rubroService = rubroService;
     this.proveedorService = proveedorService;
     this.medidaService = medidaService;
     this.carritoCompraService = carritoCompraService;
+    this.photoVideoUploader = photoVideoUploader;
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
@@ -358,6 +359,20 @@ public class ProductoServiceImpl implements IProductoService {
     productoRepository.save(productos);
     logger.warn("Los Productos {} se modificaron correctamente.", productos);
     return productos;
+  }
+
+  @Override
+  @Transactional
+  public void subirImagenProducto(long idProducto, byte[] imagen) {
+    String urlImagen = photoVideoUploader.subirImagen(Producto.class.getSimpleName() + idProducto, imagen);
+    productoRepository.actualizarUrlImagen(idProducto, urlImagen);
+  }
+
+  @Override
+  @Transactional
+  public void eliminarImagenProducto(long idProducto) {
+    photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + idProducto);
+    productoRepository.actualizarUrlImagen(idProducto, null);
   }
 
   @Override

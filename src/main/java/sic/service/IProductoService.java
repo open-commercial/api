@@ -74,6 +74,10 @@ public interface IProductoService {
       boolean checkVisibilidad,
       Boolean publico);
 
+  void subirImagenProducto(long idProducto, byte[] imagen);
+
+  void eliminarImagenProducto(long idProducto);
+
   List<Producto> getMultiplesProductosPorId(List<Long> idsProductos);
 
 }

@@ -33,12 +33,13 @@ public class ProductoBuilder {
     private Date fechaVencimiento = new Date(1597892400000L); // 20-08-2020
     private String nombreEmpresa = "Globo De Oro";
     private boolean eliminado = false;
+    private String urlImagen;
     
     public ProductoDTO build() {
         return new ProductoDTO(idProducto, codigo, descripcion, cantidad, hayStock, cantMinima, bulto, nombreMedida,
                 precioCosto, ganancia_porcentaje, ganancia_neto, precioVentaPublico, iva_porcentaje, iva_neto,
                 precioLista, nombreRubro, ilimitado, publico, fechaUltimaModificacion, estanteria, estante, razonSocialProveedor,
-                nota, fechaAlta, fechaVencimiento, nombreEmpresa, eliminado);
+                nota, fechaAlta, fechaVencimiento, nombreEmpresa, eliminado, urlImagen);
     }
     
     public ProductoBuilder withId_Producto(Long idProducto) {
@@ -173,6 +174,10 @@ public class ProductoBuilder {
     
     public ProductoBuilder withEliminado(boolean eliminado) {
         this.eliminado = eliminado;
+        return this;
+    }
+    public ProductoBuilder withUrlImagen(String urlImagen) {
+        this.urlImagen = urlImagen;
         return this;
     }
 }

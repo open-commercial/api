@@ -32,6 +32,7 @@ public class ProductoController {
   private final IClienteService clienteService;
   private final ModelMapper modelMapper;
   private static final int TAMANIO_PAGINA_DEFAULT = 50;
+  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Value("${SIC_JWT_KEY}")
   private String secretkey;
@@ -237,6 +238,21 @@ public class ProductoController {
     producto.setProveedor(proveedorService.getProveedorPorId(idProveedor));
     producto.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     return productoService.guardar(producto);
+  }
+
+  @PostMapping("/productos/{idProducto}/imagenes")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public void subirImagen(@PathVariable long idProducto, @RequestBody byte[] imagen) {
+    if (imagen.length > 1024000L)
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_error_tamanio_no_valido"));
+    productoService.subirImagenProducto(idProducto, imagen);
+  }
+
+  @DeleteMapping("/productos/{idProducto}/imagenes")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public void borrarImagen(@PathVariable long idProducto) {
+    productoService.eliminarImagenProducto(idProducto);
   }
 
   @PutMapping("/productos/multiples")

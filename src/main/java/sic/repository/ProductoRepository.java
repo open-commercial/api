@@ -1,5 +1,6 @@
 package sic.repository;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -21,4 +22,7 @@ public interface ProductoRepository extends PagingAndSortingRepository<Producto,
 
   List<Producto> findByIdProductoInOrderByIdProductoAsc(List<Long> idsProductos);
 
+  @Modifying
+  @Query("UPDATE Producto p SET p.urlImagen = :urlImagen WHERE p.idProducto = :idProducto")
+  int actualizarUrlImagen(@Param("idProducto") long idProducto, @Param("urlImagen") String urlImagen);
 }
