@@ -46,7 +46,6 @@ public class CuentaCorrienteController {
   }
 
   @GetMapping("/cuentas-corriente/clientes/busqueda/criteria")
-  @ResponseStatus(HttpStatus.OK)
   public Page<CuentaCorrienteCliente> buscarConCriteria(
     @RequestParam Long idEmpresa,
     @RequestParam(required = false) String nroCliente,
@@ -107,7 +106,6 @@ public class CuentaCorrienteController {
   }
 
   @GetMapping("/cuentas-corriente/clientes/{idCliente}")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -121,7 +119,6 @@ public class CuentaCorrienteController {
   }
 
   @GetMapping("/cuentas-corriente/proveedores/{idProveedor}")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -135,7 +132,6 @@ public class CuentaCorrienteController {
   }
 
   @GetMapping("/cuentas-corriente/clientes/{idCliente}/saldo")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -150,7 +146,6 @@ public class CuentaCorrienteController {
   }
 
   @GetMapping("/cuentas-corriente/proveedores/{idProveedor}/saldo")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -165,7 +160,6 @@ public class CuentaCorrienteController {
   }
 
   @GetMapping("/cuentas-corriente/{idCuentaCorriente}/renglones")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,

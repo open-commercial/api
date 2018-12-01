@@ -285,8 +285,6 @@ public class ProductoServiceImpl implements IProductoService {
       BigDecimal descuentoRecargoPorcentaje,
       BigDecimal gananciaNeto,
       BigDecimal gananciaPorcentaje,
-      BigDecimal impuestoInternoNeto,
-      BigDecimal impuestoInternoPorcentaje,
       BigDecimal ivaNeto,
       BigDecimal ivaPorcentaje,
       BigDecimal precioCosto,
@@ -383,7 +381,23 @@ public class ProductoServiceImpl implements IProductoService {
     if (producto == null) {
       throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_producto_no_existente"));
     }
+    if (producto.getCantidad().compareTo(BigDecimal.ZERO) > 0) {
+      producto.setHayStock(true);
+    } else {
+      producto.setHayStock(false);
+    }
     return producto;
+  }
+
+  @Override
+  public Page<Producto> getProductosConPrecioBonificado(Page<Producto> productos, Cliente cliente) {
+    BigDecimal bonificacion =
+        cliente.getBonificacion().divide(new BigDecimal("100"), RoundingMode.HALF_UP);
+    productos.forEach(
+        p ->
+            p.setPrecioBonificado(
+                p.getPrecioLista().subtract(p.getPrecioLista().multiply(bonificacion))));
+    return productos;
   }
 
   @Override

@@ -11,7 +11,6 @@ import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import sic.modelo.*;
@@ -91,7 +90,6 @@ public class AuthController {
   }
 
   @GetMapping("/password-recovery")
-  @ResponseStatus(HttpStatus.OK)
   public void recuperarPassword(
       @RequestParam String email, @RequestParam long idEmpresa, HttpServletRequest request) {
     String origin = request.getHeader("Origin");
