@@ -5,20 +5,13 @@ import java.math.BigDecimal;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import sic.modelo.ItemCarritoCompra;
+import sic.modelo.dto.CarritoCompraDTO;
 
 public interface ICarritoCompraService {
 
-  BigDecimal getSubtotal(long idUsuario);
+  CarritoCompraDTO getCarritoCompra(long idUsuario, long idCliente);
 
-  BigDecimal getBonificacionNeta(long idUsuario, BigDecimal porcentajeBonificacion);
-
-  BigDecimal getTotal(long idUsuario, long idCliente);
-
-  BigDecimal getCantArticulos(long idUsuario);
-
-  long getCantRenglones(long idUsuario);
-
-  Page<ItemCarritoCompra> getAllItemsDelUsuario(long idUsuario, Pageable pageable);
+  Page<ItemCarritoCompra> getItemsDelCaritoCompra(long idUsuario, long idCliente, Pageable pageable);
 
   void eliminarItemDelUsuario(long idUsuario, long idProducto);
 

@@ -4,15 +4,16 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
-import sic.modelo.Cliente;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
+import sic.modelo.dto.CarritoCompraDTO;
 import sic.service.ICarritoCompraService;
 import sic.service.IClienteService;
 import sic.service.IEmpresaService;
@@ -43,33 +44,23 @@ public class CarritoCompraController {
     this.clienteService = clienteService;
   }
 
-  @GetMapping("/carrito-compra/usuarios/{idUsuario}")
+  @GetMapping("/carrito-compra/usuarios/{idUsuario}/clientes/{idCliente}")
+  public CarritoCompraDTO getCarritoCompraDelUsuario(
+      @PathVariable long idUsuario, @PathVariable long idCliente) {
+    return carritoCompraService.getCarritoCompra(idUsuario, idCliente);
+  }
+
+  @JsonView(Views.Public.class)
+  @GetMapping("/carrito-compra/usuarios/{idUsuario}/clientes/{idCliente}/items")
   public Page<ItemCarritoCompra> getAllItemsDelUsuario(
     @PathVariable long idUsuario,
-    @RequestParam(required = false) Integer pagina,
-    @RequestParam(required = false) Integer tamanio) {
+    @PathVariable long idCliente,
+    @RequestParam(required = false) Integer pagina) {
     final int TAMANIO_PAGINA_DEFAULT = 10;
-    if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
     if (pagina == null || pagina < 0) pagina = 0;
     Pageable pageable =
-      new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
-    return carritoCompraService.getAllItemsDelUsuario(idUsuario, pageable);
-  }
-
-  @GetMapping("/carrito-compra/usuarios/{idUsuario}/subtotal")
-  public BigDecimal getSubtotal(@PathVariable long idUsuario) {
-    return carritoCompraService.getSubtotal(idUsuario);
-  }
-
-  @GetMapping("/carrito-compra/usuarios/{idUsuario}/clientes/{idCliente}/total")
-  public BigDecimal getTotal(@PathVariable long idUsuario,
-                             @PathVariable long idCliente) {
-    return carritoCompraService.getTotal(idUsuario, idCliente);
-  }
-
-  @GetMapping("/carrito-compra/usuarios/{idUsuario}/cantidad-articulos")
-  public BigDecimal getCantArticulos(@PathVariable long idUsuario) {
-    return carritoCompraService.getCantArticulos(idUsuario);
+      new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
+    return carritoCompraService.getItemsDelCaritoCompra(idUsuario, idCliente, pageable);
   }
 
   @DeleteMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
@@ -98,34 +89,29 @@ public class CarritoCompraController {
     carritoCompraService.modificarCantidadItem(idUsuario, idProducto, cantidad);
   }
 
-  @GetMapping("/carrito-compra/usuarios/{idUsuario}/cantidad-renglones")
-  public long getCantRenglones(@PathVariable long idUsuario) {
-    return carritoCompraService.getCantRenglones(idUsuario);
-  }
-
   @PostMapping("/carrito-compra")
   public Pedido generarPedidoConItemsDelCarrito(
     @RequestParam Long idEmpresa,
     @RequestParam Long idUsuario,
     @RequestParam Long idCliente,
     @RequestBody(required = false) String observaciones) {
-    Cliente cliente = clienteService.getClientePorId(idCliente);
+    CarritoCompraDTO carritoCompraDTO = carritoCompraService.getCarritoCompra(idUsuario, idCliente);
     Pedido pedido = new Pedido();
     pedido.setObservaciones(observaciones);
-    pedido.setSubTotal(carritoCompraService.getSubtotal(idUsuario));
+    pedido.setSubTotal(carritoCompraDTO.getSubtotal());
     pedido.setRecargoPorcentaje(BigDecimal.ZERO);
     pedido.setRecargoNeto(BigDecimal.ZERO);
-    pedido.setDescuentoPorcentaje(cliente.getBonificacion());
-    pedido.setDescuentoNeto(carritoCompraService.getBonificacionNeta(idUsuario, cliente.getBonificacion()));
-    pedido.setTotalActual(carritoCompraService.getTotal(idUsuario, idCliente));
+    pedido.setDescuentoPorcentaje(carritoCompraDTO.getBonificacionPorcentaje());
+    pedido.setDescuentoNeto(carritoCompraDTO.getBonificacionNeto());
+    pedido.setTotalActual(carritoCompraDTO.getTotal());
     pedido.setTotalEstimado(pedido.getTotalActual());
     pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    pedido.setCliente(cliente);
+    pedido.setCliente(clienteService.getClientePorId(idCliente));
     Pageable pageable =
       new PageRequest(0, Integer.MAX_VALUE, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
     List<ItemCarritoCompra> items =
-      carritoCompraService.getAllItemsDelUsuario(idUsuario, pageable).getContent();
+      carritoCompraService.getItemsDelCaritoCompra(idUsuario, idCliente, pageable).getContent();
     pedido.setRenglones(new ArrayList<>());
     items.forEach(     
         i ->

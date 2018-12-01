@@ -1,14 +1,12 @@
 package sic.service;
 
 import java.math.BigDecimal;
-import sic.modelo.TipoDeOperacion;
+
+import sic.modelo.*;
+
 import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.Page;
-import sic.modelo.BusquedaProductoCriteria;
-import sic.modelo.Empresa;
-import sic.modelo.Movimiento;
-import sic.modelo.Producto;
 
 public interface IProductoService {
 
@@ -47,6 +45,8 @@ public interface IProductoService {
 
   Producto getProductoPorId(long idProducto);
 
+  Page<Producto> getProductosConPrecioBonificado(Page<Producto> productos, Cliente cliente);
+
   BigDecimal calcularValorStock(BusquedaProductoCriteria criteria);
 
   byte[] getListaDePreciosPorEmpresa(List<Producto> productos, long idEmpresa, String formato);
@@ -60,8 +60,6 @@ public interface IProductoService {
       BigDecimal descuentoRecargoPorcentaje,
       BigDecimal gananciaNeto,
       BigDecimal gananciaPorcentaje,
-      BigDecimal impuestoInternoNeto,
-      BigDecimal impuestoInternoPorcentaje,
       BigDecimal IVANeto,
       BigDecimal IVAPorcentaje,
       BigDecimal precioCosto,

@@ -552,6 +552,25 @@ public class AppIntegrationTest {
         NotaCredito.class);
   }
 
+  private void vincularClienteParaUsuarioInicial() {
+    ClienteDTO cliente =
+      ClienteDTO.builder()
+        .bonificacion(BigDecimal.TEN)
+        .nombreFiscal("Cliente test")
+        .nombreFantasia("Cliente test.")
+        .direccion("Av Mordor")
+        .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+        .idFiscal(2355668L)
+        .email("Cliente@test.com.br")
+        .telefono("372461245")
+        .contacto("El señor Oscuro")
+        .build();
+      restTemplate.postForObject(
+        apiPrefix + "/clientes?idEmpresa=1&idCredencial=1",
+        cliente,
+        ClienteDTO.class);
+  }
+
   @Before
   public void setup() {
     String md5Test = "098f6bcd4621d373cade4e832627b4f6";
@@ -703,6 +722,7 @@ public class AppIntegrationTest {
     RubroDTO rubro =
         RubroDTO.builder().nombre("Ferreteria").empresa(empresaDTO).eliminado(false).build();
     restTemplate.postForObject(apiPrefix + "/rubros", rubro, RubroDTO.class);
+    this.vincularClienteParaUsuarioInicial();
   }
 
   @Test
