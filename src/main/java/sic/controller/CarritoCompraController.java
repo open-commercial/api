@@ -52,15 +52,16 @@ public class CarritoCompraController {
   }
 
   @JsonView(Views.Public.class)
-  @GetMapping("/carrito-compra/usuarios/{idUsuario}/items")
+  @GetMapping("/carrito-compra/usuarios/{idUsuario}/clientes/{idCliente}/items")
   public Page<ItemCarritoCompra> getAllItemsDelUsuario(
     @PathVariable long idUsuario,
+    @PathVariable long idCliente,
     @RequestParam(required = false) Integer pagina) {
     final int TAMANIO_PAGINA_DEFAULT = 10;
     if (pagina == null || pagina < 0) pagina = 0;
     Pageable pageable =
       new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
-    return carritoCompraService.getAllItemsDelUsuario(idUsuario, pageable);
+    return carritoCompraService.getItemsDelCaritoCompra(idUsuario, idCliente, pageable);
   }
 
   @DeleteMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
@@ -116,7 +117,7 @@ public class CarritoCompraController {
     Pageable pageable =
       new PageRequest(0, Integer.MAX_VALUE, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
     List<ItemCarritoCompra> items =
-      carritoCompraService.getAllItemsDelUsuario(idUsuario, pageable).getContent();
+      carritoCompraService.getItemsDelCaritoCompra(idUsuario, idCliente, pageable).getContent();
     pedido.setRenglones(new ArrayList<>());
     items.forEach(     
         i ->

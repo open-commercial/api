@@ -11,7 +11,7 @@ public interface ICarritoCompraService {
 
   CarritoCompraDTO getCarritoCompra(long idUsuario, long idCliente);
 
-  Page<ItemCarritoCompra> getAllItemsDelUsuario(long idUsuario, Pageable pageable);
+  Page<ItemCarritoCompra> getItemsDelCaritoCompra(long idUsuario, long idCliente, Pageable pageable);
 
   void eliminarItemDelUsuario(long idUsuario, long idProducto);
 

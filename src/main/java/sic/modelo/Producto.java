@@ -50,6 +50,7 @@ public class Producto implements Serializable {
   private boolean hayStock;
 
   @Transient
+  @JsonView(Views.Public.class)
   private BigDecimal precioBonificado;
 
   @Column(precision = 25, scale = 15)

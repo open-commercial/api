@@ -37,6 +37,10 @@ public class ItemCarritoCompra implements Serializable {
   @Transient
   private BigDecimal importe;
 
+  @JsonView(Views.Public.class)
+  @Transient
+  private BigDecimal importeBonificado;
+
   @ManyToOne
   @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
   @JsonIgnore
