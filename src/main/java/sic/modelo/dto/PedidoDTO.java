@@ -6,11 +6,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+
+import lombok.*;
 import sic.modelo.EstadoPedido;
 
 @Data
@@ -19,6 +16,7 @@ import sic.modelo.EstadoPedido;
 @ToString(exclude = {"facturas", "renglones"})
 @EqualsAndHashCode(of = {"nroPedido", "nombreEmpresa"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Pedido", scope = PedidoDTO.class)
+@Builder
 public class PedidoDTO implements Serializable {
     
     private long id_Pedido;

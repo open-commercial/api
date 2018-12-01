@@ -10,7 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
@@ -65,19 +64,16 @@ public class CarritoCompraController {
   }
 
   @DeleteMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   public void eliminarItem(@PathVariable long idUsuario, @PathVariable long idProducto) {
     carritoCompraService.eliminarItemDelUsuario(idUsuario, idProducto);
   }
 
   @DeleteMapping("/carrito-compra/usuarios/{idUsuario}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   public void eliminarTodosLosItems(@PathVariable long idUsuario) {
     carritoCompraService.eliminarTodosLosItemsDelUsuario(idUsuario);
   }
 
   @PostMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   public void agregarOrModificarItem(
     @PathVariable long idUsuario,
     @PathVariable long idProducto,
@@ -86,7 +82,6 @@ public class CarritoCompraController {
   }
 
   @PutMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   public void modificarCantidadItem(
     @PathVariable long idUsuario,
     @PathVariable long idProducto,
@@ -95,7 +90,6 @@ public class CarritoCompraController {
   }
 
   @PostMapping("/carrito-compra")
-  @ResponseStatus(HttpStatus.CREATED)
   public Pedido generarPedidoConItemsDelCarrito(
     @RequestParam Long idEmpresa,
     @RequestParam Long idUsuario,

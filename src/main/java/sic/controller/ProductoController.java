@@ -55,7 +55,6 @@ public class ProductoController {
   }
 
   @GetMapping("/productos/{idProducto}")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -77,13 +76,11 @@ public class ProductoController {
 
   @JsonView(Views.Public.class)
   @GetMapping("/public/productos/{idProducto}")
-  @ResponseStatus(HttpStatus.OK)
   public Producto getProductoPorIdPublic(@PathVariable long idProducto) {
     return productoService.getProductoPorId(idProducto);
   }
 
   @GetMapping("/productos/busqueda")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -96,7 +93,6 @@ public class ProductoController {
   }
 
   @GetMapping("/productos/busqueda/criteria")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -137,7 +133,6 @@ public class ProductoController {
 
   @JsonView(Views.Public.class)
   @GetMapping("/public/productos/busqueda/criteria")
-  @ResponseStatus(HttpStatus.OK)
   public Page<Producto> buscarProductosPublic(
       @RequestParam long idEmpresa,
       @RequestParam(required = false) String codigo,
@@ -198,14 +193,12 @@ public class ProductoController {
   }
 
   @DeleteMapping("/productos")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
   public void eliminarMultiplesProductos(@RequestParam long[] idProducto) {
     productoService.eliminarMultiplesProductos(idProducto);
   }
 
   @PutMapping("/productos")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(
       @RequestBody ProductoDTO productoDTO,
@@ -231,7 +224,6 @@ public class ProductoController {
   }
 
   @PostMapping("/productos")
-  @ResponseStatus(HttpStatus.CREATED)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Producto guardar(
       @RequestBody ProductoDTO productoDTO,
@@ -248,7 +240,6 @@ public class ProductoController {
   }
 
   @PutMapping("/productos/multiples")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizarMultiplesProductos(
       @RequestParam long[] idProducto,
@@ -304,7 +295,6 @@ public class ProductoController {
   }
 
   @GetMapping("/productos/valor-stock/criteria")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public BigDecimal calcularValorStock(
       @RequestParam long idEmpresa,
@@ -333,7 +323,6 @@ public class ProductoController {
   }
 
   @GetMapping("/productos/disponibilidad-stock")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,

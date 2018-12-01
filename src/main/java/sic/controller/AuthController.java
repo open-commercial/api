@@ -11,7 +11,6 @@ import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import sic.modelo.*;
@@ -37,6 +36,9 @@ public class AuthController {
 
   @Value("${RECAPTCHA_SECRET_KEY}")
   private String recaptchaSecretkey;
+
+  @Value("${RECAPTCHA_TEST_KEY}")
+  private String recaptchaTestKey;
 
   @Autowired
   public AuthController(
@@ -88,7 +90,6 @@ public class AuthController {
   }
 
   @GetMapping("/password-recovery")
-  @ResponseStatus(HttpStatus.OK)
   public void recuperarPassword(
       @RequestParam String email, @RequestParam long idEmpresa, HttpServletRequest request) {
     String origin = request.getHeader("Origin");
@@ -121,11 +122,17 @@ public class AuthController {
             + recaptchaSecretkey
             + "&response="
             + registracionClienteAndUsuarioDTO.getRecaptcha();
-    ReCaptchaResponse reCaptchaResponse =
-        restTemplate
-            .exchange(URL_RECAPTCHA + params, HttpMethod.POST, null, ReCaptchaResponse.class)
-            .getBody();
-    if (reCaptchaResponse.isSuccess()) {
+    boolean recaptchaIsSuccess;
+    if (registracionClienteAndUsuarioDTO.getRecaptcha().equals(recaptchaTestKey)) {
+      recaptchaIsSuccess = true;
+    } else {
+      ReCaptchaResponse reCaptchaResponse =
+          restTemplate
+              .exchange(URL_RECAPTCHA + params, HttpMethod.POST, null, ReCaptchaResponse.class)
+              .getBody();
+      recaptchaIsSuccess = reCaptchaResponse.isSuccess();
+    }
+    if (recaptchaIsSuccess) {
       Usuario nuevoUsuario = new Usuario();
       nuevoUsuario.setHabilitado(false);
       nuevoUsuario.setNombre(registracionClienteAndUsuarioDTO.getNombre());

@@ -5,6 +5,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
@@ -46,8 +47,6 @@ public class AppIntegrationTest {
 
   @Autowired private IPedidoService pedidoService;
 
-  @Autowired private IRegistracionService registracionService;
-
   @Autowired private TestRestTemplate restTemplate;
 
   private String token;
@@ -57,6 +56,9 @@ public class AppIntegrationTest {
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
   private static final BigDecimal CIEN = new BigDecimal("100");
+
+  @Value("${RECAPTCHA_TEST_KEY}")
+  private String recaptchaTestKey;
 
   private void crearProductos() {
     ProductoDTO productoUno =
@@ -759,46 +761,20 @@ public class AppIntegrationTest {
     assertEquals(formaDePagoDTO, formaDePagoRecuperada);
   }
 
-  // guardar un usuario sin un cliente relacionado.
-  // Cambiar el nombre de este test. usar un recaptcha
-  // particular para saltar el recaptcha.
-
   @Test
-  public void shouldCrearCredencialConRolComprador() {
-    Cliente cliente =
-        new ClienteBuilder()
-            .withBonificacion(BigDecimal.ZERO)
-            .withNroCliente("00002")
-            .withNombreFiscal("")
-            .withNombreFantasia("Sansa Stark")
-            .withDireccion("the wall")
-            .withCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-            .withIdFiscal(45887759314L)
-            .withEmail("sansa@got.com")
-            .withTelefono("415789966")
-            .withLocalidad(restTemplate.getForObject(apiPrefix + "/localidades/1", Localidad.class))
-            .withContacto("Ayra Stark")
-            .withFechaAlta(new Date())
-            .withEmpresa(restTemplate.getForObject(apiPrefix + "/empresas/1", Empresa.class))
-            .withNombreFiscal("Winter is comming")
-            .withViajante(null)
-            .build();
-    ArrayList<Rol> roles = new ArrayList<>();
-    roles.add(Rol.COMPRADOR);
-    Usuario usuario =
-        new UsuarioBuilder()
-            .withUsername("sansa")
-            .withPassword("caraDeMala")
-            .withNombre("Sansa")
-            .withApellido("Stark")
-            .withEmail("sansa@got.com")
-            .withRol(roles)
-            .withHabilitado(true)
-            .withidEmpresa(1L)
-            .build();
-    registracionService.crearCuentaConClienteAndUsuario(cliente, usuario);
-    restTemplate.postForObject(
-        apiPrefix + "/login", new Credencial(usuario.getUsername(), "caraDeMala"), String.class);
+  public void shouldRegistrarNuevaCuentaComoResponsableInscripto() {
+    RegistracionClienteAndUsuarioDTO registro = RegistracionClienteAndUsuarioDTO.builder()
+      .apellido("Stark")
+      .nombre("Sansa")
+      .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+      .idEmpresa(1L)
+      .email("sansa@got.com")
+      .telefono("415789966")
+      .password("caraDeMala")
+      .recaptcha(recaptchaTestKey)
+      .nombreFiscal("theRedWolf")
+      .build();
+    restTemplate.postForObject(apiPrefix + "/registracion", registro, Void.class);
   }
 
   @Test
@@ -1050,7 +1026,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldReporteFactura() {
+  public void shouldEmitirReporteFactura() {
     this.shouldCrearFacturaVentaA();
     restTemplate.getForObject(apiPrefix + "/facturas/1/reporte", byte[].class);
   }
@@ -2489,7 +2465,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldStockVenta() {
+  public void shouldVerificarStockVenta() {
     this.shouldCrearFacturaVentaA();
     this.checkDisponibilidadStock(4, 3);
     restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
@@ -2508,7 +2484,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldStockCompra() {
+  public void shouldVerificarStockCompra() {
     this.shouldCrearFacturaCompraA();
     this.checkDisponibilidadStock(14, 9);
     restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
@@ -2770,7 +2746,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldStockNotaCreditoVenta() {
+  public void shouldVerificarStockNotaCreditoVenta() {
     this.shouldCrearNotaCreditoVenta();
     this.checkDisponibilidadStock(10, 4);
   }
@@ -2889,13 +2865,13 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldStockNotaCreditoCompra() {
+  public void shouldVerificarStockNotaCreditoCompra() {
     this.shouldCrearNotaCreditoCompra();
     this.checkDisponibilidadStock(10, 6);
   }
 
   @Test
-  public void shouldSaldoCuentaCorrienteCliente() {
+  public void shouldComprobarSaldoCuentaCorrienteCliente() {
     this.shouldCrearFacturaVentaB();
     assertEquals(
         new BigDecimal("-5992.500000000000000"),
@@ -2924,7 +2900,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldSaldoParcialCuentaCorrienteCliente() {
+  public void shouldComprobarSaldoParcialCuentaCorrienteCliente() {
     this.shouldCrearFacturaVentaB();
     this.crearReciboParaCliente(5992.5);
     this.crearNotaDebitoParaCliente();
@@ -3099,7 +3075,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldTransicionDeEstadosDeUnPedido() {
+  public void shouldVerificarTransicionDeEstadosDeUnPedido() {
     this.shouldCrearPedido();
     this.crearFacturaTipoADePedido();
     PedidoDTO pedidoRecuperado =
@@ -3141,7 +3117,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldSaldoCuentaCorrienteProveedor() {
+  public void shouldComprobarSaldoCuentaCorrienteProveedor() {
     this.shouldCrearFacturaCompraB();
     assertEquals(
         new BigDecimal("-599.250000000000000"),
@@ -3177,7 +3153,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldSaldoParcialCuentaCorrienteProveedor() {
+  public void shouldComprobarSaldoParcialCuentaCorrienteProveedor() {
     this.shouldCrearFacturaCompraB();
     this.crearReciboParaProveedor(599.25);
     restTemplate.delete(apiPrefix + "/recibos/1");

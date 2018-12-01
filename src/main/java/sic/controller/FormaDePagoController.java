@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.FormaDePago;
@@ -40,7 +38,6 @@ public class FormaDePagoController {
   }
 
   @GetMapping("/formas-de-pago/{idFormaDePago}")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -53,14 +50,12 @@ public class FormaDePagoController {
   }
 
   @DeleteMapping("/formas-de-pago/{idFormaDePago}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void eliminar(@PathVariable long idFormaDePago) {
     formaDePagoService.eliminar(idFormaDePago);
   }
 
   @GetMapping("/formas-de-pago/predeterminada/empresas/{idEmpresa}")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -74,7 +69,6 @@ public class FormaDePagoController {
   }
 
   @GetMapping("/formas-de-pago/empresas/{idEmpresa}")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -87,7 +81,6 @@ public class FormaDePagoController {
   }
 
   @PostMapping("/formas-de-pago")
-  @ResponseStatus(HttpStatus.CREATED)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public FormaDePago guardar(@RequestBody FormaDePagoDTO formaDePagoDTO) {
     FormaDePago formaDePago = modelMapper.map(formaDePagoDTO, FormaDePago.class);
@@ -95,7 +88,6 @@ public class FormaDePagoController {
   }
 
   @PutMapping("/formas-de-pago/predeterminada/{idFormaDePago}")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void setFormaDePagoPredeterminada(@PathVariable long idFormaDePago) {
     formaDePagoService.setFormaDePagoPredeterminada(

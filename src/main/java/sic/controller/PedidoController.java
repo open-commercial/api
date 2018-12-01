@@ -50,14 +50,12 @@ public class PedidoController {
     }
     
     @GetMapping("/pedidos/{idPedido}")
-    @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Pedido getPedidoPorId(@PathVariable long idPedido) {
         return pedidoService.getPedidoPorId(idPedido);
     }
     
     @GetMapping("/pedidos/{idPedido}/renglones")
-    @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public List<RenglonPedido> getRenglonesDelPedido(@PathVariable long idPedido) {
         return pedidoService.getRenglonesDelPedido(idPedido);
@@ -65,14 +63,12 @@ public class PedidoController {
 
 
     @PostMapping("/pedidos/renglones")
-    @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
     public List<RenglonPedido> calcularRenglonesPedido(@RequestBody List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO) {
         return pedidoService.calcularRenglonesPedido(nuevosRenglonesPedidoDTO);
     }
 
     @PutMapping("/pedidos")
-    @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public void actualizar(@RequestParam Long idEmpresa,
                            @RequestParam Long idUsuario,
@@ -93,7 +89,6 @@ public class PedidoController {
     }
 
   @PostMapping("/pedidos")
-  @ResponseStatus(HttpStatus.CREATED)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -125,7 +120,6 @@ public class PedidoController {
   }
 
     @GetMapping("/pedidos/busqueda/criteria")
-    @ResponseStatus(HttpStatus.OK)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Page<Pedido> buscarConCriteria(@RequestParam Long idEmpresa,
                                           @RequestParam(required = false) Long desde,
@@ -170,7 +164,6 @@ public class PedidoController {
     }
     
     @DeleteMapping("/pedidos/{idPedido}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public void eliminar(@PathVariable long idPedido) {
         pedidoService.eliminar(idPedido);

@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Rol;
@@ -38,14 +36,12 @@ public class RubroController {
   }
 
   @GetMapping("/rubros/{idRubro}")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Rubro getRubroPorId(@PathVariable long idRubro) {
     return rubroService.getRubroPorId(idRubro);
   }
 
   @PutMapping("/rubros")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(@RequestBody RubroDTO rubroDTO) {
     Rubro rubro = modelMapper.map(rubroDTO, Rubro.class);
@@ -55,14 +51,12 @@ public class RubroController {
   }
 
   @DeleteMapping("/rubros/{idRubro}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void eliminar(@PathVariable long idRubro) {
     rubroService.eliminar(idRubro);
   }
 
   @PostMapping("/rubros")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Rubro guardar(@RequestBody RubroDTO rubroDTO) {
       Rubro rubro = modelMapper.map(rubroDTO, Rubro.class);
@@ -70,7 +64,6 @@ public class RubroController {
   }
 
   @GetMapping("/rubros/empresas/{idEmpresa}")
-  @ResponseStatus(HttpStatus.OK)
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
