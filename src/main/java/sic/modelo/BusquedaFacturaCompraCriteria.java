@@ -23,7 +23,7 @@ public class BusquedaFacturaCompraCriteria {
     private long numFactura;
     private boolean buscaPorTipoComprobante;
     private TipoDeComprobante tipoComprobante;
-    private boolean buscaPoridProducto;
+    private boolean buscaPorProducto;
     private Long idProducto;
     private Long idEmpresa;
     private int cantRegistros;

@@ -279,7 +279,7 @@ public class FacturaServiceImpl implements IFacturaService {
       builder.and(qFacturaCompra.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
     if (criteria.isBuscaPorTipoComprobante())
       builder.and(qFacturaCompra.tipoComprobante.eq(criteria.getTipoComprobante()));
-    if (criteria.isBuscaPoridProducto())
+    if (criteria.isBuscaPorProducto())
       builder.and(qFacturaCompra.renglones.any().idProductoItem.eq(criteria.getIdProducto()));
     if (criteria.isBuscaPorNumeroFactura())
       builder
@@ -327,7 +327,7 @@ public class FacturaServiceImpl implements IFacturaService {
           .and(qFacturaVenta.numFactura.eq(criteria.getNumFactura()));
     if (criteria.isBuscarPorPedido())
       builder.and(qFacturaVenta.pedido.nroPedido.eq(criteria.getNroPedido()));
-    if (criteria.isBuscaPoridProducto())
+    if (criteria.isBuscaPorProducto())
       builder.and(qFacturaVenta.renglones.any().idProductoItem.eq(criteria.getIdProducto()));
     Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
     BooleanBuilder rsPredicate = new BooleanBuilder();
