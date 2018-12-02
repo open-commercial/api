@@ -267,6 +267,7 @@ public class ClienteServiceImpl implements IClienteService {
       throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_cliente_no_existente"));
     }
     cuentaCorrienteService.eliminarCuentaCorrienteCliente(idCliente);
+    cliente.setCredencial(null);
     cliente.setEliminado(true);
     clienteRepository.save(cliente);
     logger.warn("El Cliente {} se eliminó correctamente.", cliente);
@@ -290,6 +291,11 @@ public class ClienteServiceImpl implements IClienteService {
   @Override
   public int desvincularClienteDeCredencial(long idUsuarioCliente) {
     return clienteRepository.desvincularClienteDeCredencial(idUsuarioCliente);
+  }
+
+  @Override
+  public Cliente getClientePorCredencial(Usuario usuarioCredencial) {
+    return clienteRepository.findByCredencialAndEliminado(usuarioCredencial, false);
   }
 
   @Override
