@@ -60,7 +60,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
       }
       return sb.toString();
     } catch (NoSuchAlgorithmException ex) {
-      throw new RuntimeException(ex);
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_encriptacion_no_disponible"));
     }
   }
 
