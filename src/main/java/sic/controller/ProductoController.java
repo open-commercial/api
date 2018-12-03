@@ -242,11 +242,11 @@ public class ProductoController {
 
   @PostMapping("/productos/{idProducto}/imagenes")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public void subirImagen(@PathVariable long idProducto, @RequestBody byte[] imagen) {
+  public String subirImagen(@PathVariable long idProducto, @RequestBody byte[] imagen) {
     if (imagen.length > 1024000L)
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_error_tamanio_no_valido"));
-    productoService.subirImagenProducto(idProducto, imagen);
+    return productoService.subirImagenProducto(idProducto, imagen);
   }
 
   @DeleteMapping("/productos/{idProducto}/imagenes")

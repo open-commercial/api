@@ -210,7 +210,10 @@ public class ProductoServiceImpl implements IProductoService {
   public void actualizar(Producto productoPorActualizar, Producto productoPersistido) {
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
-    productoPorActualizar.setFechaUltimaModificacion(new Date());           
+    productoPorActualizar.setFechaUltimaModificacion(new Date());
+    if (productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty()
+      && (productoPorActualizar.getUrlImagen() == null || productoPorActualizar.getUrlImagen().isEmpty()))
+      photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + productoPersistido.getIdProducto());
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
     if (productoPersistido.isPublico() && !productoPorActualizar.isPublico()) {
       carritoCompraService.eliminarItem(productoPersistido.getIdProducto());
@@ -271,6 +274,9 @@ public class ProductoServiceImpl implements IProductoService {
       }
       carritoCompraService.eliminarItem(i);
       producto.setEliminado(true);
+      if (producto.getUrlImagen() != null && !producto.getUrlImagen().isEmpty()) {
+        photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + producto.getIdProducto());
+      }
       productos.add(producto);
     }
     productoRepository.save(productos);
@@ -363,9 +369,10 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public void subirImagenProducto(long idProducto, byte[] imagen) {
+  public String subirImagenProducto(long idProducto, byte[] imagen) {
     String urlImagen = photoVideoUploader.subirImagen(Producto.class.getSimpleName() + idProducto, imagen);
     productoRepository.actualizarUrlImagen(idProducto, urlImagen);
+    return urlImagen;
   }
 
   @Override

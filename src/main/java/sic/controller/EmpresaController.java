@@ -68,9 +68,10 @@ public class EmpresaController {
   @PutMapping("/empresas")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void actualizar(@RequestBody EmpresaDTO empresaDTO) {
-    Empresa empresa = modelMapper.map(empresaDTO, Empresa.class);
-    if (empresaService.getEmpresaPorId(empresa.getId_Empresa()) != null)
-      empresaService.actualizar(empresa);
+    Empresa empresaParaActualizar = modelMapper.map(empresaDTO, Empresa.class);
+    Empresa empresaPersistida = empresaService.getEmpresaPorId(empresaParaActualizar.getId_Empresa());
+    if (empresaPersistida != null)
+      empresaService.actualizar(empresaParaActualizar, empresaPersistida);
   }
 
   @DeleteMapping("/empresas/{idEmpresa}")

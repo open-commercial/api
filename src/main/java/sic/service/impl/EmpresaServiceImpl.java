@@ -130,9 +130,12 @@ public class EmpresaServiceImpl implements IEmpresaService {
 
     @Override
     @Transactional
-    public void actualizar(Empresa empresa) {
-        validarOperacion(TipoDeOperacion.ACTUALIZACION, empresa);
-        empresaRepository.save(empresa);
+    public void actualizar(Empresa empresaParaActualizar, Empresa empresaPersistida) {
+        if (empresaPersistida.getLogo() != null && !empresaPersistida.getLogo().isEmpty()
+          && (empresaParaActualizar.getLogo() == null || empresaParaActualizar.getLogo().isEmpty()))
+            photoVideoUploader.borrarImagen(Empresa.class.getSimpleName() + empresaPersistida.getId_Empresa());
+        validarOperacion(TipoDeOperacion.ACTUALIZACION, empresaParaActualizar);
+        empresaRepository.save(empresaParaActualizar);
     }
 
     @Override
@@ -140,6 +143,7 @@ public class EmpresaServiceImpl implements IEmpresaService {
     public void eliminar(Long idEmpresa) {
         Empresa empresa = this.getEmpresaPorId(idEmpresa);
         empresa.setEliminada(true);
+        photoVideoUploader.borrarImagen(Empresa.class.getSimpleName() + empresa.getId_Empresa());
         configuracionDelSistemaService.eliminar(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa));
         empresaRepository.save(empresa);
     }
