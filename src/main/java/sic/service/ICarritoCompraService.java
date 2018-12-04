@@ -21,5 +21,5 @@ public interface ICarritoCompraService {
 
   void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad);
 
-  void modificarCantidadItem(long idUsuario, long idProducto, BigDecimal cantidad);
+  ItemCarritoCompra modificarCantidadItem(long idUsuario, long idProducto, BigDecimal cantidad);
 }

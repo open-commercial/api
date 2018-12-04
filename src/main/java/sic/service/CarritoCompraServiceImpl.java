@@ -120,7 +120,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   }
 
   @Override
-  public void modificarCantidadItem(long idUsuario, long idProducto, BigDecimal cantidad) {
+  public ItemCarritoCompra modificarCantidadItem(long idUsuario, long idProducto, BigDecimal cantidad) {
     Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
     Producto producto = productoService.getProductoPorId(idProducto);
     ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(usuario, producto);
@@ -131,7 +131,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
         item.setCantidad(cantidad);
       }
       item.setImporte(producto.getPrecioLista().multiply(cantidad));
-      carritoCompraRepository.save(item);
+      return carritoCompraRepository.save(item);
     } else {
       throw new EntityNotFoundException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_item_no_existente"));

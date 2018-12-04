@@ -82,11 +82,11 @@ public class CarritoCompraController {
   }
 
   @PutMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
-  public void modificarCantidadItem(
+  public ItemCarritoCompra modificarCantidadItem(
     @PathVariable long idUsuario,
     @PathVariable long idProducto,
     @RequestParam BigDecimal cantidad) {
-    carritoCompraService.modificarCantidadItem(idUsuario, idProducto, cantidad);
+    return carritoCompraService.modificarCantidadItem(idUsuario, idProducto, cantidad);
   }
 
   @PostMapping("/carrito-compra")
