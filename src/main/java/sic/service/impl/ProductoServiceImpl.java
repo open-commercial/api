@@ -37,6 +37,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final ProductoRepository productoRepository;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final BigDecimal CIEN = new BigDecimal("100");
+  private static final long TAMANIO_MAXIMO_IMAGEN = 1024000L;
   private final IEmpresaService empresaService;
   private final IRubroService rubroService;
   private final IProveedorService proveedorService;
@@ -212,8 +213,9 @@ public class ProductoServiceImpl implements IProductoService {
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
     productoPorActualizar.setFechaUltimaModificacion(new Date());
     if (productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty()
-      && (productoPorActualizar.getUrlImagen() == null || productoPorActualizar.getUrlImagen().isEmpty()))
+      && (productoPorActualizar.getUrlImagen() == null || productoPorActualizar.getUrlImagen().isEmpty())) {
       photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + productoPersistido.getIdProducto());
+    }
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
     if (productoPersistido.isPublico() && !productoPorActualizar.isPublico()) {
       carritoCompraService.eliminarItem(productoPersistido.getIdProducto());
@@ -370,6 +372,9 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   @Transactional
   public String subirImagenProducto(long idProducto, byte[] imagen) {
+    if (imagen.length > TAMANIO_MAXIMO_IMAGEN)
+      throw new BusinessServiceException(
+        RESOURCE_BUNDLE.getString("mensaje_error_tamanio_no_valido"));
     String urlImagen = photoVideoUploader.subirImagen(Producto.class.getSimpleName() + idProducto, imagen);
     productoRepository.actualizarUrlImagen(idProducto, urlImagen);
     return urlImagen;

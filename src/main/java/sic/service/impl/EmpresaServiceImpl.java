@@ -128,15 +128,16 @@ public class EmpresaServiceImpl implements IEmpresaService {
         return empresa;
     }
 
-    @Override
-    @Transactional
-    public void actualizar(Empresa empresaParaActualizar, Empresa empresaPersistida) {
-        if (empresaPersistida.getLogo() != null && !empresaPersistida.getLogo().isEmpty()
-          && (empresaParaActualizar.getLogo() == null || empresaParaActualizar.getLogo().isEmpty()))
-            photoVideoUploader.borrarImagen(Empresa.class.getSimpleName() + empresaPersistida.getId_Empresa());
-        validarOperacion(TipoDeOperacion.ACTUALIZACION, empresaParaActualizar);
-        empresaRepository.save(empresaParaActualizar);
-    }
+  @Override
+  @Transactional
+  public void actualizar(Empresa empresaParaActualizar, Empresa empresaPersistida) {
+     if (empresaPersistida.getLogo() != null && !empresaPersistida.getLogo().isEmpty()
+       && (empresaParaActualizar.getLogo() == null || empresaParaActualizar.getLogo().isEmpty())) {
+         photoVideoUploader.borrarImagen(Empresa.class.getSimpleName() + empresaPersistida.getId_Empresa());
+     }
+     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, empresaParaActualizar);
+     empresaRepository.save(empresaParaActualizar);
+  }
 
     @Override
     @Transactional
