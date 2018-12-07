@@ -54,26 +54,28 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     Cliente cliente = clienteService.getClientePorId(idCliente);
     carritoCompraDTO.setBonificacionPorcentaje(cliente.getBonificacion());
     carritoCompraDTO.setBonificacionNeto(
-        subtotal
-            .multiply(cliente.getBonificacion())
-            .divide(CIEN, RoundingMode.HALF_UP));
+        subtotal.multiply(cliente.getBonificacion()).divide(CIEN, RoundingMode.HALF_UP));
     carritoCompraDTO.setTotal(subtotal.subtract(carritoCompraDTO.getBonificacionNeto()));
     return carritoCompraDTO;
   }
 
   @Override
-  public Page<ItemCarritoCompra> getItemsDelCaritoCompra(long idUsuario, long idCliente, Pageable pageable) {
-    Page<ItemCarritoCompra> items = carritoCompraRepository.findAllByUsuario(
-        usuarioService.getUsuarioPorId(idUsuario), pageable);
+  public Page<ItemCarritoCompra> getItemsDelCaritoCompra(
+      long idUsuario, long idCliente, Pageable pageable) {
+    Page<ItemCarritoCompra> items =
+        carritoCompraRepository.findAllByUsuario(
+            usuarioService.getUsuarioPorId(idUsuario), pageable);
     Cliente cliente = clienteService.getClientePorId(idCliente);
     BigDecimal bonificacion = cliente.getBonificacion();
     items.forEach(
         i -> {
-          i.getProducto().setPrecioBonificado(
-              i.getProducto()
-                  .getPrecioLista()
-                  .multiply(
-                      BigDecimal.ONE.subtract(bonificacion.divide(CIEN, RoundingMode.HALF_UP))));
+          i.getProducto()
+              .setPrecioBonificado(
+                  i.getProducto()
+                      .getPrecioLista()
+                      .multiply(
+                          BigDecimal.ONE.subtract(
+                              bonificacion.divide(CIEN, RoundingMode.HALF_UP))));
           i.setImporte(i.getProducto().getPrecioLista().multiply(i.getCantidad()));
           i.setImporteBonificado(i.getProducto().getPrecioBonificado().multiply(i.getCantidad()));
         });
@@ -120,7 +122,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   }
 
   @Override
-  public ItemCarritoCompra modificarCantidadItem(long idUsuario, long idProducto, BigDecimal cantidad) {
+  public void modificarCantidadItem(long idUsuario, long idProducto, BigDecimal cantidad) {
     Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
     Producto producto = productoService.getProductoPorId(idProducto);
     ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(usuario, producto);
@@ -131,7 +133,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
         item.setCantidad(cantidad);
       }
       item.setImporte(producto.getPrecioLista().multiply(cantidad));
-      return carritoCompraRepository.save(item);
+      carritoCompraRepository.save(item);
     } else {
       throw new EntityNotFoundException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_item_no_existente"));

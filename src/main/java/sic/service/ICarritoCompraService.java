@@ -11,7 +11,8 @@ public interface ICarritoCompraService {
 
   CarritoCompraDTO getCarritoCompra(long idUsuario, long idCliente);
 
-  Page<ItemCarritoCompra> getItemsDelCaritoCompra(long idUsuario, long idCliente, Pageable pageable);
+  Page<ItemCarritoCompra> getItemsDelCaritoCompra(
+      long idUsuario, long idCliente, Pageable pageable);
 
   void eliminarItemDelUsuario(long idUsuario, long idProducto);
 
@@ -21,5 +22,5 @@ public interface ICarritoCompraService {
 
   void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad);
 
-  ItemCarritoCompra modificarCantidadItem(long idUsuario, long idProducto, BigDecimal cantidad);
+  void modificarCantidadItem(long idUsuario, long idProducto, BigDecimal cantidad);
 }

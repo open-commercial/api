@@ -32,11 +32,11 @@ public class CarritoCompraController {
 
   @Autowired
   public CarritoCompraController(
-    ICarritoCompraService carritoCompraService,
-    IPedidoService pedidoService,
-    IEmpresaService empresaService,
-    IUsuarioService usuarioService,
-    IClienteService clienteService) {
+      ICarritoCompraService carritoCompraService,
+      IPedidoService pedidoService,
+      IEmpresaService empresaService,
+      IUsuarioService usuarioService,
+      IClienteService clienteService) {
     this.carritoCompraService = carritoCompraService;
     this.pedidoService = pedidoService;
     this.empresaService = empresaService;
@@ -53,13 +53,14 @@ public class CarritoCompraController {
   @JsonView(Views.Public.class)
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/clientes/{idCliente}/items")
   public Page<ItemCarritoCompra> getAllItemsDelUsuario(
-    @PathVariable long idUsuario,
-    @PathVariable long idCliente,
-    @RequestParam(required = false) Integer pagina) {
+      @PathVariable long idUsuario,
+      @PathVariable long idCliente,
+      @RequestParam(required = false) Integer pagina) {
     final int TAMANIO_PAGINA_DEFAULT = 10;
     if (pagina == null || pagina < 0) pagina = 0;
     Pageable pageable =
-      new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
+        new PageRequest(
+            pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
     return carritoCompraService.getItemsDelCaritoCompra(idUsuario, idCliente, pageable);
   }
 
@@ -75,26 +76,26 @@ public class CarritoCompraController {
 
   @PostMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
   public void agregarOrModificarItem(
-    @PathVariable long idUsuario,
-    @PathVariable long idProducto,
-    @RequestParam BigDecimal cantidad) {
+      @PathVariable long idUsuario,
+      @PathVariable long idProducto,
+      @RequestParam BigDecimal cantidad) {
     carritoCompraService.agregarOrModificarItem(idUsuario, idProducto, cantidad);
   }
 
   @PutMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
-  public ItemCarritoCompra modificarCantidadItem(
-    @PathVariable long idUsuario,
-    @PathVariable long idProducto,
-    @RequestParam BigDecimal cantidad) {
-    return carritoCompraService.modificarCantidadItem(idUsuario, idProducto, cantidad);
+  public void modificarCantidadItem(
+      @PathVariable long idUsuario,
+      @PathVariable long idProducto,
+      @RequestParam BigDecimal cantidad) {
+    carritoCompraService.modificarCantidadItem(idUsuario, idProducto, cantidad);
   }
 
   @PostMapping("/carrito-compra")
   public Pedido generarPedidoConItemsDelCarrito(
-    @RequestParam Long idEmpresa,
-    @RequestParam Long idUsuario,
-    @RequestParam Long idCliente,
-    @RequestBody(required = false) String observaciones) {
+      @RequestParam Long idEmpresa,
+      @RequestParam Long idUsuario,
+      @RequestParam Long idCliente,
+      @RequestBody(required = false) String observaciones) {
     CarritoCompraDTO carritoCompraDTO = carritoCompraService.getCarritoCompra(idUsuario, idCliente);
     Pedido pedido = new Pedido();
     pedido.setObservaciones(observaciones);
@@ -109,17 +110,17 @@ public class CarritoCompraController {
     pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
     pedido.setCliente(clienteService.getClientePorId(idCliente));
     Pageable pageable =
-      new PageRequest(0, Integer.MAX_VALUE, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
+        new PageRequest(0, Integer.MAX_VALUE, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
     List<ItemCarritoCompra> items =
-      carritoCompraService.getItemsDelCaritoCompra(idUsuario, idCliente, pageable).getContent();
+        carritoCompraService.getItemsDelCaritoCompra(idUsuario, idCliente, pageable).getContent();
     pedido.setRenglones(new ArrayList<>());
-    items.forEach(     
+    items.forEach(
         i ->
             pedido
                 .getRenglones()
                 .add(
                     pedidoService.calcularRenglonPedido(
-                        i.getProducto().getIdProducto(), i.getCantidad(), BigDecimal.ZERO)));  
+                        i.getProducto().getIdProducto(), i.getCantidad(), BigDecimal.ZERO)));
     Pedido p = pedidoService.guardar(pedido);
     carritoCompraService.eliminarTodosLosItemsDelUsuario(idUsuario);
     return p;
