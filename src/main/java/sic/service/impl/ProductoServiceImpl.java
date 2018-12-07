@@ -17,6 +17,8 @@ import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
+import javax.xml.bind.DatatypeConverter;
+
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -195,7 +197,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public Producto guardar(Producto producto) {
+  public Producto guardar(Producto producto, String base64Imagen) {
     if (producto.getCodigo() == null) producto.setCodigo("");
     producto.setFechaAlta(new Date());
     producto.setFechaUltimaModificacion(new Date());
@@ -203,6 +205,10 @@ public class ProductoServiceImpl implements IProductoService {
     this.validarOperacion(TipoDeOperacion.ALTA, producto);
     producto = productoRepository.save(producto);
     logger.warn("El Producto {} se guardó correctamente.", producto);
+    if (base64Imagen != null) {
+      byte[] imagen = DatatypeConverter.parseBase64Binary(base64Imagen);
+      productoRepository.actualizarUrlImagen(producto.getIdProducto(), photoVideoUploader.subirImagen(Producto.class.getSimpleName() + producto.getIdProducto(), imagen));
+    }
     return producto;
   }
 

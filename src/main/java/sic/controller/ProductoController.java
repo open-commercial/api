@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductoDTO;
 import sic.service.*;
 
@@ -226,17 +227,37 @@ public class ProductoController {
   @PostMapping("/productos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Producto guardar(
-      @RequestBody ProductoDTO productoDTO,
-      @RequestParam Long idMedida,
-      @RequestParam Long idRubro,
-      @RequestParam Long idProveedor,
-      @RequestParam Long idEmpresa) {
-    Producto producto = modelMapper.map(productoDTO, Producto.class);
+    @RequestBody NuevoProductoDTO nuevoProductoDTO,
+    @RequestParam Long idMedida,
+    @RequestParam Long idRubro,
+    @RequestParam Long idProveedor,
+    @RequestParam Long idEmpresa) {
+    Producto producto = new Producto();
     producto.setMedida(medidaService.getMedidaPorId(idMedida));
     producto.setRubro(rubroService.getRubroPorId(idRubro));
     producto.setProveedor(proveedorService.getProveedorPorId(idProveedor));
     producto.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    return productoService.guardar(producto);
+    producto.setCodigo(nuevoProductoDTO.getCodigo());
+    producto.setDescripcion(nuevoProductoDTO.getDescripcion());
+    producto.setCantidad(nuevoProductoDTO.getCantidad());
+    producto.setHayStock(nuevoProductoDTO.isHayStock());
+    producto.setPrecioBonificado(nuevoProductoDTO.getPrecioBonificado());
+    producto.setCantMinima(nuevoProductoDTO.getCantMinima());
+    producto.setBulto(nuevoProductoDTO.getBulto());
+    producto.setPrecioCosto(nuevoProductoDTO.getPrecioCosto());
+    producto.setGananciaPorcentaje(nuevoProductoDTO.getGananciaPorcentaje());
+    producto.setGananciaNeto(nuevoProductoDTO.getGananciaNeto());
+    producto.setPrecioVentaPublico(nuevoProductoDTO.getPrecioVentaPublico());
+    producto.setIvaPorcentaje(nuevoProductoDTO.getIvaPorcentaje());
+    producto.setIvaNeto(nuevoProductoDTO.getIvaNeto());
+    producto.setPrecioLista(nuevoProductoDTO.getPrecioLista());
+    producto.setIlimitado(nuevoProductoDTO.isIlimitado());
+    producto.setPublico(nuevoProductoDTO.isPublico());
+    producto.setEstante(nuevoProductoDTO.getEstante());
+    producto.setEstanteria(nuevoProductoDTO.getEstanteria());
+    producto.setNota(nuevoProductoDTO.getNota());
+    producto.setFechaVencimiento(nuevoProductoDTO.getFechaVencimiento());
+    return productoService.guardar(producto, nuevoProductoDTO.getBase64Imagen());
   }
 
   @PostMapping("/productos/{idProducto}/imagenes")

@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.dto.NuevoPedidoDTO;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.modelo.dto.PedidoDTO;
 import sic.service.*;
