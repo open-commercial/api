@@ -21,136 +21,146 @@ import sic.service.IConfiguracionDelSistemaService;
 @Service
 public class EmpresaServiceImpl implements IEmpresaService {
 
-    private final EmpresaRepository empresaRepository;
-    private final IConfiguracionDelSistemaService configuracionDelSistemaService;
-    private final IPhotoVideoUploader photoVideoUploader;
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+  private final EmpresaRepository empresaRepository;
+  private final IConfiguracionDelSistemaService configuracionDelSistemaService;
+  private final IPhotoVideoUploader photoVideoUploader;
+  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+  private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
-    public EmpresaServiceImpl(EmpresaRepository empresaRepository,
-                              IConfiguracionDelSistemaService configuracionDelSistemaService,
-                              IPhotoVideoUploader photoVideoUploader) {
+  @Autowired
+  public EmpresaServiceImpl(
+      EmpresaRepository empresaRepository,
+      IConfiguracionDelSistemaService configuracionDelSistemaService,
+      IPhotoVideoUploader photoVideoUploader) {
 
-        this.empresaRepository = empresaRepository;
-        this.configuracionDelSistemaService = configuracionDelSistemaService;
-        this.photoVideoUploader = photoVideoUploader;
-    }
-    
-    @Override
-    public Empresa getEmpresaPorId(Long idEmpresa){
-        Empresa empresa = empresaRepository.findById(idEmpresa);
-        if (empresa == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_no_existente"));
-        }
-        return empresa;
-    }
+    this.empresaRepository = empresaRepository;
+    this.configuracionDelSistemaService = configuracionDelSistemaService;
+    this.photoVideoUploader = photoVideoUploader;
+  }
 
-    @Override
-    public List<Empresa> getEmpresas() {
-        return empresaRepository.findAllByAndEliminadaOrderByNombreAsc(false);
+  @Override
+  public Empresa getEmpresaPorId(Long idEmpresa) {
+    Empresa empresa = empresaRepository.findById(idEmpresa);
+    if (empresa == null) {
+      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_empresa_no_existente"));
     }
+    return empresa;
+  }
 
-    @Override
-    public Empresa getEmpresaPorNombre(String nombre) {
-        return empresaRepository.findByNombreIsAndEliminadaOrderByNombreAsc(nombre, false);
-    }
+  @Override
+  public List<Empresa> getEmpresas() {
+    return empresaRepository.findAllByAndEliminadaOrderByNombreAsc(false);
+  }
 
-    @Override
-    public Empresa getEmpresaPorIdFiscal(Long idFiscal) {
-        return empresaRepository.findByIdFiscalAndEliminada(idFiscal, false);
-    }
+  @Override
+  public Empresa getEmpresaPorNombre(String nombre) {
+    return empresaRepository.findByNombreIsAndEliminadaOrderByNombreAsc(nombre, false);
+  }
 
-    private void validarOperacion(TipoDeOperacion operacion, Empresa empresa) {
-        //Entrada de Datos
-        if (empresa.getEmail() != null && !empresa.getEmail().equals("")) {
-            if (!Validator.esEmailValido(empresa.getEmail())) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_empresa_email_invalido"));
-            }
-        }
-        //Requeridos
-        if (Validator.esVacio(empresa.getNombre())) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_vacio_nombre"));
-        }
-        if (Validator.esVacio(empresa.getDireccion())) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_vacio_direccion"));
-        }
-        if (empresa.getLocalidad() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_vacio_localidad"));
-        }
-        //Duplicados
-        //Nombre
-        Empresa empresaDuplicada = this.getEmpresaPorNombre(empresa.getNombre());
-        if (operacion == TipoDeOperacion.ALTA && empresaDuplicada != null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_duplicado_nombre"));
-        }
-        if (operacion == TipoDeOperacion.ACTUALIZACION) {
-            if (empresaDuplicada != null && empresaDuplicada.getId_Empresa() != empresa.getId_Empresa()) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_empresa_duplicado_nombre"));
-            }
-        }
-        //ID Fiscal
-        empresaDuplicada = this.getEmpresaPorIdFiscal(empresa.getIdFiscal());
-        if (operacion == TipoDeOperacion.ALTA && empresaDuplicada != null && empresa.getIdFiscal() != null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_empresa_duplicado_cuip"));
-        }
-        if (operacion == TipoDeOperacion.ACTUALIZACION) {
-            if (empresaDuplicada != null && empresaDuplicada.getId_Empresa() != empresa.getId_Empresa() && empresa.getIdFiscal() != null) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_empresa_duplicado_cuip"));
-            }
-        }
-    }
+  @Override
+  public Empresa getEmpresaPorIdFiscal(Long idFiscal) {
+    return empresaRepository.findByIdFiscalAndEliminada(idFiscal, false);
+  }
 
-    private void crearConfiguracionDelSistema(Empresa empresa) {
-        ConfiguracionDelSistema cds = new ConfiguracionDelSistema();
-        cds.setUsarFacturaVentaPreImpresa(false);
-        cds.setCantidadMaximaDeRenglonesEnFactura(28);
-        cds.setFacturaElectronicaHabilitada(false);
-        cds.setEmpresa(empresa);
-        configuracionDelSistemaService.guardar(cds);
+  private void validarOperacion(TipoDeOperacion operacion, Empresa empresa) {
+    // Entrada de Datos
+    if (empresa.getEmail() != null && !empresa.getEmail().equals("")) {
+      if (!Validator.esEmailValido(empresa.getEmail())) {
+        throw new BusinessServiceException(
+            RESOURCE_BUNDLE.getString("mensaje_empresa_email_invalido"));
+      }
     }
+    // Requeridos
+    if (Validator.esVacio(empresa.getNombre())) {
+      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_empresa_vacio_nombre"));
+    }
+    if (Validator.esVacio(empresa.getDireccion())) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_empresa_vacio_direccion"));
+    }
+    if (empresa.getLocalidad() == null) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_empresa_vacio_localidad"));
+    }
+    // Duplicados
+    // Nombre
+    Empresa empresaDuplicada = this.getEmpresaPorNombre(empresa.getNombre());
+    if (operacion == TipoDeOperacion.ALTA && empresaDuplicada != null) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_empresa_duplicado_nombre"));
+    }
+    if (operacion == TipoDeOperacion.ACTUALIZACION) {
+      if (empresaDuplicada != null && empresaDuplicada.getId_Empresa() != empresa.getId_Empresa()) {
+        throw new BusinessServiceException(
+            RESOURCE_BUNDLE.getString("mensaje_empresa_duplicado_nombre"));
+      }
+    }
+    // ID Fiscal
+    empresaDuplicada = this.getEmpresaPorIdFiscal(empresa.getIdFiscal());
+    if (operacion == TipoDeOperacion.ALTA
+        && empresaDuplicada != null
+        && empresa.getIdFiscal() != null) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_empresa_duplicado_cuip"));
+    }
+    if (operacion == TipoDeOperacion.ACTUALIZACION) {
+      if (empresaDuplicada != null
+          && empresaDuplicada.getId_Empresa() != empresa.getId_Empresa()
+          && empresa.getIdFiscal() != null) {
+        throw new BusinessServiceException(
+            RESOURCE_BUNDLE.getString("mensaje_empresa_duplicado_cuip"));
+      }
+    }
+  }
 
-    @Override
-    @Transactional
-    public Empresa guardar(Empresa empresa) {
-        validarOperacion(TipoDeOperacion.ALTA, empresa);
-        empresa = empresaRepository.save(empresa);
-        crearConfiguracionDelSistema(empresa);
-        LOGGER.warn("La Empresa {} se guardó correctamente.", empresa);
-        return empresa;
-    }
+  private void crearConfiguracionDelSistema(Empresa empresa) {
+    ConfiguracionDelSistema cds = new ConfiguracionDelSistema();
+    cds.setUsarFacturaVentaPreImpresa(false);
+    cds.setCantidadMaximaDeRenglonesEnFactura(28);
+    cds.setFacturaElectronicaHabilitada(false);
+    cds.setEmpresa(empresa);
+    configuracionDelSistemaService.guardar(cds);
+  }
+
+  @Override
+  @Transactional
+  public Empresa guardar(Empresa empresa) {
+    validarOperacion(TipoDeOperacion.ALTA, empresa);
+    empresa = empresaRepository.save(empresa);
+    crearConfiguracionDelSistema(empresa);
+    LOGGER.warn("La Empresa {} se guardó correctamente.", empresa);
+    return empresa;
+  }
 
   @Override
   @Transactional
   public void actualizar(Empresa empresaParaActualizar, Empresa empresaPersistida) {
-     if (empresaPersistida.getLogo() != null && !empresaPersistida.getLogo().isEmpty()
-       && (empresaParaActualizar.getLogo() == null || empresaParaActualizar.getLogo().isEmpty())) {
-         photoVideoUploader.borrarImagen(Empresa.class.getSimpleName() + empresaPersistida.getId_Empresa());
-     }
-     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, empresaParaActualizar);
-     empresaRepository.save(empresaParaActualizar);
+    if (empresaPersistida.getLogo() != null
+        && !empresaPersistida.getLogo().isEmpty()
+        && (empresaParaActualizar.getLogo() == null || empresaParaActualizar.getLogo().isEmpty())) {
+      photoVideoUploader.borrarImagen(
+          Empresa.class.getSimpleName() + empresaPersistida.getId_Empresa());
+    }
+    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, empresaParaActualizar);
+    empresaRepository.save(empresaParaActualizar);
   }
 
-    @Override
-    @Transactional
-    public void eliminar(Long idEmpresa) {
-        Empresa empresa = this.getEmpresaPorId(idEmpresa);
-        empresa.setEliminada(true);
-        photoVideoUploader.borrarImagen(Empresa.class.getSimpleName() + empresa.getId_Empresa());
-        configuracionDelSistemaService.eliminar(configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa));
-        empresaRepository.save(empresa);
-    }
+  @Override
+  @Transactional
+  public void eliminar(Long idEmpresa) {
+    Empresa empresa = this.getEmpresaPorId(idEmpresa);
+    empresa.setEliminada(true);
+    photoVideoUploader.borrarImagen(Empresa.class.getSimpleName() + empresa.getId_Empresa());
+    configuracionDelSistemaService.eliminar(
+        configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa));
+    empresaRepository.save(empresa);
+  }
 
   @Override
   public String guardarLogo(long idEmpresa, byte[] imagen) {
+    if (imagen.length > 1024000L)
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_error_tamanio_no_valido"));
     return photoVideoUploader.subirImagen(Empresa.class.getSimpleName() + idEmpresa, imagen);
   }
 }

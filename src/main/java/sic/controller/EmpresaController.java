@@ -26,7 +26,6 @@ public class EmpresaController {
 
   public final IEmpresaService empresaService;
   private final ModelMapper modelMapper;
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Autowired
   public EmpresaController(IEmpresaService empresaService, ModelMapper modelMapper) {
@@ -83,9 +82,6 @@ public class EmpresaController {
   @PostMapping("/empresas/{idEmpresa}/logo")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public String uploadLogo(@PathVariable long idEmpresa, @RequestBody byte[] imagen) {
-    if (imagen.length > 1024000L)
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_error_tamanio_no_valido"));
     return empresaService.guardarLogo(idEmpresa, imagen);
   }
 }
