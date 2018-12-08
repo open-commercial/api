@@ -257,7 +257,7 @@ public class ProductoController {
     producto.setEstanteria(nuevoProductoDTO.getEstanteria());
     producto.setNota(nuevoProductoDTO.getNota());
     producto.setFechaVencimiento(nuevoProductoDTO.getFechaVencimiento());
-    return productoService.guardar(producto, nuevoProductoDTO.getBase64Imagen());
+    return productoService.guardar(producto);
   }
 
   @PostMapping("/productos/{idProducto}/imagenes")

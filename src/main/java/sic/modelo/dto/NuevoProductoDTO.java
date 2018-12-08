@@ -32,5 +32,4 @@ public class NuevoProductoDTO {
   private String nota;
   private Date fechaVencimiento;
   private boolean eliminado;
-  private String base64Imagen;
 }
