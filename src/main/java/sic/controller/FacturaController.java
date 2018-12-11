@@ -37,7 +37,7 @@ public class FacturaController {
     private final IUsuarioService usuarioService;
     private final ITransportistaService transportistaService;
     private final IReciboService reciboService;
-    private static final int TAMANIO_PAGINA_DEFAULT = 50;
+    private static final int TAMANIO_PAGINA_DEFAULT = 10;
 
     @Value("${SIC_JWT_KEY}")
     private String secretkey;
@@ -170,7 +170,6 @@ public class FacturaController {
     @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
     @RequestParam(required = false) Long idProducto,
     @RequestParam(required = false) Integer pagina,
-    @RequestParam(required = false) Integer tamanio,
     @RequestParam(required = false) String ordenarPor,
     @RequestParam(required = false) String sentido) {
     Calendar fechaDesde = Calendar.getInstance();
@@ -178,9 +177,6 @@ public class FacturaController {
     if ((desde != null) && (hasta != null)) {
       fechaDesde.setTimeInMillis(desde);
       fechaHasta.setTimeInMillis(hasta);
-    }
-    if (tamanio == null || tamanio <= 0) {
-      tamanio = TAMANIO_PAGINA_DEFAULT;
     }
     if (pagina == null || pagina < 0) {
       pagina = 0;
@@ -201,7 +197,7 @@ public class FacturaController {
         .buscaPorTipoComprobante(tipoDeComprobante != null)
         .tipoComprobante(tipoDeComprobante)
         .cantRegistros(0)
-        .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
+        .pageable(this.getPageable(pagina, ordenarPor, sentido))
         .build();
     return facturaService.buscarFacturaCompra(criteria);
   }
@@ -227,7 +223,6 @@ public class FacturaController {
     @RequestParam(required = false) Long nroPedido,
     @RequestParam(required = false) Long idProducto,
     @RequestParam(required = false) Integer pagina,
-    @RequestParam(required = false) Integer tamanio,
     @RequestParam(required = false) String ordenarPor,
     @RequestParam(required = false) String sentido,
     @RequestHeader("Authorization") String token) {
@@ -236,9 +231,6 @@ public class FacturaController {
     if ((desde != null) && (hasta != null)) {
       fechaDesde.setTimeInMillis(desde);
       fechaHasta.setTimeInMillis(hasta);
-    }
-    if (tamanio == null || tamanio <= 0) {
-      tamanio = TAMANIO_PAGINA_DEFAULT;
     }
     if (pagina == null || pagina < 0) {
       pagina = 0;
@@ -265,25 +257,25 @@ public class FacturaController {
         .buscaPorTipoComprobante(tipoDeComprobante != null)
         .tipoComprobante(tipoDeComprobante)
         .cantRegistros(0)
-        .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
+        .pageable(this.getPageable(pagina, ordenarPor, sentido))
         .build();
     Claims claims =
       Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
     return facturaService.buscarFacturaVenta(criteria, (int) claims.get("idUsuario"));
   }
 
-  private Pageable getPageable(int pagina, int tamanio, String ordenarPor, String sentido) {
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
     String ordenDefault = "fecha";
     if (ordenarPor == null || sentido == null) {
-      return new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenDefault));
+      return new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
     } else {
       switch (sentido) {
         case "ASC":
-          return new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenarPor));
+          return new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
         case "DESC":
-          return new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenarPor));
+          return new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
         default:
-          return new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenDefault));
+          return new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
       }
     }
   }

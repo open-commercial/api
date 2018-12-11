@@ -30,7 +30,7 @@ public class CuentaCorrienteController {
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IProveedorService proveedorService;
   private final IClienteService clienteService;
-  private static final int TAMANIO_PAGINA_DEFAULT = 50;
+  private static final int TAMANIO_PAGINA_DEFAULT = 10;
 
   @Value("${SIC_JWT_KEY}")
   private String secretkey;
@@ -169,11 +169,9 @@ public class CuentaCorrienteController {
   })
   public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(
       @PathVariable long idCuentaCorriente,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) Integer tamanio) {
-    if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
+      @RequestParam(required = false) Integer pagina) {
     if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable = new PageRequest(pagina, tamanio);
+    Pageable pageable = new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT);
     return cuentaCorrienteService.getRenglonesCuentaCorriente(idCuentaCorriente, pageable);
   }
 
@@ -188,11 +186,9 @@ public class CuentaCorrienteController {
   public ResponseEntity<byte[]> getReporteCuentaCorrienteXls(
       @PathVariable long idCliente,
       @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) Integer tamanio,
       @RequestParam(required = false) String formato) {
-    if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
     if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable = new PageRequest(pagina, tamanio);
+    Pageable pageable = new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT);
     HttpHeaders headers = new HttpHeaders();
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
     switch (formato) {

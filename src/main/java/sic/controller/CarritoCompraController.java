@@ -29,6 +29,7 @@ public class CarritoCompraController {
   private final IEmpresaService empresaService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
+  private static final int TAMANIO_PAGINA_DEFAULT = 10;
 
   @Autowired
   public CarritoCompraController(
@@ -56,7 +57,6 @@ public class CarritoCompraController {
       @PathVariable long idUsuario,
       @PathVariable long idCliente,
       @RequestParam(required = false) Integer pagina) {
-    final int TAMANIO_PAGINA_DEFAULT = 10;
     if (pagina == null || pagina < 0) pagina = 0;
     Pageable pageable =
         new PageRequest(

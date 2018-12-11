@@ -24,7 +24,7 @@ public class CajaController {
     private final IEmpresaService empresaService;
     private final IUsuarioService usuarioService;
     private final IFormaDePagoService formaDePagoService;
-    private static final int TAMANIO_PAGINA_DEFAULT = 50;
+    private static final int TAMANIO_PAGINA_DEFAULT = 10;
 
     @Value("${SIC_JWT_KEY}")
     private String secretkey;
@@ -72,39 +72,41 @@ public class CajaController {
                            @RequestParam long idUsuarioCierre) {
         return cajaService.cerrarCaja(idCaja, monto, idUsuarioCierre, false);
     }
-    
-    @GetMapping("/cajas/busqueda/criteria")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public Page<Caja> getCajasCriteria(@RequestParam long idEmpresa,
-                                       @RequestParam(required = false) Long desde,
-                                       @RequestParam(required = false) Long hasta,
-                                       @RequestParam(required = false) Long idUsuarioApertura,
-                                       @RequestParam(required = false) Long idUsuarioCierre,
-                                       @RequestParam(required = false) Integer pagina,
-                                       @RequestParam(required = false) Integer tamanio) {
-        Calendar fechaDesde = Calendar.getInstance();            
-        Calendar fechaHasta = Calendar.getInstance();
-        if (desde != null && hasta != null) {           
-            fechaDesde.setTimeInMillis(desde);
-            fechaHasta.setTimeInMillis(hasta);
-        }
-        if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
-        if (pagina == null || pagina < 0) pagina = 0;
-        Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, "fechaApertura"));
-        BusquedaCajaCriteria criteria = BusquedaCajaCriteria.builder()
-                                        .buscaPorFecha((desde != null) && (hasta != null))
-                                        .fechaDesde(fechaDesde.getTime())
-                                        .fechaHasta(fechaHasta.getTime())
-                                        .idEmpresa(idEmpresa)
-                                        .cantidadDeRegistros(0)
-                                        .buscaPorUsuarioApertura(idUsuarioApertura != null)
-                                        .idUsuarioApertura(idUsuarioApertura)
-                                        .buscaPorUsuarioCierre(idUsuarioCierre != null)
-                                        .idUsuarioCierre(idUsuarioCierre)
-                                        .pageable(pageable)
-                                        .build();
-        return cajaService.getCajasCriteria(criteria);
+
+  @GetMapping("/cajas/busqueda/criteria")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public Page<Caja> getCajasCriteria(
+      @RequestParam long idEmpresa,
+      @RequestParam(required = false) Long desde,
+      @RequestParam(required = false) Long hasta,
+      @RequestParam(required = false) Long idUsuarioApertura,
+      @RequestParam(required = false) Long idUsuarioCierre,
+      @RequestParam(required = false) Integer pagina) {
+    Calendar fechaDesde = Calendar.getInstance();
+    Calendar fechaHasta = Calendar.getInstance();
+    if (desde != null && hasta != null) {
+      fechaDesde.setTimeInMillis(desde);
+      fechaHasta.setTimeInMillis(hasta);
     }
+    if (pagina == null || pagina < 0) pagina = 0;
+    Pageable pageable =
+        new PageRequest(
+            pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "fechaApertura"));
+    BusquedaCajaCriteria criteria =
+        BusquedaCajaCriteria.builder()
+            .buscaPorFecha((desde != null) && (hasta != null))
+            .fechaDesde(fechaDesde.getTime())
+            .fechaHasta(fechaHasta.getTime())
+            .idEmpresa(idEmpresa)
+            .cantidadDeRegistros(0)
+            .buscaPorUsuarioApertura(idUsuarioApertura != null)
+            .idUsuarioApertura(idUsuarioApertura)
+            .buscaPorUsuarioCierre(idUsuarioCierre != null)
+            .idUsuarioCierre(idUsuarioCierre)
+            .pageable(pageable)
+            .build();
+    return cajaService.getCajasCriteria(criteria);
+  }
 
   @GetMapping("/cajas/{idCaja}/movimientos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})

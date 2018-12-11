@@ -37,7 +37,7 @@ public class NotaController {
   private final IUsuarioService usuarioService;
   private final IFacturaService facturaService;
   private final ModelMapper modelMapper;
-  private static final int TAMANIO_PAGINA_DEFAULT = 50;
+  private static final int TAMANIO_PAGINA_DEFAULT = 10;
 
   @Value("${SIC_JWT_KEY}")
   private String secretkey;
@@ -93,7 +93,6 @@ public class NotaController {
       @RequestParam(required = false) Long idUsuario,
       @RequestParam(required = false) Movimiento movimiento,
       @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) Integer tamanio,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
       @RequestHeader("Authorization") String token) {
@@ -102,9 +101,6 @@ public class NotaController {
     if ((desde != null) && (hasta != null)) {
       fechaDesde.setTimeInMillis(desde);
       fechaHasta.setTimeInMillis(hasta);
-    }
-    if (tamanio == null || tamanio <= 0) {
-      tamanio = TAMANIO_PAGINA_DEFAULT;
     }
     if (pagina == null || pagina < 0) {
       pagina = 0;
@@ -125,25 +121,25 @@ public class NotaController {
             .numNota((nroNota != null) ? nroNota : 0)
             .buscaPorTipoComprobante(tipoDeComprobante != null)
             .tipoComprobante(tipoDeComprobante)
-            .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
+            .pageable(this.getPageable(pagina, ordenarPor, sentido))
             .build();
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
     return notaService.buscarNotas(criteria, (int) claims.get("idUsuario"));
   }
 
-  private Pageable getPageable(int pagina, int tamanio, String ordenarPor, String sentido) {
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
     String ordenDefault = "fecha";
     if (ordenarPor == null || sentido == null) {
-      return new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenDefault));
+      return new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
     } else {
       switch (sentido) {
         case "ASC":
-          return new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenarPor));
+          return new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
         case "DESC":
-          return new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenarPor));
+          return new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
         default:
-          return new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenDefault));
+          return new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
       }
     }
   }
@@ -414,7 +410,6 @@ public class NotaController {
       @RequestParam(required = false) Movimiento movimiento,
       @RequestParam(required = false) Long idUsuario,
       @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) Integer tamanio,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
       @RequestHeader("Authorization") String token) {
@@ -423,9 +418,6 @@ public class NotaController {
     if ((desde != null) && (hasta != null)) {
       fechaDesde.setTimeInMillis(desde);
       fechaHasta.setTimeInMillis(hasta);
-    }
-    if (tamanio == null || tamanio <= 0) {
-      tamanio = TAMANIO_PAGINA_DEFAULT;
     }
     if (pagina == null || pagina < 0) {
       pagina = 0;
@@ -446,7 +438,7 @@ public class NotaController {
             .numNota((nroNota != null) ? nroNota : 0)
             .buscaPorTipoComprobante(tipoDeComprobante != null)
             .tipoComprobante(tipoDeComprobante)
-            .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
+            .pageable(this.getPageable(pagina, ordenarPor, sentido))
             .build();
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
@@ -466,7 +458,6 @@ public class NotaController {
       @RequestParam(required = false) Movimiento movimiento,
       @RequestParam(required = false) Long idUsuario,
       @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) Integer tamanio,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
       @RequestHeader("Authorization") String token) {
@@ -475,9 +466,6 @@ public class NotaController {
     if ((desde != null) && (hasta != null)) {
       fechaDesde.setTimeInMillis(desde);
       fechaHasta.setTimeInMillis(hasta);
-    }
-    if (tamanio == null || tamanio <= 0) {
-      tamanio = TAMANIO_PAGINA_DEFAULT;
     }
     if (pagina == null || pagina < 0) {
       pagina = 0;
@@ -498,7 +486,7 @@ public class NotaController {
             .numNota((nroNota != null) ? nroNota : 0)
             .buscaPorTipoComprobante(tipoDeComprobante != null)
             .tipoComprobante(tipoDeComprobante)
-            .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
+            .pageable(this.getPageable(pagina, ordenarPor, sentido))
             .build();
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
@@ -518,7 +506,6 @@ public class NotaController {
       @RequestParam(required = false) Movimiento movimiento,
       @RequestParam(required = false) Long idUsuario,
       @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) Integer tamanio,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
       @RequestHeader("Authorization") String token) {
@@ -527,9 +514,6 @@ public class NotaController {
     if ((desde != null) && (hasta != null)) {
       fechaDesde.setTimeInMillis(desde);
       fechaHasta.setTimeInMillis(hasta);
-    }
-    if (tamanio == null || tamanio <= 0) {
-      tamanio = TAMANIO_PAGINA_DEFAULT;
     }
     if (pagina == null || pagina < 0) {
       pagina = 0;
@@ -550,7 +534,7 @@ public class NotaController {
             .numNota((nroNota != null) ? nroNota : 0)
             .buscaPorTipoComprobante(tipoDeComprobante != null)
             .tipoComprobante(tipoDeComprobante)
-            .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
+            .pageable(this.getPageable(pagina, ordenarPor, sentido))
             .build();
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
@@ -570,7 +554,6 @@ public class NotaController {
       @RequestParam(required = false) Movimiento movimiento,
       @RequestParam(required = false) Long idUsuario,
       @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) Integer tamanio,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
       @RequestHeader("Authorization") String token) {
@@ -579,9 +562,6 @@ public class NotaController {
     if ((desde != null) && (hasta != null)) {
       fechaDesde.setTimeInMillis(desde);
       fechaHasta.setTimeInMillis(hasta);
-    }
-    if (tamanio == null || tamanio <= 0) {
-      tamanio = TAMANIO_PAGINA_DEFAULT;
     }
     if (pagina == null || pagina < 0) {
       pagina = 0;
@@ -602,7 +582,7 @@ public class NotaController {
             .numNota((nroNota != null) ? nroNota : 0)
             .buscaPorTipoComprobante(tipoDeComprobante != null)
             .tipoComprobante(tipoDeComprobante)
-            .pageable(this.getPageable(pagina, tamanio, ordenarPor, sentido))
+            .pageable(this.getPageable(pagina, ordenarPor, sentido))
             .build();
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
