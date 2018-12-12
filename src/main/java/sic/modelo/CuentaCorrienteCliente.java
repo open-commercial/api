@@ -25,7 +25,7 @@ public class CuentaCorrienteCliente extends CuentaCorriente implements Serializa
 
     @OneToOne
     @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
-    @QueryInit("localidad.provincia.pais")
+    @QueryInit({"viajante", "localidad.provincia.pais"})
     private Cliente cliente;
 
     public CuentaCorrienteCliente() {}
