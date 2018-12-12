@@ -35,6 +35,7 @@ public class PedidoController {
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
     private final ModelMapper modelMapper;
+    private static final int TAMANIO_PAGINA_DEFAULT = 10;
 
     @Value("${SIC_JWT_KEY}")
     private String secretkey;
@@ -120,50 +121,55 @@ public class PedidoController {
     return pedidoService.guardar(pedido);
   }
 
-    @GetMapping("/pedidos/busqueda/criteria")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
-    public Page<Pedido> buscarConCriteria(@RequestParam Long idEmpresa,
-                                          @RequestParam(required = false) Long desde,
-                                          @RequestParam(required = false) Long hasta,
-                                          @RequestParam(required = false) Long idCliente,
-                                          @RequestParam(required = false) Long idUsuario,
-                                          @RequestParam(required = false) Long nroPedido,
-                                          @RequestParam(required = false) EstadoPedido estadoPedido,
-                                          @RequestParam(required = false) Integer pagina,
-                                          @RequestParam(required = false) Integer tamanio,
-                                          @RequestHeader("Authorization") String token) {
-        final int TAMANIO_PAGINA_DEFAULT = 50;
-        Calendar fechaDesde = Calendar.getInstance();
-        Calendar fechaHasta = Calendar.getInstance();
-        if ((desde != null) && (hasta != null)) {
-            fechaDesde.setTimeInMillis(desde);            
-            fechaHasta.setTimeInMillis(hasta);
-        }
-        Cliente cliente = null;
-        if (idCliente != null) cliente = clienteService.getClientePorId(idCliente);
-        if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
-        if (pagina == null || pagina < 0) pagina = 0;
-        Pageable pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, "fecha"));
-        BusquedaPedidoCriteria criteria = BusquedaPedidoCriteria.builder()
-                                                                .buscaPorFecha((desde != null) && (hasta != null))
-                                                                .fechaDesde(fechaDesde.getTime())
-                                                                .fechaHasta(fechaHasta.getTime())
-                                                                .buscaCliente(cliente != null)
-                                                                .idCliente(idCliente)
-                                                                .buscaUsuario(idUsuario != null)
-                                                                .idUsuario(idUsuario)
-                                                                .buscaPorNroPedido(nroPedido != null)
-                                                                .nroPedido((nroPedido != null) ? nroPedido : 0)
-                                                                .buscaPorEstadoPedido(estadoPedido != null)
-                                                                .estadoPedido(estadoPedido)
-                                                                .idEmpresa(idEmpresa)
-                                                                .pageable(pageable)
-                                                                .build();
-        Claims claims =
-                Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-        return pedidoService.buscarConCriteria(criteria, (int) claims.get("idUsuario"));
+  @GetMapping("/pedidos/busqueda/criteria")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public Page<Pedido> buscarConCriteria(
+      @RequestParam Long idEmpresa,
+      @RequestParam(required = false) Long desde,
+      @RequestParam(required = false) Long hasta,
+      @RequestParam(required = false) Long idCliente,
+      @RequestParam(required = false) Long idUsuario,
+      @RequestParam(required = false) Long nroPedido,
+      @RequestParam(required = false) EstadoPedido estadoPedido,
+      @RequestParam(required = false) Integer pagina,
+      @RequestHeader("Authorization") String token) {
+    Calendar fechaDesde = Calendar.getInstance();
+    Calendar fechaHasta = Calendar.getInstance();
+    if ((desde != null) && (hasta != null)) {
+      fechaDesde.setTimeInMillis(desde);
+      fechaHasta.setTimeInMillis(hasta);
     }
-    
+    Cliente cliente = null;
+    if (idCliente != null) cliente = clienteService.getClientePorId(idCliente);
+    if (pagina == null || pagina < 0) pagina = 0;
+    Pageable pageable = new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "fecha"));
+    BusquedaPedidoCriteria criteria =
+        BusquedaPedidoCriteria.builder()
+            .buscaPorFecha((desde != null) && (hasta != null))
+            .fechaDesde(fechaDesde.getTime())
+            .fechaHasta(fechaHasta.getTime())
+            .buscaCliente(cliente != null)
+            .idCliente(idCliente)
+            .buscaUsuario(idUsuario != null)
+            .idUsuario(idUsuario)
+            .buscaPorNroPedido(nroPedido != null)
+            .nroPedido((nroPedido != null) ? nroPedido : 0)
+            .buscaPorEstadoPedido(estadoPedido != null)
+            .estadoPedido(estadoPedido)
+            .idEmpresa(idEmpresa)
+            .pageable(pageable)
+            .build();
+    Claims claims =
+        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    return pedidoService.buscarConCriteria(criteria, (int) claims.get("idUsuario"));
+  }
+
     @DeleteMapping("/pedidos/{idPedido}")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public void eliminar(@PathVariable long idPedido) {

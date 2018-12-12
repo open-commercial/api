@@ -32,7 +32,7 @@ public class ProductoController {
   private final IEmpresaService empresaService;
   private final IClienteService clienteService;
   private final ModelMapper modelMapper;
-  private static final int TAMANIO_PAGINA_DEFAULT = 50;
+  private static final int TAMANIO_PAGINA_DEFAULT = 10;
 
   @Value("${SIC_JWT_KEY}")
   private String secretkey;
@@ -71,7 +71,9 @@ public class ProductoController {
     Cliente cliente =
         clienteService.getClientePorIdUsuarioYidEmpresa(
             (int) claims.get("idUsuario"), producto.getEmpresa().getId_Empresa());
-    Page<Producto> productos = productoService.getProductosConPrecioBonificado(new PageImpl<>(Collections.singletonList(producto)), cliente);
+    Page<Producto> productos =
+        productoService.getProductosConPrecioBonificado(
+            new PageImpl<>(Collections.singletonList(producto)), cliente);
     return productos.getContent().get(0);
   }
 

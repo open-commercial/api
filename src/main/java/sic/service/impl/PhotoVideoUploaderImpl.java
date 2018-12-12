@@ -36,7 +36,7 @@ public class PhotoVideoUploaderImpl implements IPhotoVideoUploader {
       Map uploadResult = cloudinary.uploader().upload(file, ObjectUtils.asMap(
               "public_id", nombreImagen,
               "transformation", new Transformation().crop("fit").width(800).height(600)));
-      urlImagen = uploadResult.get("url").toString();
+      urlImagen = uploadResult.get("secure_url").toString();
       logger.warn("La imagen {} se guardó correctamente.", nombreImagen);
       Files.delete(path);
     } catch (IOException ex) {
