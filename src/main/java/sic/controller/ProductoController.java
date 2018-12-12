@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductoDTO;
 import sic.service.*;
 
@@ -32,7 +33,6 @@ public class ProductoController {
   private final IClienteService clienteService;
   private final ModelMapper modelMapper;
   private static final int TAMANIO_PAGINA_DEFAULT = 10;
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Value("${SIC_JWT_KEY}")
   private String secretkey;
@@ -229,32 +229,43 @@ public class ProductoController {
   @PostMapping("/productos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Producto guardar(
-      @RequestBody ProductoDTO productoDTO,
-      @RequestParam Long idMedida,
-      @RequestParam Long idRubro,
-      @RequestParam Long idProveedor,
-      @RequestParam Long idEmpresa) {
-    Producto producto = modelMapper.map(productoDTO, Producto.class);
+    @RequestBody NuevoProductoDTO nuevoProductoDTO,
+    @RequestParam Long idMedida,
+    @RequestParam Long idRubro,
+    @RequestParam Long idProveedor,
+    @RequestParam Long idEmpresa) {
+    Producto producto = new Producto();
     producto.setMedida(medidaService.getMedidaPorId(idMedida));
     producto.setRubro(rubroService.getRubroPorId(idRubro));
     producto.setProveedor(proveedorService.getProveedorPorId(idProveedor));
     producto.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    producto.setCodigo(nuevoProductoDTO.getCodigo());
+    producto.setDescripcion(nuevoProductoDTO.getDescripcion());
+    producto.setCantidad(nuevoProductoDTO.getCantidad());
+    producto.setHayStock(nuevoProductoDTO.isHayStock());
+    producto.setPrecioBonificado(nuevoProductoDTO.getPrecioBonificado());
+    producto.setCantMinima(nuevoProductoDTO.getCantMinima());
+    producto.setBulto(nuevoProductoDTO.getBulto());
+    producto.setPrecioCosto(nuevoProductoDTO.getPrecioCosto());
+    producto.setGananciaPorcentaje(nuevoProductoDTO.getGananciaPorcentaje());
+    producto.setGananciaNeto(nuevoProductoDTO.getGananciaNeto());
+    producto.setPrecioVentaPublico(nuevoProductoDTO.getPrecioVentaPublico());
+    producto.setIvaPorcentaje(nuevoProductoDTO.getIvaPorcentaje());
+    producto.setIvaNeto(nuevoProductoDTO.getIvaNeto());
+    producto.setPrecioLista(nuevoProductoDTO.getPrecioLista());
+    producto.setIlimitado(nuevoProductoDTO.isIlimitado());
+    producto.setPublico(nuevoProductoDTO.isPublico());
+    producto.setEstante(nuevoProductoDTO.getEstante());
+    producto.setEstanteria(nuevoProductoDTO.getEstanteria());
+    producto.setNota(nuevoProductoDTO.getNota());
+    producto.setFechaVencimiento(nuevoProductoDTO.getFechaVencimiento());
     return productoService.guardar(producto);
   }
 
   @PostMapping("/productos/{idProducto}/imagenes")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public void subirImagen(@PathVariable long idProducto, @RequestBody byte[] imagen) {
-    if (imagen.length > 1024000L)
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_error_tamanio_no_valido"));
-    productoService.subirImagenProducto(idProducto, imagen);
-  }
-
-  @DeleteMapping("/productos/{idProducto}/imagenes")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public void borrarImagen(@PathVariable long idProducto) {
-    productoService.eliminarImagenProducto(idProducto);
+  public String subirImagen(@PathVariable long idProducto, @RequestBody byte[] imagen) {
+    return productoService.subirImagenProducto(idProducto, imagen);
   }
 
   @PutMapping("/productos/multiples")

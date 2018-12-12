@@ -1,8 +1,7 @@
-package sic.modelo;
+package sic.modelo.dto;
 
 import lombok.Builder;
 import lombok.Data;
-import sic.modelo.dto.RenglonPedidoDTO;
 
 import java.math.BigDecimal;
 import java.util.Date;

@@ -25,7 +25,6 @@ import sic.modelo.dto.*;
 import sic.repository.UsuarioRepository;
 import sic.service.IPedidoService;
 import sic.service.IProductoService;
-import sic.service.IRegistracionService;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -61,34 +60,36 @@ public class AppIntegrationTest {
   private String recaptchaTestKey;
 
   private void crearProductos() {
-    ProductoDTO productoUno =
-        new ProductoBuilder()
-            .withCodigo(RandomStringUtils.random(10, false, true))
-            .withDescripcion(RandomStringUtils.random(10, true, false))
-            .withCantidad(BigDecimal.TEN)
-            .withBulto(BigDecimal.ONE)
-            .withPrecioCosto(CIEN)
-            .withGanancia_porcentaje(new BigDecimal("900"))
-            .withGanancia_neto(new BigDecimal("900"))
-            .withPrecioVentaPublico(new BigDecimal("1000"))
-            .withIva_porcentaje(new BigDecimal("21.0"))
-            .withIva_neto(new BigDecimal("210"))
-            .withPrecioLista(new BigDecimal("1210"))
-            .build();
-    ProductoDTO productoDos =
-        new ProductoBuilder()
-            .withCodigo(RandomStringUtils.random(10, false, true))
-            .withDescripcion(RandomStringUtils.random(10, true, false))
-            .withCantidad(new BigDecimal("6"))
-            .withBulto(BigDecimal.ONE)
-            .withPrecioCosto(CIEN)
-            .withGanancia_porcentaje(new BigDecimal("900"))
-            .withGanancia_neto(new BigDecimal("900"))
-            .withPrecioVentaPublico(new BigDecimal("1000"))
-            .withIva_porcentaje(new BigDecimal("10.5"))
-            .withIva_neto(new BigDecimal("105"))
-            .withPrecioLista(new BigDecimal("1105"))
-            .build();
+    NuevoProductoDTO productoUno =
+      NuevoProductoDTO.builder()
+        .codigo(RandomStringUtils.random(10, false, true))
+        .descripcion(RandomStringUtils.random(10, true, false))
+        .cantidad(BigDecimal.TEN)
+        .bulto(BigDecimal.ONE)
+        .precioCosto(CIEN)
+        .gananciaPorcentaje(new BigDecimal("900"))
+        .gananciaNeto(new BigDecimal("900"))
+        .precioVentaPublico(new BigDecimal("1000"))
+        .ivaPorcentaje(new BigDecimal("21.0"))
+        .ivaNeto(new BigDecimal("210"))
+        .precioLista(new BigDecimal("1210"))
+        .nota("ProductoTest1")
+        .build();
+    NuevoProductoDTO productoDos =
+      NuevoProductoDTO.builder()
+        .codigo(RandomStringUtils.random(10, false, true))
+        .descripcion(RandomStringUtils.random(10, true, false))
+        .cantidad(new BigDecimal("6"))
+        .bulto(BigDecimal.ONE)
+        .precioCosto(CIEN)
+        .gananciaPorcentaje(new BigDecimal("900"))
+        .gananciaNeto(new BigDecimal("900"))
+        .precioVentaPublico(new BigDecimal("1000"))
+        .ivaPorcentaje(new BigDecimal("10.5"))
+        .ivaNeto(new BigDecimal("105"))
+        .precioLista(new BigDecimal("1105"))
+        .nota("ProductoTest2")
+        .build();
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     Rubro rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", Rubro.class);
     ProveedorDTO proveedor =
@@ -2344,23 +2345,20 @@ public class AppIntegrationTest {
     ProveedorDTO proveedor =
         restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
     Medida medida = restTemplate.getForObject(apiPrefix + "/medidas/1", Medida.class);
-    ProductoDTO productoUno =
-        new ProductoBuilder()
-            .withCodigo(RandomStringUtils.random(10, false, true))
-            .withDescripcion(RandomStringUtils.random(10, true, false))
-            .withCantidad(BigDecimal.TEN)
-            .withBulto(BigDecimal.ONE)
-            .withPrecioCosto(CIEN)
-            .withGanancia_porcentaje(new BigDecimal("900"))
-            .withGanancia_neto(new BigDecimal("900"))
-            .withPrecioVentaPublico(new BigDecimal("1000"))
-            .withIva_porcentaje(new BigDecimal("21.0"))
-            .withIva_neto(new BigDecimal("210"))
-            .withPrecioLista(new BigDecimal("1210"))
-            .withNombreEmpresa(empresa.getNombre())
-            .withRazonSocialProveedor(proveedor.getRazonSocial())
-            .withNombreRubro(rubro.getNombre())
-            .withNombreMedida(medida.getNombre())
+    NuevoProductoDTO productoUno =
+      NuevoProductoDTO.builder()
+            .codigo(RandomStringUtils.random(10, false, true))
+            .descripcion(RandomStringUtils.random(10, true, false))
+            .cantidad(BigDecimal.TEN)
+            .bulto(BigDecimal.ONE)
+            .precioCosto(CIEN)
+            .gananciaPorcentaje(new BigDecimal("900"))
+            .gananciaNeto(new BigDecimal("900"))
+            .precioVentaPublico(new BigDecimal("1000"))
+            .ivaPorcentaje(new BigDecimal("21.0"))
+            .ivaNeto(new BigDecimal("210"))
+            .precioLista(new BigDecimal("1210"))
+            .nota("Producto Test")
             .build();
     ProductoDTO productoRecuperado =
         restTemplate.postForObject(
@@ -2375,10 +2373,19 @@ public class AppIntegrationTest {
                 + empresa.getId_Empresa(),
             productoUno,
             ProductoDTO.class);
-    productoUno.setFechaAlta(productoRecuperado.getFechaAlta());
-    productoUno.setIdProducto(productoRecuperado.getIdProducto());
-    productoUno.setFechaUltimaModificacion(productoRecuperado.getFechaUltimaModificacion());
-    assertEquals(productoUno, productoRecuperado);
+    assertEquals(productoUno.getCantidad(), productoRecuperado.getCantidad());
+    assertEquals(productoUno.getIvaPorcentaje(), productoRecuperado.getIvaPorcentaje());
+    assertEquals(productoUno.getIvaNeto(), productoRecuperado.getIvaNeto());
+    assertEquals(productoUno.getCantMinima(), productoRecuperado.getCantMinima());
+    assertEquals(productoUno.getBulto(), productoRecuperado.getBulto());
+    assertEquals(productoUno.getCodigo(), productoRecuperado.getCodigo());
+    assertEquals(productoUno.getDescripcion(), productoRecuperado.getDescripcion());
+    assertEquals(productoUno.getGananciaNeto(), productoRecuperado.getGananciaNeto());
+    assertEquals(productoUno.getGananciaPorcentaje(), productoRecuperado.getGananciaPorcentaje());
+    assertEquals(productoUno.getPrecioLista(), productoRecuperado.getPrecioLista());
+    assertEquals(productoUno.getPrecioVentaPublico(), productoRecuperado.getPrecioVentaPublico());
+    assertEquals(productoUno.getPrecioCosto(), productoRecuperado.getPrecioCosto());
+    assertEquals(empresa.getNombre(), productoRecuperado.getNombreEmpresa());
     assertEquals(new BigDecimal("21.0"), productoRecuperado.getIvaPorcentaje());
     assertEquals(new BigDecimal("210"), productoRecuperado.getIvaNeto());
   }

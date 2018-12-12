@@ -17,6 +17,7 @@ import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
+
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -37,6 +38,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final ProductoRepository productoRepository;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final BigDecimal CIEN = new BigDecimal("100");
+  private static final long TAMANIO_MAXIMO_IMAGEN = 1024000L;
   private final IEmpresaService empresaService;
   private final IRubroService rubroService;
   private final IProveedorService proveedorService;
@@ -210,7 +212,11 @@ public class ProductoServiceImpl implements IProductoService {
   public void actualizar(Producto productoPorActualizar, Producto productoPersistido) {
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
-    productoPorActualizar.setFechaUltimaModificacion(new Date());           
+    productoPorActualizar.setFechaUltimaModificacion(new Date());
+    if (productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty()
+      && (productoPorActualizar.getUrlImagen() == null || productoPorActualizar.getUrlImagen().isEmpty())) {
+      photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + productoPersistido.getIdProducto());
+    }
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
     if (productoPersistido.isPublico() && !productoPorActualizar.isPublico()) {
       carritoCompraService.eliminarItem(productoPersistido.getIdProducto());
@@ -271,6 +277,9 @@ public class ProductoServiceImpl implements IProductoService {
       }
       carritoCompraService.eliminarItem(i);
       producto.setEliminado(true);
+      if (producto.getUrlImagen() != null && !producto.getUrlImagen().isEmpty()) {
+        photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + producto.getIdProducto());
+      }
       productos.add(producto);
     }
     productoRepository.save(productos);
@@ -363,9 +372,13 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public void subirImagenProducto(long idProducto, byte[] imagen) {
+  public String subirImagenProducto(long idProducto, byte[] imagen) {
+    if (imagen.length > TAMANIO_MAXIMO_IMAGEN)
+      throw new BusinessServiceException(
+        RESOURCE_BUNDLE.getString("mensaje_error_tamanio_no_valido"));
     String urlImagen = photoVideoUploader.subirImagen(Producto.class.getSimpleName() + idProducto, imagen);
     productoRepository.actualizarUrlImagen(idProducto, urlImagen);
+    return urlImagen;
   }
 
   @Override
