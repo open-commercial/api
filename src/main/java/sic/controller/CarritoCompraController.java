@@ -29,7 +29,7 @@ public class CarritoCompraController {
   private final IEmpresaService empresaService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
-  private static final int TAMANIO_PAGINA_DEFAULT = 10;
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
   public CarritoCompraController(

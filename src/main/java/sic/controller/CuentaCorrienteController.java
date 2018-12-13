@@ -30,7 +30,7 @@ public class CuentaCorrienteController {
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IProveedorService proveedorService;
   private final IClienteService clienteService;
-  private static final int TAMANIO_PAGINA_DEFAULT = 10;
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Value("${SIC_JWT_KEY}")
   private String secretkey;

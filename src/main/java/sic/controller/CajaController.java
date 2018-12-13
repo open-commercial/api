@@ -24,7 +24,7 @@ public class CajaController {
     private final IEmpresaService empresaService;
     private final IUsuarioService usuarioService;
     private final IFormaDePagoService formaDePagoService;
-    private static final int TAMANIO_PAGINA_DEFAULT = 10;
+    private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
     @Value("${SIC_JWT_KEY}")
     private String secretkey;

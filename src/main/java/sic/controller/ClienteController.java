@@ -23,7 +23,7 @@ public class ClienteController {
   private final IEmpresaService empresaService;
   private final ILocalidadService localidadService;
   private final IUsuarioService usuarioService;
-  private static final int TAMANIO_PAGINA_DEFAULT = 10;
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Value("${SIC_JWT_KEY}")
   private String secretkey;

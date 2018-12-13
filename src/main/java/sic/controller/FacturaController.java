@@ -37,7 +37,7 @@ public class FacturaController {
     private final IUsuarioService usuarioService;
     private final ITransportistaService transportistaService;
     private final IReciboService reciboService;
-    private static final int TAMANIO_PAGINA_DEFAULT = 10;
+    private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
     @Value("${SIC_JWT_KEY}")
     private String secretkey;
