@@ -64,7 +64,8 @@ public class ProductoController {
     Rol.COMPRADOR
   })
   public Producto getProductoPorId(
-      @PathVariable long idProducto, @RequestHeader("Authorization") String token) {
+      @PathVariable long idProducto,
+      @RequestHeader("Authorization") String token) {
     Claims claims =
         Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
     Producto producto = productoService.getProductoPorId(idProducto);
@@ -79,8 +80,23 @@ public class ProductoController {
 
   @JsonView(Views.Public.class)
   @GetMapping("/public/productos/{idProducto}")
-  public Producto getProductoPorIdPublic(@PathVariable long idProducto) {
-    return productoService.getProductoPorId(idProducto);
+  public Producto getProductoPorIdPublic(
+      @PathVariable long idProducto,
+      @RequestHeader("Authorization") String token) {
+    Producto producto = productoService.getProductoPorId(idProducto);
+    if (token != null && !token.equalsIgnoreCase("Bearer null")) {
+      Claims claims =
+        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+      Cliente cliente =
+        clienteService.getClientePorIdUsuarioYidEmpresa(
+          (int) claims.get("idUsuario"), producto.getEmpresa().getId_Empresa());
+      Page<Producto> productos =
+        productoService.getProductosConPrecioBonificado(
+          new PageImpl<>(Collections.singletonList(producto)), cliente);
+      return productos.getContent().get(0);
+    } else {
+      return producto;
+    }
   }
 
   @GetMapping("/productos/busqueda")
@@ -119,18 +135,19 @@ public class ProductoController {
       Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
     Cliente cliente =
         clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idEmpresa);
-    Page<Producto> productos = this.buscar(
-        idEmpresa,
-        codigo,
-        descripcion,
-        idRubro,
-        idProveedor,
-        soloFantantes,
-        publicos,
-        pagina,
-        null,
-        ordenarPor,
-        sentido);
+    Page<Producto> productos =
+        this.buscar(
+            idEmpresa,
+            codigo,
+            descripcion,
+            idRubro,
+            idProveedor,
+            soloFantantes,
+            publicos,
+            pagina,
+            null,
+            ordenarPor,
+            sentido);
     return productoService.getProductosConPrecioBonificado(productos, cliente);
   }
 
@@ -140,9 +157,30 @@ public class ProductoController {
       @RequestParam long idEmpresa,
       @RequestParam(required = false) String codigo,
       @RequestParam(required = false) String descripcion,
-      @RequestParam(required = false) Integer pagina) {
-    return this.buscar(
-        idEmpresa, codigo, descripcion, null, null, false, true, pagina, null, null, null);
+      @RequestParam(required = false) Integer pagina,
+      @RequestHeader("Authorization") String token) {
+    Page<Producto> productos =
+        this.buscar(
+            idEmpresa,
+            codigo,
+            descripcion,
+            null,
+            null,
+            false,
+            true,
+            pagina,
+            null,
+            null,
+            null);
+    if (token != null && !token.equalsIgnoreCase("Bearer null")) {
+      Claims claims =
+        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+      Cliente cliente =
+        clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idEmpresa);
+      return productoService.getProductosConPrecioBonificado(productos, cliente);
+    } else {
+      return productos;
+    }
   }
 
   private Page<Producto> buscar(
