@@ -3,9 +3,7 @@ package sic.controller;
 import java.util.List;
 import java.util.ResourceBundle;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +13,7 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.BusquedaUsuarioCriteria;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
+import sic.service.IAuthService;
 import sic.service.IUsuarioService;
 
 @RestController
@@ -22,14 +21,13 @@ import sic.service.IUsuarioService;
 public class UsuarioController {
 
   private final IUsuarioService usuarioService;
+  private final IAuthService authService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
-  @Value("${SIC_JWT_KEY}")
-  private String secretkey;
-
   @Autowired
-  public UsuarioController(IUsuarioService usuarioService) {
+  public UsuarioController(IUsuarioService usuarioService, IAuthService authService) {
     this.usuarioService = usuarioService;
+    this.authService = authService;
   }
 
   @GetMapping("/usuarios/{idUsuario}")
@@ -98,9 +96,8 @@ public class UsuarioController {
     Rol.COMPRADOR
   })
   public void actualizar(
-      @RequestBody Usuario usuario, @RequestHeader("Authorization") String token) {
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+      @RequestBody Usuario usuario, @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Usuario usuarioLoggedIn = this.getUsuarioPorId((int) claims.get("idUsuario"));
     boolean usuarioSeModificaASiMismo = usuarioLoggedIn.getId_Usuario() == usuario.getId_Usuario();
     if (usuarioSeModificaASiMismo || usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {

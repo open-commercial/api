@@ -4,9 +4,7 @@ import java.math.BigDecimal;
 import java.util.ResourceBundle;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,10 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
-import sic.service.BusinessServiceException;
-import sic.service.IClienteService;
-import sic.service.ICuentaCorrienteService;
-import sic.service.IProveedorService;
+import sic.service.*;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -30,79 +25,87 @@ public class CuentaCorrienteController {
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IProveedorService proveedorService;
   private final IClienteService clienteService;
+  private final IAuthService authService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
-
-  @Value("${SIC_JWT_KEY}")
-  private String secretkey;
 
   @Autowired
   public CuentaCorrienteController(
-      ICuentaCorrienteService cuentaCorrienteService,
-      IProveedorService proveedorService,
-      IClienteService clienteService) {
+    ICuentaCorrienteService cuentaCorrienteService,
+    IProveedorService proveedorService,
+    IClienteService clienteService,
+    IAuthService authService) {
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.clienteService = clienteService;
     this.proveedorService = proveedorService;
+    this.authService = authService;
   }
 
   @GetMapping("/cuentas-corriente/clientes/busqueda/criteria")
   public Page<CuentaCorrienteCliente> buscarConCriteria(
-    @RequestParam Long idEmpresa,
-    @RequestParam(required = false) String nroCliente,
-    @RequestParam(required = false) String nombreFiscal,
-    @RequestParam(required = false) String nombreFantasia,
-    @RequestParam(required = false) Long idFiscal,
-    @RequestParam(required = false) Long idViajante,
-    @RequestParam(required = false) Long idPais,
-    @RequestParam(required = false) Long idProvincia,
-    @RequestParam(required = false) Long idLocalidad,
-    @RequestParam(required = false) Integer pagina,
-    @RequestParam(required = false) String ordenarPor,
-    @RequestParam(required = false) String sentido,
-    @RequestHeader("Authorization") String token) {
+      @RequestParam Long idEmpresa,
+      @RequestParam(required = false) String nroCliente,
+      @RequestParam(required = false) String nombreFiscal,
+      @RequestParam(required = false) String nombreFantasia,
+      @RequestParam(required = false) Long idFiscal,
+      @RequestParam(required = false) Long idViajante,
+      @RequestParam(required = false) Long idPais,
+      @RequestParam(required = false) Long idProvincia,
+      @RequestParam(required = false) Long idLocalidad,
+      @RequestParam(required = false) Integer pagina,
+      @RequestParam(required = false) String ordenarPor,
+      @RequestParam(required = false) String sentido,
+      @RequestHeader("Authorization") String authorizationHeader) {
     if (pagina == null || pagina < 0) pagina = 0;
     Pageable pageable;
     if (ordenarPor == null || sentido == null) {
       pageable =
-        new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "cliente.nombreFiscal"));
+          new PageRequest(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "cliente.nombreFiscal"));
     } else {
       switch (sentido) {
-        case "ASC" : pageable =
-          new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "ASC":
+          pageable =
+              new PageRequest(
+                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
           break;
-        case "DESC" : pageable =
-          new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        case "DESC":
+          pageable =
+              new PageRequest(
+                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
           break;
-        default: pageable =
-          new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "cliente.nombreFiscal"));
+        default:
+          pageable =
+              new PageRequest(
+                  pagina,
+                  TAMANIO_PAGINA_DEFAULT,
+                  new Sort(Sort.Direction.ASC, "cliente.nombreFiscal"));
           break;
       }
     }
     BusquedaCuentaCorrienteClienteCriteria criteria =
-      BusquedaCuentaCorrienteClienteCriteria.builder()
-        .buscaPorNombreFiscal(nombreFiscal != null)
-        .nombreFiscal(nombreFiscal)
-        .buscaPorNombreFantasia(nombreFantasia != null)
-        .nombreFantasia(nombreFantasia)
-        .buscaPorIdFiscal(idFiscal != null)
-        .idFiscal(idFiscal)
-        .buscaPorViajante(idViajante != null)
-        .idViajante(idViajante)
-        .buscaPorPais(idPais != null)
-        .idPais(idPais)
-        .buscaPorProvincia(idProvincia != null)
-        .idProvincia(idProvincia)
-        .buscaPorLocalidad(idLocalidad != null)
-        .idLocalidad(idLocalidad)
-        .buscarPorNroDeCliente(nroCliente != null)
-        .nroDeCliente(nroCliente)
-        .idEmpresa(idEmpresa)
-        .pageable(pageable)
-        .build();
-    Claims claims =
-      Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    return cuentaCorrienteService.buscarCuentaCorrienteCliente(criteria, (int) claims.get("idUsuario"));
-
+        BusquedaCuentaCorrienteClienteCriteria.builder()
+            .buscaPorNombreFiscal(nombreFiscal != null)
+            .nombreFiscal(nombreFiscal)
+            .buscaPorNombreFantasia(nombreFantasia != null)
+            .nombreFantasia(nombreFantasia)
+            .buscaPorIdFiscal(idFiscal != null)
+            .idFiscal(idFiscal)
+            .buscaPorViajante(idViajante != null)
+            .idViajante(idViajante)
+            .buscaPorPais(idPais != null)
+            .idPais(idPais)
+            .buscaPorProvincia(idProvincia != null)
+            .idProvincia(idProvincia)
+            .buscaPorLocalidad(idLocalidad != null)
+            .idLocalidad(idLocalidad)
+            .buscarPorNroDeCliente(nroCliente != null)
+            .nroDeCliente(nroCliente)
+            .idEmpresa(idEmpresa)
+            .pageable(pageable)
+            .build();
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    return cuentaCorrienteService.buscarCuentaCorrienteCliente(
+        criteria, (int) claims.get("idUsuario"));
   }
 
   @GetMapping("/cuentas-corriente/clientes/{idCliente}")

@@ -6,10 +6,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,11 +34,9 @@ public class NotaController {
   private final IProveedorService proveedorService;
   private final IUsuarioService usuarioService;
   private final IFacturaService facturaService;
+  private final IAuthService authService;
   private final ModelMapper modelMapper;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
-
-  @Value("${SIC_JWT_KEY}")
-  private String secretkey;
 
   @Autowired
   public NotaController(
@@ -51,6 +47,7 @@ public class NotaController {
       IProveedorService proveedorService,
       IUsuarioService usuarioService,
       IFacturaService facturaService,
+      IAuthService authService,
       ModelMapper modelMapper) {
     this.notaService = notaService;
     this.reciboService = reciboService;
@@ -59,6 +56,7 @@ public class NotaController {
     this.proveedorService = proveedorService;
     this.usuarioService = usuarioService;
     this.facturaService = facturaService;
+    this.authService = authService;
     this.modelMapper = modelMapper;
   }
 
@@ -95,7 +93,7 @@ public class NotaController {
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
-      @RequestHeader("Authorization") String token) {
+      @RequestHeader("Authorization") String authorizationHeader) {
     Calendar fechaDesde = Calendar.getInstance();
     Calendar fechaHasta = Calendar.getInstance();
     if ((desde != null) && (hasta != null)) {
@@ -123,8 +121,7 @@ public class NotaController {
             .tipoComprobante(tipoDeComprobante)
             .pageable(this.getPageable(pagina, ordenarPor, sentido))
             .build();
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.buscarNotas(criteria, (int) claims.get("idUsuario"));
   }
 
@@ -412,7 +409,7 @@ public class NotaController {
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
-      @RequestHeader("Authorization") String token) {
+      @RequestHeader("Authorization") String authorizationHeader) {
     Calendar fechaDesde = Calendar.getInstance();
     Calendar fechaHasta = Calendar.getInstance();
     if ((desde != null) && (hasta != null)) {
@@ -440,8 +437,7 @@ public class NotaController {
             .tipoComprobante(tipoDeComprobante)
             .pageable(this.getPageable(pagina, ordenarPor, sentido))
             .build();
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalCredito(criteria, (int) claims.get("idUsuario"));
   }
 
@@ -460,7 +456,7 @@ public class NotaController {
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
-      @RequestHeader("Authorization") String token) {
+      @RequestHeader("Authorization") String authorizationHeader) {
     Calendar fechaDesde = Calendar.getInstance();
     Calendar fechaHasta = Calendar.getInstance();
     if ((desde != null) && (hasta != null)) {
@@ -488,8 +484,7 @@ public class NotaController {
             .tipoComprobante(tipoDeComprobante)
             .pageable(this.getPageable(pagina, ordenarPor, sentido))
             .build();
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalDebito(criteria, (int) claims.get("idUsuario"));
   }
 
@@ -508,7 +503,7 @@ public class NotaController {
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
-      @RequestHeader("Authorization") String token) {
+      @RequestHeader("Authorization") String authorizationHeader) {
     Calendar fechaDesde = Calendar.getInstance();
     Calendar fechaHasta = Calendar.getInstance();
     if ((desde != null) && (hasta != null)) {
@@ -536,8 +531,7 @@ public class NotaController {
             .tipoComprobante(tipoDeComprobante)
             .pageable(this.getPageable(pagina, ordenarPor, sentido))
             .build();
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalIVACredito(criteria, (int) claims.get("idUsuario"));
   }
 
@@ -556,7 +550,7 @@ public class NotaController {
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
-      @RequestHeader("Authorization") String token) {
+      @RequestHeader("Authorization") String authorizationHeader) {
     Calendar fechaDesde = Calendar.getInstance();
     Calendar fechaHasta = Calendar.getInstance();
     if ((desde != null) && (hasta != null)) {
@@ -584,8 +578,7 @@ public class NotaController {
             .tipoComprobante(tipoDeComprobante)
             .pageable(this.getPageable(pagina, ordenarPor, sentido))
             .build();
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalIVADebito(criteria, (int) claims.get("idUsuario"));
   }
 }

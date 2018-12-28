@@ -2,8 +2,6 @@ package sic.controller;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
@@ -16,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import sic.modelo.*;
 import sic.modelo.dto.RecoveryPasswordDTO;
 import sic.modelo.dto.RegistracionClienteAndUsuarioDTO;
+import sic.service.IAuthService;
 import sic.service.IEmpresaService;
 import sic.service.IRegistracionService;
 import sic.service.IUsuarioService;
@@ -27,12 +26,10 @@ public class AuthController {
   private final IUsuarioService usuarioService;
   private final IEmpresaService empresaService;
   private final IRegistracionService registracionService;
+  private final IAuthService authService;
   private final RestTemplate restTemplate;
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
   private static final String URL_RECAPTCHA = "https://www.google.com/recaptcha/api/siteverify";
-
-  @Value("${SIC_JWT_KEY}")
-  private String secretkey;
 
   @Value("${RECAPTCHA_SECRET_KEY}")
   private String recaptchaSecretkey;
@@ -45,45 +42,31 @@ public class AuthController {
       IUsuarioService usuarioService,
       IEmpresaService empresaService,
       IRegistracionService registracionService,
+      IAuthService authService,
       RestTemplate restTemplate) {
     this.usuarioService = usuarioService;
     this.empresaService = empresaService;
     this.registracionService = registracionService;
+    this.authService = authService;
     this.restTemplate = restTemplate;
-  }
-
-  private String generarToken(long idUsuario, List<Rol> rolesDeUsuario) {
-    // 24hs desde la fecha actual para expiration
-    Date today = new Date();
-    Calendar c = Calendar.getInstance();
-    c.setTime(today);
-    c.add(Calendar.DATE, 1);
-    Date tomorrow = c.getTime();
-    return Jwts.builder()
-        .setIssuedAt(today)
-        .setExpiration(tomorrow)
-        .signWith(SignatureAlgorithm.HS512, secretkey)
-        .claim("idUsuario", idUsuario)
-        .claim("roles", rolesDeUsuario)
-        .compact();
   }
 
   @PostMapping("/login")
   public String login(@RequestBody Credencial credencial) {
     Usuario usuario = usuarioService.autenticarUsuario(credencial);
-    String token = this.generarToken(usuario.getId_Usuario(), usuario.getRoles());
+    String token = authService.generarToken(usuario.getId_Usuario(), usuario.getRoles());
     usuarioService.actualizarToken(token, usuario.getId_Usuario());
     return token;
   }
 
   @PutMapping("/logout")
-  public void logout(@RequestHeader("Authorization") String token) {
+  public void logout(@RequestHeader("Authorization") String authorizationHeader) {
     Claims claims;
     try {
-      claims = Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+      claims = authService.getClaimsDelToken(authorizationHeader);
     } catch (JwtException ex) {
       throw new UnauthorizedException(
-          RESOURCE_BUNDLE.getString("mensaje_error_token_vacio_invalido"), ex);
+          RESOURCE_BUNDLE.getString("mensaje_error_token_invalido"), ex);
     }
     long idUsuario = (int) claims.get("idUsuario");
     usuarioService.actualizarToken("", idUsuario);
@@ -104,7 +87,7 @@ public class AuthController {
         usuarioService.getUsuarioPorPasswordRecoveryKeyAndIdUsuario(
             recoveryPasswordDTO.getKey(), recoveryPasswordDTO.getId());
     if (usuario != null && (new Date()).before(usuario.getPasswordRecoveryKeyExpirationDate())) {
-      token = this.generarToken(usuario.getId_Usuario(), usuario.getRoles());
+      token = authService.generarToken(usuario.getId_Usuario(), usuario.getRoles());
       usuarioService.actualizarToken(token, usuario.getId_Usuario());
       usuarioService.actualizarPasswordRecoveryKey(null, recoveryPasswordDTO.getId());
     } else {
