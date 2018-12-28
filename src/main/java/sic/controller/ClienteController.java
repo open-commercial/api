@@ -1,9 +1,7 @@
 package sic.controller;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,21 +21,21 @@ public class ClienteController {
   private final IEmpresaService empresaService;
   private final ILocalidadService localidadService;
   private final IUsuarioService usuarioService;
+  private final IAuthService authService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
-
-  @Value("${SIC_JWT_KEY}")
-  private String secretkey;
 
   @Autowired
   public ClienteController(
       IClienteService clienteService,
       IEmpresaService empresaService,
       ILocalidadService localidadService,
-      IUsuarioService usuarioService) {
+      IUsuarioService usuarioService,
+      IAuthService authService) {
     this.clienteService = clienteService;
     this.empresaService = empresaService;
     this.localidadService = localidadService;
     this.usuarioService = usuarioService;
+    this.authService = authService;
   }
 
   @GetMapping("/clientes/{idCliente}")
@@ -66,7 +64,7 @@ public class ClienteController {
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
-      @RequestHeader("Authorization") String token) {
+      @RequestHeader("Authorization") String authorizationHeader) {
     if (pagina == null || pagina < 0) pagina = 0;
     Pageable pageable;
     if (ordenarPor == null || sentido == null) {
@@ -106,8 +104,7 @@ public class ClienteController {
             .idEmpresa(idEmpresa)
             .pageable(pageable)
             .build();
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return clienteService.buscarClientes(criteria, (int) claims.get("idUsuario"));
   }
 
@@ -143,10 +140,9 @@ public class ClienteController {
       @RequestParam(required = false) Long idLocalidad,
       @RequestParam(required = false) Long idViajante,
       @RequestParam Long idCredencial,
-      @RequestHeader("Authorization") String token) {
+      @RequestHeader("Authorization") String authorizationHeader) {
     if (idCredencial != null) {
-      Claims claims =
-          Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+      Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
       Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
       if (idCredencial != idUsuarioLoggedIn
@@ -180,12 +176,11 @@ public class ClienteController {
       @RequestParam(required = false) Long idEmpresa,
       @RequestParam(required = false) Long idViajante,
       @RequestParam(required = false) Long idCredencial,
-      @RequestHeader("Authorization") String token) {
+      @RequestHeader("Authorization") String authorizationHeader) {
     Cliente clientePersistido =
         clienteService.getClientePorId(clientePorActualizar.getId_Cliente());
     if (idCredencial != null) {
-      Claims claims =
-          Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+      Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
       Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
       if (idCredencial != idUsuarioLoggedIn
@@ -204,8 +199,7 @@ public class ClienteController {
     if (clientePorActualizar.getBonificacion() != null
         && clientePersistido.getBonificacion().compareTo(clientePorActualizar.getBonificacion())
             != 0) {
-      Claims claims =
-          Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+      Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
       Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
       if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)

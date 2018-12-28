@@ -5,11 +5,9 @@ import java.util.Calendar;
 import java.util.List;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,20 +32,19 @@ public class PedidoController {
     private final IEmpresaService empresaService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
+    private final IAuthService authService;
     private final ModelMapper modelMapper;
     private static final int TAMANIO_PAGINA_DEFAULT = 25;
-
-    @Value("${SIC_JWT_KEY}")
-    private String secretkey;
 
     @Autowired
     public PedidoController(IPedidoService pedidoService, IEmpresaService empresaService,
                             IUsuarioService usuarioService, IClienteService clienteService,
-                            ModelMapper modelMapper) {
+                            IAuthService authService, ModelMapper modelMapper) {
         this.pedidoService = pedidoService;
         this.empresaService = empresaService;
         this.usuarioService = usuarioService;
         this.clienteService = clienteService;
+        this.authService = authService;
         this.modelMapper = modelMapper;
     }
     
@@ -138,7 +135,7 @@ public class PedidoController {
       @RequestParam(required = false) Long nroPedido,
       @RequestParam(required = false) EstadoPedido estadoPedido,
       @RequestParam(required = false) Integer pagina,
-      @RequestHeader("Authorization") String token) {
+      @RequestHeader("Authorization") String authorizationHeader) {
     Calendar fechaDesde = Calendar.getInstance();
     Calendar fechaHasta = Calendar.getInstance();
     if ((desde != null) && (hasta != null)) {
@@ -165,8 +162,7 @@ public class PedidoController {
             .idEmpresa(idEmpresa)
             .pageable(pageable)
             .build();
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return pedidoService.buscarConCriteria(criteria, (int) claims.get("idUsuario"));
   }
 

@@ -3,7 +3,6 @@ package sic.controller;
 import java.math.BigDecimal;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,15 +18,12 @@ import sic.service.IUsuarioService;
 @RestController
 @RequestMapping("/api/v1")
 public class CajaController {
-    
-    private final ICajaService cajaService;    
-    private final IEmpresaService empresaService;
-    private final IUsuarioService usuarioService;
-    private final IFormaDePagoService formaDePagoService;
-    private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
-    @Value("${SIC_JWT_KEY}")
-    private String secretkey;
+  private final ICajaService cajaService;
+  private final IEmpresaService empresaService;
+  private final IUsuarioService usuarioService;
+  private final IFormaDePagoService formaDePagoService;
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
   public CajaController(
@@ -41,11 +37,11 @@ public class CajaController {
     this.usuarioService = usuarioService;
   }
 
-    @GetMapping("/cajas/{idCaja}")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public Caja getCajaPorId(@PathVariable long idCaja) {
-        return cajaService.getCajaPorId(idCaja);
-    }
+  @GetMapping("/cajas/{idCaja}")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public Caja getCajaPorId(@PathVariable long idCaja) {
+    return cajaService.getCajaPorId(idCaja);
+  }
 
   @PostMapping("/cajas/apertura/empresas/{idEmpresa}/usuarios/{idUsuario}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
@@ -59,19 +55,20 @@ public class CajaController {
         saldoApertura);
   }
 
-    @DeleteMapping("/cajas/{idCaja}")
-    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-    public void eliminar(@PathVariable long idCaja) {
-        cajaService.eliminar(idCaja);
-    }
-    
-    @PutMapping("/cajas/{idCaja}/cierre")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public Caja cerrarCaja(@PathVariable long idCaja,
-                           @RequestParam BigDecimal monto,
-                           @RequestParam long idUsuarioCierre) {
-        return cajaService.cerrarCaja(idCaja, monto, idUsuarioCierre, false);
-    }
+  @DeleteMapping("/cajas/{idCaja}")
+  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
+  public void eliminar(@PathVariable long idCaja) {
+    cajaService.eliminar(idCaja);
+  }
+
+  @PutMapping("/cajas/{idCaja}/cierre")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public Caja cerrarCaja(
+      @PathVariable long idCaja,
+      @RequestParam BigDecimal monto,
+      @RequestParam long idUsuarioCierre) {
+    return cajaService.cerrarCaja(idCaja, monto, idUsuarioCierre, false);
+  }
 
   @GetMapping("/cajas/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
@@ -122,23 +119,23 @@ public class CajaController {
         fechaHasta);
   }
 
-    @GetMapping("/cajas/{idCaja}/saldo-afecta-caja")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public BigDecimal getSaldoQueAfectaCaja(@PathVariable long idCaja) {
-        return cajaService.getSaldoQueAfectaCaja(cajaService.getCajaPorId(idCaja));
-    }
+  @GetMapping("/cajas/{idCaja}/saldo-afecta-caja")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public BigDecimal getSaldoQueAfectaCaja(@PathVariable long idCaja) {
+    return cajaService.getSaldoQueAfectaCaja(cajaService.getCajaPorId(idCaja));
+  }
 
-    @GetMapping("/cajas/{idCaja}/saldo-sistema")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public BigDecimal getSaldoSistema(@PathVariable long idCaja) {
-        return cajaService.getSaldoSistema(cajaService.getCajaPorId(idCaja));
-    }
+  @GetMapping("/cajas/{idCaja}/saldo-sistema")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public BigDecimal getSaldoSistema(@PathVariable long idCaja) {
+    return cajaService.getSaldoSistema(cajaService.getCajaPorId(idCaja));
+  }
 
-    @GetMapping("/cajas/empresas/{idEmpresa}/estado-ultima-caja")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-    public boolean getEstadoUltimaCaja(@PathVariable long idEmpresa) {
-        return cajaService.isUltimaCajaAbierta(idEmpresa);
-    }
+  @GetMapping("/cajas/empresas/{idEmpresa}/estado-ultima-caja")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public boolean getEstadoUltimaCaja(@PathVariable long idEmpresa) {
+    return cajaService.isUltimaCajaAbierta(idEmpresa);
+  }
 
   @GetMapping("/cajas/saldo-sistema")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
@@ -198,17 +195,15 @@ public class CajaController {
     return cajaService.getSaldoRealCajas(criteria);
   }
 
-    @GetMapping("/cajas/{idCaja}/totales-formas-de-pago")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public Map<Long, BigDecimal> getTotalesPorFormaDePago(@PathVariable long idCaja) {
-        return cajaService.getTotalesDeFormaDePago(idCaja);
-    }
+  @GetMapping("/cajas/{idCaja}/totales-formas-de-pago")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public Map<Long, BigDecimal> getTotalesPorFormaDePago(@PathVariable long idCaja) {
+    return cajaService.getTotalesDeFormaDePago(idCaja);
+  }
 
   @PutMapping("/cajas/{idCaja}/reapertura")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public void reabrirCaja(
-      @PathVariable long idCaja,
-      @RequestParam BigDecimal monto) {
+  public void reabrirCaja(@PathVariable long idCaja, @RequestParam BigDecimal monto) {
     cajaService.reabrirCaja(idCaja, monto);
   }
 }

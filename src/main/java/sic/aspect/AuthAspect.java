@@ -1,15 +1,15 @@
 package sic.aspect;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import sic.controller.ForbiddenException;
 import sic.modelo.Rol;
+import sic.service.IAuthService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -19,16 +19,19 @@ import java.util.ResourceBundle;
 @Component
 public class AuthAspect {
 
-  @Value("${SIC_JWT_KEY}")
-  private String secretkey;
+  private final IAuthService authService;
+
+  @Autowired
+  public AuthAspect(IAuthService authService) {
+    this.authService = authService;
+  }
 
   @Before("@annotation(AccesoRolesPermitidos)")
   public void autorizarAcceso(AccesoRolesPermitidos AccesoRolesPermitidos) {
     HttpServletRequest request =
         ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-    String token = request.getHeader("Authorization");
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    String authorizationHeader = request.getHeader("Authorization");
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Rol[] rolesRequeridos = AccesoRolesPermitidos.value();
     List rolesDelUsuario = claims.get("roles", List.class);
     boolean accesoDenegado = true;

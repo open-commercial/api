@@ -5,10 +5,8 @@ import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -31,11 +29,9 @@ public class ProductoController {
   private final IProveedorService proveedorService;
   private final IEmpresaService empresaService;
   private final IClienteService clienteService;
+  private final IAuthService authService;
   private final ModelMapper modelMapper;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
-
-  @Value("${SIC_JWT_KEY}")
-  private String secretkey;
 
   @Autowired
   public ProductoController(
@@ -45,6 +41,7 @@ public class ProductoController {
       IProveedorService proveedorService,
       IEmpresaService empresaService,
       IClienteService clienteService,
+      IAuthService authService,
       ModelMapper modelMapper) {
     this.productoService = productoService;
     this.medidaService = medidaService;
@@ -52,41 +49,19 @@ public class ProductoController {
     this.proveedorService = proveedorService;
     this.empresaService = empresaService;
     this.clienteService = clienteService;
+    this.authService = authService;
     this.modelMapper = modelMapper;
-  }
-
-  @GetMapping("/productos/{idProducto}")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
-  public Producto getProductoPorId(
-      @PathVariable long idProducto,
-      @RequestHeader("Authorization") String token) {
-    Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-    Producto producto = productoService.getProductoPorId(idProducto);
-    Cliente cliente =
-        clienteService.getClientePorIdUsuarioYidEmpresa(
-            (int) claims.get("idUsuario"), producto.getEmpresa().getId_Empresa());
-    Page<Producto> productos =
-        productoService.getProductosConPrecioBonificado(
-            new PageImpl<>(Collections.singletonList(producto)), cliente);
-    return productos.getContent().get(0);
   }
 
   @JsonView(Views.Public.class)
   @GetMapping("/public/productos/{idProducto}")
   public Producto getProductoPorIdPublic(
-      @PathVariable long idProducto,
-      @RequestHeader("Authorization") String token) {
+    @PathVariable long idProducto,
+    @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Producto producto = productoService.getProductoPorId(idProducto);
-    if (token != null && !token.equalsIgnoreCase("Bearer null")) {
-      Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+    if (authorizationHeader != null) {
+      authService.validarToken(authorizationHeader);
+      Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente =
         clienteService.getClientePorIdUsuarioYidEmpresa(
           (int) claims.get("idUsuario"), producto.getEmpresa().getId_Empresa());
@@ -99,7 +74,39 @@ public class ProductoController {
     }
   }
 
-  @GetMapping("/productos/busqueda")
+  @JsonView(Views.Public.class)
+  @GetMapping("/public/productos/busqueda/criteria")
+  public Page<Producto> buscarProductosPublic(
+      @RequestParam long idEmpresa,
+      @RequestParam(required = false) String codigo,
+      @RequestParam(required = false) String descripcion,
+      @RequestParam(required = false) Integer pagina,
+      @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
+    Page<Producto> productos =
+      this.buscar(
+        idEmpresa,
+        codigo,
+        descripcion,
+        null,
+        null,
+        false,
+        true,
+        pagina,
+        null,
+        null,
+        null);
+    if (authorizationHeader != null) {
+      authService.validarToken(authorizationHeader);
+      Claims claims = authService.getClaimsDelToken(authorizationHeader);
+      Cliente cliente =
+        clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idEmpresa);
+      return productoService.getProductosConPrecioBonificado(productos, cliente);
+    } else {
+      return productos;
+    }
+  }
+
+  @GetMapping("/productos/{idProducto}")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -107,8 +114,18 @@ public class ProductoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public Producto getProductoPorCodigo(@RequestParam long idEmpresa, @RequestParam String codigo) {
-    return productoService.getProductoPorCodigo(codigo, idEmpresa);
+  public Producto getProductoPorId(
+      @PathVariable long idProducto,
+      @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Producto producto = productoService.getProductoPorId(idProducto);
+    Cliente cliente =
+        clienteService.getClientePorIdUsuarioYidEmpresa(
+            (int) claims.get("idUsuario"), producto.getEmpresa().getId_Empresa());
+    Page<Producto> productos =
+        productoService.getProductosConPrecioBonificado(
+            new PageImpl<>(Collections.singletonList(producto)), cliente);
+    return productos.getContent().get(0);
   }
 
   @GetMapping("/productos/busqueda/criteria")
@@ -130,9 +147,8 @@ public class ProductoController {
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
-      @RequestHeader("Authorization") String token) {
-    Claims claims =
-      Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
+      @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Cliente cliente =
         clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idEmpresa);
     Page<Producto> productos =
@@ -151,36 +167,16 @@ public class ProductoController {
     return productoService.getProductosConPrecioBonificado(productos, cliente);
   }
 
-  @JsonView(Views.Public.class)
-  @GetMapping("/public/productos/busqueda/criteria")
-  public Page<Producto> buscarProductosPublic(
-      @RequestParam long idEmpresa,
-      @RequestParam(required = false) String codigo,
-      @RequestParam(required = false) String descripcion,
-      @RequestParam(required = false) Integer pagina,
-      @RequestHeader("Authorization") String token) {
-    Page<Producto> productos =
-        this.buscar(
-            idEmpresa,
-            codigo,
-            descripcion,
-            null,
-            null,
-            false,
-            true,
-            pagina,
-            null,
-            null,
-            null);
-    if (token != null && !token.equalsIgnoreCase("Bearer null")) {
-      Claims claims =
-        Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token.substring(7)).getBody();
-      Cliente cliente =
-        clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idEmpresa);
-      return productoService.getProductosConPrecioBonificado(productos, cliente);
-    } else {
-      return productos;
-    }
+  @GetMapping("/productos/busqueda")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public Producto getProductoPorCodigo(@RequestParam long idEmpresa, @RequestParam String codigo) {
+    return productoService.getProductoPorCodigo(codigo, idEmpresa);
   }
 
   private Page<Producto> buscar(
