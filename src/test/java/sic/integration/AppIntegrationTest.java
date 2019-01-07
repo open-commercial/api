@@ -34,6 +34,7 @@ import java.util.*;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -3389,5 +3390,53 @@ public class AppIntegrationTest {
     List<RenglonPedido> renglones = pedidoService.getRenglonesDelPedido(1L);
     assertEquals(productos.get(0).getIdProducto(), renglones.get(0).getIdProductoItem());
     assertEquals(productos.get(1).getIdProducto(), renglones.get(1).getIdProductoItem());
+  }
+
+  @Test
+  public void shouldVerificarTotalizadoresVenta() {
+    BigDecimal totalFacturadoVenta = restTemplate.getForObject(apiPrefix + "/facturas/total-facturado-venta/criteria?idEmpresa=1", BigDecimal.class);
+    BigDecimal totalIvaVenta = restTemplate.getForObject(apiPrefix + "/facturas/total-iva-venta/criteria?idEmpresa=1", BigDecimal.class);
+    BigDecimal gananciaTotal = restTemplate.getForObject(apiPrefix + "/facturas/ganancia-total/criteria?idEmpresa=1", BigDecimal.class);
+    assertEquals(BigDecimal.ZERO, totalFacturadoVenta);
+    assertEquals(BigDecimal.ZERO, totalIvaVenta);
+    assertEquals(BigDecimal.ZERO, gananciaTotal);
+    this.shouldCrearFacturaVentaA();
+    totalFacturadoVenta = restTemplate.getForObject(apiPrefix + "/facturas/total-facturado-venta/criteria?idEmpresa=1", BigDecimal.class);
+    assertEquals(new BigDecimal("8230.762500000000000"), totalFacturadoVenta);
+    totalIvaVenta = restTemplate.getForObject(apiPrefix + "/facturas/total-iva-venta/criteria?idEmpresa=1", BigDecimal.class);
+    assertEquals(new BigDecimal("1218.262500000000000"), totalIvaVenta);
+    gananciaTotal = restTemplate.getForObject(apiPrefix + "/facturas/ganancia-total/criteria?idEmpresa=1", BigDecimal.class);
+    assertEquals(new BigDecimal("8100.000000000000000000000000000000"), gananciaTotal);
+    ProductoDTO producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    producto1.setCantidad(BigDecimal.TEN);
+    restTemplate.put(apiPrefix + "/productos", producto1);
+    ProductoDTO producto2 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    producto2.setCantidad(new BigDecimal("6"));
+    restTemplate.put(apiPrefix + "/productos", producto2);
+    this.shouldCrearFacturaVentaPresupuesto();
+    totalFacturadoVenta = restTemplate.getForObject(apiPrefix + "/facturas/total-facturado-venta/criteria?idEmpresa=1", BigDecimal.class);
+    assertEquals(new BigDecimal("14223.262500000000000"), totalFacturadoVenta);
+    totalIvaVenta = restTemplate.getForObject(apiPrefix + "/facturas/total-iva-venta/criteria?idEmpresa=1", BigDecimal.class);
+    assertEquals(new BigDecimal("1218.262500000000000"), totalIvaVenta);
+    gananciaTotal = restTemplate.getForObject(apiPrefix + "/facturas/ganancia-total/criteria?idEmpresa=1", BigDecimal.class);
+    assertEquals(new BigDecimal("14400.000000000000000000000000000000"), gananciaTotal);
+  }
+
+  @Test
+  public void shouldVerificarTotalizadoresCompra() {
+    BigDecimal totalFacturadoCompra = restTemplate.getForObject(apiPrefix + "/facturas/total-facturado-venta/criteria?idEmpresa=1", BigDecimal.class);
+    BigDecimal totalIvaCompra = restTemplate.getForObject(apiPrefix + "/facturas/total-iva-compra/criteria?idEmpresa=1", BigDecimal.class);
+    assertEquals(BigDecimal.ZERO, totalFacturadoCompra);
+    assertEquals(BigDecimal.ZERO, totalIvaCompra);
+    this.shouldCrearFacturaCompraA();
+    totalFacturadoCompra = restTemplate.getForObject(apiPrefix + "/facturas/total-facturado-compra/criteria?idEmpresa=1", BigDecimal.class);
+    assertEquals(new BigDecimal("610.895000000000000"), totalFacturadoCompra);
+    totalIvaCompra = restTemplate.getForObject(apiPrefix + "/facturas/total-iva-compra/criteria?idEmpresa=1", BigDecimal.class);
+    assertEquals(new BigDecimal("83.895000000000000"), totalIvaCompra);
+    this.shouldCrearFacturaCompraPresupuesto();
+    totalFacturadoCompra = restTemplate.getForObject(apiPrefix + "/facturas/total-facturado-compra/criteria?idEmpresa=1", BigDecimal.class);
+    assertEquals(new BigDecimal("1210.145000000000000"), totalFacturadoCompra);
+    totalIvaCompra = restTemplate.getForObject(apiPrefix + "/facturas/total-iva-compra/criteria?idEmpresa=1", BigDecimal.class);
+    assertEquals(new BigDecimal("83.895000000000000"), totalIvaCompra);
   }
 }
