@@ -17,6 +17,7 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.dto.TransportistaDTO;
 import sic.service.IEmpresaService;
+import sic.service.ILocalidadService;
 import sic.service.ITransportistaService;
 
 @RestController
@@ -25,14 +26,16 @@ public class TransportistaController {
 
   private final ITransportistaService transportistaService;
   private final IEmpresaService empresaService;
+  private final ILocalidadService localidadService;
   private final ModelMapper modelMapper;
 
   @Autowired
   public TransportistaController(
       ITransportistaService transportistaService, IEmpresaService empresaService,
-      ModelMapper modelMapper) {
+      ILocalidadService localidadService, ModelMapper modelMapper) {
     this.transportistaService = transportistaService;
     this.empresaService = empresaService;
+    this.localidadService = localidadService;
     this.modelMapper = modelMapper;
   }
 
@@ -45,9 +48,37 @@ public class TransportistaController {
   @PutMapping("/transportistas")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(@RequestBody TransportistaDTO transportistaDTO) {
-    Transportista transportista = modelMapper.map(transportistaDTO, Transportista.class);
-    if (transportistaService.getTransportistaPorId(transportista.getId_Transportista()) != null) {
-      transportistaService.actualizar(transportista);
+    Transportista transportistaPersistido =
+        transportistaService.getTransportistaPorId(transportistaDTO.getId_Transportista());
+    Transportista transportistaPorActualizar =
+        modelMapper.map(transportistaDTO, Transportista.class);
+    if (transportistaPorActualizar.getNombre() == null
+        || transportistaPorActualizar.getNombre().isEmpty()) {
+      transportistaPorActualizar.setNombre(transportistaPersistido.getNombre());
+    }
+    if (transportistaPorActualizar.getDireccion() == null) {
+      transportistaPorActualizar.setDireccion(transportistaPersistido.getDireccion());
+    }
+    if (transportistaDTO.getIdLocalidad() == null) {
+      transportistaPorActualizar.setLocalidad(transportistaPersistido.getLocalidad());
+    } else {
+      transportistaPorActualizar.setLocalidad(
+          localidadService.getLocalidadPorId(transportistaDTO.getIdLocalidad()));
+    }
+    if (transportistaPorActualizar.getWeb() == null) {
+      transportistaPorActualizar.setWeb(transportistaPersistido.getWeb());
+    }
+    if (transportistaPorActualizar.getTelefono() == null) {
+      transportistaPorActualizar.setTelefono(transportistaPersistido.getTelefono());
+    }
+    if (transportistaDTO.getIdEmpresa() == null) {
+      transportistaPorActualizar.setEmpresa(transportistaPersistido.getEmpresa());
+    } else {
+      transportistaPorActualizar.setEmpresa(
+        empresaService.getEmpresaPorId(transportistaDTO.getIdEmpresa()));
+    }
+    if (transportistaService.getTransportistaPorId(transportistaPorActualizar.getId_Transportista()) != null) {
+      transportistaService.actualizar(transportistaPorActualizar);
     }
   }
 
@@ -98,8 +129,14 @@ public class TransportistaController {
   }
 
   @PostMapping("/transportistas")
-  public Transportista guardar(@RequestBody TransportistaDTO transportistaDTO) {
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public Transportista guardar(
+      @RequestBody TransportistaDTO transportistaDTO,
+      @RequestParam Long idEmpresa,
+      @RequestParam Long idLocalidad) {
     Transportista transportista = modelMapper.map(transportistaDTO, Transportista.class);
+    transportista.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
+    transportista.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     return transportistaService.guardar(transportista);
   }
 }

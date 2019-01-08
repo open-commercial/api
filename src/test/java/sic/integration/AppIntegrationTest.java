@@ -688,8 +688,6 @@ public class AppIntegrationTest {
         ClienteDTO.class);
     TransportistaDTO transportistaDTO =
         TransportistaDTO.builder()
-            .empresa(empresaDTO)
-            .localidad(empresaDTO.getLocalidad())
             .nombre("Correo OCA")
             .direccion("Ruta 12")
             .web("pedidos@oca.com.ar")
@@ -697,7 +695,11 @@ public class AppIntegrationTest {
             .eliminado(false)
             .build();
     restTemplate.postForObject(
-        apiPrefix + "/transportistas", transportistaDTO, TransportistaDTO.class);
+        apiPrefix
+            + "/transportistas?idEmpresa=1&idLocalidad="
+            + empresaDTO.getLocalidad().getId_Localidad(),
+        transportistaDTO,
+        TransportistaDTO.class);
     MedidaDTO medidaMetro = MedidaDTO.builder().nombre("Metro").empresa(empresaDTO).build();
     MedidaDTO medidaKilo = MedidaDTO.builder().nombre("Kilo").empresa(empresaDTO).build();
     restTemplate.postForObject(apiPrefix + "/medidas", medidaMetro, MedidaDTO.class);
@@ -834,21 +836,16 @@ public class AppIntegrationTest {
 
   @Test
   public void shouldCrearTransportista() {
-    LocalidadDTO localidad =
-        restTemplate.getForObject(apiPrefix + "/localidades/1", LocalidadDTO.class);
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     TransportistaDTO transportista =
         TransportistaDTO.builder()
             .telefono("78946551122")
             .web("Ronollega.com")
             .direccion("Ruta 13 km 1313")
             .nombre("Transporte Segu Ronollega")
-            .localidad(localidad)
-            .empresa(empresa)
             .build();
     TransportistaDTO transportistaRecuperado =
         restTemplate.postForObject(
-            apiPrefix + "/transportistas", transportista, TransportistaDTO.class);
+            apiPrefix + "/transportistas?idEmpresa=1&idLocalidad=1", transportista, TransportistaDTO.class);
     assertEquals(transportista, transportistaRecuperado);
   }
 

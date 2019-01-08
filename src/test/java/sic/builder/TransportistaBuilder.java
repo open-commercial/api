@@ -12,7 +12,7 @@ public class TransportistaBuilder {
     private Localidad localidad = new LocalidadBuilder().build();
     private String web = "pedidos@oca.com.ar";
     private String telefono = "379 5402356";
-    private Empresa empresa = new EmpresaBuilder().build();;
+    private Empresa empresa = new EmpresaBuilder().build();
     private boolean eliminado = false;
     
     public Transportista build() {
