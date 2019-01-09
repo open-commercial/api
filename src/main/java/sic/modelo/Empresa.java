@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.querydsl.core.annotations.QueryInit;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -49,9 +51,20 @@ public class Empresa implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "id_Localidad", referencedColumnName = "id_Localidad")
+  @QueryInit("provincia.pais")
   private Localidad localidad;
 
   private String logo;
 
   private boolean eliminada;
+
+  @JsonGetter("idLocalidad")
+  public Long getIdLocalidad() {
+    return localidad.getId_Localidad();
+  }
+
+  @JsonGetter("nombreLocalidad")
+  public String getNombreLocalidad() {
+    return localidad.getNombre();
+  }
 }

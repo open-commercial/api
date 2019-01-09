@@ -4,14 +4,7 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.FormaDePago;
 import sic.modelo.Rol;
@@ -82,8 +75,9 @@ public class FormaDePagoController {
 
   @PostMapping("/formas-de-pago")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public FormaDePago guardar(@RequestBody FormaDePagoDTO formaDePagoDTO) {
+  public FormaDePago guardar(@RequestBody FormaDePagoDTO formaDePagoDTO, @RequestParam Long idEmpresa) {
     FormaDePago formaDePago = modelMapper.map(formaDePagoDTO, FormaDePago.class);
+    formaDePago.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     return formaDePagoService.guardar(formaDePago);
   }
 

@@ -6,7 +6,7 @@ import sic.modelo.CategoriaIVA;
 import java.util.Date;
 
 @Data
-@EqualsAndHashCode(exclude = {"id_Empresa"})
+@EqualsAndHashCode(exclude = {"id_Empresa", "idLocalidad", "nombreLocalidad"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -22,7 +22,8 @@ public class EmpresaDTO {
   private Date fechaInicioActividad;
   private String email;
   private String telefono;
-  private LocalidadDTO localidad;
+  private Long idLocalidad;
+  private String nombreLocalidad;
   private String logo;
   private boolean eliminada;
 

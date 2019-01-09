@@ -13,6 +13,7 @@ public class FormaDePagoDTO {
   private String nombre;
   private boolean afectaCaja;
   private boolean predeterminado;
-  private EmpresaDTO empresa;
+  private Long idEmpresa;
+  private String nombreEmpresa;
   private boolean eliminada;
 }

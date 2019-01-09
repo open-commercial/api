@@ -1,6 +1,7 @@
 package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.querydsl.core.annotations.QueryInit;
 import java.io.Serializable;
 import javax.persistence.Column;
@@ -23,6 +24,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombre", "empresa"})
 @ToString
+@JsonIgnoreProperties({"localidad", "empresa", "eliminado"})
 public class Transportista implements Serializable {
 
   @Id @GeneratedValue private long id_Transportista;

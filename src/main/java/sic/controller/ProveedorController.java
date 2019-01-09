@@ -21,6 +21,7 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.dto.ProveedorDTO;
 import sic.service.IEmpresaService;
+import sic.service.ILocalidadService;
 import sic.service.IProveedorService;
 
 @RestController
@@ -29,13 +30,18 @@ public class ProveedorController {
 
   private final IProveedorService proveedorService;
   private final IEmpresaService empresaService;
+  private final ILocalidadService localidadService;
   private final ModelMapper modelMapper;
 
   @Autowired
-  public ProveedorController(IProveedorService proveedorService, IEmpresaService empresaService,
-                             ModelMapper modelMapper) {
+  public ProveedorController(
+      IProveedorService proveedorService,
+      IEmpresaService empresaService,
+      ILocalidadService localidadService,
+      ModelMapper modelMapper) {
     this.proveedorService = proveedorService;
     this.empresaService = empresaService;
+    this.localidadService = localidadService;
     this.modelMapper = modelMapper;
   }
 
@@ -47,17 +53,42 @@ public class ProveedorController {
 
   @PostMapping("/proveedores")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public Proveedor guardar(@RequestBody ProveedorDTO proveedorDTO) {
+  public Proveedor guardar(
+      @RequestBody ProveedorDTO proveedorDTO,
+      @RequestParam Long idEmpresa,
+      @RequestParam Long idLocalidad) {
     Proveedor proveedor = modelMapper.map(proveedorDTO, Proveedor.class);
+    proveedor.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    proveedor.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
     return proveedorService.guardar(proveedor);
   }
 
   @PutMapping("/proveedores")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public void actualizar(@RequestBody ProveedorDTO proveedorDTO) {
-    Proveedor proveedor = modelMapper.map(proveedorDTO, Proveedor.class);
-    if (proveedorService.getProveedorPorId(proveedor.getId_Proveedor()) != null) {
-      proveedorService.actualizar(proveedor);
+  public void actualizar(
+      @RequestBody ProveedorDTO proveedorDTO,
+      @RequestParam(required = false) Long idEmpresa,
+      @RequestParam(required = false) Long idLocalidad) {
+    Proveedor proveedorPersistido =
+        proveedorService.getProveedorPorId(proveedorDTO.getId_Proveedor());
+    Proveedor proveedorPorActualizar = modelMapper.map(proveedorDTO, Proveedor.class);
+    if (proveedorPorActualizar.getRazonSocial() == null || proveedorPorActualizar.getRazonSocial().isEmpty()) {
+      proveedorPorActualizar.setRazonSocial(proveedorPersistido.getRazonSocial());
+    }
+    if (proveedorPorActualizar.getCategoriaIVA() == null) {
+      proveedorPorActualizar.setCategoriaIVA(proveedorPersistido.getCategoriaIVA());
+    }
+    if (proveedorPorActualizar.getLocalidad() == null) {
+      proveedorPorActualizar.setLocalidad(proveedorPersistido.getLocalidad());
+    }
+    if (idEmpresa != null) {
+      proveedorPorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    }
+    if (idLocalidad != null) {
+      proveedorPorActualizar.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
+    }
+    if (proveedorService.getProveedorPorId(proveedorPorActualizar.getId_Proveedor()) != null) {
+      proveedorService.actualizar(proveedorPorActualizar);
     }
   }
 
