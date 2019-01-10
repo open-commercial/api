@@ -35,10 +35,18 @@ public class MedidaController {
     
     @PutMapping("/medidas")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public void actualizar(@RequestBody Medida medida) {
-        if (medidaService.getMedidaPorId(medida.getId_Medida()) != null) {
-            medidaService.actualizar(medida);
+    public void actualizar(@RequestBody MedidaDTO medidaDTO, @RequestParam(required = false) Long idEmpresa) {
+        Medida medidaPersistida = medidaService.getMedidaPorId(medidaDTO.getId_Medida());
+        Medida medidaPorActualizar = modelMapper.map(medidaDTO, Medida.class);
+        if (medidaPorActualizar.getNombre() == null || medidaPorActualizar.getNombre().isEmpty()) {
+            medidaPorActualizar.setNombre(medidaPersistida.getNombre());
         }
+        if (idEmpresa != null) {
+            medidaPorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+        } else {
+            medidaPorActualizar.setEmpresa(medidaPersistida.getEmpresa());
+        }
+        medidaService.actualizar(medidaPorActualizar);
     }
     
     @DeleteMapping("/medidas/{idMedida}")

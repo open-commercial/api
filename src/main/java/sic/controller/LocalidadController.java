@@ -50,9 +50,10 @@ public class LocalidadController {
     if (localidadPorActualizar.getCodigoPostal() == null) {
       localidadPorActualizar.setCodigoPostal(localidadPersistida.getCodigoPostal());
     }
-    if (idProvincia != null
-        && !idProvincia.equals(localidadPersistida.getProvincia().getId_Provincia())) {
+    if (idProvincia != null) {
       localidadPorActualizar.setProvincia(provinciaService.getProvinciaPorId(idProvincia));
+    } else {
+      localidadPorActualizar.setProvincia(localidadPersistida.getProvincia());
     }
     if (localidadService.getLocalidadPorId(localidadPorActualizar.getId_Localidad()) != null) {
       localidadService.actualizar(localidadPorActualizar);

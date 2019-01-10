@@ -8,6 +8,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -33,7 +35,17 @@ public class Provincia implements Serializable {
     @ManyToOne
     @JoinColumn(name = "id_Pais", referencedColumnName = "id_Pais")
     private Pais pais;
-    
+
     private boolean eliminada;
+
+    @JsonGetter("idPais")
+    public long getIdPais() {
+        return pais.getId_Pais();
+    }
+
+    @JsonGetter("nombrePais")
+    public String getNombrePais() {
+        return pais.getNombre();
+    }
 
 }

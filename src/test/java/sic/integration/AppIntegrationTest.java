@@ -622,12 +622,11 @@ public class AppIntegrationTest {
             .postForEntity(apiPrefix + "/login", new Credencial("test", "test"), String.class)
             .getBody();
     PaisDTO paisDTO = PaisDTO.builder().nombre("Argentina").build();
-    PaisDTO paisGuardado =
-        restTemplate.postForObject(apiPrefix + "/paises", paisDTO, PaisDTO.class);
+    restTemplate.postForObject(apiPrefix + "/paises", paisDTO, PaisDTO.class);
     ProvinciaDTO provinciaDTO =
-        ProvinciaDTO.builder().nombre("Corrientes").pais(paisGuardado).build();
+        ProvinciaDTO.builder().nombre("Corrientes").build();
     ProvinciaDTO provinciaGuardada =
-        restTemplate.postForObject(apiPrefix + "/provincias", provinciaDTO, ProvinciaDTO.class);
+        restTemplate.postForObject(apiPrefix + "/provincias?idPais=1", provinciaDTO, ProvinciaDTO.class);
     LocalidadDTO localidadDTO =
         LocalidadDTO.builder()
             .nombre("Corrientes")
@@ -728,9 +727,9 @@ public class AppIntegrationTest {
     PaisDTO paisGuardado =
         restTemplate.postForObject(apiPrefix + "/paises", paisDTO, PaisDTO.class);
     ProvinciaDTO provinciaDTO =
-        ProvinciaDTO.builder().nombre("Westeros").pais(paisGuardado).build();
+        ProvinciaDTO.builder().nombre("Westeros").build();
     ProvinciaDTO provinciaGuardada =
-        restTemplate.postForObject(apiPrefix + "/provincias", provinciaDTO, ProvinciaDTO.class);
+        restTemplate.postForObject(apiPrefix + "/provincias?idPais=" + paisGuardado.getId_Pais(), provinciaDTO, ProvinciaDTO.class);
     LocalidadDTO localidadDTO =
         LocalidadDTO.builder()
             .nombre("Rocadragón")

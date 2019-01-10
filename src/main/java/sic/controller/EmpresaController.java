@@ -65,11 +65,25 @@ public class EmpresaController {
 
   @PutMapping("/empresas")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-  public void actualizar(@RequestBody EmpresaDTO empresaDTO) {
+  public void actualizar(@RequestBody EmpresaDTO empresaDTO,
+                         @RequestParam(required = false) Long idLocalidad) {
     Empresa empresaParaActualizar = modelMapper.map(empresaDTO, Empresa.class);
     Empresa empresaPersistida = empresaService.getEmpresaPorId(empresaParaActualizar.getId_Empresa());
-    if (empresaPersistida != null)
-      empresaService.actualizar(empresaParaActualizar, empresaPersistida);
+    if (empresaParaActualizar.getNombre() == null || empresaParaActualizar.getNombre().isEmpty()) {
+      empresaParaActualizar.setNombre(empresaPersistida.getNombre());
+    }
+    if (empresaParaActualizar.getDireccion() == null || empresaParaActualizar.getDireccion().isEmpty()) {
+      empresaParaActualizar.setNombre(empresaPersistida.getNombre());
+    }
+    if (empresaParaActualizar.getCategoriaIVA() == null) {
+      empresaParaActualizar.setCategoriaIVA(empresaPersistida.getCategoriaIVA());
+    }
+    if (idLocalidad != null) {
+      empresaParaActualizar.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
+    } else {
+      empresaParaActualizar.setLocalidad(empresaPersistida.getLocalidad());
+    }
+    empresaService.actualizar(empresaParaActualizar, empresaPersistida);
   }
 
   @DeleteMapping("/empresas/{idEmpresa}")
