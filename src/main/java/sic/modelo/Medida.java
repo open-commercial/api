@@ -10,6 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,6 +24,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombre", "empresa"})
 @ToString
+@JsonIgnoreProperties({"empresa", "eliminada"})
 public class Medida implements Serializable {
 
   @Id @GeneratedValue private long id_Medida;

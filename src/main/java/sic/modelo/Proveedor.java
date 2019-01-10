@@ -1,5 +1,7 @@
 package sic.modelo;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.querydsl.core.annotations.QueryInit;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -19,6 +21,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"razonSocial", "empresa"})
 @ToString
+@JsonIgnoreProperties({"empresa", "eliminado", "localidad"})
 public class Proveedor implements Serializable {
 
   @Id @GeneratedValue private long id_Proveedor;
@@ -67,4 +70,24 @@ public class Proveedor implements Serializable {
   @Transient private BigDecimal saldoCuentaCorriente;
 
   @Transient private Date fechaUltimoMovimiento;
+
+  @JsonGetter("nombreEmpresa")
+  public String getNombreEmpresa() {
+    return empresa.getNombre();
+  }
+
+  @JsonGetter("idEmpresa")
+  public long getIdEmpresa() {
+    return empresa.getId_Empresa();
+  }
+
+  @JsonGetter("nombreLocalidad")
+  public String getNombreLocalidad() {
+    return localidad.getNombre();
+  }
+
+  @JsonGetter("idLocalidad")
+  public long getIdLocalidad() {
+    return localidad.getId_Localidad();
+  }
 }

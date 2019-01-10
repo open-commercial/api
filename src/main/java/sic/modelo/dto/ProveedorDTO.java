@@ -1,5 +1,6 @@
 package sic.modelo.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import sic.modelo.CategoriaIVA;
 
@@ -8,7 +9,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
-@EqualsAndHashCode(exclude = {"id_Proveedor"})
+@EqualsAndHashCode(exclude = {"id_Proveedor", "idLocalidad", "nombreLocalidad", "nombreLocalidad", "idEmpresa", "nombreEmpresa"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

@@ -85,7 +85,7 @@ public class ProveedorController {
       proveedorPorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     }
     if (idLocalidad != null) {
-      proveedorPorActualizar.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
+      proveedorPorActualizar.setLocalidad(localidadService.getLocalidadPorId(idLocalidad ));
     }
     if (proveedorService.getProveedorPorId(proveedorPorActualizar.getId_Proveedor()) != null) {
       proveedorService.actualizar(proveedorPorActualizar);

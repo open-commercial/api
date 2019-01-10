@@ -91,7 +91,7 @@ public class AppIntegrationTest {
         .nota("ProductoTest2")
         .build();
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    Rubro rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", Rubro.class);
+    RubroDTO rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", RubroDTO.class);
     ProveedorDTO proveedor =
         restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
     Medida medida = restTemplate.getForObject(apiPrefix + "/medidas/1", Medida.class);
