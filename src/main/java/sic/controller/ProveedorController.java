@@ -73,7 +73,6 @@ public class ProveedorController {
       @RequestParam(required = false) Long idLocalidad,
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) Integer tamanio,
-      @RequestParam(required = false, defaultValue = "true") boolean conSaldo,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido) {
     final int TAMANIO_PAGINA_DEFAULT = 50;
@@ -111,7 +110,6 @@ public class ProveedorController {
             .idLocalidad(idLocalidad)
             .idEmpresa(idEmpresa)
             .pageable(pageable)
-            .conSaldo(conSaldo)
             .build();
     return proveedorService.buscarProveedores(criteria);
   }

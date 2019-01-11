@@ -119,6 +119,11 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   }
 
   @Override
+  public void eliminarCuentaCorrienteProveedor(long idProveedor) {
+    cuentaCorrienteProveedorRepository.eliminarCuentaCorrienteProveedor(idProveedor);
+  }
+
+  @Override
   public Page<CuentaCorrienteCliente> buscarCuentaCorrienteCliente(
       BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn) {
     QCuentaCorrienteCliente qCuentaCorrienteCliente =
@@ -191,6 +196,46 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             .eq(criteria.getIdEmpresa())
             .and(qCuentaCorrienteCliente.eliminada.eq(false)));
     return cuentaCorrienteClienteRepository.findAll(builder, criteria.getPageable());
+  }
+
+  @Override
+  public Page<CuentaCorrienteProveedor> buscarCuentaCorrienteProveedor(
+      BusquedaCuentaCorrienteProveedorCriteria criteria) {
+    QCuentaCorrienteProveedor qCuentaCorrienteProveedor =
+        QCuentaCorrienteProveedor.cuentaCorrienteProveedor;
+    BooleanBuilder builder = new BooleanBuilder();
+    if (criteria.isBuscaPorCodigo())
+      builder.or(
+          qCuentaCorrienteProveedor.proveedor.codigo.containsIgnoreCase(criteria.getCodigo()));
+    if (criteria.isBuscaPorRazonSocial()) {
+      String[] terminos = criteria.getRazonSocial().split(" ");
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        rsPredicate.and(
+            qCuentaCorrienteProveedor.proveedor.razonSocial.containsIgnoreCase(termino));
+      }
+      builder.or(rsPredicate);
+    }
+    if (criteria.isBuscaPorIdFiscal())
+      builder.or(qCuentaCorrienteProveedor.proveedor.idFiscal.eq(criteria.getIdFiscal()));
+    if (criteria.isBuscaPorLocalidad())
+      builder.and(
+          qCuentaCorrienteProveedor.proveedor.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
+    if (criteria.isBuscaPorProvincia())
+      builder.and(
+          qCuentaCorrienteProveedor.proveedor.localidad.provincia.id_Provincia.eq(
+              criteria.getIdProvincia()));
+    if (criteria.isBuscaPorPais())
+      builder.and(
+          qCuentaCorrienteProveedor.proveedor.localidad.provincia.pais.id_Pais.eq(
+              criteria.getIdPais()));
+    builder.and(
+        qCuentaCorrienteProveedor
+            .empresa
+            .id_Empresa
+            .eq(criteria.getIdEmpresa())
+            .and(qCuentaCorrienteProveedor.eliminada.eq(false)));
+    return cuentaCorrienteProveedorRepository.findAll(builder, criteria.getPageable());
   }
 
   @Override

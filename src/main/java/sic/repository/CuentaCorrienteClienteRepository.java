@@ -8,12 +8,15 @@ import sic.modelo.Cliente;
 import sic.modelo.CuentaCorrienteCliente;
 import sic.modelo.Empresa;
 
+public interface CuentaCorrienteClienteRepository
+    extends CuentaCorrienteRepository<CuentaCorrienteCliente>,
+        QueryDslPredicateExecutor<CuentaCorrienteCliente> {
 
-public interface CuentaCorrienteClienteRepository extends CuentaCorrienteRepository<CuentaCorrienteCliente>, QueryDslPredicateExecutor<CuentaCorrienteCliente> {
-    
-    CuentaCorrienteCliente findByClienteAndEmpresaAndEliminada(Cliente cliente, Empresa empresa, boolean eliminada);
+  CuentaCorrienteCliente findByClienteAndEmpresaAndEliminada(
+      Cliente cliente, Empresa empresa, boolean eliminada);
 
-    @Modifying
-    @Query("UPDATE CuentaCorrienteCliente ccc SET ccc.eliminada = true WHERE ccc.cliente.id_Cliente = :idCliente")
-    int eliminarCuentaCorrienteCliente(@Param("idCliente") long idCliente);
+  @Modifying
+  @Query(
+      "UPDATE CuentaCorrienteCliente ccc SET ccc.eliminada = true WHERE ccc.cliente.id_Cliente = :idCliente")
+  int eliminarCuentaCorrienteCliente(@Param("idCliente") long idCliente);
 }

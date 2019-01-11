@@ -19,17 +19,12 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@JsonIgnoreProperties({"proveedor", "empresa"})
+@JsonIgnoreProperties({"empresa"})
 public class CuentaCorrienteProveedor extends CuentaCorriente implements Serializable {
     
     @OneToOne
     @JoinColumn(name = "id_Proveedor", referencedColumnName = "id_Proveedor")
     private Proveedor proveedor;
-
-    @JsonGetter("razonSocialProveedor")
-    public String getRazonSocialProveedor() {
-        return proveedor.getRazonSocial();
-    }
 
     public CuentaCorrienteProveedor() {}
 
