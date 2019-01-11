@@ -4,13 +4,15 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.Empresa;
 import sic.modelo.Recibo;
 
-public interface ReciboRepository extends PagingAndSortingRepository<Recibo, Long> {
-    
+public interface ReciboRepository
+    extends PagingAndSortingRepository<Recibo, Long>, QueryDslPredicateExecutor<Recibo> {
+
     @Query("SELECT r FROM Recibo r WHERE r.idRecibo= :idRecibo AND r.eliminado = false")
     Recibo findById(@Param("idRecibo") long idRecibo);
 

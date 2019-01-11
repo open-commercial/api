@@ -1,19 +1,17 @@
 package sic.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
+import sic.modelo.BusquedaReciboCriteria;
 import sic.modelo.Recibo;
 import sic.modelo.Rol;
 import sic.service.IClienteService;
@@ -22,6 +20,8 @@ import sic.service.IFormaDePagoService;
 import sic.service.IProveedorService;
 import sic.service.IReciboService;
 import sic.service.IUsuarioService;
+
+import java.util.Calendar;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -33,6 +33,7 @@ public class ReciboController {
     private final IClienteService clienteService;
     private final IProveedorService proveedorService;
     private final IFormaDePagoService formaDePagoService;
+    private static final int TAMANIO_PAGINA_DEFAULT = 25;
     
     @Autowired
     public ReciboController(IReciboService reciboService, IEmpresaService empresaService,
@@ -51,7 +52,127 @@ public class ReciboController {
     public Recibo getReciboPorId(@PathVariable long idRecibo) {
         return reciboService.getById(idRecibo);
     }
-    
+
+  @GetMapping("/recibos/venta/busqueda/criteria")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public Page<Recibo> buscarConCriteriaVenta(
+      @RequestParam Long idEmpresa,
+      @RequestParam(required = false) Long desde,
+      @RequestParam(required = false) Long hasta,
+      @RequestParam(required = false) String concepto,
+      @RequestParam(required = false) Integer nroSerie,
+      @RequestParam(required = false) Integer nroRecibo,
+      @RequestParam(required = false) Long idCliente,
+      @RequestParam(required = false) Integer pagina,
+      @RequestParam(required = false) String ordenarPor,
+      @RequestParam(required = false) String sentido) {
+    Calendar fechaDesde = Calendar.getInstance();
+    Calendar fechaHasta = Calendar.getInstance();
+    if ((desde != null) && (hasta != null)) {
+      fechaDesde.setTimeInMillis(desde);
+      fechaHasta.setTimeInMillis(hasta);
+    }
+    if (pagina == null || pagina < 0) pagina = 0;
+    Pageable pageable;
+    if (ordenarPor == null || sentido == null) {
+      pageable =
+          new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "fecha"));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          pageable =
+              new PageRequest(
+                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+          break;
+        case "DESC":
+          pageable =
+              new PageRequest(
+                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+          break;
+        default:
+          pageable =
+              new PageRequest(
+                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "fecha"));
+          break;
+      }
+    }
+    BusquedaReciboCriteria criteria =
+        BusquedaReciboCriteria.builder()
+            .buscaPorFecha((desde != null) && (hasta != null))
+            .fechaDesde(fechaDesde.getTime())
+            .fechaHasta(fechaHasta.getTime())
+            .buscaPorConcepto(concepto != null)
+            .buscaPorNumeroRecibo((nroSerie != null) && (nroRecibo != null))
+            .numSerie((nroSerie != null) ? nroSerie : 0)
+            .concepto(concepto)
+            .buscaPorCliente(idCliente != null)
+            .idCliente(idCliente)
+            .idEmpresa(idEmpresa)
+            .pageable(pageable)
+            .build();
+    return reciboService.buscarRecibos(criteria);
+  }
+
+  @GetMapping("/recibos/compra/busqueda/criteria")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public Page<Recibo> buscarConCriteriaCompra(
+      @RequestParam Long idEmpresa,
+      @RequestParam(required = false) Long desde,
+      @RequestParam(required = false) Long hasta,
+      @RequestParam(required = false) String concepto,
+      @RequestParam(required = false) Integer nroSerie,
+      @RequestParam(required = false) Integer nroRecibo,
+      @RequestParam(required = false) Long idProveedor,
+      @RequestParam(required = false) Integer pagina,
+      @RequestParam(required = false) String ordenarPor,
+      @RequestParam(required = false) String sentido) {
+    Calendar fechaDesde = Calendar.getInstance();
+    Calendar fechaHasta = Calendar.getInstance();
+    if ((desde != null) && (hasta != null)) {
+      fechaDesde.setTimeInMillis(desde);
+      fechaHasta.setTimeInMillis(hasta);
+    }
+    if (pagina == null || pagina < 0) pagina = 0;
+    Pageable pageable;
+    if (ordenarPor == null || sentido == null) {
+      pageable =
+          new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "fecha"));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          pageable =
+              new PageRequest(
+                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+          break;
+        case "DESC":
+          pageable =
+              new PageRequest(
+                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+          break;
+        default:
+          pageable =
+              new PageRequest(
+                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "fecha"));
+          break;
+      }
+    }
+    BusquedaReciboCriteria criteria =
+        BusquedaReciboCriteria.builder()
+            .buscaPorFecha((desde != null) && (hasta != null))
+            .fechaDesde(fechaDesde.getTime())
+            .fechaHasta(fechaHasta.getTime())
+            .buscaPorConcepto(concepto != null)
+            .buscaPorNumeroRecibo((nroSerie != null) && (nroRecibo != null))
+            .buscaPorConcepto(concepto != null)
+            .concepto(concepto)
+            .buscaPorProveedor(idProveedor != null)
+            .idProveedor(idProveedor)
+            .idEmpresa(idEmpresa)
+            .pageable(pageable)
+            .build();
+    return reciboService.buscarRecibos(criteria);
+  }
+
     @PostMapping("/recibos/clientes")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Recibo guardarReciboCliente(@RequestParam long idUsuario,
