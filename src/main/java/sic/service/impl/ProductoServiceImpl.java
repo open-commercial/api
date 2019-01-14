@@ -13,6 +13,7 @@ import sic.modelo.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -101,7 +102,7 @@ public class ProductoServiceImpl implements IProductoService {
     Double[] iva = {10.5, 21.0, 0.0};
     if (!Arrays.asList(iva).contains(producto.getIvaPorcentaje().doubleValue())) {
       throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_producto_ganancia_neta_incorrecta"));
+        MessageFormat.format(RESOURCE_BUNDLE.getString("mensaje_producto_ganancia_neta_incorrecta"), producto.getDescripcion()));
     }
     if (producto
             .getGananciaNeto()
@@ -112,7 +113,7 @@ public class ProductoServiceImpl implements IProductoService {
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_producto_ganancia_neta_incorrecta"));
+        MessageFormat.format(RESOURCE_BUNDLE.getString("mensaje_producto_ganancia_neta_incorrecta"), producto.getDescripcion()));
     }
     if (producto
             .getPrecioVentaPublico()
@@ -122,7 +123,7 @@ public class ProductoServiceImpl implements IProductoService {
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_precio_venta_publico_incorrecto"));
+        MessageFormat.format(RESOURCE_BUNDLE.getString("mensaje_precio_venta_publico_incorrecto"), producto.getDescripcion()));
     }
     if (producto
             .getIvaNeto()
@@ -132,7 +133,7 @@ public class ProductoServiceImpl implements IProductoService {
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_producto_iva_neto_incorrecto"));
+        MessageFormat.format(RESOURCE_BUNDLE.getString("mensaje_producto_iva_neto_incorrecto"), producto.getDescripcion()));
     }
     if (producto
             .getPrecioLista()
@@ -143,7 +144,7 @@ public class ProductoServiceImpl implements IProductoService {
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_producto_precio_lista_incorrecto"));
+        MessageFormat.format(RESOURCE_BUNDLE.getString("mensaje_producto_precio_lista_incorrecto"), producto.getDescripcion()));
     }
   }
 
