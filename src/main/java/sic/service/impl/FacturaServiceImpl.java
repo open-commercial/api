@@ -687,7 +687,8 @@ public class FacturaServiceImpl implements IFacturaService {
             cal.set(Calendar.SECOND, 59);
             criteria.setFechaHasta(cal.getTime());
         }
-        return facturaCompraRepository.calcularTotalFacturadoCompra(this.getBuilderCompra(criteria));
+      BigDecimal totalFacturado = facturaCompraRepository.calcularTotalFacturadoCompra(this.getBuilderCompra(criteria));
+      return (totalFacturado != null? totalFacturado : BigDecimal.ZERO);
     }
 
     @Override
@@ -736,7 +737,8 @@ public class FacturaServiceImpl implements IFacturaService {
             criteria.setFechaHasta(cal.getTime());
         }
         TipoDeComprobante[] tipoFactura = {TipoDeComprobante.FACTURA_A};
-        return facturaCompraRepository.calcularIVACompra(this.getBuilderCompra(criteria), tipoFactura);
+      BigDecimal ivaCompra = facturaCompraRepository.calcularIVACompra(this.getBuilderCompra(criteria), tipoFactura);
+      return (ivaCompra != null? ivaCompra : BigDecimal.ZERO);
     }
 
     @Override

@@ -352,6 +352,7 @@ public class FacturaController {
       @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
       @RequestParam(required = false) Long idUsuario,
       @RequestParam(required = false) Long nroPedido,
+      @RequestParam(required = false) Long idProducto,
       @RequestHeader("Authorization") String authorizationHeader) {
     Calendar fechaDesde = Calendar.getInstance();
     Calendar fechaHasta = Calendar.getInstance();
@@ -376,6 +377,8 @@ public class FacturaController {
             .numFactura((nroFactura != null) ? nroFactura : 0)
             .buscarPorPedido(nroPedido != null)
             .nroPedido((nroPedido != null) ? nroPedido : 0)
+            .buscaPorProducto(idProducto !=null)
+            .idProducto((idProducto != null) ? idProducto : 0)
             .buscaPorTipoComprobante(tipoDeComprobante != null)
             .tipoComprobante(tipoDeComprobante)
             .cantRegistros(0)
@@ -384,37 +387,42 @@ public class FacturaController {
     return facturaService.calcularTotalFacturadoVenta(criteria, (int) claims.get("idUsuario"));
   }
 
-    @GetMapping("/facturas/total-facturado-compra/criteria")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public BigDecimal calcularTotalFacturadoCompra(@RequestParam Long idEmpresa,
-                                                   @RequestParam(required = false) Long desde,
-                                                   @RequestParam(required = false) Long hasta,
-                                                   @RequestParam(required = false) Long idProveedor,
-                                                   @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-                                                   @RequestParam(required = false) Integer nroSerie,
-                                                   @RequestParam(required = false) Integer nroFactura) {
-        Calendar fechaDesde = Calendar.getInstance();
-        Calendar fechaHasta = Calendar.getInstance();
-        if ((desde != null) && (hasta != null)) {
-            fechaDesde.setTimeInMillis(desde);            
-            fechaHasta.setTimeInMillis(hasta);
-        }
-        BusquedaFacturaCompraCriteria criteria = BusquedaFacturaCompraCriteria.builder()
-                                                 .idEmpresa(idEmpresa)
-                                                 .buscaPorFecha((desde != null) && (hasta != null))
-                                                 .fechaDesde(fechaDesde.getTime())
-                                                 .fechaHasta(fechaHasta.getTime())
-                                                 .buscaPorProveedor(idProveedor != null)
-                                                 .idProveedor(idProveedor)
-                                                 .buscaPorTipoComprobante(tipoDeComprobante != null)
-                                                 .tipoComprobante(tipoDeComprobante)
-                                                 .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
-                                                 .numSerie((nroSerie != null) ? nroSerie : 0)
-                                                 .numFactura((nroFactura != null) ? nroFactura : 0)
-                                                 .cantRegistros(0)
-                                                 .build();
-        return facturaService.calcularTotalFacturadoCompra(criteria);
+  @GetMapping("/facturas/total-facturado-compra/criteria")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public BigDecimal calcularTotalFacturadoCompra(
+      @RequestParam Long idEmpresa,
+      @RequestParam(required = false) Long desde,
+      @RequestParam(required = false) Long hasta,
+      @RequestParam(required = false) Long idProveedor,
+      @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
+      @RequestParam(required = false) Integer nroSerie,
+      @RequestParam(required = false) Integer nroFactura,
+      @RequestParam(required = false) Long idProducto) {
+    Calendar fechaDesde = Calendar.getInstance();
+    Calendar fechaHasta = Calendar.getInstance();
+    if ((desde != null) && (hasta != null)) {
+      fechaDesde.setTimeInMillis(desde);
+      fechaHasta.setTimeInMillis(hasta);
     }
+    BusquedaFacturaCompraCriteria criteria =
+        BusquedaFacturaCompraCriteria.builder()
+            .idEmpresa(idEmpresa)
+            .buscaPorFecha((desde != null) && (hasta != null))
+            .fechaDesde(fechaDesde.getTime())
+            .fechaHasta(fechaHasta.getTime())
+            .buscaPorProveedor(idProveedor != null)
+            .idProveedor(idProveedor)
+            .buscaPorTipoComprobante(tipoDeComprobante != null)
+            .tipoComprobante(tipoDeComprobante)
+            .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
+            .numSerie((nroSerie != null) ? nroSerie : 0)
+            .numFactura((nroFactura != null) ? nroFactura : 0)
+            .cantRegistros(0)
+            .buscaPorProducto(idProducto != null)
+            .idProducto((idProducto != null) ? idProducto : 0)
+            .build();
+    return facturaService.calcularTotalFacturadoCompra(criteria);
+  }
 
   @GetMapping("/facturas/total-iva-venta/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
@@ -429,6 +437,7 @@ public class FacturaController {
       @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
       @RequestParam(required = false) Long idUsuario,
       @RequestParam(required = false) Long nroPedido,
+      @RequestParam(required = false) Long idProducto,
       @RequestHeader("Authorization") String authorizationHeader) {
     Calendar fechaDesde = Calendar.getInstance();
     Calendar fechaHasta = Calendar.getInstance();
@@ -453,6 +462,8 @@ public class FacturaController {
             .numFactura((nroFactura != null) ? nroFactura : 0)
             .buscarPorPedido(nroPedido != null)
             .nroPedido((nroPedido != null) ? nroPedido : 0)
+            .buscaPorProducto(idProducto != null)
+            .idProducto((idProducto != null) ? idProducto : 0)
             .buscaPorTipoComprobante(tipoDeComprobante != null)
             .tipoComprobante(tipoDeComprobante)
             .cantRegistros(0)
@@ -461,37 +472,42 @@ public class FacturaController {
     return facturaService.calcularIvaVenta(criteria, (int) claims.get("idUsuario"));
   }
 
-    @GetMapping("/facturas/total-iva-compra/criteria")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public BigDecimal calcularTotalIvaCompra(@RequestParam Long idEmpresa,
-                                             @RequestParam(required = false) Long desde,
-                                             @RequestParam(required = false) Long hasta,
-                                             @RequestParam(required = false) Long idProveedor,
-                                             @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-                                             @RequestParam(required = false) Integer nroSerie,
-                                             @RequestParam(required = false) Integer nroFactura) {
-        Calendar fechaDesde = Calendar.getInstance();
-        Calendar fechaHasta = Calendar.getInstance();
-        if ((desde != null) && (hasta != null)) {
-            fechaDesde.setTimeInMillis(desde);            
-            fechaHasta.setTimeInMillis(hasta);
-        }
-        BusquedaFacturaCompraCriteria criteria = BusquedaFacturaCompraCriteria.builder()
-                                                 .idEmpresa(idEmpresa)
-                                                 .buscaPorFecha((desde != null) && (hasta != null))
-                                                 .fechaDesde(fechaDesde.getTime())
-                                                 .fechaHasta(fechaHasta.getTime())
-                                                 .buscaPorProveedor(idProveedor != null)
-                                                 .idProveedor(idProveedor)
-                                                 .buscaPorTipoComprobante(tipoDeComprobante != null)
-                                                 .tipoComprobante(tipoDeComprobante)
-                                                 .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
-                                                 .numSerie((nroSerie != null) ? nroSerie : 0)
-                                                 .numFactura((nroFactura != null) ? nroFactura : 0)
-                                                 .cantRegistros(0)
-                                                 .build();
-        return facturaService.calcularIvaCompra(criteria);
+  @GetMapping("/facturas/total-iva-compra/criteria")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public BigDecimal calcularTotalIvaCompra(
+      @RequestParam Long idEmpresa,
+      @RequestParam(required = false) Long desde,
+      @RequestParam(required = false) Long hasta,
+      @RequestParam(required = false) Long idProveedor,
+      @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
+      @RequestParam(required = false) Integer nroSerie,
+      @RequestParam(required = false) Integer nroFactura,
+      @RequestParam(required = false) Long idProducto) {
+    Calendar fechaDesde = Calendar.getInstance();
+    Calendar fechaHasta = Calendar.getInstance();
+    if ((desde != null) && (hasta != null)) {
+      fechaDesde.setTimeInMillis(desde);
+      fechaHasta.setTimeInMillis(hasta);
     }
+    BusquedaFacturaCompraCriteria criteria =
+        BusquedaFacturaCompraCriteria.builder()
+            .idEmpresa(idEmpresa)
+            .buscaPorFecha((desde != null) && (hasta != null))
+            .fechaDesde(fechaDesde.getTime())
+            .fechaHasta(fechaHasta.getTime())
+            .buscaPorProveedor(idProveedor != null)
+            .idProveedor(idProveedor)
+            .buscaPorTipoComprobante(tipoDeComprobante != null)
+            .tipoComprobante(tipoDeComprobante)
+            .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
+            .numSerie((nroSerie != null) ? nroSerie : 0)
+            .numFactura((nroFactura != null) ? nroFactura : 0)
+            .cantRegistros(0)
+            .buscaPorProducto(idProducto != null)
+            .idProducto((idProducto != null) ? idProducto : 0)
+            .build();
+    return facturaService.calcularIvaCompra(criteria);
+  }
 
   @GetMapping("/facturas/ganancia-total/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
@@ -506,6 +522,7 @@ public class FacturaController {
       @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
       @RequestParam(required = false) Long idUsuario,
       @RequestParam(required = false) Long nroPedido,
+      @RequestParam(required = false) Long idProducto,
       @RequestHeader("Authorization") String authorizationHeader) {
     Calendar fechaDesde = Calendar.getInstance();
     Calendar fechaHasta = Calendar.getInstance();
@@ -530,6 +547,8 @@ public class FacturaController {
             .numFactura((nroFactura != null) ? nroFactura : 0)
             .buscarPorPedido(nroPedido != null)
             .nroPedido((nroPedido != null) ? nroPedido : 0)
+            .buscaPorProducto(idProducto != null)
+            .idProducto((idProducto != null) ? idProducto : 0)
             .buscaPorTipoComprobante(tipoDeComprobante != null)
             .tipoComprobante(tipoDeComprobante)
             .cantRegistros(0)
