@@ -11,7 +11,7 @@ public interface IReciboService {
     
     Recibo getById(long idRecibo);
 
-    Page<Recibo> buscarRecibos(BusquedaReciboCriteria criteria);
+    Page<Recibo> buscarRecibos(BusquedaReciboCriteria criteria, Movimiento movimiento);
     
     Recibo guardar(Recibo recibo);
     
@@ -36,5 +36,6 @@ public interface IReciboService {
     BigDecimal getTotalRecibosClientesEntreFechas(long idEmpresa, Date desde, Date hasta);
 
     BigDecimal getTotalRecibosProveedoresEntreFechas(long idEmpresa, Date desde, Date hasta);
-    
+
+    BigDecimal calcularMontosRecibos(BusquedaReciboCriteria criteria);
 }

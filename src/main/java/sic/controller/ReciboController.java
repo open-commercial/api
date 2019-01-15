@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.BusquedaReciboCriteria;
+import sic.modelo.Movimiento;
 import sic.modelo.Recibo;
 import sic.modelo.Rol;
 import sic.service.IClienteService;
@@ -21,6 +22,7 @@ import sic.service.IProveedorService;
 import sic.service.IReciboService;
 import sic.service.IUsuarioService;
 
+import java.math.BigDecimal;
 import java.util.Calendar;
 
 @RestController
@@ -114,7 +116,7 @@ public class ReciboController {
             .idEmpresa(idEmpresa)
             .pageable(pageable)
             .build();
-    return reciboService.buscarRecibos(criteria);
+    return reciboService.buscarRecibos(criteria, Movimiento.VENTA);
   }
 
   @GetMapping("/recibos/compra/busqueda/criteria")
@@ -179,7 +181,80 @@ public class ReciboController {
             .idEmpresa(idEmpresa)
             .pageable(pageable)
             .build();
-    return reciboService.buscarRecibos(criteria);
+    return reciboService.buscarRecibos(criteria, Movimiento.COMPRA);
+  }
+
+  @GetMapping("/recibos/venta/monto/criteria")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public BigDecimal calcularMontosRecibosVenta(
+      @RequestParam Long idEmpresa,
+      @RequestParam(required = false) Long desde,
+      @RequestParam(required = false) Long hasta,
+      @RequestParam(required = false) String concepto,
+      @RequestParam(required = false) Integer nroSerie,
+      @RequestParam(required = false) Integer nroRecibo,
+      @RequestParam(required = false) Long idCliente,
+      @RequestParam(required = false) Long idUsuario) {
+    Calendar fechaDesde = Calendar.getInstance();
+    Calendar fechaHasta = Calendar.getInstance();
+    if ((desde != null) && (hasta != null)) {
+      fechaDesde.setTimeInMillis(desde);
+      fechaHasta.setTimeInMillis(hasta);
+    }
+    BusquedaReciboCriteria criteria =
+        BusquedaReciboCriteria.builder()
+            .buscaPorFecha((desde != null) && (hasta != null))
+            .fechaDesde(fechaDesde.getTime())
+            .fechaHasta(fechaHasta.getTime())
+            .buscaPorConcepto(concepto != null)
+            .concepto(concepto)
+            .buscaPorNumeroRecibo((nroSerie != null) && (nroRecibo != null))
+            .numSerie((nroSerie != null) ? nroSerie : 0)
+            .numRecibo((nroRecibo != null) ? nroRecibo : 0)
+            .buscaPorCliente(idCliente != null)
+            .idCliente(idCliente)
+            .buscaPorUsuario(idUsuario != null)
+            .idUsuario(idUsuario)
+            .idEmpresa(idEmpresa)
+            .build();
+    return reciboService.calcularMontosRecibos(criteria);
+  }
+
+  @GetMapping("/recibos/compra/monto/criteria")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public BigDecimal calcularMontosRecibosCompra(
+      @RequestParam Long idEmpresa,
+      @RequestParam(required = false) Long desde,
+      @RequestParam(required = false) Long hasta,
+      @RequestParam(required = false) String concepto,
+      @RequestParam(required = false) Integer nroSerie,
+      @RequestParam(required = false) Integer nroRecibo,
+      @RequestParam(required = false) Long idProveedor,
+      @RequestParam(required = false) Long idUsuario) {
+    Calendar fechaDesde = Calendar.getInstance();
+    Calendar fechaHasta = Calendar.getInstance();
+    if ((desde != null) && (hasta != null)) {
+      fechaDesde.setTimeInMillis(desde);
+      fechaHasta.setTimeInMillis(hasta);
+    }
+    BusquedaReciboCriteria criteria =
+        BusquedaReciboCriteria.builder()
+            .buscaPorFecha((desde != null) && (hasta != null))
+            .fechaDesde(fechaDesde.getTime())
+            .fechaHasta(fechaHasta.getTime())
+            .buscaPorConcepto(concepto != null)
+            .buscaPorNumeroRecibo((nroSerie != null) && (nroRecibo != null))
+            .numSerie((nroSerie != null) ? nroSerie : 0)
+            .numRecibo((nroRecibo != null) ? nroRecibo : 0)
+            .buscaPorConcepto(concepto != null)
+            .concepto(concepto)
+            .buscaPorProveedor(idProveedor != null)
+            .idProveedor(idProveedor)
+            .buscaPorUsuario(idUsuario != null)
+            .idUsuario(idUsuario)
+            .idEmpresa(idEmpresa)
+            .build();
+    return reciboService.calcularMontosRecibos(criteria);
   }
 
     @PostMapping("/recibos/clientes")

@@ -4,12 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
@@ -69,7 +64,7 @@ public class ReciboServiceImpl implements IReciboService {
   }
 
   @Override
-  public Page<Recibo> buscarRecibos(BusquedaReciboCriteria criteria) {
+  public Page<Recibo> buscarRecibos(BusquedaReciboCriteria criteria, Movimiento movimiento) {
     QRecibo qRecibo = QRecibo.recibo;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.isBuscaPorFecha()) {
@@ -105,6 +100,8 @@ public class ReciboServiceImpl implements IReciboService {
       builder.or(qRecibo.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
     if (criteria.isBuscaPorUsuario())
       builder.or(qRecibo.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+    if (movimiento == Movimiento.VENTA) builder.or(qRecibo.proveedor.isNull());
+    else if (movimiento == Movimiento.COMPRA) builder.or(qRecibo.cliente.isNull());
     builder.and(
         qRecibo.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qRecibo.eliminado.eq(false)));
     return reciboRepository.findAll(builder, criteria.getPageable());
@@ -163,7 +160,7 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public long getSiguienteNumeroRecibo(long idEmpresa, long serie) {
-    Recibo recibo =
+    Recibo recibo = null;
         reciboRepository.findTopByEmpresaAndNumSerieOrderByNumReciboDesc(
             empresaService.getEmpresaPorId(idEmpresa), serie);
     if (recibo == null) {
@@ -328,5 +325,68 @@ public class ReciboServiceImpl implements IReciboService {
     BigDecimal total =
         reciboRepository.getTotalRecibosProveedoresEntreFechas(idEmpresa, desde, hasta);
     return (total == null) ? BigDecimal.ZERO : total;
+  }
+
+  private BooleanBuilder getBuilder(BusquedaReciboCriteria criteria) {
+    QRecibo qRecibo = QRecibo.recibo;
+    BooleanBuilder builder = new BooleanBuilder();
+    builder.and(
+      qRecibo
+        .empresa
+        .id_Empresa
+        .eq(criteria.getIdEmpresa())
+        .and(qRecibo.eliminado.eq(false)));
+    // Fecha
+    if (criteria.isBuscaPorFecha()) {
+      FormatterFechaHora formateadorFecha =
+        new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      DateExpression<Date> fDesde =
+        Expressions.dateTemplate(
+          Date.class,
+          "convert({0}, datetime)",
+          formateadorFecha.format(criteria.getFechaDesde()));
+      DateExpression<Date> fHasta =
+        Expressions.dateTemplate(
+          Date.class,
+          "convert({0}, datetime)",
+          formateadorFecha.format(criteria.getFechaHasta()));
+      builder.and(qRecibo.fecha.between(fDesde, fHasta));
+    }
+    if (criteria.isBuscaPorCliente())
+      builder.and(qRecibo.cliente.id_Cliente.eq(criteria.getIdCliente()));
+    if (criteria.isBuscaPorUsuario())
+      builder.and(qRecibo.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+    if (criteria.isBuscaPorProveedor())
+      builder.and(qRecibo.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+    if (criteria.isBuscaPorNumeroRecibo())
+      builder
+        .and(qRecibo.numSerie.eq(criteria.getNumSerie()))
+        .and(qRecibo.numRecibo.eq(criteria.getNumRecibo()));
+    return builder;
+  }
+
+  @Override
+  public BigDecimal calcularMontosRecibos(BusquedaReciboCriteria criteria) {
+//    if (criteria.isBuscaPorFecha()
+//        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+//      throw new BusinessServiceException(
+//          ResourceBundle.getBundle("Mensajes")
+//              .getString("mensaje_factura_fechas_busqueda_invalidas"));
+//    }
+//    if (criteria.isBuscaPorFecha()) {
+//      Calendar cal = new GregorianCalendar();
+//      cal.setTime(criteria.getFechaDesde());
+//      cal.set(Calendar.HOUR_OF_DAY, 0);
+//      cal.set(Calendar.MINUTE, 0);
+//      cal.set(Calendar.SECOND, 0);
+//      criteria.setFechaDesde(cal.getTime());
+//      cal.setTime(criteria.getFechaHasta());
+//      cal.set(Calendar.HOUR_OF_DAY, 23);
+//      cal.set(Calendar.MINUTE, 59);
+//      cal.set(Calendar.SECOND, 59);
+//      criteria.setFechaHasta(cal.getTime());
+//    }
+//    BigDecimal totalFacturado = reciboRepository.calcularMontosRecibos(this.getBuilder(criteria));
+    return BigDecimal.ZERO; //(totalFacturado != null ? totalFacturado : BigDecimal.ZERO);
   }
 }
