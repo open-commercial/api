@@ -27,5 +27,7 @@ public class BusquedaReciboCriteria {
   private Long idCliente;
   private boolean buscaPorProveedor;
   private Long idProveedor;
+  private boolean buscaPorUsuario;
+  private Long idUsuario;
   private Pageable pageable;
 }

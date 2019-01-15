@@ -89,8 +89,8 @@ public class ReciboServiceImpl implements IReciboService {
     }
     if (criteria.isBuscaPorNumeroRecibo())
       builder
-        .and(qRecibo.numSerie.eq(criteria.getNumSerie()))
-        .and(qRecibo.numRecibo.eq(criteria.getNumRecibo()));
+          .and(qRecibo.numSerie.eq(criteria.getNumSerie()))
+          .and(qRecibo.numRecibo.eq(criteria.getNumRecibo()));
     if (criteria.isBuscaPorConcepto()) {
       String[] terminos = criteria.getConcepto().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
@@ -103,8 +103,10 @@ public class ReciboServiceImpl implements IReciboService {
       builder.or(qRecibo.cliente.id_Cliente.eq(criteria.getIdCliente()));
     if (criteria.isBuscaPorProveedor())
       builder.or(qRecibo.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
+    if (criteria.isBuscaPorUsuario())
+      builder.or(qRecibo.usuario.id_Usuario.eq(criteria.getIdUsuario()));
     builder.and(
-      qRecibo.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qRecibo.eliminado.eq(false)));
+        qRecibo.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qRecibo.eliminado.eq(false)));
     return reciboRepository.findAll(builder, criteria.getPageable());
   }
 

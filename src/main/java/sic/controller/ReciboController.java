@@ -63,6 +63,71 @@ public class ReciboController {
       @RequestParam(required = false) Integer nroSerie,
       @RequestParam(required = false) Integer nroRecibo,
       @RequestParam(required = false) Long idCliente,
+      @RequestParam(required = false) Long idUsuario,
+      @RequestParam(required = false) Integer pagina,
+      @RequestParam(required = false) String ordenarPor,
+      @RequestParam(required = false) String sentido) {
+    Calendar fechaDesde = Calendar.getInstance();
+    Calendar fechaHasta = Calendar.getInstance();
+    if ((desde != null) && (hasta != null)) {
+      fechaDesde.setTimeInMillis(desde);
+      fechaHasta.setTimeInMillis(hasta);
+    }
+    if (pagina == null || pagina < 0) pagina = 0;
+    Pageable pageable;
+    if (ordenarPor == null || sentido == null) {
+      pageable =
+          new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "fecha"));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          pageable =
+              new PageRequest(
+                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+          break;
+        case "DESC":
+          pageable =
+              new PageRequest(
+                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+          break;
+        default:
+          pageable =
+              new PageRequest(
+                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "fecha"));
+          break;
+      }
+    }
+    BusquedaReciboCriteria criteria =
+        BusquedaReciboCriteria.builder()
+            .buscaPorFecha((desde != null) && (hasta != null))
+            .fechaDesde(fechaDesde.getTime())
+            .fechaHasta(fechaHasta.getTime())
+            .buscaPorConcepto(concepto != null)
+            .concepto(concepto)
+            .buscaPorNumeroRecibo((nroSerie != null) && (nroRecibo != null))
+            .numSerie((nroSerie != null) ? nroSerie : 0)
+            .numRecibo((nroRecibo != null) ? nroRecibo : 0)
+            .buscaPorCliente(idCliente != null)
+            .idCliente(idCliente)
+            .buscaPorUsuario(idUsuario != null)
+            .idUsuario(idUsuario)
+            .idEmpresa(idEmpresa)
+            .pageable(pageable)
+            .build();
+    return reciboService.buscarRecibos(criteria);
+  }
+
+  @GetMapping("/recibos/compra/busqueda/criteria")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public Page<Recibo> buscarConCriteriaCompra(
+      @RequestParam Long idEmpresa,
+      @RequestParam(required = false) Long desde,
+      @RequestParam(required = false) Long hasta,
+      @RequestParam(required = false) String concepto,
+      @RequestParam(required = false) Integer nroSerie,
+      @RequestParam(required = false) Integer nroRecibo,
+      @RequestParam(required = false) Long idProveedor,
+      @RequestParam(required = false) Long idUsuario,
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido) {
@@ -104,69 +169,13 @@ public class ReciboController {
             .buscaPorConcepto(concepto != null)
             .buscaPorNumeroRecibo((nroSerie != null) && (nroRecibo != null))
             .numSerie((nroSerie != null) ? nroSerie : 0)
-            .concepto(concepto)
-            .buscaPorCliente(idCliente != null)
-            .idCliente(idCliente)
-            .idEmpresa(idEmpresa)
-            .pageable(pageable)
-            .build();
-    return reciboService.buscarRecibos(criteria);
-  }
-
-  @GetMapping("/recibos/compra/busqueda/criteria")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Page<Recibo> buscarConCriteriaCompra(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) String concepto,
-      @RequestParam(required = false) Integer nroSerie,
-      @RequestParam(required = false) Integer nroRecibo,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if ((desde != null) && (hasta != null)) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable;
-    if (ordenarPor == null || sentido == null) {
-      pageable =
-          new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "fecha"));
-    } else {
-      switch (sentido) {
-        case "ASC":
-          pageable =
-              new PageRequest(
-                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
-          break;
-        case "DESC":
-          pageable =
-              new PageRequest(
-                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
-          break;
-        default:
-          pageable =
-              new PageRequest(
-                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "fecha"));
-          break;
-      }
-    }
-    BusquedaReciboCriteria criteria =
-        BusquedaReciboCriteria.builder()
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .buscaPorConcepto(concepto != null)
-            .buscaPorNumeroRecibo((nroSerie != null) && (nroRecibo != null))
+            .numRecibo((nroRecibo != null) ? nroRecibo : 0)
             .buscaPorConcepto(concepto != null)
             .concepto(concepto)
             .buscaPorProveedor(idProveedor != null)
             .idProveedor(idProveedor)
+            .buscaPorUsuario(idUsuario != null)
+            .idUsuario(idUsuario)
             .idEmpresa(idEmpresa)
             .pageable(pageable)
             .build();
