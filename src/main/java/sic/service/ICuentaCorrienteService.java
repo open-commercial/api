@@ -22,7 +22,11 @@ public interface ICuentaCorrienteService {
 
   void eliminarCuentaCorrienteCliente(long idCliente);
 
+  void eliminarCuentaCorrienteProveedor(long idProveedor);
+
   Page<CuentaCorrienteCliente> buscarCuentaCorrienteCliente(BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn);
+
+  Page<CuentaCorrienteProveedor> buscarCuentaCorrienteProveedor(BusquedaCuentaCorrienteProveedorCriteria criteria);
 
   Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(
       long idCuentaCorriente, Pageable pageable);

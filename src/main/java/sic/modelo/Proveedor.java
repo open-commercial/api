@@ -64,7 +64,4 @@ public class Proveedor implements Serializable {
 
   private boolean eliminado;
 
-  @Transient private BigDecimal saldoCuentaCorriente;
-
-  @Transient private Date fechaUltimoMovimiento;
 }

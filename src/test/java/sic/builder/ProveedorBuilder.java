@@ -24,8 +24,6 @@ public class ProveedorBuilder {
   private Localidad localidad = new LocalidadBuilder().build();
   private Empresa empresa = new EmpresaBuilder().build();
   private boolean eliminado = false;
-  private BigDecimal saldoCuentaCorriente = BigDecimal.ZERO;
-  private Date fechaUltimoMovimiento = null;
 
   public Proveedor build() {
     return new Proveedor(
@@ -42,9 +40,7 @@ public class ProveedorBuilder {
         web,
         localidad,
         empresa,
-        eliminado,
-        saldoCuentaCorriente,
-        fechaUltimoMovimiento);
+        eliminado);
   }
 
   public ProveedorBuilder withId_Proveedor(long id_Proveedor) {
@@ -114,16 +110,6 @@ public class ProveedorBuilder {
 
   public ProveedorBuilder withEliminado(boolean eliminado) {
     this.eliminado = eliminado;
-    return this;
-  }
-
-  public ProveedorBuilder withSaldoCuentaCorriente(BigDecimal saldoCuentaCorriente) {
-    this.saldoCuentaCorriente = saldoCuentaCorriente;
-    return this;
-  }
-
-  public ProveedorBuilder withFechaUltimoMovimiento(Date fechaUltimoMovimiento) {
-    this.fechaUltimoMovimiento = fechaUltimoMovimiento;
     return this;
   }
 }
