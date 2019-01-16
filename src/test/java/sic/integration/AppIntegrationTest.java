@@ -258,7 +258,7 @@ public class AppIntegrationTest {
             + "&idCliente=1"
             + "&idFormaDePago=1",
         recibo,
-        Recibo.class);
+        ReciboDTO.class);
   }
 
   private void crearNotaDebitoParaCliente() {

@@ -11,7 +11,7 @@ import sic.modelo.Empresa;
 import sic.modelo.Recibo;
 
 public interface ReciboRepository
-    extends PagingAndSortingRepository<Recibo, Long>, QueryDslPredicateExecutor<Recibo>, ReciboRepositoryCustom {
+    extends PagingAndSortingRepository<Recibo, Long>, QueryDslPredicateExecutor<Recibo> {
 
     @Query("SELECT r FROM Recibo r WHERE r.idRecibo= :idRecibo AND r.eliminado = false")
     Recibo findById(@Param("idRecibo") long idRecibo);

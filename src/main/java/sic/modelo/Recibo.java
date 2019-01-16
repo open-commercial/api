@@ -2,6 +2,7 @@ package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -14,6 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -30,69 +32,79 @@ import lombok.ToString;
 @JsonIgnoreProperties({"formaDePago", "empresa", "cliente", "usuario", "proveedor"})
 public class Recibo implements Serializable {
 
-    @Id
-    @GeneratedValue
-    private Long idRecibo;
+  @Id
+  @GeneratedValue
+  private Long idRecibo;
 
-    private long numSerie;
+  private long numSerie;
 
-    private long numRecibo;
+  private long numRecibo;
 
-    @Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fecha;
+  @Column(nullable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date fecha;
 
-    private boolean eliminado;
+  private boolean eliminado;
 
-    @Column(nullable = false)
-    private String concepto;
+  @Column(nullable = false)
+  private String concepto;
 
-    @ManyToOne
-    @JoinColumn(name = "id_FormaDePago", referencedColumnName = "id_FormaDePago")
-    private FormaDePago formaDePago;
+  @ManyToOne
+  @JoinColumn(name = "id_FormaDePago", referencedColumnName = "id_FormaDePago")
+  private FormaDePago formaDePago;
 
-    @ManyToOne
-    @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-    private Empresa empresa;
+  @ManyToOne
+  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+  private Empresa empresa;
 
-    @ManyToOne
-    @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
-    private Cliente cliente;
+  @ManyToOne
+  @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
+  private Cliente cliente;
 
-    @ManyToOne
-    @JoinColumn(name = "id_Proveedor", referencedColumnName = "id_Proveedor")
-    private Proveedor proveedor;
+  @ManyToOne
+  @JoinColumn(name = "id_Proveedor", referencedColumnName = "id_Proveedor")
+  private Proveedor proveedor;
 
-    @ManyToOne
-    @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
-    private Usuario usuario;
+  @ManyToOne
+  @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
+  private Usuario usuario;
 
-    @Column(precision = 25, scale = 15)
-    private BigDecimal monto;
+  @Column(precision = 25, scale = 15)
+  private BigDecimal monto;
 
-    @JsonGetter("nombreFormaDePago")
-    public String getNombreFormaDePago() {
-        return formaDePago.getNombre();
-    }
+  @JsonGetter("nombreFormaDePago")
+  public String getNombreFormaDePago() {
+    return formaDePago.getNombre();
+  }
 
-    @JsonGetter("nombreEmpresa")
-    public String getNombreEmpresa() {
-        return empresa.getNombre();
-    }
+  @JsonGetter("nombreEmpresa")
+  public String getNombreEmpresa() {
+    return empresa.getNombre();
+  }
 
-    @JsonGetter("nombreFiscalCliente")
-    public String getNombreFiscalCliente() {
-        return (cliente != null) ? cliente.getNombreFiscal() : "";
-    }
+  @JsonGetter("idCliente")
+  public Long getIdCliente() {
+    return (cliente != null) ? cliente.getId_Cliente() : null;
+  }
 
-    @JsonGetter("razonSocialProveedor")
-    public String getRazonSocialProveedor() {
-        return (proveedor != null) ? proveedor.getRazonSocial() : "";
-    }
-    
-    @JsonGetter("nombreUsuario")
-    public String getNombreUsuario() {
-        return usuario.getNombre();
-    }
+  @JsonGetter("nombreFiscalCliente")
+  public String getNombreFiscalCliente() {
+    return (cliente != null) ? cliente.getNombreFiscal() : "";
+  }
+
+  @JsonGetter("idProveedor")
+  public Long getIdProveedor() {
+    return (proveedor != null) ? proveedor.getId_Proveedor() : null;
+  }
+
+  @JsonGetter("razonSocialProveedor")
+  public String getRazonSocialProveedor() {
+    return (proveedor != null) ? proveedor.getRazonSocial() : "";
+  }
+
+  @JsonGetter("nombreUsuario")
+  public String getNombreUsuario() {
+    return usuario.getNombre() + " " + usuario.getApellido() + " (" + usuario.getUsername() + ")";
+  }
 
 }

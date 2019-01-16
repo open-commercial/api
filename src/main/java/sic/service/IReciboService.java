@@ -36,6 +36,4 @@ public interface IReciboService {
     BigDecimal getTotalRecibosClientesEntreFechas(long idEmpresa, Date desde, Date hasta);
 
     BigDecimal getTotalRecibosProveedoresEntreFechas(long idEmpresa, Date desde, Date hasta);
-
-    BigDecimal calcularMontosRecibos(BusquedaReciboCriteria criteria);
 }
