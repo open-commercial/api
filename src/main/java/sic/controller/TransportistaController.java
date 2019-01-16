@@ -47,7 +47,9 @@ public class TransportistaController {
 
   @PutMapping("/transportistas")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public void actualizar(@RequestBody TransportistaDTO transportistaDTO) {
+  public void actualizar(@RequestBody TransportistaDTO transportistaDTO,
+                         @RequestParam(required = false) Long idEmpresa,
+                         @RequestParam Long idLocalidad) {
     Transportista transportistaPersistido =
         transportistaService.getTransportistaPorId(transportistaDTO.getId_Transportista());
     Transportista transportistaPorActualizar =
@@ -59,11 +61,11 @@ public class TransportistaController {
     if (transportistaPorActualizar.getDireccion() == null) {
       transportistaPorActualizar.setDireccion(transportistaPersistido.getDireccion());
     }
-    if (transportistaDTO.getIdLocalidad() == null) {
+    if (idLocalidad == null) {
       transportistaPorActualizar.setLocalidad(transportistaPersistido.getLocalidad());
     } else {
       transportistaPorActualizar.setLocalidad(
-          localidadService.getLocalidadPorId(transportistaDTO.getIdLocalidad()));
+          localidadService.getLocalidadPorId(idLocalidad));
     }
     if (transportistaPorActualizar.getWeb() == null) {
       transportistaPorActualizar.setWeb(transportistaPersistido.getWeb());
@@ -71,11 +73,11 @@ public class TransportistaController {
     if (transportistaPorActualizar.getTelefono() == null) {
       transportistaPorActualizar.setTelefono(transportistaPersistido.getTelefono());
     }
-    if (transportistaDTO.getIdEmpresa() == null) {
+    if (idEmpresa == null) {
       transportistaPorActualizar.setEmpresa(transportistaPersistido.getEmpresa());
     } else {
       transportistaPorActualizar.setEmpresa(
-        empresaService.getEmpresaPorId(transportistaDTO.getIdEmpresa()));
+        empresaService.getEmpresaPorId(idEmpresa));
     }
     if (transportistaService.getTransportistaPorId(transportistaPorActualizar.getId_Transportista()) != null) {
       transportistaService.actualizar(transportistaPorActualizar);
