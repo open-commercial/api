@@ -1,6 +1,5 @@
 package sic.modelo.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import sic.modelo.CategoriaIVA;
 
