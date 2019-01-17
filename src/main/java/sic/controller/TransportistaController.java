@@ -49,7 +49,7 @@ public class TransportistaController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(@RequestBody TransportistaDTO transportistaDTO,
                          @RequestParam(required = false) Long idEmpresa,
-                         @RequestParam Long idLocalidad) {
+                         @RequestParam(required = false) Long idLocalidad) {
     Transportista transportistaPersistido =
         transportistaService.getTransportistaPorId(transportistaDTO.getId_Transportista());
     Transportista transportistaPorActualizar =

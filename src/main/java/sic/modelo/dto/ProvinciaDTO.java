@@ -13,6 +13,7 @@ public class ProvinciaDTO {
 
   private long id_Provincia;
   private String nombre;
-  private PaisDTO pais;
+  private Long idPais;
+  private String nombrePais;
   private boolean eliminada;
 }

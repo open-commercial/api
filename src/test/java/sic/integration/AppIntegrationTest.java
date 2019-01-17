@@ -276,7 +276,6 @@ public class AppIntegrationTest {
     notaDebitoCliente.setMotivo("Test alta nota debito - Cheque rechazado");
     notaDebitoCliente.setSubTotalBruto(new BigDecimal("100"));
     notaDebitoCliente.setTotal(new BigDecimal("6113.5"));
-    notaDebitoCliente.setUsuario(credencial);
     restTemplate.postForObject(
         apiPrefix + "/notas/debito/empresa/1/usuario/1/recibo/1?idCliente=1&movimiento=VENTA",
         notaDebitoCliente,
@@ -439,7 +438,6 @@ public class AppIntegrationTest {
     notaDebito.setMotivo("Test alta nota debito - Cheque rechazado");
     notaDebito.setSubTotalBruto(new BigDecimal("100"));
     notaDebito.setTotal(new BigDecimal("321"));
-    notaDebito.setUsuario(credencial);
     notaDebito.setTipoComprobante(TipoDeComprobante.NOTA_DEBITO_B);
     restTemplate.postForObject(
         apiPrefix + "/notas/debito/empresa/1/usuario/1/recibo/3?idProveedor=1&movimiento=COMPRA",
@@ -2364,7 +2362,6 @@ public class AppIntegrationTest {
     assertEquals(productoUno.getPrecioLista(), productoRecuperado.getPrecioLista());
     assertEquals(productoUno.getPrecioVentaPublico(), productoRecuperado.getPrecioVentaPublico());
     assertEquals(productoUno.getPrecioCosto(), productoRecuperado.getPrecioCosto());
-    assertEquals(empresa.getNombre(), productoRecuperado.getNombreEmpresa());
     assertEquals(new BigDecimal("21.0"), productoRecuperado.getIvaPorcentaje());
     assertEquals(new BigDecimal("210"), productoRecuperado.getIvaNeto());
   }
@@ -2388,7 +2385,6 @@ public class AppIntegrationTest {
             .withIva_porcentaje(new BigDecimal("10.5"))
             .withIva_neto(new BigDecimal("105"))
             .withPrecioLista(new BigDecimal("1105"))
-            .withNombreEmpresa(empresa.getNombre())
             .withRazonSocialProveedor(proveedor.getRazonSocial())
             .withNombreRubro(rubro.getNombre())
             .withNombreMedida(medida.getNombre())

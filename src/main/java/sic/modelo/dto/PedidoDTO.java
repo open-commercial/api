@@ -13,7 +13,7 @@ import sic.modelo.EstadoPedido;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = {"facturas", "renglones"})
+@ToString(exclude = "renglones")
 @EqualsAndHashCode(of = {"nroPedido", "nombreEmpresa"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Pedido", scope = PedidoDTO.class)
 @Builder
@@ -28,7 +28,6 @@ public class PedidoDTO implements Serializable {
     private boolean eliminado;
     private String nombreFiscalCliente;
     private String nombreUsuario;
-    private List<FacturaDTO> facturas;
     private List<RenglonPedidoDTO> renglones;
     private BigDecimal subTotal;
     private BigDecimal recargoPorcentaje;
