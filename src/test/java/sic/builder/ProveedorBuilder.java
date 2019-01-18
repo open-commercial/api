@@ -1,8 +1,5 @@
 package sic.builder;
 
-import java.math.BigDecimal;
-import java.util.Date;
-
 import sic.modelo.CategoriaIVA;
 import sic.modelo.Empresa;
 import sic.modelo.Localidad;

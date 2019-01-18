@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.querydsl.core.annotations.QueryInit;
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.Date;
 import javax.persistence.*;
 
 import lombok.AllArgsConstructor;
@@ -66,10 +64,6 @@ public class Proveedor implements Serializable {
   private Empresa empresa;
 
   private boolean eliminado;
-
-  @Transient private BigDecimal saldoCuentaCorriente;
-
-  @Transient private Date fechaUltimoMovimiento;
 
   @JsonGetter("nombreEmpresa")
   public String getNombreEmpresa() {
