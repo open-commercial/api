@@ -4,14 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.DateExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -19,11 +18,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
 import sic.repository.ReciboRepository;
 import sic.service.*;
+import sic.util.FormatterFechaHora;
 
 @Service
 public class ReciboServiceImpl implements IReciboService {
@@ -60,6 +61,50 @@ public class ReciboServiceImpl implements IReciboService {
   @Override
   public Recibo getById(long idRecibo) {
     return reciboRepository.findById(idRecibo);
+  }
+
+  @Override
+  public Page<Recibo> buscarRecibos(BusquedaReciboCriteria criteria, Movimiento movimiento) {
+    QRecibo qRecibo = QRecibo.recibo;
+    BooleanBuilder builder = new BooleanBuilder();
+    if (criteria.isBuscaPorFecha()) {
+      FormatterFechaHora formateadorFecha =
+          new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      DateExpression<Date> fDesde =
+          Expressions.dateTemplate(
+              Date.class,
+              "convert({0}, datetime)",
+              formateadorFecha.format(criteria.getFechaDesde()));
+      DateExpression<Date> fHasta =
+          Expressions.dateTemplate(
+              Date.class,
+              "convert({0}, datetime)",
+              formateadorFecha.format(criteria.getFechaHasta()));
+      builder.and(qRecibo.fecha.between(fDesde, fHasta));
+    }
+    if (criteria.isBuscaPorNumeroRecibo())
+      builder
+          .and(qRecibo.numSerie.eq(criteria.getNumSerie()))
+          .and(qRecibo.numRecibo.eq(criteria.getNumRecibo()));
+    if (criteria.isBuscaPorConcepto()) {
+      String[] terminos = criteria.getConcepto().split(" ");
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        rsPredicate.and(qRecibo.concepto.containsIgnoreCase(termino));
+      }
+      builder.or(rsPredicate);
+    }
+    if (criteria.isBuscaPorCliente())
+      builder.or(qRecibo.cliente.id_Cliente.eq(criteria.getIdCliente()));
+    if (criteria.isBuscaPorProveedor())
+      builder.or(qRecibo.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
+    if (criteria.isBuscaPorUsuario())
+      builder.or(qRecibo.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+    if (movimiento == Movimiento.VENTA) builder.and(qRecibo.proveedor.isNull());
+    else if (movimiento == Movimiento.COMPRA) builder.and(qRecibo.cliente.isNull());
+    builder.and(
+        qRecibo.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qRecibo.eliminado.eq(false)));
+    return reciboRepository.findAll(builder, criteria.getPageable());
   }
 
   @Override
@@ -115,7 +160,7 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public long getSiguienteNumeroRecibo(long idEmpresa, long serie) {
-    Recibo recibo =
+    Recibo recibo = null;
         reciboRepository.findTopByEmpresaAndNumSerieOrderByNumReciboDesc(
             empresaService.getEmpresaPorId(idEmpresa), serie);
     if (recibo == null) {
