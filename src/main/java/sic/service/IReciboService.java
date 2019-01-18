@@ -3,15 +3,15 @@ package sic.service;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import sic.modelo.Cliente;
-import sic.modelo.Empresa;
-import sic.modelo.FormaDePago;
-import sic.modelo.Recibo;
-import sic.modelo.Usuario;
+
+import org.springframework.data.domain.Page;
+import sic.modelo.*;
 
 public interface IReciboService {
     
     Recibo getById(long idRecibo);
+
+    Page<Recibo> buscarRecibos(BusquedaReciboCriteria criteria, Movimiento movimiento);
     
     Recibo guardar(Recibo recibo);
     
@@ -36,5 +36,4 @@ public interface IReciboService {
     BigDecimal getTotalRecibosClientesEntreFechas(long idEmpresa, Date desde, Date hasta);
 
     BigDecimal getTotalRecibosProveedoresEntreFechas(long idEmpresa, Date desde, Date hasta);
-    
 }

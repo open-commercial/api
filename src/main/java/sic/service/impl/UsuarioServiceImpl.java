@@ -20,7 +20,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.controller.UnauthorizedException;
 import sic.modelo.*;
 import sic.service.*;
 import sic.util.Validator;
@@ -94,10 +93,10 @@ public class UsuarioServiceImpl implements IUsuarioService {
             credencial.getUsername(),
             this.encriptarConMD5(credencial.getPassword()));
     if (usuario == null) {
-      throw new UnauthorizedException(RESOURCE_BUNDLE.getString("mensaje_usuario_logInInvalido"));
+      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_usuario_logInInvalido"));
     }
     if (!usuario.isHabilitado()) {
-      throw new UnauthorizedException(RESOURCE_BUNDLE.getString("mensaje_usuario_no_habilitado"));
+      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_usuario_no_habilitado"));
     }
     return usuario;
   }

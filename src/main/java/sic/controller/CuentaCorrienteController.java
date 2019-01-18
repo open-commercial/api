@@ -108,6 +108,73 @@ public class CuentaCorrienteController {
         criteria, (int) claims.get("idUsuario"));
   }
 
+  @GetMapping("/cuentas-corriente/proveedores/busqueda/criteria")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+  })
+  public Page<CuentaCorrienteProveedor> buscarConCriteria(
+      @RequestParam Long idEmpresa,
+      @RequestParam(required = false) String codigo,
+      @RequestParam(required = false) String razonSocial,
+      @RequestParam(required = false) Long idFiscal,
+      @RequestParam(required = false) Long idPais,
+      @RequestParam(required = false) Long idProvincia,
+      @RequestParam(required = false) Long idLocalidad,
+      @RequestParam(required = false) Integer pagina,
+      @RequestParam(required = false) String ordenarPor,
+      @RequestParam(required = false) String sentido) {
+    if (pagina == null || pagina < 0) pagina = 0;
+    Pageable pageable;
+    if (ordenarPor == null || sentido == null) {
+      pageable =
+          new PageRequest(
+              pagina,
+              TAMANIO_PAGINA_DEFAULT,
+              new Sort(Sort.Direction.ASC, "proveedor.razonSocial"));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          pageable =
+              new PageRequest(
+                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+          break;
+        case "DESC":
+          pageable =
+              new PageRequest(
+                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+          break;
+        default:
+          pageable =
+              new PageRequest(
+                  pagina,
+                  TAMANIO_PAGINA_DEFAULT,
+                  new Sort(Sort.Direction.ASC, "proveedor.razonSocial"));
+          break;
+      }
+    }
+    BusquedaCuentaCorrienteProveedorCriteria criteria =
+        BusquedaCuentaCorrienteProveedorCriteria.builder()
+            .buscaPorCodigo(codigo != null)
+            .codigo(codigo)
+            .buscaPorRazonSocial(razonSocial != null)
+            .razonSocial(razonSocial)
+            .buscaPorIdFiscal(idFiscal != null)
+            .idFiscal(idFiscal)
+            .buscaPorIdFiscal(idFiscal != null)
+            .idFiscal(idFiscal)
+            .buscaPorPais(idPais != null)
+            .idPais(idPais)
+            .buscaPorProvincia(idProvincia != null)
+            .idProvincia(idProvincia)
+            .buscaPorLocalidad(idLocalidad != null)
+            .idLocalidad(idLocalidad)
+            .idEmpresa(idEmpresa)
+            .pageable(pageable)
+            .build();
+    return cuentaCorrienteService.buscarCuentaCorrienteProveedor(criteria);
+  }
+
   @GetMapping("/cuentas-corriente/clientes/{idCliente}")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,

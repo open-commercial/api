@@ -83,16 +83,6 @@ public class ProveedorServiceImpl implements IProveedorService {
             .eq(criteria.getIdEmpresa())
             .and(qProveedor.eliminado.eq(false)));
     Page<Proveedor> proveedores = proveedorRepository.findAll(builder, criteria.getPageable());
-    if (criteria.isConSaldo()) {
-      proveedores
-          .getContent()
-          .forEach(
-              p -> {
-                CuentaCorriente cc = cuentaCorrienteService.getCuentaCorrientePorProveedor(p);
-                p.setSaldoCuentaCorriente(cc.getSaldo());
-                p.setFechaUltimoMovimiento(cc.getFechaUltimoMovimiento());
-              });
-    }
     return proveedores;
   }
 
@@ -218,6 +208,7 @@ public class ProveedorServiceImpl implements IProveedorService {
       throw new EntityNotFoundException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_no_existente"));
     }
+    cuentaCorrienteService.eliminarCuentaCorrienteProveedor(idProveedor);
     proveedor.setEliminado(true);
     proveedorRepository.save(proveedor);
   }
