@@ -8,6 +8,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -21,6 +25,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombre", "empresa"})
 @ToString
+@JsonIgnoreProperties({"idEmpresa", "nombreEmpresa"})
 public class Rubro implements Serializable {
 
     @Id
@@ -32,8 +37,19 @@ public class Rubro implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+    @NotNull(message = "{mensaje_rubro_empresa_vacia}")
     private Empresa empresa;
 
     private boolean eliminado;
+
+    @JsonGetter("nombreEmpresa")
+    public String getNombreEmpresa() {
+        return empresa.getNombre();
+    }
+
+    @JsonGetter("idEmpresa")
+    public long getIdEmpresa() {
+        return empresa.getId_Empresa();
+    }
 
 }

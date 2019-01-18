@@ -8,6 +8,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -21,22 +24,40 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombre"})
 @ToString
+@JsonIgnoreProperties({"provincia", "eliminada"})
 public class Localidad implements Serializable {
-    
-    @Id
-    @GeneratedValue
-    private long id_Localidad;
 
-    @Column(nullable = false)
-    private String nombre;
+  @Id @GeneratedValue private long id_Localidad;
 
-    @Column(nullable = false)
-    private String codigoPostal;
+  @Column(nullable = false)
+  private String nombre;
 
-    @ManyToOne
-    @JoinColumn(name = "id_Provincia", referencedColumnName = "id_Provincia")
-    private Provincia provincia;
+  @Column(nullable = false)
+  private String codigoPostal;
 
-    private boolean eliminada;
-    
+  @ManyToOne
+  @JoinColumn(name = "id_Provincia", referencedColumnName = "id_Provincia")
+  private Provincia provincia;
+
+  private boolean eliminada;
+
+  @JsonGetter("idProvincia")
+  public long getIdProvincia() {
+    return provincia.getId_Provincia();
+  }
+
+  @JsonGetter("nombreProvincia")
+  public String getNombreProvincia() {
+    return provincia.getNombre();
+  }
+
+  @JsonGetter("idPais")
+  public long getIdPais() {
+    return provincia.getPais().getId_Pais();
+  }
+
+  @JsonGetter("nombrePais")
+  public String getNombrePais() {
+    return provincia.getPais().getNombre();
+  }
 }

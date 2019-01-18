@@ -155,9 +155,4 @@ public class Producto implements Serializable {
   public String getRazonSocialProveedor() {
     return proveedor.getRazonSocial();
   }
-
-  @JsonGetter("nombreEmpresa")
-  public String getNombreEmpresa() {
-    return empresa.getNombre();
-  }
 }

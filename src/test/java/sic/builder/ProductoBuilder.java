@@ -31,7 +31,6 @@ public class ProductoBuilder {
     private String nota = "Cumple con las normas ISO";
     private Date fechaAlta = new Date(1458010800000L); // 15-03-2016;
     private Date fechaVencimiento = new Date(1597892400000L); // 20-08-2020
-    private String nombreEmpresa = "Globo De Oro";
     private boolean eliminado = false;
     private String urlImagen;
     
@@ -39,7 +38,7 @@ public class ProductoBuilder {
         return new ProductoDTO(idProducto, codigo, descripcion, cantidad, hayStock, cantMinima, bulto, nombreMedida,
                 precioCosto, ganancia_porcentaje, ganancia_neto, precioVentaPublico, iva_porcentaje, iva_neto,
                 precioLista, nombreRubro, ilimitado, publico, fechaUltimaModificacion, estanteria, estante, razonSocialProveedor,
-                nota, fechaAlta, fechaVencimiento, nombreEmpresa, eliminado, urlImagen);
+                nota, fechaAlta, fechaVencimiento, eliminado, urlImagen);
     }
     
     public ProductoBuilder withId_Producto(Long idProducto) {
@@ -164,11 +163,6 @@ public class ProductoBuilder {
     
     public ProductoBuilder withFechaVencimiento(Date fechaVencimiento) {
         this.fechaVencimiento = fechaVencimiento;
-        return this;
-    }
-    
-    public ProductoBuilder withNombreEmpresa(String nombreEmpresa) {
-        this.nombreEmpresa = nombreEmpresa;
         return this;
     }
     

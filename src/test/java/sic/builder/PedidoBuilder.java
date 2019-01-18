@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import sic.modelo.EstadoPedido;
-import sic.modelo.dto.FacturaDTO;
 import sic.modelo.dto.PedidoDTO;
 import sic.modelo.dto.RenglonPedidoDTO;
 
@@ -20,7 +19,6 @@ public class PedidoBuilder {
     private boolean eliminado = false;
     private String nombreFiscalCliente = "Construcciones S.A.";
     private String nombreUsuario = "Daenerys Targaryen";
-    private List<FacturaDTO> facturas;
     private List<RenglonPedidoDTO> renglones;
     private BigDecimal subTotal = new BigDecimal("544.5");;
     private BigDecimal recargoPorcentaje = BigDecimal.ZERO;
@@ -55,7 +53,6 @@ public class PedidoBuilder {
         eliminado,
         nombreFiscalCliente,
         nombreUsuario,
-        facturas,
         renglones,
         subTotal,
         recargoPorcentaje,
@@ -108,11 +105,6 @@ public class PedidoBuilder {
 
     public PedidoBuilder withNombreUsuario(String nombreUsuario) {
         this.nombreUsuario = nombreUsuario;
-        return this;
-    }
-
-    public PedidoBuilder withFacturas(List<FacturaDTO> facturas) {
-        this.facturas = facturas;
         return this;
     }
 

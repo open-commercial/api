@@ -1,32 +1,30 @@
 package sic.controller;
 
 import java.util.List;
+
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Provincia;
 import sic.modelo.Rol;
+import sic.modelo.dto.ProvinciaDTO;
 import sic.service.IPaisService;
 import sic.service.IProvinciaService;
 
 @RestController
 @RequestMapping("/api/v1")
 public class ProvinciaController {
-    
+
     private final IProvinciaService provinciaService;
     private final IPaisService paisService;
-    
+    private final ModelMapper modelMapper;
+
     @Autowired
-    public ProvinciaController(IProvinciaService provinciaService, IPaisService paisService) {  
-            this.provinciaService = provinciaService;
-            this.paisService = paisService;
+    public ProvinciaController(IProvinciaService provinciaService, IPaisService paisService, ModelMapper modelMapper) {
+        this.provinciaService = provinciaService;
+        this.paisService = paisService;
+        this.modelMapper = modelMapper;
     }
     
     @GetMapping("/provincias/{idProvincia}")
@@ -37,9 +35,20 @@ public class ProvinciaController {
     
     @PutMapping("/provincias")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public void actualizar(@RequestBody Provincia provincia) { 
-        if (provinciaService.getProvinciaPorId(provincia.getId_Provincia()) != null) {
-            provinciaService.actualizar(provincia);
+    public void actualizar(@RequestBody ProvinciaDTO provinciaDTO, @RequestParam(required = false) Long idPais) {
+        Provincia provinciaPersistida = provinciaService.getProvinciaPorId(provinciaDTO.getId_Provincia());
+        Provincia provinciaPorActualizar = modelMapper.map(provinciaDTO, Provincia.class);
+        if (provinciaPorActualizar.getNombre() == null
+          || provinciaPorActualizar.getNombre().isEmpty()) {
+            provinciaPorActualizar.setNombre(provinciaPersistida.getNombre());
+        }
+        if (idPais != null) {
+            provinciaPorActualizar.setPais(paisService.getPaisPorId(idPais));
+        } else {
+            provinciaPorActualizar.setPais(provinciaPersistida.getPais());
+        }
+        if (provinciaService.getProvinciaPorId(provinciaPorActualizar.getId_Provincia()) != null) {
+            provinciaService.actualizar(provinciaPorActualizar);
         }
     }
     
@@ -57,7 +66,9 @@ public class ProvinciaController {
     
     @PostMapping("/provincias")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public Provincia guardar(@RequestBody Provincia provincia) {
+    public Provincia guardar(@RequestBody ProvinciaDTO provinciaDTO, @RequestParam Long idPais) {
+        Provincia provincia = modelMapper.map(provinciaDTO, Provincia.class);
+        provincia.setPais(paisService.getPaisPorId(idPais));
         return provinciaService.guardar(provincia);
     }
 }

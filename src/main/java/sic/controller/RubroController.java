@@ -4,14 +4,7 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Rol;
 import sic.modelo.Rubro;
@@ -43,11 +36,19 @@ public class RubroController {
 
   @PutMapping("/rubros")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public void actualizar(@RequestBody RubroDTO rubroDTO) {
-    Rubro rubro = modelMapper.map(rubroDTO, Rubro.class);
-    if (rubroService.getRubroPorId(rubro.getId_Rubro()) != null) {
-      rubroService.actualizar(rubro);
+  public void actualizar(
+      @RequestBody RubroDTO rubroDTO, @RequestParam(required = false) Long idEmpresa) {
+    Rubro rubroPersistido = rubroService.getRubroPorId(rubroDTO.getId_Rubro());
+    Rubro rubroPorActualizar = modelMapper.map(rubroDTO, Rubro.class);
+    if (rubroPorActualizar.getNombre() == null || rubroPorActualizar.getNombre().isEmpty()) {
+      rubroPorActualizar.setNombre(rubroPersistido.getNombre());
     }
+    if (idEmpresa != null) {
+      rubroPorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    } else {
+      rubroPorActualizar.setEmpresa(rubroPersistido.getEmpresa());
+    }
+    rubroService.actualizar(rubroPorActualizar);
   }
 
   @DeleteMapping("/rubros/{idRubro}")
@@ -58,8 +59,9 @@ public class RubroController {
 
   @PostMapping("/rubros")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public Rubro guardar(@RequestBody RubroDTO rubroDTO) {
-      Rubro rubro = modelMapper.map(rubroDTO, Rubro.class);
+  public Rubro guardar(@RequestBody RubroDTO rubroDTO, @RequestParam Long idEmpresa) {
+    Rubro rubro = modelMapper.map(rubroDTO, Rubro.class);
+    rubro.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     return rubroService.guardar(rubro);
   }
 
