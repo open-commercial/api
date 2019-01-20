@@ -13,6 +13,10 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.querydsl.core.annotations.QueryInit;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -26,6 +30,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nroGasto", "empresa"})
 @ToString
+@JsonIgnoreProperties({"empresa", "eliminado", "usuario"})
 public class Gasto implements Serializable {
 
     @Id
@@ -43,6 +48,7 @@ public class Gasto implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+    @QueryInit("localidad.provincia.pais")
     private Empresa empresa;
 
     @OneToOne
@@ -58,4 +64,33 @@ public class Gasto implements Serializable {
 
     private boolean eliminado;
 
+    @JsonGetter("idEmpresa")
+    public Long getIdEmpresa() {
+        return empresa.getId_Empresa();
+    }
+
+    @JsonGetter("nombreEmpresa")
+    public String getNombreEmpresa() {
+        return empresa.getNombre();
+    }
+
+    @JsonGetter("ifFormaDePago")
+    public Long getiIdFormaDePago() {
+        return formaDePago.getId_FormaDePago();
+    }
+
+    @JsonGetter("nombreFormaDePago")
+    public String getNombreFormaDePago() {
+        return formaDePago.getNombre();
+    }
+
+    @JsonGetter("idUsuario")
+    public Long getIdCredencial() {
+        return usuario.getId_Usuario();
+    }
+
+    @JsonGetter("nombreUsuario")
+    public String getNombreUsuario() {
+        return usuario.getNombre() + " " + usuario.getApellido() + " (" + usuario.getUsername() + ")";
+    }
 }

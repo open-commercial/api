@@ -54,6 +54,10 @@ public class GastoServiceImpl implements IGastoService {
                     .getString("mensaje_gasto_fecha_vacia"));
         }
         Caja caja = this.cajaService.getUltimaCaja(gasto.getEmpresa().getId_Empresa());
+        if (caja == null) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_caja_no_existente"));
+        }
         if (caja.getEstado().equals(EstadoCaja.CERRADA)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_gasto_caja_cerrada"));
@@ -95,7 +99,7 @@ public class GastoServiceImpl implements IGastoService {
         this.validarGasto(gasto);
         gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getEmpresa().getId_Empresa()) + 1);
         gasto = gastoRepository.save(gasto);
-        LOGGER.warn("El Gasto " + gasto + " se guardó correctamente." );
+        LOGGER.warn("El Gasto {} se guardó correctamente.", gasto);
         return gasto;
     }
 
