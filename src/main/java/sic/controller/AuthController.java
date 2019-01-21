@@ -117,7 +117,7 @@ public class AuthController {
     }
     if (recaptchaIsSuccess) {
       Usuario nuevoUsuario = new Usuario();
-      nuevoUsuario.setHabilitado(false);
+      nuevoUsuario.setHabilitado(true);
       nuevoUsuario.setNombre(registracionClienteAndUsuarioDTO.getNombre());
       nuevoUsuario.setApellido(registracionClienteAndUsuarioDTO.getApellido());
       nuevoUsuario.setEmail(registracionClienteAndUsuarioDTO.getEmail());
