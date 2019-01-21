@@ -125,10 +125,16 @@ public class GastoServiceImpl implements IGastoService {
         gastoParaEliminar.setEliminado(true);
         gastoRepository.save(gastoParaEliminar);
     }
-    
+
     @Override
     public long getUltimoNumeroDeGasto(long idEmpresa) {
-        return gastoRepository.findTopByEmpresaAndEliminadoOrderByNroGastoDesc(empresaService.getEmpresaPorId(idEmpresa), false).getNroGasto();
+        Gasto gasto =
+          gastoRepository.findTopByEmpresaAndEliminadoOrderByNroGastoDesc(empresaService.getEmpresaPorId(idEmpresa), false);
+        if (gasto == null) {
+            return 1; // No existe ningun Gasto anterior
+        } else {
+            return 1 + gasto.getNroGasto();
+        }
     }
 
     @Override
