@@ -20,6 +20,8 @@ public class BusquedaPedidoCriteria {
     private Long idCliente;
     private boolean buscaUsuario;
     private Long idUsuario;
+    private boolean buscaPorViajante;
+    private Long idViajante;
     private boolean buscaPorNroPedido;
     private long nroPedido;
     private boolean buscaPorEstadoPedido;

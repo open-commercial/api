@@ -95,13 +95,13 @@ public class ReciboServiceImpl implements IReciboService {
       builder.or(rsPredicate);
     }
     if (criteria.isBuscaPorCliente())
-      builder.or(qRecibo.cliente.id_Cliente.eq(criteria.getIdCliente()));
+      builder.and(qRecibo.cliente.id_Cliente.eq(criteria.getIdCliente()));
     if (criteria.isBuscaPorProveedor())
-      builder.or(qRecibo.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
+      builder.and(qRecibo.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
     if (criteria.isBuscaPorUsuario())
-      builder.or(qRecibo.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+      builder.and(qRecibo.usuario.id_Usuario.eq(criteria.getIdUsuario()));
     if (criteria.isBuscaPorViajante())
-      builder.or(qRecibo.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
+      builder.and(qRecibo.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (movimiento == Movimiento.VENTA) builder.and(qRecibo.proveedor.isNull());
     else if (movimiento == Movimiento.COMPRA) builder.and(qRecibo.cliente.isNull());
     builder.and(

@@ -28,6 +28,8 @@ public class PedidoDTO implements Serializable {
     private boolean eliminado;
     private String nombreFiscalCliente;
     private String nombreUsuario;
+    private Long idViajante;
+    private String nombreViajante;
     private List<RenglonPedidoDTO> renglones;
     private BigDecimal subTotal;
     private BigDecimal recargoPorcentaje;
