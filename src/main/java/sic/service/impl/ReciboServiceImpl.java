@@ -100,6 +100,8 @@ public class ReciboServiceImpl implements IReciboService {
       builder.or(qRecibo.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
     if (criteria.isBuscaPorUsuario())
       builder.or(qRecibo.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+    if (criteria.isBuscaPorViajante())
+      builder.or(qRecibo.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (movimiento == Movimiento.VENTA) builder.and(qRecibo.proveedor.isNull());
     else if (movimiento == Movimiento.COMPRA) builder.and(qRecibo.cliente.isNull());
     builder.and(

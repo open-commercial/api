@@ -27,5 +27,7 @@ public class ReciboDTO implements Serializable {
   private Long idProveedor;
   private String razonSocialProveedor;
   private String nombreUsuario;
+  private Long idViajante;
+  private String nombreViajante;
   private double monto;
 }
