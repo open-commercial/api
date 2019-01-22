@@ -1,5 +1,6 @@
 package sic.controller;
 
+import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -53,8 +54,9 @@ public class GastoController {
         Gasto gasto = modelMapper.map(gastoDTO, Gasto.class);
         gasto.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
         gasto.setFormaDePago(formaDePagoService.getFormasDePagoPorId(idFormaDePago));
-        Integer idUsuario = (int) authService.getClaimsDelToken(authorizationHeader).get("idUsuario");
-        gasto.setUsuario(usuarioService.getUsuarioPorId(idUsuario.longValue()));
+        Claims claims = authService.getClaimsDelToken(authorizationHeader);
+        long idUsuarioLoggedIn = (int) claims.get("idUsuario");
+        gasto.setUsuario(usuarioService.getUsuarioPorId(idUsuarioLoggedIn));
         return gastoService.guardar(gasto);
     }
 
