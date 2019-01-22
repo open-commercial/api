@@ -3414,4 +3414,20 @@ public class AppIntegrationTest {
     totalIvaCompra = restTemplate.getForObject(apiPrefix + "/facturas/total-iva-compra/criteria?idEmpresa=1", BigDecimal.class);
     assertEquals(new BigDecimal("83.895000000000000"), totalIvaCompra);
   }
+
+  @Test
+  public void shouldVerificarSaldoCaja() {
+    CajaDTO caja = restTemplate.postForObject(apiPrefix + "/cajas/apertura/empresas/1/usuarios/1?saldoApertura=200", null, CajaDTO.class);
+    assertEquals(new BigDecimal("200"), caja.getSaldoApertura());
+    this.crearReciboParaCliente(300);
+    assertEquals(new BigDecimal("500.000000000000000"), restTemplate.getForObject(apiPrefix + "/cajas/1/saldo-sistema", BigDecimal.class));
+    this.crearReciboParaProveedor(500);
+    assertEquals(new BigDecimal("0E-15"), restTemplate.getForObject(apiPrefix + "/cajas/1/saldo-sistema", BigDecimal.class));
+    GastoDTO gasto = GastoDTO.builder()
+      .concepto("Gasto test")
+      .fecha(new Date())
+      .monto(new BigDecimal("200")).build();
+    restTemplate.postForObject(apiPrefix + "/gastos?idEmpresa=1&idFormaDePago=1", gasto, GastoDTO.class);
+    assertEquals(new BigDecimal("-200.000000000000000"), restTemplate.getForObject(apiPrefix + "/cajas/1/saldo-sistema", BigDecimal.class));
+  }
 }

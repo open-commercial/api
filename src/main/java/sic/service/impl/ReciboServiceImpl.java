@@ -160,9 +160,9 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public long getSiguienteNumeroRecibo(long idEmpresa, long serie) {
-    Recibo recibo = null;
-        reciboRepository.findTopByEmpresaAndNumSerieOrderByNumReciboDesc(
-            empresaService.getEmpresaPorId(idEmpresa), serie);
+    Recibo recibo =
+      reciboRepository.findTopByEmpresaAndNumSerieOrderByNumReciboDesc(
+        empresaService.getEmpresaPorId(idEmpresa), serie);
     if (recibo == null) {
       return 1; // No existe ningun Recibo anterior
     } else {

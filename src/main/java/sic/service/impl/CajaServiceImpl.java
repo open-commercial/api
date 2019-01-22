@@ -67,42 +67,40 @@ public class CajaServiceImpl implements ICajaService {
         this.reciboService = reciboService;
     }
 
-    @Override
-    public void validarCaja(Caja caja) {
-        //Entrada de Datos
-        //Requeridos
-        if (caja.getFechaApertura() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_caja_fecha_vacia"));
-        }
-        if (caja.getEmpresa() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_caja_empresa_vacia"));
-        }
-        if (caja.getUsuarioAbreCaja() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_caja_usuario_vacio"));
-        }
-        //Una Caja por dia
-        Caja ultimaCaja = this.getUltimaCaja(caja.getEmpresa().getId_Empresa());
-        if (ultimaCaja == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_caja_no_existente"));
-        }
-        if (ultimaCaja.getEstado() == EstadoCaja.ABIERTA) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_caja_anterior_abierta"));
-        }
-        if (Validator.compararDias(ultimaCaja.getFechaApertura(), caja.getFechaApertura()) >= 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_fecha_apertura_no_valida"));
-        }
-        //Duplicados        
-        if (cajaRepository.findById(caja.getId_Caja()) != null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_caja_duplicada"));
-        }
+  @Override
+  public void validarCaja(Caja caja) {
+    //Entrada de Datos
+    //Requeridos
+    if (caja.getFechaApertura() == null) {
+      throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+        .getString("mensaje_caja_fecha_vacia"));
     }
+    if (caja.getEmpresa() == null) {
+      throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+        .getString("mensaje_caja_empresa_vacia"));
+    }
+    if (caja.getUsuarioAbreCaja() == null) {
+      throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+        .getString("mensaje_caja_usuario_vacio"));
+    }
+    //Una Caja por dia
+    Caja ultimaCaja = this.getUltimaCaja(caja.getEmpresa().getId_Empresa());
+    if (ultimaCaja != null) {
+      if (ultimaCaja.getEstado() == EstadoCaja.ABIERTA) {
+        throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+          .getString("mensaje_caja_anterior_abierta"));
+      }
+      if (Validator.compararDias(ultimaCaja.getFechaApertura(), caja.getFechaApertura()) >= 0) {
+        throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+          .getString("mensaje_fecha_apertura_no_valida"));
+      }
+    }
+    //Duplicados
+    if (cajaRepository.findById(caja.getId_Caja()) != null) {
+      throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+        .getString("mensaje_caja_duplicada"));
+    }
+  }
 
     @Override
     @Transactional
@@ -138,7 +136,8 @@ public class CajaServiceImpl implements ICajaService {
     @Override
     public Caja getUltimaCaja(long id_Empresa) {
         Pageable pageable = new PageRequest(0, 1);
-        return cajaRepository.findTopByEmpresaAndEliminadaOrderByIdCajaDesc(id_Empresa, pageable).getContent().get(0);
+        List<Caja> topCaja = cajaRepository.findTopByEmpresaAndEliminadaOrderByIdCajaDesc(id_Empresa, pageable).getContent();
+        return (topCaja.isEmpty()) ? null : topCaja.get(0);
     }
 
     @Override
