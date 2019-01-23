@@ -244,27 +244,15 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public void actualizar(Usuario usuario, Usuario usuarioLoggedIn) {
+  public void actualizar(Usuario usuario) {
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario);
-    usuario.setUsername(usuario.getUsername().toLowerCase());
-    if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
-      usuario.setRoles(usuarioLoggedIn.getRoles());
-    }
-    if (usuario.getPassword() == null || usuario.getPassword().isEmpty()) {
-      Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
-      usuario.setPassword(usuarioGuardado.getPassword());
-    } else {
-      usuario.setPassword(this.encriptarConMD5(usuario.getPassword()));
-    }
     if (!usuario.getRoles().contains(Rol.VIAJANTE)) {
       this.clienteService.desvincularClienteDeViajante(usuario.getId_Usuario());
     }
     if (!usuario.getRoles().contains(Rol.COMPRADOR)) {
       this.clienteService.desvincularClienteDeCredencial(usuario.getId_Usuario());
     }
-    if (usuarioLoggedIn.getId_Usuario() == usuario.getId_Usuario()) {
-      usuario.setToken(usuarioLoggedIn.getToken());
-    }
+    usuario.setUsername(usuario.getUsername().toLowerCase());
     usuarioRepository.save(usuario);
     logger.warn("El Usuario {} se actualizó correctamente.", usuario);
   }
