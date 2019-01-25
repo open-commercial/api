@@ -136,6 +136,25 @@ public abstract class Nota implements Serializable {
     }
   }
 
+  @JsonGetter("idViajante")
+  public Long getIdViajante() {
+    if (cliente != null && cliente.getViajante() != null) {
+      return cliente.getViajante().getId_Usuario();
+    } else {
+      return null;
+    }
+  }
+
+  @JsonGetter("nombreViajante")
+  public String getNombreViajante() {
+    if (cliente != null && cliente.getViajante() != null) {
+      return cliente.getViajante().getNombre() + " " + cliente.getViajante().getApellido() + " (" + cliente.getViajante().getUsername() + ")";
+    } else {
+      return null;
+    }
+  }
+
+
   @JsonGetter("idProveedor")
   public Long getIdProveedor() {
     if (proveedor != null) {
