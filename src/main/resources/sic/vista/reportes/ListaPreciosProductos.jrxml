@@ -80,7 +80,7 @@ $P{empresa}.getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" :
 					<font size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($P{empresa}.getLocalidad() != null) 
-? $P{empresa}.getLocalidad().getNombre() + " " + $P{empresa}.getLocalidad().getProvincia().getNombre() + " " + $P{empresa}.getLocalidad().getProvincia().getPais().getNombre()
+? $P{empresa}.getLocalidad().getNombre() + " " + $P{empresa}.getLocalidad().getProvincia().getNombre()
 : ""]]></textFieldExpression>
 			</textField>
 			<textField>

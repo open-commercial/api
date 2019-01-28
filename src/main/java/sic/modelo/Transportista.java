@@ -37,7 +37,7 @@ public class Transportista implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "id_Localidad", referencedColumnName = "id_Localidad")
-  @QueryInit("provincia.pais")
+  @QueryInit("provincia")
   private Localidad localidad;
 
   @Column(nullable = false)
@@ -65,11 +65,6 @@ public class Transportista implements Serializable {
   @JsonGetter("nombreProvincia")
   public String getNombreProvincia() {
     return localidad.getProvincia().getNombre();
-  }
-
-  @JsonGetter("nombrePais")
-  public String getNombrePais() {
-    return localidad.getProvincia().getPais().getNombre();
   }
 
   @JsonGetter("idEmpresa")

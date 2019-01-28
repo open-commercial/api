@@ -58,7 +58,6 @@ public class ClienteController {
       @RequestParam(required = false) String nombreFantasia,
       @RequestParam(required = false) Long idFiscal,
       @RequestParam(required = false) Long idViajante,
-      @RequestParam(required = false) Long idPais,
       @RequestParam(required = false) Long idProvincia,
       @RequestParam(required = false) Long idLocalidad,
       @RequestParam(required = false) Integer pagina,
@@ -93,8 +92,6 @@ public class ClienteController {
             .idFiscal(idFiscal)
             .buscaPorViajante(idViajante != null)
             .idViajante(idViajante)
-            .buscaPorPais(idPais != null)
-            .idPais(idPais)
             .buscaPorProvincia(idProvincia != null)
             .idProvincia(idProvincia)
             .buscaPorLocalidad(idLocalidad != null)

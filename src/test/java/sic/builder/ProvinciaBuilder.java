@@ -1,17 +1,15 @@
 package sic.builder;
 
-import sic.modelo.Pais;
 import sic.modelo.Provincia;
 
 public class ProvinciaBuilder {
     
     private long id_Provincia = 0L;
     private String nombre = "Corrientes";
-    private Pais pais = new PaisBuilder().build();
     private boolean eliminada = false;
     
     public Provincia build() {
-        return new Provincia(id_Provincia, nombre, pais, eliminada);
+        return new Provincia(id_Provincia, nombre, eliminada);
     }
     
     public ProvinciaBuilder withId_Provincia(long id_Provincia) {
@@ -21,11 +19,6 @@ public class ProvinciaBuilder {
     
     public ProvinciaBuilder withNombre(String nombre) {
         this.nombre = nombre;
-        return this;
-    }
-    
-    public ProvinciaBuilder withPais(Pais pais) {
-        this.pais = pais;
         return this;
     }
     

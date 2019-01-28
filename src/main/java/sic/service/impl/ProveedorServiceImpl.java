@@ -74,8 +74,6 @@ public class ProveedorServiceImpl implements IProveedorService {
       builder.and(qProveedor.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
       builder.and(qProveedor.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
-    if (criteria.isBuscaPorPais())
-      builder.and(qProveedor.localidad.provincia.pais.id_Pais.eq(criteria.getIdPais()));
     builder.and(
         qProveedor
             .empresa

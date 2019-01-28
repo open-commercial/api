@@ -104,7 +104,7 @@ $P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("MON
 					<font size="8" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($P{cuentaCorrienteCliente}.getEmpresa().getLocalidad() != null) 
-? $P{cuentaCorrienteCliente}.getEmpresa().getLocalidad().getNombre() + " " + $P{cuentaCorrienteCliente}.getEmpresa().getLocalidad().getProvincia().getNombre() + " " + $P{cuentaCorrienteCliente}.getEmpresa().getLocalidad().getProvincia().getPais().getNombre()
+? $P{cuentaCorrienteCliente}.getEmpresa().getLocalidad().getNombre() + " " + $P{cuentaCorrienteCliente}.getEmpresa().getLocalidad().getProvincia().getNombre() 
 : ""]]></textFieldExpression>
 			</textField>
 			<textField>
@@ -173,7 +173,7 @@ $P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("MON
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($P{cuentaCorrienteCliente}.getCliente().getLocalidad() != null) 
-? $P{cuentaCorrienteCliente}.getCliente().getLocalidad().getNombre() + " " + $P{cuentaCorrienteCliente}.getCliente().getLocalidad().getProvincia().getNombre() + " " + $P{cuentaCorrienteCliente}.getCliente().getLocalidad().getProvincia().getPais().getNombre()
+? $P{cuentaCorrienteCliente}.getCliente().getLocalidad().getNombre() + " " + $P{cuentaCorrienteCliente}.getCliente().getLocalidad().getProvincia().getNombre() 
 : ""]]></textFieldExpression>
 			</textField>
 			<textField>

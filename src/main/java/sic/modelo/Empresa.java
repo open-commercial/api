@@ -53,7 +53,7 @@ public class Empresa implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "id_Localidad", referencedColumnName = "id_Localidad")
-  @QueryInit("provincia.pais")
+  @QueryInit("provincia")
   private Localidad localidad;
 
   private String logo;

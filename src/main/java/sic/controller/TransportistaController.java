@@ -95,15 +95,12 @@ public class TransportistaController {
   public List<Transportista> buscarTransportista(
       @RequestParam long idEmpresa,
       @RequestParam(required = false) String nombre,
-      @RequestParam(required = false) Long idPais,
       @RequestParam(required = false) Long idProvincia,
       @RequestParam(required = false) Long idLocalidad) {
     BusquedaTransportistaCriteria criteria =
         new BusquedaTransportistaCriteria(
             (nombre != null),
             nombre,
-            (idPais != null),
-            idPais,
             (idProvincia != null),
             idProvincia,
             (idLocalidad != null),

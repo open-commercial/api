@@ -99,7 +99,6 @@ public class ProveedorController {
       @RequestParam(required = false) String codigo,
       @RequestParam(required = false) String razonSocial,
       @RequestParam(required = false) Long idFiscal,
-      @RequestParam(required = false) Long idPais,
       @RequestParam(required = false) Long idProvincia,
       @RequestParam(required = false) Long idLocalidad,
       @RequestParam(required = false) Integer pagina,
@@ -133,8 +132,6 @@ public class ProveedorController {
             .razonSocial(razonSocial)
             .buscaPorIdFiscal(idFiscal != null)
             .idFiscal(idFiscal)
-            .buscaPorPais(idPais != null)
-            .idPais(idPais)
             .buscaPorProvincia(idProvincia != null)
             .idProvincia(idProvincia)
             .buscaPorLocalidad(idLocalidad != null)

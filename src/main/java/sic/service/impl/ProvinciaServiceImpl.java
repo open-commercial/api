@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.Pais;
 import sic.modelo.Provincia;
 import sic.service.IProvinciaService;
 import sic.service.BusinessServiceException;
@@ -38,13 +37,8 @@ public class ProvinciaServiceImpl implements IProvinciaService {
     }
 
     @Override
-    public List<Provincia> getProvinciasDelPais(Pais pais) {
-        return provinciaRepository.findAllByAndPaisAndEliminadaOrderByNombreAsc(pais, false);
-    }
-
-    @Override
-    public Provincia getProvinciaPorNombre(String nombre, Pais pais) {
-        return provinciaRepository.findByNombreAndPaisAndEliminadaOrderByNombreAsc(nombre, pais, false);
+    public Provincia getProvinciaPorNombre(String nombre) {
+        return provinciaRepository.findByNombreAndEliminadaOrderByNombreAsc(nombre, false);
     }
 
     private void validarOperacion(TipoDeOperacion operacion, Provincia provincia) {
@@ -53,13 +47,9 @@ public class ProvinciaServiceImpl implements IProvinciaService {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_provincia_vacio_nombre"));
         }
-        if (provincia.getPais() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_provincia_pais_vacio"));
-        }
         //Duplicados
         //Nombre
-        Provincia provinciaDuplicada = this.getProvinciaPorNombre(provincia.getNombre(), provincia.getPais());
+        Provincia provinciaDuplicada = this.getProvinciaPorNombre(provincia.getNombre());
         if (operacion.equals(TipoDeOperacion.ALTA) && provinciaDuplicada != null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_provincia_duplicado_nombre"));
@@ -96,7 +86,12 @@ public class ProvinciaServiceImpl implements IProvinciaService {
     public Provincia guardar(Provincia provincia) {
         this.validarOperacion(TipoDeOperacion.ALTA, provincia);
         provincia = provinciaRepository.save(provincia);
-        LOGGER.warn("La Provincia " + provincia + " se guardó correctamente.");
+        LOGGER.warn("La Provincia {} se guardó correctamente.", provincia);
         return provincia;
+    }
+
+    @Override
+    public List<Provincia> getProvincias() {
+        return provinciaRepository.findAllByAndEliminadaOrderByNombreAsc(false);
     }
 }

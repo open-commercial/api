@@ -17,8 +17,6 @@ public class BusquedaCuentaCorrienteProveedorCriteria {
   private String razonSocial;
   private boolean buscaPorIdFiscal;
   private Long idFiscal;
-  private boolean buscaPorPais;
-  private Long idPais;
   private boolean buscaPorProvincia;
   private Long idProvincia;
   private boolean buscaPorLocalidad;

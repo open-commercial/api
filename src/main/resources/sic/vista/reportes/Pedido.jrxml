@@ -122,7 +122,7 @@ $P{pedido}.getEmpresa().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 					<font size="8" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($P{pedido}.getEmpresa().getLocalidad() != null) 
-? $P{pedido}.getEmpresa().getLocalidad().getNombre() + " " + $P{pedido}.getEmpresa().getLocalidad().getProvincia().getNombre() + " " + $P{pedido}.getEmpresa().getLocalidad().getProvincia().getPais().getNombre()
+? $P{pedido}.getEmpresa().getLocalidad().getNombre() + " " + $P{pedido}.getEmpresa().getLocalidad().getProvincia().getNombre() 
 : ""]]></textFieldExpression>
 			</textField>
 			<textField>
@@ -234,7 +234,7 @@ $P{pedido}.getEmpresa().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($P{pedido}.getCliente().getLocalidad() != null) 
-? $P{pedido}.getCliente().getLocalidad().getNombre() + " " + $P{pedido}.getCliente().getLocalidad().getProvincia().getNombre() + " " + $P{pedido}.getCliente().getLocalidad().getProvincia().getPais().getNombre()
+? $P{pedido}.getCliente().getLocalidad().getNombre() + " " + $P{pedido}.getCliente().getLocalidad().getProvincia().getNombre() 
 : ""]]></textFieldExpression>
 			</textField>
 			<staticText>

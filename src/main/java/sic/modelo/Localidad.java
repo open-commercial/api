@@ -50,14 +50,4 @@ public class Localidad implements Serializable {
   public String getNombreProvincia() {
     return provincia.getNombre();
   }
-
-  @JsonGetter("idPais")
-  public long getIdPais() {
-    return provincia.getPais().getId_Pais();
-  }
-
-  @JsonGetter("nombrePais")
-  public String getNombrePais() {
-    return provincia.getPais().getNombre();
-  }
 }

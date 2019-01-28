@@ -140,7 +140,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 					<font size="8" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($P{notaDebito}.getEmpresa().getLocalidad() != null) 
-? $P{notaDebito}.getEmpresa().getLocalidad().getNombre() + " " + $P{notaDebito}.getEmpresa().getLocalidad().getProvincia().getNombre() + " " + $P{notaDebito}.getEmpresa().getLocalidad().getProvincia().getPais().getNombre()
+? $P{notaDebito}.getEmpresa().getLocalidad().getNombre() + " " + $P{notaDebito}.getEmpresa().getLocalidad().getProvincia().getNombre() 
 : ""]]></textFieldExpression>
 			</textField>
 			<textField>
@@ -268,7 +268,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($P{notaDebito}.getCliente().getLocalidad() != null) 
-? $P{notaDebito}.getCliente().getLocalidad().getNombre() + " " + $P{notaDebito}.getCliente().getLocalidad().getProvincia().getNombre() + " " + $P{notaDebito}.getCliente().getLocalidad().getProvincia().getPais().getNombre()
+? $P{notaDebito}.getCliente().getLocalidad().getNombre() + " " + $P{notaDebito}.getCliente().getLocalidad().getProvincia().getNombre() + " " 
 : ""]]></textFieldExpression>
 			</textField>
 			<textField>

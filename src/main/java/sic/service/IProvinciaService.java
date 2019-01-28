@@ -1,8 +1,8 @@
 package sic.service;
 
-import java.util.List;
-import sic.modelo.Pais;
 import sic.modelo.Provincia;
+
+import java.util.List;
 
 public interface IProvinciaService {
     
@@ -12,10 +12,10 @@ public interface IProvinciaService {
 
     void eliminar(long idProvincia);
 
-    Provincia getProvinciaPorNombre(String nombre, Pais pais);
-
-    List<Provincia> getProvinciasDelPais(Pais pais);
+    Provincia getProvinciaPorNombre(String nombre);
 
     Provincia guardar(Provincia provincia);
+
+    List<Provincia> getProvincias();
     
 }

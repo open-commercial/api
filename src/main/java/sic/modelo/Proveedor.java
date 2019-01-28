@@ -56,7 +56,7 @@ public class Proveedor implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "id_Localidad", referencedColumnName = "id_Localidad")
-  @QueryInit("provincia.pais")
+  @QueryInit("provincia")
   private Localidad localidad;
 
   @ManyToOne
@@ -93,15 +93,5 @@ public class Proveedor implements Serializable {
   @JsonGetter("nombreProvincia")
   public String getNombreProvincia() {
     return (localidad != null) ? localidad.getProvincia().getNombre() : null;
-  }
-
-  @JsonGetter("idPais")
-  public Long getIdPais() {
-    return (localidad != null) ? localidad.getProvincia().getPais().getId_Pais() : null;
-  }
-
-  @JsonGetter("nombrePais")
-  public String getNombrePais() {
-    return (localidad != null) ? localidad.getProvincia().getPais().getNombre() : null;
   }
 }

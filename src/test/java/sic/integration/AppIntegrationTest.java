@@ -263,7 +263,6 @@ public class AppIntegrationTest {
   }
 
   private void crearNotaDebitoParaCliente() {
-    UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
     NotaDebitoDTO notaDebitoCliente = new NotaDebitoDTO();
     List<RenglonNotaDebito> renglonesCalculados =
         Arrays.asList(
@@ -620,12 +619,10 @@ public class AppIntegrationTest {
         restTemplate
             .postForEntity(apiPrefix + "/login", new Credencial("test", "test"), String.class)
             .getBody();
-    PaisDTO paisDTO = PaisDTO.builder().nombre("Argentina").build();
-    restTemplate.postForObject(apiPrefix + "/paises", paisDTO, PaisDTO.class);
     ProvinciaDTO provinciaDTO =
         ProvinciaDTO.builder().nombre("Corrientes").build();
     ProvinciaDTO provinciaGuardada =
-        restTemplate.postForObject(apiPrefix + "/provincias?idPais=1", provinciaDTO, ProvinciaDTO.class);
+        restTemplate.postForObject(apiPrefix + "/provincias", provinciaDTO, ProvinciaDTO.class);
     LocalidadDTO localidadDTO =
         LocalidadDTO.builder()
             .nombre("Corrientes")
@@ -722,13 +719,10 @@ public class AppIntegrationTest {
 
   @Test
   public void shouldCrearPaisProvinciaLocalidad() {
-    PaisDTO paisDTO = PaisDTO.builder().nombre("Poniente").build();
-    PaisDTO paisGuardado =
-        restTemplate.postForObject(apiPrefix + "/paises", paisDTO, PaisDTO.class);
     ProvinciaDTO provinciaDTO =
         ProvinciaDTO.builder().nombre("Westeros").build();
     ProvinciaDTO provinciaGuardada =
-        restTemplate.postForObject(apiPrefix + "/provincias?idPais=" + paisGuardado.getId_Pais(), provinciaDTO, ProvinciaDTO.class);
+        restTemplate.postForObject(apiPrefix + "/provincias", provinciaDTO, ProvinciaDTO.class);
     LocalidadDTO localidadDTO =
         LocalidadDTO.builder()
             .nombre("Rocadragón")
