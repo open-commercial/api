@@ -32,4 +32,6 @@ public interface IUsuarioService {
   int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada);
 
   Page<Usuario> getUsuariosPorRol(Rol rol);
+
+  String encriptarConMD5(String password);
 }

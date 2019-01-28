@@ -121,7 +121,7 @@ public class UsuarioController {
         usuarioPersistido.setRoles(usuarioLoggedIn.getRoles());
       }
       if (usuarioPorActualizar.getPassword() != null && !usuarioPorActualizar.getPassword().isEmpty()) {
-        usuarioPersistido.setPassword(usuarioPorActualizar.getPassword());
+        usuarioPersistido.setPassword(usuarioService.encriptarConMD5(usuarioPorActualizar.getPassword()));
       }
       if (usuarioLoggedIn.getId_Usuario() == usuarioPersistido.getId_Usuario()) {
         usuarioPersistido.setToken(usuarioLoggedIn.getToken());
@@ -129,7 +129,7 @@ public class UsuarioController {
       usuarioService.actualizar(usuarioPersistido);
     } else {
       throw new ForbiddenException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
     }
   }
 
