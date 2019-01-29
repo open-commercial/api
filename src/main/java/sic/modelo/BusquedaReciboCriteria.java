@@ -29,5 +29,7 @@ public class BusquedaReciboCriteria {
   private Long idProveedor;
   private boolean buscaPorUsuario;
   private Long idUsuario;
+  private boolean buscaPorViajante;
+  private Long idViajante;
   private Pageable pageable;
 }

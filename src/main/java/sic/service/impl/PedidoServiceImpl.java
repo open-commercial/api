@@ -279,6 +279,7 @@ public class PedidoServiceImpl implements IPedidoService {
     }
     if (criteria.isBuscaCliente()) builder.and(qpedido.cliente.id_Cliente.eq(criteria.getIdCliente()));
     if (criteria.isBuscaUsuario()) builder.and(qpedido.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+    if (criteria.isBuscaPorViajante()) builder.and(qpedido.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaPorNroPedido()) builder.and(qpedido.nroPedido.eq(criteria.getNroPedido()));
     if (criteria.isBuscaPorEstadoPedido()) builder.and(qpedido.estado.eq(criteria.getEstadoPedido()));
     Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);

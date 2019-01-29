@@ -66,6 +66,7 @@ public class ReciboController {
       @RequestParam(required = false) Integer nroRecibo,
       @RequestParam(required = false) Long idCliente,
       @RequestParam(required = false) Long idUsuario,
+      @RequestParam(required = false) Long idViajante,
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido) {
@@ -113,6 +114,8 @@ public class ReciboController {
             .idCliente(idCliente)
             .buscaPorUsuario(idUsuario != null)
             .idUsuario(idUsuario)
+            .buscaPorViajante(idViajante != null)
+            .idViajante(idViajante)
             .idEmpresa(idEmpresa)
             .pageable(pageable)
             .build();

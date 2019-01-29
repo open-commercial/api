@@ -68,6 +68,17 @@ public class ReciboServiceImpl implements IReciboService {
     QRecibo qRecibo = QRecibo.recibo;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.isBuscaPorFecha()) {
+      Calendar cal = new GregorianCalendar();
+      cal.setTime(criteria.getFechaDesde());
+      cal.set(Calendar.HOUR_OF_DAY, 0);
+      cal.set(Calendar.MINUTE, 0);
+      cal.set(Calendar.SECOND, 0);
+      criteria.setFechaDesde(cal.getTime());
+      cal.setTime(criteria.getFechaHasta());
+      cal.set(Calendar.HOUR_OF_DAY, 23);
+      cal.set(Calendar.MINUTE, 59);
+      cal.set(Calendar.SECOND, 59);
+      criteria.setFechaHasta(cal.getTime());
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
       DateExpression<Date> fDesde =
@@ -95,11 +106,13 @@ public class ReciboServiceImpl implements IReciboService {
       builder.or(rsPredicate);
     }
     if (criteria.isBuscaPorCliente())
-      builder.or(qRecibo.cliente.id_Cliente.eq(criteria.getIdCliente()));
+      builder.and(qRecibo.cliente.id_Cliente.eq(criteria.getIdCliente()));
     if (criteria.isBuscaPorProveedor())
-      builder.or(qRecibo.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
+      builder.and(qRecibo.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
     if (criteria.isBuscaPorUsuario())
-      builder.or(qRecibo.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+      builder.and(qRecibo.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+    if (criteria.isBuscaPorViajante())
+      builder.and(qRecibo.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (movimiento == Movimiento.VENTA) builder.and(qRecibo.proveedor.isNull());
     else if (movimiento == Movimiento.COMPRA) builder.and(qRecibo.cliente.isNull());
     builder.and(

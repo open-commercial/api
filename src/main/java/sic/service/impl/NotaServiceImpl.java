@@ -137,8 +137,10 @@ public class NotaServiceImpl implements INotaService {
     }
     if (criteria.isBuscaUsuario())
       builder.and(qNota.usuario.id_Usuario.eq(criteria.getIdUsuario()));
-    if (criteria.isBuscaCliente())
+    if (criteria.isBuscaCliente() && criteria.getMovimiento().equals(Movimiento.VENTA))
       builder.and(qNota.cliente.id_Cliente.eq(criteria.getIdCliente()));
+    if (criteria.isBuscaViajante() && criteria.getMovimiento().equals(Movimiento.VENTA))
+      builder.and(qNota.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaProveedor())
       builder.and(qNota.proveedor.id_Proveedor.eq(criteria.getIdCliente()));
     if (criteria.isBuscaPorTipoComprobante())
@@ -208,6 +210,8 @@ public class NotaServiceImpl implements INotaService {
       builder.and(qNotaCredito.usuario.id_Usuario.eq(criteria.getIdUsuario()));
     if (criteria.isBuscaCliente())
       builder.and(qNotaCredito.cliente.id_Cliente.eq(criteria.getIdCliente()));
+    if (criteria.isBuscaViajante())
+      builder.and(qNotaCredito.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaProveedor())
       builder.and(qNotaCredito.proveedor.id_Proveedor.eq(criteria.getIdCliente()));
     if (criteria.isBuscaPorTipoComprobante())
@@ -277,6 +281,8 @@ public class NotaServiceImpl implements INotaService {
       builder.and(qNotDebito.usuario.id_Usuario.eq(criteria.getIdUsuario()));
     if (criteria.isBuscaCliente())
       builder.and(qNotDebito.cliente.id_Cliente.eq(criteria.getIdCliente()));
+    if (criteria.isBuscaViajante())
+      builder.and(qNotDebito.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaProveedor())
       builder.and(qNotDebito.proveedor.id_Proveedor.eq(criteria.getIdCliente()));
     if (criteria.isBuscaPorTipoComprobante())
