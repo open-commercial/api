@@ -90,7 +90,14 @@ public class UsuarioController {
 
   @PostMapping("/usuarios")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Usuario guardar(@RequestBody UsuarioDTO usuarioDTO) {
+  public Usuario guardar(@RequestBody UsuarioDTO usuarioDTO, @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Usuario usuarioLoggedIn = this.getUsuarioPorId((int) claims.get("idUsuario"));
+    if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
+      && (usuarioDTO.getRoles().size() != 1 || !usuarioDTO.getRoles().contains(Rol.COMPRADOR))) {
+      throw new ForbiddenException(
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+    }
     Usuario usuario = modelMapper.map(usuarioDTO, Usuario.class);
     return usuarioService.guardar(usuario);
   }
