@@ -1,6 +1,7 @@
 package sic.modelo;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.DecimalMin;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -38,6 +40,12 @@ public class Localidad implements Serializable {
   @ManyToOne
   @JoinColumn(name = "id_Provincia", referencedColumnName = "id_Provincia")
   private Provincia provincia;
+
+  private boolean envioGratuito;
+
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_ubicacion_costoEnvio_negativo}")
+  private BigDecimal costoEnvio;
 
   private boolean eliminada;
 

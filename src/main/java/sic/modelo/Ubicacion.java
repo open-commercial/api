@@ -6,9 +6,7 @@ import com.querydsl.core.annotations.QueryInit;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.DecimalMin;
 import java.io.Serializable;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "ubicacion")
@@ -33,9 +31,9 @@ public class Ubicacion implements Serializable {
 
   private Long longitud;
 
-  private String calle;
+  private String calle; //req
 
-  private Integer numero;
+  private Integer numero; // req
 
   private Integer piso;
 
@@ -44,12 +42,6 @@ public class Ubicacion implements Serializable {
   private Integer codigoPostal;
 
   private boolean eliminada;
-
-  private boolean envioGratuito;
-
-  @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_ubicacion_costoEnvio_negativo}")
-  private BigDecimal costoEnvio;
 
   @JsonGetter("idLocalidad")
   public Long getIdLocalidad() {
