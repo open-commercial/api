@@ -1,6 +1,7 @@
 package sic.controller;
 
 import io.jsonwebtoken.Claims;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.dto.ClienteDTO;
 import sic.service.*;
 
 import java.util.ResourceBundle;
@@ -22,6 +24,7 @@ public class ClienteController {
   private final ILocalidadService localidadService;
   private final IUsuarioService usuarioService;
   private final IAuthService authService;
+  private final ModelMapper modelMapper;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
@@ -30,12 +33,14 @@ public class ClienteController {
       IEmpresaService empresaService,
       ILocalidadService localidadService,
       IUsuarioService usuarioService,
-      IAuthService authService) {
+      IAuthService authService,
+      ModelMapper modelMapper) {
     this.clienteService = clienteService;
     this.empresaService = empresaService;
     this.localidadService = localidadService;
     this.usuarioService = usuarioService;
     this.authService = authService;
+    this.modelMapper = modelMapper;
   }
 
   @GetMapping("/clientes/{idCliente}")
@@ -132,12 +137,12 @@ public class ClienteController {
     Rol.COMPRADOR
   })
   public Cliente guardar(
-      @RequestBody Cliente cliente,
+      @RequestBody ClienteDTO nuevoCliente,
       @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long idLocalidad,
       @RequestParam(required = false) Long idViajante,
       @RequestParam Long idCredencial,
       @RequestHeader("Authorization") String authorizationHeader) {
+    Cliente cliente = modelMapper.map(nuevoCliente, Cliente.class);
     if (idCredencial != null) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
@@ -151,7 +156,6 @@ public class ClienteController {
         cliente.setCredencial(usuarioCredencial);
       }
     }
-    if (idLocalidad != null) cliente.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
     cliente.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     if (idViajante != null) {
       cliente.setViajante(usuarioService.getUsuarioPorId(idViajante));
@@ -168,12 +172,12 @@ public class ClienteController {
     Rol.COMPRADOR
   })
   public void actualizar(
-      @RequestBody Cliente clientePorActualizar,
-      @RequestParam(required = false) Long idLocalidad,
+      @RequestBody ClienteDTO cliente,
       @RequestParam(required = false) Long idEmpresa,
       @RequestParam(required = false) Long idViajante,
       @RequestParam(required = false) Long idCredencial,
       @RequestHeader("Authorization") String authorizationHeader) {
+    Cliente clientePorActualizar = modelMapper.map(cliente, Cliente.class);
     Cliente clientePersistido =
         clienteService.getClientePorId(clientePorActualizar.getId_Cliente());
     if (idCredencial != null) {
@@ -207,10 +211,8 @@ public class ClienteController {
     } else {
       clientePorActualizar.setBonificacion(clientePersistido.getBonificacion());
     }
-    if (idLocalidad != null) {
-      clientePorActualizar.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
-    } else {
-      clientePorActualizar.setLocalidad(null);
+    if (clientePorActualizar.getUbicacion() == null) {
+      clientePorActualizar.setUbicacion(clientePersistido.getUbicacion());
     }
     if (idEmpresa != null) {
       clientePorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));

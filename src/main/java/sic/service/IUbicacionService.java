@@ -6,7 +6,7 @@ import sic.modelo.Ubicacion;
 
 public interface IUbicacionService {
 
-  void actualizar(Ubicacion ubicacion);
+  Ubicacion guardar(Ubicacion ubicacion);
 
   Page<Ubicacion> buscarUbicaciones(BusquedaUbicacionCriteria criteria);
 

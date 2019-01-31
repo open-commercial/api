@@ -50,8 +50,8 @@ public class Pedido implements Serializable {
   @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
   private Empresa empresa;
 
-//  @Embedded
-//  private Ubicacion envio;
+  @Embedded
+  private DetalleEnvio detalleEnvio;
 
   private boolean eliminado;
 

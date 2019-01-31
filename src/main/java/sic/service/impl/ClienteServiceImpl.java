@@ -15,12 +15,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
-import sic.service.IClienteService;
-import sic.service.BusinessServiceException;
-import sic.service.IUsuarioService;
+import sic.service.*;
 import sic.util.Validator;
 import sic.repository.ClienteRepository;
-import sic.service.ICuentaCorrienteService;
 
 @Service
 public class ClienteServiceImpl implements IClienteService {
@@ -28,6 +25,7 @@ public class ClienteServiceImpl implements IClienteService {
   private final ClienteRepository clienteRepository;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IUsuarioService usuarioService;
+  private final IUbicacionService ubicacionService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
@@ -35,10 +33,12 @@ public class ClienteServiceImpl implements IClienteService {
   public ClienteServiceImpl(
       ClienteRepository clienteRepository,
       ICuentaCorrienteService cuentaCorrienteService,
-      IUsuarioService usuarioService) {
+      IUsuarioService usuarioService,
+      IUbicacionService ubicacionService) {
     this.clienteRepository = clienteRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.usuarioService = usuarioService;
+    this.ubicacionService = ubicacionService;
   }
 
   @Override
@@ -111,9 +111,9 @@ public class ClienteServiceImpl implements IClienteService {
     if (criteria.isBuscaPorViajante())
       builder.and(qCliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaPorLocalidad())
-      builder.and(qCliente.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
+      builder.and(qCliente.ubicacion.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
-      builder.and(qCliente.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
+      builder.and(qCliente.ubicacion.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
     Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
@@ -220,6 +220,10 @@ public class ClienteServiceImpl implements IClienteService {
           cliente.getCredencial().getRoles().add(Rol.COMPRADOR);
         }
       }
+    }
+    if (cliente.getUbicacion() != null) {
+      Ubicacion ubicacion = ubicacionService.guardar(cliente.getUbicacion());
+      cliente.setUbicacion(ubicacion);
     }
     cliente = clienteRepository.save(cliente);
     cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);

@@ -3,6 +3,7 @@ package sic.controller;
 import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
@@ -114,7 +115,28 @@ public class PedidoController {
     pedido.setTotalActual(nuevoPedidoDTO.getTotal());
     pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    pedido.setCliente(clienteService.getClientePorId(idCliente));
+    Cliente cliente = clienteService.getClientePorId(idCliente);
+    if (nuevoPedidoDTO.getDetalleEnvio() == null) {
+      if (cliente.getUbicacion() == null) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_cliente_sin_ubicacion"));
+      }
+      DetalleEnvio detalleEnvio = new DetalleEnvio();
+      detalleEnvio.setDescripcion(cliente.getUbicacion().getDescripcion());
+      detalleEnvio.setLatitud(cliente.getUbicacion().getLatitud());
+      detalleEnvio.setLongitud(cliente.getUbicacion().getLatitud());
+      detalleEnvio.setCalle(cliente.getUbicacion().getCalle());
+      detalleEnvio.setNumero(cliente.getUbicacion().getNumero());
+      detalleEnvio.setPiso(cliente.getUbicacion().getPiso());
+      detalleEnvio.setDepartamento(cliente.getUbicacion().getDepartamento());
+      detalleEnvio.setCodigoPostal(cliente.getUbicacion().getCodigoPostal());
+      detalleEnvio.setNombreLocalidad(cliente.getUbicacion().getNombreLocalidad());
+      detalleEnvio.setNombreProvincia(cliente.getUbicacion().getNombreProvincia());
+      pedido.setDetalleEnvio(detalleEnvio);
+    } else {
+      pedido.setDetalleEnvio(nuevoPedidoDTO.getDetalleEnvio());
+    }
+    pedido.setCliente(cliente);
     return pedidoService.guardar(pedido);
   }
 

@@ -16,7 +16,7 @@ public class ClienteBuilder {
   private Long idFiscal = 23248527419L;
   private String email = "servimetal@hotmail.com";
   private String telefono = "3794587114";
-  private Localidad localidad = new LocalidadBuilder().build();
+  private Ubicacion ubicacion = new UbicacionBuilder().build();
   private String contacto = "Facundo Pastore";
   private Date fechaAlta = new Date(1458010800000L); // 15-03-2016;
   private Empresa empresa = new EmpresaBuilder().build();
@@ -37,7 +37,7 @@ public class ClienteBuilder {
         idFiscal,
         email,
         telefono,
-        localidad,
+        ubicacion,
         contacto,
         fechaAlta,
         empresa,
@@ -97,8 +97,8 @@ public class ClienteBuilder {
     return this;
   }
 
-  public ClienteBuilder withLocalidad(Localidad localidad) {
-    this.localidad = localidad;
+  public ClienteBuilder withUbicacion(Ubicacion ubicacion) {
+    this.ubicacion = ubicacion;
     return this;
   }
 

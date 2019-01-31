@@ -14,17 +14,21 @@ public class DetalleEnvio {
 
   private String descripcion;
 
-  private Long latitud;
+  private Double latitud;
 
-  private Long longitud;
+  private Double longitud;
 
-  private String calle; //req
+  private String calle;
 
-  private Integer numero; // req
+  private Integer numero;
 
   private Integer piso;
 
   private String departamento;
 
   private Integer codigoPostal;
+
+  private String nombreLocalidad;
+
+  private String nombreProvincia;
 }

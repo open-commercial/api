@@ -660,12 +660,18 @@ public class AppIntegrationTest {
             .roles(new ArrayList<>(Collections.singletonList(Rol.COMPRADOR)))
             .build();
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
+    UbicacionDTO ubicacion = UbicacionDTO.builder()
+      .idLocalidad(localidadDTO.getId_Localidad())
+      .calle("Siempre viva")
+      .numero(123)
+      .build();
     ClienteDTO cliente =
         ClienteDTO.builder()
             .bonificacion(BigDecimal.TEN)
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
             .nombreFiscal("Peter Parker")
             .telefono("379123452")
+            .ubicacion(ubicacion)
             .build();
     restTemplate.postForObject(
         apiPrefix

@@ -12,9 +12,9 @@ public class UbicacionDTO {
 
   private String descripcion;
 
-  private Long latitud;
+  private Double latitud;
 
-  private Long longitud;
+  private Double longitud;
 
   private String calle;
 

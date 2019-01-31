@@ -9,7 +9,6 @@ import sic.modelo.DetalleEnvio;
 import sic.modelo.EstadoPedido;
 import sic.modelo.dto.PedidoDTO;
 import sic.modelo.dto.RenglonPedidoDTO;
-import sic.modelo.dto.UbicacionDTO;
 
 public class PedidoBuilder {
 
@@ -19,7 +18,7 @@ public class PedidoBuilder {
   private Date fechaVencimiento;
   private String observaciones = "Los precios se encuentran sujetos a modificaciones.";
   private String nombreEmpresa = "Globo Corporation";
-  private DetalleEnvio envio;
+  private DetalleEnvio detalleEnvio;
   private boolean eliminado = false;
   private String nombreFiscalCliente = "Construcciones S.A.";
   private String nombreUsuario = "Daenerys Targaryen";
@@ -54,7 +53,7 @@ public class PedidoBuilder {
       fechaVencimiento,
       observaciones,
       nombreEmpresa,
-      envio,
+      detalleEnvio,
       eliminado,
       nombreFiscalCliente,
       nombreUsuario,
@@ -100,7 +99,7 @@ public class PedidoBuilder {
   }
 
   public PedidoBuilder withDetalleEnvio(DetalleEnvio envio) {
-    this.envio = envio;
+    this.detalleEnvio = envio;
     return this;
   }
 

@@ -71,7 +71,6 @@ public class ClienteServiceImplTest {
         new ClienteBuilder()
             .withEmail("soporte@gmail.com")
             .withNombreFiscal("Ferreteria Julian")
-            .withLocalidad(new LocalidadBuilder().build())
             .withEmpresa(null)
             .build();
     clienteServiceImpl.validarOperacion(TipoDeOperacion.ELIMINACION, cliente);

@@ -1,0 +1,89 @@
+package sic.builder;
+
+import sic.modelo.Localidad;
+import sic.modelo.Ubicacion;
+
+public class UbicacionBuilder {
+
+  private long idUbicacion = 0L;
+  private Localidad localidad = new LocalidadBuilder().build();
+  private String descripcion = "Rejas Verdes, el perro ladra mucho";
+  private Double latitud = -27.468805;
+  private Double longitud = -58.834360;
+  private String calle = "Pedernera";
+  private Integer numero = 4585;
+  private Integer piso = 0;
+  private String departamento = "no posee";
+  private Integer codigoPostal = 3400;
+  private boolean eliminada = false;
+
+  public Ubicacion build() {
+    return new Ubicacion(
+        idUbicacion,
+        localidad,
+        descripcion,
+        latitud,
+        longitud,
+        calle,
+        numero,
+        piso,
+        departamento,
+        codigoPostal,
+        eliminada);
+  }
+
+  public UbicacionBuilder withIdUbicacion(long idUbicacion) {
+    this.idUbicacion = idUbicacion;
+    return this;
+  }
+
+  public UbicacionBuilder withLocalidad(Localidad localidad) {
+    this.localidad = localidad;
+    return this;
+  }
+
+  public UbicacionBuilder withDescripcion(String descripcion) {
+    this.descripcion = descripcion;
+    return this;
+  }
+
+  public UbicacionBuilder withLatitud(Double latitud) {
+    this.latitud = latitud;
+    return this;
+  }
+
+  public UbicacionBuilder withLongitud(Double longitud) {
+    this.longitud = longitud;
+    return this;
+  }
+
+  public UbicacionBuilder withCalle(String calle) {
+    this.calle = calle;
+    return this;
+  }
+
+  public UbicacionBuilder withNumero(Integer numero) {
+    this.numero = numero;
+    return this;
+  }
+
+  public UbicacionBuilder withPiso(Integer piso) {
+    this.piso = piso;
+    return this;
+  }
+
+  public UbicacionBuilder withDepartamento(String codigoPostal) {
+    this.piso = piso;
+    return this;
+  }
+
+  public UbicacionBuilder withCodigoPostal(Integer codigoPostal) {
+    this.codigoPostal = codigoPostal;
+    return this;
+  }
+
+  public UbicacionBuilder withEliminada(boolean eliminada) {
+    this.eliminada = eliminada;
+    return this;
+  }
+}
