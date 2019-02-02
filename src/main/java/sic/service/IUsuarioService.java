@@ -11,7 +11,7 @@ public interface IUsuarioService {
 
   Usuario getUsuarioPorPasswordRecoveryKeyAndIdUsuario(String passwordRecoveryKey, long idUsuario);
 
-  void actualizar(Usuario usuario, Usuario usuarioLoggedIn);
+  void actualizar(Usuario usuario);
 
   void actualizarToken(String token, long idUsuario);
 
@@ -32,4 +32,6 @@ public interface IUsuarioService {
   int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada);
 
   Page<Usuario> getUsuariosPorRol(Rol rol);
+
+  String encriptarConMD5(String password);
 }

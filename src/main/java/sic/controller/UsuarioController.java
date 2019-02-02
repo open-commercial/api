@@ -3,6 +3,7 @@ package sic.controller;
 import java.util.List;
 import java.util.ResourceBundle;
 import io.jsonwebtoken.Claims;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,7 +14,9 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.BusquedaUsuarioCriteria;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
+import sic.modelo.dto.UsuarioDTO;
 import sic.service.IAuthService;
+import sic.service.IClienteService;
 import sic.service.IUsuarioService;
 
 @RestController
@@ -22,12 +25,16 @@ public class UsuarioController {
 
   private final IUsuarioService usuarioService;
   private final IAuthService authService;
+  private final IClienteService clienteService;
+  private final ModelMapper modelMapper;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
-  public UsuarioController(IUsuarioService usuarioService, IAuthService authService) {
+  public UsuarioController(IUsuarioService usuarioService, IAuthService authService, IClienteService clienteService, ModelMapper modelMapper) {
     this.usuarioService = usuarioService;
     this.authService = authService;
+    this.clienteService = clienteService;
+    this.modelMapper = modelMapper;
   }
 
   @GetMapping("/usuarios/{idUsuario}")
@@ -82,8 +89,16 @@ public class UsuarioController {
   }
 
   @PostMapping("/usuarios")
-  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-  public Usuario guardar(@RequestBody Usuario usuario) {
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public Usuario guardar(@RequestBody UsuarioDTO usuarioDTO, @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Usuario usuarioLoggedIn = this.getUsuarioPorId((int) claims.get("idUsuario"));
+    if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
+      && (usuarioDTO.getRoles().size() != 1 || !usuarioDTO.getRoles().contains(Rol.COMPRADOR))) {
+      throw new ForbiddenException(
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+    }
+    Usuario usuario = modelMapper.map(usuarioDTO, Usuario.class);
     return usuarioService.guardar(usuario);
   }
 
@@ -96,15 +111,32 @@ public class UsuarioController {
     Rol.COMPRADOR
   })
   public void actualizar(
-      @RequestBody Usuario usuario, @RequestHeader("Authorization") String authorizationHeader) {
+      @RequestBody UsuarioDTO usuarioDTO,
+      @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Usuario usuarioLoggedIn = this.getUsuarioPorId((int) claims.get("idUsuario"));
-    boolean usuarioSeModificaASiMismo = usuarioLoggedIn.getId_Usuario() == usuario.getId_Usuario();
+    boolean usuarioSeModificaASiMismo = usuarioLoggedIn.getId_Usuario() == usuarioDTO.getId_Usuario();
     if (usuarioSeModificaASiMismo || usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
-      usuarioService.actualizar(usuario, usuarioLoggedIn);
+      Usuario usuarioPorActualizar = modelMapper.map(usuarioDTO, Usuario.class);
+      Usuario usuarioPersistido = usuarioService.getUsuarioPorId(usuarioDTO.getId_Usuario());
+      if (!usuarioPersistido.getUsername().equalsIgnoreCase(usuarioPorActualizar.getUsername())) {
+        usuarioPersistido.setUsername(usuarioPorActualizar.getUsername().toLowerCase());
+      }
+      if (usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
+        usuarioPersistido.setRoles(usuarioPorActualizar.getRoles());
+      } else {
+        usuarioPersistido.setRoles(usuarioLoggedIn.getRoles());
+      }
+      if (usuarioPorActualizar.getPassword() != null && !usuarioPorActualizar.getPassword().isEmpty()) {
+        usuarioPersistido.setPassword(usuarioService.encriptarConMD5(usuarioPorActualizar.getPassword()));
+      }
+      if (usuarioLoggedIn.getId_Usuario() == usuarioPersistido.getId_Usuario()) {
+        usuarioPersistido.setToken(usuarioLoggedIn.getToken());
+      }
+      usuarioService.actualizar(usuarioPersistido);
     } else {
       throw new ForbiddenException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
     }
   }
 
