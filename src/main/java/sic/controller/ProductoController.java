@@ -65,10 +65,14 @@ public class ProductoController {
       Cliente cliente =
         clienteService.getClientePorIdUsuarioYidEmpresa(
           (int) claims.get("idUsuario"), producto.getEmpresa().getId_Empresa());
-      Page<Producto> productos =
-        productoService.getProductosConPrecioBonificado(
-          new PageImpl<>(Collections.singletonList(producto)), cliente);
-      return productos.getContent().get(0);
+      if (cliente != null) {
+        Page<Producto> productos =
+          productoService.getProductosConPrecioBonificado(
+            new PageImpl<>(Collections.singletonList(producto)), cliente);
+        return productos.getContent().get(0);
+      } else {
+        return producto;
+      }
     } else {
       return producto;
     }
@@ -100,7 +104,11 @@ public class ProductoController {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente =
         clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idEmpresa);
-      return productoService.getProductosConPrecioBonificado(productos, cliente);
+      if (cliente != null) {
+        return productoService.getProductosConPrecioBonificado(productos, cliente);
+      } else {
+        return productos;
+      }
     } else {
       return productos;
     }
@@ -122,10 +130,14 @@ public class ProductoController {
     Cliente cliente =
         clienteService.getClientePorIdUsuarioYidEmpresa(
             (int) claims.get("idUsuario"), producto.getEmpresa().getId_Empresa());
-    Page<Producto> productos =
+    if (cliente != null) {
+      Page<Producto> productos =
         productoService.getProductosConPrecioBonificado(
-            new PageImpl<>(Collections.singletonList(producto)), cliente);
-    return productos.getContent().get(0);
+          new PageImpl<>(Collections.singletonList(producto)), cliente);
+      return productos.getContent().get(0);
+    } else {
+     return producto;
+    }
   }
 
   @GetMapping("/productos/busqueda/criteria")
@@ -164,7 +176,11 @@ public class ProductoController {
             null,
             ordenarPor,
             sentido);
-    return productoService.getProductosConPrecioBonificado(productos, cliente);
+    if (cliente != null) {
+      return productoService.getProductosConPrecioBonificado(productos, cliente);
+    } else {
+     return productos;
+    }
   }
 
   @GetMapping("/productos/busqueda")
