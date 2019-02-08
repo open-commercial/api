@@ -26,9 +26,7 @@ public class DetalleEnvio {
 
   private String departamento;
 
-  private Integer codigoPostal;
+  private String codigoPostal;
 
-  private String nombreLocalidad;
-
-  private String nombreProvincia;
+  private String detalleUbicacion;
 }

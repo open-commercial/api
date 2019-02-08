@@ -11,14 +11,14 @@ public class ClienteBuilder {
   private String nroCliente = "00001";
   private String nombreFiscal = "Construcciones S.A.";
   private String nombreFantasia = "Servimetal";
-  private String direccion = "Perugorria 2421";
   private CategoriaIVA categoriaIVA = CategoriaIVA.RESPONSABLE_INSCRIPTO;
   private Long idFiscal = 23248527419L;
   private String email = "servimetal@hotmail.com";
   private String telefono = "3794587114";
-  private Ubicacion ubicacion = new UbicacionBuilder().build();
+  private Ubicacion ubicacionFacturacion = new UbicacionBuilder().build();
+  private Ubicacion ubicacionEnvio = new UbicacionBuilder().build();
   private String contacto = "Facundo Pastore";
-  private Date fechaAlta = new Date(1458010800000L); // 15-03-2016;
+  private Date fechaAlta = new Date(1458010800000L);
   private Empresa empresa = new EmpresaBuilder().build();
   private Usuario viajante = new UsuarioBuilder().build();
   private Usuario credencial = new UsuarioBuilder().build();
@@ -32,12 +32,12 @@ public class ClienteBuilder {
         nroCliente,
         nombreFiscal,
         nombreFantasia,
-        direccion,
         categoriaIVA,
         idFiscal,
         email,
         telefono,
-        ubicacion,
+        ubicacionFacturacion,
+        ubicacionEnvio,
         contacto,
         fechaAlta,
         empresa,
@@ -72,11 +72,6 @@ public class ClienteBuilder {
     return this;
   }
 
-  public ClienteBuilder withDireccion(String direccion) {
-    this.direccion = direccion;
-    return this;
-  }
-
   public ClienteBuilder withCategoriaIVA(CategoriaIVA categoriaIVA) {
     this.categoriaIVA = categoriaIVA;
     return this;
@@ -97,8 +92,13 @@ public class ClienteBuilder {
     return this;
   }
 
-  public ClienteBuilder withUbicacion(Ubicacion ubicacion) {
-    this.ubicacion = ubicacion;
+  public ClienteBuilder withUbicacionFacturacion(Ubicacion ubicacionFacturacion) {
+    this.ubicacionFacturacion = ubicacionFacturacion;
+    return this;
+  }
+
+  public ClienteBuilder withUbicacionEnvio(Ubicacion ubicacionEnvio) {
+    this.ubicacionEnvio = ubicacionEnvio;
     return this;
   }
 

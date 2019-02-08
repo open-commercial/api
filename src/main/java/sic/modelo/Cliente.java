@@ -24,7 +24,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombreFiscal", "idFiscal", "empresa"})
 @ToString
-@JsonIgnoreProperties({"ubicacion", "empresa", "viajante", "credencial", "eliminado"})
+@JsonIgnoreProperties({"empresa", "viajante", "credencial", "eliminado"})
 public class Cliente implements Serializable {
 
   @Id @GeneratedValue private long id_Cliente;
@@ -42,8 +42,6 @@ public class Cliente implements Serializable {
 
   private String nombreFantasia;
 
-  private String direccion;
-
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private CategoriaIVA categoriaIVA;
@@ -55,9 +53,16 @@ public class Cliente implements Serializable {
   private String telefono;
 
   @OneToOne
-  @JoinColumn(name = "idUbicacion", referencedColumnName = "idUbicacion")
+  @JoinColumn(name = "idUbicacionFacturacion", referencedColumnName = "idUbicacion")
   @QueryInit("localidad.provincia")
-  private Ubicacion ubicacion;
+  @NotNull
+  private Ubicacion ubicacionFacturacion;
+
+  @OneToOne
+  @JoinColumn(name = "idUbicacionEnvio", referencedColumnName = "idUbicacion")
+  @QueryInit("localidad.provincia")
+  @NotNull
+  private Ubicacion ubicacionEnvio;
 
   private String contacto;
 
@@ -80,26 +85,6 @@ public class Cliente implements Serializable {
   private boolean eliminado;
 
   private boolean predeterminado;
-
-  @JsonGetter("idLocalidad")
-  public Long getIdLocalidad() {
-    return (ubicacion != null && ubicacion.getLocalidad() != null) ? ubicacion.getLocalidad().getId_Localidad() : null;
-  }
-
-  @JsonGetter("nombreLocalidad")
-  public String getNombreLocalidad() {
-    return (ubicacion != null && ubicacion.getLocalidad() != null) ? ubicacion.getLocalidad().getNombre() : null;
-  }
-
-  @JsonGetter("idProvincia")
-  public Long getIdProvincia() {
-    return (ubicacion != null && ubicacion.getLocalidad() != null) ? ubicacion.getLocalidad().getProvincia().getId_Provincia() : null;
-  }
-
-  @JsonGetter("nombreProvincia")
-  public String getNombreProvincia() {
-    return (ubicacion != null && ubicacion.getLocalidad() != null) ? ubicacion.getLocalidad().getProvincia().getNombre() : null;
-  }
 
   @JsonGetter("idEmpresa")
   public Long getIdEmpresa() {

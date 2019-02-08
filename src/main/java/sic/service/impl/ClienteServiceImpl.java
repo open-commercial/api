@@ -111,9 +111,13 @@ public class ClienteServiceImpl implements IClienteService {
     if (criteria.isBuscaPorViajante())
       builder.and(qCliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaPorLocalidad())
-      builder.and(qCliente.ubicacion.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
+      builder.and(qCliente.ubicacionFacturacion.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
-      builder.and(qCliente.ubicacion.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
+      builder.and(qCliente.ubicacionFacturacion.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
+    if (criteria.isBuscaPorLocalidad())
+      builder.and(qCliente.ubicacionEnvio.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
+    if (criteria.isBuscaPorProvincia())
+      builder.and(qCliente.ubicacionEnvio.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
     Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
@@ -191,6 +195,13 @@ public class ClienteServiceImpl implements IClienteService {
             RESOURCE_BUNDLE.getString("mensaje_cliente_duplicado_idFiscal"));
       }
     }
+    // Ubicacion
+    if (cliente.getUbicacionFacturacion() == null) {
+      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_ubicacion_facturacion_vacia"));
+    }
+    if (cliente.getUbicacionEnvio() == null) {
+      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_ubicacion_envio_vacia"));
+    }
   }
 
   @Override
@@ -200,6 +211,12 @@ public class ClienteServiceImpl implements IClienteService {
     cliente.setEliminado(false);
     cliente.setNroCliente(this.generarNroDeCliente(cliente.getEmpresa()));
     if (cliente.getBonificacion() == null) cliente.setBonificacion(BigDecimal.ZERO);
+    if (cliente.getUbicacionFacturacion() == null) {
+      cliente.setUbicacionFacturacion(new Ubicacion());
+    }
+    if (cliente.getUbicacionEnvio() == null) {
+      cliente.setUbicacionEnvio(new Ubicacion());
+    }
     this.validarOperacion(TipoDeOperacion.ALTA, cliente);
     CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
     cuentaCorrienteCliente.setCliente(cliente);
@@ -221,9 +238,13 @@ public class ClienteServiceImpl implements IClienteService {
         }
       }
     }
-    if (cliente.getUbicacion() != null) {
-      Ubicacion ubicacion = ubicacionService.guardar(cliente.getUbicacion());
-      cliente.setUbicacion(ubicacion);
+    if (cliente.getUbicacionFacturacion() != null) {
+      Ubicacion ubicacion = ubicacionService.guardar(cliente.getUbicacionFacturacion());
+      cliente.setUbicacionFacturacion(ubicacion);
+    }
+    if (cliente.getUbicacionEnvio() != null) {
+      Ubicacion ubicacion = ubicacionService.guardar(cliente.getUbicacionEnvio());
+      cliente.setUbicacionEnvio(ubicacion);
     }
     cliente = clienteRepository.save(cliente);
     cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);

@@ -19,6 +19,6 @@ public class BusquedaUbicacionCriteria {
   private boolean buscarPorDescripcion;
   private String descripcion;
   private boolean buscaPorCodigoPostal;
-  private Integer codigoPostal;
+  private String codigoPostal;
   private Pageable pageable;
 }

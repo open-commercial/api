@@ -18,16 +18,11 @@ public class ClienteDTO implements Serializable {
   private BigDecimal bonificacion;
   private String nombreFiscal;
   private String nombreFantasia;
-  private String direccion;
   private CategoriaIVA categoriaIVA;
   private Long idFiscal;
   private String email;
   private String telefono;
   private UbicacionDTO ubicacion;
-  private Long idLocalidad;
-  private String nombreLocalidad;
-  private Long idProvincia;
-  private String nombreProvincia;
   private String contacto;
   private Date fechaAlta;
   private Long idEmpresa;

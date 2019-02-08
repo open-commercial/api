@@ -224,18 +224,8 @@ $P{pedido}.getEmpresa().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{pedido}.getCliente().getDireccion()]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="60" y="209" width="495" height="15" uuid="e0084cc3-1c80-4007-9e51-4ee7c9be1c7f">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[($P{pedido}.getCliente().getUbicacion() != null) 
-? $P{pedido}.getCliente().getUbicacion().getNombreLocalidad() + " " + $P{pedido}.getCliente().getUbicacion().getNombreProvincia()
-: ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{pedido}.getCliente().getUbicacionFacturacion() != null) 
+? $P{pedido}.getCliente().getUbicacionFacturacion().getDetalleUbicacion() : ""]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="224" width="60" height="15" uuid="f0b344fb-6370-43de-819b-3c1edd682fe1">

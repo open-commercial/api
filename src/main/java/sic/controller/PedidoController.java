@@ -117,21 +117,22 @@ public class PedidoController {
     pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
     Cliente cliente = clienteService.getClientePorId(idCliente);
     if (nuevoPedidoDTO.getDetalleEnvio() == null) {
-      if (cliente.getUbicacion() == null) {
+      if (cliente.getUbicacionFacturacion() == null) {
         throw new BusinessServiceException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_cliente_sin_ubicacion"));
       }
       DetalleEnvio detalleEnvio = new DetalleEnvio();
-      detalleEnvio.setDescripcion(cliente.getUbicacion().getDescripcion());
-      detalleEnvio.setLatitud(cliente.getUbicacion().getLatitud());
-      detalleEnvio.setLongitud(cliente.getUbicacion().getLatitud());
-      detalleEnvio.setCalle(cliente.getUbicacion().getCalle());
-      detalleEnvio.setNumero(cliente.getUbicacion().getNumero());
-      detalleEnvio.setPiso(cliente.getUbicacion().getPiso());
-      detalleEnvio.setDepartamento(cliente.getUbicacion().getDepartamento());
-      detalleEnvio.setCodigoPostal(cliente.getUbicacion().getCodigoPostal());
-      detalleEnvio.setNombreLocalidad(cliente.getUbicacion().getNombreLocalidad());
-      detalleEnvio.setNombreProvincia(cliente.getUbicacion().getNombreProvincia());
+      detalleEnvio.setDescripcion(cliente.getUbicacionEnvio().getDescripcion());
+      detalleEnvio.setLatitud(cliente.getUbicacionEnvio().getLatitud());
+      detalleEnvio.setLongitud(cliente.getUbicacionEnvio().getLatitud());
+      detalleEnvio.setCalle(cliente.getUbicacionEnvio().getCalle());
+      detalleEnvio.setNumero(cliente.getUbicacionEnvio().getNumero());
+      detalleEnvio.setPiso(cliente.getUbicacionEnvio().getPiso());
+      detalleEnvio.setDepartamento(cliente.getUbicacionEnvio().getDepartamento());
+      if (cliente.getUbicacionEnvio().getLocalidad() != null) {
+        detalleEnvio.setCodigoPostal(cliente.getUbicacionEnvio().getLocalidad().getCodigoPostal());
+        detalleEnvio.setDetalleUbicacion(cliente.getUbicacionEnvio().getDetalleUbicacion());
+      }
       pedido.setDetalleEnvio(detalleEnvio);
     } else {
       pedido.setDetalleEnvio(nuevoPedidoDTO.getDetalleEnvio());

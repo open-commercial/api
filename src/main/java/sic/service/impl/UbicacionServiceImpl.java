@@ -48,7 +48,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
     if (criteria.isBuscaPorProvincia())
       builder.and(qUbicacion.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
     if (criteria.isBuscaPorCodigoPostal())
-      builder.and(qUbicacion.codigoPostal.eq(criteria.getCodigoPostal()));
+      builder.and(qUbicacion.localidad.codigoPostal.eq(criteria.getCodigoPostal()));
     return ubicacionRepository.findAll(builder, criteria.getPageable());
   }
 

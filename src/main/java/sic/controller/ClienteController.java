@@ -172,12 +172,12 @@ public class ClienteController {
     Rol.COMPRADOR
   })
   public void actualizar(
-      @RequestBody ClienteDTO cliente,
+      @RequestBody ClienteDTO clienteDTO,
       @RequestParam(required = false) Long idEmpresa,
       @RequestParam(required = false) Long idViajante,
       @RequestParam(required = false) Long idCredencial,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Cliente clientePorActualizar = modelMapper.map(cliente, Cliente.class);
+    Cliente clientePorActualizar = modelMapper.map(clienteDTO, Cliente.class);
     Cliente clientePersistido =
         clienteService.getClientePorId(clientePorActualizar.getId_Cliente());
     if (idCredencial != null) {
@@ -211,8 +211,75 @@ public class ClienteController {
     } else {
       clientePorActualizar.setBonificacion(clientePersistido.getBonificacion());
     }
-    if (clientePorActualizar.getUbicacion() == null) {
-      clientePorActualizar.setUbicacion(clientePersistido.getUbicacion());
+    if (clienteDTO.getUbicacion() != null) {
+      if (clienteDTO.getUbicacion().getIdUbicacion()
+          == clientePersistido.getUbicacionFacturacion().getIdUbicacion()) {
+        clientePorActualizar.setUbicacionFacturacion(clientePersistido.getUbicacionFacturacion());
+      } else {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
+      }
+      if (clienteDTO.getUbicacion().getIdLocalidad()
+          != clientePersistido.getUbicacionFacturacion().getLocalidad().getId_Localidad()) {
+        clientePorActualizar
+            .getUbicacionFacturacion()
+            .setLocalidad(
+                localidadService.getLocalidadPorId(clienteDTO.getUbicacion().getIdLocalidad()));
+      }
+      // probar lo de model mapper
+      if (clienteDTO.getUbicacion().getDescripcion() != null
+          && !clienteDTO
+              .getUbicacion()
+              .getDescripcion()
+              .equals(clientePersistido.getUbicacionFacturacion().getDescripcion())) {
+        clientePorActualizar
+            .getUbicacionFacturacion()
+            .setDescripcion(clienteDTO.getUbicacion().getDescripcion());
+      }
+      if (clienteDTO.getUbicacion().getLatitud() != null
+          && !clienteDTO
+              .getUbicacion()
+              .getLatitud()
+              .equals(clientePersistido.getUbicacionFacturacion().getLatitud())) {
+        clientePorActualizar.getUbicacionFacturacion().setLatitud(clienteDTO.getUbicacion().getLatitud());
+      }
+      if (clienteDTO.getUbicacion().getLongitud() != null
+          && !clienteDTO
+              .getUbicacion()
+              .getLongitud()
+              .equals(clientePersistido.getUbicacionFacturacion().getLongitud())) {
+        clientePorActualizar.getUbicacionFacturacion().setLongitud(clienteDTO.getUbicacion().getLongitud());
+      }
+      if (clienteDTO.getUbicacion().getCalle() != null
+          && !clienteDTO
+              .getUbicacion()
+              .getCalle()
+              .equals(clientePersistido.getUbicacionFacturacion().getCalle())) {
+        clientePorActualizar.getUbicacionFacturacion().setCalle(clienteDTO.getUbicacion().getCalle());
+      }
+      if (clienteDTO.getUbicacion().getNumero() != null
+          && !clienteDTO
+              .getUbicacion()
+              .getNumero()
+              .equals(clientePersistido.getUbicacionFacturacion().getNumero())) {
+        clientePorActualizar.getUbicacionFacturacion().setNumero(clienteDTO.getUbicacion().getNumero());
+      }
+      if (clienteDTO.getUbicacion().getPiso() != null
+          && !clienteDTO
+              .getUbicacion()
+              .getPiso()
+              .equals(clientePersistido.getUbicacionFacturacion().getPiso())) {
+        clientePorActualizar.getUbicacionFacturacion().setPiso(clienteDTO.getUbicacion().getPiso());
+      }
+      if (clienteDTO.getUbicacion().getDepartamento() != null
+          && !clienteDTO
+              .getUbicacion()
+              .getDepartamento()
+              .equals(clientePersistido.getUbicacionFacturacion().getDepartamento())) {
+        clientePorActualizar
+            .getUbicacionFacturacion()
+            .setDepartamento(clienteDTO.getUbicacion().getDepartamento());
+      }
     }
     if (idEmpresa != null) {
       clientePorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));

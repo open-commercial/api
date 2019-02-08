@@ -24,13 +24,13 @@ public class UbicacionDTO {
 
   private String departamento;
 
-  private Integer codigoPostal;
-
   private boolean eliminada;
 
   private Long idLocalidad;
 
   private String nombreLocalidad;
+
+  private String codigoPostal;
 
   private Long idProvincia;
 
