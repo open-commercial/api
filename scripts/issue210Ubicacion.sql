@@ -37,8 +37,10 @@ INNER JOIN ubicacion u ON c.id_Cliente = u.id_Cliente
 SET c.idUbicacionFacturacion = u.idUbicacion
 where u.calle = "ubicacionFacturacion"; 
 
+SET SQL_SAFE_UPDATES = 0;
 UPDATE ubicacion u inner join cliente c on u.id_Cliente = c.id_Cliente
 SET u.descripcion = c.direccion;
+SET SQL_SAFE_UPDATES = 1;
 
 UPDATE cliente c
 INNER JOIN ubicacion u ON c.id_Cliente = u.id_Cliente
@@ -48,7 +50,11 @@ where u.calle = "ubicacionEnvio";
 SET foreign_key_checks = 0;
 
 ALTER TABLE `cliente`
-ADD CONSTRAINT `FK579lk7ig7n1n6ahgy8bb5kks1` FOREIGN KEY (`idUbicacion`) 
+ADD CONSTRAINT `FK838frolnqaeg8h97ggqu1rd67` FOREIGN KEY (`idUbicacionFacturacion`) 
+REFERENCES `ubicacion`(`idUbicacion`);
+
+ALTER TABLE `cliente`
+ADD CONSTRAINT `FKkfnh6um3l9l5i0ywxwqr1qq9e` FOREIGN KEY (`idUbicacionEnvio`) 
 REFERENCES `ubicacion`(`idUbicacion`);
 
 SET foreign_key_checks = 1;
@@ -61,10 +67,10 @@ ALTER TABLE `cliente`
 DROP FOREIGN KEY `FKc6sfncrbiypm57rdsn5gdoffe`;
 ALTER TABLE `cliente` 
 DROP COLUMN `id_Localidad`,
-DROP INDEX `FKc6sfncrbiypm57rdsn5gdoffe` ;ç
+DROP INDEX `FKc6sfncrbiypm57rdsn5gdoffe` ;
 
 ALTER TABLE `cliente` 
-DROP COLUMN `descripcion`;
+DROP COLUMN `direccion`;
 
 ALTER TABLE `localidad` 
 ADD COLUMN  `costoEnvio` decimal(25,15) DEFAULT NULL,
