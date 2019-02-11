@@ -47,7 +47,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
     ubicacionDeEnvio.setCalle(ubicacion.getCalle());
     ubicacionDeEnvio.setPiso(ubicacion.getPiso());
     ubicacionDeEnvio.setEliminada(false);
-    ubicacionRepository.save(ubicacion);
+    ubicacionRepository.save(ubicacionDeEnvio);
   }
 
   @Override

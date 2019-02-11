@@ -27,10 +27,10 @@ public class UbicacionController {
     this.modelMapper = modelMapper;
   }
 
-  @PutMapping("/ubicaciones/envio")
+  @PutMapping("/ubicaciones/envio/clientes/{idCliente}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
   public void actualizar(@RequestBody UbicacionDTO ubicacionDTO,
-                         @RequestParam Long idCliente) {
+                         @PathVariable long idCliente) {
     Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
     ubicacionService.actualizarUbicacionEnvio(ubicacion, clienteService.getClientePorId(idCliente));
   }
