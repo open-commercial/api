@@ -6,7 +6,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
+import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.BusquedaUbicacionCriteria;
+import sic.modelo.Cliente;
 import sic.modelo.QUbicacion;
 import sic.modelo.Ubicacion;
 import sic.repository.UbicacionRepository;
@@ -29,6 +31,23 @@ public class UbicacionServiceImpl implements IUbicacionService {
     Ubicacion ubicacionGuardada = ubicacionRepository.save(ubicacion);
     logger.warn("El Cliente {} se actualizó correctamente.", ubicacion);
     return ubicacionGuardada;
+  }
+
+  @Override
+  @Transactional
+  public void actualizarUbicacionEnvio(Ubicacion ubicacion, Cliente cliente) {
+    Ubicacion ubicacionDeEnvio = cliente.getUbicacionEnvio();
+    ubicacionDeEnvio.setLocalidad(ubicacion.getLocalidad());
+    ubicacionDeEnvio.setCalle(ubicacion.getCalle());
+    ubicacionDeEnvio.setDepartamento(ubicacion.getDepartamento());
+    ubicacionDeEnvio.setDescripcion(ubicacion.getDescripcion());
+    ubicacionDeEnvio.setLatitud(ubicacion.getLatitud());
+    ubicacionDeEnvio.setLongitud(ubicacion.getLongitud());
+    ubicacionDeEnvio.setNumero(ubicacion.getNumero());
+    ubicacionDeEnvio.setCalle(ubicacion.getCalle());
+    ubicacionDeEnvio.setPiso(ubicacion.getPiso());
+    ubicacionDeEnvio.setEliminada(false);
+    ubicacionRepository.save(ubicacion);
   }
 
   @Override

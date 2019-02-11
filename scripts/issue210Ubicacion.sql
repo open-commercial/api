@@ -1,3 +1,5 @@
+DROP TABLE pais;
+
 CREATE TABLE `ubicacion` (
   `idUbicacion` bigint(20) NOT NULL AUTO_INCREMENT,
   `calle` varchar(255) COLLATE utf8_unicode_ci,
@@ -35,9 +37,12 @@ INNER JOIN ubicacion u ON c.id_Cliente = u.id_Cliente
 SET c.idUbicacionFacturacion = u.idUbicacion
 where u.calle = "ubicacionFacturacion"; 
 
+UPDATE ubicacion u inner join cliente c on u.id_Cliente = c.id_Cliente
+SET u.descripcion = c.direccion;
+
 UPDATE cliente c
 INNER JOIN ubicacion u ON c.id_Cliente = u.id_Cliente
-SET c.idUbicacionFacturacion = u.idUbicacion
+SET c.idUbicacionEnvio = u.idUbicacion
 where u.calle = "ubicacionEnvio"; 
 
 SET foreign_key_checks = 0;
@@ -56,7 +61,10 @@ ALTER TABLE `cliente`
 DROP FOREIGN KEY `FKc6sfncrbiypm57rdsn5gdoffe`;
 ALTER TABLE `cliente` 
 DROP COLUMN `id_Localidad`,
-DROP INDEX `FKc6sfncrbiypm57rdsn5gdoffe` ;
+DROP INDEX `FKc6sfncrbiypm57rdsn5gdoffe` ;ç
+
+ALTER TABLE `cliente` 
+DROP COLUMN `descripcion`;
 
 ALTER TABLE `localidad` 
 ADD COLUMN  `costoEnvio` decimal(25,15) DEFAULT NULL,

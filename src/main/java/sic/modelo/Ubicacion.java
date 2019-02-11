@@ -12,7 +12,7 @@ import javax.validation.constraints.DecimalMin;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "ubicacionFacturacion")
+@Table(name = "ubicacion")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

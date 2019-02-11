@@ -235,7 +235,7 @@ public class ProductoServiceImpl implements IProductoService {
             entry -> {
               Producto producto = productoRepository.findById(entry.getKey());
               if (producto == null) {
-                logger.warn("Se intenta actualizar el stock de un producto eliminado.");
+                logger.warn("Se intenta actualizarUbicacionEnvio el stock de un producto eliminado.");
               }
               if (producto != null && !producto.isIlimitado()) {
                 if (movimiento.equals(Movimiento.VENTA)) {
