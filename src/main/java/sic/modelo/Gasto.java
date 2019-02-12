@@ -46,7 +46,7 @@ public class Gasto implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-  @QueryInit("localidad.provincia")
+  @QueryInit("ubicacion.localidad.provincia")
   private Empresa empresa;
 
   @OneToOne

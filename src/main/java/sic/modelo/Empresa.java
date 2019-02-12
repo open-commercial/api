@@ -53,7 +53,7 @@ public class Empresa implements Serializable {
   @JoinColumn(name = "idUbicacion", referencedColumnName = "idUbicacion")
   @QueryInit("localidad.provincia")
   @NotNull
-  private Ubicacion ubicacion;;
+  private Ubicacion ubicacion;
 
   private String logo;
 
