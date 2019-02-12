@@ -1,9 +1,6 @@
 package sic.builder;
 
-import sic.modelo.CategoriaIVA;
-import sic.modelo.Empresa;
-import sic.modelo.Localidad;
-import sic.modelo.Proveedor;
+import sic.modelo.*;
 
 public class ProveedorBuilder {
 
@@ -18,7 +15,7 @@ public class ProveedorBuilder {
   private String contacto = "Raul Gamez";
   private String email = "chamacosrl@gmail.com";
   private String web = "www.chamacosrl.com.ar";
-  private Localidad localidad = new LocalidadBuilder().build();
+  private Ubicacion ubicacion = new UbicacionBuilder().build();
   private Empresa empresa = new EmpresaBuilder().build();
   private boolean eliminado = false;
 
@@ -35,7 +32,7 @@ public class ProveedorBuilder {
         contacto,
         email,
         web,
-        localidad,
+        ubicacion,
         empresa,
         eliminado);
   }
@@ -95,8 +92,8 @@ public class ProveedorBuilder {
     return this;
   }
 
-  public ProveedorBuilder withLocalidad(Localidad localidad) {
-    this.localidad = localidad;
+  public ProveedorBuilder withUbicacion(Ubicacion ubicacion) {
+    this.ubicacion = ubicacion;
     return this;
   }
 

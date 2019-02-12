@@ -1,6 +1,7 @@
 package sic.controller;
 
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.dto.TransportistaDTO;
+import sic.service.BusinessServiceException;
 import sic.service.IEmpresaService;
 import sic.service.ILocalidadService;
 import sic.service.ITransportistaService;
@@ -48,8 +50,7 @@ public class TransportistaController {
   @PutMapping("/transportistas")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(@RequestBody TransportistaDTO transportistaDTO,
-                         @RequestParam(required = false) Long idEmpresa,
-                         @RequestParam(required = false) Long idLocalidad) {
+                         @RequestParam(required = false) Long idEmpresa) {
     Transportista transportistaPersistido =
         transportistaService.getTransportistaPorId(transportistaDTO.getId_Transportista());
     Transportista transportistaPorActualizar =
@@ -61,11 +62,21 @@ public class TransportistaController {
     if (transportistaPorActualizar.getDireccion() == null) {
       transportistaPorActualizar.setDireccion(transportistaPersistido.getDireccion());
     }
-    if (idLocalidad == null) {
-      transportistaPorActualizar.setLocalidad(transportistaPersistido.getLocalidad());
-    } else {
-      transportistaPorActualizar.setLocalidad(
-          localidadService.getLocalidadPorId(idLocalidad));
+    if (transportistaDTO.getUbicacion() != null) {
+      if (transportistaDTO.getUbicacion().getIdUbicacion()
+        == transportistaPersistido.getUbicacion().getIdUbicacion()) {
+        transportistaPorActualizar.setUbicacion(transportistaPersistido.getUbicacion());
+      } else {
+        throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
+      }
+      if (transportistaDTO.getUbicacion().getIdLocalidad()
+        != transportistaPersistido.getUbicacion().getLocalidad().getId_Localidad()) {
+        transportistaPorActualizar
+          .getUbicacion()
+          .setLocalidad(
+            localidadService.getLocalidadPorId(transportistaDTO.getUbicacion().getIdLocalidad()));
+      }
     }
     if (transportistaPorActualizar.getWeb() == null) {
       transportistaPorActualizar.setWeb(transportistaPersistido.getWeb());
@@ -131,10 +142,8 @@ public class TransportistaController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Transportista guardar(
       @RequestBody TransportistaDTO transportistaDTO,
-      @RequestParam Long idEmpresa,
-      @RequestParam Long idLocalidad) {
+      @RequestParam Long idEmpresa) {
     Transportista transportista = modelMapper.map(transportistaDTO, Transportista.class);
-    transportista.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
     transportista.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     return transportistaService.guardar(transportista);
   }

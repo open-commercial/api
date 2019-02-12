@@ -3,6 +3,7 @@ package sic.modelo;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -51,10 +52,11 @@ public class Empresa implements Serializable {
   @Column(nullable = false)
   private String telefono;
 
-  @ManyToOne
-  @JoinColumn(name = "id_Localidad", referencedColumnName = "id_Localidad")
-  @QueryInit("provincia")
-  private Localidad localidad;
+  @OneToOne
+  @JoinColumn(name = "idUbicacion", referencedColumnName = "idUbicacion")
+  @QueryInit("localidad.provincia")
+  @NotNull
+  private Ubicacion ubicacion;;
 
   private String logo;
 
@@ -62,11 +64,11 @@ public class Empresa implements Serializable {
 
   @JsonGetter("idLocalidad")
   public Long getIdLocalidad() {
-    return localidad.getId_Localidad();
+    return (ubicacion.getLocalidad() != null) ? ubicacion.getLocalidad().getId_Localidad() :  null;
   }
 
   @JsonGetter("nombreLocalidad")
   public String getNombreLocalidad() {
-    return localidad.getNombre();
+    return (ubicacion.getLocalidad() != null) ? ubicacion.getLocalidad().getNombre() : null;
   }
 }

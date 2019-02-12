@@ -10,13 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.ConfiguracionDelSistema;
 import sic.modelo.Empresa;
-import sic.service.IEmpresaService;
-import sic.service.BusinessServiceException;
+import sic.modelo.Ubicacion;
+import sic.service.*;
 import sic.modelo.TipoDeOperacion;
-import sic.service.IPhotoVideoUploader;
 import sic.util.Validator;
 import sic.repository.EmpresaRepository;
-import sic.service.IConfiguracionDelSistemaService;
 
 @Service
 public class EmpresaServiceImpl implements IEmpresaService {
@@ -24,6 +22,7 @@ public class EmpresaServiceImpl implements IEmpresaService {
   private final EmpresaRepository empresaRepository;
   private final IConfiguracionDelSistemaService configuracionDelSistemaService;
   private final IPhotoVideoUploader photoVideoUploader;
+  private final IUbicacionService ubicacionService;
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
   private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
@@ -31,10 +30,11 @@ public class EmpresaServiceImpl implements IEmpresaService {
   public EmpresaServiceImpl(
       EmpresaRepository empresaRepository,
       IConfiguracionDelSistemaService configuracionDelSistemaService,
+      IUbicacionService ubicacionService,
       IPhotoVideoUploader photoVideoUploader) {
-
     this.empresaRepository = empresaRepository;
     this.configuracionDelSistemaService = configuracionDelSistemaService;
+    this.ubicacionService = ubicacionService;
     this.photoVideoUploader = photoVideoUploader;
   }
 
@@ -78,9 +78,9 @@ public class EmpresaServiceImpl implements IEmpresaService {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_empresa_vacio_direccion"));
     }
-    if (empresa.getLocalidad() == null) {
+    if (empresa.getUbicacion() == null) {
       throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_empresa_vacio_localidad"));
+          RESOURCE_BUNDLE.getString("mensaje_ubicacion_vacia"));
     }
     // Duplicados
     // Nombre
@@ -125,7 +125,14 @@ public class EmpresaServiceImpl implements IEmpresaService {
   @Override
   @Transactional
   public Empresa guardar(Empresa empresa) {
+    if (empresa.getUbicacion() == null) {
+      empresa.setUbicacion(new Ubicacion());
+    }
     validarOperacion(TipoDeOperacion.ALTA, empresa);
+    if (empresa.getUbicacion() != null) {
+      Ubicacion ubicacion = ubicacionService.guardar(empresa.getUbicacion());
+      empresa.setUbicacion(ubicacion);
+    }
     empresa = empresaRepository.save(empresa);
     crearConfiguracionDelSistema(empresa);
     LOGGER.warn("La Empresa {} se guardó correctamente.", empresa);

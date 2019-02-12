@@ -3,7 +3,7 @@ package sic.service.impl;
 import com.querydsl.core.BooleanBuilder;
 
 import org.springframework.data.domain.Page;
-import sic.modelo.BusquedaProveedorCriteria;
+import sic.modelo.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -14,14 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.CuentaCorriente;
-import sic.modelo.CuentaCorrienteProveedor;
-import sic.modelo.Empresa;
-import sic.modelo.Proveedor;
-import sic.modelo.QProveedor;
 import sic.service.IProveedorService;
 import sic.service.BusinessServiceException;
-import sic.modelo.TipoDeOperacion;
+import sic.service.IUbicacionService;
 import sic.util.Validator;
 import sic.repository.ProveedorRepository;
 import sic.service.ICuentaCorrienteService;
@@ -31,13 +26,17 @@ public class ProveedorServiceImpl implements IProveedorService {
 
   private final ProveedorRepository proveedorRepository;
   private final ICuentaCorrienteService cuentaCorrienteService;
+  private final IUbicacionService ubicacionService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
   public ProveedorServiceImpl(
-      ProveedorRepository proveedorRepository, ICuentaCorrienteService cuentaCorrienteService) {
+      ProveedorRepository proveedorRepository,
+      ICuentaCorrienteService cuentaCorrienteService,
+      IUbicacionService ubicacionService) {
     this.proveedorRepository = proveedorRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
+    this.ubicacionService = ubicacionService;
   }
 
   @Override
@@ -71,9 +70,9 @@ public class ProveedorServiceImpl implements IProveedorService {
     if (criteria.isBuscaPorCodigo())
       builder.or(qProveedor.codigo.containsIgnoreCase(criteria.getCodigo()));
     if (criteria.isBuscaPorLocalidad())
-      builder.and(qProveedor.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
+      builder.and(qProveedor.ubicacion.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
-      builder.and(qProveedor.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
+      builder.and(qProveedor.ubicacion.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
     builder.and(
         qProveedor
             .empresa
@@ -116,9 +115,9 @@ public class ProveedorServiceImpl implements IProveedorService {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_condicionIVA_vacia"));
     }
-    if (proveedor.getLocalidad() == null) {
+    if (proveedor.getUbicacion() == null) {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_localidad_vacia"));
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_vacia"));
     }
     if (proveedor.getEmpresa() == null) {
       throw new BusinessServiceException(
@@ -180,7 +179,14 @@ public class ProveedorServiceImpl implements IProveedorService {
   @Transactional
   public Proveedor guardar(Proveedor proveedor) {
     if (proveedor.getCodigo() == null) proveedor.setCodigo("");
+    if (proveedor.getUbicacion() == null) {
+      proveedor.setUbicacion(new Ubicacion());
+    }
     this.validarOperacion(TipoDeOperacion.ALTA, proveedor);
+    if (proveedor.getUbicacion() != null) {
+      Ubicacion ubicacion = ubicacionService.guardar(proveedor.getUbicacion());
+      proveedor.setUbicacion(ubicacion);
+    }
     proveedor = proveedorRepository.save(proveedor);
     CuentaCorrienteProveedor cuentaCorrienteProveedor = new CuentaCorrienteProveedor();
     cuentaCorrienteProveedor.setProveedor(proveedor);

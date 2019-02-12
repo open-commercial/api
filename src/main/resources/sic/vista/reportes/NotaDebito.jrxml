@@ -139,8 +139,8 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{notaDebito}.getEmpresa().getLocalidad() != null) 
-? $P{notaDebito}.getEmpresa().getLocalidad().getNombre() + " " + $P{notaDebito}.getEmpresa().getLocalidad().getProvincia().getNombre() 
+				<textFieldExpression><![CDATA[($P{notaDebito}.getEmpresa().getUbicacion().getLocalidad() != null) 
+? $P{notaDebito}.getEmpresa().getUbicacion().getLocalidad().getNombre() + " " + $P{notaDebito}.getEmpresa().getUbicacion().getLocalidad().getProvincia().getNombre() 
 : ""]]></textFieldExpression>
 			</textField>
 			<textField>
@@ -259,8 +259,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($P{notaDebito}.getCliente().getUbicacionFacturacion() != null) 
-? $P{notaDebito}.getCliente().getUbicacionFacturacion().getDetalleUbicacion() : ""
-]]></textFieldExpression>
+? $P{notaDebito}.getCliente().getUbicacionFacturacion().getDetalleUbicacion() : ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="50" y="221" width="505" height="15" uuid="cb8691ce-a678-4cf1-a2c7-4938068372c4">

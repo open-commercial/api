@@ -2,7 +2,9 @@ package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
 import java.util.ArrayList;
-import sic.modelo.BusquedaTransportistaCriteria;
+
+import sic.modelo.*;
+
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
@@ -12,12 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.Empresa;
-import sic.modelo.QTransportista;
-import sic.modelo.Transportista;
 import sic.service.ITransportistaService;
 import sic.service.BusinessServiceException;
-import sic.modelo.TipoDeOperacion;
+import sic.service.IUbicacionService;
 import sic.util.Validator;
 import sic.repository.TransportistaRepository;
 
@@ -25,11 +24,14 @@ import sic.repository.TransportistaRepository;
 public class TransportistaServiceImpl implements ITransportistaService {
 
   private final TransportistaRepository transportistaRepository;
+  private final IUbicacionService ubicacionService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
-  public TransportistaServiceImpl(TransportistaRepository transportistaRepository) {
+  public TransportistaServiceImpl(TransportistaRepository transportistaRepository,
+                                  IUbicacionService ubicacionService) {
     this.transportistaRepository = transportistaRepository;
+    this.ubicacionService = ubicacionService;
   }
 
   @Override
@@ -66,9 +68,9 @@ public class TransportistaServiceImpl implements ITransportistaService {
     if (criteria.isBuscarPorNombre())
       builder.and(this.buildPredicadoNombre(criteria.getNombre(), qTransportista));
     if (criteria.isBuscarPorLocalidad())
-      builder.and(qTransportista.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
+      builder.and(qTransportista.ubicacion.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
     if (criteria.isBuscarPorProvincia())
-      builder.and(qTransportista.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
+      builder.and(qTransportista.ubicacion.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
     List<Transportista> list = new ArrayList<>();
     transportistaRepository
         .findAll(builder, new Sort(Sort.Direction.ASC, "nombre"))
@@ -97,9 +99,9 @@ public class TransportistaServiceImpl implements ITransportistaService {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_transportista_nombre_vacio"));
     }
-    if (transportista.getLocalidad() == null) {
+    if (transportista.getUbicacion() == null) {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_transportista_localidad_vacia"));
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_vacia"));
     }
     if (transportista.getEmpresa() == null) {
       throw new BusinessServiceException(
@@ -126,9 +128,16 @@ public class TransportistaServiceImpl implements ITransportistaService {
   @Override
   @Transactional
   public Transportista guardar(Transportista transportista) {
+    if (transportista.getUbicacion() == null) {
+      transportista.setUbicacion(new Ubicacion());
+    }
     this.validarOperacion(TipoDeOperacion.ALTA, transportista);
+    if (transportista.getUbicacion() != null) {
+      Ubicacion ubicacion = ubicacionService.guardar(transportista.getUbicacion());
+      transportista.setUbicacion(ubicacion);
+    }
     transportista = transportistaRepository.save(transportista);
-    logger.warn("El Transportista " + transportista + " se guardó correctamente.");
+    logger.warn("El Transportista {} se guardó correctamente.", transportista);
     return transportista;
   }
 

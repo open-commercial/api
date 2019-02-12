@@ -5,6 +5,7 @@ import java.util.Date;
 import sic.modelo.CategoriaIVA;
 import sic.modelo.Empresa;
 import sic.modelo.Localidad;
+import sic.modelo.Ubicacion;
 
 public class EmpresaBuilder {
 
@@ -18,7 +19,7 @@ public class EmpresaBuilder {
   private Date fechaInicioActividad = new Date(539924400000L); // 10-02-1987
   private String email = "support@globocorporation.com";
   private String telefono = "379 4895549";
-  private Localidad localidad = new LocalidadBuilder().build();
+  private Ubicacion ubicacion = new UbicacionBuilder().build();
   private String logo = "";
   private boolean eliminada = false;
 
@@ -34,7 +35,7 @@ public class EmpresaBuilder {
         fechaInicioActividad,
         email,
         telefono,
-        localidad,
+        ubicacion,
         logo,
         eliminada);
   }
@@ -89,8 +90,8 @@ public class EmpresaBuilder {
     return this;
   }
 
-  public EmpresaBuilder withLocalidad(Localidad localidad) {
-    this.localidad = localidad;
+  public EmpresaBuilder withUbicacion(Ubicacion ubicacion) {
+    this.ubicacion = ubicacion;
     return this;
   }
 

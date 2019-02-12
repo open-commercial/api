@@ -4,13 +4,9 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.querydsl.core.annotations.QueryInit;
 import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -35,10 +31,11 @@ public class Transportista implements Serializable {
   @Column(nullable = false)
   private String direccion;
 
-  @ManyToOne
-  @JoinColumn(name = "id_Localidad", referencedColumnName = "id_Localidad")
-  @QueryInit("provincia")
-  private Localidad localidad;
+  @OneToOne
+  @JoinColumn(name = "idUbicacion", referencedColumnName = "idUbicacion")
+  @QueryInit("localidad.provincia")
+  @NotNull
+  private Ubicacion ubicacion;
 
   @Column(nullable = false)
   private String web;
@@ -54,17 +51,19 @@ public class Transportista implements Serializable {
 
   @JsonGetter("idLocalidad")
   public Long getIdLocalidad() {
-    return localidad.getId_Localidad();
+    return (ubicacion.getLocalidad() != null) ? ubicacion.getLocalidad().getId_Localidad() : null;
   }
 
   @JsonGetter("nombreLocalidad")
   public String getNombreLocalidad() {
-    return localidad.getNombre();
+    return (ubicacion.getLocalidad() != null) ? ubicacion.getLocalidad().getNombre() : null;
   }
 
   @JsonGetter("nombreProvincia")
   public String getNombreProvincia() {
-    return localidad.getProvincia().getNombre();
+    return (ubicacion.getLocalidad() != null)
+        ? ubicacion.getLocalidad().getProvincia().getNombre()
+        : null;
   }
 
   @JsonGetter("idEmpresa")

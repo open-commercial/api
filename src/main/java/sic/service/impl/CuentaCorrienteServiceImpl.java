@@ -223,10 +223,10 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       builder.or(qCuentaCorrienteProveedor.proveedor.idFiscal.eq(criteria.getIdFiscal()));
     if (criteria.isBuscaPorLocalidad())
       builder.and(
-          qCuentaCorrienteProveedor.proveedor.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
+          qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
       builder.and(
-          qCuentaCorrienteProveedor.proveedor.localidad.provincia.id_Provincia.eq(
+          qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.provincia.id_Provincia.eq(
               criteria.getIdProvincia()));
     builder.and(
         qCuentaCorrienteProveedor

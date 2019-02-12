@@ -1,6 +1,7 @@
 package sic.controller;
 
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.dto.ProveedorDTO;
+import sic.service.BusinessServiceException;
 import sic.service.IEmpresaService;
 import sic.service.ILocalidadService;
 import sic.service.IProveedorService;
@@ -55,11 +57,9 @@ public class ProveedorController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Proveedor guardar(
       @RequestBody ProveedorDTO proveedorDTO,
-      @RequestParam Long idEmpresa,
-      @RequestParam Long idLocalidad) {
+      @RequestParam Long idEmpresa) {
     Proveedor proveedor = modelMapper.map(proveedorDTO, Proveedor.class);
     proveedor.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    proveedor.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
     return proveedorService.guardar(proveedor);
   }
 
@@ -67,25 +67,35 @@ public class ProveedorController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(
       @RequestBody ProveedorDTO proveedorDTO,
-      @RequestParam(required = false) Long idEmpresa,
-      @RequestParam(required = false) Long idLocalidad) {
+      @RequestParam(required = false) Long idEmpresa) {
     Proveedor proveedorPersistido =
         proveedorService.getProveedorPorId(proveedorDTO.getId_Proveedor());
     Proveedor proveedorPorActualizar = modelMapper.map(proveedorDTO, Proveedor.class);
-    if (proveedorPorActualizar.getRazonSocial() == null || proveedorPorActualizar.getRazonSocial().isEmpty()) {
+    if (proveedorPorActualizar.getRazonSocial() == null
+        || proveedorPorActualizar.getRazonSocial().isEmpty()) {
       proveedorPorActualizar.setRazonSocial(proveedorPersistido.getRazonSocial());
     }
     if (proveedorPorActualizar.getCategoriaIVA() == null) {
       proveedorPorActualizar.setCategoriaIVA(proveedorPersistido.getCategoriaIVA());
     }
-    if (proveedorPorActualizar.getLocalidad() == null) {
-      proveedorPorActualizar.setLocalidad(proveedorPersistido.getLocalidad());
+    if (proveedorDTO.getUbicacion() != null) {
+      if (proveedorDTO.getUbicacion().getIdUbicacion()
+          == proveedorPersistido.getUbicacion().getIdUbicacion()) {
+        proveedorPorActualizar.setUbicacion(proveedorPersistido.getUbicacion());
+      } else {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
+      }
+      if (proveedorDTO.getUbicacion().getIdLocalidad()
+          != proveedorPersistido.getUbicacion().getLocalidad().getId_Localidad()) {
+        proveedorPorActualizar
+            .getUbicacion()
+            .setLocalidad(
+                localidadService.getLocalidadPorId(proveedorDTO.getUbicacion().getIdLocalidad()));
+      }
     }
     if (idEmpresa != null) {
       proveedorPorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    }
-    if (idLocalidad != null) {
-      proveedorPorActualizar.setLocalidad(localidadService.getLocalidadPorId(idLocalidad ));
     }
     if (proveedorService.getProveedorPorId(proveedorPorActualizar.getId_Proveedor()) != null) {
       proveedorService.actualizar(proveedorPorActualizar);

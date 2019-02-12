@@ -23,8 +23,10 @@ import sic.builder.*;
 import sic.modelo.*;
 import sic.modelo.dto.*;
 import sic.repository.UsuarioRepository;
+import sic.service.ILocalidadService;
 import sic.service.IPedidoService;
 import sic.service.IProductoService;
+import sic.service.IProvinciaService;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -46,6 +48,10 @@ public class AppIntegrationTest {
   @Autowired private IProductoService productoService;
 
   @Autowired private IPedidoService pedidoService;
+
+  @Autowired private IProvinciaService provinciaService;
+
+  @Autowired private ILocalidadService localidadService;
 
   @Autowired private TestRestTemplate restTemplate;
 
@@ -618,17 +624,19 @@ public class AppIntegrationTest {
         restTemplate
             .postForEntity(apiPrefix + "/login", new Credencial("test", "test"), String.class)
             .getBody();
-    ProvinciaDTO provinciaDTO =
-        ProvinciaDTO.builder().nombre("Corrientes").build();
-    ProvinciaDTO provinciaGuardada =
-        restTemplate.postForObject(apiPrefix + "/provincias", provinciaDTO, ProvinciaDTO.class);
-    LocalidadDTO localidadDTO =
-        LocalidadDTO.builder()
-            .nombre("Corrientes")
-            .codigoPostal("3400")
-            .build();
-    localidadDTO =
-        restTemplate.postForObject(apiPrefix + "/localidades?idProvincia=" + provinciaGuardada.getId_Provincia(), localidadDTO, LocalidadDTO.class);
+//    ProvinciaDTO provinciaDTO =
+//        ProvinciaDTO.builder().nombre("Corrientes").build();
+//    ProvinciaDTO provinciaGuardada =
+//        restTemplate.postForObject(apiPrefix + "/provincias", provinciaDTO, ProvinciaDTO.class);
+    provinciaService.guardar(new ProvinciaBuilder().withNombre("Corrientes").build());
+//    LocalidadDTO localidadDTO =
+//        LocalidadDTO.builder()
+//            .nombre("Corrientes")
+//            .codigoPostal("3400")
+//            .build();
+//    localidadDTO =
+//        restTemplate.postForObject(apiPrefix + "/localidades?idProvincia=" + provinciaGuardada.getId_Provincia(), localidadDTO, LocalidadDTO.class);
+    localidadService.guardar(new LocalidadBuilder().withProvincia(provinciaService.getProvinciaPorId(1l)).withNombre("Corrientes").withCodigoPostal("3400").build());
     EmpresaDTO empresaDTO =
         EmpresaDTO.builder()
             .nombre("Globo Corporation")
@@ -640,8 +648,9 @@ public class AppIntegrationTest {
             .fechaInicioActividad(new Date(539924400000L))
             .email("support@globocorporation.com")
             .telefono("379 4895549")
+            .ubicacion(UbicacionDTO.builder().idLocalidad(1l).build())
             .build();
-    empresaDTO = restTemplate.postForObject(apiPrefix + "/empresas?idLocalidad=" + localidadDTO.getId_Localidad(), empresaDTO, EmpresaDTO.class);
+    empresaDTO = restTemplate.postForObject(apiPrefix + "/empresas", empresaDTO, EmpresaDTO.class);
     FormaDePagoDTO formaDePago =
         FormaDePagoDTO.builder()
             .afectaCaja(true)
@@ -660,7 +669,7 @@ public class AppIntegrationTest {
             .build();
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
     UbicacionDTO ubicacion = UbicacionDTO.builder()
-      .idLocalidad(localidadDTO.getId_Localidad())
+      .idLocalidad(1l)
       .calle("Siempre viva")
       .numero(123)
       .build();
@@ -676,8 +685,7 @@ public class AppIntegrationTest {
         apiPrefix
             + "/clientes?idEmpresa="
             + empresaDTO.getId_Empresa()
-            + "&idLocalidad="
-            + localidadDTO.getId_Localidad()
+            + "&idLocalidad=1"
             + "&idCredencial="
             + credencial.getId_Usuario(),
         cliente,
@@ -691,11 +699,7 @@ public class AppIntegrationTest {
             .eliminado(false)
             .build();
     restTemplate.postForObject(
-        apiPrefix
-            + "/transportistas?idEmpresa=1&idLocalidad="
-            + empresaDTO.getIdLocalidad(),
-        transportistaDTO,
-        TransportistaDTO.class);
+        apiPrefix + "/transportistas?idEmpresa=1", transportistaDTO, TransportistaDTO.class);
     MedidaDTO medidaMetro = MedidaDTO.builder().nombre("Metro").build();
     MedidaDTO medidaKilo = MedidaDTO.builder().nombre("Kilo").build();
     restTemplate.postForObject(apiPrefix + "/medidas?idEmpresa=1", medidaMetro, MedidaDTO.class);
@@ -783,7 +787,7 @@ public class AppIntegrationTest {
             .nombre("La gran idea")
             .build();
     EmpresaDTO empresaGuardada =
-        restTemplate.postForObject(apiPrefix + "/empresas?idLocalidad=1", empresaNueva, EmpresaDTO.class);
+        restTemplate.postForObject(apiPrefix + "/empresas", empresaNueva, EmpresaDTO.class);
     assertEquals(empresaNueva, empresaGuardada);
   }
 

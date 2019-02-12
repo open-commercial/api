@@ -1,6 +1,8 @@
 package sic.controller;
 
 import java.util.List;
+import java.util.ResourceBundle;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -8,6 +10,7 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Empresa;
 import sic.modelo.Rol;
 import sic.modelo.dto.EmpresaDTO;
+import sic.service.BusinessServiceException;
 import sic.service.IEmpresaService;
 import sic.service.ILocalidadService;
 
@@ -53,17 +56,20 @@ public class EmpresaController {
 
   @PostMapping("/empresas")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-  public Empresa guardar(@RequestBody EmpresaDTO empresaDTO,
-                         @RequestParam Long idLocalidad) {
+  public Empresa guardar(@RequestBody EmpresaDTO empresaDTO) {
     Empresa empresa = modelMapper.map(empresaDTO, Empresa.class);
-    empresa.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
+    if (empresaDTO.getUbicacion() != null && empresaDTO.getUbicacion().getIdLocalidad() != 0) {
+      empresa
+          .getUbicacion()
+          .setLocalidad(
+              localidadService.getLocalidadPorId(empresaDTO.getUbicacion().getIdLocalidad()));
+    }
     return empresaService.guardar(empresa);
   }
 
   @PutMapping("/empresas")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-  public void actualizar(@RequestBody EmpresaDTO empresaDTO,
-                         @RequestParam(required = false) Long idLocalidad) {
+  public void actualizar(@RequestBody EmpresaDTO empresaDTO) {
     Empresa empresaParaActualizar = modelMapper.map(empresaDTO, Empresa.class);
     Empresa empresaPersistida = empresaService.getEmpresaPorId(empresaParaActualizar.getId_Empresa());
     if (empresaParaActualizar.getNombre() == null || empresaParaActualizar.getNombre().isEmpty()) {
@@ -75,10 +81,21 @@ public class EmpresaController {
     if (empresaParaActualizar.getCategoriaIVA() == null) {
       empresaParaActualizar.setCategoriaIVA(empresaPersistida.getCategoriaIVA());
     }
-    if (idLocalidad != null) {
-      empresaParaActualizar.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
-    } else {
-      empresaParaActualizar.setLocalidad(empresaPersistida.getLocalidad());
+    if (empresaDTO.getUbicacion() != null) {
+      if (empresaDTO.getUbicacion().getIdUbicacion()
+          == empresaPersistida.getUbicacion().getIdUbicacion()) {
+        empresaParaActualizar.setUbicacion(empresaPersistida.getUbicacion());
+      } else {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
+      }
+      if (empresaDTO.getUbicacion().getIdLocalidad()
+          != empresaPersistida.getUbicacion().getLocalidad().getId_Localidad()) {
+        empresaParaActualizar
+            .getUbicacion()
+            .setLocalidad(
+                localidadService.getLocalidadPorId(empresaDTO.getUbicacion().getIdLocalidad()));
+      }
     }
     empresaService.actualizar(empresaParaActualizar, empresaPersistida);
   }

@@ -132,8 +132,8 @@ $P{recibo}.getEmpresa().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{recibo}.getEmpresa().getLocalidad() != null) 
-? $P{recibo}.getEmpresa().getLocalidad().getNombre() + " " + $P{recibo}.getEmpresa().getLocalidad().getProvincia().getNombre() 
+				<textFieldExpression><![CDATA[($P{recibo}.getEmpresa().getUbicacion().getLocalidad() != null) 
+? $P{recibo}.getEmpresa().getUbicacion().getLocalidad().getNombre() + " " + $P{recibo}.getEmpresa().getUbicacion().getLocalidad().getProvincia().getNombre() 
 : ""]]></textFieldExpression>
 			</textField>
 			<textField>

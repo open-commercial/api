@@ -3,20 +3,21 @@ package sic.builder;
 import sic.modelo.Empresa;
 import sic.modelo.Localidad;
 import sic.modelo.Transportista;
+import sic.modelo.Ubicacion;
 
 public class TransportistaBuilder {
 
     private long id_Transportista = 0L;
     private String nombre = "Correo OCA";
     private String direccion = "Ruta 12";
-    private Localidad localidad = new LocalidadBuilder().build();
+    private Ubicacion ubicacion = new UbicacionBuilder().build();
     private String web = "pedidos@oca.com.ar";
     private String telefono = "379 5402356";
     private Empresa empresa = new EmpresaBuilder().build();
     private boolean eliminado = false;
     
     public Transportista build() {
-        return new Transportista(id_Transportista, nombre, direccion, localidad, web, telefono, empresa, eliminado);
+        return new Transportista(id_Transportista, nombre, direccion, ubicacion, web, telefono, empresa, eliminado);
     }
     
     public TransportistaBuilder withId_Transportista(long idTransportista) {
@@ -34,8 +35,8 @@ public class TransportistaBuilder {
         return this;
     }
     
-    public TransportistaBuilder withLocalidad(Localidad localidad){
-        this.localidad = localidad;
+    public TransportistaBuilder withUbicacion(Ubicacion ubicacion){
+        this.ubicacion = ubicacion;
         return this;
     }
 
