@@ -1,4 +1,3 @@
-DROP TABLE pais;
 
 CREATE TABLE `ubicacion` (
   `idUbicacion` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -75,3 +74,129 @@ DROP COLUMN `direccion`;
 ALTER TABLE `localidad` 
 ADD COLUMN  `costoEnvio` decimal(25,15) DEFAULT NULL,
 ADD COLUMN  `envioGratuito` bit(1) NOT NULL;
+
+ALTER TABLE `localidad` 
+ADD COLUMN  `idProveedor` bigint(20) DEFAULT NULL;
+
+-- PROVEEDOR
+ALTER TABLE `ubicacion` 
+ADD COLUMN `idProveedor` BIGINT(20);
+
+INSERT INTO `ubicacion`(calle, numero, id_Localidad, idProveedor, eliminada) 
+select "ubicacion proveedor", 123,localidad.id_Localidad, proveedor.id_Proveedor, proveedor.eliminado from proveedor inner join localidad
+on proveedor.id_Localidad = localidad.id_Localidad;
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE ubicacion u inner join proveedor p on u.idProveedor = p.id_Proveedor
+SET u.descripcion = p.direccion;
+SET SQL_SAFE_UPDATES = 1;
+
+ALTER TABLE `proveedor` 
+DROP COLUMN `direccion`;
+
+ALTER TABLE `proveedor` 
+ADD COLUMN `idUbicacion` BIGINT(20);
+
+UPDATE proveedor p
+INNER JOIN ubicacion u ON p.id_Proveedor = u.idProveedor
+SET p.idUbicacion = u.idUbicacion; 
+
+ALTER TABLE `proveedor` 
+DROP FOREIGN KEY `FK93qeca10ljkj4qmj59yyp11of`;
+ALTER TABLE `proveedor` 
+DROP COLUMN `id_Localidad`,
+DROP INDEX `FK93qeca10ljkj4qmj59yyp11of` ;
+
+-- FOREING KEY PROVEEDOR
+ALTER TABLE `proveedor`
+ADD CONSTRAINT `FKjljtmiir6f667w008hwkpqoca` FOREIGN KEY (`idUbicacion`) 
+REFERENCES `ubicacion`(`idUbicacion`);
+
+ALTER TABLE `ubicacion` 
+DROP COLUMN `idProveedor`;
+
+-- Transportista
+
+ALTER TABLE `ubicacion` 
+ADD COLUMN `idTransportista` BIGINT(20);
+
+INSERT INTO `ubicacion`(calle, numero, id_Localidad, idTransportista, eliminada) 
+select "ubicacion transportista", 123, localidad.id_Localidad, transportista.id_Transportista, transportista.eliminado from transportista inner join localidad
+on transportista.id_Localidad = localidad.id_Localidad;
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE ubicacion u inner join transportista t on u.idTransportista = t.id_Transportista
+SET u.descripcion = t.direccion;
+SET SQL_SAFE_UPDATES = 1;
+
+ALTER TABLE `transportista` 
+DROP COLUMN `direccion`;
+
+ALTER TABLE `transportista` 
+ADD COLUMN `idUbicacion` BIGINT(20);
+
+UPDATE transportista t
+INNER JOIN ubicacion u ON t.id_Transportista = u.idTransportista
+SET t.idUbicacion = u.idUbicacion; 
+
+ALTER TABLE `transportista` 
+DROP FOREIGN KEY `FK7i066mrrg36mr0olx1eaqbua5`;
+ALTER TABLE `transportista` 
+DROP COLUMN `id_Localidad`,
+DROP INDEX `FK7i066mrrg36mr0olx1eaqbua5` ;
+
+-- FOREING KEY TRANSPORTISTA
+ALTER TABLE `transportista`
+ADD CONSTRAINT `FKlu1d8169dmth4c4u8u409y0yo` FOREIGN KEY (`idUbicacion`) 
+REFERENCES `ubicacion`(`idUbicacion`);
+
+ALTER TABLE `ubicacion` 
+DROP COLUMN `idTransportista`;
+
+-- EMPRESA
+
+ALTER TABLE `ubicacion` 
+ADD COLUMN `idEmpresa` BIGINT(20);
+
+INSERT INTO `ubicacion`(calle, numero, id_Localidad, idEmpresa, eliminada) 
+select "ubicacion empresa", 123, localidad.id_Localidad, empresa.id_Empresa, empresa.eliminada from empresa inner join localidad
+on empresa.id_Localidad = localidad.id_Localidad;
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE ubicacion u inner join empresa e on u.idEmpresa = e.id_Empresa
+SET u.descripcion = e.direccion;
+SET SQL_SAFE_UPDATES = 1;
+
+ALTER TABLE `empresa` 
+DROP COLUMN `direccion`;
+
+ALTER TABLE `empresa` 
+ADD COLUMN `idUbicacion` BIGINT(20);
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE empresa e
+INNER JOIN ubicacion u ON e.id_Empresa = u.idEmpresa
+SET e.idUbicacion = u.idUbicacion; 
+SET SQL_SAFE_UPDATES = 1;
+
+ALTER TABLE `empresa` --
+DROP FOREIGN KEY `FK98yi7oddg1up58158pwk9lf39`; 
+ALTER TABLE `empresa` 
+DROP COLUMN `id_Localidad`,
+DROP INDEX `FK98yi7oddg1up58158pwk9lf39` ;
+
+-- FOREING KEY TRANSPORTISTA
+ALTER TABLE `empresa`
+ADD CONSTRAINT `FK9vp5rconju76goo4m612b13vg` FOREIGN KEY (`idUbicacion`) 
+REFERENCES `ubicacion`(`idUbicacion`);
+
+-- TIRAR TABLA PAIS
+
+ALTER TABLE `provincia` 
+DROP FOREIGN KEY `FKoeyy00k8sswpaedo6i6dvux4r`; 
+ALTER TABLE `provincia` 
+DROP COLUMN `id_Pais`,
+DROP INDEX `FKoeyy00k8sswpaedo6i6dvux4r` ;
+
+DROP TABLE pais;
+
