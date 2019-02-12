@@ -20,7 +20,6 @@ public class TransportistaDTO {
 
   private long id_Transportista;
   private String nombre;
-  private String direccion;
   private UbicacionDTO ubicacion;
   private String nombreLocalidad;
   private String nombreProvincia;

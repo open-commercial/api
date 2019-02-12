@@ -59,9 +59,6 @@ public class TransportistaController {
         || transportistaPorActualizar.getNombre().isEmpty()) {
       transportistaPorActualizar.setNombre(transportistaPersistido.getNombre());
     }
-    if (transportistaPorActualizar.getDireccion() == null) {
-      transportistaPorActualizar.setDireccion(transportistaPersistido.getDireccion());
-    }
     if (transportistaDTO.getUbicacion() != null) {
       if (transportistaDTO.getUbicacion().getIdUbicacion()
         == transportistaPersistido.getUbicacion().getIdUbicacion()) {

@@ -75,9 +75,6 @@ public class EmpresaController {
     if (empresaParaActualizar.getNombre() == null || empresaParaActualizar.getNombre().isEmpty()) {
       empresaParaActualizar.setNombre(empresaPersistida.getNombre());
     }
-    if (empresaParaActualizar.getDireccion() == null || empresaParaActualizar.getDireccion().isEmpty()) {
-      empresaParaActualizar.setNombre(empresaPersistida.getNombre());
-    }
     if (empresaParaActualizar.getCategoriaIVA() == null) {
       empresaParaActualizar.setCategoriaIVA(empresaPersistida.getCategoriaIVA());
     }

@@ -33,9 +33,6 @@ public class Empresa implements Serializable {
   private String lema;
 
   @Column(nullable = false)
-  private String direccion;
-
-  @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private CategoriaIVA categoriaIVA;
 

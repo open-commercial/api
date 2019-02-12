@@ -66,7 +66,7 @@
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{pedido}.getEmpresa().getDireccion()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{pedido}.getEmpresa().getUbicacion().getDescripcion()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="145" width="555" height="15" uuid="3c596225-a4e6-4283-92e6-74a5552f2211">

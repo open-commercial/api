@@ -12,7 +12,6 @@ public class EmpresaBuilder {
   private long id_Empresa = 0L;
   private String nombre = "Globo Corporation";
   private String lema = "Enjoy the life";
-  private String direccion = "Viamonte 542";
   private CategoriaIVA categoriaIVA = CategoriaIVA.RESPONSABLE_INSCRIPTO;
   private Long idFiscal = 23154587589L;
   private Long ingresosBrutos = 123456789L;
@@ -28,7 +27,6 @@ public class EmpresaBuilder {
         id_Empresa,
         nombre,
         lema,
-        direccion,
         categoriaIVA,
         idFiscal,
         ingresosBrutos,
@@ -52,11 +50,6 @@ public class EmpresaBuilder {
 
   public EmpresaBuilder withLema(String lema) {
     this.lema = lema;
-    return this;
-  }
-
-  public EmpresaBuilder withDireccion(String direccion) {
-    this.direccion = direccion;
     return this;
   }
 

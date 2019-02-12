@@ -624,24 +624,12 @@ public class AppIntegrationTest {
         restTemplate
             .postForEntity(apiPrefix + "/login", new Credencial("test", "test"), String.class)
             .getBody();
-//    ProvinciaDTO provinciaDTO =
-//        ProvinciaDTO.builder().nombre("Corrientes").build();
-//    ProvinciaDTO provinciaGuardada =
-//        restTemplate.postForObject(apiPrefix + "/provincias", provinciaDTO, ProvinciaDTO.class);
     provinciaService.guardar(new ProvinciaBuilder().withNombre("Corrientes").build());
-//    LocalidadDTO localidadDTO =
-//        LocalidadDTO.builder()
-//            .nombre("Corrientes")
-//            .codigoPostal("3400")
-//            .build();
-//    localidadDTO =
-//        restTemplate.postForObject(apiPrefix + "/localidades?idProvincia=" + provinciaGuardada.getId_Provincia(), localidadDTO, LocalidadDTO.class);
     localidadService.guardar(new LocalidadBuilder().withProvincia(provinciaService.getProvinciaPorId(1l)).withNombre("Corrientes").withCodigoPostal("3400").build());
     EmpresaDTO empresaDTO =
         EmpresaDTO.builder()
             .nombre("Globo Corporation")
             .lema("Enjoy the life")
-            .direccion("Viamonte 542")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
             .idFiscal(23154587589L)
             .ingresosBrutos(123456789L)
@@ -693,7 +681,6 @@ public class AppIntegrationTest {
     TransportistaDTO transportistaDTO =
         TransportistaDTO.builder()
             .nombre("Correo OCA")
-            .direccion("Ruta 12")
             .web("pedidos@oca.com.ar")
             .telefono("379 5402356")
             .eliminado(false)
@@ -708,7 +695,6 @@ public class AppIntegrationTest {
         ProveedorDTO.builder()
             .codigo("ABC123")
             .razonSocial("Chamaco S.R.L.")
-            .direccion("La Rioja 2047")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
             .idFiscal(23127895679L)
             .telPrimario("379 4356778")
@@ -782,7 +768,6 @@ public class AppIntegrationTest {
             .ingresosBrutos(21112244L)
             .idFiscal(7488521665766L)
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-            .direccion("Junin casi costanera")
             .lema("Hoy no se fía, mañana si.")
             .nombre("La gran idea")
             .build();
@@ -830,7 +815,6 @@ public class AppIntegrationTest {
         TransportistaDTO.builder()
             .telefono("78946551122")
             .web("Ronollega.com")
-            .direccion("Ruta 13 km 1313")
             .nombre("Transporte Segu Ronollega")
             .build();
     TransportistaDTO transportistaRecuperado =
@@ -862,7 +846,6 @@ public class AppIntegrationTest {
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
             .codigo("555888")
             .contacto("Ricardo")
-            .direccion("Doctor Migraña")
             .email("ricardodelbarrio@gmail.com")
             .telPrimario("4512778851")
             .telSecundario("784551122")

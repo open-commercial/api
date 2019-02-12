@@ -15,7 +15,6 @@ public class EmpresaDTO {
   private long id_Empresa;
   private String nombre;
   private String lema;
-  private String direccion;
   private CategoriaIVA categoriaIVA;
   private Long idFiscal;
   private long ingresosBrutos;

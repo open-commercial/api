@@ -32,9 +32,6 @@ public class Proveedor implements Serializable {
   private String razonSocial;
 
   @Column(nullable = false)
-  private String direccion;
-
-  @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private CategoriaIVA categoriaIVA;
 

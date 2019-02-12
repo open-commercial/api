@@ -28,9 +28,6 @@ public class Transportista implements Serializable {
   @Column(nullable = false)
   private String nombre;
 
-  @Column(nullable = false)
-  private String direccion;
-
   @OneToOne
   @JoinColumn(name = "idUbicacion", referencedColumnName = "idUbicacion")
   @QueryInit("localidad.provincia")

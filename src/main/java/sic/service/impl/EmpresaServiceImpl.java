@@ -74,10 +74,6 @@ public class EmpresaServiceImpl implements IEmpresaService {
     if (Validator.esVacio(empresa.getNombre())) {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_empresa_vacio_nombre"));
     }
-    if (Validator.esVacio(empresa.getDireccion())) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_empresa_vacio_direccion"));
-    }
     if (empresa.getUbicacion() == null) {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_ubicacion_vacia"));
