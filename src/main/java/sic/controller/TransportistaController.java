@@ -19,8 +19,8 @@ import sic.modelo.*;
 import sic.modelo.dto.TransportistaDTO;
 import sic.service.BusinessServiceException;
 import sic.service.IEmpresaService;
-import sic.service.ILocalidadService;
 import sic.service.ITransportistaService;
+import sic.service.IUbicacionService;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -28,16 +28,16 @@ public class TransportistaController {
 
   private final ITransportistaService transportistaService;
   private final IEmpresaService empresaService;
-  private final ILocalidadService localidadService;
+  private final IUbicacionService ubicacionService;
   private final ModelMapper modelMapper;
 
   @Autowired
   public TransportistaController(
-      ITransportistaService transportistaService, IEmpresaService empresaService,
-      ILocalidadService localidadService, ModelMapper modelMapper) {
+    ITransportistaService transportistaService, IEmpresaService empresaService,
+    IUbicacionService ubicacionService, ModelMapper modelMapper) {
     this.transportistaService = transportistaService;
     this.empresaService = empresaService;
-    this.localidadService = localidadService;
+    this.ubicacionService = ubicacionService;
     this.modelMapper = modelMapper;
   }
 
@@ -52,11 +52,11 @@ public class TransportistaController {
   public void actualizar(@RequestBody TransportistaDTO transportistaDTO,
                          @RequestParam(required = false) Long idEmpresa) {
     Transportista transportistaPersistido =
-        transportistaService.getTransportistaPorId(transportistaDTO.getId_Transportista());
+      transportistaService.getTransportistaPorId(transportistaDTO.getId_Transportista());
     Transportista transportistaPorActualizar =
-        modelMapper.map(transportistaDTO, Transportista.class);
+      modelMapper.map(transportistaDTO, Transportista.class);
     if (transportistaPorActualizar.getNombre() == null
-        || transportistaPorActualizar.getNombre().isEmpty()) {
+      || transportistaPorActualizar.getNombre().isEmpty()) {
       transportistaPorActualizar.setNombre(transportistaPersistido.getNombre());
     }
     if (transportistaDTO.getUbicacion() != null) {
@@ -72,7 +72,7 @@ public class TransportistaController {
         transportistaPorActualizar
           .getUbicacion()
           .setLocalidad(
-            localidadService.getLocalidadPorId(transportistaDTO.getUbicacion().getIdLocalidad()));
+            ubicacionService.getLocalidadPorId(transportistaDTO.getUbicacion().getIdLocalidad()));
       }
     }
     if (transportistaPorActualizar.getWeb() == null) {
@@ -101,19 +101,19 @@ public class TransportistaController {
     Rol.COMPRADOR
   })
   public List<Transportista> buscarTransportista(
-      @RequestParam long idEmpresa,
-      @RequestParam(required = false) String nombre,
-      @RequestParam(required = false) Long idProvincia,
-      @RequestParam(required = false) Long idLocalidad) {
+    @RequestParam long idEmpresa,
+    @RequestParam(required = false) String nombre,
+    @RequestParam(required = false) Long idProvincia,
+    @RequestParam(required = false) Long idLocalidad) {
     BusquedaTransportistaCriteria criteria =
-        new BusquedaTransportistaCriteria(
-            (nombre != null),
-            nombre,
-            (idProvincia != null),
-            idProvincia,
-            (idLocalidad != null),
-            idLocalidad,
-            idEmpresa);
+      new BusquedaTransportistaCriteria(
+        (nombre != null),
+        nombre,
+        (idProvincia != null),
+        idProvincia,
+        (idLocalidad != null),
+        idLocalidad,
+        idEmpresa);
     return transportistaService.buscarTransportistas(criteria);
   }
 
@@ -138,8 +138,8 @@ public class TransportistaController {
   @PostMapping("/transportistas")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Transportista guardar(
-      @RequestBody TransportistaDTO transportistaDTO,
-      @RequestParam Long idEmpresa) {
+    @RequestBody TransportistaDTO transportistaDTO,
+    @RequestParam Long idEmpresa) {
     Transportista transportista = modelMapper.map(transportistaDTO, Transportista.class);
     transportista.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     return transportistaService.guardar(transportista);

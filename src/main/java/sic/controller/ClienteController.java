@@ -21,7 +21,7 @@ public class ClienteController {
 
   private final IClienteService clienteService;
   private final IEmpresaService empresaService;
-  private final ILocalidadService localidadService;
+  private final IUbicacionService ubicacionService;
   private final IUsuarioService usuarioService;
   private final IAuthService authService;
   private final ModelMapper modelMapper;
@@ -29,15 +29,15 @@ public class ClienteController {
 
   @Autowired
   public ClienteController(
-      IClienteService clienteService,
-      IEmpresaService empresaService,
-      ILocalidadService localidadService,
-      IUsuarioService usuarioService,
-      IAuthService authService,
-      ModelMapper modelMapper) {
+    IClienteService clienteService,
+    IEmpresaService empresaService,
+    IUbicacionService ubicacionService,
+    IUsuarioService usuarioService,
+    IAuthService authService,
+    ModelMapper modelMapper) {
     this.clienteService = clienteService;
     this.empresaService = empresaService;
-    this.localidadService = localidadService;
+    this.ubicacionService = ubicacionService;
     this.usuarioService = usuarioService;
     this.authService = authService;
     this.modelMapper = modelMapper;
@@ -57,55 +57,58 @@ public class ClienteController {
 
   @GetMapping("/clientes/busqueda/criteria")
   public Page<Cliente> buscarConCriteria(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) String nroCliente,
-      @RequestParam(required = false) String nombreFiscal,
-      @RequestParam(required = false) String nombreFantasia,
-      @RequestParam(required = false) Long idFiscal,
-      @RequestParam(required = false) Long idViajante,
-      @RequestParam(required = false) Long idProvincia,
-      @RequestParam(required = false) Long idLocalidad,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido,
-      @RequestHeader("Authorization") String authorizationHeader) {
+    @RequestParam Long idEmpresa,
+    @RequestParam(required = false) String nroCliente,
+    @RequestParam(required = false) String nombreFiscal,
+    @RequestParam(required = false) String nombreFantasia,
+    @RequestParam(required = false) Long idFiscal,
+    @RequestParam(required = false) Long idViajante,
+    @RequestParam(required = false) Long idProvincia,
+    @RequestParam(required = false) Long idLocalidad,
+    @RequestParam(required = false) Integer pagina,
+    @RequestParam(required = false) String ordenarPor,
+    @RequestParam(required = false) String sentido,
+    @RequestHeader("Authorization") String authorizationHeader) {
     if (pagina == null || pagina < 0) pagina = 0;
     Pageable pageable;
     if (ordenarPor == null || sentido == null) {
       pageable =
-          new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombreFiscal"));
+        new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombreFiscal"));
     } else {
       switch (sentido) {
-        case "ASC" : pageable =
-                new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
-        break;
-        case "DESC" : pageable =
-                new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        case "ASC":
+          pageable =
+            new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
           break;
-        default: pageable =
-                new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombreFiscal"));
-        break;
+        case "DESC":
+          pageable =
+            new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+          break;
+        default:
+          pageable =
+            new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombreFiscal"));
+          break;
       }
     }
     BusquedaClienteCriteria criteria =
-        BusquedaClienteCriteria.builder()
-            .buscaPorNombreFiscal(nombreFiscal != null)
-            .nombreFiscal(nombreFiscal)
-            .buscaPorNombreFantasia(nombreFantasia != null)
-            .nombreFantasia(nombreFantasia)
-            .buscaPorIdFiscal(idFiscal != null)
-            .idFiscal(idFiscal)
-            .buscaPorViajante(idViajante != null)
-            .idViajante(idViajante)
-            .buscaPorProvincia(idProvincia != null)
-            .idProvincia(idProvincia)
-            .buscaPorLocalidad(idLocalidad != null)
-            .idLocalidad(idLocalidad)
-            .buscarPorNroDeCliente(nroCliente != null)
-            .nroDeCliente(nroCliente)
-            .idEmpresa(idEmpresa)
-            .pageable(pageable)
-            .build();
+      BusquedaClienteCriteria.builder()
+        .buscaPorNombreFiscal(nombreFiscal != null)
+        .nombreFiscal(nombreFiscal)
+        .buscaPorNombreFantasia(nombreFantasia != null)
+        .nombreFantasia(nombreFantasia)
+        .buscaPorIdFiscal(idFiscal != null)
+        .idFiscal(idFiscal)
+        .buscaPorViajante(idViajante != null)
+        .idViajante(idViajante)
+        .buscaPorProvincia(idProvincia != null)
+        .idProvincia(idProvincia)
+        .buscaPorLocalidad(idLocalidad != null)
+        .idLocalidad(idLocalidad)
+        .buscarPorNroDeCliente(nroCliente != null)
+        .nroDeCliente(nroCliente)
+        .idEmpresa(idEmpresa)
+        .pageable(pageable)
+        .build();
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return clienteService.buscarClientes(criteria, (int) claims.get("idUsuario"));
   }
@@ -137,20 +140,20 @@ public class ClienteController {
     Rol.COMPRADOR
   })
   public Cliente guardar(
-      @RequestBody ClienteDTO nuevoCliente,
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long idViajante,
-      @RequestParam Long idCredencial,
-      @RequestHeader("Authorization") String authorizationHeader) {
+    @RequestBody ClienteDTO nuevoCliente,
+    @RequestParam Long idEmpresa,
+    @RequestParam(required = false) Long idViajante,
+    @RequestParam Long idCredencial,
+    @RequestHeader("Authorization") String authorizationHeader) {
     Cliente cliente = modelMapper.map(nuevoCliente, Cliente.class);
     if (idCredencial != null) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
       Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
       if (idCredencial != idUsuarioLoggedIn
-          && !usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
+        && !usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
         throw new ForbiddenException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
       } else {
         Usuario usuarioCredencial = usuarioService.getUsuarioPorId(idCredencial);
         cliente.setCredencial(usuarioCredencial);
@@ -172,24 +175,24 @@ public class ClienteController {
     Rol.COMPRADOR
   })
   public void actualizar(
-      @RequestBody ClienteDTO clienteDTO,
-      @RequestParam(required = false) Long idEmpresa,
-      @RequestParam(required = false) Long idViajante,
-      @RequestParam(required = false) Long idCredencial,
-      @RequestHeader("Authorization") String authorizationHeader) {
+    @RequestBody ClienteDTO clienteDTO,
+    @RequestParam(required = false) Long idEmpresa,
+    @RequestParam(required = false) Long idViajante,
+    @RequestParam(required = false) Long idCredencial,
+    @RequestHeader("Authorization") String authorizationHeader) {
     Cliente clientePorActualizar = modelMapper.map(clienteDTO, Cliente.class);
     Cliente clientePersistido =
-        clienteService.getClientePorId(clientePorActualizar.getId_Cliente());
+      clienteService.getClientePorId(clientePorActualizar.getId_Cliente());
     if (idCredencial != null) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
       Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
       if (idCredencial != idUsuarioLoggedIn
-          && clientePersistido.getCredencial() != null
-          && clientePersistido.getCredencial().getId_Usuario() != idCredencial
-          && !usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
+        && clientePersistido.getCredencial() != null
+        && clientePersistido.getCredencial().getId_Usuario() != idCredencial
+        && !usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
         throw new ForbiddenException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
       } else {
         Usuario usuarioCredencial = usuarioService.getUsuarioPorId(idCredencial);
         clientePorActualizar.setCredencial(usuarioCredencial);
@@ -198,87 +201,87 @@ public class ClienteController {
       clientePorActualizar.setCredencial(null);
     }
     if (clientePorActualizar.getBonificacion() != null
-        && clientePersistido.getBonificacion().compareTo(clientePorActualizar.getBonificacion())
-            != 0) {
+      && clientePersistido.getBonificacion().compareTo(clientePorActualizar.getBonificacion())
+      != 0) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
       Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
       if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
-          && !usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)) {
+        && !usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)) {
         throw new ForbiddenException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
       }
     } else {
       clientePorActualizar.setBonificacion(clientePersistido.getBonificacion());
     }
     if (clienteDTO.getUbicacion() != null) {
       if (clienteDTO.getUbicacion().getIdUbicacion()
-          == clientePersistido.getUbicacionFacturacion().getIdUbicacion()) {
+        == clientePersistido.getUbicacionFacturacion().getIdUbicacion()) {
         clientePorActualizar.setUbicacionFacturacion(clientePersistido.getUbicacionFacturacion());
       } else {
         throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
       }
       if (clienteDTO.getUbicacion().getIdLocalidad()
-          != clientePersistido.getUbicacionFacturacion().getLocalidad().getId_Localidad()) {
+        != clientePersistido.getUbicacionFacturacion().getLocalidad().getId_Localidad()) {
         clientePorActualizar
-            .getUbicacionFacturacion()
-            .setLocalidad(
-                localidadService.getLocalidadPorId(clienteDTO.getUbicacion().getIdLocalidad()));
+          .getUbicacionFacturacion()
+          .setLocalidad(
+            ubicacionService.getLocalidadPorId(clienteDTO.getUbicacion().getIdLocalidad()));
       }
       // probar lo de model mapper
       if (clienteDTO.getUbicacion().getDescripcion() != null
-          && !clienteDTO
-              .getUbicacion()
-              .getDescripcion()
-              .equals(clientePersistido.getUbicacionFacturacion().getDescripcion())) {
+        && !clienteDTO
+        .getUbicacion()
+        .getDescripcion()
+        .equals(clientePersistido.getUbicacionFacturacion().getDescripcion())) {
         clientePorActualizar
-            .getUbicacionFacturacion()
-            .setDescripcion(clienteDTO.getUbicacion().getDescripcion());
+          .getUbicacionFacturacion()
+          .setDescripcion(clienteDTO.getUbicacion().getDescripcion());
       }
       if (clienteDTO.getUbicacion().getLatitud() != null
-          && !clienteDTO
-              .getUbicacion()
-              .getLatitud()
-              .equals(clientePersistido.getUbicacionFacturacion().getLatitud())) {
+        && !clienteDTO
+        .getUbicacion()
+        .getLatitud()
+        .equals(clientePersistido.getUbicacionFacturacion().getLatitud())) {
         clientePorActualizar.getUbicacionFacturacion().setLatitud(clienteDTO.getUbicacion().getLatitud());
       }
       if (clienteDTO.getUbicacion().getLongitud() != null
-          && !clienteDTO
-              .getUbicacion()
-              .getLongitud()
-              .equals(clientePersistido.getUbicacionFacturacion().getLongitud())) {
+        && !clienteDTO
+        .getUbicacion()
+        .getLongitud()
+        .equals(clientePersistido.getUbicacionFacturacion().getLongitud())) {
         clientePorActualizar.getUbicacionFacturacion().setLongitud(clienteDTO.getUbicacion().getLongitud());
       }
       if (clienteDTO.getUbicacion().getCalle() != null
-          && !clienteDTO
-              .getUbicacion()
-              .getCalle()
-              .equals(clientePersistido.getUbicacionFacturacion().getCalle())) {
+        && !clienteDTO
+        .getUbicacion()
+        .getCalle()
+        .equals(clientePersistido.getUbicacionFacturacion().getCalle())) {
         clientePorActualizar.getUbicacionFacturacion().setCalle(clienteDTO.getUbicacion().getCalle());
       }
       if (clienteDTO.getUbicacion().getNumero() != null
-          && !clienteDTO
-              .getUbicacion()
-              .getNumero()
-              .equals(clientePersistido.getUbicacionFacturacion().getNumero())) {
+        && !clienteDTO
+        .getUbicacion()
+        .getNumero()
+        .equals(clientePersistido.getUbicacionFacturacion().getNumero())) {
         clientePorActualizar.getUbicacionFacturacion().setNumero(clienteDTO.getUbicacion().getNumero());
       }
       if (clienteDTO.getUbicacion().getPiso() != null
-          && !clienteDTO
-              .getUbicacion()
-              .getPiso()
-              .equals(clientePersistido.getUbicacionFacturacion().getPiso())) {
+        && !clienteDTO
+        .getUbicacion()
+        .getPiso()
+        .equals(clientePersistido.getUbicacionFacturacion().getPiso())) {
         clientePorActualizar.getUbicacionFacturacion().setPiso(clienteDTO.getUbicacion().getPiso());
       }
       if (clienteDTO.getUbicacion().getDepartamento() != null
-          && !clienteDTO
-              .getUbicacion()
-              .getDepartamento()
-              .equals(clientePersistido.getUbicacionFacturacion().getDepartamento())) {
+        && !clienteDTO
+        .getUbicacion()
+        .getDepartamento()
+        .equals(clientePersistido.getUbicacionFacturacion().getDepartamento())) {
         clientePorActualizar
-            .getUbicacionFacturacion()
-            .setDepartamento(clienteDTO.getUbicacion().getDepartamento());
+          .getUbicacionFacturacion()
+          .setDepartamento(clienteDTO.getUbicacion().getDepartamento());
       }
     }
     if (idEmpresa != null) {
@@ -316,7 +319,7 @@ public class ClienteController {
     Rol.COMPRADOR
   })
   public Cliente getClientePorIdUsuario(
-      @PathVariable long idUsuario, @PathVariable long idEmpresa) {
+    @PathVariable long idUsuario, @PathVariable long idEmpresa) {
     return clienteService.getClientePorIdUsuarioYidEmpresa(idUsuario, idEmpresa);
   }
 }

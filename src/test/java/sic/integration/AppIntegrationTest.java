@@ -22,11 +22,11 @@ import org.springframework.web.client.RestClientResponseException;
 import sic.builder.*;
 import sic.modelo.*;
 import sic.modelo.dto.*;
+import sic.repository.LocalidadRepository;
+import sic.repository.ProvinciaRepository;
 import sic.repository.UsuarioRepository;
-import sic.service.ILocalidadService;
 import sic.service.IPedidoService;
 import sic.service.IProductoService;
-import sic.service.IProvinciaService;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -36,7 +36,6 @@ import java.util.*;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -49,9 +48,9 @@ public class AppIntegrationTest {
 
   @Autowired private IPedidoService pedidoService;
 
-  @Autowired private IProvinciaService provinciaService;
+  @Autowired private ProvinciaRepository provinciaRepository;
 
-  @Autowired private ILocalidadService localidadService;
+  @Autowired private LocalidadRepository localidadRepository;
 
   @Autowired private TestRestTemplate restTemplate;
 
@@ -624,8 +623,8 @@ public class AppIntegrationTest {
         restTemplate
             .postForEntity(apiPrefix + "/login", new Credencial("test", "test"), String.class)
             .getBody();
-    provinciaService.guardar(new ProvinciaBuilder().withNombre("Corrientes").build());
-    localidadService.guardar(new LocalidadBuilder().withProvincia(provinciaService.getProvinciaPorId(1l)).withNombre("Corrientes").withCodigoPostal("3400").build());
+    provinciaRepository.save(new ProvinciaBuilder().withNombre("Corrientes").build());
+    localidadRepository.save(new LocalidadBuilder().withProvincia(provinciaRepository.findById(1l)).withNombre("Corrientes").withCodigoPostal("3400").build());
     EmpresaDTO empresaDTO =
         EmpresaDTO.builder()
             .nombre("Globo Corporation")
@@ -710,23 +709,6 @@ public class AppIntegrationTest {
         RubroDTO.builder().nombre("Ferreteria").eliminado(false).build();
     restTemplate.postForObject(apiPrefix + "/rubros?idEmpresa=1", rubro, RubroDTO.class);
     this.vincularClienteParaUsuarioInicial();
-  }
-
-  @Test
-  public void shouldCrearPaisProvinciaLocalidad() {
-    ProvinciaDTO provinciaDTO =
-        ProvinciaDTO.builder().nombre("Westeros").build();
-    ProvinciaDTO provinciaGuardada =
-        restTemplate.postForObject(apiPrefix + "/provincias", provinciaDTO, ProvinciaDTO.class);
-    LocalidadDTO localidadDTO =
-        LocalidadDTO.builder()
-            .nombre("Rocadragón")
-            .codigoPostal("77889")
-            .build();
-    LocalidadDTO localidadGuardada =
-        restTemplate.postForObject(apiPrefix + "/localidades?idProvincia=" + provinciaGuardada.getId_Provincia(), localidadDTO, LocalidadDTO.class);
-    assertEquals(localidadDTO, localidadGuardada);
-    assertEquals(provinciaGuardada.getNombre(), provinciaGuardada.getNombre());
   }
 
   @Test

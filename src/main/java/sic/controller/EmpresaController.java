@@ -12,21 +12,21 @@ import sic.modelo.Rol;
 import sic.modelo.dto.EmpresaDTO;
 import sic.service.BusinessServiceException;
 import sic.service.IEmpresaService;
-import sic.service.ILocalidadService;
+import sic.service.IUbicacionService;
 
 @RestController
 @RequestMapping("/api/v1")
 public class EmpresaController {
 
   public final IEmpresaService empresaService;
-  private final ILocalidadService localidadService;
+  private final IUbicacionService ubicacionService;
   private final ModelMapper modelMapper;
 
   @Autowired
   public EmpresaController(
-      IEmpresaService empresaService, ILocalidadService localidadService, ModelMapper modelMapper) {
+    IEmpresaService empresaService, IUbicacionService ubicacionService, ModelMapper modelMapper) {
     this.empresaService = empresaService;
-    this.localidadService = localidadService;
+    this.ubicacionService = ubicacionService;
     this.modelMapper = modelMapper;
   }
 
@@ -60,9 +60,9 @@ public class EmpresaController {
     Empresa empresa = modelMapper.map(empresaDTO, Empresa.class);
     if (empresaDTO.getUbicacion() != null && empresaDTO.getUbicacion().getIdLocalidad() != 0) {
       empresa
-          .getUbicacion()
-          .setLocalidad(
-              localidadService.getLocalidadPorId(empresaDTO.getUbicacion().getIdLocalidad()));
+        .getUbicacion()
+        .setLocalidad(
+          ubicacionService.getLocalidadPorId(empresaDTO.getUbicacion().getIdLocalidad()));
     }
     return empresaService.guardar(empresa);
   }
@@ -80,18 +80,18 @@ public class EmpresaController {
     }
     if (empresaDTO.getUbicacion() != null) {
       if (empresaDTO.getUbicacion().getIdUbicacion()
-          == empresaPersistida.getUbicacion().getIdUbicacion()) {
+        == empresaPersistida.getUbicacion().getIdUbicacion()) {
         empresaParaActualizar.setUbicacion(empresaPersistida.getUbicacion());
       } else {
         throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
       }
       if (empresaDTO.getUbicacion().getIdLocalidad()
-          != empresaPersistida.getUbicacion().getLocalidad().getId_Localidad()) {
+        != empresaPersistida.getUbicacion().getLocalidad().getId_Localidad()) {
         empresaParaActualizar
-            .getUbicacion()
-            .setLocalidad(
-                localidadService.getLocalidadPorId(empresaDTO.getUbicacion().getIdLocalidad()));
+          .getUbicacion()
+          .setLocalidad(
+            ubicacionService.getLocalidadPorId(empresaDTO.getUbicacion().getIdLocalidad()));
       }
     }
     empresaService.actualizar(empresaParaActualizar, empresaPersistida);
