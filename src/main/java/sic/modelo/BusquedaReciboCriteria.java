@@ -32,4 +32,5 @@ public class BusquedaReciboCriteria {
   private boolean buscaPorViajante;
   private Long idViajante;
   private Pageable pageable;
+  private Movimiento movimiento;
 }
