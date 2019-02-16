@@ -1,8 +1,6 @@
 package sic.controller;
 
 import java.util.List;
-import java.util.ResourceBundle;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +8,6 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Empresa;
 import sic.modelo.Rol;
 import sic.modelo.dto.EmpresaDTO;
-import sic.service.BusinessServiceException;
 import sic.service.IEmpresaService;
 import sic.service.ILocalidadService;
 
