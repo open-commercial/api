@@ -228,39 +228,40 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public void actualizarStock(
-      Map<Long, BigDecimal> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento) {
+    Map<Long, BigDecimal> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento) {
     idsYCantidades
-        .entrySet()
-        .forEach(
-            entry -> {
-              Producto producto = productoRepository.findById(entry.getKey());
-              if (producto == null) {
-                logger.warn("Se intenta actualizar el stock de un producto eliminado.");
+      .entrySet()
+      .forEach(
+        entry -> {
+          Producto producto = productoRepository.findById(entry.getKey());
+          if (producto == null) {
+            logger.warn("Se intenta actualizar el stock de un producto eliminado.");
+          }
+          if (producto != null && !producto.isIlimitado()) {
+            if (movimiento.equals(Movimiento.VENTA)) {
+              if (operacion == TipoDeOperacion.ALTA) {
+                producto.setCantidad(producto.getCantidad().subtract(entry.getValue()));
               }
-              if (producto != null && !producto.isIlimitado()) {
-                if (movimiento.equals(Movimiento.VENTA)) {
-                  if (operacion == TipoDeOperacion.ALTA) {
-                    producto.setCantidad(producto.getCantidad().subtract(entry.getValue()));
-                  }
-                  if (operacion == TipoDeOperacion.ELIMINACION
-                      || operacion == TipoDeOperacion.ACTUALIZACION) {
-                    producto.setCantidad(producto.getCantidad().add(entry.getValue()));
-                  }
-                } else if (movimiento.equals(Movimiento.COMPRA)) {
-                  if (operacion == TipoDeOperacion.ALTA) {
-                    producto.setCantidad(producto.getCantidad().add(entry.getValue()));
-                  }
-                  if (operacion == TipoDeOperacion.ELIMINACION) {
-                    BigDecimal result = producto.getCantidad().subtract(entry.getValue());
-                    if (result.compareTo(BigDecimal.ZERO) < 0) {
-                      result = BigDecimal.ZERO;
-                    }
-                    producto.setCantidad(result);
-                  }
+              if (operacion == TipoDeOperacion.ELIMINACION
+                || operacion == TipoDeOperacion.ACTUALIZACION) {
+                producto.setCantidad(producto.getCantidad().add(entry.getValue()));
+              }
+            } else if (movimiento.equals(Movimiento.COMPRA)) {
+              if (operacion == TipoDeOperacion.ALTA) {
+                producto.setCantidad(producto.getCantidad().add(entry.getValue()));
+              }
+              if (operacion == TipoDeOperacion.ELIMINACION
+                || operacion == TipoDeOperacion.ACTUALIZACION) {
+                BigDecimal result = producto.getCantidad().subtract(entry.getValue());
+                if (result.compareTo(BigDecimal.ZERO) < 0) {
+                  result = BigDecimal.ZERO;
                 }
-                productoRepository.save(producto);
+                producto.setCantidad(result);
               }
-            });
+            }
+            productoRepository.save(producto);
+          }
+        });
   }
 
   @Override

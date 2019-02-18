@@ -2850,7 +2850,7 @@ public class AppIntegrationTest {
   @Test
   public void shouldVerificarStockNotaCreditoCompra() {
     this.shouldCrearNotaCreditoCompra();
-    this.checkDisponibilidadStock(10, 6);
+    this.checkDisponibilidadStock(12, 8);
   }
 
   @Test
