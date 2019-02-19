@@ -39,9 +39,14 @@ public class UbicacionServiceImpl implements IUbicacionService {
 
   @Override
   public Ubicacion guardar(Ubicacion ubicacion) {
+    this.validarUbicacion(ubicacion);
     Ubicacion ubicacionGuardada = ubicacionRepository.save(ubicacion);
-    logger.warn("El Cliente {} se actualizó correctamente.", ubicacion);
+    logger.warn("La ubicación {} se actualizó correctamente.", ubicacion);
     return ubicacionGuardada;
+  }
+
+  private void validarUbicacion(Ubicacion ubicacion) {
+
   }
 
   @Override

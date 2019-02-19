@@ -55,13 +55,11 @@ public class Cliente implements Serializable {
   @OneToOne
   @JoinColumn(name = "idUbicacionFacturacion", referencedColumnName = "idUbicacion")
   @QueryInit("localidad.provincia")
-  @NotNull
   private Ubicacion ubicacionFacturacion;
 
   @OneToOne
   @JoinColumn(name = "idUbicacionEnvio", referencedColumnName = "idUbicacion")
   @QueryInit("localidad.provincia")
-  @NotNull
   private Ubicacion ubicacionEnvio;
 
   private String contacto;

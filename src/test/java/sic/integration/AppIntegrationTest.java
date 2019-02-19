@@ -635,7 +635,7 @@ public class AppIntegrationTest {
             .fechaInicioActividad(new Date(539924400000L))
             .email("support@globocorporation.com")
             .telefono("379 4895549")
-            .ubicacion(UbicacionDTO.builder().idLocalidad(1l).build())
+            .ubicacion(UbicacionDTO.builder().idLocalidad(1l).calle("Napoles").numero(5600).build())
             .build();
     empresaDTO = restTemplate.postForObject(apiPrefix + "/empresas", empresaDTO, EmpresaDTO.class);
     FormaDePagoDTO formaDePago =
@@ -655,10 +655,13 @@ public class AppIntegrationTest {
             .roles(new ArrayList<>(Collections.singletonList(Rol.COMPRADOR)))
             .build();
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
+    LocalidadDTO localidadRecuperada = restTemplate.getForObject(apiPrefix + "/ubicaciones/localidades/1", LocalidadDTO.class);
     UbicacionDTO ubicacion = UbicacionDTO.builder()
       .idLocalidad(1l)
       .calle("Siempre viva")
       .numero(123)
+      .nombreLocalidad(localidadRecuperada.getNombre())
+      .nombreProvincia(localidadRecuperada.getNombreProvincia())
       .build();
     ClienteDTO cliente =
         ClienteDTO.builder()
@@ -666,13 +669,12 @@ public class AppIntegrationTest {
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
             .nombreFiscal("Peter Parker")
             .telefono("379123452")
-            .ubicacion(ubicacion)
+            .ubicacionFacturacion(ubicacion)
             .build();
     restTemplate.postForObject(
         apiPrefix
             + "/clientes?idEmpresa="
             + empresaDTO.getId_Empresa()
-            + "&idLocalidad=1"
             + "&idCredencial="
             + credencial.getId_Usuario(),
         cliente,
@@ -2915,7 +2917,7 @@ public class AppIntegrationTest {
             .build();
     PedidoDTO pedidoRecuperado =
         restTemplate.postForObject(
-            apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=2",
+            apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=2&usarUbicacionDeFacturacion=true",
             nuevoPedidoDTO,
             PedidoDTO.class);
     assertEquals(nuevoPedidoDTO.getTotal(), pedidoRecuperado.getTotalEstimado());
@@ -2969,6 +2971,9 @@ public class AppIntegrationTest {
     BigDecimal descuentoNeto =
         importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
+    DetalleEnvio detalleEnvioPedido = new DetalleEnvio();
+    detalleEnvioPedido.setCalle("test pedido");
+    detalleEnvioPedido.setNumero(123);
     NuevoPedidoDTO nuevoPedidoDTO =
         NuevoPedidoDTO.builder()
             .descuentoNeto(descuentoNeto)
@@ -2980,10 +2985,11 @@ public class AppIntegrationTest {
             .renglones(renglonesPedido)
             .subTotal(importe)
             .total(total)
+            .detalleEnvio(detalleEnvioPedido)
             .build();
     PedidoDTO pedidoRecuperado =
         restTemplate.postForObject(
-            apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=1",
+            apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=1&usarUbicacionDeFacturacion=true",
             nuevoPedidoDTO,
             PedidoDTO.class);
     assertEquals(nuevoPedidoDTO.getTotal(), pedidoRecuperado.getTotalEstimado());

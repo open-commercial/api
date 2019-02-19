@@ -22,7 +22,8 @@ public class ClienteDTO implements Serializable {
   private Long idFiscal;
   private String email;
   private String telefono;
-  private UbicacionDTO ubicacion;
+  private UbicacionDTO ubicacionFacturacion;
+  private UbicacionDTO ubicacionEnvio;
   private String contacto;
   private Date fechaAlta;
   private Long idEmpresa;

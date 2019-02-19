@@ -43,18 +43,21 @@ public class PedidoServiceImpl implements IPedidoService {
   private final IClienteService clienteService;
   private final IProductoService productoService;
   private final ICorreoElectronicoService correoElectronicoService;
+  private final IUbicacionService ubicacionService;
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Autowired
-  public PedidoServiceImpl(PedidoRepository pedidoRepository,
-                           RenglonPedidoRepository renglonPedidoRepository,
-                           IFacturaService facturaService,
-                           IUsuarioService usuarioService,
-                           IClienteService clienteService,
-                           IProductoService productoService,
-                           ICorreoElectronicoService correoElectronicoService) {
+  public PedidoServiceImpl(
+      PedidoRepository pedidoRepository,
+      RenglonPedidoRepository renglonPedidoRepository,
+      IFacturaService facturaService,
+      IUsuarioService usuarioService,
+      IClienteService clienteService,
+      IProductoService productoService,
+      ICorreoElectronicoService correoElectronicoService,
+      IUbicacionService ubicacionService) {
     this.facturaService = facturaService;
     this.pedidoRepository = pedidoRepository;
     this.renglonPedidoRepository = renglonPedidoRepository;
@@ -62,6 +65,7 @@ public class PedidoServiceImpl implements IPedidoService {
     this.clienteService = clienteService;
     this.productoService = productoService;
     this.correoElectronicoService = correoElectronicoService;
+    this.ubicacionService = ubicacionService;
   }
 
   private void validarPedido(TipoDeOperacion operacion, Pedido pedido) {
@@ -71,7 +75,8 @@ public class PedidoServiceImpl implements IPedidoService {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_fecha_vacia"));
     }
     if (pedido.getRenglones() == null || pedido.getRenglones().isEmpty()) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_renglones_vacio"));
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_pedido_renglones_vacio"));
     }
     if (pedido.getEmpresa() == null) {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_empresa_vacia"));
@@ -84,17 +89,37 @@ public class PedidoServiceImpl implements IPedidoService {
     }
     // Validar Estado
     EstadoPedido estado = pedido.getEstado();
-    if ((estado != EstadoPedido.ABIERTO) && (estado != EstadoPedido.ACTIVO) && (estado != EstadoPedido.CERRADO)) {
+    if ((estado != EstadoPedido.ABIERTO)
+        && (estado != EstadoPedido.ACTIVO)
+        && (estado != EstadoPedido.CERRADO)) {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaja_estado_no_valido"));
     }
     // Duplicados
-    if (operacion == TipoDeOperacion.ALTA &&
-      pedidoRepository.findByNroPedidoAndEmpresaAndEliminado(pedido.getNroPedido(), pedido.getEmpresa(), false) != null) {
+    if (operacion == TipoDeOperacion.ALTA
+        && pedidoRepository.findByNroPedidoAndEmpresaAndEliminado(
+                pedido.getNroPedido(), pedido.getEmpresa(), false)
+            != null) {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_duplicado"));
     }
-    if (operacion == TipoDeOperacion.ACTUALIZACION &&
-      pedidoRepository.findByNroPedidoAndEmpresaAndEliminado(pedido.getNroPedido(), pedido.getEmpresa(), false) == null) {
+    if (operacion == TipoDeOperacion.ACTUALIZACION
+        && pedidoRepository.findByNroPedidoAndEmpresaAndEliminado(
+                pedido.getNroPedido(), pedido.getEmpresa(), false)
+            == null) {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_no_existente"));
+    }
+    // DetalleEnvío
+    if (pedido.getDetalleEnvio() == null) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_pedido_detalle_envio_vacio"));
+    }
+    if (pedido.getDetalleEnvio().getCalle() == null
+        || pedido.getDetalleEnvio().getCalle().isEmpty()) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_pedido_detalle_envio_calle_vacio"));
+    }
+    if (pedido.getDetalleEnvio().getNumero() == null) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_pedido_detalle_envio_numero_vacio"));
     }
     // Calculos
     /*BigDecimal[] importes = new BigDecimal[pedido.getRenglones().size()];
@@ -230,30 +255,93 @@ public class PedidoServiceImpl implements IPedidoService {
       pedido.setObservaciones("Los precios se encuentran sujetos a modificaciones.");
     }
     this.validarPedido(TipoDeOperacion.ALTA, pedido);
+    this.modificarUbicacionEnvíoCliente(pedido.getDetalleEnvio(), pedido.getCliente());
     pedido = pedidoRepository.save(pedido);
     logger.warn("El Pedido {} se guardó correctamente.", pedido);
     String emailCliente = pedido.getCliente().getEmail();
     if (emailCliente != null && !emailCliente.isEmpty()) {
       correoElectronicoService.enviarMailPorEmpresa(
-        pedido.getEmpresa().getId_Empresa(),
-        emailCliente,
-        "",
-        "Nuevo Pedido Ingresado",
-        MessageFormat.format(RESOURCE_BUNDLE.getString("mensaje_correo_pedido_recibido"),
-          pedido.getCliente().getNombreFiscal(),
-          "Pedido Nº " + pedido.getNroPedido()),
-        this.getReportePedido(pedido),
-        "Reporte");
+          pedido.getEmpresa().getId_Empresa(),
+          emailCliente,
+          "",
+          "Nuevo Pedido Ingresado",
+          MessageFormat.format(
+              RESOURCE_BUNDLE.getString("mensaje_correo_pedido_recibido"),
+              pedido.getCliente().getNombreFiscal(),
+              "Pedido Nº " + pedido.getNroPedido()),
+          this.getReportePedido(pedido),
+          "Reporte");
       logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
     return pedido;
   }
 
+  private void modificarUbicacionEnvíoCliente(DetalleEnvio detalleEnvioPedido, Cliente cliente) {
+    if (cliente.getUbicacionEnvio() != null) {
+      DetalleEnvio detalleEnvioCliente = new DetalleEnvio();
+      detalleEnvioCliente.setDescripcion(cliente.getUbicacionEnvio().getDescripcion());
+      detalleEnvioCliente.setLatitud(cliente.getUbicacionEnvio().getLatitud());
+      detalleEnvioCliente.setLongitud(cliente.getUbicacionEnvio().getLongitud());
+      detalleEnvioCliente.setCalle(cliente.getUbicacionEnvio().getCalle());
+      detalleEnvioCliente.setNumero(cliente.getUbicacionEnvio().getNumero());
+      detalleEnvioCliente.setPiso(cliente.getUbicacionEnvio().getPiso());
+      detalleEnvioCliente.setDepartamento(cliente.getUbicacionEnvio().getDepartamento());
+      detalleEnvioCliente.setCodigoPostal(cliente.getUbicacionEnvio().getCodigoPostal());
+      detalleEnvioCliente.setNombreLocalidad(
+          cliente.getUbicacionEnvio().getLocalidad().getNombre());
+      if (!detalleEnvioPedido.equals(detalleEnvioCliente)) {
+        if (!detalleEnvioPedido
+                .getNombreLocalidad()
+                .equals(detalleEnvioCliente.getNombreLocalidad())
+            || !detalleEnvioPedido
+                .getNombreProvincia()
+                .equals(detalleEnvioCliente.getNombreProvincia())) {
+          cliente
+              .getUbicacionEnvio()
+              .setLocalidad(
+                  ubicacionService.getLocalidadPorNombre(
+                      detalleEnvioPedido.getNombreLocalidad(),
+                      ubicacionService.getProvinciaPorNombre(
+                          detalleEnvioPedido.getNombreProvincia())));
+        }
+        cliente.getUbicacionEnvio().setPiso(detalleEnvioPedido.getPiso());
+        cliente.getUbicacionEnvio().setDepartamento(detalleEnvioPedido.getDepartamento());
+        cliente.getUbicacionEnvio().setCalle(detalleEnvioPedido.getCalle());
+        cliente.getUbicacionEnvio().setNumero(detalleEnvioPedido.getNumero());
+        cliente.getUbicacionEnvio().setLatitud(detalleEnvioPedido.getLatitud());
+        cliente.getUbicacionEnvio().setLongitud(detalleEnvioPedido.getLongitud());
+        cliente.getUbicacionEnvio().setDescripcion(detalleEnvioPedido.getDescripcion());
+      }
+      clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
+    } else {
+      Ubicacion ubicacionNueva = new Ubicacion();
+      ubicacionNueva.setDescripcion(detalleEnvioPedido.getDescripcion());
+      ubicacionNueva.setLatitud(detalleEnvioPedido.getLatitud());
+      ubicacionNueva.setLongitud(detalleEnvioPedido.getLongitud());
+      ubicacionNueva.setCalle(detalleEnvioPedido.getCalle());
+      ubicacionNueva.setNumero(detalleEnvioPedido.getNumero());
+      ubicacionNueva.setPiso(detalleEnvioPedido.getPiso());
+      ubicacionNueva.setDepartamento(detalleEnvioPedido.getDepartamento());
+      if (detalleEnvioPedido.getNombreLocalidad() != null
+          && detalleEnvioPedido.getNombreProvincia() != null) {
+        ubicacionNueva.setLocalidad(
+            ubicacionService.getLocalidadPorNombre(
+                detalleEnvioPedido.getNombreLocalidad(),
+                ubicacionService.getProvinciaPorNombre(detalleEnvioPedido.getNombreProvincia())));
+      }
+      ubicacionNueva = ubicacionService.guardar(ubicacionNueva);
+      cliente.setUbicacionEnvio(ubicacionNueva);
+      clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
+    }
+  }
+
   @Override
   public Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
     // Fecha
-    if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_fechas_busqueda_invalidas"));
+    if (criteria.isBuscaPorFecha()
+        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_pedido_fechas_busqueda_invalidas"));
     }
     if (criteria.isBuscaPorFecha()) {
       Calendar cal = new GregorianCalendar();
@@ -270,22 +358,35 @@ public class PedidoServiceImpl implements IPedidoService {
     }
     QPedido qpedido = QPedido.pedido;
     BooleanBuilder builder = new BooleanBuilder();
-    builder.and(qpedido.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qpedido.eliminado.eq(false)));
+    builder.and(
+        qpedido.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qpedido.eliminado.eq(false)));
     if (criteria.isBuscaPorFecha()) {
-      FormatterFechaHora formateadorFecha = new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
-      DateExpression<Date> fDesde = Expressions.dateTemplate(Date.class, "convert({0}, datetime)", formateadorFecha.format(criteria.getFechaDesde()));
-      DateExpression<Date> fHasta = Expressions.dateTemplate(Date.class, "convert({0}, datetime)", formateadorFecha.format(criteria.getFechaHasta()));
+      FormatterFechaHora formateadorFecha =
+          new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      DateExpression<Date> fDesde =
+          Expressions.dateTemplate(
+              Date.class,
+              "convert({0}, datetime)",
+              formateadorFecha.format(criteria.getFechaDesde()));
+      DateExpression<Date> fHasta =
+          Expressions.dateTemplate(
+              Date.class,
+              "convert({0}, datetime)",
+              formateadorFecha.format(criteria.getFechaHasta()));
       builder.and(qpedido.fecha.between(fDesde, fHasta));
     }
-    if (criteria.isBuscaCliente()) builder.and(qpedido.cliente.id_Cliente.eq(criteria.getIdCliente()));
-    if (criteria.isBuscaUsuario()) builder.and(qpedido.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+    if (criteria.isBuscaCliente())
+      builder.and(qpedido.cliente.id_Cliente.eq(criteria.getIdCliente()));
+    if (criteria.isBuscaUsuario())
+      builder.and(qpedido.usuario.id_Usuario.eq(criteria.getIdUsuario()));
     if (criteria.isBuscaPorNroPedido()) builder.and(qpedido.nroPedido.eq(criteria.getNroPedido()));
-    if (criteria.isBuscaPorEstadoPedido()) builder.and(qpedido.estado.eq(criteria.getEstadoPedido()));
+    if (criteria.isBuscaPorEstadoPedido())
+      builder.and(qpedido.estado.eq(criteria.getEstadoPedido()));
     Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
     BooleanBuilder rsPredicate = new BooleanBuilder();
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
-      && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
-      && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
+        && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
+        && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
       for (Rol rol : usuarioLogueado.getRoles()) {
         switch (rol) {
           case VIAJANTE:
@@ -293,8 +394,8 @@ public class PedidoServiceImpl implements IPedidoService {
             break;
           case COMPRADOR:
             Cliente clienteRelacionado =
-              clienteService.getClientePorIdUsuarioYidEmpresa(
-                idUsuarioLoggedIn, criteria.getIdEmpresa());
+                clienteService.getClientePorIdUsuarioYidEmpresa(
+                    idUsuarioLoggedIn, criteria.getIdEmpresa());
             if (clienteRelacionado != null) {
               rsPredicate.or(qpedido.cliente.eq(clienteRelacionado));
             }
@@ -312,6 +413,7 @@ public class PedidoServiceImpl implements IPedidoService {
   @Transactional
   public void actualizar(Pedido pedido) {
     this.validarPedido(TipoDeOperacion.ACTUALIZACION, pedido);
+    this.modificarUbicacionEnvíoCliente(pedido.getDetalleEnvio(), pedido.getCliente());
     pedidoRepository.save(pedido);
   }
 
@@ -335,35 +437,35 @@ public class PedidoServiceImpl implements IPedidoService {
   public Map<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido) {
     List<RenglonFactura> renglonesDeFacturas = new ArrayList<>();
     this.getFacturasDelPedido(nroPedido)
-      .forEach(
-        f ->
-          f.getRenglones()
-            .forEach(
-              r ->
-                renglonesDeFacturas.add(
-                  facturaService.calcularRenglon(
-                    f.getTipoComprobante(),
-                    Movimiento.VENTA,
-                    r.getCantidad(),
-                    r.getIdProductoItem(),
-                    r.getDescuentoPorcentaje(),
-                    false))));
+        .forEach(
+            f ->
+                f.getRenglones()
+                    .forEach(
+                        r ->
+                            renglonesDeFacturas.add(
+                                facturaService.calcularRenglon(
+                                    f.getTipoComprobante(),
+                                    Movimiento.VENTA,
+                                    r.getCantidad(),
+                                    r.getIdProductoItem(),
+                                    r.getDescuentoPorcentaje(),
+                                    false))));
     HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
     if (!renglonesDeFacturas.isEmpty()) {
       renglonesDeFacturas.forEach(
-        r -> {
-          if (listaRenglonesUnificados.containsKey(r.getIdProductoItem())) {
-            listaRenglonesUnificados
-              .get(r.getIdProductoItem())
-              .setCantidad(
-                listaRenglonesUnificados
+          r -> {
+            if (listaRenglonesUnificados.containsKey(r.getIdProductoItem())) {
+              listaRenglonesUnificados
                   .get(r.getIdProductoItem())
-                  .getCantidad()
-                  .add(r.getCantidad()));
-          } else {
-            listaRenglonesUnificados.put(r.getIdProductoItem(), r);
-          }
-        });
+                  .setCantidad(
+                      listaRenglonesUnificados
+                          .get(r.getIdProductoItem())
+                          .getCantidad()
+                          .add(r.getCantidad()));
+            } else {
+              listaRenglonesUnificados.put(r.getIdProductoItem(), r);
+            }
+          });
     }
     return listaRenglonesUnificados;
   }
@@ -376,7 +478,8 @@ public class PedidoServiceImpl implements IPedidoService {
     params.put("pedido", pedido);
     if (pedido.getEmpresa().getLogo() != null && !pedido.getEmpresa().getLogo().isEmpty()) {
       try {
-        params.put("logo", new ImageIcon(ImageIO.read(new URL(pedido.getEmpresa().getLogo()))).getImage());
+        params.put(
+            "logo", new ImageIcon(ImageIO.read(new URL(pedido.getEmpresa().getLogo()))).getImage());
       } catch (IOException ex) {
         logger.error(ex.getMessage());
         throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_empresa_404_logo"), ex);
@@ -385,7 +488,8 @@ public class PedidoServiceImpl implements IPedidoService {
     List<RenglonPedido> renglones = this.getRenglonesDelPedido(pedido.getId_Pedido());
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
     try {
-      return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(isFileReport, params, ds));
+      return JasperExportManager.exportReportToPdf(
+          JasperFillManager.fillReport(isFileReport, params, ds));
     } catch (JRException ex) {
       logger.error(ex.getMessage());
       throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_error_reporte"), ex);
@@ -393,17 +497,19 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public BigDecimal calcularDescuentoNeto(BigDecimal precioUnitario, BigDecimal descuentoPorcentaje) {
+  public BigDecimal calcularDescuentoNeto(
+      BigDecimal precioUnitario, BigDecimal descuentoPorcentaje) {
     BigDecimal resultado = BigDecimal.ZERO;
     if (descuentoPorcentaje.compareTo(BigDecimal.ZERO) != 0) {
-      resultado = precioUnitario.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+      resultado =
+          precioUnitario.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
     }
     return resultado;
   }
 
   @Override
   public RenglonPedido calcularRenglonPedido(
-    long idProducto, BigDecimal cantidad, BigDecimal descuentoPorcentaje) {
+      long idProducto, BigDecimal cantidad, BigDecimal descuentoPorcentaje) {
     RenglonPedido nuevoRenglon = new RenglonPedido();
     Producto producto = productoService.getProductoPorId(idProducto);
     nuevoRenglon.setIdProductoItem(producto.getIdProducto());
@@ -414,26 +520,26 @@ public class PedidoServiceImpl implements IPedidoService {
     nuevoRenglon.setPrecioUnitario(producto.getPrecioLista());
     nuevoRenglon.setDescuentoPorcentaje(descuentoPorcentaje);
     nuevoRenglon.setDescuentoNeto(
-      this.calcularDescuentoNeto(
-        producto.getPrecioLista(), descuentoPorcentaje));
+        this.calcularDescuentoNeto(producto.getPrecioLista(), descuentoPorcentaje));
     nuevoRenglon.setImporte(
-      CalculosComprobante.calcularImporte(
-        nuevoRenglon.getCantidad(),
-        producto.getPrecioLista(),
-        nuevoRenglon.getDescuentoNeto()));
+        CalculosComprobante.calcularImporte(
+            nuevoRenglon.getCantidad(),
+            producto.getPrecioLista(),
+            nuevoRenglon.getDescuentoNeto()));
     return nuevoRenglon;
   }
 
   @Override
   public List<RenglonPedido> calcularRenglonesPedido(
-    List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO) {
+      List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO) {
     List<RenglonPedido> renglonesPedido = new ArrayList<>();
-    nuevosRenglonesPedidoDTO.forEach(nuevoRenglonesPedidoDTO -> renglonesPedido.add(
-      this.calcularRenglonPedido(
-        nuevoRenglonesPedidoDTO.getIdProductoItem(),
-        nuevoRenglonesPedidoDTO.getCantidad(),
-        nuevoRenglonesPedidoDTO.getDescuentoPorcentaje())));
+    nuevosRenglonesPedidoDTO.forEach(
+        nuevoRenglonesPedidoDTO ->
+            renglonesPedido.add(
+                this.calcularRenglonPedido(
+                    nuevoRenglonesPedidoDTO.getIdProductoItem(),
+                    nuevoRenglonesPedidoDTO.getCantidad(),
+                    nuevoRenglonesPedidoDTO.getDescuentoPorcentaje())));
     return renglonesPedido;
   }
-
 }
