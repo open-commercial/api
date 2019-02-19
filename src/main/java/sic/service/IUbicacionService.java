@@ -28,4 +28,6 @@ public interface IUbicacionService {
   Provincia getProvinciaPorNombre(String nombre);
 
   List<Provincia> getProvincias();
+
+  Localidad guardarLocalidad(String nombre, String nombreProvincia, String codigoPostal);
 }

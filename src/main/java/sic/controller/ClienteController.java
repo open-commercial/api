@@ -248,83 +248,84 @@ public class ClienteController {
                 ubicacionService.getLocalidadPorId(
                     clienteDTO.getUbicacionFacturacion().getIdLocalidad()));
       }
-      if (clienteDTO.getUbicacionEnvio() != null) {
-        if (clienteDTO.getUbicacionEnvio().getIdUbicacion()
-            == clientePersistido.getUbicacionEnvio().getIdUbicacion()) {
-          clientePorActualizar.setUbicacionEnvio(clientePersistido.getUbicacionFacturacion());
-        } else {
-          throw new BusinessServiceException(
-              ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
-        }
-        if (clienteDTO.getUbicacionEnvio().getIdLocalidad()
-            != clientePersistido.getUbicacionEnvio().getLocalidad().getId_Localidad()) {
-          clientePorActualizar
-              .getUbicacionEnvio()
-              .setLocalidad(
-                  ubicacionService.getLocalidadPorId(
-                      clienteDTO.getUbicacionFacturacion().getIdLocalidad()));
-        }
-      }
-      // probar lo de model mapper
-      //      if (clienteDTO.getUbicacion().getDescripcion() != null
-      //        && !clienteDTO
-      //        .getUbicacion()
-      //        .getDescripcion()
-      //        .equals(clientePersistido.getUbicacionFacturacion().getDescripcion())) {
-      //        clientePorActualizar
-      //          .getUbicacionFacturacion()
-      //          .setDescripcion(clienteDTO.getUbicacion().getDescripcion());
-      //      }
-      //      if (clienteDTO.getUbicacion().getLatitud() != null
-      //        && !clienteDTO
-      //        .getUbicacion()
-      //        .getLatitud()
-      //        .equals(clientePersistido.getUbicacionFacturacion().getLatitud())) {
-      //
-      // clientePorActualizar.getUbicacionFacturacion().setLatitud(clienteDTO.getUbicacion().getLatitud());
-      //      }
-      //      if (clienteDTO.getUbicacion().getLongitud() != null
-      //        && !clienteDTO
-      //        .getUbicacion()
-      //        .getLongitud()
-      //        .equals(clientePersistido.getUbicacionFacturacion().getLongitud())) {
-      //
-      // clientePorActualizar.getUbicacionFacturacion().setLongitud(clienteDTO.getUbicacion().getLongitud());
-      //      }
-      //      if (clienteDTO.getUbicacion().getCalle() != null
-      //        && !clienteDTO
-      //        .getUbicacion()
-      //        .getCalle()
-      //        .equals(clientePersistido.getUbicacionFacturacion().getCalle())) {
-      //
-      // clientePorActualizar.getUbicacionFacturacion().setCalle(clienteDTO.getUbicacion().getCalle());
-      //      }
-      //      if (clienteDTO.getUbicacion().getNumero() != null
-      //        && !clienteDTO
-      //        .getUbicacion()
-      //        .getNumero()
-      //        .equals(clientePersistido.getUbicacionFacturacion().getNumero())) {
-      //
-      // clientePorActualizar.getUbicacionFacturacion().setNumero(clienteDTO.getUbicacion().getNumero());
-      //      }
-      //      if (clienteDTO.getUbicacion().getPiso() != null
-      //        && !clienteDTO
-      //        .getUbicacion()
-      //        .getPiso()
-      //        .equals(clientePersistido.getUbicacionFacturacion().getPiso())) {
-      //
-      // clientePorActualizar.getUbicacionFacturacion().setPiso(clienteDTO.getUbicacion().getPiso());
-      //      }
-      //      if (clienteDTO.getUbicacion().getDepartamento() != null
-      //        && !clienteDTO
-      //        .getUbicacion()
-      //        .getDepartamento()
-      //        .equals(clientePersistido.getUbicacionFacturacion().getDepartamento())) {
-      //        clientePorActualizar
-      //          .getUbicacionFacturacion()
-      //          .setDepartamento(clienteDTO.getUbicacion().getDepartamento());
-      //      }
     }
+    if (clienteDTO.getUbicacionEnvio() != null) {
+      if (clienteDTO.getUbicacionEnvio().getIdUbicacion()
+          == clientePersistido.getUbicacionEnvio().getIdUbicacion()) {
+        clientePorActualizar.setUbicacionEnvio(clientePersistido.getUbicacionFacturacion());
+      } else {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
+      }
+      if (clienteDTO.getUbicacionEnvio().getIdLocalidad()
+          != clientePersistido.getUbicacionEnvio().getLocalidad().getId_Localidad()) {
+        clientePorActualizar
+            .getUbicacionEnvio()
+            .setLocalidad(
+                ubicacionService.getLocalidadPorId(
+                    clienteDTO.getUbicacionFacturacion().getIdLocalidad()));
+      }
+    }
+
+    // probar lo de model mapper
+    //      if (clienteDTO.getUbicacion().getDescripcion() != null
+    //        && !clienteDTO
+    //        .getUbicacion()
+    //        .getDescripcion()
+    //        .equals(clientePersistido.getUbicacionFacturacion().getDescripcion())) {
+    //        clientePorActualizar
+    //          .getUbicacionFacturacion()
+    //          .setDescripcion(clienteDTO.getUbicacion().getDescripcion());
+    //      }
+    //      if (clienteDTO.getUbicacion().getLatitud() != null
+    //        && !clienteDTO
+    //        .getUbicacion()
+    //        .getLatitud()
+    //        .equals(clientePersistido.getUbicacionFacturacion().getLatitud())) {
+    //
+    // clientePorActualizar.getUbicacionFacturacion().setLatitud(clienteDTO.getUbicacion().getLatitud());
+    //      }
+    //      if (clienteDTO.getUbicacion().getLongitud() != null
+    //        && !clienteDTO
+    //        .getUbicacion()
+    //        .getLongitud()
+    //        .equals(clientePersistido.getUbicacionFacturacion().getLongitud())) {
+    //
+    // clientePorActualizar.getUbicacionFacturacion().setLongitud(clienteDTO.getUbicacion().getLongitud());
+    //      }
+    //      if (clienteDTO.getUbicacion().getCalle() != null
+    //        && !clienteDTO
+    //        .getUbicacion()
+    //        .getCalle()
+    //        .equals(clientePersistido.getUbicacionFacturacion().getCalle())) {
+    //
+    // clientePorActualizar.getUbicacionFacturacion().setCalle(clienteDTO.getUbicacion().getCalle());
+    //      }
+    //      if (clienteDTO.getUbicacion().getNumero() != null
+    //        && !clienteDTO
+    //        .getUbicacion()
+    //        .getNumero()
+    //        .equals(clientePersistido.getUbicacionFacturacion().getNumero())) {
+    //
+    // clientePorActualizar.getUbicacionFacturacion().setNumero(clienteDTO.getUbicacion().getNumero());
+    //      }
+    //      if (clienteDTO.getUbicacion().getPiso() != null
+    //        && !clienteDTO
+    //        .getUbicacion()
+    //        .getPiso()
+    //        .equals(clientePersistido.getUbicacionFacturacion().getPiso())) {
+    //
+    // clientePorActualizar.getUbicacionFacturacion().setPiso(clienteDTO.getUbicacion().getPiso());
+    //      }
+    //      if (clienteDTO.getUbicacion().getDepartamento() != null
+    //        && !clienteDTO
+    //        .getUbicacion()
+    //        .getDepartamento()
+    //        .equals(clientePersistido.getUbicacionFacturacion().getDepartamento())) {
+    //        clientePorActualizar
+    //          .getUbicacionFacturacion()
+    //          .setDepartamento(clienteDTO.getUbicacion().getDepartamento());
+    //      }
     if (idEmpresa != null) {
       clientePorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     } else {

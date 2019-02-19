@@ -26,6 +26,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
   private final LocalidadRepository localidadRepository;
   private final ProvinciaRepository provinciaRepository;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Autowired
   public UbicacionServiceImpl(
@@ -46,7 +47,32 @@ public class UbicacionServiceImpl implements IUbicacionService {
   }
 
   private void validarUbicacion(Ubicacion ubicacion) {
+    if (ubicacion.getLocalidad() != null)
+      this.guardarLocalidad(
+          ubicacion.getLocalidad().getNombre(),
+          ubicacion.getLocalidad().getNombreProvincia(),
+          ubicacion.getLocalidad().getCodigoPostal());
+  }
 
+  @Override
+  public Localidad guardarLocalidad(String nombre, String nombreProvincia, String codigoPostal) {
+    if (codigoPostal == null || codigoPostal.isEmpty())
+      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_ubicacion_codigo_postal_vacio"));
+    Provincia provincia = this.getProvinciaPorNombre(nombreProvincia);
+    if (provincia == null) {
+      provincia = new Provincia();
+      provincia.setNombre(nombreProvincia);
+      provincia = provinciaRepository.save(provincia);
+    }
+    Localidad localidad = this.getLocalidadPorNombre(nombre, provincia);
+    if (localidad == null) {
+      localidad = new Localidad();
+      localidad.setNombre(nombre);
+      localidad.setCodigoPostal(codigoPostal);
+      localidad.setProvincia(provincia);
+      localidad = localidadRepository.save(localidad);
+    }
+    return localidad;
   }
 
   @Override
