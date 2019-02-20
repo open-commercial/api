@@ -132,7 +132,7 @@ public class UsuarioController {
       if (usuarioLoggedIn.getId_Usuario() == usuarioPersistido.getId_Usuario()) {
         usuarioPorActualizar.setToken(usuarioLoggedIn.getToken());
       }
-      usuarioService.actualizar(usuarioPorActualizar);
+      usuarioService.actualizar(usuarioPorActualizar, usuarioPersistido);
     } else {
       throw new ForbiddenException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));

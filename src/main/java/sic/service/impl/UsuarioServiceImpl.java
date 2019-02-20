@@ -244,10 +244,12 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public void actualizar(Usuario usuarioPorActualizar) {
+  public void actualizar(Usuario usuarioPorActualizar, Usuario usuarioPersistido) {
     if (usuarioPorActualizar.getPassword() != null
         && !usuarioPorActualizar.getPassword().isEmpty()) {
       usuarioPorActualizar.setPassword(this.encriptarConMD5(usuarioPorActualizar.getPassword()));
+    } else {
+      usuarioPorActualizar.setPassword(usuarioPersistido.getPassword());
     }
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuarioPorActualizar);
     if (!usuarioPorActualizar.getRoles().contains(Rol.VIAJANTE)) {
