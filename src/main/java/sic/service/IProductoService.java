@@ -13,7 +13,7 @@ public interface IProductoService {
   void actualizar(Producto productoPorActualizar, Producto productoPersistido);
 
   void actualizarStock(
-      Map<Long, BigDecimal> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento);
+      Map<Long, BigDecimal> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento, TipoDeComprobante tipoDeComprobante);
 
   Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
 

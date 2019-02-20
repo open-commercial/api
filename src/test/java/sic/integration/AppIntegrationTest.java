@@ -2850,7 +2850,10 @@ public class AppIntegrationTest {
   @Test
   public void shouldVerificarStockNotaCreditoCompra() {
     this.shouldCrearNotaCreditoCompra();
-    this.checkDisponibilidadStock(12, 8);
+    ProductoDTO producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    ProductoDTO producto2 = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
+    assertEquals(new BigDecimal("12.000000000000000"), producto1.getCantidad());
+    assertEquals(new BigDecimal("8.000000000000000"), producto2.getCantidad());
   }
 
   @Test

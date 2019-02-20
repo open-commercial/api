@@ -228,40 +228,86 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public void actualizarStock(
-    Map<Long, BigDecimal> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento) {
-    idsYCantidades
-      .entrySet()
-      .forEach(
-        entry -> {
-          Producto producto = productoRepository.findById(entry.getKey());
+      Map<Long, BigDecimal> idsYCantidades,
+      TipoDeOperacion operacion,
+      Movimiento movimiento,
+      TipoDeComprobante tipoDeComprobante) {
+    idsYCantidades.forEach(
+        (idProducto, cantidad) -> {
+          Producto producto = productoRepository.findById(idProducto);
           if (producto == null) {
             logger.warn("Se intenta actualizar el stock de un producto eliminado.");
           }
           if (producto != null && !producto.isIlimitado()) {
-            if (movimiento.equals(Movimiento.VENTA)) {
-              if (operacion == TipoDeOperacion.ALTA) {
-                producto.setCantidad(producto.getCantidad().subtract(entry.getValue()));
+            if (movimiento == Movimiento.VENTA) {
+              List<TipoDeComprobante> tiposDeFactura =
+                  Arrays.asList(
+                      TipoDeComprobante.FACTURA_A,
+                      TipoDeComprobante.FACTURA_B,
+                      TipoDeComprobante.FACTURA_C,
+                      TipoDeComprobante.FACTURA_X,
+                      TipoDeComprobante.FACTURA_Y,
+                      TipoDeComprobante.PRESUPUESTO);
+              if (tiposDeFactura.contains(tipoDeComprobante)) {
+                this.a(operacion, producto, cantidad);
               }
-              if (operacion == TipoDeOperacion.ELIMINACION
-                || operacion == TipoDeOperacion.ACTUALIZACION) {
-                producto.setCantidad(producto.getCantidad().add(entry.getValue()));
+              List<TipoDeComprobante> tiposDeNota =
+                  Arrays.asList(
+                      TipoDeComprobante.NOTA_CREDITO_A,
+                      TipoDeComprobante.NOTA_CREDITO_B,
+                      TipoDeComprobante.NOTA_CREDITO_X,
+                      TipoDeComprobante.NOTA_CREDITO_X,
+                      TipoDeComprobante.NOTA_CREDITO_Y,
+                      TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO);
+              if (tiposDeNota.contains(tipoDeComprobante)) {
+                this.b(operacion, producto, cantidad);
               }
-            } else if (movimiento.equals(Movimiento.COMPRA)) {
-              if (operacion == TipoDeOperacion.ALTA) {
-                producto.setCantidad(producto.getCantidad().add(entry.getValue()));
+            }
+            if (movimiento == Movimiento.COMPRA) {
+              List<TipoDeComprobante> tiposDeFactura =
+                  Arrays.asList(
+                      TipoDeComprobante.FACTURA_A,
+                      TipoDeComprobante.FACTURA_B,
+                      TipoDeComprobante.FACTURA_C,
+                      TipoDeComprobante.FACTURA_X,
+                      TipoDeComprobante.FACTURA_Y,
+                      TipoDeComprobante.PRESUPUESTO);
+              if (tiposDeFactura.contains(tipoDeComprobante)) {
+                this.b(operacion, producto, cantidad);
               }
-              if (operacion == TipoDeOperacion.ELIMINACION
-                || operacion == TipoDeOperacion.ACTUALIZACION) {
-                BigDecimal result = producto.getCantidad().subtract(entry.getValue());
-                if (result.compareTo(BigDecimal.ZERO) < 0) {
-                  result = BigDecimal.ZERO;
-                }
-                producto.setCantidad(result);
+              List<TipoDeComprobante> tiposDeNota =
+                  Arrays.asList(
+                      TipoDeComprobante.NOTA_CREDITO_A,
+                      TipoDeComprobante.NOTA_CREDITO_B,
+                      TipoDeComprobante.NOTA_CREDITO_X,
+                      TipoDeComprobante.NOTA_CREDITO_X,
+                      TipoDeComprobante.NOTA_CREDITO_Y,
+                      TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO);
+              if (tiposDeNota.contains(tipoDeComprobante)) {
+                this.a(operacion, producto, cantidad);
               }
             }
             productoRepository.save(producto);
           }
         });
+  }
+
+  private void a(TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
+    if (operacion == TipoDeOperacion.ALTA) {
+      producto.setCantidad(producto.getCantidad().subtract(cantidad));
+    }
+    if (operacion == TipoDeOperacion.ELIMINACION) {
+      producto.setCantidad(producto.getCantidad().add(cantidad));
+    }
+  }
+
+  private void b(TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
+    if (operacion == TipoDeOperacion.ALTA) {
+      producto.setCantidad(producto.getCantidad().add(cantidad));
+    }
+    if (operacion == TipoDeOperacion.ELIMINACION) {
+      producto.setCantidad(producto.getCantidad().subtract(cantidad));
+    }
   }
 
   @Override

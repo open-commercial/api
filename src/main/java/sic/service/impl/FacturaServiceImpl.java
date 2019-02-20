@@ -376,7 +376,7 @@ public class FacturaServiceImpl implements IFacturaService {
     List<FacturaVenta> facturasProcesadas = new ArrayList<>();
     facturas.forEach(
         f -> productoService.actualizarStock(
-                this.getIdsProductosYCantidades(f), TipoDeOperacion.ALTA, Movimiento.VENTA));
+                this.getIdsProductosYCantidades(f), TipoDeOperacion.ALTA, Movimiento.VENTA, f.getTipoComprobante()));
       if (idPedido != null) {
       Pedido pedido = pedidoService.getPedidoPorId(idPedido);
       facturas.forEach(f -> f.setPedido(pedido));
@@ -418,7 +418,7 @@ public class FacturaServiceImpl implements IFacturaService {
     List<FacturaCompra> facturasProcesadas = new ArrayList<>();
     facturas.forEach(
         f -> productoService.actualizarStock(
-                this.getIdsProductosYCantidades(f), TipoDeOperacion.ALTA, Movimiento.COMPRA));
+                this.getIdsProductosYCantidades(f), TipoDeOperacion.ALTA, Movimiento.COMPRA, f.getTipoComprobante()));
     for (Factura f : facturas) {
       FacturaCompra facturaGuardada = null;
       if (f instanceof FacturaCompra) {
@@ -445,10 +445,12 @@ public class FacturaServiceImpl implements IFacturaService {
                             .getString("mensaje_no_se_puede_eliminar"));
                 }
                 this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) factura, TipoDeOperacion.ELIMINACION);
-                productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.VENTA);
+                productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION,
+                  Movimiento.VENTA, factura.getTipoComprobante());
             } else if (factura instanceof FacturaCompra) {
                 this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaCompra) factura, TipoDeOperacion.ELIMINACION);
-                productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION, Movimiento.COMPRA);
+                productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION,
+                  Movimiento.COMPRA, factura.getTipoComprobante());
             }
             factura.setEliminada(true);
             if (factura.getPedido() != null) {

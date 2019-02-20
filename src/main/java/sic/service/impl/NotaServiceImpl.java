@@ -694,7 +694,11 @@ public class NotaServiceImpl implements INotaService {
               notaCredito.getFacturaCompra().getTipoComprobante()));
     }
     if (notaCredito.isModificaStock()) {
-      this.actualizarStock(notaCredito.getRenglonesNotaCredito(), TipoDeOperacion.ACTUALIZACION, notaCredito.getMovimiento());
+      this.actualizarStock(
+          notaCredito.getRenglonesNotaCredito(),
+          TipoDeOperacion.ALTA,
+          notaCredito.getMovimiento(),
+          notaCredito.getTipoComprobante());
     }
     this.validarCalculosCredito(notaCredito);
     notaCredito = notaCreditoRepository.save(notaCredito);
@@ -836,13 +840,16 @@ public class NotaServiceImpl implements INotaService {
   }
 
   private void actualizarStock(
-      List<RenglonNotaCredito> renglonesNotaCredito, TipoDeOperacion tipoOperacion, Movimiento movimiento) {
+      List<RenglonNotaCredito> renglonesNotaCredito,
+      TipoDeOperacion tipoOperacion,
+      Movimiento movimiento,
+      TipoDeComprobante tipoDeComprobante) {
     HashMap<Long, BigDecimal> idsYCantidades = new HashMap<>();
     renglonesNotaCredito.forEach(r -> idsYCantidades.put(r.getIdProductoItem(), r.getCantidad()));
     if (tipoOperacion == TipoDeOperacion.ELIMINACION) {
       tipoOperacion = TipoDeOperacion.ALTA;
     }
-    productoService.actualizarStock(idsYCantidades, tipoOperacion, movimiento);
+    productoService.actualizarStock(idsYCantidades, tipoOperacion, movimiento, tipoDeComprobante);
   }
 
   @Override
@@ -924,13 +931,21 @@ public class NotaServiceImpl implements INotaService {
           if (nota instanceof NotaCredito) {
             NotaCredito nc = (NotaCredito) nota;
             if (nc.isModificaStock()) {
-              this.actualizarStock(nc.getRenglonesNotaCredito(), TipoDeOperacion.ALTA, nota.getMovimiento());
+              this.actualizarStock(
+                  nc.getRenglonesNotaCredito(),
+                  TipoDeOperacion.ELIMINACION,
+                  nota.getMovimiento(),
+                  nota.getTipoComprobante());
             }
           }
         } else if (nota.getMovimiento() == Movimiento.COMPRA && nota instanceof NotaCredito) {
           NotaCredito nc = (NotaCredito) nota;
           if (nc.isModificaStock()) {
-            this.actualizarStock(nc.getRenglonesNotaCredito(), TipoDeOperacion.ACTUALIZACION, nota.getMovimiento());
+            this.actualizarStock(
+                nc.getRenglonesNotaCredito(),
+                TipoDeOperacion.ELIMINACION,
+                nota.getMovimiento(),
+                nota.getTipoComprobante());
           }
         }
         nota.setEliminada(true);
