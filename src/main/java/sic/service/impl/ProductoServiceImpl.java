@@ -239,60 +239,49 @@ public class ProductoServiceImpl implements IProductoService {
             logger.warn("Se intenta actualizar el stock de un producto eliminado.");
           }
           if (producto != null && !producto.isIlimitado()) {
-            if (movimiento == Movimiento.VENTA) {
-              List<TipoDeComprobante> tiposDeFactura =
-                  Arrays.asList(
-                      TipoDeComprobante.FACTURA_A,
-                      TipoDeComprobante.FACTURA_B,
-                      TipoDeComprobante.FACTURA_C,
-                      TipoDeComprobante.FACTURA_X,
-                      TipoDeComprobante.FACTURA_Y,
-                      TipoDeComprobante.PRESUPUESTO);
-              if (tiposDeFactura.contains(tipoDeComprobante)) {
-                this.a(operacion, producto, cantidad);
-              }
-              List<TipoDeComprobante> tiposDeNota =
-                  Arrays.asList(
-                      TipoDeComprobante.NOTA_CREDITO_A,
-                      TipoDeComprobante.NOTA_CREDITO_B,
-                      TipoDeComprobante.NOTA_CREDITO_X,
-                      TipoDeComprobante.NOTA_CREDITO_X,
-                      TipoDeComprobante.NOTA_CREDITO_Y,
-                      TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO);
-              if (tiposDeNota.contains(tipoDeComprobante)) {
-                this.b(operacion, producto, cantidad);
-              }
-            }
-            if (movimiento == Movimiento.COMPRA) {
-              List<TipoDeComprobante> tiposDeFactura =
-                  Arrays.asList(
-                      TipoDeComprobante.FACTURA_A,
-                      TipoDeComprobante.FACTURA_B,
-                      TipoDeComprobante.FACTURA_C,
-                      TipoDeComprobante.FACTURA_X,
-                      TipoDeComprobante.FACTURA_Y,
-                      TipoDeComprobante.PRESUPUESTO);
-              if (tiposDeFactura.contains(tipoDeComprobante)) {
-                this.b(operacion, producto, cantidad);
-              }
-              List<TipoDeComprobante> tiposDeNota =
-                  Arrays.asList(
-                      TipoDeComprobante.NOTA_CREDITO_A,
-                      TipoDeComprobante.NOTA_CREDITO_B,
-                      TipoDeComprobante.NOTA_CREDITO_X,
-                      TipoDeComprobante.NOTA_CREDITO_X,
-                      TipoDeComprobante.NOTA_CREDITO_Y,
-                      TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO);
-              if (tiposDeNota.contains(tipoDeComprobante)) {
-                this.a(operacion, producto, cantidad);
-              }
+            List<TipoDeComprobante> tiposDeFactura =
+                Arrays.asList(
+                    TipoDeComprobante.FACTURA_A,
+                    TipoDeComprobante.FACTURA_B,
+                    TipoDeComprobante.FACTURA_C,
+                    TipoDeComprobante.FACTURA_X,
+                    TipoDeComprobante.FACTURA_Y,
+                    TipoDeComprobante.PRESUPUESTO);
+            List<TipoDeComprobante> tiposDeNotaCreditoQueAfectanStock =
+                Arrays.asList(
+                    TipoDeComprobante.NOTA_CREDITO_A,
+                    TipoDeComprobante.NOTA_CREDITO_B,
+                    TipoDeComprobante.NOTA_CREDITO_X,
+                    TipoDeComprobante.NOTA_CREDITO_X,
+                    TipoDeComprobante.NOTA_CREDITO_Y,
+                    TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO);
+            switch (movimiento) {
+              case VENTA:
+                if (tiposDeFactura.contains(tipoDeComprobante)) {
+                  this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(operacion, producto, cantidad);
+                }
+                if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
+                  this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(operacion, producto, cantidad);
+                }
+                break;
+              case COMPRA:
+                if (tiposDeFactura.contains(tipoDeComprobante)) {
+                  this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(operacion, producto, cantidad);
+                }
+                if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
+                  this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(operacion, producto, cantidad);
+                }
+                break;
+              default:
+                throw new BusinessServiceException(
+                    RESOURCE_BUNDLE.getString("mensaje_movimiento_no_valido"));
             }
             productoRepository.save(producto);
           }
         });
   }
 
-  private void a(TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
+  private void cambiaStockPorFacturaVentaOrNotaCreditoCompra(TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
     if (operacion == TipoDeOperacion.ALTA) {
       producto.setCantidad(producto.getCantidad().subtract(cantidad));
     }
@@ -301,7 +290,7 @@ public class ProductoServiceImpl implements IProductoService {
     }
   }
 
-  private void b(TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
+  private void cambiaStockPorFacturaCompraOrNotaCreditoVenta(TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
     if (operacion == TipoDeOperacion.ALTA) {
       producto.setCantidad(producto.getCantidad().add(cantidad));
     }

@@ -846,9 +846,6 @@ public class NotaServiceImpl implements INotaService {
       TipoDeComprobante tipoDeComprobante) {
     HashMap<Long, BigDecimal> idsYCantidades = new HashMap<>();
     renglonesNotaCredito.forEach(r -> idsYCantidades.put(r.getIdProductoItem(), r.getCantidad()));
-    if (tipoOperacion == TipoDeOperacion.ELIMINACION) {
-      tipoOperacion = TipoDeOperacion.ALTA;
-    }
     productoService.actualizarStock(idsYCantidades, tipoOperacion, movimiento, tipoDeComprobante);
   }
 
