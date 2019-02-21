@@ -99,15 +99,16 @@ public class PedidoController {
     Rol.COMPRADOR
   })
   public Pedido guardar(
-      @RequestParam Long idEmpresa,
-      @RequestParam Long idUsuario,
-      @RequestParam Long idCliente,
-      @RequestParam boolean usarUbicacionDeFacturacion,
-      @RequestBody NuevoPedidoDTO nuevoPedidoDTO) {
+    @RequestParam Long idEmpresa,
+    @RequestParam Long idUsuario,
+    @RequestParam Long idCliente,
+    @RequestParam boolean usarUbicacionDeFacturacion,
+    @RequestBody NuevoPedidoDTO nuevoPedidoDTO) {
     Pedido pedido = new Pedido();
     pedido.setFechaVencimiento(nuevoPedidoDTO.getFechaVencimiento());
     pedido.setObservaciones(nuevoPedidoDTO.getObservaciones());
-    Type listType = new TypeToken<List<RenglonPedido>>() {}.getType();
+    Type listType = new TypeToken<List<RenglonPedido>>() {
+    }.getType();
     pedido.setRenglones(modelMapper.map(nuevoPedidoDTO.getRenglones(), listType));
     pedido.setSubTotal(nuevoPedidoDTO.getSubTotal());
     pedido.setRecargoPorcentaje(nuevoPedidoDTO.getRecargoPorcentaje());
@@ -123,6 +124,9 @@ public class PedidoController {
     if (cliente.getUbicacionFacturacion() == null) {
       throw new BusinessServiceException(
         ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_cliente_sin_ubicacion"));
+    }
+    if (usarUbicacionDeFacturacion) {
+      pedido.setDetalleEnvio(modelMapper.map(cliente.getUbicacionFacturacion(), UbicacionDTO.class));
     }
     pedido.setCliente(cliente);
     return pedidoService.guardar(pedido);

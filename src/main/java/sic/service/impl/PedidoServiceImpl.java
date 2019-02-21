@@ -286,16 +286,20 @@ public class PedidoServiceImpl implements IPedidoService {
       cliente.getUbicacionEnvio().setNumero(ubicacionEnvio.getNumero());
       cliente.getUbicacionEnvio().setPiso(ubicacionEnvio.getPiso());
       cliente.getUbicacionEnvio().setDepartamento(ubicacionEnvio.getDepartamento());
-      if (ubicacionEnvio.getNombreLocalidad() != null
-          && !ubicacionEnvio
-              .getNombreLocalidad()
-              .equals(cliente.getUbicacionEnvio().getLocalidad().getNombre())) {
+      if (ubicacionEnvio.getIdLocalidad() != null) {
         cliente
-            .getUbicacionEnvio()
-            .setLocalidad(
-                ubicacionService.getLocalidadPorNombre(
-                    ubicacionEnvio.getNombreLocalidad(),
-                    ubicacionService.getProvinciaPorNombre(ubicacionEnvio.getNombreProvincia())));
+          .getUbicacionEnvio()
+          .setLocalidad(ubicacionService.getLocalidadPorId(ubicacionEnvio.getIdLocalidad()));
+      } else if ((ubicacionEnvio.getNombreLocalidad() != null && ubicacionEnvio.getNombreProvincia() != null)
+        && !ubicacionEnvio
+        .getNombreLocalidad()
+        .equals(cliente.getUbicacionEnvio().getLocalidad().getNombre())) {
+        cliente
+          .getUbicacionEnvio()
+          .setLocalidad(
+            ubicacionService.getLocalidadPorNombre(
+              ubicacionEnvio.getNombreLocalidad(),
+              ubicacionService.getProvinciaPorNombre(ubicacionEnvio.getNombreProvincia())));
       }
       clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
     } else {
