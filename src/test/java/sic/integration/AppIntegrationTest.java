@@ -122,22 +122,6 @@ public class AppIntegrationTest {
         ProductoDTO.class);
   }
 
-  private void checkDisponibilidadStock(double cantidadProductoUno, double cantidadProductoDos) {
-    String uri =
-        apiPrefix
-            + "/productos/disponibilidad-stock?idProducto=1,2"
-            + "&cantidad="
-            + cantidadProductoUno
-            + ","
-            + cantidadProductoDos;
-    Assert.assertTrue(
-        restTemplate
-            .exchange(
-                uri, HttpMethod.GET, null, new ParameterizedTypeReference<Map<Long, Producto>>() {})
-            .getBody()
-            .isEmpty());
-  }
-
   private void crearFacturaTipoADePedido() {
     RenglonFactura[] renglonesParaFacturar =
         restTemplate.getForObject(
@@ -2450,9 +2434,15 @@ public class AppIntegrationTest {
   @Test
   public void shouldVerificarStockVenta() {
     this.shouldCrearFacturaVentaA();
-    this.checkDisponibilidadStock(4, 3);
+    ProductoDTO producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    ProductoDTO producto2 = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
+    assertEquals(new BigDecimal("4.000000000000000"), producto1.getCantidad());
+    assertEquals(new BigDecimal("3.000000000000000"), producto2.getCantidad());
     restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-    this.checkDisponibilidadStock(10, 6);
+    producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    producto2 = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
+    assertEquals(new BigDecimal("10.000000000000000"), producto1.getCantidad());
+    assertEquals(new BigDecimal("6.000000000000000"), producto2.getCantidad());
   }
 
   @Test
@@ -2469,16 +2459,25 @@ public class AppIntegrationTest {
   @Test
   public void shouldVerificarStockCompra() {
     this.shouldCrearFacturaCompraA();
-    this.checkDisponibilidadStock(14, 9);
+    ProductoDTO producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    ProductoDTO producto2 = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
+    assertEquals(new BigDecimal("14.000000000000000"), producto1.getCantidad());
+    assertEquals(new BigDecimal("9.000000000000000"), producto2.getCantidad());
     restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-    this.checkDisponibilidadStock(10, 6);
+    producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    producto2 = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
+    assertEquals(new BigDecimal("10.000000000000000"), producto1.getCantidad());
+    assertEquals(new BigDecimal("6.000000000000000"), producto2.getCantidad());
   }
 
   @Ignore
   @Test
   public void shouldBajaFacturaCompraCuandoLaCantidadEsNegativa() {
     this.shouldCrearFacturaCompraA();
-    this.checkDisponibilidadStock(14, 9);
+    ProductoDTO producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    ProductoDTO producto2 = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
+    assertEquals(new BigDecimal("14.000000000000000"), producto1.getCantidad());
+    assertEquals(new BigDecimal("9.000000000000000"), producto2.getCantidad());
     ProductoDTO productoUno =
         restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO productoDos =
@@ -2593,7 +2592,10 @@ public class AppIntegrationTest {
         facturaVentaA,
         FacturaVentaDTO[].class);
     restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-    this.checkDisponibilidadStock(10, 6);
+    producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    producto2 = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
+    assertEquals(BigDecimal.TEN, producto1.getCantidad());
+    assertEquals(new BigDecimal("6.000000000000000"), producto2.getCantidad());
   }
 
   @Test
@@ -2731,7 +2733,10 @@ public class AppIntegrationTest {
   @Test
   public void shouldVerificarStockNotaCreditoVenta() {
     this.shouldCrearNotaCreditoVenta();
-    this.checkDisponibilidadStock(10, 4);
+    ProductoDTO producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    ProductoDTO producto2 = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
+    assertEquals(new BigDecimal("10.000000000000000"), producto1.getCantidad());
+    assertEquals(new BigDecimal("4.000000000000000"), producto2.getCantidad());
   }
 
   @Test
