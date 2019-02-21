@@ -2899,22 +2899,28 @@ public class AppIntegrationTest {
       importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
     }
     BigDecimal recargoNeto =
-        importe.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
+      importe.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal descuentoNeto =
-        importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
+      importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
+    UbicacionDTO detalleEnvioPedido = UbicacionDTO
+      .builder()
+      .calle("test ubicacion pedido")
+      .numero(132)
+      .build();
     NuevoPedidoDTO nuevoPedidoDTO =
-        NuevoPedidoDTO.builder()
-            .descuentoNeto(descuentoNeto)
-            .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
-            .recargoNeto(recargoNeto)
-            .recargoPorcentaje(new BigDecimal("5"))
-            .fechaVencimiento(new Date())
-            .observaciones("Nuevo Pedido Test")
-            .renglones(renglonesPedido)
-            .subTotal(importe)
-            .total(total)
-            .build();
+      NuevoPedidoDTO.builder()
+        .descuentoNeto(descuentoNeto)
+        .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
+        .recargoNeto(recargoNeto)
+        .recargoPorcentaje(new BigDecimal("5"))
+        .fechaVencimiento(new Date())
+        .observaciones("Nuevo Pedido Test")
+        .renglones(renglonesPedido)
+        .subTotal(importe)
+        .total(total)
+        .detalleEnvio(detalleEnvioPedido)
+        .build();
     PedidoDTO pedidoRecuperado =
         restTemplate.postForObject(
             apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=2&usarUbicacionDeFacturacion=true",
