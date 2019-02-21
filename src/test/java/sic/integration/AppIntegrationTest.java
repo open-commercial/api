@@ -2268,23 +2268,7 @@ public class AppIntegrationTest {
             apiPrefix + "/productos?idMedida=1&idRubro=1&idProveedor=1&idEmpresa=1",
             productoDos,
             ProductoDTO.class);
-    String uri =
-        apiPrefix
-            + "/productos/disponibilidad-stock?idProducto="
-            + productoUno.getIdProducto()
-            + ","
-            + productoDos.getIdProducto()
-            + "&cantidad=10,6";
-    Assert.assertTrue(
-        restTemplate
-            .exchange(
-                uri,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<Map<Double, Producto>>() {})
-            .getBody()
-            .isEmpty());
-    uri = apiPrefix + "/productos/multiples?idProducto=1,2&descuentoRecargoPorcentaje=10";
+    String uri = apiPrefix + "/productos/multiples?idProducto=1,2&descuentoRecargoPorcentaje=10";
     restTemplate.put(uri, null);
     productoUno = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     productoDos = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
