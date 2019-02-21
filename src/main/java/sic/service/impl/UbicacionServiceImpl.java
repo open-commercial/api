@@ -77,19 +77,29 @@ public class UbicacionServiceImpl implements IUbicacionService {
 
   @Override
   @Transactional
-  public void actualizarUbicacionEnvio(Ubicacion ubicacion, Cliente cliente) {
+  public void actualizarUbicacionEnvio(Ubicacion ubicacionParaActualizar, Cliente cliente) {
     Ubicacion ubicacionDeEnvio = cliente.getUbicacionEnvio();
-    ubicacionDeEnvio.setLocalidad(ubicacion.getLocalidad());
-    ubicacionDeEnvio.setCalle(ubicacion.getCalle());
-    ubicacionDeEnvio.setDepartamento(ubicacion.getDepartamento());
-    ubicacionDeEnvio.setDescripcion(ubicacion.getDescripcion());
-    ubicacionDeEnvio.setLatitud(ubicacion.getLatitud());
-    ubicacionDeEnvio.setLongitud(ubicacion.getLongitud());
-    ubicacionDeEnvio.setNumero(ubicacion.getNumero());
-    ubicacionDeEnvio.setCalle(ubicacion.getCalle());
-    ubicacionDeEnvio.setPiso(ubicacion.getPiso());
-    ubicacionDeEnvio.setEliminada(false);
-    ubicacionRepository.save(ubicacionDeEnvio);
+    this.actualizarUbicacion(ubicacionDeEnvio, ubicacionParaActualizar);
+  }
+
+  @Override
+  @Transactional
+  public void actualizarUbicacionFacturacion(Ubicacion ubicacionParaActualizar, Cliente cliente) {
+    Ubicacion ubicacionDeFacturacion = cliente.getUbicacionFacturacion();
+    this.actualizarUbicacion(ubicacionDeFacturacion, ubicacionParaActualizar);
+  }
+
+  private void actualizarUbicacion(Ubicacion ubicacionCliente, Ubicacion ubicacionParaActualizar) {
+    ubicacionCliente.setCalle(ubicacionParaActualizar.getCalle());
+    ubicacionCliente.setDepartamento(ubicacionParaActualizar.getDepartamento());
+    ubicacionCliente.setDescripcion(ubicacionParaActualizar.getDescripcion());
+    ubicacionCliente.setLatitud(ubicacionParaActualizar.getLatitud());
+    ubicacionCliente.setLongitud(ubicacionParaActualizar.getLongitud());
+    ubicacionCliente.setNumero(ubicacionParaActualizar.getNumero());
+    ubicacionCliente.setCalle(ubicacionParaActualizar.getCalle());
+    ubicacionCliente.setPiso(ubicacionParaActualizar.getPiso());
+    //ubicacionCliente.setEliminada(false);
+    ubicacionRepository.save(ubicacionParaActualizar);
   }
 
   @Override

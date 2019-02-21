@@ -23,6 +23,7 @@ import sic.modelo.*;
 import sic.modelo.dto.NuevoPedidoDTO;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.modelo.dto.PedidoDTO;
+import sic.modelo.dto.UbicacionDTO;
 import sic.service.*;
 
 @RestController
@@ -78,9 +79,7 @@ public class PedidoController {
         pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
         pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
         pedido.setCliente(clienteService.getClientePorId(idCliente));
-
-
-
+        pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getUbicacionEnvio(), UbicacionDTO.class));
         //Las facturas se recuperan para evitar cambios no deseados. 
         pedido.setFacturas(pedidoService.getFacturasDelPedido(pedido.getId_Pedido()));
         //Si los renglones vienen null, recupera los renglones del pedido para actualizar
@@ -119,43 +118,11 @@ public class PedidoController {
     pedido.setTotalActual(nuevoPedidoDTO.getTotal());
     pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
+    pedido.setDetalleEnvio(nuevoPedidoDTO.getDetalleEnvio());
     Cliente cliente = clienteService.getClientePorId(idCliente);
     if (cliente.getUbicacionFacturacion() == null) {
       throw new BusinessServiceException(
         ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_cliente_sin_ubicacion"));
-    }
-    DetalleEnvio detalleEnvio = new DetalleEnvio();
-    if (usarUbicacionDeFacturacion) {
-      detalleEnvio.setNombreLocalidad(cliente.getUbicacionFacturacion().getLocalidad().getNombre());
-      detalleEnvio.setNombreProvincia(cliente.getUbicacionFacturacion().getLocalidad().getProvincia().getNombre());
-      detalleEnvio.setDescripcion(cliente.getUbicacionFacturacion().getDescripcion());
-      detalleEnvio.setLatitud(cliente.getUbicacionFacturacion().getLatitud());
-      detalleEnvio.setLongitud(cliente.getUbicacionFacturacion().getLatitud());
-      detalleEnvio.setCalle(cliente.getUbicacionFacturacion().getCalle());
-      detalleEnvio.setNumero(cliente.getUbicacionFacturacion().getNumero());
-      detalleEnvio.setPiso(cliente.getUbicacionFacturacion().getPiso());
-      detalleEnvio.setDepartamento(cliente.getUbicacionFacturacion().getDepartamento());
-      if (cliente.getUbicacionFacturacion().getLocalidad() != null) {
-        detalleEnvio.setCodigoPostal(cliente.getUbicacionFacturacion().getLocalidad().getCodigoPostal());
-        detalleEnvio.setDetalleUbicacion(cliente.getUbicacionFacturacion().getDetalleUbicacion());
-      }
-      pedido.setDetalleEnvio(detalleEnvio);
-    }
-    if (nuevoPedidoDTO.getDetalleEnvio() == null && cliente.getUbicacionEnvio() != null) {
-      detalleEnvio.setNombreLocalidad(cliente.getUbicacionFacturacion().getLocalidad().getNombre());
-      detalleEnvio.setNombreProvincia(cliente.getUbicacionFacturacion().getLocalidad().getProvincia().getNombre());
-      detalleEnvio.setDescripcion(cliente.getUbicacionEnvio().getDescripcion());
-      detalleEnvio.setLatitud(cliente.getUbicacionEnvio().getLatitud());
-      detalleEnvio.setLongitud(cliente.getUbicacionEnvio().getLatitud());
-      detalleEnvio.setCalle(cliente.getUbicacionEnvio().getCalle());
-      detalleEnvio.setNumero(cliente.getUbicacionEnvio().getNumero());
-      detalleEnvio.setPiso(cliente.getUbicacionEnvio().getPiso());
-      detalleEnvio.setDepartamento(cliente.getUbicacionEnvio().getDepartamento());
-      if (cliente.getUbicacionEnvio().getLocalidad() != null) {
-        detalleEnvio.setCodigoPostal(cliente.getUbicacionEnvio().getLocalidad().getCodigoPostal());
-        detalleEnvio.setDetalleUbicacion(cliente.getUbicacionEnvio().getDetalleUbicacion());
-      }
-      pedido.setDetalleEnvio(detalleEnvio);
     }
     pedido.setCliente(cliente);
     return pedidoService.guardar(pedido);

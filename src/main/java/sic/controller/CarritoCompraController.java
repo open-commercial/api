@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,7 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
+import sic.modelo.Ubicacion;
 import sic.modelo.dto.CarritoCompraDTO;
+import sic.modelo.dto.UbicacionDTO;
 import sic.service.ICarritoCompraService;
 import sic.service.IClienteService;
 import sic.service.IEmpresaService;
@@ -29,6 +32,7 @@ public class CarritoCompraController {
   private final IEmpresaService empresaService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
+  private final ModelMapper modelMapper;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
@@ -37,12 +41,14 @@ public class CarritoCompraController {
       IPedidoService pedidoService,
       IEmpresaService empresaService,
       IUsuarioService usuarioService,
-      IClienteService clienteService) {
+      IClienteService clienteService,
+      ModelMapper modelMapper) {
     this.carritoCompraService = carritoCompraService;
     this.pedidoService = pedidoService;
     this.empresaService = empresaService;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
+    this.modelMapper = modelMapper;
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/clientes/{idCliente}")
@@ -121,6 +127,7 @@ public class CarritoCompraController {
                 .add(
                     pedidoService.calcularRenglonPedido(
                         i.getProducto().getIdProducto(), i.getCantidad(), BigDecimal.ZERO)));
+//    pedido.setu
     Pedido p = pedidoService.guardar(pedido);
     carritoCompraService.eliminarTodosLosItemsDelUsuario(idUsuario);
     return p;

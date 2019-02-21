@@ -2971,9 +2971,11 @@ public class AppIntegrationTest {
     BigDecimal descuentoNeto =
         importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
-    DetalleEnvio detalleEnvioPedido = new DetalleEnvio();
-    detalleEnvioPedido.setCalle("test pedido");
-    detalleEnvioPedido.setNumero(123);
+    UbicacionDTO detalleEnvioPedido = UbicacionDTO
+      .builder()
+      .calle("test ubicacion pedido")
+      .numero(132)
+      .build();
     NuevoPedidoDTO nuevoPedidoDTO =
         NuevoPedidoDTO.builder()
             .descuentoNeto(descuentoNeto)

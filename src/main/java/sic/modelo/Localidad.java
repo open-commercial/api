@@ -27,7 +27,7 @@ import org.hibernate.validator.constraints.NotBlank;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombre"})
 @ToString
-@JsonIgnoreProperties({"provincia", "eliminada"})
+@JsonIgnoreProperties({"provincia", "codigoPostal", "eliminada"})
 public class Localidad implements Serializable {
 
   @Id @GeneratedValue private long id_Localidad;

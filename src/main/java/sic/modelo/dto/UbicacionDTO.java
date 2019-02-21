@@ -2,10 +2,13 @@ package sic.modelo.dto;
 
 import lombok.*;
 
+import javax.persistence.Embeddable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Embeddable
 public class UbicacionDTO {
 
   private long idUbicacion;

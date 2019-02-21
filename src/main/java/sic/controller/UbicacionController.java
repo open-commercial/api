@@ -32,10 +32,36 @@ public class UbicacionController {
   }
 
   @PutMapping("/ubicaciones/envio/clientes/{idCliente}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
-  public void actualizar(@RequestBody UbicacionDTO ubicacionDTO,
-                         @PathVariable long idCliente) {
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public void actualizarEnvio(
+      @RequestBody UbicacionDTO ubicacionDTO, @PathVariable long idCliente) {
     Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
+    if (ubicacionDTO.getIdLocalidad() != null) {
+      ubicacion.setLocalidad(ubicacionService.getLocalidadPorId(ubicacionDTO.getIdLocalidad()));
+    }
+    ubicacionService.actualizarUbicacionEnvio(ubicacion, clienteService.getClientePorId(idCliente));
+  }
+
+  @PutMapping("/ubicaciones/facturacion/clientes/{idCliente}")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public void actualizarFacturacion(
+      @RequestBody UbicacionDTO ubicacionDTO, @PathVariable long idCliente) {
+    Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
+    if (ubicacionDTO.getIdLocalidad() != null) {
+      ubicacion.setLocalidad(ubicacionService.getLocalidadPorId(ubicacionDTO.getIdLocalidad()));
+    }
     ubicacionService.actualizarUbicacionEnvio(ubicacion, clienteService.getClientePorId(idCliente));
   }
 

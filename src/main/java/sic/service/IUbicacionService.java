@@ -11,6 +11,8 @@ public interface IUbicacionService {
 
   void actualizarUbicacionEnvio(Ubicacion ubicacion, Cliente cliente);
 
+  void actualizarUbicacionFacturacion(Ubicacion ubicacion, Cliente cliente);
+
   Page<Ubicacion> buscarUbicaciones(BusquedaUbicacionCriteria criteria);
 
   void eliminarUbicacion(long idUbicacion);

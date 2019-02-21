@@ -18,6 +18,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import sic.modelo.dto.UbicacionDTO;
 
 @Entity
 @Table(name = "pedido")
@@ -51,7 +52,7 @@ public class Pedido implements Serializable {
   private Empresa empresa;
 
   @Embedded
-  private DetalleEnvio detalleEnvio;
+  private UbicacionDTO detalleEnvio;
 
   private boolean eliminado;
 

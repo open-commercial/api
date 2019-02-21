@@ -21,7 +21,6 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombre"})
 @ToString
-@JsonIgnoreProperties("localidad")
 public class Empresa implements Serializable {
 
   @Id @GeneratedValue private long id_Empresa;
@@ -58,14 +57,4 @@ public class Empresa implements Serializable {
   private String logo;
 
   private boolean eliminada;
-
-  @JsonGetter("idLocalidad")
-  public Long getIdLocalidad() {
-    return (ubicacion.getLocalidad() != null) ? ubicacion.getLocalidad().getId_Localidad() :  null;
-  }
-
-  @JsonGetter("nombreLocalidad")
-  public String getNombreLocalidad() {
-    return (ubicacion.getLocalidad() != null) ? ubicacion.getLocalidad().getNombre() : null;
-  }
 }

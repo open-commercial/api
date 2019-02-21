@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
+import sic.modelo.dto.UbicacionDTO;
 import sic.repository.RenglonPedidoRepository;
 import sic.service.*;
 import sic.repository.PedidoRepository;
@@ -276,58 +277,42 @@ public class PedidoServiceImpl implements IPedidoService {
     return pedido;
   }
 
-  private void modificarUbicacionEnvíoCliente(DetalleEnvio detalleEnvioPedido, Cliente cliente) {
+  private void modificarUbicacionEnvíoCliente(UbicacionDTO ubicacionEnvio, Cliente cliente) {
     if (cliente.getUbicacionEnvio() != null) {
-      DetalleEnvio detalleEnvioCliente = new DetalleEnvio();
-      detalleEnvioCliente.setDescripcion(cliente.getUbicacionEnvio().getDescripcion());
-      detalleEnvioCliente.setLatitud(cliente.getUbicacionEnvio().getLatitud());
-      detalleEnvioCliente.setLongitud(cliente.getUbicacionEnvio().getLongitud());
-      detalleEnvioCliente.setCalle(cliente.getUbicacionEnvio().getCalle());
-      detalleEnvioCliente.setNumero(cliente.getUbicacionEnvio().getNumero());
-      detalleEnvioCliente.setPiso(cliente.getUbicacionEnvio().getPiso());
-      detalleEnvioCliente.setDepartamento(cliente.getUbicacionEnvio().getDepartamento());
-      detalleEnvioCliente.setCodigoPostal(cliente.getUbicacionEnvio().getCodigoPostal());
-      detalleEnvioCliente.setNombreLocalidad(
-          cliente.getUbicacionEnvio().getLocalidad().getNombre());
-      if (!detalleEnvioPedido.equals(detalleEnvioCliente)) {
-        if (!detalleEnvioPedido
-                .getNombreLocalidad()
-                .equals(detalleEnvioCliente.getNombreLocalidad())
-            || !detalleEnvioPedido
-                .getNombreProvincia()
-                .equals(detalleEnvioCliente.getNombreProvincia())) {
-          cliente
-              .getUbicacionEnvio()
-              .setLocalidad(
-                  ubicacionService.getLocalidadPorNombre(
-                      detalleEnvioPedido.getNombreLocalidad(),
-                      ubicacionService.getProvinciaPorNombre(
-                          detalleEnvioPedido.getNombreProvincia())));
-        }
-        cliente.getUbicacionEnvio().setPiso(detalleEnvioPedido.getPiso());
-        cliente.getUbicacionEnvio().setDepartamento(detalleEnvioPedido.getDepartamento());
-        cliente.getUbicacionEnvio().setCalle(detalleEnvioPedido.getCalle());
-        cliente.getUbicacionEnvio().setNumero(detalleEnvioPedido.getNumero());
-        cliente.getUbicacionEnvio().setLatitud(detalleEnvioPedido.getLatitud());
-        cliente.getUbicacionEnvio().setLongitud(detalleEnvioPedido.getLongitud());
-        cliente.getUbicacionEnvio().setDescripcion(detalleEnvioPedido.getDescripcion());
+      cliente.getUbicacionEnvio().setDescripcion(ubicacionEnvio.getDescripcion());
+      cliente.getUbicacionEnvio().setLatitud(ubicacionEnvio.getLatitud());
+      cliente.getUbicacionEnvio().setLongitud(ubicacionEnvio.getLongitud());
+      cliente.getUbicacionEnvio().setCalle(ubicacionEnvio.getCalle());
+      cliente.getUbicacionEnvio().setNumero(ubicacionEnvio.getNumero());
+      cliente.getUbicacionEnvio().setPiso(ubicacionEnvio.getPiso());
+      cliente.getUbicacionEnvio().setDepartamento(ubicacionEnvio.getDepartamento());
+      if (ubicacionEnvio.getNombreLocalidad() != null
+          && !ubicacionEnvio
+              .getNombreLocalidad()
+              .equals(cliente.getUbicacionEnvio().getLocalidad().getNombre())) {
+        cliente
+            .getUbicacionEnvio()
+            .setLocalidad(
+                ubicacionService.getLocalidadPorNombre(
+                    ubicacionEnvio.getNombreLocalidad(),
+                    ubicacionService.getProvinciaPorNombre(ubicacionEnvio.getNombreProvincia())));
       }
       clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
     } else {
       Ubicacion ubicacionNueva = new Ubicacion();
-      ubicacionNueva.setDescripcion(detalleEnvioPedido.getDescripcion());
-      ubicacionNueva.setLatitud(detalleEnvioPedido.getLatitud());
-      ubicacionNueva.setLongitud(detalleEnvioPedido.getLongitud());
-      ubicacionNueva.setCalle(detalleEnvioPedido.getCalle());
-      ubicacionNueva.setNumero(detalleEnvioPedido.getNumero());
-      ubicacionNueva.setPiso(detalleEnvioPedido.getPiso());
-      ubicacionNueva.setDepartamento(detalleEnvioPedido.getDepartamento());
-      if (detalleEnvioPedido.getNombreLocalidad() != null
-          && detalleEnvioPedido.getNombreProvincia() != null) {
+      ubicacionNueva.setDescripcion(ubicacionEnvio.getDescripcion());
+      ubicacionNueva.setLatitud(ubicacionEnvio.getLatitud());
+      ubicacionNueva.setLongitud(ubicacionEnvio.getLongitud());
+      ubicacionNueva.setCalle(ubicacionEnvio.getCalle());
+      ubicacionNueva.setNumero(ubicacionEnvio.getNumero());
+      ubicacionNueva.setPiso(ubicacionEnvio.getPiso());
+      ubicacionNueva.setDepartamento(ubicacionEnvio.getDepartamento());
+      if (ubicacionEnvio.getNombreLocalidad() != null
+          && ubicacionEnvio.getNombreProvincia() != null) {
         ubicacionNueva.setLocalidad(
             ubicacionService.getLocalidadPorNombre(
-                detalleEnvioPedido.getNombreLocalidad(),
-                ubicacionService.getProvinciaPorNombre(detalleEnvioPedido.getNombreProvincia())));
+                ubicacionEnvio.getNombreLocalidad(),
+                ubicacionService.getProvinciaPorNombre(ubicacionEnvio.getNombreProvincia())));
       }
       ubicacionNueva = ubicacionService.guardar(ubicacionNueva);
       cliente.setUbicacionEnvio(ubicacionNueva);

@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.List;
 
 import lombok.*;
-import sic.modelo.DetalleEnvio;
 import sic.modelo.EstadoPedido;
 
 @Data
@@ -27,7 +26,7 @@ public class PedidoDTO implements Serializable {
   private Date fechaVencimiento;
   private String observaciones;
   private String nombreEmpresa;
-  private DetalleEnvio detalleEnvio;
+  private UbicacionDTO ubicacionEnvio;
   private boolean eliminado;
   private String nombreFiscalCliente;
   private String nombreUsuario;
