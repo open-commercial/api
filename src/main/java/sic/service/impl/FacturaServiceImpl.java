@@ -512,6 +512,10 @@ public class FacturaServiceImpl implements IFacturaService {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_factura_proveedor_vacio"));
             }
+            if (Validator.compararFechas(new Date(), factura.getFecha()) > 0) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_factura_compra_fecha_incorrecta"));
+            }
         }
         if (factura instanceof FacturaVenta) {
             FacturaVenta facturaVenta = (FacturaVenta) factura;
