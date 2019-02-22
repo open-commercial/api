@@ -11,7 +11,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 
 import sic.modelo.*;
-import sic.service.ICajaService;
+import sic.service.*;
 
 import java.util.Calendar;
 import java.util.Collections;
@@ -33,15 +33,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.service.BusinessServiceException;
-import sic.service.IEmpresaService;
-import sic.service.IFormaDePagoService;
-import sic.service.IGastoService;
-import sic.service.IUsuarioService;
 import sic.util.FormatterFechaHora;
 import sic.util.Validator;
 import sic.repository.CajaRepository;
-import sic.service.IReciboService;
 
 @Service
 public class CajaServiceImpl implements ICajaService {
@@ -52,6 +46,7 @@ public class CajaServiceImpl implements ICajaService {
   private final IEmpresaService empresaService;
   private final IUsuarioService usuarioService;
   private final IReciboService reciboService;
+  private final IMyClockService clockService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
@@ -62,13 +57,15 @@ public class CajaServiceImpl implements ICajaService {
       IGastoService gastoService,
       IEmpresaService empresaService,
       IUsuarioService usuarioService,
-      IReciboService reciboService) {
+      IReciboService reciboService,
+      IMyClockService clockService) {
     this.cajaRepository = cajaRepository;
     this.formaDePagoService = formaDePagoService;
     this.gastoService = gastoService;
     this.empresaService = empresaService;
     this.usuarioService = usuarioService;
     this.reciboService = reciboService;
+    this.clockService = clockService;
   }
 
   @Override
@@ -110,7 +107,7 @@ public class CajaServiceImpl implements ICajaService {
     caja.setEmpresa(empresa);
     caja.setSaldoApertura(saldoApertura);
     caja.setUsuarioAbreCaja(usuarioApertura);
-    caja.setFechaApertura(new Date());
+    caja.setFechaApertura(this.clockService.getFechaActual());
     this.validarCaja(caja);
     return cajaRepository.save(caja);
   }
@@ -233,7 +230,7 @@ public class CajaServiceImpl implements ICajaService {
       fechaCierre = fechaCierre.withSecond(59);
       cajaACerrar.setFechaCierre(Date.from(fechaCierre.atZone(ZoneId.systemDefault()).toInstant()));
     } else {
-      cajaACerrar.setFechaCierre(new Date());
+      cajaACerrar.setFechaCierre(this.clockService.getFechaActual());
     }
     if (idUsuario != null) {
       cajaACerrar.setUsuarioCierraCaja(usuarioService.getUsuarioPorId(idUsuario));

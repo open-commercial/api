@@ -25,6 +25,7 @@ import sic.interceptor.JwtInterceptor;
 import sic.service.impl.AfipWebServiceSOAPClient;
 
 import java.io.IOException;
+import java.time.Clock;
 
 @SpringBootApplication
 @EnableScheduling
@@ -108,6 +109,11 @@ public class App extends WebMvcConfigurerAdapter {
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
+
+  @Bean
+  public Clock clock() {
+    return Clock.systemDefaultZone();
+  }
 
     public static void main(String[] args) {
         SpringApplication.run(App.class, args);
