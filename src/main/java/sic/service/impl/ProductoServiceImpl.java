@@ -433,10 +433,11 @@ public class ProductoServiceImpl implements IProductoService {
     }
     if (producto.getCantidad().compareTo(BigDecimal.ZERO) > 0) {
       producto.setHayStock(true);
+      return producto;
     } else {
       producto.setHayStock(false);
+      return producto;
     }
-    return producto;
   }
 
   @Override
