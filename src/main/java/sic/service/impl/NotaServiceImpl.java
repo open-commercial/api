@@ -497,9 +497,13 @@ public class NotaServiceImpl implements INotaService {
             ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_cliente_CAE"));
       }
     } else if (nota instanceof NotaCredito && nota.getMovimiento().equals(Movimiento.COMPRA)) {
-      if (nota.getFecha().compareTo(nota.getFacturaCompra().getFecha()) <= 0) {
+      if (nota.getFecha().compareTo(nota.getFacturaCompra().getFecha()) < 0) {
         throw new BusinessServiceException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_fecha_incorrecta"));
+      }
+      if (nota.getFecha().compareTo(new Date()) > 0) {
+        throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+          .getString("mensaje_nota_fecha_incorrecta"));
       }
     }
     if (nota.getMotivo() == null || nota.getMotivo().isEmpty()) {
