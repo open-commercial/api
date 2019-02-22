@@ -18,9 +18,12 @@ import java.io.Serializable;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"idUbicacion", "localidad"})
 @ToString
+@JsonIgnoreProperties("localidad")
 public class Ubicacion implements Serializable {
 
-  @Id @GeneratedValue private long idUbicacion;
+  @Id
+  @GeneratedValue
+  private long idUbicacion;
 
   @ManyToOne
   @JoinColumn(name = "id_Localidad", referencedColumnName = "id_Localidad")
@@ -52,14 +55,14 @@ public class Ubicacion implements Serializable {
   @JsonGetter("detalleUbicacion")
   public String getDetalleUbicacion() {
     return (this.getCalle() != null ? this.getCalle() : "")
-        + " "
-        + (this.getNumero() != null ? this.getNumero() : "")
-        + ", "
-        + (this.getPiso() != null ? this.getPiso() : "")
-        + ", "
-        + (this.getLocalidad() != null ? this.getLocalidad().getNombre() : "")
-        + " "
-        + (this.getLocalidad() != null ? this.getLocalidad().getNombreProvincia() : "");
+      + " "
+      + (this.getNumero() != null ? this.getNumero() : "")
+      + ", "
+      + (this.getPiso() != null ? this.getPiso() : "")
+      + ", "
+      + (this.getLocalidad() != null ? this.getLocalidad().getNombre() : "")
+      + " "
+      + (this.getLocalidad() != null ? this.getLocalidad().getNombreProvincia() : "");
   }
 
   @JsonGetter("idLocalidad")
@@ -67,9 +70,19 @@ public class Ubicacion implements Serializable {
     return (localidad != null) ? localidad.getId_Localidad() : null;
   }
 
+  @JsonGetter("nombreLocalidad")
+  public String getNombreLocalidad() {
+    return (localidad != null) ? localidad.getNombre() : null;
+  }
+
   @JsonGetter("idProvincia")
   public Long getIdProvincia() {
     return (localidad != null) ? localidad.getProvincia().getId_Provincia() : null;
+  }
+
+  @JsonGetter("nombreProvincia")
+  public String getNombreProvincia() {
+    return (localidad != null) ? localidad.getProvincia().getNombre() : null;
   }
 
   @JsonGetter("codigoPostal")
