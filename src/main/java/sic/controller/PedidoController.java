@@ -126,6 +126,7 @@ public class PedidoController {
         ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_cliente_sin_ubicacion"));
     }
     if (usarUbicacionDeFacturacion) {
+      modelMapper.getConfiguration().setAmbiguityIgnored(true);
       pedido.setDetalleEnvio(modelMapper.map(cliente.getUbicacionFacturacion(), UbicacionDTO.class));
     }
     pedido.setCliente(cliente);
