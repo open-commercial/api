@@ -18,7 +18,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"idUbicacion", "localidad"})
 @ToString
-@JsonIgnoreProperties("localidad")
 public class Ubicacion implements Serializable {
 
   @Id @GeneratedValue private long idUbicacion;
