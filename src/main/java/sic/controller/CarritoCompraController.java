@@ -3,6 +3,7 @@ package sic.controller;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.modelmapper.ModelMapper;
@@ -17,11 +18,7 @@ import sic.modelo.Pedido;
 import sic.modelo.Ubicacion;
 import sic.modelo.dto.CarritoCompraDTO;
 import sic.modelo.dto.UbicacionDTO;
-import sic.service.ICarritoCompraService;
-import sic.service.IClienteService;
-import sic.service.IEmpresaService;
-import sic.service.IPedidoService;
-import sic.service.IUsuarioService;
+import sic.service.*;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -104,6 +101,12 @@ public class CarritoCompraController {
       @RequestBody(required = false) String observaciones) {
     CarritoCompraDTO carritoCompraDTO = carritoCompraService.getCarritoCompra(idUsuario, idCliente);
     Pedido pedido = new Pedido();
+    pedido.setCliente(clienteService.getClientePorId(idCliente));
+    if (pedido.getCliente().getUbicacionFacturacion() == null) {
+      throw new BusinessServiceException(
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_cliente_sin_ubicacion"));
+    }
+    pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getUbicacionEnvio(), UbicacionDTO.class));
     pedido.setObservaciones(observaciones);
     pedido.setSubTotal(carritoCompraDTO.getSubtotal());
     pedido.setRecargoPorcentaje(BigDecimal.ZERO);
@@ -114,7 +117,6 @@ public class CarritoCompraController {
     pedido.setTotalEstimado(pedido.getTotalActual());
     pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    pedido.setCliente(clienteService.getClientePorId(idCliente));
     Pageable pageable =
         new PageRequest(0, Integer.MAX_VALUE, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
     List<ItemCarritoCompra> items =
@@ -127,7 +129,6 @@ public class CarritoCompraController {
                 .add(
                     pedidoService.calcularRenglonPedido(
                         i.getProducto().getIdProducto(), i.getCantidad(), BigDecimal.ZERO)));
-//    pedido.setu
     Pedido p = pedidoService.guardar(pedido);
     carritoCompraService.eliminarTodosLosItemsDelUsuario(idUsuario);
     return p;

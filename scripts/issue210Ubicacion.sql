@@ -1,4 +1,3 @@
-
 CREATE TABLE `ubicacion` (
   `idUbicacion` bigint(20) NOT NULL AUTO_INCREMENT,
   `calle` varchar(255) COLLATE utf8_unicode_ci,
@@ -60,7 +59,6 @@ SET foreign_key_checks = 1;
 
 ALTER TABLE `ubicacion` 
 DROP COLUMN `id_Cliente`;
-
 
 ALTER TABLE `cliente` 
 DROP FOREIGN KEY `FKc6sfncrbiypm57rdsn5gdoffe`;
@@ -199,4 +197,43 @@ DROP COLUMN `id_Pais`,
 DROP INDEX `FKoeyy00k8sswpaedo6i6dvux4r` ;
 
 DROP TABLE pais;
+
+-- llenar tabla pedido
+
+ALTER TABLE `pedido` 
+ADD COLUMN  `calle` varchar(255) DEFAULT NULL,
+ADD COLUMN  `codigoPostal` varchar(255) DEFAULT NULL,
+ADD COLUMN  `departamento` varchar(255) DEFAULT NULL,
+ADD COLUMN  `descripcion` varchar(255) DEFAULT NULL,
+ADD COLUMN  `eliminada` bit(1) NOT NULL,
+ADD COLUMN  `idLocalidad` bigint(20) DEFAULT NULL,
+ADD COLUMN  `idProvincia` bigint(20) DEFAULT NULL,
+ADD COLUMN  `idUbicacion` bigint(20) NOT NULL,
+ADD COLUMN  `latitud` double DEFAULT NULL,
+ADD COLUMN  `longitud` double DEFAULT NULL,
+ADD COLUMN  `nombreLocalidad` varchar(255) DEFAULT NULL,
+ADD COLUMN  `nombreProvincia` varchar(255) DEFAULT NULL,
+ADD COLUMN  `numero` int(11) DEFAULT NULL,
+ADD COLUMN  `piso` int(11) DEFAULT NULL;
+
+update pedido 
+inner join cliente on pedido.id_Cliente = cliente.id_Cliente
+inner join ubicacion on cliente.idUbicacionFacturacion = ubicacion.idUbicacion
+inner join localidad on localidad.id_Localidad = ubicacion.id_Localidad
+inner join provincia on provincia.id_Provincia = localidad.id_Provincia
+SET pedido.calle = ubicacion.calle, 
+pedido.codigoPostal = localidad.codigoPostal,
+pedido.departamento = ubicacion.departamento,
+pedido.descripcion = ubicacion.descripcion,
+pedido.eliminada = ubicacion.eliminada,
+pedido.idLocalidad = localidad.id_Localidad,
+pedido.idProvincia = provincia.id_Provincia,
+pedido.idUbicacion = ubicacion.idUbicacion,
+pedido.latitud = ubicacion.latitud, 
+pedido.longitud = ubicacion.longitud, 
+pedido.nombreLocalidad = localidad.nombre,
+pedido.nombreProvincia = provincia.nombre,
+pedido.numero = ubicacion.numero,
+pedido.piso = ubicacion.piso
+;
 
