@@ -23,22 +23,6 @@ public class Validator {
                     + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")).matcher(cadena)).matches();
         }
     }
-
-    /**
-     * Compara dos fechas pasadas como Date
-     *
-     * @param fechaAnterior
-     * @param fechaSiguiente
-     * @return 0 si es igual, menor a 0 si fechaAnterior esta antes de
-     * fechaSiguiente, mayor a 0 si fechaAnterior esta despues de fechaSiguiente
-     */
-    public static int compararFechas(Date fechaAnterior, Date fechaSiguiente) {
-        Calendar anterior = Calendar.getInstance();
-        Calendar siguiente = Calendar.getInstance();
-        anterior.setTime(fechaAnterior);
-        siguiente.setTime(fechaSiguiente);
-        return siguiente.compareTo(anterior);
-    }
     
     /**
      * Compara dos fechas teniendo en cuenta solo los dias sin hora

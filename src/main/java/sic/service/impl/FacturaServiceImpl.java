@@ -480,10 +480,10 @@ public class FacturaServiceImpl implements IFacturaService {
             calFechaFactura.set(Calendar.MINUTE, 0);
             calFechaFactura.set(Calendar.SECOND, 0);
             calFechaFactura.set(Calendar.MILLISECOND, 0);
-            if (Validator.compararFechas(calFechaVencimiento.getTime(), calFechaFactura.getTime()) > 0) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_factura_fecha_invalida"));
-            }
+          if (calFechaFactura.getTime().compareTo(calFechaVencimiento.getTime()) > 0) {
+            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_factura_fecha_invalida"));
+          }
         }
         //Requeridos
         if (factura.getFecha() == null) {
@@ -512,10 +512,10 @@ public class FacturaServiceImpl implements IFacturaService {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_factura_proveedor_vacio"));
             }
-            if (Validator.compararFechas(new Date(), factura.getFecha()) > 0) {
+          if (factura.getFecha().compareTo(new Date()) > 0) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
               .getString("mensaje_factura_compra_fecha_incorrecta"));
-            }
+          }
         }
         if (factura instanceof FacturaVenta) {
             FacturaVenta facturaVenta = (FacturaVenta) factura;
