@@ -3419,7 +3419,7 @@ public class AppIntegrationTest {
 
   @Test
   public void shouldVerificarSaldoCaja() {
-    CajaDTO caja = restTemplate.postForObject(apiPrefix + "/cajas/apertura/empresas/1/usuarios/1?saldoApertura=200", null, CajaDTO.class);
+    CajaDTO caja = restTemplate.postForObject(apiPrefix + "/cajas/apertura/empresas/1?saldoApertura=200", null, CajaDTO.class);
     assertEquals(new BigDecimal("200"), caja.getSaldoApertura());
     this.crearReciboParaCliente(300);
     assertEquals(new BigDecimal("500.000000000000000"), restTemplate.getForObject(apiPrefix + "/cajas/1/saldo-sistema", BigDecimal.class));
