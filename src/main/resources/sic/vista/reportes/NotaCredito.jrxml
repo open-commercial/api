@@ -303,7 +303,7 @@ $P{notaCredito}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") 
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getCliente().getIdFiscal()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getCliente().getIdFiscal() == null ? "" : $P{notaCredito}.getCliente().getIdFiscal()]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement mode="Transparent" x="360" y="45" width="99" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="9e7dfcda-5c8c-4987-88c2-2b820976c1bf">
