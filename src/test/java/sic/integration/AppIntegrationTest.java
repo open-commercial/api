@@ -3445,4 +3445,41 @@ public class AppIntegrationTest {
     assertEquals(cliente.getUbicacionFacturacion().getNombreProvincia(), clienteRecuperado.getUbicacionFacturacion().getNombreProvincia());
     assertEquals(cliente.getUbicacionFacturacion().getCodigoPostal(), clienteRecuperado.getUbicacionFacturacion().getCodigoPostal());
   }
+
+  @Test
+  public void shouldCrearUbicacionDeEnvioEnModificacionDeCliente() {
+    ClienteDTO cliente =
+      ClienteDTO.builder()
+        .bonificacion(BigDecimal.TEN)
+        .nombreFiscal("Enrique Peña")
+        .nombreFantasia("Los gemelos fantasticos.")
+        .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+        .idFiscal(1244566L)
+        .email("enriqueelgenial@outlook.com")
+        .telefono("3875114422")
+        .contacto("La señora de Enrique")
+        .ubicacionFacturacion(UbicacionDTO.builder().nombreLocalidad("Posadas").nombreProvincia("Misiones").codigoPostal("N3300").build())
+        .build();
+    UsuarioDTO credencial =
+      UsuarioDTO.builder()
+        .username("enrique")
+        .password("peña213")
+        .nombre("Enrique")
+        .apellido("Peña")
+        .email("enriqueelgenial@outlook.com")
+        .roles(new ArrayList<>(Collections.singletonList(Rol.COMPRADOR)))
+        .build();
+    credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
+    ClienteDTO clienteRecuperado =
+      restTemplate.postForObject(
+        apiPrefix + "/clientes?idEmpresa=1&idCredencial=" + credencial.getId_Usuario(),
+        cliente,
+        ClienteDTO.class);
+    clienteRecuperado.setUbicacionEnvio(UbicacionDTO.builder().nombreLocalidad("Resistencia").nombreProvincia("Chaco").codigoPostal("H3500").build());
+    restTemplate.put(apiPrefix + "/clientes", clienteRecuperado);
+    clienteRecuperado = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class);
+    assertEquals("Resistencia", clienteRecuperado.getUbicacionEnvio().getNombreLocalidad());
+    assertEquals("Chaco", clienteRecuperado.getUbicacionEnvio().getNombreProvincia());
+    assertEquals("H3500", clienteRecuperado.getUbicacionEnvio().getCodigoPostal());
+  }
 }

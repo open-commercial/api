@@ -270,6 +270,12 @@ public class ClienteServiceImpl implements IClienteService {
         }
       }
     }
+    if (clientePorActualizar.getUbicacionFacturacion().getIdUbicacion() == 0l) {
+      clientePorActualizar.setUbicacionFacturacion(ubicacionService.guardar(clientePorActualizar.getUbicacionFacturacion()));
+    }
+    if (clientePorActualizar.getUbicacionEnvio().getIdUbicacion() == 0l) {
+      clientePorActualizar.setUbicacionEnvio(ubicacionService.guardar(clientePorActualizar.getUbicacionEnvio()));
+    }
     clienteRepository.save(clientePorActualizar);
     logger.warn("El Cliente {} se actualizó correctamente.", clientePorActualizar);
   }
