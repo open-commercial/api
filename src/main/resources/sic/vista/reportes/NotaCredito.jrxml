@@ -11,6 +11,7 @@
 	<parameter name="preImpresa" class="java.lang.Boolean"/>
 	<parameter name="formasDePago" class="java.lang.String"/>
 	<parameter name="nroNota" class="java.lang.Long"/>
+	<parameter name="detalleUbicacion" class="java.lang.String"/>
 	<field name="descripcionItem" class="java.lang.String"/>
 	<field name="codigoItem" class="java.lang.String"/>
 	<field name="medidaItem" class="java.lang.String"/>
@@ -262,8 +263,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{notaCredito}.getCliente().getUbicacionFacturacion() != null) 
-? $P{notaCredito}.getCliente().getUbicacionFacturacion().getDetalleUbicacion() : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{detalleUbicacion} ]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="50" y="221" width="505" height="15" uuid="cb8691ce-a678-4cf1-a2c7-4938068372c4">

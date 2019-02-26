@@ -72,7 +72,12 @@ public class FacturaController {
       @RequestParam(required = false) Long idPedido) {
     Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
     fv.setEmpresa(empresa);
-    fv.setCliente(clienteService.getClientePorId(idCliente));
+    Cliente cliente = clienteService.getClientePorId(idCliente);
+    if (cliente.getUbicacionFacturacion() == null) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_cliente_sin_ubicacion"));
+    }
+    fv.setCliente(cliente);
     fv.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
     fv.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
     List<FacturaVenta> facturasGuardadas;

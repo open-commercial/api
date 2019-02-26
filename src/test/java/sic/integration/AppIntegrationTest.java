@@ -3531,9 +3531,23 @@ public class AppIntegrationTest {
       .build());
     restTemplate.put(apiPrefix + "/clientes", clienteRecuperado);
     clienteRecuperado = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class);
+    assertEquals("Posadas", clienteRecuperado.getUbicacionFacturacion().getNombreLocalidad());
+    assertEquals("Misiones", clienteRecuperado.getUbicacionFacturacion().getNombreProvincia());
+    assertEquals("N3300", clienteRecuperado.getUbicacionFacturacion().getCodigoPostal());
     assertEquals("Resistencia", clienteRecuperado.getUbicacionEnvio().getNombreLocalidad());
     assertEquals("Chaco", clienteRecuperado.getUbicacionEnvio().getNombreProvincia());
     assertEquals("H3500", clienteRecuperado.getUbicacionEnvio().getCodigoPostal());
     assertEquals("Av San Martín", clienteRecuperado.getUbicacionEnvio().getCalle());
+  }
+
+  @Test
+  public void shouldModificarUbicacionDeFacturacionCliente() {
+    this.shouldCrearUbicacionDeFacturacionEnAltaDeCliente();
+    ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class);
+    cliente.getUbicacionFacturacion().setCalle("Regresión lineal");
+    cliente.getUbicacionFacturacion().setNumero(999);
+    restTemplate.put(apiPrefix + "/clientes", cliente);
+    cliente = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class);
+    assertEquals("Regresión lineal", cliente.getUbicacionFacturacion().getCalle());
   }
 }

@@ -46,6 +46,12 @@ public class UbicacionServiceImpl implements IUbicacionService {
     return ubicacionGuardada;
   }
 
+  @Override
+  public void actualizar(Ubicacion ubicacion) {
+    this.validarUbicacion(ubicacion);
+    ubicacionRepository.save(ubicacion);
+  }
+
   private void validarUbicacion(Ubicacion ubicacion) {
     if (ubicacion.getLocalidad() != null)
       ubicacion.setLocalidad(this.guardarLocalidad(
@@ -73,33 +79,6 @@ public class UbicacionServiceImpl implements IUbicacionService {
       localidad = localidadRepository.save(localidad);
     }
     return localidad;
-  }
-
-  @Override
-  @Transactional
-  public void actualizarUbicacionEnvio(Ubicacion ubicacionParaActualizar, Cliente cliente) {
-    Ubicacion ubicacionDeEnvio = cliente.getUbicacionEnvio();
-    this.actualizarUbicacion(ubicacionDeEnvio, ubicacionParaActualizar);
-  }
-
-  @Override
-  @Transactional
-  public void actualizarUbicacionFacturacion(Ubicacion ubicacionParaActualizar, Cliente cliente) {
-    Ubicacion ubicacionDeFacturacion = cliente.getUbicacionFacturacion();
-    this.actualizarUbicacion(ubicacionDeFacturacion, ubicacionParaActualizar);
-  }
-
-  private void actualizarUbicacion(Ubicacion ubicacionCliente, Ubicacion ubicacionParaActualizar) {
-    ubicacionCliente.setCalle(ubicacionParaActualizar.getCalle());
-    ubicacionCliente.setDepartamento(ubicacionParaActualizar.getDepartamento());
-    ubicacionCliente.setDescripcion(ubicacionParaActualizar.getDescripcion());
-    ubicacionCliente.setLatitud(ubicacionParaActualizar.getLatitud());
-    ubicacionCliente.setLongitud(ubicacionParaActualizar.getLongitud());
-    ubicacionCliente.setNumero(ubicacionParaActualizar.getNumero());
-    ubicacionCliente.setCalle(ubicacionParaActualizar.getCalle());
-    ubicacionCliente.setPiso(ubicacionParaActualizar.getPiso());
-    //ubicacionCliente.setEliminada(false);
-    ubicacionRepository.save(ubicacionParaActualizar);
   }
 
   @Override

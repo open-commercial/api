@@ -10,6 +10,7 @@
 	<parameter name="logo" class="java.awt.Image"/>
 	<parameter name="preImpresa" class="java.lang.Boolean"/>
 	<parameter name="formasDePago" class="java.lang.String"/>
+	<parameter name="detalleUbicacion" class="java.lang.String"/>
 	<parameter name="nroFactura" class="java.lang.Long"/>
 	<field name="descripcionItem" class="java.lang.String"/>
 	<field name="codigoItem" class="java.lang.String"/>
@@ -77,7 +78,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getEmpresa().getDireccion()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getEmpresa().getUbicacion().getDescripcion()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="145" width="555" height="15" uuid="3c596225-a4e6-4283-92e6-74a5552f2211">
@@ -151,8 +152,8 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{facturaVenta}.getEmpresa().getLocalidad() != null) 
-? $P{facturaVenta}.getEmpresa().getLocalidad().getNombre() + " " + $P{facturaVenta}.getEmpresa().getLocalidad().getProvincia().getNombre() + " " + $P{facturaVenta}.getEmpresa().getLocalidad().getProvincia().getPais().getNombre()
+				<textFieldExpression><![CDATA[($P{facturaVenta}.getEmpresa().getUbicacion().getLocalidad() != null) 
+? $P{facturaVenta}.getEmpresa().getUbicacion().getLocalidad().getNombre() + " " + $P{facturaVenta}.getEmpresa().getUbicacion().getLocalidad().getProvincia().getNombre() + " "
 : ""]]></textFieldExpression>
 			</textField>
 			<textField>
@@ -277,18 +278,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getCliente().getDireccion()]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="50" y="206" width="505" height="15" uuid="e0084cc3-1c80-4007-9e51-4ee7c9be1c7f">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[($P{facturaVenta}.getCliente().getLocalidad() != null) 
-? $P{facturaVenta}.getCliente().getLocalidad().getNombre() + " " + $P{facturaVenta}.getCliente().getLocalidad().getProvincia().getNombre() + " " + $P{facturaVenta}.getCliente().getLocalidad().getProvincia().getPais().getNombre()
-: ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{detalleUbicacion}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="50" y="221" width="505" height="15" uuid="cb8691ce-a678-4cf1-a2c7-4938068372c4">

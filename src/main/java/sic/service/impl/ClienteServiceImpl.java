@@ -199,6 +199,14 @@ public class ClienteServiceImpl implements IClienteService {
             RESOURCE_BUNDLE.getString("mensaje_cliente_duplicado_idFiscal"));
       }
     }
+    // Ubicacion
+    if (cliente.getUbicacionFacturacion() != null && cliente.getUbicacionEnvio() != null) {
+      if (cliente.getUbicacionFacturacion().getIdUbicacion()
+          == cliente.getUbicacionEnvio().getIdUbicacion()) {
+        throw new BusinessServiceException(
+            RESOURCE_BUNDLE.getString("mensaje_ubicacion_facturacion_envio_iguales"));
+      }
+    }
   }
 
   @Override
@@ -208,6 +216,14 @@ public class ClienteServiceImpl implements IClienteService {
     cliente.setEliminado(false);
     cliente.setNroCliente(this.generarNroDeCliente(cliente.getEmpresa()));
     if (cliente.getBonificacion() == null) cliente.setBonificacion(BigDecimal.ZERO);
+    if (cliente.getUbicacionFacturacion() != null) {
+      Ubicacion ubicacion = ubicacionService.guardar(cliente.getUbicacionFacturacion());
+      cliente.setUbicacionFacturacion(ubicacion);
+    }
+    if (cliente.getUbicacionEnvio() != null) {
+      Ubicacion ubicacion = ubicacionService.guardar(cliente.getUbicacionEnvio());
+      cliente.setUbicacionEnvio(ubicacion);
+    }
     this.validarOperacion(TipoDeOperacion.ALTA, cliente);
     CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
     cuentaCorrienteCliente.setCliente(cliente);
@@ -229,14 +245,6 @@ public class ClienteServiceImpl implements IClienteService {
         }
       }
     }
-    if (cliente.getUbicacionFacturacion() != null) {
-      Ubicacion ubicacion = ubicacionService.guardar(cliente.getUbicacionFacturacion());
-      cliente.setUbicacionFacturacion(ubicacion);
-    }
-    if (cliente.getUbicacionEnvio() != null) {
-      Ubicacion ubicacion = ubicacionService.guardar(cliente.getUbicacionEnvio());
-      cliente.setUbicacionEnvio(ubicacion);
-    }
     cliente = clienteRepository.save(cliente);
     cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);
     logger.warn("El Cliente {} se guardó correctamente.", cliente);
@@ -252,6 +260,22 @@ public class ClienteServiceImpl implements IClienteService {
     clientePorActualizar.setEliminado(clientePersistido.isEliminado());
     if (clientePorActualizar.getBonificacion() == null)
       clientePorActualizar.setBonificacion(BigDecimal.ZERO);
+    if (clientePorActualizar.getUbicacionFacturacion() != null) {
+      if (clientePorActualizar.getUbicacionFacturacion().getIdUbicacion() == 0L) {
+        clientePorActualizar.setUbicacionFacturacion(
+            ubicacionService.guardar(clientePorActualizar.getUbicacionFacturacion()));
+      } else {
+        ubicacionService.actualizar(clientePorActualizar.getUbicacionFacturacion());
+      }
+    }
+    if (clientePorActualizar.getUbicacionEnvio() != null) {
+      if (clientePorActualizar.getUbicacionEnvio().getIdUbicacion() == 0L) {
+        clientePorActualizar.setUbicacionEnvio(
+            ubicacionService.guardar(clientePorActualizar.getUbicacionEnvio()));
+      } else {
+        ubicacionService.actualizar(clientePorActualizar.getUbicacionEnvio());
+      }
+    }
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, clientePorActualizar);
     if (clientePorActualizar.getCredencial() != null) {
       Cliente clienteYaAsignado =
@@ -269,12 +293,6 @@ public class ClienteServiceImpl implements IClienteService {
           clientePorActualizar.getCredencial().getRoles().add(Rol.COMPRADOR);
         }
       }
-    }
-    if (clientePorActualizar.getUbicacionFacturacion().getIdUbicacion() == 0l) {
-      clientePorActualizar.setUbicacionFacturacion(ubicacionService.guardar(clientePorActualizar.getUbicacionFacturacion()));
-    }
-    if (clientePorActualizar.getUbicacionEnvio().getIdUbicacion() == 0l) {
-      clientePorActualizar.setUbicacionEnvio(ubicacionService.guardar(clientePorActualizar.getUbicacionEnvio()));
     }
     clienteRepository.save(clientePorActualizar);
     logger.warn("El Cliente {} se actualizó correctamente.", clientePorActualizar);

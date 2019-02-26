@@ -245,7 +245,7 @@ public class ClienteController {
       if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
           && !usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)) {
         throw new ForbiddenException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
       }
     } else {
       clientePorActualizar.setBonificacion(clientePersistido.getBonificacion());
@@ -253,19 +253,21 @@ public class ClienteController {
     if (clienteDTO.getUbicacionFacturacion() != null) {
       if (clientePersistido.getUbicacionFacturacion() != null) {
         if (clienteDTO.getUbicacionFacturacion().getIdUbicacion()
-          == clientePersistido.getUbicacionFacturacion().getIdUbicacion()) {
-          clientePorActualizar.setUbicacionFacturacion(clientePersistido.getUbicacionFacturacion());
-        } else {
+            != clientePersistido.getUbicacionFacturacion().getIdUbicacion()) {
           throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
+              ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
         }
         if (clienteDTO.getUbicacionFacturacion().getIdLocalidad()
-          != clientePersistido.getUbicacionFacturacion().getLocalidad().getId_Localidad()) {
+            != clientePersistido.getUbicacionFacturacion().getLocalidad().getId_Localidad()) {
           clientePorActualizar
-            .getUbicacionFacturacion()
-            .setLocalidad(
-              ubicacionService.getLocalidadPorId(
-                clienteDTO.getUbicacionFacturacion().getIdLocalidad()));
+              .getUbicacionFacturacion()
+              .setLocalidad(
+                  ubicacionService.getLocalidadPorId(
+                      clienteDTO.getUbicacionFacturacion().getIdLocalidad()));
+        } else {
+          clientePorActualizar
+              .getUbicacionFacturacion()
+              .setLocalidad(clientePersistido.getUbicacionFacturacion().getLocalidad());
         }
       }
       if (clienteDTO.getUbicacionFacturacion().getIdLocalidad() == null) {
@@ -281,19 +283,22 @@ public class ClienteController {
     if (clienteDTO.getUbicacionEnvio() != null) {
       if (clientePersistido.getUbicacionEnvio() != null) {
         if (clienteDTO.getUbicacionEnvio().getIdUbicacion()
-          == clientePersistido.getUbicacionEnvio().getIdUbicacion()) {
-          clientePorActualizar.setUbicacionEnvio(clientePersistido.getUbicacionFacturacion());
-        } else {
+            != clientePersistido.getUbicacionEnvio().getIdUbicacion()) {
           throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
+              ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
         }
-        if (clientePersistido.getUbicacionEnvio().getLocalidad() != null && (clienteDTO.getUbicacionEnvio().getIdLocalidad()
-          != clientePersistido.getUbicacionEnvio().getLocalidad().getId_Localidad())) {
+        if (clientePersistido.getUbicacionEnvio().getLocalidad() != null
+            && (clienteDTO.getUbicacionEnvio().getIdLocalidad()
+                != clientePersistido.getUbicacionEnvio().getLocalidad().getId_Localidad())) {
           clientePorActualizar
-            .getUbicacionEnvio()
-            .setLocalidad(
-              ubicacionService.getLocalidadPorId(
-                clienteDTO.getUbicacionFacturacion().getIdLocalidad()));
+              .getUbicacionEnvio()
+              .setLocalidad(
+                  ubicacionService.getLocalidadPorId(
+                      clienteDTO.getUbicacionFacturacion().getIdLocalidad()));
+        } else {
+          clientePorActualizar
+              .getUbicacionEnvio()
+              .setLocalidad(clientePersistido.getUbicacionEnvio().getLocalidad());
         }
       }
       if (clienteDTO.getUbicacionEnvio().getIdLocalidad() == null) {

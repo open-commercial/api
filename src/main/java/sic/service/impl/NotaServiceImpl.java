@@ -894,6 +894,26 @@ public class NotaServiceImpl implements INotaService {
             ResourceBundle.getBundle("Mensajes").getString("mensaje_empresa_404_logo"), ex);
       }
     }
+    String detalleUbicacion =
+        (nota.getCliente().getUbicacionFacturacion().getCalle() != null
+                ? nota.getCliente().getUbicacionFacturacion().getCalle()
+                : "")
+            + " "
+            + (nota.getCliente().getUbicacionFacturacion().getNumero() != null
+                ? nota.getCliente().getUbicacionFacturacion().getNumero()
+                : "")
+            + ", "
+            + (nota.getCliente().getUbicacionFacturacion().getPiso() != null
+                ? nota.getCliente().getUbicacionFacturacion().getPiso() + ","
+                : "")
+            + (nota.getCliente().getUbicacionFacturacion().getNombreLocalidad() != null
+                ? nota.getCliente().getUbicacionFacturacion().getNombreProvincia()
+                : "")
+            + " "
+            + (nota.getCliente().getUbicacionFacturacion().getNombreProvincia() != null
+                ? nota.getCliente().getUbicacionFacturacion().getNombreProvincia()
+                : "");
+    params.put("detalleUbicacion", detalleUbicacion);
     try {
       return JasperExportManager.exportReportToPdf(
           JasperFillManager.fillReport(isFileReport, params, ds));

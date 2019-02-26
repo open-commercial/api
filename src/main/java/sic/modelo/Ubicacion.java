@@ -52,19 +52,6 @@ public class Ubicacion implements Serializable {
 
   private boolean eliminada;
 
-  @JsonGetter("detalleUbicacion")
-  public String getDetalleUbicacion() {
-    return (this.getCalle() != null ? this.getCalle() : "")
-      + " "
-      + (this.getNumero() != null ? this.getNumero() : "")
-      + ", "
-      + (this.getPiso() != null ? this.getPiso() : "")
-      + ", "
-      + (this.getLocalidad() != null ? this.getLocalidad().getNombre() : "")
-      + " "
-      + (this.getLocalidad() != null ? this.getLocalidad().getNombreProvincia() : "");
-  }
-
   @JsonGetter("idLocalidad")
   public Long getIdLocalidad() {
     return (localidad != null) ? localidad.getId_Localidad() : null;

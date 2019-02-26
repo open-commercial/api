@@ -16,6 +16,7 @@
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.report.description" value=""/>
 	<parameter name="cuentaCorrienteCliente" class="sic.modelo.CuentaCorrienteCliente"/>
+	<parameter name="detalleUbicacion" class="java.lang.String"/>
 	<parameter name="logo" class="java.awt.Image"/>
 	<field name="tipoComprobante" class="sic.modelo.TipoDeComprobante"/>
 	<field name="fecha" class="java.util.Date"/>
@@ -48,7 +49,7 @@
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getEmpresa().getDireccion()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getEmpresa().getUbicacion().getDescripcion()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="145" width="800" height="15" uuid="3c596225-a4e6-4283-92e6-74a5552f2211">
@@ -103,8 +104,8 @@ $P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("MON
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{cuentaCorrienteCliente}.getEmpresa().getLocalidad() != null) 
-? $P{cuentaCorrienteCliente}.getEmpresa().getLocalidad().getNombre() + " " + $P{cuentaCorrienteCliente}.getEmpresa().getLocalidad().getProvincia().getNombre() 
+				<textFieldExpression><![CDATA[($P{cuentaCorrienteCliente}.getEmpresa().getUbicacion().getLocalidad() != null) 
+? $P{cuentaCorrienteCliente}.getEmpresa().getUbicacion().getLocalidad().getNombre() + " " + $P{cuentaCorrienteCliente}.getEmpresa().getUbicacion().getLocalidad().getProvincia().getNombre() 
 : ""]]></textFieldExpression>
 			</textField>
 			<textField>
@@ -163,18 +164,7 @@ $P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("MON
 				<textElement verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getCliente().getDireccion()]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement positionType="FixRelativeToBottom" x="50" y="206" width="505" height="15" uuid="e0084cc3-1c80-4007-9e51-4ee7c9be1c7f">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[($P{cuentaCorrienteCliente}.getCliente().getLocalidad() != null) 
-? $P{cuentaCorrienteCliente}.getCliente().getLocalidad().getNombre() + " " + $P{cuentaCorrienteCliente}.getCliente().getLocalidad().getProvincia().getNombre() 
-: ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{detalleUbicacion}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement positionType="FixRelativeToBottom" x="50" y="221" width="505" height="15" uuid="cb8691ce-a678-4cf1-a2c7-4938068372c4">

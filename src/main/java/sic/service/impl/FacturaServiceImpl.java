@@ -886,6 +886,27 @@ public class FacturaServiceImpl implements IFacturaService {
         }
         List<RenglonFactura> renglones = this.getRenglonesDeLaFactura(factura.getId_Factura());
         JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
+        FacturaVenta fv = (FacturaVenta) factura;
+    String detalleUbicacion =
+        (fv.getCliente().getUbicacionFacturacion().getCalle() != null
+                ? fv.getCliente().getUbicacionFacturacion().getCalle()
+                : "")
+            + " "
+            + (fv.getCliente().getUbicacionFacturacion().getNumero() != null
+                ? fv.getCliente().getUbicacionFacturacion().getNumero()
+                : "")
+            + ", "
+            + (fv.getCliente().getUbicacionFacturacion().getPiso() != null
+                ? fv.getCliente().getUbicacionFacturacion().getPiso() + ","
+                : "")
+            + (fv.getCliente().getUbicacionFacturacion().getNombreLocalidad() != null
+                ? fv.getCliente().getUbicacionFacturacion().getNombreProvincia()
+                : "")
+            + " "
+            + (fv.getCliente().getUbicacionFacturacion().getNombreProvincia() != null
+                ? fv.getCliente().getUbicacionFacturacion().getNombreProvincia()
+                : "");
+    params.put("detalleUbicacion", detalleUbicacion);
          try {
             return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
