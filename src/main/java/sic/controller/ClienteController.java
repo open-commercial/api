@@ -245,26 +245,28 @@ public class ClienteController {
       if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
           && !usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)) {
         throw new ForbiddenException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
       }
     } else {
       clientePorActualizar.setBonificacion(clientePersistido.getBonificacion());
     }
     if (clienteDTO.getUbicacionFacturacion() != null) {
-      if (clienteDTO.getUbicacionFacturacion().getIdUbicacion()
+      if (clientePersistido.getUbicacionFacturacion() != null) {
+        if (clienteDTO.getUbicacionFacturacion().getIdUbicacion()
           == clientePersistido.getUbicacionFacturacion().getIdUbicacion()) {
-        clientePorActualizar.setUbicacionFacturacion(clientePersistido.getUbicacionFacturacion());
-      } else {
-        throw new BusinessServiceException(
+          clientePorActualizar.setUbicacionFacturacion(clientePersistido.getUbicacionFacturacion());
+        } else {
+          throw new BusinessServiceException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
-      }
-      if (clienteDTO.getUbicacionFacturacion().getIdLocalidad()
+        }
+        if (clienteDTO.getUbicacionFacturacion().getIdLocalidad()
           != clientePersistido.getUbicacionFacturacion().getLocalidad().getId_Localidad()) {
-        clientePorActualizar
+          clientePorActualizar
             .getUbicacionFacturacion()
             .setLocalidad(
-                ubicacionService.getLocalidadPorId(
-                    clienteDTO.getUbicacionFacturacion().getIdLocalidad()));
+              ubicacionService.getLocalidadPorId(
+                clienteDTO.getUbicacionFacturacion().getIdLocalidad()));
+        }
       }
       if (clienteDTO.getUbicacionFacturacion().getIdLocalidad() == null) {
         Provincia provincia = new Provincia();
