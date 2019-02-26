@@ -3411,4 +3411,38 @@ public class AppIntegrationTest {
     restTemplate.postForObject(apiPrefix + "/gastos?idEmpresa=1&idFormaDePago=1", gasto, GastoDTO.class);
     assertEquals(new BigDecimal("-200.000000000000000"), restTemplate.getForObject(apiPrefix + "/cajas/1/saldo-sistema", BigDecimal.class));
   }
+
+  @Test
+  public void shouldCrearUbicacionDeFacturacionEnAltaDeCliente() {
+    ClienteDTO cliente =
+      ClienteDTO.builder()
+        .bonificacion(BigDecimal.TEN)
+        .nombreFiscal("Enrique Peña")
+        .nombreFantasia("Los gemelos fantasticos.")
+        .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+        .idFiscal(1244566L)
+        .email("enriqueelgenial@outlook.com")
+        .telefono("3875114422")
+        .contacto("La señora de Enrique")
+        .ubicacionFacturacion(UbicacionDTO.builder().nombreLocalidad("Posadas").nombreProvincia("Misiones").codigoPostal("N3300").build())
+        .build();
+    UsuarioDTO credencial =
+      UsuarioDTO.builder()
+        .username("enrique")
+        .password("peña213")
+        .nombre("Enrique")
+        .apellido("Peña")
+        .email("enriqueelgenial@outlook.com")
+        .roles(new ArrayList<>(Collections.singletonList(Rol.COMPRADOR)))
+        .build();
+    credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
+    ClienteDTO clienteRecuperado =
+      restTemplate.postForObject(
+        apiPrefix + "/clientes?idEmpresa=1&idCredencial=" + credencial.getId_Usuario(),
+        cliente,
+        ClienteDTO.class);
+    assertEquals(cliente.getUbicacionFacturacion().getNombreLocalidad(), clienteRecuperado.getUbicacionFacturacion().getNombreLocalidad());
+    assertEquals(cliente.getUbicacionFacturacion().getNombreProvincia(), clienteRecuperado.getUbicacionFacturacion().getNombreProvincia());
+    assertEquals(cliente.getUbicacionFacturacion().getCodigoPostal(), clienteRecuperado.getUbicacionFacturacion().getCodigoPostal());
+  }
 }

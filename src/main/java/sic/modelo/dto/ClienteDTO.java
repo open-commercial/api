@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
-@EqualsAndHashCode(exclude = {"id_Cliente", "idEmpresa", "nombreEmpresa", "fechaAlta", "idCredencial", "nombreCredencial"})
+@EqualsAndHashCode(exclude = {"id_Cliente", "idEmpresa", "nombreEmpresa", "fechaAlta", "idCredencial", "nombreCredencial", "ubicacionFacturacion", "ubicacionEnvio"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

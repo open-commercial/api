@@ -181,6 +181,24 @@ public class ClienteController {
           ubicacionService.getLocalidadPorId(
             nuevoCliente.getUbicacionEnvio().getIdLocalidad()));
     }
+    if (nuevoCliente.getUbicacionFacturacion() != null && nuevoCliente.getUbicacionFacturacion().getIdLocalidad() == null) {
+      Provincia provincia = new Provincia();
+      provincia.setNombre(nuevoCliente.getUbicacionFacturacion().getNombreProvincia());
+      Localidad localidad = new Localidad();
+      localidad.setProvincia(provincia);
+      localidad.setCodigoPostal(nuevoCliente.getUbicacionFacturacion().getCodigoPostal());
+      localidad.setNombre(nuevoCliente.getUbicacionFacturacion().getNombreLocalidad());
+      cliente.getUbicacionFacturacion().setLocalidad(localidad);
+    }
+    if (nuevoCliente.getUbicacionEnvio() != null && nuevoCliente.getUbicacionEnvio().getIdLocalidad() == null) {
+      Provincia provincia = new Provincia();
+      provincia.setNombre(nuevoCliente.getUbicacionEnvio().getNombreProvincia());
+      Localidad localidad = new Localidad();
+      localidad.setProvincia(provincia);
+      localidad.setCodigoPostal(nuevoCliente.getUbicacionEnvio().getCodigoPostal());
+      localidad.setNombre(nuevoCliente.getUbicacionEnvio().getNombreLocalidad());
+      cliente.getUbicacionEnvio().setLocalidad(localidad);
+    }
     return clienteService.guardar(cliente);
   }
 

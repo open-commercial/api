@@ -48,10 +48,10 @@ public class UbicacionServiceImpl implements IUbicacionService {
 
   private void validarUbicacion(Ubicacion ubicacion) {
     if (ubicacion.getLocalidad() != null)
-      this.guardarLocalidad(
-          ubicacion.getLocalidad().getNombre(),
-          ubicacion.getLocalidad().getNombreProvincia(),
-          ubicacion.getLocalidad().getCodigoPostal());
+      ubicacion.setLocalidad(this.guardarLocalidad(
+        ubicacion.getLocalidad().getNombre(),
+        ubicacion.getLocalidad().getNombreProvincia(),
+        ubicacion.getLocalidad().getCodigoPostal()));
   }
 
   @Override
