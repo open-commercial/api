@@ -2,10 +2,9 @@ package sic.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sic.service.IMyClockService;
+import sic.service.IClockService;
 
 import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -13,12 +12,12 @@ import java.util.Date;
 import static java.time.Instant.ofEpochMilli;
 
 @Service
-public class MyClockServiceImpl implements IMyClockService {
+public class ClockServiceImpl implements IClockService {
 
   private Clock clock;
 
   @Autowired
-  public MyClockServiceImpl(Clock clock) {
+  public ClockServiceImpl(Clock clock) {
     this.clock = clock;
   }
 

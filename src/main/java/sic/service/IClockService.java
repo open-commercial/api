@@ -2,7 +2,7 @@ package sic.service;
 
 import java.util.Date;
 
-public interface IMyClockService {
+public interface IClockService {
 
   Date getFechaActual();
 

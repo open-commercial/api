@@ -23,7 +23,7 @@ import sic.builder.*;
 import sic.modelo.*;
 import sic.modelo.dto.*;
 import sic.repository.UsuarioRepository;
-import sic.service.IMyClockService;
+import sic.service.IClockService;
 import sic.service.IPedidoService;
 import sic.service.IProductoService;
 
@@ -47,7 +47,7 @@ public class AppIntegrationTest {
 
   @Autowired private IPedidoService pedidoService;
 
-  @Autowired private IMyClockService clockService;
+  @Autowired private IClockService clockService;
 
   @Autowired private TestRestTemplate restTemplate;
 
@@ -3437,7 +3437,7 @@ public class AppIntegrationTest {
   public void shouldVerificarFechaCierreCaja() {
     restTemplate.postForObject(apiPrefix + "/cajas/apertura/empresas/1?saldoApertura=200", null, CajaDTO.class);
     clockService.cambiarFechaHora(2030, 9, 24, 23, 59, 59);
-    restTemplate.put(apiPrefix + "/cajas/1/cierre?idCaja=1&monto=300", CajaDTO.class);
+    restTemplate.put(apiPrefix + "/cajas/1/cierre?monto=300", CajaDTO.class);
     CajaDTO cajaRecuperada = restTemplate.getForObject(apiPrefix + "/cajas/1", CajaDTO.class);
     Calendar fechaCierre = Calendar.getInstance();
     fechaCierre.setTime(cajaRecuperada.getFechaCierre());

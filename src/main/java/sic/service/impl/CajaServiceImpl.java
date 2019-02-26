@@ -46,7 +46,7 @@ public class CajaServiceImpl implements ICajaService {
   private final IEmpresaService empresaService;
   private final IUsuarioService usuarioService;
   private final IReciboService reciboService;
-  private final IMyClockService clockService;
+  private final IClockService clockService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
@@ -58,7 +58,7 @@ public class CajaServiceImpl implements ICajaService {
       IEmpresaService empresaService,
       IUsuarioService usuarioService,
       IReciboService reciboService,
-      IMyClockService clockService) {
+      IClockService clockService) {
     this.cajaRepository = cajaRepository;
     this.formaDePagoService = formaDePagoService;
     this.gastoService = gastoService;
