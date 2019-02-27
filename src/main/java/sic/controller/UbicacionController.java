@@ -60,7 +60,7 @@ public class UbicacionController {
     return ubicacionService.getProvincias();
   }
 
-  @PostMapping("/ubicaciones/facturacion/clientes/{idCliente}")
+  @PostMapping("/ubicaciones/clientes/{idCliente}/facturacion")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -80,7 +80,7 @@ public class UbicacionController {
         ubicacion, clienteService.getClientePorId(idCliente));
   }
 
-  @PostMapping("/ubicaciones/envio/clientes/{idCliente}")
+  @PostMapping("/ubicaciones/clientes/{idCliente}/envio")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
