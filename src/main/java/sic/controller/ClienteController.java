@@ -164,6 +164,8 @@ public class ClienteController {
     if (idViajante != null) {
       cliente.setViajante(usuarioService.getUsuarioPorId(idViajante));
     }
+    cliente.setUbicacionFacturacion(null);
+    cliente.setUbicacionEnvio(null);
     return clienteService.guardar(cliente);
   }
 
@@ -224,6 +226,16 @@ public class ClienteController {
       clientePorActualizar.setViajante(usuarioService.getUsuarioPorId(idViajante));
     } else {
       clientePorActualizar.setViajante(null);
+    }
+    if (clientePersistido.getUbicacionFacturacion() != null) {
+      clientePorActualizar.setUbicacionFacturacion(clientePersistido.getUbicacionFacturacion());
+    } else {
+      clientePorActualizar.setUbicacionFacturacion(null);
+    }
+    if (clientePersistido.getUbicacionEnvio() != null) {
+      clientePorActualizar.setUbicacionEnvio(clientePersistido.getUbicacionEnvio());
+    } else {
+      clientePorActualizar.setUbicacionEnvio(null);
     }
     clienteService.actualizar(clientePorActualizar, clientePersistido);
   }
