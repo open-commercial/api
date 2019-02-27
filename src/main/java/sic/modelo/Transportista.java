@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.querydsl.core.annotations.QueryInit;
 import java.io.Serializable;
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -31,7 +30,6 @@ public class Transportista implements Serializable {
   @OneToOne
   @JoinColumn(name = "idUbicacion", referencedColumnName = "idUbicacion")
   @QueryInit("localidad.provincia")
-  @NotNull
   private Ubicacion ubicacion;
 
   @Column(nullable = false)
@@ -48,17 +46,21 @@ public class Transportista implements Serializable {
 
   @JsonGetter("idLocalidad")
   public Long getIdLocalidad() {
-    return (ubicacion.getLocalidad() != null) ? ubicacion.getLocalidad().getId_Localidad() : null;
+    return (ubicacion != null && ubicacion.getLocalidad() != null)
+        ? ubicacion.getLocalidad().getId_Localidad()
+        : null;
   }
 
   @JsonGetter("nombreLocalidad")
   public String getNombreLocalidad() {
-    return (ubicacion.getLocalidad() != null) ? ubicacion.getLocalidad().getNombre() : null;
+    return (ubicacion != null && ubicacion.getLocalidad() != null)
+        ? ubicacion.getLocalidad().getNombre()
+        : null;
   }
 
   @JsonGetter("nombreProvincia")
   public String getNombreProvincia() {
-    return (ubicacion.getLocalidad() != null)
+    return (ubicacion != null && ubicacion.getLocalidad() != null)
         ? ubicacion.getLocalidad().getProvincia().getNombre()
         : null;
   }

@@ -26,17 +26,14 @@ public class ProveedorServiceImpl implements IProveedorService {
 
   private final ProveedorRepository proveedorRepository;
   private final ICuentaCorrienteService cuentaCorrienteService;
-  private final IUbicacionService ubicacionService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
   public ProveedorServiceImpl(
       ProveedorRepository proveedorRepository,
-      ICuentaCorrienteService cuentaCorrienteService,
-      IUbicacionService ubicacionService) {
+      ICuentaCorrienteService cuentaCorrienteService) {
     this.proveedorRepository = proveedorRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
-    this.ubicacionService = ubicacionService;
   }
 
   @Override
@@ -115,10 +112,6 @@ public class ProveedorServiceImpl implements IProveedorService {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_condicionIVA_vacia"));
     }
-    if (proveedor.getUbicacion() == null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_vacia"));
-    }
     if (proveedor.getEmpresa() == null) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_empresa_vacia"));
@@ -179,14 +172,7 @@ public class ProveedorServiceImpl implements IProveedorService {
   @Transactional
   public Proveedor guardar(Proveedor proveedor) {
     if (proveedor.getCodigo() == null) proveedor.setCodigo("");
-    if (proveedor.getUbicacion() == null) {
-      proveedor.setUbicacion(new Ubicacion());
-    }
     this.validarOperacion(TipoDeOperacion.ALTA, proveedor);
-    if (proveedor.getUbicacion() != null) {
-      Ubicacion ubicacion = ubicacionService.guardar(proveedor.getUbicacion());
-      proveedor.setUbicacion(ubicacion);
-    }
     proveedor = proveedorRepository.save(proveedor);
     CuentaCorrienteProveedor cuentaCorrienteProveedor = new CuentaCorrienteProveedor();
     cuentaCorrienteProveedor.setProveedor(proveedor);

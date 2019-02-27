@@ -118,10 +118,6 @@ public class PedidoServiceImpl implements IPedidoService {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_pedido_detalle_envio_calle_vacio"));
     }
-    if (pedido.getDetalleEnvio().getNumero() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_pedido_detalle_envio_numero_vacio"));
-    }
     // Calculos
     /*BigDecimal[] importes = new BigDecimal[pedido.getRenglones().size()];
     int i = 0;
@@ -481,9 +477,7 @@ public class PedidoServiceImpl implements IPedidoService {
         ? pedido.getDetalleEnvio().getCalle()
         : "")
         + " "
-        + (pedido.getDetalleEnvio().getNumero() != null
-        ? pedido.getDetalleEnvio().getNumero()
-        : "")
+        + pedido.getDetalleEnvio().getNumero()
         + ", "
         + (pedido.getDetalleEnvio().getPiso() != null
         ? pedido.getDetalleEnvio().getPiso() + ","

@@ -6,7 +6,7 @@ CREATE TABLE `ubicacion` (
   `eliminada` bit(1) NOT NULL,
   `latitud` double DEFAULT NULL,
   `longitud` double DEFAULT NULL,
-  `numero` int(11),
+  `numero` int(11) NOT NULL,
   `piso` int(11) DEFAULT NULL,
   `id_Localidad` bigint(20) DEFAULT NULL,
   `id_Cliente` bigint(20) NOT NULL,
@@ -201,7 +201,7 @@ DROP TABLE pais;
 -- llenar tabla pedido
 
 ALTER TABLE `pedido` 
-ADD COLUMN  `calle` varchar(255) DEFAULT NULL,
+ADD COLUMN  `calle` varchar(255),
 ADD COLUMN  `codigoPostal` varchar(255) DEFAULT NULL,
 ADD COLUMN  `departamento` varchar(255) DEFAULT NULL,
 ADD COLUMN  `descripcion` varchar(255) DEFAULT NULL,
@@ -213,7 +213,7 @@ ADD COLUMN  `latitud` double DEFAULT NULL,
 ADD COLUMN  `longitud` double DEFAULT NULL,
 ADD COLUMN  `nombreLocalidad` varchar(255) DEFAULT NULL,
 ADD COLUMN  `nombreProvincia` varchar(255) DEFAULT NULL,
-ADD COLUMN  `numero` int(11) DEFAULT NULL,
+ADD COLUMN  `numero` int(11),
 ADD COLUMN  `piso` int(11) DEFAULT NULL;
 
 update pedido 

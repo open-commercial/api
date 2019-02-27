@@ -59,21 +59,10 @@ public class TransportistaController {
       || transportistaPorActualizar.getNombre().isEmpty()) {
       transportistaPorActualizar.setNombre(transportistaPersistido.getNombre());
     }
-    if (transportistaDTO.getUbicacion() != null) {
-      if (transportistaDTO.getUbicacion().getIdUbicacion()
-        == transportistaPersistido.getUbicacion().getIdUbicacion()) {
-        transportistaPorActualizar.setUbicacion(transportistaPersistido.getUbicacion());
-      } else {
-        throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
-      }
-      if (transportistaDTO.getUbicacion().getIdLocalidad()
-        != transportistaPersistido.getUbicacion().getLocalidad().getId_Localidad()) {
-        transportistaPorActualizar
-          .getUbicacion()
-          .setLocalidad(
-            ubicacionService.getLocalidadPorId(transportistaDTO.getUbicacion().getIdLocalidad()));
-      }
+    if (transportistaPersistido.getUbicacion() != null) {
+      transportistaPorActualizar.setUbicacion(transportistaPersistido.getUbicacion());
+    } else {
+      transportistaPorActualizar.setUbicacion(null);
     }
     if (transportistaPorActualizar.getWeb() == null) {
       transportistaPorActualizar.setWeb(transportistaPersistido.getWeb());
@@ -84,8 +73,7 @@ public class TransportistaController {
     if (idEmpresa == null) {
       transportistaPorActualizar.setEmpresa(transportistaPersistido.getEmpresa());
     } else {
-      transportistaPorActualizar.setEmpresa(
-        empresaService.getEmpresaPorId(idEmpresa));
+      transportistaPorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     }
     if (transportistaService.getTransportistaPorId(transportistaPorActualizar.getId_Transportista()) != null) {
       transportistaService.actualizar(transportistaPorActualizar);

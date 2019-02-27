@@ -58,12 +58,6 @@ public class EmpresaController {
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public Empresa guardar(@RequestBody EmpresaDTO empresaDTO) {
     Empresa empresa = modelMapper.map(empresaDTO, Empresa.class);
-    if (empresaDTO.getUbicacion() != null && empresaDTO.getUbicacion().getIdLocalidad() != 0) {
-      empresa
-        .getUbicacion()
-        .setLocalidad(
-          ubicacionService.getLocalidadPorId(empresaDTO.getUbicacion().getIdLocalidad()));
-    }
     return empresaService.guardar(empresa);
   }
 
@@ -71,28 +65,18 @@ public class EmpresaController {
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void actualizar(@RequestBody EmpresaDTO empresaDTO) {
     Empresa empresaParaActualizar = modelMapper.map(empresaDTO, Empresa.class);
-    Empresa empresaPersistida = empresaService.getEmpresaPorId(empresaParaActualizar.getId_Empresa());
+    Empresa empresaPersistida =
+        empresaService.getEmpresaPorId(empresaParaActualizar.getId_Empresa());
     if (empresaParaActualizar.getNombre() == null || empresaParaActualizar.getNombre().isEmpty()) {
       empresaParaActualizar.setNombre(empresaPersistida.getNombre());
     }
     if (empresaParaActualizar.getCategoriaIVA() == null) {
       empresaParaActualizar.setCategoriaIVA(empresaPersistida.getCategoriaIVA());
     }
-    if (empresaDTO.getUbicacion() != null) {
-      if (empresaDTO.getUbicacion().getIdUbicacion()
-        == empresaPersistida.getUbicacion().getIdUbicacion()) {
-        empresaParaActualizar.setUbicacion(empresaPersistida.getUbicacion());
-      } else {
-        throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
-      }
-      if (empresaDTO.getUbicacion().getIdLocalidad()
-        != empresaPersistida.getUbicacion().getLocalidad().getId_Localidad()) {
-        empresaParaActualizar
-          .getUbicacion()
-          .setLocalidad(
-            ubicacionService.getLocalidadPorId(empresaDTO.getUbicacion().getIdLocalidad()));
-      }
+    if (empresaPersistida.getUbicacion() != null) {
+      empresaParaActualizar.setUbicacion(empresaPersistida.getUbicacion());
+    } else {
+      empresaParaActualizar.setUbicacion(null);
     }
     empresaService.actualizar(empresaParaActualizar, empresaPersistida);
   }

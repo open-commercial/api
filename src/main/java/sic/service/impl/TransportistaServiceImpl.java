@@ -24,14 +24,11 @@ import sic.repository.TransportistaRepository;
 public class TransportistaServiceImpl implements ITransportistaService {
 
   private final TransportistaRepository transportistaRepository;
-  private final IUbicacionService ubicacionService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
-  public TransportistaServiceImpl(TransportistaRepository transportistaRepository,
-                                  IUbicacionService ubicacionService) {
+  public TransportistaServiceImpl(TransportistaRepository transportistaRepository) {
     this.transportistaRepository = transportistaRepository;
-    this.ubicacionService = ubicacionService;
   }
 
   @Override
@@ -99,10 +96,6 @@ public class TransportistaServiceImpl implements ITransportistaService {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_transportista_nombre_vacio"));
     }
-    if (transportista.getUbicacion() == null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_vacia"));
-    }
     if (transportista.getEmpresa() == null) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_transportista_empresa_vacia"));
@@ -128,14 +121,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
   @Override
   @Transactional
   public Transportista guardar(Transportista transportista) {
-    if (transportista.getUbicacion() == null) {
-      transportista.setUbicacion(new Ubicacion());
-    }
     this.validarOperacion(TipoDeOperacion.ALTA, transportista);
-    if (transportista.getUbicacion() != null) {
-      Ubicacion ubicacion = ubicacionService.guardar(transportista.getUbicacion());
-      transportista.setUbicacion(ubicacion);
-    }
     transportista = transportistaRepository.save(transportista);
     logger.warn("El Transportista {} se guardó correctamente.", transportista);
     return transportista;

@@ -11,9 +11,7 @@ import sic.modelo.*;
 import sic.repository.LocalidadRepository;
 import sic.repository.ProvinciaRepository;
 import sic.repository.UbicacionRepository;
-import sic.service.BusinessServiceException;
-import sic.service.IClienteService;
-import sic.service.IUbicacionService;
+import sic.service.*;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
@@ -26,6 +24,9 @@ public class UbicacionServiceImpl implements IUbicacionService {
   private final LocalidadRepository localidadRepository;
   private final ProvinciaRepository provinciaRepository;
   private final IClienteService clienteService;
+  private final IEmpresaService empresaService;
+  private final IProveedorService proveedorService;
+  private final ITransportistaService transportistaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
@@ -34,10 +35,16 @@ public class UbicacionServiceImpl implements IUbicacionService {
     UbicacionRepository ubicacionRepository,
     LocalidadRepository localidadRepository,
     ProvinciaRepository provinciaRepository,
-    IClienteService clienteService) {
+    IClienteService clienteService,
+    IEmpresaService empresaService,
+    IProveedorService proveedorService,
+    ITransportistaService transportistaService) {
     this.ubicacionRepository = ubicacionRepository;
     this.localidadRepository = localidadRepository;
     this.provinciaRepository = provinciaRepository;
+    this.empresaService = empresaService;
+    this.proveedorService = proveedorService;
+    this.transportistaService = transportistaService;
     this.clienteService = clienteService;
   }
 
@@ -52,7 +59,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
 
   @Override
   @Transactional
-  public Ubicacion guardarUbicacionDeFacturacion(Ubicacion ubicacion, Cliente cliente) {
+  public Ubicacion guardarUbicacionDeFacturacionCliente(Ubicacion ubicacion, Cliente cliente) {
     cliente.setUbicacionFacturacion(this.guardar(ubicacion));
     clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
     return cliente.getUbicacionFacturacion();
@@ -60,10 +67,34 @@ public class UbicacionServiceImpl implements IUbicacionService {
 
   @Override
   @Transactional
-  public Ubicacion guardarUbicacionDeEnvio(Ubicacion ubicacion, Cliente cliente) {
+  public Ubicacion guardarUbicacionDeEnvioCliente(Ubicacion ubicacion, Cliente cliente) {
     cliente.setUbicacionEnvio(this.guardar(ubicacion));
     clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
     return cliente.getUbicacionEnvio();
+  }
+
+  @Override
+  @Transactional
+  public Ubicacion guardaUbicacionEmpresa(Ubicacion ubicacion, Empresa empresa) {
+    empresa.setUbicacion(this.guardar(ubicacion));
+    empresaService.actualizar(empresa, empresaService.getEmpresaPorId(empresa.getId_Empresa()));
+    return empresa.getUbicacion();
+  }
+
+  @Override
+  @Transactional
+  public Ubicacion guardaUbicacionProveedor(Ubicacion ubicacion, Proveedor proveedor) {
+    proveedor.setUbicacion(this.guardar(ubicacion));
+    proveedorService.actualizar(proveedor);
+    return proveedor.getUbicacion();
+  }
+
+  @Override
+  @Transactional
+  public Ubicacion guardarUbicacionTransportista(Ubicacion ubicacion, Transportista transportista) {
+    transportista.setUbicacion(this.guardar(ubicacion));
+    transportistaService.actualizar(transportista);
+    return transportista.getUbicacion();
   }
 
   @Override
@@ -73,11 +104,15 @@ public class UbicacionServiceImpl implements IUbicacionService {
   }
 
   private void validarUbicacion(Ubicacion ubicacion) {
+    if (ubicacion.getCalle() == null)
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_ubicacion_calle_vacia"));
     if (ubicacion.getLocalidad() != null)
-      ubicacion.setLocalidad(this.guardarLocalidad(
-        ubicacion.getLocalidad().getNombre(),
-        ubicacion.getLocalidad().getNombreProvincia(),
-        ubicacion.getLocalidad().getCodigoPostal()));
+      ubicacion.setLocalidad(
+          this.guardarLocalidad(
+              ubicacion.getLocalidad().getNombre(),
+              ubicacion.getLocalidad().getNombreProvincia(),
+              ubicacion.getLocalidad().getCodigoPostal()));
   }
 
   @Override
@@ -120,11 +155,6 @@ public class UbicacionServiceImpl implements IUbicacionService {
     if (criteria.isBuscaPorCodigoPostal())
       builder.and(qUbicacion.localidad.codigoPostal.eq(criteria.getCodigoPostal()));
     return ubicacionRepository.findAll(builder, criteria.getPageable());
-  }
-
-  @Override
-  public void eliminarUbicacion(long idUbicacion) {
-    ubicacionRepository.eliminar(idUbicacion);
   }
 
   @Override

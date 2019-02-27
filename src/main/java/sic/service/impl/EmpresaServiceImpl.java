@@ -22,7 +22,6 @@ public class EmpresaServiceImpl implements IEmpresaService {
   private final EmpresaRepository empresaRepository;
   private final IConfiguracionDelSistemaService configuracionDelSistemaService;
   private final IPhotoVideoUploader photoVideoUploader;
-  private final IUbicacionService ubicacionService;
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
   private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
@@ -30,11 +29,9 @@ public class EmpresaServiceImpl implements IEmpresaService {
   public EmpresaServiceImpl(
       EmpresaRepository empresaRepository,
       IConfiguracionDelSistemaService configuracionDelSistemaService,
-      IUbicacionService ubicacionService,
       IPhotoVideoUploader photoVideoUploader) {
     this.empresaRepository = empresaRepository;
     this.configuracionDelSistemaService = configuracionDelSistemaService;
-    this.ubicacionService = ubicacionService;
     this.photoVideoUploader = photoVideoUploader;
   }
 
@@ -73,10 +70,6 @@ public class EmpresaServiceImpl implements IEmpresaService {
     // Requeridos
     if (Validator.esVacio(empresa.getNombre())) {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_empresa_vacio_nombre"));
-    }
-    if (empresa.getUbicacion() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_ubicacion_vacia"));
     }
     // Duplicados
     // Nombre
@@ -121,14 +114,7 @@ public class EmpresaServiceImpl implements IEmpresaService {
   @Override
   @Transactional
   public Empresa guardar(Empresa empresa) {
-    if (empresa.getUbicacion() == null) {
-      empresa.setUbicacion(new Ubicacion());
-    }
     validarOperacion(TipoDeOperacion.ALTA, empresa);
-    if (empresa.getUbicacion() != null) {
-      Ubicacion ubicacion = ubicacionService.guardar(empresa.getUbicacion());
-      empresa.setUbicacion(ubicacion);
-    }
     empresa = empresaRepository.save(empresa);
     crearConfiguracionDelSistema(empresa);
     LOGGER.warn("La Empresa {} se guardó correctamente.", empresa);

@@ -7,17 +7,21 @@ import java.util.List;
 
 public interface IUbicacionService {
 
+  Ubicacion guardarUbicacionDeFacturacionCliente(Ubicacion ubicacion, Cliente cliente);
+
+  Ubicacion guardarUbicacionDeEnvioCliente(Ubicacion ubicacion, Cliente cliente);
+
+  Ubicacion guardaUbicacionEmpresa(Ubicacion ubicacion, Empresa empresa);
+
+  Ubicacion guardaUbicacionProveedor(Ubicacion ubicacion, Proveedor proveedor);
+
+  Ubicacion guardarUbicacionTransportista(Ubicacion ubicacion, Transportista transportista);
+
   Ubicacion guardar(Ubicacion ubicacion);
-
-  Ubicacion guardarUbicacionDeFacturacion(Ubicacion ubicacion, Cliente cliente);
-
-  Ubicacion guardarUbicacionDeEnvio(Ubicacion ubicacion, Cliente cliente);
 
   void actualizar(Ubicacion ubicacion);
 
   Page<Ubicacion> buscarUbicaciones(BusquedaUbicacionCriteria criteria);
-
-  void eliminarUbicacion(long idUbicacion);
 
   Ubicacion getUbicacionPorId(long idUbicacion);
 

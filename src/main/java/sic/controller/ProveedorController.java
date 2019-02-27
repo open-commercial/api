@@ -78,21 +78,10 @@ public class ProveedorController {
     if (proveedorPorActualizar.getCategoriaIVA() == null) {
       proveedorPorActualizar.setCategoriaIVA(proveedorPersistido.getCategoriaIVA());
     }
-    if (proveedorDTO.getUbicacion() != null) {
-      if (proveedorDTO.getUbicacion().getIdUbicacion()
-        == proveedorPersistido.getUbicacion().getIdUbicacion()) {
-        proveedorPorActualizar.setUbicacion(proveedorPersistido.getUbicacion());
-      } else {
-        throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
-      }
-      if (proveedorDTO.getUbicacion().getIdLocalidad()
-        != proveedorPersistido.getUbicacion().getLocalidad().getId_Localidad()) {
-        proveedorPorActualizar
-          .getUbicacion()
-          .setLocalidad(
-            ubicacionService.getLocalidadPorId(proveedorDTO.getUbicacion().getIdLocalidad()));
-      }
+    if (proveedorPersistido.getUbicacion() != null) {
+      proveedorPorActualizar.setUbicacion(proveedorPersistido.getUbicacion());
+    } else {
+      proveedorPorActualizar.setUbicacion(null);
     }
     if (idEmpresa != null) {
       proveedorPorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));

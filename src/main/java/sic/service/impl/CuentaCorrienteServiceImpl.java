@@ -449,26 +449,37 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                 RESOURCE_BUNDLE.getString("mensaje_empresa_404_logo"), ex);
       }
     }
-    String detalleUbicacion =
-      (cuentaCorrienteCliente.getCliente().getUbicacionFacturacion().getCalle() != null
-        ? cuentaCorrienteCliente.getCliente().getUbicacionFacturacion().getCalle()
-        : "")
-        + " "
-        + (cuentaCorrienteCliente.getCliente().getUbicacionFacturacion().getNumero() != null
-        ? cuentaCorrienteCliente.getCliente().getUbicacionFacturacion().getNumero()
-        : "")
-        + ", "
-        + (cuentaCorrienteCliente.getCliente().getUbicacionFacturacion().getPiso() != null
-        ? cuentaCorrienteCliente.getCliente().getUbicacionFacturacion().getPiso() + ","
-        : "")
-        + (cuentaCorrienteCliente.getCliente().getUbicacionFacturacion().getNombreLocalidad() != null
-        ? cuentaCorrienteCliente.getCliente().getUbicacionFacturacion().getNombreProvincia()
-        : "")
-        + " "
-        + (cuentaCorrienteCliente.getCliente().getUbicacionFacturacion().getNombreProvincia() != null
-        ? cuentaCorrienteCliente.getCliente().getUbicacionFacturacion().getNombreProvincia()
-        : "");
-    params.put("detalleUbicacion", detalleUbicacion);
+    if (cuentaCorrienteCliente.getCliente().getUbicacionFacturacion() != null) {
+      String detalleUbicacion =
+          cuentaCorrienteCliente.getCliente().getUbicacionFacturacion().getCalle()
+              + " "
+              + cuentaCorrienteCliente.getCliente().getUbicacionFacturacion().getNumero()
+              + ", "
+              + (cuentaCorrienteCliente.getCliente().getUbicacionFacturacion().getPiso() != null
+                  ? cuentaCorrienteCliente.getCliente().getUbicacionFacturacion().getPiso()
+                  : " ")
+              + (cuentaCorrienteCliente.getCliente().getUbicacionFacturacion().getDepartamento()
+                      != null
+                  ? cuentaCorrienteCliente.getCliente().getUbicacionFacturacion().getDepartamento()
+                      + ", "
+                  : ", ")
+              + (cuentaCorrienteCliente.getCliente().getUbicacionFacturacion().getNombreLocalidad()
+                      != null
+                  ? cuentaCorrienteCliente
+                      .getCliente()
+                      .getUbicacionFacturacion()
+                      .getNombreProvincia()
+                  : " ")
+              + " "
+              + (cuentaCorrienteCliente.getCliente().getUbicacionFacturacion().getNombreProvincia()
+                      != null
+                  ? cuentaCorrienteCliente
+                      .getCliente()
+                      .getUbicacionFacturacion()
+                      .getNombreProvincia()
+                  : "");
+      params.put("detalleUbicacion", detalleUbicacion);
+    }
     switch (formato) {
       case "xlsx":
         try {

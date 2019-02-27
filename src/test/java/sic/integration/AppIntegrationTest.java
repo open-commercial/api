@@ -635,9 +635,14 @@ public class AppIntegrationTest {
             .fechaInicioActividad(new Date(539924400000L))
             .email("support@globocorporation.com")
             .telefono("379 4895549")
-            .ubicacion(UbicacionDTO.builder().idLocalidad(1l).calle("Napoles").numero(5600).build())
             .build();
     empresaDTO = restTemplate.postForObject(apiPrefix + "/empresas", empresaDTO, EmpresaDTO.class);
+    restTemplate.postForObject(apiPrefix + "/ubicaciones/empresas/1", UbicacionDTO.builder()
+      .calle("Napoles")
+      .numero(5600)
+      .nombreLocalidad("Corrientes")
+      .nombreProvincia("Corrientes")
+      .codigoPostal("W3400").build(), UbicacionDTO.class);
     FormaDePagoDTO formaDePago =
         FormaDePagoDTO.builder()
             .afectaCaja(true)
@@ -655,7 +660,6 @@ public class AppIntegrationTest {
             .roles(new ArrayList<>(Collections.singletonList(Rol.COMPRADOR)))
             .build();
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
-    restTemplate.getForObject(apiPrefix + "/ubicaciones/localidades/1", LocalidadDTO.class);
     ClienteDTO cliente =
         ClienteDTO.builder()
             .bonificacion(BigDecimal.TEN)
@@ -686,6 +690,12 @@ public class AppIntegrationTest {
             .build();
     restTemplate.postForObject(
         apiPrefix + "/transportistas?idEmpresa=1", transportistaDTO, TransportistaDTO.class);
+    restTemplate.postForObject(apiPrefix + "/ubicaciones/transportistas/1", UbicacionDTO.builder()
+      .calle("Rio Chico 15000")
+      .numero(4589)
+      .nombreLocalidad("Corrientes")
+      .nombreProvincia("Corrientes")
+      .codigoPostal("W3400").build(), UbicacionDTO.class);
     MedidaDTO medidaMetro = MedidaDTO.builder().nombre("Metro").build();
     MedidaDTO medidaKilo = MedidaDTO.builder().nombre("Kilo").build();
     restTemplate.postForObject(apiPrefix + "/medidas?idEmpresa=1", medidaMetro, MedidaDTO.class);
@@ -704,7 +714,13 @@ public class AppIntegrationTest {
             .eliminado(false)
             .saldoCuentaCorriente(BigDecimal.ZERO)
             .build();
-    restTemplate.postForObject(apiPrefix + "/proveedores?idEmpresa=1&idLocalidad=1", proveedorDTO, Proveedor.class);
+    restTemplate.postForObject(apiPrefix + "/proveedores?idEmpresa=1", proveedorDTO, Proveedor.class);
+    restTemplate.postForObject(apiPrefix + "/ubicaciones/proveedores/1", UbicacionDTO.builder()
+      .calle("Av armenia")
+      .numero(45677)
+      .nombreLocalidad("Corrientes")
+      .nombreProvincia("Corrientes")
+      .codigoPostal("W3400").build(), UbicacionDTO.class);
     RubroDTO rubro =
         RubroDTO.builder().nombre("Ferreteria").eliminado(false).build();
     restTemplate.postForObject(apiPrefix + "/rubros?idEmpresa=1", rubro, RubroDTO.class);
@@ -3438,6 +3454,8 @@ public class AppIntegrationTest {
         cliente,
         ClienteDTO.class);
     restTemplate.postForObject(apiPrefix + "/ubicaciones/clientes/3/facturacion", UbicacionDTO.builder()
+      .calle("Calle nueva")
+      .numero(7895)
       .nombreLocalidad("Posadas")
       .nombreProvincia("Misiones")
       .codigoPostal("N3300").build(), UbicacionDTO.class);
@@ -3518,6 +3536,8 @@ public class AppIntegrationTest {
       .nombreLocalidad("Posadas")
       .nombreProvincia("Misiones")
       .codigoPostal("N3300")
+      .calle("Av No Conozco")
+      .numero(5600)
       .build(), UbicacionDTO.class);
     restTemplate.postForObject(apiPrefix + "/ubicaciones/clientes/3/envio", UbicacionDTO.builder()
       .nombreLocalidad("Resistencia")

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.querydsl.core.annotations.QueryInit;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import javax.validation.constraints.DecimalMax;
@@ -41,9 +43,10 @@ public class Ubicacion implements Serializable {
   private Double longitud;
 
   @Length(max = 255, message = "{mensaje_ubicacion_longitud_calle }")
+  @NotBlank
   private String calle;
 
-  private Integer numero;
+  private int numero;
 
   private Integer piso;
 

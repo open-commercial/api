@@ -16,7 +16,7 @@ public class UbicacionDTO {
   private Double latitud;
   private Double longitud;
   private String calle;
-  private Integer numero;
+  private int numero;
   private Integer piso;
   private String departamento;
   private boolean eliminada;
