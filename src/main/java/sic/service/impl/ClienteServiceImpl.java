@@ -25,7 +25,6 @@ public class ClienteServiceImpl implements IClienteService {
   private final ClienteRepository clienteRepository;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IUsuarioService usuarioService;
-  private final IUbicacionService ubicacionService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
@@ -33,12 +32,10 @@ public class ClienteServiceImpl implements IClienteService {
   public ClienteServiceImpl(
       ClienteRepository clienteRepository,
       ICuentaCorrienteService cuentaCorrienteService,
-      IUsuarioService usuarioService,
-      IUbicacionService ubicacionService) {
+      IUsuarioService usuarioService) {
     this.clienteRepository = clienteRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.usuarioService = usuarioService;
-    this.ubicacionService = ubicacionService;
   }
 
   @Override
@@ -216,14 +213,6 @@ public class ClienteServiceImpl implements IClienteService {
     cliente.setEliminado(false);
     cliente.setNroCliente(this.generarNroDeCliente(cliente.getEmpresa()));
     if (cliente.getBonificacion() == null) cliente.setBonificacion(BigDecimal.ZERO);
-    if (cliente.getUbicacionFacturacion() != null) {
-      Ubicacion ubicacion = ubicacionService.guardar(cliente.getUbicacionFacturacion());
-      cliente.setUbicacionFacturacion(ubicacion);
-    }
-    if (cliente.getUbicacionEnvio() != null) {
-      Ubicacion ubicacion = ubicacionService.guardar(cliente.getUbicacionEnvio());
-      cliente.setUbicacionEnvio(ubicacion);
-    }
     this.validarOperacion(TipoDeOperacion.ALTA, cliente);
     CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
     cuentaCorrienteCliente.setCliente(cliente);
@@ -260,22 +249,22 @@ public class ClienteServiceImpl implements IClienteService {
     clientePorActualizar.setEliminado(clientePersistido.isEliminado());
     if (clientePorActualizar.getBonificacion() == null)
       clientePorActualizar.setBonificacion(BigDecimal.ZERO);
-    if (clientePorActualizar.getUbicacionFacturacion() != null) {
-      if (clientePorActualizar.getUbicacionFacturacion().getIdUbicacion() == 0L) {
-        clientePorActualizar.setUbicacionFacturacion(
-            ubicacionService.guardar(clientePorActualizar.getUbicacionFacturacion()));
-      } else {
-        ubicacionService.actualizar(clientePorActualizar.getUbicacionFacturacion());
-      }
-    }
-    if (clientePorActualizar.getUbicacionEnvio() != null) {
-      if (clientePorActualizar.getUbicacionEnvio().getIdUbicacion() == 0L) {
-        clientePorActualizar.setUbicacionEnvio(
-            ubicacionService.guardar(clientePorActualizar.getUbicacionEnvio()));
-      } else {
-        ubicacionService.actualizar(clientePorActualizar.getUbicacionEnvio());
-      }
-    }
+//    if (clientePorActualizar.getUbicacionFacturacion() != null) {
+//      if (clientePorActualizar.getUbicacionFacturacion().getIdUbicacion() == 0L) {
+//        clientePorActualizar.setUbicacionFacturacion(
+//            ubicacionService.guardar(clientePorActualizar.getUbicacionFacturacion()));
+//      } else {
+//        ubicacionService.actualizar(clientePorActualizar.getUbicacionFacturacion());
+//      }
+//    }
+//    if (clientePorActualizar.getUbicacionEnvio() != null) {
+//      if (clientePorActualizar.getUbicacionEnvio().getIdUbicacion() == 0L) {
+//        clientePorActualizar.setUbicacionEnvio(
+//            ubicacionService.guardar(clientePorActualizar.getUbicacionEnvio()));
+//      } else {
+//        ubicacionService.actualizar(clientePorActualizar.getUbicacionEnvio());
+//      }
+//    }
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, clientePorActualizar);
     if (clientePorActualizar.getCredencial() != null) {
       Cliente clienteYaAsignado =

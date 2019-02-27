@@ -9,6 +9,10 @@ public interface IUbicacionService {
 
   Ubicacion guardar(Ubicacion ubicacion);
 
+  Ubicacion guardarUbicacionDeFacturacion(Ubicacion ubicacion, Cliente cliente);
+
+  Ubicacion guardarUbicacionDeEnvio(Ubicacion ubicacion, Cliente cliente);
+
   void actualizar(Ubicacion ubicacion);
 
   Page<Ubicacion> buscarUbicaciones(BusquedaUbicacionCriteria criteria);

@@ -21,7 +21,6 @@ public class ClienteController {
 
   private final IClienteService clienteService;
   private final IEmpresaService empresaService;
-  private final IUbicacionService ubicacionService;
   private final IUsuarioService usuarioService;
   private final IAuthService authService;
   private final ModelMapper modelMapper;
@@ -31,13 +30,11 @@ public class ClienteController {
   public ClienteController(
       IClienteService clienteService,
       IEmpresaService empresaService,
-      IUbicacionService ubicacionService,
       IUsuarioService usuarioService,
       IAuthService authService,
       ModelMapper modelMapper) {
     this.clienteService = clienteService;
     this.empresaService = empresaService;
-    this.ubicacionService = ubicacionService;
     this.usuarioService = usuarioService;
     this.authService = authService;
     this.modelMapper = modelMapper;
@@ -167,38 +164,6 @@ public class ClienteController {
     if (idViajante != null) {
       cliente.setViajante(usuarioService.getUsuarioPorId(idViajante));
     }
-    if (nuevoCliente.getUbicacionFacturacion() != null && nuevoCliente.getUbicacionFacturacion().getIdLocalidad() != null) {
-      cliente
-          .getUbicacionFacturacion()
-          .setLocalidad(
-              ubicacionService.getLocalidadPorId(
-                  nuevoCliente.getUbicacionFacturacion().getIdLocalidad()));
-    }
-    if (nuevoCliente.getUbicacionEnvio() != null && nuevoCliente.getUbicacionEnvio().getIdLocalidad() != null) {
-      cliente
-        .getUbicacionEnvio()
-        .setLocalidad(
-          ubicacionService.getLocalidadPorId(
-            nuevoCliente.getUbicacionEnvio().getIdLocalidad()));
-    }
-    if (nuevoCliente.getUbicacionFacturacion() != null && nuevoCliente.getUbicacionFacturacion().getIdLocalidad() == null) {
-      Provincia provincia = new Provincia();
-      provincia.setNombre(nuevoCliente.getUbicacionFacturacion().getNombreProvincia());
-      Localidad localidad = new Localidad();
-      localidad.setProvincia(provincia);
-      localidad.setCodigoPostal(nuevoCliente.getUbicacionFacturacion().getCodigoPostal());
-      localidad.setNombre(nuevoCliente.getUbicacionFacturacion().getNombreLocalidad());
-      cliente.getUbicacionFacturacion().setLocalidad(localidad);
-    }
-    if (nuevoCliente.getUbicacionEnvio() != null && nuevoCliente.getUbicacionEnvio().getIdLocalidad() == null) {
-      Provincia provincia = new Provincia();
-      provincia.setNombre(nuevoCliente.getUbicacionEnvio().getNombreProvincia());
-      Localidad localidad = new Localidad();
-      localidad.setProvincia(provincia);
-      localidad.setCodigoPostal(nuevoCliente.getUbicacionEnvio().getCodigoPostal());
-      localidad.setNombre(nuevoCliente.getUbicacionEnvio().getNombreLocalidad());
-      cliente.getUbicacionEnvio().setLocalidad(localidad);
-    }
     return clienteService.guardar(cliente);
   }
 
@@ -250,127 +215,6 @@ public class ClienteController {
     } else {
       clientePorActualizar.setBonificacion(clientePersistido.getBonificacion());
     }
-    if (clienteDTO.getUbicacionFacturacion() != null) {
-      if (clientePersistido.getUbicacionFacturacion() != null) {
-        if (clienteDTO.getUbicacionFacturacion().getIdUbicacion()
-            != clientePersistido.getUbicacionFacturacion().getIdUbicacion()) {
-          throw new BusinessServiceException(
-              ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
-        }
-        if (clienteDTO.getUbicacionFacturacion().getIdLocalidad()
-            != clientePersistido.getUbicacionFacturacion().getLocalidad().getId_Localidad()) {
-          clientePorActualizar
-              .getUbicacionFacturacion()
-              .setLocalidad(
-                  ubicacionService.getLocalidadPorId(
-                      clienteDTO.getUbicacionFacturacion().getIdLocalidad()));
-        } else {
-          clientePorActualizar
-              .getUbicacionFacturacion()
-              .setLocalidad(clientePersistido.getUbicacionFacturacion().getLocalidad());
-        }
-      }
-      if (clienteDTO.getUbicacionFacturacion().getIdLocalidad() == null) {
-        Provincia provincia = new Provincia();
-        provincia.setNombre(clienteDTO.getUbicacionFacturacion().getNombreProvincia());
-        Localidad localidad = new Localidad();
-        localidad.setProvincia(provincia);
-        localidad.setCodigoPostal(clienteDTO.getUbicacionFacturacion().getCodigoPostal());
-        localidad.setNombre(clienteDTO.getUbicacionFacturacion().getNombreLocalidad());
-        clientePorActualizar.getUbicacionFacturacion().setLocalidad(localidad);
-      }
-    }
-    if (clienteDTO.getUbicacionEnvio() != null) {
-      if (clientePersistido.getUbicacionEnvio() != null) {
-        if (clienteDTO.getUbicacionEnvio().getIdUbicacion()
-            != clientePersistido.getUbicacionEnvio().getIdUbicacion()) {
-          throw new BusinessServiceException(
-              ResourceBundle.getBundle("Mensajes").getString("mensaje_error_ubicacion_incorrecta"));
-        }
-        if (clientePersistido.getUbicacionEnvio().getLocalidad() != null
-            && (clienteDTO.getUbicacionEnvio().getIdLocalidad()
-                != clientePersistido.getUbicacionEnvio().getLocalidad().getId_Localidad())) {
-          clientePorActualizar
-              .getUbicacionEnvio()
-              .setLocalidad(
-                  ubicacionService.getLocalidadPorId(
-                      clienteDTO.getUbicacionFacturacion().getIdLocalidad()));
-        } else {
-          clientePorActualizar
-              .getUbicacionEnvio()
-              .setLocalidad(clientePersistido.getUbicacionEnvio().getLocalidad());
-        }
-      }
-      if (clienteDTO.getUbicacionEnvio().getIdLocalidad() == null) {
-        Provincia provincia = new Provincia();
-        provincia.setNombre(clienteDTO.getUbicacionEnvio().getNombreProvincia());
-        Localidad localidad = new Localidad();
-        localidad.setProvincia(provincia);
-        localidad.setCodigoPostal(clienteDTO.getUbicacionEnvio().getCodigoPostal());
-        localidad.setNombre(clienteDTO.getUbicacionEnvio().getNombreLocalidad());
-        clientePorActualizar.getUbicacionEnvio().setLocalidad(localidad);
-      }
-    }
-
-    // probar lo de model mapper
-    //      if (clienteDTO.getUbicacion().getDescripcion() != null
-    //        && !clienteDTO
-    //        .getUbicacion()
-    //        .getDescripcion()
-    //        .equals(clientePersistido.getUbicacionFacturacion().getDescripcion())) {
-    //        clientePorActualizar
-    //          .getUbicacionFacturacion()
-    //          .setDescripcion(clienteDTO.getUbicacion().getDescripcion());
-    //      }
-    //      if (clienteDTO.getUbicacion().getLatitud() != null
-    //        && !clienteDTO
-    //        .getUbicacion()
-    //        .getLatitud()
-    //        .equals(clientePersistido.getUbicacionFacturacion().getLatitud())) {
-    //
-    // clientePorActualizar.getUbicacionFacturacion().setLatitud(clienteDTO.getUbicacion().getLatitud());
-    //      }
-    //      if (clienteDTO.getUbicacion().getLongitud() != null
-    //        && !clienteDTO
-    //        .getUbicacion()
-    //        .getLongitud()
-    //        .equals(clientePersistido.getUbicacionFacturacion().getLongitud())) {
-    //
-    // clientePorActualizar.getUbicacionFacturacion().setLongitud(clienteDTO.getUbicacion().getLongitud());
-    //      }
-    //      if (clienteDTO.getUbicacion().getCalle() != null
-    //        && !clienteDTO
-    //        .getUbicacion()
-    //        .getCalle()
-    //        .equals(clientePersistido.getUbicacionFacturacion().getCalle())) {
-    //
-    // clientePorActualizar.getUbicacionFacturacion().setCalle(clienteDTO.getUbicacion().getCalle());
-    //      }
-    //      if (clienteDTO.getUbicacion().getNumero() != null
-    //        && !clienteDTO
-    //        .getUbicacion()
-    //        .getNumero()
-    //        .equals(clientePersistido.getUbicacionFacturacion().getNumero())) {
-    //
-    // clientePorActualizar.getUbicacionFacturacion().setNumero(clienteDTO.getUbicacion().getNumero());
-    //      }
-    //      if (clienteDTO.getUbicacion().getPiso() != null
-    //        && !clienteDTO
-    //        .getUbicacion()
-    //        .getPiso()
-    //        .equals(clientePersistido.getUbicacionFacturacion().getPiso())) {
-    //
-    // clientePorActualizar.getUbicacionFacturacion().setPiso(clienteDTO.getUbicacion().getPiso());
-    //      }
-    //      if (clienteDTO.getUbicacion().getDepartamento() != null
-    //        && !clienteDTO
-    //        .getUbicacion()
-    //        .getDepartamento()
-    //        .equals(clientePersistido.getUbicacionFacturacion().getDepartamento())) {
-    //        clientePorActualizar
-    //          .getUbicacionFacturacion()
-    //          .setDepartamento(clienteDTO.getUbicacion().getDepartamento());
-    //      }
     if (idEmpresa != null) {
       clientePorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     } else {

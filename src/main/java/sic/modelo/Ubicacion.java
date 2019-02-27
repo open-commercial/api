@@ -40,14 +40,14 @@ public class Ubicacion implements Serializable {
   @DecimalMax(value = "180", message = "{mensaje_producto_cantidad_negativa}")
   private Double longitud;
 
-  @Length(max = 254, message = "{mensaje_ubicacion_longitud_calle }")
+  @Length(max = 255, message = "{mensaje_ubicacion_longitud_calle }")
   private String calle;
 
   private Integer numero;
 
   private Integer piso;
 
-  @Length(max = 254, message = "{mensaje_ubicacion_longitud_departamento}")
+  @Length(max = 255, message = "{mensaje_ubicacion_longitud_departamento}")
   private String departamento;
 
   private boolean eliminada;

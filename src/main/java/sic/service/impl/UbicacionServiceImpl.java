@@ -12,8 +12,8 @@ import sic.repository.LocalidadRepository;
 import sic.repository.ProvinciaRepository;
 import sic.repository.UbicacionRepository;
 import sic.service.BusinessServiceException;
+import sic.service.IClienteService;
 import sic.service.IUbicacionService;
-import sic.util.Validator;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
@@ -25,6 +25,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
   private final UbicacionRepository ubicacionRepository;
   private final LocalidadRepository localidadRepository;
   private final ProvinciaRepository provinciaRepository;
+  private final IClienteService clienteService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
@@ -32,18 +33,37 @@ public class UbicacionServiceImpl implements IUbicacionService {
   public UbicacionServiceImpl(
     UbicacionRepository ubicacionRepository,
     LocalidadRepository localidadRepository,
-    ProvinciaRepository provinciaRepository) {
+    ProvinciaRepository provinciaRepository,
+    IClienteService clienteService) {
     this.ubicacionRepository = ubicacionRepository;
     this.localidadRepository = localidadRepository;
     this.provinciaRepository = provinciaRepository;
+    this.clienteService = clienteService;
   }
 
   @Override
+  @Transactional
   public Ubicacion guardar(Ubicacion ubicacion) {
     this.validarUbicacion(ubicacion);
     Ubicacion ubicacionGuardada = ubicacionRepository.save(ubicacion);
     logger.warn("La ubicación {} se actualizó correctamente.", ubicacion);
     return ubicacionGuardada;
+  }
+
+  @Override
+  @Transactional
+  public Ubicacion guardarUbicacionDeFacturacion(Ubicacion ubicacion, Cliente cliente) {
+    cliente.setUbicacionFacturacion(this.guardar(ubicacion));
+    clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
+    return cliente.getUbicacionFacturacion();
+  }
+
+  @Override
+  @Transactional
+  public Ubicacion guardarUbicacionDeEnvio(Ubicacion ubicacion, Cliente cliente) {
+    cliente.setUbicacionEnvio(this.guardar(ubicacion));
+    clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
+    return cliente.getUbicacionEnvio();
   }
 
   @Override
