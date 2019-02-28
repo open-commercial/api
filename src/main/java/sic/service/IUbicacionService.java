@@ -7,31 +7,60 @@ import java.util.List;
 
 public interface IUbicacionService {
 
-  Ubicacion guardarUbicacionDeFacturacionCliente(Ubicacion ubicacion, Cliente cliente);
+  Ubicacion guardarUbicacionDeFacturacionCliente(
+      Ubicacion ubicacion,
+      String nombreLocalidad,
+      String codigoPostal,
+      String nombreProvincia,
+      Cliente cliente);
 
-  Ubicacion guardarUbicacionDeEnvioCliente(Ubicacion ubicacion, Cliente cliente);
+  Ubicacion guardarUbicacionDeEnvioCliente(
+      Ubicacion ubicacion,
+      String nombreLocalidad,
+      String codigoPostal,
+      String nombreProvincia,
+      Cliente cliente);
 
-  Ubicacion guardaUbicacionEmpresa(Ubicacion ubicacion, Empresa empresa);
+  Ubicacion guardaUbicacionEmpresa(
+      Ubicacion ubicacion,
+      String nombreLocalidad,
+      String codigoPostal,
+      String nombreProvincia,
+      Empresa empresa);
 
-  Ubicacion guardaUbicacionProveedor(Ubicacion ubicacion, Proveedor proveedor);
+  Ubicacion guardaUbicacionProveedor(
+      Ubicacion ubicacion,
+      String nombreLocalidad,
+      String codigoPostal,
+      String nombreProvincia,
+      Proveedor proveedor);
 
-  Ubicacion guardarUbicacionTransportista(Ubicacion ubicacion, Transportista transportista);
+  Ubicacion guardarUbicacionTransportista(
+      Ubicacion ubicacion,
+      String nombreLocalidad,
+      String codigoPostal,
+      String nombreProvincia,
+      Transportista transportista);
 
-  Ubicacion guardar(Ubicacion ubicacion);
+  Ubicacion guardar(
+      Ubicacion ubicacion, String nombreLocalidad, String codigoPostal, String nombreProvincia);
 
-  void actualizar(Ubicacion ubicacion);
+  void actualizar(Ubicacion ubicacion,
+                  String nombreLocalidad,
+                  String codigoPostal,
+                  String nombreProvincia);
 
   Page<Ubicacion> buscarUbicaciones(BusquedaUbicacionCriteria criteria);
 
   Ubicacion getUbicacionPorId(long idUbicacion);
 
-  Localidad getLocalidadPorId(Long id_Localidad);
+  Localidad getLocalidadPorId(Long idLocalidad);
 
   Localidad getLocalidadPorNombre(String nombre, Provincia provincia);
 
   List<Localidad> getLocalidadesDeLaProvincia(Provincia provincia);
 
-  Provincia getProvinciaPorId(Long id_Provincia);
+  Provincia getProvinciaPorId(Long idProvincia);
 
   Provincia getProvinciaPorNombre(String nombre);
 

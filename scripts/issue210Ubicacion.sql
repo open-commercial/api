@@ -237,3 +237,12 @@ pedido.numero = ubicacion.numero,
 pedido.piso = ubicacion.piso
 ;
 
+-- BackFill Codigo postal
+SET SQL_SAFE_UPDATES = 0;
+UPDATE localidad
+SET 
+    localidad.codigoPostal = 'N99999'
+WHERE
+    localidad.codigoPostal = '';
+SET SQL_SAFE_UPDATES = 1;
+

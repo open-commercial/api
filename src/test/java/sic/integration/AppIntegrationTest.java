@@ -3466,7 +3466,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldCrearUbicacionDeEnvioEnModificacionDeCliente() {
+  public void shouldCrearUbicacionDeEnvioDeCliente() {
     ClienteDTO cliente =
       ClienteDTO.builder()
         .bonificacion(BigDecimal.TEN)
@@ -3506,7 +3506,7 @@ public class AppIntegrationTest {
   }
 
   @Test
-  public void shouldCrearUbicacionDeFacturacionYEnvioModificandoCliente() {
+  public void shouldCrearUbicacionDeFacturacionYEnvioDeCliente() {
     ClienteDTO cliente =
       ClienteDTO.builder()
         .bonificacion(BigDecimal.TEN)
@@ -3559,6 +3559,54 @@ public class AppIntegrationTest {
   @Test
   public void shouldModificarUbicacionDeFacturacionCliente() {
     this.shouldCrearUbicacionDeFacturacionEnAltaDeCliente();
+    UbicacionDTO ubicacionDTO = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class).getUbicacionFacturacion();
+    ubicacionDTO.setCalle("Regresión lineal");
+    ubicacionDTO.setNumero(999);
+    restTemplate.put(apiPrefix + "/ubicaciones", ubicacionDTO);
+    ClienteDTO clienteDTO = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class);
+    assertEquals("Regresión lineal", clienteDTO.getUbicacionFacturacion().getCalle());
+  }
+
+  @Test
+  public void shouldCrearUbicacionDeFacturacionSinLocalidadEnAltaDeCliente() {
+    ClienteDTO cliente =
+        ClienteDTO.builder()
+            .bonificacion(BigDecimal.TEN)
+            .nombreFiscal("Enrique Peña")
+            .nombreFantasia("Los gemelos fantasticos.")
+            .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+            .idFiscal(1244566L)
+            .email("enriqueelgenial@outlook.com")
+            .telefono("3875114422")
+            .contacto("La señora de Enrique")
+            .build();
+    UsuarioDTO credencial =
+        UsuarioDTO.builder()
+            .username("enrique")
+            .password("peña213")
+            .nombre("Enrique")
+            .apellido("Peña")
+            .email("enriqueelgenial@outlook.com")
+            .roles(new ArrayList<>(Collections.singletonList(Rol.COMPRADOR)))
+            .build();
+    credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
+    restTemplate.postForObject(
+        apiPrefix + "/clientes?idEmpresa=1&idCredencial=" + credencial.getId_Usuario(),
+        cliente,
+        ClienteDTO.class);
+    restTemplate.postForObject(
+        apiPrefix + "/ubicaciones/clientes/3/facturacion",
+        UbicacionDTO.builder().calle("Calle nueva").numero(7895).build(),
+        UbicacionDTO.class);
+    ClienteDTO clienteRecuperado =
+        restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class);
+    assertEquals("Calle nueva", clienteRecuperado.getUbicacionFacturacion().getCalle());
+    assertEquals(7895, clienteRecuperado.getUbicacionFacturacion().getNumero());
+    }
+
+  @Test
+  public void shouldModificarUbicacionDeFacturacionSinLocalidadDeCliente() {
+    this.shouldCrearUbicacionDeFacturacionSinLocalidadEnAltaDeCliente();
     UbicacionDTO ubicacionDTO = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class).getUbicacionFacturacion();
     ubicacionDTO.setCalle("Regresión lineal");
     ubicacionDTO.setNumero(999);

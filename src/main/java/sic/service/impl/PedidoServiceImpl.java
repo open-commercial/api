@@ -297,6 +297,11 @@ public class PedidoServiceImpl implements IPedidoService {
               ubicacionEnvio.getNombreLocalidad(),
               ubicacionService.getProvinciaPorNombre(ubicacionEnvio.getNombreProvincia())));
       }
+      ubicacionService.actualizar(
+          cliente.getUbicacionEnvio(),
+          ubicacionEnvio.getNombreLocalidad(),
+          ubicacionEnvio.getCodigoPostal(),
+          ubicacionEnvio.getNombreProvincia());
       clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
     } else {
       Ubicacion ubicacionNueva = new Ubicacion();
@@ -314,7 +319,12 @@ public class PedidoServiceImpl implements IPedidoService {
                 ubicacionEnvio.getNombreLocalidad(),
                 ubicacionService.getProvinciaPorNombre(ubicacionEnvio.getNombreProvincia())));
       }
-      ubicacionNueva = ubicacionService.guardar(ubicacionNueva);
+      ubicacionNueva =
+          ubicacionService.guardar(
+              ubicacionNueva,
+              ubicacionEnvio.getNombreLocalidad(),
+              ubicacionEnvio.getCodigoPostal(),
+              ubicacionEnvio.getNombreProvincia());
       cliente.setUbicacionEnvio(ubicacionNueva);
       clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
     }

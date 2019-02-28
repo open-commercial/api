@@ -92,11 +92,12 @@ public class UbicacionController {
               .getString("mensaje_error_ubicacion_incorrecta_cliente"));
     }
     Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
-    Provincia provincia = new Provincia();
-    provincia.setNombre(ubicacionDTO.getNombreProvincia());
-    ubicacion.getLocalidad().setProvincia(provincia);
-    ubicacion.getLocalidad().setCodigoPostal(ubicacionDTO.getCodigoPostal());
-    return ubicacionService.guardarUbicacionDeFacturacionCliente(ubicacion, cliente);
+    return ubicacionService.guardarUbicacionDeFacturacionCliente(
+        ubicacion,
+        ubicacionDTO.getNombreLocalidad(),
+        ubicacionDTO.getCodigoPostal(),
+        ubicacionDTO.getNombreProvincia(),
+        cliente);
   }
 
   @PostMapping("/ubicaciones/clientes/{idCliente}/envio")
@@ -116,11 +117,12 @@ public class UbicacionController {
               .getString("mensaje_error_ubicacion_incorrecta_cliente"));
     }
     Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
-    Provincia provincia = new Provincia();
-    provincia.setNombre(ubicacionDTO.getNombreProvincia());
-    ubicacion.getLocalidad().setProvincia(provincia);
-    ubicacion.getLocalidad().setCodigoPostal(ubicacionDTO.getCodigoPostal());
-    return ubicacionService.guardarUbicacionDeEnvioCliente(ubicacion, cliente);
+    return ubicacionService.guardarUbicacionDeEnvioCliente(
+        ubicacion,
+        ubicacionDTO.getNombreLocalidad(),
+        ubicacionDTO.getCodigoPostal(),
+        ubicacionDTO.getNombreProvincia(),
+        cliente);
   }
 
   @PutMapping("/ubicaciones")
@@ -134,11 +136,7 @@ public class UbicacionController {
   public void actualizar(@RequestBody UbicacionDTO ubicacionDTO) {
     if (ubicacionDTO.getIdUbicacion() != 0L) {
       Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
-      Provincia provincia = new Provincia();
-      provincia.setNombre(ubicacionDTO.getNombreProvincia());
-      ubicacion.getLocalidad().setProvincia(provincia);
-      ubicacion.getLocalidad().setCodigoPostal(ubicacionDTO.getCodigoPostal());
-      ubicacionService.actualizar(ubicacion);
+      ubicacionService.actualizar(ubicacion, ubicacionDTO.getNombreLocalidad(), ubicacionDTO.getCodigoPostal(), ubicacionDTO.getNombreProvincia());
     }
   }
 
@@ -153,11 +151,12 @@ public class UbicacionController {
               .getString("mensaje_error_ubicacion_incorrecta_empresa"));
     }
     Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
-    Provincia provincia = new Provincia();
-    provincia.setNombre(ubicacionDTO.getNombreProvincia());
-    ubicacion.getLocalidad().setProvincia(provincia);
-    ubicacion.getLocalidad().setCodigoPostal(ubicacionDTO.getCodigoPostal());
-    return ubicacionService.guardaUbicacionEmpresa(ubicacion, empresa);
+    return ubicacionService.guardaUbicacionEmpresa(
+        ubicacion,
+        ubicacionDTO.getNombreLocalidad(),
+        ubicacionDTO.getCodigoPostal(),
+        ubicacionDTO.getNombreProvincia(),
+        empresa);
   }
 
   @PostMapping("/ubicaciones/proveedores/{idProveedor}")
@@ -171,11 +170,12 @@ public class UbicacionController {
               .getString("mensaje_error_ubicacion_incorrecta_proveedor"));
     }
     Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
-    Provincia provincia = new Provincia();
-    provincia.setNombre(ubicacionDTO.getNombreProvincia());
-    ubicacion.getLocalidad().setProvincia(provincia);
-    ubicacion.getLocalidad().setCodigoPostal(ubicacionDTO.getCodigoPostal());
-    return ubicacionService.guardaUbicacionProveedor(ubicacion, proveedor);
+    return ubicacionService.guardaUbicacionProveedor(
+        ubicacion,
+        ubicacionDTO.getNombreLocalidad(),
+        ubicacionDTO.getCodigoPostal(),
+        ubicacionDTO.getNombreProvincia(),
+        proveedor);
   }
 
   @PostMapping("/ubicaciones/transportistas/{idTransportista}")
@@ -189,11 +189,11 @@ public class UbicacionController {
               .getString("mensaje_error_ubicacion_incorrecta_transportista"));
     }
     Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
-    Provincia provincia = new Provincia();
-    provincia.setNombre(ubicacionDTO.getNombreProvincia());
-    ubicacion.getLocalidad().setProvincia(provincia);
-    ubicacion.getLocalidad().setCodigoPostal(ubicacionDTO.getCodigoPostal());
     return ubicacionService.guardarUbicacionTransportista(
-        ubicacion, transportistaService.getTransportistaPorId(idTransportista));
+        ubicacion,
+        ubicacionDTO.getNombreLocalidad(),
+        ubicacionDTO.getCodigoPostal(),
+        ubicacionDTO.getNombreProvincia(),
+        transportistaService.getTransportistaPorId(idTransportista));
   }
 }

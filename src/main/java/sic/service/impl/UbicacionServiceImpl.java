@@ -32,13 +32,13 @@ public class UbicacionServiceImpl implements IUbicacionService {
 
   @Autowired
   public UbicacionServiceImpl(
-    UbicacionRepository ubicacionRepository,
-    LocalidadRepository localidadRepository,
-    ProvinciaRepository provinciaRepository,
-    IClienteService clienteService,
-    IEmpresaService empresaService,
-    IProveedorService proveedorService,
-    ITransportistaService transportistaService) {
+      UbicacionRepository ubicacionRepository,
+      LocalidadRepository localidadRepository,
+      ProvinciaRepository provinciaRepository,
+      IClienteService clienteService,
+      IEmpresaService empresaService,
+      IProveedorService proveedorService,
+      ITransportistaService transportistaService) {
     this.ubicacionRepository = ubicacionRepository;
     this.localidadRepository = localidadRepository;
     this.provinciaRepository = provinciaRepository;
@@ -50,63 +50,108 @@ public class UbicacionServiceImpl implements IUbicacionService {
 
   @Override
   @Transactional
-  public Ubicacion guardar(Ubicacion ubicacion) {
-    this.validarUbicacion(ubicacion);
+  public Ubicacion guardar(
+      Ubicacion ubicacion, String nombreLocalidad, String codigoPostal, String nombreProvincia) {
+    this.validarUbicacion(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia);
     Ubicacion ubicacionGuardada = ubicacionRepository.save(ubicacion);
     logger.warn("La ubicación {} se actualizó correctamente.", ubicacion);
     return ubicacionGuardada;
   }
 
+  private void instanciarLocalidadParaUbicacion(
+      Ubicacion ubicacion, String nombreLocalidad, String codigoPostal, String nombreProvincia) {
+    if (nombreLocalidad != null && codigoPostal != null && nombreProvincia != null) {
+      Provincia provincia = new Provincia();
+      provincia.setNombre(nombreLocalidad);
+      Localidad localidad = new Localidad();
+      localidad.setNombre(nombreLocalidad);
+      localidad.setCodigoPostal(codigoPostal);
+      localidad.setProvincia(provincia);
+      ubicacion.setLocalidad(localidad);
+    }
+  }
+
   @Override
   @Transactional
-  public Ubicacion guardarUbicacionDeFacturacionCliente(Ubicacion ubicacion, Cliente cliente) {
-    cliente.setUbicacionFacturacion(this.guardar(ubicacion));
+  public Ubicacion guardarUbicacionDeFacturacionCliente(
+      Ubicacion ubicacion,
+      String nombreLocalidad,
+      String codigoPostal,
+      String nombreProvincia,
+      Cliente cliente) {
+    cliente.setUbicacionFacturacion(
+        this.guardar(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia));
     clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
     return cliente.getUbicacionFacturacion();
   }
 
   @Override
   @Transactional
-  public Ubicacion guardarUbicacionDeEnvioCliente(Ubicacion ubicacion, Cliente cliente) {
-    cliente.setUbicacionEnvio(this.guardar(ubicacion));
+  public Ubicacion guardarUbicacionDeEnvioCliente(
+      Ubicacion ubicacion,
+      String nombreLocalidad,
+      String codigoPostal,
+      String nombreProvincia,
+      Cliente cliente) {
+    cliente.setUbicacionEnvio(
+        this.guardar(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia));
     clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
     return cliente.getUbicacionEnvio();
   }
 
   @Override
   @Transactional
-  public Ubicacion guardaUbicacionEmpresa(Ubicacion ubicacion, Empresa empresa) {
-    empresa.setUbicacion(this.guardar(ubicacion));
+  public Ubicacion guardaUbicacionEmpresa(
+      Ubicacion ubicacion,
+      String nombreLocalidad,
+      String codigoPostal,
+      String nombreProvincia,
+      Empresa empresa) {
+    empresa.setUbicacion(this.guardar(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia));
     empresaService.actualizar(empresa, empresaService.getEmpresaPorId(empresa.getId_Empresa()));
     return empresa.getUbicacion();
   }
 
   @Override
   @Transactional
-  public Ubicacion guardaUbicacionProveedor(Ubicacion ubicacion, Proveedor proveedor) {
-    proveedor.setUbicacion(this.guardar(ubicacion));
+  public Ubicacion guardaUbicacionProveedor(
+      Ubicacion ubicacion,
+      String nombreLocalidad,
+      String codigoPostal,
+      String nombreProvincia,
+      Proveedor proveedor) {
+    proveedor.setUbicacion(this.guardar(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia));
     proveedorService.actualizar(proveedor);
     return proveedor.getUbicacion();
   }
 
   @Override
   @Transactional
-  public Ubicacion guardarUbicacionTransportista(Ubicacion ubicacion, Transportista transportista) {
-    transportista.setUbicacion(this.guardar(ubicacion));
+  public Ubicacion guardarUbicacionTransportista(
+      Ubicacion ubicacion,
+      String nombreLocalidad,
+      String codigoPostal,
+      String nombreProvincia,
+      Transportista transportista) {
+    transportista.setUbicacion(
+        this.guardar(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia));
     transportistaService.actualizar(transportista);
     return transportista.getUbicacion();
   }
 
   @Override
-  public void actualizar(Ubicacion ubicacion) {
-    this.validarUbicacion(ubicacion);
+  public void actualizar(
+      Ubicacion ubicacion, String nombreLocalidad, String codigoPostal, String nombreProvincia) {
+    this.instanciarLocalidadParaUbicacion(
+        ubicacion, nombreLocalidad, codigoPostal, nombreProvincia);
+    this.validarUbicacion(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia);
     ubicacionRepository.save(ubicacion);
   }
 
-  private void validarUbicacion(Ubicacion ubicacion) {
-    if (ubicacion.getCalle() == null)
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_ubicacion_calle_vacia"));
+  private void validarUbicacion(
+      Ubicacion ubicacion, String nombreLocalidad, String codigoPostal, String nombreProvincia) {
+    this.instanciarLocalidadParaUbicacion(
+        ubicacion, nombreLocalidad, codigoPostal, nombreProvincia);
     if (ubicacion.getLocalidad() != null)
       ubicacion.setLocalidad(
           this.guardarLocalidad(
@@ -117,8 +162,6 @@ public class UbicacionServiceImpl implements IUbicacionService {
 
   @Override
   public Localidad guardarLocalidad(String nombre, String nombreProvincia, String codigoPostal) {
-    if (codigoPostal == null || codigoPostal.isEmpty())
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_ubicacion_codigo_postal_vacio"));
     Provincia provincia = this.getProvinciaPorNombre(nombreProvincia);
     if (provincia == null) {
       provincia = new Provincia();
@@ -166,15 +209,16 @@ public class UbicacionServiceImpl implements IUbicacionService {
   public Localidad getLocalidadPorId(Long idLocalidad) {
     Localidad localidad = localidadRepository.findOne(idLocalidad);
     if (localidad == null) {
-      throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-        .getString("mensaje_localidad_no_existente"));
+      throw new EntityNotFoundException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_localidad_no_existente"));
     }
     return localidad;
   }
 
   @Override
   public Localidad getLocalidadPorNombre(String nombre, Provincia provincia) {
-    return localidadRepository.findByNombreAndProvinciaAndEliminadaOrderByNombreAsc(nombre, provincia, false);
+    return localidadRepository.findByNombreAndProvinciaAndEliminadaOrderByNombreAsc(
+        nombre, provincia, false);
   }
 
   @Override
@@ -182,13 +226,12 @@ public class UbicacionServiceImpl implements IUbicacionService {
     return localidadRepository.findAllByAndProvinciaAndEliminadaOrderByNombreAsc(provincia, false);
   }
 
-
   @Override
   public Provincia getProvinciaPorId(Long idProvincia) {
     Provincia provincia = provinciaRepository.findOne(idProvincia);
     if (provincia == null) {
-      throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-        .getString("mensaje_provincia_no_existente"));
+      throw new EntityNotFoundException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_provincia_no_existente"));
     }
     return provincia;
   }
