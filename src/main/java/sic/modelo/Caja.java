@@ -87,9 +87,18 @@ public class Caja implements Serializable {
     return usuarioAbreCaja.getId_Usuario();
   }
 
-  @JsonGetter("nombreUsuarioAbreAcaja")
+  @JsonGetter("nombreUsuarioAbreCaja")
   public String getNombreUsuarioAbreCaja() {
-    return usuarioAbreCaja.getNombre();
+    if (usuarioAbreCaja != null) {
+      return usuarioAbreCaja.getNombre()
+        + " "
+        + usuarioAbreCaja.getApellido()
+        + " ("
+        + usuarioAbreCaja.getUsername()
+        + ")";
+    } else {
+      return null;
+    }
   }
 
   @JsonGetter("idUsuarioCierraCaja")
@@ -97,9 +106,18 @@ public class Caja implements Serializable {
     return (usuarioCierraCaja != null) ? usuarioCierraCaja.getId_Usuario() : null;
   }
 
-  @JsonGetter("nombreUsuarioCierraAcaja")
+  @JsonGetter("nombreUsuarioCierraCaja")
   public String getNombreUsuarioCierraCaja() {
-    return (usuarioCierraCaja != null) ? usuarioCierraCaja.getNombre() : null;
+    if (usuarioCierraCaja != null) {
+      return usuarioCierraCaja.getNombre()
+        + " "
+        + usuarioCierraCaja.getApellido()
+        + " ("
+        + usuarioCierraCaja.getUsername()
+        + ")";
+    } else {
+      return null;
+    }
   }
 
 }
