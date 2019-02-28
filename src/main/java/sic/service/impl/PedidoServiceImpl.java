@@ -97,58 +97,6 @@ public class PedidoServiceImpl implements IPedidoService {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_no_existente"));
     }
     // Calculos
-    /*BigDecimal[] importes = new BigDecimal[pedido.getRenglones().size()];
-    int i = 0;
-    for (RenglonPedido renglon : pedido.getRenglones()) {
-      importes[i] = renglon.getImporte();
-      i++;
-    }
-    if (pedido
-      .getImporte()
-      .compareTo(
-        CalculosComprobante.calcularSubTotal(importes))
-      != 0) {
-      String mensaje = RESOURCE_BUNDLE.getString("mensaje_pedido_sub_total_no_valido");
-      logger.error(mensaje);
-      throw new BusinessServiceException(mensaje);
-    }
-    if (pedido
-      .getRecargoNeto()
-      .compareTo(
-        CalculosComprobante.calcularProporcion(
-          pedido.getImporte(),
-          pedido.getRecargoPorcentaje()))
-      != 0) {
-      String mensaje = RESOURCE_BUNDLE.getString("mensaje_pedido_recargo_no_valido");
-      logger.error(mensaje);
-      throw new BusinessServiceException(mensaje);
-    }
-    if (pedido
-      .getDescuentoNeto()
-      .compareTo(
-        CalculosComprobante.calcularProporcion(
-          pedido.getImporte(),
-          pedido.getDescuentoPorcentaje()))
-      != 0) {
-      String mensaje = RESOURCE_BUNDLE.getString("mensaje_pedido_recargo_no_valido");
-      logger.error(mensaje);
-      throw new BusinessServiceException(mensaje);
-    }
-    if (pedido
-      .getTotalEstimado()
-      .compareTo(
-        CalculosComprobante.calcularSubTotalBruto(
-          false,
-          pedido.getImporte(),
-          pedido.getRecargoNeto(),
-          pedido.getDescuentoNeto(),
-          null,
-          null))
-      != 0) {
-      String mensaje = RESOURCE_BUNDLE.getString("mensaje_pedido_total_estimado_no_valido");
-      logger.error(mensaje);
-      throw new BusinessServiceException(mensaje);
-    }*/
   }
 
   @Override
