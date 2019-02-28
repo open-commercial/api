@@ -976,11 +976,6 @@ public class FacturaServiceImpl implements IFacturaService {
       BigDecimal descuentoPorcentaje,
       boolean dividiendoRenglonFactura) {
     Producto producto = productoService.getProductoPorId(idProducto);
-    /*if (dividiendoRenglonFactura == false && cantidad < producto.getBulto()
-            && (movimiento == Movimiento.VENTA || movimiento == Movimiento.PEDIDO)) {
-        throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                .getString("mensaje_producto_cantidad_menor_a_minima"));
-    }*/
     RenglonFactura nuevoRenglon = new RenglonFactura();
     nuevoRenglon.setIdProductoItem(producto.getIdProducto());
     nuevoRenglon.setCodigoItem(producto.getCodigo());
