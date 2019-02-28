@@ -62,7 +62,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
       Ubicacion ubicacion, String nombreLocalidad, String codigoPostal, String nombreProvincia) {
     if (nombreLocalidad != null && codigoPostal != null && nombreProvincia != null) {
       Provincia provincia = new Provincia();
-      provincia.setNombre(nombreLocalidad);
+      provincia.setNombre(nombreProvincia);
       Localidad localidad = new Localidad();
       localidad.setNombre(nombreLocalidad);
       localidad.setCodigoPostal(codigoPostal);
