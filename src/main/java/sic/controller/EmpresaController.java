@@ -1,7 +1,6 @@
 package sic.controller;
 
 import java.util.List;
-import java.util.ResourceBundle;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,23 +9,19 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Empresa;
 import sic.modelo.Rol;
 import sic.modelo.dto.EmpresaDTO;
-import sic.service.BusinessServiceException;
 import sic.service.IEmpresaService;
-import sic.service.IUbicacionService;
 
 @RestController
 @RequestMapping("/api/v1")
 public class EmpresaController {
 
   public final IEmpresaService empresaService;
-  private final IUbicacionService ubicacionService;
   private final ModelMapper modelMapper;
 
   @Autowired
   public EmpresaController(
-    IEmpresaService empresaService, IUbicacionService ubicacionService, ModelMapper modelMapper) {
+    IEmpresaService empresaService, ModelMapper modelMapper) {
     this.empresaService = empresaService;
-    this.ubicacionService = ubicacionService;
     this.modelMapper = modelMapper;
   }
 

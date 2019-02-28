@@ -249,22 +249,6 @@ public class ClienteServiceImpl implements IClienteService {
     clientePorActualizar.setEliminado(clientePersistido.isEliminado());
     if (clientePorActualizar.getBonificacion() == null)
       clientePorActualizar.setBonificacion(BigDecimal.ZERO);
-//    if (clientePorActualizar.getUbicacionFacturacion() != null) {
-//      if (clientePorActualizar.getUbicacionFacturacion().getIdUbicacion() == 0L) {
-//        clientePorActualizar.setUbicacionFacturacion(
-//            ubicacionService.guardar(clientePorActualizar.getUbicacionFacturacion()));
-//      } else {
-//        ubicacionService.actualizar(clientePorActualizar.getUbicacionFacturacion());
-//      }
-//    }
-//    if (clientePorActualizar.getUbicacionEnvio() != null) {
-//      if (clientePorActualizar.getUbicacionEnvio().getIdUbicacion() == 0L) {
-//        clientePorActualizar.setUbicacionEnvio(
-//            ubicacionService.guardar(clientePorActualizar.getUbicacionEnvio()));
-//      } else {
-//        ubicacionService.actualizar(clientePorActualizar.getUbicacionEnvio());
-//      }
-//    }
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, clientePorActualizar);
     if (clientePorActualizar.getCredencial() != null) {
       Cliente clienteYaAsignado =

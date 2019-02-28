@@ -227,16 +227,8 @@ public class ClienteController {
     } else {
       clientePorActualizar.setViajante(null);
     }
-    if (clientePersistido.getUbicacionFacturacion() != null) {
-      clientePorActualizar.setUbicacionFacturacion(clientePersistido.getUbicacionFacturacion());
-    } else {
-      clientePorActualizar.setUbicacionFacturacion(null);
-    }
-    if (clientePersistido.getUbicacionEnvio() != null) {
-      clientePorActualizar.setUbicacionEnvio(clientePersistido.getUbicacionEnvio());
-    } else {
-      clientePorActualizar.setUbicacionEnvio(null);
-    }
+    clientePorActualizar.setUbicacionFacturacion(clientePersistido.getUbicacionFacturacion());
+    clientePorActualizar.setUbicacionEnvio(clientePersistido.getUbicacionEnvio());
     clienteService.actualizar(clientePorActualizar, clientePersistido);
   }
 
