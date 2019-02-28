@@ -104,7 +104,7 @@ public class ClienteServiceImpl implements IClienteService {
     }
     if (criteria.isBuscaPorIdFiscal()) builder.or(qCliente.idFiscal.eq(criteria.getIdFiscal()));
     if (criteria.isBuscarPorNroDeCliente())
-      builder.and(qCliente.nroCliente.containsIgnoreCase(criteria.getNroDeCliente()));
+      builder.or(qCliente.nroCliente.containsIgnoreCase(criteria.getNroDeCliente()));
     if (criteria.isBuscaPorViajante())
       builder.and(qCliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaPorLocalidad())
