@@ -72,23 +72,4 @@ public class Proveedor implements Serializable {
     return empresa.getId_Empresa();
   }
 
-  @JsonGetter("idLocalidad")
-  public Long getIdLocalidad() {
-    return (ubicacion != null && ubicacion.getLocalidad() != null) ? ubicacion.getLocalidad().getId_Localidad() : null;
-  }
-
-  @JsonGetter("nombreLocalidad")
-  public String getNombreLocalidad() {
-    return (ubicacion != null && ubicacion.getLocalidad() != null) ? ubicacion.getLocalidad().getNombre() : null;
-  }
-
-  @JsonGetter("idProvincia")
-  public Long getIdProvincia() {
-    return (ubicacion != null && ubicacion.getLocalidad() != null) ? ubicacion.getLocalidad().getProvincia().getId_Provincia() : null;
-  }
-
-  @JsonGetter("nombreProvincia")
-  public String getNombreProvincia() {
-    return (ubicacion != null && ubicacion.getLocalidad() != null) ? ubicacion.getLocalidad().getProvincia().getNombre() : null;
-  }
 }

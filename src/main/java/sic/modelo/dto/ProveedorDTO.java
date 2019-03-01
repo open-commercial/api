@@ -12,9 +12,6 @@ import java.util.Date;
     exclude = {
       "id_Proveedor",
       "ubicacion",
-      "nombreLocalidad",
-      "idProvincia",
-      "nombreProvincia",
       "idEmpresa",
       "nombreEmpresa"
     })
@@ -34,9 +31,6 @@ public class ProveedorDTO implements Serializable {
   private String email;
   private String web;
   private UbicacionDTO ubicacion;
-  private String nombreLocalidad;
-  private Long idProvincia;
-  private String nombreProvincia;
   private Long idEmpresa;
   private String nombreEmpresa;
   private boolean eliminado;
