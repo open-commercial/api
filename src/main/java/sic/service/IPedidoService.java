@@ -12,7 +12,9 @@ public interface IPedidoService {
 
   Pedido getPedidoPorId(Long id);
 
-  void actualizar(Pedido pedido);
+  void actualizar(Pedido pedido, boolean usarUbicacionDeFacturacion);
+
+  void actualizarFacturasDelPedido(Pedido pedido);
 
   Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn);
 
@@ -32,7 +34,7 @@ public interface IPedidoService {
 
   byte[] getReportePedido(Pedido pedido);
 
-  Pedido guardar(Pedido pedido);
+  Pedido guardar(Pedido pedido, boolean usarUbicacionDeFacturacion);
 
   RenglonPedido calcularRenglonPedido(
     long idProducto,

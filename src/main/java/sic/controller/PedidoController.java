@@ -74,12 +74,12 @@ public class PedidoController {
     public void actualizar(@RequestParam Long idEmpresa,
                            @RequestParam Long idUsuario,
                            @RequestParam Long idCliente,
+                           @RequestParam boolean usarUbicacionDeFacturacion,
                            @RequestBody PedidoDTO pedidoDTO) {
         Pedido pedido = modelMapper.map(pedidoDTO, Pedido.class);
         pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
         pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
         pedido.setCliente(clienteService.getClientePorId(idCliente));
-        pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getUbicacionEnvio(), UbicacionDTO.class));
         //Las facturas se recuperan para evitar cambios no deseados. 
         pedido.setFacturas(pedidoService.getFacturasDelPedido(pedido.getId_Pedido()));
         //Si los renglones vienen null, recupera los renglones del pedido para actualizar
@@ -87,7 +87,7 @@ public class PedidoController {
         if (pedido.getRenglones() == null) {
             pedido.setRenglones(pedidoService.getRenglonesDelPedido(pedido.getId_Pedido()));
         }
-        pedidoService.actualizar(pedido);        
+        pedidoService.actualizar(pedido, usarUbicacionDeFacturacion);
     }
 
   @PostMapping("/pedidos")
@@ -119,18 +119,13 @@ public class PedidoController {
     pedido.setTotalActual(nuevoPedidoDTO.getTotal());
     pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    pedido.setDetalleEnvio(nuevoPedidoDTO.getDetalleEnvio());
     Cliente cliente = clienteService.getClientePorId(idCliente);
     if (cliente.getUbicacionFacturacion() == null) {
       throw new BusinessServiceException(
         ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_cliente_sin_ubicacion"));
     }
-    if (usarUbicacionDeFacturacion) {
-      modelMapper.getConfiguration().setAmbiguityIgnored(true);
-      pedido.setDetalleEnvio(modelMapper.map(cliente.getUbicacionFacturacion(), UbicacionDTO.class));
-    }
     pedido.setCliente(cliente);
-    return pedidoService.guardar(pedido);
+    return pedidoService.guardar(pedido, usarUbicacionDeFacturacion);
   }
 
   @GetMapping("/pedidos/busqueda/criteria")

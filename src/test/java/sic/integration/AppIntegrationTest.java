@@ -2917,11 +2917,6 @@ public class AppIntegrationTest {
     BigDecimal descuentoNeto =
       importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
-    UbicacionDTO detalleEnvioPedido = UbicacionDTO
-      .builder()
-      .calle("test ubicacion pedido")
-      .numero(132)
-      .build();
     NuevoPedidoDTO nuevoPedidoDTO =
       NuevoPedidoDTO.builder()
         .descuentoNeto(descuentoNeto)
@@ -2933,7 +2928,6 @@ public class AppIntegrationTest {
         .renglones(renglonesPedido)
         .subTotal(importe)
         .total(total)
-        .detalleEnvio(detalleEnvioPedido)
         .build();
     PedidoDTO pedidoRecuperado =
         restTemplate.postForObject(
@@ -2991,11 +2985,6 @@ public class AppIntegrationTest {
     BigDecimal descuentoNeto =
         importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
-    UbicacionDTO detalleEnvioPedido = UbicacionDTO
-      .builder()
-      .calle("test ubicacion pedido")
-      .numero(132)
-      .build();
     NuevoPedidoDTO nuevoPedidoDTO =
         NuevoPedidoDTO.builder()
             .descuentoNeto(descuentoNeto)
@@ -3007,7 +2996,6 @@ public class AppIntegrationTest {
             .renglones(renglonesPedido)
             .subTotal(importe)
             .total(total)
-            .detalleEnvio(detalleEnvioPedido)
             .build();
     PedidoDTO pedidoRecuperado =
         restTemplate.postForObject(
@@ -3043,7 +3031,7 @@ public class AppIntegrationTest {
     pedidoRecuperado.setTotalEstimado(total);
     pedidoRecuperado.setRenglones(renglonesPedido);
     pedidoRecuperado.setObservaciones("Cambiando las observaciones del pedido");
-    restTemplate.put(apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=1", pedidoRecuperado);
+    restTemplate.put(apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=1&usarUbicacionDeFacturacion=true", pedidoRecuperado);
     PedidoDTO pedidoModificado =
         restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoDTO.class);
     assertEquals(pedidoRecuperado, pedidoModificado);

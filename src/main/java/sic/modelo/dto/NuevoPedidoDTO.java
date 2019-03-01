@@ -14,7 +14,6 @@ public class NuevoPedidoDTO {
   private Date fechaVencimiento;
   private String observaciones;
   private List<RenglonPedidoDTO> renglones;
-  private UbicacionDTO detalleEnvio;
   private BigDecimal subTotal;
   private BigDecimal recargoPorcentaje;
   private BigDecimal recargoNeto;

@@ -19,6 +19,7 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,7 @@ public class PedidoServiceImpl implements IPedidoService {
   private final IProductoService productoService;
   private final ICorreoElectronicoService correoElectronicoService;
   private final IUbicacionService ubicacionService;
+  private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
@@ -58,7 +60,8 @@ public class PedidoServiceImpl implements IPedidoService {
       IClienteService clienteService,
       IProductoService productoService,
       ICorreoElectronicoService correoElectronicoService,
-      IUbicacionService ubicacionService) {
+      IUbicacionService ubicacionService,
+      ModelMapper modelMapper) {
     this.facturaService = facturaService;
     this.pedidoRepository = pedidoRepository;
     this.renglonPedidoRepository = renglonPedidoRepository;
@@ -67,6 +70,7 @@ public class PedidoServiceImpl implements IPedidoService {
     this.productoService = productoService;
     this.correoElectronicoService = correoElectronicoService;
     this.ubicacionService = ubicacionService;
+    this.modelMapper = modelMapper;
   }
 
   private void validarPedido(TipoDeOperacion operacion, Pedido pedido) {
@@ -118,59 +122,6 @@ public class PedidoServiceImpl implements IPedidoService {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_pedido_detalle_envio_calle_vacio"));
     }
-    // Calculos
-    /*BigDecimal[] importes = new BigDecimal[pedido.getRenglones().size()];
-    int i = 0;
-    for (RenglonPedido renglon : pedido.getRenglones()) {
-      importes[i] = renglon.getImporte();
-      i++;
-    }
-    if (pedido
-      .getImporte()
-      .compareTo(
-        CalculosComprobante.calcularSubTotal(importes))
-      != 0) {
-      String mensaje = RESOURCE_BUNDLE.getString("mensaje_pedido_sub_total_no_valido");
-      logger.error(mensaje);
-      throw new BusinessServiceException(mensaje);
-    }
-    if (pedido
-      .getRecargoNeto()
-      .compareTo(
-        CalculosComprobante.calcularProporcion(
-          pedido.getImporte(),
-          pedido.getRecargoPorcentaje()))
-      != 0) {
-      String mensaje = RESOURCE_BUNDLE.getString("mensaje_pedido_recargo_no_valido");
-      logger.error(mensaje);
-      throw new BusinessServiceException(mensaje);
-    }
-    if (pedido
-      .getDescuentoNeto()
-      .compareTo(
-        CalculosComprobante.calcularProporcion(
-          pedido.getImporte(),
-          pedido.getDescuentoPorcentaje()))
-      != 0) {
-      String mensaje = RESOURCE_BUNDLE.getString("mensaje_pedido_recargo_no_valido");
-      logger.error(mensaje);
-      throw new BusinessServiceException(mensaje);
-    }
-    if (pedido
-      .getTotalEstimado()
-      .compareTo(
-        CalculosComprobante.calcularSubTotalBruto(
-          false,
-          pedido.getImporte(),
-          pedido.getRecargoNeto(),
-          pedido.getDescuentoNeto(),
-          null,
-          null))
-      != 0) {
-      String mensaje = RESOURCE_BUNDLE.getString("mensaje_pedido_total_estimado_no_valido");
-      logger.error(mensaje);
-      throw new BusinessServiceException(mensaje);
-    }*/
   }
 
   @Override
@@ -244,15 +195,19 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public Pedido guardar(Pedido pedido) {
+  public Pedido guardar(Pedido pedido, boolean usarUbicacionDeFacturacion) {
     pedido.setFecha(new Date());
     pedido.setNroPedido(this.generarNumeroPedido(pedido.getEmpresa()));
     pedido.setEstado(EstadoPedido.ABIERTO);
     if (pedido.getObservaciones() == null || pedido.getObservaciones().equals("")) {
       pedido.setObservaciones("Los precios se encuentran sujetos a modificaciones.");
     }
+    if (usarUbicacionDeFacturacion) {
+      pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getUbicacionFacturacion(), UbicacionDTO.class));
+    } else {
+      pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getUbicacionEnvio(), UbicacionDTO.class));
+    }
     this.validarPedido(TipoDeOperacion.ALTA, pedido);
-    this.modificarUbicacionEnvíoCliente(pedido.getDetalleEnvio(), pedido.getCliente());
     pedido = pedidoRepository.save(pedido);
     logger.warn("El Pedido {} se guardó correctamente.", pedido);
     String emailCliente = pedido.getCliente().getEmail();
@@ -271,63 +226,6 @@ public class PedidoServiceImpl implements IPedidoService {
       logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
     return pedido;
-  }
-
-  private void modificarUbicacionEnvíoCliente(UbicacionDTO ubicacionEnvio, Cliente cliente) {
-    if (cliente.getUbicacionEnvio() != null) {
-      cliente.getUbicacionEnvio().setDescripcion(ubicacionEnvio.getDescripcion());
-      cliente.getUbicacionEnvio().setLatitud(ubicacionEnvio.getLatitud());
-      cliente.getUbicacionEnvio().setLongitud(ubicacionEnvio.getLongitud());
-      cliente.getUbicacionEnvio().setCalle(ubicacionEnvio.getCalle());
-      cliente.getUbicacionEnvio().setNumero(ubicacionEnvio.getNumero());
-      cliente.getUbicacionEnvio().setPiso(ubicacionEnvio.getPiso());
-      cliente.getUbicacionEnvio().setDepartamento(ubicacionEnvio.getDepartamento());
-      if (ubicacionEnvio.getIdLocalidad() != null) {
-        cliente
-          .getUbicacionEnvio()
-          .setLocalidad(ubicacionService.getLocalidadPorId(ubicacionEnvio.getIdLocalidad()));
-      } else if ((ubicacionEnvio.getNombreLocalidad() != null && ubicacionEnvio.getNombreProvincia() != null)
-        && !ubicacionEnvio
-        .getNombreLocalidad()
-        .equals(cliente.getUbicacionEnvio().getLocalidad().getNombre())) {
-        cliente
-          .getUbicacionEnvio()
-          .setLocalidad(
-            ubicacionService.getLocalidadPorNombre(
-              ubicacionEnvio.getNombreLocalidad(),
-              ubicacionService.getProvinciaPorNombre(ubicacionEnvio.getNombreProvincia())));
-      }
-      ubicacionService.actualizar(
-          cliente.getUbicacionEnvio(),
-          ubicacionEnvio.getNombreLocalidad(),
-          ubicacionEnvio.getCodigoPostal(),
-          ubicacionEnvio.getNombreProvincia());
-      clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
-    } else {
-      Ubicacion ubicacionNueva = new Ubicacion();
-      ubicacionNueva.setDescripcion(ubicacionEnvio.getDescripcion());
-      ubicacionNueva.setLatitud(ubicacionEnvio.getLatitud());
-      ubicacionNueva.setLongitud(ubicacionEnvio.getLongitud());
-      ubicacionNueva.setCalle(ubicacionEnvio.getCalle());
-      ubicacionNueva.setNumero(ubicacionEnvio.getNumero());
-      ubicacionNueva.setPiso(ubicacionEnvio.getPiso());
-      ubicacionNueva.setDepartamento(ubicacionEnvio.getDepartamento());
-      if (ubicacionEnvio.getNombreLocalidad() != null
-          && ubicacionEnvio.getNombreProvincia() != null) {
-        ubicacionNueva.setLocalidad(
-            ubicacionService.getLocalidadPorNombre(
-                ubicacionEnvio.getNombreLocalidad(),
-                ubicacionService.getProvinciaPorNombre(ubicacionEnvio.getNombreProvincia())));
-      }
-      ubicacionNueva =
-          ubicacionService.guardar(
-              ubicacionNueva,
-              ubicacionEnvio.getNombreLocalidad(),
-              ubicacionEnvio.getCodigoPostal(),
-              ubicacionEnvio.getNombreProvincia());
-      cliente.setUbicacionEnvio(ubicacionNueva);
-      clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
-    }
   }
 
   @Override
@@ -406,9 +304,20 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public void actualizar(Pedido pedido) {
+  public void actualizar(Pedido pedido, boolean usarDireccionDeFacturacion) {
+    if (usarDireccionDeFacturacion) {
+      pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getUbicacionFacturacion(), UbicacionDTO.class));
+    } else {
+      pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getUbicacionEnvio(), UbicacionDTO.class));
+    }
     this.validarPedido(TipoDeOperacion.ACTUALIZACION, pedido);
-    this.modificarUbicacionEnvíoCliente(pedido.getDetalleEnvio(), pedido.getCliente());
+    pedidoRepository.save(pedido);
+  }
+
+  @Override
+  @Transactional
+  public void actualizarFacturasDelPedido(Pedido pedido) {
+    this.validarPedido(TipoDeOperacion.ACTUALIZACION, pedido);
     pedidoRepository.save(pedido);
   }
 

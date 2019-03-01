@@ -29,7 +29,6 @@ public class CarritoCompraController {
   private final IEmpresaService empresaService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
-  private final ModelMapper modelMapper;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
@@ -38,14 +37,12 @@ public class CarritoCompraController {
       IPedidoService pedidoService,
       IEmpresaService empresaService,
       IUsuarioService usuarioService,
-      IClienteService clienteService,
-      ModelMapper modelMapper) {
+      IClienteService clienteService) {
     this.carritoCompraService = carritoCompraService;
     this.pedidoService = pedidoService;
     this.empresaService = empresaService;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
-    this.modelMapper = modelMapper;
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/clientes/{idCliente}")
@@ -98,6 +95,7 @@ public class CarritoCompraController {
       @RequestParam Long idEmpresa,
       @RequestParam Long idUsuario,
       @RequestParam Long idCliente,
+      @RequestParam boolean usarUbicacionDeFacturacion,
       @RequestBody(required = false) String observaciones) {
     CarritoCompraDTO carritoCompraDTO = carritoCompraService.getCarritoCompra(idUsuario, idCliente);
     Pedido pedido = new Pedido();
@@ -106,7 +104,6 @@ public class CarritoCompraController {
       throw new BusinessServiceException(
         ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_cliente_sin_ubicacion"));
     }
-    pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getUbicacionEnvio(), UbicacionDTO.class));
     pedido.setObservaciones(observaciones);
     pedido.setSubTotal(carritoCompraDTO.getSubtotal());
     pedido.setRecargoPorcentaje(BigDecimal.ZERO);
@@ -129,7 +126,7 @@ public class CarritoCompraController {
                 .add(
                     pedidoService.calcularRenglonPedido(
                         i.getProducto().getIdProducto(), i.getCantidad(), BigDecimal.ZERO)));
-    Pedido p = pedidoService.guardar(pedido);
+    Pedido p = pedidoService.guardar(pedido, usarUbicacionDeFacturacion);
     carritoCompraService.eliminarTodosLosItemsDelUsuario(idUsuario);
     return p;
   }
