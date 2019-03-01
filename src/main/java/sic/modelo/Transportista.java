@@ -44,26 +44,6 @@ public class Transportista implements Serializable {
 
   private boolean eliminado;
 
-  @JsonGetter("idLocalidad")
-  public Long getIdLocalidad() {
-    return (ubicacion != null && ubicacion.getLocalidad() != null)
-        ? ubicacion.getLocalidad().getId_Localidad()
-        : null;
-  }
-
-  @JsonGetter("nombreLocalidad")
-  public String getNombreLocalidad() {
-    return (ubicacion != null && ubicacion.getLocalidad() != null)
-        ? ubicacion.getLocalidad().getNombre()
-        : null;
-  }
-
-  @JsonGetter("nombreProvincia")
-  public String getNombreProvincia() {
-    return (ubicacion != null && ubicacion.getLocalidad() != null)
-        ? ubicacion.getLocalidad().getProvincia().getNombre()
-        : null;
-  }
 
   @JsonGetter("idEmpresa")
   public Long getIdEmpresa() {
