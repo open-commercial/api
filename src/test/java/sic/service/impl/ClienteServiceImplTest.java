@@ -1,15 +1,14 @@
 package sic.service.impl;
 
 import java.util.ResourceBundle;
-import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import org.junit.Rule;
-import org.junit.rules.ExpectedException;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.builder.ClienteBuilder;
 import sic.builder.EmpresaBuilder;
 import sic.builder.LocalidadBuilder;
@@ -18,17 +17,15 @@ import sic.service.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
 import sic.repository.ClienteRepository;
 
-@RunWith(SpringRunner.class)
-public class ClienteServiceImplTest {
+@ExtendWith(SpringExtension.class)
+class ClienteServiceImplTest {
 
   @Mock private ClienteRepository clienteRepository;
 
   @InjectMocks private ClienteServiceImpl clienteServiceImpl;
 
-  @Rule public ExpectedException thrown = ExpectedException.none();
-
   @Test
-  public void shouldSetClientePredeterminado() {
+  void shouldSetClientePredeterminado() {
     Cliente resultadoEsperado = new ClienteBuilder().build();
     clienteServiceImpl.setClientePredeterminado(resultadoEsperado);
     when(clienteRepository.findByEmpresaAndPredeterminadoAndEliminado(
@@ -40,62 +37,86 @@ public class ClienteServiceImplTest {
   }
 
   @Test
-  public void shouldValidarOperacionWhenEmailInvalido() {
-    thrown.expect(BusinessServiceException.class);
-    thrown.expectMessage(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_email_invalido"));
-    clienteServiceImpl.validarOperacion(
-        TipoDeOperacion.ELIMINACION, new ClienteBuilder().withEmail("@@.com").build());
+  void shouldLanzarExceptionWhenEmailInvalido() {
+    BusinessServiceException thrown =
+        assertThrows(
+            BusinessServiceException.class,
+            () ->
+                clienteServiceImpl.validarOperacion(
+                    TipoDeOperacion.ELIMINACION, new ClienteBuilder().withEmail("@@.com").build()));
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_email_invalido")));
   }
 
   @Test
-  public void shouldValidarOperacionWhenCondicionIVAesNull() {
-    thrown.expect(BusinessServiceException.class);
-    thrown.expectMessage(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_categoriaIVA"));
-    clienteServiceImpl.validarOperacion(
-        TipoDeOperacion.ELIMINACION,
-        new ClienteBuilder()
-            .withCategoriaIVA(null)
-            .withEmail("soporte@gmail.com")
-            .withNombreFiscal("Ferreteria Julian")
-            .build());
+  void shouldLanzarExceptionWhenCondicionIVAesNull() {
+    BusinessServiceException thrown =
+        assertThrows(
+            BusinessServiceException.class,
+            () ->
+                clienteServiceImpl.validarOperacion(
+                    TipoDeOperacion.ELIMINACION,
+                    new ClienteBuilder()
+                        .withCategoriaIVA(null)
+                        .withEmail("soporte@gmail.com")
+                        .withNombreFiscal("Ferreteria Julian")
+                        .build()));
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_cliente_vacio_categoriaIVA")));
   }
 
   @Test
-  public void shouldValidarOperacionWhenEmpresaEsNull() {
-    thrown.expect(BusinessServiceException.class);
-    thrown.expectMessage(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_empresa"));
-    Cliente cliente =
-        new ClienteBuilder()
-            .withEmail("soporte@gmail.com")
-            .withNombreFiscal("Ferreteria Julian")
-            .withLocalidad(new LocalidadBuilder().build())
-            .withEmpresa(null)
-            .build();
-    clienteServiceImpl.validarOperacion(TipoDeOperacion.ELIMINACION, cliente);
+  void shouldLanzarExceptionWhenEmpresaEsNull() {
+    BusinessServiceException thrown =
+        assertThrows(
+            BusinessServiceException.class,
+            () ->
+                clienteServiceImpl.validarOperacion(
+                    TipoDeOperacion.ELIMINACION,
+                    new ClienteBuilder()
+                        .withEmail("soporte@gmail.com")
+                        .withNombreFiscal("Ferreteria Julian")
+                        .withLocalidad(new LocalidadBuilder().build())
+                        .withEmpresa(null)
+                        .build()));
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_empresa")));
   }
 
   @Test
-  public void shouldValidarOperacionWhenIdFiscalDuplicadoEnAlta() {
-    thrown.expect(BusinessServiceException.class);
-    thrown.expectMessage(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_duplicado_idFiscal"));
-    Cliente cliente = new ClienteBuilder().build();
+  void shouldLanzarExceptionWhenIdFiscalDuplicadoEnAlta() {
+    Cliente clienteNuevo = new ClienteBuilder().build();
     Cliente clienteDuplicado = new ClienteBuilder().build();
-    when(clienteRepository.findByIdFiscalAndEmpresaAndEliminado(
-            cliente.getIdFiscal(), cliente.getEmpresa(), false))
-        .thenReturn(cliente);
-    clienteServiceImpl.validarOperacion(TipoDeOperacion.ALTA, clienteDuplicado);
+    BusinessServiceException thrown =
+        assertThrows(
+            BusinessServiceException.class,
+            () -> {
+              when(clienteRepository.findByIdFiscalAndEmpresaAndEliminado(
+                      clienteNuevo.getIdFiscal(), clienteNuevo.getEmpresa(), false))
+                  .thenReturn(clienteNuevo);
+              clienteServiceImpl.validarOperacion(TipoDeOperacion.ALTA, clienteDuplicado);
+            });
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_cliente_duplicado_idFiscal")));
   }
 
   @Test
-  public void shouldValidarOperacionWhenIdFiscalDuplicadoEnActualizacion() {
-    thrown.expect(BusinessServiceException.class);
-    thrown.expectMessage(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_duplicado_idFiscal"));
-    Cliente cliente =
+  void shouldLanzarExceptionWhenIdFiscalDuplicadoEnActualizacion() {
+    Cliente clienteNuevo =
         new ClienteBuilder()
             .withId_Cliente(7L)
             .withNombreFiscal("Merceria los dos botones")
@@ -107,9 +128,20 @@ public class ClienteServiceImplTest {
             .withNombreFiscal("Merceria los dos botones")
             .withIdFiscal(23111111119L)
             .build();
-    when(clienteRepository.findByIdFiscalAndEmpresaAndEliminado(
-            cliente.getIdFiscal(), cliente.getEmpresa(), false))
-        .thenReturn(cliente);
-    clienteServiceImpl.validarOperacion(TipoDeOperacion.ACTUALIZACION, clienteDuplicado);
+    BusinessServiceException thrown =
+        assertThrows(
+            BusinessServiceException.class,
+            () -> {
+              when(clienteRepository.findByIdFiscalAndEmpresaAndEliminado(
+                      clienteNuevo.getIdFiscal(), clienteNuevo.getEmpresa(), false))
+                  .thenReturn(clienteNuevo);
+              clienteServiceImpl.validarOperacion(TipoDeOperacion.ACTUALIZACION, clienteDuplicado);
+            });
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                ResourceBundle.getBundle("Mensajes")
+                    .getString("mensaje_cliente_duplicado_idFiscal")));
   }
 }

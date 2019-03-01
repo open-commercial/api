@@ -1,21 +1,22 @@
 package sic.util;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
 
-public class ValidatorTest {
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-    @Test
-    public void shouldEsVacioWhenNoEsVacio() {
-        String campo = "no Vacio";
-        boolean result = Validator.esVacio(campo);
-        assertFalse(result);
-    }
+class ValidatorTest {
 
-    @Test
-    public void shouldEsEmailValidoWhenNoLoEs() {
-        String cadena = "No es un mail Valido";
-        boolean result = Validator.esEmailValido(cadena);
-        assertFalse(result);
-    }
+  @Test
+  void shouldEsVacioWhenNoEsVacio() {
+    String campo = "no Vacio";
+    boolean result = Validator.esVacio(campo);
+    assertFalse(result);
+  }
+
+  @Test
+  void shouldEsEmailValidoWhenNoLoEs() {
+    String cadena = "No es un mail Valido";
+    boolean result = Validator.esEmailValido(cadena);
+    assertFalse(result);
+  }
 }
