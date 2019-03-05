@@ -216,7 +216,7 @@ $P{pedido}.getEmpresa().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				<textElement textAlignment="Left">
 					<font size="8" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Domicilio:]]></text>
+				<text><![CDATA[Envío:]]></text>
 			</staticText>
 			<textField>
 				<reportElement x="60" y="194" width="495" height="15" uuid="9dc064b1-4bc1-4e5d-b6bb-ab49687c9e88">

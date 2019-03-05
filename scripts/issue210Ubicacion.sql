@@ -21,8 +21,16 @@ select "ubicacionFacturacion", 123,localidad.id_Localidad, cliente.id_Cliente, c
 on cliente.id_Localidad = localidad.id_Localidad;
 
 INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente, eliminada) 
+select "ubicacionFacturacion", 123, null, cliente.id_Cliente, cliente.eliminado from cliente
+where cliente.id_Localidad is null;
+
+INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente, eliminada) 
 select "ubicacionEnvio", 123,localidad.id_Localidad, cliente.id_Cliente, cliente.eliminado from cliente inner join localidad
 on cliente.id_Localidad = localidad.id_Localidad;
+
+INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente, eliminada) 
+select "ubicacionEnvio", 123, null, cliente.id_Cliente, cliente.eliminado from cliente
+where cliente.id_Localidad is null;
 
 ALTER TABLE `cliente` 
 ADD COLUMN `idUbicacionFacturacion` BIGINT(20) AFTER `bonificacion`;
@@ -236,6 +244,14 @@ pedido.nombreProvincia = provincia.nombre,
 pedido.numero = ubicacion.numero,
 pedido.piso = ubicacion.piso
 ;
+
+SET SQL_SAFE_UPDATES = 0;
+update pedido 
+SET pedido.calle = 'backfill calle pedido', 
+pedido.numero = 999
+WHERE pedido.calle is null or pedido.numero is null
+;
+SET SQL_SAFE_UPDATES = 1;
 
 -- BackFill Codigo postal
 SET SQL_SAFE_UPDATES = 0;

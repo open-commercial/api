@@ -9,7 +9,6 @@ import sic.modelo.dto.UbicacionDTO;
 import sic.service.*;
 
 import java.util.List;
-import java.util.ResourceBundle;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -86,11 +85,6 @@ public class UbicacionController {
   public Ubicacion guardarUbicacionDeFacturacion(
       @RequestBody UbicacionDTO ubicacionDTO, @PathVariable Long idCliente) {
     Cliente cliente = clienteService.getClientePorId(idCliente);
-    if (cliente.getUbicacionFacturacion() != null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_error_ubicacion_incorrecta_cliente"));
-    }
     Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
     return ubicacionService.guardarUbicacionDeFacturacionCliente(
         ubicacion,
@@ -111,11 +105,6 @@ public class UbicacionController {
   public Ubicacion guardarUbicacionDeEnvio(
       @RequestBody UbicacionDTO ubicacionDTO, @PathVariable Long idCliente) {
     Cliente cliente = clienteService.getClientePorId(idCliente);
-    if (cliente.getUbicacionEnvio() != null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_error_ubicacion_incorrecta_cliente"));
-    }
     Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
     return ubicacionService.guardarUbicacionDeEnvioCliente(
         ubicacion,
@@ -145,11 +134,6 @@ public class UbicacionController {
   public Ubicacion guardarUbicacionDeEmpresa(
       @RequestBody UbicacionDTO ubicacionDTO, @PathVariable Long idEmpresa) {
     Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
-    if (empresa.getUbicacion() != null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_error_ubicacion_incorrecta_empresa"));
-    }
     Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
     return ubicacionService.guardaUbicacionEmpresa(
         ubicacion,
@@ -164,11 +148,6 @@ public class UbicacionController {
   public Ubicacion guardarUbicacionDeProveedor(
       @RequestBody UbicacionDTO ubicacionDTO, @PathVariable Long idProveedor) {
     Proveedor proveedor = proveedorService.getProveedorPorId(idProveedor);
-    if (proveedor.getUbicacion() != null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_error_ubicacion_incorrecta_proveedor"));
-    }
     Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
     return ubicacionService.guardaUbicacionProveedor(
         ubicacion,
@@ -182,12 +161,6 @@ public class UbicacionController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Ubicacion guardarUbicacionDeTransportista(
       @RequestBody UbicacionDTO ubicacionDTO, @PathVariable Long idTransportista) {
-    Transportista transportista = transportistaService.getTransportistaPorId(idTransportista);
-    if (transportista.getUbicacion() != null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_error_ubicacion_incorrecta_transportista"));
-    }
     Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
     return ubicacionService.guardarUbicacionTransportista(
         ubicacion,

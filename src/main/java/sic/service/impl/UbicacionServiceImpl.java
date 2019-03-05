@@ -79,6 +79,10 @@ public class UbicacionServiceImpl implements IUbicacionService {
       String codigoPostal,
       String nombreProvincia,
       Cliente cliente) {
+    if (cliente.getUbicacionFacturacion() != null) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_cliente"));
+    }
     cliente.setUbicacionFacturacion(
         this.guardar(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia));
     clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
@@ -93,6 +97,10 @@ public class UbicacionServiceImpl implements IUbicacionService {
       String codigoPostal,
       String nombreProvincia,
       Cliente cliente) {
+    if (cliente.getUbicacionEnvio() != null) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_cliente"));
+    }
     cliente.setUbicacionEnvio(
         this.guardar(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia));
     clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
@@ -107,6 +115,10 @@ public class UbicacionServiceImpl implements IUbicacionService {
       String codigoPostal,
       String nombreProvincia,
       Empresa empresa) {
+    if (empresa.getUbicacion() != null) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_empresa"));
+    }
     empresa.setUbicacion(this.guardar(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia));
     empresaService.actualizar(empresa, empresaService.getEmpresaPorId(empresa.getId_Empresa()));
     return empresa.getUbicacion();
@@ -120,6 +132,10 @@ public class UbicacionServiceImpl implements IUbicacionService {
       String codigoPostal,
       String nombreProvincia,
       Proveedor proveedor) {
+    if (proveedor.getUbicacion() != null) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_proveedor"));
+    }
     proveedor.setUbicacion(this.guardar(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia));
     proveedorService.actualizar(proveedor);
     return proveedor.getUbicacion();
@@ -133,6 +149,10 @@ public class UbicacionServiceImpl implements IUbicacionService {
       String codigoPostal,
       String nombreProvincia,
       Transportista transportista) {
+    if (transportista.getUbicacion() != null) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_transportista"));
+    }
     transportista.setUbicacion(
         this.guardar(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia));
     transportistaService.actualizar(transportista);
@@ -210,7 +230,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
     Localidad localidad = localidadRepository.findOne(idLocalidad);
     if (localidad == null) {
       throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_localidad_no_existente"));
+          RESOURCE_BUNDLE.getString("mensaje_localidad_no_existente"));
     }
     return localidad;
   }
