@@ -3,13 +3,14 @@ package sic.modelo.dto;
 import lombok.*;
 
 import javax.persistence.Embeddable;
+import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Embeddable
-public class UbicacionDTO {
+public class UbicacionDTO implements Serializable {
 
   private long idUbicacion;
   private String descripcion;

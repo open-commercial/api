@@ -122,7 +122,7 @@ public class PedidoController {
     Cliente cliente = clienteService.getClientePorId(idCliente);
     if (cliente.getUbicacionFacturacion() == null) {
       throw new BusinessServiceException(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_cliente_sin_ubicacion"));
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_facturacion_vacia"));
     }
     pedido.setCliente(cliente);
     return pedidoService.guardar(pedido, usarUbicacionDeFacturacion);

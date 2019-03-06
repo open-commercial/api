@@ -102,7 +102,7 @@ public class CarritoCompraController {
     pedido.setCliente(clienteService.getClientePorId(idCliente));
     if (pedido.getCliente().getUbicacionFacturacion() == null) {
       throw new BusinessServiceException(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_cliente_sin_ubicacion"));
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_facturacion_vacia"));
     }
     pedido.setObservaciones(observaciones);
     pedido.setSubTotal(carritoCompraDTO.getSubtotal());

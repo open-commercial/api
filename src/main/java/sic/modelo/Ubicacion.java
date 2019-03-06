@@ -34,16 +34,16 @@ public class Ubicacion implements Serializable {
 
   private String descripcion;
 
-  @DecimalMin(value = "-90", message = "{mensaje_producto_cantidad_negativa}")
-  @DecimalMax(value = "90", message = "{mensaje_producto_cantidad_negativa}")
+  @DecimalMin(value = "-90", message = "{mensaje_ubicacion_latitud_fuera_de_rango}")
+  @DecimalMax(value = "90", message = "{mensaje_ubicacion_latitud_fuera_de_rango}")
   private Double latitud;
 
-  @DecimalMin(value = "-180", message = "{mensaje_producto_cantidad_negativa}")
-  @DecimalMax(value = "180", message = "{mensaje_producto_cantidad_negativa}")
+  @DecimalMin(value = "-180", message = "{mensaje_ubicacion_longitud_fuera_de_rango}")
+  @DecimalMax(value = "180", message = "{mensaje_ubicacion_longitud_fuera_de_rango}")
   private Double longitud;
 
-  @Length(max = 255, message = "{mensaje_ubicacion_longitud_calle }")
-  @NotBlank
+  @Length(max = 255, message = "{mensaje_ubicacion_longitud_calle}")
+  @NotBlank(message = "{mensaje_ubicacion_calle_vacia}")
   private String calle;
 
   private int numero;

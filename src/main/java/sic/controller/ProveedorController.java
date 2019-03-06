@@ -21,10 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.dto.ProveedorDTO;
-import sic.service.BusinessServiceException;
 import sic.service.IEmpresaService;
 import sic.service.IProveedorService;
-import sic.service.IUbicacionService;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -32,18 +30,15 @@ public class ProveedorController {
 
   private final IProveedorService proveedorService;
   private final IEmpresaService empresaService;
-  private final IUbicacionService ubicacionService;
   private final ModelMapper modelMapper;
 
   @Autowired
   public ProveedorController(
     IProveedorService proveedorService,
     IEmpresaService empresaService,
-    IUbicacionService ubicacionService,
     ModelMapper modelMapper) {
     this.proveedorService = proveedorService;
     this.empresaService = empresaService;
-    this.ubicacionService = ubicacionService;
     this.modelMapper = modelMapper;
   }
 

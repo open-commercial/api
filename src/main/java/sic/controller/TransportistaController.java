@@ -1,7 +1,6 @@
 package sic.controller;
 
 import java.util.List;
-import java.util.ResourceBundle;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.dto.TransportistaDTO;
-import sic.service.BusinessServiceException;
 import sic.service.IEmpresaService;
 import sic.service.ITransportistaService;
-import sic.service.IUbicacionService;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -28,16 +25,14 @@ public class TransportistaController {
 
   private final ITransportistaService transportistaService;
   private final IEmpresaService empresaService;
-  private final IUbicacionService ubicacionService;
   private final ModelMapper modelMapper;
 
   @Autowired
   public TransportistaController(
     ITransportistaService transportistaService, IEmpresaService empresaService,
-    IUbicacionService ubicacionService, ModelMapper modelMapper) {
+    ModelMapper modelMapper) {
     this.transportistaService = transportistaService;
     this.empresaService = empresaService;
-    this.ubicacionService = ubicacionService;
     this.modelMapper = modelMapper;
   }
 

@@ -50,10 +50,6 @@ public interface IUbicacionService {
                   String codigoPostal,
                   String nombreProvincia);
 
-  Page<Ubicacion> buscarUbicaciones(BusquedaUbicacionCriteria criteria);
-
-  Ubicacion getUbicacionPorId(long idUbicacion);
-
   Localidad getLocalidadPorId(Long idLocalidad);
 
   Localidad getLocalidadPorNombre(String nombre, Provincia provincia);
