@@ -27,13 +27,14 @@ import sic.modelo.dto.UbicacionDTO;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nroPedido", "empresa"})
 @ToString(exclude = {"facturas", "renglones"})
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Pedido", scope = Pedido.class)
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.PropertyGenerator.class,
+    property = "id_Pedido",
+    scope = Pedido.class)
 @JsonIgnoreProperties({"cliente", "usuario", "empresa"})
 public class Pedido implements Serializable {
 
-  @Id
-  @GeneratedValue
-  private long id_Pedido;
+  @Id @GeneratedValue private long id_Pedido;
 
   private long nroPedido;
 
@@ -112,4 +113,13 @@ public class Pedido implements Serializable {
     return usuario.getNombre() + " " + usuario.getApellido() + " (" + usuario.getUsername() + ")";
   }
 
+  @JsonGetter("idViajante")
+  public Long getIdViajante() {
+    return (cliente.getViajante() != null) ? cliente.getViajante().getId_Usuario() : null;
+  }
+
+  @JsonGetter("nombreViajante")
+  public String getNombreViajante() {
+    return (cliente.getViajante() != null) ? cliente.getNombreViajante() :  null;
+  }
 }

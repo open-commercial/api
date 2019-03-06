@@ -107,4 +107,13 @@ public class Recibo implements Serializable {
     return usuario.getNombre() + " " + usuario.getApellido() + " (" + usuario.getUsername() + ")";
   }
 
+  @JsonGetter("idViajante")
+  public Long getIdViajante() {
+    return (cliente != null && cliente.getViajante() != null) ? cliente.getViajante().getId_Usuario() : null;
+  }
+
+  @JsonGetter("nombreViajante")
+  public String getNombreViajante() {
+    return (cliente != null && cliente.getViajante() != null) ? cliente.getNombreViajante() : null;
+  }
 }

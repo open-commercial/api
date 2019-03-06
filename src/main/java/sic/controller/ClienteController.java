@@ -152,7 +152,9 @@ public class ClienteController {
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
       Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
       if (idCredencial != idUsuarioLoggedIn
-          && !usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
+          && !(usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
+              || usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)
+              || usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR))) {
         throw new ForbiddenException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
       } else {
@@ -193,7 +195,9 @@ public class ClienteController {
       if (idCredencial != idUsuarioLoggedIn
           && clientePersistido.getCredencial() != null
           && clientePersistido.getCredencial().getId_Usuario() != idCredencial
-          && !usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
+          && !(usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
+              || usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)
+              || usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR))) {
         throw new ForbiddenException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
       } else {

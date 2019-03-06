@@ -3,6 +3,7 @@ package sic.controller;
 import java.util.List;
 import java.util.ResourceBundle;
 import io.jsonwebtoken.Claims;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,6 +14,7 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.BusquedaUsuarioCriteria;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
+import sic.modelo.dto.UsuarioDTO;
 import sic.service.IAuthService;
 import sic.service.IUsuarioService;
 
@@ -22,12 +24,15 @@ public class UsuarioController {
 
   private final IUsuarioService usuarioService;
   private final IAuthService authService;
+  private final ModelMapper modelMapper;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
-  public UsuarioController(IUsuarioService usuarioService, IAuthService authService) {
+  public UsuarioController(
+      IUsuarioService usuarioService, IAuthService authService, ModelMapper modelMapper) {
     this.usuarioService = usuarioService;
     this.authService = authService;
+    this.modelMapper = modelMapper;
   }
 
   @GetMapping("/usuarios/{idUsuario}")
@@ -50,17 +55,23 @@ public class UsuarioController {
     Pageable pageable;
     if (ordenarPor == null || sentido == null) {
       pageable =
-        new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombre"));
+          new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombre"));
     } else {
       switch (sentido) {
-        case "ASC" : pageable =
-          new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "ASC":
+          pageable =
+              new PageRequest(
+                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
           break;
-        case "DESC" : pageable =
-          new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        case "DESC":
+          pageable =
+              new PageRequest(
+                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
           break;
-        default: pageable =
-          new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombre"));
+        default:
+          pageable =
+              new PageRequest(
+                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombre"));
           break;
       }
     }
@@ -82,8 +93,18 @@ public class UsuarioController {
   }
 
   @PostMapping("/usuarios")
-  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-  public Usuario guardar(@RequestBody Usuario usuario) {
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public Usuario guardar(
+      @RequestBody UsuarioDTO usuarioDTO,
+      @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Usuario usuarioLoggedIn = this.getUsuarioPorId((int) claims.get("idUsuario"));
+    if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
+        && (usuarioDTO.getRoles().size() != 1 || !usuarioDTO.getRoles().contains(Rol.COMPRADOR))) {
+      throw new ForbiddenException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+    }
+    Usuario usuario = modelMapper.map(usuarioDTO, Usuario.class);
     return usuarioService.guardar(usuario);
   }
 
@@ -96,12 +117,22 @@ public class UsuarioController {
     Rol.COMPRADOR
   })
   public void actualizar(
-      @RequestBody Usuario usuario, @RequestHeader("Authorization") String authorizationHeader) {
+      @RequestBody UsuarioDTO usuarioDTO,
+      @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Usuario usuarioLoggedIn = this.getUsuarioPorId((int) claims.get("idUsuario"));
-    boolean usuarioSeModificaASiMismo = usuarioLoggedIn.getId_Usuario() == usuario.getId_Usuario();
+    boolean usuarioSeModificaASiMismo =
+        usuarioLoggedIn.getId_Usuario() == usuarioDTO.getId_Usuario();
     if (usuarioSeModificaASiMismo || usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
-      usuarioService.actualizar(usuario, usuarioLoggedIn);
+      Usuario usuarioPorActualizar = modelMapper.map(usuarioDTO, Usuario.class);
+      Usuario usuarioPersistido = usuarioService.getUsuarioPorId(usuarioDTO.getId_Usuario());
+      if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
+        usuarioPorActualizar.setRoles(usuarioPersistido.getRoles());
+      }
+      if (usuarioLoggedIn.getId_Usuario() == usuarioPersistido.getId_Usuario()) {
+        usuarioPorActualizar.setToken(usuarioLoggedIn.getToken());
+      }
+      usuarioService.actualizar(usuarioPorActualizar, usuarioPersistido);
     } else {
       throw new ForbiddenException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));

@@ -39,5 +39,4 @@ public class PedidoDTO implements Serializable {
   private BigDecimal totalEstimado;
   private BigDecimal totalActual;
   private EstadoPedido estado;
-
 }

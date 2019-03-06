@@ -54,4 +54,14 @@ public class FacturaVenta extends Factura implements Serializable {
         return cliente.getNombreFiscal();
     }
 
+    @JsonGetter("idViajante")
+    public Long getIdViajante() {
+        return (cliente.getViajante() != null) ?  cliente.getViajante().getId_Usuario() : null;
+    }
+
+    @JsonGetter("nombreViajante")
+    public String getNombreViajante() {
+        return (cliente.getViajante() != null) ? cliente.getViajante().getNombre() + " " + cliente.getViajante().getApellido() + " (" + cliente.getViajante().getUsername() + ")" : null;
+    }
+
 }

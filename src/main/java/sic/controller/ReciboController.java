@@ -66,6 +66,7 @@ public class ReciboController {
       @RequestParam(required = false) Integer nroRecibo,
       @RequestParam(required = false) Long idCliente,
       @RequestParam(required = false) Long idUsuario,
+      @RequestParam(required = false) Long idViajante,
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido) {
@@ -113,10 +114,13 @@ public class ReciboController {
             .idCliente(idCliente)
             .buscaPorUsuario(idUsuario != null)
             .idUsuario(idUsuario)
+            .buscaPorViajante(idViajante != null)
+            .idViajante(idViajante)
             .idEmpresa(idEmpresa)
             .pageable(pageable)
+            .movimiento(Movimiento.VENTA)
             .build();
-    return reciboService.buscarRecibos(criteria, Movimiento.VENTA);
+    return reciboService.buscarRecibos(criteria);
   }
 
   @GetMapping("/recibos/compra/busqueda/criteria")
@@ -180,8 +184,83 @@ public class ReciboController {
             .idUsuario(idUsuario)
             .idEmpresa(idEmpresa)
             .pageable(pageable)
+            .movimiento(Movimiento.COMPRA)
             .build();
-    return reciboService.buscarRecibos(criteria, Movimiento.COMPRA);
+    return reciboService.buscarRecibos(criteria);
+  }
+
+  @GetMapping("/recibos/compra/total/criteria")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public BigDecimal getTotalRecibosCompra(@RequestParam Long idEmpresa,
+                                          @RequestParam(required = false) Long desde,
+                                          @RequestParam(required = false) Long hasta,
+                                          @RequestParam(required = false) String concepto,
+                                          @RequestParam(required = false) Integer nroSerie,
+                                          @RequestParam(required = false) Integer nroRecibo,
+                                          @RequestParam(required = false) Long idProveedor,
+                                          @RequestParam(required = false) Long idUsuario) {
+    Calendar fechaDesde = Calendar.getInstance();
+    Calendar fechaHasta = Calendar.getInstance();
+    if ((desde != null) && (hasta != null)) {
+      fechaDesde.setTimeInMillis(desde);
+      fechaHasta.setTimeInMillis(hasta);
+    }
+    BusquedaReciboCriteria criteria =
+      BusquedaReciboCriteria.builder()
+        .buscaPorFecha((desde != null) && (hasta != null))
+        .fechaDesde(fechaDesde.getTime())
+        .fechaHasta(fechaHasta.getTime())
+        .buscaPorConcepto(concepto != null)
+        .buscaPorNumeroRecibo((nroSerie != null) && (nroRecibo != null))
+        .numSerie((nroSerie != null) ? nroSerie : 0)
+        .numRecibo((nroRecibo != null) ? nroRecibo : 0)
+        .buscaPorConcepto(concepto != null)
+        .concepto(concepto)
+        .buscaPorProveedor(idProveedor != null)
+        .idProveedor(idProveedor)
+        .buscaPorUsuario(idUsuario != null)
+        .idUsuario(idUsuario)
+        .idEmpresa(idEmpresa)
+        .movimiento(Movimiento.COMPRA)
+        .build();
+    return reciboService.getTotalRecibos(criteria);
+  }
+
+  @GetMapping("/recibos/venta/total/criteria")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public BigDecimal getTotalRecibosVenta(@RequestParam Long idEmpresa,
+                                         @RequestParam(required = false) Long desde,
+                                         @RequestParam(required = false) Long hasta,
+                                         @RequestParam(required = false) String concepto,
+                                         @RequestParam(required = false) Integer nroSerie,
+                                         @RequestParam(required = false) Integer nroRecibo,
+                                         @RequestParam(required = false) Long idCliente,
+                                         @RequestParam(required = false) Long idUsuario) {
+    Calendar fechaDesde = Calendar.getInstance();
+    Calendar fechaHasta = Calendar.getInstance();
+    if ((desde != null) && (hasta != null)) {
+      fechaDesde.setTimeInMillis(desde);
+      fechaHasta.setTimeInMillis(hasta);
+    }
+    BusquedaReciboCriteria criteria =
+      BusquedaReciboCriteria.builder()
+        .buscaPorFecha((desde != null) && (hasta != null))
+        .fechaDesde(fechaDesde.getTime())
+        .fechaHasta(fechaHasta.getTime())
+        .buscaPorConcepto(concepto != null)
+        .buscaPorNumeroRecibo((nroSerie != null) && (nroRecibo != null))
+        .numSerie((nroSerie != null) ? nroSerie : 0)
+        .numRecibo((nroRecibo != null) ? nroRecibo : 0)
+        .buscaPorConcepto(concepto != null)
+        .concepto(concepto)
+        .buscaPorCliente(idCliente != null)
+        .idCliente(idCliente)
+        .buscaPorUsuario(idUsuario != null)
+        .idUsuario(idUsuario)
+        .idEmpresa(idEmpresa)
+        .movimiento(Movimiento.VENTA)
+        .build();
+    return reciboService.getTotalRecibos(criteria);
   }
 
     @PostMapping("/recibos/clientes")

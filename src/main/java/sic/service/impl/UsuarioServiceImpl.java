@@ -244,29 +244,23 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public void actualizar(Usuario usuario, Usuario usuarioLoggedIn) {
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuario);
-    usuario.setUsername(usuario.getUsername().toLowerCase());
-    if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
-      usuario.setRoles(usuarioLoggedIn.getRoles());
-    }
-    if (usuario.getPassword() == null || usuario.getPassword().isEmpty()) {
-      Usuario usuarioGuardado = usuarioRepository.findById(usuario.getId_Usuario());
-      usuario.setPassword(usuarioGuardado.getPassword());
+  public void actualizar(Usuario usuarioPorActualizar, Usuario usuarioPersistido) {
+    if (usuarioPorActualizar.getPassword() != null
+        && !usuarioPorActualizar.getPassword().isEmpty()) {
+      usuarioPorActualizar.setPassword(this.encriptarConMD5(usuarioPorActualizar.getPassword()));
     } else {
-      usuario.setPassword(this.encriptarConMD5(usuario.getPassword()));
+      usuarioPorActualizar.setPassword(usuarioPersistido.getPassword());
     }
-    if (!usuario.getRoles().contains(Rol.VIAJANTE)) {
-      this.clienteService.desvincularClienteDeViajante(usuario.getId_Usuario());
+    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuarioPorActualizar);
+    if (!usuarioPorActualizar.getRoles().contains(Rol.VIAJANTE)) {
+      this.clienteService.desvincularClienteDeViajante(usuarioPorActualizar.getId_Usuario());
     }
-    if (!usuario.getRoles().contains(Rol.COMPRADOR)) {
-      this.clienteService.desvincularClienteDeCredencial(usuario.getId_Usuario());
+    if (!usuarioPorActualizar.getRoles().contains(Rol.COMPRADOR)) {
+      this.clienteService.desvincularClienteDeCredencial(usuarioPorActualizar.getId_Usuario());
     }
-    if (usuarioLoggedIn.getId_Usuario() == usuario.getId_Usuario()) {
-      usuario.setToken(usuarioLoggedIn.getToken());
-    }
-    usuarioRepository.save(usuario);
-    logger.warn("El Usuario {} se actualizó correctamente.", usuario);
+    usuarioPorActualizar.setUsername(usuarioPorActualizar.getUsername().toLowerCase());
+    usuarioRepository.save(usuarioPorActualizar);
+    logger.warn("El Usuario {} se actualizó correctamente.", usuarioPorActualizar);
   }
 
   @Override

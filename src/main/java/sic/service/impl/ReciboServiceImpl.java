@@ -63,29 +63,39 @@ public class ReciboServiceImpl implements IReciboService {
     return reciboRepository.findById(idRecibo);
   }
 
-  @Override
-  public Page<Recibo> buscarRecibos(BusquedaReciboCriteria criteria, Movimiento movimiento) {
+  private BooleanBuilder getBuilder(BusquedaReciboCriteria criteria) {
     QRecibo qRecibo = QRecibo.recibo;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.isBuscaPorFecha()) {
+      Calendar cal = new GregorianCalendar();
+      cal.setTime(criteria.getFechaDesde());
+      cal.set(Calendar.HOUR_OF_DAY, 0);
+      cal.set(Calendar.MINUTE, 0);
+      cal.set(Calendar.SECOND, 0);
+      criteria.setFechaDesde(cal.getTime());
+      cal.setTime(criteria.getFechaHasta());
+      cal.set(Calendar.HOUR_OF_DAY, 23);
+      cal.set(Calendar.MINUTE, 59);
+      cal.set(Calendar.SECOND, 59);
+      criteria.setFechaHasta(cal.getTime());
       FormatterFechaHora formateadorFecha =
-          new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+        new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
       DateExpression<Date> fDesde =
-          Expressions.dateTemplate(
-              Date.class,
-              "convert({0}, datetime)",
-              formateadorFecha.format(criteria.getFechaDesde()));
+        Expressions.dateTemplate(
+          Date.class,
+          "convert({0}, datetime)",
+          formateadorFecha.format(criteria.getFechaDesde()));
       DateExpression<Date> fHasta =
-          Expressions.dateTemplate(
-              Date.class,
-              "convert({0}, datetime)",
-              formateadorFecha.format(criteria.getFechaHasta()));
+        Expressions.dateTemplate(
+          Date.class,
+          "convert({0}, datetime)",
+          formateadorFecha.format(criteria.getFechaHasta()));
       builder.and(qRecibo.fecha.between(fDesde, fHasta));
     }
     if (criteria.isBuscaPorNumeroRecibo())
       builder
-          .and(qRecibo.numSerie.eq(criteria.getNumSerie()))
-          .and(qRecibo.numRecibo.eq(criteria.getNumRecibo()));
+        .and(qRecibo.numSerie.eq(criteria.getNumSerie()))
+        .and(qRecibo.numRecibo.eq(criteria.getNumRecibo()));
     if (criteria.isBuscaPorConcepto()) {
       String[] terminos = criteria.getConcepto().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
@@ -95,16 +105,28 @@ public class ReciboServiceImpl implements IReciboService {
       builder.or(rsPredicate);
     }
     if (criteria.isBuscaPorCliente())
-      builder.or(qRecibo.cliente.id_Cliente.eq(criteria.getIdCliente()));
+      builder.and(qRecibo.cliente.id_Cliente.eq(criteria.getIdCliente()));
     if (criteria.isBuscaPorProveedor())
-      builder.or(qRecibo.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
+      builder.and(qRecibo.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
     if (criteria.isBuscaPorUsuario())
-      builder.or(qRecibo.usuario.id_Usuario.eq(criteria.getIdUsuario()));
-    if (movimiento == Movimiento.VENTA) builder.and(qRecibo.proveedor.isNull());
-    else if (movimiento == Movimiento.COMPRA) builder.and(qRecibo.cliente.isNull());
+      builder.and(qRecibo.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+    if (criteria.isBuscaPorViajante())
+      builder.and(qRecibo.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
+    if (criteria.getMovimiento() == Movimiento.VENTA) builder.and(qRecibo.proveedor.isNull());
+    else if (criteria.getMovimiento() == Movimiento.COMPRA) builder.and(qRecibo.cliente.isNull());
     builder.and(
-        qRecibo.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qRecibo.eliminado.eq(false)));
-    return reciboRepository.findAll(builder, criteria.getPageable());
+      qRecibo.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qRecibo.eliminado.eq(false)));
+    return builder;
+  }
+
+  @Override
+  public Page<Recibo> buscarRecibos(BusquedaReciboCriteria criteria) {
+    return reciboRepository.findAll(this.getBuilder(criteria), criteria.getPageable());
+  }
+
+  @Override
+  public BigDecimal getTotalRecibos(BusquedaReciboCriteria criteria) {
+    return reciboRepository.getTotalRecibos(this.getBuilder(criteria));
   }
 
   @Override

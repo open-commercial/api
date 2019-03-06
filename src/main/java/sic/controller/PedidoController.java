@@ -142,6 +142,7 @@ public class PedidoController {
       @RequestParam(required = false) Long hasta,
       @RequestParam(required = false) Long idCliente,
       @RequestParam(required = false) Long idUsuario,
+      @RequestParam(required = false) Long idViajante,
       @RequestParam(required = false) Long nroPedido,
       @RequestParam(required = false) EstadoPedido estadoPedido,
       @RequestParam(required = false) Integer pagina,
@@ -165,6 +166,8 @@ public class PedidoController {
             .idCliente(idCliente)
             .buscaUsuario(idUsuario != null)
             .idUsuario(idUsuario)
+            .buscaPorViajante(idViajante != null)
+            .idViajante(idViajante)
             .buscaPorNroPedido(nroPedido != null)
             .nroPedido((nroPedido != null) ? nroPedido : 0)
             .buscaPorEstadoPedido(estadoPedido != null)

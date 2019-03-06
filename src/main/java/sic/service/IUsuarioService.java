@@ -11,13 +11,13 @@ public interface IUsuarioService {
 
   Usuario getUsuarioPorPasswordRecoveryKeyAndIdUsuario(String passwordRecoveryKey, long idUsuario);
 
-  void actualizar(Usuario usuario, Usuario usuarioLoggedIn);
+  void actualizar(Usuario usuarioPorActualizar, Usuario usuarioPersistido);
 
   void actualizarToken(String token, long idUsuario);
 
   void actualizarPasswordRecoveryKey(String passwordRecoveryKey, long idUsuario);
 
-  void enviarEmailDeRecuperacion(long idEmpresa, String Email, String host);
+  void enviarEmailDeRecuperacion(long idEmpresa, String email, String host);
 
   void eliminar(long idUsuario);
 
@@ -32,4 +32,6 @@ public interface IUsuarioService {
   int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada);
 
   Page<Usuario> getUsuariosPorRol(Rol rol);
+
+  String encriptarConMD5(String password);
 }
