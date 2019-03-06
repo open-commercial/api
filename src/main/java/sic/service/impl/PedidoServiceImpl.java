@@ -45,7 +45,6 @@ public class PedidoServiceImpl implements IPedidoService {
   private final IClienteService clienteService;
   private final IProductoService productoService;
   private final ICorreoElectronicoService correoElectronicoService;
-  private final IUbicacionService ubicacionService;
   private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -60,7 +59,6 @@ public class PedidoServiceImpl implements IPedidoService {
       IClienteService clienteService,
       IProductoService productoService,
       ICorreoElectronicoService correoElectronicoService,
-      IUbicacionService ubicacionService,
       ModelMapper modelMapper) {
     this.facturaService = facturaService;
     this.pedidoRepository = pedidoRepository;
@@ -69,7 +67,6 @@ public class PedidoServiceImpl implements IPedidoService {
     this.clienteService = clienteService;
     this.productoService = productoService;
     this.correoElectronicoService = correoElectronicoService;
-    this.ubicacionService = ubicacionService;
     this.modelMapper = modelMapper;
   }
 
@@ -303,19 +300,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public void actualizar(Pedido pedido, boolean usarDireccionDeFacturacion) {
-    if (usarDireccionDeFacturacion) {
-      pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getUbicacionFacturacion(), UbicacionDTO.class));
-    } else {
-      pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getUbicacionEnvio(), UbicacionDTO.class));
-    }
-    this.validarPedido(TipoDeOperacion.ACTUALIZACION, pedido);
-    pedidoRepository.save(pedido);
-  }
-
-  @Override
-  @Transactional
-  public void actualizarFacturasDelPedido(Pedido pedido) {
+  public void actualizar(Pedido pedido) {
     this.validarPedido(TipoDeOperacion.ACTUALIZACION, pedido);
     pedidoRepository.save(pedido);
   }

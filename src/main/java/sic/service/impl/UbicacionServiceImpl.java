@@ -1,17 +1,16 @@
 package sic.service.impl;
 
-import com.querydsl.core.BooleanBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
 import sic.repository.LocalidadRepository;
 import sic.repository.ProvinciaRepository;
 import sic.repository.UbicacionRepository;
 import sic.service.*;
+import sic.util.Validator;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
@@ -238,5 +237,38 @@ public class UbicacionServiceImpl implements IUbicacionService {
   @Override
   public List<Provincia> getProvincias() {
     return provinciaRepository.findAllByAndEliminadaOrderByNombreAsc(false);
+  }
+
+  @Override
+  @Transactional
+  public void actualizarLocalidad(Localidad localidad) {
+    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, localidad);
+    localidadRepository.save(localidad);
+  }
+
+  @Override
+  public void validarOperacion(TipoDeOperacion operacion, Localidad localidad) {
+    //Requeridos
+    if (Validator.esVacio(localidad.getNombre())) {
+      throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+        .getString("mensaje_localidad_vacio_nombre"));
+    }
+    if (localidad.getProvincia() == null) {
+      throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+        .getString("mensaje_localidad_provincia_vacio"));
+    }
+    //Duplicados
+    //Nombre
+    Localidad localidadDuplicada = this.getLocalidadPorNombre(localidad.getNombre(), localidad.getProvincia());
+    if (operacion.equals(TipoDeOperacion.ALTA) && localidadDuplicada != null) {
+      throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+        .getString("mensaje_localidad_duplicado_nombre"));
+    }
+    if (operacion.equals(TipoDeOperacion.ACTUALIZACION)) {
+      if (localidadDuplicada != null && localidadDuplicada.getId_Localidad() != localidad.getId_Localidad()) {
+        throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+          .getString("mensaje_localidad_duplicado_nombre"));
+      }
+    }
   }
 }

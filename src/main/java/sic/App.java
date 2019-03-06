@@ -105,12 +105,12 @@ public class App extends WebMvcConfigurerAdapter {
     @Bean
     public ModelMapper modelMapper() {
       ModelMapper modelMapper = new ModelMapper();
-      PropertyMap<Ubicacion, UbicacionDTO> propertyMap = new PropertyMap<Ubicacion, UbicacionDTO>(){
+      PropertyMap<Ubicacion, UbicacionDTO> ubicacionMapping = new PropertyMap<Ubicacion, UbicacionDTO>(){
         protected void configure() {
           map(source.getLocalidad().getNombre(), destination.getNombreLocalidad());
         }
       };
-      modelMapper.addMappings(propertyMap);
+      modelMapper.addMappings(ubicacionMapping);
       return modelMapper;
     }
 

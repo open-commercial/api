@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.dto.LocalidadDTO;
 import sic.modelo.dto.UbicacionDTO;
 import sic.service.*;
 
@@ -169,4 +170,25 @@ public class UbicacionController {
         ubicacionDTO.getNombreProvincia(),
         transportistaService.getTransportistaPorId(idTransportista));
   }
+
+  @PutMapping("/ubicaciones/localidades")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public void actualizar(
+    @RequestBody LocalidadDTO localidadDTO) {
+    Localidad localidadPersistida =
+      ubicacionService.getLocalidadPorId(localidadDTO.getId_Localidad());
+    Localidad localidadPorActualizar = modelMapper.map(localidadDTO, Localidad.class);
+    if (localidadPorActualizar.getNombre() == null
+      || localidadPorActualizar.getNombre().isEmpty()) {
+      localidadPorActualizar.setNombre(localidadPersistida.getNombre());
+    }
+    if (localidadPorActualizar.getCodigoPostal() == null) {
+      localidadPorActualizar.setCodigoPostal(localidadPersistida.getCodigoPostal());
+    }
+    localidadPorActualizar.setProvincia(localidadPersistida.getProvincia());
+    if (ubicacionService.getLocalidadPorId(localidadPorActualizar.getId_Localidad()) != null) {
+      ubicacionService.actualizarLocalidad(localidadPorActualizar);
+    }
+  }
+
 }

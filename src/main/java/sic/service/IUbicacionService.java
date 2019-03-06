@@ -1,6 +1,5 @@
 package sic.service;
 
-import org.springframework.data.domain.Page;
 import sic.modelo.*;
 
 import java.util.List;
@@ -63,4 +62,8 @@ public interface IUbicacionService {
   List<Provincia> getProvincias();
 
   Localidad guardarLocalidad(String nombre, String nombreProvincia, String codigoPostal);
+
+  void actualizarLocalidad(Localidad localidad);
+
+  void validarOperacion(TipoDeOperacion operacion, Localidad localidad);
 }

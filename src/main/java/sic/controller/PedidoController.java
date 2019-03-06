@@ -69,25 +69,30 @@ public class PedidoController {
         return pedidoService.calcularRenglonesPedido(nuevosRenglonesPedidoDTO);
     }
 
-    @PutMapping("/pedidos")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
-    public void actualizar(@RequestParam Long idEmpresa,
-                           @RequestParam Long idUsuario,
-                           @RequestParam Long idCliente,
-                           @RequestParam boolean usarUbicacionDeFacturacion,
-                           @RequestBody PedidoDTO pedidoDTO) {
-        Pedido pedido = modelMapper.map(pedidoDTO, Pedido.class);
-        pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-        pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-        pedido.setCliente(clienteService.getClientePorId(idCliente));
-        //Las facturas se recuperan para evitar cambios no deseados. 
-        pedido.setFacturas(pedidoService.getFacturasDelPedido(pedido.getId_Pedido()));
-        //Si los renglones vienen null, recupera los renglones del pedido para actualizar
-        //caso contrario, ultiliza los renglones del pedido.
-        if (pedido.getRenglones() == null) {
-            pedido.setRenglones(pedidoService.getRenglonesDelPedido(pedido.getId_Pedido()));
-        }
-        pedidoService.actualizar(pedido, usarUbicacionDeFacturacion);
+  @PutMapping("/pedidos")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
+  public void actualizar(@RequestParam Long idEmpresa,
+                         @RequestParam Long idUsuario,
+                         @RequestParam Long idCliente,
+                         @RequestParam boolean usarUbicacionDeFacturacion,
+                         @RequestBody PedidoDTO pedidoDTO) {
+    Pedido pedido = modelMapper.map(pedidoDTO, Pedido.class);
+    pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
+    pedido.setCliente(clienteService.getClientePorId(idCliente));
+    //Las facturas se recuperan para evitar cambios no deseados.
+    pedido.setFacturas(pedidoService.getFacturasDelPedido(pedido.getId_Pedido()));
+    //Si los renglones vienen null, recupera los renglones del pedido para actualizarLocalidad
+    //caso contrario, ultiliza los renglones del pedido.
+    if (pedido.getRenglones() == null) {
+      pedido.setRenglones(pedidoService.getRenglonesDelPedido(pedido.getId_Pedido()));
+    }
+    if (usarUbicacionDeFacturacion) {
+      pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getUbicacionFacturacion(), UbicacionDTO.class));
+    } else {
+      pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getUbicacionEnvio(), UbicacionDTO.class));
+    }
+    pedidoService.actualizar(pedido);
     }
 
   @PostMapping("/pedidos")
