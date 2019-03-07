@@ -468,7 +468,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                   ? cuentaCorrienteCliente
                       .getCliente()
                       .getUbicacionFacturacion()
-                      .getNombreProvincia()
+                      .getNombreLocalidad()
                   : " ")
               + " "
               + (cuentaCorrienteCliente.getCliente().getUbicacionFacturacion().getNombreProvincia()

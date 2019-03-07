@@ -906,7 +906,7 @@ public class FacturaServiceImpl implements IFacturaService {
                   ? fv.getCliente().getUbicacionFacturacion().getDepartamento() + ", "
                   : ", ")
               + (fv.getCliente().getUbicacionFacturacion().getNombreLocalidad() != null
-                  ? fv.getCliente().getUbicacionFacturacion().getNombreProvincia()
+                  ? fv.getCliente().getUbicacionFacturacion().getNombreLocalidad()
                   : " ")
               + " "
               + (fv.getCliente().getUbicacionFacturacion().getNombreProvincia() != null

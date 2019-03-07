@@ -921,7 +921,7 @@ public class NotaServiceImpl implements INotaService {
                   ? nota.getCliente().getUbicacionFacturacion().getDepartamento() + ", "
                   : ", ")
               + (nota.getCliente().getUbicacionFacturacion().getNombreLocalidad() != null
-                  ? nota.getCliente().getUbicacionFacturacion().getNombreProvincia()
+                  ? nota.getCliente().getUbicacionFacturacion().getNombreLocalidad()
                   : " ")
               + " "
               + (nota.getCliente().getUbicacionFacturacion().getNombreProvincia() != null

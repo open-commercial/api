@@ -386,7 +386,7 @@ public class PedidoServiceImpl implements IPedidoService {
         ? pedido.getDetalleEnvio().getPiso() + ","
         : "")
         + (pedido.getDetalleEnvio().getNombreLocalidad() != null
-        ? pedido.getDetalleEnvio().getNombreProvincia()
+        ? pedido.getDetalleEnvio().getNombreLocalidad()
         : "")
         + " "
         + (pedido.getDetalleEnvio().getNombreProvincia() != null
