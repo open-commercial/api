@@ -10,6 +10,7 @@ import sic.modelo.dto.UbicacionDTO;
 import sic.service.*;
 
 import java.util.List;
+import java.util.ResourceBundle;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -173,22 +174,27 @@ public class UbicacionController {
 
   @PutMapping("/ubicaciones/localidades")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public void actualizar(
-    @RequestBody LocalidadDTO localidadDTO) {
+  public void actualizar(@RequestBody LocalidadDTO localidadDTO) {
     Localidad localidadPersistida =
-      ubicacionService.getLocalidadPorId(localidadDTO.getId_Localidad());
+        ubicacionService.getLocalidadPorId(localidadDTO.getId_Localidad());
     Localidad localidadPorActualizar = modelMapper.map(localidadDTO, Localidad.class);
-    if (localidadPorActualizar.getNombre() == null
-      || localidadPorActualizar.getNombre().isEmpty()) {
-      localidadPorActualizar.setNombre(localidadPersistida.getNombre());
+    if (localidadPorActualizar.getNombre() != null
+        && !localidadPorActualizar.getNombre().equals(localidadPersistida.getNombre())) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_localidad_cambio_nombre"));
     }
-    if (localidadPorActualizar.getCodigoPostal() == null) {
-      localidadPorActualizar.setCodigoPostal(localidadPersistida.getCodigoPostal());
+    if (localidadPorActualizar.getCodigoPostal() != null
+        && !localidadPorActualizar
+            .getCodigoPostal()
+            .equals(localidadPersistida.getCodigoPostal())) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_localidad_cambio_codigo_postal"));
     }
+    localidadPorActualizar.setNombre(localidadPersistida.getNombre());
+    localidadPorActualizar.setCodigoPostal(localidadPersistida.getCodigoPostal());
     localidadPorActualizar.setProvincia(localidadPersistida.getProvincia());
     if (ubicacionService.getLocalidadPorId(localidadPorActualizar.getId_Localidad()) != null) {
       ubicacionService.actualizarLocalidad(localidadPorActualizar);
     }
   }
-
 }
