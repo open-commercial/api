@@ -3676,4 +3676,14 @@ class AppIntegrationTest {
     ClienteDTO clienteDTO = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class);
     assertEquals("Regresión lineal", clienteDTO.getUbicacionFacturacion().getCalle());
   }
+
+  @Test
+  public void shouldModificarCostoEnvioDeLocalidad() {
+    LocalidadDTO localidad = restTemplate.getForObject(apiPrefix + "/ubicaciones/localidades/1", LocalidadDTO.class);
+    localidad.setEnvioGratuito(true);
+    localidad.setCostoEnvio(new BigDecimal("450"));
+    restTemplate.put(apiPrefix + "/ubicaciones/localidades", localidad);
+    assertTrue(localidad.isEnvioGratuito());
+    assertEquals(new BigDecimal("450"), localidad.getCostoEnvio());
+  }
 }
