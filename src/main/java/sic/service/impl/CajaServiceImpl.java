@@ -223,7 +223,7 @@ public class CajaServiceImpl implements ICajaService {
     cajaACerrar.setSaldoReal(monto);
     if (scheduling) {
       LocalDateTime fechaCierre =
-        LocalDateTime.ofInstant(this.clockService.getFechaActual().toInstant(), ZoneId.systemDefault());
+        LocalDateTime.ofInstant(cajaACerrar.getFechaApertura().toInstant(), ZoneId.systemDefault());
       fechaCierre = fechaCierre.withHour(23);
       fechaCierre = fechaCierre.withMinute(59);
       fechaCierre = fechaCierre.withSecond(59);
