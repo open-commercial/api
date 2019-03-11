@@ -19,6 +19,10 @@ import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductoDTO;
 import sic.service.*;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validation;
+
 @RestController
 @RequestMapping("/api/v1")
 public class ProductoController {
@@ -35,14 +39,14 @@ public class ProductoController {
 
   @Autowired
   public ProductoController(
-      IProductoService productoService,
-      IMedidaService medidaService,
-      IRubroService rubroService,
-      IProveedorService proveedorService,
-      IEmpresaService empresaService,
-      IClienteService clienteService,
-      IAuthService authService,
-      ModelMapper modelMapper) {
+    IProductoService productoService,
+    IMedidaService medidaService,
+    IRubroService rubroService,
+    IProveedorService proveedorService,
+    IEmpresaService empresaService,
+    IClienteService clienteService,
+    IAuthService authService,
+    ModelMapper modelMapper) {
     this.productoService = productoService;
     this.medidaService = medidaService;
     this.rubroService = rubroService;
@@ -272,6 +276,13 @@ public class ProductoController {
       if (idEmpresa != null)
         productoPorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
       else productoPorActualizar.setEmpresa(productoPersistido.getEmpresa());
+
+      Set<ConstraintViolation<Producto>> constraintViolations =
+        Validation.buildDefaultValidatorFactory().getValidator().validate(productoPorActualizar);
+      if (!constraintViolations.isEmpty()) {
+        throw new ConstraintViolationException(constraintViolations);
+      }
+
       productoService.actualizar(productoPorActualizar, productoPersistido);
     }
   }
