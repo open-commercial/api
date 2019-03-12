@@ -84,10 +84,9 @@ public class Ubicacion implements Serializable {
     return calle
         + " "
         + numero
-        + ", "
-        + (piso != null ? piso : "")
-        + (departamento != null ? departamento + ", " : "")
-        + (localidad != null ? localidad.getNombre() : " ")
+        + (piso != null ? ", " + piso : "")
+        + (departamento != null ? departamento: "")
+        + (localidad != null ?  ", " + localidad.getNombre() : " ")
         + " "
         + (localidad != null ? localidad.getProvincia().getNombre() : " ");
   }

@@ -11,7 +11,6 @@ import java.util.Date;
 @EqualsAndHashCode(
     exclude = {
       "id_Proveedor",
-      "ubicacion",
       "idEmpresa",
       "nombreEmpresa"
     })
@@ -30,7 +29,8 @@ public class ProveedorDTO implements Serializable {
   private String contacto;
   private String email;
   private String web;
-  private UbicacionDTO ubicacion;
+  private Long idUbicacion;
+  private String detalleUbicacion;
   private Long idEmpresa;
   private String nombreEmpresa;
   private boolean eliminado;

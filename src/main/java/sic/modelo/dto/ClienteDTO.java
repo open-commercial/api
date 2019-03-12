@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
-@EqualsAndHashCode(exclude = {"id_Cliente", "idEmpresa", "nombreEmpresa", "fechaAlta", "idCredencial", "nombreCredencial", "ubicacionFacturacion", "ubicacionEnvio"})
+@EqualsAndHashCode(exclude = {"id_Cliente", "idEmpresa", "nombreEmpresa", "fechaAlta", "idCredencial", "nombreCredencial"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -20,6 +20,10 @@ public class ClienteDTO implements Serializable {
   private String nombreFantasia;
   private CategoriaIVA categoriaIVA;
   private Long idFiscal;
+  private Long idUbicacionFacturacion;
+  private String detalleUbicacionFacturacion;
+  private Long idUbicacionEnvio;
+  private String detalleUbicacionEnvio;
   private String email;
   private String telefono;
   private String contacto;
@@ -33,9 +37,5 @@ public class ClienteDTO implements Serializable {
   private boolean predeterminado;
   private BigDecimal saldoCuentaCorriente;
   private Date fechaUltimoMovimiento;
-  private Long idUbicacionFacturacion;
-  private String detalleUbicacionFacturacion;
-  private Long idUbicacionEnvio;
-  private String detalleUbicacionEnvio;
 
 }
