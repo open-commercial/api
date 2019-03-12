@@ -92,6 +92,10 @@ INSERT INTO `ubicacion`(calle, numero, id_Localidad, idProveedor, eliminada)
 select "ubicacion proveedor", 123,localidad.id_Localidad, proveedor.id_Proveedor, proveedor.eliminado from proveedor inner join localidad
 on proveedor.id_Localidad = localidad.id_Localidad;
 
+INSERT INTO `ubicacion`(calle, numero, id_Localidad, idProveedor, eliminada) 
+select "ubicacion proveedor", 123, null, proveedor.id_Proveedor, proveedor.eliminado from proveedor
+where proveedor.id_Localidad is null;
+
 SET SQL_SAFE_UPDATES = 0;
 UPDATE ubicacion u inner join proveedor p on u.idProveedor = p.id_Proveedor
 SET u.descripcion = p.direccion;

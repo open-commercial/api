@@ -19,7 +19,6 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"idUbicacion", "localidad"})
-@ToString
 @JsonIgnoreProperties("localidad")
 public class Ubicacion implements Serializable {
 
@@ -78,5 +77,18 @@ public class Ubicacion implements Serializable {
   @JsonGetter("codigoPostal")
   public String getCodigoPostal() {
     return (localidad != null) ? localidad.getCodigoPostal() : null;
+  }
+
+  @Override
+  public String toString() {
+    return calle
+        + " "
+        + numero
+        + ", "
+        + (piso != null ? piso : "")
+        + (departamento != null ? departamento + ", " : "")
+        + (localidad != null ? localidad.getNombre() : " ")
+        + " "
+        + (localidad != null ? localidad.getProvincia().getNombre() : " ");
   }
 }

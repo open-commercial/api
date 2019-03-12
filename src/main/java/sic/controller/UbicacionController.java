@@ -39,6 +39,18 @@ public class UbicacionController {
     this.modelMapper = modelMapper;
   }
 
+  @GetMapping("/ubicaciones/{idUbicacion}")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public Ubicacion getUbicacionPorId(@PathVariable Long idUbicacion) {
+    return ubicacionService.getUbicacionPorId(idUbicacion);
+  }
+
   @GetMapping("/ubicaciones/localidades/{idLocalidad}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Localidad getLocalidadPorId(@PathVariable long idLocalidad) {

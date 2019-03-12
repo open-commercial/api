@@ -49,6 +49,12 @@ public class UbicacionServiceImpl implements IUbicacionService {
 
   @Override
   @Transactional
+  public Ubicacion getUbicacionPorId(long idUbicacion) {
+    return ubicacionRepository.findById(idUbicacion);
+  }
+
+  @Override
+  @Transactional
   public Ubicacion guardar(
       Ubicacion ubicacion, String nombreLocalidad, String codigoPostal, String nombreProvincia) {
     this.validarUbicacion(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia);

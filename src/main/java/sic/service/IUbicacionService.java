@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface IUbicacionService {
 
+  Ubicacion getUbicacionPorId(long idUbicacion);
+
   Ubicacion guardarUbicacionDeFacturacionCliente(
       Ubicacion ubicacion,
       String nombreLocalidad,
