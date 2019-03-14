@@ -3,6 +3,8 @@ package sic.modelo;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.querydsl.core.annotations.QueryInit;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -52,4 +54,22 @@ public class Empresa implements Serializable {
   private String logo;
 
   private boolean eliminada;
+
+  @JsonGetter("idUbicacion")
+  public Long getidUbicacion() {
+    if (ubicacion != null) {
+      return ubicacion.getIdUbicacion();
+    } else {
+      return null;
+    }
+  }
+
+  @JsonGetter("detalleUbicacion")
+  public String getDetalleUbicacion() {
+    if (ubicacion != null) {
+      return ubicacion.toString();
+    } else {
+      return null;
+    }
+  }
 }

@@ -8,7 +8,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(
     exclude = {
       "id_Transportista",
-      "ubicacion",
       "idEmpresa",
       "nombreEmpresa"
     })
@@ -17,7 +16,8 @@ public class TransportistaDTO {
 
   private long id_Transportista;
   private String nombre;
-  private UbicacionDTO ubicacion;
+  private Long idUbicacion;
+  private String detalleUbicacion;
   private String web;
   private String telefono;
   private Long idEmpresa;
