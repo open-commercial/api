@@ -41,7 +41,7 @@
 				<imageExpression><![CDATA[$P{logo}]]></imageExpression>
 			</image>
 			<rectangle>
-				<reportElement x="158" y="0" width="397" height="142" uuid="17eeab7f-475f-47f7-a9cb-fe3e752d1203"/>
+				<reportElement x="158" y="0" width="397" height="120" uuid="17eeab7f-475f-47f7-a9cb-fe3e752d1203"/>
 			</rectangle>
 			<textField>
 				<reportElement x="168" y="7" width="370" height="27" uuid="bca1cc0f-82e0-4c5e-b252-bb5e6bb24856"/>
@@ -62,10 +62,10 @@
 				<textElement>
 					<font size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{empresa}.getDireccion()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{empresa}.getDetalleUbicacion()]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="168" y="94" width="370" height="20" uuid="0ea1d205-1cbf-4268-8f06-c4c760bcb0a1"/>
+				<reportElement x="168" y="74" width="370" height="20" uuid="0ea1d205-1cbf-4268-8f06-c4c760bcb0a1"/>
 				<textElement>
 					<font size="12"/>
 				</textElement>
@@ -75,16 +75,7 @@ $P{empresa}.getCategoriaIVA().toString().equals("CONSUMIDOR_FINAL") ? "Consumido
 $P{empresa}.getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" : ""]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="168" y="74" width="370" height="20" uuid="c2839fc3-1937-402f-bc03-ef5f0f0b9ce4"/>
-				<textElement>
-					<font size="12"/>
-				</textElement>
-				<textFieldExpression><![CDATA[($P{empresa}.getLocalidad() != null) 
-? $P{empresa}.getLocalidad().getNombre() + " " + $P{empresa}.getLocalidad().getProvincia().getNombre()
-: ""]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="168" y="114" width="162" height="20" uuid="bf12b167-4c5f-4a38-a849-46625cef8b3d"/>
+				<reportElement x="168" y="94" width="162" height="20" uuid="bf12b167-4c5f-4a38-a849-46625cef8b3d"/>
 				<textElement>
 					<font size="12"/>
 				</textElement>

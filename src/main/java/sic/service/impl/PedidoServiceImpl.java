@@ -375,24 +375,6 @@ public class PedidoServiceImpl implements IPedidoService {
     }
     List<RenglonPedido> renglones = this.getRenglonesDelPedido(pedido.getId_Pedido());
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
-    String detalleEnvio =
-      (pedido.getDetalleEnvio().getCalle() != null
-        ? pedido.getDetalleEnvio().getCalle()
-        : "")
-        + " "
-        + pedido.getDetalleEnvio().getNumero()
-        + ", "
-        + (pedido.getDetalleEnvio().getPiso() != null
-        ? pedido.getDetalleEnvio().getPiso() + ","
-        : "")
-        + (pedido.getDetalleEnvio().getNombreLocalidad() != null
-        ? pedido.getDetalleEnvio().getNombreLocalidad()
-        : "")
-        + " "
-        + (pedido.getDetalleEnvio().getNombreProvincia() != null
-        ? pedido.getDetalleEnvio().getNombreProvincia()
-        : "");
-    params.put("detalleUbicacion", detalleEnvio);
     try {
       return JasperExportManager.exportReportToPdf(
           JasperFillManager.fillReport(isFileReport, params, ds));

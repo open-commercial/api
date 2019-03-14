@@ -31,7 +31,7 @@ import sic.modelo.dto.UbicacionDTO;
     generator = ObjectIdGenerators.PropertyGenerator.class,
     property = "id_Pedido",
     scope = Pedido.class)
-@JsonIgnoreProperties({"cliente", "usuario", "empresa"})
+@JsonIgnoreProperties({"cliente", "usuario", "empresa", "detalleEnvio"})
 public class Pedido implements Serializable {
 
   @Id @GeneratedValue private long id_Pedido;
@@ -121,5 +121,17 @@ public class Pedido implements Serializable {
   @JsonGetter("nombreViajante")
   public String getNombreViajante() {
     return (cliente.getViajante() != null) ? cliente.getNombreViajante() :  null;
+  }
+
+  @JsonGetter("detalleEnvio")
+  public String getDealleEnvio() {
+    return detalleEnvio.getCalle()
+      + " "
+      + detalleEnvio.getNumero()
+      + (detalleEnvio.getPiso() != null ? ", " + detalleEnvio.getPiso() : "")
+      + (detalleEnvio.getDepartamento() != null ? detalleEnvio.getDepartamento(): "")
+      + (detalleEnvio.getNombreLocalidad() != null ?  ", " + detalleEnvio.getNombreLocalidad() : " ")
+      + " "
+      + (detalleEnvio.getNombreProvincia() != null ? detalleEnvio.getNombreProvincia() : " ");
   }
 }
