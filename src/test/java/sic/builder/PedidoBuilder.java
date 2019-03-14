@@ -18,7 +18,7 @@ public class PedidoBuilder {
   private Date fechaVencimiento;
   private String observaciones = "Los precios se encuentran sujetos a modificaciones.";
   private String nombreEmpresa = "Globo Corporation";
-  private UbicacionDTO detalleEnvio;
+  private String detalleEnvio;
   private boolean eliminado = false;
   private String nombreFiscalCliente = "Construcciones S.A.";
   private String nombreUsuario = "Daenerys Targaryen";
@@ -98,7 +98,7 @@ public class PedidoBuilder {
     return this;
   }
 
-  public PedidoBuilder withDetalleEnvio(UbicacionDTO envio) {
+  public PedidoBuilder withDetalleEnvio(String envio) {
     this.detalleEnvio = envio;
     return this;
   }

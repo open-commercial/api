@@ -114,11 +114,6 @@ public class PedidoServiceImpl implements IPedidoService {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_pedido_detalle_envio_vacio"));
     }
-    if (pedido.getDetalleEnvio().getCalle() == null
-        || pedido.getDetalleEnvio().getCalle().isEmpty()) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_pedido_detalle_envio_calle_vacio"));
-    }
   }
 
   @Override

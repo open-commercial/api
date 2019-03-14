@@ -26,7 +26,7 @@ public class PedidoDTO implements Serializable {
   private Date fechaVencimiento;
   private String observaciones;
   private String nombreEmpresa;
-  private UbicacionDTO ubicacionEnvio;
+  private String detalleEnvio;
   private boolean eliminado;
   private String nombreFiscalCliente;
   private String nombreUsuario;
