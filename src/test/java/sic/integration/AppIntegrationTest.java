@@ -3489,7 +3489,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  public void shouldCrearUbicacionDeFacturacionEnAltaDeCliente() {
+  void shouldCrearUbicacionDeFacturacionEnAltaDeCliente() {
     ClienteDTO cliente =
       ClienteDTO.builder()
         .bonificacion(BigDecimal.TEN)
@@ -3529,7 +3529,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  public void shouldCrearUbicacionDeEnvioDeCliente() {
+  void shouldCrearUbicacionDeEnvioDeCliente() {
     ClienteDTO cliente =
       ClienteDTO.builder()
         .bonificacion(BigDecimal.TEN)
@@ -3570,7 +3570,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  public void shouldCrearUbicacionDeFacturacionYEnvioDeCliente() {
+  void shouldCrearUbicacionDeFacturacionYEnvioDeCliente() {
     ClienteDTO cliente =
       ClienteDTO.builder()
         .bonificacion(BigDecimal.TEN)
@@ -3623,7 +3623,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  public void shouldModificarUbicacionDeFacturacionCliente() {
+  void shouldModificarUbicacionDeFacturacionCliente() {
     this.shouldCrearUbicacionDeFacturacionEnAltaDeCliente();
     ClienteDTO clienteRecuperado = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class);
     UbicacionDTO ubicacionDeFacturacionCliente = restTemplate.getForObject(apiPrefix + "/ubicaciones/" + clienteRecuperado.getIdUbicacionFacturacion(), UbicacionDTO.class);
@@ -3635,7 +3635,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  public void shouldCrearUbicacionDeFacturacionSinLocalidadEnAltaDeCliente() {
+  void shouldCrearUbicacionDeFacturacionSinLocalidadEnAltaDeCliente() {
     ClienteDTO cliente =
       ClienteDTO.builder()
         .bonificacion(BigDecimal.TEN)
@@ -3674,7 +3674,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  public void shouldModificarUbicacionDeFacturacionSinLocalidadDeCliente() {
+  void shouldModificarUbicacionDeFacturacionSinLocalidadDeCliente() {
     this.shouldCrearUbicacionDeFacturacionSinLocalidadEnAltaDeCliente();
     ClienteDTO clienteRecuperado =
       restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class);
@@ -3687,7 +3687,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  public void shouldModificarCostoEnvioDeLocalidad() {
+  void shouldModificarCostoEnvioDeLocalidad() {
     LocalidadDTO localidad = restTemplate.getForObject(apiPrefix + "/ubicaciones/localidades/1", LocalidadDTO.class);
     localidad.setEnvioGratuito(true);
     localidad.setCostoEnvio(new BigDecimal("450"));

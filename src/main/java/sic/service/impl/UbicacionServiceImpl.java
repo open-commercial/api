@@ -1,8 +1,10 @@
 package sic.service.impl;
 
+import com.querydsl.core.BooleanBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
@@ -276,5 +278,40 @@ public class UbicacionServiceImpl implements IUbicacionService {
           .getString("mensaje_localidad_duplicado_nombre"));
       }
     }
+  }
+
+  @Override
+  public Page<Localidad> buscar(BusquedaLocalidadCriteria criteria) {
+    QLocalidad qLocalidad = QLocalidad.localidad;
+    BooleanBuilder builder = new BooleanBuilder();
+    if (criteria.isBuscaPorNombre()) {
+      String[] terminos = criteria.getNombre().split(" ");
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        rsPredicate.and(qLocalidad.nombre.containsIgnoreCase(termino));
+      }
+      builder.or(rsPredicate);
+    }
+    if (criteria.isBuscaPorCodigoPostal()) {
+      String[] terminos = criteria.getCodigoPostal().split(" ");
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        rsPredicate.and(qLocalidad.codigoPostal.containsIgnoreCase(termino));
+      }
+      builder.or(rsPredicate);
+    }
+    if (criteria.isBuscaPorNombreProvincia()) {
+      String[] terminos = criteria.getNombreProvincia().split(" ");
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        rsPredicate.and(qLocalidad.provincia.nombre.containsIgnoreCase(termino));
+      }
+      builder.or(rsPredicate);
+    }
+    if (criteria.isBuscaPorEnvio()) {
+      builder.and(qLocalidad.envioGratuito.eq(criteria.getEnvioGratuito()));
+    }
+    builder.and(qLocalidad.eliminada.isFalse());
+    return localidadRepository.findAll(builder, criteria.getPageable());
   }
 }

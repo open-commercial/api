@@ -2,6 +2,10 @@ package sic.controller;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
@@ -21,6 +25,7 @@ public class UbicacionController {
   private final IEmpresaService empresaService;
   private final IProveedorService proveedorService;
   private final ITransportistaService transportistaService;
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final ModelMapper modelMapper;
 
   @Autowired
@@ -208,5 +213,53 @@ public class UbicacionController {
     if (ubicacionService.getLocalidadPorId(localidadPorActualizar.getId_Localidad()) != null) {
       ubicacionService.actualizarLocalidad(localidadPorActualizar);
     }
+  }
+
+  @GetMapping("/ubicaciones/localidades/busqueda/criteria")
+  public Page<Localidad> buscarConCriteria(
+    @RequestParam(required = false) String nombreLocalidad,
+    @RequestParam(required = false) String codigoPostal,
+    @RequestParam(required = false) String nombreProvincia,
+    @RequestParam(required = false) Boolean envioGratuito,
+    @RequestParam(required = false) Integer pagina,
+    @RequestParam(required = false) String ordenarPor,
+    @RequestParam(required = false) String sentido) {
+    if (pagina == null || pagina < 0) pagina = 0;
+    Pageable pageable;
+    if (ordenarPor == null || sentido == null) {
+      pageable =
+        new PageRequest(
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombre"));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          pageable =
+            new PageRequest(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+          break;
+        case "DESC":
+          pageable =
+            new PageRequest(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+          break;
+        default:
+          pageable =
+            new PageRequest(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombre"));
+          break;
+      }
+    }
+    BusquedaLocalidadCriteria criteria = BusquedaLocalidadCriteria.builder()
+      .buscaPorNombre(nombreLocalidad != null)
+      .nombre(nombreLocalidad)
+      .buscaPorCodigoPostal(codigoPostal != null)
+      .codigoPostal(codigoPostal)
+      .buscaPorNombreProvincia(nombreProvincia != null)
+      .nombreProvincia(nombreProvincia)
+      .buscaPorEnvio(envioGratuito != null)
+      .envioGratuito(envioGratuito)
+      .pageable(pageable)
+      .build();
+    return ubicacionService.buscar(criteria);
   }
 }
