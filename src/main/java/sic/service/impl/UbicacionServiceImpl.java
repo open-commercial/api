@@ -306,7 +306,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
       for (String termino : terminos) {
         rsPredicate.and(qLocalidad.provincia.nombre.containsIgnoreCase(termino));
       }
-      builder.or(rsPredicate);
+      builder.and(rsPredicate);
     }
     if (criteria.isBuscaPorEnvio()) {
       builder.and(qLocalidad.envioGratuito.eq(criteria.getEnvioGratuito()));
