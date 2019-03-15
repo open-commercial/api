@@ -25,6 +25,8 @@ import sic.builder.*;
 import sic.modelo.*;
 import sic.modelo.dto.*;
 import sic.repository.UsuarioRepository;
+import sic.service.ICajaService;
+import sic.service.IClockService;
 import sic.service.IPedidoService;
 import sic.service.IProductoService;
 import java.io.IOException;
@@ -34,7 +36,6 @@ import java.nio.charset.Charset;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -45,6 +46,10 @@ class AppIntegrationTest {
   @Autowired private IProductoService productoService;
 
   @Autowired private IPedidoService pedidoService;
+
+  @Autowired private IClockService clockService;
+
+  @Autowired private ICajaService cajaService;
 
   @Autowired private TestRestTemplate restTemplate;
 
@@ -3462,12 +3467,8 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldVerificarSaldoCaja() {
-    CajaDTO caja =
-        restTemplate.postForObject(
-            apiPrefix + "/cajas/apertura/empresas/1/usuarios/1?saldoApertura=200",
-            null,
-            CajaDTO.class);
+  public void shouldVerificarSaldoCaja() {
+    CajaDTO caja = restTemplate.postForObject(apiPrefix + "/cajas/apertura/empresas/1?saldoApertura=200", null, CajaDTO.class);
     assertEquals(new BigDecimal("200"), caja.getSaldoApertura());
     this.crearReciboParaCliente(300);
     assertEquals(
@@ -3489,4 +3490,34 @@ class AppIntegrationTest {
         new BigDecimal("-200.000000000000000"),
         restTemplate.getForObject(apiPrefix + "/cajas/1/saldo-sistema", BigDecimal.class));
   }
+
+  @Test
+  public void shouldVerificarFechaCierreCajaSinScheduling() {
+    restTemplate.postForObject(apiPrefix + "/cajas/apertura/empresas/1?saldoApertura=200", null, CajaDTO.class);
+    clockService.cambiarFechaHora(2030, 9, 24, 23, 59, 59);
+    restTemplate.put(apiPrefix + "/cajas/1/cierre?monto=300", CajaDTO.class);
+    CajaDTO cajaRecuperada = restTemplate.getForObject(apiPrefix + "/cajas/1", CajaDTO.class);
+    Calendar fechaCierre = Calendar.getInstance();
+    fechaCierre.setTime(cajaRecuperada.getFechaCierre());
+    assertEquals(2030, fechaCierre.get(Calendar.YEAR));
+    assertEquals(8, fechaCierre.get(Calendar.MONTH));
+    assertEquals(24, fechaCierre.get(Calendar.DATE));
+  }
+
+  @Test
+  public void shouldVerificarFechaCierreCajaConScheduling() {
+    clockService.cambiarFechaHora(2019, 12, 31, 10, 15, 35);
+    restTemplate.postForObject(apiPrefix + "/cajas/apertura/empresas/1?saldoApertura=200", null, CajaDTO.class);
+    cajaService.cerrarCaja(1L, new BigDecimal("300"), 1L, true);
+    CajaDTO cajaRecuperada = restTemplate.getForObject(apiPrefix + "/cajas/1", CajaDTO.class);
+    Calendar fechaCierre = Calendar.getInstance();
+    fechaCierre.setTime(cajaRecuperada.getFechaCierre());
+    assertEquals(2019, fechaCierre.get(Calendar.YEAR));
+    assertEquals(11, fechaCierre.get(Calendar.MONTH));
+    assertEquals(31, fechaCierre.get(Calendar.DATE));
+    assertEquals(23, fechaCierre.get(Calendar.HOUR_OF_DAY));
+    assertEquals(59, fechaCierre.get(Calendar.MINUTE));
+    assertEquals(59, fechaCierre.get(Calendar.SECOND));
+  }
+
 }

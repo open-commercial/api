@@ -2,6 +2,8 @@ package sic.controller;
 
 import java.math.BigDecimal;
 import java.util.*;
+
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -10,10 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
-import sic.service.ICajaService;
-import sic.service.IEmpresaService;
-import sic.service.IFormaDePagoService;
-import sic.service.IUsuarioService;
+import sic.service.*;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -23,6 +22,7 @@ public class CajaController {
   private final IEmpresaService empresaService;
   private final IUsuarioService usuarioService;
   private final IFormaDePagoService formaDePagoService;
+  private final IAuthService authService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
@@ -30,11 +30,13 @@ public class CajaController {
       ICajaService cajaService,
       IEmpresaService empresaService,
       IFormaDePagoService formaDePagoService,
-      IUsuarioService usuarioService) {
+      IUsuarioService usuarioService,
+      IAuthService authService) {
     this.cajaService = cajaService;
     this.empresaService = empresaService;
     this.formaDePagoService = formaDePagoService;
     this.usuarioService = usuarioService;
+    this.authService = authService;
   }
 
   @GetMapping("/cajas/{idCaja}")
@@ -43,15 +45,17 @@ public class CajaController {
     return cajaService.getCajaPorId(idCaja);
   }
 
-  @PostMapping("/cajas/apertura/empresas/{idEmpresa}/usuarios/{idUsuario}")
+  @PostMapping("/cajas/apertura/empresas/{idEmpresa}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Caja abrirCaja(
       @PathVariable long idEmpresa,
-      @PathVariable long idUsuario,
-      @RequestParam BigDecimal saldoApertura) {
+      @RequestParam BigDecimal saldoApertura,
+      @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get("idUsuario");
     return cajaService.abrirCaja(
         empresaService.getEmpresaPorId(idEmpresa),
-        usuarioService.getUsuarioPorId(idUsuario),
+        usuarioService.getUsuarioPorId(idUsuarioLoggedIn),
         saldoApertura);
   }
 
@@ -66,8 +70,10 @@ public class CajaController {
   public Caja cerrarCaja(
       @PathVariable long idCaja,
       @RequestParam BigDecimal monto,
-      @RequestParam long idUsuarioCierre) {
-    return cajaService.cerrarCaja(idCaja, monto, idUsuarioCierre, false);
+      @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get("idUsuario");
+    return cajaService.cerrarCaja(idCaja, monto, idUsuarioLoggedIn, false);
   }
 
   @GetMapping("/cajas/busqueda/criteria")
