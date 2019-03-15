@@ -125,6 +125,9 @@ REFERENCES `ubicacion`(`idUbicacion`);
 ALTER TABLE `ubicacion` 
 DROP COLUMN `idProveedor`;
 
+ALTER TABLE `localidad` 
+DROP COLUMN `idProveedor`;
+
 -- Transportista
 
 ALTER TABLE `ubicacion` 
@@ -199,6 +202,9 @@ DROP INDEX `FK98yi7oddg1up58158pwk9lf39` ;
 ALTER TABLE `empresa`
 ADD CONSTRAINT `FK9vp5rconju76goo4m612b13vg` FOREIGN KEY (`idUbicacion`) 
 REFERENCES `ubicacion`(`idUbicacion`);
+
+ALTER TABLE `ubicacion` 
+DROP COLUMN `idEmpresa`;
 
 -- TIRAR TABLA PAIS
 
