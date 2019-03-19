@@ -125,7 +125,8 @@ public class PedidoController {
       throw new BusinessServiceException(
         ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_envio_vacia"));
     }
-    if (cliente.getEmpresa().getUbicacion() == null && tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
+    Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
+    if (empresa.getUbicacion() == null && tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
       throw new BusinessServiceException(
         ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_sucursal_vacia"));
     }

@@ -227,7 +227,7 @@ public class PedidoServiceImpl implements IPedidoService {
     }
     if (tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
       pedido.setDetalleEnvio(
-          modelMapper.map(pedido.getCliente().getEmpresa().getUbicacion(), UbicacionDTO.class));
+          modelMapper.map(pedido.getEmpresa().getUbicacion(), UbicacionDTO.class));
     }
     pedido.setTipoDeEnvio(tipoDeEnvio);
   }
