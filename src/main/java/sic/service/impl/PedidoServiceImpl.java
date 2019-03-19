@@ -194,15 +194,7 @@ public class PedidoServiceImpl implements IPedidoService {
     if (pedido.getObservaciones() == null || pedido.getObservaciones().equals("")) {
       pedido.setObservaciones("Los precios se encuentran sujetos a modificaciones.");
     }
-    if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_FACTURACION) {
-      pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getUbicacionFacturacion(), UbicacionDTO.class));
-    }
-    if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_ENVIO) {
-      pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getUbicacionEnvio(), UbicacionDTO.class));
-    }
-    if (tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
-      pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getEmpresa().getUbicacion(), UbicacionDTO.class));
-    }
+    this.asignarDetalleEnvio(pedido, tipoDeEnvio);
     this.validarPedido(TipoDeOperacion.ALTA, pedido);
     pedido = pedidoRepository.save(pedido);
     logger.warn("El Pedido {} se guardó correctamente.", pedido);
@@ -222,6 +214,22 @@ public class PedidoServiceImpl implements IPedidoService {
       logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
     return pedido;
+  }
+
+  private void asignarDetalleEnvio(Pedido pedido, TipoDeEnvio tipoDeEnvio) {
+    if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_FACTURACION) {
+      pedido.setDetalleEnvio(
+          modelMapper.map(pedido.getCliente().getUbicacionFacturacion(), UbicacionDTO.class));
+    }
+    if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_ENVIO) {
+      pedido.setDetalleEnvio(
+          modelMapper.map(pedido.getCliente().getUbicacionEnvio(), UbicacionDTO.class));
+    }
+    if (tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
+      pedido.setDetalleEnvio(
+          modelMapper.map(pedido.getCliente().getEmpresa().getUbicacion(), UbicacionDTO.class));
+    }
+    pedido.setTipoDeEnvio(tipoDeEnvio);
   }
 
   @Override
@@ -270,6 +278,7 @@ public class PedidoServiceImpl implements IPedidoService {
     if (criteria.isBuscaPorNroPedido()) builder.and(qpedido.nroPedido.eq(criteria.getNroPedido()));
     if (criteria.isBuscaPorEstadoPedido())
       builder.and(qpedido.estado.eq(criteria.getEstadoPedido()));
+    if (criteria.isBuscaPorEnvio()) builder.and(qpedido.tipoDeEnvio.eq(criteria.getTipoDeEnvio()));
     Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
     BooleanBuilder rsPredicate = new BooleanBuilder();
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
@@ -299,7 +308,8 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public void actualizar(Pedido pedido) {
+  public void actualizar(Pedido pedido, TipoDeEnvio tipoDeEnvio) {
+    this.asignarDetalleEnvio(pedido, tipoDeEnvio);
     this.validarPedido(TipoDeOperacion.ACTUALIZACION, pedido);
     pedidoRepository.save(pedido);
   }

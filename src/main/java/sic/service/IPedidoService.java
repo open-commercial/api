@@ -12,7 +12,7 @@ public interface IPedidoService {
 
   Pedido getPedidoPorId(Long id);
 
-  void actualizar(Pedido pedido);
+  void actualizar(Pedido pedido, TipoDeEnvio tipoDeEnvio);
 
   Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn);
 

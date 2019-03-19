@@ -219,6 +219,7 @@ DROP TABLE pais;
 -- llenar tabla pedido
 
 ALTER TABLE `pedido` 
+ADD COLUMN  `tipoDeEnvio` varchar(255) NOT NULL,
 ADD COLUMN  `calle` varchar(255),
 ADD COLUMN  `codigoPostal` varchar(255) DEFAULT NULL,
 ADD COLUMN  `departamento` varchar(255) DEFAULT NULL,
@@ -252,7 +253,8 @@ pedido.longitud = ubicacion.longitud,
 pedido.nombreLocalidad = localidad.nombre,
 pedido.nombreProvincia = provincia.nombre,
 pedido.numero = ubicacion.numero,
-pedido.piso = ubicacion.piso
+pedido.piso = ubicacion.piso,
+pedido.tipoDeEnvio = "USAR_UBICACION_FACTURACION"
 ;
 
 SET SQL_SAFE_UPDATES = 0;

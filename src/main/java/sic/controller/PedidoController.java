@@ -74,7 +74,7 @@ public class PedidoController {
   public void actualizar(@RequestParam Long idEmpresa,
                          @RequestParam Long idUsuario,
                          @RequestParam Long idCliente,
-                         @RequestParam boolean usarUbicacionDeFacturacion,
+                         @RequestParam TipoDeEnvio tipoDeEnvio,
                          @RequestBody PedidoDTO pedidoDTO) {
     Pedido pedido = modelMapper.map(pedidoDTO, Pedido.class);
     pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
@@ -84,15 +84,7 @@ public class PedidoController {
     pedido.setFacturas(pedidoService.getFacturasDelPedido(pedido.getId_Pedido()));
     //Si los renglones vienen null, recupera los renglones del pedido para actualizarLocalidad
     //caso contrario, ultiliza los renglones del pedido.
-    if (pedido.getRenglones() == null) {
-      pedido.setRenglones(pedidoService.getRenglonesDelPedido(pedido.getId_Pedido()));
-    }
-    if (usarUbicacionDeFacturacion) {
-      pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getUbicacionFacturacion(), UbicacionDTO.class));
-    } else {
-      pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getUbicacionEnvio(), UbicacionDTO.class));
-    }
-    pedidoService.actualizar(pedido);
+    pedidoService.actualizar(pedido, tipoDeEnvio);
     }
 
   @PostMapping("/pedidos")
@@ -158,6 +150,7 @@ public class PedidoController {
       @RequestParam(required = false) Long idViajante,
       @RequestParam(required = false) Long nroPedido,
       @RequestParam(required = false) EstadoPedido estadoPedido,
+      @RequestParam(required = false) TipoDeEnvio tipoDeEnvio,
       @RequestParam(required = false) Integer pagina,
       @RequestHeader("Authorization") String authorizationHeader) {
     Calendar fechaDesde = Calendar.getInstance();
@@ -185,6 +178,8 @@ public class PedidoController {
             .nroPedido((nroPedido != null) ? nroPedido : 0)
             .buscaPorEstadoPedido(estadoPedido != null)
             .estadoPedido(estadoPedido)
+            .buscaPorEnvio(tipoDeEnvio != null)
+            .tipoDeEnvio(tipoDeEnvio)
             .idEmpresa(idEmpresa)
             .pageable(pageable)
             .build();
