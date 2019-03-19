@@ -31,7 +31,7 @@ import sic.modelo.dto.UbicacionDTO;
     generator = ObjectIdGenerators.PropertyGenerator.class,
     property = "id_Pedido",
     scope = Pedido.class)
-@JsonIgnoreProperties({"cliente", "usuario", "empresa", "detalleEnvio"})
+@JsonIgnoreProperties({"cliente", "usuario", "empresa"})
 public class Pedido implements Serializable {
 
   @Id @GeneratedValue private long id_Pedido;

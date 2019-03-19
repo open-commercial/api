@@ -187,17 +187,21 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public Pedido guardar(Pedido pedido, boolean usarUbicacionDeFacturacion) {
+  public Pedido guardar(Pedido pedido, TipoDeEnvio tipoDeEnvio) {
     pedido.setFecha(new Date());
     pedido.setNroPedido(this.generarNumeroPedido(pedido.getEmpresa()));
     pedido.setEstado(EstadoPedido.ABIERTO);
     if (pedido.getObservaciones() == null || pedido.getObservaciones().equals("")) {
       pedido.setObservaciones("Los precios se encuentran sujetos a modificaciones.");
     }
-    if (usarUbicacionDeFacturacion) {
+    if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_FACTURACION) {
       pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getUbicacionFacturacion(), UbicacionDTO.class));
-    } else {
+    }
+    if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_ENVIO) {
       pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getUbicacionEnvio(), UbicacionDTO.class));
+    }
+    if (tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
+      pedido.setDetalleEnvio(modelMapper.map(pedido.getCliente().getEmpresa().getUbicacion(), UbicacionDTO.class));
     }
     this.validarPedido(TipoDeOperacion.ALTA, pedido);
     pedido = pedidoRepository.save(pedido);

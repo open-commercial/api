@@ -673,6 +673,12 @@ class AppIntegrationTest {
       .nombreLocalidad("Corrientes")
       .nombreProvincia("Corrientes")
       .codigoPostal("W3400").build(), UbicacionDTO.class);
+    restTemplate.postForObject(apiPrefix + "/ubicaciones/clientes/1/envio", UbicacionDTO.builder()
+      .calle("Rio Uruguay")
+      .numero(15000)
+      .nombreLocalidad("Corrientes")
+      .nombreProvincia("Corrientes")
+      .codigoPostal("W3400").build(), UbicacionDTO.class);
     TransportistaDTO transportistaDTO =
       TransportistaDTO.builder()
         .nombre("Correo OCA")
@@ -2954,12 +2960,162 @@ class AppIntegrationTest {
         .build();
     PedidoDTO pedidoRecuperado =
       restTemplate.postForObject(
-        apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=2&usarUbicacionDeFacturacion=true",
+        apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=2&tipoDeEnvio=USAR_UBICACION_FACTURACION",
         nuevoPedidoDTO,
         PedidoDTO.class);
     assertEquals(nuevoPedidoDTO.getTotal(), pedidoRecuperado.getTotalEstimado());
     assertEquals(pedidoRecuperado.getObservaciones(), nuevoPedidoDTO.getObservaciones());
     assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
+  }
+
+  @Test
+  void shouldCrearPedidoConUbicacionFacturacion() {
+    this.crearProductos();
+    List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
+    renglonesPedidoDTO.add(
+      NuevoRenglonPedidoDTO.builder()
+        .idProductoItem(1L)
+        .cantidad(new BigDecimal("5.000000000000000"))
+        .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
+        .build());
+    renglonesPedidoDTO.add(
+      NuevoRenglonPedidoDTO.builder()
+        .idProductoItem(2L)
+        .cantidad(new BigDecimal("2.000000000000000"))
+        .descuentoPorcentaje(BigDecimal.ZERO)
+        .build());
+    List<RenglonPedidoDTO> renglonesPedido =
+      Arrays.asList(
+        restTemplate.postForObject(
+          apiPrefix + "/pedidos/renglones", renglonesPedidoDTO, RenglonPedidoDTO[].class));
+    BigDecimal importe = BigDecimal.ZERO;
+    for (RenglonPedidoDTO renglon : renglonesPedido) {
+      importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
+    }
+    BigDecimal recargoNeto =
+      importe.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
+    BigDecimal descuentoNeto =
+      importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
+    BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
+    NuevoPedidoDTO nuevoPedidoDTO =
+      NuevoPedidoDTO.builder()
+        .descuentoNeto(descuentoNeto)
+        .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
+        .recargoNeto(recargoNeto)
+        .recargoPorcentaje(new BigDecimal("5"))
+        .fechaVencimiento(new Date())
+        .observaciones("Nuevo Pedido Test")
+        .renglones(renglonesPedido)
+        .subTotal(importe)
+        .total(total)
+        .build();
+    PedidoDTO pedidoRecuperado =
+      restTemplate.postForObject(
+        apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=2&tipoDeEnvio=USAR_UBICACION_FACTURACION",
+        nuevoPedidoDTO,
+        PedidoDTO.class);
+    ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", ClienteDTO.class);
+    assertEquals(cliente.getDetalleUbicacionFacturacion(), pedidoRecuperado.getDetalleEnvio());
+  }
+
+  @Test
+  void shouldCrearPedidoConUbicacionEnvio() {
+    this.crearProductos();
+    List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
+    renglonesPedidoDTO.add(
+      NuevoRenglonPedidoDTO.builder()
+        .idProductoItem(1L)
+        .cantidad(new BigDecimal("5.000000000000000"))
+        .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
+        .build());
+    renglonesPedidoDTO.add(
+      NuevoRenglonPedidoDTO.builder()
+        .idProductoItem(2L)
+        .cantidad(new BigDecimal("2.000000000000000"))
+        .descuentoPorcentaje(BigDecimal.ZERO)
+        .build());
+    List<RenglonPedidoDTO> renglonesPedido =
+      Arrays.asList(
+        restTemplate.postForObject(
+          apiPrefix + "/pedidos/renglones", renglonesPedidoDTO, RenglonPedidoDTO[].class));
+    BigDecimal importe = BigDecimal.ZERO;
+    for (RenglonPedidoDTO renglon : renglonesPedido) {
+      importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
+    }
+    BigDecimal recargoNeto =
+      importe.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
+    BigDecimal descuentoNeto =
+      importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
+    BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
+    NuevoPedidoDTO nuevoPedidoDTO =
+      NuevoPedidoDTO.builder()
+        .descuentoNeto(descuentoNeto)
+        .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
+        .recargoNeto(recargoNeto)
+        .recargoPorcentaje(new BigDecimal("5"))
+        .fechaVencimiento(new Date())
+        .observaciones("Nuevo Pedido Test")
+        .renglones(renglonesPedido)
+        .subTotal(importe)
+        .total(total)
+        .build();
+    PedidoDTO pedidoRecuperado =
+      restTemplate.postForObject(
+        apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=2&tipoDeEnvio=USAR_UBICACION_ENVIO",
+        nuevoPedidoDTO,
+        PedidoDTO.class);
+    ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", ClienteDTO.class);
+    assertEquals(cliente.getDetalleUbicacionEnvio(), pedidoRecuperado.getDetalleEnvio());
+  }
+
+  @Test
+  void shouldCrearPedidoConUbicacionSucursal() {
+    this.crearProductos();
+    List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
+    renglonesPedidoDTO.add(
+      NuevoRenglonPedidoDTO.builder()
+        .idProductoItem(1L)
+        .cantidad(new BigDecimal("5.000000000000000"))
+        .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
+        .build());
+    renglonesPedidoDTO.add(
+      NuevoRenglonPedidoDTO.builder()
+        .idProductoItem(2L)
+        .cantidad(new BigDecimal("2.000000000000000"))
+        .descuentoPorcentaje(BigDecimal.ZERO)
+        .build());
+    List<RenglonPedidoDTO> renglonesPedido =
+      Arrays.asList(
+        restTemplate.postForObject(
+          apiPrefix + "/pedidos/renglones", renglonesPedidoDTO, RenglonPedidoDTO[].class));
+    BigDecimal importe = BigDecimal.ZERO;
+    for (RenglonPedidoDTO renglon : renglonesPedido) {
+      importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
+    }
+    BigDecimal recargoNeto =
+      importe.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
+    BigDecimal descuentoNeto =
+      importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
+    BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
+    NuevoPedidoDTO nuevoPedidoDTO =
+      NuevoPedidoDTO.builder()
+        .descuentoNeto(descuentoNeto)
+        .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
+        .recargoNeto(recargoNeto)
+        .recargoPorcentaje(new BigDecimal("5"))
+        .fechaVencimiento(new Date())
+        .observaciones("Nuevo Pedido Test")
+        .renglones(renglonesPedido)
+        .subTotal(importe)
+        .total(total)
+        .build();
+    PedidoDTO pedidoRecuperado =
+      restTemplate.postForObject(
+        apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=2&tipoDeEnvio=RETIRO_EN_SUCURSAL",
+        nuevoPedidoDTO,
+        PedidoDTO.class);
+    EmpresaDTO empresaDTO = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    assertEquals(empresaDTO.getDetalleUbicacion(), pedidoRecuperado.getDetalleEnvio());
   }
 
   @Test
@@ -3022,7 +3178,7 @@ class AppIntegrationTest {
         .build();
     PedidoDTO pedidoRecuperado =
       restTemplate.postForObject(
-        apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=1&usarUbicacionDeFacturacion=true",
+        apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=1&tipoDeEnvio=USAR_UBICACION_FACTURACION",
         nuevoPedidoDTO,
         PedidoDTO.class);
     assertEquals(nuevoPedidoDTO.getTotal(), pedidoRecuperado.getTotalEstimado());

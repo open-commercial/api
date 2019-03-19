@@ -32,7 +32,7 @@ public interface IPedidoService {
 
   byte[] getReportePedido(Pedido pedido);
 
-  Pedido guardar(Pedido pedido, boolean usarUbicacionDeFacturacion);
+  Pedido guardar(Pedido pedido, TipoDeEnvio tipoDeEnvio);
 
   RenglonPedido calcularRenglonPedido(
     long idProducto,

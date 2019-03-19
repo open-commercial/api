@@ -15,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
+import sic.modelo.TipoDeEnvio;
 import sic.modelo.Ubicacion;
 import sic.modelo.dto.CarritoCompraDTO;
 import sic.modelo.dto.UbicacionDTO;
@@ -95,7 +96,7 @@ public class CarritoCompraController {
       @RequestParam Long idEmpresa,
       @RequestParam Long idUsuario,
       @RequestParam Long idCliente,
-      @RequestParam boolean usarUbicacionDeFacturacion,
+      @RequestParam TipoDeEnvio tipoDeEnvio,
       @RequestBody(required = false) String observaciones) {
     CarritoCompraDTO carritoCompraDTO = carritoCompraService.getCarritoCompra(idUsuario, idCliente);
     Pedido pedido = new Pedido();
@@ -126,7 +127,7 @@ public class CarritoCompraController {
                 .add(
                     pedidoService.calcularRenglonPedido(
                         i.getProducto().getIdProducto(), i.getCantidad(), BigDecimal.ZERO)));
-    Pedido p = pedidoService.guardar(pedido, usarUbicacionDeFacturacion);
+    Pedido p = pedidoService.guardar(pedido, tipoDeEnvio);
     carritoCompraService.eliminarTodosLosItemsDelUsuario(idUsuario);
     return p;
   }

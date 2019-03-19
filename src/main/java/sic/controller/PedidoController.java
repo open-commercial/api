@@ -107,7 +107,7 @@ public class PedidoController {
     @RequestParam Long idEmpresa,
     @RequestParam Long idUsuario,
     @RequestParam Long idCliente,
-    @RequestParam boolean usarUbicacionDeFacturacion,
+    @RequestParam TipoDeEnvio tipoDeEnvio,
     @RequestBody NuevoPedidoDTO nuevoPedidoDTO) {
     Pedido pedido = new Pedido();
     pedido.setFechaVencimiento(nuevoPedidoDTO.getFechaVencimiento());
@@ -129,8 +129,16 @@ public class PedidoController {
       throw new BusinessServiceException(
         ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_facturacion_vacia"));
     }
+    if (cliente.getUbicacionEnvio() == null && tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_ENVIO) {
+      throw new BusinessServiceException(
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_envio_vacia"));
+    }
+    if (cliente.getEmpresa().getUbicacion() == null && tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
+      throw new BusinessServiceException(
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_sucursal_vacia"));
+    }
     pedido.setCliente(cliente);
-    return pedidoService.guardar(pedido, usarUbicacionDeFacturacion);
+    return pedidoService.guardar(pedido, tipoDeEnvio);
   }
 
   @GetMapping("/pedidos/busqueda/criteria")
