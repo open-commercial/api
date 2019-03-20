@@ -78,7 +78,7 @@ ALTER TABLE `cliente`
 DROP COLUMN `direccion`;
 
 ALTER TABLE `localidad` 
-ADD COLUMN  `costoEnvio` decimal(25,15) DEFAULT NULL,
+ADD COLUMN  `costoEnvio` decimal(25,15) DEFAULT 0 NOT NULL,
 ADD COLUMN  `envioGratuito` bit(1) NOT NULL;
 
 ALTER TABLE `localidad` 
@@ -273,5 +273,11 @@ SET
     localidad.codigoPostal = 'N99999'
 WHERE
     localidad.codigoPostal = '';
+SET SQL_SAFE_UPDATES = 1;
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE localidad
+SET 
+    localidad.costoEnvio = 0;
 SET SQL_SAFE_UPDATES = 1;
 

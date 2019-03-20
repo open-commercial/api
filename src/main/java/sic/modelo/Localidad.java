@@ -45,7 +45,7 @@ public class Localidad implements Serializable {
 
   private boolean envioGratuito;
 
-  @Column(precision = 25, scale = 15)
+  @Column(nullable = false, precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_ubicacion_costoEnvio_negativo}")
   private BigDecimal costoEnvio;
 
