@@ -15,6 +15,7 @@ import sic.service.*;
 import sic.util.Validator;
 
 import javax.persistence.EntityNotFoundException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -201,6 +202,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
       localidad.setNombre(nombre);
       localidad.setCodigoPostal(codigoPostal);
       localidad.setProvincia(provincia);
+      localidad.setCostoEnvio(BigDecimal.ZERO);
       localidad = localidadRepository.save(localidad);
     }
     return localidad;
