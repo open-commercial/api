@@ -5,6 +5,7 @@ import java.util.Date;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.querydsl.core.annotations.QueryInit;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,6 +20,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombre"})
 @ToString
+@JsonIgnoreProperties({"ubicacion", "eliminada"})
 public class Empresa implements Serializable {
 
   @Id @GeneratedValue private long id_Empresa;
