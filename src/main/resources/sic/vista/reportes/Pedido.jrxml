@@ -8,6 +8,7 @@
 	<parameter name="pedido" class="sic.modelo.Pedido"/>
 	<parameter name="nroComprobante" class="java.lang.String"/>
 	<parameter name="logo" class="java.awt.Image"/>
+	<parameter name="detalleEnvio" class="java.lang.String"/>
 	<parameter name="preImpresa" class="java.lang.Boolean"/>
 	<field name="cantidad" class="java.math.BigDecimal"/>
 	<field name="descuentoPorcentaje" class="java.math.BigDecimal"/>
@@ -213,7 +214,7 @@ $P{pedido}.getEmpresa().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{pedido}.getDetalleEnvio()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{detalleEnvio}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="193" width="60" height="15" uuid="f0b344fb-6370-43de-819b-3c1edd682fe1">
@@ -434,7 +435,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Vendedor:]]></text>
+				<text><![CDATA[Usuario:]]></text>
 			</staticText>
 			<textField>
 				<reportElement x="80" y="0" width="250" height="15" uuid="5ee9b3e5-307e-4b11-9756-f997491e191d">

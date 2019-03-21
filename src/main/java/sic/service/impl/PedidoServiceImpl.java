@@ -382,6 +382,20 @@ public class PedidoServiceImpl implements IPedidoService {
         throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_empresa_404_logo"), ex);
       }
     }
+    String detalleEnvio = "";
+    if (pedido.getTipoDeEnvio() == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
+      detalleEnvio =
+          "Retira en Sucursal "
+              + "{"
+              + pedido.getEmpresa().getNombre()
+              + "}"
+              + " ("
+              + pedido.getDetalleEnvio()
+              + ")";
+    } else {
+      detalleEnvio = pedido.getDetalleEnvio();
+    }
+    params.put("detalleEnvio", detalleEnvio);
     List<RenglonPedido> renglones = this.getRenglonesDelPedido(pedido.getId_Pedido());
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
     try {
