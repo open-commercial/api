@@ -73,7 +73,10 @@ public class FacturaController {
     Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
     fv.setEmpresa(empresa);
     Cliente cliente = clienteService.getClientePorId(idCliente);
-    if (cliente.getUbicacionFacturacion() == null) {
+    if (cliente.getUbicacionFacturacion() == null
+        && (fv.getTipoComprobante() == TipoDeComprobante.FACTURA_A
+            || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_B
+            || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_C)) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_facturacion_vacia"));
     }
