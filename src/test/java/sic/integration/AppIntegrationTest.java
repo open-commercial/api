@@ -188,6 +188,7 @@ class AppIntegrationTest {
             BigDecimal.ONE.add(recargoPorcentaje.divide(new BigDecimal("100")))));
     facturaVentaA.setTotal(total);
     facturaVentaA.setFecha(new Date());
+    this.abrirCaja();
     restTemplate.postForObject(
         apiPrefix
             + "/facturas/venta?idPedido=1"
@@ -555,6 +556,10 @@ class AppIntegrationTest {
             .build();
     restTemplate.postForObject(
         apiPrefix + "/clientes?idEmpresa=1&idCredencial=1", cliente, ClienteDTO.class);
+  }
+
+  private void abrirCaja() {
+    restTemplate.postForObject(apiPrefix + "/cajas/apertura/empresas/1?saldoApertura=0", null, CajaDTO.class);
   }
 
   @BeforeEach
@@ -2874,6 +2879,7 @@ class AppIntegrationTest {
 
   @Test
   void shouldComprobarSaldoCuentaCorrienteCliente() {
+    this.abrirCaja();
     this.shouldCrearFacturaVentaB();
     assertEquals(
         new BigDecimal("-5992.500000000000000"),
@@ -2903,6 +2909,7 @@ class AppIntegrationTest {
 
   @Test
   void shouldComprobarSaldoParcialCuentaCorrienteCliente() {
+    this.abrirCaja();
     this.shouldCrearFacturaVentaB();
     this.crearReciboParaCliente(5992.5);
     this.crearNotaDebitoParaCliente();
@@ -3120,6 +3127,7 @@ class AppIntegrationTest {
 
   @Test
   void shouldComprobarSaldoCuentaCorrienteProveedor() {
+    this.abrirCaja();
     this.shouldCrearFacturaCompraB();
     assertEquals(
         new BigDecimal("-599.250000000000000"),
@@ -3156,6 +3164,7 @@ class AppIntegrationTest {
 
   @Test
   void shouldComprobarSaldoParcialCuentaCorrienteProveedor() {
+    this.abrirCaja();
     this.shouldCrearFacturaCompraB();
     this.crearReciboParaProveedor(599.25);
     restTemplate.delete(apiPrefix + "/recibos/1");
@@ -3290,6 +3299,7 @@ class AppIntegrationTest {
 
   @Test
   void shouldActualizarFechaUltimaModificacionCuentaCorrienteCliente() {
+    this.abrirCaja();
     shouldCrearFacturaVentaB();
     CuentaCorriente ccCliente =
         restTemplate.getForObject(
@@ -3337,6 +3347,7 @@ class AppIntegrationTest {
 
   @Test
   void shouldActualizarFechaUltimaModificacionCuentaCorrienteProveedor() {
+    this.abrirCaja();
     shouldCrearFacturaCompraB();
     CuentaCorriente ccCliente =
         restTemplate.getForObject(

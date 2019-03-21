@@ -60,7 +60,7 @@ public class GastoServiceImpl implements IGastoService {
         }
         if (caja.getEstado().equals(EstadoCaja.CERRADA)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_gasto_caja_cerrada"));
+                    .getString("mensaje_caja_cerrada"));
         }
         if (gasto.getFecha().before(caja.getFechaApertura())) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -120,7 +120,7 @@ public class GastoServiceImpl implements IGastoService {
         Gasto gastoParaEliminar = this.getGastoPorId(idGasto);
         if (this.cajaService.getUltimaCaja(gastoParaEliminar.getEmpresa().getId_Empresa()).getEstado().equals(EstadoCaja.CERRADA)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_gasto_caja_cerrada"));
+                    .getString("mensaje_caja_cerrada"));
         }
         gastoParaEliminar.setEliminado(true);
         gastoRepository.save(gastoParaEliminar);

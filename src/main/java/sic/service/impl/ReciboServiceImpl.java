@@ -151,6 +151,20 @@ public class ReciboServiceImpl implements IReciboService {
   }
 
   private void validarRecibo(Recibo recibo) {
+    // Caja
+    Caja caja = this.cajaService.getUltimaCaja(recibo.getEmpresa().getId_Empresa());
+    if (caja == null) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_caja_no_existente"));
+    }
+    if (caja.getEstado().equals(EstadoCaja.CERRADA)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_caja_cerrada"));
+    }
+    if (recibo.getFecha().before(caja.getFechaApertura())) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_recibo_fecha_no_valida"));
+    }
     // Requeridos
     if (recibo.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
       throw new BusinessServiceException(
