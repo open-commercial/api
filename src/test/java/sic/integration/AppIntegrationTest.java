@@ -60,6 +60,9 @@ class AppIntegrationTest {
   @Autowired
   private LocalidadRepository localidadRepository;
 
+  @Autowired
+  private TestRestTemplate restTemplate;
+
   @Autowired private IClockService clockService;
 
   @Autowired private ICajaService cajaService;
@@ -3841,7 +3844,7 @@ class AppIntegrationTest {
   void shouldVerificarSaldoCaja() {
     CajaDTO caja =
       restTemplate.postForObject(
-        apiPrefix + "/cajas/apertura/empresas/1/usuarios/1?saldoApertura=200",
+        apiPrefix + "/cajas/apertura/empresas/1?saldoApertura=200",
         null,
         CajaDTO.class);
     assertEquals(new BigDecimal("200"), caja.getSaldoApertura());
