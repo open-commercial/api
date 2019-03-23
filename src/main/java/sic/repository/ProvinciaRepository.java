@@ -8,11 +8,11 @@ import sic.modelo.Provincia;
 
 public interface ProvinciaRepository extends PagingAndSortingRepository<Provincia, Long> {
     
-      @Query("SELECT p FROM Provincia p WHERE p.id_Provincia = :idProvincia AND p.eliminada = false")
+      @Query("SELECT p FROM Provincia p WHERE p.id_Provincia = :idProvincia")
       Provincia findById(@Param("idProvincia") long idProvincia);
     
-      Provincia findByNombreAndEliminadaOrderByNombreAsc(String nombre, boolean eliminada);
+      Provincia findByNombreOrderByNombreAsc(String nombre);
       
-      List<Provincia> findAllByAndEliminadaOrderByNombreAsc(boolean eliminada);
+      List<Provincia> findAllByOrderByNombreAsc();
 
 }

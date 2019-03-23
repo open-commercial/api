@@ -163,12 +163,10 @@ public class UbicacionServiceImpl implements IUbicacionService {
 
   private void validarUbicacion(
       Ubicacion ubicacion, String nombreLocalidad, String codigoPostal, String nombreProvincia) {
-    if (ubicacion.getLocalidad() != null)
-      ubicacion.setLocalidad(
-          this.guardarLocalidad(
-              nombreLocalidad,
-              nombreProvincia,
-              codigoPostal));
+    if (ubicacion.getLocalidad() != null) {
+      ubicacion.setLocalidad(this.guardarLocalidad(nombreLocalidad, nombreProvincia, codigoPostal));
+      this.validarOperacion(TipoDeOperacion.ACTUALIZACION, ubicacion.getLocalidad());
+    }
   }
 
   @Override
@@ -203,13 +201,12 @@ public class UbicacionServiceImpl implements IUbicacionService {
 
   @Override
   public Localidad getLocalidadPorNombre(String nombre, Provincia provincia) {
-    return localidadRepository.findByNombreAndProvinciaAndEliminadaOrderByNombreAsc(
-        nombre, provincia, false);
+    return localidadRepository.findByNombreAndProvinciaOrderByNombreAsc(nombre, provincia);
   }
 
   @Override
   public List<Localidad> getLocalidadesDeLaProvincia(Provincia provincia) {
-    return localidadRepository.findAllByAndProvinciaAndEliminadaOrderByNombreAsc(provincia, false);
+    return localidadRepository.findAllByAndProvinciaOrderByNombreAsc(provincia);
   }
 
   @Override
@@ -224,12 +221,12 @@ public class UbicacionServiceImpl implements IUbicacionService {
 
   @Override
   public Provincia getProvinciaPorNombre(String nombre) {
-    return provinciaRepository.findByNombreAndEliminadaOrderByNombreAsc(nombre, false);
+    return provinciaRepository.findByNombreOrderByNombreAsc(nombre);
   }
 
   @Override
   public List<Provincia> getProvincias() {
-    return provinciaRepository.findAllByAndEliminadaOrderByNombreAsc(false);
+    return provinciaRepository.findAllByOrderByNombreAsc();
   }
 
   @Override
@@ -245,6 +242,10 @@ public class UbicacionServiceImpl implements IUbicacionService {
     if (Validator.esVacio(localidad.getNombre())) {
       throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
         .getString("mensaje_localidad_vacio_nombre"));
+    }
+    if (Validator.esVacio(localidad.getCodigoPostal())) {
+      throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+        .getString("mensaje_localidad_codigo_postal_vacio"));
     }
     if (localidad.getProvincia() == null) {
       throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -296,7 +297,6 @@ public class UbicacionServiceImpl implements IUbicacionService {
     if (criteria.isBuscaPorEnvio()) {
       builder.and(qLocalidad.envioGratuito.eq(criteria.getEnvioGratuito()));
     }
-    builder.and(qLocalidad.eliminada.isFalse());
     return localidadRepository.findAll(builder, criteria.getPageable());
   }
 }

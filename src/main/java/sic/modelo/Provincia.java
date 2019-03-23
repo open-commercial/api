@@ -26,6 +26,4 @@ public class Provincia implements Serializable {
 
   @Column(nullable = false)
   private String nombre;
-
-  private boolean eliminada;
 }

@@ -14,7 +14,6 @@ public class UbicacionBuilder {
   private Integer numero = 4585;
   private Integer piso = 0;
   private String departamento = "no posee";
-  private boolean eliminada = false;
 
   public Ubicacion build() {
     return new Ubicacion(
@@ -26,8 +25,7 @@ public class UbicacionBuilder {
         calle,
         numero,
         piso,
-        departamento,
-        eliminada);
+        departamento);
   }
 
   public UbicacionBuilder withIdUbicacion(long idUbicacion) {
@@ -72,11 +70,6 @@ public class UbicacionBuilder {
 
   public UbicacionBuilder withDepartamento(String codigoPostal) {
     this.piso = piso;
-    return this;
-  }
-
-  public UbicacionBuilder withEliminada(boolean eliminada) {
-    this.eliminada = eliminada;
     return this;
   }
 }

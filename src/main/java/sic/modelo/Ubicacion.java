@@ -51,8 +51,6 @@ public class Ubicacion implements Serializable {
   @Length(max = 255, message = "{mensaje_ubicacion_longitud_departamento}")
   private String departamento;
 
-  private boolean eliminada;
-
   @JsonGetter("idLocalidad")
   public Long getIdLocalidad() {
     return (localidad != null) ? localidad.getId_Localidad() : null;

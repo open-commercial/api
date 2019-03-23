@@ -13,10 +13,9 @@ public class LocalidadBuilder {
   private Provincia provincia = new ProvinciaBuilder().build();
   private boolean envioGratuito = false;
   private BigDecimal costoEnvio = BigDecimal.ZERO;
-  private boolean eliminada = false;
 
   public Localidad build() {
-    return new Localidad(id_Localidad, nombre, codigoPostal, provincia, envioGratuito, costoEnvio, eliminada);
+    return new Localidad(id_Localidad, nombre, codigoPostal, provincia, envioGratuito, costoEnvio);
   }
 
   public LocalidadBuilder withId_Localidad(long id_Localidad) {
@@ -46,11 +45,6 @@ public class LocalidadBuilder {
 
   public LocalidadBuilder withCostoEnvio(BigDecimal costoEnvio) {
     this.costoEnvio = costoEnvio;
-    return this;
-  }
-
-  public LocalidadBuilder withEliminada(boolean eliminada) {
-    this.eliminada = eliminada;
     return this;
   }
 }

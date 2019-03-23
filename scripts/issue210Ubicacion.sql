@@ -3,7 +3,6 @@ CREATE TABLE `ubicacion` (
   `calle` varchar(255) COLLATE utf8_unicode_ci,
   `departamento` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `descripcion` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `eliminada` bit(1) NOT NULL,
   `latitud` double DEFAULT NULL,
   `longitud` double DEFAULT NULL,
   `numero` int(11) NOT NULL,
@@ -16,20 +15,20 @@ CREATE TABLE `ubicacion` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
-INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente, eliminada) 
-select "ubicacionFacturacion", 123,localidad.id_Localidad, cliente.id_Cliente, cliente.eliminado from cliente inner join localidad
+INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente) 
+select "ubicacionFacturacion", 123,localidad.id_Localidad, cliente.id_Cliente from cliente inner join localidad
 on cliente.id_Localidad = localidad.id_Localidad;
 
-INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente, eliminada) 
-select "ubicacionFacturacion", 123, null, cliente.id_Cliente, cliente.eliminado from cliente
+INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente) 
+select "ubicacionFacturacion", 123, null, cliente.id_Cliente from cliente
 where cliente.id_Localidad is null;
 
-INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente, eliminada) 
-select "ubicacionEnvio", 123,localidad.id_Localidad, cliente.id_Cliente, cliente.eliminado from cliente inner join localidad
+INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente) 
+select "ubicacionEnvio", 123,localidad.id_Localidad, cliente.id_Cliente from cliente inner join localidad
 on cliente.id_Localidad = localidad.id_Localidad;
 
-INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente, eliminada) 
-select "ubicacionEnvio", 123, null, cliente.id_Cliente, cliente.eliminado from cliente
+INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente) 
+select "ubicacionEnvio", 123, null, cliente.id_Cliente from cliente
 where cliente.id_Localidad is null;
 
 ALTER TABLE `cliente` 
@@ -88,12 +87,12 @@ ADD COLUMN  `idProveedor` bigint(20) DEFAULT NULL;
 ALTER TABLE `ubicacion` 
 ADD COLUMN `idProveedor` BIGINT(20);
 
-INSERT INTO `ubicacion`(calle, numero, id_Localidad, idProveedor, eliminada) 
-select "ubicacion proveedor", 123,localidad.id_Localidad, proveedor.id_Proveedor, proveedor.eliminado from proveedor inner join localidad
+INSERT INTO `ubicacion`(calle, numero, id_Localidad, idProveedor) 
+select "ubicacion proveedor", 123,localidad.id_Localidad, proveedor.id_Proveedor from proveedor inner join localidad
 on proveedor.id_Localidad = localidad.id_Localidad;
 
-INSERT INTO `ubicacion`(calle, numero, id_Localidad, idProveedor, eliminada) 
-select "ubicacion proveedor", 123, null, proveedor.id_Proveedor, proveedor.eliminado from proveedor
+INSERT INTO `ubicacion`(calle, numero, id_Localidad, idProveedor) 
+select "ubicacion proveedor", 123, null, proveedor.id_Proveedor from proveedor
 where proveedor.id_Localidad is null;
 
 SET SQL_SAFE_UPDATES = 0;
@@ -133,8 +132,8 @@ DROP COLUMN `idProveedor`;
 ALTER TABLE `ubicacion` 
 ADD COLUMN `idTransportista` BIGINT(20);
 
-INSERT INTO `ubicacion`(calle, numero, id_Localidad, idTransportista, eliminada) 
-select "ubicacion transportista", 123, localidad.id_Localidad, transportista.id_Transportista, transportista.eliminado from transportista inner join localidad
+INSERT INTO `ubicacion`(calle, numero, id_Localidad, idTransportista) 
+select "ubicacion transportista", 123, localidad.id_Localidad, transportista.id_Transportista from transportista inner join localidad
 on transportista.id_Localidad = localidad.id_Localidad;
 
 SET SQL_SAFE_UPDATES = 0;
@@ -171,8 +170,8 @@ DROP COLUMN `idTransportista`;
 ALTER TABLE `ubicacion` 
 ADD COLUMN `idEmpresa` BIGINT(20);
 
-INSERT INTO `ubicacion`(calle, numero, id_Localidad, idEmpresa, eliminada) 
-select "ubicacion empresa", 123, localidad.id_Localidad, empresa.id_Empresa, empresa.eliminada from empresa inner join localidad
+INSERT INTO `ubicacion`(calle, numero, id_Localidad, idEmpresa) 
+select "ubicacion empresa", 123, localidad.id_Localidad, empresa.id_Empresa from empresa inner join localidad
 on empresa.id_Localidad = localidad.id_Localidad;
 
 SET SQL_SAFE_UPDATES = 0;

@@ -6,10 +6,9 @@ public class ProvinciaBuilder {
     
     private long id_Provincia = 0L;
     private String nombre = "Corrientes";
-    private boolean eliminada = false;
     
     public Provincia build() {
-        return new Provincia(id_Provincia, nombre, eliminada);
+        return new Provincia(id_Provincia, nombre);
     }
     
     public ProvinciaBuilder withId_Provincia(long id_Provincia) {
@@ -19,11 +18,6 @@ public class ProvinciaBuilder {
     
     public ProvinciaBuilder withNombre(String nombre) {
         this.nombre = nombre;
-        return this;
-    }
-    
-    public ProvinciaBuilder withEliminada(boolean eliminada) {
-        this.eliminada = eliminada;
         return this;
     }
 }

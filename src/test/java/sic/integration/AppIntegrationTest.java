@@ -1851,7 +1851,7 @@ class AppIntegrationTest {
           FacturaVentaDTO[].class);
     } catch (RestClientResponseException ex) {
       assertTrue(
-          ex.getMessage().startsWith("La ubicaciÃ³n de facturacion se encuentra vacÃ\u00ADa."));
+          ex.getMessage().startsWith("La ubicacion de facturacion se encuentra vacia."));
     }
   }
 

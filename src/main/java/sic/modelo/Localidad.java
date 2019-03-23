@@ -49,8 +49,6 @@ public class Localidad implements Serializable {
   @DecimalMin(value = "0", message = "{mensaje_ubicacion_costoEnvio_negativo}")
   private BigDecimal costoEnvio;
 
-  private boolean eliminada;
-
   @JsonGetter("idProvincia")
   public long getIdProvincia() {
     return provincia.getId_Provincia();
