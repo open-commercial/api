@@ -152,7 +152,8 @@ $P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("MON
 				<textElement verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getCliente().getDetalleUbicacionFacturacion()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{cuentaCorrienteCliente}.getCliente().getDetalleUbicacionFacturacion() != null) ?
+$P{cuentaCorrienteCliente}.getCliente().getDetalleUbicacionFacturacion() : ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement positionType="FixRelativeToBottom" x="50" y="191" width="505" height="15" uuid="cb8691ce-a678-4cf1-a2c7-4938068372c4">

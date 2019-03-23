@@ -3,7 +3,6 @@ package sic.controller;
 import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
@@ -23,7 +22,6 @@ import sic.modelo.*;
 import sic.modelo.dto.NuevoPedidoDTO;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.modelo.dto.PedidoDTO;
-import sic.modelo.dto.UbicacionDTO;
 import sic.service.*;
 
 @RestController
@@ -114,22 +112,10 @@ public class PedidoController {
     pedido.setDescuentoNeto(nuevoPedidoDTO.getDescuentoNeto());
     pedido.setTotalEstimado(nuevoPedidoDTO.getTotal());
     pedido.setTotalActual(nuevoPedidoDTO.getTotal());
-    pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    Empresa empresaParaPedido = empresaService.getEmpresaPorId(idEmpresa);
+    pedido.setEmpresa(empresaParaPedido);
     pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
     Cliente cliente = clienteService.getClientePorId(idCliente);
-    if (cliente.getUbicacionFacturacion() == null) {
-      throw new BusinessServiceException(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_facturacion_vacia"));
-    }
-    if (cliente.getUbicacionEnvio() == null && tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_ENVIO) {
-      throw new BusinessServiceException(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_envio_vacia"));
-    }
-    Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
-    if (empresa.getUbicacion() == null && tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
-      throw new BusinessServiceException(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_sucursal_vacia"));
-    }
     pedido.setCliente(cliente);
     return pedidoService.guardar(pedido, tipoDeEnvio);
   }

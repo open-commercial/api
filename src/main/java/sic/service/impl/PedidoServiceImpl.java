@@ -45,6 +45,7 @@ public class PedidoServiceImpl implements IPedidoService {
   private final IClienteService clienteService;
   private final IProductoService productoService;
   private final ICorreoElectronicoService correoElectronicoService;
+  private final IUbicacionService ubicacionService;
   private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -59,6 +60,7 @@ public class PedidoServiceImpl implements IPedidoService {
       IClienteService clienteService,
       IProductoService productoService,
       ICorreoElectronicoService correoElectronicoService,
+      IUbicacionService ubicacionService,
       ModelMapper modelMapper) {
     this.facturaService = facturaService;
     this.pedidoRepository = pedidoRepository;
@@ -67,6 +69,7 @@ public class PedidoServiceImpl implements IPedidoService {
     this.clienteService = clienteService;
     this.productoService = productoService;
     this.correoElectronicoService = correoElectronicoService;
+    this.ubicacionService = ubicacionService;
     this.modelMapper = modelMapper;
   }
 
@@ -188,6 +191,21 @@ public class PedidoServiceImpl implements IPedidoService {
   @Override
   @Transactional
   public Pedido guardar(Pedido pedido, TipoDeEnvio tipoDeEnvio) {
+    if (pedido.getCliente().getUbicacionFacturacion() == null
+        && tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_FACTURACION) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_facturacion_vacia"));
+    }
+    if (pedido.getCliente().getUbicacionEnvio() == null
+        && tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_ENVIO) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_envio_vacia"));
+    }
+    if (pedido.getEmpresa().getUbicacion() == null
+        && tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_sucursal_vacia"));
+    }
     pedido.setFecha(new Date());
     pedido.setNroPedido(this.generarNumeroPedido(pedido.getEmpresa()));
     pedido.setEstado(EstadoPedido.ABIERTO);
@@ -385,7 +403,7 @@ public class PedidoServiceImpl implements IPedidoService {
     String detalleEnvio = "";
     if (pedido.getTipoDeEnvio() == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
       detalleEnvio =
-          "Retira en Sucursal "
+          "Retira en Sucursal: "
               + pedido.getEmpresa().getNombre()
               + " ("
               + pedido.getDetalleEnvio()

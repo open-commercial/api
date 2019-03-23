@@ -66,19 +66,6 @@ public class UbicacionServiceImpl implements IUbicacionService {
     return ubicacionGuardada;
   }
 
-  private void instanciarLocalidadParaUbicacion(
-      Ubicacion ubicacion, String nombreLocalidad, String codigoPostal, String nombreProvincia) {
-    if (nombreLocalidad != null && codigoPostal != null && nombreProvincia != null) {
-      Provincia provincia = new Provincia();
-      provincia.setNombre(nombreProvincia);
-      Localidad localidad = new Localidad();
-      localidad.setNombre(nombreLocalidad);
-      localidad.setCodigoPostal(codigoPostal);
-      localidad.setProvincia(provincia);
-      ubicacion.setLocalidad(localidad);
-    }
-  }
-
   @Override
   @Transactional
   public Ubicacion guardarUbicacionDeFacturacionCliente(
@@ -170,22 +157,18 @@ public class UbicacionServiceImpl implements IUbicacionService {
   @Override
   public void actualizar(
       Ubicacion ubicacion, String nombreLocalidad, String codigoPostal, String nombreProvincia) {
-    this.instanciarLocalidadParaUbicacion(
-        ubicacion, nombreLocalidad, codigoPostal, nombreProvincia);
     this.validarUbicacion(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia);
     ubicacionRepository.save(ubicacion);
   }
 
   private void validarUbicacion(
       Ubicacion ubicacion, String nombreLocalidad, String codigoPostal, String nombreProvincia) {
-    this.instanciarLocalidadParaUbicacion(
-        ubicacion, nombreLocalidad, codigoPostal, nombreProvincia);
     if (ubicacion.getLocalidad() != null)
       ubicacion.setLocalidad(
           this.guardarLocalidad(
-              ubicacion.getLocalidad().getNombre(),
-              ubicacion.getLocalidad().getNombreProvincia(),
-              ubicacion.getLocalidad().getCodigoPostal()));
+              nombreLocalidad,
+              nombreProvincia,
+              codigoPostal));
   }
 
   @Override
