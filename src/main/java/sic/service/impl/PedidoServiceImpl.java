@@ -386,9 +386,7 @@ public class PedidoServiceImpl implements IPedidoService {
     if (pedido.getTipoDeEnvio() == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
       detalleEnvio =
           "Retira en Sucursal "
-              + "{"
               + pedido.getEmpresa().getNombre()
-              + "}"
               + " ("
               + pedido.getDetalleEnvio()
               + ")";
