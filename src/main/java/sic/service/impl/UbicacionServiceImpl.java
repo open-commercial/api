@@ -34,13 +34,13 @@ public class UbicacionServiceImpl implements IUbicacionService {
 
   @Autowired
   public UbicacionServiceImpl(
-      UbicacionRepository ubicacionRepository,
-      LocalidadRepository localidadRepository,
-      ProvinciaRepository provinciaRepository,
-      IClienteService clienteService,
-      IEmpresaService empresaService,
-      IProveedorService proveedorService,
-      ITransportistaService transportistaService) {
+    UbicacionRepository ubicacionRepository,
+    LocalidadRepository localidadRepository,
+    ProvinciaRepository provinciaRepository,
+    IClienteService clienteService,
+    IEmpresaService empresaService,
+    IProveedorService proveedorService,
+    ITransportistaService transportistaService) {
     this.ubicacionRepository = ubicacionRepository;
     this.localidadRepository = localidadRepository;
     this.provinciaRepository = provinciaRepository;
@@ -59,8 +59,8 @@ public class UbicacionServiceImpl implements IUbicacionService {
   @Override
   @Transactional
   public Ubicacion guardar(
-      Ubicacion ubicacion, String nombreLocalidad, String codigoPostal, String nombreProvincia) {
-    this.validarUbicacion(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia);
+    Ubicacion ubicacion) {
+    this.validarUbicacion(ubicacion);
     Ubicacion ubicacionGuardada = ubicacionRepository.save(ubicacion);
     logger.warn("La ubicación {} se actualizó correctamente.", ubicacion);
     return ubicacionGuardada;
@@ -69,17 +69,14 @@ public class UbicacionServiceImpl implements IUbicacionService {
   @Override
   @Transactional
   public Ubicacion guardarUbicacionDeFacturacionCliente(
-      Ubicacion ubicacion,
-      String nombreLocalidad,
-      String codigoPostal,
-      String nombreProvincia,
-      Cliente cliente) {
+    Ubicacion ubicacion,
+    Cliente cliente) {
     if (cliente.getUbicacionFacturacion() != null) {
       throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_cliente"));
+        RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_cliente"));
     }
     cliente.setUbicacionFacturacion(
-        this.guardar(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia));
+      this.guardar(ubicacion));
     clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
     return cliente.getUbicacionFacturacion();
   }
@@ -87,17 +84,14 @@ public class UbicacionServiceImpl implements IUbicacionService {
   @Override
   @Transactional
   public Ubicacion guardarUbicacionDeEnvioCliente(
-      Ubicacion ubicacion,
-      String nombreLocalidad,
-      String codigoPostal,
-      String nombreProvincia,
-      Cliente cliente) {
+    Ubicacion ubicacion,
+    Cliente cliente) {
     if (cliente.getUbicacionEnvio() != null) {
       throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_cliente"));
+        RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_cliente"));
     }
     cliente.setUbicacionEnvio(
-        this.guardar(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia));
+      this.guardar(ubicacion));
     clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
     return cliente.getUbicacionEnvio();
   }
@@ -105,16 +99,13 @@ public class UbicacionServiceImpl implements IUbicacionService {
   @Override
   @Transactional
   public Ubicacion guardaUbicacionEmpresa(
-      Ubicacion ubicacion,
-      String nombreLocalidad,
-      String codigoPostal,
-      String nombreProvincia,
-      Empresa empresa) {
+    Ubicacion ubicacion,
+    Empresa empresa) {
     if (empresa.getUbicacion() != null) {
       throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_empresa"));
+        RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_empresa"));
     }
-    empresa.setUbicacion(this.guardar(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia));
+    empresa.setUbicacion(this.guardar(ubicacion));
     empresaService.actualizar(empresa, empresaService.getEmpresaPorId(empresa.getId_Empresa()));
     return empresa.getUbicacion();
   }
@@ -122,16 +113,13 @@ public class UbicacionServiceImpl implements IUbicacionService {
   @Override
   @Transactional
   public Ubicacion guardaUbicacionProveedor(
-      Ubicacion ubicacion,
-      String nombreLocalidad,
-      String codigoPostal,
-      String nombreProvincia,
-      Proveedor proveedor) {
+    Ubicacion ubicacion,
+    Proveedor proveedor) {
     if (proveedor.getUbicacion() != null) {
       throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_proveedor"));
+        RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_proveedor"));
     }
-    proveedor.setUbicacion(this.guardar(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia));
+    proveedor.setUbicacion(this.guardar(ubicacion));
     proveedorService.actualizar(proveedor);
     return proveedor.getUbicacion();
   }
@@ -139,54 +127,30 @@ public class UbicacionServiceImpl implements IUbicacionService {
   @Override
   @Transactional
   public Ubicacion guardarUbicacionTransportista(
-      Ubicacion ubicacion,
-      String nombreLocalidad,
-      String codigoPostal,
-      String nombreProvincia,
-      Transportista transportista) {
+    Ubicacion ubicacion,
+    Transportista transportista) {
     if (transportista.getUbicacion() != null) {
       throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_transportista"));
+        RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_transportista"));
     }
     transportista.setUbicacion(
-        this.guardar(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia));
+      this.guardar(ubicacion));
     transportistaService.actualizar(transportista);
     return transportista.getUbicacion();
   }
 
   @Override
   public void actualizar(
-      Ubicacion ubicacion, String nombreLocalidad, String codigoPostal, String nombreProvincia) {
-    this.validarUbicacion(ubicacion, nombreLocalidad, codigoPostal, nombreProvincia);
+    Ubicacion ubicacion) {
+    this.validarUbicacion(ubicacion);
     ubicacionRepository.save(ubicacion);
   }
 
   private void validarUbicacion(
-      Ubicacion ubicacion, String nombreLocalidad, String codigoPostal, String nombreProvincia) {
+    Ubicacion ubicacion) {
     if (ubicacion.getLocalidad() != null) {
-      ubicacion.setLocalidad(this.guardarLocalidad(nombreLocalidad, nombreProvincia, codigoPostal));
       this.validarOperacion(TipoDeOperacion.ACTUALIZACION, ubicacion.getLocalidad());
     }
-  }
-
-  @Override
-  public Localidad guardarLocalidad(String nombre, String nombreProvincia, String codigoPostal) {
-    Provincia provincia = this.getProvinciaPorNombre(nombreProvincia);
-    if (provincia == null) {
-      provincia = new Provincia();
-      provincia.setNombre(nombreProvincia);
-      provincia = provinciaRepository.save(provincia);
-    }
-    Localidad localidad = this.getLocalidadPorNombre(nombre, provincia);
-    if (localidad == null) {
-      localidad = new Localidad();
-      localidad.setNombre(nombre);
-      localidad.setCodigoPostal(codigoPostal);
-      localidad.setProvincia(provincia);
-      localidad.setCostoEnvio(BigDecimal.ZERO);
-      localidad = localidadRepository.save(localidad);
-    }
-    return localidad;
   }
 
   @Override
@@ -194,7 +158,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
     Localidad localidad = localidadRepository.findOne(idLocalidad);
     if (localidad == null) {
       throw new EntityNotFoundException(
-          RESOURCE_BUNDLE.getString("mensaje_localidad_no_existente"));
+        RESOURCE_BUNDLE.getString("mensaje_localidad_no_existente"));
     }
     return localidad;
   }
@@ -214,7 +178,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
     Provincia provincia = provinciaRepository.findOne(idProvincia);
     if (provincia == null) {
       throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_provincia_no_existente"));
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_provincia_no_existente"));
     }
     return provincia;
   }

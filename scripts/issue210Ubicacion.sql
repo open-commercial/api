@@ -7,7 +7,7 @@ CREATE TABLE `ubicacion` (
   `longitud` double DEFAULT NULL,
   `numero` int(11) NOT NULL,
   `piso` int(11) DEFAULT NULL,
-  `id_Localidad` bigint(20) DEFAULT NULL,
+  `id_Localidad` bigint(20)  NOT NULL,
   `id_Cliente` bigint(20) NOT NULL,
   PRIMARY KEY (`idUbicacion`),
   KEY `FKnt928a1oc3mtwe2spg8ov6qdm` (`id_Localidad`),
@@ -20,7 +20,7 @@ select "ubicacionFacturacion", 123,localidad.id_Localidad, cliente.id_Cliente fr
 on cliente.id_Localidad = localidad.id_Localidad;
 
 INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente) 
-select "ubicacionFacturacion", 123, null, cliente.id_Cliente from cliente
+select "ubicacionFacturacion", 123, 242, cliente.id_Cliente from cliente
 where cliente.id_Localidad is null;
 
 INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente) 
@@ -28,7 +28,7 @@ select "ubicacionEnvio", 123,localidad.id_Localidad, cliente.id_Cliente from cli
 on cliente.id_Localidad = localidad.id_Localidad;
 
 INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente) 
-select "ubicacionEnvio", 123, null, cliente.id_Cliente from cliente
+select "ubicacionEnvio", 123, 242, cliente.id_Cliente from cliente
 where cliente.id_Localidad is null;
 
 ALTER TABLE `cliente` 
@@ -92,7 +92,7 @@ select "ubicacion proveedor", 123,localidad.id_Localidad, proveedor.id_Proveedor
 on proveedor.id_Localidad = localidad.id_Localidad;
 
 INSERT INTO `ubicacion`(calle, numero, id_Localidad, idProveedor) 
-select "ubicacion proveedor", 123, null, proveedor.id_Proveedor from proveedor
+select "ubicacion proveedor", 123, 242, proveedor.id_Proveedor from proveedor
 where proveedor.id_Localidad is null;
 
 SET SQL_SAFE_UPDATES = 0;

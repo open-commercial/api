@@ -12,47 +12,29 @@ public interface IUbicacionService {
   Page<Localidad> buscar(BusquedaLocalidadCriteria criteria);
 
   Ubicacion guardarUbicacionDeFacturacionCliente(
-      Ubicacion ubicacion,
-      String nombreLocalidad,
-      String codigoPostal,
-      String nombreProvincia,
-      Cliente cliente);
+    Ubicacion ubicacion,
+    Cliente cliente);
 
   Ubicacion guardarUbicacionDeEnvioCliente(
-      Ubicacion ubicacion,
-      String nombreLocalidad,
-      String codigoPostal,
-      String nombreProvincia,
-      Cliente cliente);
+    Ubicacion ubicacion,
+    Cliente cliente);
 
   Ubicacion guardaUbicacionEmpresa(
-      Ubicacion ubicacion,
-      String nombreLocalidad,
-      String codigoPostal,
-      String nombreProvincia,
-      Empresa empresa);
+    Ubicacion ubicacion,
+    Empresa empresa);
 
   Ubicacion guardaUbicacionProveedor(
-      Ubicacion ubicacion,
-      String nombreLocalidad,
-      String codigoPostal,
-      String nombreProvincia,
-      Proveedor proveedor);
+    Ubicacion ubicacion,
+    Proveedor proveedor);
 
   Ubicacion guardarUbicacionTransportista(
-      Ubicacion ubicacion,
-      String nombreLocalidad,
-      String codigoPostal,
-      String nombreProvincia,
-      Transportista transportista);
+    Ubicacion ubicacion,
+    Transportista transportista);
 
   Ubicacion guardar(
-      Ubicacion ubicacion, String nombreLocalidad, String codigoPostal, String nombreProvincia);
+    Ubicacion ubicacion);
 
-  void actualizar(Ubicacion ubicacion,
-                  String nombreLocalidad,
-                  String codigoPostal,
-                  String nombreProvincia);
+  void actualizar(Ubicacion ubicacion);
 
   Localidad getLocalidadPorId(Long idLocalidad);
 
@@ -65,8 +47,6 @@ public interface IUbicacionService {
   Provincia getProvinciaPorNombre(String nombre);
 
   List<Provincia> getProvincias();
-
-  Localidad guardarLocalidad(String nombre, String nombreProvincia, String codigoPostal);
 
   void actualizarLocalidad(Localidad localidad);
 

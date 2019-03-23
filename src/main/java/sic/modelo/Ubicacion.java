@@ -10,6 +10,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import javax.persistence.*;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Entity
@@ -28,6 +29,7 @@ public class Ubicacion implements Serializable {
   @ManyToOne
   @JoinColumn(name = "id_Localidad", referencedColumnName = "id_Localidad")
   @QueryInit("provincia")
+  @NotNull
   private Localidad localidad;
 
   private String descripcion;
