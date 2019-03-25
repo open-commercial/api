@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ProvinciaDTO {
 
-  private long id_Provincia;
+  private long idProvincia;
   private String nombre;
 }
