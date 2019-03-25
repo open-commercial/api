@@ -87,12 +87,12 @@ ADD COLUMN  `idProveedor` bigint(20) DEFAULT NULL;
 ALTER TABLE `ubicacion` 
 ADD COLUMN `idProveedor` BIGINT(20);
 
-INSERT INTO `ubicacion`(calle, numero, id_Localidad, idProveedor) 
-select "ubicacion proveedor", 123,localidad.id_Localidad, proveedor.id_Proveedor from proveedor inner join localidad
+INSERT INTO `ubicacion`(calle, numero, idLocalidad, idProveedor) 
+select "ubicacion proveedor", 123,localidad.id_Localidad, proveedor.idProveedor from proveedor inner join localidad
 on proveedor.id_Localidad = localidad.id_Localidad;
 
 INSERT INTO `ubicacion`(calle, numero, id_Localidad, idProveedor) 
-select "ubicacion proveedor", 123, 242, proveedor.id_Proveedor from proveedor
+select "ubicacion proveedor", 123, 242, proveedor.idProveedor from proveedor
 where proveedor.id_Localidad is null;
 
 SET SQL_SAFE_UPDATES = 0;
@@ -107,7 +107,7 @@ ALTER TABLE `proveedor`
 ADD COLUMN `idUbicacion` BIGINT(20);
 
 UPDATE proveedor p
-INNER JOIN ubicacion u ON p.id_Proveedor = u.idProveedor
+INNER JOIN ubicacion u ON p.idProveedor = u.idProveedor
 SET p.idUbicacion = u.idUbicacion; 
 
 ALTER TABLE `proveedor` 
@@ -137,7 +137,7 @@ select "ubicacion transportista", 123, localidad.id_Localidad, transportista.id_
 on transportista.id_Localidad = localidad.id_Localidad;
 
 SET SQL_SAFE_UPDATES = 0;
-UPDATE ubicacion u inner join transportista t on u.idTransportista = t.id_Transportista
+UPDATE ubicacion u inner join transportista t on u.idTransportista = t.idTransportista
 SET u.descripcion = t.direccion;
 SET SQL_SAFE_UPDATES = 1;
 
@@ -170,7 +170,7 @@ DROP COLUMN `idTransportista`;
 ALTER TABLE `ubicacion` 
 ADD COLUMN `idEmpresa` BIGINT(20);
 
-INSERT INTO `ubicacion`(calle, numero, id_Localidad, idEmpresa) 
+INSERT INTO `ubicacion`(calle, numero, idLocalidad, idEmpresa) 
 select "ubicacion empresa", 123, localidad.id_Localidad, empresa.id_Empresa from empresa inner join localidad
 on empresa.id_Localidad = localidad.id_Localidad;
 
@@ -237,15 +237,15 @@ ADD COLUMN  `piso` int(11) DEFAULT NULL;
 update pedido 
 inner join cliente on pedido.id_Cliente = cliente.id_Cliente
 inner join ubicacion on cliente.idUbicacionFacturacion = ubicacion.idUbicacion
-inner join localidad on localidad.id_Localidad = ubicacion.id_Localidad
-inner join provincia on provincia.id_Provincia = localidad.id_Provincia
+inner join localidad on localidad.id_Localidad = ubicacion.idLocalidad
+inner join provincia on provincia.id_Provincia = localidad.idProvincia
 SET pedido.calle = ubicacion.calle, 
 pedido.codigoPostal = localidad.codigoPostal,
 pedido.departamento = ubicacion.departamento,
 pedido.descripcion = ubicacion.descripcion,
 pedido.eliminada = ubicacion.eliminada,
-pedido.idLocalidad = localidad.id_Localidad,
-pedido.idProvincia = provincia.id_Provincia,
+pedido.idLocalidad = localidad.idLocalidad,
+pedido.idProvincia = provincia.idProvincia,
 pedido.idUbicacion = ubicacion.idUbicacion,
 pedido.latitud = ubicacion.latitud, 
 pedido.longitud = ubicacion.longitud, 
