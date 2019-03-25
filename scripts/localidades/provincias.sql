@@ -1,5 +1,3 @@
-ALTER TABLE provincia MODIFY COLUMN eliminada bit(1) NOT NULL DEFAULT 0;
-
 INSERT INTO provincia (idProvincia, nombre) VALUES
     (14,'Córdoba'),
     (22,'Chaco'),
@@ -25,3 +23,5 @@ INSERT INTO provincia (idProvincia, nombre) VALUES
     (58,'Neuquén'),
     (74,'San Luis'),
     (90,'Tucumán');
+
+ALTER TABLE localidad MODIFY COLUMN codigoPostal varchar(255) NOT NULL DEFAULT 0;
