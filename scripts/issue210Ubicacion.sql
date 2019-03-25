@@ -367,6 +367,22 @@ ALTER TABLE `empresa`
 ADD CONSTRAINT `FK9vp5rconju76goo4m612b13vg` FOREIGN KEY (`idUbicacion`) 
 REFERENCES `ubicacion`(`idUbicacion`);
 
+ALTER TABLE `ubicacion` 
+DROP FOREIGN KEY `FKnt928a1oc3mtwe2spg8ov6qdm`;
+
+TRUNCATE TABLE `localidad`;
+
+ALTER TABLE `localidad` 
+DROP FOREIGN KEY `FKip25qf9bb8vuf96trysbnng6g`;
+
+TRUNCATE TABLE `provincia`;
+
+ALTER TABLE `ubicacion`
+ADD CONSTRAINT `FKnt928a1oc3mtwe2spg8ov6qdm` FOREIGN KEY (`idLocalidad`) 
+REFERENCES `localidad`(`idLocalidad`);
+
+ALTER TABLE `localidad`
+ADD CONSTRAINT `FKip25qf9bb8vuf96trysbnng6g` FOREIGN KEY (`idProvincia`) 
+REFERENCES `provincia`(`idProvincia`);
+
 SET foreign_key_checks = 1;
-
-
