@@ -62,7 +62,8 @@
 				<textElement>
 					<font size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{empresa}.getDetalleUbicacion()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{empresa}.getDetalleUbicacion() !=  null) ?
+$P{empresa}.getDetalleUbicacion() : ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="168" y="74" width="370" height="20" uuid="0ea1d205-1cbf-4268-8f06-c4c760bcb0a1"/>

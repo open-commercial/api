@@ -75,7 +75,8 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getEmpresa().getDetalleUbicacion()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaCredito}.getEmpresa().getDetalleUbicacion() != null) ? 
+$P{notaCredito}.getEmpresa().getDetalleUbicacion()  : ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="130" width="555" height="15" uuid="3c596225-a4e6-4283-92e6-74a5552f2211">
