@@ -5,20 +5,20 @@ import java.util.Date;
 import sic.modelo.CategoriaIVA;
 import sic.modelo.Empresa;
 import sic.modelo.Localidad;
+import sic.modelo.Ubicacion;
 
 public class EmpresaBuilder {
 
   private long id_Empresa = 0L;
   private String nombre = "Globo Corporation";
   private String lema = "Enjoy the life";
-  private String direccion = "Viamonte 542";
   private CategoriaIVA categoriaIVA = CategoriaIVA.RESPONSABLE_INSCRIPTO;
   private Long idFiscal = 23154587589L;
   private Long ingresosBrutos = 123456789L;
   private Date fechaInicioActividad = new Date(539924400000L); // 10-02-1987
   private String email = "support@globocorporation.com";
   private String telefono = "379 4895549";
-  private Localidad localidad = new LocalidadBuilder().build();
+  private Ubicacion ubicacion = new UbicacionBuilder().build();
   private String logo = "";
   private boolean eliminada = false;
 
@@ -27,14 +27,13 @@ public class EmpresaBuilder {
         id_Empresa,
         nombre,
         lema,
-        direccion,
         categoriaIVA,
         idFiscal,
         ingresosBrutos,
         fechaInicioActividad,
         email,
         telefono,
-        localidad,
+        ubicacion,
         logo,
         eliminada);
   }
@@ -51,11 +50,6 @@ public class EmpresaBuilder {
 
   public EmpresaBuilder withLema(String lema) {
     this.lema = lema;
-    return this;
-  }
-
-  public EmpresaBuilder withDireccion(String direccion) {
-    this.direccion = direccion;
     return this;
   }
 
@@ -89,8 +83,8 @@ public class EmpresaBuilder {
     return this;
   }
 
-  public EmpresaBuilder withLocalidad(Localidad localidad) {
-    this.localidad = localidad;
+  public EmpresaBuilder withUbicacion(Ubicacion ubicacion) {
+    this.ubicacion = ubicacion;
     return this;
   }
 

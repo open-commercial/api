@@ -155,15 +155,18 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       builder.and(qCuentaCorrienteCliente.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaPorLocalidad())
       builder.and(
-          qCuentaCorrienteCliente.cliente.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
+          qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
       builder.and(
-          qCuentaCorrienteCliente.cliente.localidad.provincia.id_Provincia.eq(
+          qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.provincia.idProvincia.eq(
               criteria.getIdProvincia()));
-    if (criteria.isBuscaPorPais())
+    if (criteria.isBuscaPorLocalidad())
       builder.and(
-          qCuentaCorrienteCliente.cliente.localidad.provincia.pais.id_Pais.eq(
-              criteria.getIdPais()));
+        qCuentaCorrienteCliente.cliente.ubicacionEnvio.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
+    if (criteria.isBuscaPorProvincia())
+      builder.and(
+        qCuentaCorrienteCliente.cliente.ubicacionEnvio.localidad.provincia.idProvincia.eq(
+          criteria.getIdProvincia()));
     Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
@@ -220,15 +223,11 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       builder.or(qCuentaCorrienteProveedor.proveedor.idFiscal.eq(criteria.getIdFiscal()));
     if (criteria.isBuscaPorLocalidad())
       builder.and(
-          qCuentaCorrienteProveedor.proveedor.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
+          qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
       builder.and(
-          qCuentaCorrienteProveedor.proveedor.localidad.provincia.id_Provincia.eq(
+          qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.provincia.idProvincia.eq(
               criteria.getIdProvincia()));
-    if (criteria.isBuscaPorPais())
-      builder.and(
-          qCuentaCorrienteProveedor.proveedor.localidad.provincia.pais.id_Pais.eq(
-              criteria.getIdPais()));
     builder.and(
         qCuentaCorrienteProveedor
             .empresa

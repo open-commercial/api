@@ -4,13 +4,8 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.querydsl.core.annotations.QueryInit;
 import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,7 +19,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombre", "empresa"})
 @ToString
-@JsonIgnoreProperties({"localidad", "empresa", "eliminado"})
+@JsonIgnoreProperties({"localidad", "empresa", "ubicacion", "eliminado"})
 public class Transportista implements Serializable {
 
   @Id @GeneratedValue private long id_Transportista;
@@ -32,13 +27,10 @@ public class Transportista implements Serializable {
   @Column(nullable = false)
   private String nombre;
 
-  @Column(nullable = false)
-  private String direccion;
-
-  @ManyToOne
-  @JoinColumn(name = "id_Localidad", referencedColumnName = "id_Localidad")
-  @QueryInit("provincia.pais")
-  private Localidad localidad;
+  @OneToOne
+  @JoinColumn(name = "idUbicacion", referencedColumnName = "idUbicacion")
+  @QueryInit("localidad.provincia")
+  private Ubicacion ubicacion;
 
   @Column(nullable = false)
   private String web;
@@ -52,25 +44,6 @@ public class Transportista implements Serializable {
 
   private boolean eliminado;
 
-  @JsonGetter("idLocalidad")
-  public Long getIdLocalidad() {
-    return localidad.getId_Localidad();
-  }
-
-  @JsonGetter("nombreLocalidad")
-  public String getNombreLocalidad() {
-    return localidad.getNombre();
-  }
-
-  @JsonGetter("nombreProvincia")
-  public String getNombreProvincia() {
-    return localidad.getProvincia().getNombre();
-  }
-
-  @JsonGetter("nombrePais")
-  public String getNombrePais() {
-    return localidad.getProvincia().getPais().getNombre();
-  }
 
   @JsonGetter("idEmpresa")
   public Long getIdEmpresa() {
@@ -80,5 +53,23 @@ public class Transportista implements Serializable {
   @JsonGetter("nombreEmpresa")
   public String getNombreEmpresa() {
     return empresa.getNombre();
+  }
+
+  @JsonGetter("idUbicacion")
+  public Long getidUbicacion() {
+    if (ubicacion != null) {
+      return ubicacion.getIdUbicacion();
+    } else {
+      return null;
+    }
+  }
+
+  @JsonGetter("detalleUbicacion")
+  public String getDetalleUbicacion() {
+    if (ubicacion != null) {
+      return ubicacion.toString();
+    } else {
+      return null;
+    }
   }
 }

@@ -75,22 +75,21 @@ class ClienteServiceImplTest {
   @Test
   void shouldLanzarExceptionWhenEmpresaEsNull() {
     BusinessServiceException thrown =
-        assertThrows(
-            BusinessServiceException.class,
-            () ->
-                clienteServiceImpl.validarOperacion(
-                    TipoDeOperacion.ELIMINACION,
-                    new ClienteBuilder()
-                        .withEmail("soporte@gmail.com")
-                        .withNombreFiscal("Ferreteria Julian")
-                        .withLocalidad(new LocalidadBuilder().build())
-                        .withEmpresa(null)
-                        .build()));
+      assertThrows(
+        BusinessServiceException.class,
+        () ->
+          clienteServiceImpl.validarOperacion(
+            TipoDeOperacion.ELIMINACION,
+            new ClienteBuilder()
+              .withEmail("soporte@gmail.com")
+              .withNombreFiscal("Ferreteria Julian")
+              .withEmpresa(null)
+              .build()));
     assertTrue(
-        thrown
-            .getMessage()
-            .contains(
-                ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_empresa")));
+      thrown
+        .getMessage()
+        .contains(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_empresa")));
   }
 
   @Test

@@ -8,7 +8,12 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
-@EqualsAndHashCode(exclude = {"id_Proveedor", "idLocalidad", "nombreLocalidad", "idProvincia", "nombreProvincia", "idPais", "nombrePais", "idEmpresa", "nombreEmpresa"})
+@EqualsAndHashCode(
+    exclude = {
+      "id_Proveedor",
+      "idEmpresa",
+      "nombreEmpresa"
+    })
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -17,7 +22,6 @@ public class ProveedorDTO implements Serializable {
   private long id_Proveedor;
   private String codigo;
   private String razonSocial;
-  private String direccion;
   private CategoriaIVA categoriaIVA;
   private Long idFiscal;
   private String telPrimario;
@@ -25,12 +29,8 @@ public class ProveedorDTO implements Serializable {
   private String contacto;
   private String email;
   private String web;
-  private Long idLocalidad;
-  private String nombreLocalidad;
-  private Long idProvincia;
-  private String nombreProvincia;
-  private Long idPais;
-  private String nombrePais;
+  private Long idUbicacion;
+  private String detalleUbicacion;
   private Long idEmpresa;
   private String nombreEmpresa;
   private boolean eliminado;
