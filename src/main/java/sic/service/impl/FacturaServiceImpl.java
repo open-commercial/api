@@ -892,7 +892,6 @@ public class FacturaServiceImpl implements IFacturaService {
         }
         List<RenglonFactura> renglones = this.getRenglonesDeLaFactura(factura.getId_Factura());
         JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
-        FacturaVenta fv = (FacturaVenta) factura;
          try {
             return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {

@@ -20,7 +20,6 @@ public class UbicacionDTO implements Serializable {
   private int numero;
   private Integer piso;
   private String departamento;
-  private boolean eliminada;
   private Long idLocalidad;
   private String nombreLocalidad;
   private String codigoPostal;

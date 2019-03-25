@@ -16,19 +16,19 @@ CREATE TABLE `ubicacion` (
 
 
 INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente) 
-select "ubicacionFacturacion", 123,localidad.id_Localidad, cliente.id_Cliente from cliente inner join localidad
+select "ubicacionFacturacion", 0,localidad.id_Localidad, cliente.id_Cliente from cliente inner join localidad
 on cliente.id_Localidad = localidad.id_Localidad;
 
 INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente) 
-select "ubicacionFacturacion", 123, 242, cliente.id_Cliente from cliente
+select "ubicacionFacturacion", 0, 242, cliente.id_Cliente from cliente
 where cliente.id_Localidad is null;
 
 INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente) 
-select "ubicacionEnvio", 123,localidad.id_Localidad, cliente.id_Cliente from cliente inner join localidad
+select "ubicacionEnvio", 0,localidad.id_Localidad, cliente.id_Cliente from cliente inner join localidad
 on cliente.id_Localidad = localidad.id_Localidad;
 
 INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente) 
-select "ubicacionEnvio", 123, 242, cliente.id_Cliente from cliente
+select "ubicacionEnvio", 0, 242, cliente.id_Cliente from cliente
 where cliente.id_Localidad is null;
 
 ALTER TABLE `cliente` 
@@ -197,7 +197,7 @@ ALTER TABLE `empresa`
 DROP COLUMN `id_Localidad`,
 DROP INDEX `FK98yi7oddg1up58158pwk9lf39` ;
 
--- FOREING KEY TRANSPORTISTA
+-- FOREING KEY EMPRESA
 ALTER TABLE `empresa`
 ADD CONSTRAINT `FK9vp5rconju76goo4m612b13vg` FOREIGN KEY (`idUbicacion`) 
 REFERENCES `ubicacion`(`idUbicacion`);
@@ -239,7 +239,7 @@ inner join cliente on pedido.id_Cliente = cliente.id_Cliente
 inner join ubicacion on cliente.idUbicacionFacturacion = ubicacion.idUbicacion
 inner join localidad on localidad.id_Localidad = ubicacion.id_Localidad
 inner join provincia on provincia.id_Provincia = localidad.id_Provincia
-SET pedido.calle = ubicacion.calle, 
+SET pedido.calle = ubicacion.descripcion, 
 pedido.codigoPostal = localidad.codigoPostal,
 pedido.departamento = ubicacion.departamento,
 pedido.descripcion = ubicacion.descripcion,
@@ -250,7 +250,7 @@ pedido.latitud = ubicacion.latitud,
 pedido.longitud = ubicacion.longitud, 
 pedido.nombreLocalidad = localidad.nombre,
 pedido.nombreProvincia = provincia.nombre,
-pedido.numero = ubicacion.numero,
+pedido.numero = -9,
 pedido.piso = ubicacion.piso,
 pedido.tipoDeEnvio = "USAR_UBICACION_FACTURACION"
 ;
@@ -306,3 +306,67 @@ DROP COLUMN `eliminada`;
 
 ALTER TABLE `provincia`
 DROP COLUMN `eliminada`;
+
+-- Tirar tabla ubicación
+
+ALTER TABLE `cliente` 
+DROP FOREIGN KEY `FKkfnh6um3l9l5i0ywxwqr1qq9e`; -- envio
+
+ALTER TABLE `cliente` 
+DROP FOREIGN KEY `FK838frolnqaeg8h97ggqu1rd67`; -- facturacion
+
+ALTER TABLE `proveedor` 
+DROP FOREIGN KEY `FKjljtmiir6f667w008hwkpqoca`;
+
+ALTER TABLE `transportista` 
+DROP FOREIGN KEY `FKlu1d8169dmth4c4u8u409y0yo`;
+
+ALTER TABLE `empresa` 
+DROP FOREIGN KEY `FK9vp5rconju76goo4m612b13vg`;
+
+TRUNCATE TABLE `ubicacion`;
+
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE cliente
+SET cliente.idUbicacionEnvio = NULL;
+
+UPDATE cliente
+SET cliente.idUbicacionFacturacion = NULL;
+
+UPDATE proveedor
+SET proveedor.idUbicacion = NULL;
+
+UPDATE transportista
+SET transportista.idUbicacion = NULL;
+
+UPDATE empresa
+SET empresa.idUbicacion = NULL;
+
+SET SQL_SAFE_UPDATES = 1;
+
+SET foreign_key_checks = 0;
+
+ALTER TABLE `cliente`
+ADD CONSTRAINT `FKkfnh6um3l9l5i0ywxwqr1qq9e` FOREIGN KEY (`idUbicacionEnvio`) 
+REFERENCES `ubicacion`(`idUbicacion`);
+
+ALTER TABLE `cliente`
+ADD CONSTRAINT `FK838frolnqaeg8h97ggqu1rd67` FOREIGN KEY (`idUbicacionFacturacion`) 
+REFERENCES `ubicacion`(`idUbicacion`);
+
+ALTER TABLE `proveedor`
+ADD CONSTRAINT `FKjljtmiir6f667w008hwkpqoca` FOREIGN KEY (`idUbicacion`) 
+REFERENCES `ubicacion`(`idUbicacion`);
+
+ALTER TABLE `transportista`
+ADD CONSTRAINT `FKlu1d8169dmth4c4u8u409y0yo` FOREIGN KEY (`idUbicacion`) 
+REFERENCES `ubicacion`(`idUbicacion`);
+
+ALTER TABLE `empresa`
+ADD CONSTRAINT `FK9vp5rconju76goo4m612b13vg` FOREIGN KEY (`idUbicacion`) 
+REFERENCES `ubicacion`(`idUbicacion`);
+
+SET foreign_key_checks = 1;
+
+
