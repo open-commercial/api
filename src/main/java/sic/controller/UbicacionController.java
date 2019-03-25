@@ -57,7 +57,7 @@ public class UbicacionController {
   }
 
   @GetMapping("/ubicaciones/localidades/{idLocalidad}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public Localidad getLocalidadPorId(@PathVariable long idLocalidad) {
     return ubicacionService.getLocalidadPorId(idLocalidad);
   }
@@ -76,7 +76,7 @@ public class UbicacionController {
   }
 
   @GetMapping("/ubicaciones/provincias/{idProvincia}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public Provincia getProvinciaPorId(@PathVariable long idProvincia) {
     return ubicacionService.getProvinciaPorId(idProvincia);
   }
@@ -207,6 +207,7 @@ public class UbicacionController {
   }
 
   @GetMapping("/ubicaciones/localidades/busqueda/criteria")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Page<Localidad> buscarConCriteria(
     @RequestParam(required = false) String nombreLocalidad,
     @RequestParam(required = false) String codigoPostal,
