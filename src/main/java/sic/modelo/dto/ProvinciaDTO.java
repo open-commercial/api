@@ -13,5 +13,4 @@ public class ProvinciaDTO {
 
   private long id_Provincia;
   private String nombre;
-  private boolean eliminada;
 }

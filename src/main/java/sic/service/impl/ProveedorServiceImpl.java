@@ -67,9 +67,9 @@ public class ProveedorServiceImpl implements IProveedorService {
     if (criteria.isBuscaPorCodigo())
       builder.or(qProveedor.codigo.containsIgnoreCase(criteria.getCodigo()));
     if (criteria.isBuscaPorLocalidad())
-      builder.and(qProveedor.ubicacion.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
+      builder.and(qProveedor.ubicacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
-      builder.and(qProveedor.ubicacion.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
+      builder.and(qProveedor.ubicacion.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
     builder.and(
         qProveedor
             .empresa

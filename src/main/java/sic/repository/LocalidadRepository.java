@@ -10,7 +10,7 @@ import sic.modelo.Provincia;
 
 public interface LocalidadRepository extends PagingAndSortingRepository<Localidad, Long>, QueryDslPredicateExecutor<Localidad> {
     
-      @Query("SELECT l FROM Localidad l WHERE l.id_Localidad = :idLocalidad")
+      @Query("SELECT l FROM Localidad l WHERE l.idLocalidad = :idLocalidad")
       Localidad findById(@Param("idLocalidad") long idLocalidad);
       
       Localidad findByNombreAndProvinciaOrderByNombreAsc(String nombre, Provincia provincia);

@@ -109,16 +109,16 @@ public class ClienteServiceImpl implements IClienteService {
       builder.and(qCliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaPorLocalidad())
       builder.and(
-          qCliente.ubicacionFacturacion.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
+          qCliente.ubicacionFacturacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
       builder.and(
-          qCliente.ubicacionFacturacion.localidad.provincia.id_Provincia.eq(
+          qCliente.ubicacionFacturacion.localidad.provincia.idProvincia.eq(
               criteria.getIdProvincia()));
     if (criteria.isBuscaPorLocalidad())
-      builder.and(qCliente.ubicacionEnvio.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
+      builder.and(qCliente.ubicacionEnvio.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
       builder.and(
-          qCliente.ubicacionEnvio.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
+          qCliente.ubicacionEnvio.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
     Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)

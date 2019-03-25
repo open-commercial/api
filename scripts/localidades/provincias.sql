@@ -1,4 +1,6 @@
-INSERT INTO provincia VALUES
+ALTER TABLE provincia MODIFY COLUMN eliminada bit(1) NOT NULL DEFAULT 0;
+
+INSERT INTO provincia (idProvincia, nombre) VALUES
     (14,'Córdoba'),
     (22,'Chaco'),
     (26,'Chubut'),

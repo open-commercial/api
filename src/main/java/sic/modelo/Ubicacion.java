@@ -27,7 +27,7 @@ public class Ubicacion implements Serializable {
   private long idUbicacion;
 
   @ManyToOne
-  @JoinColumn(name = "id_Localidad", referencedColumnName = "id_Localidad")
+  @JoinColumn(name = "idLocalidad", referencedColumnName = "idLocalidad")
   @QueryInit("provincia")
   @NotNull
   private Localidad localidad;
@@ -55,7 +55,7 @@ public class Ubicacion implements Serializable {
 
   @JsonGetter("idLocalidad")
   public Long getIdLocalidad() {
-    return (localidad != null) ? localidad.getId_Localidad() : null;
+    return (localidad != null) ? localidad.getIdLocalidad() : null;
   }
 
   @JsonGetter("nombreLocalidad")
@@ -65,7 +65,7 @@ public class Ubicacion implements Serializable {
 
   @JsonGetter("idProvincia")
   public Long getIdProvincia() {
-    return (localidad != null) ? localidad.getProvincia().getId_Provincia() : null;
+    return (localidad != null) ? localidad.getProvincia().getIdProvincia() : null;
   }
 
   @JsonGetter("nombreProvincia")

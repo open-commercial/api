@@ -27,10 +27,10 @@ import org.hibernate.validator.constraints.NotBlank;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombre"})
 @ToString
-@JsonIgnoreProperties({"provincia", "eliminada"})
+@JsonIgnoreProperties("provincia")
 public class Localidad implements Serializable {
 
-  @Id @GeneratedValue private long id_Localidad;
+  @Id @GeneratedValue private long idLocalidad;
 
   @Column(nullable = false)
   private String nombre;
@@ -40,7 +40,7 @@ public class Localidad implements Serializable {
   private String codigoPostal;
 
   @ManyToOne
-  @JoinColumn(name = "id_Provincia", referencedColumnName = "id_Provincia")
+  @JoinColumn(name = "idProvincia", referencedColumnName = "idProvincia")
   private Provincia provincia;
 
   private boolean envioGratuito;
@@ -51,7 +51,7 @@ public class Localidad implements Serializable {
 
   @JsonGetter("idProvincia")
   public long getIdProvincia() {
-    return provincia.getId_Provincia();
+    return provincia.getIdProvincia();
   }
 
   @JsonGetter("nombreProvincia")

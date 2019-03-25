@@ -16,19 +16,19 @@ CREATE TABLE `ubicacion` (
 
 
 INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente) 
-select "ubicacionFacturacion", 123,localidad.id_Localidad, cliente.id_Cliente from cliente inner join localidad
+select cliente.direccion, 123,localidad.id_Localidad, cliente.id_Cliente from cliente inner join localidad
 on cliente.id_Localidad = localidad.id_Localidad;
 
 INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente) 
-select "ubicacionFacturacion", 123, 242, cliente.id_Cliente from cliente
+select  cliente.direccion, 123, 242, cliente.id_Cliente from cliente
 where cliente.id_Localidad is null;
 
 INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente) 
-select "ubicacionEnvio", 123,localidad.id_Localidad, cliente.id_Cliente from cliente inner join localidad
+select  cliente.direccion, 123,localidad.id_Localidad, cliente.id_Cliente from cliente inner join localidad
 on cliente.id_Localidad = localidad.id_Localidad;
 
 INSERT INTO `ubicacion`(calle, numero, id_Localidad, id_Cliente) 
-select "ubicacionEnvio", 123, 242, cliente.id_Cliente from cliente
+select  cliente.direccion, 123, 242, cliente.id_Cliente from cliente
 where cliente.id_Localidad is null;
 
 ALTER TABLE `cliente` 
@@ -78,7 +78,7 @@ DROP COLUMN `direccion`;
 
 ALTER TABLE `localidad` 
 ADD COLUMN  `costoEnvio` decimal(25,15) DEFAULT 0 NOT NULL,
-ADD COLUMN  `envioGratuito` bit(1) NOT NULL;
+ADD COLUMN  `envioGratuito` bit(1) DEFAULT 0 NOT NULL;
 
 ALTER TABLE `localidad` 
 ADD COLUMN  `idProveedor` bigint(20) DEFAULT NULL;
@@ -280,3 +280,30 @@ SET
     localidad.costoEnvio = 0;
 SET SQL_SAFE_UPDATES = 1;
 
+ALTER TABLE `localidad` 
+DROP FOREIGN KEY `FKip25qf9bb8vuf96trysbnng6g`;
+
+ALTER TABLE `localidad` CHANGE `id_Localidad` `idLocalidad` bigint(20) NOT NULL AUTO_INCREMENT; 
+
+ALTER TABLE `localidad` CHANGE `id_Provincia` `idProvincia` bigint(20) NOT NULL; 
+
+ALTER TABLE `provincia` CHANGE `id_Provincia` `idProvincia` bigint(20) NOT NULL AUTO_INCREMENT; 
+
+ALTER TABLE `localidad`
+ADD CONSTRAINT `FKip25qf9bb8vuf96trysbnng6g` FOREIGN KEY (`idProvincia`) 
+REFERENCES `provincia`(`idProvincia`);
+
+ALTER TABLE `ubicacion` 
+DROP FOREIGN KEY `FKnt928a1oc3mtwe2spg8ov6qdm`;
+
+ALTER TABLE `ubicacion` CHANGE `id_Localidad` `idLocalidad` bigint(20) NOT NULL; 
+
+ALTER TABLE `ubicacion`
+ADD CONSTRAINT `FKnt928a1oc3mtwe2spg8ov6qdm` FOREIGN KEY (`idLocalidad`) 
+REFERENCES `localidad`(`idLocalidad`);
+
+ALTER TABLE `localidad`
+DROP COLUMN `eliminada`;
+
+ALTER TABLE `provincia`
+DROP COLUMN `eliminada`;

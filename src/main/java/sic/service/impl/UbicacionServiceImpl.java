@@ -223,7 +223,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
         .getString("mensaje_localidad_duplicado_nombre"));
     }
     if (operacion.equals(TipoDeOperacion.ACTUALIZACION)) {
-      if (localidadDuplicada != null && localidadDuplicada.getId_Localidad() != localidad.getId_Localidad()) {
+      if (localidadDuplicada != null && localidadDuplicada.getIdLocalidad() != localidad.getIdLocalidad()) {
         throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
           .getString("mensaje_localidad_duplicado_nombre"));
       }

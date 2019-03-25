@@ -184,7 +184,7 @@ public class UbicacionController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(@RequestBody LocalidadDTO localidadDTO) {
     Localidad localidadPersistida =
-      ubicacionService.getLocalidadPorId(localidadDTO.getId_Localidad());
+      ubicacionService.getLocalidadPorId(localidadDTO.getIdLocalidad());
     Localidad localidadPorActualizar = modelMapper.map(localidadDTO, Localidad.class);
     if (localidadPorActualizar.getNombre() != null
       && !localidadPorActualizar.getNombre().equals(localidadPersistida.getNombre())) {
@@ -201,7 +201,7 @@ public class UbicacionController {
     localidadPorActualizar.setNombre(localidadPersistida.getNombre());
     localidadPorActualizar.setCodigoPostal(localidadPersistida.getCodigoPostal());
     localidadPorActualizar.setProvincia(localidadPersistida.getProvincia());
-    if (ubicacionService.getLocalidadPorId(localidadPorActualizar.getId_Localidad()) != null) {
+    if (ubicacionService.getLocalidadPorId(localidadPorActualizar.getIdLocalidad()) != null) {
       ubicacionService.actualizarLocalidad(localidadPorActualizar);
     }
   }

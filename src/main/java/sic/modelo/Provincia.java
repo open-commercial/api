@@ -22,7 +22,7 @@ import lombok.ToString;
 @ToString
 public class Provincia implements Serializable {
 
-  @Id @GeneratedValue private long id_Provincia;
+  @Id @GeneratedValue private long idProvincia;
 
   @Column(nullable = false)
   private String nombre;

@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 public class LocalidadBuilder {
 
-  private long id_Localidad = 0L;
+  private long idLocalidad = 0L;
   private String nombre = "Goya";
   private String codigoPostal = "3450";
   private Provincia provincia = new ProvinciaBuilder().build();
@@ -15,11 +15,11 @@ public class LocalidadBuilder {
   private BigDecimal costoEnvio = BigDecimal.ZERO;
 
   public Localidad build() {
-    return new Localidad(id_Localidad, nombre, codigoPostal, provincia, envioGratuito, costoEnvio);
+    return new Localidad(idLocalidad, nombre, codigoPostal, provincia, envioGratuito, costoEnvio);
   }
 
-  public LocalidadBuilder withId_Localidad(long id_Localidad) {
-    this.id_Localidad = id_Localidad;
+  public LocalidadBuilder withIdLocalidad(long idLocalidad) {
+    this.idLocalidad = idLocalidad;
     return this;
   }
 

@@ -8,7 +8,7 @@ import sic.modelo.Provincia;
 
 public interface ProvinciaRepository extends PagingAndSortingRepository<Provincia, Long> {
     
-      @Query("SELECT p FROM Provincia p WHERE p.id_Provincia = :idProvincia")
+      @Query("SELECT p FROM Provincia p WHERE p.idProvincia = :idProvincia")
       Provincia findById(@Param("idProvincia") long idProvincia);
     
       Provincia findByNombreOrderByNombreAsc(String nombre);
