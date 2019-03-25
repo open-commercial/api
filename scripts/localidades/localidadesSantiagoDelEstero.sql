@@ -1,4 +1,4 @@
-INSERT INTO localidad (id_Localidad, nombre, id_Provincia) VALUES
+INSERT INTO localidad (idLocalidad, nombre, idProvincia) VALUES
     (86021010000,'ESTACION ATAMISQUI',86),
     (86035030000,'ARDILES',86),
     (86035100000,'LA DARSENA',86),

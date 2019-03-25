@@ -1,4 +1,4 @@
-INSERT INTO localidad (id_Localidad, nombre, id_Provincia) VALUES
+INSERT INTO localidad (idLocalidad, nombre, idProvincia) VALUES
     (74007030000,'LEANDRO N. ALEM',74),
     (74007070000,'SAN FRANCISCO DEL MONTE DE ORO',74),
     (74014010000,'LA CALERA',74),

@@ -1,4 +1,4 @@
-INSERT INTO localidad (id_Localidad, nombre, id_Provincia) VALUES
+INSERT INTO localidad (idLocalidad, nombre, idProvincia) VALUES
     (30008030000,'COLONIA HUGUES',30),
     (30008090002,'EL COLORADO',30),
     (30008100000,'UBAJAY',30),

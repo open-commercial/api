@@ -1,4 +1,4 @@
-INSERT INTO localidad (id_Localidad, nombre, id_Provincia) VALUES
+INSERT INTO localidad (idLocalidad, nombre, idProvincia) VALUES
     (50007010006,'6A. SECCION',50),
     (50021010004,'PRESIDENTE SARMIENTO',50),
     (50028010000,'COLONIA SEGOVIA',50),

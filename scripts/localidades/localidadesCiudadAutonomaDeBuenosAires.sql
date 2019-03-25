@@ -1,4 +1,4 @@
-INSERT INTO localidad (id_Localidad, nombre, id_Provincia) VALUES
+INSERT INTO localidad (idLocalidad, nombre, idProvincia) VALUES
     (02000010000,'CIUDAD DE BUENOS AIRES',02),
     (02004010002,'BOCA',02),
     (02004010003,'NUEVA POMPEYA',02),

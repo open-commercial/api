@@ -1,4 +1,4 @@
-INSERT INTO localidad (id_Localidad, nombre, id_Provincia) VALUES
+INSERT INTO localidad (idLocalidad, nombre, idProvincia) VALUES
     (06021020000,'CORONEL SEGUI',06),
     (06028010007,'LONGCHAMPS',06),
     (06028010009,'MINISTRO RIVADAVIA',06),
