@@ -256,8 +256,8 @@ pedido.tipoDeEnvio = "USAR_UBICACION_FACTURACION"
 
 SET SQL_SAFE_UPDATES = 0;
 update pedido 
-SET pedido.calle = 'backfill calle pedido', 
-pedido.numero = 999, 
+SET pedido.calle = '(sin calle)',
+pedido.numero = -9,
 pedido.tipoDeEnvio = "USAR_UBICACION_FACTURACION"
 WHERE pedido.calle is null or pedido.numero is null
 ;
