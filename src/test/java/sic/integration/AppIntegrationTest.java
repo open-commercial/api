@@ -2476,18 +2476,18 @@ class AppIntegrationTest {
         .withIva_neto(new BigDecimal("105"))
         .withPrecioLista(new BigDecimal("1105"))
         .build();
-    productoUno =
-      restTemplate.postForObject(
+    restTemplate.postForObject(
         apiPrefix + "/productos?idMedida=1&idRubro=1&idProveedor=1&idEmpresa=1",
         productoUno,
         ProductoDTO.class);
-    productoDos =
-      restTemplate.postForObject(
+    restTemplate.postForObject(
         apiPrefix + "/productos?idMedida=1&idRubro=1&idProveedor=1&idEmpresa=1",
         productoDos,
         ProductoDTO.class);
-    String uri = apiPrefix + "/productos/multiples?idProducto=1,2&descuentoRecargoPorcentaje=10";
-    restTemplate.put(uri, null);
+    long[] idsProductos = {1L, 2L};
+    ActualizarProductosDTO actualizarProductosDTO = ActualizarProductosDTO.builder()
+      .idProducto(idsProductos).descuentoRecargoPorcentaje(BigDecimal.TEN).build();
+    restTemplate.put(apiPrefix + "/productos/multiples", actualizarProductosDTO);
     productoUno = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     productoDos = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
     assertEquals(new BigDecimal("110.000000000000000"), productoUno.getPrecioCosto());

@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.dto.ActualizarProductosDTO;
 import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductoDTO;
 import sic.service.*;
@@ -321,56 +322,45 @@ public class ProductoController {
   @PutMapping("/productos/multiples")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizarMultiplesProductos(
-      @RequestParam long[] idProducto,
-      @RequestParam(required = false) BigDecimal descuentoRecargoPorcentaje,
-      @RequestParam(required = false) Long idMedida,
-      @RequestParam(required = false) Long idRubro,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) BigDecimal gananciaNeto,
-      @RequestParam(required = false) BigDecimal gananciaPorcentaje,
-      @RequestParam(required = false) BigDecimal IVANeto,
-      @RequestParam(required = false) BigDecimal IVAPorcentaje,
-      @RequestParam(required = false) BigDecimal precioCosto,
-      @RequestParam(required = false) BigDecimal precioLista,
-      @RequestParam(required = false) BigDecimal precioVentaPublico,
-      @RequestParam(required = false) Boolean publico) {
+    @RequestBody ActualizarProductosDTO actualizarProductosDTO) {
     boolean actualizaPrecios = false;
-    if (gananciaNeto != null
-        && gananciaPorcentaje != null
-        && IVANeto != null
-        && IVAPorcentaje != null
-        && precioCosto != null
-        && precioLista != null
-        && precioVentaPublico != null) {
+    if (actualizarProductosDTO.getGananciaNeto() != null
+        && actualizarProductosDTO.getGananciaPorcentaje() != null
+        && actualizarProductosDTO.getIvaNeto() != null
+        && actualizarProductosDTO.getIvaPorcentaje() != null
+        && actualizarProductosDTO.getPrecioCosto() != null
+        && actualizarProductosDTO.getPrecioLista() != null
+        && actualizarProductosDTO.getPrecioVentaPublico() != null) {
       actualizaPrecios = true;
     }
     boolean aplicaDescuentoRecargoPorcentaje = false;
-    if (descuentoRecargoPorcentaje != null) aplicaDescuentoRecargoPorcentaje = true;
+    if (actualizarProductosDTO.getDescuentoRecargoPorcentaje() != null)
+      aplicaDescuentoRecargoPorcentaje = true;
     if (aplicaDescuentoRecargoPorcentaje && actualizaPrecios) {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes")
               .getString("mensaje_modificar_producto_no_permitido"));
     }
     productoService.actualizarMultiples(
-        idProducto,
+        actualizarProductosDTO.getIdProducto(),
         actualizaPrecios,
         aplicaDescuentoRecargoPorcentaje,
-        descuentoRecargoPorcentaje,
-        gananciaNeto,
-        gananciaPorcentaje,
-        IVANeto,
-        IVAPorcentaje,
-        precioCosto,
-        precioLista,
-        precioVentaPublico,
-        (idMedida != null),
-        idMedida,
-        (idRubro != null),
-        idRubro,
-        (idProveedor != null),
-        idProveedor,
-        (publico != null),
-        publico);
+        actualizarProductosDTO.getDescuentoRecargoPorcentaje(),
+        actualizarProductosDTO.getGananciaNeto(),
+        actualizarProductosDTO.getGananciaPorcentaje(),
+        actualizarProductosDTO.getIvaNeto(),
+        actualizarProductosDTO.getIvaPorcentaje(),
+        actualizarProductosDTO.getPrecioCosto(),
+        actualizarProductosDTO.getPrecioLista(),
+        actualizarProductosDTO.getPrecioVentaPublico(),
+        (actualizarProductosDTO.getIdMedida() != null),
+        actualizarProductosDTO.getIdMedida(),
+        (actualizarProductosDTO.getIdRubro() != null),
+        actualizarProductosDTO.getIdRubro(),
+        (actualizarProductosDTO.getIdProveedor() != null),
+        actualizarProductosDTO.getIdProveedor(),
+        (actualizarProductosDTO.getPublico() != null),
+        actualizarProductosDTO.getPublico());
   }
 
   @GetMapping("/productos/valor-stock/criteria")
