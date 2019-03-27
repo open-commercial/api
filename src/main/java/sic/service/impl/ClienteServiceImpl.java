@@ -7,6 +7,7 @@ import java.text.MessageFormat;
 import java.util.Date;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.service.IClienteService;
 import sic.service.BusinessServiceException;
@@ -23,6 +25,7 @@ import sic.repository.ClienteRepository;
 import sic.service.ICuentaCorrienteService;
 
 @Service
+@Validated
 public class ClienteServiceImpl implements IClienteService {
 
   private final ClienteRepository clienteRepository;
@@ -231,7 +234,7 @@ public class ClienteServiceImpl implements IClienteService {
 
   @Override
   @Transactional
-  public void actualizar(Cliente clientePorActualizar, Cliente clientePersistido) {
+  public void actualizar(@Valid Cliente clientePorActualizar, Cliente clientePersistido) {
     clientePorActualizar.setNroCliente(clientePersistido.getNroCliente());
     clientePorActualizar.setFechaAlta(clientePersistido.getFechaAlta());
     clientePorActualizar.setPredeterminado(clientePersistido.isPredeterminado());
