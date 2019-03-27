@@ -15,12 +15,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
-import sic.service.IClienteService;
-import sic.service.BusinessServiceException;
-import sic.service.IUsuarioService;
+import sic.service.*;
 import sic.util.Validator;
 import sic.repository.ClienteRepository;
-import sic.service.ICuentaCorrienteService;
 
 @Service
 public class ClienteServiceImpl implements IClienteService {
@@ -111,11 +108,17 @@ public class ClienteServiceImpl implements IClienteService {
     if (criteria.isBuscaPorViajante())
       builder.and(qCliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaPorLocalidad())
-      builder.and(qCliente.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
+      builder.and(
+          qCliente.ubicacionFacturacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
-      builder.and(qCliente.localidad.provincia.id_Provincia.eq(criteria.getIdProvincia()));
-    if (criteria.isBuscaPorPais())
-      builder.and(qCliente.localidad.provincia.pais.id_Pais.eq(criteria.getIdPais()));
+      builder.and(
+          qCliente.ubicacionFacturacion.localidad.provincia.idProvincia.eq(
+              criteria.getIdProvincia()));
+    if (criteria.isBuscaPorLocalidad())
+      builder.and(qCliente.ubicacionEnvio.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
+    if (criteria.isBuscaPorProvincia())
+      builder.and(
+          qCliente.ubicacionEnvio.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
     Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
@@ -193,6 +196,14 @@ public class ClienteServiceImpl implements IClienteService {
             RESOURCE_BUNDLE.getString("mensaje_cliente_duplicado_idFiscal"));
       }
     }
+    // Ubicacion
+    if (cliente.getUbicacionFacturacion() != null && cliente.getUbicacionEnvio() != null) {
+      if (cliente.getUbicacionFacturacion().getIdUbicacion()
+          == cliente.getUbicacionEnvio().getIdUbicacion()) {
+        throw new BusinessServiceException(
+            RESOURCE_BUNDLE.getString("mensaje_ubicacion_facturacion_envio_iguales"));
+      }
+    }
   }
 
   @Override
@@ -236,7 +247,8 @@ public class ClienteServiceImpl implements IClienteService {
     clientePorActualizar.setFechaAlta(clientePersistido.getFechaAlta());
     clientePorActualizar.setPredeterminado(clientePersistido.isPredeterminado());
     clientePorActualizar.setEliminado(clientePersistido.isEliminado());
-    if (clientePorActualizar.getBonificacion() == null) clientePorActualizar.setBonificacion(BigDecimal.ZERO);
+    if (clientePorActualizar.getBonificacion() == null)
+      clientePorActualizar.setBonificacion(BigDecimal.ZERO);
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, clientePorActualizar);
     if (clientePorActualizar.getCredencial() != null) {
       Cliente clienteYaAsignado =

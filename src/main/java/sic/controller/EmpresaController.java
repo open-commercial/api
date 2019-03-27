@@ -9,21 +9,18 @@ import sic.modelo.Empresa;
 import sic.modelo.Rol;
 import sic.modelo.dto.EmpresaDTO;
 import sic.service.IEmpresaService;
-import sic.service.ILocalidadService;
 
 @RestController
 @RequestMapping("/api/v1")
 public class EmpresaController {
 
   public final IEmpresaService empresaService;
-  private final ILocalidadService localidadService;
   private final ModelMapper modelMapper;
 
   @Autowired
   public EmpresaController(
-      IEmpresaService empresaService, ILocalidadService localidadService, ModelMapper modelMapper) {
+    IEmpresaService empresaService, ModelMapper modelMapper) {
     this.empresaService = empresaService;
-    this.localidadService = localidadService;
     this.modelMapper = modelMapper;
   }
 
@@ -53,32 +50,27 @@ public class EmpresaController {
 
   @PostMapping("/empresas")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-  public Empresa guardar(@RequestBody EmpresaDTO empresaDTO,
-                         @RequestParam Long idLocalidad) {
+  public Empresa guardar(@RequestBody EmpresaDTO empresaDTO) {
     Empresa empresa = modelMapper.map(empresaDTO, Empresa.class);
-    empresa.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
     return empresaService.guardar(empresa);
   }
 
   @PutMapping("/empresas")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-  public void actualizar(@RequestBody EmpresaDTO empresaDTO,
-                         @RequestParam(required = false) Long idLocalidad) {
+  public void actualizar(@RequestBody EmpresaDTO empresaDTO) {
     Empresa empresaParaActualizar = modelMapper.map(empresaDTO, Empresa.class);
-    Empresa empresaPersistida = empresaService.getEmpresaPorId(empresaParaActualizar.getId_Empresa());
+    Empresa empresaPersistida =
+        empresaService.getEmpresaPorId(empresaParaActualizar.getId_Empresa());
     if (empresaParaActualizar.getNombre() == null || empresaParaActualizar.getNombre().isEmpty()) {
-      empresaParaActualizar.setNombre(empresaPersistida.getNombre());
-    }
-    if (empresaParaActualizar.getDireccion() == null || empresaParaActualizar.getDireccion().isEmpty()) {
       empresaParaActualizar.setNombre(empresaPersistida.getNombre());
     }
     if (empresaParaActualizar.getCategoriaIVA() == null) {
       empresaParaActualizar.setCategoriaIVA(empresaPersistida.getCategoriaIVA());
     }
-    if (idLocalidad != null) {
-      empresaParaActualizar.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
+    if (empresaPersistida.getUbicacion() != null) {
+      empresaParaActualizar.setUbicacion(empresaPersistida.getUbicacion());
     } else {
-      empresaParaActualizar.setLocalidad(empresaPersistida.getLocalidad());
+      empresaParaActualizar.setUbicacion(null);
     }
     empresaService.actualizar(empresaParaActualizar, empresaPersistida);
   }

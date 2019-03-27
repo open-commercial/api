@@ -6,28 +6,19 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import sic.modelo.dto.UbicacionDTO;
 
 @Entity
 @Table(name = "pedido")
@@ -40,7 +31,7 @@ import lombok.ToString;
     generator = ObjectIdGenerators.PropertyGenerator.class,
     property = "id_Pedido",
     scope = Pedido.class)
-@JsonIgnoreProperties({"cliente", "usuario", "empresa"})
+@JsonIgnoreProperties({"cliente", "usuario", "empresa", "tipoDeEnvio"})
 public class Pedido implements Serializable {
 
   @Id @GeneratedValue private long id_Pedido;
@@ -60,6 +51,13 @@ public class Pedido implements Serializable {
   @ManyToOne
   @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
   private Empresa empresa;
+
+  @Embedded
+  private UbicacionDTO detalleEnvio;
+
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private TipoDeEnvio tipoDeEnvio;
 
   private boolean eliminado;
 
@@ -127,5 +125,17 @@ public class Pedido implements Serializable {
   @JsonGetter("nombreViajante")
   public String getNombreViajante() {
     return (cliente.getViajante() != null) ? cliente.getNombreViajante() :  null;
+  }
+
+  @JsonGetter("detalleEnvio")
+  public String getDetalleEnvio() {
+    return detalleEnvio.getCalle()
+      + " "
+      + detalleEnvio.getNumero()
+      + (detalleEnvio.getPiso() != null ? ", " + detalleEnvio.getPiso() : "")
+      + (detalleEnvio.getDepartamento() != null ? detalleEnvio.getDepartamento(): "")
+      + (detalleEnvio.getNombreLocalidad() != null ?  ", " + detalleEnvio.getNombreLocalidad() : " ")
+      + " "
+      + (detalleEnvio.getNombreProvincia() != null ? detalleEnvio.getNombreProvincia() : " ");
   }
 }

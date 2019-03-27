@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -22,6 +23,8 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import sic.interceptor.JwtInterceptor;
+import sic.modelo.Ubicacion;
+import sic.modelo.dto.UbicacionDTO;
 import sic.service.impl.AfipWebServiceSOAPClient;
 
 import java.io.IOException;
@@ -102,7 +105,14 @@ public class App extends WebMvcConfigurerAdapter {
 
     @Bean
     public ModelMapper modelMapper() {
-        return new ModelMapper();
+      ModelMapper modelMapper = new ModelMapper();
+      PropertyMap<Ubicacion, UbicacionDTO> ubicacionMapping = new PropertyMap<Ubicacion, UbicacionDTO>(){
+        protected void configure() {
+          map(source.getLocalidad().getNombre(), destination.getNombreLocalidad());
+        }
+      };
+      modelMapper.addMappings(ubicacionMapping);
+      return modelMapper;
     }
 
     @Bean

@@ -4,9 +4,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import sic.modelo.EstadoPedido;
 import sic.modelo.dto.PedidoDTO;
 import sic.modelo.dto.RenglonPedidoDTO;
+import sic.modelo.dto.UbicacionDTO;
 
 public class PedidoBuilder {
 
@@ -16,13 +18,12 @@ public class PedidoBuilder {
   private Date fechaVencimiento;
   private String observaciones = "Los precios se encuentran sujetos a modificaciones.";
   private String nombreEmpresa = "Globo Corporation";
+  private String detalleEnvio;
   private boolean eliminado = false;
   private String nombreFiscalCliente = "Construcciones S.A.";
   private String nombreUsuario = "Daenerys Targaryen";
-  private Long idViajante = 1L;
-  private String nombreViajante;
   private List<RenglonPedidoDTO> renglones;
-  private BigDecimal subTotal = new BigDecimal("544.5");;
+  private BigDecimal subTotal = new BigDecimal("544.5");
   private BigDecimal recargoPorcentaje = BigDecimal.ZERO;
   private BigDecimal recargoNeto = BigDecimal.ZERO;
   private BigDecimal descuentoPorcentaje = BigDecimal.ZERO;
@@ -34,39 +35,37 @@ public class PedidoBuilder {
   public PedidoDTO build() {
     if (renglones == null) {
       RenglonPedidoDTO renglon1 = new RenglonPedidoBuilder().build();
-      RenglonPedidoDTO renglon2 =
-          new RenglonPedidoBuilder()
-              .withCantidad(BigDecimal.ONE)
-              .withIdRenglonPedido(90L)
-              .withIdProducto(77L)
-              .withDescripcion("Pack 6 Vasos")
-              .build();
+      RenglonPedidoDTO renglon2 = new RenglonPedidoBuilder()
+        .withCantidad(BigDecimal.ONE)
+        .withIdRenglonPedido(90L)
+        .withIdProducto(77L)
+        .withDescripcion("Pack 6 Vasos")
+        .build();
       List<RenglonPedidoDTO> renglonesPedido = new ArrayList<>();
       renglonesPedido.add(renglon1);
       renglonesPedido.add(renglon2);
       this.renglones = renglonesPedido;
     }
     return new PedidoDTO(
-        id_Pedido,
-        nroPedido,
-        fecha,
-        fechaVencimiento,
-        observaciones,
-        nombreEmpresa,
-        eliminado,
-        nombreFiscalCliente,
-        nombreUsuario,
-        idViajante,
-        nombreViajante,
-        renglones,
-        subTotal,
-        recargoPorcentaje,
-        recargoNeto,
-        descuentoPorcentaje,
-        descuentoNeto,
-        totalEstimado,
-        totalActual,
-        estado);
+      id_Pedido,
+      nroPedido,
+      fecha,
+      fechaVencimiento,
+      observaciones,
+      nombreEmpresa,
+      detalleEnvio,
+      eliminado,
+      nombreFiscalCliente,
+      nombreUsuario,
+      renglones,
+      subTotal,
+      recargoPorcentaje,
+      recargoNeto,
+      descuentoPorcentaje,
+      descuentoNeto,
+      totalEstimado,
+      totalActual,
+      estado);
   }
 
   public PedidoBuilder withIdPedido(long idPedido) {
@@ -99,6 +98,11 @@ public class PedidoBuilder {
     return this;
   }
 
+  public PedidoBuilder withDetalleEnvio(String envio) {
+    this.detalleEnvio = envio;
+    return this;
+  }
+
   public PedidoBuilder withEliminado(boolean eliminado) {
     this.eliminado = eliminado;
     return this;
@@ -111,16 +115,6 @@ public class PedidoBuilder {
 
   public PedidoBuilder withNombreUsuario(String nombreUsuario) {
     this.nombreUsuario = nombreUsuario;
-    return this;
-  }
-
-  public PedidoBuilder withIdViajante(Long idViajante) {
-    this.idViajante = idViajante;
-    return this;
-  }
-
-  public PedidoBuilder withNombreViajante(String nombreViajante) {
-    this.nombreViajante = nombreViajante;
     return this;
   }
 

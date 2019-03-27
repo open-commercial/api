@@ -5,11 +5,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -25,27 +22,8 @@ import lombok.ToString;
 @ToString
 public class Provincia implements Serializable {
 
-    @Id
-    @GeneratedValue
-    private long id_Provincia;
+  @Id @GeneratedValue private long idProvincia;
 
-    @Column(nullable = false)
-    private String nombre;
-
-    @ManyToOne
-    @JoinColumn(name = "id_Pais", referencedColumnName = "id_Pais")
-    private Pais pais;
-
-    private boolean eliminada;
-
-    @JsonGetter("idPais")
-    public long getIdPais() {
-        return pais.getId_Pais();
-    }
-
-    @JsonGetter("nombrePais")
-    public String getNombrePais() {
-        return pais.getNombre();
-    }
-
+  @Column(nullable = false)
+  private String nombre;
 }
