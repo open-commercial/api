@@ -100,6 +100,23 @@ public class CajaServiceImpl implements ICajaService {
   }
 
   @Override
+  public void validarMovimiento(Date fechaMovimiento, long idEmpresa) {
+    Caja caja = this.getUltimaCaja(idEmpresa);
+    if (caja == null) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_caja_no_existente"));
+    }
+    if (caja.getEstado().equals(EstadoCaja.CERRADA)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_caja_cerrada"));
+    }
+    if (fechaMovimiento.before(caja.getFechaApertura())) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_caja_movimiento_fecha_no_valida"));
+    }
+  }
+
+  @Override
   @Transactional
   public Caja abrirCaja(Empresa empresa, Usuario usuarioApertura, BigDecimal saldoApertura) {
     Caja caja = new Caja();

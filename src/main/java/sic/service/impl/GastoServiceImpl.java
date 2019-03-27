@@ -53,23 +53,11 @@ public class GastoServiceImpl implements IGastoService {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_gasto_fecha_vacia"));
         }
-        Caja caja = this.cajaService.getUltimaCaja(gasto.getEmpresa().getId_Empresa());
-        if (caja == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_caja_no_existente"));
-        }
-        if (caja.getEstado().equals(EstadoCaja.CERRADA)) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_caja_cerrada"));
-        }
-        if (gasto.getFecha().before(caja.getFechaApertura())) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_gasto_fecha_no_valida"));
-        }
         if (gasto.getEmpresa() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_gasto_empresa_vacia"));
         }
+        this.cajaService.validarMovimiento(gasto.getFecha(), gasto.getEmpresa().getId_Empresa());
         if (gasto.getUsuario() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_gasto_usuario_vacio"));

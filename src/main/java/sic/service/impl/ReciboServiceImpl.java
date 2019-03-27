@@ -151,20 +151,6 @@ public class ReciboServiceImpl implements IReciboService {
   }
 
   private void validarRecibo(Recibo recibo) {
-    // Caja
-    Caja caja = this.cajaService.getUltimaCaja(recibo.getEmpresa().getId_Empresa());
-    if (caja == null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_caja_no_existente"));
-    }
-    if (caja.getEstado().equals(EstadoCaja.CERRADA)) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_caja_cerrada"));
-    }
-    if (recibo.getFecha().before(caja.getFechaApertura())) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_recibo_fecha_no_valida"));
-    }
     // Requeridos
     if (recibo.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
       throw new BusinessServiceException(
@@ -173,6 +159,7 @@ public class ReciboServiceImpl implements IReciboService {
     if (recibo.getEmpresa() == null) {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_recibo_empresa_vacia"));
     }
+    this.cajaService.validarMovimiento(recibo.getFecha(), recibo.getEmpresa().getId_Empresa());
     if (recibo.getCliente() == null && recibo.getProveedor() == null) {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_recibo_cliente_proveedor_vacio"));
