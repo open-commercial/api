@@ -129,13 +129,11 @@ public class Pedido implements Serializable {
 
   @JsonGetter("detalleEnvio")
   public String getDetalleEnvio() {
-    return detalleEnvio.getCalle()
-      + " "
-      + detalleEnvio.getNumero()
-      + (detalleEnvio.getPiso() != null ? ", " + detalleEnvio.getPiso() : "")
-      + (detalleEnvio.getDepartamento() != null ? detalleEnvio.getDepartamento(): "")
-      + (detalleEnvio.getNombreLocalidad() != null ?  ", " + detalleEnvio.getNombreLocalidad() : " ")
-      + " "
-      + (detalleEnvio.getNombreProvincia() != null ? detalleEnvio.getNombreProvincia() : " ");
+    return (detalleEnvio.getCalle() != null ? detalleEnvio.getCalle() + " " : "")
+        + (detalleEnvio.getNumero() != null ? detalleEnvio.getNumero() + " " : "")
+        + (detalleEnvio.getPiso() != null ? detalleEnvio.getPiso() + " " : "")
+        + (detalleEnvio.getDepartamento() != null ? detalleEnvio.getDepartamento() + " " : "")
+        + (detalleEnvio.getNombreLocalidad() != null ? detalleEnvio.getNombreLocalidad() + " " : "")
+        + (detalleEnvio.getNombreProvincia() != null ? detalleEnvio.getNombreProvincia() : "");
   }
 }

@@ -17,7 +17,7 @@ public class UbicacionDTO implements Serializable {
   private Double latitud;
   private Double longitud;
   private String calle;
-  private int numero;
+  private Integer numero;
   private Integer piso;
   private String departamento;
   private Long idLocalidad;
