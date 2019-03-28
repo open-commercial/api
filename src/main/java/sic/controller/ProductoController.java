@@ -95,6 +95,7 @@ public class ProductoController {
         null,
         false,
         true,
+        false,
         pagina,
         null,
         null,
@@ -156,6 +157,7 @@ public class ProductoController {
       @RequestParam(required = false) Long idProveedor,
       @RequestParam(required = false) boolean soloFantantes,
       @RequestParam(required = false) Boolean publicos,
+      @RequestParam(required = false) Boolean destacados,
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
@@ -172,6 +174,7 @@ public class ProductoController {
             idProveedor,
             soloFantantes,
             publicos,
+            destacados,
             pagina,
             null,
             ordenarPor,
@@ -203,6 +206,7 @@ public class ProductoController {
       Long idProveedor,
       boolean soloFantantes,
       Boolean publicos,
+      Boolean destacados,
       Integer pagina,
       Integer tamanio,
       String ordenarPor,
@@ -240,6 +244,8 @@ public class ProductoController {
             .listarSoloFaltantes(soloFantantes)
             .buscaPorVisibilidad(publicos != null)
             .publico(publicos)
+            .buscaPorDestacado(destacados != null)
+            .destacado(destacados)
             .pageable(pageable)
             .build();
     return productoService.buscarProductos(criteria);
@@ -305,6 +311,7 @@ public class ProductoController {
     producto.setPrecioLista(nuevoProductoDTO.getPrecioLista());
     producto.setIlimitado(nuevoProductoDTO.isIlimitado());
     producto.setPublico(nuevoProductoDTO.isPublico());
+    producto.setDestacado(nuevoProductoDTO.isDestacado());
     producto.setEstante(nuevoProductoDTO.getEstante());
     producto.setEstanteria(nuevoProductoDTO.getEstanteria());
     producto.setNota(nuevoProductoDTO.getNota());
@@ -382,7 +389,8 @@ public class ProductoController {
       @RequestParam(required = false) Long idRubro,
       @RequestParam(required = false) Long idProveedor,
       @RequestParam(required = false) boolean soloFantantes,
-      @RequestParam(required = false) Boolean publicos) {
+      @RequestParam(required = false) Boolean publicos,
+      @RequestParam(required = false) Boolean destacados) {
     BusquedaProductoCriteria criteria =
         BusquedaProductoCriteria.builder()
             .buscarPorCodigo((codigo != null))
@@ -397,6 +405,8 @@ public class ProductoController {
             .listarSoloFaltantes(soloFantantes)
             .buscaPorVisibilidad(publicos != null)
             .publico(publicos)
+            .buscaPorDestacado(destacados != null)
+            .destacado(destacados)
             .build();
     return productoService.calcularValorStock(criteria);
   }
@@ -430,6 +440,7 @@ public class ProductoController {
       @RequestParam(required = false) Long idProveedor,
       @RequestParam(required = false) boolean soloFantantes,
       @RequestParam(required = false) Boolean publicos,
+      @RequestParam(required = false) Boolean destacados,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
       @RequestParam(required = false) String formato) {
@@ -449,6 +460,7 @@ public class ProductoController {
                     idProveedor,
                     soloFantantes,
                     publicos,
+                    destacados,
                     0,
                     Integer.MAX_VALUE,
                     ordenarPor,
@@ -471,6 +483,7 @@ public class ProductoController {
                     idProveedor,
                     soloFantantes,
                     publicos,
+                    destacados,
                     0,
                     Integer.MAX_VALUE,
                     ordenarPor,

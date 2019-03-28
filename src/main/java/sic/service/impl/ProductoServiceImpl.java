@@ -68,6 +68,13 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
+    if (operacion == TipoDeOperacion.ALTA && (!producto.isPublico() && producto.isDestacado())) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_producto_no_publico_destacado"));
+    }
+    if (operacion == TipoDeOperacion.ACTUALIZACION && !producto.isPublico()) {
+      producto.setDestacado(false);
+    }
     // Duplicados
     // Codigo
     if (!producto.getCodigo().equals("")) {
@@ -183,6 +190,9 @@ public class ProductoServiceImpl implements IProductoService {
     if (criteria.isBuscaPorVisibilidad())
       if (criteria.getPublico()) builder.and(qProducto.publico.isTrue());
       else builder.and(qProducto.publico.isFalse());
+    if (criteria.isBuscaPorDestacado())
+      if (criteria.getDestacado()) builder.and(qProducto.destacado.isTrue());
+      else builder.and(qProducto.destacado.isFalse());
     return builder;
   }
 

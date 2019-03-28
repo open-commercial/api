@@ -93,6 +93,8 @@ class AppIntegrationTest {
         .ivaNeto(new BigDecimal("210"))
         .precioLista(new BigDecimal("1210"))
         .nota("ProductoTest1")
+        .publico(true)
+        .destacado(true)
         .build();
     NuevoProductoDTO productoDos =
       NuevoProductoDTO.builder()
@@ -108,6 +110,7 @@ class AppIntegrationTest {
         .ivaNeto(new BigDecimal("105"))
         .precioLista(new BigDecimal("1105"))
         .nota("ProductoTest2")
+        .destacado(false)
         .build();
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     RubroDTO rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", RubroDTO.class);

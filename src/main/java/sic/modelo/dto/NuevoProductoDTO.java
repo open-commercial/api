@@ -26,6 +26,7 @@ public class NuevoProductoDTO {
   private BigDecimal precioLista;
   private boolean ilimitado;
   private boolean publico;
+  private boolean destacado;
   private Date fechaUltimaModificacion;
   private String estanteria;
   private String estante;

@@ -31,6 +31,7 @@ public class ProductoDTO implements Serializable {
   private String nombreRubro;
   private boolean ilimitado;
   private boolean publico;
+  private boolean destacado;
   private Date fechaUltimaModificacion;
   private String estanteria;
   private String estante;
