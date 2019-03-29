@@ -2485,9 +2485,9 @@ class AppIntegrationTest {
         productoDos,
         ProductoDTO.class);
     long[] idsProductos = {1L, 2L};
-    ActualizarProductosDTO actualizarProductosDTO = ActualizarProductosDTO.builder()
+    ProductosParaActualizarDTO productosParaActualizarDTO = ProductosParaActualizarDTO.builder()
       .idProducto(idsProductos).descuentoRecargoPorcentaje(BigDecimal.TEN).build();
-    restTemplate.put(apiPrefix + "/productos/multiples", actualizarProductosDTO);
+    restTemplate.put(apiPrefix + "/productos/multiples", productosParaActualizarDTO);
     productoUno = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     productoDos = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
     assertEquals(new BigDecimal("110.000000000000000"), productoUno.getPrecioCosto());

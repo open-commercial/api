@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Data
 @Builder
-public class ActualizarProductosDTO {
+public class ProductosParaActualizarDTO {
 
   private long[] idProducto;
   private BigDecimal descuentoRecargoPorcentaje;

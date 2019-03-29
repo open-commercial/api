@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
-import sic.modelo.dto.ActualizarProductosDTO;
+import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductoDTO;
 import sic.service.*;
@@ -322,19 +322,19 @@ public class ProductoController {
   @PutMapping("/productos/multiples")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizarMultiplesProductos(
-    @RequestBody ActualizarProductosDTO actualizarProductosDTO) {
+    @RequestBody ProductosParaActualizarDTO productosParaActualizarDTO) {
     boolean actualizaPrecios = false;
-    if (actualizarProductosDTO.getGananciaNeto() != null
-        && actualizarProductosDTO.getGananciaPorcentaje() != null
-        && actualizarProductosDTO.getIvaNeto() != null
-        && actualizarProductosDTO.getIvaPorcentaje() != null
-        && actualizarProductosDTO.getPrecioCosto() != null
-        && actualizarProductosDTO.getPrecioLista() != null
-        && actualizarProductosDTO.getPrecioVentaPublico() != null) {
+    if (productosParaActualizarDTO.getGananciaNeto() != null
+        && productosParaActualizarDTO.getGananciaPorcentaje() != null
+        && productosParaActualizarDTO.getIvaNeto() != null
+        && productosParaActualizarDTO.getIvaPorcentaje() != null
+        && productosParaActualizarDTO.getPrecioCosto() != null
+        && productosParaActualizarDTO.getPrecioLista() != null
+        && productosParaActualizarDTO.getPrecioVentaPublico() != null) {
       actualizaPrecios = true;
     }
     boolean aplicaDescuentoRecargoPorcentaje = false;
-    if (actualizarProductosDTO.getDescuentoRecargoPorcentaje() != null)
+    if (productosParaActualizarDTO.getDescuentoRecargoPorcentaje() != null)
       aplicaDescuentoRecargoPorcentaje = true;
     if (aplicaDescuentoRecargoPorcentaje && actualizaPrecios) {
       throw new BusinessServiceException(
@@ -342,25 +342,25 @@ public class ProductoController {
               .getString("mensaje_modificar_producto_no_permitido"));
     }
     productoService.actualizarMultiples(
-        actualizarProductosDTO.getIdProducto(),
+        productosParaActualizarDTO.getIdProducto(),
         actualizaPrecios,
         aplicaDescuentoRecargoPorcentaje,
-        actualizarProductosDTO.getDescuentoRecargoPorcentaje(),
-        actualizarProductosDTO.getGananciaNeto(),
-        actualizarProductosDTO.getGananciaPorcentaje(),
-        actualizarProductosDTO.getIvaNeto(),
-        actualizarProductosDTO.getIvaPorcentaje(),
-        actualizarProductosDTO.getPrecioCosto(),
-        actualizarProductosDTO.getPrecioLista(),
-        actualizarProductosDTO.getPrecioVentaPublico(),
-        (actualizarProductosDTO.getIdMedida() != null),
-        actualizarProductosDTO.getIdMedida(),
-        (actualizarProductosDTO.getIdRubro() != null),
-        actualizarProductosDTO.getIdRubro(),
-        (actualizarProductosDTO.getIdProveedor() != null),
-        actualizarProductosDTO.getIdProveedor(),
-        (actualizarProductosDTO.getPublico() != null),
-        actualizarProductosDTO.getPublico());
+        productosParaActualizarDTO.getDescuentoRecargoPorcentaje(),
+        productosParaActualizarDTO.getGananciaNeto(),
+        productosParaActualizarDTO.getGananciaPorcentaje(),
+        productosParaActualizarDTO.getIvaNeto(),
+        productosParaActualizarDTO.getIvaPorcentaje(),
+        productosParaActualizarDTO.getPrecioCosto(),
+        productosParaActualizarDTO.getPrecioLista(),
+        productosParaActualizarDTO.getPrecioVentaPublico(),
+        (productosParaActualizarDTO.getIdMedida() != null),
+        productosParaActualizarDTO.getIdMedida(),
+        (productosParaActualizarDTO.getIdRubro() != null),
+        productosParaActualizarDTO.getIdRubro(),
+        (productosParaActualizarDTO.getIdProveedor() != null),
+        productosParaActualizarDTO.getIdProveedor(),
+        (productosParaActualizarDTO.getPublico() != null),
+        productosParaActualizarDTO.getPublico());
   }
 
   @GetMapping("/productos/valor-stock/criteria")
