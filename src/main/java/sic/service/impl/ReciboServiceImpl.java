@@ -150,8 +150,8 @@ public class ReciboServiceImpl implements IReciboService {
     return recibo;
   }
 
-  private void validarRecibo(Recibo recibo) {
-    // Requeridos
+  @Override
+  public void validarRecibo(Recibo recibo) {
     if (recibo.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_recibo_monto_igual_menor_cero"));
