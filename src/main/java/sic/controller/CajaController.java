@@ -137,7 +137,7 @@ public class CajaController {
     return cajaService.getSaldoSistema(cajaService.getCajaPorId(idCaja));
   }
 
-  @GetMapping("/cajas/empresas/{idEmpresa}/estado-ultima-caja")
+  @GetMapping("/cajas/empresas/{idEmpresa}/ultima-caja-abierta")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public boolean getEstadoUltimaCaja(@PathVariable long idEmpresa) {
     return cajaService.isUltimaCajaAbierta(idEmpresa);
