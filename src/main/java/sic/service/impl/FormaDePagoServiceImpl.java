@@ -19,7 +19,7 @@ import sic.repository.FormaDePagoRepository;
 public class FormaDePagoServiceImpl implements IFormaDePagoService {
 
     private final FormaDePagoRepository formaDePagoRepository;
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     public FormaDePagoServiceImpl(FormaDePagoRepository formaDePagoRepository) {
@@ -33,12 +33,9 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
 
     @Override
     public FormaDePago getFormasDePagoPorId(long idFormaDePago) {
-        FormaDePago formaDePago = formaDePagoRepository.findOne(idFormaDePago);
-        if (formaDePago == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_formaDePago_no_existente"));
-        }
-        return formaDePago;
+        return formaDePagoRepository.findById(idFormaDePago)
+          .orElseThrow(() -> new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
+            .getString("mensaje_formaDePago_no_existente")));
     }
 
     @Override
@@ -93,7 +90,7 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
     public FormaDePago guardar(FormaDePago formaDePago) {
         this.validarOperacion(formaDePago);
         formaDePago = formaDePagoRepository.save(formaDePago);
-        LOGGER.warn("La Forma de Pago " + formaDePago + " se guardó correctamente." );
+        logger.warn("La Forma de Pago " + formaDePago + " se guardó correctamente." );
         return formaDePago;
     }
 

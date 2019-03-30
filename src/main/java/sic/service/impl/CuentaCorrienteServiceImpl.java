@@ -430,7 +430,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     ClassLoader classLoader = CuentaCorrienteServiceImpl.class.getClassLoader();
     InputStream isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/CuentaCorriente.jasper");
-    page = new PageRequest(0, (page.getPageNumber() + 1) * page.getPageSize());
+    page = PageRequest.of(0, (page.getPageNumber() + 1) * page.getPageSize());
     JRBeanCollectionDataSource ds =
         new JRBeanCollectionDataSource(
             this.getRenglonesCuentaCorriente(cuentaCorrienteCliente.getIdCuentaCorriente(), page)

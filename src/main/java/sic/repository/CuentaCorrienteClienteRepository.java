@@ -2,7 +2,7 @@ package sic.repository;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.Cliente;
 import sic.modelo.CuentaCorrienteCliente;
@@ -10,7 +10,7 @@ import sic.modelo.Empresa;
 
 public interface CuentaCorrienteClienteRepository
     extends CuentaCorrienteRepository<CuentaCorrienteCliente>,
-        QueryDslPredicateExecutor<CuentaCorrienteCliente> {
+        QuerydslPredicateExecutor<CuentaCorrienteCliente> {
 
   CuentaCorrienteCliente findByClienteAndEmpresaAndEliminada(
       Cliente cliente, Empresa empresa, boolean eliminada);

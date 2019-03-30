@@ -149,7 +149,7 @@ public class PedidoController {
     Cliente cliente = null;
     if (idCliente != null) cliente = clienteService.getClientePorId(idCliente);
     if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable = new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "fecha"));
+    Pageable pageable = PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "fecha"));
     BusquedaPedidoCriteria criteria =
         BusquedaPedidoCriteria.builder()
             .buscaPorFecha((desde != null) && (hasta != null))

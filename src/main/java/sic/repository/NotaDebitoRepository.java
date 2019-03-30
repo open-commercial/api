@@ -7,9 +7,6 @@ import sic.modelo.*;
 public interface NotaDebitoRepository
     extends NotaRepository<NotaDebito>, NotaDebitoRepositoryCustom {
 
-  @Query("SELECT nd FROM NotaDebito nd WHERE nd.idNota= :idNotaDebito AND nd.eliminada = false")
-  NotaDebito getById(@Param("idNotaDebito") long idNotaDebito);
-
   @Query(
       "SELECT max(nd.nroNota) FROM NotaDebito nd "
           + "WHERE nd.tipoComprobante = :tipoComprobante AND nd.serie = :serie AND nd.empresa.id_Empresa = :idEmpresa "

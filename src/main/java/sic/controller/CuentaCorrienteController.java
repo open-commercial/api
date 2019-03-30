@@ -58,23 +58,23 @@ public class CuentaCorrienteController {
     Pageable pageable;
     if (ordenarPor == null || sentido == null) {
       pageable =
-          new PageRequest(
+          PageRequest.of(
               pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "cliente.nombreFiscal"));
     } else {
       switch (sentido) {
         case "ASC":
           pageable =
-              new PageRequest(
+              PageRequest.of(
                   pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
           break;
         case "DESC":
           pageable =
-              new PageRequest(
+              PageRequest.of(
                   pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
           break;
         default:
           pageable =
-              new PageRequest(
+              PageRequest.of(
                   pagina,
                   TAMANIO_PAGINA_DEFAULT,
                   new Sort(Sort.Direction.ASC, "cliente.nombreFiscal"));
@@ -124,7 +124,7 @@ public class CuentaCorrienteController {
     Pageable pageable;
     if (ordenarPor == null || sentido == null) {
       pageable =
-          new PageRequest(
+          PageRequest.of(
               pagina,
               TAMANIO_PAGINA_DEFAULT,
               new Sort(Sort.Direction.ASC, "proveedor.razonSocial"));
@@ -132,17 +132,17 @@ public class CuentaCorrienteController {
       switch (sentido) {
         case "ASC":
           pageable =
-              new PageRequest(
+              PageRequest.of(
                   pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
           break;
         case "DESC":
           pageable =
-              new PageRequest(
+              PageRequest.of(
                   pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
           break;
         default:
           pageable =
-              new PageRequest(
+              PageRequest.of(
                   pagina,
                   TAMANIO_PAGINA_DEFAULT,
                   new Sort(Sort.Direction.ASC, "proveedor.razonSocial"));
@@ -235,7 +235,7 @@ public class CuentaCorrienteController {
       @PathVariable long idCuentaCorriente,
       @RequestParam(required = false) Integer pagina) {
     if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable = new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT);
+    Pageable pageable = PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT);
     return cuentaCorrienteService.getRenglonesCuentaCorriente(idCuentaCorriente, pageable);
   }
 
@@ -252,7 +252,7 @@ public class CuentaCorrienteController {
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) String formato) {
     if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable = new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT);
+    Pageable pageable = PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT);
     HttpHeaders headers = new HttpHeaders();
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
     switch (formato) {

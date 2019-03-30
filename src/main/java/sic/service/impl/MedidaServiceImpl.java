@@ -20,7 +20,7 @@ import sic.repository.MedidaRepository;
 public class MedidaServiceImpl implements IMedidaService {
 
   private final MedidaRepository medidaRepository;
-  private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
   public MedidaServiceImpl(MedidaRepository medidaRepository) {
@@ -29,12 +29,12 @@ public class MedidaServiceImpl implements IMedidaService {
 
   @Override
   public Medida getMedidaPorId(Long idMedida) {
-    Medida medida = medidaRepository.findById(idMedida);
-    if (medida == null) {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_medida_no_existente"));
-    }
-    return medida;
+    return medidaRepository
+        .findById(idMedida)
+        .orElseThrow(
+            () ->
+                new EntityNotFoundException(
+                    ResourceBundle.getBundle("Mensajes").getString("mensaje_medida_no_existente")));
   }
 
   @Override
@@ -81,7 +81,7 @@ public class MedidaServiceImpl implements IMedidaService {
   public Medida guardar(Medida medida) {
     this.validarOperacion(TipoDeOperacion.ALTA, medida);
     medida = medidaRepository.save(medida);
-    LOGGER.warn("La Medida " + medida + " se guardó correctamente.");
+    logger.warn("La Medida " + medida + " se guardó correctamente.");
     return medida;
   }
 

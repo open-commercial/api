@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.service.IProveedorService;
 import sic.service.BusinessServiceException;
-import sic.service.IUbicacionService;
 import sic.util.Validator;
 import sic.repository.ProveedorRepository;
 import sic.service.ICuentaCorrienteService;
@@ -37,13 +36,14 @@ public class ProveedorServiceImpl implements IProveedorService {
   }
 
   @Override
-  public Proveedor getProveedorPorId(Long idProveedor) {
-    Proveedor proveedor = proveedorRepository.findById(idProveedor);
-    if (proveedor == null) {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_no_existente"));
-    }
-    return proveedor;
+  public Proveedor getProveedorPorId(long idProveedor) {
+    return proveedorRepository
+        .findById(idProveedor)
+        .orElseThrow(
+            () ->
+                new EntityNotFoundException(
+                    ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_proveedor_no_existente")));
   }
 
   @Override

@@ -93,7 +93,7 @@ public class CajaController {
     }
     if (pagina == null || pagina < 0) pagina = 0;
     Pageable pageable =
-        new PageRequest(
+        PageRequest.of(
             pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "fechaApertura"));
     BusquedaCajaCriteria criteria =
         BusquedaCajaCriteria.builder()

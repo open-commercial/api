@@ -37,12 +37,9 @@ public class GastoServiceImpl implements IGastoService {
     
     @Override
     public Gasto getGastoPorId(Long idGasto) {
-        Gasto gasto = gastoRepository.findById(idGasto);
-        if (gasto == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_gasto_no_existente"));
-        }
-        return gasto;
+        return gastoRepository.findById(idGasto)
+          .orElseThrow(() -> new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
+            .getString("mensaje_gasto_no_existente")));
     }
 
     @Override
@@ -72,7 +69,7 @@ public class GastoServiceImpl implements IGastoService {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_gasto_forma_de_pago_vacia"));
         }
-        if (gastoRepository.findOne(gasto.getId_Gasto()) != null) {
+        if (gastoRepository.findById(gasto.getId_Gasto()) != null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_gasto_duplicada"));
         }

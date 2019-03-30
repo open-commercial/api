@@ -10,7 +10,7 @@ import sic.modelo.dto.NuevoRenglonPedidoDTO;
 
 public interface IPedidoService {
 
-  Pedido getPedidoPorId(Long id);
+  Pedido getPedidoPorId(long id);
 
   void actualizar(Pedido pedido, TipoDeEnvio tipoDeEnvio);
 

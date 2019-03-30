@@ -104,17 +104,17 @@ public class ProveedorController {
     if (pagina == null || pagina < 0) pagina = 0;
     Pageable pageable;
     if (ordenarPor == null || sentido == null) {
-      pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "razonSocial"));
+      pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.ASC, "razonSocial"));
     } else {
       switch (sentido) {
         case "ASC":
-          pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenarPor));
+          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenarPor));
           break;
         case "DESC":
-          pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenarPor));
+          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenarPor));
           break;
         default:
-          pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "razonSocial"));
+          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.ASC, "razonSocial"));
           break;
       }
     }

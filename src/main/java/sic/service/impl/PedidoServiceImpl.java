@@ -45,7 +45,6 @@ public class PedidoServiceImpl implements IPedidoService {
   private final IClienteService clienteService;
   private final IProductoService productoService;
   private final ICorreoElectronicoService correoElectronicoService;
-  private final IUbicacionService ubicacionService;
   private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -60,7 +59,6 @@ public class PedidoServiceImpl implements IPedidoService {
       IClienteService clienteService,
       IProductoService productoService,
       ICorreoElectronicoService correoElectronicoService,
-      IUbicacionService ubicacionService,
       ModelMapper modelMapper) {
     this.facturaService = facturaService;
     this.pedidoRepository = pedidoRepository;
@@ -69,7 +67,6 @@ public class PedidoServiceImpl implements IPedidoService {
     this.clienteService = clienteService;
     this.productoService = productoService;
     this.correoElectronicoService = correoElectronicoService;
-    this.ubicacionService = ubicacionService;
     this.modelMapper = modelMapper;
   }
 
@@ -120,12 +117,13 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public Pedido getPedidoPorId(Long idPedido) {
-    Pedido pedido = pedidoRepository.findById(idPedido);
-    if (pedido == null) {
-      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_pedido_no_existente"));
-    }
-    return pedido;
+  public Pedido getPedidoPorId(long idPedido) {
+    return pedidoRepository
+        .findById(idPedido)
+        .orElseThrow(
+            () ->
+                new EntityNotFoundException(
+                    RESOURCE_BUNDLE.getString("mensaje_pedido_no_existente")));
   }
 
   @Override

@@ -10,7 +10,7 @@ import org.springframework.data.domain.Page;
 
 public interface IFacturaService {
 
-  Factura getFacturaPorId(Long idFactura);
+  Factura getFacturaPorId(long idFactura);
 
   List<Factura> getFacturasDelPedido(Long idPedido);
 

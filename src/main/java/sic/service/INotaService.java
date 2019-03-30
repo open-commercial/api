@@ -15,7 +15,7 @@ public interface INotaService {
 
   byte[] getReporteNota(Nota nota);
 
-  Nota getNotaPorId(Long idNota);
+  Nota getNotaPorId(long idNota);
 
   Page<Nota> buscarNotas(BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn);
 
@@ -35,9 +35,9 @@ public interface INotaService {
 
   TipoDeComprobante[] getTiposNota(Empresa empresa);
 
-  List<RenglonNotaCredito> getRenglonesDeNotaCredito(Long idNota);
+  List<RenglonNotaCredito> getRenglonesDeNotaCredito(long idNota);
 
-  List<RenglonNotaDebito> getRenglonesDeNotaDebito(Long idNota);
+  List<RenglonNotaDebito> getRenglonesDeNotaDebito(long idNota);
 
   List<RenglonFactura> getRenglonesFacturaModificadosParaNotaCredito(long idFactura);
 

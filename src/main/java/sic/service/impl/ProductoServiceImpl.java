@@ -234,11 +234,8 @@ public class ProductoServiceImpl implements IProductoService {
     TipoDeComprobante tipoDeComprobante) {
     idsYCantidades.forEach(
       (idProducto, cantidad) -> {
-        Producto producto = productoRepository.findById(idProducto);
-        if (producto == null) {
-          logger.warn("Se intenta actualizar el stock de un producto eliminado.");
-        }
-        if (producto != null && !producto.isIlimitado()) {
+        Optional<Producto> producto = productoRepository.findById(idProducto);
+        if (producto.isPresent() && !producto.get().isIlimitado()) {
           List<TipoDeComprobante> tiposDeFactura =
             Arrays.asList(
               TipoDeComprobante.FACTURA_A,
@@ -258,25 +255,27 @@ public class ProductoServiceImpl implements IProductoService {
           switch (movimiento) {
             case VENTA:
               if (tiposDeFactura.contains(tipoDeComprobante)) {
-                this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(operacion, producto, cantidad);
+                this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(operacion, producto.get(), cantidad);
               }
               if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
-                this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(operacion, producto, cantidad);
+                this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(operacion, producto.get(), cantidad);
               }
               break;
             case COMPRA:
               if (tiposDeFactura.contains(tipoDeComprobante)) {
-                this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(operacion, producto, cantidad);
+                this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(operacion, producto.get(), cantidad);
               }
               if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
-                this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(operacion, producto, cantidad);
+                this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(operacion, producto.get(), cantidad);
               }
               break;
             default:
               throw new BusinessServiceException(
                 RESOURCE_BUNDLE.getString("mensaje_movimiento_no_valido"));
           }
-          productoRepository.save(producto);
+          productoRepository.save(producto.get());
+        } else {
+          logger.warn("Se intenta actualizar el stock de un producto eliminado.");
         }
       });
   }
@@ -319,7 +318,7 @@ public class ProductoServiceImpl implements IProductoService {
       }
       productos.add(producto);
     }
-    productoRepository.save(productos);
+    productoRepository.saveAll(productos);
   }
 
   @Override
@@ -402,7 +401,7 @@ public class ProductoServiceImpl implements IProductoService {
       }
       this.validarOperacion(TipoDeOperacion.ACTUALIZACION, p);
     }
-    productoRepository.save(productos);
+    productoRepository.saveAll(productos);
     logger.warn("Los Productos {} se modificaron correctamente.", productos);
     return productos;
   }
@@ -427,16 +426,17 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public Producto getProductoPorId(long idProducto) {
-    Producto producto = productoRepository.findById(idProducto);
-    if (producto == null) {
-      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_producto_no_existente"));
-    }
-    if (producto.getCantidad().compareTo(BigDecimal.ZERO) > 0) {
-      producto.setHayStock(true);
-      return producto;
+    Optional<Producto> producto = productoRepository.findById(idProducto);
+    if (producto.isPresent()) {
+      if (producto.get().getCantidad().compareTo(BigDecimal.ZERO) > 0) {
+        producto.get().setHayStock(true);
+        return producto.get();
+      } else {
+        producto.get().setHayStock(false);
+        return producto.get();
+      }
     } else {
-      producto.setHayStock(false);
-      return producto;
+      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_producto_no_existente"));
     }
   }
 

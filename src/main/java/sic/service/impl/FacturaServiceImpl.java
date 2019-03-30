@@ -11,14 +11,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
@@ -36,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 import sic.service.*;
 import sic.util.CalculosComprobante;
 import sic.util.FormatterFechaHora;
-import sic.util.Validator;
 import sic.repository.FacturaVentaRepository;
 import sic.repository.FacturaCompraRepository;
 import sic.repository.FacturaRepository;
@@ -94,15 +86,16 @@ public class FacturaServiceImpl implements IFacturaService {
     this.clienteService = clienteService;
   }
 
-    @Override
-    public Factura getFacturaPorId(Long idFactura) {
-        Factura factura = facturaRepository.findById(idFactura);
-        if (factura == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_eliminada"));
-        }
-        return factura;
+  @Override
+  public Factura getFacturaPorId(long idFactura) {
+    Optional<Factura> factura = facturaRepository.findById(idFactura);
+    if (factura.isPresent()) {
+      return factura.get();
+    } else {
+      throw new EntityNotFoundException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_factura_eliminada"));
     }
+  }
 
   @Override
   public List<Factura> getFacturasDelPedido(Long idPedido) {
@@ -201,7 +194,8 @@ public class FacturaServiceImpl implements IFacturaService {
 
     @Override
     public RenglonFactura getRenglonFactura(Long idRenglonFactura) {
-        return renglonFacturaRepository.findOne(idRenglonFactura);
+        return renglonFacturaRepository.findById(idRenglonFactura)
+          .orElse(null);
     }
 
     @Override

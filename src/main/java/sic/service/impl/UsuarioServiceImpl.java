@@ -66,11 +66,12 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public Usuario getUsuarioPorId(Long idUsuario) {
-    Usuario usuario = usuarioRepository.findById(idUsuario);
-    if (usuario == null) {
-      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_usuario_no_existente"));
-    }
-    return usuario;
+    return usuarioRepository
+        .findById(idUsuario)
+        .orElseThrow(
+            () ->
+                new EntityNotFoundException(
+                    RESOURCE_BUNDLE.getString("mensaje_usuario_no_existente")));
   }
 
   @Override
@@ -239,7 +240,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public Page<Usuario> getUsuariosPorRol(Rol rol) {
-    Pageable pageable = new PageRequest(0, Integer.MAX_VALUE);
+    Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
     return usuarioRepository.findAllByRolesContainsAndEliminado(rol, false, pageable);
   }
 

@@ -29,11 +29,11 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
 
   @Override
   public ConfiguracionDelSistema getConfiguracionDelSistemaPorId(long idConfiguracionDelSistema) {
-    ConfiguracionDelSistema cds = configuracionRepository.findOne(idConfiguracionDelSistema);
-    if (cds == null) {
-      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_cds_no_existente"));
-    }
-    return cds;
+    return configuracionRepository
+        .findById(idConfiguracionDelSistema)
+        .orElseThrow(
+            () ->
+                new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_cds_no_existente")));
   }
 
   @Override

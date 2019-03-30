@@ -212,17 +212,17 @@ public class ProductoController {
     String ordenDefault = "descripcion";
     Pageable pageable;
     if (ordenarPor == null || sentido == null) {
-      pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenDefault));
+      pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenDefault));
     } else {
       switch (sentido) {
         case "ASC":
-          pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenarPor));
+          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenarPor));
           break;
         case "DESC":
-          pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenarPor));
+          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenarPor));
           break;
         default:
-          pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenDefault));
+          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenDefault));
           break;
       }
     }

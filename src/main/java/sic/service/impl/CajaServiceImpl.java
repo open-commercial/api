@@ -147,7 +147,7 @@ public class CajaServiceImpl implements ICajaService {
 
   @Override
   public Caja getUltimaCaja(long idEmpresa) {
-    Pageable pageable = new PageRequest(0, 1);
+    Pageable pageable = PageRequest.of(0, 1);
     List<Caja> topCaja =
         cajaRepository
             .findTopByEmpresaAndEliminadaOrderByIdCajaDesc(idEmpresa, pageable)
@@ -157,11 +157,12 @@ public class CajaServiceImpl implements ICajaService {
 
   @Override
   public Caja getCajaPorId(Long idCaja) {
-    Caja caja = cajaRepository.findById(idCaja);
-    if (caja == null) {
-      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_caja_no_existente"));
-    }
-    return caja;
+    return cajaRepository
+        .findById(idCaja)
+        .orElseThrow(
+            () ->
+                new EntityNotFoundException(
+                    RESOURCE_BUNDLE.getString("mensaje_caja_no_existente")));
   }
 
   @Override
@@ -174,7 +175,7 @@ public class CajaServiceImpl implements ICajaService {
       pageSize = criteria.getPageable().getPageSize();
       sorting = criteria.getPageable().getSort();
     }
-    Pageable pageable = new PageRequest(pageNumber, pageSize, sorting);
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, sorting);
     return cajaRepository.findAll(getBuilder(criteria), pageable);
   }
 

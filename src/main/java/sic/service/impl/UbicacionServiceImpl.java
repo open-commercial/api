@@ -15,7 +15,6 @@ import sic.service.*;
 import sic.util.Validator;
 
 import javax.persistence.EntityNotFoundException;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -53,7 +52,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
   @Override
   @Transactional
   public Ubicacion getUbicacionPorId(long idUbicacion) {
-    return ubicacionRepository.findById(idUbicacion);
+    return ubicacionRepository.findById(idUbicacion).orElse(null);
   }
 
   @Override
@@ -155,12 +154,12 @@ public class UbicacionServiceImpl implements IUbicacionService {
 
   @Override
   public Localidad getLocalidadPorId(Long idLocalidad) {
-    Localidad localidad = localidadRepository.findOne(idLocalidad);
-    if (localidad == null) {
-      throw new EntityNotFoundException(
-        RESOURCE_BUNDLE.getString("mensaje_localidad_no_existente"));
-    }
-    return localidad;
+    return localidadRepository
+        .findById(idLocalidad)
+        .orElseThrow(
+            () ->
+                new EntityNotFoundException(
+                    RESOURCE_BUNDLE.getString("mensaje_localidad_no_existente")));
   }
 
   @Override
@@ -175,12 +174,13 @@ public class UbicacionServiceImpl implements IUbicacionService {
 
   @Override
   public Provincia getProvinciaPorId(Long idProvincia) {
-    Provincia provincia = provinciaRepository.findOne(idProvincia);
-    if (provincia == null) {
-      throw new EntityNotFoundException(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_provincia_no_existente"));
-    }
-    return provincia;
+    return provinciaRepository
+        .findById(idProvincia)
+        .orElseThrow(
+            () ->
+                new EntityNotFoundException(
+                    ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_provincia_no_existente")));
   }
 
   @Override

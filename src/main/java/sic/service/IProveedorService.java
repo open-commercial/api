@@ -9,7 +9,7 @@ import sic.modelo.Proveedor;
 
 public interface IProveedorService {
 
-  Proveedor getProveedorPorId(Long id_Proveedor);
+  Proveedor getProveedorPorId(long id_Proveedor);
 
   void actualizar(Proveedor proveedor);
 

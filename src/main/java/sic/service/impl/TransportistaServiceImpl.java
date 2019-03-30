@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.service.ITransportistaService;
 import sic.service.BusinessServiceException;
-import sic.service.IUbicacionService;
 import sic.util.Validator;
 import sic.repository.TransportistaRepository;
 
@@ -33,12 +32,13 @@ public class TransportistaServiceImpl implements ITransportistaService {
 
   @Override
   public Transportista getTransportistaPorId(long idTransportista) {
-    Transportista transportista = transportistaRepository.findOne(idTransportista);
-    if (transportista == null) {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_transportista_no_existente"));
-    }
-    return transportista;
+    return transportistaRepository
+        .findById(idTransportista)
+        .orElseThrow(
+            () ->
+                new EntityNotFoundException(
+                    ResourceBundle.getBundle("Mensajes")
+                        .getString("mensaje_transportista_no_existente")));
   }
 
   @Override
