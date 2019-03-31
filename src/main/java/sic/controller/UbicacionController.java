@@ -191,15 +191,10 @@ public class UbicacionController {
       throw new BusinessServiceException(
         ResourceBundle.getBundle("Mensajes").getString("mensaje_localidad_cambio_nombre"));
     }
-    if (localidadPorActualizar.getCodigoPostal() != null
-      && !localidadPorActualizar
-      .getCodigoPostal()
-      .equals(localidadPersistida.getCodigoPostal())) {
-      throw new BusinessServiceException(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_localidad_cambio_codigo_postal"));
+    if (localidadPorActualizar.getCodigoPostal() == null) {
+      localidadPorActualizar.setCodigoPostal(localidadPersistida.getCodigoPostal());
     }
     localidadPorActualizar.setNombre(localidadPersistida.getNombre());
-    localidadPorActualizar.setCodigoPostal(localidadPersistida.getCodigoPostal());
     localidadPorActualizar.setProvincia(localidadPersistida.getProvincia());
     if (ubicacionService.getLocalidadPorId(localidadPorActualizar.getIdLocalidad()) != null) {
       ubicacionService.actualizarLocalidad(localidadPorActualizar);

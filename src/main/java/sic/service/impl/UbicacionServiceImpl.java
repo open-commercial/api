@@ -169,6 +169,11 @@ public class UbicacionServiceImpl implements IUbicacionService {
   }
 
   @Override
+  public Localidad getLocalidadPorCodigoPostal(String codigoPostal) {
+    return  localidadRepository.findByCodigoPostal(codigoPostal);
+  }
+
+  @Override
   public List<Localidad> getLocalidadesDeLaProvincia(Provincia provincia) {
     return localidadRepository.findAllByAndProvinciaOrderByNombreAsc(provincia);
   }
@@ -181,11 +186,6 @@ public class UbicacionServiceImpl implements IUbicacionService {
         ResourceBundle.getBundle("Mensajes").getString("mensaje_provincia_no_existente"));
     }
     return provincia;
-  }
-
-  @Override
-  public Provincia getProvinciaPorNombre(String nombre) {
-    return provinciaRepository.findByNombreOrderByNombreAsc(nombre);
   }
 
   @Override
@@ -207,10 +207,6 @@ public class UbicacionServiceImpl implements IUbicacionService {
       throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
         .getString("mensaje_localidad_vacio_nombre"));
     }
-    if (Validator.esVacio(localidad.getCodigoPostal())) {
-      throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-        .getString("mensaje_localidad_codigo_postal_vacio"));
-    }
     if (localidad.getProvincia() == null) {
       throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
         .getString("mensaje_localidad_provincia_vacio"));
@@ -227,6 +223,12 @@ public class UbicacionServiceImpl implements IUbicacionService {
         throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
           .getString("mensaje_localidad_duplicado_nombre"));
       }
+    }
+    //Codigo Postal
+    localidadDuplicada = this.getLocalidadPorCodigoPostal(localidad.getCodigoPostal());
+    if (operacion.equals(TipoDeOperacion.ALTA) && localidadDuplicada != null) {
+      throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
+        .getString("mensaje_localidad_duplicado_codigo_postal"));
     }
   }
 

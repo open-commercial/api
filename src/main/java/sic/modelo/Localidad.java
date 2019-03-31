@@ -35,8 +35,6 @@ public class Localidad implements Serializable {
   @Column(nullable = false)
   private String nombre;
 
-  @Column(nullable = false)
-  @NotBlank(message = "{mensaje_ubicacion_codigo_postal_vacio}")
   private String codigoPostal;
 
   @ManyToOne

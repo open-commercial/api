@@ -14,6 +14,8 @@ public interface LocalidadRepository extends PagingAndSortingRepository<Localida
       Localidad findById(@Param("idLocalidad") long idLocalidad);
       
       Localidad findByNombreAndProvinciaOrderByNombreAsc(String nombre, Provincia provincia);
+
+      Localidad findByCodigoPostal(String codigoPostal);
       
       List<Localidad> findAllByAndProvinciaOrderByNombreAsc(Provincia provincia);
     
