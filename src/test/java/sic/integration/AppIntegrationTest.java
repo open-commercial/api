@@ -3184,10 +3184,14 @@ class AppIntegrationTest {
         .renglones(renglonesPedido)
         .subTotal(importe)
         .total(total)
+        .idEmpresa(1L)
+        .idUsuario(2L)
+        .idCliente(1L)
+        .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
         .build();
     PedidoDTO pedidoRecuperado =
       restTemplate.postForObject(
-        apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=2&tipoDeEnvio=USAR_UBICACION_FACTURACION",
+        apiPrefix + "/pedidos",
         nuevoPedidoDTO,
         PedidoDTO.class);
     assertEquals(nuevoPedidoDTO.getTotal(), pedidoRecuperado.getTotalEstimado());
@@ -3235,10 +3239,14 @@ class AppIntegrationTest {
         .renglones(renglonesPedido)
         .subTotal(importe)
         .total(total)
+        .idEmpresa(1L)
+        .idUsuario(2L)
+        .idCliente(1L)
+        .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
         .build();
     PedidoDTO pedidoRecuperado =
       restTemplate.postForObject(
-        apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=2&tipoDeEnvio=USAR_UBICACION_FACTURACION",
+        apiPrefix + "/pedidos",
         nuevoPedidoDTO,
         PedidoDTO.class);
     ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", ClienteDTO.class);
@@ -3285,10 +3293,14 @@ class AppIntegrationTest {
         .renglones(renglonesPedido)
         .subTotal(importe)
         .total(total)
+        .idEmpresa(1L)
+        .idUsuario(2L)
+        .idCliente(1L)
+        .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_ENVIO)
         .build();
     PedidoDTO pedidoRecuperado =
       restTemplate.postForObject(
-        apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=2&tipoDeEnvio=USAR_UBICACION_ENVIO",
+        apiPrefix + "/pedidos",
         nuevoPedidoDTO,
         PedidoDTO.class);
     ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", ClienteDTO.class);
@@ -3298,6 +3310,13 @@ class AppIntegrationTest {
   @Test
   void shouldCrearPedidoConUbicacionSucursal() {
     this.crearProductos();
+    this.shouldCrearEmpresaResponsableInscripto();
+    UbicacionDTO ubicacionDTO = UbicacionDTO.builder()
+      .idLocalidad(1L)
+      .calle("Rio Piacentin")
+      .numero(345)
+      .build();
+    restTemplate.postForObject(apiPrefix + "/ubicaciones/empresas/2", ubicacionDTO, UbicacionDTO.class);
     List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
@@ -3335,13 +3354,18 @@ class AppIntegrationTest {
         .renglones(renglonesPedido)
         .subTotal(importe)
         .total(total)
+        .idEmpresa(1L)
+        .idUsuario(2L)
+        .idCliente(1L)
+        .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
+        .idSucursal(2L)
         .build();
     PedidoDTO pedidoRecuperado =
       restTemplate.postForObject(
-        apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=2&tipoDeEnvio=RETIRO_EN_SUCURSAL",
+        apiPrefix + "/pedidos",
         nuevoPedidoDTO,
         PedidoDTO.class);
-    EmpresaDTO empresaDTO = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    EmpresaDTO empresaDTO = restTemplate.getForObject(apiPrefix + "/empresas/2", EmpresaDTO.class);
     assertEquals(empresaDTO.getDetalleUbicacion(), pedidoRecuperado.getDetalleEnvio());
   }
 
@@ -3402,10 +3426,14 @@ class AppIntegrationTest {
         .renglones(renglonesPedido)
         .subTotal(importe)
         .total(total)
+        .idEmpresa(1L)
+        .idUsuario(1L)
+        .idCliente(1L)
+        .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
         .build();
     PedidoDTO pedidoRecuperado =
       restTemplate.postForObject(
-        apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=1&tipoDeEnvio=USAR_UBICACION_FACTURACION",
+        apiPrefix + "/pedidos",
         nuevoPedidoDTO,
         PedidoDTO.class);
     assertEquals(nuevoPedidoDTO.getTotal(), pedidoRecuperado.getTotalEstimado());

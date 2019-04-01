@@ -391,8 +391,7 @@ public class FacturaServiceImpl implements IFacturaService {
         }
       }
       List<Factura> facturasParaRelacionarAlPedido = new ArrayList<>(facturasProcesadas);
-      pedido.setFacturas(facturasParaRelacionarAlPedido);
-      pedidoService.actualizar(pedido, pedido.getTipoDeEnvio());
+      pedidoService.actualizarFacturasDelPedido(pedido,facturasParaRelacionarAlPedido);
       facturasProcesadas.forEach(f -> logger.warn("La Factura {} se guardó correctamente.", f));
       pedidoService.actualizarEstadoPedido(pedido);
     } else {

@@ -73,16 +73,18 @@ public class PedidoController {
                          @RequestParam Long idUsuario,
                          @RequestParam Long idCliente,
                          @RequestParam TipoDeEnvio tipoDeEnvio,
+                         @RequestParam(required = false) Long idSucursal,
                          @RequestBody PedidoDTO pedidoDTO) {
     Pedido pedido = modelMapper.map(pedidoDTO, Pedido.class);
     pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
     pedido.setCliente(clienteService.getClientePorId(idCliente));
+    pedido.setDetalleEnvio(pedidoService.getPedidoPorId(pedidoDTO.getId_Pedido()).getDetalleEnvio());
     //Las facturas se recuperan para evitar cambios no deseados.
     pedido.setFacturas(pedidoService.getFacturasDelPedido(pedido.getId_Pedido()));
     //Si los renglones vienen null, recupera los renglones del pedido para actualizarLocalidad
     //caso contrario, ultiliza los renglones del pedido.
-    pedidoService.actualizar(pedido, tipoDeEnvio);
+    pedidoService.actualizar(pedido, tipoDeEnvio, idSucursal);
     }
 
   @PostMapping("/pedidos")
@@ -94,10 +96,6 @@ public class PedidoController {
     Rol.COMPRADOR
   })
   public Pedido guardar(
-    @RequestParam Long idEmpresa,
-    @RequestParam Long idUsuario,
-    @RequestParam Long idCliente,
-    @RequestParam TipoDeEnvio tipoDeEnvio,
     @RequestBody NuevoPedidoDTO nuevoPedidoDTO) {
     Pedido pedido = new Pedido();
     pedido.setFechaVencimiento(nuevoPedidoDTO.getFechaVencimiento());
@@ -112,12 +110,12 @@ public class PedidoController {
     pedido.setDescuentoNeto(nuevoPedidoDTO.getDescuentoNeto());
     pedido.setTotalEstimado(nuevoPedidoDTO.getTotal());
     pedido.setTotalActual(nuevoPedidoDTO.getTotal());
-    Empresa empresaParaPedido = empresaService.getEmpresaPorId(idEmpresa);
+    Empresa empresaParaPedido = empresaService.getEmpresaPorId(nuevoPedidoDTO.getIdEmpresa());
     pedido.setEmpresa(empresaParaPedido);
-    pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    Cliente cliente = clienteService.getClientePorId(idCliente);
+    pedido.setUsuario(usuarioService.getUsuarioPorId(nuevoPedidoDTO.getIdUsuario()));
+    Cliente cliente = clienteService.getClientePorId(nuevoPedidoDTO.getIdCliente());
     pedido.setCliente(cliente);
-    return pedidoService.guardar(pedido, tipoDeEnvio);
+    return pedidoService.guardar(pedido, nuevoPedidoDTO.getTipoDeEnvio(), nuevoPedidoDTO.getIdSucursal());
   }
 
   @GetMapping("/pedidos/busqueda/criteria")
