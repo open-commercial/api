@@ -323,44 +323,7 @@ public class ProductoController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizarMultiplesProductos(
     @RequestBody ProductosParaActualizarDTO productosParaActualizarDTO) {
-    boolean actualizaPrecios = false;
-    if (productosParaActualizarDTO.getGananciaNeto() != null
-        && productosParaActualizarDTO.getGananciaPorcentaje() != null
-        && productosParaActualizarDTO.getIvaNeto() != null
-        && productosParaActualizarDTO.getIvaPorcentaje() != null
-        && productosParaActualizarDTO.getPrecioCosto() != null
-        && productosParaActualizarDTO.getPrecioLista() != null
-        && productosParaActualizarDTO.getPrecioVentaPublico() != null) {
-      actualizaPrecios = true;
-    }
-    boolean aplicaDescuentoRecargoPorcentaje = false;
-    if (productosParaActualizarDTO.getDescuentoRecargoPorcentaje() != null)
-      aplicaDescuentoRecargoPorcentaje = true;
-    if (aplicaDescuentoRecargoPorcentaje && actualizaPrecios) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_modificar_producto_no_permitido"));
-    }
-    productoService.actualizarMultiples(
-        productosParaActualizarDTO.getIdProducto(),
-        actualizaPrecios,
-        aplicaDescuentoRecargoPorcentaje,
-        productosParaActualizarDTO.getDescuentoRecargoPorcentaje(),
-        productosParaActualizarDTO.getGananciaNeto(),
-        productosParaActualizarDTO.getGananciaPorcentaje(),
-        productosParaActualizarDTO.getIvaNeto(),
-        productosParaActualizarDTO.getIvaPorcentaje(),
-        productosParaActualizarDTO.getPrecioCosto(),
-        productosParaActualizarDTO.getPrecioLista(),
-        productosParaActualizarDTO.getPrecioVentaPublico(),
-        (productosParaActualizarDTO.getIdMedida() != null),
-        productosParaActualizarDTO.getIdMedida(),
-        (productosParaActualizarDTO.getIdRubro() != null),
-        productosParaActualizarDTO.getIdRubro(),
-        (productosParaActualizarDTO.getIdProveedor() != null),
-        productosParaActualizarDTO.getIdProveedor(),
-        (productosParaActualizarDTO.getPublico() != null),
-        productosParaActualizarDTO.getPublico());
+    productoService.actualizarMultiples(productosParaActualizarDTO);
   }
 
   @GetMapping("/productos/valor-stock/criteria")
