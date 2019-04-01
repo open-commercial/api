@@ -311,7 +311,6 @@ public class ProductoController {
     producto.setPrecioLista(nuevoProductoDTO.getPrecioLista());
     producto.setIlimitado(nuevoProductoDTO.isIlimitado());
     producto.setPublico(nuevoProductoDTO.isPublico());
-    producto.setDestacado(nuevoProductoDTO.isDestacado());
     producto.setEstante(nuevoProductoDTO.getEstante());
     producto.setEstanteria(nuevoProductoDTO.getEstanteria());
     producto.setNota(nuevoProductoDTO.getNota());

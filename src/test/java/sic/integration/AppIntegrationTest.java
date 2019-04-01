@@ -39,6 +39,7 @@ import java.nio.charset.Charset;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -729,7 +730,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  public void shouldCrearFormaDePagoChequeQueAfectaCaja() {
+  void shouldCrearFormaDePagoChequeQueAfectaCaja() {
     FormaDePagoDTO formaDePagoDTO =
       FormaDePagoDTO.builder().nombre("Cheque").afectaCaja(true).build();
     FormaDePagoDTO formaDePagoRecuperada =
@@ -2601,6 +2602,45 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldNotCrearProductoDestacado() {
+    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    Rubro rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", Rubro.class);
+    ProveedorDTO proveedor =
+        restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
+    Medida medida = restTemplate.getForObject(apiPrefix + "/medidas/1", Medida.class);
+    NuevoProductoDTO productoUno =
+        NuevoProductoDTO.builder()
+            .codigo(RandomStringUtils.random(10, false, true))
+            .descripcion(RandomStringUtils.random(10, true, false))
+            .cantidad(BigDecimal.TEN)
+            .bulto(BigDecimal.ONE)
+            .precioCosto(CIEN)
+            .gananciaPorcentaje(new BigDecimal("900"))
+            .gananciaNeto(new BigDecimal("900"))
+            .precioVentaPublico(new BigDecimal("1000"))
+            .ivaPorcentaje(new BigDecimal("21.0"))
+            .ivaNeto(new BigDecimal("210"))
+            .precioLista(new BigDecimal("1210"))
+            .nota("Producto Test")
+            .destacado(true)
+            .build();
+    ProductoDTO productoRecuperado =
+        restTemplate.postForObject(
+            apiPrefix
+                + "/productos?idMedida="
+                + medida.getId_Medida()
+                + "&idRubro="
+                + rubro.getId_Rubro()
+                + "&idProveedor="
+                + proveedor.getId_Proveedor()
+                + "&idEmpresa="
+                + empresa.getId_Empresa(),
+            productoUno,
+            ProductoDTO.class);
+    assertFalse(productoRecuperado.isDestacado());
+  }
+
+  @Test
   void shouldModificarProducto() {
     this.shouldCrearProductoConIva21();
     ProductoDTO productoAModificar =
@@ -2612,6 +2652,40 @@ class AppIntegrationTest {
     ProductoDTO productoModificado =
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     assertEquals(productoAModificar, productoModificado);
+  }
+
+  @Test
+  void shouldNotModificarProductoComoDestacadoSiEsPrivado() {
+    this.shouldCrearProductoConIva21();
+    ProductoDTO productoAModificar =
+        restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    productoAModificar.setDescripcion("PRODUCTO MODIFICADO.");
+    productoAModificar.setCantidad(new BigDecimal("52"));
+    productoAModificar.setDestacado(true);
+    productoAModificar.setUrlImagen(null);
+    productoAModificar.setCodigo("666");
+    try {
+      restTemplate.put(apiPrefix + "/productos?idMedida=2", productoAModificar);
+    } catch (RestClientResponseException ex) {
+      assertTrue(ex.getMessage().startsWith("Un producto no puede ser destacado si es privado o no contiene imagen."));
+    }
+  }
+
+  @Test
+  void shouldNotModificarProductoComoDestacadoSiNoTieneImagen() {
+    this.shouldCrearProductoConIva21();
+    ProductoDTO productoAModificar =
+      restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    productoAModificar.setDescripcion("PRODUCTO MODIFICADO.");
+    productoAModificar.setCantidad(new BigDecimal("52"));
+    productoAModificar.setPublico(false);
+    productoAModificar.setDestacado(true);
+    productoAModificar.setCodigo("666");
+    try {
+      restTemplate.put(apiPrefix + "/productos?idMedida=2", productoAModificar);
+    } catch (RestClientResponseException ex) {
+      assertTrue(ex.getMessage().startsWith("Un producto no puede ser destacado si es privado o no contiene imagen."));
+    }
   }
 
   @Test

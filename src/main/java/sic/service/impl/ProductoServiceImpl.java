@@ -68,12 +68,16 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
-    if (operacion == TipoDeOperacion.ALTA && (!producto.isPublico() && producto.isDestacado())) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_producto_no_publico_destacado"));
-    }
-    if (operacion == TipoDeOperacion.ACTUALIZACION && !producto.isPublico()) {
-      producto.setDestacado(false);
+    if (operacion == TipoDeOperacion.ACTUALIZACION) {
+      if (producto.isDestacado()
+          && (producto.isPublico()
+              || (producto.getUrlImagen() == null || producto.getUrlImagen().isEmpty()))) {
+        throw new BusinessServiceException(
+            RESOURCE_BUNDLE.getString("mensaje_producto_destacado_privado_o_sin_imagen"));
+      }
+      if (!producto.isPublico()) {
+        producto.setDestacado(false);
+      }
     }
     // Duplicados
     // Codigo
@@ -212,6 +216,7 @@ public class ProductoServiceImpl implements IProductoService {
     producto.setFechaAlta(new Date());
     producto.setFechaUltimaModificacion(new Date());
     producto.setEliminado(false);
+    producto.setDestacado(false);
     this.validarOperacion(TipoDeOperacion.ALTA, producto);
     producto = productoRepository.save(producto);
     logger.warn("El Producto {} se guardó correctamente.", producto);
