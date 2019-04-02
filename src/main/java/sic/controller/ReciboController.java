@@ -272,7 +272,7 @@ public class ReciboController {
                                        @RequestBody Recibo recibo) {
         recibo.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
         recibo.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-        recibo.setCliente(clienteService.getClientePorId(idCliente));
+        recibo.setCliente(clienteService.getClienteNoEliminadoPorId(idCliente));
         recibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(idFormaDePago));
         return reciboService.guardar(recibo);
     }

@@ -179,7 +179,7 @@ public class CuentaCorrienteController {
   })
   public CuentaCorrienteCliente getCuentaCorrientePorCliente(@PathVariable Long idCliente) {
     return cuentaCorrienteService.getCuentaCorrientePorCliente(
-        clienteService.getClientePorId(idCliente));
+        clienteService.getClienteNoEliminadoPorId(idCliente));
   }
 
   @GetMapping("/cuentas-corriente/proveedores/{idProveedor}")
@@ -205,7 +205,7 @@ public class CuentaCorrienteController {
   })
   public BigDecimal getSaldoCuentaCorrienteCliente(@PathVariable long idCliente) {
     return cuentaCorrienteService
-        .getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente))
+        .getCuentaCorrientePorCliente(clienteService.getClienteNoEliminadoPorId(idCliente))
         .getSaldo();
   }
 
@@ -262,7 +262,7 @@ public class CuentaCorrienteController {
         byte[] reporteXls =
             cuentaCorrienteService.getReporteCuentaCorrienteCliente(
                 cuentaCorrienteService.getCuentaCorrientePorCliente(
-                    clienteService.getClientePorId(idCliente)),
+                    clienteService.getClienteNoEliminadoPorId(idCliente)),
                 pageable,
                 formato);
         headers.setContentLength(reporteXls.length);
@@ -273,7 +273,7 @@ public class CuentaCorrienteController {
         byte[] reportePDF =
             cuentaCorrienteService.getReporteCuentaCorrienteCliente(
                 cuentaCorrienteService.getCuentaCorrientePorCliente(
-                    clienteService.getClientePorId(idCliente)),
+                    clienteService.getClienteNoEliminadoPorId(idCliente)),
                 pageable,
                 formato);
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);

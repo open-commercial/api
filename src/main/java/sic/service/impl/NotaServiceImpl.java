@@ -348,7 +348,7 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public TipoDeComprobante[] getTipoNotaCliente(Long idCliente, Long idEmpresa) {
     Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
-    Cliente cliente = clienteService.getClientePorId(idCliente);
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())
         && CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
       TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[6];

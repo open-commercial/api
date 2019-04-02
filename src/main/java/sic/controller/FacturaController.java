@@ -72,7 +72,7 @@ public class FacturaController {
       @RequestParam(required = false) Long idPedido) {
     Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
     fv.setEmpresa(empresa);
-    Cliente cliente = clienteService.getClientePorId(idCliente);
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     if (cliente.getUbicacionFacturacion() == null
         && (fv.getTipoComprobante() == TipoDeComprobante.FACTURA_A
             || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_B
@@ -299,7 +299,7 @@ public class FacturaController {
         || rolesDeUsuario.contains(Rol.ENCARGADO)
         || rolesDeUsuario.contains(Rol.VENDEDOR)) {
       return facturaService.getTipoFacturaVenta(
-          empresaService.getEmpresaPorId(idEmpresa), clienteService.getClientePorId(idCliente));
+          empresaService.getEmpresaPorId(idEmpresa), clienteService.getClienteNoEliminadoPorId(idCliente));
     } else if (rolesDeUsuario.contains(Rol.VIAJANTE)
             || rolesDeUsuario.contains(Rol.COMPRADOR)) {
       return new TipoDeComprobante[] {TipoDeComprobante.PEDIDO};

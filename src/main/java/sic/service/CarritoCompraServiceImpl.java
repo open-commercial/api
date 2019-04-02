@@ -51,7 +51,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     BigDecimal subtotal = carritoCompraRepository.calcularSubtotal(idUsuario);
     if (subtotal == null) subtotal = BigDecimal.ZERO;
     carritoCompraDTO.setSubtotal(subtotal);
-    Cliente cliente = clienteService.getClientePorId(idCliente);
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     carritoCompraDTO.setBonificacionPorcentaje(cliente.getBonificacion());
     carritoCompraDTO.setBonificacionNeto(
         subtotal.multiply(cliente.getBonificacion()).divide(CIEN, RoundingMode.HALF_UP));
@@ -65,7 +65,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     Page<ItemCarritoCompra> items =
         carritoCompraRepository.findAllByUsuario(
             usuarioService.getUsuarioPorId(idUsuario), pageable);
-    Cliente cliente = clienteService.getClientePorId(idCliente);
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     BigDecimal bonificacion = cliente.getBonificacion();
     items.forEach(
         i -> {

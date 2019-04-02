@@ -49,7 +49,7 @@ public class ClienteController {
     Rol.COMPRADOR
   })
   public Cliente getCliente(@PathVariable long idCliente) {
-    return clienteService.getClientePorId(idCliente);
+    return clienteService.getClienteNoEliminadoPorId(idCliente);
   }
 
   @GetMapping("/clientes/busqueda/criteria")
@@ -187,7 +187,7 @@ public class ClienteController {
       @RequestHeader("Authorization") String authorizationHeader) {
     Cliente clientePorActualizar = modelMapper.map(clienteDTO, Cliente.class);
     Cliente clientePersistido =
-        clienteService.getClientePorId(clientePorActualizar.getId_Cliente());
+        clienteService.getClienteNoEliminadoPorId(clientePorActualizar.getId_Cliente());
     if (idCredencial != null) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
@@ -239,7 +239,7 @@ public class ClienteController {
   @PutMapping("/clientes/{idCliente}/predeterminado")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void setClientePredeterminado(@PathVariable long idCliente) {
-    clienteService.setClientePredeterminado(clienteService.getClientePorId(idCliente));
+    clienteService.setClientePredeterminado(clienteService.getClienteNoEliminadoPorId(idCliente));
   }
 
   @GetMapping("/clientes/pedidos/{idPedido}")

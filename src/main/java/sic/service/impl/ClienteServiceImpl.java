@@ -5,6 +5,7 @@ import com.querydsl.core.BooleanBuilder;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.Date;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 
@@ -39,13 +40,13 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public Cliente getClientePorId(long idCliente) {
-    return clienteRepository
-        .findById(idCliente)
-        .orElseThrow(
-            () ->
-                new EntityNotFoundException(
-                    RESOURCE_BUNDLE.getString("mensaje_cliente_no_existente")));
+  public Cliente getClienteNoEliminadoPorId(long idCliente) {
+    Optional<Cliente> cliente = clienteRepository.findById(idCliente);
+    if (cliente.isPresent() && !cliente.get().isEliminado()) {
+      return cliente.get();
+    } else {
+      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_cliente_no_existente"));
+    }
   }
 
   @Override
@@ -275,7 +276,7 @@ public class ClienteServiceImpl implements IClienteService {
   @Override
   @Transactional
   public void eliminar(long idCliente) {
-    Cliente cliente = this.getClientePorId(idCliente);
+    Cliente cliente = this.getClienteNoEliminadoPorId(idCliente);
     if (cliente == null) {
       throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_cliente_no_existente"));
     }

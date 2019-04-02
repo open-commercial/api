@@ -76,7 +76,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
     }
     cliente.setUbicacionFacturacion(
       this.guardar(ubicacion));
-    clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
+    clienteService.actualizar(cliente, clienteService.getClienteNoEliminadoPorId(cliente.getId_Cliente()));
     return cliente.getUbicacionFacturacion();
   }
 
@@ -91,7 +91,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
     }
     cliente.setUbicacionEnvio(
       this.guardar(ubicacion));
-    clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
+    clienteService.actualizar(cliente, clienteService.getClienteNoEliminadoPorId(cliente.getId_Cliente()));
     return cliente.getUbicacionEnvio();
   }
 

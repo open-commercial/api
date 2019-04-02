@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,9 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
 import sic.modelo.TipoDeEnvio;
-import sic.modelo.Ubicacion;
 import sic.modelo.dto.CarritoCompraDTO;
-import sic.modelo.dto.UbicacionDTO;
 import sic.service.*;
 
 @RestController
@@ -100,7 +97,7 @@ public class CarritoCompraController {
       @RequestBody(required = false) String observaciones) {
     CarritoCompraDTO carritoCompraDTO = carritoCompraService.getCarritoCompra(idUsuario, idCliente);
     Pedido pedido = new Pedido();
-    pedido.setCliente(clienteService.getClientePorId(idCliente));
+    pedido.setCliente(clienteService.getClienteNoEliminadoPorId(idCliente));
     if (pedido.getCliente().getUbicacionFacturacion() == null) {
       throw new BusinessServiceException(
         ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_facturacion_vacia"));

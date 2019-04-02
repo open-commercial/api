@@ -227,7 +227,7 @@ public class NotaController {
     nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     Factura factura = facturaService.getFacturaPorId(idFactura);
     if (movimiento == Movimiento.VENTA && idCliente != null && factura instanceof FacturaVenta) {
-      nota.setCliente(clienteService.getClientePorId(idCliente));
+      nota.setCliente(clienteService.getClienteNoEliminadoPorId(idCliente));
       nota.setFacturaVenta((FacturaVenta) factura);
     } else if (movimiento == Movimiento.COMPRA
         && idProveedor != null
@@ -257,7 +257,7 @@ public class NotaController {
     NotaDebito nota = modelMapper.map(notaDebitoDTO, NotaDebito.class);
     nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     if (movimiento == Movimiento.VENTA && idCliente != null) {
-      nota.setCliente(clienteService.getClientePorId(idCliente));
+      nota.setCliente(clienteService.getClienteNoEliminadoPorId(idCliente));
     } else if (movimiento == Movimiento.COMPRA && idProveedor != null) {
       nota.setProveedor(proveedorService.getProveedorPorId(idProveedor));
     } else {

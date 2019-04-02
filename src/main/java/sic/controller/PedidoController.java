@@ -77,7 +77,7 @@ public class PedidoController {
     Pedido pedido = modelMapper.map(pedidoDTO, Pedido.class);
     pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    pedido.setCliente(clienteService.getClientePorId(idCliente));
+    pedido.setCliente(clienteService.getClienteNoEliminadoPorId(idCliente));
     //Las facturas se recuperan para evitar cambios no deseados.
     pedido.setFacturas(pedidoService.getFacturasDelPedido(pedido.getId_Pedido()));
     //Si los renglones vienen null, recupera los renglones del pedido para actualizarLocalidad
@@ -115,7 +115,7 @@ public class PedidoController {
     Empresa empresaParaPedido = empresaService.getEmpresaPorId(idEmpresa);
     pedido.setEmpresa(empresaParaPedido);
     pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    Cliente cliente = clienteService.getClientePorId(idCliente);
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     pedido.setCliente(cliente);
     return pedidoService.guardar(pedido, tipoDeEnvio);
   }
@@ -147,7 +147,7 @@ public class PedidoController {
       fechaHasta.setTimeInMillis(hasta);
     }
     Cliente cliente = null;
-    if (idCliente != null) cliente = clienteService.getClientePorId(idCliente);
+    if (idCliente != null) cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     if (pagina == null || pagina < 0) pagina = 0;
     Pageable pageable = PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "fecha"));
     BusquedaPedidoCriteria criteria =

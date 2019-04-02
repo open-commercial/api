@@ -103,7 +103,7 @@ public class UbicacionController {
   })
   public Ubicacion guardarUbicacionDeFacturacion(
     @RequestBody UbicacionDTO ubicacionDTO, @PathVariable Long idCliente) {
-    Cliente cliente = clienteService.getClientePorId(idCliente);
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
     ubicacion.setLocalidad(ubicacionService.getLocalidadPorId(ubicacionDTO.getIdLocalidad()));
     return ubicacionService.guardarUbicacionDeFacturacionCliente(
@@ -121,7 +121,7 @@ public class UbicacionController {
   })
   public Ubicacion guardarUbicacionDeEnvio(
     @RequestBody UbicacionDTO ubicacionDTO, @PathVariable Long idCliente) {
-    Cliente cliente = clienteService.getClientePorId(idCliente);
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
     ubicacion.setLocalidad(ubicacionService.getLocalidadPorId(ubicacionDTO.getIdLocalidad()));
     return ubicacionService.guardarUbicacionDeEnvioCliente(
