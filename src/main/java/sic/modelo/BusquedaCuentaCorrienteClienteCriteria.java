@@ -20,8 +20,6 @@ public class BusquedaCuentaCorrienteClienteCriteria {
   private Long idFiscal;
   private boolean buscaPorViajante;
   private Long idViajante;
-  private boolean buscaPorPais;
-  private Long idPais;
   private boolean buscaPorProvincia;
   private Long idProvincia;
   private boolean buscaPorLocalidad;

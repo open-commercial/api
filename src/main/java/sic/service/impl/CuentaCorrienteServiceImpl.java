@@ -155,18 +155,12 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       builder.and(qCuentaCorrienteCliente.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaPorLocalidad())
       builder.and(
-          qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
+          qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.idLocalidad.eq(
+              criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
       builder.and(
           qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.provincia.idProvincia.eq(
               criteria.getIdProvincia()));
-    if (criteria.isBuscaPorLocalidad())
-      builder.and(
-        qCuentaCorrienteCliente.cliente.ubicacionEnvio.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
-    if (criteria.isBuscaPorProvincia())
-      builder.and(
-        qCuentaCorrienteCliente.cliente.ubicacionEnvio.localidad.provincia.idProvincia.eq(
-          criteria.getIdProvincia()));
     Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
