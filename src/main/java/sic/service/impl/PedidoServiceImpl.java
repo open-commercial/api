@@ -408,14 +408,9 @@ public class PedidoServiceImpl implements IPedidoService {
         throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_empresa_404_logo"), ex);
       }
     }
-    String detalleEnvio = "";
+    String detalleEnvio;
     if (pedido.getTipoDeEnvio() == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
-      detalleEnvio =
-          "Retira en Sucursal: "
-              + pedido.getEmpresa().getNombre()
-              + " ("
-              + pedido.getEnvio()
-              + ")";
+      detalleEnvio = "Retira en Sucursal: " + pedido.getEnvio();
     } else {
       detalleEnvio = pedido.getEnvio();
     }
