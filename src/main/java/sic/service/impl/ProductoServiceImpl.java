@@ -69,13 +69,19 @@ public class ProductoServiceImpl implements IProductoService {
 
   private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
     if (operacion == TipoDeOperacion.ACTUALIZACION) {
-      if (producto.isDestacado()
-          && (producto.isPublico()
-              || (producto.getUrlImagen() == null || producto.getUrlImagen().isEmpty()))) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_producto_destacado_privado_o_sin_imagen"));
-      }
-      if (!producto.isPublico()) {
+      if (producto.isDestacado()) {
+        if (!producto.isPublico()
+            || (producto.getUrlImagen() == null || producto.getUrlImagen().isEmpty())) {
+          throw new BusinessServiceException(
+              RESOURCE_BUNDLE.getString("mensaje_producto_destacado_privado_o_sin_imagen"));
+        }
+        if (productoRepository.getCantidadDeProductosDestacadosPorRubro(
+                producto.getRubro().getId_Rubro())
+            >= 15) {
+          throw new BusinessServiceException(
+              RESOURCE_BUNDLE.getString("mensaje_producto_destacado_cantidad_minima_superada"));
+        }
+      } else {
         producto.setDestacado(false);
       }
     }
@@ -162,6 +168,40 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   public Page<Producto> buscarProductos(BusquedaProductoCriteria criteria) {
     return productoRepository.findAll(this.getBuilder(criteria), criteria.getPageable());
+  }
+
+  @Override
+  public Map<String, List<Producto>> getProductosDestacadosAgrupadosPorRubro(long idEmpresa, Cliente cliente) {
+    Map<String, List<Producto>> mapProductos = new HashMap<>();
+    BusquedaProductoCriteria criteria =
+        BusquedaProductoCriteria.builder()
+            .idEmpresa(idEmpresa)
+            .buscaPorDestacado(true)
+            .destacado(true)
+            .build();
+    if (cliente != null) {
+      rubroService
+          .getRubros(empresaService.getEmpresaPorId(idEmpresa))
+          .forEach(
+              r -> {
+                criteria.setBuscarPorRubro(true);
+                criteria.setIdRubro(r.getId_Rubro());
+                mapProductos.put(
+                    r.getNombre(),
+                    this.getProductosConPrecioBonificado(this.buscarProductos(criteria), cliente)
+                        .getContent());
+              });
+    } else {
+      rubroService
+          .getRubros(empresaService.getEmpresaPorId(idEmpresa))
+          .forEach(
+              r -> {
+                criteria.setBuscarPorRubro(true);
+                criteria.setIdRubro(r.getId_Rubro());
+                mapProductos.put(r.getNombre(), this.buscarProductos(criteria).getContent());
+              });
+    }
+    return mapProductos;
   }
 
   private BooleanBuilder getBuilder(BusquedaProductoCriteria criteria) {

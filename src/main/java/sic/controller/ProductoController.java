@@ -115,6 +115,23 @@ public class ProductoController {
     }
   }
 
+  @JsonView(Views.Public.class)
+  @GetMapping("/public/productos/destacados")
+  public Map<String, List<Producto>> getProductosDestacados(
+      @RequestParam long idEmpresa,
+      @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
+    Cliente cliente = null;
+    if (authorizationHeader != null) {
+      authService.validarToken(authorizationHeader);
+      Claims claims = authService.getClaimsDelToken(authorizationHeader);
+      cliente =
+          clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idEmpresa);
+      return productoService.getProductosDestacadosAgrupadosPorRubro(idEmpresa, cliente);
+    } else {
+      return productoService.getProductosDestacadosAgrupadosPorRubro(idEmpresa, cliente);
+    }
+  }
+
   @GetMapping("/productos/{idProducto}")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
