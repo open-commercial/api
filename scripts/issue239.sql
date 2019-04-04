@@ -11,3 +11,6 @@ SET SQL_SAFE_UPDATES = 1;
 
 ALTER TABLE ubicacion
 Change numero numero int(11) DEFAULT NULL;
+
+ALTER TABLE ubicacion
+Change calle calle varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL;
