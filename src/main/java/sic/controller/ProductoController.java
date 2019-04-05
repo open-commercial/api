@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductoDTO;
 import sic.service.*;
@@ -321,56 +322,8 @@ public class ProductoController {
   @PutMapping("/productos/multiples")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizarMultiplesProductos(
-      @RequestParam long[] idProducto,
-      @RequestParam(required = false) BigDecimal descuentoRecargoPorcentaje,
-      @RequestParam(required = false) Long idMedida,
-      @RequestParam(required = false) Long idRubro,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) BigDecimal gananciaNeto,
-      @RequestParam(required = false) BigDecimal gananciaPorcentaje,
-      @RequestParam(required = false) BigDecimal IVANeto,
-      @RequestParam(required = false) BigDecimal IVAPorcentaje,
-      @RequestParam(required = false) BigDecimal precioCosto,
-      @RequestParam(required = false) BigDecimal precioLista,
-      @RequestParam(required = false) BigDecimal precioVentaPublico,
-      @RequestParam(required = false) Boolean publico) {
-    boolean actualizaPrecios = false;
-    if (gananciaNeto != null
-        && gananciaPorcentaje != null
-        && IVANeto != null
-        && IVAPorcentaje != null
-        && precioCosto != null
-        && precioLista != null
-        && precioVentaPublico != null) {
-      actualizaPrecios = true;
-    }
-    boolean aplicaDescuentoRecargoPorcentaje = false;
-    if (descuentoRecargoPorcentaje != null) aplicaDescuentoRecargoPorcentaje = true;
-    if (aplicaDescuentoRecargoPorcentaje && actualizaPrecios) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_modificar_producto_no_permitido"));
-    }
-    productoService.actualizarMultiples(
-        idProducto,
-        actualizaPrecios,
-        aplicaDescuentoRecargoPorcentaje,
-        descuentoRecargoPorcentaje,
-        gananciaNeto,
-        gananciaPorcentaje,
-        IVANeto,
-        IVAPorcentaje,
-        precioCosto,
-        precioLista,
-        precioVentaPublico,
-        (idMedida != null),
-        idMedida,
-        (idRubro != null),
-        idRubro,
-        (idProveedor != null),
-        idProveedor,
-        (publico != null),
-        publico);
+    @RequestBody ProductosParaActualizarDTO productosParaActualizarDTO) {
+    productoService.actualizarMultiples(productosParaActualizarDTO);
   }
 
   @GetMapping("/productos/valor-stock/criteria")
