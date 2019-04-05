@@ -60,7 +60,6 @@ public class UbicacionServiceImpl implements IUbicacionService {
   @Transactional
   public Ubicacion guardar(
     Ubicacion ubicacion) {
-    this.validarUbicacion(ubicacion);
     Ubicacion ubicacionGuardada = ubicacionRepository.save(ubicacion);
     logger.warn("La ubicación {} se actualizó correctamente.", ubicacion);
     return ubicacionGuardada;
@@ -142,15 +141,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
   @Override
   public void actualizar(
     Ubicacion ubicacion) {
-    this.validarUbicacion(ubicacion);
     ubicacionRepository.save(ubicacion);
-  }
-
-  private void validarUbicacion(
-    Ubicacion ubicacion) {
-    if (ubicacion.getLocalidad() != null) {
-      this.validarOperacion(TipoDeOperacion.ACTUALIZACION, ubicacion.getLocalidad());
-    }
   }
 
   @Override
@@ -170,7 +161,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
 
   @Override
   public Localidad getLocalidadPorCodigoPostal(String codigoPostal) {
-    return  localidadRepository.findByCodigoPostal(codigoPostal);
+    return localidadRepository.findByCodigoPostal(codigoPostal);
   }
 
   @Override
@@ -196,12 +187,12 @@ public class UbicacionServiceImpl implements IUbicacionService {
   @Override
   @Transactional
   public void actualizarLocalidad(Localidad localidad) {
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, localidad);
+    this.validarLocalidad(TipoDeOperacion.ACTUALIZACION, localidad);
     localidadRepository.save(localidad);
   }
 
   @Override
-  public void validarOperacion(TipoDeOperacion operacion, Localidad localidad) {
+  public void validarLocalidad(TipoDeOperacion operacion, Localidad localidad) {
     //Requeridos
     if (Validator.esVacio(localidad.getNombre())) {
       throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -224,11 +215,14 @@ public class UbicacionServiceImpl implements IUbicacionService {
           .getString("mensaje_localidad_duplicado_nombre"));
       }
     }
-    //Codigo Postal
-    localidadDuplicada = this.getLocalidadPorCodigoPostal(localidad.getCodigoPostal());
-    if (operacion.equals(TipoDeOperacion.ALTA) && localidadDuplicada != null) {
-      throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-        .getString("mensaje_localidad_duplicado_codigo_postal"));
+    // Codigo Postal
+    if (localidad.getCodigoPostal() != null) {
+      localidadDuplicada = this.getLocalidadPorCodigoPostal(localidad.getCodigoPostal());
+      if (operacion.equals(TipoDeOperacion.ALTA) && localidadDuplicada != null) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes")
+                .getString("mensaje_localidad_duplicado_codigo_postal"));
+      }
     }
   }
 
