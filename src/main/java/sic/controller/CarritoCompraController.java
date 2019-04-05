@@ -97,6 +97,7 @@ public class CarritoCompraController {
       @RequestParam Long idUsuario,
       @RequestParam Long idCliente,
       @RequestParam TipoDeEnvio tipoDeEnvio,
+      @RequestParam(required = false) Long idSucursal,
       @RequestBody(required = false) String observaciones) {
     CarritoCompraDTO carritoCompraDTO = carritoCompraService.getCarritoCompra(idUsuario, idCliente);
     Pedido pedido = new Pedido();
@@ -127,7 +128,7 @@ public class CarritoCompraController {
                 .add(
                     pedidoService.calcularRenglonPedido(
                         i.getProducto().getIdProducto(), i.getCantidad(), BigDecimal.ZERO)));
-    Pedido p = pedidoService.guardar(pedido, tipoDeEnvio);
+    Pedido p = pedidoService.guardar(pedido, tipoDeEnvio, idSucursal);
     carritoCompraService.eliminarTodosLosItemsDelUsuario(idUsuario);
     return p;
   }

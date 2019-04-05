@@ -25,7 +25,7 @@ public class GastoServiceImpl implements IGastoService {
     private final GastoRepository gastoRepository;
     private final IEmpresaService empresaService;
     private final ICajaService cajaService;
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     @Lazy
@@ -47,29 +47,15 @@ public class GastoServiceImpl implements IGastoService {
 
     @Override
     public void validarGasto(Gasto gasto) {
-        //Entrada de Datos
-        //Requeridos
         if (gasto.getFecha() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_gasto_fecha_vacia"));
-        }
-        Caja caja = this.cajaService.getUltimaCaja(gasto.getEmpresa().getId_Empresa());
-        if (caja == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_caja_no_existente"));
-        }
-        if (caja.getEstado().equals(EstadoCaja.CERRADA)) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_gasto_caja_cerrada"));
-        }
-        if (gasto.getFecha().before(caja.getFechaApertura())) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_gasto_fecha_no_valida"));
         }
         if (gasto.getEmpresa() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_gasto_empresa_vacia"));
         }
+        this.cajaService.validarMovimiento(gasto.getFecha(), gasto.getEmpresa().getId_Empresa());
         if (gasto.getUsuario() == null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_gasto_usuario_vacio"));
@@ -86,7 +72,6 @@ public class GastoServiceImpl implements IGastoService {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_gasto_forma_de_pago_vacia"));
         }
-        //Duplicados
         if (gastoRepository.findOne(gasto.getId_Gasto()) != null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_gasto_duplicada"));
@@ -99,7 +84,7 @@ public class GastoServiceImpl implements IGastoService {
         this.validarGasto(gasto);
         gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getEmpresa().getId_Empresa()) + 1);
         gasto = gastoRepository.save(gasto);
-        LOGGER.warn("El Gasto {} se guardó correctamente.", gasto);
+        logger.warn("El Gasto {} se guardó correctamente.", gasto);
         return gasto;
     }
 
@@ -120,7 +105,7 @@ public class GastoServiceImpl implements IGastoService {
         Gasto gastoParaEliminar = this.getGastoPorId(idGasto);
         if (this.cajaService.getUltimaCaja(gastoParaEliminar.getEmpresa().getId_Empresa()).getEstado().equals(EstadoCaja.CERRADA)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_gasto_caja_cerrada"));
+                    .getString("mensaje_caja_cerrada"));
         }
         gastoParaEliminar.setEliminado(true);
         gastoRepository.save(gastoParaEliminar);

@@ -202,6 +202,7 @@ class AppIntegrationTest {
         BigDecimal.ONE.add(recargoPorcentaje.divide(new BigDecimal("100")))));
     facturaVentaA.setTotal(total);
     facturaVentaA.setFecha(new Date());
+    this.abrirCaja();
     restTemplate.postForObject(
       apiPrefix
         + "/facturas/venta?idPedido=1"
@@ -570,6 +571,10 @@ class AppIntegrationTest {
       apiPrefix + "/clientes?idEmpresa=1&idCredencial=1",
       cliente,
       ClienteDTO.class);
+  }
+
+  private void abrirCaja() {
+    restTemplate.postForObject(apiPrefix + "/cajas/apertura/empresas/1?saldoApertura=0", null, CajaDTO.class);
   }
 
   @BeforeEach
@@ -2476,18 +2481,18 @@ class AppIntegrationTest {
         .withIva_neto(new BigDecimal("105"))
         .withPrecioLista(new BigDecimal("1105"))
         .build();
-    productoUno =
-      restTemplate.postForObject(
+    restTemplate.postForObject(
         apiPrefix + "/productos?idMedida=1&idRubro=1&idProveedor=1&idEmpresa=1",
         productoUno,
         ProductoDTO.class);
-    productoDos =
-      restTemplate.postForObject(
+    restTemplate.postForObject(
         apiPrefix + "/productos?idMedida=1&idRubro=1&idProveedor=1&idEmpresa=1",
         productoDos,
         ProductoDTO.class);
-    String uri = apiPrefix + "/productos/multiples?idProducto=1,2&descuentoRecargoPorcentaje=10";
-    restTemplate.put(uri, null);
+    long[] idsProductos = {1L, 2L};
+    ProductosParaActualizarDTO productosParaActualizarDTO = ProductosParaActualizarDTO.builder()
+      .idProducto(idsProductos).descuentoRecargoPorcentaje(BigDecimal.TEN).build();
+    restTemplate.put(apiPrefix + "/productos/multiples", productosParaActualizarDTO);
     productoUno = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     productoDos = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
     assertEquals(new BigDecimal("110.000000000000000"), productoUno.getPrecioCosto());
@@ -2500,6 +2505,102 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("1100.000000000000000"), productoDos.getPrecioVentaPublico());
     assertEquals(new BigDecimal("115.500000000000000"), productoDos.getIvaNeto());
     assertEquals(new BigDecimal("1215.500000000000000"), productoDos.getPrecioLista());
+  }
+  @Test
+  void shouldCambiarPreciosProductos() {
+    this.crearProductos();
+    long[] idsProductos = {1L, 2L};
+    ProductosParaActualizarDTO productosParaActualizarDTO = ProductosParaActualizarDTO.builder()
+      .idProducto(idsProductos).precioCosto(new BigDecimal("150"))
+      .gananciaPorcentaje(new BigDecimal("10"))
+      .gananciaNeto(new BigDecimal("15"))
+      .precioVentaPublico(new BigDecimal("165"))
+      .ivaPorcentaje(BigDecimal.ZERO)
+      .ivaNeto(BigDecimal.ZERO)
+      .precioLista(new BigDecimal("165")).build();
+    restTemplate.put(apiPrefix + "/productos/multiples", productosParaActualizarDTO);
+    ProductoDTO productoUno = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    ProductoDTO productoDos = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
+    assertEquals(new BigDecimal("150.000000000000000"), productoUno.getPrecioCosto());
+    assertEquals(new BigDecimal("150.000000000000000"), productoDos.getPrecioCosto());
+    assertEquals(new BigDecimal("10.000000000000000"), productoUno.getGananciaPorcentaje());
+    assertEquals(new BigDecimal("10.000000000000000"), productoDos.getGananciaPorcentaje());
+    assertEquals(new BigDecimal("15.000000000000000"), productoUno.getGananciaNeto());
+    assertEquals(new BigDecimal("15.000000000000000"), productoDos.getGananciaNeto());
+    assertEquals(new BigDecimal("165.000000000000000"), productoUno.getPrecioVentaPublico());
+    assertEquals(new BigDecimal("165.000000000000000"), productoDos.getPrecioVentaPublico());
+    assertEquals(new BigDecimal("0E-15"), productoUno.getIvaPorcentaje());
+    assertEquals(new BigDecimal("0E-15"), productoDos.getIvaPorcentaje());
+    assertEquals(new BigDecimal("0E-15"), productoUno.getIvaNeto());
+    assertEquals(new BigDecimal("0E-15"), productoDos.getIvaNeto());
+    assertEquals(new BigDecimal("165.000000000000000"), productoDos.getPrecioLista());
+    assertEquals(new BigDecimal("165.000000000000000"), productoDos.getPrecioLista());
+
+  }
+
+  @Test
+  void shouldCambiarMedidasProductos() {
+    this.crearProductos();
+    long[] idsProductos = {1L, 2L};
+    MedidaDTO medida = MedidaDTO.builder()
+      .nombre("Distancia de Plank")
+      .build();
+    medida = restTemplate.postForObject(apiPrefix + "/medidas?idEmpresa=1", medida, MedidaDTO.class);
+    ProductosParaActualizarDTO productosParaActualizarDTO = ProductosParaActualizarDTO.builder()
+      .idProducto(idsProductos)
+      .idMedida(medida.getId_Medida()).build();
+    restTemplate.put(apiPrefix + "/productos/multiples", productosParaActualizarDTO);
+    ProductoDTO productoUno = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    ProductoDTO productoDos = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
+    assertEquals("Distancia de Plank", productoUno.getNombreMedida());
+    assertEquals("Distancia de Plank", productoDos.getNombreMedida());
+  }
+
+  @Test
+  void shouldCambiarRubrosProductos() {
+    this.crearProductos();
+    long[] idsProductos = {1L, 2L};
+    RubroDTO rubro = RubroDTO.builder()
+      .nombre("Telefonía Galactica")
+      .build();
+    rubro = restTemplate.postForObject(apiPrefix + "/rubros?idEmpresa=1", rubro, RubroDTO.class);
+    ProductosParaActualizarDTO productosParaActualizarDTO = ProductosParaActualizarDTO.builder()
+      .idProducto(idsProductos)
+      .idRubro(rubro.getId_Rubro()).build();
+    restTemplate.put(apiPrefix + "/productos/multiples", productosParaActualizarDTO);
+    ProductoDTO productoUno = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    ProductoDTO productoDos = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
+    assertEquals("Telefonía Galactica", productoUno.getNombreRubro());
+    assertEquals("Telefonía Galactica", productoDos.getNombreRubro());
+  }
+
+  @Test
+  void shouldCambiarProveedorProductos() {
+    this.crearProductos();
+    long[] idsProductos = {1L, 2L};
+    ProveedorDTO proveedor =
+      ProveedorDTO.builder()
+        .codigo("QWE456")
+        .razonSocial("Chamigo S.R.L.")
+        .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+        .idFiscal(99999999999L)
+        .telPrimario("379 59566333")
+        .telSecundario("379 41122547")
+        .contacto("Raul Jomer")
+        .email("chamigosrl@gmail.com")
+        .web("www.chamigosrl.com.ar")
+        .eliminado(false)
+        .saldoCuentaCorriente(BigDecimal.ZERO)
+        .build();
+    proveedor = restTemplate.postForObject(apiPrefix + "/proveedores?idEmpresa=1", proveedor, ProveedorDTO.class);
+    ProductosParaActualizarDTO productosParaActualizarDTO = ProductosParaActualizarDTO.builder()
+      .idProducto(idsProductos)
+      .idProveedor(proveedor.getId_Proveedor()).build();
+    restTemplate.put(apiPrefix + "/productos/multiples", productosParaActualizarDTO);
+    ProductoDTO productoUno = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    ProductoDTO productoDos = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
+    assertEquals("Chamigo S.R.L.", productoUno.getRazonSocialProveedor());
+    assertEquals("Chamigo S.R.L.", productoDos.getRazonSocialProveedor());
   }
 
   @Test
@@ -3086,6 +3187,7 @@ class AppIntegrationTest {
 
   @Test
   void shouldComprobarSaldoCuentaCorrienteCliente() {
+    this.abrirCaja();
     this.shouldCrearFacturaVentaB();
     assertEquals(
       new BigDecimal("-5992.500000000000000"),
@@ -3115,6 +3217,7 @@ class AppIntegrationTest {
 
   @Test
   void shouldComprobarSaldoParcialCuentaCorrienteCliente() {
+    this.abrirCaja();
     this.shouldCrearFacturaVentaB();
     this.crearReciboParaCliente(5992.5);
     this.crearNotaDebitoParaCliente();
@@ -3177,10 +3280,14 @@ class AppIntegrationTest {
         .renglones(renglonesPedido)
         .subTotal(importe)
         .total(total)
+        .idEmpresa(1L)
+        .idUsuario(2L)
+        .idCliente(1L)
+        .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
         .build();
     PedidoDTO pedidoRecuperado =
       restTemplate.postForObject(
-        apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=2&tipoDeEnvio=USAR_UBICACION_FACTURACION",
+        apiPrefix + "/pedidos",
         nuevoPedidoDTO,
         PedidoDTO.class);
     assertEquals(nuevoPedidoDTO.getTotal(), pedidoRecuperado.getTotalEstimado());
@@ -3228,10 +3335,14 @@ class AppIntegrationTest {
         .renglones(renglonesPedido)
         .subTotal(importe)
         .total(total)
+        .idEmpresa(1L)
+        .idUsuario(2L)
+        .idCliente(1L)
+        .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
         .build();
     PedidoDTO pedidoRecuperado =
       restTemplate.postForObject(
-        apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=2&tipoDeEnvio=USAR_UBICACION_FACTURACION",
+        apiPrefix + "/pedidos",
         nuevoPedidoDTO,
         PedidoDTO.class);
     ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", ClienteDTO.class);
@@ -3278,10 +3389,14 @@ class AppIntegrationTest {
         .renglones(renglonesPedido)
         .subTotal(importe)
         .total(total)
+        .idEmpresa(1L)
+        .idUsuario(2L)
+        .idCliente(1L)
+        .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_ENVIO)
         .build();
     PedidoDTO pedidoRecuperado =
       restTemplate.postForObject(
-        apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=2&tipoDeEnvio=USAR_UBICACION_ENVIO",
+        apiPrefix + "/pedidos",
         nuevoPedidoDTO,
         PedidoDTO.class);
     ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", ClienteDTO.class);
@@ -3291,6 +3406,13 @@ class AppIntegrationTest {
   @Test
   void shouldCrearPedidoConUbicacionSucursal() {
     this.crearProductos();
+    this.shouldCrearEmpresaResponsableInscripto();
+    UbicacionDTO ubicacionDTO = UbicacionDTO.builder()
+      .idLocalidad(1L)
+      .calle("Rio Piacentin")
+      .numero(345)
+      .build();
+    restTemplate.postForObject(apiPrefix + "/ubicaciones/empresas/2", ubicacionDTO, UbicacionDTO.class);
     List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
@@ -3328,13 +3450,18 @@ class AppIntegrationTest {
         .renglones(renglonesPedido)
         .subTotal(importe)
         .total(total)
+        .idEmpresa(1L)
+        .idUsuario(2L)
+        .idCliente(1L)
+        .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
+        .idSucursal(2L)
         .build();
     PedidoDTO pedidoRecuperado =
       restTemplate.postForObject(
-        apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=2&tipoDeEnvio=RETIRO_EN_SUCURSAL",
+        apiPrefix + "/pedidos",
         nuevoPedidoDTO,
         PedidoDTO.class);
-    EmpresaDTO empresaDTO = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    EmpresaDTO empresaDTO = restTemplate.getForObject(apiPrefix + "/empresas/2", EmpresaDTO.class);
     assertEquals(empresaDTO.getDetalleUbicacion(), pedidoRecuperado.getDetalleEnvio());
   }
 
@@ -3395,10 +3522,14 @@ class AppIntegrationTest {
         .renglones(renglonesPedido)
         .subTotal(importe)
         .total(total)
+        .idEmpresa(1L)
+        .idUsuario(1L)
+        .idCliente(1L)
+        .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
         .build();
     PedidoDTO pedidoRecuperado =
       restTemplate.postForObject(
-        apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=1&tipoDeEnvio=USAR_UBICACION_FACTURACION",
+        apiPrefix + "/pedidos",
         nuevoPedidoDTO,
         PedidoDTO.class);
     assertEquals(nuevoPedidoDTO.getTotal(), pedidoRecuperado.getTotalEstimado());
@@ -3484,6 +3615,7 @@ class AppIntegrationTest {
 
   @Test
   void shouldComprobarSaldoCuentaCorrienteProveedor() {
+    this.abrirCaja();
     this.shouldCrearFacturaCompraB();
     assertEquals(
       new BigDecimal("-599.250000000000000"),
@@ -3520,6 +3652,7 @@ class AppIntegrationTest {
 
   @Test
   void shouldComprobarSaldoParcialCuentaCorrienteProveedor() {
+    this.abrirCaja();
     this.shouldCrearFacturaCompraB();
     this.crearReciboParaProveedor(599.25);
     restTemplate.delete(apiPrefix + "/recibos/1");
@@ -3659,6 +3792,7 @@ class AppIntegrationTest {
 
   @Test
   void shouldActualizarFechaUltimaModificacionCuentaCorrienteCliente() {
+    this.abrirCaja();
     shouldCrearFacturaVentaB();
     CuentaCorriente ccCliente =
       restTemplate.getForObject(
@@ -3706,6 +3840,7 @@ class AppIntegrationTest {
 
   @Test
   void shouldActualizarFechaUltimaModificacionCuentaCorrienteProveedor() {
+    this.abrirCaja();
     shouldCrearFacturaCompraB();
     CuentaCorriente ccCliente =
       restTemplate.getForObject(

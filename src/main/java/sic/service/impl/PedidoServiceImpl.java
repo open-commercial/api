@@ -45,7 +45,7 @@ public class PedidoServiceImpl implements IPedidoService {
   private final IClienteService clienteService;
   private final IProductoService productoService;
   private final ICorreoElectronicoService correoElectronicoService;
-  private final IUbicacionService ubicacionService;
+  private final IEmpresaService empresaService;
   private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -60,7 +60,7 @@ public class PedidoServiceImpl implements IPedidoService {
       IClienteService clienteService,
       IProductoService productoService,
       ICorreoElectronicoService correoElectronicoService,
-      IUbicacionService ubicacionService,
+      IEmpresaService empresaService,
       ModelMapper modelMapper) {
     this.facturaService = facturaService;
     this.pedidoRepository = pedidoRepository;
@@ -69,7 +69,7 @@ public class PedidoServiceImpl implements IPedidoService {
     this.clienteService = clienteService;
     this.productoService = productoService;
     this.correoElectronicoService = correoElectronicoService;
-    this.ubicacionService = ubicacionService;
+    this.empresaService = empresaService;
     this.modelMapper = modelMapper;
   }
 
@@ -190,29 +190,14 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public Pedido guardar(Pedido pedido, TipoDeEnvio tipoDeEnvio) {
-    if (pedido.getCliente().getUbicacionFacturacion() == null
-        && tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_FACTURACION) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_facturacion_vacia"));
-    }
-    if (pedido.getCliente().getUbicacionEnvio() == null
-        && tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_ENVIO) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_envio_vacia"));
-    }
-    if (pedido.getEmpresa().getUbicacion() == null
-        && tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_sucursal_vacia"));
-    }
+  public Pedido guardar(Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal) {
+    this.asignarDetalleEnvio(pedido, tipoDeEnvio, idSucursal);
     pedido.setFecha(new Date());
     pedido.setNroPedido(this.generarNumeroPedido(pedido.getEmpresa()));
     pedido.setEstado(EstadoPedido.ABIERTO);
     if (pedido.getObservaciones() == null || pedido.getObservaciones().equals("")) {
       pedido.setObservaciones("Los precios se encuentran sujetos a modificaciones.");
     }
-    this.asignarDetalleEnvio(pedido, tipoDeEnvio);
     this.validarPedido(TipoDeOperacion.ALTA, pedido);
     pedido = pedidoRepository.save(pedido);
     logger.warn("El Pedido {} se guardó correctamente.", pedido);
@@ -234,7 +219,21 @@ public class PedidoServiceImpl implements IPedidoService {
     return pedido;
   }
 
-  private void asignarDetalleEnvio(Pedido pedido, TipoDeEnvio tipoDeEnvio) {
+  private void asignarDetalleEnvio(Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal) {
+    if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_FACTURACION
+        && pedido.getCliente().getUbicacionFacturacion() == null) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_facturacion_vacia"));
+    }
+    if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_ENVIO
+        && pedido.getCliente().getUbicacionEnvio() == null) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_envio_vacia"));
+    }
+    if (tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL && idSucursal == null) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_sucursal_vacia"));
+    }
     if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_FACTURACION) {
       pedido.setDetalleEnvio(
           modelMapper.map(pedido.getCliente().getUbicacionFacturacion(), UbicacionDTO.class));
@@ -245,7 +244,8 @@ public class PedidoServiceImpl implements IPedidoService {
     }
     if (tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
       pedido.setDetalleEnvio(
-          modelMapper.map(pedido.getEmpresa().getUbicacion(), UbicacionDTO.class));
+          modelMapper.map(
+              empresaService.getEmpresaPorId(idSucursal).getUbicacion(), UbicacionDTO.class));
     }
     pedido.setTipoDeEnvio(tipoDeEnvio);
   }
@@ -326,8 +326,16 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public void actualizar(Pedido pedido, TipoDeEnvio tipoDeEnvio) {
-    this.asignarDetalleEnvio(pedido, tipoDeEnvio);
+  public void actualizar(Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal) {
+    this.asignarDetalleEnvio(pedido, tipoDeEnvio, idSucursal);
+    this.validarPedido(TipoDeOperacion.ACTUALIZACION, pedido);
+    pedidoRepository.save(pedido);
+  }
+
+  @Override
+  @Transactional
+  public void actualizarFacturasDelPedido(Pedido pedido, List<Factura> facturas) {
+    pedido.setFacturas(facturas);
     this.validarPedido(TipoDeOperacion.ACTUALIZACION, pedido);
     pedidoRepository.save(pedido);
   }
@@ -400,16 +408,11 @@ public class PedidoServiceImpl implements IPedidoService {
         throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_empresa_404_logo"), ex);
       }
     }
-    String detalleEnvio = "";
+    String detalleEnvio;
     if (pedido.getTipoDeEnvio() == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
-      detalleEnvio =
-          "Retira en Sucursal: "
-              + pedido.getEmpresa().getNombre()
-              + " ("
-              + pedido.getDetalleEnvio()
-              + ")";
+      detalleEnvio = "Retira en Sucursal: " + pedido.getEnvio();
     } else {
-      detalleEnvio = pedido.getDetalleEnvio();
+      detalleEnvio = pedido.getEnvio();
     }
     params.put("detalleEnvio", detalleEnvio);
     List<RenglonPedido> renglones = this.getRenglonesDelPedido(pedido.getId_Pedido());

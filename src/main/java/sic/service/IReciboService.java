@@ -15,6 +15,8 @@ public interface IReciboService {
 
   BigDecimal getTotalRecibos(BusquedaReciboCriteria criteria);
 
+  void validarRecibo(Recibo recibo);
+
   Recibo guardar(Recibo recibo);
 
   List<Recibo> construirRecibos(
