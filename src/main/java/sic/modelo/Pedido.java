@@ -128,7 +128,7 @@ public class Pedido implements Serializable {
   }
 
   @JsonGetter("detalleEnvio")
-  public String getDetalleEnvio() {
+  public String getEnvio() {
     return (detalleEnvio.getCalle() != null ? detalleEnvio.getCalle() + " " : "")
         + (detalleEnvio.getNumero() != null ? detalleEnvio.getNumero() + " " : "")
         + (detalleEnvio.getPiso() != null ? detalleEnvio.getPiso() + " " : "")
