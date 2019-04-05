@@ -429,36 +429,6 @@ public class FacturaServiceImpl implements IFacturaService {
     return facturasProcesadas;
   }
 
-    @Override
-    @Transactional
-    public void eliminar(long[] idsFactura) {
-        for (long idFactura : idsFactura) {
-            Factura factura = this.getFacturaPorId(idFactura);
-            if (factura instanceof FacturaVenta) {
-                if (factura.getCAE() != 0L) {
-                    throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                            .getString("mensaje_eliminar_factura_aprobada"));
-                }
-                if (notaService.existsByFacturaVentaAndEliminada((FacturaVenta) factura)) {
-                    throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                            .getString("mensaje_no_se_puede_eliminar"));
-                }
-                this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaVenta) factura, TipoDeOperacion.ELIMINACION);
-                productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION,
-                  Movimiento.VENTA, factura.getTipoComprobante());
-            } else if (factura instanceof FacturaCompra) {
-                this.cuentaCorrienteService.asentarEnCuentaCorriente((FacturaCompra) factura, TipoDeOperacion.ELIMINACION);
-                productoService.actualizarStock(this.getIdsProductosYCantidades(factura), TipoDeOperacion.ELIMINACION,
-                  Movimiento.COMPRA, factura.getTipoComprobante());
-            }
-            factura.setEliminada(true);
-            if (factura.getPedido() != null) {
-                pedidoService.actualizarEstadoPedido(factura.getPedido());
-            }
-        }
-    }
-
-
     private Map<Long, BigDecimal> getIdsProductosYCantidades(Factura factura) {
         Map<Long, BigDecimal> idsYCantidades = new HashMap<>();
         factura.getRenglones().forEach(r ->

@@ -2628,17 +2628,6 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldCrearYEliminarFacturaVenta() {
-    this.shouldCrearFacturaVentaA();
-    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-    try {
-      restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaDTO.class);
-    } catch (RestClientResponseException ex) {
-      assertTrue(ex.getMessage().startsWith("La factura no existe o se encuentra eliminada."));
-    }
-  }
-
-  @Test
   void shouldVerificarStockVenta() {
     this.shouldCrearFacturaVentaA();
     ProductoDTO producto1 =
@@ -2647,22 +2636,6 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
     assertEquals(new BigDecimal("4.000000000000000"), producto1.getCantidad());
     assertEquals(new BigDecimal("3.000000000000000"), producto2.getCantidad());
-    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-    producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
-    producto2 = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
-    assertEquals(new BigDecimal("10.000000000000000"), producto1.getCantidad());
-    assertEquals(new BigDecimal("6.000000000000000"), producto2.getCantidad());
-  }
-
-  @Test
-  void shouldCrearAndEliminarFacturaCompra() {
-    this.shouldCrearFacturaCompraA();
-    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-    try {
-      restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaDTO.class);
-    } catch (RestClientResponseException ex) {
-      assertTrue(ex.getMessage().startsWith("La factura no existe o se encuentra eliminada."));
-    }
   }
 
   @Test
@@ -2674,11 +2647,6 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
     assertEquals(new BigDecimal("14.000000000000000"), producto1.getCantidad());
     assertEquals(new BigDecimal("9.000000000000000"), producto2.getCantidad());
-    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-    producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
-    producto2 = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
-    assertEquals(new BigDecimal("10.000000000000000"), producto1.getCantidad());
-    assertEquals(new BigDecimal("6.000000000000000"), producto2.getCantidad());
   }
 
   @Disabled
@@ -3503,18 +3471,6 @@ class AppIntegrationTest {
       restTemplate.getForObject(
         apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
     assertEquals(EstadoPedido.CERRADO, pedidoRecuperado.getEstado());
-    restTemplate.delete(
-      apiPrefix + "/facturas?idFactura=" + facturasRecuperadas.get(0).getId_Factura());
-    pedidoRecuperado =
-      restTemplate.getForObject(
-        apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
-    assertEquals(EstadoPedido.ACTIVO, pedidoRecuperado.getEstado());
-    restTemplate.delete(
-      apiPrefix + "/facturas?idFactura=" + facturasRecuperadas.get(1).getId_Factura());
-    pedidoRecuperado =
-      restTemplate.getForObject(
-        apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
-    assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
   }
 
   @Test
@@ -3547,11 +3503,6 @@ class AppIntegrationTest {
       new BigDecimal("100.000000000000000"),
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/proveedores/1/saldo", BigDecimal.class));
-    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-    assertEquals(
-      new BigDecimal("699.250000000000000"),
-      restTemplate.getForObject(
-        apiPrefix + "/cuentas-corriente/proveedores/1/saldo", BigDecimal.class));
   }
 
   @Test
@@ -3562,51 +3513,38 @@ class AppIntegrationTest {
     restTemplate.delete(apiPrefix + "/recibos/1");
     this.crearReciboParaProveedor(499.25);
     this.crearReciboParaProveedor(200);
-    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-    List<RenglonCuentaCorriente> renglonesCuentaCorriente =
-      restTemplate
-        .exchange(
-          apiPrefix + "/cuentas-corriente/2/renglones" + "?pagina=" + 0 + "&tamanio=" + 50,
-          HttpMethod.GET,
-          null,
-          new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {
-          })
-        .getBody()
-        .getContent();
-    assertEquals(699.25, renglonesCuentaCorriente.get(0).getSaldo(), 0);
-    assertEquals(499.25, renglonesCuentaCorriente.get(1).getSaldo(), 0);
     this.shouldCrearFacturaCompraB();
     this.crearNotaCreditoParaProveedor();
-    renglonesCuentaCorriente =
-      restTemplate
-        .exchange(
-          apiPrefix + "/cuentas-corriente/2/renglones" + "?pagina=" + 0 + "&tamanio=" + 50,
-          HttpMethod.GET,
-          null,
-          new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {
-          })
-        .getBody()
-        .getContent();
-    assertEquals(511.4, renglonesCuentaCorriente.get(0).getSaldo(), 0);
-    assertEquals(100.0, renglonesCuentaCorriente.get(1).getSaldo(), 0);
-    assertEquals(699.25, renglonesCuentaCorriente.get(2).getSaldo(), 0);
-    assertEquals(499.25, renglonesCuentaCorriente.get(3).getSaldo(), 0);
+    List<RenglonCuentaCorriente> renglonesCuentaCorriente =
+        restTemplate
+            .exchange(
+                apiPrefix + "/cuentas-corriente/2/renglones" + "?pagina=" + 0 + "&tamanio=" + 50,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {})
+            .getBody()
+            .getContent();
+    assertEquals(-87.85, renglonesCuentaCorriente.get(0).getSaldo(), 0);
+    assertEquals(-499.25, renglonesCuentaCorriente.get(1).getSaldo(), 0);
+    assertEquals(100, renglonesCuentaCorriente.get(2).getSaldo(), 0);
+    assertEquals(-100, renglonesCuentaCorriente.get(3).getSaldo(), 0);
+    assertEquals(-599.25, renglonesCuentaCorriente.get(4).getSaldo(), 0);
     this.crearNotaDebitoParaProveedor();
     renglonesCuentaCorriente =
-      restTemplate
-        .exchange(
-          apiPrefix + "/cuentas-corriente/2/renglones" + "?pagina=" + 0 + "&tamanio=" + 50,
-          HttpMethod.GET,
-          null,
-          new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {
-          })
-        .getBody()
-        .getContent();
-    assertEquals(190.40, renglonesCuentaCorriente.get(0).getSaldo(), 0);
-    assertEquals(511.40, renglonesCuentaCorriente.get(1).getSaldo(), 0);
-    assertEquals(100.0, renglonesCuentaCorriente.get(2).getSaldo(), 0);
-    assertEquals(699.25, renglonesCuentaCorriente.get(3).getSaldo(), 0);
-    assertEquals(499.25, renglonesCuentaCorriente.get(4).getSaldo(), 0);
+        restTemplate
+            .exchange(
+                apiPrefix + "/cuentas-corriente/2/renglones" + "?pagina=" + 0 + "&tamanio=" + 50,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {})
+            .getBody()
+            .getContent();
+    assertEquals(-408.85, renglonesCuentaCorriente.get(0).getSaldo(), 0);
+    assertEquals(-87.85, renglonesCuentaCorriente.get(1).getSaldo(), 0);
+    assertEquals(-499.25, renglonesCuentaCorriente.get(2).getSaldo(), 0);
+    assertEquals(100, renglonesCuentaCorriente.get(3).getSaldo(), 0);
+    assertEquals(-100, renglonesCuentaCorriente.get(4).getSaldo(), 0);
+    assertEquals(-599.25, renglonesCuentaCorriente.get(5).getSaldo(), 0);
     restTemplate.delete(apiPrefix + "/notas/?idsNota=2");
     renglonesCuentaCorriente =
       restTemplate
@@ -3618,10 +3556,11 @@ class AppIntegrationTest {
           })
         .getBody()
         .getContent();
-    assertEquals(511.40, renglonesCuentaCorriente.get(0).getSaldo(), 0);
-    assertEquals(100.0, renglonesCuentaCorriente.get(1).getSaldo(), 0);
-    assertEquals(699.25, renglonesCuentaCorriente.get(2).getSaldo(), 0);
-    assertEquals(499.25, renglonesCuentaCorriente.get(3).getSaldo(), 0);
+    assertEquals(-87.85, renglonesCuentaCorriente.get(0).getSaldo(), 0);
+    assertEquals(-499.25, renglonesCuentaCorriente.get(1).getSaldo(), 0);
+    assertEquals(100, renglonesCuentaCorriente.get(2).getSaldo(), 0);
+    assertEquals(-100, renglonesCuentaCorriente.get(3).getSaldo(), 0);
+    assertEquals(-599.25, renglonesCuentaCorriente.get(4).getSaldo(), 0);
     restTemplate.delete(apiPrefix + "/notas/?idsNota=1");
     renglonesCuentaCorriente =
       restTemplate
@@ -3633,9 +3572,10 @@ class AppIntegrationTest {
           })
         .getBody()
         .getContent();
-    assertEquals(100.00, renglonesCuentaCorriente.get(0).getSaldo(), 0);
-    assertEquals(699.25, renglonesCuentaCorriente.get(1).getSaldo(), 0);
-    assertEquals(499.25, renglonesCuentaCorriente.get(2).getSaldo(), 0);
+    assertEquals(-499.25, renglonesCuentaCorriente.get(0).getSaldo(), 0);
+    assertEquals(100, renglonesCuentaCorriente.get(1).getSaldo(), 0);
+    assertEquals(-100, renglonesCuentaCorriente.get(2).getSaldo(), 0);
+    assertEquals(-599.25, renglonesCuentaCorriente.get(3).getSaldo(), 0);
   }
 
   @Test
@@ -3735,11 +3675,6 @@ class AppIntegrationTest {
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/clientes/1", CuentaCorriente.class);
     assertEquals(reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
-    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-    ccCliente =
-      restTemplate.getForObject(
-        apiPrefix + "/cuentas-corriente/clientes/1", CuentaCorriente.class);
-    assertEquals(reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
   }
 
   @Test
@@ -3774,11 +3709,6 @@ class AppIntegrationTest {
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
     reciboDTO = restTemplate.getForObject(apiPrefix + "/recibos/3", ReciboDTO.class);
-    assertEquals(reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
-    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-    ccCliente =
-      restTemplate.getForObject(
-        apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
     assertEquals(reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
   }
 
