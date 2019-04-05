@@ -326,24 +326,20 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   @Transactional
   public List<Producto> actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO) {
-    boolean actualizaPrecios = false;
-    if (productosParaActualizarDTO.getGananciaNeto() != null
+    boolean actualizaPrecios = productosParaActualizarDTO.getGananciaNeto() != null
       && productosParaActualizarDTO.getGananciaPorcentaje() != null
       && productosParaActualizarDTO.getIvaNeto() != null
       && productosParaActualizarDTO.getIvaPorcentaje() != null
       && productosParaActualizarDTO.getPrecioCosto() != null
       && productosParaActualizarDTO.getPrecioLista() != null
-      && productosParaActualizarDTO.getPrecioVentaPublico() != null) {
-      actualizaPrecios = true;
-    }
-    boolean aplicaDescuentoRecargoPorcentaje = false;
-    if (productosParaActualizarDTO.getDescuentoRecargoPorcentaje() != null)
-      aplicaDescuentoRecargoPorcentaje = true;
+      && productosParaActualizarDTO.getPrecioVentaPublico() != null;
+    boolean aplicaDescuentoRecargoPorcentaje = productosParaActualizarDTO.getDescuentoRecargoPorcentaje() != null;
     if (aplicaDescuentoRecargoPorcentaje && actualizaPrecios) {
       throw new BusinessServiceException(
-        ResourceBundle.getBundle("Mensajes")
-          .getString("mensaje_modificar_producto_no_permitido"));
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_modificar_producto_no_permitido"));
     }
+    // Requeridos
     if (Validator.tieneDuplicados(productosParaActualizarDTO.getIdProducto())) {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_error_ids_duplicados"));
     }
@@ -353,26 +349,33 @@ public class ProductoServiceImpl implements IProductoService {
     }
     BigDecimal multiplicador = BigDecimal.ZERO;
     if (aplicaDescuentoRecargoPorcentaje) {
-      if (productosParaActualizarDTO.getDescuentoRecargoPorcentaje().compareTo(BigDecimal.ZERO) > 0) {
+      if (productosParaActualizarDTO.getDescuentoRecargoPorcentaje().compareTo(BigDecimal.ZERO)
+          > 0) {
         multiplicador =
-          productosParaActualizarDTO.getDescuentoRecargoPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP).add(BigDecimal.ONE);
+            productosParaActualizarDTO
+                .getDescuentoRecargoPorcentaje()
+                .divide(CIEN, 15, RoundingMode.HALF_UP)
+                .add(BigDecimal.ONE);
       } else {
         multiplicador =
-          BigDecimal.ONE.subtract(
-            productosParaActualizarDTO.getDescuentoRecargoPorcentaje().abs().divide(CIEN, 15, RoundingMode.HALF_UP));
+            BigDecimal.ONE.subtract(
+                productosParaActualizarDTO
+                    .getDescuentoRecargoPorcentaje()
+                    .abs()
+                    .divide(CIEN, 15, RoundingMode.HALF_UP));
       }
     }
     for (Producto p : productos) {
       if (productosParaActualizarDTO.getIdMedida() != null) {
-        Medida medida = medidaService.getMedidaPorId(productosParaActualizarDTO.getIdMedida());
-        p.setMedida(medida);
+        p.setMedida(medidaService.getMedidaPorId(productosParaActualizarDTO.getIdMedida()));
       }
       if (productosParaActualizarDTO.getIdRubro() != null) {
         Rubro rubro = rubroService.getRubroPorId(productosParaActualizarDTO.getIdRubro());
         p.setRubro(rubro);
       }
       if (productosParaActualizarDTO.getIdProveedor() != null) {
-        Proveedor proveedor = proveedorService.getProveedorPorId(productosParaActualizarDTO.getIdProveedor());
+        Proveedor proveedor =
+            proveedorService.getProveedorPorId(productosParaActualizarDTO.getIdProveedor());
         p.setProveedor(proveedor);
       }
       if (actualizaPrecios) {
@@ -392,16 +395,17 @@ public class ProductoServiceImpl implements IProductoService {
         p.setPrecioLista(p.getPrecioLista().multiply(multiplicador));
         p.setFechaUltimaModificacion(new Date());
       }
-      if (productosParaActualizarDTO.getIdMedida() != null ||
-        productosParaActualizarDTO.getIdRubro() != null ||
-        productosParaActualizarDTO.getIdProveedor() != null ||
-        actualizaPrecios ||
-        aplicaDescuentoRecargoPorcentaje) {
+      if (productosParaActualizarDTO.getIdMedida() != null
+          || productosParaActualizarDTO.getIdRubro() != null
+          || productosParaActualizarDTO.getIdProveedor() != null
+          || actualizaPrecios
+          || aplicaDescuentoRecargoPorcentaje) {
         p.setFechaUltimaModificacion(new Date());
       }
       if (productosParaActualizarDTO.getPublico() != null) {
         p.setPublico(productosParaActualizarDTO.getPublico());
-        if (!productosParaActualizarDTO.getPublico()) carritoCompraService.eliminarItem(p.getIdProducto());
+        if (!productosParaActualizarDTO.getPublico())
+          carritoCompraService.eliminarItem(p.getIdProducto());
       }
       this.validarOperacion(TipoDeOperacion.ACTUALIZACION, p);
     }
