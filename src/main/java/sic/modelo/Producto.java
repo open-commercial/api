@@ -108,7 +108,6 @@ public class Producto implements Serializable {
 
   private boolean publico;
 
-  @JsonView(Views.Public.class)
   private boolean destacado;
 
   @Temporal(TemporalType.TIMESTAMP)

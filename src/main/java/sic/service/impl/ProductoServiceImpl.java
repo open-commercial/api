@@ -40,6 +40,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final BigDecimal CIEN = new BigDecimal("100");
   private static final long TAMANIO_MAXIMO_IMAGEN = 1024000L;
+  private static final int CANTIDAD_DE_PRODUCTOS_DESTACADOS = 15;
   private final IEmpresaService empresaService;
   private final IRubroService rubroService;
   private final IProveedorService proveedorService;
@@ -77,9 +78,12 @@ public class ProductoServiceImpl implements IProductoService {
         }
         if (productoRepository.getCantidadDeProductosDestacadosPorRubro(
                 producto.getRubro().getId_Rubro())
-            >= 15) {
+            >= CANTIDAD_DE_PRODUCTOS_DESTACADOS) {
           throw new BusinessServiceException(
-              RESOURCE_BUNDLE.getString("mensaje_producto_destacado_cantidad_minima_superada"));
+              MessageFormat.format(
+                  RESOURCE_BUNDLE.getString("mensaje_producto_destacado_cantidad_minima_superada"),
+                  CANTIDAD_DE_PRODUCTOS_DESTACADOS,
+                  producto.getRubro().getNombre()));
         }
       } else {
         producto.setDestacado(false);
