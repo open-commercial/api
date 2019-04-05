@@ -50,5 +50,5 @@ public interface IUbicacionService {
 
   void actualizarLocalidad(Localidad localidad);
 
-  void validarLocalidad(TipoDeOperacion operacion, Localidad localidad);
+  void validarOperacion(TipoDeOperacion operacion, Localidad localidad);
 }

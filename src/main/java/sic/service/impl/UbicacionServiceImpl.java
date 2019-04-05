@@ -187,12 +187,12 @@ public class UbicacionServiceImpl implements IUbicacionService {
   @Override
   @Transactional
   public void actualizarLocalidad(Localidad localidad) {
-    this.validarLocalidad(TipoDeOperacion.ACTUALIZACION, localidad);
+    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, localidad);
     localidadRepository.save(localidad);
   }
 
   @Override
-  public void validarLocalidad(TipoDeOperacion operacion, Localidad localidad) {
+  public void validarOperacion(TipoDeOperacion operacion, Localidad localidad) {
     //Requeridos
     if (Validator.esVacio(localidad.getNombre())) {
       throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
