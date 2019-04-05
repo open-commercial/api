@@ -40,11 +40,11 @@ public interface IUbicacionService {
 
   Localidad getLocalidadPorNombre(String nombre, Provincia provincia);
 
+  Localidad getLocalidadPorCodigoPostal(String codigoPostal);
+
   List<Localidad> getLocalidadesDeLaProvincia(Provincia provincia);
 
   Provincia getProvinciaPorId(Long idProvincia);
-
-  Provincia getProvinciaPorNombre(String nombre);
 
   List<Provincia> getProvincias();
 
