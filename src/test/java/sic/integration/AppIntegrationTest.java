@@ -4143,7 +4143,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  public void shouldVerificarFechaCierreCajaSinScheduling() {
+  void shouldVerificarFechaCierreCajaSinScheduling() {
     restTemplate.postForObject(apiPrefix + "/cajas/apertura/empresas/1?saldoApertura=200", null, CajaDTO.class);
     clockService.cambiarFechaHora(2030, 9, 24, 23, 59, 59);
     restTemplate.put(apiPrefix + "/cajas/1/cierre?monto=300", CajaDTO.class);
@@ -4156,7 +4156,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  public void shouldVerificarFechaCierreCajaConScheduling() {
+  void shouldVerificarFechaCierreCajaConScheduling() {
     clockService.cambiarFechaHora(2019, 12, 31, 10, 15, 35);
     restTemplate.postForObject(apiPrefix + "/cajas/apertura/empresas/1?saldoApertura=200", null, CajaDTO.class);
     cajaService.cerrarCaja(1L, new BigDecimal("300"), 1L, true);
@@ -4171,4 +4171,65 @@ class AppIntegrationTest {
     assertEquals(59, fechaCierre.get(Calendar.SECOND));
   }
 
+  @Test
+  void shouldNotModificarProductoComoDestacado() {
+    List<NuevoProductoDTO> productos = new ArrayList<>();
+    NuevoProductoDTO producto;
+    for (int i = 0; i < 16; i++) {
+      producto =
+          NuevoProductoDTO.builder()
+              .codigo(RandomStringUtils.random(10, false, true))
+              .descripcion(RandomStringUtils.random(10, true, false))
+              .cantidad(BigDecimal.TEN)
+              .bulto(BigDecimal.ONE)
+              .precioCosto(CIEN)
+              .gananciaPorcentaje(new BigDecimal("900"))
+              .gananciaNeto(new BigDecimal("900"))
+              .precioVentaPublico(new BigDecimal("1000"))
+              .ivaPorcentaje(new BigDecimal("21.0"))
+              .ivaNeto(new BigDecimal("210"))
+              .precioLista(new BigDecimal("1210"))
+              .nota(RandomStringUtils.random(10, true, true))
+              .build();
+      productos.add(producto);
+    }
+    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    RubroDTO rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", RubroDTO.class);
+    ProveedorDTO proveedor =
+        restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
+    Medida medida = restTemplate.getForObject(apiPrefix + "/medidas/1", Medida.class);
+    productos.forEach(
+        p ->
+            restTemplate.postForObject(
+                apiPrefix
+                    + "/productos?idMedida="
+                    + medida.getId_Medida()
+                    + "&idRubro="
+                    + rubro.getId_Rubro()
+                    + "&idProveedor="
+                    + proveedor.getId_Proveedor()
+                    + "&idEmpresa="
+                    + empresa.getId_Empresa(),
+                p,
+                ProductoDTO.class));
+    List<ProductoDTO> productosRecuperados = new ArrayList<>();
+    for (int i = 1; i < 17; i++) {
+      productosRecuperados.add(
+          restTemplate.getForObject(apiPrefix + "/productos/" + i, ProductoDTO.class));
+    }
+    try {
+      productosRecuperados.forEach(
+          p -> {
+            p.setUrlImagen("http://imagenAsd.com");
+            p.setPublico(true);
+            p.setDestacado(true);
+            restTemplate.put(apiPrefix + "/productos", p);
+          });
+    } catch (RestClientResponseException ex) {
+      assertTrue(
+          ex.getMessage()
+              .startsWith(
+                  "Ya alcanzo el limite de 15 productos destacados para el rubro Ferreteria."));
+    }
+  }
 }

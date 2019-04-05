@@ -36,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 import sic.service.*;
 import sic.util.CalculosComprobante;
 import sic.util.FormatterFechaHora;
-import sic.util.Validator;
 import sic.repository.FacturaVentaRepository;
 import sic.repository.FacturaCompraRepository;
 import sic.repository.FacturaRepository;
