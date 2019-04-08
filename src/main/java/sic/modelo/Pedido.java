@@ -23,6 +23,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -81,24 +84,32 @@ public class Pedido implements Serializable {
   private List<RenglonPedido> renglones;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_pedido_subtotal_negativo}")
   private BigDecimal subTotal;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_pedido_recargo_porcentaje_negativo}")
   private BigDecimal recargoPorcentaje;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_regargo_neto_negativo}")
   private BigDecimal recargoNeto;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_pedido_descuento_porcentaje_negativo}")
+  @DecimalMax(value = "100", message = "{mensaje_factura_descuento_porcentaje_superior_100}")
   private BigDecimal descuentoPorcentaje;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_pedido_descuento_neto_negativo}")
   private BigDecimal descuentoNeto;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_pedido_total_estimado_negativo}")
   private BigDecimal totalEstimado;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_pedido_total_actual_negativo}")
   private BigDecimal totalActual;
 
   @Enumerated(EnumType.STRING)

@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.DateExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
 import java.io.InputStream;
@@ -22,6 +23,8 @@ import java.util.ResourceBundle;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
+import javax.validation.Valid;
+
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -36,13 +39,13 @@ import org.springframework.transaction.annotation.Transactional;
 import sic.service.*;
 import sic.util.CalculosComprobante;
 import sic.util.FormatterFechaHora;
-import sic.util.Validator;
 import sic.repository.FacturaVentaRepository;
 import sic.repository.FacturaCompraRepository;
 import sic.repository.FacturaRepository;
 import sic.repository.RenglonFacturaRepository;
 
 @Service
+@Validated
 public class FacturaServiceImpl implements IFacturaService {
 
     private final FacturaRepository facturaRepository;
@@ -372,7 +375,7 @@ public class FacturaServiceImpl implements IFacturaService {
   @Override
   @Transactional
   public List<FacturaVenta> guardar(
-      List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos) {
+    @Valid List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos) {
     List<FacturaVenta> facturasProcesadas = new ArrayList<>();
     facturas.forEach(
         f -> productoService.actualizarStock(

@@ -14,6 +14,7 @@ import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
+import javax.validation.Valid;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.repository.RenglonPedidoRepository;
@@ -34,6 +36,7 @@ import sic.util.CalculosComprobante;
 import sic.util.FormatterFechaHora;
 
 @Service
+@Validated
 public class PedidoServiceImpl implements IPedidoService {
 
   private final PedidoRepository pedidoRepository;
@@ -222,7 +225,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public Pedido guardar(Pedido pedido) {
+  public Pedido guardar(@Valid Pedido pedido) {
     pedido.setFecha(new Date());
     pedido.setNroPedido(this.generarNumeroPedido(pedido.getEmpresa()));
     pedido.setEstado(EstadoPedido.ABIERTO);
@@ -311,7 +314,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public void actualizar(Pedido pedido) {
+  public void actualizar(@Valid Pedido pedido) {
     this.validarPedido(TipoDeOperacion.ACTUALIZACION, pedido);
     pedidoRepository.save(pedido);
   }

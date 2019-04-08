@@ -27,6 +27,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -92,33 +95,44 @@ public abstract class Factura implements Serializable {
     private List<RenglonFactura> renglones;
 
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_factura_subtotal_negativo}")
     private BigDecimal subTotal;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_factura_recargo_porcentaje_negativo}")
     private BigDecimal recargoPorcentaje;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_factura_recargo_neto_negativo}")
     private BigDecimal recargoNeto;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_factura_descuento_porcentaje_negativo}")
+    @DecimalMax(value = "100", message = "{mensaje_factura_descuento_porcentaje_superior_100}")
     private BigDecimal descuentoPorcentaje;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_factura_descuento_neto_negativo}")
     private BigDecimal descuentoNeto;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_factura_sub_total_bruto}")
     private BigDecimal subTotalBruto;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_factura_iva_105_neto_negativo}")
     private BigDecimal iva105Neto;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_factura_iva_21_neto_negativo}")
     private BigDecimal iva21Neto;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_factura_impuesto_interno_neto}")
     private BigDecimal impuestoInternoNeto;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_factura_total_negativo}")
     private BigDecimal total;
 
     @Column(nullable = false)
