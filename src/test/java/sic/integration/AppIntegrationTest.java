@@ -2655,6 +2655,68 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldNotModificarProductoComoDestacado() {
+    List<NuevoProductoDTO> productos = new ArrayList<>();
+    NuevoProductoDTO producto;
+    for (int i = 0; i < 16; i++) {
+      producto =
+        NuevoProductoDTO.builder()
+          .codigo(RandomStringUtils.random(10, false, true))
+          .descripcion(RandomStringUtils.random(10, true, false))
+          .cantidad(BigDecimal.TEN)
+          .bulto(BigDecimal.ONE)
+          .precioCosto(CIEN)
+          .gananciaPorcentaje(new BigDecimal("900"))
+          .gananciaNeto(new BigDecimal("900"))
+          .precioVentaPublico(new BigDecimal("1000"))
+          .ivaPorcentaje(new BigDecimal("21.0"))
+          .ivaNeto(new BigDecimal("210"))
+          .precioLista(new BigDecimal("1210"))
+          .nota(RandomStringUtils.random(10, true, true))
+          .build();
+      productos.add(producto);
+    }
+    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    RubroDTO rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", RubroDTO.class);
+    ProveedorDTO proveedor =
+      restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
+    Medida medida = restTemplate.getForObject(apiPrefix + "/medidas/1", Medida.class);
+    productos.forEach(
+      p ->
+        restTemplate.postForObject(
+          apiPrefix
+            + "/productos?idMedida="
+            + medida.getId_Medida()
+            + "&idRubro="
+            + rubro.getId_Rubro()
+            + "&idProveedor="
+            + proveedor.getId_Proveedor()
+            + "&idEmpresa="
+            + empresa.getId_Empresa(),
+          p,
+          ProductoDTO.class));
+    List<ProductoDTO> productosRecuperados = new ArrayList<>();
+    for (int i = 1; i < 17; i++) {
+      productosRecuperados.add(
+        restTemplate.getForObject(apiPrefix + "/productos/" + i, ProductoDTO.class));
+    }
+    try {
+      productosRecuperados.forEach(
+        p -> {
+          p.setUrlImagen("http://imagenAsd.com");
+          p.setPublico(true);
+          p.setDestacado(true);
+          restTemplate.put(apiPrefix + "/productos", p);
+        });
+    } catch (RestClientResponseException ex) {
+      assertTrue(
+        ex.getMessage()
+          .startsWith(
+            "Ya alcanzo el limite de 15 productos destacados para el rubro Ferreteria."));
+    }
+  }
+
+  @Test
   void shouldNotModificarProductoComoDestacadoSiEsPrivado() {
     this.shouldCrearProductoConIva21();
     ProductoDTO productoAModificar =
@@ -2667,7 +2729,7 @@ class AppIntegrationTest {
     try {
       restTemplate.put(apiPrefix + "/productos?idMedida=2", productoAModificar);
     } catch (RestClientResponseException ex) {
-      assertTrue(ex.getMessage().startsWith("Un producto no puede ser destacado si es privado o no contiene imagen."));
+      assertTrue(ex.getMessage().startsWith("Para poder marcarlo como Destacado, debe ser Publico y tener imagen asignada."));
     }
   }
 
@@ -2684,7 +2746,7 @@ class AppIntegrationTest {
     try {
       restTemplate.put(apiPrefix + "/productos?idMedida=2", productoAModificar);
     } catch (RestClientResponseException ex) {
-      assertTrue(ex.getMessage().startsWith("Un producto no puede ser destacado si es privado o no contiene imagen."));
+      assertTrue(ex.getMessage().startsWith("Para poder marcarlo como Destacado, debe ser Publico y tener imagen asignada."));
     }
   }
 
@@ -4169,67 +4231,5 @@ class AppIntegrationTest {
     assertEquals(23, fechaCierre.get(Calendar.HOUR_OF_DAY));
     assertEquals(59, fechaCierre.get(Calendar.MINUTE));
     assertEquals(59, fechaCierre.get(Calendar.SECOND));
-  }
-
-  @Test
-  void shouldNotModificarProductoComoDestacado() {
-    List<NuevoProductoDTO> productos = new ArrayList<>();
-    NuevoProductoDTO producto;
-    for (int i = 0; i < 16; i++) {
-      producto =
-          NuevoProductoDTO.builder()
-              .codigo(RandomStringUtils.random(10, false, true))
-              .descripcion(RandomStringUtils.random(10, true, false))
-              .cantidad(BigDecimal.TEN)
-              .bulto(BigDecimal.ONE)
-              .precioCosto(CIEN)
-              .gananciaPorcentaje(new BigDecimal("900"))
-              .gananciaNeto(new BigDecimal("900"))
-              .precioVentaPublico(new BigDecimal("1000"))
-              .ivaPorcentaje(new BigDecimal("21.0"))
-              .ivaNeto(new BigDecimal("210"))
-              .precioLista(new BigDecimal("1210"))
-              .nota(RandomStringUtils.random(10, true, true))
-              .build();
-      productos.add(producto);
-    }
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    RubroDTO rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", RubroDTO.class);
-    ProveedorDTO proveedor =
-        restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
-    Medida medida = restTemplate.getForObject(apiPrefix + "/medidas/1", Medida.class);
-    productos.forEach(
-        p ->
-            restTemplate.postForObject(
-                apiPrefix
-                    + "/productos?idMedida="
-                    + medida.getId_Medida()
-                    + "&idRubro="
-                    + rubro.getId_Rubro()
-                    + "&idProveedor="
-                    + proveedor.getId_Proveedor()
-                    + "&idEmpresa="
-                    + empresa.getId_Empresa(),
-                p,
-                ProductoDTO.class));
-    List<ProductoDTO> productosRecuperados = new ArrayList<>();
-    for (int i = 1; i < 17; i++) {
-      productosRecuperados.add(
-          restTemplate.getForObject(apiPrefix + "/productos/" + i, ProductoDTO.class));
-    }
-    try {
-      productosRecuperados.forEach(
-          p -> {
-            p.setUrlImagen("http://imagenAsd.com");
-            p.setPublico(true);
-            p.setDestacado(true);
-            restTemplate.put(apiPrefix + "/productos", p);
-          });
-    } catch (RestClientResponseException ex) {
-      assertTrue(
-          ex.getMessage()
-              .startsWith(
-                  "Ya alcanzo el limite de 15 productos destacados para el rubro Ferreteria."));
-    }
   }
 }
