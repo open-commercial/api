@@ -3213,6 +3213,11 @@ class AppIntegrationTest {
       new BigDecimal("4114.000000000000000"),
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
+    this.shouldCrearFacturaVentaA();
+    assertEquals(
+      new BigDecimal("-4116.762500000000000"),
+      restTemplate.getForObject(
+        apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
   }
 
   @Test
