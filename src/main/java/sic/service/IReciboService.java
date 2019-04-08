@@ -7,6 +7,8 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 
+import javax.validation.Valid;
+
 public interface IReciboService {
 
   Recibo getById(long idRecibo);
@@ -15,7 +17,7 @@ public interface IReciboService {
 
   BigDecimal getTotalRecibos(BusquedaReciboCriteria criteria);
 
-  Recibo guardar(Recibo recibo);
+  Recibo guardar(@Valid Recibo recibo);
 
   List<Recibo> construirRecibos(
       long[] formaDePago,

@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.validation.Valid;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.DateExpression;
@@ -21,12 +22,14 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.repository.ReciboRepository;
 import sic.service.*;
 import sic.util.FormatterFechaHora;
 
 @Service
+@Validated
 public class ReciboServiceImpl implements IReciboService {
 
   private final ReciboRepository reciboRepository;
@@ -131,7 +134,7 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   @Transactional
-  public Recibo guardar(Recibo recibo) {
+  public Recibo guardar(@Valid Recibo recibo) {
     recibo.setNumSerie(
         configuracionDelSistemaService
             .getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa())

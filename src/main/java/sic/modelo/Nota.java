@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.*;
+import javax.validation.constraints.DecimalMin;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -88,15 +89,19 @@ public abstract class Nota implements Serializable {
   private String motivo;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_sub_total_bruto}")
   private BigDecimal subTotalBruto;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_iva_21_neto_negativo}")
   private BigDecimal iva21Neto;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_iva_105_neto_negativo}")
   private BigDecimal iva105Neto;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_total_negativo}")
   private BigDecimal total;
 
   private long CAE;
