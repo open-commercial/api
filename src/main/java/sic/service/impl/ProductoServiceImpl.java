@@ -85,8 +85,6 @@ public class ProductoServiceImpl implements IProductoService {
                   CANTIDAD_DE_PRODUCTOS_DESTACADOS,
                   producto.getRubro().getNombre()));
         }
-      } else {
-        producto.setDestacado(false);
       }
     }
     // Duplicados
@@ -205,6 +203,7 @@ public class ProductoServiceImpl implements IProductoService {
                 mapProductos.put(r.getNombre(), this.buscarProductos(criteria).getContent());
               });
     }
+    mapProductos.keySet().removeIf(key -> mapProductos.get(key) == null || mapProductos.get(key).isEmpty());
     return mapProductos;
   }
 
