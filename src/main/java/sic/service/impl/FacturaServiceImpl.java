@@ -375,32 +375,34 @@ public class FacturaServiceImpl implements IFacturaService {
       List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos) {
     List<FacturaVenta> facturasProcesadas = new ArrayList<>();
     facturas.forEach(
-        f -> productoService.actualizarStock(
-                this.getIdsProductosYCantidades(f), TipoDeOperacion.ALTA, Movimiento.VENTA, f.getTipoComprobante()));
-      if (idPedido != null) {
+        f ->
+            productoService.actualizarStock(
+                this.getIdsProductosYCantidades(f),
+                TipoDeOperacion.ALTA,
+                Movimiento.VENTA,
+                f.getTipoComprobante()));
+    if (idPedido != null) {
       Pedido pedido = pedidoService.getPedidoPorId(idPedido);
       facturas.forEach(f -> f.setPedido(pedido));
       for (Factura f : facturas) {
         FacturaVenta facturaGuardada =
             facturaVentaRepository.save((FacturaVenta) this.procesarFactura(f));
-        this.cuentaCorrienteService.asentarEnCuentaCorriente(
-            facturaGuardada, TipoDeOperacion.ALTA);
+        this.cuentaCorrienteService.asentarEnCuentaCorriente(facturaGuardada);
         facturasProcesadas.add(facturaGuardada);
         if (recibos != null) {
           recibos.forEach(reciboService::guardar);
         }
       }
       List<Factura> facturasParaRelacionarAlPedido = new ArrayList<>(facturasProcesadas);
-      pedidoService.actualizarFacturasDelPedido(pedido,facturasParaRelacionarAlPedido);
+      pedidoService.actualizarFacturasDelPedido(pedido, facturasParaRelacionarAlPedido);
       facturasProcesadas.forEach(f -> logger.warn("La Factura {} se guardó correctamente.", f));
       pedidoService.actualizarEstadoPedido(pedido);
     } else {
       facturasProcesadas = new ArrayList<>();
       for (Factura f : facturas) {
         FacturaVenta facturaGuardada;
-          facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFactura(f));
-          this.cuentaCorrienteService.asentarEnCuentaCorriente(
-              facturaGuardada, TipoDeOperacion.ALTA);
+        facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFactura(f));
+        this.cuentaCorrienteService.asentarEnCuentaCorriente(facturaGuardada);
         facturasProcesadas.add(facturaGuardada);
         logger.warn("La Factura {} se guardó correctamente.", facturaGuardada);
         if (recibos != null) {
@@ -416,13 +418,17 @@ public class FacturaServiceImpl implements IFacturaService {
   public List<FacturaCompra> guardar(List<FacturaCompra> facturas) {
     List<FacturaCompra> facturasProcesadas = new ArrayList<>();
     facturas.forEach(
-        f -> productoService.actualizarStock(
-                this.getIdsProductosYCantidades(f), TipoDeOperacion.ALTA, Movimiento.COMPRA, f.getTipoComprobante()));
+        f ->
+            productoService.actualizarStock(
+                this.getIdsProductosYCantidades(f),
+                TipoDeOperacion.ALTA,
+                Movimiento.COMPRA,
+                f.getTipoComprobante()));
     for (Factura f : facturas) {
       FacturaCompra facturaGuardada = null;
       if (f instanceof FacturaCompra) {
         facturaGuardada = facturaCompraRepository.save((FacturaCompra) this.procesarFactura(f));
-        this.cuentaCorrienteService.asentarEnCuentaCorriente(facturaGuardada, TipoDeOperacion.ALTA);
+        this.cuentaCorrienteService.asentarEnCuentaCorriente(facturaGuardada);
       }
       facturasProcesadas.add(facturaGuardada);
     }

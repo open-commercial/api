@@ -31,11 +31,11 @@ public interface ICuentaCorrienteService {
   Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(
       long idCuentaCorriente, Pageable pageable);
 
-  void asentarEnCuentaCorriente(FacturaVenta facturaVenta, TipoDeOperacion tipo);
+  void asentarEnCuentaCorriente(FacturaVenta facturaVenta);
 
-  void asentarEnCuentaCorriente(FacturaCompra facturaCompra, TipoDeOperacion tipo);
+  void asentarEnCuentaCorriente(FacturaCompra facturaCompra);
 
-  void asentarEnCuentaCorriente(Nota nota, TipoDeOperacion tipo);
+  void asentarEnCuentaCorriente(Nota nota);
 
   void asentarEnCuentaCorriente(Recibo recibo, TipoDeOperacion tipo);
 
