@@ -162,12 +162,21 @@ public class ClienteController {
         cliente.setCredencial(usuarioCredencial);
       }
     }
+    if (nuevoCliente.getUbicacionFacturacion() != null) {
+      cliente.setUbicacionFacturacion(
+          modelMapper.map(nuevoCliente.getUbicacionFacturacion(), Ubicacion.class));
+    } else {
+      cliente.setUbicacionFacturacion(null);
+    }
+    if (nuevoCliente.getUbicacionEnvio() != null) {
+      cliente.setUbicacionEnvio(modelMapper.map(nuevoCliente.getUbicacionEnvio(), Ubicacion.class));
+    } else {
+      cliente.setUbicacionEnvio(null);
+    }
     cliente.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     if (idViajante != null) {
       cliente.setViajante(usuarioService.getUsuarioPorId(idViajante));
     }
-    cliente.setUbicacionFacturacion(null);
-    cliente.setUbicacionEnvio(null);
     return clienteService.guardar(cliente);
   }
 

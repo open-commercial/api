@@ -11,6 +11,7 @@ import javax.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,17 +26,21 @@ public class ClienteServiceImpl implements IClienteService {
   private final ClienteRepository clienteRepository;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IUsuarioService usuarioService;
+  private final IUbicacionService ubicacionService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Autowired
+  @Lazy
   public ClienteServiceImpl(
       ClienteRepository clienteRepository,
       ICuentaCorrienteService cuentaCorrienteService,
-      IUsuarioService usuarioService) {
+      IUsuarioService usuarioService,
+      IUbicacionService ubicacionService) {
     this.clienteRepository = clienteRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.usuarioService = usuarioService;
+    this.ubicacionService = ubicacionService;
   }
 
   @Override
@@ -197,12 +202,23 @@ public class ClienteServiceImpl implements IClienteService {
       }
     }
     // Ubicacion
-    if (cliente.getUbicacionFacturacion() != null && cliente.getUbicacionEnvio() != null) {
-      if (cliente.getUbicacionFacturacion().getIdUbicacion()
-          == cliente.getUbicacionEnvio().getIdUbicacion()) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_ubicacion_facturacion_envio_iguales"));
-      }
+    if (cliente.getUbicacionFacturacion() != null
+        && cliente.getUbicacionEnvio() != null
+        && operacion == TipoDeOperacion.ACTUALIZACION
+        && (cliente.getUbicacionFacturacion().getIdUbicacion()
+            == cliente.getUbicacionEnvio().getIdUbicacion())) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_ubicacion_facturacion_envio_iguales"));
+    }
+    if (cliente.getUbicacionFacturacion() != null
+        && cliente.getUbicacionFacturacion().getLocalidad() == null) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_ubicacion_facturacion_sin_localidad"));
+    }
+    if (cliente.getUbicacionEnvio() != null
+      && cliente.getUbicacionEnvio().getLocalidad() == null) {
+      throw new BusinessServiceException(
+        RESOURCE_BUNDLE.getString("mensaje_ubicacion_envio_sin_localidad"));
     }
   }
 
@@ -213,6 +229,21 @@ public class ClienteServiceImpl implements IClienteService {
     cliente.setEliminado(false);
     cliente.setNroCliente(this.generarNroDeCliente(cliente.getEmpresa()));
     if (cliente.getBonificacion() == null) cliente.setBonificacion(BigDecimal.ZERO);
+    if (cliente.getUbicacionFacturacion() != null
+        && cliente.getUbicacionFacturacion().getIdLocalidad() != null) {
+      cliente
+          .getUbicacionFacturacion()
+          .setLocalidad(
+              ubicacionService.getLocalidadPorId(
+                  cliente.getUbicacionFacturacion().getIdLocalidad()));
+    }
+    if (cliente.getUbicacionEnvio() != null
+        && cliente.getUbicacionEnvio().getIdLocalidad() != null) {
+      cliente
+          .getUbicacionEnvio()
+          .setLocalidad(
+              ubicacionService.getLocalidadPorId(cliente.getUbicacionEnvio().getIdLocalidad()));
+    }
     this.validarOperacion(TipoDeOperacion.ALTA, cliente);
     CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
     cuentaCorrienteCliente.setCliente(cliente);

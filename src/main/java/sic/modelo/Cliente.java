@@ -24,7 +24,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombreFiscal", "idFiscal", "empresa"})
 @ToString
-@JsonIgnoreProperties({"ubicacionFacturacion", "ubicacionEnvio","empresa", "viajante", "credencial", "eliminado"})
+@JsonIgnoreProperties({"empresa", "viajante", "credencial", "eliminado"})
 public class Cliente implements Serializable {
 
   @Id @GeneratedValue private long id_Cliente;
@@ -52,12 +52,12 @@ public class Cliente implements Serializable {
 
   private String telefono;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "idUbicacionFacturacion", referencedColumnName = "idUbicacion")
   @QueryInit("localidad.provincia")
   private Ubicacion ubicacionFacturacion;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "idUbicacionEnvio", referencedColumnName = "idUbicacion")
   @QueryInit("localidad.provincia")
   private Ubicacion ubicacionEnvio;

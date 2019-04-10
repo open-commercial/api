@@ -21,7 +21,6 @@ import java.util.ResourceBundle;
 public class UbicacionController {
 
   private final IUbicacionService ubicacionService;
-  private final IClienteService clienteService;
   private final IEmpresaService empresaService;
   private final IProveedorService proveedorService;
   private final ITransportistaService transportistaService;
@@ -31,13 +30,11 @@ public class UbicacionController {
   @Autowired
   public UbicacionController(
     IUbicacionService ubicacionService,
-    IClienteService clienteService,
     IEmpresaService empresaService,
     IProveedorService proveedorService,
     ITransportistaService transportistaService,
     ModelMapper modelMapper) {
     this.ubicacionService = ubicacionService;
-    this.clienteService = clienteService;
     this.empresaService = empresaService;
     this.proveedorService = proveedorService;
     this.transportistaService = transportistaService;
@@ -91,42 +88,6 @@ public class UbicacionController {
   })
   public List<Provincia> getProvincias() {
     return ubicacionService.getProvincias();
-  }
-
-  @PostMapping("/ubicaciones/clientes/{idCliente}/facturacion")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
-  public Ubicacion guardarUbicacionDeFacturacion(
-    @RequestBody UbicacionDTO ubicacionDTO, @PathVariable Long idCliente) {
-    Cliente cliente = clienteService.getClientePorId(idCliente);
-    Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
-    ubicacion.setLocalidad(ubicacionService.getLocalidadPorId(ubicacionDTO.getIdLocalidad()));
-    return ubicacionService.guardarUbicacionDeFacturacionCliente(
-      ubicacion,
-      cliente);
-  }
-
-  @PostMapping("/ubicaciones/clientes/{idCliente}/envio")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
-  public Ubicacion guardarUbicacionDeEnvio(
-    @RequestBody UbicacionDTO ubicacionDTO, @PathVariable Long idCliente) {
-    Cliente cliente = clienteService.getClientePorId(idCliente);
-    Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
-    ubicacion.setLocalidad(ubicacionService.getLocalidadPorId(ubicacionDTO.getIdLocalidad()));
-    return ubicacionService.guardarUbicacionDeEnvioCliente(
-      ubicacion,
-      cliente);
   }
 
   @PutMapping("/ubicaciones")
