@@ -117,7 +117,7 @@ public class ProductoController {
 
   @JsonView(Views.Public.class)
   @GetMapping("/public/productos/destacados")
-  public Map<String, List<Producto>> getProductosDestacados(
+  public Map<String, List<Producto>> getProductosDestacadosPublic(
       @RequestParam long idEmpresa,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Cliente cliente = null;

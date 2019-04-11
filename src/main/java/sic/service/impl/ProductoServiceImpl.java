@@ -70,21 +70,20 @@ public class ProductoServiceImpl implements IProductoService {
 
   private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
     if (operacion == TipoDeOperacion.ACTUALIZACION) {
-      if (producto.isDestacado()) {
-        if (!producto.isPublico()
-            || (producto.getUrlImagen() == null || producto.getUrlImagen().isEmpty())) {
-          throw new BusinessServiceException(
-              RESOURCE_BUNDLE.getString("mensaje_producto_destacado_privado_o_sin_imagen"));
-        }
-        if (productoRepository.getCantidadDeProductosDestacadosPorRubro(
-                producto.getRubro().getId_Rubro())
-            >= CANTIDAD_DE_PRODUCTOS_DESTACADOS) {
-          throw new BusinessServiceException(
-              MessageFormat.format(
-                  RESOURCE_BUNDLE.getString("mensaje_producto_destacado_cantidad_minima_superada"),
-                  CANTIDAD_DE_PRODUCTOS_DESTACADOS,
-                  producto.getRubro().getNombre()));
-        }
+      if (producto.isDestacado()
+          && (!producto.isPublico()
+              || (producto.getUrlImagen() == null || producto.getUrlImagen().isEmpty()))) {
+        throw new BusinessServiceException(
+            RESOURCE_BUNDLE.getString("mensaje_producto_destacado_privado_o_sin_imagen"));
+      }
+      if (productoRepository.getCantidadDeProductosDestacadosPorRubro(
+              producto.getRubro().getId_Rubro())
+          >= CANTIDAD_DE_PRODUCTOS_DESTACADOS) {
+        throw new BusinessServiceException(
+            MessageFormat.format(
+                RESOURCE_BUNDLE.getString("mensaje_producto_destacado_cantidad_minima_superada"),
+                CANTIDAD_DE_PRODUCTOS_DESTACADOS,
+                producto.getRubro().getNombre()));
       }
     }
     // Duplicados
@@ -117,11 +116,16 @@ public class ProductoServiceImpl implements IProductoService {
         && productoDuplicado.getIdProducto() != producto.getIdProducto())
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_producto_duplicado_descripcion"));
-    // Calculos
+    this.validarCalculos(producto);
+  }
+
+  private void validarCalculos(Producto producto) {
     Double[] iva = {10.5, 21.0, 0.0};
     if (!Arrays.asList(iva).contains(producto.getIvaPorcentaje().doubleValue())) {
       throw new BusinessServiceException(
-        MessageFormat.format(RESOURCE_BUNDLE.getString("mensaje_producto_ganancia_neta_incorrecta"), producto.getDescripcion()));
+          MessageFormat.format(
+              RESOURCE_BUNDLE.getString("mensaje_producto_ganancia_neta_incorrecta"),
+              producto.getDescripcion()));
     }
     if (producto
             .getGananciaNeto()
@@ -132,7 +136,9 @@ public class ProductoServiceImpl implements IProductoService {
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-        MessageFormat.format(RESOURCE_BUNDLE.getString("mensaje_producto_ganancia_neta_incorrecta"), producto.getDescripcion()));
+          MessageFormat.format(
+              RESOURCE_BUNDLE.getString("mensaje_producto_ganancia_neta_incorrecta"),
+              producto.getDescripcion()));
     }
     if (producto
             .getPrecioVentaPublico()
@@ -142,7 +148,9 @@ public class ProductoServiceImpl implements IProductoService {
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-        MessageFormat.format(RESOURCE_BUNDLE.getString("mensaje_precio_venta_publico_incorrecto"), producto.getDescripcion()));
+          MessageFormat.format(
+              RESOURCE_BUNDLE.getString("mensaje_precio_venta_publico_incorrecto"),
+              producto.getDescripcion()));
     }
     if (producto
             .getIvaNeto()
@@ -152,7 +160,9 @@ public class ProductoServiceImpl implements IProductoService {
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-        MessageFormat.format(RESOURCE_BUNDLE.getString("mensaje_producto_iva_neto_incorrecto"), producto.getDescripcion()));
+          MessageFormat.format(
+              RESOURCE_BUNDLE.getString("mensaje_producto_iva_neto_incorrecto"),
+              producto.getDescripcion()));
     }
     if (producto
             .getPrecioLista()
@@ -163,7 +173,9 @@ public class ProductoServiceImpl implements IProductoService {
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-        MessageFormat.format(RESOURCE_BUNDLE.getString("mensaje_producto_precio_lista_incorrecto"), producto.getDescripcion()));
+          MessageFormat.format(
+              RESOURCE_BUNDLE.getString("mensaje_producto_precio_lista_incorrecto"),
+              producto.getDescripcion()));
     }
   }
 
