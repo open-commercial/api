@@ -7,6 +7,7 @@ import sic.modelo.*;
 import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.Page;
+import sic.modelo.dto.ProductosParaActualizarDTO;
 
 import javax.validation.Valid;
 
@@ -55,26 +56,7 @@ public interface IProductoService {
 
   Producto guardar(@Valid Producto producto);
 
-  List<Producto> actualizarMultiples(
-      long[] idProducto,
-      boolean checkPrecios,
-      boolean checkDescuentoRecargoPorcentaje,
-      BigDecimal descuentoRecargoPorcentaje,
-      BigDecimal gananciaNeto,
-      BigDecimal gananciaPorcentaje,
-      BigDecimal IVANeto,
-      BigDecimal IVAPorcentaje,
-      BigDecimal precioCosto,
-      BigDecimal precioLista,
-      BigDecimal precioVentaPublico,
-      boolean checkMedida,
-      Long idMedida,
-      boolean checkRubro,
-      Long idRubro,
-      boolean checkProveedor,
-      Long idProveedor,
-      boolean checkVisibilidad,
-      Boolean publico);
+  List<Producto> actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO);
 
   String subirImagenProducto(long idProducto, byte[] imagen);
 

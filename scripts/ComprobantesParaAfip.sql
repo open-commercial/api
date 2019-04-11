@@ -5,10 +5,11 @@ SELECT factura.fecha, factura.tipoComprobante, factura.numSerieAfip, factura.num
     (100 * factura.iva105Neto) / 10.5 AS 'base_imponible_105', ((100 * factura.iva21Neto) / 21) AS 'base_imponible_21', factura.total
 FROM factura INNER JOIN facturaventa ON factura.id_Factura = facturaventa.id_Factura
 	INNER JOIN cliente ON facturaventa.id_Cliente = cliente.id_Cliente
-  INNER JOIN localidad ON cliente.id_Localidad = localidad.id_Localidad
-  INNER JOIN provincia ON localidad.id_Provincia = provincia.id_Provincia
+    INNER JOIN ubicacion ON cliente.idUbicacionFacturacion = ubicacion.idUbicacion
+	INNER JOIN localidad ON ubicacion.idLocalidad = localidad.idLocalidad
+	INNER JOIN provincia ON localidad.idProvincia = provincia.idProvincia
 WHERE (factura.tipoComprobante = 'FACTURA_A' OR factura.tipoComprobante = 'FACTURA_B')
-	AND (factura.fecha >= '2018-11-01 00:00:00' AND factura.fecha <= '2018-11-30 23:59:59')
+	AND (factura.fecha >= '2019-03-01 00:00:00' AND factura.fecha <= '2019-03-31 23:59:59')
 	AND factura.eliminada = 0 AND factura.id_Empresa = 1
 ORDER BY factura.tipoComprobante, factura.fecha ASC
 LIMIT 0,1000000;
@@ -20,10 +21,11 @@ SELECT nota.fecha, nota.tipoComprobante, nota.numSerieAfip, nota.numNotaAfip, no
     (100 * nota.iva105neto) / 10.5 AS 'base_imponible_105', ((100 * nota.iva21neto) / 21) AS 'base_imponible_21', nota.total
 FROM nota INNER JOIN notacredito on nota.idNota = notacredito.idNota
 	INNER JOIN cliente ON nota.id_Cliente = cliente.id_Cliente
-  INNER JOIN localidad ON cliente.id_Localidad = localidad.id_Localidad
-  INNER JOIN provincia ON localidad.id_Provincia = provincia.id_Provincia
+	INNER JOIN ubicacion ON cliente.idUbicacionFacturacion = ubicacion.idUbicacion
+	INNER JOIN localidad ON ubicacion.idLocalidad = localidad.idLocalidad
+	INNER JOIN provincia ON localidad.idProvincia = provincia.idProvincia
 WHERE (nota.tipoComprobante = 'NOTA_CREDITO_A' OR nota.tipoComprobante = 'NOTA_CREDITO_B')
-	AND (nota.fecha >= '2018-11-01 00:00:00' AND nota.fecha <= '2018-11-30 23:59:59')
+	AND (nota.fecha >= '2019-03-01 00:00:00' AND nota.fecha <= '2019-03-31 23:59:59')
 	AND nota.eliminada = 0 AND nota.id_Empresa = 1
 ORDER BY nota.tipoComprobante, nota.fecha ASC
 LIMIT 0,1000000;
@@ -35,10 +37,11 @@ SELECT nota.fecha, nota.tipoComprobante, nota.numSerieAfip, nota.numNotaAfip, no
     (100 * nota.iva105neto) / 10.5 AS 'base_imponible_105', ((100 * nota.iva21neto) / 21) AS 'base_imponible_21', nota.total
 FROM nota INNER JOIN notadebito on nota.idNota = notadebito.idNota
 	INNER JOIN cliente ON nota.id_Cliente = cliente.id_Cliente
-  INNER JOIN localidad ON cliente.id_Localidad = localidad.id_Localidad
-  INNER JOIN provincia ON localidad.id_Provincia = provincia.id_Provincia
+	INNER JOIN ubicacion ON cliente.idUbicacionFacturacion = ubicacion.idUbicacion
+	INNER JOIN localidad ON ubicacion.idLocalidad = localidad.idLocalidad
+	INNER JOIN provincia ON localidad.idProvincia = provincia.idProvincia
 WHERE (nota.tipoComprobante = 'NOTA_DEBITO_A' OR nota.tipoComprobante = 'NOTA_DEBITO_B')
-	AND (nota.fecha >= '2018-11-01 00:00:00' AND nota.fecha <= '2018-11-30 23:59:59')
+	AND (nota.fecha >= '2019-03-01 00:00:00' AND nota.fecha <= '2019-03-31 23:59:59')
 	AND nota.eliminada = 0 AND nota.id_Empresa = 1
 ORDER BY nota.tipoComprobante, nota.fecha ASC
 LIMIT 0,1000000;

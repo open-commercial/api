@@ -20,7 +20,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombre"})
 @ToString
-@JsonIgnoreProperties("localidad")
+@JsonIgnoreProperties({"ubicacion", "eliminada"})
 public class Empresa implements Serializable {
 
   @Id @GeneratedValue private long id_Empresa;
@@ -30,9 +30,6 @@ public class Empresa implements Serializable {
 
   @Column(nullable = false)
   private String lema;
-
-  @Column(nullable = false)
-  private String direccion;
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
@@ -51,22 +48,30 @@ public class Empresa implements Serializable {
   @Column(nullable = false)
   private String telefono;
 
-  @ManyToOne
-  @JoinColumn(name = "id_Localidad", referencedColumnName = "id_Localidad")
-  @QueryInit("provincia.pais")
-  private Localidad localidad;
+  @OneToOne
+  @JoinColumn(name = "idUbicacion", referencedColumnName = "idUbicacion")
+  @QueryInit("localidad.provincia")
+  private Ubicacion ubicacion;
 
   private String logo;
 
   private boolean eliminada;
 
-  @JsonGetter("idLocalidad")
-  public Long getIdLocalidad() {
-    return localidad.getId_Localidad();
+  @JsonGetter("idUbicacion")
+  public Long getidUbicacion() {
+    if (ubicacion != null) {
+      return ubicacion.getIdUbicacion();
+    } else {
+      return null;
+    }
   }
 
-  @JsonGetter("nombreLocalidad")
-  public String getNombreLocalidad() {
-    return localidad.getNombre();
+  @JsonGetter("detalleUbicacion")
+  public String getDetalleUbicacion() {
+    if (ubicacion != null) {
+      return ubicacion.toString();
+    } else {
+      return null;
+    }
   }
 }

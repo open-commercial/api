@@ -298,12 +298,6 @@ public class NotaController {
     return notaService.autorizarNota(notaService.getNotaPorId(idNota));
   }
 
-  @DeleteMapping("/notas")
-  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-  public void eliminarNota(@RequestParam long[] idsNota) {
-    notaService.eliminarNota(idsNota);
-  }
-
   @GetMapping("/notas/{idNota}/iva-neto")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getIvaNetoNota(@PathVariable long idNota) {

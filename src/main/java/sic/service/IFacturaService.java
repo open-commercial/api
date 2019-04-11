@@ -36,8 +36,6 @@ public interface IFacturaService {
 
   List<FacturaCompra> guardar(List<FacturaCompra> facturas);
 
-  void eliminar(long[] idFactura);
-
   FacturaVenta autorizarFacturaVenta(FacturaVenta fv);
 
   BigDecimal calcularIvaNetoFactura(TipoDeComprobante tipo, BigDecimal[] cantidades,

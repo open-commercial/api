@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.service.*;
 import sic.util.Validator;
 import sic.repository.ProductoRepository;
@@ -231,57 +232,57 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public void actualizarStock(
-      Map<Long, BigDecimal> idsYCantidades,
-      TipoDeOperacion operacion,
-      Movimiento movimiento,
-      TipoDeComprobante tipoDeComprobante) {
+    Map<Long, BigDecimal> idsYCantidades,
+    TipoDeOperacion operacion,
+    Movimiento movimiento,
+    TipoDeComprobante tipoDeComprobante) {
     idsYCantidades.forEach(
-        (idProducto, cantidad) -> {
-          Producto producto = productoRepository.findById(idProducto);
-          if (producto == null) {
-            logger.warn("Se intenta actualizar el stock de un producto eliminado.");
+      (idProducto, cantidad) -> {
+        Producto producto = productoRepository.findById(idProducto);
+        if (producto == null) {
+          logger.warn("Se intenta actualizar el stock de un producto eliminado.");
+        }
+        if (producto != null && !producto.isIlimitado()) {
+          List<TipoDeComprobante> tiposDeFactura =
+            Arrays.asList(
+              TipoDeComprobante.FACTURA_A,
+              TipoDeComprobante.FACTURA_B,
+              TipoDeComprobante.FACTURA_C,
+              TipoDeComprobante.FACTURA_X,
+              TipoDeComprobante.FACTURA_Y,
+              TipoDeComprobante.PRESUPUESTO);
+          List<TipoDeComprobante> tiposDeNotaCreditoQueAfectanStock =
+            Arrays.asList(
+              TipoDeComprobante.NOTA_CREDITO_A,
+              TipoDeComprobante.NOTA_CREDITO_B,
+              TipoDeComprobante.NOTA_CREDITO_X,
+              TipoDeComprobante.NOTA_CREDITO_X,
+              TipoDeComprobante.NOTA_CREDITO_Y,
+              TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO);
+          switch (movimiento) {
+            case VENTA:
+              if (tiposDeFactura.contains(tipoDeComprobante)) {
+                this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(operacion, producto, cantidad);
+              }
+              if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
+                this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(operacion, producto, cantidad);
+              }
+              break;
+            case COMPRA:
+              if (tiposDeFactura.contains(tipoDeComprobante)) {
+                this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(operacion, producto, cantidad);
+              }
+              if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
+                this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(operacion, producto, cantidad);
+              }
+              break;
+            default:
+              throw new BusinessServiceException(
+                RESOURCE_BUNDLE.getString("mensaje_movimiento_no_valido"));
           }
-          if (producto != null && !producto.isIlimitado()) {
-            List<TipoDeComprobante> tiposDeFactura =
-                Arrays.asList(
-                    TipoDeComprobante.FACTURA_A,
-                    TipoDeComprobante.FACTURA_B,
-                    TipoDeComprobante.FACTURA_C,
-                    TipoDeComprobante.FACTURA_X,
-                    TipoDeComprobante.FACTURA_Y,
-                    TipoDeComprobante.PRESUPUESTO);
-            List<TipoDeComprobante> tiposDeNotaCreditoQueAfectanStock =
-                Arrays.asList(
-                    TipoDeComprobante.NOTA_CREDITO_A,
-                    TipoDeComprobante.NOTA_CREDITO_B,
-                    TipoDeComprobante.NOTA_CREDITO_X,
-                    TipoDeComprobante.NOTA_CREDITO_X,
-                    TipoDeComprobante.NOTA_CREDITO_Y,
-                    TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO);
-            switch (movimiento) {
-              case VENTA:
-                if (tiposDeFactura.contains(tipoDeComprobante)) {
-                  this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(operacion, producto, cantidad);
-                }
-                if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
-                  this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(operacion, producto, cantidad);
-                }
-                break;
-              case COMPRA:
-                if (tiposDeFactura.contains(tipoDeComprobante)) {
-                  this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(operacion, producto, cantidad);
-                }
-                if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
-                  this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(operacion, producto, cantidad);
-                }
-                break;
-              default:
-                throw new BusinessServiceException(
-                    RESOURCE_BUNDLE.getString("mensaje_movimiento_no_valido"));
-            }
-            productoRepository.save(producto);
-          }
-        });
+          productoRepository.save(producto);
+        }
+      });
   }
 
   private void cambiaStockPorFacturaVentaOrNotaCreditoCompra(TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
@@ -327,68 +328,69 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public List<Producto> actualizarMultiples(
-      long[] idProducto,
-      boolean checkPrecios,
-      boolean checkDescuentoRecargoPorcentaje,
-      BigDecimal descuentoRecargoPorcentaje,
-      BigDecimal gananciaNeto,
-      BigDecimal gananciaPorcentaje,
-      BigDecimal ivaNeto,
-      BigDecimal ivaPorcentaje,
-      BigDecimal precioCosto,
-      BigDecimal precioLista,
-      BigDecimal precioVentaPublico,
-      boolean checkMedida,
-      Long idMedida,
-      boolean checkRubro,
-      Long idRubro,
-      boolean checkProveedor,
-      Long idProveedor,
-      boolean checkVisibilidad,
-      Boolean publico) {
+  public List<Producto> actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO) {
+    boolean actualizaPrecios = productosParaActualizarDTO.getGananciaNeto() != null
+      && productosParaActualizarDTO.getGananciaPorcentaje() != null
+      && productosParaActualizarDTO.getIvaNeto() != null
+      && productosParaActualizarDTO.getIvaPorcentaje() != null
+      && productosParaActualizarDTO.getPrecioCosto() != null
+      && productosParaActualizarDTO.getPrecioLista() != null
+      && productosParaActualizarDTO.getPrecioVentaPublico() != null;
+    boolean aplicaDescuentoRecargoPorcentaje = productosParaActualizarDTO.getDescuentoRecargoPorcentaje() != null;
+    if (aplicaDescuentoRecargoPorcentaje && actualizaPrecios) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_modificar_producto_no_permitido"));
+    }
     // Requeridos
-    if (Validator.tieneDuplicados(idProducto)) {
+    if (Validator.tieneDuplicados(productosParaActualizarDTO.getIdProducto())) {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_error_ids_duplicados"));
     }
     List<Producto> productos = new ArrayList<>();
-    for (long i : idProducto) {
+    for (long i : productosParaActualizarDTO.getIdProducto()) {
       productos.add(this.getProductoPorId(i));
     }
     BigDecimal multiplicador = BigDecimal.ZERO;
-    if (checkDescuentoRecargoPorcentaje) {
-      if (descuentoRecargoPorcentaje.compareTo(BigDecimal.ZERO) > 0) {
+    if (aplicaDescuentoRecargoPorcentaje) {
+      if (productosParaActualizarDTO.getDescuentoRecargoPorcentaje().compareTo(BigDecimal.ZERO)
+          > 0) {
         multiplicador =
-            descuentoRecargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP).add(BigDecimal.ONE);
+            productosParaActualizarDTO
+                .getDescuentoRecargoPorcentaje()
+                .divide(CIEN, 15, RoundingMode.HALF_UP)
+                .add(BigDecimal.ONE);
       } else {
         multiplicador =
             BigDecimal.ONE.subtract(
-                descuentoRecargoPorcentaje.abs().divide(CIEN, 15, RoundingMode.HALF_UP));
+                productosParaActualizarDTO
+                    .getDescuentoRecargoPorcentaje()
+                    .abs()
+                    .divide(CIEN, 15, RoundingMode.HALF_UP));
       }
     }
     for (Producto p : productos) {
-      if (checkMedida) {
-        Medida medida = medidaService.getMedidaPorId(idMedida);
-        p.setMedida(medida);
+      if (productosParaActualizarDTO.getIdMedida() != null) {
+        p.setMedida(medidaService.getMedidaPorId(productosParaActualizarDTO.getIdMedida()));
       }
-      if (checkRubro) {
-        Rubro rubro = rubroService.getRubroPorId(idRubro);
+      if (productosParaActualizarDTO.getIdRubro() != null) {
+        Rubro rubro = rubroService.getRubroPorId(productosParaActualizarDTO.getIdRubro());
         p.setRubro(rubro);
       }
-      if (checkProveedor) {
-        Proveedor proveedor = proveedorService.getProveedorPorId(idProveedor);
+      if (productosParaActualizarDTO.getIdProveedor() != null) {
+        Proveedor proveedor =
+            proveedorService.getProveedorPorId(productosParaActualizarDTO.getIdProveedor());
         p.setProveedor(proveedor);
       }
-      if (checkPrecios) {
-        p.setPrecioCosto(precioCosto);
-        p.setGananciaPorcentaje(gananciaPorcentaje);
-        p.setGananciaNeto(gananciaNeto);
-        p.setPrecioVentaPublico(precioVentaPublico);
-        p.setIvaPorcentaje(ivaPorcentaje);
-        p.setIvaNeto(ivaNeto);
-        p.setPrecioLista(precioLista);
+      if (actualizaPrecios) {
+        p.setPrecioCosto(productosParaActualizarDTO.getPrecioCosto());
+        p.setGananciaPorcentaje(productosParaActualizarDTO.getGananciaPorcentaje());
+        p.setGananciaNeto(productosParaActualizarDTO.getGananciaNeto());
+        p.setPrecioVentaPublico(productosParaActualizarDTO.getPrecioVentaPublico());
+        p.setIvaPorcentaje(productosParaActualizarDTO.getIvaPorcentaje());
+        p.setIvaNeto(productosParaActualizarDTO.getIvaNeto());
+        p.setPrecioLista(productosParaActualizarDTO.getPrecioLista());
       }
-      if (checkDescuentoRecargoPorcentaje) {
+      if (aplicaDescuentoRecargoPorcentaje) {
         p.setPrecioCosto(p.getPrecioCosto().multiply(multiplicador));
         p.setGananciaNeto(p.getGananciaNeto().multiply(multiplicador));
         p.setPrecioVentaPublico(p.getPrecioVentaPublico().multiply(multiplicador));
@@ -396,12 +398,17 @@ public class ProductoServiceImpl implements IProductoService {
         p.setPrecioLista(p.getPrecioLista().multiply(multiplicador));
         p.setFechaUltimaModificacion(new Date());
       }
-      if (checkMedida || checkRubro || checkProveedor || checkPrecios) {
+      if (productosParaActualizarDTO.getIdMedida() != null
+          || productosParaActualizarDTO.getIdRubro() != null
+          || productosParaActualizarDTO.getIdProveedor() != null
+          || actualizaPrecios
+          || aplicaDescuentoRecargoPorcentaje) {
         p.setFechaUltimaModificacion(new Date());
       }
-      if (checkVisibilidad) {
-        p.setPublico(publico);
-        if (!publico) carritoCompraService.eliminarItem(p.getIdProducto());
+      if (productosParaActualizarDTO.getPublico() != null) {
+        p.setPublico(productosParaActualizarDTO.getPublico());
+        if (!productosParaActualizarDTO.getPublico())
+          carritoCompraService.eliminarItem(p.getIdProducto());
       }
       this.validarOperacion(TipoDeOperacion.ACTUALIZACION, p);
     }

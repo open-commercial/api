@@ -1,6 +1,7 @@
 package sic.controller;
 
 import io.jsonwebtoken.Claims;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.dto.ClienteDTO;
 import sic.service.*;
 
 import java.util.ResourceBundle;
@@ -19,23 +21,23 @@ public class ClienteController {
 
   private final IClienteService clienteService;
   private final IEmpresaService empresaService;
-  private final ILocalidadService localidadService;
   private final IUsuarioService usuarioService;
   private final IAuthService authService;
+  private final ModelMapper modelMapper;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
   public ClienteController(
       IClienteService clienteService,
       IEmpresaService empresaService,
-      ILocalidadService localidadService,
       IUsuarioService usuarioService,
-      IAuthService authService) {
+      IAuthService authService,
+      ModelMapper modelMapper) {
     this.clienteService = clienteService;
     this.empresaService = empresaService;
-    this.localidadService = localidadService;
     this.usuarioService = usuarioService;
     this.authService = authService;
+    this.modelMapper = modelMapper;
   }
 
   @GetMapping("/clientes/{idCliente}")
@@ -58,7 +60,6 @@ public class ClienteController {
       @RequestParam(required = false) String nombreFantasia,
       @RequestParam(required = false) Long idFiscal,
       @RequestParam(required = false) Long idViajante,
-      @RequestParam(required = false) Long idPais,
       @RequestParam(required = false) Long idProvincia,
       @RequestParam(required = false) Long idLocalidad,
       @RequestParam(required = false) Integer pagina,
@@ -69,18 +70,25 @@ public class ClienteController {
     Pageable pageable;
     if (ordenarPor == null || sentido == null) {
       pageable =
-          new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombreFiscal"));
+          new PageRequest(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombreFiscal"));
     } else {
       switch (sentido) {
-        case "ASC" : pageable =
-                new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
-        break;
-        case "DESC" : pageable =
-                new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        case "ASC":
+          pageable =
+              new PageRequest(
+                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
           break;
-        default: pageable =
-                new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombreFiscal"));
-        break;
+        case "DESC":
+          pageable =
+              new PageRequest(
+                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+          break;
+        default:
+          pageable =
+              new PageRequest(
+                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombreFiscal"));
+          break;
       }
     }
     BusquedaClienteCriteria criteria =
@@ -93,8 +101,6 @@ public class ClienteController {
             .idFiscal(idFiscal)
             .buscaPorViajante(idViajante != null)
             .idViajante(idViajante)
-            .buscaPorPais(idPais != null)
-            .idPais(idPais)
             .buscaPorProvincia(idProvincia != null)
             .idProvincia(idProvincia)
             .buscaPorLocalidad(idLocalidad != null)
@@ -135,12 +141,12 @@ public class ClienteController {
     Rol.COMPRADOR
   })
   public Cliente guardar(
-      @RequestBody Cliente cliente,
+      @RequestBody ClienteDTO nuevoCliente,
       @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long idLocalidad,
       @RequestParam(required = false) Long idViajante,
       @RequestParam Long idCredencial,
       @RequestHeader("Authorization") String authorizationHeader) {
+    Cliente cliente = modelMapper.map(nuevoCliente, Cliente.class);
     if (idCredencial != null) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
@@ -156,11 +162,12 @@ public class ClienteController {
         cliente.setCredencial(usuarioCredencial);
       }
     }
-    if (idLocalidad != null) cliente.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
     cliente.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     if (idViajante != null) {
       cliente.setViajante(usuarioService.getUsuarioPorId(idViajante));
     }
+    cliente.setUbicacionFacturacion(null);
+    cliente.setUbicacionEnvio(null);
     return clienteService.guardar(cliente);
   }
 
@@ -173,12 +180,12 @@ public class ClienteController {
     Rol.COMPRADOR
   })
   public void actualizar(
-      @RequestBody Cliente clientePorActualizar,
-      @RequestParam(required = false) Long idLocalidad,
+      @RequestBody ClienteDTO clienteDTO,
       @RequestParam(required = false) Long idEmpresa,
       @RequestParam(required = false) Long idViajante,
       @RequestParam(required = false) Long idCredencial,
       @RequestHeader("Authorization") String authorizationHeader) {
+    Cliente clientePorActualizar = modelMapper.map(clienteDTO, Cliente.class);
     Cliente clientePersistido =
         clienteService.getClientePorId(clientePorActualizar.getId_Cliente());
     if (idCredencial != null) {
@@ -198,7 +205,7 @@ public class ClienteController {
         clientePorActualizar.setCredencial(usuarioCredencial);
       }
     } else {
-      clientePorActualizar.setCredencial(null);
+      clientePorActualizar.setCredencial(clientePersistido.getCredencial());
     }
     if (clientePorActualizar.getBonificacion() != null
         && clientePersistido.getBonificacion().compareTo(clientePorActualizar.getBonificacion())
@@ -214,22 +221,18 @@ public class ClienteController {
     } else {
       clientePorActualizar.setBonificacion(clientePersistido.getBonificacion());
     }
-    if (idLocalidad != null) {
-      clientePorActualizar.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
-    } else {
-      clientePorActualizar.setLocalidad(null);
-    }
     if (idEmpresa != null) {
       clientePorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     } else {
       clientePorActualizar.setEmpresa(clientePersistido.getEmpresa());
     }
-    clientePorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     if (idViajante != null) {
       clientePorActualizar.setViajante(usuarioService.getUsuarioPorId(idViajante));
     } else {
       clientePorActualizar.setViajante(null);
     }
+    clientePorActualizar.setUbicacionFacturacion(clientePersistido.getUbicacionFacturacion());
+    clientePorActualizar.setUbicacionEnvio(clientePersistido.getUbicacionEnvio());
     clienteService.actualizar(clientePorActualizar, clientePersistido);
   }
 

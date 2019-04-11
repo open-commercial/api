@@ -155,15 +155,12 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       builder.and(qCuentaCorrienteCliente.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaPorLocalidad())
       builder.and(
-          qCuentaCorrienteCliente.cliente.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
+          qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.idLocalidad.eq(
+              criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
       builder.and(
-          qCuentaCorrienteCliente.cliente.localidad.provincia.id_Provincia.eq(
+          qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.provincia.idProvincia.eq(
               criteria.getIdProvincia()));
-    if (criteria.isBuscaPorPais())
-      builder.and(
-          qCuentaCorrienteCliente.cliente.localidad.provincia.pais.id_Pais.eq(
-              criteria.getIdPais()));
     Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
@@ -220,15 +217,11 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       builder.or(qCuentaCorrienteProveedor.proveedor.idFiscal.eq(criteria.getIdFiscal()));
     if (criteria.isBuscaPorLocalidad())
       builder.and(
-          qCuentaCorrienteProveedor.proveedor.localidad.id_Localidad.eq(criteria.getIdLocalidad()));
+          qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
       builder.and(
-          qCuentaCorrienteProveedor.proveedor.localidad.provincia.id_Provincia.eq(
+          qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.provincia.idProvincia.eq(
               criteria.getIdProvincia()));
-    if (criteria.isBuscaPorPais())
-      builder.and(
-          qCuentaCorrienteProveedor.proveedor.localidad.provincia.pais.id_Pais.eq(
-              criteria.getIdPais()));
     builder.and(
         qCuentaCorrienteProveedor
             .empresa
@@ -252,107 +245,71 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   @Transactional
-  public void asentarEnCuentaCorriente(FacturaVenta facturaVenta, TipoDeOperacion tipo) {
-    if (tipo == TipoDeOperacion.ALTA) {
-      RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
-      rcc.setTipoComprobante(facturaVenta.getTipoComprobante());
-      rcc.setSerie(facturaVenta.getNumSerie());
-      rcc.setNumero(facturaVenta.getNumFactura());
-      rcc.setFactura(facturaVenta);
-      rcc.setFecha(facturaVenta.getFecha());
-      rcc.setFechaVencimiento(facturaVenta.getFechaVencimiento());
-      rcc.setIdMovimiento(facturaVenta.getId_Factura());
-      rcc.setMonto(facturaVenta.getTotal().negate());
-      CuentaCorriente cc = this.getCuentaCorrientePorCliente(facturaVenta.getCliente());
-      cc.getRenglones().add(rcc);
-      cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));
-      cc.setFechaUltimoMovimiento(facturaVenta.getFecha());
-      rcc.setCuentaCorriente(cc);
-      this.renglonCuentaCorrienteRepository.save(rcc);
-      logger.warn(
-              RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
-    }
-    if (tipo == TipoDeOperacion.ELIMINACION) {
-      RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeFactura(facturaVenta, false);
-      CuentaCorriente cc = this.getCuentaCorrientePorCliente(facturaVenta.getCliente());
-      cc.setSaldo(cc.getSaldo().add(rcc.getMonto().negate()));
-      this.cambiarFechaUltimoComprobante(cc, rcc);
-      rcc.setEliminado(true);
-      logger.warn(
-              RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_eliminado"), rcc);
-    }
+  public void asentarEnCuentaCorriente(FacturaVenta facturaVenta) {
+    RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
+    rcc.setTipoComprobante(facturaVenta.getTipoComprobante());
+    rcc.setSerie(facturaVenta.getNumSerie());
+    rcc.setNumero(facturaVenta.getNumFactura());
+    rcc.setFactura(facturaVenta);
+    rcc.setFecha(facturaVenta.getFecha());
+    rcc.setFechaVencimiento(facturaVenta.getFechaVencimiento());
+    rcc.setIdMovimiento(facturaVenta.getId_Factura());
+    rcc.setMonto(facturaVenta.getTotal().negate());
+    CuentaCorriente cc = this.getCuentaCorrientePorCliente(facturaVenta.getCliente());
+    cc.getRenglones().add(rcc);
+    cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));
+    cc.setFechaUltimoMovimiento(facturaVenta.getFecha());
+    rcc.setCuentaCorriente(cc);
+    this.renglonCuentaCorrienteRepository.save(rcc);
+    logger.warn(RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
   }
 
   @Override
   @Transactional
-  public void asentarEnCuentaCorriente(FacturaCompra facturaCompra, TipoDeOperacion tipo) {
-    if (tipo == TipoDeOperacion.ALTA) {
-      RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
-      rcc.setTipoComprobante(facturaCompra.getTipoComprobante());
-      rcc.setSerie(facturaCompra.getNumSerie());
-      rcc.setNumero(facturaCompra.getNumFactura());
-      rcc.setFactura(facturaCompra);
-      rcc.setFecha(facturaCompra.getFecha());
-      rcc.setFechaVencimiento(facturaCompra.getFechaVencimiento());
-      rcc.setIdMovimiento(facturaCompra.getId_Factura());
-      rcc.setMonto(facturaCompra.getTotal().negate());
-      CuentaCorriente cc = this.getCuentaCorrientePorProveedor(facturaCompra.getProveedor());
-      cc.getRenglones().add(rcc);
-      cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));
-      cc.setFechaUltimoMovimiento(facturaCompra.getFecha());
-      rcc.setCuentaCorriente(cc);
-      this.renglonCuentaCorrienteRepository.save(rcc);
-      logger.warn(
-              RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
-    }
-    if (tipo == TipoDeOperacion.ELIMINACION) {
-      RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeFactura(facturaCompra, false);
-      CuentaCorriente cc = this.getCuentaCorrientePorProveedor(facturaCompra.getProveedor());
-      cc.setSaldo(cc.getSaldo().add(rcc.getMonto().negate()));
-      this.cambiarFechaUltimoComprobante(cc, rcc);
-      rcc.setEliminado(true);
-      logger.warn(
-              RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_eliminado"), rcc);
-    }
+  public void asentarEnCuentaCorriente(FacturaCompra facturaCompra) {
+    RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
+    rcc.setTipoComprobante(facturaCompra.getTipoComprobante());
+    rcc.setSerie(facturaCompra.getNumSerie());
+    rcc.setNumero(facturaCompra.getNumFactura());
+    rcc.setFactura(facturaCompra);
+    rcc.setFecha(facturaCompra.getFecha());
+    rcc.setFechaVencimiento(facturaCompra.getFechaVencimiento());
+    rcc.setIdMovimiento(facturaCompra.getId_Factura());
+    rcc.setMonto(facturaCompra.getTotal().negate());
+    CuentaCorriente cc = this.getCuentaCorrientePorProveedor(facturaCompra.getProveedor());
+    cc.getRenglones().add(rcc);
+    cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));
+    cc.setFechaUltimoMovimiento(facturaCompra.getFecha());
+    rcc.setCuentaCorriente(cc);
+    this.renglonCuentaCorrienteRepository.save(rcc);
+    logger.warn(RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
   }
 
   @Override
   @Transactional
-  public void asentarEnCuentaCorriente(Nota nota, TipoDeOperacion tipo) {
-    if (tipo == TipoDeOperacion.ALTA) {
-      RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
-      rcc.setTipoComprobante(nota.getTipoComprobante());
-      rcc.setSerie(nota.getSerie());
-      rcc.setNumero(nota.getNroNota());
-      CuentaCorriente cc = this.getCuentaCorrientePorNota(nota);
-      if (nota instanceof NotaCredito) {
-        rcc.setMonto(nota.getTotal());
-      }
-      if (nota instanceof NotaDebito) {
-        rcc.setMonto(nota.getTotal().negate());
-      }
-      cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));
-      cc.setFechaUltimoMovimiento(nota.getFecha());
-      rcc.setDescripcion(nota.getMotivo());
-      rcc.setNota(nota);
-      rcc.setFecha(nota.getFecha());
-      rcc.setIdMovimiento(nota.getIdNota());
-      if (nota.getMovimiento() == Movimiento.COMPRA) rcc.setCAE(nota.getCAE());
-      cc.getRenglones().add(rcc);
-      rcc.setCuentaCorriente(cc);
-      this.renglonCuentaCorrienteRepository.save(rcc);
-      logger.warn(
-              RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
+  public void asentarEnCuentaCorriente(Nota nota) {
+    RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
+    rcc.setTipoComprobante(nota.getTipoComprobante());
+    rcc.setSerie(nota.getSerie());
+    rcc.setNumero(nota.getNroNota());
+    CuentaCorriente cc = this.getCuentaCorrientePorNota(nota);
+    if (nota instanceof NotaCredito) {
+      rcc.setMonto(nota.getTotal());
     }
-    if (tipo == TipoDeOperacion.ELIMINACION) {
-      CuentaCorriente cc = this.getCuentaCorrientePorNota(nota);
-      RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeNota(nota, false);
-      cc.setSaldo(cc.getSaldo().subtract(rcc.getMonto()));
-      this.cambiarFechaUltimoComprobante(cc, rcc);
-      rcc.setEliminado(true);
-      logger.warn(
-              RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_eliminado"), rcc);
+    if (nota instanceof NotaDebito) {
+      rcc.setMonto(nota.getTotal().negate());
     }
+    cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));
+    cc.setFechaUltimoMovimiento(nota.getFecha());
+    rcc.setDescripcion(nota.getMotivo());
+    rcc.setNota(nota);
+    rcc.setFecha(nota.getFecha());
+    rcc.setIdMovimiento(nota.getIdNota());
+    if (nota.getMovimiento() == Movimiento.COMPRA) rcc.setCAE(nota.getCAE());
+    cc.getRenglones().add(rcc);
+    rcc.setCuentaCorriente(cc);
+    this.renglonCuentaCorrienteRepository.save(rcc);
+    logger.warn(RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
   }
 
   private CuentaCorriente getCuentaCorrientePorNota(Nota nota) {

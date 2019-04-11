@@ -11,6 +11,8 @@ import sic.modelo.*;
 public interface ICajaService {
 
     void actualizar(Caja caja);
+
+    void validarMovimiento(Date fechaMovimiento, long idEmpresa);
     
     void eliminar(Long idCaja);
     
@@ -20,7 +22,7 @@ public interface ICajaService {
 
     Map<Long, BigDecimal> getTotalesDeFormaDePago(long idCaja);
 
-    Caja getUltimaCaja(long id_Empresa);
+    Caja getUltimaCaja(long idEmpresa);
 
     Caja abrirCaja(Empresa empresa, Usuario usuarioApertura, BigDecimal saldoApertura);
 

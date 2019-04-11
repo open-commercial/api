@@ -10,13 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.ConfiguracionDelSistema;
 import sic.modelo.Empresa;
-import sic.service.IEmpresaService;
-import sic.service.BusinessServiceException;
+import sic.modelo.Ubicacion;
+import sic.service.*;
 import sic.modelo.TipoDeOperacion;
-import sic.service.IPhotoVideoUploader;
 import sic.util.Validator;
 import sic.repository.EmpresaRepository;
-import sic.service.IConfiguracionDelSistemaService;
 
 @Service
 public class EmpresaServiceImpl implements IEmpresaService {
@@ -32,7 +30,6 @@ public class EmpresaServiceImpl implements IEmpresaService {
       EmpresaRepository empresaRepository,
       IConfiguracionDelSistemaService configuracionDelSistemaService,
       IPhotoVideoUploader photoVideoUploader) {
-
     this.empresaRepository = empresaRepository;
     this.configuracionDelSistemaService = configuracionDelSistemaService;
     this.photoVideoUploader = photoVideoUploader;
@@ -73,14 +70,6 @@ public class EmpresaServiceImpl implements IEmpresaService {
     // Requeridos
     if (Validator.esVacio(empresa.getNombre())) {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_empresa_vacio_nombre"));
-    }
-    if (Validator.esVacio(empresa.getDireccion())) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_empresa_vacio_direccion"));
-    }
-    if (empresa.getLocalidad() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_empresa_vacio_localidad"));
     }
     // Duplicados
     // Nombre

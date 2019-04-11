@@ -1,6 +1,7 @@
 package sic.controller;
 
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,6 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.dto.ProveedorDTO;
 import sic.service.IEmpresaService;
-import sic.service.ILocalidadService;
 import sic.service.IProveedorService;
 
 @RestController
@@ -30,18 +30,15 @@ public class ProveedorController {
 
   private final IProveedorService proveedorService;
   private final IEmpresaService empresaService;
-  private final ILocalidadService localidadService;
   private final ModelMapper modelMapper;
 
   @Autowired
   public ProveedorController(
-      IProveedorService proveedorService,
-      IEmpresaService empresaService,
-      ILocalidadService localidadService,
-      ModelMapper modelMapper) {
+    IProveedorService proveedorService,
+    IEmpresaService empresaService,
+    ModelMapper modelMapper) {
     this.proveedorService = proveedorService;
     this.empresaService = empresaService;
-    this.localidadService = localidadService;
     this.modelMapper = modelMapper;
   }
 
@@ -54,38 +51,35 @@ public class ProveedorController {
   @PostMapping("/proveedores")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Proveedor guardar(
-      @RequestBody ProveedorDTO proveedorDTO,
-      @RequestParam Long idEmpresa,
-      @RequestParam Long idLocalidad) {
+    @RequestBody ProveedorDTO proveedorDTO,
+    @RequestParam Long idEmpresa) {
     Proveedor proveedor = modelMapper.map(proveedorDTO, Proveedor.class);
     proveedor.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    proveedor.setLocalidad(localidadService.getLocalidadPorId(idLocalidad));
     return proveedorService.guardar(proveedor);
   }
 
   @PutMapping("/proveedores")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(
-      @RequestBody ProveedorDTO proveedorDTO,
-      @RequestParam(required = false) Long idEmpresa,
-      @RequestParam(required = false) Long idLocalidad) {
+    @RequestBody ProveedorDTO proveedorDTO,
+    @RequestParam(required = false) Long idEmpresa) {
     Proveedor proveedorPersistido =
-        proveedorService.getProveedorPorId(proveedorDTO.getId_Proveedor());
+      proveedorService.getProveedorPorId(proveedorDTO.getId_Proveedor());
     Proveedor proveedorPorActualizar = modelMapper.map(proveedorDTO, Proveedor.class);
-    if (proveedorPorActualizar.getRazonSocial() == null || proveedorPorActualizar.getRazonSocial().isEmpty()) {
+    if (proveedorPorActualizar.getRazonSocial() == null
+      || proveedorPorActualizar.getRazonSocial().isEmpty()) {
       proveedorPorActualizar.setRazonSocial(proveedorPersistido.getRazonSocial());
     }
     if (proveedorPorActualizar.getCategoriaIVA() == null) {
       proveedorPorActualizar.setCategoriaIVA(proveedorPersistido.getCategoriaIVA());
     }
-    if (proveedorPorActualizar.getLocalidad() == null) {
-      proveedorPorActualizar.setLocalidad(proveedorPersistido.getLocalidad());
+    if (proveedorPersistido.getUbicacion() != null) {
+      proveedorPorActualizar.setUbicacion(proveedorPersistido.getUbicacion());
+    } else {
+      proveedorPorActualizar.setUbicacion(null);
     }
     if (idEmpresa != null) {
       proveedorPorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    }
-    if (idLocalidad != null) {
-      proveedorPorActualizar.setLocalidad(localidadService.getLocalidadPorId(idLocalidad ));
     }
     if (proveedorService.getProveedorPorId(proveedorPorActualizar.getId_Proveedor()) != null) {
       proveedorService.actualizar(proveedorPorActualizar);
@@ -95,17 +89,16 @@ public class ProveedorController {
   @GetMapping("/proveedores/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Page<Proveedor> buscarProveedores(
-      @RequestParam(value = "idEmpresa") long idEmpresa,
-      @RequestParam(required = false) String codigo,
-      @RequestParam(required = false) String razonSocial,
-      @RequestParam(required = false) Long idFiscal,
-      @RequestParam(required = false) Long idPais,
-      @RequestParam(required = false) Long idProvincia,
-      @RequestParam(required = false) Long idLocalidad,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) Integer tamanio,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido) {
+    @RequestParam(value = "idEmpresa") long idEmpresa,
+    @RequestParam(required = false) String codigo,
+    @RequestParam(required = false) String razonSocial,
+    @RequestParam(required = false) Long idFiscal,
+    @RequestParam(required = false) Long idProvincia,
+    @RequestParam(required = false) Long idLocalidad,
+    @RequestParam(required = false) Integer pagina,
+    @RequestParam(required = false) Integer tamanio,
+    @RequestParam(required = false) String ordenarPor,
+    @RequestParam(required = false) String sentido) {
     final int TAMANIO_PAGINA_DEFAULT = 50;
     if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
     if (pagina == null || pagina < 0) pagina = 0;
@@ -126,22 +119,20 @@ public class ProveedorController {
       }
     }
     BusquedaProveedorCriteria criteria =
-        BusquedaProveedorCriteria.builder()
-            .buscaPorCodigo(codigo != null)
-            .codigo(codigo)
-            .buscaPorRazonSocial(razonSocial != null)
-            .razonSocial(razonSocial)
-            .buscaPorIdFiscal(idFiscal != null)
-            .idFiscal(idFiscal)
-            .buscaPorPais(idPais != null)
-            .idPais(idPais)
-            .buscaPorProvincia(idProvincia != null)
-            .idProvincia(idProvincia)
-            .buscaPorLocalidad(idLocalidad != null)
-            .idLocalidad(idLocalidad)
-            .idEmpresa(idEmpresa)
-            .pageable(pageable)
-            .build();
+      BusquedaProveedorCriteria.builder()
+        .buscaPorCodigo(codigo != null)
+        .codigo(codigo)
+        .buscaPorRazonSocial(razonSocial != null)
+        .razonSocial(razonSocial)
+        .buscaPorIdFiscal(idFiscal != null)
+        .idFiscal(idFiscal)
+        .buscaPorProvincia(idProvincia != null)
+        .idProvincia(idProvincia)
+        .buscaPorLocalidad(idLocalidad != null)
+        .idLocalidad(idLocalidad)
+        .idEmpresa(idEmpresa)
+        .pageable(pageable)
+        .build();
     return proveedorService.buscarProveedores(criteria);
   }
 

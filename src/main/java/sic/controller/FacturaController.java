@@ -72,7 +72,15 @@ public class FacturaController {
       @RequestParam(required = false) Long idPedido) {
     Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
     fv.setEmpresa(empresa);
-    fv.setCliente(clienteService.getClientePorId(idCliente));
+    Cliente cliente = clienteService.getClientePorId(idCliente);
+    if (cliente.getUbicacionFacturacion() == null
+        && (fv.getTipoComprobante() == TipoDeComprobante.FACTURA_A
+            || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_B
+            || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_C)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_facturacion_vacia"));
+    }
+    fv.setCliente(cliente);
     fv.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
     fv.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
     List<FacturaVenta> facturasGuardadas;
@@ -130,13 +138,7 @@ public class FacturaController {
     public FacturaVenta autorizarFactura(@PathVariable long idFactura) {
         return facturaService.autorizarFacturaVenta((FacturaVenta) facturaService.getFacturaPorId(idFactura));
     }
-    
-    @DeleteMapping("/facturas")
-    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-    public void eliminar(@RequestParam long[] idFactura) {
-        facturaService.eliminar(idFactura);
-    }
-        
+
     @GetMapping("/facturas/{idFactura}/renglones")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public List<RenglonFactura> getRenglonesDeLaFactura(@PathVariable long idFactura) {

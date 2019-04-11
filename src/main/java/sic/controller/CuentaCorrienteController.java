@@ -48,7 +48,6 @@ public class CuentaCorrienteController {
       @RequestParam(required = false) String nombreFantasia,
       @RequestParam(required = false) Long idFiscal,
       @RequestParam(required = false) Long idViajante,
-      @RequestParam(required = false) Long idPais,
       @RequestParam(required = false) Long idProvincia,
       @RequestParam(required = false) Long idLocalidad,
       @RequestParam(required = false) Integer pagina,
@@ -92,8 +91,6 @@ public class CuentaCorrienteController {
             .idFiscal(idFiscal)
             .buscaPorViajante(idViajante != null)
             .idViajante(idViajante)
-            .buscaPorPais(idPais != null)
-            .idPais(idPais)
             .buscaPorProvincia(idProvincia != null)
             .idProvincia(idProvincia)
             .buscaPorLocalidad(idLocalidad != null)
@@ -118,7 +115,6 @@ public class CuentaCorrienteController {
       @RequestParam(required = false) String codigo,
       @RequestParam(required = false) String razonSocial,
       @RequestParam(required = false) Long idFiscal,
-      @RequestParam(required = false) Long idPais,
       @RequestParam(required = false) Long idProvincia,
       @RequestParam(required = false) Long idLocalidad,
       @RequestParam(required = false) Integer pagina,
@@ -163,8 +159,6 @@ public class CuentaCorrienteController {
             .idFiscal(idFiscal)
             .buscaPorIdFiscal(idFiscal != null)
             .idFiscal(idFiscal)
-            .buscaPorPais(idPais != null)
-            .idPais(idPais)
             .buscaPorProvincia(idProvincia != null)
             .idProvincia(idProvincia)
             .buscaPorLocalidad(idLocalidad != null)
