@@ -41,8 +41,6 @@ public interface INotaService {
 
   List<RenglonFactura> getRenglonesFacturaModificadosParaNotaCredito(long idFactura);
 
-  void eliminarNota(long[] idNota);
-
   BigDecimal calcularTotalNota(List<RenglonNotaCredito> renglonesNota);
 
   BigDecimal getIvaNetoNota(Long idNota);

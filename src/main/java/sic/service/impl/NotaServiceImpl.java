@@ -706,7 +706,7 @@ public class NotaServiceImpl implements INotaService {
     }
     this.validarCalculosCredito(notaCredito);
     notaCredito = notaCreditoRepository.save(notaCredito);
-    this.cuentaCorrienteService.asentarEnCuentaCorriente(notaCredito, TipoDeOperacion.ALTA);
+    this.cuentaCorrienteService.asentarEnCuentaCorriente(notaCredito);
     logger.warn("La Nota {} se guardó correctamente.", notaCredito);
     return notaCredito;
   }
@@ -738,7 +738,7 @@ public class NotaServiceImpl implements INotaService {
     }
     this.validarCalculosDebito(notaDebito);
     notaDebito = notaDebitoRepository.save(notaDebito);
-    cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito, TipoDeOperacion.ALTA);
+    cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito);
     logger.warn("La Nota {} se guardó correctamente.", notaDebito);
     return notaDebito;
   }
@@ -915,45 +915,6 @@ public class NotaServiceImpl implements INotaService {
       logger.error(ex.getMessage());
       throw new ServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_error_reporte"), ex);
-    }
-  }
-
-  @Override
-  @Transactional
-  public void eliminarNota(long[] idsNota) {
-    for (long idNota : idsNota) {
-      Nota nota = this.getNotaPorId(idNota);
-      if (nota != null) {
-        if (nota.getMovimiento() == Movimiento.VENTA) {
-          if (nota.getCAE() != 0L) {
-            throw new BusinessServiceException(
-                ResourceBundle.getBundle("Mensajes").getString("mensaje_eliminar_nota_aprobada"));
-          }
-          if (nota instanceof NotaCredito) {
-            NotaCredito nc = (NotaCredito) nota;
-            if (nc.isModificaStock()) {
-              this.actualizarStock(
-                  nc.getRenglonesNotaCredito(),
-                  TipoDeOperacion.ELIMINACION,
-                  nota.getMovimiento(),
-                  nota.getTipoComprobante());
-            }
-          }
-        } else if (nota.getMovimiento() == Movimiento.COMPRA && nota instanceof NotaCredito) {
-          NotaCredito nc = (NotaCredito) nota;
-          if (nc.isModificaStock()) {
-            this.actualizarStock(
-                nc.getRenglonesNotaCredito(),
-                TipoDeOperacion.ELIMINACION,
-                nota.getMovimiento(),
-                nota.getTipoComprobante());
-          }
-        }
-        nota.setEliminada(true);
-        this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ELIMINACION);
-        notaRepository.save(nota);
-        logger.warn("La Nota {} se eliminó correctamente.", nota);
-      }
     }
   }
 
