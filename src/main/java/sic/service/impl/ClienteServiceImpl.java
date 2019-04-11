@@ -205,6 +205,8 @@ public class ClienteServiceImpl implements IClienteService {
     if (cliente.getUbicacionFacturacion() != null
         && cliente.getUbicacionEnvio() != null
         && operacion == TipoDeOperacion.ACTUALIZACION
+        && (cliente.getUbicacionFacturacion().getIdUbicacion() != 0L)
+        && (cliente.getUbicacionEnvio().getIdUbicacion() != 0L)
         && (cliente.getUbicacionFacturacion().getIdUbicacion()
             == cliente.getUbicacionEnvio().getIdUbicacion())) {
       throw new BusinessServiceException(

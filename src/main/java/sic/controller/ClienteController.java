@@ -22,6 +22,7 @@ public class ClienteController {
   private final IClienteService clienteService;
   private final IEmpresaService empresaService;
   private final IUsuarioService usuarioService;
+  private final IUbicacionService ubicacionService;
   private final IAuthService authService;
   private final ModelMapper modelMapper;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
@@ -31,11 +32,13 @@ public class ClienteController {
       IClienteService clienteService,
       IEmpresaService empresaService,
       IUsuarioService usuarioService,
+      IUbicacionService ubicacionService,
       IAuthService authService,
       ModelMapper modelMapper) {
     this.clienteService = clienteService;
     this.empresaService = empresaService;
     this.usuarioService = usuarioService;
+    this.ubicacionService = ubicacionService;
     this.authService = authService;
     this.modelMapper = modelMapper;
   }
@@ -142,40 +145,39 @@ public class ClienteController {
   })
   public Cliente guardar(
       @RequestBody ClienteDTO nuevoCliente,
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long idViajante,
-      @RequestParam Long idCredencial,
       @RequestHeader("Authorization") String authorizationHeader) {
     Cliente cliente = modelMapper.map(nuevoCliente, Cliente.class);
-    if (idCredencial != null) {
+    if (nuevoCliente.getIdCredencial() != null) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
       Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
-      if (idCredencial != idUsuarioLoggedIn
+      if (nuevoCliente.getIdCredencial() != idUsuarioLoggedIn
           && !(usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
               || usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)
               || usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR))) {
         throw new ForbiddenException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
       } else {
-        Usuario usuarioCredencial = usuarioService.getUsuarioPorId(idCredencial);
+        Usuario usuarioCredencial = usuarioService.getUsuarioPorId(nuevoCliente.getIdCredencial());
         cliente.setCredencial(usuarioCredencial);
       }
     }
+    cliente.setUbicacionFacturacion(null);
     if (nuevoCliente.getUbicacionFacturacion() != null) {
       cliente.setUbicacionFacturacion(
           modelMapper.map(nuevoCliente.getUbicacionFacturacion(), Ubicacion.class));
-    } else {
-      cliente.setUbicacionFacturacion(null);
     }
+    cliente.setUbicacionEnvio(null);
     if (nuevoCliente.getUbicacionEnvio() != null) {
       cliente.setUbicacionEnvio(modelMapper.map(nuevoCliente.getUbicacionEnvio(), Ubicacion.class));
-    } else {
-      cliente.setUbicacionEnvio(null);
     }
-    cliente.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    if (idViajante != null) {
-      cliente.setViajante(usuarioService.getUsuarioPorId(idViajante));
+    if (nuevoCliente.getIdEmpresa() == null) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_empresa"));
+    }
+    cliente.setEmpresa(empresaService.getEmpresaPorId(nuevoCliente.getIdEmpresa()));
+    if (nuevoCliente.getIdViajante() != null) {
+      cliente.setViajante(usuarioService.getUsuarioPorId(nuevoCliente.getIdViajante()));
     }
     return clienteService.guardar(cliente);
   }
@@ -190,27 +192,24 @@ public class ClienteController {
   })
   public void actualizar(
       @RequestBody ClienteDTO clienteDTO,
-      @RequestParam(required = false) Long idEmpresa,
-      @RequestParam(required = false) Long idViajante,
-      @RequestParam(required = false) Long idCredencial,
       @RequestHeader("Authorization") String authorizationHeader) {
     Cliente clientePorActualizar = modelMapper.map(clienteDTO, Cliente.class);
     Cliente clientePersistido =
         clienteService.getClientePorId(clientePorActualizar.getId_Cliente());
-    if (idCredencial != null) {
+    if (clienteDTO.getIdCredencial() != null) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
       Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
-      if (idCredencial != idUsuarioLoggedIn
+      if (clienteDTO.getIdCredencial() != idUsuarioLoggedIn
           && clientePersistido.getCredencial() != null
-          && clientePersistido.getCredencial().getId_Usuario() != idCredencial
+          && clientePersistido.getCredencial().getId_Usuario() != clienteDTO.getIdCredencial()
           && !(usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
               || usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)
               || usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR))) {
         throw new ForbiddenException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
       } else {
-        Usuario usuarioCredencial = usuarioService.getUsuarioPorId(idCredencial);
+        Usuario usuarioCredencial = usuarioService.getUsuarioPorId(clienteDTO.getIdCredencial());
         clientePorActualizar.setCredencial(usuarioCredencial);
       }
     } else {
@@ -230,18 +229,31 @@ public class ClienteController {
     } else {
       clientePorActualizar.setBonificacion(clientePersistido.getBonificacion());
     }
-    if (idEmpresa != null) {
-      clientePorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    Ubicacion ubicacion;
+    if (clienteDTO.getUbicacionFacturacion() != null) {
+      ubicacion = modelMapper.map(clienteDTO.getUbicacionFacturacion(), Ubicacion.class);
+      ubicacion.setLocalidad(ubicacionService.getLocalidadPorId(ubicacion.getIdLocalidad()));
+      clientePorActualizar.setUbicacionFacturacion(ubicacion);
+    } else {
+      clientePorActualizar.setUbicacionFacturacion(clientePersistido.getUbicacionFacturacion());
+    }
+    if (clienteDTO.getUbicacionEnvio() != null) {
+      ubicacion = modelMapper.map(clienteDTO.getUbicacionEnvio(), Ubicacion.class);
+      ubicacion.setLocalidad(ubicacionService.getLocalidadPorId(ubicacion.getIdLocalidad()));
+      clientePorActualizar.setUbicacionEnvio(ubicacion);
+    } else {
+      clientePorActualizar.setUbicacionEnvio(clientePersistido.getUbicacionEnvio());
+    }
+    if (clienteDTO.getIdEmpresa() != null) {
+      clientePorActualizar.setEmpresa(empresaService.getEmpresaPorId(clienteDTO.getIdEmpresa()));
     } else {
       clientePorActualizar.setEmpresa(clientePersistido.getEmpresa());
     }
-    if (idViajante != null) {
-      clientePorActualizar.setViajante(usuarioService.getUsuarioPorId(idViajante));
+    if (clienteDTO.getIdViajante() != null) {
+      clientePorActualizar.setViajante(usuarioService.getUsuarioPorId(clienteDTO.getIdViajante()));
     } else {
       clientePorActualizar.setViajante(null);
     }
-    clientePorActualizar.setUbicacionFacturacion(clientePersistido.getUbicacionFacturacion());
-    clientePorActualizar.setUbicacionEnvio(clientePersistido.getUbicacionEnvio());
     clienteService.actualizar(clientePorActualizar, clientePersistido);
   }
 
