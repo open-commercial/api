@@ -84,6 +84,7 @@ public class ProductoController {
       @RequestParam long idEmpresa,
       @RequestParam(required = false) String codigo,
       @RequestParam(required = false) String descripcion,
+      @RequestParam(required = false) Boolean destacados,
       @RequestParam(required = false) Integer pagina,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Page<Producto> productos =
@@ -95,7 +96,7 @@ public class ProductoController {
         null,
         false,
         true,
-        false,
+        destacados,
         pagina,
         null,
         null,
@@ -112,23 +113,6 @@ public class ProductoController {
       }
     } else {
       return productos;
-    }
-  }
-
-  @JsonView(Views.Public.class)
-  @GetMapping("/public/productos/destacados")
-  public Map<String, List<Producto>> getProductosDestacadosPublic(
-      @RequestParam long idEmpresa,
-      @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
-    Cliente cliente = null;
-    if (authorizationHeader != null) {
-      authService.validarToken(authorizationHeader);
-      Claims claims = authService.getClaimsDelToken(authorizationHeader);
-      cliente =
-          clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idEmpresa);
-      return productoService.getProductosDestacadosAgrupadosPorRubro(idEmpresa, cliente);
-    } else {
-      return productoService.getProductosDestacadosAgrupadosPorRubro(idEmpresa, cliente);
     }
   }
 
