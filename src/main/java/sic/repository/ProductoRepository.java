@@ -22,9 +22,6 @@ public interface ProductoRepository extends PagingAndSortingRepository<Producto,
 
   List<Producto> findByIdProductoInOrderByIdProductoAsc(List<Long> idsProductos);
 
-  @Query("SELECT COUNT(p) FROM Producto p WHERE p.destacado = true and p.rubro.id_Rubro = :idRubro and p.eliminado = false")
-  Integer getCantidadDeProductosDestacadosPorRubro(@Param("idRubro") long idRubro);
-
   @Modifying
   @Query("UPDATE Producto p SET p.urlImagen = :urlImagen WHERE p.idProducto = :idProducto")
   int actualizarUrlImagen(@Param("idProducto") long idProducto, @Param("urlImagen") String urlImagen);
