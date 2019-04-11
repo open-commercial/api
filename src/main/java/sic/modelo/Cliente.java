@@ -52,12 +52,12 @@ public class Cliente implements Serializable {
 
   private String telefono;
 
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToOne(cascade = CascadeType.PERSIST, orphanRemoval = true)
   @JoinColumn(name = "idUbicacionFacturacion", referencedColumnName = "idUbicacion")
   @QueryInit("localidad.provincia")
   private Ubicacion ubicacionFacturacion;
 
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToOne(cascade = CascadeType.PERSIST, orphanRemoval = true)
   @JoinColumn(name = "idUbicacionEnvio", referencedColumnName = "idUbicacion")
   @QueryInit("localidad.provincia")
   private Ubicacion ubicacionEnvio;

@@ -23,6 +23,7 @@ public class UbicacionController {
   private final IUbicacionService ubicacionService;
   private final IEmpresaService empresaService;
   private final IProveedorService proveedorService;
+  private final IClienteService clienteService;
   private final ITransportistaService transportistaService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final ModelMapper modelMapper;
@@ -32,11 +33,13 @@ public class UbicacionController {
     IUbicacionService ubicacionService,
     IEmpresaService empresaService,
     IProveedorService proveedorService,
+    IClienteService clienteService,
     ITransportistaService transportistaService,
     ModelMapper modelMapper) {
     this.ubicacionService = ubicacionService;
     this.empresaService = empresaService;
     this.proveedorService = proveedorService;
+    this.clienteService = clienteService;
     this.transportistaService = transportistaService;
     this.modelMapper = modelMapper;
   }
@@ -88,6 +91,42 @@ public class UbicacionController {
   })
   public List<Provincia> getProvincias() {
     return ubicacionService.getProvincias();
+  }
+
+  @PostMapping("/ubicaciones/clientes/{idCliente}/facturacion")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public Ubicacion guardarUbicacionDeFacturacion(
+    @RequestBody UbicacionDTO ubicacionDTO, @PathVariable Long idCliente) {
+    Cliente cliente = clienteService.getClientePorId(idCliente);
+    Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
+    ubicacion.setLocalidad(ubicacionService.getLocalidadPorId(ubicacionDTO.getIdLocalidad()));
+    return ubicacionService.guardarUbicacionDeFacturacionCliente(
+      ubicacion,
+      cliente);
+  }
+
+  @PostMapping("/ubicaciones/clientes/{idCliente}/envio")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public Ubicacion guardarUbicacionDeEnvio(
+    @RequestBody UbicacionDTO ubicacionDTO, @PathVariable Long idCliente) {
+    Cliente cliente = clienteService.getClientePorId(idCliente);
+    Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
+    ubicacion.setLocalidad(ubicacionService.getLocalidadPorId(ubicacionDTO.getIdLocalidad()));
+    return ubicacionService.guardarUbicacionDeEnvioCliente(
+      ubicacion,
+      cliente);
   }
 
   @PutMapping("/ubicaciones")
