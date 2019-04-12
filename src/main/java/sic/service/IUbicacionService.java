@@ -15,10 +15,6 @@ public interface IUbicacionService {
     Ubicacion ubicacion,
     Empresa empresa);
 
-  Ubicacion guardarUbicacionTransportista(
-    Ubicacion ubicacion,
-    Transportista transportista);
-
   Ubicacion guardar(
     Ubicacion ubicacion);
 

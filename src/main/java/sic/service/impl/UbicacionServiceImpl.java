@@ -25,7 +25,6 @@ public class UbicacionServiceImpl implements IUbicacionService {
   private final LocalidadRepository localidadRepository;
   private final ProvinciaRepository provinciaRepository;
   private final IEmpresaService empresaService;
-  private final ITransportistaService transportistaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
@@ -34,13 +33,11 @@ public class UbicacionServiceImpl implements IUbicacionService {
     UbicacionRepository ubicacionRepository,
     LocalidadRepository localidadRepository,
     ProvinciaRepository provinciaRepository,
-    IEmpresaService empresaService,
-    ITransportistaService transportistaService) {
+    IEmpresaService empresaService) {
     this.ubicacionRepository = ubicacionRepository;
     this.localidadRepository = localidadRepository;
     this.provinciaRepository = provinciaRepository;
     this.empresaService = empresaService;
-    this.transportistaService = transportistaService;
   }
 
   @Override
@@ -70,21 +67,6 @@ public class UbicacionServiceImpl implements IUbicacionService {
     empresa.setUbicacion(this.guardar(ubicacion));
     empresaService.actualizar(empresa, empresaService.getEmpresaPorId(empresa.getId_Empresa()));
     return empresa.getUbicacion();
-  }
-
-  @Override
-  @Transactional
-  public Ubicacion guardarUbicacionTransportista(
-    Ubicacion ubicacion,
-    Transportista transportista) {
-    if (transportista.getUbicacion() != null) {
-      throw new BusinessServiceException(
-        RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_transportista"));
-    }
-    transportista.setUbicacion(
-      this.guardar(ubicacion));
-    transportistaService.actualizar(transportista);
-    return transportista.getUbicacion();
   }
 
   @Override

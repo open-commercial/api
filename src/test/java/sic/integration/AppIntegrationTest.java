@@ -689,13 +689,16 @@ class AppIntegrationTest {
             .web("pedidos@oca.com.ar")
             .telefono("379 5402356")
             .eliminado(false)
+            .idEmpresa(1L)
+            .ubicacion(
+                UbicacionDTO.builder()
+                    .calle("Rio Chico 15000")
+                    .numero(4589)
+                    .idLocalidad(1L)
+                    .build())
             .build();
     restTemplate.postForObject(
-      apiPrefix + "/transportistas?idEmpresa=1", transportistaDTO, TransportistaDTO.class);
-    restTemplate.postForObject(apiPrefix + "/ubicaciones/transportistas/1", UbicacionDTO.builder()
-      .calle("Rio Chico 15000")
-      .numero(4589)
-      .idLocalidad(1L).build(), UbicacionDTO.class);
+        apiPrefix + "/transportistas?idEmpresa=1", transportistaDTO, TransportistaDTO.class);
     MedidaDTO medidaMetro = MedidaDTO.builder().nombre("Metro").build();
     MedidaDTO medidaKilo = MedidaDTO.builder().nombre("Kilo").build();
     restTemplate.postForObject(apiPrefix + "/medidas?idEmpresa=1", medidaMetro, MedidaDTO.class);
@@ -1237,26 +1240,6 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldCrearProveedorSinUbicacion() {
-    ProveedorDTO proveedor =
-      ProveedorDTO.builder()
-        .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-        .codigo("555888")
-        .contacto("Ricardo")
-        .email("ricardodelbarrio@gmail.com")
-        .telPrimario("4512778851")
-        .telSecundario("784551122")
-        .web("")
-        .razonSocial("Migral Compuesto")
-        .idEmpresa(1L)
-        .build();
-    ProveedorDTO proveedorRecuperado =
-      restTemplate.postForObject(
-        apiPrefix + "/proveedores", proveedor, ProveedorDTO.class);
-    assertEquals(proveedor, proveedorRecuperado);
-  }
-
-  @Test
   void shouldCrearProveedorConUbicacionYEditarla() {
     UbicacionDTO ubicacion = UbicacionDTO.builder()
       .calle("Belgrano")
@@ -1291,17 +1274,67 @@ class AppIntegrationTest {
   @Test
   void shouldCrearTransportista() {
     TransportistaDTO transportista =
-      TransportistaDTO.builder()
-        .telefono("78946551122")
-        .web("Ronollega.com")
-        .nombre("Transporte Segu Ronollega")
-        .build();
+        TransportistaDTO.builder()
+            .telefono("78946551122")
+            .web("Ronollega.com")
+            .nombre("Transporte Segu Ronollega")
+            .idEmpresa(1L)
+            .build();
     TransportistaDTO transportistaRecuperado =
-      restTemplate.postForObject(
-        apiPrefix + "/transportistas?idEmpresa=1&idLocalidad=1",
-        transportista,
-        TransportistaDTO.class);
+        restTemplate.postForObject(
+            apiPrefix + "/transportistas", transportista, TransportistaDTO.class);
     assertEquals(transportista, transportistaRecuperado);
+  }
+
+  @Test
+  void shouldCrearTransportistaConUbicacion() {
+    TransportistaDTO transportista =
+        TransportistaDTO.builder()
+            .telefono("78946551122")
+            .web("Ronollega.com")
+            .nombre("Transporte Segu Ronollega")
+            .idEmpresa(1L)
+            .ubicacion(
+                UbicacionDTO.builder()
+                    .calle("Los Rios Puros Nacidos del Mar de la Calma")
+                    .numero(784445)
+                    .idLocalidad(1L)
+                    .build())
+            .build();
+    TransportistaDTO transportistaRecuperado =
+        restTemplate.postForObject(
+            apiPrefix + "/transportistas", transportista, TransportistaDTO.class);
+    assertEquals(transportista, transportistaRecuperado);
+  }
+
+  @Test
+  void shouldEditarUbicacionDeTransportista() {
+    TransportistaDTO transportista =
+        TransportistaDTO.builder()
+            .telefono("78946551122")
+            .web("Ronollega.com")
+            .nombre("Transporte Segu Ronollega")
+            .idEmpresa(1L)
+            .ubicacion(
+                UbicacionDTO.builder()
+                    .calle("Los Rios Puros Nacidos del Mar de la Calma")
+                    .numero(784445)
+                    .idLocalidad(1L)
+                    .build())
+            .build();
+    TransportistaDTO transportistaRecuperado =
+        restTemplate.postForObject(
+            apiPrefix + "/transportistas", transportista, TransportistaDTO.class);
+    UbicacionDTO ubicacion = transportistaRecuperado.getUbicacion();
+    ubicacion.setCalle("Los Prados Rosas de los Elfos Sagrados");
+    ubicacion.setNumero(789996);
+    transportistaRecuperado.setUbicacion(ubicacion);
+    restTemplate.put(apiPrefix + "/transportistas", transportistaRecuperado);
+    transportistaRecuperado =
+        restTemplate.getForObject(
+            apiPrefix + "/transportistas/" + transportistaRecuperado.getId_Transportista(),
+            TransportistaDTO.class);
+    assertEquals(ubicacion, transportistaRecuperado.getUbicacion());
   }
 
   @Test

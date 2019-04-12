@@ -121,17 +121,6 @@ public class UbicacionController {
       empresa);
   }
 
-  @PostMapping("/ubicaciones/transportistas/{idTransportista}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public Ubicacion guardarUbicacionDeTransportista(
-    @RequestBody UbicacionDTO ubicacionDTO, @PathVariable Long idTransportista) {
-    Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
-    ubicacion.setLocalidad(ubicacionService.getLocalidadPorId(ubicacionDTO.getIdLocalidad()));
-    return ubicacionService.guardarUbicacionTransportista(
-      ubicacion,
-      transportistaService.getTransportistaPorId(idTransportista));
-  }
-
   @PutMapping("/ubicaciones/localidades")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(@RequestBody LocalidadDTO localidadDTO) {
