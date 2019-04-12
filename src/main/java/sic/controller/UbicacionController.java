@@ -21,26 +21,14 @@ import java.util.ResourceBundle;
 public class UbicacionController {
 
   private final IUbicacionService ubicacionService;
-  private final IEmpresaService empresaService;
-  private final IProveedorService proveedorService;
-  private final IClienteService clienteService;
-  private final ITransportistaService transportistaService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final ModelMapper modelMapper;
 
   @Autowired
   public UbicacionController(
     IUbicacionService ubicacionService,
-    IEmpresaService empresaService,
-    IProveedorService proveedorService,
-    IClienteService clienteService,
-    ITransportistaService transportistaService,
     ModelMapper modelMapper) {
     this.ubicacionService = ubicacionService;
-    this.empresaService = empresaService;
-    this.proveedorService = proveedorService;
-    this.clienteService = clienteService;
-    this.transportistaService = transportistaService;
     this.modelMapper = modelMapper;
   }
 
@@ -91,34 +79,6 @@ public class UbicacionController {
   })
   public List<Provincia> getProvincias() {
     return ubicacionService.getProvincias();
-  }
-
-  @PutMapping("/ubicaciones")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
-  public void actualizar(@RequestBody UbicacionDTO ubicacionDTO) {
-    if (ubicacionDTO.getIdUbicacion() != 0L) {
-      Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
-      ubicacion.setLocalidad(ubicacionService.getLocalidadPorId(ubicacionDTO.getIdLocalidad()));
-      ubicacionService.actualizar(ubicacion);
-    }
-  }
-
-  @PostMapping("/ubicaciones/empresas/{idEmpresa}")
-  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-  public Ubicacion guardarUbicacionDeEmpresa(
-    @RequestBody UbicacionDTO ubicacionDTO, @PathVariable Long idEmpresa) {
-    Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
-    Ubicacion ubicacion = modelMapper.map(ubicacionDTO, Ubicacion.class);
-    ubicacion.setLocalidad(ubicacionService.getLocalidadPorId(ubicacionDTO.getIdLocalidad()));
-    return ubicacionService.guardaUbicacionEmpresa(
-      ubicacion,
-      empresa);
   }
 
   @PutMapping("/ubicaciones/localidades")

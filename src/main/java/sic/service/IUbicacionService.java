@@ -11,14 +11,8 @@ public interface IUbicacionService {
 
   Page<Localidad> buscar(BusquedaLocalidadCriteria criteria);
 
-  Ubicacion guardaUbicacionEmpresa(
-    Ubicacion ubicacion,
-    Empresa empresa);
-
   Ubicacion guardar(
     Ubicacion ubicacion);
-
-  void actualizar(Ubicacion ubicacion);
 
   Localidad getLocalidadPorId(Long idLocalidad);
 

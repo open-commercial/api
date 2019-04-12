@@ -24,7 +24,6 @@ public class UbicacionServiceImpl implements IUbicacionService {
   private final UbicacionRepository ubicacionRepository;
   private final LocalidadRepository localidadRepository;
   private final ProvinciaRepository provinciaRepository;
-  private final IEmpresaService empresaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
@@ -32,12 +31,10 @@ public class UbicacionServiceImpl implements IUbicacionService {
   public UbicacionServiceImpl(
     UbicacionRepository ubicacionRepository,
     LocalidadRepository localidadRepository,
-    ProvinciaRepository provinciaRepository,
-    IEmpresaService empresaService) {
+    ProvinciaRepository provinciaRepository) {
     this.ubicacionRepository = ubicacionRepository;
     this.localidadRepository = localidadRepository;
     this.provinciaRepository = provinciaRepository;
-    this.empresaService = empresaService;
   }
 
   @Override
@@ -53,26 +50,6 @@ public class UbicacionServiceImpl implements IUbicacionService {
     Ubicacion ubicacionGuardada = ubicacionRepository.save(ubicacion);
     logger.warn("La ubicación {} se actualizó correctamente.", ubicacion);
     return ubicacionGuardada;
-  }
-
-  @Override
-  @Transactional
-  public Ubicacion guardaUbicacionEmpresa(
-    Ubicacion ubicacion,
-    Empresa empresa) {
-    if (empresa.getUbicacion() != null) {
-      throw new BusinessServiceException(
-        RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_empresa"));
-    }
-    empresa.setUbicacion(this.guardar(ubicacion));
-    empresaService.actualizar(empresa, empresaService.getEmpresaPorId(empresa.getId_Empresa()));
-    return empresa.getUbicacion();
-  }
-
-  @Override
-  public void actualizar(
-    Ubicacion ubicacion) {
-    ubicacionRepository.save(ubicacion);
   }
 
   @Override

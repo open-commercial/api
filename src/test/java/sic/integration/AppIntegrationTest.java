@@ -637,21 +637,18 @@ class AppIntegrationTest {
     localidadRepository.save(new LocalidadBuilder().withProvincia(provinciaRepository.findById(2L)).withNombre("Posadas").withCodigoPostal("N3300").build());
     localidadRepository.save(new LocalidadBuilder().withProvincia(provinciaRepository.findById(3L)).withNombre("Resistencia").withCodigoPostal("H3500").build());
     EmpresaDTO empresaDTO =
-      EmpresaDTO.builder()
-        .nombre("Globo Corporation")
-        .lema("Enjoy the life")
-        .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-        .idFiscal(23154587589L)
-        .ingresosBrutos(123456789L)
-        .fechaInicioActividad(new Date(539924400000L))
-        .email("support@globocorporation.com")
-        .telefono("379 4895549")
-        .build();
+        EmpresaDTO.builder()
+            .nombre("Globo Corporation")
+            .lema("Enjoy the life")
+            .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+            .idFiscal(23154587589L)
+            .ingresosBrutos(123456789L)
+            .fechaInicioActividad(new Date(539924400000L))
+            .email("support@globocorporation.com")
+            .telefono("379 4895549")
+            .ubicacion(UbicacionDTO.builder().calle("Napoles").numero(5600).idLocalidad(1L).build())
+            .build();
     empresaDTO = restTemplate.postForObject(apiPrefix + "/empresas", empresaDTO, EmpresaDTO.class);
-    restTemplate.postForObject(apiPrefix + "/ubicaciones/empresas/1", UbicacionDTO.builder()
-      .calle("Napoles")
-      .numero(5600)
-      .idLocalidad(1L).build(), UbicacionDTO.class);
     FormaDePagoDTO formaDePago =
       FormaDePagoDTO.builder().afectaCaja(true).nombre("Efectivo").predeterminado(true).build();
     restTemplate.postForObject(
@@ -756,19 +753,77 @@ class AppIntegrationTest {
   @Test
   void shouldCrearEmpresaResponsableInscripto() {
     EmpresaDTO empresaNueva =
-      EmpresaDTO.builder()
-        .telefono("3795221144")
-        .email("empresa@nueva.com")
-        .fechaInicioActividad(new Date())
-        .ingresosBrutos(21112244L)
-        .idFiscal(7488521665766L)
-        .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-        .lema("Hoy no se fía, mañana si.")
-        .nombre("La gran idea")
-        .build();
+        EmpresaDTO.builder()
+            .telefono("3795221144")
+            .email("empresa@nueva.com")
+            .fechaInicioActividad(new Date())
+            .ingresosBrutos(21112244L)
+            .idFiscal(7488521665766L)
+            .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+            .lema("Hoy no se fía, mañana si.")
+            .nombre("La gran idea")
+            .ubicacion(
+                UbicacionDTO.builder().idLocalidad(1L).calle("Rio Piacentin").numero(345).build())
+            .build();
     EmpresaDTO empresaGuardada =
       restTemplate.postForObject(apiPrefix + "/empresas", empresaNueva, EmpresaDTO.class);
     assertEquals(empresaNueva, empresaGuardada);
+  }
+
+  @Test
+  void shouldCrearEmpresaConUbicacion() {
+    EmpresaDTO empresaNueva =
+        EmpresaDTO.builder()
+            .telefono("3795221144")
+            .email("empresa@nueva.com")
+            .fechaInicioActividad(new Date())
+            .ingresosBrutos(21112244L)
+            .idFiscal(7488521665766L)
+            .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+            .lema("Hoy no se fía, mañana si.")
+            .nombre("La gran idea")
+            .ubicacion(
+                UbicacionDTO.builder()
+                    .calle("Valle Sagrado de los Enanos")
+                    .numero(8877)
+                    .idLocalidad(1L)
+                    .build())
+            .build();
+    EmpresaDTO empresaGuardada =
+        restTemplate.postForObject(apiPrefix + "/empresas", empresaNueva, EmpresaDTO.class);
+    assertEquals(empresaNueva, empresaGuardada);
+  }
+
+  @Test
+  void shouldEditarUbicacionDeEmpresa() {
+    EmpresaDTO empresaNueva =
+        EmpresaDTO.builder()
+            .telefono("3795221144")
+            .email("empresa@nueva.com")
+            .fechaInicioActividad(new Date())
+            .ingresosBrutos(21112244L)
+            .idFiscal(7488521665766L)
+            .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+            .lema("Hoy no se fía, mañana si.")
+            .nombre("La gran idea")
+            .ubicacion(
+                UbicacionDTO.builder()
+                    .calle("Valle Sagrado de los Enanos")
+                    .numero(8877)
+                    .idLocalidad(1L)
+                    .build())
+            .build();
+    EmpresaDTO empresaGuardada =
+        restTemplate.postForObject(apiPrefix + "/empresas", empresaNueva, EmpresaDTO.class);
+    UbicacionDTO ubicacion = empresaGuardada.getUbicacion();
+    ubicacion.setCalle("Los Rios Negros");
+    ubicacion.setNumero(1456);
+    empresaGuardada.setUbicacion(ubicacion);
+    restTemplate.put(apiPrefix + "/empresas", empresaGuardada);
+    empresaGuardada =
+        restTemplate.getForObject(
+            apiPrefix + "/empresas/" + empresaGuardada.getId_Empresa(), EmpresaDTO.class);
+    assertEquals(ubicacion, empresaGuardada.getUbicacion());
   }
 
   @Test
@@ -992,30 +1047,6 @@ class AppIntegrationTest {
       assertTrue(
           ex.getMessage().startsWith("La ubicacion de envio debe poseer una localidad asociada."));
     }
-  }
-
-  @Test
-  void shouldModificarUbicacionDeFacturacionDeCliente() {
-    this.shouldCrearClienteConUbicacionDeFacturacion();
-    UbicacionDTO ubicacionDeFacturacion = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class).getUbicacionFacturacion();
-    ubicacionDeFacturacion.setCalle("Calle Nueva");
-    ubicacionDeFacturacion.setNumero(456);
-    restTemplate.put(apiPrefix + "/ubicaciones", ubicacionDeFacturacion);
-    ubicacionDeFacturacion = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class).getUbicacionFacturacion();
-    assertEquals("Calle Nueva", ubicacionDeFacturacion.getCalle());
-    assertEquals(456, ubicacionDeFacturacion.getNumero());
-  }
-
-  @Test
-  void shouldModificarUbicacionDeEnvioDeCliente() {
-    this.shouldCrearClienteConUbicacionDeEnvio();
-    UbicacionDTO ubicacionDeEnvio = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class).getUbicacionEnvio();
-    ubicacionDeEnvio.setCalle("Calle Nueva de envio");
-    ubicacionDeEnvio.setNumero(79999);
-    restTemplate.put(apiPrefix + "/ubicaciones", ubicacionDeEnvio);
-    ubicacionDeEnvio = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class).getUbicacionEnvio();
-    assertEquals("Calle Nueva de envio", ubicacionDeEnvio.getCalle());
-    assertEquals(79999, ubicacionDeEnvio.getNumero());
   }
 
   @Test
@@ -3020,6 +3051,7 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("115.500000000000000"), productoDos.getIvaNeto());
     assertEquals(new BigDecimal("1215.500000000000000"), productoDos.getPrecioLista());
   }
+
   @Test
   void shouldCambiarPreciosProductos() {
     this.crearProductos();
@@ -3925,12 +3957,6 @@ class AppIntegrationTest {
   void shouldCrearPedidoConUbicacionSucursal() {
     this.crearProductos();
     this.shouldCrearEmpresaResponsableInscripto();
-    UbicacionDTO ubicacionDTO = UbicacionDTO.builder()
-      .idLocalidad(1L)
-      .calle("Rio Piacentin")
-      .numero(345)
-      .build();
-    restTemplate.postForObject(apiPrefix + "/ubicaciones/empresas/2", ubicacionDTO, UbicacionDTO.class);
     List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
@@ -3980,7 +4006,7 @@ class AppIntegrationTest {
         nuevoPedidoDTO,
         PedidoDTO.class);
     EmpresaDTO empresaDTO = restTemplate.getForObject(apiPrefix + "/empresas/2", EmpresaDTO.class);
-    assertEquals(empresaDTO.getDetalleUbicacion(), pedidoRecuperado.getDetalleEnvio());
+    assertEquals("Rio Piacentin 345 Corrientes Corrientes", pedidoRecuperado.getDetalleEnvio());
   }
 
   @Test
@@ -4515,17 +4541,6 @@ class AppIntegrationTest {
     assertEquals(
       new BigDecimal("-200.000000000000000"),
       restTemplate.getForObject(apiPrefix + "/cajas/1/saldo-sistema", BigDecimal.class));
-  }
-
-  @Test
-  void shouldModificarUbicacionDeFacturacionCliente() {
-    this.shouldCrearClienteConUbicacionDeFacturacion();
-    UbicacionDTO ubicacionDeFacturacionCliente = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class).getUbicacionFacturacion();
-    ubicacionDeFacturacionCliente.setCalle("Regresión lineal");
-    ubicacionDeFacturacionCliente.setNumero(999);
-    restTemplate.put(apiPrefix + "/ubicaciones", ubicacionDeFacturacionCliente);
-    ubicacionDeFacturacionCliente = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class).getUbicacionFacturacion();
-    assertEquals("Regresión lineal", ubicacionDeFacturacionCliente.getCalle());
   }
 
   @Test
