@@ -31,7 +31,6 @@ public class ClienteServiceImpl implements IClienteService {
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Autowired
-  @Lazy
   public ClienteServiceImpl(
       ClienteRepository clienteRepository,
       ICuentaCorrienteService cuentaCorrienteService,

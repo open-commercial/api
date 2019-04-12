@@ -139,40 +139,4 @@ public class Cliente implements Serializable {
       return null;
     }
   }
-
-  @JsonGetter("idUbicacionFacturacion")
-  public Long getidUbicacionFacturacion() {
-    if (ubicacionFacturacion != null) {
-      return ubicacionFacturacion.getIdUbicacion();
-    } else {
-      return null;
-    }
-  }
-
-  @JsonGetter("detalleUbicacionFacturacion")
-  public String getDetalleUbicacionFacturacion() {
-    if (ubicacionFacturacion != null) {
-      return ubicacionFacturacion.toString();
-    } else {
-      return null;
-    }
-  }
-
-  @JsonGetter("idUbicacionEnvio")
-  public Long getidUbicacionEnvio() {
-    if (ubicacionEnvio != null) {
-      return ubicacionEnvio.getIdUbicacion();
-    } else {
-      return null;
-    }
-  }
-
-  @JsonGetter("detalleUbicacionEnvio")
-  public String getDetalleUbicacionEnvio() {
-    if (ubicacionEnvio != null) {
-      return ubicacionEnvio.toString();
-    } else {
-      return null;
-    }
-  }
 }

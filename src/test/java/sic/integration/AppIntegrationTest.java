@@ -701,26 +701,24 @@ class AppIntegrationTest {
     restTemplate.postForObject(apiPrefix + "/medidas?idEmpresa=1", medidaMetro, MedidaDTO.class);
     restTemplate.postForObject(apiPrefix + "/medidas?idEmpresa=1", medidaKilo, MedidaDTO.class);
     ProveedorDTO proveedorDTO =
-      ProveedorDTO.builder()
-        .codigo("ABC123")
-        .razonSocial("Chamaco S.R.L.")
-        .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-        .idFiscal(23127895679L)
-        .telPrimario("379 4356778")
-        .telSecundario("379 4894514")
-        .contacto("Raul Gamez")
-        .email("chamacosrl@gmail.com")
-        .web("www.chamacosrl.com.ar")
-        .eliminado(false)
-        .saldoCuentaCorriente(BigDecimal.ZERO)
-        .build();
-    restTemplate.postForObject(apiPrefix + "/proveedores?idEmpresa=1", proveedorDTO, Proveedor.class);
-    restTemplate.postForObject(apiPrefix + "/ubicaciones/proveedores/1", UbicacionDTO.builder()
-      .calle("Av armenia")
-      .numero(45677)
-      .idLocalidad(1L).build(), UbicacionDTO.class);
-    RubroDTO rubro =
-      RubroDTO.builder().nombre("Ferreteria").eliminado(false).build();
+        ProveedorDTO.builder()
+            .codigo("ABC123")
+            .razonSocial("Chamaco S.R.L.")
+            .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+            .idFiscal(23127895679L)
+            .telPrimario("379 4356778")
+            .telSecundario("379 4894514")
+            .contacto("Raul Gamez")
+            .email("chamacosrl@gmail.com")
+            .web("www.chamacosrl.com.ar")
+            .eliminado(false)
+            .saldoCuentaCorriente(BigDecimal.ZERO)
+            .ubicacion(
+                UbicacionDTO.builder().calle("Av armenia").numero(45677).idLocalidad(1L).build())
+            .idEmpresa(1L)
+            .build();
+    restTemplate.postForObject(apiPrefix + "/proveedores", proveedorDTO, Proveedor.class);
+    RubroDTO rubro = RubroDTO.builder().nombre("Ferreteria").eliminado(false).build();
     restTemplate.postForObject(apiPrefix + "/rubros?idEmpresa=1", rubro, RubroDTO.class);
     this.vincularClienteParaUsuarioInicial();
   }
@@ -1213,6 +1211,84 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldCrearProveedorConUbicacion() {
+    UbicacionDTO ubicacion = UbicacionDTO.builder()
+      .calle("Belgrano")
+      .numero(456)
+      .idLocalidad(1L)
+      .build();
+    ProveedorDTO proveedor =
+      ProveedorDTO.builder()
+        .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+        .codigo("555888")
+        .contacto("Ricardo")
+        .email("ricardodelbarrio@gmail.com")
+        .telPrimario("4512778851")
+        .telSecundario("784551122")
+        .web("")
+        .razonSocial("Migral Compuesto")
+        .ubicacion(ubicacion)
+        .idEmpresa(1L)
+        .build();
+    ProveedorDTO proveedorRecuperado =
+      restTemplate.postForObject(
+        apiPrefix + "/proveedores", proveedor, ProveedorDTO.class);
+    assertEquals(proveedor, proveedorRecuperado);
+  }
+
+  @Test
+  void shouldCrearProveedorSinUbicacion() {
+    ProveedorDTO proveedor =
+      ProveedorDTO.builder()
+        .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+        .codigo("555888")
+        .contacto("Ricardo")
+        .email("ricardodelbarrio@gmail.com")
+        .telPrimario("4512778851")
+        .telSecundario("784551122")
+        .web("")
+        .razonSocial("Migral Compuesto")
+        .idEmpresa(1L)
+        .build();
+    ProveedorDTO proveedorRecuperado =
+      restTemplate.postForObject(
+        apiPrefix + "/proveedores", proveedor, ProveedorDTO.class);
+    assertEquals(proveedor, proveedorRecuperado);
+  }
+
+  @Test
+  void shouldCrearProveedorConUbicacionYEditarla() {
+    UbicacionDTO ubicacion = UbicacionDTO.builder()
+      .calle("Belgrano")
+      .numero(456)
+      .idLocalidad(1L)
+      .build();
+    ProveedorDTO proveedor =
+      ProveedorDTO.builder()
+        .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+        .codigo("555888")
+        .contacto("Ricardo")
+        .email("ricardodelbarrio@gmail.com")
+        .telPrimario("4512778851")
+        .telSecundario("784551122")
+        .web("")
+        .razonSocial("Migral Compuesto")
+        .ubicacion(ubicacion)
+        .idEmpresa(1L)
+        .build();
+    ProveedorDTO proveedorRecuperado =
+      restTemplate.postForObject(
+        apiPrefix + "/proveedores", proveedor, ProveedorDTO.class);
+    ubicacion = proveedorRecuperado.getUbicacion();
+    ubicacion.setCalle("Rosas");
+    ubicacion.setNumero(9666);
+    proveedorRecuperado.setUbicacion(ubicacion);
+    restTemplate.put(apiPrefix + "/proveedores", proveedorRecuperado);
+    proveedorRecuperado = restTemplate.getForObject(apiPrefix+ "/proveedores/" + proveedorRecuperado.getId_Proveedor(), ProveedorDTO.class);
+    assertEquals(ubicacion, proveedorRecuperado.getUbicacion());
+  }
+
+  @Test
   void shouldCrearTransportista() {
     TransportistaDTO transportista =
       TransportistaDTO.builder()
@@ -1256,10 +1332,11 @@ class AppIntegrationTest {
         .telSecundario("784551122")
         .web("")
         .razonSocial("Migral Compuesto")
+        .idEmpresa(1L)
         .build();
     ProveedorDTO proveedorRecuperado =
       restTemplate.postForObject(
-        apiPrefix + "/proveedores?idEmpresa=1&idLocalidad=1", proveedor, ProveedorDTO.class);
+        apiPrefix + "/proveedores", proveedor, ProveedorDTO.class);
     assertEquals(proveedor, proveedorRecuperado);
   }
 
@@ -2995,8 +3072,9 @@ class AppIntegrationTest {
         .web("www.chamigosrl.com.ar")
         .eliminado(false)
         .saldoCuentaCorriente(BigDecimal.ZERO)
+        .idEmpresa(1L)
         .build();
-    proveedor = restTemplate.postForObject(apiPrefix + "/proveedores?idEmpresa=1", proveedor, ProveedorDTO.class);
+    proveedor = restTemplate.postForObject(apiPrefix + "/proveedores", proveedor, ProveedorDTO.class);
     ProductosParaActualizarDTO productosParaActualizarDTO = ProductosParaActualizarDTO.builder()
       .idProducto(idsProductos)
       .idProveedor(proveedor.getId_Proveedor()).build();

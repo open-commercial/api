@@ -246,8 +246,8 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{notaDebito}.getCliente().getDetalleUbicacionFacturacion() != null) ? 
-$P{notaDebito}.getCliente().getDetalleUbicacionFacturacion() : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaDebito}.getCliente().getUbicacionFacturacion() != null) ? 
+$P{notaDebito}.getCliente().getUbicacionFacturacion() : ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="50" y="191" width="505" height="15" uuid="cb8691ce-a678-4cf1-a2c7-4938068372c4">

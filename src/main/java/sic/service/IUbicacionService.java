@@ -11,21 +11,9 @@ public interface IUbicacionService {
 
   Page<Localidad> buscar(BusquedaLocalidadCriteria criteria);
 
-  Ubicacion guardarUbicacionDeFacturacionCliente(
-    Ubicacion ubicacion,
-    Cliente cliente);
-
-  Ubicacion guardarUbicacionDeEnvioCliente(
-    Ubicacion ubicacion,
-    Cliente cliente);
-
   Ubicacion guardaUbicacionEmpresa(
     Ubicacion ubicacion,
     Empresa empresa);
-
-  Ubicacion guardaUbicacionProveedor(
-    Ubicacion ubicacion,
-    Proveedor proveedor);
 
   Ubicacion guardarUbicacionTransportista(
     Ubicacion ubicacion,
