@@ -69,6 +69,13 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
+    if (operacion == TipoDeOperacion.ACTUALIZACION
+        && (producto.isDestacado()
+            && (!producto.isPublico()
+                || (producto.getUrlImagen() == null || producto.getUrlImagen().isEmpty())))) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_producto_destacado_privado_o_sin_imagen"));
+    }
     // Duplicados
     // Codigo
     if (!producto.getCodigo().equals("")) {
@@ -99,11 +106,16 @@ public class ProductoServiceImpl implements IProductoService {
         && productoDuplicado.getIdProducto() != producto.getIdProducto())
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_producto_duplicado_descripcion"));
-    // Calculos
+    this.validarCalculos(producto);
+  }
+
+  private void validarCalculos(Producto producto) {
     Double[] iva = {10.5, 21.0, 0.0};
     if (!Arrays.asList(iva).contains(producto.getIvaPorcentaje().doubleValue())) {
       throw new BusinessServiceException(
-        MessageFormat.format(RESOURCE_BUNDLE.getString("mensaje_producto_ganancia_neta_incorrecta"), producto.getDescripcion()));
+          MessageFormat.format(
+              RESOURCE_BUNDLE.getString("mensaje_producto_ganancia_neta_incorrecta"),
+              producto.getDescripcion()));
     }
     if (producto
             .getGananciaNeto()
@@ -114,7 +126,9 @@ public class ProductoServiceImpl implements IProductoService {
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-        MessageFormat.format(RESOURCE_BUNDLE.getString("mensaje_producto_ganancia_neta_incorrecta"), producto.getDescripcion()));
+          MessageFormat.format(
+              RESOURCE_BUNDLE.getString("mensaje_producto_ganancia_neta_incorrecta"),
+              producto.getDescripcion()));
     }
     if (producto
             .getPrecioVentaPublico()
@@ -124,7 +138,9 @@ public class ProductoServiceImpl implements IProductoService {
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-        MessageFormat.format(RESOURCE_BUNDLE.getString("mensaje_precio_venta_publico_incorrecto"), producto.getDescripcion()));
+          MessageFormat.format(
+              RESOURCE_BUNDLE.getString("mensaje_precio_venta_publico_incorrecto"),
+              producto.getDescripcion()));
     }
     if (producto
             .getIvaNeto()
@@ -134,7 +150,9 @@ public class ProductoServiceImpl implements IProductoService {
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-        MessageFormat.format(RESOURCE_BUNDLE.getString("mensaje_producto_iva_neto_incorrecto"), producto.getDescripcion()));
+          MessageFormat.format(
+              RESOURCE_BUNDLE.getString("mensaje_producto_iva_neto_incorrecto"),
+              producto.getDescripcion()));
     }
     if (producto
             .getPrecioLista()
@@ -145,7 +163,9 @@ public class ProductoServiceImpl implements IProductoService {
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-        MessageFormat.format(RESOURCE_BUNDLE.getString("mensaje_producto_precio_lista_incorrecto"), producto.getDescripcion()));
+          MessageFormat.format(
+              RESOURCE_BUNDLE.getString("mensaje_producto_precio_lista_incorrecto"),
+              producto.getDescripcion()));
     }
   }
 
@@ -184,6 +204,9 @@ public class ProductoServiceImpl implements IProductoService {
     if (criteria.isBuscaPorVisibilidad())
       if (criteria.getPublico()) builder.and(qProducto.publico.isTrue());
       else builder.and(qProducto.publico.isFalse());
+    if (criteria.isBuscaPorDestacado())
+      if (criteria.getDestacado()) builder.and(qProducto.destacado.isTrue());
+      else builder.and(qProducto.destacado.isFalse());
     return builder;
   }
 
@@ -203,6 +226,7 @@ public class ProductoServiceImpl implements IProductoService {
     producto.setFechaAlta(new Date());
     producto.setFechaUltimaModificacion(new Date());
     producto.setEliminado(false);
+    producto.setDestacado(false);
     this.validarOperacion(TipoDeOperacion.ALTA, producto);
     producto = productoRepository.save(producto);
     logger.warn("El Producto {} se guardó correctamente.", producto);

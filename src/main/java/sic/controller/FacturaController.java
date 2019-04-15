@@ -138,13 +138,7 @@ public class FacturaController {
     public FacturaVenta autorizarFactura(@PathVariable long idFactura) {
         return facturaService.autorizarFacturaVenta((FacturaVenta) facturaService.getFacturaPorId(idFactura));
     }
-    
-    @DeleteMapping("/facturas")
-    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-    public void eliminar(@RequestParam long[] idFactura) {
-        facturaService.eliminar(idFactura);
-    }
-        
+
     @GetMapping("/facturas/{idFactura}/renglones")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public List<RenglonFactura> getRenglonesDeLaFactura(@PathVariable long idFactura) {

@@ -94,6 +94,8 @@ class AppIntegrationTest {
         .ivaNeto(new BigDecimal("210"))
         .precioLista(new BigDecimal("1210"))
         .nota("ProductoTest1")
+        .publico(true)
+        .destacado(true)
         .build();
     NuevoProductoDTO productoDos =
       NuevoProductoDTO.builder()
@@ -109,6 +111,7 @@ class AppIntegrationTest {
         .ivaNeto(new BigDecimal("105"))
         .precioLista(new BigDecimal("1105"))
         .nota("ProductoTest2")
+        .destacado(false)
         .build();
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     RubroDTO rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", RubroDTO.class);
@@ -3246,6 +3249,45 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldNotCrearProductoDestacado() {
+    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    Rubro rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", Rubro.class);
+    ProveedorDTO proveedor =
+        restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
+    Medida medida = restTemplate.getForObject(apiPrefix + "/medidas/1", Medida.class);
+    NuevoProductoDTO productoUno =
+        NuevoProductoDTO.builder()
+            .codigo(RandomStringUtils.random(10, false, true))
+            .descripcion(RandomStringUtils.random(10, true, false))
+            .cantidad(BigDecimal.TEN)
+            .bulto(BigDecimal.ONE)
+            .precioCosto(CIEN)
+            .gananciaPorcentaje(new BigDecimal("900"))
+            .gananciaNeto(new BigDecimal("900"))
+            .precioVentaPublico(new BigDecimal("1000"))
+            .ivaPorcentaje(new BigDecimal("21.0"))
+            .ivaNeto(new BigDecimal("210"))
+            .precioLista(new BigDecimal("1210"))
+            .nota("Producto Test")
+            .destacado(true)
+            .build();
+    ProductoDTO productoRecuperado =
+        restTemplate.postForObject(
+            apiPrefix
+                + "/productos?idMedida="
+                + medida.getId_Medida()
+                + "&idRubro="
+                + rubro.getId_Rubro()
+                + "&idProveedor="
+                + proveedor.getId_Proveedor()
+                + "&idEmpresa="
+                + empresa.getId_Empresa(),
+            productoUno,
+            ProductoDTO.class);
+    assertFalse(productoRecuperado.isDestacado());
+  }
+
+  @Test
   void shouldModificarProducto() {
     this.shouldCrearProductoConIva21();
     ProductoDTO productoAModificar =
@@ -3260,6 +3302,40 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldNotModificarProductoComoDestacadoSiEsPrivado() {
+    this.shouldCrearProductoConIva21();
+    ProductoDTO productoAModificar =
+        restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    productoAModificar.setDescripcion("PRODUCTO MODIFICADO.");
+    productoAModificar.setCantidad(new BigDecimal("52"));
+    productoAModificar.setDestacado(true);
+    productoAModificar.setUrlImagen(null);
+    productoAModificar.setCodigo("666");
+    try {
+      restTemplate.put(apiPrefix + "/productos?idMedida=2", productoAModificar);
+    } catch (RestClientResponseException ex) {
+      assertTrue(ex.getMessage().startsWith("Para poder marcarlo como Destacado, debe ser Publico y tener imagen asignada."));
+    }
+  }
+
+  @Test
+  void shouldNotModificarProductoComoDestacadoSiNoTieneImagen() {
+    this.shouldCrearProductoConIva21();
+    ProductoDTO productoAModificar =
+      restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    productoAModificar.setDescripcion("PRODUCTO MODIFICADO.");
+    productoAModificar.setCantidad(new BigDecimal("52"));
+    productoAModificar.setPublico(false);
+    productoAModificar.setDestacado(true);
+    productoAModificar.setCodigo("666");
+    try {
+      restTemplate.put(apiPrefix + "/productos?idMedida=2", productoAModificar);
+    } catch (RestClientResponseException ex) {
+      assertTrue(ex.getMessage().startsWith("Para poder marcarlo como Destacado, debe ser Publico y tener imagen asignada."));
+    }
+  }
+
+  @Test
   void shouldEliminarProducto() {
     this.shouldCrearProductoConIva21();
     restTemplate.delete(apiPrefix + "/productos?idProducto=1");
@@ -3267,17 +3343,6 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     } catch (RestClientResponseException ex) {
       assertTrue(ex.getMessage().startsWith("El producto solicitado no existe."));
-    }
-  }
-
-  @Test
-  void shouldCrearYEliminarFacturaVenta() {
-    this.shouldCrearFacturaVentaA();
-    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-    try {
-      restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaDTO.class);
-    } catch (RestClientResponseException ex) {
-      assertTrue(ex.getMessage().startsWith("La factura no existe o se encuentra eliminada."));
     }
   }
 
@@ -3290,22 +3355,6 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
     assertEquals(new BigDecimal("4.000000000000000"), producto1.getCantidad());
     assertEquals(new BigDecimal("3.000000000000000"), producto2.getCantidad());
-    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-    producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
-    producto2 = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
-    assertEquals(new BigDecimal("10.000000000000000"), producto1.getCantidad());
-    assertEquals(new BigDecimal("6.000000000000000"), producto2.getCantidad());
-  }
-
-  @Test
-  void shouldCrearAndEliminarFacturaCompra() {
-    this.shouldCrearFacturaCompraA();
-    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-    try {
-      restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaDTO.class);
-    } catch (RestClientResponseException ex) {
-      assertTrue(ex.getMessage().startsWith("La factura no existe o se encuentra eliminada."));
-    }
   }
 
   @Test
@@ -3317,11 +3366,6 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
     assertEquals(new BigDecimal("14.000000000000000"), producto1.getCantidad());
     assertEquals(new BigDecimal("9.000000000000000"), producto2.getCantidad());
-    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-    producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
-    producto2 = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
-    assertEquals(new BigDecimal("10.000000000000000"), producto1.getCantidad());
-    assertEquals(new BigDecimal("6.000000000000000"), producto2.getCantidad());
   }
 
   @Disabled
@@ -3596,11 +3640,6 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
     assertEquals(new BigDecimal("10.000000000000000"), producto1.getCantidad());
     assertEquals(new BigDecimal("4.000000000000000"), producto2.getCantidad());
-    restTemplate.delete(apiPrefix + "/notas?idsNota=1");
-    producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
-    producto2 = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
-    assertEquals(new BigDecimal("5.000000000000000"), producto1.getCantidad());
-    assertEquals(new BigDecimal("4.000000000000000"), producto2.getCantidad());
   }
 
   @Test
@@ -3724,11 +3763,6 @@ class AppIntegrationTest {
     ProductoDTO producto2 =
       restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
     assertEquals(new BigDecimal("12.000000000000000"), producto1.getCantidad());
-    assertEquals(new BigDecimal("8.000000000000000"), producto2.getCantidad());
-    restTemplate.delete(apiPrefix + "/notas?idsNota=1");
-    producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
-    producto2 = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
-    assertEquals(new BigDecimal("15.000000000000000"), producto1.getCantidad());
     assertEquals(new BigDecimal("8.000000000000000"), producto2.getCantidad());
   }
 
@@ -4143,18 +4177,6 @@ class AppIntegrationTest {
       restTemplate.getForObject(
         apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
     assertEquals(EstadoPedido.CERRADO, pedidoRecuperado.getEstado());
-    restTemplate.delete(
-      apiPrefix + "/facturas?idFactura=" + facturasRecuperadas.get(0).getId_Factura());
-    pedidoRecuperado =
-      restTemplate.getForObject(
-        apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
-    assertEquals(EstadoPedido.ACTIVO, pedidoRecuperado.getEstado());
-    restTemplate.delete(
-      apiPrefix + "/facturas?idFactura=" + facturasRecuperadas.get(1).getId_Factura());
-    pedidoRecuperado =
-      restTemplate.getForObject(
-        apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
-    assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
   }
 
   @Test
@@ -4187,11 +4209,6 @@ class AppIntegrationTest {
       new BigDecimal("100.000000000000000"),
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/proveedores/1/saldo", BigDecimal.class));
-    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-    assertEquals(
-      new BigDecimal("699.250000000000000"),
-      restTemplate.getForObject(
-        apiPrefix + "/cuentas-corriente/proveedores/1/saldo", BigDecimal.class));
   }
 
   @Test
@@ -4202,80 +4219,38 @@ class AppIntegrationTest {
     restTemplate.delete(apiPrefix + "/recibos/1");
     this.crearReciboParaProveedor(499.25);
     this.crearReciboParaProveedor(200);
-    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-    List<RenglonCuentaCorriente> renglonesCuentaCorriente =
-      restTemplate
-        .exchange(
-          apiPrefix + "/cuentas-corriente/2/renglones" + "?pagina=" + 0 + "&tamanio=" + 50,
-          HttpMethod.GET,
-          null,
-          new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {
-          })
-        .getBody()
-        .getContent();
-    assertEquals(699.25, renglonesCuentaCorriente.get(0).getSaldo(), 0);
-    assertEquals(499.25, renglonesCuentaCorriente.get(1).getSaldo(), 0);
     this.shouldCrearFacturaCompraB();
     this.crearNotaCreditoParaProveedor();
-    renglonesCuentaCorriente =
-      restTemplate
-        .exchange(
-          apiPrefix + "/cuentas-corriente/2/renglones" + "?pagina=" + 0 + "&tamanio=" + 50,
-          HttpMethod.GET,
-          null,
-          new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {
-          })
-        .getBody()
-        .getContent();
-    assertEquals(511.4, renglonesCuentaCorriente.get(0).getSaldo(), 0);
-    assertEquals(100.0, renglonesCuentaCorriente.get(1).getSaldo(), 0);
-    assertEquals(699.25, renglonesCuentaCorriente.get(2).getSaldo(), 0);
-    assertEquals(499.25, renglonesCuentaCorriente.get(3).getSaldo(), 0);
+    List<RenglonCuentaCorriente> renglonesCuentaCorriente =
+        restTemplate
+            .exchange(
+                apiPrefix + "/cuentas-corriente/2/renglones" + "?pagina=" + 0 + "&tamanio=" + 50,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {})
+            .getBody()
+            .getContent();
+    assertEquals(-87.85, renglonesCuentaCorriente.get(0).getSaldo(), 0);
+    assertEquals(-499.25, renglonesCuentaCorriente.get(1).getSaldo(), 0);
+    assertEquals(100, renglonesCuentaCorriente.get(2).getSaldo(), 0);
+    assertEquals(-100, renglonesCuentaCorriente.get(3).getSaldo(), 0);
+    assertEquals(-599.25, renglonesCuentaCorriente.get(4).getSaldo(), 0);
     this.crearNotaDebitoParaProveedor();
     renglonesCuentaCorriente =
-      restTemplate
-        .exchange(
-          apiPrefix + "/cuentas-corriente/2/renglones" + "?pagina=" + 0 + "&tamanio=" + 50,
-          HttpMethod.GET,
-          null,
-          new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {
-          })
-        .getBody()
-        .getContent();
-    assertEquals(190.40, renglonesCuentaCorriente.get(0).getSaldo(), 0);
-    assertEquals(511.40, renglonesCuentaCorriente.get(1).getSaldo(), 0);
-    assertEquals(100.0, renglonesCuentaCorriente.get(2).getSaldo(), 0);
-    assertEquals(699.25, renglonesCuentaCorriente.get(3).getSaldo(), 0);
-    assertEquals(499.25, renglonesCuentaCorriente.get(4).getSaldo(), 0);
-    restTemplate.delete(apiPrefix + "/notas/?idsNota=2");
-    renglonesCuentaCorriente =
-      restTemplate
-        .exchange(
-          apiPrefix + "/cuentas-corriente/2/renglones" + "?pagina=" + 0 + "&tamanio=" + 50,
-          HttpMethod.GET,
-          null,
-          new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {
-          })
-        .getBody()
-        .getContent();
-    assertEquals(511.40, renglonesCuentaCorriente.get(0).getSaldo(), 0);
-    assertEquals(100.0, renglonesCuentaCorriente.get(1).getSaldo(), 0);
-    assertEquals(699.25, renglonesCuentaCorriente.get(2).getSaldo(), 0);
-    assertEquals(499.25, renglonesCuentaCorriente.get(3).getSaldo(), 0);
-    restTemplate.delete(apiPrefix + "/notas/?idsNota=1");
-    renglonesCuentaCorriente =
-      restTemplate
-        .exchange(
-          apiPrefix + "/cuentas-corriente/2/renglones" + "?pagina=" + 0 + "&tamanio=" + 50,
-          HttpMethod.GET,
-          null,
-          new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {
-          })
-        .getBody()
-        .getContent();
-    assertEquals(100.00, renglonesCuentaCorriente.get(0).getSaldo(), 0);
-    assertEquals(699.25, renglonesCuentaCorriente.get(1).getSaldo(), 0);
-    assertEquals(499.25, renglonesCuentaCorriente.get(2).getSaldo(), 0);
+        restTemplate
+            .exchange(
+                apiPrefix + "/cuentas-corriente/2/renglones" + "?pagina=" + 0 + "&tamanio=" + 50,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {})
+            .getBody()
+            .getContent();
+    assertEquals(-408.85, renglonesCuentaCorriente.get(0).getSaldo(), 0);
+    assertEquals(-87.85, renglonesCuentaCorriente.get(1).getSaldo(), 0);
+    assertEquals(-499.25, renglonesCuentaCorriente.get(2).getSaldo(), 0);
+    assertEquals(100, renglonesCuentaCorriente.get(3).getSaldo(), 0);
+    assertEquals(-100, renglonesCuentaCorriente.get(4).getSaldo(), 0);
+    assertEquals(-599.25, renglonesCuentaCorriente.get(5).getSaldo(), 0);
   }
 
   @Test
@@ -4370,16 +4345,6 @@ class AppIntegrationTest {
     NotaCreditoDTO notaCreditoDTO =
       restTemplate.getForObject(apiPrefix + "/notas/2", NotaCreditoDTO.class);
     assertEquals(notaCreditoDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
-    restTemplate.delete(apiPrefix + "/notas?idsNota=2");
-    ccCliente =
-      restTemplate.getForObject(
-        apiPrefix + "/cuentas-corriente/clientes/1", CuentaCorriente.class);
-    assertEquals(reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
-    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-    ccCliente =
-      restTemplate.getForObject(
-        apiPrefix + "/cuentas-corriente/clientes/1", CuentaCorriente.class);
-    assertEquals(reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
   }
 
   @Test
@@ -4414,11 +4379,6 @@ class AppIntegrationTest {
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
     reciboDTO = restTemplate.getForObject(apiPrefix + "/recibos/3", ReciboDTO.class);
-    assertEquals(reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
-    restTemplate.delete(apiPrefix + "/facturas?idFactura=1");
-    ccCliente =
-      restTemplate.getForObject(
-        apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
     assertEquals(reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
   }
 
@@ -4581,5 +4541,4 @@ class AppIntegrationTest {
     assertEquals(59, fechaCierre.get(Calendar.MINUTE));
     assertEquals(59, fechaCierre.get(Calendar.SECOND));
   }
-
 }
