@@ -22,27 +22,74 @@ import lombok.ToString;
 @JsonIgnoreProperties({"cliente", "usuario", "empresa", "pedido", "transportista"})
 public class FacturaVenta extends Factura implements Serializable {
 
-    @ManyToOne
-    @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
-    private Cliente cliente;
+  @ManyToOne
+  @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
+  private Cliente cliente;
 
-    public FacturaVenta() {}
+  public FacturaVenta() {}
 
-    public FacturaVenta(Cliente cliente, Usuario usuario, long id_Factura, Date fecha,
-            TipoDeComprobante tipoComprobante, long numSerie, long numFactura, Date fechaVencimiento,
-            Pedido pedido, Transportista transportista, List<RenglonFactura> renglones, BigDecimal subTotal,
-            BigDecimal recargo_porcentaje, BigDecimal recargo_neto, BigDecimal descuento_porcentaje,
-            BigDecimal descuento_neto, BigDecimal subTotal_neto, BigDecimal iva_105_neto, BigDecimal iva_21_neto,
-            BigDecimal impuestoInterno_neto, BigDecimal total, String observaciones, Empresa empresa,
-            boolean eliminada, long CAE, Date vencimientoCAE, long numSerieAfip, long numFacturaAfip) {
-        
-        super(id_Factura, usuario, fecha, tipoComprobante, numSerie, numFactura, fechaVencimiento,
-                pedido, transportista, renglones, subTotal, recargo_porcentaje, 
-                recargo_neto, descuento_porcentaje, descuento_neto, subTotal_neto, 
-                iva_105_neto, iva_21_neto, impuestoInterno_neto, total, observaciones,
-                empresa, eliminada, CAE, vencimientoCAE, numSerieAfip, numFacturaAfip);
-        this.cliente = cliente;
-    }
+  public FacturaVenta(
+      Cliente cliente,
+      Usuario usuario,
+      long id_Factura,
+      Date fecha,
+      TipoDeComprobante tipoComprobante,
+      long numSerie,
+      long numFactura,
+      Date fechaVencimiento,
+      Pedido pedido,
+      Transportista transportista,
+      List<RenglonFactura> renglones,
+      BigDecimal subTotal,
+      BigDecimal recargo_porcentaje,
+      BigDecimal recargo_neto,
+      BigDecimal descuento_porcentaje,
+      BigDecimal descuento_neto,
+      BigDecimal subTotal_neto,
+      BigDecimal iva_105_neto,
+      BigDecimal iva_21_neto,
+      BigDecimal impuestoInterno_neto,
+      BigDecimal total,
+      String observaciones,
+      BigDecimal cantidadDeArticulos,
+      Empresa empresa,
+      boolean eliminada,
+      long CAE,
+      Date vencimientoCAE,
+      long numSerieAfip,
+      long numFacturaAfip) {
+
+    super(
+        id_Factura,
+        usuario,
+        fecha,
+        tipoComprobante,
+        numSerie,
+        numFactura,
+        fechaVencimiento,
+        pedido,
+        transportista,
+        renglones,
+        subTotal,
+        recargo_porcentaje,
+        recargo_neto,
+        descuento_porcentaje,
+        descuento_neto,
+        subTotal_neto,
+        iva_105_neto,
+        iva_21_neto,
+        impuestoInterno_neto,
+        total,
+        observaciones,
+        cantidadDeArticulos,
+        empresa,
+        eliminada,
+        CAE,
+        vencimientoCAE,
+        numSerieAfip,
+        numFacturaAfip);
+    this.cliente = cliente;
+  }
 
     @JsonGetter("idCliente")
     public Long getIdCliente() {

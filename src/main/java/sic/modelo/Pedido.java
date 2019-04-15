@@ -18,6 +18,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.Formula;
 import sic.modelo.dto.UbicacionDTO;
 
 @Entity
@@ -101,6 +102,13 @@ public class Pedido implements Serializable {
 
   @Enumerated(EnumType.STRING)
   private EstadoPedido estado;
+
+  @Column(precision = 25, scale = 15)
+  @Formula(
+      value =
+        "(SELECT SUM(renglonpedido.cantidad) FROM"
+        + " renglonpedido WHERE renglonpedido.id_Pedido = id_Pedido)")
+  private BigDecimal cantidadDeArticulos;
 
   @JsonGetter("nombreEmpresa")
   public String getNombreEmpresa() {
