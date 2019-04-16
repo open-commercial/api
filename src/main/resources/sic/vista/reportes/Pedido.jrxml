@@ -430,7 +430,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 	<lastPageFooter>
 		<band height="105">
 			<staticText>
-				<reportElement x="0" y="0" width="80" height="15" uuid="91ccf54e-4e88-46c6-bf3d-a55f2b7bd295">
+				<reportElement x="0" y="0" width="90" height="15" uuid="91ccf54e-4e88-46c6-bf3d-a55f2b7bd295">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
@@ -439,7 +439,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				<text><![CDATA[Usuario:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="80" y="0" width="250" height="15" uuid="5ee9b3e5-307e-4b11-9756-f997491e191d">
+				<reportElement x="90" y="0" width="240" height="15" uuid="5ee9b3e5-307e-4b11-9756-f997491e191d">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
@@ -449,7 +449,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 + " " + "(" +$P{pedido}.getUsuario().getUsername() + ")"]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="15" width="80" height="15" uuid="43f39702-e0af-456b-bea4-3952f75b1aa5">
+				<reportElement x="0" y="30" width="90" height="15" uuid="43f39702-e0af-456b-bea4-3952f75b1aa5">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
@@ -458,7 +458,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				<text><![CDATA[Observaciones:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="80" y="15" width="250" height="63" uuid="7d4cd7c6-3ef8-449b-b63b-9d16f6eb9934"/>
+				<reportElement x="90" y="30" width="240" height="48" uuid="7d4cd7c6-3ef8-449b-b63b-9d16f6eb9934"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
@@ -581,6 +581,22 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{pedido}.getRecargoNeto().doubleValue()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="15" width="90" height="15" uuid="9526ac59-9a9c-41dd-b695-b0b4c636968a">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cantidad Artículos:]]></text>
+			</staticText>
+			<textField evaluationTime="Report">
+				<reportElement positionType="FixRelativeToBottom" x="90" y="15" width="90" height="15" uuid="58477052-98f2-4b1d-8e8f-58b054b5bfeb"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{pedido}.getCantidadArticulos().doubleValue()]]></textFieldExpression>
 			</textField>
 		</band>
 	</lastPageFooter>

@@ -1860,6 +1860,13 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shloudVerificarCantidadDeArticulosEnFacturaA() {
+    this.shouldCrearFacturaVentaA();
+    FacturaDTO facturaDTO = restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaDTO.class);
+    assertEquals(new BigDecimal("9.000000000000000"), facturaDTO.getCantidadArticulos());
+  }
+
+  @Test
   void shouldCrearFacturaCompraA() {
     this.crearProductos();
     RenglonFactura renglonUno =
@@ -2510,6 +2517,7 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("115.500000000000000"), productoDos.getIvaNeto());
     assertEquals(new BigDecimal("1215.500000000000000"), productoDos.getPrecioLista());
   }
+
   @Test
   void shouldCambiarPreciosProductos() {
     this.crearProductos();
@@ -3639,6 +3647,13 @@ class AppIntegrationTest {
       restTemplate.getForObject(
         apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
     assertEquals(EstadoPedido.CERRADO, pedidoRecuperado.getEstado());
+  }
+
+  @Test
+  void shloudVerificarCantidadDeArticulosEnPedido() {
+    this.shouldCrearPedido();
+    PedidoDTO pedidoDTO = restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoDTO.class);
+    assertEquals(new BigDecimal("7.000000000000000"), pedidoDTO.getCantidadArticulos());
   }
 
   @Test

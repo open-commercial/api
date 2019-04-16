@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
+import javax.validation.constraints.DecimalMin;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -104,11 +105,8 @@ public class Pedido implements Serializable {
   private EstadoPedido estado;
 
   @Column(precision = 25, scale = 15)
-  @Formula(
-      value =
-        "(SELECT SUM(renglonpedido.cantidad) FROM"
-        + " renglonpedido WHERE renglonpedido.id_Pedido = id_Pedido)")
-  private BigDecimal cantidadDeArticulos;
+  @DecimalMin(value = "0", message = "{mensaje_cantidad_de_productos_negativa}", inclusive = false)
+  private BigDecimal cantidadArticulos;
 
   @JsonGetter("nombreEmpresa")
   public String getNombreEmpresa() {

@@ -14,9 +14,12 @@ import sic.modelo.EstadoPedido;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = "renglones")
+@ToString(exclude = {"renglones", "cantidadArticulos"})
 @EqualsAndHashCode(of = {"nroPedido", "nombreEmpresa"})
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Pedido", scope = PedidoDTO.class)
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.PropertyGenerator.class,
+    property = "id_Pedido",
+    scope = PedidoDTO.class)
 @Builder
 public class PedidoDTO implements Serializable {
 
@@ -39,4 +42,5 @@ public class PedidoDTO implements Serializable {
   private BigDecimal totalEstimado;
   private BigDecimal totalActual;
   private EstadoPedido estado;
+  private BigDecimal cantidadArticulos;
 }
