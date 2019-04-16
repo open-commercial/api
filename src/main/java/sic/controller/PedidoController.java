@@ -136,6 +136,7 @@ public class PedidoController {
       @RequestParam(required = false) Long nroPedido,
       @RequestParam(required = false) EstadoPedido estadoPedido,
       @RequestParam(required = false) TipoDeEnvio tipoDeEnvio,
+      @RequestParam(required = false) Long idProducto,
       @RequestParam(required = false) Integer pagina,
       @RequestHeader("Authorization") String authorizationHeader) {
     Calendar fechaDesde = Calendar.getInstance();
@@ -165,6 +166,8 @@ public class PedidoController {
             .estadoPedido(estadoPedido)
             .buscaPorEnvio(tipoDeEnvio != null)
             .tipoDeEnvio(tipoDeEnvio)
+            .buscaPorProducto(idProducto != null)
+            .idProducto(idProducto)
             .idEmpresa(idEmpresa)
             .pageable(pageable)
             .build();
