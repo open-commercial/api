@@ -193,12 +193,15 @@ public class ClienteServiceImpl implements IClienteService {
       }
     }
     // Ubicacion
-    if (cliente.getUbicacionFacturacion() != null && cliente.getUbicacionEnvio() != null) {
-      if (cliente.getUbicacionFacturacion().getIdUbicacion()
-          == cliente.getUbicacionEnvio().getIdUbicacion()) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_ubicacion_facturacion_envio_iguales"));
-      }
+    if (cliente.getUbicacionFacturacion() != null
+        && cliente.getUbicacionEnvio() != null
+        && operacion == TipoDeOperacion.ACTUALIZACION
+        && (cliente.getUbicacionFacturacion().getIdUbicacion() != 0L)
+        && (cliente.getUbicacionEnvio().getIdUbicacion() != 0L)
+        && (cliente.getUbicacionFacturacion().getIdUbicacion()
+            == cliente.getUbicacionEnvio().getIdUbicacion())) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_ubicacion_facturacion_envio_iguales"));
     }
   }
 
