@@ -152,7 +152,9 @@ public class EmpresaServiceImpl implements IEmpresaService {
     Empresa empresa = this.getEmpresaPorId(idEmpresa);
     empresa.setEliminada(true);
     empresa.setUbicacion(null);
-    photoVideoUploader.borrarImagen(Empresa.class.getSimpleName() + empresa.getId_Empresa());
+    if (empresa.getLogo() != null && !empresa.getLogo().isEmpty()) {
+      photoVideoUploader.borrarImagen(Empresa.class.getSimpleName() + empresa.getId_Empresa());
+    }
     configuracionDelSistemaService.eliminar(
         configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa));
     empresaRepository.save(empresa);
