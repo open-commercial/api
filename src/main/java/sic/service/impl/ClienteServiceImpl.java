@@ -312,6 +312,8 @@ public class ClienteServiceImpl implements IClienteService {
     cuentaCorrienteService.eliminarCuentaCorrienteCliente(idCliente);
     cliente.setCredencial(null);
     cliente.setEliminado(true);
+    cliente.setUbicacionFacturacion(null);
+    cliente.setUbicacionEnvio(null);
     clienteRepository.save(cliente);
     logger.warn("El Cliente {} se eliminó correctamente.", cliente);
   }
