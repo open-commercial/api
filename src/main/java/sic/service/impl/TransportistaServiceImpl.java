@@ -157,6 +157,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
           ResourceBundle.getBundle("Mensajes").getString("mensaje_transportista_no_existente"));
     }
     transportista.setEliminado(true);
+    transportista.setUbicacion(null);
     transportistaRepository.save(transportista);
   }
 }

@@ -213,6 +213,7 @@ public class ProveedorServiceImpl implements IProveedorService {
     }
     cuentaCorrienteService.eliminarCuentaCorrienteProveedor(idProveedor);
     proveedor.setEliminado(true);
+    proveedor.setUbicacion(null);
     proveedorRepository.save(proveedor);
   }
 }

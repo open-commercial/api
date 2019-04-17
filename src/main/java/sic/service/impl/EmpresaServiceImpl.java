@@ -151,6 +151,7 @@ public class EmpresaServiceImpl implements IEmpresaService {
   public void eliminar(Long idEmpresa) {
     Empresa empresa = this.getEmpresaPorId(idEmpresa);
     empresa.setEliminada(true);
+    empresa.setUbicacion(null);
     photoVideoUploader.borrarImagen(Empresa.class.getSimpleName() + empresa.getId_Empresa());
     configuracionDelSistemaService.eliminar(
         configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa));

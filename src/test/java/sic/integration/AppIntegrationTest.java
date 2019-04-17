@@ -1161,14 +1161,6 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldEliminarUbicacionesDelClienteAlEliminarlo() {
-    this.shouldCrearClienteConUbicaciones();
-    restTemplate.delete(apiPrefix + "/clientes/3");
-    assertEquals(null, restTemplate.getForObject(apiPrefix + "/ubicaciones/7", UbicacionDTO.class));
-    assertEquals(null, restTemplate.getForObject(apiPrefix + "/ubicaciones/6", UbicacionDTO.class));
-  }
-
-  @Test
   void shouldModificarUbicacionesDeClientes() {
     UsuarioDTO credencial =
         UsuarioDTO.builder()
@@ -1376,6 +1368,35 @@ class AppIntegrationTest {
             apiPrefix + "/transportistas/" + transportistaRecuperado.getId_Transportista(),
             TransportistaDTO.class);
     assertEquals(ubicacion, transportistaRecuperado.getUbicacion());
+  }
+
+  @Test
+  void shouldEliminarUbicacionesDelClienteAlEliminarlo() {
+    this.shouldCrearClienteConUbicaciones();
+    restTemplate.delete(apiPrefix + "/clientes/3");
+    assertNull(restTemplate.getForObject(apiPrefix + "/ubicaciones/7", UbicacionDTO.class));
+    assertNull(restTemplate.getForObject(apiPrefix + "/ubicaciones/6", UbicacionDTO.class));
+  }
+
+  @Test
+  void shouldEliminarUbicacionesDelEmpresaAlEliminarla() {
+    this.shouldCrearEmpresaResponsableInscripto();
+    restTemplate.delete(apiPrefix + "/empresas/2");
+    assertNull(restTemplate.getForObject(apiPrefix + "/ubicaciones/6", UbicacionDTO.class));
+  }
+
+  @Test
+  void shouldEliminarUbicacionesDelProveedorAlEliminarlo() {
+    this.shouldCrearProveedorConUbicacion();
+    restTemplate.delete(apiPrefix + "/proveedores/2");
+    assertNull(restTemplate.getForObject(apiPrefix + "/ubicaciones/6", UbicacionDTO.class));
+  }
+
+  @Test
+  void shouldEliminarUbicacionesDelTransportistaAlEliminarla() {
+    this.shouldCrearTransportistaConUbicacion();
+    restTemplate.delete(apiPrefix + "/transportistas/2");
+    assertNull(restTemplate.getForObject(apiPrefix + "/ubicaciones/6", UbicacionDTO.class));
   }
 
   @Test
