@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.dto.LocalidadDTO;
-import sic.modelo.dto.UbicacionDTO;
 import sic.service.*;
 
 import java.util.List;

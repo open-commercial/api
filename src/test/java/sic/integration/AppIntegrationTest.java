@@ -1161,6 +1161,14 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldEliminarUbicacionesDelClienteAlEliminarlo() {
+    this.shouldCrearClienteConUbicaciones();
+    restTemplate.delete(apiPrefix + "/clientes/3");
+    assertEquals(null, restTemplate.getForObject(apiPrefix + "/ubicaciones/7", UbicacionDTO.class));
+    assertEquals(null, restTemplate.getForObject(apiPrefix + "/ubicaciones/6", UbicacionDTO.class));
+  }
+
+  @Test
   void shouldModificarUbicacionesDeClientes() {
     UsuarioDTO credencial =
         UsuarioDTO.builder()
