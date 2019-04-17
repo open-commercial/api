@@ -6,7 +6,7 @@ import javax.persistence.Embeddable;
 import java.io.Serializable;
 
 @Data
-@EqualsAndHashCode(exclude = {"idUbicacion", "idProvincia", "nombreLocalidad", "codigoPostal", "idProvincia", "nombreProvincia"})
+@EqualsAndHashCode(exclude = {"idUbicacion", "idLocalidad", "nombreLocalidad", "codigoPostal", "idProvincia", "nombreProvincia"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
