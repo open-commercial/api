@@ -102,10 +102,6 @@ public class CarritoCompraController {
     CarritoCompraDTO carritoCompraDTO = carritoCompraService.getCarritoCompra(idUsuario, idCliente);
     Pedido pedido = new Pedido();
     pedido.setCliente(clienteService.getClientePorId(idCliente));
-    if (pedido.getCliente().getUbicacionFacturacion() == null) {
-      throw new BusinessServiceException(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_facturacion_vacia"));
-    }
     pedido.setObservaciones(observaciones);
     pedido.setSubTotal(carritoCompraDTO.getSubtotal());
     pedido.setRecargoPorcentaje(BigDecimal.ZERO);
