@@ -153,13 +153,6 @@ public class ClienteServiceImpl implements IClienteService {
 
   @Override
   public void validarOperacion(TipoDeOperacion operacion, Cliente cliente) {
-    // Entrada de Datos
-    if (cliente.getEmail() != null
-        && !cliente.getEmail().equals("")
-        && !Validator.esEmailValido(cliente.getEmail())) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_email_invalido"));
-    }
     // Requeridos
     if (cliente.getCategoriaIVA() == null) {
       throw new BusinessServiceException(

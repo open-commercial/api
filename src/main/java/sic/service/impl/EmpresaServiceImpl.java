@@ -3,6 +3,8 @@ package sic.service.impl;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,13 +62,6 @@ public class EmpresaServiceImpl implements IEmpresaService {
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Empresa empresa) {
-    // Entrada de Datos
-    if (empresa.getEmail() != null && !empresa.getEmail().equals("")) {
-      if (!Validator.esEmailValido(empresa.getEmail())) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_empresa_email_invalido"));
-      }
-    }
     // Requeridos
     if (Validator.esVacio(empresa.getNombre())) {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_empresa_vacio_nombre"));
@@ -113,7 +108,7 @@ public class EmpresaServiceImpl implements IEmpresaService {
 
   @Override
   @Transactional
-  public Empresa guardar(Empresa empresa) {
+  public Empresa guardar(@Valid Empresa empresa) {
     validarOperacion(TipoDeOperacion.ALTA, empresa);
     empresa = empresaRepository.save(empresa);
     crearConfiguracionDelSistema(empresa);

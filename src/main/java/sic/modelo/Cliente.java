@@ -16,6 +16,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.validator.constraints.Email;
 
 @Entity
 @Table(name = "cliente")
@@ -48,6 +49,7 @@ public class Cliente implements Serializable {
 
   private Long idFiscal;
 
+  @Email(message = "{mensaje_correo_formato_incorrecto}")
   private String email;
 
   private String telefono;

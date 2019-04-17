@@ -8,6 +8,8 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 
+import javax.validation.Valid;
+
 public interface ICajaService {
 
     void actualizar(Caja caja);
@@ -26,7 +28,7 @@ public interface ICajaService {
 
     Caja abrirCaja(Empresa empresa, Usuario usuarioApertura, BigDecimal saldoApertura);
 
-    void validarCaja(Caja caja);
+    void validarCaja(@Valid Caja caja);
     
     Caja cerrarCaja(long idCaja, BigDecimal monto, Long idUsuario, boolean scheduling);
     

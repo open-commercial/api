@@ -3,6 +3,8 @@ package sic.service;
 import java.util.List;
 import sic.modelo.Empresa;
 
+import javax.validation.Valid;
+
 public interface IEmpresaService {
 
   Empresa getEmpresaPorId(Long id_Empresa);
@@ -17,7 +19,7 @@ public interface IEmpresaService {
 
   List<Empresa> getEmpresas();
 
-  Empresa guardar(Empresa empresa);
+  Empresa guardar(@Valid Empresa empresa);
 
   String guardarLogo(long idEmpresa, byte[] imagen);
 }

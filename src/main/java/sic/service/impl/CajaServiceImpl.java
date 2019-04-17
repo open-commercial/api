@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.service.*;
 
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,7 @@ import sic.util.Validator;
 import sic.repository.CajaRepository;
 
 @Service
+@Validated
 public class CajaServiceImpl implements ICajaService {
 
   private final CajaRepository cajaRepository;
@@ -69,7 +72,7 @@ public class CajaServiceImpl implements ICajaService {
   }
 
   @Override
-  public void validarCaja(Caja caja) {
+  public void validarCaja(@Valid Caja caja) {
     // Entrada de Datos
     // Requeridos
     if (caja.getFechaApertura() == null) {
