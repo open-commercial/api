@@ -3,6 +3,7 @@ package sic.service.impl;
 import com.querydsl.core.BooleanBuilder;
 
 import org.springframework.data.domain.Page;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
 import java.math.BigDecimal;
@@ -10,6 +11,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +20,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.service.IProveedorService;
 import sic.service.BusinessServiceException;
-import sic.service.IUbicacionService;
-import sic.util.Validator;
 import sic.repository.ProveedorRepository;
 import sic.service.ICuentaCorrienteService;
 
 @Service
+@Validated
 public class ProveedorServiceImpl implements IProveedorService {
 
   private final ProveedorRepository proveedorRepository;
@@ -97,26 +99,6 @@ public class ProveedorServiceImpl implements IProveedorService {
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Proveedor proveedor) {
-    // Entrada de Datos
-    if (proveedor.getEmail() != null
-        && !proveedor.getEmail().equals("")
-        && !Validator.esEmailValido(proveedor.getEmail())) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_email_invalido"));
-    }
-    // Requeridos
-    if (Validator.esVacio(proveedor.getRazonSocial())) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_razonSocial_vacia"));
-    }
-    if (proveedor.getCategoriaIVA() == null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_condicionIVA_vacia"));
-    }
-    if (proveedor.getEmpresa() == null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_empresa_vacia"));
-    }
     // Duplicados
     // Codigo
     if (!proveedor.getCodigo().equals("")) {
@@ -171,7 +153,7 @@ public class ProveedorServiceImpl implements IProveedorService {
 
   @Override
   @Transactional
-  public Proveedor guardar(Proveedor proveedor) {
+  public Proveedor guardar(@Validated Proveedor proveedor) {
     if (proveedor.getCodigo() == null) proveedor.setCodigo("");
     this.validarOperacion(TipoDeOperacion.ALTA, proveedor);
     proveedor = proveedorRepository.save(proveedor);
@@ -187,7 +169,7 @@ public class ProveedorServiceImpl implements IProveedorService {
 
   @Override
   @Transactional
-  public void actualizar(Proveedor proveedor) {
+  public void actualizar(@Valid Proveedor proveedor) {
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, proveedor);
     proveedorRepository.save(proveedor);
   }
