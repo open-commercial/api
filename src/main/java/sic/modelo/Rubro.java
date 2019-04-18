@@ -17,6 +17,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
 @Table(name = "rubro")
@@ -32,6 +33,8 @@ public class Rubro implements Serializable {
     @GeneratedValue
     private long id_Rubro;
 
+    @NotNull(message = "{mensaje_rubro_nombre_vacio}")
+    @NotEmpty(message = "{mensaje_rubro_nombre_vacio}")
     @Column(nullable = false)
     private String nombre;
 

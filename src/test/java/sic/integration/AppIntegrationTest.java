@@ -731,7 +731,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  public void shouldCrearFormaDePagoChequeQueAfectaCaja() {
+  void shouldCrearFormaDePagoChequeQueAfectaCaja() {
     FormaDePagoDTO formaDePagoDTO =
       FormaDePagoDTO.builder().nombre("Cheque").afectaCaja(true).build();
     FormaDePagoDTO formaDePagoRecuperada =
