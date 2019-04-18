@@ -7,6 +7,8 @@ import sic.modelo.Empresa;
 import sic.modelo.FormaDePago;
 import sic.modelo.Gasto;
 
+import javax.validation.Valid;
+
 public interface IGastoService {
     
     Gasto getGastoPorId(Long id);
@@ -17,7 +19,7 @@ public interface IGastoService {
 
     List<Gasto> getGastosEntreFechasYFormaDePago(Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta);
 
-    Gasto guardar(Gasto gasto);
+    Gasto guardar(@Valid Gasto gasto);
 
     void validarGasto(Gasto gasto);
 
