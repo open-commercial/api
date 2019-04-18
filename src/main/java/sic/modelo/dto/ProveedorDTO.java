@@ -29,8 +29,7 @@ public class ProveedorDTO implements Serializable {
   private String contacto;
   private String email;
   private String web;
-  private Long idUbicacion;
-  private String detalleUbicacion;
+  private UbicacionDTO ubicacion;
   private Long idEmpresa;
   private String nombreEmpresa;
   private boolean eliminado;

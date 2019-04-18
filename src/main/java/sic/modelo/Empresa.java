@@ -5,7 +5,6 @@ import java.util.Date;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.querydsl.core.annotations.QueryInit;
 import lombok.AllArgsConstructor;
@@ -23,7 +22,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombre"})
 @ToString
-@JsonIgnoreProperties({"ubicacion", "eliminada"})
+@JsonIgnoreProperties("eliminada")
 public class Empresa implements Serializable {
 
   @Id @GeneratedValue private long id_Empresa;
@@ -55,7 +54,7 @@ public class Empresa implements Serializable {
   @Column(nullable = false)
   private String telefono;
 
-  @OneToOne
+  @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
   @JoinColumn(name = "idUbicacion", referencedColumnName = "idUbicacion")
   @QueryInit("localidad.provincia")
   private Ubicacion ubicacion;
@@ -63,22 +62,4 @@ public class Empresa implements Serializable {
   private String logo;
 
   private boolean eliminada;
-
-  @JsonGetter("idUbicacion")
-  public Long getidUbicacion() {
-    if (ubicacion != null) {
-      return ubicacion.getIdUbicacion();
-    } else {
-      return null;
-    }
-  }
-
-  @JsonGetter("detalleUbicacion")
-  public String getDetalleUbicacion() {
-    if (ubicacion != null) {
-      return ubicacion.toString();
-    } else {
-      return null;
-    }
-  }
 }

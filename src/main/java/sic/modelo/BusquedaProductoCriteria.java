@@ -24,5 +24,7 @@ public class BusquedaProductoCriteria {
   private boolean listarSoloFaltantes;
   private boolean buscaPorVisibilidad;
   private Boolean publico;
+  private boolean buscaPorDestacado;
+  private Boolean destacado;
   private Pageable pageable;
 }

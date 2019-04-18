@@ -22,6 +22,7 @@ import sic.service.IProveedorService;
 import sic.service.BusinessServiceException;
 import sic.repository.ProveedorRepository;
 import sic.service.ICuentaCorrienteService;
+import sic.service.IUbicacionService;
 
 @Service
 @Validated
@@ -29,14 +30,18 @@ public class ProveedorServiceImpl implements IProveedorService {
 
   private final ProveedorRepository proveedorRepository;
   private final ICuentaCorrienteService cuentaCorrienteService;
+  private final IUbicacionService ubicacionService;
+  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
   public ProveedorServiceImpl(
       ProveedorRepository proveedorRepository,
-      ICuentaCorrienteService cuentaCorrienteService) {
+      ICuentaCorrienteService cuentaCorrienteService,
+      IUbicacionService ubicacionService) {
     this.proveedorRepository = proveedorRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
+    this.ubicacionService = ubicacionService;
   }
 
   @Override
@@ -108,13 +113,13 @@ public class ProveedorServiceImpl implements IProveedorService {
           && proveedorDuplicado != null
           && proveedorDuplicado.getId_Proveedor() != proveedor.getId_Proveedor()) {
         throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_duplicado_codigo"));
+            RESOURCE_BUNDLE.getString("mensaje_proveedor_duplicado_codigo"));
       }
       if (operacion.equals(TipoDeOperacion.ALTA)
           && proveedorDuplicado != null
           && !proveedor.getCodigo().equals("")) {
         throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_duplicado_codigo"));
+            RESOURCE_BUNDLE.getString("mensaje_proveedor_duplicado_codigo"));
       }
     }
     // ID Fiscal
@@ -125,13 +130,13 @@ public class ProveedorServiceImpl implements IProveedorService {
           && proveedorDuplicado != null
           && proveedorDuplicado.getId_Proveedor() != proveedor.getId_Proveedor()) {
         throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_duplicado_idFiscal"));
+            RESOURCE_BUNDLE.getString("mensaje_proveedor_duplicado_idFiscal"));
       }
       if (operacion.equals(TipoDeOperacion.ALTA)
           && proveedorDuplicado != null
           && proveedor.getIdFiscal() != null) {
         throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_duplicado_idFiscal"));
+            RESOURCE_BUNDLE.getString("mensaje_proveedor_duplicado_idFiscal"));
       }
     }
     // Razon social
@@ -139,15 +144,18 @@ public class ProveedorServiceImpl implements IProveedorService {
         this.getProveedorPorRazonSocial(proveedor.getRazonSocial(), proveedor.getEmpresa());
     if (operacion == TipoDeOperacion.ALTA && proveedorDuplicado != null) {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_proveedor_duplicado_razonSocial"));
+          RESOURCE_BUNDLE.getString("mensaje_proveedor_duplicado_razonSocial"));
     }
     if (operacion == TipoDeOperacion.ACTUALIZACION
         && proveedorDuplicado != null
         && proveedorDuplicado.getId_Proveedor() != proveedor.getId_Proveedor()) {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_proveedor_duplicado_razonSocial"));
+          RESOURCE_BUNDLE.getString("mensaje_proveedor_duplicado_razonSocial"));
+    }
+    // Ubicacion
+    if (proveedor.getUbicacion() != null && proveedor.getUbicacion().getLocalidad() == null) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_ubicacion_sin_localidad"));
     }
   }
 
@@ -155,6 +163,12 @@ public class ProveedorServiceImpl implements IProveedorService {
   @Transactional
   public Proveedor guardar(@Validated Proveedor proveedor) {
     if (proveedor.getCodigo() == null) proveedor.setCodigo("");
+    if (proveedor.getUbicacion() != null && proveedor.getUbicacion().getIdLocalidad() != null) {
+      proveedor
+          .getUbicacion()
+          .setLocalidad(
+              ubicacionService.getLocalidadPorId(proveedor.getUbicacion().getIdLocalidad()));
+    }
     this.validarOperacion(TipoDeOperacion.ALTA, proveedor);
     proveedor = proveedorRepository.save(proveedor);
     CuentaCorrienteProveedor cuentaCorrienteProveedor = new CuentaCorrienteProveedor();
@@ -184,6 +198,7 @@ public class ProveedorServiceImpl implements IProveedorService {
     }
     cuentaCorrienteService.eliminarCuentaCorrienteProveedor(idProveedor);
     proveedor.setEliminado(true);
+    proveedor.setUbicacion(null);
     proveedorRepository.save(proveedor);
   }
 }

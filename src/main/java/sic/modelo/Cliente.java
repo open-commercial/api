@@ -25,7 +25,7 @@ import org.hibernate.validator.constraints.Email;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombreFiscal", "idFiscal", "empresa"})
 @ToString
-@JsonIgnoreProperties({"ubicacionFacturacion", "ubicacionEnvio","empresa", "viajante", "credencial", "eliminado"})
+@JsonIgnoreProperties({"empresa", "viajante", "credencial", "eliminado"})
 public class Cliente implements Serializable {
 
   @Id @GeneratedValue private long id_Cliente;
@@ -54,12 +54,12 @@ public class Cliente implements Serializable {
 
   private String telefono;
 
-  @OneToOne
+  @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
   @JoinColumn(name = "idUbicacionFacturacion", referencedColumnName = "idUbicacion")
   @QueryInit("localidad.provincia")
   private Ubicacion ubicacionFacturacion;
 
-  @OneToOne
+  @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
   @JoinColumn(name = "idUbicacionEnvio", referencedColumnName = "idUbicacion")
   @QueryInit("localidad.provincia")
   private Ubicacion ubicacionEnvio;
@@ -137,42 +137,6 @@ public class Cliente implements Serializable {
           + " ("
           + credencial.getUsername()
           + ")";
-    } else {
-      return null;
-    }
-  }
-
-  @JsonGetter("idUbicacionFacturacion")
-  public Long getidUbicacionFacturacion() {
-    if (ubicacionFacturacion != null) {
-      return ubicacionFacturacion.getIdUbicacion();
-    } else {
-      return null;
-    }
-  }
-
-  @JsonGetter("detalleUbicacionFacturacion")
-  public String getDetalleUbicacionFacturacion() {
-    if (ubicacionFacturacion != null) {
-      return ubicacionFacturacion.toString();
-    } else {
-      return null;
-    }
-  }
-
-  @JsonGetter("idUbicacionEnvio")
-  public Long getidUbicacionEnvio() {
-    if (ubicacionEnvio != null) {
-      return ubicacionEnvio.getIdUbicacion();
-    } else {
-      return null;
-    }
-  }
-
-  @JsonGetter("detalleUbicacionEnvio")
-  public String getDetalleUbicacionEnvio() {
-    if (ubicacionEnvio != null) {
-      return ubicacionEnvio.toString();
     } else {
       return null;
     }

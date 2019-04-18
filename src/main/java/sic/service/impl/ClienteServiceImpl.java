@@ -28,6 +28,7 @@ public class ClienteServiceImpl implements IClienteService {
   private final ClienteRepository clienteRepository;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IUsuarioService usuarioService;
+  private final IUbicacionService ubicacionService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
@@ -35,10 +36,12 @@ public class ClienteServiceImpl implements IClienteService {
   public ClienteServiceImpl(
       ClienteRepository clienteRepository,
       ICuentaCorrienteService cuentaCorrienteService,
-      IUsuarioService usuarioService) {
+      IUsuarioService usuarioService,
+      IUbicacionService ubicacionService) {
     this.clienteRepository = clienteRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.usuarioService = usuarioService;
+    this.ubicacionService = ubicacionService;
   }
 
   @Override
@@ -203,6 +206,16 @@ public class ClienteServiceImpl implements IClienteService {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_ubicacion_facturacion_envio_iguales"));
     }
+    if (cliente.getUbicacionFacturacion() != null
+        && cliente.getUbicacionFacturacion().getLocalidad() == null) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_ubicacion_facturacion_sin_localidad"));
+    }
+    if (cliente.getUbicacionEnvio() != null
+      && cliente.getUbicacionEnvio().getLocalidad() == null) {
+      throw new BusinessServiceException(
+        RESOURCE_BUNDLE.getString("mensaje_ubicacion_envio_sin_localidad"));
+    }
   }
 
   @Override
@@ -212,6 +225,21 @@ public class ClienteServiceImpl implements IClienteService {
     cliente.setEliminado(false);
     cliente.setNroCliente(this.generarNroDeCliente(cliente.getEmpresa()));
     if (cliente.getBonificacion() == null) cliente.setBonificacion(BigDecimal.ZERO);
+    if (cliente.getUbicacionFacturacion() != null
+        && cliente.getUbicacionFacturacion().getIdLocalidad() != null) {
+      cliente
+          .getUbicacionFacturacion()
+          .setLocalidad(
+              ubicacionService.getLocalidadPorId(
+                  cliente.getUbicacionFacturacion().getIdLocalidad()));
+    }
+    if (cliente.getUbicacionEnvio() != null
+        && cliente.getUbicacionEnvio().getIdLocalidad() != null) {
+      cliente
+          .getUbicacionEnvio()
+          .setLocalidad(
+              ubicacionService.getLocalidadPorId(cliente.getUbicacionEnvio().getIdLocalidad()));
+    }
     this.validarOperacion(TipoDeOperacion.ALTA, cliente);
     CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
     cuentaCorrienteCliente.setCliente(cliente);
@@ -281,6 +309,8 @@ public class ClienteServiceImpl implements IClienteService {
     cuentaCorrienteService.eliminarCuentaCorrienteCliente(idCliente);
     cliente.setCredencial(null);
     cliente.setEliminado(true);
+    cliente.setUbicacionFacturacion(null);
+    cliente.setUbicacionEnvio(null);
     clienteRepository.save(cliente);
     logger.warn("El Cliente {} se eliminó correctamente.", cliente);
   }

@@ -7,20 +7,24 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Empresa;
 import sic.modelo.Rol;
+import sic.modelo.Ubicacion;
 import sic.modelo.dto.EmpresaDTO;
 import sic.service.IEmpresaService;
+import sic.service.IUbicacionService;
 
 @RestController
 @RequestMapping("/api/v1")
 public class EmpresaController {
 
   public final IEmpresaService empresaService;
+  public final IUbicacionService ubicacionService;
   private final ModelMapper modelMapper;
 
   @Autowired
   public EmpresaController(
-    IEmpresaService empresaService, ModelMapper modelMapper) {
+      IEmpresaService empresaService, IUbicacionService ubicacionService, ModelMapper modelMapper) {
     this.empresaService = empresaService;
+    this.ubicacionService = ubicacionService;
     this.modelMapper = modelMapper;
   }
 
@@ -52,6 +56,10 @@ public class EmpresaController {
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public Empresa guardar(@RequestBody EmpresaDTO empresaDTO) {
     Empresa empresa = modelMapper.map(empresaDTO, Empresa.class);
+    empresa.setUbicacion(null);
+    if (empresaDTO.getUbicacion() != null) {
+      empresa.setUbicacion(modelMapper.map(empresaDTO.getUbicacion(), Ubicacion.class));
+    }
     return empresaService.guardar(empresa);
   }
 
@@ -67,10 +75,15 @@ public class EmpresaController {
     if (empresaParaActualizar.getCategoriaIVA() == null) {
       empresaParaActualizar.setCategoriaIVA(empresaPersistida.getCategoriaIVA());
     }
-    if (empresaPersistida.getUbicacion() != null) {
-      empresaParaActualizar.setUbicacion(empresaPersistida.getUbicacion());
+    Ubicacion ubicacion;
+    if (empresaDTO.getUbicacion() != null) {
+      ubicacion = modelMapper.map(empresaDTO.getUbicacion(), Ubicacion.class);
+      ubicacion.setLocalidad(
+          ubicacionService.getLocalidadPorId(
+              modelMapper.map(empresaDTO.getUbicacion(), Ubicacion.class).getIdLocalidad()));
+      empresaParaActualizar.setUbicacion(ubicacion);
     } else {
-      empresaParaActualizar.setUbicacion(null);
+      empresaParaActualizar.setUbicacion(empresaPersistida.getUbicacion());
     }
     empresaService.actualizar(empresaParaActualizar, empresaPersistida);
   }

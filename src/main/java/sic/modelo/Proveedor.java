@@ -22,7 +22,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"razonSocial", "empresa"})
 @ToString
-@JsonIgnoreProperties({"empresa", "eliminado", "ubicacion"})
+@JsonIgnoreProperties({"empresa", "eliminado"})
 public class Proveedor implements Serializable {
 
   @Id @GeneratedValue private long id_Proveedor;
@@ -57,7 +57,7 @@ public class Proveedor implements Serializable {
   @Column(nullable = false)
   private String web;
 
-  @OneToOne
+  @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
   @JoinColumn(name = "idUbicacion", referencedColumnName = "idUbicacion")
   @QueryInit("localidad.provincia")
   private Ubicacion ubicacion;
@@ -77,23 +77,5 @@ public class Proveedor implements Serializable {
   @JsonGetter("idEmpresa")
   public long getIdEmpresa() {
     return empresa.getId_Empresa();
-  }
-
-  @JsonGetter("idUbicacion")
-  public Long getidUbicacion() {
-    if (ubicacion != null) {
-      return ubicacion.getIdUbicacion();
-    } else {
-      return null;
-    }
-  }
-
-  @JsonGetter("detalleUbicacion")
-  public String getDetalleUbicacion() {
-    if (ubicacion != null) {
-      return ubicacion.toString();
-    } else {
-      return null;
-    }
   }
 }
