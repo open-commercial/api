@@ -33,9 +33,9 @@ public class Rubro implements Serializable {
     @GeneratedValue
     private long id_Rubro;
 
+    @Column(nullable = false)
     @NotNull(message = "{mensaje_rubro_nombre_vacio}")
     @NotEmpty(message = "{mensaje_rubro_nombre_vacio}")
-    @Column(nullable = false)
     private String nombre;
 
     @ManyToOne
