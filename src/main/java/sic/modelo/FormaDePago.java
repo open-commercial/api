@@ -44,7 +44,7 @@ public class FormaDePago implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-  @NotNull(message = "{mensaje_forma_de_pago_nombre_vacio}")
+  @NotNull(message = "{mensaje_forma_de_pago_empresa_vacia}")
   private Empresa empresa;
 
   private boolean eliminada;

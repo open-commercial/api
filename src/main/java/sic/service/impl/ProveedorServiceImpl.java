@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import sic.modelo.*;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
@@ -178,6 +179,7 @@ public class ProveedorServiceImpl implements IProveedorService {
     cuentaCorrienteProveedor.setProveedor(proveedor);
     cuentaCorrienteProveedor.setEmpresa(proveedor.getEmpresa());
     cuentaCorrienteProveedor.setSaldo(BigDecimal.ZERO);
+    cuentaCorrienteProveedor.setFechaApertura(new Date());
     cuentaCorrienteService.guardarCuentaCorrienteProveedor(cuentaCorrienteProveedor);
     logger.warn("El Proveedor {} se guardó correctamente.", proveedor);
     return proveedor;

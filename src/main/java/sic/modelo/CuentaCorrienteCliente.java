@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import com.querydsl.core.annotations.QueryInit;
 import lombok.Data;
@@ -26,6 +27,7 @@ public class CuentaCorrienteCliente extends CuentaCorriente implements Serializa
     @OneToOne
     @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
     @QueryInit({"viajante", "ubicacionFacturacion.localidad.provincia", "ubicacionEnvio.localidad.provincia"})
+    @NotNull(message = "{mensaje_cuenta_corriente_cliente_vacio}")
     private Cliente cliente;
 
     public CuentaCorrienteCliente() {}

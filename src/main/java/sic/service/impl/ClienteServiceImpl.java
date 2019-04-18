@@ -233,6 +233,7 @@ public class ClienteServiceImpl implements IClienteService {
         }
       }
     }
+    cuentaCorrienteCliente.setFechaApertura(cuentaCorrienteCliente.getCliente().getFechaAlta());
     cliente = clienteRepository.save(cliente);
     cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);
     logger.warn("El Cliente {} se guardó correctamente.", cliente);

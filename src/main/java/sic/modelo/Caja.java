@@ -41,7 +41,7 @@ public class Caja implements Serializable {
 
   @Column(nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
-  @NotNull(message = "{mensaje_caja_fecha_vacia}")
+  @NotNull(message = "{mensaje_caja_fecha_apertura_vacia}")
   private Date fechaApertura;
 
   @Temporal(TemporalType.TIMESTAMP)
