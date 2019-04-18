@@ -11,6 +11,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotEmpty;
+import org.modelmapper.internal.bytebuddy.implementation.bind.annotation.Empty;
 
 @Entity
 @Table(name = "usuario")
@@ -27,6 +30,7 @@ public class Usuario implements Serializable {
     private long id_Usuario;
     
     @Column(nullable = false)
+    @NotEmpty(message = "{mensaje_usuario_vacio_username}")
     private String username;
     
     @Column(nullable = false)
@@ -34,12 +38,15 @@ public class Usuario implements Serializable {
     private String password;
     
     @Column(nullable = false)
+    @NotEmpty(message = "{mensaje_usuario_vacio_nombre}")
     private String nombre;
     
     @Column(nullable = false)
+    @NotEmpty(message = "{mensaje_usuario_vacio_apellido}")
     private String apellido;
     
     @Column(nullable = false)
+    @Email(message = "{mensaje_usuario_invalido_email}")
     private String email;
     
     @Column(length = 300)

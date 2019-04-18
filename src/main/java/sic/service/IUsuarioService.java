@@ -3,6 +3,8 @@ package sic.service;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 
+import javax.validation.Valid;
+
 public interface IUsuarioService {
 
   Usuario getUsuarioPorId(Long idUsuario);
@@ -27,7 +29,7 @@ public interface IUsuarioService {
 
   void validarOperacion(TipoDeOperacion operacion, Usuario usuario);
 
-  Usuario guardar(Usuario usuario);
+  Usuario guardar(@Valid Usuario usuario);
 
   int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada);
 
