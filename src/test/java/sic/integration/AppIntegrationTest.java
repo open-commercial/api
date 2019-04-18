@@ -750,6 +750,11 @@ class AppIntegrationTest {
         .nombreFiscal("theRedWolf")
         .build();
     restTemplate.postForObject(apiPrefix + "/registracion", registro, Void.class);
+    UsuarioDTO usuario = restTemplate.getForObject(apiPrefix + "/usuarios/3", UsuarioDTO.class);
+    assertEquals(usuario.getNombre(), "Sansa");
+    assertEquals(usuario.getApellido(), "Stark");
+    ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class);
+    assertEquals(cliente.getNombreFiscal(), "theRedWolf");
   }
 
   @Test
