@@ -18,7 +18,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.validator.constraints.NotBlank;
 
 @Entity
 @Table(name = "localidad")

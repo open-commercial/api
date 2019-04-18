@@ -31,15 +31,15 @@ public class FacturaCompra extends Factura implements Serializable {
     public FacturaCompra(long id_Factura, Usuario usuario, Date fecha, TipoDeComprobante tipoComprobante, long numSerie,
             long numFactura, Date fechaVencimiento, Pedido pedido, Transportista transportista, 
             List<RenglonFactura> renglones, BigDecimal subTotal,
-            BigDecimal recargo_porcentaje, BigDecimal recargo_neto, BigDecimal descuento_porcentaje,
-            BigDecimal descuento_neto, BigDecimal subTotal_neto, BigDecimal iva_105_neto, BigDecimal iva_21_neto,
-            BigDecimal impuestoInterno_neto, BigDecimal total, String observaciones, Empresa empresa, boolean eliminada,
+            BigDecimal recargoPorcentaje, BigDecimal recargoNeto, BigDecimal descuentoPorcentaje,
+            BigDecimal descuentoNeto, BigDecimal subTotalNeto, BigDecimal iva105Neto, BigDecimal iva21Neto,
+            BigDecimal impuestoInternoNeto, BigDecimal total, String observaciones, Empresa empresa, boolean eliminada,
             long CAE, Date vencimientoCAE, Proveedor proveedor, long numSerieAfip, long numFacturaAfip) {
         
         super(id_Factura, usuario, fecha, tipoComprobante, numSerie, numFactura, fechaVencimiento,
-                pedido, transportista, renglones, subTotal, recargo_porcentaje,
-                recargo_neto, descuento_porcentaje, descuento_neto, subTotal_neto, iva_105_neto,
-                iva_21_neto, impuestoInterno_neto, total, observaciones, empresa, eliminada,
+                pedido, transportista, renglones, subTotal, recargoPorcentaje,
+                recargoNeto, descuentoPorcentaje, descuentoNeto, subTotalNeto, iva105Neto,
+                iva21Neto, impuestoInternoNeto, total, observaciones, empresa, eliminada,
                 CAE, vencimientoCAE, numSerieAfip, numFacturaAfip);
         this.proveedor = proveedor;
     }
