@@ -14,7 +14,6 @@ import sic.modelo.ConfiguracionDelSistema;
 import sic.modelo.Empresa;
 import sic.service.*;
 import sic.modelo.TipoDeOperacion;
-import sic.util.Validator;
 import sic.repository.EmpresaRepository;
 
 @Service
@@ -126,7 +125,7 @@ public class EmpresaServiceImpl implements IEmpresaService {
 
   @Override
   @Transactional
-  public void actualizar(Empresa empresaParaActualizar, Empresa empresaPersistida) {
+  public void actualizar(@Valid Empresa empresaParaActualizar, Empresa empresaPersistida) {
     if (empresaPersistida.getLogo() != null
         && !empresaPersistida.getLogo().isEmpty()
         && (empresaParaActualizar.getLogo() == null || empresaParaActualizar.getLogo().isEmpty())) {

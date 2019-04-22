@@ -67,7 +67,7 @@ public class RubroServiceImpl implements IRubroService {
 
     @Override
     @Transactional
-    public void actualizar(Rubro rubro) {
+    public void actualizar(@Valid Rubro rubro) {
         this.validarOperacion(TipoDeOperacion.ACTUALIZACION, rubro);
         rubroRepository.save(rubro);
     }

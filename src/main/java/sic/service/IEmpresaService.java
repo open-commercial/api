@@ -9,7 +9,7 @@ public interface IEmpresaService {
 
   Empresa getEmpresaPorId(Long id_Empresa);
 
-  void actualizar(Empresa empresaParaActualizar, Empresa empresaPersistida);
+  void actualizar(@Valid Empresa empresaParaActualizar, Empresa empresaPersistida);
 
   void eliminar(Long idEmpresa);
 

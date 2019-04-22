@@ -204,7 +204,7 @@ public class ClienteServiceImpl implements IClienteService {
 
   @Override
   @Transactional
-  public Cliente guardar(Cliente cliente) {
+  public Cliente guardar(@Valid Cliente cliente) {
     cliente.setFechaAlta(new Date());
     cliente.setEliminado(false);
     cliente.setNroCliente(this.generarNroDeCliente(cliente.getEmpresa()));

@@ -12,7 +12,7 @@ import javax.validation.Valid;
 
 public interface ICajaService {
 
-    void actualizar(Caja caja);
+    void actualizar(@Valid Caja caja);
 
     void validarMovimiento(Date fechaMovimiento, long idEmpresa);
     

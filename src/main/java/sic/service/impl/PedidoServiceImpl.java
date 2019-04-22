@@ -319,7 +319,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public void actualizarFacturasDelPedido(Pedido pedido, List<Factura> facturas) {
+  public void actualizarFacturasDelPedido(@Valid Pedido pedido, List<Factura> facturas) {
     pedido.setFacturas(facturas);
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, pedido);
     pedidoRepository.save(pedido);

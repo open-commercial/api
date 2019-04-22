@@ -23,7 +23,7 @@ public interface IClienteService {
 
   void setClientePredeterminado(Cliente cliente);
 
-  Cliente guardar(Cliente cliente);
+  Cliente guardar(@Valid Cliente cliente);
 
   void validarOperacion(TipoDeOperacion operacion, Cliente cliente);
 

@@ -16,7 +16,7 @@ public interface IPedidoService {
 
   void actualizar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal);
 
-  void actualizarFacturasDelPedido(Pedido pedido, List<Factura> facturas);
+  void actualizarFacturasDelPedido(@Valid Pedido pedido, List<Factura> facturas);
 
   Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn);
 

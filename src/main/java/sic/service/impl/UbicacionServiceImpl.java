@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.repository.LocalidadRepository;
 import sic.repository.ProvinciaRepository;
@@ -15,10 +16,12 @@ import sic.service.*;
 import sic.util.Validator;
 
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.ResourceBundle;
 
 @Service
+@Validated
 public class UbicacionServiceImpl implements IUbicacionService {
 
   private final UbicacionRepository ubicacionRepository;
@@ -46,7 +49,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
   @Override
   @Transactional
   public Ubicacion guardar(
-    Ubicacion ubicacion) {
+    @Valid Ubicacion ubicacion) {
     Ubicacion ubicacionGuardada = ubicacionRepository.save(ubicacion);
     logger.warn("La ubicación {} se actualizó correctamente.", ubicacion);
     return ubicacionGuardada;
@@ -94,7 +97,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
 
   @Override
   @Transactional
-  public void actualizarLocalidad(Localidad localidad) {
+  public void actualizarLocalidad(@Valid Localidad localidad) {
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, localidad);
     localidadRepository.save(localidad);
   }

@@ -122,7 +122,8 @@ public class CajaServiceImpl implements ICajaService {
   }
 
   @Override
-  public void actualizar(Caja caja) {
+  @Transactional
+  public void actualizar(@Valid Caja caja) {
     cajaRepository.save(caja);
   }
 

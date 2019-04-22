@@ -11,7 +11,7 @@ public interface IMedidaService {
     
     Medida getMedidaPorId(Long id_Medida);
 
-    void actualizar(Medida medida);
+    void actualizar(@Valid Medida medida);
 
     void eliminar(long idMedida);
 

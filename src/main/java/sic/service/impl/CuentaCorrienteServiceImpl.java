@@ -66,6 +66,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   }
 
   @Override
+  @Transactional
   public CuentaCorrienteCliente guardarCuentaCorrienteCliente(
       @Valid CuentaCorrienteCliente cuentaCorrienteCliente) {
     this.validarOperacion(cuentaCorrienteCliente);
@@ -75,6 +76,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   }
 
   @Override
+  @Transactional
   public CuentaCorrienteProveedor guardarCuentaCorrienteProveedor(
       @Valid CuentaCorrienteProveedor cuentaCorrienteProveedor) {
     this.validarOperacion(cuentaCorrienteProveedor);
@@ -85,7 +87,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   }
 
   @Override
-  public void validarOperacion(@Valid CuentaCorriente cuentaCorriente) {
+  public void validarOperacion(CuentaCorriente cuentaCorriente) {
     // Duplicados
     if (cuentaCorriente.getIdCuentaCorriente() != null && cuentaCorrienteRepository.findById(cuentaCorriente.getIdCuentaCorriente()) != null) {
       throw new BusinessServiceException(

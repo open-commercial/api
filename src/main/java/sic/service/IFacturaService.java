@@ -34,7 +34,7 @@ public interface IFacturaService {
 
   List<FacturaVenta> guardar(@Valid List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos);
 
-  List<FacturaCompra> guardar(List<FacturaCompra> facturas);
+  List<FacturaCompra> guardar(@Valid List<FacturaCompra> facturas);
 
   FacturaVenta autorizarFacturaVenta(FacturaVenta fv);
 

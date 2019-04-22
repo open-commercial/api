@@ -417,7 +417,7 @@ public class FacturaServiceImpl implements IFacturaService {
 
   @Override
   @Transactional
-  public List<FacturaCompra> guardar(List<FacturaCompra> facturas) {
+  public List<FacturaCompra> guardar(@Valid List<FacturaCompra> facturas) {
     List<FacturaCompra> facturasProcesadas = new ArrayList<>();
     facturas.forEach(
         f ->

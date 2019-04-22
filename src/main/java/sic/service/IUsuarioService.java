@@ -13,7 +13,7 @@ public interface IUsuarioService {
 
   Usuario getUsuarioPorPasswordRecoveryKeyAndIdUsuario(String passwordRecoveryKey, long idUsuario);
 
-  void actualizar(Usuario usuarioPorActualizar, Usuario usuarioPersistido);
+  void actualizar(@Valid Usuario usuarioPorActualizar, Usuario usuarioPersistido);
 
   void actualizarToken(String token, long idUsuario);
 

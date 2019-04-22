@@ -132,6 +132,13 @@ public class UsuarioController {
       if (usuarioLoggedIn.getId_Usuario() == usuarioPersistido.getId_Usuario()) {
         usuarioPorActualizar.setToken(usuarioLoggedIn.getToken());
       }
+      if (usuarioPorActualizar.getPassword() != null
+          && !usuarioPorActualizar.getPassword().isEmpty()) {
+        usuarioPorActualizar.setPassword(
+            usuarioService.encriptarConMD5(usuarioPorActualizar.getPassword()));
+      } else {
+        usuarioPorActualizar.setPassword(usuarioPersistido.getPassword());
+      }
       usuarioService.actualizar(usuarioPorActualizar, usuarioPersistido);
     } else {
       throw new ForbiddenException(

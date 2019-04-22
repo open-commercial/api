@@ -13,7 +13,7 @@ public interface IGastoService {
     
     Gasto getGastoPorId(Long id);
     
-    void actualizar(Gasto gasto);
+    void actualizar(@Valid Gasto gasto);
     
     void eliminar(long idGasto);
 

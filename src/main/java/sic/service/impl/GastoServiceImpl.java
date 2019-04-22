@@ -75,7 +75,7 @@ public class GastoServiceImpl implements IGastoService {
 
     @Override
     @Transactional
-    public void actualizar(Gasto gasto) {
+    public void actualizar(@Valid Gasto gasto) {
         gastoRepository.save(gasto);
     }
     

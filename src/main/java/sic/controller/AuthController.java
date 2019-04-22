@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,6 +142,7 @@ public class AuthController {
           || categoriaIVA == CategoriaIVA.EXENTO) {
         nuevoCliente.setNombreFiscal(registracionClienteAndUsuarioDTO.getNombreFiscal());
         nuevoCliente.setCategoriaIVA(categoriaIVA);
+        nuevoCliente.setBonificacion(BigDecimal.ZERO);
       }
       this.registracionService.crearCuentaConClienteAndUsuario(nuevoCliente, nuevoUsuario);
     } else {

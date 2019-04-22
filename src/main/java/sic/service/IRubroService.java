@@ -10,7 +10,7 @@ public interface IRubroService {
 
     Rubro getRubroPorId(Long idRubro);
     
-    void actualizar(Rubro rubro);
+    void actualizar(@Valid Rubro rubro);
 
     void eliminar(long idRubro);
 

@@ -69,7 +69,7 @@ public class MedidaServiceImpl implements IMedidaService {
 
   @Override
   @Transactional
-  public void actualizar(Medida medida) {
+  public void actualizar(@Valid Medida medida) {
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, medida);
     medidaRepository.save(medida);
   }

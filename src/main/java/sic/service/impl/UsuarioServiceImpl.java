@@ -224,13 +224,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public void actualizar(Usuario usuarioPorActualizar, Usuario usuarioPersistido) {
-    if (usuarioPorActualizar.getPassword() != null
-        && !usuarioPorActualizar.getPassword().isEmpty()) {
-      usuarioPorActualizar.setPassword(this.encriptarConMD5(usuarioPorActualizar.getPassword()));
-    } else {
-      usuarioPorActualizar.setPassword(usuarioPersistido.getPassword());
-    }
+  @Transactional
+  public void actualizar(@Valid Usuario usuarioPorActualizar, Usuario usuarioPersistido) {
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuarioPorActualizar);
     if (!usuarioPorActualizar.getRoles().contains(Rol.VIAJANTE)) {
       this.clienteService.desvincularClienteDeViajante(usuarioPorActualizar.getId_Usuario());
@@ -288,6 +283,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
+  @Transactional
   public Usuario guardar(@Valid Usuario usuario) {
     this.validarOperacion(TipoDeOperacion.ALTA, usuario);
     usuario.setUsername(usuario.getUsername().toLowerCase());
