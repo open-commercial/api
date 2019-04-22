@@ -10,6 +10,8 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -24,6 +26,7 @@ public class FacturaVenta extends Factura implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
+    @NotNull(message = "{mensaje_factura_cliente_vacio}")
     private Cliente cliente;
 
     public FacturaVenta() {}

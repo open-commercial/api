@@ -49,7 +49,7 @@ public class Caja implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-  @NotNull(message = "{mensaje_caja_fecha_vacia}")
+  @NotNull(message = "{mensaje_caja_empresa_vacia}")
   private Empresa empresa;
 
   @OneToOne

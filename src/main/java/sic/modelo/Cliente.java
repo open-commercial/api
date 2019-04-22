@@ -17,6 +17,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotBlank;
 
 @Entity
 @Table(name = "cliente")
@@ -39,12 +40,14 @@ public class Cliente implements Serializable {
   private String nroCliente;
 
   @Column(nullable = false)
+  @NotBlank(message = "{mensaje_cliente_vacio_nombreFiscal}")
   private String nombreFiscal;
 
   private String nombreFantasia;
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
+  @NotNull(message = "{mensaje_cliente_vacio_categoriaIVA}")
   private CategoriaIVA categoriaIVA;
 
   private Long idFiscal;
@@ -52,6 +55,7 @@ public class Cliente implements Serializable {
   @Email(message = "{mensaje_correo_formato_incorrecto}")
   private String email;
 
+  @NotBlank(message = "{mensaje_cliente_vacio_telefono}")
   private String telefono;
 
   @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
@@ -72,6 +76,7 @@ public class Cliente implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+  @NotNull(message = "{mensaje_cliente_vacio_empresa}")
   private Empresa empresa;
 
   @ManyToOne

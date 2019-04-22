@@ -146,7 +146,7 @@ public class ReciboServiceImpl implements IReciboService {
                 .getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa())
                 .getNroPuntoDeVentaAfip()));
     recibo.setFecha(new Date());
-    this.validarRecibo(recibo);
+    this.validarOperacion(recibo);
     recibo = reciboRepository.save(recibo);
     this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
     logger.warn("El Recibo {} se guardó correctamente.", recibo);
@@ -154,14 +154,7 @@ public class ReciboServiceImpl implements IReciboService {
   }
 
   @Override
-  public void validarRecibo(Recibo recibo) {
-    if (recibo.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_recibo_monto_igual_menor_cero"));
-    }
-    if (recibo.getEmpresa() == null) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_recibo_empresa_vacia"));
-    }
+  public void validarOperacion(Recibo recibo) {
     this.cajaService.validarMovimiento(recibo.getFecha(), recibo.getEmpresa().getId_Empresa());
     if (recibo.getCliente() == null && recibo.getProveedor() == null) {
       throw new BusinessServiceException(
@@ -170,17 +163,6 @@ public class ReciboServiceImpl implements IReciboService {
     if (recibo.getCliente() != null && recibo.getProveedor() != null) {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_recibo_cliente_proveedor_simultaneos"));
-    }
-    if (recibo.getUsuario() == null) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_recibo_usuario_vacio"));
-    }
-    if (recibo.getFormaDePago() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_recibo_forma_de_pago_vacia"));
-    }
-    if (recibo.getConcepto() == null || recibo.getConcepto().equals("")) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_recibo_concepto_vacio"));
     }
   }
 

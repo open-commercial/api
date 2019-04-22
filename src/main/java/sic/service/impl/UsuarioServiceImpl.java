@@ -170,14 +170,6 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public void validarOperacion(TipoDeOperacion operacion, Usuario usuario) {
-    if (operacion == TipoDeOperacion.ALTA && Validator.esVacio(usuario.getPassword())) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_usuario_vacio_password"));
-    }
-    if (usuario.getRoles().isEmpty()) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_usuario_no_selecciono_rol"));
-    }
     // Username sin espacios en blanco
     if (usuario.getUsername().contains(" ")) {
       throw new BusinessServiceException(

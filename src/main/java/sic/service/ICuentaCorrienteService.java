@@ -19,7 +19,7 @@ public interface ICuentaCorrienteService {
   CuentaCorrienteProveedor guardarCuentaCorrienteProveedor(
       @Valid CuentaCorrienteProveedor cuentaCorrienteProveedor);
 
-  void validarCuentaCorriente(@Valid CuentaCorriente cuentaCorriente);
+  void validarOperacion(@Valid CuentaCorriente cuentaCorriente);
 
   void eliminarCuentaCorrienteCliente(long idCliente);
 

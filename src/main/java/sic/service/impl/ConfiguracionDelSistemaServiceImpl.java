@@ -48,7 +48,7 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
   @Override
   @Transactional
   public ConfiguracionDelSistema guardar(@Valid ConfiguracionDelSistema cds) {
-    this.validarCds(TipoDeOperacion.ALTA, cds);
+    this.validarOperacion(TipoDeOperacion.ALTA, cds);
     cds = configuracionRepository.save(cds);
     logger.warn("La Configuracion del Sistema {} se guardó correctamente.", cds);
     return cds;
@@ -57,7 +57,7 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
   @Override
   @Transactional
   public void actualizar(@Valid ConfiguracionDelSistema cds) {
-    this.validarCds(TipoDeOperacion.ACTUALIZACION, cds);
+    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, cds);
     if (cds.getPasswordCertificadoAfip() != null) {
       cds.setPasswordCertificadoAfip(cds.getPasswordCertificadoAfip());
     }
@@ -74,7 +74,7 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
   }
 
   @Override
-  public void validarCds(TipoDeOperacion tipoOperacion, ConfiguracionDelSistema cds) {
+  public void validarOperacion(TipoDeOperacion tipoOperacion, ConfiguracionDelSistema cds) {
     if (tipoOperacion.equals(TipoDeOperacion.ACTUALIZACION)) {
       if (cds.isFacturaElectronicaHabilitada() || cds.isEmailSenderHabilitado()) {
         ConfiguracionDelSistema cdsRecuperado =

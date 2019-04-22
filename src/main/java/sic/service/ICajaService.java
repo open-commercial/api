@@ -28,7 +28,7 @@ public interface ICajaService {
 
     Caja abrirCaja(Empresa empresa, Usuario usuarioApertura, BigDecimal saldoApertura);
 
-    void validarCaja(@Valid Caja caja);
+    void validarOperacion(@Valid Caja caja);
     
     Caja cerrarCaja(long idCaja, BigDecimal monto, Long idUsuario, boolean scheduling);
     

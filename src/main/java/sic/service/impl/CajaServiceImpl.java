@@ -72,18 +72,7 @@ public class CajaServiceImpl implements ICajaService {
   }
 
   @Override
-  public void validarCaja(@Valid Caja caja) {
-    // Entrada de Datos
-    // Requeridos
-    if (caja.getFechaApertura() == null) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_caja_fecha_vacia"));
-    }
-    if (caja.getEmpresa() == null) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_caja_empresa_vacia"));
-    }
-    if (caja.getUsuarioAbreCaja() == null) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_caja_usuario_vacio"));
-    }
+  public void validarOperacion(@Valid Caja caja) {
     // Una Caja por dia
     Caja ultimaCaja = this.getUltimaCaja(caja.getEmpresa().getId_Empresa());
     if (ultimaCaja != null) {
@@ -128,7 +117,7 @@ public class CajaServiceImpl implements ICajaService {
     caja.setSaldoApertura(saldoApertura);
     caja.setUsuarioAbreCaja(usuarioApertura);
     caja.setFechaApertura(this.clockService.getFechaActual());
-    this.validarCaja(caja);
+    this.validarOperacion(caja);
     return cajaRepository.save(caja);
   }
 

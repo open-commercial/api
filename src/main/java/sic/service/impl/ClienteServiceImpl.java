@@ -157,23 +157,7 @@ public class ClienteServiceImpl implements IClienteService {
   @Override
   public void validarOperacion(TipoDeOperacion operacion, Cliente cliente) {
     // Requeridos
-    if (cliente.getCategoriaIVA() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_categoriaIVA"));
-    }
-    if (Validator.esVacio(cliente.getNombreFiscal())) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_nombreFiscal"));
-    }
-    if (Validator.esVacio(cliente.getTelefono())) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_telefono"));
-    }
-    if (cliente.getEmpresa() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_empresa"));
-    }
-    if (cliente.getCredencial() == null) {
+    if (operacion == TipoDeOperacion.ALTA && cliente.getCredencial() == null) {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_credencial"));
     }

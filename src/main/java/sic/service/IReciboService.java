@@ -19,7 +19,7 @@ public interface IReciboService {
 
   Recibo guardar(@Valid Recibo recibo);
 
-  void validarRecibo(Recibo recibo);
+  void validarOperacion(Recibo recibo);
 
   List<Recibo> construirRecibos(
       long[] formaDePago,

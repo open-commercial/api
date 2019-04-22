@@ -14,12 +14,14 @@ import java.util.List;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.validator.constraints.NotEmpty;
 import sic.modelo.dto.UbicacionDTO;
 
 @Entity
@@ -42,6 +44,7 @@ public class Pedido implements Serializable {
 
   @Column(nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
+  @NotNull(message = "{mensaje_pedido_fecha_vacia}")
   private Date fecha;
 
   @Temporal(TemporalType.TIMESTAMP)
@@ -52,6 +55,7 @@ public class Pedido implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+  @NotNull(message = "{mensaje_pedido_empresa_vacia}")
   private Empresa empresa;
 
   @Embedded
@@ -65,10 +69,12 @@ public class Pedido implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
+  @NotNull(message = "{mensaje_pedido_cliente_vacio}")
   private Cliente cliente;
 
   @ManyToOne
   @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
+  @NotNull(message = "{mensaje_pedido_usuario_vacio}")
   private Usuario usuario;
 
   @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
@@ -78,6 +84,7 @@ public class Pedido implements Serializable {
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "id_Pedido")
   @JsonProperty(access = Access.WRITE_ONLY)
+  @NotEmpty
   private List<RenglonPedido> renglones;
 
   @Column(precision = 25, scale = 15)

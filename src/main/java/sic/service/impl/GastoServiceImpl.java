@@ -50,7 +50,7 @@ public class GastoServiceImpl implements IGastoService {
     }
 
     @Override
-    public void validarGasto(Gasto gasto) {
+    public void validarOperacion(Gasto gasto) {
         this.cajaService.validarMovimiento(gasto.getFecha(), gasto.getEmpresa().getId_Empresa());
         if (gastoRepository.findOne(gasto.getId_Gasto()) != null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
@@ -61,7 +61,7 @@ public class GastoServiceImpl implements IGastoService {
     @Override
     @Transactional
     public Gasto guardar(@Valid Gasto gasto) {
-        this.validarGasto(gasto);
+        this.validarOperacion(gasto);
         gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getEmpresa().getId_Empresa()) + 1);
         gasto = gastoRepository.save(gasto);
         logger.warn("El Gasto {} se guardó correctamente.", gasto);

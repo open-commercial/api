@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.NotBlank;
 
 @Entity
 @Table(name = "nota")
@@ -86,6 +87,7 @@ public abstract class Nota implements Serializable {
   private Movimiento movimiento;
 
   @Column(nullable = false)
+  @NotBlank(message = "{mensaje_nota_de_motivo_vacio}")
   private String motivo;
 
   @Column(precision = 25, scale = 15)

@@ -490,7 +490,7 @@ public class NotaServiceImpl implements INotaService {
     return this.notaDebitoRepository.getById(idNota).getRenglonesNotaDebito();
   }
 
-  private void validarNota(Nota nota) {
+  private void validarOperacion(Nota nota) {
     if (nota instanceof NotaCredito && nota.getMovimiento().equals(Movimiento.VENTA)) {
       if (nota.getFecha().compareTo(nota.getFacturaVenta().getFecha()) <= 0) {
         throw new BusinessServiceException(
@@ -508,21 +508,6 @@ public class NotaServiceImpl implements INotaService {
       if (nota.getFecha().compareTo(new Date()) > 0) {
         throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
           .getString("mensaje_nota_fecha_incorrecta"));
-      }
-    }
-    if (nota.getMotivo() == null || nota.getMotivo().isEmpty()) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_de_motivo_vacio"));
-    }
-    if (nota instanceof NotaCredito) {
-      if (((NotaCredito) nota).getRenglonesNotaCredito() == null) {
-        throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_de_renglones_vacio"));
-      }
-    } else {
-      if (((NotaDebito) nota).getRenglonesNotaDebito() == null) {
-        throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_de_renglones_vacio"));
       }
     }
   }
@@ -684,7 +669,7 @@ public class NotaServiceImpl implements INotaService {
     if (notaCredito.getFecha() == null) {
       notaCredito.setFecha(new Date());
     }
-    this.validarNota(notaCredito);
+    this.validarOperacion(notaCredito);
     if (notaCredito.getMovimiento().equals(Movimiento.VENTA)) {
       notaCredito.setTipoComprobante(
           this.getTipoDeNotaCreditoSegunFactura(
@@ -721,7 +706,7 @@ public class NotaServiceImpl implements INotaService {
     if (notaDebito.getFecha() == null) {
       notaDebito.setFecha(new Date());
     }
-    this.validarNota(notaDebito);
+    this.validarOperacion(notaDebito);
     if (notaDebito.getMovimiento().equals(Movimiento.VENTA)) {
       notaDebito.setTipoComprobante(
           this.getTipoDeNotaDebito(

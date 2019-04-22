@@ -362,13 +362,12 @@ public class FacturaServiceImpl implements IFacturaService {
     private Factura procesarFactura(Factura factura) {
         factura.setEliminada(false);
         if (factura instanceof FacturaVenta) {
-            factura.setFecha(new Date());
             factura.setNumSerie(configuracionDelSistemaService
                     .getConfiguracionDelSistemaPorEmpresa(factura.getEmpresa()).getNroPuntoDeVentaAfip());
             factura.setNumFactura(this.calcularNumeroFacturaVenta(factura.getTipoComprobante(),
                     factura.getNumSerie(), factura.getEmpresa().getId_Empresa()));
         }
-        this.validarFactura(factura);
+        this.validarOperacion(factura);
         return factura;
     }
 
@@ -445,75 +444,46 @@ public class FacturaServiceImpl implements IFacturaService {
         return idsYCantidades;
     }
 
-    private void validarFactura(Factura factura) {
-        //Entrada de Datos
-        if (factura.getFechaVencimiento() != null) {
-            Calendar calFechaVencimiento = new GregorianCalendar();
-            calFechaVencimiento.setTime(factura.getFechaVencimiento());
-            calFechaVencimiento.set(Calendar.HOUR, 0);
-            calFechaVencimiento.set(Calendar.MINUTE, 0);
-            calFechaVencimiento.set(Calendar.SECOND, 0);
-            calFechaVencimiento.set(Calendar.MILLISECOND, 0);
-            Calendar calFechaFactura = new GregorianCalendar();
-            calFechaFactura.setTime(factura.getFecha());
-            calFechaFactura.set(Calendar.HOUR, 0);
-            calFechaFactura.set(Calendar.MINUTE, 0);
-            calFechaFactura.set(Calendar.SECOND, 0);
-            calFechaFactura.set(Calendar.MILLISECOND, 0);
-          if (calFechaFactura.getTime().compareTo(calFechaVencimiento.getTime()) > 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_factura_fecha_invalida"));
-          }
-        }
-        //Requeridos
-        if (factura.getFecha() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_fecha_vacia"));
-        }
-        if (factura.getTipoComprobante() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_tipo_factura_vacia"));
-        }
-        if (factura.getTransportista() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_transportista_vacio"));
-        }
-        if (factura.getRenglones() == null || factura.getRenglones().isEmpty()) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_renglones_vacio"));
-        }
-        if (factura.getEmpresa() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_empresa_vacia"));
-        }
-        if (factura instanceof FacturaCompra) {
-            FacturaCompra facturaCompra = (FacturaCompra) factura;
-            if (facturaCompra.getProveedor() == null) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_factura_proveedor_vacio"));
-            }
-          if (factura.getFecha().compareTo(new Date()) > 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_factura_compra_fecha_incorrecta"));
-          }
-        }
-        if (factura instanceof FacturaVenta) {
-            FacturaVenta facturaVenta = (FacturaVenta) factura;
-            if (facturaVenta.getCliente() == null) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_factura_cliente_vacio"));
-            }
-            if (facturaVenta.getUsuario() == null) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_factura_usuario_vacio"));
-            }
-            if (facturaVenta.getCAE() != 0l) {
-                throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_factura_venta_CAE"));
-            }
-        }
-    // Calculos
-    // SubTotal
+  private void validarOperacion(Factura factura) {
+    // Entrada de Datos
+    if (factura.getFechaVencimiento() != null) {
+      Calendar calFechaVencimiento = new GregorianCalendar();
+      calFechaVencimiento.setTime(factura.getFechaVencimiento());
+      calFechaVencimiento.set(Calendar.HOUR, 0);
+      calFechaVencimiento.set(Calendar.MINUTE, 0);
+      calFechaVencimiento.set(Calendar.SECOND, 0);
+      calFechaVencimiento.set(Calendar.MILLISECOND, 0);
+      Calendar calFechaFactura = new GregorianCalendar();
+      calFechaFactura.setTime(factura.getFecha());
+      calFechaFactura.set(Calendar.HOUR, 0);
+      calFechaFactura.set(Calendar.MINUTE, 0);
+      calFechaFactura.set(Calendar.SECOND, 0);
+      calFechaFactura.set(Calendar.MILLISECOND, 0);
+      if (calFechaFactura.getTime().compareTo(calFechaVencimiento.getTime()) > 0) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_factura_fecha_invalida"));
+      }
+    }
+    // Requeridos
+    if (factura instanceof FacturaCompra) {
+      if (factura.getFecha().compareTo(new Date()) > 0) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes")
+                .getString("mensaje_factura_compra_fecha_incorrecta"));
+      }
+    }
+    if (factura instanceof FacturaVenta) {
+      FacturaVenta facturaVenta = (FacturaVenta) factura;
+      if (facturaVenta.getCAE() != 0L) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_factura_venta_CAE"));
+      }
+    }
+    this.validarCalculos(factura);
+  }
+
+  private void validarCalculos(Factura factura) {
+    //subTotal
     BigDecimal[] importes = new BigDecimal[factura.getRenglones().size()];
     int i = 0;
     for (RenglonFactura renglon : factura.getRenglones()) {
@@ -586,8 +556,8 @@ public class FacturaServiceImpl implements IFacturaService {
             || factura.getTipoComprobante() == TipoDeComprobante.FACTURA_C)
         && (factura.getIva21Neto().compareTo(BigDecimal.ZERO) != 0
             || factura.getIva105Neto().compareTo(BigDecimal.ZERO) != 0)) {
-        throw new BusinessServiceException(
-                ResourceBundle.getBundle("Mensajes").getString("mensaje_factura_iva_no_valido"));
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_factura_iva_no_valido"));
     }
     // Total
     BigDecimal total =
@@ -598,7 +568,7 @@ public class FacturaServiceImpl implements IFacturaService {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_factura_total_no_valido"));
     }
-    }
+  }
 
     @Override
     @Transactional

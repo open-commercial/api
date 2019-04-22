@@ -64,10 +64,6 @@ public class EmpresaServiceImpl implements IEmpresaService {
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Empresa empresa) {
-    // Requeridos
-    if (Validator.esVacio(empresa.getNombre())) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_empresa_vacio_nombre"));
-    }
     // Duplicados
     // Nombre
     Empresa empresaDuplicada = this.getEmpresaPorNombre(empresa.getNombre());

@@ -29,12 +29,14 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
 @Table(name = "factura")
@@ -64,14 +66,17 @@ public abstract class Factura implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
+    @NotNull(message = "{mensaje_factura_usuario_vacio}")
     private Usuario usuario;
 
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
+    @NotNull(message = "{mensaje_factura_fecha_vacia}")
     private Date fecha;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @NotNull(message = "{mensaje_factura_tipo_factura_vacia}")
     private TipoDeComprobante tipoComprobante;
 
     private long numSerie;
@@ -87,11 +92,13 @@ public abstract class Factura implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_Transportista", referencedColumnName = "id_Transportista")
+    @NotNull(message = "{mensaje_factura_transportista_vacio}")
     private Transportista transportista;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "id_Factura")
     @JsonProperty(access = Access.WRITE_ONLY)
+    @NotEmpty(message = "{mensaje_factura_renglones_vacio}")
     private List<RenglonFactura> renglones;
 
     @Column(precision = 25, scale = 15)
@@ -139,7 +146,8 @@ public abstract class Factura implements Serializable {
     private String observaciones;
 
     @ManyToOne
-    @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")    
+    @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+    @NotNull(message = "{mensaje_factura_empresa_vacia}")
     private Empresa empresa;
 
     private boolean eliminada;

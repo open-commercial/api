@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.modelmapper.internal.bytebuddy.implementation.bind.annotation.Empty;
 
 @Entity
 @Table(name = "usuario")
@@ -35,6 +34,7 @@ public class Usuario implements Serializable {
     
     @Column(nullable = false)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @NotEmpty(message = "{mensaje_usuario_vacio_password}")
     private String password;
     
     @Column(nullable = false)
@@ -63,6 +63,7 @@ public class Usuario implements Serializable {
     @CollectionTable(name="rol", joinColumns = @JoinColumn(name = "id_Usuario"))
     @Enumerated(EnumType.STRING)
     @Column(name="nombre")
+    @NotEmpty(message = "{mensaje_usuario_no_selecciono_rol}")
     private List<Rol> roles;
 
     private boolean habilitado;

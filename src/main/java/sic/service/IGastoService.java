@@ -21,7 +21,7 @@ public interface IGastoService {
 
     Gasto guardar(@Valid Gasto gasto);
 
-    void validarGasto(Gasto gasto);
+    void validarOperacion(Gasto gasto);
 
     long getUltimoNumeroDeGasto(long id_empresa);
 

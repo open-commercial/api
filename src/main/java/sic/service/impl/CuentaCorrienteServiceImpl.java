@@ -68,7 +68,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   @Override
   public CuentaCorrienteCliente guardarCuentaCorrienteCliente(
       @Valid CuentaCorrienteCliente cuentaCorrienteCliente) {
-    this.validarCuentaCorriente(cuentaCorrienteCliente);
+    this.validarOperacion(cuentaCorrienteCliente);
     cuentaCorrienteCliente = cuentaCorrienteClienteRepository.save(cuentaCorrienteCliente);
     logger.warn("La Cuenta Corriente Cliente {} se guardó correctamente.", cuentaCorrienteCliente);
     return cuentaCorrienteCliente;
@@ -77,7 +77,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   @Override
   public CuentaCorrienteProveedor guardarCuentaCorrienteProveedor(
       @Valid CuentaCorrienteProveedor cuentaCorrienteProveedor) {
-    this.validarCuentaCorriente(cuentaCorrienteProveedor);
+    this.validarOperacion(cuentaCorrienteProveedor);
     cuentaCorrienteProveedor = cuentaCorrienteProveedorRepository.save(cuentaCorrienteProveedor);
     logger.warn(
         "La Cuenta Corriente Proveedor {} se guardó correctamente.", cuentaCorrienteProveedor);
@@ -85,7 +85,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   }
 
   @Override
-  public void validarCuentaCorriente(@Valid CuentaCorriente cuentaCorriente) {
+  public void validarOperacion(@Valid CuentaCorriente cuentaCorriente) {
     // Duplicados
     if (cuentaCorriente.getIdCuentaCorriente() != null && cuentaCorrienteRepository.findById(cuentaCorriente.getIdCuentaCorriente()) != null) {
       throw new BusinessServiceException(
