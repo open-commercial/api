@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import sic.modelo.dto.ClienteDTO;
+import sic.modelo.dto.UbicacionDTO;
 
 @Entity
 @Table(name = "facturaventa")
@@ -21,45 +22,103 @@ import sic.modelo.dto.ClienteDTO;
 @JsonIgnoreProperties({"clienteDTO", "usuario", "empresa", "pedido", "transportista"})
 public class FacturaVenta extends Factura implements Serializable {
 
-    @Embedded
-    private ClienteDTO clienteDTO;
+  @Embedded private ClienteDTO clienteDTO;
 
-    public FacturaVenta() {}
+  public FacturaVenta() {}
 
-    public FacturaVenta(ClienteDTO clienteDTO, Usuario usuario, long id_Factura, Date fecha,
-            TipoDeComprobante tipoComprobante, long numSerie, long numFactura, Date fechaVencimiento,
-            Pedido pedido, Transportista transportista, List<RenglonFactura> renglones, BigDecimal subTotal,
-            BigDecimal recargoPorcentaje, BigDecimal recargoNeto, BigDecimal descuentoPorcentaje,
-            BigDecimal descuentoNeto, BigDecimal subTotalNeto, BigDecimal iva105Neto, BigDecimal iva21Neto,
-            BigDecimal impuestoInternoNeto, BigDecimal total, String observaciones, Empresa empresa,
-            boolean eliminada, long CAE, Date vencimientoCAE, long numSerieAfip, long numFacturaAfip) {
-        
-        super(id_Factura, usuario, fecha, tipoComprobante, numSerie, numFactura, fechaVencimiento,
-                pedido, transportista, renglones, subTotal, recargoPorcentaje,
-                recargoNeto, descuentoPorcentaje, descuentoNeto, subTotalNeto,
-                iva105Neto, iva21Neto, impuestoInternoNeto, total, observaciones,
-                empresa, eliminada, CAE, vencimientoCAE, numSerieAfip, numFacturaAfip);
-        this.clienteDTO = clienteDTO;
-    }
+  public FacturaVenta(
+      ClienteDTO clienteDTO,
+      Usuario usuario,
+      long id_Factura,
+      Date fecha,
+      TipoDeComprobante tipoComprobante,
+      long numSerie,
+      long numFactura,
+      Date fechaVencimiento,
+      Pedido pedido,
+      Transportista transportista,
+      List<RenglonFactura> renglones,
+      BigDecimal subTotal,
+      BigDecimal recargoPorcentaje,
+      BigDecimal recargoNeto,
+      BigDecimal descuentoPorcentaje,
+      BigDecimal descuentoNeto,
+      BigDecimal subTotalNeto,
+      BigDecimal iva105Neto,
+      BigDecimal iva21Neto,
+      BigDecimal impuestoInternoNeto,
+      BigDecimal total,
+      String observaciones,
+      Empresa empresa,
+      boolean eliminada,
+      long CAE,
+      Date vencimientoCAE,
+      long numSerieAfip,
+      long numFacturaAfip) {
 
-    @JsonGetter("idCliente")
-    public Long getIdCliente() {
-        return clienteDTO.getId_Cliente();
-    }
+    super(
+        id_Factura,
+        usuario,
+        fecha,
+        tipoComprobante,
+        numSerie,
+        numFactura,
+        fechaVencimiento,
+        pedido,
+        transportista,
+        renglones,
+        subTotal,
+        recargoPorcentaje,
+        recargoNeto,
+        descuentoPorcentaje,
+        descuentoNeto,
+        subTotalNeto,
+        iva105Neto,
+        iva21Neto,
+        impuestoInternoNeto,
+        total,
+        observaciones,
+        empresa,
+        eliminada,
+        CAE,
+        vencimientoCAE,
+        numSerieAfip,
+        numFacturaAfip);
+    this.clienteDTO = clienteDTO;
+  }
 
-    @JsonGetter("nombreFiscalCliente")
-    public String getNombreFiscalCliente() {
-        return clienteDTO.getNombreFiscal();
-    }
+  @JsonGetter("idCliente")
+  public Long getIdCliente() {
+    return clienteDTO.getId_Cliente();
+  }
 
-    @JsonGetter("idViajante")
-    public Long getIdViajante() {
-        return clienteDTO.getIdViajante();
-    }
+  @JsonGetter("nombreFiscalCliente")
+  public String getNombreFiscalCliente() {
+    return clienteDTO.getNombreFiscal();
+  }
 
-    @JsonGetter("nombreViajante")
-    public String getNombreViajante() {
-        return clienteDTO.getNombreViajante();
-    }
+  @JsonGetter("nroDeCliente")
+  public String getNroDeCliente() {
+    return clienteDTO.getNroCliente();
+  }
 
+  @JsonGetter("categoriaIVA")
+  public CategoriaIVA getCategoriaIVA() {
+    return clienteDTO.getCategoriaIVA();
+  }
+
+  @JsonGetter("idViajante")
+  public Long getIdViajante() {
+    return clienteDTO.getIdViajante();
+  }
+
+  @JsonGetter("nombreViajante")
+  public String getNombreViajante() {
+    return clienteDTO.getNombreViajante();
+  }
+
+  @JsonGetter("ubicacionFacturacion")
+  public UbicacionDTO getUbicacionFacturacion() {
+    return clienteDTO.getUbicacionFacturacion();
+  }
 }
