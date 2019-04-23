@@ -100,11 +100,9 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         throw new BusinessServiceException(
                 RESOURCE_BUNDLE.getString("mensaje_cliente_vacio"));
       }
-    } else if (cuentaCorriente instanceof CuentaCorrienteProveedor) {
-      if (((CuentaCorrienteProveedor) cuentaCorriente).getProveedor() == null) {
-        throw new BusinessServiceException(
-                RESOURCE_BUNDLE.getString("mensaje_proveedor_vacio"));
-      }
+    } else if (cuentaCorriente instanceof CuentaCorrienteProveedor
+        && ((CuentaCorrienteProveedor) cuentaCorriente).getProveedor() == null) {
+      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_proveedor_vacio"));
     }
     // Duplicados
     if (cuentaCorriente.getIdCuentaCorriente() != null && cuentaCorrienteRepository.findById(cuentaCorriente.getIdCuentaCorriente()) != null) {
@@ -255,7 +253,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     rcc.setFechaVencimiento(facturaVenta.getFechaVencimiento());
     rcc.setIdMovimiento(facturaVenta.getId_Factura());
     rcc.setMonto(facturaVenta.getTotal().negate());
-    CuentaCorriente cc = this.getCuentaCorrientePorCliente(facturaVenta.getCliente());
+    CuentaCorriente cc = this.getCuentaCorrientePorCliente(clienteService.getClientePorId(facturaVenta.getIdCliente()));
     cc.getRenglones().add(rcc);
     cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));
     cc.setFechaUltimoMovimiento(facturaVenta.getFecha());

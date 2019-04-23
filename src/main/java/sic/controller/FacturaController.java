@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import io.jsonwebtoken.Claims;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.dto.ClienteDTO;
 import sic.service.*;
 
 @RestController
@@ -30,6 +32,7 @@ public class FacturaController {
   private final ITransportistaService transportistaService;
   private final IReciboService reciboService;
   private final IAuthService authService;
+  private final ModelMapper modelMapper;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
@@ -41,6 +44,7 @@ public class FacturaController {
       IUsuarioService usuarioService,
       ITransportistaService transportistaService,
       IReciboService reciboService,
+      ModelMapper modelMapper,
       IAuthService authService) {
     this.facturaService = facturaService;
     this.empresaService = empresaService;
@@ -50,6 +54,7 @@ public class FacturaController {
     this.transportistaService = transportistaService;
     this.reciboService = reciboService;
     this.authService = authService;
+    this.modelMapper = modelMapper;
   }
 
     @GetMapping("/facturas/{idFactura}")
@@ -80,7 +85,7 @@ public class FacturaController {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_facturacion_vacia"));
     }
-    fv.setCliente(cliente);
+    fv.setClienteDTO(modelMapper.map(cliente, ClienteDTO.class));
     fv.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
     fv.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
     List<FacturaVenta> facturasGuardadas;
@@ -92,7 +97,7 @@ public class FacturaController {
               reciboService.construirRecibos(
                   idsFormaDePago,
                   empresa,
-                  fv.getCliente(),
+                  cliente,
                   fv.getUsuario(),
                   montos,
                   fv.getTotal(),
@@ -107,7 +112,7 @@ public class FacturaController {
               reciboService.construirRecibos(
                   idsFormaDePago,
                   empresa,
-                  fv.getCliente(),
+                  cliente,
                   fv.getUsuario(),
                   montos,
                   fv.getTotal(),

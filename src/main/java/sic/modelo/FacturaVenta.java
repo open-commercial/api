@@ -6,29 +6,27 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import sic.modelo.dto.ClienteDTO;
 
 @Entity
 @Table(name = "facturaventa")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@JsonIgnoreProperties({"cliente", "usuario", "empresa", "pedido", "transportista"})
+@JsonIgnoreProperties({"clienteDTO", "usuario", "empresa", "pedido", "transportista"})
 public class FacturaVenta extends Factura implements Serializable {
 
-    @ManyToOne
-    @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
-    private Cliente cliente;
+    @Embedded
+    private ClienteDTO clienteDTO;
 
     public FacturaVenta() {}
 
-    public FacturaVenta(Cliente cliente, Usuario usuario, long id_Factura, Date fecha,
+    public FacturaVenta(ClienteDTO clienteDTO, Usuario usuario, long id_Factura, Date fecha,
             TipoDeComprobante tipoComprobante, long numSerie, long numFactura, Date fechaVencimiento,
             Pedido pedido, Transportista transportista, List<RenglonFactura> renglones, BigDecimal subTotal,
             BigDecimal recargoPorcentaje, BigDecimal recargoNeto, BigDecimal descuentoPorcentaje,
@@ -41,27 +39,27 @@ public class FacturaVenta extends Factura implements Serializable {
                 recargoNeto, descuentoPorcentaje, descuentoNeto, subTotalNeto,
                 iva105Neto, iva21Neto, impuestoInternoNeto, total, observaciones,
                 empresa, eliminada, CAE, vencimientoCAE, numSerieAfip, numFacturaAfip);
-        this.cliente = cliente;
+        this.clienteDTO = clienteDTO;
     }
 
     @JsonGetter("idCliente")
     public Long getIdCliente() {
-        return cliente.getId_Cliente();
+        return clienteDTO.getId_Cliente();
     }
 
     @JsonGetter("nombreFiscalCliente")
     public String getNombreFiscalCliente() {
-        return cliente.getNombreFiscal();
+        return clienteDTO.getNombreFiscal();
     }
 
     @JsonGetter("idViajante")
     public Long getIdViajante() {
-        return (cliente.getViajante() != null) ?  cliente.getViajante().getId_Usuario() : null;
+        return clienteDTO.getIdViajante();
     }
 
     @JsonGetter("nombreViajante")
     public String getNombreViajante() {
-        return (cliente.getViajante() != null) ? cliente.getViajante().getNombre() + " " + cliente.getViajante().getApellido() + " (" + cliente.getViajante().getUsername() + ")" : null;
+        return clienteDTO.getNombreViajante();
     }
 
 }

@@ -313,13 +313,13 @@ public class FacturaServiceImpl implements IFacturaService {
       builder.and(qFacturaVenta.fecha.between(fDesde, fHasta));
     }
     if (criteria.isBuscaCliente())
-      builder.and(qFacturaVenta.cliente.id_Cliente.eq(criteria.getIdCliente()));
+      builder.and(qFacturaVenta.clienteDTO.id_Cliente.eq(criteria.getIdCliente()));
     if (criteria.isBuscaPorTipoComprobante())
       builder.and(qFacturaVenta.tipoComprobante.eq(criteria.getTipoComprobante()));
     if (criteria.isBuscaUsuario())
       builder.and(qFacturaVenta.usuario.id_Usuario.eq(criteria.getIdUsuario()));
     if (criteria.isBuscaViajante())
-      builder.and(qFacturaVenta.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
+      builder.and(qFacturaVenta.clienteDTO.idViajante.eq(criteria.getIdViajante()));
     if (criteria.isBuscaPorNumeroFactura())
       builder
           .and(qFacturaVenta.numSerie.eq(criteria.getNumSerie()))
@@ -333,23 +333,26 @@ public class FacturaServiceImpl implements IFacturaService {
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
         && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
-      for (Rol rol : usuarioLogueado.getRoles()) {
-        switch (rol) {
-          case VIAJANTE:
-            rsPredicate.or(qFacturaVenta.cliente.viajante.eq(usuarioLogueado));
-            break;
-          case COMPRADOR:
-            Cliente clienteRelacionado =
-                clienteService.getClientePorIdUsuarioYidEmpresa(
-                    idUsuarioLoggedIn, criteria.getIdEmpresa());
-            if (clienteRelacionado != null) {
-              rsPredicate.or(qFacturaVenta.cliente.eq(clienteRelacionado));
-            } else {
-              rsPredicate.or(qFacturaVenta.cliente.isNull());
-            }
-            break;
-        }
-      }
+      usuarioLogueado
+          .getRoles()
+          .forEach(
+              rol -> {
+                if (rol == Rol.VIAJANTE) {
+                  rsPredicate.or(
+                      qFacturaVenta.clienteDTO.idViajante.eq(usuarioLogueado.getId_Usuario()));
+                }
+                if (rol == Rol.COMPRADOR) {
+                  Cliente clienteRelacionado =
+                      clienteService.getClientePorIdUsuarioYidEmpresa(
+                          idUsuarioLoggedIn, criteria.getIdEmpresa());
+                  if (clienteRelacionado != null) {
+                    rsPredicate.or(
+                        qFacturaVenta.clienteDTO.id_Cliente.eq(clienteRelacionado.getId_Cliente()));
+                  } else {
+                    rsPredicate.or(qFacturaVenta.clienteDTO.isNull());
+                  }
+                }
+              });
       builder.and(rsPredicate);
     }
     return builder;
@@ -495,7 +498,7 @@ public class FacturaServiceImpl implements IFacturaService {
         }
         if (factura instanceof FacturaVenta) {
             FacturaVenta facturaVenta = (FacturaVenta) factura;
-            if (facturaVenta.getCliente() == null) {
+            if (facturaVenta.getClienteDTO() == null) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_factura_cliente_vacio"));
             }
@@ -503,7 +506,7 @@ public class FacturaServiceImpl implements IFacturaService {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_factura_usuario_vacio"));
             }
-            if (facturaVenta.getCAE() != 0l) {
+            if (facturaVenta.getCAE() != 0L) {
                 throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                         .getString("mensaje_factura_venta_CAE"));
             }
@@ -599,7 +602,8 @@ public class FacturaServiceImpl implements IFacturaService {
     @Override
     @Transactional
     public FacturaVenta autorizarFacturaVenta(FacturaVenta fv) {
-        ComprobanteAFIP comprobante = ComprobanteAFIP.builder()
+    Cliente cliente = clienteService.getClientePorId(fv.getIdCliente());
+    ComprobanteAFIP comprobante = ComprobanteAFIP.builder()
                 .fecha(fv.getFecha())
                 .tipoComprobante(fv.getTipoComprobante())
                 .CAE(fv.getCAE())
@@ -607,7 +611,7 @@ public class FacturaServiceImpl implements IFacturaService {
                 .numSerieAfip(fv.getNumSerieAfip())
                 .numFacturaAfip(fv.getNumFacturaAfip())
                 .empresa(fv.getEmpresa())
-                .cliente(fv.getCliente())
+                .cliente(cliente)
                 .subtotalBruto(fv.getSubTotalBruto())
                 .iva105neto(fv.getIva105Neto())
                 .iva21neto(fv.getIva21Neto())
@@ -990,26 +994,26 @@ public class FacturaServiceImpl implements IFacturaService {
     @Override
     public List<FacturaVenta> dividirFactura(FacturaVenta facturaADividir, int[] indices) {
         FacturaVenta facturaSinIVA = new FacturaVenta();
-        facturaSinIVA.setCliente(facturaADividir.getCliente());
+        facturaSinIVA.setClienteDTO(facturaADividir.getClienteDTO());
         facturaSinIVA.setUsuario(facturaADividir.getUsuario());
         facturaSinIVA.setPedido(facturaADividir.getPedido());
         facturaSinIVA.setDescuentoPorcentaje(facturaADividir.getDescuentoPorcentaje());
         facturaSinIVA.setRecargoPorcentaje(facturaADividir.getRecargoPorcentaje());
         FacturaVenta facturaConIVA = new FacturaVenta();
-        facturaConIVA.setCliente(facturaADividir.getCliente());
+        facturaConIVA.setClienteDTO(facturaADividir.getClienteDTO());
         facturaConIVA.setUsuario(facturaADividir.getUsuario());
         facturaConIVA.setPedido(facturaADividir.getPedido());
         facturaConIVA.setTipoComprobante(facturaADividir.getTipoComprobante());
         facturaConIVA.setDescuentoPorcentaje(facturaADividir.getDescuentoPorcentaje());
         facturaConIVA.setRecargoPorcentaje(facturaADividir.getRecargoPorcentaje());
         List<FacturaVenta> facturas = new ArrayList<>();
-        facturaSinIVA = this.agregarRenglonesAFacturaSinIVA(facturaSinIVA, indices, facturaADividir.getRenglones());
-        facturaConIVA = this.agregarRenglonesAFacturaConIVA(facturaConIVA, indices,facturaADividir.getRenglones());
+        this.agregarRenglonesAFacturaSinIVA(facturaSinIVA, indices, facturaADividir.getRenglones());
+        this.agregarRenglonesAFacturaConIVA(facturaConIVA, indices,facturaADividir.getRenglones());
         if (!facturaSinIVA.getRenglones().isEmpty()) {
-            facturaSinIVA = this.procesarFacturaSinIVA(facturaADividir, facturaSinIVA);
+            this.procesarFacturaSinIVA(facturaADividir, facturaSinIVA);
             facturas.add(facturaSinIVA);
         }
-        facturaConIVA = this.procesarFacturaConIVA(facturaADividir, facturaConIVA);
+        this.procesarFacturaConIVA(facturaADividir, facturaConIVA);
         facturas.add(facturaConIVA);
         return facturas;
     }

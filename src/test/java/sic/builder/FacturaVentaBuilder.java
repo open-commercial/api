@@ -12,6 +12,7 @@ import sic.modelo.RenglonFactura;
 import sic.modelo.TipoDeComprobante;
 import sic.modelo.Transportista;
 import sic.modelo.Usuario;
+import sic.modelo.dto.ClienteDTO;
 
 public class FacturaVentaBuilder {
     
@@ -24,7 +25,7 @@ public class FacturaVentaBuilder {
     private Pedido pedido =  null;
     private Transportista transportista = new TransportistaBuilder().build();
     private List<RenglonFactura> renglones;
-    private Cliente cliente = new ClienteBuilder().build();
+    private ClienteDTO clienteDTO = ClienteDTO.builder().build();
     private Usuario usuario = new UsuarioBuilder().build();
     private BigDecimal subTotal = new BigDecimal("6500");
     private BigDecimal recargo_porcentaje = BigDecimal.ZERO;
@@ -59,7 +60,7 @@ public class FacturaVentaBuilder {
             renglonesFactura.add(renglon2);
             this.renglones = renglonesFactura;
         }
-        FacturaVenta factura = new FacturaVenta(cliente, usuario, id_Factura, fecha,
+        FacturaVenta factura = new FacturaVenta(clienteDTO, usuario, id_Factura, fecha,
                 tipoFactura, numSerie, numFactura, fechaVencimiento, pedido, transportista,
                 renglones, subTotal, recargo_porcentaje, recargo_neto, descuento_porcentaje, 
                 descuento_neto, subTotal_neto, iva_105_neto, iva_21_neto, impuestoInterno_neto, total, 
@@ -112,8 +113,8 @@ public class FacturaVentaBuilder {
         return this;
     }  
     
-    public FacturaVentaBuilder withCliente(Cliente cliente) {
-        this.cliente = cliente;
+    public FacturaVentaBuilder withCliente(ClienteDTO clienteDTO) {
+        this.clienteDTO = clienteDTO;
         return this;
     }
 
