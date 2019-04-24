@@ -37,15 +37,14 @@ public class AuthServiceImpl implements IAuthService {
 
   @Override
   public String generarToken(long idUsuario, List<Rol> rolesDeUsuario) {
-    // 24hs desde la fecha actual para expiration
     Date today = new Date();
     Calendar c = Calendar.getInstance();
     c.setTime(today);
-    c.add(Calendar.DATE, 1);
-    Date tomorrow = c.getTime();
+    c.add(Calendar.YEAR, 1);
+    Date yearLater = c.getTime();
     return Jwts.builder()
         .setIssuedAt(today)
-        .setExpiration(tomorrow)
+        .setExpiration(yearLater)
         .signWith(SignatureAlgorithm.HS512, secretkey)
         .claim("idUsuario", idUsuario)
         .claim("roles", rolesDeUsuario)
@@ -53,34 +52,46 @@ public class AuthServiceImpl implements IAuthService {
   }
 
   @Override
-  public void validarToken(String authorizationHeader) {
+  public boolean esAuthorizationHeaderValido(String authorizationHeader) {
     if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-      throw new UnauthorizedException(RESOURCE_BUNDLE.getString("mensaje_error_token_invalido"));
+      return false;
     }
     final long idUsuario;
     idUsuario = (int) this.getClaimsDelToken(authorizationHeader).get("idUsuario");
     Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
     final String token = authorizationHeader.substring(7); // The part after "Bearer "
     if (!token.equalsIgnoreCase(usuario.getToken())) {
-      throw new UnauthorizedException(RESOURCE_BUNDLE.getString("mensaje_error_token_invalido"));
+      return false;
     }
     if (!usuario.isHabilitado()) {
       logger.warn(RESOURCE_BUNDLE.getString("mensaje_usuario_no_habilitado"));
-      throw new UnauthorizedException(RESOURCE_BUNDLE.getString("mensaje_error_token_invalido"));
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public boolean esTokenValido(String token) {
+    if (token == null || token.isEmpty()) return false;
+    try {
+      Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token);
+      return true;
+    } catch (JwtException ex) {
+      logger.error(ex.getMessage());
+      return false;
     }
   }
 
   @Override
   public Claims getClaimsDelToken(String authorizationHeader) {
-    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+    if (authorizationHeader == null
+        || !authorizationHeader.startsWith("Bearer ")
+        || !this.esTokenValido(authorizationHeader.substring(7))) { // The part after "Bearer "
       throw new UnauthorizedException(RESOURCE_BUNDLE.getString("mensaje_error_token_invalido"));
     }
-    final String token = authorizationHeader.substring(7); // The part after "Bearer "
-    try {
-      return Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token).getBody();
-    } catch (JwtException ex) {
-      throw new UnauthorizedException(
-          RESOURCE_BUNDLE.getString("mensaje_error_token_invalido"), ex);
-    }
+    return Jwts.parser()
+        .setSigningKey(secretkey)
+        .parseClaimsJws(authorizationHeader.substring(7))
+        .getBody();
   }
 }

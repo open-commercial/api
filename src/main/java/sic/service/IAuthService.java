@@ -9,7 +9,9 @@ public interface IAuthService {
 
   String generarToken(long idUsuario, List<Rol> rolesDeUsuario);
 
-  void validarToken(String authorizationHeader);
+  boolean esAuthorizationHeaderValido(String authorizationHeader);
+
+  boolean esTokenValido(String authorizationHeader);
 
   Claims getClaimsDelToken(String authorizationHeader);
 }

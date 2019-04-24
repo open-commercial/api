@@ -54,9 +54,13 @@ public class AuthController {
   @PostMapping("/login")
   public String login(@RequestBody Credencial credencial) {
     Usuario usuario = usuarioService.autenticarUsuario(credencial);
-    String token = authService.generarToken(usuario.getId_Usuario(), usuario.getRoles());
-    usuarioService.actualizarToken(token, usuario.getId_Usuario());
-    return token;
+    if (authService.esTokenValido(usuario.getToken())) {
+      return usuario.getToken();
+    } else {
+      String token = authService.generarToken(usuario.getId_Usuario(), usuario.getRoles());
+      usuarioService.actualizarToken(token, usuario.getId_Usuario());
+      return token;
+    }
   }
 
   @PutMapping("/logout")
