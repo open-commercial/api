@@ -3,10 +3,7 @@ package sic.modelo.dto;
 import lombok.*;
 import sic.modelo.CategoriaIVA;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -24,6 +21,7 @@ public class ClienteDTO implements Serializable {
   private String nroCliente;
   private String nombreFiscal;
   private String nombreFantasia;
+  @Enumerated(EnumType.STRING)
   private CategoriaIVA categoriaIVA;
   private Long idFiscal;
 
@@ -72,7 +70,5 @@ public class ClienteDTO implements Serializable {
   private Long idCredencial;
   private String nombreCredencial;
   private boolean predeterminado;
-  private BigDecimal saldoCuentaCorriente;
-  private Date fechaUltimoMovimiento;
 
 }
