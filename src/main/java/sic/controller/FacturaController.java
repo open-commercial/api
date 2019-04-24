@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.dto.ClienteDTO;
+import sic.modelo.dto.FacturaCompraDTO;
+import sic.modelo.dto.FacturaVentaDTO;
 import sic.service.*;
 
 @RestController
@@ -66,7 +68,7 @@ public class FacturaController {
   @PostMapping("/facturas/venta")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public List<FacturaVenta> guardarFacturaVenta(
-      @RequestBody FacturaVenta fv,
+      @RequestBody FacturaVentaDTO facturaVentaDTO,
       @RequestParam Long idEmpresa,
       @RequestParam Long idCliente,
       @RequestParam Long idUsuario,
@@ -75,6 +77,7 @@ public class FacturaController {
       @RequestParam(required = false) BigDecimal[] montos,
       @RequestParam(required = false) int[] indices,
       @RequestParam(required = false) Long idPedido) {
+    FacturaVenta fv = modelMapper.map(facturaVentaDTO, FacturaVenta.class);
     Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
     fv.setEmpresa(empresa);
     Cliente cliente = clienteService.getClientePorId(idCliente);
@@ -124,11 +127,12 @@ public class FacturaController {
   @PostMapping("/facturas/compra")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public List<FacturaCompra> guardarFacturaCompra(
-      @RequestBody FacturaCompra fc,
+      @RequestBody FacturaCompraDTO facturaCompraDTO,
       @RequestParam Long idUsuario,
       @RequestParam Long idEmpresa,
       @RequestParam Long idProveedor,
       @RequestParam Long idTransportista) {
+    FacturaCompra fc = modelMapper.map(facturaCompraDTO, FacturaCompra.class);
     fc.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     fc.setProveedor(proveedorService.getProveedorPorId(idProveedor));
     fc.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
