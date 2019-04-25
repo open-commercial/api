@@ -65,15 +65,11 @@ public class AuthController {
 
   @PutMapping("/logout")
   public void logout(@RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims;
-    try {
-      claims = authService.getClaimsDelToken(authorizationHeader);
-    } catch (JwtException ex) {
-      throw new UnauthorizedException(
-          RESOURCE_BUNDLE.getString("mensaje_error_token_invalido"), ex);
+    if (authService.esAuthorizationHeaderValido(authorizationHeader)) {
+        Claims claims = authService.getClaimsDelToken(authorizationHeader);
+        long idUsuario = (int) claims.get("idUsuario");
+        usuarioService.actualizarToken("", idUsuario);
     }
-    long idUsuario = (int) claims.get("idUsuario");
-    usuarioService.actualizarToken("", idUsuario);
   }
 
   @GetMapping("/password-recovery")
