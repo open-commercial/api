@@ -134,24 +134,38 @@ public abstract class Factura implements Serializable {
     
     @Temporal(TemporalType.TIMESTAMP)
     private Date vencimientoCAE;
-    
+
     private long numSerieAfip;
 
     private long numFacturaAfip;
-    
-    @JsonGetter("nombreTransportista")
-    public String getNombreTransportista() {
-        return transportista.getNombre();
-    }    
-    
+
     @JsonGetter("nombreEmpresa")
     public String getNombreEmpresa() {
         return empresa.getNombre();
+    }
+
+    @JsonGetter("idEmpresa")
+    public Long getIdEmpresa() {
+        return empresa.getId_Empresa();
     }
 
     @JsonGetter("nombreUsuario")
     public String getNombreUsuario() {
         return usuario.getNombre() + " " + usuario.getApellido() + " (" + usuario.getUsername() + ")";
     }
-    
+
+    @JsonGetter("idUsuario")
+    public Long getIdUsuario() {
+        return usuario.getId_Usuario();
+    }
+
+    @JsonGetter("nombreTransportista")
+    public String getNombreTransportista() {
+        return transportista.getNombre();
+    }
+
+    @JsonGetter("idTransportista")
+    public Long getIdTransportista() {
+        return transportista.getId_Transportista();
+    }
 }

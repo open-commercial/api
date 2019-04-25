@@ -19,9 +19,14 @@ import sic.modelo.dto.UbicacionDTO;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@JsonIgnoreProperties({"clienteDTO", "usuario", "empresa", "pedido", "transportista"})
+@JsonIgnoreProperties({"clienteDTO", "cliente", "usuario", "empresa", "pedido", "transportista"})
 public class FacturaVenta extends Factura implements Serializable {
 
+  @ManyToOne
+  @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
+  private Cliente cliente;
+
+  @AttributeOverride(name = "id_Cliente", column = @Column(name = "idClienteEmbedded"))
   @Embedded private ClienteDTO clienteDTO;
 
   public FacturaVenta() {}

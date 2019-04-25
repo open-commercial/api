@@ -69,18 +69,14 @@ public class FacturaController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public List<FacturaVenta> guardarFacturaVenta(
       @RequestBody FacturaVentaDTO facturaVentaDTO,
-      @RequestParam Long idEmpresa,
-      @RequestParam Long idCliente,
-      @RequestParam Long idUsuario,
-      @RequestParam Long idTransportista,
       @RequestParam(required = false) long[] idsFormaDePago,
       @RequestParam(required = false) BigDecimal[] montos,
       @RequestParam(required = false) int[] indices,
       @RequestParam(required = false) Long idPedido) {
     FacturaVenta fv = modelMapper.map(facturaVentaDTO, FacturaVenta.class);
-    Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
+    Empresa empresa = empresaService.getEmpresaPorId(facturaVentaDTO.getIdEmpresa());
     fv.setEmpresa(empresa);
-    Cliente cliente = clienteService.getClientePorId(idCliente);
+    Cliente cliente = clienteService.getClientePorId(facturaVentaDTO.getIdCliente());
     if (cliente.getUbicacionFacturacion() == null
         && (fv.getTipoComprobante() == TipoDeComprobante.FACTURA_A
             || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_B
@@ -88,9 +84,10 @@ public class FacturaController {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_facturacion_vacia"));
     }
+    fv.setCliente(cliente);
     fv.setClienteDTO(modelMapper.map(cliente, ClienteDTO.class));
-    fv.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    fv.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
+    fv.setUsuario(usuarioService.getUsuarioPorId(facturaVentaDTO.getIdUsuario()));
+    fv.setTransportista(transportistaService.getTransportistaPorId(facturaVentaDTO.getIdTransportista()));
     List<FacturaVenta> facturasGuardadas;
     if (indices != null) {
       facturasGuardadas =
@@ -127,16 +124,12 @@ public class FacturaController {
   @PostMapping("/facturas/compra")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public List<FacturaCompra> guardarFacturaCompra(
-      @RequestBody FacturaCompraDTO facturaCompraDTO,
-      @RequestParam Long idUsuario,
-      @RequestParam Long idEmpresa,
-      @RequestParam Long idProveedor,
-      @RequestParam Long idTransportista) {
+      @RequestBody FacturaCompraDTO facturaCompraDTO) {
     FacturaCompra fc = modelMapper.map(facturaCompraDTO, FacturaCompra.class);
-    fc.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    fc.setProveedor(proveedorService.getProveedorPorId(idProveedor));
-    fc.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    fc.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
+    fc.setEmpresa(empresaService.getEmpresaPorId(facturaCompraDTO.getIdEmpresa()));
+    fc.setProveedor(proveedorService.getProveedorPorId(facturaCompraDTO.getIdProveedor()));
+    fc.setUsuario(usuarioService.getUsuarioPorId(facturaCompraDTO.getIdUsuario()));
+    fc.setTransportista(transportistaService.getTransportistaPorId(facturaCompraDTO.getIdTransportista()));
     List<FacturaCompra> facturas = new ArrayList<>();
     facturas.add(fc);
     return facturaService.guardar(facturas);

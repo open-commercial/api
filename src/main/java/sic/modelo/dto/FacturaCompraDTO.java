@@ -10,7 +10,9 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Builder
 public class FacturaCompraDTO extends FacturaDTO implements Serializable {
-    
+
+    private Long idProveedor;
+
     private String razonSocialProveedor;
     
 }

@@ -313,13 +313,13 @@ public class FacturaServiceImpl implements IFacturaService {
       builder.and(qFacturaVenta.fecha.between(fDesde, fHasta));
     }
     if (criteria.isBuscaCliente())
-      builder.and(qFacturaVenta.clienteDTO.id_Cliente.eq(criteria.getIdCliente()));
+      builder.and(qFacturaVenta.cliente.id_Cliente.eq(criteria.getIdCliente()));
     if (criteria.isBuscaPorTipoComprobante())
       builder.and(qFacturaVenta.tipoComprobante.eq(criteria.getTipoComprobante()));
     if (criteria.isBuscaUsuario())
       builder.and(qFacturaVenta.usuario.id_Usuario.eq(criteria.getIdUsuario()));
     if (criteria.isBuscaViajante())
-      builder.and(qFacturaVenta.clienteDTO.idViajante.eq(criteria.getIdViajante()));
+      builder.and(qFacturaVenta.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaPorNumeroFactura())
       builder
           .and(qFacturaVenta.numSerie.eq(criteria.getNumSerie()))
@@ -339,7 +339,7 @@ public class FacturaServiceImpl implements IFacturaService {
               rol -> {
                 if (rol == Rol.VIAJANTE) {
                   rsPredicate.or(
-                      qFacturaVenta.clienteDTO.idViajante.eq(usuarioLogueado.getId_Usuario()));
+                      qFacturaVenta.cliente.viajante.id_Usuario.eq(usuarioLogueado.getId_Usuario()));
                 }
                 if (rol == Rol.COMPRADOR) {
                   Cliente clienteRelacionado =
@@ -347,9 +347,9 @@ public class FacturaServiceImpl implements IFacturaService {
                           idUsuarioLoggedIn, criteria.getIdEmpresa());
                   if (clienteRelacionado != null) {
                     rsPredicate.or(
-                        qFacturaVenta.clienteDTO.id_Cliente.eq(clienteRelacionado.getId_Cliente()));
+                        qFacturaVenta.cliente.id_Cliente.eq(clienteRelacionado.getId_Cliente()));
                   } else {
-                    rsPredicate.or(qFacturaVenta.clienteDTO.isNull());
+                    rsPredicate.or(qFacturaVenta.cliente.isNull());
                   }
                 }
               });
