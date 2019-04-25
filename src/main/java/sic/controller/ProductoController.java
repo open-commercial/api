@@ -60,8 +60,7 @@ public class ProductoController {
     @PathVariable long idProducto,
     @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Producto producto = productoService.getProductoPorId(idProducto);
-    if (authorizationHeader != null) {
-      authService.validarToken(authorizationHeader);
+    if (authorizationHeader != null && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente =
         clienteService.getClientePorIdUsuarioYidEmpresa(
@@ -102,8 +101,7 @@ public class ProductoController {
         null,
         null,
         null);
-    if (authorizationHeader != null) {
-      authService.validarToken(authorizationHeader);
+    if (authorizationHeader != null && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente =
         clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idEmpresa);
