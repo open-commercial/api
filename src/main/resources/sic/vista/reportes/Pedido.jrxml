@@ -449,7 +449,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 + " " + "(" +$P{pedido}.getUsuario().getUsername() + ")"]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="30" width="90" height="15" uuid="43f39702-e0af-456b-bea4-3952f75b1aa5">
+				<reportElement x="0" y="30" width="103" height="15" uuid="43f39702-e0af-456b-bea4-3952f75b1aa5">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
@@ -458,7 +458,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				<text><![CDATA[Observaciones:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="90" y="30" width="240" height="48" uuid="7d4cd7c6-3ef8-449b-b63b-9d16f6eb9934"/>
+				<reportElement x="103" y="30" width="227" height="48" uuid="7d4cd7c6-3ef8-449b-b63b-9d16f6eb9934"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
@@ -583,16 +583,16 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				<textFieldExpression><![CDATA[$P{pedido}.getRecargoNeto().doubleValue()]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="15" width="90" height="15" uuid="9526ac59-9a9c-41dd-b695-b0b4c636968a">
+				<reportElement x="0" y="15" width="103" height="15" uuid="9526ac59-9a9c-41dd-b695-b0b4c636968a">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Cantidad Artículos:]]></text>
+				<text><![CDATA[Cantidad de Artículos:]]></text>
 			</staticText>
-			<textField evaluationTime="Report">
-				<reportElement positionType="FixRelativeToBottom" x="90" y="15" width="90" height="15" uuid="58477052-98f2-4b1d-8e8f-58b054b5bfeb"/>
+			<textField evaluationTime="Report" pattern=" #,##0.#">
+				<reportElement positionType="FixRelativeToBottom" x="103" y="15" width="90" height="15" uuid="58477052-98f2-4b1d-8e8f-58b054b5bfeb"/>
 				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font size="8"/>
 				</textElement>

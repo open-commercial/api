@@ -369,13 +369,17 @@ public class FacturaServiceImpl implements IFacturaService {
               factura.getNumSerie(),
               factura.getEmpresa().getId_Empresa()));
     }
+    this.calcularCantidadDeArticulos(factura);
+    this.validarFactura(factura);
+    return factura;
+  }
+
+  private void calcularCantidadDeArticulos(Factura factura) {
     factura.setCantidadArticulos(BigDecimal.ZERO);
     factura
         .getRenglones()
         .forEach(
             r -> factura.setCantidadArticulos(factura.getCantidadArticulos().add(r.getCantidad())));
-    this.validarFactura(factura);
-    return factura;
   }
 
   @Override

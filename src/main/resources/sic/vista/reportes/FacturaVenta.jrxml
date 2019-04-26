@@ -667,7 +667,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textFieldExpression><![CDATA[$P{facturaVenta}.getTotal().doubleValue()]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="20" width="90" height="15" uuid="43f39702-e0af-456b-bea4-3952f75b1aa5">
+				<reportElement x="0" y="20" width="110" height="15" uuid="43f39702-e0af-456b-bea4-3952f75b1aa5">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
@@ -676,7 +676,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<text><![CDATA[Observaciones:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="90" y="20" width="250" height="61" uuid="7d4cd7c6-3ef8-449b-b63b-9d16f6eb9934"/>
+				<reportElement x="110" y="20" width="230" height="61" uuid="7d4cd7c6-3ef8-449b-b63b-9d16f6eb9934"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
@@ -770,16 +770,16 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textFieldExpression><![CDATA["de " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="5" width="90" height="15" uuid="2e831fe3-176c-4fee-b5a7-884a19007852">
+				<reportElement x="0" y="5" width="110" height="15" uuid="2e831fe3-176c-4fee-b5a7-884a19007852">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Cantidad Artículos:]]></text>
+				<text><![CDATA[Cantidad de Artículos:]]></text>
 			</staticText>
-			<textField evaluationTime="Report">
-				<reportElement positionType="FixRelativeToBottom" x="90" y="5" width="90" height="15" uuid="4768c0c6-a8c8-4f3f-a786-e588613842f1"/>
+			<textField evaluationTime="Report" pattern=" #,##0.#">
+				<reportElement positionType="FixRelativeToBottom" x="110" y="5" width="90" height="15" uuid="4768c0c6-a8c8-4f3f-a786-e588613842f1"/>
 				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font size="8"/>
 				</textElement>
