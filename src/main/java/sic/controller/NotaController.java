@@ -212,59 +212,125 @@ public class NotaController {
     return notaService.getRenglonesDeNotaDebito(idNotaDebito);
   }
 
-  @PostMapping("/notas/credito/empresa/{idEmpresa}/usuario/{idUsuario}/factura/{idFactura}")
+  @PostMapping("/notas/credito/empresas/{idEmpresa}/usuarios/{idUsuario}/clientes/{idCliente}/facturas/{idFactura}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Nota guardarNotaCredito(
+  public Nota guardarNotaCreditoClienteDeFactura(
       @RequestBody NotaCreditoDTO notaCreditoDTO,
       @PathVariable long idEmpresa,
-      @RequestParam Movimiento movimiento,
-      @RequestParam(required = false) Long idCliente,
-      @RequestParam(required = false) Long idProveedor,
+      @PathVariable long idCliente,
       @PathVariable long idUsuario,
       @PathVariable long idFactura,
       @RequestParam boolean modificarStock) {
     NotaCredito nota = modelMapper.map(notaCreditoDTO, NotaCredito.class);
     nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    nota.setCliente(clienteService.getClientePorId(idCliente));
     Factura factura = facturaService.getFacturaPorId(idFactura);
-    if (movimiento == Movimiento.VENTA && idCliente != null && factura instanceof FacturaVenta) {
-      nota.setCliente(clienteService.getClientePorId(idCliente));
+    if (factura instanceof FacturaVenta
+        && ((FacturaVenta) factura).getIdCliente() == idCliente) {
       nota.setFacturaVenta((FacturaVenta) factura);
-    } else if (movimiento == Movimiento.COMPRA
-        && idProveedor != null
-        && factura instanceof FacturaCompra) {
-      nota.setProveedor(proveedorService.getProveedorPorId(idProveedor));
-      nota.setFacturaCompra((FacturaCompra) factura);
     } else {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_movimiento_no_valido"));
     }
-    nota.setMovimiento(movimiento);
+    nota.setMovimiento(Movimiento.VENTA);
     nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
     nota.setModificaStock(modificarStock);
     return notaService.guardarNotaCredito(nota);
   }
 
-  @PostMapping("/notas/debito/empresa/{idEmpresa}/usuario/{idUsuario}/recibo/{idRecibo}")
+  @PostMapping("/notas/credito/empresas/{idEmpresa}/usuarios/{idUsuario}/clientes/{idCliente}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Nota guardarNotaDebito(
+  public Nota guardarNotaCreditoCliente(
+    @RequestBody NotaCreditoDTO notaCreditoDTO,
+    @PathVariable long idEmpresa,
+    @PathVariable long idCliente,
+    @PathVariable long idUsuario,
+    @RequestParam TipoDeComprobante tipoDeComprobante) {
+    NotaCredito nota = modelMapper.map(notaCreditoDTO, NotaCredito.class);
+    nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    nota.setCliente(clienteService.getClientePorId(idCliente));
+    nota.setMovimiento(Movimiento.VENTA);
+    nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
+    nota.setTipoComprobante(tipoDeComprobante);
+    nota.setModificaStock(false);
+    return notaService.guardarNotaCredito(nota);
+  }
+
+  @PostMapping("/notas/credito/empresas/{idEmpresa}/usuarios/{idUsuario}/proveedores/{idProveedor}/facturas/{idFactura}")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public Nota guardarNotaCreditoProveedorDeFactura(
+    @RequestBody NotaCreditoDTO notaCreditoDTO,
+    @PathVariable long idEmpresa,
+    @PathVariable long idProveedor,
+    @PathVariable long idUsuario,
+    @PathVariable long idFactura,
+    @RequestParam boolean modificarStock) {
+    NotaCredito nota = modelMapper.map(notaCreditoDTO, NotaCredito.class);
+    nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    nota.setProveedor(proveedorService.getProveedorPorId(idProveedor));
+    Factura factura = facturaService.getFacturaPorId(idFactura);
+    if (factura instanceof FacturaCompra
+      && ((FacturaCompra) factura).getIdProveedor() == idProveedor) {
+      nota.setFacturaCompra((FacturaCompra) factura);
+    } else {
+      throw new BusinessServiceException(
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_movimiento_no_valido"));
+    }
+    nota.setMovimiento(Movimiento.COMPRA);
+    nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
+    nota.setModificaStock(modificarStock);
+    return notaService.guardarNotaCredito(nota);
+  }
+
+  @PostMapping("/notas/credito/empresas/{idEmpresa}/usuarios/{idUsuario}/proveedores/{idProveedor}")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public Nota guardarNotaCreditoProveedor(
+    @RequestBody NotaCreditoDTO notaCreditoDTO,
+    @PathVariable long idEmpresa,
+    @PathVariable long idProveedor,
+    @PathVariable long idUsuario,
+    @RequestParam TipoDeComprobante tipoDeComprobante) {
+    NotaCredito nota = modelMapper.map(notaCreditoDTO, NotaCredito.class);
+    nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    nota.setProveedor(proveedorService.getProveedorPorId(idProveedor));
+    nota.setMovimiento(Movimiento.COMPRA);
+    nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
+    nota.setTipoComprobante(tipoDeComprobante);
+    nota.setModificaStock(false);
+    return notaService.guardarNotaCredito(nota);
+  }
+
+  @PostMapping(
+      "/notas/debito/empresas/{idEmpresa}/usuarios/{idUsuario}/clientes/{idCliente}/recibos/{idRecibo}")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public Nota guardarNotaDebitoCliente(
       @RequestBody NotaDebitoDTO notaDebitoDTO,
       @PathVariable long idEmpresa,
-      @RequestParam Movimiento movimiento,
-      @RequestParam(required = false) Long idCliente,
-      @RequestParam(required = false) Long idProveedor,
+      @PathVariable long idCliente,
       @PathVariable long idUsuario,
       @PathVariable long idRecibo) {
     NotaDebito nota = modelMapper.map(notaDebitoDTO, NotaDebito.class);
     nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    if (movimiento == Movimiento.VENTA && idCliente != null) {
-      nota.setCliente(clienteService.getClientePorId(idCliente));
-    } else if (movimiento == Movimiento.COMPRA && idProveedor != null) {
-      nota.setProveedor(proveedorService.getProveedorPorId(idProveedor));
-    } else {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_movimiento_no_valido"));
-    }
-    nota.setMovimiento(movimiento);
+    nota.setCliente(clienteService.getClientePorId(idCliente));
+    nota.setMovimiento(Movimiento.VENTA);
+    nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
+    nota.setRecibo(reciboService.getById(idRecibo));
+    return notaService.guardarNotaDebito(nota);
+  }
+
+  @PostMapping(
+    "/notas/debito/empresas/{idEmpresa}/usuarios/{idUsuario}/proveedores/{idProveedor}/recibos/{idRecibo}")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public Nota guardarNotaDebitoProveedor(
+    @RequestBody NotaDebitoDTO notaDebitoDTO,
+    @PathVariable long idEmpresa,
+    @PathVariable long idProveedor,
+    @PathVariable long idUsuario,
+    @PathVariable long idRecibo) {
+    NotaDebito nota = modelMapper.map(notaDebitoDTO, NotaDebito.class);
+    nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    nota.setProveedor(proveedorService.getProveedorPorId(idProveedor));
+    nota.setMovimiento(Movimiento.COMPRA);
     nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
     nota.setRecibo(reciboService.getById(idRecibo));
     return notaService.guardarNotaDebito(nota);
@@ -282,10 +348,7 @@ public class NotaController {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_PDF);
     Nota nota = notaService.getNotaPorId(idNota);
-    String fileName =
-        (nota instanceof NotaCredito)
-            ? "NotaCredito.pdf"
-            : (nota instanceof NotaDebito) ? "NotaDebito.pdf" : "Nota.pdf";
+    String fileName = (nota instanceof NotaCredito) ? "NotaCredito.pdf" : "NotaDebito.pdf";
     headers.add("content-disposition", "inline; filename=" + fileName);
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
     byte[] reportePDF = notaService.getReporteNota(nota);
@@ -310,7 +373,16 @@ public class NotaController {
       @RequestParam TipoDeComprobante tipoDeComprobante,
       @RequestParam BigDecimal[] cantidad,
       @RequestParam long[] idRenglonFactura) {
-    return notaService.calcularRenglonCredito(tipoDeComprobante, cantidad, idRenglonFactura);
+    return notaService.calcularRenglonCreditoProducto(tipoDeComprobante, cantidad, idRenglonFactura);
+  }
+
+  @GetMapping("/notas/renglon/credito")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public RenglonNotaCredito calcularRenglonNotaCredito(
+      @RequestParam TipoDeComprobante tipoDeComprobante,
+      @RequestParam String detalle,
+      @RequestParam BigDecimal monto) {
+    return notaService.calcularRenglonCredito(tipoDeComprobante, detalle, monto);
   }
 
   @GetMapping("/notas/renglon/debito/recibo/{idRecibo}")

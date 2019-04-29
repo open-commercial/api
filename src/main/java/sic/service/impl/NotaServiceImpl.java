@@ -488,19 +488,19 @@ public class NotaServiceImpl implements INotaService {
 
   private void validarNota(Nota nota) {
     if (nota instanceof NotaCredito && nota.getMovimiento().equals(Movimiento.VENTA)) {
-      if (nota.getFecha().compareTo(nota.getFacturaVenta().getFecha()) <= 0) {
-        throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_fecha_incorrecta"));
-      }
+//      if (nota.getFecha().compareTo(nota.getFacturaVenta().getFecha()) <= 0) {
+//        throw new BusinessServiceException(
+//            ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_fecha_incorrecta"));
+//      }
       if (nota.getCAE() != 0L) {
         throw new BusinessServiceException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_cliente_CAE"));
       }
     } else if (nota instanceof NotaCredito && nota.getMovimiento().equals(Movimiento.COMPRA)) {
-      if (nota.getFecha().compareTo(nota.getFacturaCompra().getFecha()) < 0) {
-        throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_fecha_incorrecta"));
-      }
+//      if (nota.getFecha().compareTo(nota.getFacturaCompra().getFecha()) < 0) {
+//        throw new BusinessServiceException(
+//            ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_fecha_incorrecta"));
+//      }
       if (nota.getFecha().compareTo(new Date()) > 0) {
         throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
           .getString("mensaje_nota_fecha_incorrecta"));
@@ -682,9 +682,11 @@ public class NotaServiceImpl implements INotaService {
     }
     this.validarNota(notaCredito);
     if (notaCredito.getMovimiento().equals(Movimiento.VENTA)) {
-      notaCredito.setTipoComprobante(
-          this.getTipoDeNotaCreditoSegunFactura(
-              notaCredito.getFacturaVenta().getTipoComprobante()));
+      if (notaCredito.getFacturaVenta() != null) {
+        notaCredito.setTipoComprobante(
+            this.getTipoDeNotaCreditoSegunFactura(
+                notaCredito.getFacturaVenta().getTipoComprobante()));
+      }
       notaCredito.setSerie(
           configuracionDelSistemaService
               .getConfiguracionDelSistemaPorEmpresa(notaCredito.getEmpresa())
@@ -692,7 +694,8 @@ public class NotaServiceImpl implements INotaService {
       notaCredito.setNroNota(
           this.getSiguienteNumeroNotaCreditoCliente(
               notaCredito.getIdEmpresa(), notaCredito.getTipoComprobante()));
-    } else if (notaCredito.getMovimiento().equals(Movimiento.COMPRA)) {
+    } else if (notaCredito.getMovimiento().equals(Movimiento.COMPRA)
+        && notaCredito.getFacturaCompra() != null) {
       notaCredito.setTipoComprobante(
           this.getTipoDeNotaCreditoSegunFactura(
               notaCredito.getFacturaCompra().getTipoComprobante()));
@@ -948,7 +951,7 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
-  public List<RenglonNotaCredito> calcularRenglonCredito(
+  public List<RenglonNotaCredito> calcularRenglonCreditoProducto(
       TipoDeComprobante tipo, BigDecimal[] cantidad, long[] idRenglonFactura) {
     List<RenglonNotaCredito> renglonesNota = new ArrayList<>();
     RenglonNotaCredito renglonNota;
@@ -1010,6 +1013,47 @@ public class NotaServiceImpl implements INotaService {
       }
     }
     return renglonesNota;
+  }
+
+  @Override
+  public RenglonNotaCredito calcularRenglonCredito(TipoDeComprobante tipo, String detalle, BigDecimal monto) {
+    RenglonNotaCredito renglonNota = new RenglonNotaCredito();
+    renglonNota.setIdProductoItem(null);
+    renglonNota.setCodigoItem(null);
+    renglonNota.setDescripcionItem(detalle);
+    renglonNota.setMedidaItem(null);
+    renglonNota.setCantidad(BigDecimal.ONE);
+    BigDecimal subTotal = monto.multiply(new BigDecimal("100")).divide(new BigDecimal("121"), 15, RoundingMode.HALF_UP);
+    renglonNota.setPrecioUnitario(
+        (tipo == TipoDeComprobante.FACTURA_B || tipo == TipoDeComprobante.PRESUPUESTO)
+            ? monto
+            : subTotal);
+    renglonNota.setDescuentoPorcentaje(BigDecimal.ZERO);
+    renglonNota.setDescuentoNeto(BigDecimal.ZERO);
+    renglonNota.setGananciaPorcentaje(BigDecimal.ZERO);
+    renglonNota.setGananciaNeto(BigDecimal.ZERO);
+    renglonNota.setIvaPorcentaje(
+        (tipo == TipoDeComprobante.FACTURA_A
+                || tipo == TipoDeComprobante.FACTURA_B
+                || tipo == TipoDeComprobante.PRESUPUESTO)
+            ? new BigDecimal("21")
+            : BigDecimal.ZERO);
+    renglonNota.setIvaNeto(monto.subtract(subTotal));
+    renglonNota.setImporte(
+        (tipo == TipoDeComprobante.FACTURA_B || tipo == TipoDeComprobante.PRESUPUESTO)
+            ? monto
+            : subTotal);
+    renglonNota.setImporteBruto(
+        (tipo == TipoDeComprobante.FACTURA_B || tipo == TipoDeComprobante.PRESUPUESTO)
+            ? monto
+            : subTotal);
+    renglonNota.setImporteNeto(monto);
+//    if (tipo == TipoDeComprobante.FACTURA_B || tipo == TipoDeComprobante.PRESUPUESTO) {
+//      renglonNota.setImporteNeto(monto);
+//    } else {
+//      renglonNota.setImporteNeto(renglonNota.getImporteBruto().add(renglonNota.getIvaNeto()));
+//    }
+    return renglonNota;
   }
 
   @Override
