@@ -3,6 +3,7 @@ package sic.controller;
 import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import io.jsonwebtoken.Claims;
@@ -304,13 +305,12 @@ public class NotaController {
     return notaService.getIvaNetoNota(idNota);
   }
 
-  @GetMapping("/notas/renglon/credito/producto")
+  @PostMapping("/notas/renglon/credito/producto")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public List<RenglonNotaCredito> calcularRenglonNotaCreditoProducto(
-      @RequestParam TipoDeComprobante tipoDeComprobante,
-      @RequestParam BigDecimal[] cantidad,
-      @RequestParam long[] idRenglonFactura) {
-    return notaService.calcularRenglonCredito(tipoDeComprobante, cantidad, idRenglonFactura);
+      @RequestBody Map<Long, BigDecimal> idsYCantidades,
+      @RequestParam TipoDeComprobante tipoDeComprobante) {
+    return notaService.calcularRenglonCredito(tipoDeComprobante, idsYCantidades);
   }
 
   @GetMapping("/notas/renglon/debito/recibo/{idRecibo}")

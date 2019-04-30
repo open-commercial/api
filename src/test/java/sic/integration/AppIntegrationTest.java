@@ -305,15 +305,16 @@ class AppIntegrationTest {
           })
         .getBody()
         .getContent();
+    Map<Long, BigDecimal> idsDeRenglonesAndCantidades = new HashMap<>();
+    idsDeRenglonesAndCantidades.put(1L, new BigDecimal("5"));
     List<RenglonNotaCredito> renglonesNotaCredito =
       Arrays.asList(
-        restTemplate.getForObject(
+        restTemplate.postForObject(
           apiPrefix
             + "/notas/renglon/credito/producto?"
             + "tipoDeComprobante="
-            + facturasRecuperadas.get(0).getTipoComprobante().name()
-            + "&cantidad=5"
-            + "&idRenglonFactura=1",
+            + facturasRecuperadas.get(0).getTipoComprobante().name(),
+          idsDeRenglonesAndCantidades,
           RenglonNotaCredito[].class));
     NotaCreditoDTO notaCredito = NotaCreditoDTO.builder().build();
     notaCredito.setRenglonesNotaCredito(renglonesNotaCredito);
@@ -453,15 +454,16 @@ class AppIntegrationTest {
   }
 
   private void crearNotaCreditoParaProveedor() {
+    Map<Long, BigDecimal> idsDeRenglonesAndCantidades = new HashMap<>();
+    idsDeRenglonesAndCantidades.put(3L, new BigDecimal("5"));
     List<RenglonNotaCredito> renglonesNotaCredito =
       Arrays.asList(
-        restTemplate.getForObject(
+        restTemplate.postForObject(
           apiPrefix
             + "/notas/renglon/credito/producto?"
             + "tipoDeComprobante="
-            + TipoDeComprobante.FACTURA_B
-            + "&cantidad=5"
-            + "&idRenglonFactura=3",
+            + TipoDeComprobante.FACTURA_B,
+          idsDeRenglonesAndCantidades,
           RenglonNotaCredito[].class));
     NotaCreditoDTO notaCreditoProveedor = NotaCreditoDTO.builder().build();
     notaCreditoProveedor.setRenglonesNotaCredito(renglonesNotaCredito);
@@ -3549,15 +3551,16 @@ class AppIntegrationTest {
           })
         .getBody()
         .getContent();
+    Map<Long, BigDecimal> idsDeRenglonesAndCantidades = new HashMap<>();
+    idsDeRenglonesAndCantidades.put(1L, new BigDecimal("5"));
     List<RenglonNotaCredito> renglonesNotaCredito =
       Arrays.asList(
-        restTemplate.getForObject(
+        restTemplate.postForObject(
           apiPrefix
             + "/notas/renglon/credito/producto?"
             + "tipoDeComprobante="
-            + facturasRecuperadas.get(0).getTipoComprobante().name()
-            + "&cantidad=5"
-            + "&idRenglonFactura=1",
+            + facturasRecuperadas.get(0).getTipoComprobante().name(),
+          idsDeRenglonesAndCantidades,
           RenglonNotaCredito[].class));
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     NotaCreditoDTO notaCredito = NotaCreditoDTO.builder().build();
@@ -3678,16 +3681,17 @@ class AppIntegrationTest {
   @Test
   void shouldCrearNotaCreditoCompra() {
     this.shouldCrearFacturaCompraB();
+    Map<Long, BigDecimal> idsDeRenglonesAndCantidades = new HashMap<>();
+    idsDeRenglonesAndCantidades.put(1L, new BigDecimal("3"));
     List<RenglonNotaCredito> renglonesNotaCredito =
-      Arrays.asList(
-        restTemplate.getForObject(
-          apiPrefix
-            + "/notas/renglon/credito/producto?"
-            + "tipoDeComprobante="
-            + TipoDeComprobante.FACTURA_B
-            + "&cantidad=3"
-            + "&idRenglonFactura=1",
-          RenglonNotaCredito[].class));
+        Arrays.asList(
+            restTemplate.postForObject(
+                apiPrefix
+                    + "/notas/renglon/credito/producto?"
+                    + "tipoDeComprobante="
+                    + TipoDeComprobante.FACTURA_B,
+                idsDeRenglonesAndCantidades,
+                RenglonNotaCredito[].class));
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     NotaCreditoDTO notaCreditoProveedor = NotaCreditoDTO.builder().build();
     notaCreditoProveedor.setTipoComprobante(TipoDeComprobante.NOTA_CREDITO_B);
@@ -3696,11 +3700,11 @@ class AppIntegrationTest {
     notaCreditoProveedor.setFecha(new Date());
     notaCreditoProveedor.setModificaStock(true);
     notaCreditoProveedor.setSubTotal(
-      restTemplate.getForObject(
-        apiPrefix
-          + "/notas/credito/sub-total?importe="
-          + renglonesNotaCredito.get(0).getImporteNeto(),
-        BigDecimal.class));
+        restTemplate.getForObject(
+            apiPrefix
+                + "/notas/credito/sub-total?importe="
+                + renglonesNotaCredito.get(0).getImporteNeto(),
+            BigDecimal.class));
     notaCreditoProveedor.setRecargoPorcentaje(BigDecimal.TEN);
     notaCreditoProveedor.setRecargoNeto(
       restTemplate.getForObject(
