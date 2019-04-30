@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
+import sic.modelo.dto.RenglonesDeFacturaParaNotaCreditoDTO;
 
 public interface INotaService {
 
@@ -47,8 +48,7 @@ public interface INotaService {
 
   BigDecimal getIvaNetoNota(Long idNota);
 
-  List<RenglonNotaCredito> calcularRenglonCredito(
-      TipoDeComprobante tipo, Map<Long, BigDecimal> idsYCantidades);
+  List<RenglonNotaCredito> calcularRenglonCredito(RenglonesDeFacturaParaNotaCreditoDTO renglonesDeFacturaParaNotaCreditoDTO);
 
   List<RenglonNotaDebito> calcularRenglonDebito(
       long idRecibo, BigDecimal monto, BigDecimal ivaPorcentaje);

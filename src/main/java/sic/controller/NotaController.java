@@ -22,6 +22,7 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.dto.NotaCreditoDTO;
 import sic.modelo.dto.NotaDebitoDTO;
+import sic.modelo.dto.RenglonesDeFacturaParaNotaCreditoDTO;
 import sic.service.*;
 
 @RestController
@@ -308,9 +309,8 @@ public class NotaController {
   @PostMapping("/notas/renglon/credito/producto")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public List<RenglonNotaCredito> calcularRenglonNotaCreditoProducto(
-      @RequestBody Map<Long, BigDecimal> idsYCantidades,
-      @RequestParam TipoDeComprobante tipoDeComprobante) {
-    return notaService.calcularRenglonCredito(tipoDeComprobante, idsYCantidades);
+    @RequestBody RenglonesDeFacturaParaNotaCreditoDTO renglonesDeFacturaParaNotaCreditoDTO) {
+    return notaService.calcularRenglonCredito(renglonesDeFacturaParaNotaCreditoDTO);
   }
 
   @GetMapping("/notas/renglon/debito/recibo/{idRecibo}")

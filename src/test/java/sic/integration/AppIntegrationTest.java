@@ -307,14 +307,17 @@ class AppIntegrationTest {
         .getContent();
     Map<Long, BigDecimal> idsDeRenglonesAndCantidades = new HashMap<>();
     idsDeRenglonesAndCantidades.put(1L, new BigDecimal("5"));
+    RenglonesDeFacturaParaNotaCreditoDTO renglonesDeFacturaParaNotaCreditoDTO =
+      RenglonesDeFacturaParaNotaCreditoDTO.builder()
+        .idsYCantidades(idsDeRenglonesAndCantidades)
+        .tipoDeComprobante(facturasRecuperadas.get(0).getTipoComprobante())
+        .build();
     List<RenglonNotaCredito> renglonesNotaCredito =
       Arrays.asList(
         restTemplate.postForObject(
           apiPrefix
-            + "/notas/renglon/credito/producto?"
-            + "tipoDeComprobante="
-            + facturasRecuperadas.get(0).getTipoComprobante().name(),
-          idsDeRenglonesAndCantidades,
+            + "/notas/renglon/credito/producto",
+          renglonesDeFacturaParaNotaCreditoDTO,
           RenglonNotaCredito[].class));
     NotaCreditoDTO notaCredito = NotaCreditoDTO.builder().build();
     notaCredito.setRenglonesNotaCredito(renglonesNotaCredito);
@@ -456,14 +459,17 @@ class AppIntegrationTest {
   private void crearNotaCreditoParaProveedor() {
     Map<Long, BigDecimal> idsDeRenglonesAndCantidades = new HashMap<>();
     idsDeRenglonesAndCantidades.put(3L, new BigDecimal("5"));
+    RenglonesDeFacturaParaNotaCreditoDTO renglonesDeFacturaParaNotaCreditoDTO =
+      RenglonesDeFacturaParaNotaCreditoDTO.builder()
+        .idsYCantidades(idsDeRenglonesAndCantidades)
+        .tipoDeComprobante(TipoDeComprobante.FACTURA_B)
+        .build();
     List<RenglonNotaCredito> renglonesNotaCredito =
       Arrays.asList(
         restTemplate.postForObject(
           apiPrefix
-            + "/notas/renglon/credito/producto?"
-            + "tipoDeComprobante="
-            + TipoDeComprobante.FACTURA_B,
-          idsDeRenglonesAndCantidades,
+            + "/notas/renglon/credito/producto",
+          renglonesDeFacturaParaNotaCreditoDTO,
           RenglonNotaCredito[].class));
     NotaCreditoDTO notaCreditoProveedor = NotaCreditoDTO.builder().build();
     notaCreditoProveedor.setRenglonesNotaCredito(renglonesNotaCredito);
@@ -3553,14 +3559,17 @@ class AppIntegrationTest {
         .getContent();
     Map<Long, BigDecimal> idsDeRenglonesAndCantidades = new HashMap<>();
     idsDeRenglonesAndCantidades.put(1L, new BigDecimal("5"));
+    RenglonesDeFacturaParaNotaCreditoDTO renglonesDeFacturaParaNotaCreditoDTO =
+      RenglonesDeFacturaParaNotaCreditoDTO.builder()
+        .idsYCantidades(idsDeRenglonesAndCantidades)
+        .tipoDeComprobante(TipoDeComprobante.FACTURA_B)
+        .build();
     List<RenglonNotaCredito> renglonesNotaCredito =
       Arrays.asList(
         restTemplate.postForObject(
           apiPrefix
-            + "/notas/renglon/credito/producto?"
-            + "tipoDeComprobante="
-            + facturasRecuperadas.get(0).getTipoComprobante().name(),
-          idsDeRenglonesAndCantidades,
+            + "/notas/renglon/credito/producto",
+          renglonesDeFacturaParaNotaCreditoDTO,
           RenglonNotaCredito[].class));
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     NotaCreditoDTO notaCredito = NotaCreditoDTO.builder().build();
@@ -3683,15 +3692,18 @@ class AppIntegrationTest {
     this.shouldCrearFacturaCompraB();
     Map<Long, BigDecimal> idsDeRenglonesAndCantidades = new HashMap<>();
     idsDeRenglonesAndCantidades.put(1L, new BigDecimal("3"));
+    RenglonesDeFacturaParaNotaCreditoDTO renglonesDeFacturaParaNotaCreditoDTO =
+      RenglonesDeFacturaParaNotaCreditoDTO.builder()
+        .idsYCantidades(idsDeRenglonesAndCantidades)
+        .tipoDeComprobante(TipoDeComprobante.FACTURA_B)
+        .build();
     List<RenglonNotaCredito> renglonesNotaCredito =
-        Arrays.asList(
-            restTemplate.postForObject(
-                apiPrefix
-                    + "/notas/renglon/credito/producto?"
-                    + "tipoDeComprobante="
-                    + TipoDeComprobante.FACTURA_B,
-                idsDeRenglonesAndCantidades,
-                RenglonNotaCredito[].class));
+      Arrays.asList(
+        restTemplate.postForObject(
+          apiPrefix
+            + "/notas/renglon/credito/producto",
+          renglonesDeFacturaParaNotaCreditoDTO,
+          RenglonNotaCredito[].class));
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     NotaCreditoDTO notaCreditoProveedor = NotaCreditoDTO.builder().build();
     notaCreditoProveedor.setTipoComprobante(TipoDeComprobante.NOTA_CREDITO_B);

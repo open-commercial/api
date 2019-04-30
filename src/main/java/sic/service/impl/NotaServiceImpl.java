@@ -23,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
+import sic.modelo.dto.RenglonesDeFacturaParaNotaCreditoDTO;
 import sic.repository.NotaCreditoRepository;
 import sic.repository.NotaDebitoRepository;
 import sic.service.*;
@@ -948,77 +949,76 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
-  public List<RenglonNotaCredito> calcularRenglonCredito(
-      TipoDeComprobante tipo, Map<Long, BigDecimal> idsRenglonesAndCantidades) {
+  public List<RenglonNotaCredito> calcularRenglonCredito(RenglonesDeFacturaParaNotaCreditoDTO renglonesDeFacturaParaNotaCreditoDTO) {
     List<RenglonNotaCredito> renglonesNota = new ArrayList<>();
-    idsRenglonesAndCantidades
-        .keySet()
-        .forEach(
-            idRenglonFactura -> {
-              RenglonNotaCredito renglonNota;
-              RenglonFactura renglonFactura = facturaService.getRenglonFactura(idRenglonFactura);
-              if (renglonFactura.getCantidad().compareTo(idsRenglonesAndCantidades.get(idRenglonFactura)) < 0
-                  || idsRenglonesAndCantidades.get(idRenglonFactura).compareTo(BigDecimal.ZERO) < 0) {
-                throw new BusinessServiceException(
-                    ResourceBundle.getBundle("Mensajes")
-                            .getString("mensaje_nota_de_credito_cantidad_no_valida")
-                        + " "
-                        + renglonFactura.getDescripcionItem());
-              }
-              renglonNota = new RenglonNotaCredito();
-              renglonNota.setIdProductoItem(renglonFactura.getIdProductoItem());
-              renglonNota.setCodigoItem(renglonFactura.getCodigoItem());
-              renglonNota.setDescripcionItem(renglonFactura.getDescripcionItem());
-              renglonNota.setMedidaItem(renglonFactura.getMedidaItem());
-              renglonNota.setCantidad(idsRenglonesAndCantidades.get(idRenglonFactura));
-              renglonNota.setPrecioUnitario(renglonFactura.getPrecioUnitario());
-              renglonNota.setDescuentoPorcentaje(renglonFactura.getDescuentoPorcentaje());
-              renglonNota.setDescuentoNeto(
-                  renglonFactura
-                      .getDescuentoPorcentaje()
-                      .divide(CIEN, 15, RoundingMode.HALF_UP)
-                      .multiply(renglonNota.getPrecioUnitario()));
-              renglonNota.setGananciaPorcentaje(renglonFactura.getGananciaPorcentaje());
-              renglonNota.setGananciaNeto(
+    renglonesDeFacturaParaNotaCreditoDTO.getIdsYCantidades()
+      .keySet()
+      .forEach(
+        idRenglonFactura -> {
+          RenglonNotaCredito renglonNota;
+          RenglonFactura renglonFactura = facturaService.getRenglonFactura(idRenglonFactura);
+          if (renglonFactura.getCantidad().compareTo(renglonesDeFacturaParaNotaCreditoDTO.getIdsYCantidades().get(idRenglonFactura)) < 0
+            || renglonesDeFacturaParaNotaCreditoDTO.getIdsYCantidades().get(idRenglonFactura).compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessServiceException(
+              ResourceBundle.getBundle("Mensajes")
+                .getString("mensaje_nota_de_credito_cantidad_no_valida")
+                + " "
+                + renglonFactura.getDescripcionItem());
+          }
+          renglonNota = new RenglonNotaCredito();
+          renglonNota.setIdProductoItem(renglonFactura.getIdProductoItem());
+          renglonNota.setCodigoItem(renglonFactura.getCodigoItem());
+          renglonNota.setDescripcionItem(renglonFactura.getDescripcionItem());
+          renglonNota.setMedidaItem(renglonFactura.getMedidaItem());
+          renglonNota.setCantidad(renglonesDeFacturaParaNotaCreditoDTO.getIdsYCantidades().get(idRenglonFactura));
+          renglonNota.setPrecioUnitario(renglonFactura.getPrecioUnitario());
+          renglonNota.setDescuentoPorcentaje(renglonFactura.getDescuentoPorcentaje());
+          renglonNota.setDescuentoNeto(
+            renglonFactura
+              .getDescuentoPorcentaje()
+              .divide(CIEN, 15, RoundingMode.HALF_UP)
+              .multiply(renglonNota.getPrecioUnitario()));
+          renglonNota.setGananciaPorcentaje(renglonFactura.getGananciaPorcentaje());
+          renglonNota.setGananciaNeto(
+            renglonNota
+              .getGananciaPorcentaje()
+              .divide(CIEN, 15, RoundingMode.HALF_UP)
+              .multiply(renglonNota.getPrecioUnitario()));
+          renglonNota.setIvaPorcentaje(renglonFactura.getIvaPorcentaje());
+          if (renglonesDeFacturaParaNotaCreditoDTO.getTipoDeComprobante().equals(TipoDeComprobante.FACTURA_Y)) {
+            renglonNota.setIvaPorcentaje(
+              renglonFactura
+                .getIvaPorcentaje()
+                .divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP));
+          }
+          renglonNota.setIvaNeto(
+            (renglonesDeFacturaParaNotaCreditoDTO.getTipoDeComprobante() == TipoDeComprobante.FACTURA_A
+              || renglonesDeFacturaParaNotaCreditoDTO.getTipoDeComprobante() == TipoDeComprobante.FACTURA_B
+              || renglonesDeFacturaParaNotaCreditoDTO.getTipoDeComprobante() == TipoDeComprobante.PRESUPUESTO)
+              ? renglonFactura.getIvaNeto()
+              : BigDecimal.ZERO);
+          renglonNota.setImporte(
+            renglonNota.getPrecioUnitario().multiply(renglonesDeFacturaParaNotaCreditoDTO.getIdsYCantidades().get(idRenglonFactura)));
+          renglonNota.setImporteBruto(
+            renglonNota
+              .getImporte()
+              .subtract(
+                renglonNota
+                  .getDescuentoNeto()
+                  .multiply(renglonesDeFacturaParaNotaCreditoDTO.getIdsYCantidades().get(idRenglonFactura))));
+          if (renglonesDeFacturaParaNotaCreditoDTO.getTipoDeComprobante() == TipoDeComprobante.FACTURA_B || renglonesDeFacturaParaNotaCreditoDTO.getTipoDeComprobante() == TipoDeComprobante.PRESUPUESTO) {
+            renglonNota.setImporteNeto(renglonNota.getImporteBruto());
+          } else {
+            renglonNota.setImporteNeto(
+              renglonNota
+                .getImporteBruto()
+                .add(
                   renglonNota
-                      .getGananciaPorcentaje()
-                      .divide(CIEN, 15, RoundingMode.HALF_UP)
-                      .multiply(renglonNota.getPrecioUnitario()));
-              renglonNota.setIvaPorcentaje(renglonFactura.getIvaPorcentaje());
-              if (tipo.equals(TipoDeComprobante.FACTURA_Y)) {
-                renglonNota.setIvaPorcentaje(
-                    renglonFactura
-                        .getIvaPorcentaje()
-                        .divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP));
-              }
-              renglonNota.setIvaNeto(
-                  (tipo == TipoDeComprobante.FACTURA_A
-                          || tipo == TipoDeComprobante.FACTURA_B
-                          || tipo == TipoDeComprobante.PRESUPUESTO)
-                      ? renglonFactura.getIvaNeto()
-                      : BigDecimal.ZERO);
-              renglonNota.setImporte(
-                  renglonNota.getPrecioUnitario().multiply(idsRenglonesAndCantidades.get(idRenglonFactura)));
-              renglonNota.setImporteBruto(
-                  renglonNota
-                      .getImporte()
-                      .subtract(
-                          renglonNota
-                              .getDescuentoNeto()
-                              .multiply(idsRenglonesAndCantidades.get(idRenglonFactura))));
-              if (tipo == TipoDeComprobante.FACTURA_B || tipo == TipoDeComprobante.PRESUPUESTO) {
-                renglonNota.setImporteNeto(renglonNota.getImporteBruto());
-              } else {
-                renglonNota.setImporteNeto(
-                    renglonNota
-                        .getImporteBruto()
-                        .add(
-                            renglonNota
-                                .getIvaNeto()
-                                .multiply(idsRenglonesAndCantidades.get(idRenglonFactura))));
-              }
-              renglonesNota.add(renglonNota);
-            });
+                    .getIvaNeto()
+                    .multiply(renglonesDeFacturaParaNotaCreditoDTO.getIdsYCantidades().get(idRenglonFactura))));
+          }
+          renglonesNota.add(renglonNota);
+        });
     return renglonesNota;
   }
 
