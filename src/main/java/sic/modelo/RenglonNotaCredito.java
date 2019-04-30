@@ -39,7 +39,6 @@ public class RenglonNotaCredito implements Serializable {
     @NotNull(message = "{mensaje_renglon_credito_vacio_descripcion}")
     private String descripcionItem;
 
-   // @NotNull(message = "{mensaje_renglon_credito_vacio_medida}")
     private String medidaItem;
         
     @Column(precision = 25, scale = 15)

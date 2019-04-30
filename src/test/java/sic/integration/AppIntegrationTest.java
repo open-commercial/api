@@ -3670,7 +3670,7 @@ class AppIntegrationTest {
             apiPrefix
                 + "/notas/renglon/credito?"
                 + "tipoDeComprobante="
-                + TipoDeComprobante.FACTURA_A
+                + TipoDeComprobante.NOTA_CREDITO_A
                 + "&detalle=RenglonNotaCredito"
                 + "&monto=1000",
             RenglonNotaCredito.class);
@@ -3899,7 +3899,7 @@ class AppIntegrationTest {
         apiPrefix
           + "/notas/renglon/credito?"
           + "tipoDeComprobante="
-          + TipoDeComprobante.FACTURA_B
+          + TipoDeComprobante.NOTA_CREDITO_B
           + "&detalle=RenglonNotaCredito"
           + "&monto=1000",
         RenglonNotaCredito.class);

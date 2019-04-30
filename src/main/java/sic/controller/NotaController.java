@@ -146,7 +146,7 @@ public class NotaController {
 
   @GetMapping("/notas/tipos/empresas/{idEmpresa}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public TipoDeComprobante[] getTipoNotaCredito(@PathVariable long idEmpresa) {
+  public TipoDeComprobante[] getTipoNotaCreditoEmpresa(@PathVariable long idEmpresa) {
     return notaService.getTiposNota(empresaService.getEmpresaPorId(idEmpresa));
   }
 
@@ -174,7 +174,7 @@ public class NotaController {
     return notaService.existsNotaDebitoPorRecibo(reciboService.getById(idRecibo));
   }
 
-  @GetMapping("/notas/tipos")
+  @GetMapping("/notas/tipos/credito")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -182,9 +182,22 @@ public class NotaController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public TipoDeComprobante[] getTipoNota(
+  public TipoDeComprobante[] getTipoNotaCreditoCliente(
       @RequestParam long idCliente, @RequestParam long idEmpresa) {
-    return notaService.getTipoNotaCliente(idCliente, idEmpresa);
+    return notaService.getTipoNotaCreditoCliente(idCliente, idEmpresa);
+  }
+
+  @GetMapping("/notas/tipos/debito")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public TipoDeComprobante[] getTipoNotaDebitoCliente(
+    @RequestParam long idCliente, @RequestParam long idEmpresa) {
+    return notaService.getTipoNotaDebitoCliente(idCliente, idEmpresa);
   }
 
   @GetMapping("/notas/renglones/credito/{idNotaCredito}")
@@ -244,14 +257,12 @@ public class NotaController {
     @RequestBody NotaCreditoDTO notaCreditoDTO,
     @PathVariable long idEmpresa,
     @PathVariable long idCliente,
-    @PathVariable long idUsuario,
-    @RequestParam TipoDeComprobante tipoDeComprobante) {
+    @PathVariable long idUsuario) {
     NotaCredito nota = modelMapper.map(notaCreditoDTO, NotaCredito.class);
     nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     nota.setCliente(clienteService.getClientePorId(idCliente));
     nota.setMovimiento(Movimiento.VENTA);
     nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    nota.setTipoComprobante(tipoDeComprobante);
     nota.setModificaStock(false);
     return notaService.guardarNotaCredito(nota);
   }
@@ -288,14 +299,12 @@ public class NotaController {
     @RequestBody NotaCreditoDTO notaCreditoDTO,
     @PathVariable long idEmpresa,
     @PathVariable long idProveedor,
-    @PathVariable long idUsuario,
-    @RequestParam TipoDeComprobante tipoDeComprobante) {
+    @PathVariable long idUsuario) {
     NotaCredito nota = modelMapper.map(notaCreditoDTO, NotaCredito.class);
     nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     nota.setProveedor(proveedorService.getProveedorPorId(idProveedor));
     nota.setMovimiento(Movimiento.COMPRA);
     nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    nota.setTipoComprobante(tipoDeComprobante);
     nota.setModificaStock(false);
     return notaService.guardarNotaCredito(nota);
   }
