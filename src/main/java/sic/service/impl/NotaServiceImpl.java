@@ -951,74 +951,68 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public List<RenglonNotaCredito> calcularRenglonCredito(RenglonesDeFacturaParaNotaCreditoDTO renglonesDeFacturaParaNotaCreditoDTO) {
     List<RenglonNotaCredito> renglonesNota = new ArrayList<>();
-    renglonesDeFacturaParaNotaCreditoDTO.getIdsYCantidades()
-      .keySet()
-      .forEach(
-        idRenglonFactura -> {
-          RenglonNotaCredito renglonNota;
-          RenglonFactura renglonFactura = facturaService.getRenglonFactura(idRenglonFactura);
-          if (renglonFactura.getCantidad().compareTo(renglonesDeFacturaParaNotaCreditoDTO.getIdsYCantidades().get(idRenglonFactura)) < 0
-            || renglonesDeFacturaParaNotaCreditoDTO.getIdsYCantidades().get(idRenglonFactura).compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessServiceException(
-              ResourceBundle.getBundle("Mensajes")
-                .getString("mensaje_nota_de_credito_cantidad_no_valida")
-                + " "
-                + renglonFactura.getDescripcionItem());
-          }
-          renglonNota = new RenglonNotaCredito();
-          renglonNota.setIdProductoItem(renglonFactura.getIdProductoItem());
-          renglonNota.setCodigoItem(renglonFactura.getCodigoItem());
-          renglonNota.setDescripcionItem(renglonFactura.getDescripcionItem());
-          renglonNota.setMedidaItem(renglonFactura.getMedidaItem());
-          renglonNota.setCantidad(renglonesDeFacturaParaNotaCreditoDTO.getIdsYCantidades().get(idRenglonFactura));
-          renglonNota.setPrecioUnitario(renglonFactura.getPrecioUnitario());
-          renglonNota.setDescuentoPorcentaje(renglonFactura.getDescuentoPorcentaje());
-          renglonNota.setDescuentoNeto(
+    RenglonNotaCredito renglonNota;
+    if (renglonesDeFacturaParaNotaCreditoDTO.getCantidades().length == renglonesDeFacturaParaNotaCreditoDTO.getIdsRenglonesFactura().length) {
+      for (int i = 0; i < renglonesDeFacturaParaNotaCreditoDTO.getIdsRenglonesFactura().length; i++) {
+        RenglonFactura renglonFactura = facturaService.getRenglonFactura(renglonesDeFacturaParaNotaCreditoDTO.getIdsRenglonesFactura()[i]);
+        if (renglonFactura.getCantidad().compareTo(renglonesDeFacturaParaNotaCreditoDTO.getCantidades()[i]) < 0
+          || renglonesDeFacturaParaNotaCreditoDTO.getCantidades()[i].compareTo(BigDecimal.ZERO) < 0) {
+          throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_nota_de_credito_cantidad_no_valida")
+              + " "
+              + renglonFactura.getDescripcionItem());
+        }
+        renglonNota = new RenglonNotaCredito();
+        renglonNota.setIdProductoItem(renglonFactura.getIdProductoItem());
+        renglonNota.setCodigoItem(renglonFactura.getCodigoItem());
+        renglonNota.setDescripcionItem(renglonFactura.getDescripcionItem());
+        renglonNota.setMedidaItem(renglonFactura.getMedidaItem());
+        renglonNota.setCantidad(renglonesDeFacturaParaNotaCreditoDTO.getCantidades()[i]);
+        renglonNota.setPrecioUnitario(renglonFactura.getPrecioUnitario());
+        renglonNota.setDescuentoPorcentaje(renglonFactura.getDescuentoPorcentaje());
+        renglonNota.setDescuentoNeto(
+          renglonFactura
+            .getDescuentoPorcentaje()
+            .divide(CIEN, 15, RoundingMode.HALF_UP)
+            .multiply(renglonNota.getPrecioUnitario()));
+        renglonNota.setGananciaPorcentaje(renglonFactura.getGananciaPorcentaje());
+        renglonNota.setGananciaNeto(
+          renglonNota
+            .getGananciaPorcentaje()
+            .divide(CIEN, 15, RoundingMode.HALF_UP)
+            .multiply(renglonNota.getPrecioUnitario()));
+        renglonNota.setIvaPorcentaje(renglonFactura.getIvaPorcentaje());
+        if (renglonesDeFacturaParaNotaCreditoDTO.getTipoDeComprobante().equals(TipoDeComprobante.FACTURA_Y)) {
+          renglonNota.setIvaPorcentaje(
             renglonFactura
-              .getDescuentoPorcentaje()
-              .divide(CIEN, 15, RoundingMode.HALF_UP)
-              .multiply(renglonNota.getPrecioUnitario()));
-          renglonNota.setGananciaPorcentaje(renglonFactura.getGananciaPorcentaje());
-          renglonNota.setGananciaNeto(
-            renglonNota
-              .getGananciaPorcentaje()
-              .divide(CIEN, 15, RoundingMode.HALF_UP)
-              .multiply(renglonNota.getPrecioUnitario()));
-          renglonNota.setIvaPorcentaje(renglonFactura.getIvaPorcentaje());
-          if (renglonesDeFacturaParaNotaCreditoDTO.getTipoDeComprobante().equals(TipoDeComprobante.FACTURA_Y)) {
-            renglonNota.setIvaPorcentaje(
-              renglonFactura
-                .getIvaPorcentaje()
-                .divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP));
-          }
-          renglonNota.setIvaNeto(
-            (renglonesDeFacturaParaNotaCreditoDTO.getTipoDeComprobante() == TipoDeComprobante.FACTURA_A
-              || renglonesDeFacturaParaNotaCreditoDTO.getTipoDeComprobante() == TipoDeComprobante.FACTURA_B
-              || renglonesDeFacturaParaNotaCreditoDTO.getTipoDeComprobante() == TipoDeComprobante.PRESUPUESTO)
-              ? renglonFactura.getIvaNeto()
-              : BigDecimal.ZERO);
-          renglonNota.setImporte(
-            renglonNota.getPrecioUnitario().multiply(renglonesDeFacturaParaNotaCreditoDTO.getIdsYCantidades().get(idRenglonFactura)));
-          renglonNota.setImporteBruto(
-            renglonNota
-              .getImporte()
-              .subtract(
-                renglonNota
-                  .getDescuentoNeto()
-                  .multiply(renglonesDeFacturaParaNotaCreditoDTO.getIdsYCantidades().get(idRenglonFactura))));
-          if (renglonesDeFacturaParaNotaCreditoDTO.getTipoDeComprobante() == TipoDeComprobante.FACTURA_B || renglonesDeFacturaParaNotaCreditoDTO.getTipoDeComprobante() == TipoDeComprobante.PRESUPUESTO) {
-            renglonNota.setImporteNeto(renglonNota.getImporteBruto());
-          } else {
-            renglonNota.setImporteNeto(
-              renglonNota
-                .getImporteBruto()
-                .add(
-                  renglonNota
-                    .getIvaNeto()
-                    .multiply(renglonesDeFacturaParaNotaCreditoDTO.getIdsYCantidades().get(idRenglonFactura))));
-          }
-          renglonesNota.add(renglonNota);
-        });
+              .getIvaPorcentaje()
+              .divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP));
+        }
+        renglonNota.setIvaNeto(
+          (renglonesDeFacturaParaNotaCreditoDTO.getTipoDeComprobante() == TipoDeComprobante.FACTURA_A
+            || renglonesDeFacturaParaNotaCreditoDTO.getTipoDeComprobante() == TipoDeComprobante.FACTURA_B
+            || renglonesDeFacturaParaNotaCreditoDTO.getTipoDeComprobante() == TipoDeComprobante.PRESUPUESTO)
+            ? renglonFactura.getIvaNeto()
+            : BigDecimal.ZERO);
+        renglonNota.setImporte(renglonNota.getPrecioUnitario()
+          .multiply(renglonesDeFacturaParaNotaCreditoDTO.getCantidades()[i]));
+        renglonNota.setImporteBruto(
+          renglonNota
+            .getImporte()
+            .subtract(renglonNota.getDescuentoNeto().multiply(renglonesDeFacturaParaNotaCreditoDTO.getCantidades()[i])));
+        if (renglonesDeFacturaParaNotaCreditoDTO.getTipoDeComprobante() == TipoDeComprobante.FACTURA_B
+          || renglonesDeFacturaParaNotaCreditoDTO.getTipoDeComprobante() == TipoDeComprobante.PRESUPUESTO) {
+          renglonNota.setImporteNeto(renglonNota.getImporteBruto());
+        } else {
+          renglonNota.setImporteNeto(
+            renglonNota.getImporteBruto()
+              .add(renglonNota.getIvaNeto()
+                .multiply(renglonesDeFacturaParaNotaCreditoDTO.getCantidades()[i])));
+        }
+        renglonesNota.add(renglonNota);
+      }
+    }
     return renglonesNota;
   }
 

@@ -5,7 +5,6 @@ import lombok.*;
 import sic.modelo.TipoDeComprobante;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -13,6 +12,7 @@ import java.util.Map;
 @Builder
 public class RenglonesDeFacturaParaNotaCreditoDTO {
 
-  Map<Long, BigDecimal> idsYCantidades;
+  private Long[] idsRenglonesFactura;
+  private BigDecimal[] cantidades;
   TipoDeComprobante tipoDeComprobante;
 }

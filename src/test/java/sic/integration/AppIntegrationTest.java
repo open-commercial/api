@@ -305,11 +305,12 @@ class AppIntegrationTest {
           })
         .getBody()
         .getContent();
-    Map<Long, BigDecimal> idsDeRenglonesAndCantidades = new HashMap<>();
-    idsDeRenglonesAndCantidades.put(1L, new BigDecimal("5"));
+    Long[] idsRenglonesFacura = new Long[]{1L};
+    BigDecimal[] cantidades = new BigDecimal[]{new BigDecimal("5")};
     RenglonesDeFacturaParaNotaCreditoDTO renglonesDeFacturaParaNotaCreditoDTO =
       RenglonesDeFacturaParaNotaCreditoDTO.builder()
-        .idsYCantidades(idsDeRenglonesAndCantidades)
+        .idsRenglonesFactura(idsRenglonesFacura)
+        .cantidades(cantidades)
         .tipoDeComprobante(facturasRecuperadas.get(0).getTipoComprobante())
         .build();
     List<RenglonNotaCredito> renglonesNotaCredito =
@@ -433,7 +434,6 @@ class AppIntegrationTest {
   }
 
   private void crearNotaDebitoParaProveedor() {
-    UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/2", UsuarioDTO.class);
     NotaDebitoDTO notaDebito = new NotaDebitoDTO();
     notaDebito.setCAE(0L);
     notaDebito.setFecha(new Date());
@@ -457,11 +457,12 @@ class AppIntegrationTest {
   }
 
   private void crearNotaCreditoParaProveedor() {
-    Map<Long, BigDecimal> idsDeRenglonesAndCantidades = new HashMap<>();
-    idsDeRenglonesAndCantidades.put(3L, new BigDecimal("5"));
+    Long[] idsRenglonesFacura = new Long[]{3L};
+    BigDecimal[] cantidades = new BigDecimal[]{new BigDecimal("5")};
     RenglonesDeFacturaParaNotaCreditoDTO renglonesDeFacturaParaNotaCreditoDTO =
       RenglonesDeFacturaParaNotaCreditoDTO.builder()
-        .idsYCantidades(idsDeRenglonesAndCantidades)
+        .idsRenglonesFactura(idsRenglonesFacura)
+        .cantidades(cantidades)
         .tipoDeComprobante(TipoDeComprobante.FACTURA_B)
         .build();
     List<RenglonNotaCredito> renglonesNotaCredito =
@@ -3557,12 +3558,13 @@ class AppIntegrationTest {
           })
         .getBody()
         .getContent();
-    Map<Long, BigDecimal> idsDeRenglonesAndCantidades = new HashMap<>();
-    idsDeRenglonesAndCantidades.put(1L, new BigDecimal("5"));
+    Long[] idsRenglonesFacura = new Long[]{1L};
+    BigDecimal[] cantidades = new BigDecimal[]{new BigDecimal("5")};
     RenglonesDeFacturaParaNotaCreditoDTO renglonesDeFacturaParaNotaCreditoDTO =
       RenglonesDeFacturaParaNotaCreditoDTO.builder()
-        .idsYCantidades(idsDeRenglonesAndCantidades)
-        .tipoDeComprobante(TipoDeComprobante.FACTURA_B)
+        .idsRenglonesFactura(idsRenglonesFacura)
+        .cantidades(cantidades)
+        .tipoDeComprobante(facturasRecuperadas.get(0).getTipoComprobante())
         .build();
     List<RenglonNotaCredito> renglonesNotaCredito =
       Arrays.asList(
@@ -3690,11 +3692,12 @@ class AppIntegrationTest {
   @Test
   void shouldCrearNotaCreditoCompra() {
     this.shouldCrearFacturaCompraB();
-    Map<Long, BigDecimal> idsDeRenglonesAndCantidades = new HashMap<>();
-    idsDeRenglonesAndCantidades.put(1L, new BigDecimal("3"));
+    Long[] idsRenglonesFacura = new Long[]{1L};
+    BigDecimal[] cantidades = new BigDecimal[]{new BigDecimal("3")};
     RenglonesDeFacturaParaNotaCreditoDTO renglonesDeFacturaParaNotaCreditoDTO =
       RenglonesDeFacturaParaNotaCreditoDTO.builder()
-        .idsYCantidades(idsDeRenglonesAndCantidades)
+        .idsRenglonesFactura(idsRenglonesFacura)
+        .cantidades(cantidades)
         .tipoDeComprobante(TipoDeComprobante.FACTURA_B)
         .build();
     List<RenglonNotaCredito> renglonesNotaCredito =
