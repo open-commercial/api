@@ -41,14 +41,14 @@ public class FacturaVenta extends Factura implements Serializable {
       Transportista transportista,
       List<RenglonFactura> renglones,
       BigDecimal subTotal,
-      BigDecimal recargo_porcentaje,
-      BigDecimal recargo_neto,
-      BigDecimal descuento_porcentaje,
-      BigDecimal descuento_neto,
-      BigDecimal subTotal_neto,
-      BigDecimal iva_105_neto,
-      BigDecimal iva_21_neto,
-      BigDecimal impuestoInterno_neto,
+      BigDecimal recargoPorcentaje,
+      BigDecimal recargoNeto,
+      BigDecimal descuentoPorcentaje,
+      BigDecimal descuentoNeto,
+      BigDecimal subTotalNeto,
+      BigDecimal iva105Neto,
+      BigDecimal iva21Neto,
+      BigDecimal impuestoInternoNeto,
       BigDecimal total,
       String observaciones,
       BigDecimal cantidadDeArticulos,
@@ -71,14 +71,14 @@ public class FacturaVenta extends Factura implements Serializable {
         transportista,
         renglones,
         subTotal,
-        recargo_porcentaje,
-        recargo_neto,
-        descuento_porcentaje,
-        descuento_neto,
-        subTotal_neto,
-        iva_105_neto,
-        iva_21_neto,
-        impuestoInterno_neto,
+        recargoPorcentaje,
+        recargoNeto,
+        descuentoPorcentaje,
+        descuentoNeto,
+        subTotalNeto,
+        iva105Neto,
+        iva21Neto,
+        impuestoInternoNeto,
         total,
         observaciones,
         cantidadDeArticulos,
@@ -91,24 +91,30 @@ public class FacturaVenta extends Factura implements Serializable {
     this.cliente = cliente;
   }
 
-    @JsonGetter("idCliente")
-    public Long getIdCliente() {
-        return cliente.getId_Cliente();
-    }
+  @JsonGetter("idCliente")
+  public Long getIdCliente() {
+    return cliente.getId_Cliente();
+  }
 
-    @JsonGetter("nombreFiscalCliente")
-    public String getNombreFiscalCliente() {
-        return cliente.getNombreFiscal();
-    }
+  @JsonGetter("nombreFiscalCliente")
+  public String getNombreFiscalCliente() {
+    return cliente.getNombreFiscal();
+  }
 
-    @JsonGetter("idViajante")
-    public Long getIdViajante() {
-        return (cliente.getViajante() != null) ?  cliente.getViajante().getId_Usuario() : null;
-    }
+  @JsonGetter("idViajante")
+  public Long getIdViajante() {
+    return (cliente.getViajante() != null) ? cliente.getViajante().getId_Usuario() : null;
+  }
 
-    @JsonGetter("nombreViajante")
-    public String getNombreViajante() {
-        return (cliente.getViajante() != null) ? cliente.getViajante().getNombre() + " " + cliente.getViajante().getApellido() + " (" + cliente.getViajante().getUsername() + ")" : null;
-    }
-
+  @JsonGetter("nombreViajante")
+  public String getNombreViajante() {
+    return (cliente.getViajante() != null)
+        ? cliente.getViajante().getNombre()
+            + " "
+            + cliente.getViajante().getApellido()
+            + " ("
+            + cliente.getViajante().getUsername()
+            + ")"
+        : null;
+  }
 }

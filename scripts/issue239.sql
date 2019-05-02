@@ -14,3 +14,6 @@ Change numero numero int(11) DEFAULT NULL;
 
 ALTER TABLE ubicacion
 Change calle calle varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL;
+
+ALTER TABLE pedido
+Change piso piso varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL;

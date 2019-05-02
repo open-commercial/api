@@ -21,8 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.dto.ProveedorDTO;
+import sic.service.BusinessServiceException;
 import sic.service.IEmpresaService;
 import sic.service.IProveedorService;
+import sic.service.IUbicacionService;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -30,15 +32,18 @@ public class ProveedorController {
 
   private final IProveedorService proveedorService;
   private final IEmpresaService empresaService;
+  private final IUbicacionService ubicacionService;
   private final ModelMapper modelMapper;
 
   @Autowired
   public ProveedorController(
     IProveedorService proveedorService,
     IEmpresaService empresaService,
+    IUbicacionService ubicacionService,
     ModelMapper modelMapper) {
     this.proveedorService = proveedorService;
     this.empresaService = empresaService;
+    this.ubicacionService = ubicacionService;
     this.modelMapper = modelMapper;
   }
 
@@ -50,19 +55,25 @@ public class ProveedorController {
 
   @PostMapping("/proveedores")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public Proveedor guardar(
-    @RequestBody ProveedorDTO proveedorDTO,
-    @RequestParam Long idEmpresa) {
+  public Proveedor guardar(@RequestBody ProveedorDTO proveedorDTO) {
     Proveedor proveedor = modelMapper.map(proveedorDTO, Proveedor.class);
-    proveedor.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    if (proveedorDTO.getIdEmpresa() != null) {
+      proveedor.setEmpresa(empresaService.getEmpresaPorId(proveedorDTO.getIdEmpresa()));
+    } else {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_empresa_vacia"));
+    }
+    proveedor.setUbicacion(null);
+    if (proveedorDTO.getUbicacion() != null) {
+      proveedor.setUbicacion(modelMapper.map(proveedorDTO.getUbicacion(), Ubicacion.class));
+    }
     return proveedorService.guardar(proveedor);
   }
 
   @PutMapping("/proveedores")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(
-    @RequestBody ProveedorDTO proveedorDTO,
-    @RequestParam(required = false) Long idEmpresa) {
+    @RequestBody ProveedorDTO proveedorDTO) {
     Proveedor proveedorPersistido =
       proveedorService.getProveedorPorId(proveedorDTO.getId_Proveedor());
     Proveedor proveedorPorActualizar = modelMapper.map(proveedorDTO, Proveedor.class);
@@ -78,8 +89,19 @@ public class ProveedorController {
     } else {
       proveedorPorActualizar.setUbicacion(null);
     }
-    if (idEmpresa != null) {
-      proveedorPorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    if (proveedorDTO.getIdEmpresa() != null) {
+      proveedorPorActualizar.setEmpresa(
+          empresaService.getEmpresaPorId(proveedorDTO.getIdEmpresa()));
+    } else {
+      proveedorPorActualizar.setEmpresa(proveedorPersistido.getEmpresa());
+    }
+    Ubicacion ubicacion;
+    if (proveedorDTO.getUbicacion() != null) {
+      ubicacion = modelMapper.map(proveedorDTO.getUbicacion(), Ubicacion.class);
+      ubicacion.setLocalidad(ubicacionService.getLocalidadPorId(ubicacion.getIdLocalidad()));
+      proveedorPorActualizar.setUbicacion(ubicacion);
+    } else {
+      proveedorPorActualizar.setUbicacion(proveedorPersistido.getUbicacion());
     }
     if (proveedorService.getProveedorPorId(proveedorPorActualizar.getId_Proveedor()) != null) {
       proveedorService.actualizar(proveedorPorActualizar);

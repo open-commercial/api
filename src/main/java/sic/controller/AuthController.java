@@ -54,22 +54,22 @@ public class AuthController {
   @PostMapping("/login")
   public String login(@RequestBody Credencial credencial) {
     Usuario usuario = usuarioService.autenticarUsuario(credencial);
-    String token = authService.generarToken(usuario.getId_Usuario(), usuario.getRoles());
-    usuarioService.actualizarToken(token, usuario.getId_Usuario());
-    return token;
+    if (authService.esTokenValido(usuario.getToken())) {
+      return usuario.getToken();
+    } else {
+      String token = authService.generarToken(usuario.getId_Usuario(), usuario.getRoles());
+      usuarioService.actualizarToken(token, usuario.getId_Usuario());
+      return token;
+    }
   }
 
   @PutMapping("/logout")
   public void logout(@RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims;
-    try {
-      claims = authService.getClaimsDelToken(authorizationHeader);
-    } catch (JwtException ex) {
-      throw new UnauthorizedException(
-          RESOURCE_BUNDLE.getString("mensaje_error_token_invalido"), ex);
+    if (authService.esAuthorizationHeaderValido(authorizationHeader)) {
+        Claims claims = authService.getClaimsDelToken(authorizationHeader);
+        long idUsuario = (int) claims.get("idUsuario");
+        usuarioService.actualizarToken("", idUsuario);
     }
-    long idUsuario = (int) claims.get("idUsuario");
-    usuarioService.actualizarToken("", idUsuario);
   }
 
   @GetMapping("/password-recovery")

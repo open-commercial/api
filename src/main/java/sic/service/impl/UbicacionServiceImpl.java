@@ -24,10 +24,6 @@ public class UbicacionServiceImpl implements IUbicacionService {
   private final UbicacionRepository ubicacionRepository;
   private final LocalidadRepository localidadRepository;
   private final ProvinciaRepository provinciaRepository;
-  private final IClienteService clienteService;
-  private final IEmpresaService empresaService;
-  private final IProveedorService proveedorService;
-  private final ITransportistaService transportistaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
@@ -35,18 +31,10 @@ public class UbicacionServiceImpl implements IUbicacionService {
   public UbicacionServiceImpl(
     UbicacionRepository ubicacionRepository,
     LocalidadRepository localidadRepository,
-    ProvinciaRepository provinciaRepository,
-    IClienteService clienteService,
-    IEmpresaService empresaService,
-    IProveedorService proveedorService,
-    ITransportistaService transportistaService) {
+    ProvinciaRepository provinciaRepository) {
     this.ubicacionRepository = ubicacionRepository;
     this.localidadRepository = localidadRepository;
     this.provinciaRepository = provinciaRepository;
-    this.empresaService = empresaService;
-    this.proveedorService = proveedorService;
-    this.transportistaService = transportistaService;
-    this.clienteService = clienteService;
   }
 
   @Override
@@ -62,85 +50,6 @@ public class UbicacionServiceImpl implements IUbicacionService {
     Ubicacion ubicacionGuardada = ubicacionRepository.save(ubicacion);
     logger.warn("La ubicación {} se actualizó correctamente.", ubicacion);
     return ubicacionGuardada;
-  }
-
-  @Override
-  @Transactional
-  public Ubicacion guardarUbicacionDeFacturacionCliente(
-    Ubicacion ubicacion,
-    Cliente cliente) {
-    if (cliente.getUbicacionFacturacion() != null) {
-      throw new BusinessServiceException(
-        RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_cliente"));
-    }
-    cliente.setUbicacionFacturacion(
-      this.guardar(ubicacion));
-    clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
-    return cliente.getUbicacionFacturacion();
-  }
-
-  @Override
-  @Transactional
-  public Ubicacion guardarUbicacionDeEnvioCliente(
-    Ubicacion ubicacion,
-    Cliente cliente) {
-    if (cliente.getUbicacionEnvio() != null) {
-      throw new BusinessServiceException(
-        RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_cliente"));
-    }
-    cliente.setUbicacionEnvio(
-      this.guardar(ubicacion));
-    clienteService.actualizar(cliente, clienteService.getClientePorId(cliente.getId_Cliente()));
-    return cliente.getUbicacionEnvio();
-  }
-
-  @Override
-  @Transactional
-  public Ubicacion guardaUbicacionEmpresa(
-    Ubicacion ubicacion,
-    Empresa empresa) {
-    if (empresa.getUbicacion() != null) {
-      throw new BusinessServiceException(
-        RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_empresa"));
-    }
-    empresa.setUbicacion(this.guardar(ubicacion));
-    empresaService.actualizar(empresa, empresaService.getEmpresaPorId(empresa.getId_Empresa()));
-    return empresa.getUbicacion();
-  }
-
-  @Override
-  @Transactional
-  public Ubicacion guardaUbicacionProveedor(
-    Ubicacion ubicacion,
-    Proveedor proveedor) {
-    if (proveedor.getUbicacion() != null) {
-      throw new BusinessServiceException(
-        RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_proveedor"));
-    }
-    proveedor.setUbicacion(this.guardar(ubicacion));
-    proveedorService.actualizar(proveedor);
-    return proveedor.getUbicacion();
-  }
-
-  @Override
-  @Transactional
-  public Ubicacion guardarUbicacionTransportista(
-    Ubicacion ubicacion,
-    Transportista transportista) {
-    if (transportista.getUbicacion() != null) {
-      throw new BusinessServiceException(
-        RESOURCE_BUNDLE.getString("mensaje_error_ubicacion_incorrecta_transportista"));
-    }
-    transportista.setUbicacion(
-      this.guardar(ubicacion));
-    transportistaService.actualizar(transportista);
-    return transportista.getUbicacion();
-  }
-
-  @Override
-  public void actualizar(
-    Ubicacion ubicacion) {
-    ubicacionRepository.save(ubicacion);
   }
 
   @Override
