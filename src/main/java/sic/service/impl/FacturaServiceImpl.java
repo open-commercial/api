@@ -355,18 +355,32 @@ public class FacturaServiceImpl implements IFacturaService {
     return builder;
   }
 
-    private Factura procesarFactura(Factura factura) {
-        factura.setEliminada(false);
-        if (factura instanceof FacturaVenta) {
-            factura.setFecha(new Date());
-            factura.setNumSerie(configuracionDelSistemaService
-                    .getConfiguracionDelSistemaPorEmpresa(factura.getEmpresa()).getNroPuntoDeVentaAfip());
-            factura.setNumFactura(this.calcularNumeroFacturaVenta(factura.getTipoComprobante(),
-                    factura.getNumSerie(), factura.getEmpresa().getId_Empresa()));
-        }
-        this.validarFactura(factura);
-        return factura;
+  private Factura procesarFactura(Factura factura) {
+    factura.setEliminada(false);
+    if (factura instanceof FacturaVenta) {
+      factura.setFecha(new Date());
+      factura.setNumSerie(
+          configuracionDelSistemaService
+              .getConfiguracionDelSistemaPorEmpresa(factura.getEmpresa())
+              .getNroPuntoDeVentaAfip());
+      factura.setNumFactura(
+          this.calcularNumeroFacturaVenta(
+              factura.getTipoComprobante(),
+              factura.getNumSerie(),
+              factura.getEmpresa().getId_Empresa()));
     }
+    this.calcularCantidadDeArticulos(factura);
+    this.validarFactura(factura);
+    return factura;
+  }
+
+  private void calcularCantidadDeArticulos(Factura factura) {
+    factura.setCantidadArticulos(BigDecimal.ZERO);
+    factura
+        .getRenglones()
+        .forEach(
+            r -> factura.setCantidadArticulos(factura.getCantidadArticulos().add(r.getCantidad())));
+  }
 
   @Override
   @Transactional

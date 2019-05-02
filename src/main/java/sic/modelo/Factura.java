@@ -27,6 +27,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.DecimalMin;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -123,6 +125,10 @@ public abstract class Factura implements Serializable {
 
     @Column(nullable = false)
     private String observaciones;
+
+    @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_cantidad_de_productos_negativa}", inclusive = false)
+    private BigDecimal cantidadArticulos;
 
     @ManyToOne
     @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")    

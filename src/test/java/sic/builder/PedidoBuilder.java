@@ -31,6 +31,7 @@ public class PedidoBuilder {
   private BigDecimal totalEstimado = new BigDecimal("544.5");
   private BigDecimal totalActual = new BigDecimal("544.5");
   private EstadoPedido estado = EstadoPedido.ABIERTO;
+  private BigDecimal cantidadArticulos = new BigDecimal("3");
 
   public PedidoDTO build() {
     if (renglones == null) {
@@ -65,7 +66,8 @@ public class PedidoBuilder {
       descuentoNeto,
       totalEstimado,
       totalActual,
-      estado);
+      estado,
+      cantidadArticulos);
   }
 
   public PedidoBuilder withIdPedido(long idPedido) {
@@ -135,6 +137,11 @@ public class PedidoBuilder {
 
   public PedidoBuilder withEstado(EstadoPedido estadoPedido) {
     this.estado = estadoPedido;
+    return this;
+  }
+
+  public PedidoBuilder withEstado(BigDecimal cantidadArticulos) {
+    this.cantidadArticulos = cantidadArticulos;
     return this;
   }
 }

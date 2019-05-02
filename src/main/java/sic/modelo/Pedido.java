@@ -12,12 +12,14 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
+import javax.validation.constraints.DecimalMin;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.Formula;
 import sic.modelo.dto.UbicacionDTO;
 
 @Entity
@@ -101,6 +103,10 @@ public class Pedido implements Serializable {
 
   @Enumerated(EnumType.STRING)
   private EstadoPedido estado;
+
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_cantidad_de_productos_negativa}", inclusive = false)
+  private BigDecimal cantidadArticulos;
 
   @JsonGetter("nombreEmpresa")
   public String getNombreEmpresa() {

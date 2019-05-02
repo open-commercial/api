@@ -22,46 +22,99 @@ import lombok.ToString;
 @JsonIgnoreProperties({"cliente", "usuario", "empresa", "pedido", "transportista"})
 public class FacturaVenta extends Factura implements Serializable {
 
-    @ManyToOne
-    @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
-    private Cliente cliente;
+  @ManyToOne
+  @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
+  private Cliente cliente;
 
-    public FacturaVenta() {}
+  public FacturaVenta() {}
 
-    public FacturaVenta(Cliente cliente, Usuario usuario, long id_Factura, Date fecha,
-            TipoDeComprobante tipoComprobante, long numSerie, long numFactura, Date fechaVencimiento,
-            Pedido pedido, Transportista transportista, List<RenglonFactura> renglones, BigDecimal subTotal,
-            BigDecimal recargoPorcentaje, BigDecimal recargoNeto, BigDecimal descuentoPorcentaje,
-            BigDecimal descuentoNeto, BigDecimal subTotalNeto, BigDecimal iva105Neto, BigDecimal iva21Neto,
-            BigDecimal impuestoInternoNeto, BigDecimal total, String observaciones, Empresa empresa,
-            boolean eliminada, long CAE, Date vencimientoCAE, long numSerieAfip, long numFacturaAfip) {
-        
-        super(id_Factura, usuario, fecha, tipoComprobante, numSerie, numFactura, fechaVencimiento,
-                pedido, transportista, renglones, subTotal, recargoPorcentaje,
-                recargoNeto, descuentoPorcentaje, descuentoNeto, subTotalNeto,
-                iva105Neto, iva21Neto, impuestoInternoNeto, total, observaciones,
-                empresa, eliminada, CAE, vencimientoCAE, numSerieAfip, numFacturaAfip);
-        this.cliente = cliente;
-    }
+  public FacturaVenta(
+      Cliente cliente,
+      Usuario usuario,
+      long id_Factura,
+      Date fecha,
+      TipoDeComprobante tipoComprobante,
+      long numSerie,
+      long numFactura,
+      Date fechaVencimiento,
+      Pedido pedido,
+      Transportista transportista,
+      List<RenglonFactura> renglones,
+      BigDecimal subTotal,
+      BigDecimal recargoPorcentaje,
+      BigDecimal recargoNeto,
+      BigDecimal descuentoPorcentaje,
+      BigDecimal descuentoNeto,
+      BigDecimal subTotalNeto,
+      BigDecimal iva105Neto,
+      BigDecimal iva21Neto,
+      BigDecimal impuestoInternoNeto,
+      BigDecimal total,
+      String observaciones,
+      BigDecimal cantidadDeArticulos,
+      Empresa empresa,
+      boolean eliminada,
+      long CAE,
+      Date vencimientoCAE,
+      long numSerieAfip,
+      long numFacturaAfip) {
 
-    @JsonGetter("idCliente")
-    public Long getIdCliente() {
-        return cliente.getId_Cliente();
-    }
+    super(
+        id_Factura,
+        usuario,
+        fecha,
+        tipoComprobante,
+        numSerie,
+        numFactura,
+        fechaVencimiento,
+        pedido,
+        transportista,
+        renglones,
+        subTotal,
+        recargoPorcentaje,
+        recargoNeto,
+        descuentoPorcentaje,
+        descuentoNeto,
+        subTotalNeto,
+        iva105Neto,
+        iva21Neto,
+        impuestoInternoNeto,
+        total,
+        observaciones,
+        cantidadDeArticulos,
+        empresa,
+        eliminada,
+        CAE,
+        vencimientoCAE,
+        numSerieAfip,
+        numFacturaAfip);
+    this.cliente = cliente;
+  }
 
-    @JsonGetter("nombreFiscalCliente")
-    public String getNombreFiscalCliente() {
-        return cliente.getNombreFiscal();
-    }
+  @JsonGetter("idCliente")
+  public Long getIdCliente() {
+    return cliente.getId_Cliente();
+  }
 
-    @JsonGetter("idViajante")
-    public Long getIdViajante() {
-        return (cliente.getViajante() != null) ?  cliente.getViajante().getId_Usuario() : null;
-    }
+  @JsonGetter("nombreFiscalCliente")
+  public String getNombreFiscalCliente() {
+    return cliente.getNombreFiscal();
+  }
 
-    @JsonGetter("nombreViajante")
-    public String getNombreViajante() {
-        return (cliente.getViajante() != null) ? cliente.getViajante().getNombre() + " " + cliente.getViajante().getApellido() + " (" + cliente.getViajante().getUsername() + ")" : null;
-    }
+  @JsonGetter("idViajante")
+  public Long getIdViajante() {
+    return (cliente.getViajante() != null) ? cliente.getViajante().getId_Usuario() : null;
+  }
 
+  @JsonGetter("nombreViajante")
+  public String getNombreViajante() {
+    return (cliente.getViajante() != null)
+        ? cliente.getViajante().getNombre()
+            + " "
+            + cliente.getViajante().getApellido()
+            + " ("
+            + cliente.getViajante().getUsername()
+            + ")"
+        : null;
+  }
 }

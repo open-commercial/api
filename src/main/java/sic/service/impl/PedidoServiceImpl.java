@@ -192,6 +192,7 @@ public class PedidoServiceImpl implements IPedidoService {
   @Transactional
   public Pedido guardar(Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal) {
     this.asignarDetalleEnvio(pedido, tipoDeEnvio, idSucursal);
+    this.calcularCantidadDeArticulos(pedido);
     pedido.setFecha(new Date());
     pedido.setNroPedido(this.generarNumeroPedido(pedido.getEmpresa()));
     pedido.setEstado(EstadoPedido.ABIERTO);
@@ -217,6 +218,14 @@ public class PedidoServiceImpl implements IPedidoService {
       logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
     return pedido;
+  }
+
+  private void calcularCantidadDeArticulos(Pedido pedido) {
+    pedido.setCantidadArticulos(BigDecimal.ZERO);
+    pedido
+        .getRenglones()
+        .forEach(
+            r -> pedido.setCantidadArticulos(pedido.getCantidadArticulos().add(r.getCantidad())));
   }
 
   private void asignarDetalleEnvio(Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal) {
@@ -330,6 +339,7 @@ public class PedidoServiceImpl implements IPedidoService {
   @Transactional
   public void actualizar(Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal) {
     this.asignarDetalleEnvio(pedido, tipoDeEnvio, idSucursal);
+    this.calcularCantidadDeArticulos(pedido);
     this.validarPedido(TipoDeOperacion.ACTUALIZACION, pedido);
     pedidoRepository.save(pedido);
   }
