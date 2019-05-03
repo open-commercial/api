@@ -326,7 +326,7 @@ public class PedidoServiceImpl implements IPedidoService {
   public void actualizar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal) {
     this.asignarDetalleEnvio(pedido, tipoDeEnvio, idSucursal);
     this.calcularCantidadDeArticulos(pedido);
-    this.validarPedido(TipoDeOperacion.ACTUALIZACION, pedido);
+    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, pedido);
     pedidoRepository.save(pedido);
   }
 
