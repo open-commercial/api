@@ -23,8 +23,6 @@ public interface INotaService {
 
   boolean existsNotaDebitoPorRecibo(Recibo recibo);
 
-  boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta);
-
   List<NotaCredito> getNotasCreditoPorFactura(Long idFactura);
 
   long getSiguienteNumeroNotaDebitoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
@@ -37,6 +35,8 @@ public interface INotaService {
 
   TipoDeComprobante[] getTiposNota(Empresa empresa);
 
+  TipoDeComprobante getTipoDeNotaCreditoSegunFactura(TipoDeComprobante tipo);
+
   List<RenglonNotaCredito> getRenglonesDeNotaCredito(Long idNota);
 
   List<RenglonNotaDebito> getRenglonesDeNotaDebito(Long idNota);
@@ -48,7 +48,7 @@ public interface INotaService {
   BigDecimal getIvaNetoNota(Long idNota);
 
   List<RenglonNotaCredito> calcularRenglonCreditoProducto(
-      TipoDeComprobante tipo, BigDecimal[] cantidad, long[] idRenglonFactura);
+      TipoDeComprobante tipo, BigDecimal[] cantidad, Long[] idRenglonFactura);
 
   RenglonNotaCredito calcularRenglonCredito(TipoDeComprobante tipo, String Detalle, BigDecimal monto);
 

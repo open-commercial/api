@@ -330,11 +330,6 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
-  public boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta) {
-    return notaCreditoRepository.existsByFacturaVentaAndEliminada(facturaVenta, false);
-  }
-
-  @Override
   public TipoDeComprobante[] getTipoNotaCreditoCliente(Long idCliente, Long idEmpresa) {
     Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
     Cliente cliente = clienteService.getClientePorId(idCliente);
@@ -848,7 +843,8 @@ public class NotaServiceImpl implements INotaService {
     }
   }
 
-  private TipoDeComprobante getTipoDeNotaCreditoSegunFactura(TipoDeComprobante tipo) {
+  @Override
+  public TipoDeComprobante getTipoDeNotaCreditoSegunFactura(TipoDeComprobante tipo) {
     switch (tipo) {
       case FACTURA_A:
         return TipoDeComprobante.NOTA_CREDITO_A;
@@ -972,7 +968,7 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public List<RenglonNotaCredito> calcularRenglonCreditoProducto(
-      TipoDeComprobante tipo, BigDecimal[] cantidad, long[] idRenglonFactura) {
+      TipoDeComprobante tipo, BigDecimal[] cantidad, Long[] idRenglonFactura) {
     List<RenglonNotaCredito> renglonesNota = new ArrayList<>();
     RenglonNotaCredito renglonNota;
     if (cantidad.length == idRenglonFactura.length) {
@@ -1147,21 +1143,28 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public BigDecimal calcularIVANetoCredito(
-      TipoDeComprobante tipoDeComprobante,
-      BigDecimal[] cantidades,
-      BigDecimal[] ivaPorcentajeRenglones,
-      BigDecimal[] ivaNetoRenglones,
-      BigDecimal ivaPorcentaje,
-      BigDecimal descuentoPorcentaje,
-      BigDecimal recargoPorcentaje) {
-    return facturaService.calcularIvaNetoFactura(
-        tipoDeComprobante,
-        cantidades,
-        ivaPorcentajeRenglones,
-        ivaNetoRenglones,
-        ivaPorcentaje,
-        descuentoPorcentaje,
-        recargoPorcentaje);
+    TipoDeComprobante tipoDeComprobante,
+    BigDecimal[] cantidades,
+    BigDecimal[] ivaPorcentajeRenglones,
+    BigDecimal[] ivaNetoRenglones,
+    BigDecimal ivaPorcentaje,
+    BigDecimal descuentoPorcentaje,
+    BigDecimal recargoPorcentaje) {
+    BigDecimal resultado = BigDecimal.ZERO;
+    int indice = cantidades.length;
+    for (int i = 0; i < indice; i++) {
+      if (ivaPorcentajeRenglones[i].compareTo(ivaPorcentaje) == 0) {
+        if (tipoDeComprobante == TipoDeComprobante.NOTA_CREDITO_A || tipoDeComprobante == TipoDeComprobante.NOTA_CREDITO_B
+          || tipoDeComprobante == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO) {
+          resultado = resultado.add(cantidades[i].multiply(ivaNetoRenglones[i]
+            .subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
+            .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
+        } else {
+          resultado = resultado.add(cantidades[i].multiply(ivaNetoRenglones[i]));
+        }
+      }
+    }
+    return resultado;
   }
 
   @Override
