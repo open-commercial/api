@@ -140,6 +140,8 @@ public class UsuarioController {
         usuarioPorActualizar.setPassword(usuarioPersistido.getPassword());
       }
       usuarioService.actualizar(usuarioPorActualizar, usuarioPersistido);
+      if (!usuarioSeModificaASiMismo)
+        usuarioService.actualizarToken("", usuarioPorActualizar.getId_Usuario());
     } else {
       throw new ForbiddenException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));

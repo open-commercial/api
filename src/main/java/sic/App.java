@@ -45,6 +45,7 @@ public class App extends WebMvcConfigurerAdapter {
         registry.addInterceptor(this.jwtInterceptor())
                 .addPathPatterns("/api/**")
                 .excludePathPatterns("/api/*/login")
+                .excludePathPatterns("/api/*/logout")
                 .excludePathPatterns("/api/*/password-recovery")
                 .excludePathPatterns("/api/*/registracion")
                 .excludePathPatterns("/api/*/public/**");

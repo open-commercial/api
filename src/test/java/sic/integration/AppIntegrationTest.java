@@ -1,7 +1,7 @@
 package sic.integration;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -750,6 +750,11 @@ class AppIntegrationTest {
         .nombreFiscal("theRedWolf")
         .build();
     restTemplate.postForObject(apiPrefix + "/registracion", registro, Void.class);
+    UsuarioDTO usuario = restTemplate.getForObject(apiPrefix + "/usuarios/3", UsuarioDTO.class);
+    assertEquals(usuario.getNombre(), "Sansa");
+    assertEquals(usuario.getApellido(), "Stark");
+    ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class);
+    assertEquals(cliente.getNombreFiscal(), "theRedWolf");
   }
 
   @Test
@@ -2429,6 +2434,13 @@ class AppIntegrationTest {
       assertTrue(
           ex.getMessage().startsWith("La ubicacion de facturacion se encuentra vacia."));
     }
+  }
+
+  @Test
+  void shloudVerificarCantidadDeArticulosEnFacturaA() {
+    this.shouldCrearFacturaVentaA();
+    FacturaDTO facturaDTO = restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaDTO.class);
+    assertEquals(new BigDecimal("9.000000000000000"), facturaDTO.getCantidadArticulos());
   }
 
   @Test
@@ -4205,6 +4217,13 @@ class AppIntegrationTest {
       restTemplate.getForObject(
         apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
     assertEquals(EstadoPedido.CERRADO, pedidoRecuperado.getEstado());
+  }
+
+  @Test
+  void shloudVerificarCantidadDeArticulosEnPedido() {
+    this.shouldCrearPedido();
+    PedidoDTO pedidoDTO = restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoDTO.class);
+    assertEquals(new BigDecimal("7.000000000000000"), pedidoDTO.getCantidadArticulos());
   }
 
   @Test
