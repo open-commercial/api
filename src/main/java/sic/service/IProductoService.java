@@ -9,9 +9,11 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 import sic.modelo.dto.ProductosParaActualizarDTO;
 
+import javax.validation.Valid;
+
 public interface IProductoService {
 
-  void actualizar(Producto productoPorActualizar, Producto productoPersistido);
+  void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido);
 
   void actualizarStock(
       Map<Long, BigDecimal> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento, TipoDeComprobante tipoDeComprobante);
@@ -52,7 +54,7 @@ public interface IProductoService {
 
   byte[] getListaDePreciosPorEmpresa(List<Producto> productos, long idEmpresa, String formato);
 
-  Producto guardar(Producto producto);
+  Producto guardar(@Valid Producto producto);
 
   List<Producto> actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO);
 

@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
+
 import com.querydsl.core.BooleanBuilder;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.service.*;
 import sic.util.Validator;
@@ -27,6 +30,7 @@ import sic.repository.UsuarioRepository;
 
 @Service
 @Transactional
+@Validated
 public class UsuarioServiceImpl implements IUsuarioService {
 
   private final UsuarioRepository usuarioRepository;
@@ -166,30 +170,6 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public void validarOperacion(TipoDeOperacion operacion, Usuario usuario) {
-    // Requeridos
-    if (Validator.esVacio(usuario.getNombre())) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_usuario_vacio_nombre"));
-    }
-    if (Validator.esVacio(usuario.getApellido())) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_usuario_vacio_apellido"));
-    }
-    if (Validator.esVacio(usuario.getUsername())) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_vacio_username"));
-    }
-    if (!Validator.esEmailValido(usuario.getEmail())) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_usuario_invalido_email"));
-    }
-    if (operacion == TipoDeOperacion.ALTA && Validator.esVacio(usuario.getPassword())) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_usuario_vacio_password"));
-    }
-    if (usuario.getRoles().isEmpty()) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_usuario_no_selecciono_rol"));
-    }
     // Username sin espacios en blanco
     if (usuario.getUsername().contains(" ")) {
       throw new BusinessServiceException(
@@ -244,13 +224,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public void actualizar(Usuario usuarioPorActualizar, Usuario usuarioPersistido) {
-    if (usuarioPorActualizar.getPassword() != null
-        && !usuarioPorActualizar.getPassword().isEmpty()) {
-      usuarioPorActualizar.setPassword(this.encriptarConMD5(usuarioPorActualizar.getPassword()));
-    } else {
-      usuarioPorActualizar.setPassword(usuarioPersistido.getPassword());
-    }
+  @Transactional
+  public void actualizar(@Valid Usuario usuarioPorActualizar, Usuario usuarioPersistido) {
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuarioPorActualizar);
     if (!usuarioPorActualizar.getRoles().contains(Rol.VIAJANTE)) {
       this.clienteService.desvincularClienteDeViajante(usuarioPorActualizar.getId_Usuario());
@@ -308,7 +283,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public Usuario guardar(Usuario usuario) {
+  @Transactional
+  public Usuario guardar(@Valid Usuario usuario) {
     this.validarOperacion(TipoDeOperacion.ALTA, usuario);
     usuario.setUsername(usuario.getUsername().toLowerCase());
     usuario.setPassword(this.encriptarConMD5(usuario.getPassword()));

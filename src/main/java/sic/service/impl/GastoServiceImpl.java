@@ -2,12 +2,15 @@ package sic.service.impl;
 
 import java.math.BigDecimal;
 
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.service.IGastoService;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +23,7 @@ import sic.service.ICajaService;
 import sic.service.IEmpresaService;
 
 @Service
+@Validated
 public class GastoServiceImpl implements IGastoService {
 
     private final GastoRepository gastoRepository;
@@ -46,32 +50,8 @@ public class GastoServiceImpl implements IGastoService {
     }
 
     @Override
-    public void validarGasto(Gasto gasto) {
-        if (gasto.getFecha() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_gasto_fecha_vacia"));
-        }
-        if (gasto.getEmpresa() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_gasto_empresa_vacia"));
-        }
+    public void validarOperacion(Gasto gasto) {
         this.cajaService.validarMovimiento(gasto.getFecha(), gasto.getEmpresa().getId_Empresa());
-        if (gasto.getUsuario() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_gasto_usuario_vacio"));
-        }
-        if (gasto.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_gasto_negativo_cero"));
-        }
-        if (gasto.getConcepto() == null || gasto.getConcepto().isEmpty()) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_gasto_concepto_vacio"));
-        }
-        if(gasto.getFormaDePago() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_gasto_forma_de_pago_vacia"));
-        }
         if (gastoRepository.findOne(gasto.getId_Gasto()) != null) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
                     .getString("mensaje_gasto_duplicada"));
@@ -80,8 +60,8 @@ public class GastoServiceImpl implements IGastoService {
 
     @Override
     @Transactional
-    public Gasto guardar(Gasto gasto) {
-        this.validarGasto(gasto);
+    public Gasto guardar(@Valid Gasto gasto) {
+        this.validarOperacion(gasto);
         gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getEmpresa().getId_Empresa()) + 1);
         gasto = gastoRepository.save(gasto);
         logger.warn("El Gasto {} se guardó correctamente.", gasto);
@@ -95,7 +75,7 @@ public class GastoServiceImpl implements IGastoService {
 
     @Override
     @Transactional
-    public void actualizar(Gasto gasto) {
+    public void actualizar(@Valid Gasto gasto) {
         gastoRepository.save(gasto);
     }
     

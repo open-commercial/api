@@ -4,11 +4,13 @@ import java.util.List;
 import sic.modelo.Empresa;
 import sic.modelo.Rubro;
 
+import javax.validation.Valid;
+
 public interface IRubroService {
 
     Rubro getRubroPorId(Long idRubro);
     
-    void actualizar(Rubro rubro);
+    void actualizar(@Valid Rubro rubro);
 
     void eliminar(long idRubro);
 
@@ -16,6 +18,6 @@ public interface IRubroService {
 
     List<Rubro> getRubros(Empresa empresa);
 
-    Rubro guardar(Rubro rubro);
+    Rubro guardar(@Valid Rubro rubro);
     
 }

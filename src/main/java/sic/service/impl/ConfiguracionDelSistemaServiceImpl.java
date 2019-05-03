@@ -2,11 +2,14 @@ package sic.service.impl;
 
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.ConfiguracionDelSistema;
 import sic.modelo.Empresa;
 import sic.modelo.TipoDeOperacion;
@@ -15,6 +18,7 @@ import sic.repository.ConfiguracionDelSistemaRepository;
 import sic.service.BusinessServiceException;
 
 @Service
+@Validated
 public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSistemaService {
 
   private final ConfiguracionDelSistemaRepository configuracionRepository;
@@ -43,8 +47,8 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
 
   @Override
   @Transactional
-  public ConfiguracionDelSistema guardar(ConfiguracionDelSistema cds) {
-    this.validarCds(TipoDeOperacion.ALTA, cds);
+  public ConfiguracionDelSistema guardar(@Valid ConfiguracionDelSistema cds) {
+    this.validarOperacion(TipoDeOperacion.ALTA, cds);
     cds = configuracionRepository.save(cds);
     logger.warn("La Configuracion del Sistema {} se guardó correctamente.", cds);
     return cds;
@@ -52,8 +56,8 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
 
   @Override
   @Transactional
-  public void actualizar(ConfiguracionDelSistema cds) {
-    this.validarCds(TipoDeOperacion.ACTUALIZACION, cds);
+  public void actualizar(@Valid ConfiguracionDelSistema cds) {
+    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, cds);
     if (cds.getPasswordCertificadoAfip() != null) {
       cds.setPasswordCertificadoAfip(cds.getPasswordCertificadoAfip());
     }
@@ -70,7 +74,7 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
   }
 
   @Override
-  public void validarCds(TipoDeOperacion tipoOperacion, ConfiguracionDelSistema cds) {
+  public void validarOperacion(TipoDeOperacion tipoOperacion, ConfiguracionDelSistema cds) {
     if (tipoOperacion.equals(TipoDeOperacion.ACTUALIZACION)) {
       if (cds.isFacturaElectronicaHabilitada() || cds.isEmailSenderHabilitado()) {
         ConfiguracionDelSistema cdsRecuperado =

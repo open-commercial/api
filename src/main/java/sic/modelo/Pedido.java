@@ -11,15 +11,17 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.*;
+import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
-
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.DecimalMin;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.annotations.Formula;
+import org.hibernate.validator.constraints.NotEmpty;
 import sic.modelo.dto.UbicacionDTO;
 
 @Entity
@@ -42,6 +44,7 @@ public class Pedido implements Serializable {
 
   @Column(nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
+  @NotNull(message = "{mensaje_pedido_fecha_vacia}")
   private Date fecha;
 
   @Temporal(TemporalType.TIMESTAMP)
@@ -52,6 +55,7 @@ public class Pedido implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+  @NotNull(message = "{mensaje_pedido_empresa_vacia}")
   private Empresa empresa;
 
   @Embedded
@@ -65,10 +69,12 @@ public class Pedido implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
+  @NotNull(message = "{mensaje_pedido_cliente_vacio}")
   private Cliente cliente;
 
   @ManyToOne
   @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
+  @NotNull(message = "{mensaje_pedido_usuario_vacio}")
   private Usuario usuario;
 
   @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
@@ -78,27 +84,36 @@ public class Pedido implements Serializable {
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "id_Pedido")
   @JsonProperty(access = Access.WRITE_ONLY)
+  @NotEmpty
   private List<RenglonPedido> renglones;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_subtotal_negativo}")
   private BigDecimal subTotal;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_recargo_porcentaje_negativo}")
   private BigDecimal recargoPorcentaje;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_regargo_neto_negativo}")
   private BigDecimal recargoNeto;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_descuento_porcentaje_negativo}")
+  @DecimalMax(value = "100", message = "{mensaje_descuento_porcentaje_superior_100}")
   private BigDecimal descuentoPorcentaje;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_descuento_neto_negativo}")
   private BigDecimal descuentoNeto;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_pedido_total_estimado_negativo}")
   private BigDecimal totalEstimado;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_pedido_total_actual_negativo}")
   private BigDecimal totalActual;
 
   @Enumerated(EnumType.STRING)

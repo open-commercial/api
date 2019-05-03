@@ -83,6 +83,7 @@ public class FacturaController {
     fv.setCliente(cliente);
     fv.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
     fv.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
+    fv.setFecha(new Date());
     List<FacturaVenta> facturasGuardadas;
     if (indices != null) {
       facturasGuardadas =

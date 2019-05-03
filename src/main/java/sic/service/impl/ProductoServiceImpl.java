@@ -8,6 +8,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.export.*;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
 import java.math.BigDecimal;
@@ -18,6 +19,7 @@ import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
+import javax.validation.Valid;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -35,6 +37,7 @@ import sic.util.Validator;
 import sic.repository.ProductoRepository;
 
 @Service
+@Validated
 public class ProductoServiceImpl implements IProductoService {
 
   private final ProductoRepository productoRepository;
@@ -221,7 +224,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public Producto guardar(Producto producto) {
+  public Producto guardar(@Valid Producto producto) {
     if (producto.getCodigo() == null) producto.setCodigo("");
     producto.setFechaAlta(new Date());
     producto.setFechaUltimaModificacion(new Date());
@@ -235,7 +238,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public void actualizar(Producto productoPorActualizar, Producto productoPersistido) {
+  public void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido) {
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
     productoPorActualizar.setFechaUltimaModificacion(new Date());
