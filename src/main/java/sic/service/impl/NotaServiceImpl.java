@@ -947,26 +947,6 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
-  public BigDecimal getIvaNetoNota(Long idNota) {
-    Nota nota = this.getNotaPorId(idNota);
-    BigDecimal ivaNeto = BigDecimal.ZERO;
-    if (nota instanceof NotaCredito) {
-      for (RenglonNotaCredito r : this.getRenglonesDeNotaCredito(nota.getIdNota())) {
-        ivaNeto =
-            ivaNeto.add(
-                r.getIvaPorcentaje()
-                    .divide(CIEN, 15, RoundingMode.HALF_UP)
-                    .multiply(r.getImporte()));
-      }
-    } else {
-      for (RenglonNotaCredito r : this.getRenglonesDeNotaCredito(nota.getIdNota())) {
-        ivaNeto = ivaNeto.add(r.getIvaNeto());
-      }
-    }
-    return ivaNeto;
-  }
-
-  @Override
   public List<RenglonNotaCredito> calcularRenglonCreditoProducto(
       TipoDeComprobante tipo, BigDecimal[] cantidad, Long[] idRenglonFactura) {
     List<RenglonNotaCredito> renglonesNota = new ArrayList<>();
@@ -1032,7 +1012,8 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
-  public RenglonNotaCredito calcularRenglonCredito(TipoDeComprobante tipo, String detalle, BigDecimal monto) {
+  public RenglonNotaCredito calcularRenglonCredito(
+      TipoDeComprobante tipo, String detalle, BigDecimal monto) {
     this.validarTipoNotaCredito(tipo);
     RenglonNotaCredito renglonNota = new RenglonNotaCredito();
     renglonNota.setIdProductoItem(null);
@@ -1040,9 +1021,13 @@ public class NotaServiceImpl implements INotaService {
     renglonNota.setDescripcionItem(detalle);
     renglonNota.setMedidaItem(null);
     renglonNota.setCantidad(BigDecimal.ONE);
-    BigDecimal subTotal = monto.multiply(new BigDecimal("100")).divide(new BigDecimal("121"), 15, RoundingMode.HALF_UP);
+    BigDecimal subTotal =
+        monto
+            .multiply(new BigDecimal("100"))
+            .divide(new BigDecimal("121"), 15, RoundingMode.HALF_UP);
     renglonNota.setPrecioUnitario(
-        (tipo == TipoDeComprobante.NOTA_CREDITO_B || tipo == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO)
+        (tipo == TipoDeComprobante.NOTA_CREDITO_B
+                || tipo == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO)
             ? monto
             : subTotal);
     renglonNota.setDescuentoPorcentaje(BigDecimal.ZERO);
@@ -1057,14 +1042,21 @@ public class NotaServiceImpl implements INotaService {
             : BigDecimal.ZERO);
     renglonNota.setIvaNeto(monto.subtract(subTotal));
     renglonNota.setImporte(
-        (tipo == TipoDeComprobante.NOTA_CREDITO_B || tipo == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO)
+        (tipo == TipoDeComprobante.NOTA_CREDITO_B
+                || tipo == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO)
             ? monto
             : subTotal);
     renglonNota.setImporteBruto(
-        (tipo == TipoDeComprobante.NOTA_CREDITO_B || tipo == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO)
+        (tipo == TipoDeComprobante.NOTA_CREDITO_B
+                || tipo == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO)
             ? monto
             : subTotal);
-    renglonNota.setImporteNeto(monto);
+    if (tipo == TipoDeComprobante.NOTA_CREDITO_B
+        || tipo == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO) {
+      renglonNota.setImporteNeto(renglonNota.getImporteBruto());
+    } else {
+      renglonNota.setImporteNeto(renglonNota.getImporteBruto().add(renglonNota.getIvaNeto()));
+    }
     return renglonNota;
   }
 

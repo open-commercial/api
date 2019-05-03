@@ -45,8 +45,6 @@ public interface INotaService {
 
   BigDecimal calcularTotalNota(List<RenglonNotaCredito> renglonesNota);
 
-  BigDecimal getIvaNetoNota(Long idNota);
-
   List<RenglonNotaCredito> calcularRenglonCreditoProducto(
       TipoDeComprobante tipo, BigDecimal[] cantidad, Long[] idRenglonFactura);
 

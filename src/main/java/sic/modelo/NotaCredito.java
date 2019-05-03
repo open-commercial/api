@@ -19,7 +19,7 @@ import lombok.ToString;
 @Table(name = "notacredito")
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true, exclude = "renglonesNotaCredito")
+@ToString(callSuper = true)
 public class NotaCredito extends Nota implements Serializable {
 
   @Column(nullable = false)
@@ -27,7 +27,7 @@ public class NotaCredito extends Nota implements Serializable {
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "idNota")
-  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+  @JsonProperty(access = JsonProperty.Access.READ_WRITE)
   @Column(nullable = false)
   private List<RenglonNotaCredito> renglonesNotaCredito;
 

@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import sic.modelo.TipoDeComprobante;
 
 import java.math.BigDecimal;
 
@@ -12,14 +11,11 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class NuevaNotaCreditoDTO {
+public class NuevaNotaCreditoDeFacturaDTO {
 
-  private Long idCliente;
-  private Long idProveedor;
   private Long idFactura;
   private BigDecimal[] cantidades;
   private Long[] idsRenglonesFactura;
-  private BigDecimal monto;
-  private TipoDeComprobante tipo;
-  private String detalle;
+  private boolean modificaStock;
+  private String motivo;
 }

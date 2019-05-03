@@ -19,7 +19,8 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.dto.NotaCreditoDTO;
 import sic.modelo.dto.NotaDebitoDTO;
-import sic.modelo.dto.NuevaNotaCreditoDTO;
+import sic.modelo.dto.NuevaNotaCreditoDeFacturaDTO;
+import sic.modelo.dto.NuevaNotaCreditoSinFacturaDTO;
 import sic.service.*;
 
 @RestController
@@ -226,15 +227,16 @@ public class NotaController {
     return notaService.getRenglonesDeNotaDebito(idNotaDebito);
   }
 
-  @PostMapping("/notas/credito") // para proveedores como para clientes, ver si viene el idFactura y de venir, recuperar, ver que es, y asignar
+  @PostMapping("/notas/credito/calculos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public NotaCredito calcularNotaCreditoCliente(
-    @RequestBody NuevaNotaCreditoDTO nuevaNotaCreditoDTO) {
+  public NotaCredito calcularNotaCreditoConFactura(
+    @RequestBody NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO,
+    @RequestHeader("Authorization") String authorizationHeader) {
     NotaCredito notaCreditoNueva = new NotaCredito();
-    Factura factura = facturaService.getFacturaPorId(nuevaNotaCreditoDTO.getIdFactura()); // exception
+    Factura factura = facturaService.getFacturaPorId(nuevaNotaCreditoDeFacturaDTO.getIdFactura());
     notaCreditoNueva.setRenglonesNotaCredito(
       notaService.calcularRenglonCreditoProducto(factura.getTipoComprobante(),
-        nuevaNotaCreditoDTO.getCantidades(), nuevaNotaCreditoDTO.getIdsRenglonesFactura()));
+        nuevaNotaCreditoDeFacturaDTO.getCantidades(), nuevaNotaCreditoDeFacturaDTO.getIdsRenglonesFactura()));
     List<BigDecimal> importes = new ArrayList<>();
     List<BigDecimal> cantidades = new ArrayList<>();
     List<BigDecimal> ivaPorcentajeRenglones = new ArrayList<>();
@@ -266,67 +268,108 @@ public class NotaController {
     notaCreditoNueva.setSubTotalBruto(notaService.calcularSubTotalBrutoCredito(factura.getTipoComprobante(),
       notaCreditoNueva.getSubTotal(), notaCreditoNueva.getRecargoNeto(), notaCreditoNueva.getDescuentoNeto(),
       notaCreditoNueva.getIva105Neto(), notaCreditoNueva.getIva21Neto()));
-    notaCreditoNueva.setTotal(notaService.calcularTotalNota(notaCreditoNueva.getRenglonesNotaCredito()));
+    notaCreditoNueva.setTotal(notaService.calcularTotalCredito(notaCreditoNueva.getSubTotalBruto(), notaCreditoNueva.getIva105Neto(), notaCreditoNueva.getIva21Neto()));
     notaCreditoNueva.setFecha(new Date());
-    notaCreditoNueva.setCliente(clienteService.getClientePorId(nuevaNotaCreditoDTO.getIdCliente()));
+    if (factura instanceof FacturaVenta) {
+      notaCreditoNueva.setCliente(clienteService.getClientePorId(((FacturaVenta)factura).getIdCliente()));
+    } else if (factura instanceof FacturaCompra) {
+      notaCreditoNueva.setProveedor(proveedorService.getProveedorPorId(((FacturaCompra)factura).getIdProveedor()));
+    }
+    notaCreditoNueva.setEmpresa(factura.getEmpresa());
+    notaCreditoNueva.setModificaStock(nuevaNotaCreditoDeFacturaDTO.isModificaStock());
+    notaCreditoNueva.setMotivo(nuevaNotaCreditoDeFacturaDTO.getMotivo());
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    notaCreditoNueva.setUsuario(usuarioService.getUsuarioPorId(((Integer) claims.get("idUsuario")).longValue()));
     return notaCreditoNueva;
   }
 
-  @PostMapping("/notas/credito/empresas/{idEmpresa}/usuarios/{idUsuario}/clientes/{idCliente}")
+  @PostMapping("/notas/credito/calculos-sin-factura")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Nota guardarNotaCreditoCliente(
-    @RequestBody NotaCreditoDTO notaCreditoDTO,
-    @PathVariable long idEmpresa,
-    @PathVariable long idCliente,
-    @PathVariable long idUsuario) {
-    NotaCredito nota = modelMapper.map(notaCreditoDTO, NotaCredito.class);
-    nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    nota.setCliente(clienteService.getClientePorId(idCliente));
-    nota.setMovimiento(Movimiento.VENTA);
-    nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    nota.setModificaStock(false);
-    return notaService.guardarNotaCredito(nota);
-  }
-
-  @PostMapping("/notas/credito/empresas/{idEmpresa}/usuarios/{idUsuario}/proveedores/{idProveedor}/facturas/{idFactura}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Nota guardarNotaCreditoProveedorDeFactura(
-    @RequestBody NotaCreditoDTO notaCreditoDTO,
-    @PathVariable long idEmpresa,
-    @PathVariable long idProveedor,
-    @PathVariable long idUsuario,
-    @PathVariable long idFactura,
-    @RequestParam boolean modificarStock) {
-    NotaCredito nota = modelMapper.map(notaCreditoDTO, NotaCredito.class);
-    nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    nota.setProveedor(proveedorService.getProveedorPorId(idProveedor));
-    Factura factura = facturaService.getFacturaPorId(idFactura);
-    if (factura instanceof FacturaCompra
-      && ((FacturaCompra) factura).getIdProveedor() == idProveedor) {
-      nota.setFacturaCompra((FacturaCompra) factura);
-    } else {
-      throw new BusinessServiceException(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_movimiento_no_valido"));
+  public NotaCredito calcularNotaCreditoSinFactura(
+      @RequestBody NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO,
+      @RequestHeader("Authorization") String authorizationHeader) {
+    NotaCredito notaCreditoNueva = new NotaCredito();
+    List<RenglonNotaCredito> renglones = new ArrayList<>();
+    notaCreditoNueva.setTipoComprobante(nuevaNotaCreditoSinFacturaDTO.getTipo());
+    renglones.add(
+        notaService.calcularRenglonCredito(
+            nuevaNotaCreditoSinFacturaDTO.getTipo(),
+            nuevaNotaCreditoSinFacturaDTO.getDetalle(),
+            nuevaNotaCreditoSinFacturaDTO.getMonto()));
+    notaCreditoNueva.setRenglonesNotaCredito(renglones);
+    if (notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_A
+        || notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B
+        || notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_Y
+        || notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO) {
+      notaCreditoNueva.setSubTotal(
+          notaCreditoNueva.getRenglonesNotaCredito().get(0).getImporteBruto());
+    } else if (notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_X) {
+      notaCreditoNueva.setSubTotal(
+          notaCreditoNueva.getRenglonesNotaCredito().get(0).getImporteNeto());
     }
-    nota.setMovimiento(Movimiento.COMPRA);
-    nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    nota.setModificaStock(modificarStock);
-    return notaService.guardarNotaCredito(nota);
+    notaCreditoNueva.setDescuentoPorcentaje(BigDecimal.ZERO);
+    notaCreditoNueva.setDescuentoNeto(BigDecimal.ZERO);
+    notaCreditoNueva.setRecargoPorcentaje(BigDecimal.ZERO);
+    notaCreditoNueva.setRecargoNeto(BigDecimal.ZERO);
+    notaCreditoNueva.setIva105Neto(BigDecimal.ZERO);
+    notaCreditoNueva.setIva21Neto(notaCreditoNueva.getRenglonesNotaCredito().get(0).getIvaNeto());
+    BigDecimal subTotalBruto = notaCreditoNueva.getSubTotal();
+    if (notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B
+      || notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO) {
+      subTotalBruto = subTotalBruto.subtract(notaCreditoNueva.getIva21Neto());
+    }
+    notaCreditoNueva.setSubTotalBruto(subTotalBruto);
+    notaCreditoNueva.setTotal(
+        notaService.calcularTotalNota(notaCreditoNueva.getRenglonesNotaCredito()));
+    notaCreditoNueva.setFecha(new Date());
+    if ((nuevaNotaCreditoSinFacturaDTO.getIdCliente() != null
+            && nuevaNotaCreditoSinFacturaDTO.getIdProveedor() != null)
+        || (nuevaNotaCreditoSinFacturaDTO.getIdCliente() == null
+            && nuevaNotaCreditoSinFacturaDTO.getIdProveedor() == null)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_ambigua"));
+    }
+    if (nuevaNotaCreditoSinFacturaDTO.getIdCliente() != null) {
+      notaCreditoNueva.setCliente(
+          clienteService.getClientePorId(nuevaNotaCreditoSinFacturaDTO.getIdCliente()));
+    }
+    if (nuevaNotaCreditoSinFacturaDTO.getIdProveedor() != null) {
+      notaCreditoNueva.setProveedor(
+          proveedorService.getProveedorPorId(nuevaNotaCreditoSinFacturaDTO.getIdProveedor()));
+    }
+    notaCreditoNueva.setEmpresa(
+        empresaService.getEmpresaPorId(nuevaNotaCreditoSinFacturaDTO.getIdEmpresa()));
+    notaCreditoNueva.setModificaStock(false);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    notaCreditoNueva.setUsuario(
+        usuarioService.getUsuarioPorId(((Integer) claims.get("idUsuario")).longValue()));
+    notaCreditoNueva.setMotivo(nuevaNotaCreditoSinFacturaDTO.getMotivo());
+    return notaCreditoNueva;
   }
 
-  @PostMapping("/notas/credito/empresas/{idEmpresa}/usuarios/{idUsuario}/proveedores/{idProveedor}")
+  @PostMapping("/notas/credito")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Nota guardarNotaCreditoProveedor(
-    @RequestBody NotaCreditoDTO notaCreditoDTO,
-    @PathVariable long idEmpresa,
-    @PathVariable long idProveedor,
-    @PathVariable long idUsuario) {
+  public Nota guardarNotaCredito(
+      @RequestBody NotaCreditoDTO notaCreditoDTO,
+      @RequestHeader("Authorization") String authorizationHeader) {
     NotaCredito nota = modelMapper.map(notaCreditoDTO, NotaCredito.class);
-    nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    nota.setProveedor(proveedorService.getProveedorPorId(idProveedor));
-    nota.setMovimiento(Movimiento.COMPRA);
-    nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    nota.setModificaStock(false);
+    nota.setEmpresa(empresaService.getEmpresaPorId(notaCreditoDTO.getIdEmpresa()));
+    if ((notaCreditoDTO.getIdCliente() != null && notaCreditoDTO.getIdProveedor() != null)
+        || (notaCreditoDTO.getIdCliente() == null && notaCreditoDTO.getIdProveedor() == null)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_ambigua"));
+    }
+    if (notaCreditoDTO.getIdCliente() != null) {
+      nota.setCliente(clienteService.getClientePorId(notaCreditoDTO.getIdCliente()));
+      nota.setMovimiento(Movimiento.VENTA);
+    }
+    if (notaCreditoDTO.getIdProveedor() != null) {
+      nota.setProveedor(proveedorService.getProveedorPorId(notaCreditoDTO.getIdProveedor()));
+      nota.setMovimiento(Movimiento.COMPRA);
+    }
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    nota.setUsuario(
+        usuarioService.getUsuarioPorId(((Integer) claims.get("idUsuario")).longValue()));
     return notaService.guardarNotaCredito(nota);
   }
 
@@ -391,12 +434,6 @@ public class NotaController {
     return notaService.autorizarNota(notaService.getNotaPorId(idNota));
   }
 
-  @GetMapping("/notas/{idNota}/iva-neto")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal getIvaNetoNota(@PathVariable long idNota) {
-    return notaService.getIvaNetoNota(idNota);
-  }
-
   @PostMapping("/notas/credito/empresas/{idEmpresa}/usuarios/{idUsuario}/clientes/{idCliente}/facturas/{idFactura}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Nota guardarNotaCreditoClienteDeFactura(
@@ -423,24 +460,6 @@ public class NotaController {
     return notaService.guardarNotaCredito(nota);
   }
 
-  @GetMapping("/notas/renglon/credito/producto")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public List<RenglonNotaCredito> calcularRenglonNotaCreditoProducto(
-      @RequestParam TipoDeComprobante tipoDeComprobante,
-      @RequestParam BigDecimal[] cantidad,
-      @RequestParam Long[] idRenglonFactura) {
-    return notaService.calcularRenglonCreditoProducto(tipoDeComprobante, cantidad, idRenglonFactura);
-  }
-
-  @GetMapping("/notas/renglon/credito")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public RenglonNotaCredito calcularRenglonNotaCredito(
-      @RequestParam TipoDeComprobante tipoDeComprobante,
-      @RequestParam String detalle,
-      @RequestParam BigDecimal monto) {
-    return notaService.calcularRenglonCredito(tipoDeComprobante, detalle, monto);
-  }
-
   @GetMapping("/notas/renglon/debito/recibo/{idRecibo}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public List<RenglonNotaDebito> calcularRenglonNotaDebito(
@@ -448,68 +467,6 @@ public class NotaController {
       @RequestParam BigDecimal monto,
       @RequestParam BigDecimal ivaPorcentaje) {
     return notaService.calcularRenglonDebito(idRecibo, monto, ivaPorcentaje);
-  }
-
-  @GetMapping("/notas/credito/sub-total")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal calcularSubTotalCredito(@RequestParam BigDecimal[] importe) {
-    return notaService.calcularSubTotalCredito(importe);
-  }
-
-  @GetMapping("/notas/credito/descuento-neto")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal calcularDescuentoNetoCredito(
-      @RequestParam BigDecimal subTotal, @RequestParam BigDecimal descuentoPorcentaje) {
-    return notaService.calcularDecuentoNetoCredito(subTotal, descuentoPorcentaje);
-  }
-
-  @GetMapping("/notas/credito/recargo-neto")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal calcularRecargoNetoCredito(
-      @RequestParam BigDecimal subTotal, @RequestParam BigDecimal recargoPorcentaje) {
-    return notaService.calcularRecargoNetoCredito(subTotal, recargoPorcentaje);
-  }
-
-  @GetMapping("/notas/credito/iva-neto")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal calcularIVANetoCredito(
-      @RequestParam TipoDeComprobante tipoDeComprobante,
-      @RequestParam BigDecimal[] cantidades,
-      @RequestParam BigDecimal[] ivaPorcentajeRenglones,
-      @RequestParam BigDecimal[] ivaNetoRenglones,
-      @RequestParam BigDecimal ivaPorcentaje,
-      @RequestParam BigDecimal descuentoPorcentaje,
-      @RequestParam BigDecimal recargoPorcentaje) {
-    return notaService.calcularIVANetoCredito(
-        tipoDeComprobante,
-        cantidades,
-        ivaPorcentajeRenglones,
-        ivaNetoRenglones,
-        ivaPorcentaje,
-        descuentoPorcentaje,
-        recargoPorcentaje);
-  }
-
-  @GetMapping("/notas/credito/sub-total-bruto")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal calcularSubTotalBrutoCredito(
-      TipoDeComprobante tipoDeComprobante,
-      BigDecimal subTotal,
-      BigDecimal recargoNeto,
-      BigDecimal descuentoNeto,
-      BigDecimal iva105Neto,
-      BigDecimal iva21Neto) {
-    return notaService.calcularSubTotalBrutoCredito(
-        tipoDeComprobante, subTotal, recargoNeto, descuentoNeto, iva105Neto, iva21Neto);
-  }
-
-  @GetMapping("/notas/credito/total")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal calcularTotalCredito(
-      @RequestParam BigDecimal subTotalBruto,
-      @RequestParam BigDecimal iva105Neto,
-      @RequestParam BigDecimal iva21Neto) {
-    return notaService.calcularTotalCredito(subTotalBruto, iva105Neto, iva21Neto);
   }
 
   @GetMapping("/notas/debito/total")
