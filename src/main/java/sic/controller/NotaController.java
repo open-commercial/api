@@ -36,6 +36,7 @@ public class NotaController {
   private final IFacturaService facturaService;
   private final IAuthService authService;
   private final ModelMapper modelMapper;
+  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
@@ -328,8 +329,7 @@ public class NotaController {
             && nuevaNotaCreditoSinFacturaDTO.getIdProveedor() != null)
         || (nuevaNotaCreditoSinFacturaDTO.getIdCliente() == null
             && nuevaNotaCreditoSinFacturaDTO.getIdProveedor() == null)) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_ambigua"));
+      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_nota_cliente_proveedor_juntos"));
     }
     if (nuevaNotaCreditoSinFacturaDTO.getIdCliente() != null) {
       notaCreditoNueva.setCliente(
@@ -358,8 +358,7 @@ public class NotaController {
     nota.setEmpresa(empresaService.getEmpresaPorId(notaCreditoDTO.getIdEmpresa()));
     if ((notaCreditoDTO.getIdCliente() != null && notaCreditoDTO.getIdProveedor() != null)
         || (notaCreditoDTO.getIdCliente() == null && notaCreditoDTO.getIdProveedor() == null)) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_nota_ambigua"));
+      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_nota_cliente_proveedor_juntos"));
     }
     if (notaCreditoDTO.getIdCliente() != null) {
       nota.setCliente(clienteService.getClientePorId(notaCreditoDTO.getIdCliente()));
@@ -442,32 +441,6 @@ public class NotaController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Nota autorizarNota(@PathVariable long idNota) {
     return notaService.autorizarNota(notaService.getNotaPorId(idNota));
-  }
-
-  @PostMapping("/notas/credito/empresas/{idEmpresa}/usuarios/{idUsuario}/clientes/{idCliente}/facturas/{idFactura}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Nota guardarNotaCreditoClienteDeFactura(
-    @RequestBody NotaCreditoDTO notaCreditoDTO,
-    @PathVariable long idEmpresa,
-    @PathVariable long idCliente,
-    @PathVariable long idUsuario,
-    @PathVariable long idFactura,
-    @RequestParam boolean modificarStock) {
-    NotaCredito nota = modelMapper.map(notaCreditoDTO, NotaCredito.class);
-    nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    nota.setCliente(clienteService.getClientePorId(idCliente));
-    Factura factura = facturaService.getFacturaPorId(idFactura);
-    if (factura instanceof FacturaVenta
-      && ((FacturaVenta) factura).getIdCliente() == idCliente) {
-      nota.setFacturaVenta((FacturaVenta) factura);
-    } else {
-      throw new BusinessServiceException(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_movimiento_no_valido"));
-    }
-    nota.setMovimiento(Movimiento.VENTA);
-    nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    nota.setModificaStock(modificarStock);
-    return notaService.guardarNotaCredito(nota);
   }
 
   @GetMapping("/notas/renglon/debito/recibo/{idRecibo}")
