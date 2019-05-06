@@ -283,8 +283,11 @@ class AppIntegrationTest {
     notaDebitoCliente.setMotivo("Test alta nota debito - Cheque rechazado");
     notaDebitoCliente.setSubTotalBruto(new BigDecimal("100"));
     notaDebitoCliente.setTotal(new BigDecimal("6113.5"));
+    notaDebitoCliente.setIdEmpresa(1L);
+    notaDebitoCliente.setIdCliente(1L);
+    notaDebitoCliente.setIdRecibo(1L);
     restTemplate.postForObject(
-      apiPrefix + "/notas/debito/empresas/1/usuarios/1/clientes/1/recibos/1",
+      apiPrefix + "/notas/debito/clientes",
       notaDebitoCliente,
       Nota.class);
     restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
@@ -361,8 +364,11 @@ class AppIntegrationTest {
     notaDebito.setSubTotalBruto(new BigDecimal("100"));
     notaDebito.setTotal(new BigDecimal("321"));
     notaDebito.setTipoComprobante(TipoDeComprobante.NOTA_DEBITO_B);
+    notaDebito.setIdRecibo(3L);
+    notaDebito.setIdEmpresa(1L);
+    notaDebito.setIdProveedor(1L);
     restTemplate.postForObject(
-      apiPrefix + "/notas/debito/empresas/1/usuarios/1/proveedores/1/recibos/3",
+      apiPrefix + "/notas/debito/proveedores",
       notaDebito,
       NotaDebito.class);
   }

@@ -382,39 +382,35 @@ public class NotaController {
     return notaService.guardarNotaCredito(nota);
   }
 
-  @PostMapping(
-      "/notas/debito/empresas/{idEmpresa}/usuarios/{idUsuario}/clientes/{idCliente}/recibos/{idRecibo}")
+  @PostMapping("/notas/debito/clientes")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Nota guardarNotaDebitoCliente(
       @RequestBody NotaDebitoDTO notaDebitoDTO,
-      @PathVariable long idEmpresa,
-      @PathVariable long idCliente,
-      @PathVariable long idUsuario,
-      @PathVariable long idRecibo) {
+      @RequestHeader("Authorization") String authorizationHeader) {
     NotaDebito nota = modelMapper.map(notaDebitoDTO, NotaDebito.class);
-    nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    nota.setCliente(clienteService.getClientePorId(idCliente));
+    nota.setEmpresa(empresaService.getEmpresaPorId(notaDebitoDTO.getIdEmpresa()));
+    nota.setCliente(clienteService.getClientePorId(notaDebitoDTO.getIdCliente()));
     nota.setMovimiento(Movimiento.VENTA);
-    nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    nota.setRecibo(reciboService.getById(idRecibo));
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    nota.setUsuario(
+        usuarioService.getUsuarioPorId(((Integer) claims.get("idUsuario")).longValue()));
+    nota.setRecibo(reciboService.getById(notaDebitoDTO.getIdRecibo()));
     return notaService.guardarNotaDebito(nota);
   }
 
-  @PostMapping(
-    "/notas/debito/empresas/{idEmpresa}/usuarios/{idUsuario}/proveedores/{idProveedor}/recibos/{idRecibo}")
+  @PostMapping("/notas/debito/proveedores")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Nota guardarNotaDebitoProveedor(
-    @RequestBody NotaDebitoDTO notaDebitoDTO,
-    @PathVariable long idEmpresa,
-    @PathVariable long idProveedor,
-    @PathVariable long idUsuario,
-    @PathVariable long idRecibo) {
+      @RequestBody NotaDebitoDTO notaDebitoDTO,
+      @RequestHeader("Authorization") String authorizationHeader) {
     NotaDebito nota = modelMapper.map(notaDebitoDTO, NotaDebito.class);
-    nota.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    nota.setProveedor(proveedorService.getProveedorPorId(idProveedor));
+    nota.setEmpresa(empresaService.getEmpresaPorId(notaDebitoDTO.getIdEmpresa()));
+    nota.setProveedor(proveedorService.getProveedorPorId(notaDebitoDTO.getIdProveedor()));
     nota.setMovimiento(Movimiento.COMPRA);
-    nota.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    nota.setRecibo(reciboService.getById(idRecibo));
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    nota.setUsuario(
+        usuarioService.getUsuarioPorId(((Integer) claims.get("idUsuario")).longValue()));
+    nota.setRecibo(reciboService.getById(notaDebitoDTO.getIdRecibo()));
     return notaService.guardarNotaDebito(nota);
   }
 
