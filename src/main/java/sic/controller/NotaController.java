@@ -272,8 +272,10 @@ public class NotaController {
     notaCreditoNueva.setFecha(new Date());
     if (factura instanceof FacturaVenta) {
       notaCreditoNueva.setCliente(clienteService.getClientePorId(((FacturaVenta)factura).getIdCliente()));
+      notaCreditoNueva.setFacturaVenta((FacturaVenta)factura);
     } else if (factura instanceof FacturaCompra) {
       notaCreditoNueva.setProveedor(proveedorService.getProveedorPorId(((FacturaCompra)factura).getIdProveedor()));
+      notaCreditoNueva.setFacturaCompra((FacturaCompra) factura);
     }
     notaCreditoNueva.setEmpresa(factura.getEmpresa());
     notaCreditoNueva.setModificaStock(nuevaNotaCreditoDeFacturaDTO.isModificaStock());
@@ -362,10 +364,18 @@ public class NotaController {
     if (notaCreditoDTO.getIdCliente() != null) {
       nota.setCliente(clienteService.getClientePorId(notaCreditoDTO.getIdCliente()));
       nota.setMovimiento(Movimiento.VENTA);
+      if (notaCreditoDTO.getIdFacturaVenta() != null) {
+        nota.setFacturaVenta(
+            (FacturaVenta) facturaService.getFacturaPorId(notaCreditoDTO.getIdFacturaVenta()));
+      }
     }
     if (notaCreditoDTO.getIdProveedor() != null) {
       nota.setProveedor(proveedorService.getProveedorPorId(notaCreditoDTO.getIdProveedor()));
       nota.setMovimiento(Movimiento.COMPRA);
+      if (notaCreditoDTO.getIdFacturaCompra() != null) {
+        nota.setFacturaCompra(
+            (FacturaCompra) facturaService.getFacturaPorId(notaCreditoDTO.getIdFacturaCompra()));
+      }
     }
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     nota.setUsuario(

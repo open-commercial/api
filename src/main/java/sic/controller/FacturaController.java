@@ -144,13 +144,13 @@ public class FacturaController {
     public List<RenglonFactura> getRenglonesDeLaFactura(@PathVariable long idFactura) {
             return facturaService.getRenglonesDeLaFactura(idFactura);
     }
-    
-    @GetMapping("/facturas/{idFactura}/renglones/notas/credito")
 
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-    public List<RenglonFactura> getRenglonesDeLaFacturaModificadosParaCredito(@PathVariable long idFactura) {
-            return facturaService.getRenglonesDeLaFacturaModificadosParaCredito(idFactura);
-    }
+  @GetMapping("/facturas/{idFactura}/renglones/notas/credito")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public List<RenglonFactura> getRenglonesDeLaFacturaModificadosParaCredito(
+      @PathVariable long idFactura) {
+    return facturaService.getRenglonesDeLaFacturaModificadosParaCredito(idFactura);
+  }
 
   @GetMapping("/facturas/compra/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
