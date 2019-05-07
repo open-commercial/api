@@ -1,5 +1,7 @@
 package sic.controller;
 
+import io.jsonwebtoken.Claims;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,12 +17,8 @@ import sic.modelo.BusquedaReciboCriteria;
 import sic.modelo.Movimiento;
 import sic.modelo.Recibo;
 import sic.modelo.Rol;
-import sic.service.IClienteService;
-import sic.service.IEmpresaService;
-import sic.service.IFormaDePagoService;
-import sic.service.IProveedorService;
-import sic.service.IReciboService;
-import sic.service.IUsuarioService;
+import sic.modelo.dto.ReciboDTO;
+import sic.service.*;
 
 import java.math.BigDecimal;
 import java.util.Calendar;
@@ -35,18 +33,23 @@ public class ReciboController {
     private final IClienteService clienteService;
     private final IProveedorService proveedorService;
     private final IFormaDePagoService formaDePagoService;
+    private final IAuthService authService;
+    private final ModelMapper modelMapper;
     private static final int TAMANIO_PAGINA_DEFAULT = 25;
     
     @Autowired
     public ReciboController(IReciboService reciboService, IEmpresaService empresaService,
                             IUsuarioService usuarioService, IClienteService clienteService,
-                            IProveedorService proveedorService, IFormaDePagoService formaDePagoService) {
+                            IProveedorService proveedorService, IFormaDePagoService formaDePagoService,
+                            IAuthService authService, ModelMapper modelMapper) {
         this.reciboService = reciboService;
         this.empresaService = empresaService;
         this.usuarioService = usuarioService;
         this.clienteService = clienteService;
         this.formaDePagoService = formaDePagoService;
         this.proveedorService = proveedorService;
+        this.authService = authService;
+        this.modelMapper = modelMapper;
     }
     
     @GetMapping("/recibos/{idRecibo}")
@@ -263,34 +266,36 @@ public class ReciboController {
     return reciboService.getTotalRecibos(criteria);
   }
 
-    @PostMapping("/recibos/clientes")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public Recibo guardarReciboCliente(@RequestParam long idUsuario,
-                                       @RequestParam long idEmpresa,
-                                       @RequestParam long idCliente,
-                                       @RequestParam long idFormaDePago,
-                                       @RequestBody Recibo recibo) {
-        recibo.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-        recibo.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-        recibo.setCliente(clienteService.getClientePorId(idCliente));
-        recibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(idFormaDePago));
-        return reciboService.guardar(recibo);
-    }
-    
-    @PostMapping("/recibos/proveedores")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public Recibo guardarReciboProveedor(@RequestParam long idUsuario,
-                                         @RequestParam long idEmpresa,
-                                         @RequestParam long idProveedor,
-                                         @RequestParam long idFormaDePago,
-                                         @RequestBody Recibo recibo) {
-        recibo.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-        recibo.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-        recibo.setProveedor(proveedorService.getProveedorPorId(idProveedor));
-        recibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(idFormaDePago));
-        return reciboService.guardar(recibo);
-    }
-    
+  @PostMapping("/recibos/clientes")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public Recibo guardarReciboCliente(
+      @RequestBody ReciboDTO reciboDTO,
+      @RequestHeader("Authorization") String authorizationHeader) {
+    Recibo recibo = modelMapper.map(reciboDTO, Recibo.class);
+    recibo.setEmpresa(empresaService.getEmpresaPorId(reciboDTO.getIdEmpresa()));
+    recibo.setCliente(clienteService.getClientePorId(reciboDTO.getIdCliente()));
+    recibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(reciboDTO.getIdFormaDePago()));
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    recibo.setUsuario(
+        usuarioService.getUsuarioPorId(((Integer) claims.get("idUsuario")).longValue()));
+    return reciboService.guardar(recibo);
+  }
+
+  @PostMapping("/recibos/proveedores")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public Recibo guardarReciboProveedor(
+      @RequestBody ReciboDTO reciboDTO,
+      @RequestHeader("Authorization") String authorizationHeader) {
+    Recibo recibo = modelMapper.map(reciboDTO, Recibo.class);
+    recibo.setEmpresa(empresaService.getEmpresaPorId(reciboDTO.getIdEmpresa()));
+    recibo.setProveedor(proveedorService.getProveedorPorId(reciboDTO.getIdProveedor()));
+    recibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(reciboDTO.getIdFormaDePago()));
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    recibo.setUsuario(
+        usuarioService.getUsuarioPorId(((Integer) claims.get("idUsuario")).longValue()));
+    return reciboService.guardar(recibo);
+  }
+
     @DeleteMapping("/recibos/{idRecibo}")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
     public void eliminar(@PathVariable long idRecibo) {

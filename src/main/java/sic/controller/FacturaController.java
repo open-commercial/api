@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import io.jsonwebtoken.Claims;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.dto.FacturaCompraDTO;
+import sic.modelo.dto.FacturaVentaDTO;
 import sic.service.*;
 
 @RestController
@@ -29,6 +32,7 @@ public class FacturaController {
   private final IUsuarioService usuarioService;
   private final ITransportistaService transportistaService;
   private final IReciboService reciboService;
+  private final ModelMapper modelMapper;
   private final IAuthService authService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
@@ -41,6 +45,7 @@ public class FacturaController {
       IUsuarioService usuarioService,
       ITransportistaService transportistaService,
       IReciboService reciboService,
+      ModelMapper modelMapper,
       IAuthService authService) {
     this.facturaService = facturaService;
     this.empresaService = empresaService;
@@ -50,6 +55,7 @@ public class FacturaController {
     this.transportistaService = transportistaService;
     this.reciboService = reciboService;
     this.authService = authService;
+    this.modelMapper = modelMapper;
   }
 
     @GetMapping("/facturas/{idFactura}")
@@ -61,18 +67,16 @@ public class FacturaController {
   @PostMapping("/facturas/venta")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public List<FacturaVenta> guardarFacturaVenta(
-      @RequestBody FacturaVenta fv,
-      @RequestParam Long idEmpresa,
-      @RequestParam Long idCliente,
-      @RequestParam Long idUsuario,
-      @RequestParam Long idTransportista,
+      @RequestBody FacturaVentaDTO facturaVentaDTO,
       @RequestParam(required = false) long[] idsFormaDePago,
       @RequestParam(required = false) BigDecimal[] montos,
       @RequestParam(required = false) int[] indices,
-      @RequestParam(required = false) Long idPedido) {
-    Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
+      @RequestParam(required = false) Long idPedido,
+      @RequestHeader("Authorization") String authorizationHeader) {
+    FacturaVenta fv = modelMapper.map(facturaVentaDTO, FacturaVenta.class);
+    Empresa empresa = empresaService.getEmpresaPorId(facturaVentaDTO.getIdEmpresa());
     fv.setEmpresa(empresa);
-    Cliente cliente = clienteService.getClientePorId(idCliente);
+    Cliente cliente = clienteService.getClientePorId(facturaVentaDTO.getIdCliente());
     if (cliente.getUbicacionFacturacion() == null
         && (fv.getTipoComprobante() == TipoDeComprobante.FACTURA_A
             || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_B
@@ -81,9 +85,10 @@ public class FacturaController {
           ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_facturacion_vacia"));
     }
     fv.setCliente(cliente);
-    fv.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    fv.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
+    fv.setTransportista(transportistaService.getTransportistaPorId(facturaVentaDTO.getIdTransportista()));
     fv.setFecha(new Date());
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    fv.setUsuario(usuarioService.getUsuarioPorId(((Integer) claims.get("idUsuario")).longValue()));
     List<FacturaVenta> facturasGuardadas;
     if (indices != null) {
       facturasGuardadas =
@@ -120,15 +125,15 @@ public class FacturaController {
   @PostMapping("/facturas/compra")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public List<FacturaCompra> guardarFacturaCompra(
-      @RequestBody FacturaCompra fc,
-      @RequestParam Long idUsuario,
-      @RequestParam Long idEmpresa,
-      @RequestParam Long idProveedor,
-      @RequestParam Long idTransportista) {
-    fc.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    fc.setProveedor(proveedorService.getProveedorPorId(idProveedor));
-    fc.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    fc.setTransportista(transportistaService.getTransportistaPorId(idTransportista));
+      @RequestBody FacturaCompraDTO facturaCompraDTO,
+      @RequestHeader("Authorization") String authorizationHeader) {
+    FacturaCompra fc = modelMapper.map(facturaCompraDTO, FacturaCompra.class);
+    fc.setEmpresa(empresaService.getEmpresaPorId(facturaCompraDTO.getIdEmpresa()));
+    fc.setProveedor(proveedorService.getProveedorPorId(facturaCompraDTO.getIdProveedor()));
+    fc.setTransportista(
+        transportistaService.getTransportistaPorId(facturaCompraDTO.getIdTransportista()));
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    fc.setUsuario(usuarioService.getUsuarioPorId(((Integer) claims.get("idUsuario")).longValue()));
     List<FacturaCompra> facturas = new ArrayList<>();
     facturas.add(fc);
     return facturaService.guardar(facturas);

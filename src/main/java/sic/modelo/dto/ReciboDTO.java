@@ -20,7 +20,9 @@ public class ReciboDTO implements Serializable {
   private Date fecha;
   private boolean eliminado;
   private String concepto;
+  private long idFormaDePago;
   private String nombreFormaDePago;
+  private long idEmpresa;
   private String nombreEmpresa;
   private Long idCliente;
   private String nombreFiscalCliente;
