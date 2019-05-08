@@ -3,6 +3,9 @@ package sic.service;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import sic.modelo.BusquedaGastoCriteria;
 import sic.modelo.Empresa;
 import sic.modelo.FormaDePago;
 import sic.modelo.Gasto;
@@ -22,6 +25,8 @@ public interface IGastoService {
     Gasto guardar(@Valid Gasto gasto);
 
     void validarOperacion(Gasto gasto);
+
+    Page<Gasto> buscarGastos(BusquedaGastoCriteria criteria);
 
     long getUltimoNumeroDeGasto(long id_empresa);
 
