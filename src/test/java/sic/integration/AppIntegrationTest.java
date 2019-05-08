@@ -1421,6 +1421,44 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldGetRubrosDeEmpresa() {
+    this.shouldCrearRubro();
+    List<RubroDTO> rubrosRecuperados =
+        restTemplate
+            .exchange(
+                apiPrefix + "/rubros/empresas/1",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<RubroDTO>>() {})
+            .getBody();
+    assertEquals("Ferreteria", rubrosRecuperados.get(0).getNombre());
+    assertEquals("Reparación de Ovnis", rubrosRecuperados.get(1).getNombre());
+  }
+
+  @Test
+  void shouldGetExceptionYaExisteRubroConElNombreIngresadoEnAlta() {
+    try {
+      this.shouldCrearRubro();
+      RubroDTO rubro = RubroDTO.builder().nombre("Reparación de Ovnis").build();
+      restTemplate.postForObject(apiPrefix + "/rubros?idEmpresa=1", rubro, RubroDTO.class);
+    } catch (RestClientResponseException ex) {
+      assertTrue(ex.getMessage().startsWith("Ya existe un rubro con el nombre ingresado."));
+    }
+  }
+
+  @Test
+  void shouldGetExceptionYaExisteRubroConElNombreIngresadoEnModificacion() {
+    try {
+      this.shouldCrearRubro();
+      RubroDTO rubro = restTemplate.getForObject(apiPrefix + "/rubros/2", RubroDTO.class);
+      rubro.setNombre("Ferreteria");
+      restTemplate.put(apiPrefix + "/rubros", rubro);
+    } catch (RestClientResponseException ex) {
+      assertTrue(ex.getMessage().startsWith("Ya existe un rubro con el nombre ingresado."));
+    }
+  }
+
+  @Test
   void shouldCrearProveedorResponsableInscripto() {
     ProveedorDTO proveedor =
       ProveedorDTO.builder()
