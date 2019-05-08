@@ -75,22 +75,6 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
 
   @Override
   public void validarOperacion(TipoDeOperacion tipoOperacion, ConfiguracionDelSistema cds) {
-    if (tipoOperacion.equals(TipoDeOperacion.ACTUALIZACION)) {
-      if (cds.isFacturaElectronicaHabilitada() || cds.isEmailSenderHabilitado()) {
-        ConfiguracionDelSistema cdsRecuperado =
-            this.getConfiguracionDelSistemaPorId(cds.getId_ConfiguracionDelSistema());
-        if (cds.isFacturaElectronicaHabilitada() && cds.getPasswordCertificadoAfip().equals("")) {
-          cds.setPasswordCertificadoAfip(cdsRecuperado.getPasswordCertificadoAfip());
-        }
-        if (cds.isEmailSenderHabilitado() && cds.getEmailPassword().equals("")) {
-          cds.setEmailPassword(cdsRecuperado.getEmailPassword());
-        }
-      }
-    } else if (tipoOperacion.equals(TipoDeOperacion.ALTA)
-        && cds.isEmailSenderHabilitado()
-        && !cds.getEmailPassword().equals("")) {
-      cds.setEmailPassword(cds.getEmailPassword());
-    }
     if (cds.isFacturaElectronicaHabilitada()) {
       if (cds.getCertificadoAfip() == null) {
         throw new BusinessServiceException(
