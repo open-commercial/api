@@ -18,11 +18,13 @@ public class BusquedaGastoCriteria {
   private Date fechaDesde;
   private Date fechaHasta;
   private Long idEmpresa;
-  private Pageable pageable;
   private boolean buscaPorUsuario;
   private Long idUsuario;
+  private boolean buscarPorFormaDePago;
+  private Long idFormaDePago;
   private boolean buscaPorNro;
   private Long nroGasto;
   private boolean buscaPorConcepto;
   private String concepto;
+  private Pageable pageable;
 }

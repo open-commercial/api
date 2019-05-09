@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import sic.modelo.Empresa;
 import sic.modelo.Gasto;
 
-public interface GastoRepository extends PagingAndSortingRepository<Gasto, Long>, QueryDslPredicateExecutor<Gasto> {
+public interface GastoRepository extends PagingAndSortingRepository<Gasto, Long>, QueryDslPredicateExecutor<Gasto>, GastoRepositoryCustom {
 
     @Query("SELECT g FROM Gasto g WHERE g.id_Gasto = :idGasto AND g.eliminado = false")
     Gasto findById(@Param("idGasto") long idGasto);

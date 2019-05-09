@@ -63,6 +63,10 @@ public class GastoServiceImpl implements IGastoService {
 
   @Override
   public Page<Gasto> buscarGastos(BusquedaGastoCriteria criteria) {
+    return gastoRepository.findAll(this.getBuilder(criteria), criteria.getPageable());
+  }
+
+  private BooleanBuilder getBuilder(BusquedaGastoCriteria criteria) {
     if (criteria.isBuscaPorFecha()
         && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
       throw new BusinessServiceException(
@@ -106,12 +110,14 @@ public class GastoServiceImpl implements IGastoService {
               formateadorFecha.format(criteria.getFechaHasta()));
       builder.and(qGasto.fecha.between(fDesde, fHasta));
     }
+    if (criteria.isBuscarPorFormaDePago())
+      builder.or(qGasto.formaDePago.id_FormaDePago.eq(criteria.getIdFormaDePago()));
     if (criteria.isBuscaPorNro()) builder.or(qGasto.nroGasto.eq(criteria.getNroGasto()));
     if (criteria.isBuscaPorUsuario())
       builder.and(qGasto.usuario.id_Usuario.eq(criteria.getIdUsuario()));
     builder.and(
         qGasto.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qGasto.eliminado.eq(false)));
-    return gastoRepository.findAll(builder, criteria.getPageable());
+    return builder;
   }
 
     @Override
@@ -178,4 +184,8 @@ public class GastoServiceImpl implements IGastoService {
         return (total == null) ? BigDecimal.ZERO : total;
     }
 
+  @Override
+  public BigDecimal getTotalGastos(BusquedaGastoCriteria criteria) {
+    return gastoRepository.getTotalGastos(this.getBuilder(criteria));
+  }
 }

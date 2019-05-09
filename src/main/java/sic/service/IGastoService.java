@@ -36,4 +36,6 @@ public interface IGastoService {
 
     BigDecimal getTotalGastosEntreFechas(long idEmpresa, Date desde, Date hasta);
 
+    BigDecimal getTotalGastos(BusquedaGastoCriteria criteria);
+
 }
