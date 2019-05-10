@@ -3960,6 +3960,72 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldNotActualizarPedidoPorNumeroNoExistente() {
+    this.crearProductos();
+    List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
+    renglonesPedidoDTO.add(
+        NuevoRenglonPedidoDTO.builder()
+            .idProductoItem(1L)
+            .cantidad(new BigDecimal("5.000000000000000"))
+            .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
+            .build());
+    renglonesPedidoDTO.add(
+        NuevoRenglonPedidoDTO.builder()
+            .idProductoItem(2L)
+            .cantidad(new BigDecimal("2.000000000000000"))
+            .descuentoPorcentaje(BigDecimal.ZERO)
+            .build());
+    List<RenglonPedidoDTO> renglonesPedido =
+        Arrays.asList(
+            restTemplate.postForObject(
+                apiPrefix + "/pedidos/renglones", renglonesPedidoDTO, RenglonPedidoDTO[].class));
+    BigDecimal importe = BigDecimal.ZERO;
+    for (RenglonPedidoDTO renglon : renglonesPedido) {
+      importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
+    }
+    BigDecimal recargoNeto =
+        importe.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
+    BigDecimal descuentoNeto =
+        importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
+    BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
+    NuevoPedidoDTO nuevoPedidoDTO =
+        NuevoPedidoDTO.builder()
+            .descuentoNeto(descuentoNeto)
+            .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
+            .recargoNeto(recargoNeto)
+            .recargoPorcentaje(new BigDecimal("5"))
+            .fechaVencimiento(new Date())
+            .observaciones("Nuevo Pedido Test")
+            .renglones(renglonesPedido)
+            .subTotal(importe)
+            .total(total)
+            .idEmpresa(1L)
+            .idUsuario(2L)
+            .idCliente(1L)
+            .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
+            .build();
+    PedidoDTO pedidoRecuperado =
+        restTemplate.postForObject(apiPrefix + "/pedidos", nuevoPedidoDTO, PedidoDTO.class);
+    pedidoRecuperado.setNroPedido(1L);
+    pedidoRecuperado.setRenglones(
+        restTemplate
+            .exchange(
+                apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido() + "/renglones",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<RenglonPedidoDTO>>() {})
+            .getBody());
+    try {
+      restTemplate.put(
+          apiPrefix
+              + "/pedidos?idEmpresa=1&idUsuario=2&idCliente=1&tipoDeEnvio=USAR_UBICACION_FACTURACION",
+          pedidoRecuperado);
+    } catch (RestClientResponseException ex) {
+      assertTrue(ex.getMessage().startsWith("El pedido solicitado no existe."));
+    }
+  }
+
+  @Test
   void shouldCrearPedidoConUbicacionFacturacion() {
     this.crearProductos();
     List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();

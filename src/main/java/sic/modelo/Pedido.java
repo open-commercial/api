@@ -84,7 +84,7 @@ public class Pedido implements Serializable {
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "id_Pedido")
   @JsonProperty(access = Access.WRITE_ONLY)
-  @NotEmpty
+  @NotEmpty(message = "{mensaje_pedido_renglones_vacios}")
   private List<RenglonPedido> renglones;
 
   @Column(precision = 25, scale = 15)
