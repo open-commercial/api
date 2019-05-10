@@ -2,26 +2,24 @@ package sic.service;
 
 import sic.modelo.ConfiguracionDelSistema;
 import sic.modelo.Empresa;
-import sic.modelo.TipoDeOperacion;
 
 import javax.validation.Valid;
 
 public interface IConfiguracionDelSistemaService {
 
-    void actualizar(@Valid ConfiguracionDelSistema cds);
+  void actualizar(@Valid ConfiguracionDelSistema cds);
 
-    ConfiguracionDelSistema getConfiguracionDelSistemaPorEmpresa(Empresa empresa);
+  ConfiguracionDelSistema getConfiguracionDelSistemaPorEmpresa(Empresa empresa);
 
-    ConfiguracionDelSistema getConfiguracionDelSistemaPorId(long idConfiguracionDelSistema);
+  ConfiguracionDelSistema getConfiguracionDelSistemaPorId(long idConfiguracionDelSistema);
 
-    ConfiguracionDelSistema guardar(@Valid ConfiguracionDelSistema cds);
-    
-    void eliminar(ConfiguracionDelSistema cds);
-    
-    void validarOperacion(TipoDeOperacion tipoOperacion, ConfiguracionDelSistema cds);
+  ConfiguracionDelSistema guardar(@Valid ConfiguracionDelSistema cds);
 
-    int getCantidadMaximaDeRenglonesPorIdEmpresa(long  idEmpresa);
+  void eliminar(ConfiguracionDelSistema cds);
 
-    boolean isFacturaElectronicaHabilitada(long  idEmpresa);
-    
+  void validarOperacion(ConfiguracionDelSistema cds);
+
+  int getCantidadMaximaDeRenglonesPorIdEmpresa(long idEmpresa);
+
+  boolean isFacturaElectronicaHabilitada(long idEmpresa);
 }

@@ -19,19 +19,20 @@ import sic.service.IEmpresaService;
 @RestController
 @RequestMapping("/api/v1")
 public class ConfiguracionDelSistemaController {
-    
-    private final IConfiguracionDelSistemaService configuracionDelSistemaService;
-    private final IEmpresaService empresaService;
-    private final ModelMapper modelMapper;
-    
-    @Autowired
-    public ConfiguracionDelSistemaController(IConfiguracionDelSistemaService configuracionDelSistemaService,
-                                             IEmpresaService empresaService,
-                                             ModelMapper modelMapper) {
-        this.configuracionDelSistemaService = configuracionDelSistemaService;
-        this.empresaService = empresaService;
-        this.modelMapper = modelMapper;
-    }
+
+  private final IConfiguracionDelSistemaService configuracionDelSistemaService;
+  private final IEmpresaService empresaService;
+  private final ModelMapper modelMapper;
+
+  @Autowired
+  public ConfiguracionDelSistemaController(
+      IConfiguracionDelSistemaService configuracionDelSistemaService,
+      IEmpresaService empresaService,
+      ModelMapper modelMapper) {
+    this.configuracionDelSistemaService = configuracionDelSistemaService;
+    this.empresaService = empresaService;
+    this.modelMapper = modelMapper;
+  }
 
   @PutMapping("/configuraciones-del-sistema")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
@@ -74,22 +75,23 @@ public class ConfiguracionDelSistemaController {
     return configuracionDelSistemaService.guardar(configuracionDelSistema);
   }
 
-    @GetMapping("/configuraciones-del-sistema/empresas/{idEmpresa}")
-    @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-    public ConfiguracionDelSistema getconfiguracionDelSistemaPorEmpresa(@PathVariable long idEmpresa) {
-        return configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    }
+  @GetMapping("/configuraciones-del-sistema/empresas/{idEmpresa}")
+  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
+  public ConfiguracionDelSistema getconfiguracionDelSistemaPorEmpresa(
+      @PathVariable long idEmpresa) {
+    return configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(
+        empresaService.getEmpresaPorId(idEmpresa));
+  }
 
-    @GetMapping("/configuraciones-del-sistema/empresas/{idEmpresa}/cantidad-renglones")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
-    public int getCantidadMaximaDeRenglonesPorIdEmpresa(@PathVariable long idEmpresa) {
-        return configuracionDelSistemaService.getCantidadMaximaDeRenglonesPorIdEmpresa(idEmpresa);
-    }
+  @GetMapping("/configuraciones-del-sistema/empresas/{idEmpresa}/cantidad-renglones")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
+  public int getCantidadMaximaDeRenglonesPorIdEmpresa(@PathVariable long idEmpresa) {
+    return configuracionDelSistemaService.getCantidadMaximaDeRenglonesPorIdEmpresa(idEmpresa);
+  }
 
-    @GetMapping("/configuraciones-del-sistema/empresas/{idEmpresa}/factura-electronica-habilitada")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-    public boolean isFacturaElectronicaHabilitada(@PathVariable long idEmpresa) {
-        return configuracionDelSistemaService.isFacturaElectronicaHabilitada(idEmpresa);
-    }
-
+  @GetMapping("/configuraciones-del-sistema/empresas/{idEmpresa}/factura-electronica-habilitada")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public boolean isFacturaElectronicaHabilitada(@PathVariable long idEmpresa) {
+    return configuracionDelSistemaService.isFacturaElectronicaHabilitada(idEmpresa);
+  }
 }
