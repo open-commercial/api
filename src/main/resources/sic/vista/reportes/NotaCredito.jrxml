@@ -758,7 +758,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textElement verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{notaCredito}.getFacturaVenta() != null) ? $P{notaCredito}.getFacturaVenta().getFecha() : "Ninguno" ]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaCredito}.getFacturaVenta() != null) ? $P{notaCredito}.getFacturaVenta().getFecha() : ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="95" width="40" height="12" uuid="e06933f8-0985-4dac-bbb6-4e273d26e38a">
