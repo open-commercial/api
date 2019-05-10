@@ -80,9 +80,19 @@ public class Recibo implements Serializable {
   @DecimalMin(value = "0", message = "{mensaje_monto_negativo}")
   private BigDecimal monto;
 
+  @JsonGetter("idFormaDePago")
+  public long getIdFormaDePago() {
+    return formaDePago.getId_FormaDePago();
+  }
+
   @JsonGetter("nombreFormaDePago")
   public String getNombreFormaDePago() {
     return formaDePago.getNombre();
+  }
+
+  @JsonGetter("idEmpresa")
+  public long getIdEmpresa() {
+    return empresa.getId_Empresa();
   }
 
   @JsonGetter("nombreEmpresa")
