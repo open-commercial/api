@@ -292,6 +292,11 @@ public class NotaController {
       @RequestBody NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     NotaCredito notaCreditoNueva = new NotaCredito();
+    if (nuevaNotaCreditoSinFacturaDTO.getDetalle() == null
+        || nuevaNotaCreditoSinFacturaDTO.getDetalle().isEmpty()) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_nota_renglon_sin_descripcion"));
+    }
     List<RenglonNotaCredito> renglones = new ArrayList<>();
     notaCreditoNueva.setTipoComprobante(nuevaNotaCreditoSinFacturaDTO.getTipo());
     renglones.add(
