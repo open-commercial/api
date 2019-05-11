@@ -83,6 +83,12 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   }
 
   @Override
+  public ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(
+      long idUsuario, long idProducto) {
+    return this.carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
+  }
+
+  @Override
   public void eliminarItemDelUsuario(long idUsuario, long idProducto) {
     carritoCompraRepository.eliminarItemDelUsuario(idUsuario, idProducto);
   }
@@ -101,7 +107,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   public void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad) {
     Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
     Producto producto = productoService.getProductoPorId(idProducto);
-    ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(usuario, producto);
+    ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
     if (item == null) {
       BigDecimal importe = producto.getPrecioLista().multiply(cantidad);
       ItemCarritoCompra itemCC =
@@ -123,9 +129,8 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   @Override
   public void modificarCantidadItem(long idUsuario, long idProducto, BigDecimal cantidad) {
-    Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
     Producto producto = productoService.getProductoPorId(idProducto);
-    ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(usuario, producto);
+    ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
     if (item != null) {
       if (cantidad.compareTo(BigDecimal.ZERO) < 0) {
         item.setCantidad(BigDecimal.ZERO);

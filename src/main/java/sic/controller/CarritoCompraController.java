@@ -61,6 +61,12 @@ public class CarritoCompraController {
     return carritoCompraService.getItemsDelCaritoCompra(idUsuario, idCliente, pageable);
   }
 
+  @JsonView(Views.Public.class)
+  @GetMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
+  public ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(@PathVariable long idUsuario, @PathVariable long idProducto) {
+    return carritoCompraService.getItemCarritoDeCompraDeUsuarioPorIdProducto(idUsuario, idProducto);
+  }
+
   @DeleteMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
   public void eliminarItem(@PathVariable long idUsuario, @PathVariable long idProducto) {
     carritoCompraService.eliminarItemDelUsuario(idUsuario, idProducto);
