@@ -85,14 +85,6 @@ public class CarritoCompraController {
     carritoCompraService.agregarOrModificarItem(idUsuario, idProducto, cantidad);
   }
 
-  @PutMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
-  public void modificarCantidadItem(
-      @PathVariable long idUsuario,
-      @PathVariable long idProducto,
-      @RequestParam BigDecimal cantidad) {
-    carritoCompraService.modificarCantidadItem(idUsuario, idProducto, cantidad);
-  }
-
   @PostMapping("/carrito-compra")
   public Pedido generarPedidoConItemsDelCarrito(
       @RequestParam Long idEmpresa,
