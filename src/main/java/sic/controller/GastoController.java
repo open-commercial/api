@@ -134,7 +134,7 @@ public class GastoController {
 
   @GetMapping("/gastos/total/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public BigDecimal getTotalRecibosVenta(
+  public BigDecimal getTotalGastos(
       @RequestParam Long idEmpresa,
       @RequestParam(required = false) Long desde,
       @RequestParam(required = false) Long hasta,
