@@ -3,9 +3,11 @@ package sic.service;
 import sic.modelo.*;
 import org.springframework.data.domain.Page;
 
+import javax.validation.Valid;
+
 public interface IClienteService {
 
-  void actualizar(Cliente clientePorActualizar, Cliente clientePersistido);
+  void actualizar(@Valid Cliente clientePorActualizar, Cliente clientePersistido);
 
   Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long idUsuario);
 
@@ -21,7 +23,7 @@ public interface IClienteService {
 
   void setClientePredeterminado(Cliente cliente);
 
-  Cliente guardar(Cliente cliente);
+  Cliente guardar(@Valid Cliente cliente);
 
   void validarOperacion(TipoDeOperacion operacion, Cliente cliente);
 

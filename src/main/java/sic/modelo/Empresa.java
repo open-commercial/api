@@ -3,6 +3,7 @@ package sic.modelo;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.querydsl.core.annotations.QueryInit;
@@ -11,6 +12,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
 @Table(name = "empresa")
@@ -24,6 +27,8 @@ public class Empresa implements Serializable {
 
   @Id @GeneratedValue private long id_Empresa;
 
+  @NotNull(message = "{mensaje_empresa_nombre_vacio}")
+  @NotEmpty(message = "{mensaje_empresa_nombre_vacio}")
   @Column(nullable = false)
   private String nombre;
 
@@ -32,6 +37,7 @@ public class Empresa implements Serializable {
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
+  @NotNull(message = "{mensaje_empresa_condicion_iva_vacia}")
   private CategoriaIVA categoriaIVA;
 
   private Long idFiscal;
@@ -42,6 +48,7 @@ public class Empresa implements Serializable {
   private Date fechaInicioActividad;
 
   @Column(nullable = false)
+  @Email(message = "{mensaje_correo_formato_incorrecto}")
   private String email;
 
   @Column(nullable = false)

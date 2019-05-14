@@ -14,6 +14,7 @@ import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
+import javax.validation.Valid;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.modelo.dto.UbicacionDTO;
@@ -36,6 +38,7 @@ import sic.util.CalculosComprobante;
 import sic.util.FormatterFechaHora;
 
 @Service
+@Validated
 public class PedidoServiceImpl implements IPedidoService {
 
   private final PedidoRepository pedidoRepository;
@@ -73,25 +76,8 @@ public class PedidoServiceImpl implements IPedidoService {
     this.modelMapper = modelMapper;
   }
 
-  private void validarPedido(TipoDeOperacion operacion, Pedido pedido) {
+  private void validarOperacion(TipoDeOperacion operacion, Pedido pedido) {
     // Entrada de Datos
-    // Requeridos
-    if (pedido.getFecha() == null) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_fecha_vacia"));
-    }
-    if (pedido.getRenglones() == null || pedido.getRenglones().isEmpty()) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_pedido_renglones_vacio"));
-    }
-    if (pedido.getEmpresa() == null) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_empresa_vacia"));
-    }
-    if (pedido.getUsuario() == null) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_usuario_vacio"));
-    }
-    if (pedido.getCliente() == null) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_cliente_vacio"));
-    }
     // Validar Estado
     EstadoPedido estado = pedido.getEstado();
     if ((estado != EstadoPedido.ABIERTO)
@@ -190,15 +176,16 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public Pedido guardar(Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal) {
+  public Pedido guardar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal) {
     this.asignarDetalleEnvio(pedido, tipoDeEnvio, idSucursal);
+    this.calcularCantidadDeArticulos(pedido);
     pedido.setFecha(new Date());
     pedido.setNroPedido(this.generarNumeroPedido(pedido.getEmpresa()));
     pedido.setEstado(EstadoPedido.ABIERTO);
     if (pedido.getObservaciones() == null || pedido.getObservaciones().equals("")) {
       pedido.setObservaciones("Los precios se encuentran sujetos a modificaciones.");
     }
-    this.validarPedido(TipoDeOperacion.ALTA, pedido);
+    this.validarOperacion(TipoDeOperacion.ALTA, pedido);
     pedido = pedidoRepository.save(pedido);
     logger.warn("El Pedido {} se guardó correctamente.", pedido);
     String emailCliente = pedido.getCliente().getEmail();
@@ -217,6 +204,14 @@ public class PedidoServiceImpl implements IPedidoService {
       logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
     return pedido;
+  }
+
+  private void calcularCantidadDeArticulos(Pedido pedido) {
+    pedido.setCantidadArticulos(BigDecimal.ZERO);
+    pedido
+        .getRenglones()
+        .forEach(
+            r -> pedido.setCantidadArticulos(pedido.getCantidadArticulos().add(r.getCantidad())));
   }
 
   private void asignarDetalleEnvio(Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal) {
@@ -328,17 +323,18 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public void actualizar(Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal) {
+  public void actualizar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal) {
     this.asignarDetalleEnvio(pedido, tipoDeEnvio, idSucursal);
-    this.validarPedido(TipoDeOperacion.ACTUALIZACION, pedido);
+    this.calcularCantidadDeArticulos(pedido);
+    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, pedido);
     pedidoRepository.save(pedido);
   }
 
   @Override
   @Transactional
-  public void actualizarFacturasDelPedido(Pedido pedido, List<Factura> facturas) {
+  public void actualizarFacturasDelPedido(@Valid Pedido pedido, List<Factura> facturas) {
     pedido.setFacturas(facturas);
-    this.validarPedido(TipoDeOperacion.ACTUALIZACION, pedido);
+    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, pedido);
     pedidoRepository.save(pedido);
   }
 

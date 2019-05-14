@@ -5,12 +5,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.querydsl.core.annotations.QueryInit;
 import java.io.Serializable;
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
 @Table(name = "proveedor")
@@ -28,10 +31,12 @@ public class Proveedor implements Serializable {
   private String codigo;
 
   @Column(nullable = false)
+  @NotEmpty(message = "{mensaje_proveedor_razonSocial_vacia}")
   private String razonSocial;
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
+  @NotNull(message = "{mensaje_proveedor_condicionIVA_vacia}")
   private CategoriaIVA categoriaIVA;
 
   private Long idFiscal;
@@ -46,6 +51,7 @@ public class Proveedor implements Serializable {
   private String contacto;
 
   @Column(nullable = false)
+  @Email(message = "{mensaje_proveedor_email_invalido}")
   private String email;
 
   @Column(nullable = false)
@@ -58,6 +64,7 @@ public class Proveedor implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+  @NotNull(message = "{mensaje_proveedor_empresa_vacia}")
   private Empresa empresa;
 
   private boolean eliminado;

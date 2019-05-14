@@ -15,12 +15,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.validator.constraints.NotBlank;
 
 @Entity
 @Table(name = "recibo")
@@ -47,14 +50,17 @@ public class Recibo implements Serializable {
   private boolean eliminado;
 
   @Column(nullable = false)
+  @NotBlank(message = "{mensaje_recibo_concepto_vacio}")
   private String concepto;
 
   @ManyToOne
   @JoinColumn(name = "id_FormaDePago", referencedColumnName = "id_FormaDePago")
+  @NotNull(message = "{mensaje_recibo_forma_de_pago_vacia}")
   private FormaDePago formaDePago;
 
   @ManyToOne
   @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+  @NotNull(message = "{mensaje_recibo_empresa_vacia}")
   private Empresa empresa;
 
   @ManyToOne
@@ -67,14 +73,26 @@ public class Recibo implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
+  @NotNull(message = "{mensaje_recibo_usuario_vacio}")
   private Usuario usuario;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_monto_negativo}")
   private BigDecimal monto;
+
+  @JsonGetter("idFormaDePago")
+  public long getIdFormaDePago() {
+    return formaDePago.getId_FormaDePago();
+  }
 
   @JsonGetter("nombreFormaDePago")
   public String getNombreFormaDePago() {
     return formaDePago.getNombre();
+  }
+
+  @JsonGetter("idEmpresa")
+  public long getIdEmpresa() {
+    return empresa.getId_Empresa();
   }
 
   @JsonGetter("nombreEmpresa")

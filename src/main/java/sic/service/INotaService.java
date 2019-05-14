@@ -5,11 +5,13 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 
+import javax.validation.Valid;
+
 public interface INotaService {
 
-  Nota guardarNotaCredito(NotaCredito nota);
+  Nota guardarNotaCredito(@Valid NotaCredito nota);
 
-  Nota guardarNotaDebito(NotaDebito nota);
+  Nota guardarNotaDebito(@Valid NotaDebito nota);
 
   Nota autorizarNota(Nota nota);
 

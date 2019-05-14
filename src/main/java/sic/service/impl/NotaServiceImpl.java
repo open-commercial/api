@@ -8,6 +8,8 @@ import java.net.URL;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.validation.Valid;
+
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.DateExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -22,6 +24,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.repository.NotaCreditoRepository;
 import sic.repository.NotaDebitoRepository;
@@ -30,6 +33,7 @@ import sic.repository.NotaRepository;
 import sic.util.FormatterFechaHora;
 
 @Service
+@Validated
 public class NotaServiceImpl implements INotaService {
 
   private final NotaRepository notaRepository;
@@ -500,7 +504,7 @@ public class NotaServiceImpl implements INotaService {
     return this.notaDebitoRepository.getById(idNota).getRenglonesNotaDebito();
   }
 
-  private void validarNota(Nota nota) {
+  private void validarOperacion(Nota nota) {
     if (nota instanceof NotaCredito && nota.getMovimiento().equals(Movimiento.VENTA)) {
       if (nota.getFacturaVenta() != null
           && nota.getFecha().compareTo(nota.getFacturaVenta().getFecha()) <= 0) {
@@ -685,11 +689,11 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   @Transactional
-  public Nota guardarNotaCredito(NotaCredito notaCredito) {
+  public Nota guardarNotaCredito(@Valid NotaCredito notaCredito) {
     if (notaCredito.getFecha() == null) {
       notaCredito.setFecha(new Date());
     }
-    this.validarNota(notaCredito);
+    this.validarOperacion(notaCredito);
     if (notaCredito.getMovimiento().equals(Movimiento.VENTA)) {
       if (notaCredito.getFacturaVenta() != null) {
         notaCredito.setTipoComprobante(
@@ -725,11 +729,11 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   @Transactional
-  public NotaDebito guardarNotaDebito(NotaDebito notaDebito) {
+  public NotaDebito guardarNotaDebito(@Valid NotaDebito notaDebito) {
     if (notaDebito.getFecha() == null) {
       notaDebito.setFecha(new Date());
     }
-    this.validarNota(notaDebito);
+    this.validarOperacion(notaDebito);
     if (notaDebito.getMovimiento().equals(Movimiento.VENTA)) {
       notaDebito.setTipoComprobante(
           this.getTipoDeNotaDebito(

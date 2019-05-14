@@ -13,6 +13,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -22,6 +24,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
 @Table(name = "gasto")
@@ -39,25 +42,32 @@ public class Gasto implements Serializable {
 
   @Column(nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
+  @NotNull(message = "{mensaje_gasto_fecha_vacia}")
   private Date fecha;
 
   @Column(nullable = false)
+  @NotNull
+  @NotEmpty(message = "{mensaje_gasto_concepto_vacio}")
   private String concepto;
 
   @ManyToOne
   @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
   @QueryInit("ubicacion.localidad.provincia")
+  @NotNull(message = "{mensaje_gasto_empresa_vacia}")
   private Empresa empresa;
 
   @OneToOne
   @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
+  @NotNull(message = "{mensaje_gasto_usuario_vacio}")
   private Usuario usuario;
 
   @OneToOne
   @JoinColumn(name = "id_FormaDePago", referencedColumnName = "id_FormaDePago")
+  @NotNull(message = "{mensaje_gasto_forma_de_pago_vacia}")
   private FormaDePago formaDePago;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_gasto_negativo_cero}")
   private BigDecimal monto;
 
   private boolean eliminado;

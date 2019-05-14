@@ -3,19 +3,22 @@ package sic.service.impl;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.Empresa;
 import sic.modelo.FormaDePago;
 import sic.service.IFormaDePagoService;
 import sic.service.BusinessServiceException;
-import sic.util.Validator;
 import sic.repository.FormaDePagoRepository;
 
 @Service
+@Validated
 public class FormaDePagoServiceImpl implements IFormaDePagoService {
 
     private final FormaDePagoRepository formaDePagoRepository;
@@ -66,15 +69,6 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
     }
 
     private void validarOperacion(FormaDePago formaDePago) {
-        //Requeridos
-        if (Validator.esVacio(formaDePago.getNombre())) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_formaDePago_vacio_nombre"));
-        }
-        if (formaDePago.getEmpresa() == null) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_formaDePago_empresa_vacio"));
-        }
         //Duplicados
         //Nombre
         if (formaDePagoRepository.findByNombreAndEmpresaAndEliminada(formaDePago.getNombre(), formaDePago.getEmpresa(), false) != null) {
@@ -84,16 +78,16 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
         //Predeterminado
         if (formaDePago.isPredeterminado() && (formaDePagoRepository.findByAndEmpresaAndPredeterminadoAndEliminada(formaDePago.getEmpresa(), true, false) != null)) {
             throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_formaDePago_predeterminada_existente"));
+                    .getString("mensaje_forma_de_pago_empresa_vacia"));
         }
     }
 
     @Override
     @Transactional
-    public FormaDePago guardar(FormaDePago formaDePago) {
+    public FormaDePago guardar(@Valid FormaDePago formaDePago) {
         this.validarOperacion(formaDePago);
         formaDePago = formaDePagoRepository.save(formaDePago);
-        LOGGER.warn("La Forma de Pago " + formaDePago + " se guardó correctamente." );
+        LOGGER.warn("La Forma de Pago {} se guardó correctamente.", formaDePago);
         return formaDePago;
     }
 

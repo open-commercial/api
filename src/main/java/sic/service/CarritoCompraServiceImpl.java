@@ -2,7 +2,6 @@ package sic.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ResourceBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,6 @@ import sic.modelo.Producto;
 import sic.modelo.Usuario;
 import sic.modelo.dto.CarritoCompraDTO;
 import sic.repository.CarritoCompraRepository;
-import javax.persistence.EntityNotFoundException;
 
 @Service
 @Transactional
@@ -83,6 +81,12 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   }
 
   @Override
+  public ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(
+      long idUsuario, long idProducto) {
+    return this.carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
+  }
+
+  @Override
   public void eliminarItemDelUsuario(long idUsuario, long idProducto) {
     carritoCompraRepository.eliminarItemDelUsuario(idUsuario, idProducto);
   }
@@ -101,7 +105,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   public void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad) {
     Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
     Producto producto = productoService.getProductoPorId(idProducto);
-    ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(usuario, producto);
+    ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
     if (item == null) {
       BigDecimal importe = producto.getPrecioLista().multiply(cantidad);
       ItemCarritoCompra itemCC =
@@ -109,34 +113,14 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
               new ItemCarritoCompra(null, cantidad, producto, importe, null, usuario));
       logger.warn("Nuevo item de carrito de compra agregado: {}", itemCC);
     } else {
-      BigDecimal nuevaCantidad = item.getCantidad().add(cantidad);
-      if (nuevaCantidad.compareTo(BigDecimal.ZERO) < 0) {
-        item.setCantidad(BigDecimal.ZERO);
-      } else {
-        item.setCantidad(nuevaCantidad);
-      }
-      item.setImporte(producto.getPrecioLista().multiply(nuevaCantidad));
-      ItemCarritoCompra itemCC = carritoCompraRepository.save(item);
-      logger.warn("Item de carrito de compra modificado: {}", itemCC);
-    }
-  }
-
-  @Override
-  public void modificarCantidadItem(long idUsuario, long idProducto, BigDecimal cantidad) {
-    Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
-    Producto producto = productoService.getProductoPorId(idProducto);
-    ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(usuario, producto);
-    if (item != null) {
       if (cantidad.compareTo(BigDecimal.ZERO) < 0) {
         item.setCantidad(BigDecimal.ZERO);
       } else {
         item.setCantidad(cantidad);
       }
       item.setImporte(producto.getPrecioLista().multiply(cantidad));
-      carritoCompraRepository.save(item);
-    } else {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_item_no_existente"));
+      ItemCarritoCompra itemCC = carritoCompraRepository.save(item);
+      logger.warn("Item de carrito de compra modificado: {}", itemCC);
     }
   }
 }

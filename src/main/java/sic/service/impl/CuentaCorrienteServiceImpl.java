@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.validation.Valid;
 
 import com.querydsl.core.BooleanBuilder;
 import net.sf.jasperreports.engine.JRException;
@@ -26,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.repository.CuentaCorrienteClienteRepository;
 import sic.repository.CuentaCorrienteProveedorRepository;
@@ -34,6 +36,7 @@ import sic.repository.RenglonCuentaCorrienteRepository;
 import sic.service.*;
 
 @Service
+@Validated
 public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   private final CuentaCorrienteRepository cuentaCorrienteRepository;
@@ -63,20 +66,20 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   }
 
   @Override
+  @Transactional
   public CuentaCorrienteCliente guardarCuentaCorrienteCliente(
-      CuentaCorrienteCliente cuentaCorrienteCliente) {
-    cuentaCorrienteCliente.setFechaApertura(cuentaCorrienteCliente.getCliente().getFechaAlta());
-    this.validarCuentaCorriente(cuentaCorrienteCliente);
+      @Valid CuentaCorrienteCliente cuentaCorrienteCliente) {
+    this.validarOperacion(cuentaCorrienteCliente);
     cuentaCorrienteCliente = cuentaCorrienteClienteRepository.save(cuentaCorrienteCliente);
     logger.warn("La Cuenta Corriente Cliente {} se guardó correctamente.", cuentaCorrienteCliente);
     return cuentaCorrienteCliente;
   }
 
   @Override
+  @Transactional
   public CuentaCorrienteProveedor guardarCuentaCorrienteProveedor(
-      CuentaCorrienteProveedor cuentaCorrienteProveedor) {
-    cuentaCorrienteProveedor.setFechaApertura(new Date());
-    this.validarCuentaCorriente(cuentaCorrienteProveedor);
+      @Valid CuentaCorrienteProveedor cuentaCorrienteProveedor) {
+    this.validarOperacion(cuentaCorrienteProveedor);
     cuentaCorrienteProveedor = cuentaCorrienteProveedorRepository.save(cuentaCorrienteProveedor);
     logger.warn(
         "La Cuenta Corriente Proveedor {} se guardó correctamente.", cuentaCorrienteProveedor);
@@ -84,28 +87,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   }
 
   @Override
-  public void validarCuentaCorriente(CuentaCorriente cuentaCorriente) {
-    // Entrada de Datos
-    // Requeridos
-    if (cuentaCorriente.getFechaApertura() == null) {
-      throw new BusinessServiceException(
-              RESOURCE_BUNDLE.getString("mensaje_cuenta_corriente_fecha_vacia"));
-    }
-    if (cuentaCorriente.getEmpresa() == null) {
-      throw new BusinessServiceException(
-              RESOURCE_BUNDLE.getString("mensaje_caja_empresa_vacia"));
-    }
-    if (cuentaCorriente instanceof CuentaCorrienteCliente) {
-      if (((CuentaCorrienteCliente) cuentaCorriente).getCliente() == null) {
-        throw new BusinessServiceException(
-                RESOURCE_BUNDLE.getString("mensaje_cliente_vacio"));
-      }
-    } else if (cuentaCorriente instanceof CuentaCorrienteProveedor) {
-      if (((CuentaCorrienteProveedor) cuentaCorriente).getProveedor() == null) {
-        throw new BusinessServiceException(
-                RESOURCE_BUNDLE.getString("mensaje_proveedor_vacio"));
-      }
-    }
+  public void validarOperacion(CuentaCorriente cuentaCorriente) {
     // Duplicados
     if (cuentaCorriente.getIdCuentaCorriente() != null && cuentaCorrienteRepository.findById(cuentaCorriente.getIdCuentaCorriente()) != null) {
       throw new BusinessServiceException(
