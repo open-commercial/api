@@ -3,11 +3,14 @@ package sic.service.impl;
 import com.querydsl.core.BooleanBuilder;
 import java.util.ArrayList;
 
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,18 +19,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.service.ITransportistaService;
 import sic.service.BusinessServiceException;
-import sic.util.Validator;
 import sic.repository.TransportistaRepository;
+import sic.service.IUbicacionService;
 
 @Service
+@Validated
 public class TransportistaServiceImpl implements ITransportistaService {
 
   private final TransportistaRepository transportistaRepository;
+  private final IUbicacionService ubicacionService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Autowired
-  public TransportistaServiceImpl(TransportistaRepository transportistaRepository) {
+  public TransportistaServiceImpl(TransportistaRepository transportistaRepository, IUbicacionService ubicacionService) {
     this.transportistaRepository = transportistaRepository;
+    this.ubicacionService = ubicacionService;
   }
 
   @Override
@@ -91,36 +98,38 @@ public class TransportistaServiceImpl implements ITransportistaService {
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Transportista transportista) {
-    // Requeridos
-    if (Validator.esVacio(transportista.getNombre())) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_transportista_nombre_vacio"));
-    }
-    if (transportista.getEmpresa() == null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_transportista_empresa_vacia"));
-    }
     // Duplicados
     // Nombre
     Transportista transportistaDuplicado =
         this.getTransportistaPorNombre(transportista.getNombre(), transportista.getEmpresa());
     if (operacion.equals(TipoDeOperacion.ALTA) && transportistaDuplicado != null) {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_transportista_duplicado_nombre"));
+          RESOURCE_BUNDLE.getString("mensaje_transportista_duplicado_nombre"));
     }
-    if (operacion.equals(TipoDeOperacion.ACTUALIZACION)) {
-      if (transportistaDuplicado != null
-          && transportistaDuplicado.getId_Transportista() != transportista.getId_Transportista()) {
-        throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes")
-                .getString("mensaje_transportista_duplicado_nombre"));
-      }
+    if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
+        && (transportistaDuplicado != null
+            && transportistaDuplicado.getId_Transportista()
+                != transportista.getId_Transportista())) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_transportista_duplicado_nombre"));
+    }
+    if (transportista.getUbicacion() != null
+        && transportista.getUbicacion().getLocalidad() == null) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_ubicacion_sin_localidad"));
     }
   }
 
   @Override
   @Transactional
-  public Transportista guardar(Transportista transportista) {
+  public Transportista guardar(@Valid Transportista transportista) {
+    if (transportista.getUbicacion() != null
+        && transportista.getUbicacion().getIdLocalidad() != null) {
+      transportista
+          .getUbicacion()
+          .setLocalidad(
+              ubicacionService.getLocalidadPorId(transportista.getUbicacion().getIdLocalidad()));
+    }
     this.validarOperacion(TipoDeOperacion.ALTA, transportista);
     transportista = transportistaRepository.save(transportista);
     logger.warn("El Transportista {} se guardó correctamente.", transportista);
@@ -129,7 +138,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
 
   @Override
   @Transactional
-  public void actualizar(Transportista transportista) {
+  public void actualizar(@Valid Transportista transportista) {
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, transportista);
     transportistaRepository.save(transportista);
   }
@@ -143,6 +152,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
           ResourceBundle.getBundle("Mensajes").getString("mensaje_transportista_no_existente"));
     }
     transportista.setEliminado(true);
+    transportista.setUbicacion(null);
     transportistaRepository.save(transportista);
   }
 }

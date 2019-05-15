@@ -2,6 +2,7 @@ package sic.controller;
 
 import java.lang.reflect.Type;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import io.jsonwebtoken.Claims;
@@ -73,16 +74,18 @@ public class PedidoController {
                          @RequestParam Long idUsuario,
                          @RequestParam Long idCliente,
                          @RequestParam TipoDeEnvio tipoDeEnvio,
+                         @RequestParam(required = false) Long idSucursal,
                          @RequestBody PedidoDTO pedidoDTO) {
     Pedido pedido = modelMapper.map(pedidoDTO, Pedido.class);
     pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
     pedido.setCliente(clienteService.getClienteNoEliminadoPorId(idCliente));
+    pedido.setDetalleEnvio(pedidoService.getPedidoPorId(pedidoDTO.getId_Pedido()).getDetalleEnvio());
     //Las facturas se recuperan para evitar cambios no deseados.
     pedido.setFacturas(pedidoService.getFacturasDelPedido(pedido.getId_Pedido()));
     //Si los renglones vienen null, recupera los renglones del pedido para actualizarLocalidad
     //caso contrario, ultiliza los renglones del pedido.
-    pedidoService.actualizar(pedido, tipoDeEnvio);
+    pedidoService.actualizar(pedido, tipoDeEnvio, idSucursal);
     }
 
   @PostMapping("/pedidos")
@@ -94,10 +97,6 @@ public class PedidoController {
     Rol.COMPRADOR
   })
   public Pedido guardar(
-    @RequestParam Long idEmpresa,
-    @RequestParam Long idUsuario,
-    @RequestParam Long idCliente,
-    @RequestParam TipoDeEnvio tipoDeEnvio,
     @RequestBody NuevoPedidoDTO nuevoPedidoDTO) {
     Pedido pedido = new Pedido();
     pedido.setFechaVencimiento(nuevoPedidoDTO.getFechaVencimiento());
@@ -112,12 +111,13 @@ public class PedidoController {
     pedido.setDescuentoNeto(nuevoPedidoDTO.getDescuentoNeto());
     pedido.setTotalEstimado(nuevoPedidoDTO.getTotal());
     pedido.setTotalActual(nuevoPedidoDTO.getTotal());
-    Empresa empresaParaPedido = empresaService.getEmpresaPorId(idEmpresa);
+    Empresa empresaParaPedido = empresaService.getEmpresaPorId(nuevoPedidoDTO.getIdEmpresa());
     pedido.setEmpresa(empresaParaPedido);
-    pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
-    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
+    pedido.setUsuario(usuarioService.getUsuarioPorId(nuevoPedidoDTO.getIdUsuario()));
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(nuevoPedidoDTO.getIdCliente());
     pedido.setCliente(cliente);
-    return pedidoService.guardar(pedido, tipoDeEnvio);
+    pedido.setFecha(new Date());
+    return pedidoService.guardar(pedido, nuevoPedidoDTO.getTipoDeEnvio(), nuevoPedidoDTO.getIdSucursal());
   }
 
   @GetMapping("/pedidos/busqueda/criteria")
@@ -138,6 +138,7 @@ public class PedidoController {
       @RequestParam(required = false) Long nroPedido,
       @RequestParam(required = false) EstadoPedido estadoPedido,
       @RequestParam(required = false) TipoDeEnvio tipoDeEnvio,
+      @RequestParam(required = false) Long idProducto,
       @RequestParam(required = false) Integer pagina,
       @RequestHeader("Authorization") String authorizationHeader) {
     Calendar fechaDesde = Calendar.getInstance();
@@ -167,6 +168,8 @@ public class PedidoController {
             .estadoPedido(estadoPedido)
             .buscaPorEnvio(tipoDeEnvio != null)
             .tipoDeEnvio(tipoDeEnvio)
+            .buscaPorProducto(idProducto != null)
+            .idProducto(idProducto)
             .idEmpresa(idEmpresa)
             .pageable(pageable)
             .build();

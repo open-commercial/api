@@ -16,6 +16,7 @@ import javax.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
 @Table(name = "notadebito")
@@ -28,6 +29,7 @@ public class NotaDebito extends Nota implements Serializable {
   @JoinColumn(name = "idNota")
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   @Column(nullable = false)
+  @NotEmpty(message = "{mensaje_nota_de_renglones_vacio}")
   private List<RenglonNotaDebito> renglonesNotaDebito;
 
   @Column(precision = 25, scale = 15)

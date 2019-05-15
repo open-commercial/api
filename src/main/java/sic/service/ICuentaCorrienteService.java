@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import sic.modelo.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 public interface ICuentaCorrienteService {
@@ -13,29 +14,30 @@ public interface ICuentaCorrienteService {
   CuentaCorrienteProveedor getCuentaCorrientePorProveedor(Proveedor proveedor);
 
   CuentaCorrienteCliente guardarCuentaCorrienteCliente(
-      CuentaCorrienteCliente cuentaCorrienteCliente);
+      @Valid CuentaCorrienteCliente cuentaCorrienteCliente);
 
   CuentaCorrienteProveedor guardarCuentaCorrienteProveedor(
-      CuentaCorrienteProveedor cuentaCorrienteProveedor);
+      @Valid CuentaCorrienteProveedor cuentaCorrienteProveedor);
 
-  void validarCuentaCorriente(CuentaCorriente cuentaCorriente);
+  void validarOperacion(CuentaCorriente cuentaCorriente);
 
   void eliminarCuentaCorrienteCliente(long idCliente);
 
   void eliminarCuentaCorrienteProveedor(long idProveedor);
 
-  Page<CuentaCorrienteCliente> buscarCuentaCorrienteCliente(BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn);
+  Page<CuentaCorrienteCliente> buscarCuentaCorrienteCliente(
+      BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn);
 
   Page<CuentaCorrienteProveedor> buscarCuentaCorrienteProveedor(BusquedaCuentaCorrienteProveedorCriteria criteria);
 
   Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(
       long idCuentaCorriente, Pageable pageable);
 
-  void asentarEnCuentaCorriente(FacturaVenta facturaVenta, TipoDeOperacion tipo);
+  void asentarEnCuentaCorriente(FacturaVenta facturaVenta);
 
-  void asentarEnCuentaCorriente(FacturaCompra facturaCompra, TipoDeOperacion tipo);
+  void asentarEnCuentaCorriente(FacturaCompra facturaCompra);
 
-  void asentarEnCuentaCorriente(Nota nota, TipoDeOperacion tipo);
+  void asentarEnCuentaCorriente(Nota nota);
 
   void asentarEnCuentaCorriente(Recibo recibo, TipoDeOperacion tipo);
 

@@ -25,27 +25,6 @@ class MedidaServiceImplTest {
   @InjectMocks private MedidaServiceImpl medidaService;
 
   @Test
-  void shouldLanzarExceptionWhenNombreVacio() {
-    Medida medidaMock = new MedidaBuilder().build();
-    Medida medidaNueva = new MedidaBuilder().build();
-    BusinessServiceException thrown =
-        assertThrows(
-            BusinessServiceException.class,
-            () -> {
-              when(medidaRepository.findByNombreAndEmpresaAndEliminada(
-                      "", medidaNueva.getEmpresa(), false))
-                  .thenReturn(medidaMock);
-              medidaNueva.setNombre("");
-              medidaService.validarOperacion(TipoDeOperacion.ALTA, medidaNueva);
-            });
-    assertTrue(
-        thrown
-            .getMessage()
-            .contains(
-                ResourceBundle.getBundle("Mensajes").getString("mensaje_medida_vacio_nombre")));
-  }
-
-  @Test
   void shouldLanzarExceptionWhenNombreDuplicadoEnAlta() {
     Medida medidaMock = new MedidaBuilder().build();
     Medida medidaNueva = new MedidaBuilder().build();

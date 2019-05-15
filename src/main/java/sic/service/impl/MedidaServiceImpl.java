@@ -3,20 +3,23 @@ package sic.service.impl;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.Empresa;
 import sic.modelo.Medida;
 import sic.service.IMedidaService;
 import sic.service.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
-import sic.util.Validator;
 import sic.repository.MedidaRepository;
 
 @Service
+@Validated
 public class MedidaServiceImpl implements IMedidaService {
 
   private final MedidaRepository medidaRepository;
@@ -49,11 +52,6 @@ public class MedidaServiceImpl implements IMedidaService {
 
   @Override
   public void validarOperacion(TipoDeOperacion operacion, Medida medida) {
-    // Requeridos
-    if (Validator.esVacio(medida.getNombre())) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_medida_vacio_nombre"));
-    }
     // Duplicados
     // Nombre
     Medida medidaDuplicada = this.getMedidaPorNombre(medida.getNombre(), medida.getEmpresa());
@@ -61,27 +59,27 @@ public class MedidaServiceImpl implements IMedidaService {
       throw new BusinessServiceException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_medida_duplicada_nombre"));
     }
-    if (operacion.equals(TipoDeOperacion.ACTUALIZACION)) {
-      if (medidaDuplicada != null && medidaDuplicada.getId_Medida() != medida.getId_Medida()) {
-        throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_medida_duplicada_nombre"));
-      }
+    if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
+        && medidaDuplicada != null
+        && medidaDuplicada.getId_Medida() != medida.getId_Medida()) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_medida_duplicada_nombre"));
     }
   }
 
   @Override
   @Transactional
-  public void actualizar(Medida medida) {
+  public void actualizar(@Valid Medida medida) {
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, medida);
     medidaRepository.save(medida);
   }
 
   @Override
   @Transactional
-  public Medida guardar(Medida medida) {
+  public Medida guardar(@Valid Medida medida) {
     this.validarOperacion(TipoDeOperacion.ALTA, medida);
     medida = medidaRepository.save(medida);
-    logger.warn("La Medida " + medida + " se guardó correctamente.");
+    logger.warn("La Medida {} se guardó correctamente.", medida);
     return medida;
   }
 

@@ -28,6 +28,8 @@ public class BusquedaPedidoCriteria {
     private EstadoPedido estadoPedido;
     private boolean buscaPorEnvio;
     private TipoDeEnvio tipoDeEnvio;
+    private boolean buscaPorProducto;
+    private Long idProducto;
     private Long idEmpresa;
     private int cantRegistros;    
     private Pageable pageable;

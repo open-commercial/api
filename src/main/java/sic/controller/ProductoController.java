@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductoDTO;
 import sic.service.*;
@@ -35,14 +36,14 @@ public class ProductoController {
 
   @Autowired
   public ProductoController(
-      IProductoService productoService,
-      IMedidaService medidaService,
-      IRubroService rubroService,
-      IProveedorService proveedorService,
-      IEmpresaService empresaService,
-      IClienteService clienteService,
-      IAuthService authService,
-      ModelMapper modelMapper) {
+    IProductoService productoService,
+    IMedidaService medidaService,
+    IRubroService rubroService,
+    IProveedorService proveedorService,
+    IEmpresaService empresaService,
+    IClienteService clienteService,
+    IAuthService authService,
+    ModelMapper modelMapper) {
     this.productoService = productoService;
     this.medidaService = medidaService;
     this.rubroService = rubroService;
@@ -59,8 +60,7 @@ public class ProductoController {
     @PathVariable long idProducto,
     @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Producto producto = productoService.getProductoPorId(idProducto);
-    if (authorizationHeader != null) {
-      authService.validarToken(authorizationHeader);
+    if (authorizationHeader != null && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente =
         clienteService.getClientePorIdUsuarioYidEmpresa(
@@ -84,6 +84,7 @@ public class ProductoController {
       @RequestParam long idEmpresa,
       @RequestParam(required = false) String codigo,
       @RequestParam(required = false) String descripcion,
+      @RequestParam(required = false) Boolean destacados,
       @RequestParam(required = false) Integer pagina,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Page<Producto> productos =
@@ -95,12 +96,12 @@ public class ProductoController {
         null,
         false,
         true,
+        destacados,
         pagina,
         null,
         null,
         null);
-    if (authorizationHeader != null) {
-      authService.validarToken(authorizationHeader);
+    if (authorizationHeader != null && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente =
         clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idEmpresa);
@@ -156,6 +157,7 @@ public class ProductoController {
       @RequestParam(required = false) Long idProveedor,
       @RequestParam(required = false) boolean soloFantantes,
       @RequestParam(required = false) Boolean publicos,
+      @RequestParam(required = false) Boolean destacados,
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
@@ -172,6 +174,7 @@ public class ProductoController {
             idProveedor,
             soloFantantes,
             publicos,
+            destacados,
             pagina,
             null,
             ordenarPor,
@@ -203,6 +206,7 @@ public class ProductoController {
       Long idProveedor,
       boolean soloFantantes,
       Boolean publicos,
+      Boolean destacados,
       Integer pagina,
       Integer tamanio,
       String ordenarPor,
@@ -240,6 +244,8 @@ public class ProductoController {
             .listarSoloFaltantes(soloFantantes)
             .buscaPorVisibilidad(publicos != null)
             .publico(publicos)
+            .buscaPorDestacado(destacados != null)
+            .destacado(destacados)
             .pageable(pageable)
             .build();
     return productoService.buscarProductos(criteria);
@@ -321,56 +327,8 @@ public class ProductoController {
   @PutMapping("/productos/multiples")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizarMultiplesProductos(
-      @RequestParam long[] idProducto,
-      @RequestParam(required = false) BigDecimal descuentoRecargoPorcentaje,
-      @RequestParam(required = false) Long idMedida,
-      @RequestParam(required = false) Long idRubro,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) BigDecimal gananciaNeto,
-      @RequestParam(required = false) BigDecimal gananciaPorcentaje,
-      @RequestParam(required = false) BigDecimal IVANeto,
-      @RequestParam(required = false) BigDecimal IVAPorcentaje,
-      @RequestParam(required = false) BigDecimal precioCosto,
-      @RequestParam(required = false) BigDecimal precioLista,
-      @RequestParam(required = false) BigDecimal precioVentaPublico,
-      @RequestParam(required = false) Boolean publico) {
-    boolean actualizaPrecios = false;
-    if (gananciaNeto != null
-        && gananciaPorcentaje != null
-        && IVANeto != null
-        && IVAPorcentaje != null
-        && precioCosto != null
-        && precioLista != null
-        && precioVentaPublico != null) {
-      actualizaPrecios = true;
-    }
-    boolean aplicaDescuentoRecargoPorcentaje = false;
-    if (descuentoRecargoPorcentaje != null) aplicaDescuentoRecargoPorcentaje = true;
-    if (aplicaDescuentoRecargoPorcentaje && actualizaPrecios) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_modificar_producto_no_permitido"));
-    }
-    productoService.actualizarMultiples(
-        idProducto,
-        actualizaPrecios,
-        aplicaDescuentoRecargoPorcentaje,
-        descuentoRecargoPorcentaje,
-        gananciaNeto,
-        gananciaPorcentaje,
-        IVANeto,
-        IVAPorcentaje,
-        precioCosto,
-        precioLista,
-        precioVentaPublico,
-        (idMedida != null),
-        idMedida,
-        (idRubro != null),
-        idRubro,
-        (idProveedor != null),
-        idProveedor,
-        (publico != null),
-        publico);
+    @RequestBody ProductosParaActualizarDTO productosParaActualizarDTO) {
+    productoService.actualizarMultiples(productosParaActualizarDTO);
   }
 
   @GetMapping("/productos/valor-stock/criteria")
@@ -382,7 +340,8 @@ public class ProductoController {
       @RequestParam(required = false) Long idRubro,
       @RequestParam(required = false) Long idProveedor,
       @RequestParam(required = false) boolean soloFantantes,
-      @RequestParam(required = false) Boolean publicos) {
+      @RequestParam(required = false) Boolean publicos,
+      @RequestParam(required = false) Boolean destacados) {
     BusquedaProductoCriteria criteria =
         BusquedaProductoCriteria.builder()
             .buscarPorCodigo((codigo != null))
@@ -397,6 +356,8 @@ public class ProductoController {
             .listarSoloFaltantes(soloFantantes)
             .buscaPorVisibilidad(publicos != null)
             .publico(publicos)
+            .buscaPorDestacado(destacados != null)
+            .destacado(destacados)
             .build();
     return productoService.calcularValorStock(criteria);
   }
@@ -430,6 +391,7 @@ public class ProductoController {
       @RequestParam(required = false) Long idProveedor,
       @RequestParam(required = false) boolean soloFantantes,
       @RequestParam(required = false) Boolean publicos,
+      @RequestParam(required = false) Boolean destacados,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
       @RequestParam(required = false) String formato) {
@@ -449,6 +411,7 @@ public class ProductoController {
                     idProveedor,
                     soloFantantes,
                     publicos,
+                    destacados,
                     0,
                     Integer.MAX_VALUE,
                     ordenarPor,
@@ -471,6 +434,7 @@ public class ProductoController {
                     idProveedor,
                     soloFantantes,
                     publicos,
+                    destacados,
                     0,
                     Integer.MAX_VALUE,
                     ordenarPor,

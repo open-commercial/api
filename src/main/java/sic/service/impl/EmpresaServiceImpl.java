@@ -3,6 +3,8 @@ package sic.service.impl;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.ConfiguracionDelSistema;
 import sic.modelo.Empresa;
-import sic.modelo.Ubicacion;
 import sic.service.*;
 import sic.modelo.TipoDeOperacion;
-import sic.util.Validator;
 import sic.repository.EmpresaRepository;
 
 @Service
@@ -22,6 +22,7 @@ public class EmpresaServiceImpl implements IEmpresaService {
   private final EmpresaRepository empresaRepository;
   private final IConfiguracionDelSistemaService configuracionDelSistemaService;
   private final IPhotoVideoUploader photoVideoUploader;
+  private final IUbicacionService ubicacionService;
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
   private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
@@ -29,9 +30,11 @@ public class EmpresaServiceImpl implements IEmpresaService {
   public EmpresaServiceImpl(
       EmpresaRepository empresaRepository,
       IConfiguracionDelSistemaService configuracionDelSistemaService,
+      IUbicacionService ubicacionService,
       IPhotoVideoUploader photoVideoUploader) {
     this.empresaRepository = empresaRepository;
     this.configuracionDelSistemaService = configuracionDelSistemaService;
+    this.ubicacionService = ubicacionService;
     this.photoVideoUploader = photoVideoUploader;
   }
 
@@ -61,17 +64,6 @@ public class EmpresaServiceImpl implements IEmpresaService {
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Empresa empresa) {
-    // Entrada de Datos
-    if (empresa.getEmail() != null && !empresa.getEmail().equals("")) {
-      if (!Validator.esEmailValido(empresa.getEmail())) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_empresa_email_invalido"));
-      }
-    }
-    // Requeridos
-    if (Validator.esVacio(empresa.getNombre())) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_empresa_vacio_nombre"));
-    }
     // Duplicados
     // Nombre
     Empresa empresaDuplicada = this.getEmpresaPorNombre(empresa.getNombre());
@@ -93,13 +85,17 @@ public class EmpresaServiceImpl implements IEmpresaService {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_empresa_duplicado_cuip"));
     }
-    if (operacion == TipoDeOperacion.ACTUALIZACION) {
-      if (empresaDuplicada != null
-          && empresaDuplicada.getId_Empresa() != empresa.getId_Empresa()
-          && empresa.getIdFiscal() != null) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_empresa_duplicado_cuip"));
-      }
+    if (operacion == TipoDeOperacion.ACTUALIZACION
+        && empresaDuplicada != null
+        && empresaDuplicada.getId_Empresa() != empresa.getId_Empresa()
+        && empresa.getIdFiscal() != null) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_empresa_duplicado_cuip"));
+    }
+    if (empresa.getUbicacion() != null
+      && empresa.getUbicacion().getLocalidad() == null) {
+      throw new BusinessServiceException(
+        RESOURCE_BUNDLE.getString("mensaje_ubicacion_sin_localidad"));
     }
   }
 
@@ -114,7 +110,13 @@ public class EmpresaServiceImpl implements IEmpresaService {
 
   @Override
   @Transactional
-  public Empresa guardar(Empresa empresa) {
+  public Empresa guardar(@Valid Empresa empresa) {
+    if (empresa.getUbicacion() != null && empresa.getUbicacion().getIdLocalidad() != null) {
+      empresa
+          .getUbicacion()
+          .setLocalidad(
+              ubicacionService.getLocalidadPorId(empresa.getUbicacion().getIdLocalidad()));
+    }
     validarOperacion(TipoDeOperacion.ALTA, empresa);
     empresa = empresaRepository.save(empresa);
     crearConfiguracionDelSistema(empresa);
@@ -124,7 +126,7 @@ public class EmpresaServiceImpl implements IEmpresaService {
 
   @Override
   @Transactional
-  public void actualizar(Empresa empresaParaActualizar, Empresa empresaPersistida) {
+  public void actualizar(@Valid Empresa empresaParaActualizar, Empresa empresaPersistida) {
     if (empresaPersistida.getLogo() != null
         && !empresaPersistida.getLogo().isEmpty()
         && (empresaParaActualizar.getLogo() == null || empresaParaActualizar.getLogo().isEmpty())) {
@@ -140,7 +142,10 @@ public class EmpresaServiceImpl implements IEmpresaService {
   public void eliminar(Long idEmpresa) {
     Empresa empresa = this.getEmpresaPorId(idEmpresa);
     empresa.setEliminada(true);
-    photoVideoUploader.borrarImagen(Empresa.class.getSimpleName() + empresa.getId_Empresa());
+    empresa.setUbicacion(null);
+    if (empresa.getLogo() != null && !empresa.getLogo().isEmpty()) {
+      photoVideoUploader.borrarImagen(Empresa.class.getSimpleName() + empresa.getId_Empresa());
+    }
     configuracionDelSistemaService.eliminar(
         configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa));
     empresaRepository.save(empresa);

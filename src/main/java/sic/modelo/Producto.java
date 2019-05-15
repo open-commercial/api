@@ -108,6 +108,8 @@ public class Producto implements Serializable {
 
   private boolean publico;
 
+  private boolean destacado;
+
   @Temporal(TemporalType.TIMESTAMP)
   private Date fechaUltimaModificacion;
 

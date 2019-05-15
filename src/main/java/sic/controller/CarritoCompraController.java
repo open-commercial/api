@@ -3,7 +3,6 @@ package sic.controller;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +61,12 @@ public class CarritoCompraController {
     return carritoCompraService.getItemsDelCaritoCompra(idUsuario, idCliente, pageable);
   }
 
+  @JsonView(Views.Public.class)
+  @GetMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
+  public ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(@PathVariable long idUsuario, @PathVariable long idProducto) {
+    return carritoCompraService.getItemCarritoDeCompraDeUsuarioPorIdProducto(idUsuario, idProducto);
+  }
+
   @DeleteMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
   public void eliminarItem(@PathVariable long idUsuario, @PathVariable long idProducto) {
     carritoCompraService.eliminarItemDelUsuario(idUsuario, idProducto);
@@ -80,28 +85,17 @@ public class CarritoCompraController {
     carritoCompraService.agregarOrModificarItem(idUsuario, idProducto, cantidad);
   }
 
-  @PutMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
-  public void modificarCantidadItem(
-      @PathVariable long idUsuario,
-      @PathVariable long idProducto,
-      @RequestParam BigDecimal cantidad) {
-    carritoCompraService.modificarCantidadItem(idUsuario, idProducto, cantidad);
-  }
-
   @PostMapping("/carrito-compra")
   public Pedido generarPedidoConItemsDelCarrito(
       @RequestParam Long idEmpresa,
       @RequestParam Long idUsuario,
       @RequestParam Long idCliente,
       @RequestParam TipoDeEnvio tipoDeEnvio,
+      @RequestParam(required = false) Long idSucursal,
       @RequestBody(required = false) String observaciones) {
     CarritoCompraDTO carritoCompraDTO = carritoCompraService.getCarritoCompra(idUsuario, idCliente);
     Pedido pedido = new Pedido();
     pedido.setCliente(clienteService.getClienteNoEliminadoPorId(idCliente));
-    if (pedido.getCliente().getUbicacionFacturacion() == null) {
-      throw new BusinessServiceException(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_facturacion_vacia"));
-    }
     pedido.setObservaciones(observaciones);
     pedido.setSubTotal(carritoCompraDTO.getSubtotal());
     pedido.setRecargoPorcentaje(BigDecimal.ZERO);
@@ -124,7 +118,7 @@ public class CarritoCompraController {
                 .add(
                     pedidoService.calcularRenglonPedido(
                         i.getProducto().getIdProducto(), i.getCantidad(), BigDecimal.ZERO)));
-    Pedido p = pedidoService.guardar(pedido, tipoDeEnvio);
+    Pedido p = pedidoService.guardar(pedido, tipoDeEnvio, idSucursal);
     carritoCompraService.eliminarTodosLosItemsDelUsuario(idUsuario);
     return p;
   }

@@ -19,6 +19,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -56,10 +58,12 @@ public abstract class CuentaCorriente implements Serializable {
     
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
+    @NotNull(message = "{mensaje_cuenta_corriente_fecha_vacia}")
     private Date fechaApertura;
     
     @ManyToOne
     @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+    @NotNull(message = "{mensaje_cuenta_corriente_empresa_vacia}")
     private Empresa empresa;
 
     @Column(precision = 25, scale = 15)

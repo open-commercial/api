@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,17 +16,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.service.*;
 import sic.util.Validator;
 import sic.repository.ClienteRepository;
 
 @Service
+@Validated
 public class ClienteServiceImpl implements IClienteService {
 
   private final ClienteRepository clienteRepository;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IUsuarioService usuarioService;
+  private final IUbicacionService ubicacionService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
@@ -33,10 +37,12 @@ public class ClienteServiceImpl implements IClienteService {
   public ClienteServiceImpl(
       ClienteRepository clienteRepository,
       ICuentaCorrienteService cuentaCorrienteService,
-      IUsuarioService usuarioService) {
+      IUsuarioService usuarioService,
+      IUbicacionService ubicacionService) {
     this.clienteRepository = clienteRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.usuarioService = usuarioService;
+    this.ubicacionService = ubicacionService;
   }
 
   @Override
@@ -152,31 +158,8 @@ public class ClienteServiceImpl implements IClienteService {
 
   @Override
   public void validarOperacion(TipoDeOperacion operacion, Cliente cliente) {
-    // Entrada de Datos
-    if (cliente.getEmail() != null
-        && !cliente.getEmail().equals("")
-        && !Validator.esEmailValido(cliente.getEmail())) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_email_invalido"));
-    }
     // Requeridos
-    if (cliente.getCategoriaIVA() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_categoriaIVA"));
-    }
-    if (Validator.esVacio(cliente.getNombreFiscal())) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_nombreFiscal"));
-    }
-    if (Validator.esVacio(cliente.getTelefono())) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_telefono"));
-    }
-    if (cliente.getEmpresa() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_empresa"));
-    }
-    if (cliente.getCredencial() == null) {
+    if (operacion == TipoDeOperacion.ALTA && cliente.getCredencial() == null) {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_credencial"));
     }
@@ -199,22 +182,50 @@ public class ClienteServiceImpl implements IClienteService {
       }
     }
     // Ubicacion
-    if (cliente.getUbicacionFacturacion() != null && cliente.getUbicacionEnvio() != null) {
-      if (cliente.getUbicacionFacturacion().getIdUbicacion()
-          == cliente.getUbicacionEnvio().getIdUbicacion()) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_ubicacion_facturacion_envio_iguales"));
-      }
+    if (cliente.getUbicacionFacturacion() != null
+        && cliente.getUbicacionEnvio() != null
+        && operacion == TipoDeOperacion.ACTUALIZACION
+        && (cliente.getUbicacionFacturacion().getIdUbicacion() != 0L)
+        && (cliente.getUbicacionEnvio().getIdUbicacion() != 0L)
+        && (cliente.getUbicacionFacturacion().getIdUbicacion()
+            == cliente.getUbicacionEnvio().getIdUbicacion())) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_ubicacion_facturacion_envio_iguales"));
+    }
+    if (cliente.getUbicacionFacturacion() != null
+        && cliente.getUbicacionFacturacion().getLocalidad() == null) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_ubicacion_facturacion_sin_localidad"));
+    }
+    if (cliente.getUbicacionEnvio() != null
+      && cliente.getUbicacionEnvio().getLocalidad() == null) {
+      throw new BusinessServiceException(
+        RESOURCE_BUNDLE.getString("mensaje_ubicacion_envio_sin_localidad"));
     }
   }
 
   @Override
   @Transactional
-  public Cliente guardar(Cliente cliente) {
+  public Cliente guardar(@Valid Cliente cliente) {
     cliente.setFechaAlta(new Date());
     cliente.setEliminado(false);
     cliente.setNroCliente(this.generarNroDeCliente(cliente.getEmpresa()));
     if (cliente.getBonificacion() == null) cliente.setBonificacion(BigDecimal.ZERO);
+    if (cliente.getUbicacionFacturacion() != null
+        && cliente.getUbicacionFacturacion().getIdLocalidad() != null) {
+      cliente
+          .getUbicacionFacturacion()
+          .setLocalidad(
+              ubicacionService.getLocalidadPorId(
+                  cliente.getUbicacionFacturacion().getIdLocalidad()));
+    }
+    if (cliente.getUbicacionEnvio() != null
+        && cliente.getUbicacionEnvio().getIdLocalidad() != null) {
+      cliente
+          .getUbicacionEnvio()
+          .setLocalidad(
+              ubicacionService.getLocalidadPorId(cliente.getUbicacionEnvio().getIdLocalidad()));
+    }
     this.validarOperacion(TipoDeOperacion.ALTA, cliente);
     CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
     cuentaCorrienteCliente.setCliente(cliente);
@@ -236,6 +247,7 @@ public class ClienteServiceImpl implements IClienteService {
         }
       }
     }
+    cuentaCorrienteCliente.setFechaApertura(cuentaCorrienteCliente.getCliente().getFechaAlta());
     cliente = clienteRepository.save(cliente);
     cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);
     logger.warn("El Cliente {} se guardó correctamente.", cliente);
@@ -244,7 +256,7 @@ public class ClienteServiceImpl implements IClienteService {
 
   @Override
   @Transactional
-  public void actualizar(Cliente clientePorActualizar, Cliente clientePersistido) {
+  public void actualizar(@Valid Cliente clientePorActualizar, Cliente clientePersistido) {
     clientePorActualizar.setNroCliente(clientePersistido.getNroCliente());
     clientePorActualizar.setFechaAlta(clientePersistido.getFechaAlta());
     clientePorActualizar.setPredeterminado(clientePersistido.isPredeterminado());
@@ -283,6 +295,8 @@ public class ClienteServiceImpl implements IClienteService {
     cuentaCorrienteService.eliminarCuentaCorrienteCliente(idCliente);
     cliente.setCredencial(null);
     cliente.setEliminado(true);
+    cliente.setUbicacionFacturacion(null);
+    cliente.setUbicacionEnvio(null);
     clienteRepository.save(cliente);
     logger.warn("El Cliente {} se eliminó correctamente.", cliente);
   }

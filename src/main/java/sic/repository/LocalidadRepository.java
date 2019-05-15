@@ -16,5 +16,7 @@ public interface LocalidadRepository
 
   Localidad findByNombreAndProvinciaOrderByNombreAsc(String nombre, Provincia provincia);
 
+  Localidad findByCodigoPostal(String codigoPostal);
+
   List<Localidad> findAllByAndProvinciaOrderByNombreAsc(Provincia provincia);
 }

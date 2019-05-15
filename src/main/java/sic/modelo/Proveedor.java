@@ -5,12 +5,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.querydsl.core.annotations.QueryInit;
 import java.io.Serializable;
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
 @Table(name = "proveedor")
@@ -19,7 +22,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"razonSocial", "empresa"})
 @ToString
-@JsonIgnoreProperties({"empresa", "eliminado", "ubicacion"})
+@JsonIgnoreProperties({"empresa", "eliminado"})
 public class Proveedor implements Serializable {
 
   @Id @GeneratedValue private long id_Proveedor;
@@ -28,10 +31,12 @@ public class Proveedor implements Serializable {
   private String codigo;
 
   @Column(nullable = false)
+  @NotEmpty(message = "{mensaje_proveedor_razonSocial_vacia}")
   private String razonSocial;
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
+  @NotNull(message = "{mensaje_proveedor_condicionIVA_vacia}")
   private CategoriaIVA categoriaIVA;
 
   private Long idFiscal;
@@ -46,18 +51,20 @@ public class Proveedor implements Serializable {
   private String contacto;
 
   @Column(nullable = false)
+  @Email(message = "{mensaje_proveedor_email_invalido}")
   private String email;
 
   @Column(nullable = false)
   private String web;
 
-  @OneToOne
+  @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
   @JoinColumn(name = "idUbicacion", referencedColumnName = "idUbicacion")
   @QueryInit("localidad.provincia")
   private Ubicacion ubicacion;
 
   @ManyToOne
   @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+  @NotNull(message = "{mensaje_proveedor_empresa_vacia}")
   private Empresa empresa;
 
   private boolean eliminado;
@@ -70,23 +77,5 @@ public class Proveedor implements Serializable {
   @JsonGetter("idEmpresa")
   public long getIdEmpresa() {
     return empresa.getId_Empresa();
-  }
-
-  @JsonGetter("idUbicacion")
-  public Long getidUbicacion() {
-    if (ubicacion != null) {
-      return ubicacion.getIdUbicacion();
-    } else {
-      return null;
-    }
-  }
-
-  @JsonGetter("detalleUbicacion")
-  public String getDetalleUbicacion() {
-    if (ubicacion != null) {
-      return ubicacion.toString();
-    } else {
-      return null;
-    }
   }
 }

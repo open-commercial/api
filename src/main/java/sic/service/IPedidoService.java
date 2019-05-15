@@ -8,11 +8,15 @@ import org.springframework.data.domain.Page;
 import sic.modelo.*;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 
+import javax.validation.Valid;
+
 public interface IPedidoService {
 
   Pedido getPedidoPorId(long id);
 
-  void actualizar(Pedido pedido, TipoDeEnvio tipoDeEnvio);
+  void actualizar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal);
+
+  void actualizarFacturasDelPedido(@Valid Pedido pedido, List<Factura> facturas);
 
   Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn);
 
@@ -32,7 +36,7 @@ public interface IPedidoService {
 
   byte[] getReportePedido(Pedido pedido);
 
-  Pedido guardar(Pedido pedido, TipoDeEnvio tipoDeEnvio);
+  Pedido guardar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal);
 
   RenglonPedido calcularRenglonPedido(
     long idProducto,

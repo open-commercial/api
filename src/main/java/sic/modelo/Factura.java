@@ -27,11 +27,15 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
 @Table(name = "factura")
@@ -61,14 +65,17 @@ public abstract class Factura implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
+    @NotNull(message = "{mensaje_factura_usuario_vacio}")
     private Usuario usuario;
 
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
+    @NotNull(message = "{mensaje_factura_fecha_vacia}")
     private Date fecha;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @NotNull(message = "{mensaje_factura_tipo_factura_vacia}")
     private TipoDeComprobante tipoComprobante;
 
     private long numSerie;
@@ -84,48 +91,66 @@ public abstract class Factura implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_Transportista", referencedColumnName = "id_Transportista")
+    @NotNull(message = "{mensaje_factura_transportista_vacio}")
     private Transportista transportista;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "id_Factura")
     @JsonProperty(access = Access.WRITE_ONLY)
+    @NotEmpty(message = "{mensaje_factura_renglones_vacio}")
     private List<RenglonFactura> renglones;
 
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_subtotal_negativo}")
     private BigDecimal subTotal;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_recargo_porcentaje_negativo}")
     private BigDecimal recargoPorcentaje;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_recargo_neto_negativo}")
     private BigDecimal recargoNeto;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_descuento_porcentaje_negativo}")
+    @DecimalMax(value = "100", message = "{mensaje_descuento_porcentaje_superior_100}")
     private BigDecimal descuentoPorcentaje;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_descuento_neto_negativo}")
     private BigDecimal descuentoNeto;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_sub_total_bruto}")
     private BigDecimal subTotalBruto;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_iva_105_neto_negativo}")
     private BigDecimal iva105Neto;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_iva_21_neto_negativo}")
     private BigDecimal iva21Neto;
     
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_factura_impuesto_interno_neto}")
     private BigDecimal impuestoInternoNeto;
-    
+
     @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_total_negativo}")
     private BigDecimal total;
 
     @Column(nullable = false)
     private String observaciones;
 
+    @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_cantidad_de_productos_negativa}", inclusive = false)
+    private BigDecimal cantidadArticulos;
+
     @ManyToOne
-    @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")    
+    @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+    @NotNull(message = "{mensaje_factura_empresa_vacia}")
     private Empresa empresa;
 
     private boolean eliminada;
@@ -138,12 +163,22 @@ public abstract class Factura implements Serializable {
     private long numSerieAfip;
 
     private long numFacturaAfip;
-    
+
+    @JsonGetter("idTransportista")
+    public long getIdTransportista() {
+        return transportista.getId_Transportista();
+    }
+
     @JsonGetter("nombreTransportista")
     public String getNombreTransportista() {
         return transportista.getNombre();
-    }    
-    
+    }
+
+    @JsonGetter("idEmpresa")
+    public long getIdEmpresa() {
+        return empresa.getId_Empresa();
+    }
+
     @JsonGetter("nombreEmpresa")
     public String getNombreEmpresa() {
         return empresa.getNombre();

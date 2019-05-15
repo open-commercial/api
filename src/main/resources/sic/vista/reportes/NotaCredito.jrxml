@@ -75,8 +75,8 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{notaCredito}.getEmpresa().getDetalleUbicacion() != null) ? 
-$P{notaCredito}.getEmpresa().getDetalleUbicacion()  : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaCredito}.getEmpresa().getUbicacion() != null) ? 
+$P{notaCredito}.getEmpresa().getUbicacion()  : ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="130" width="555" height="15" uuid="3c596225-a4e6-4283-92e6-74a5552f2211">
@@ -250,7 +250,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{notaCredito}.getCliente().getDetalleUbicacionFacturacion() != null ) ? $P{notaCredito}.getCliente().getDetalleUbicacionFacturacion() : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaCredito}.getCliente().getUbicacionFacturacion() != null ) ? $P{notaCredito}.getCliente().getUbicacionFacturacion() : ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="50" y="191" width="505" height="15" uuid="cb8691ce-a678-4cf1-a2c7-4938068372c4">
@@ -422,7 +422,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{codigoItem}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{codigoItem} != null) ? $F{codigoItem} : ""]]></textFieldExpression>
 			</textField>
 			<textField pattern="">
 				<reportElement x="80" y="0" width="250" height="15" uuid="f2bfc27d-700e-40b7-a73b-6303c546d09a">
@@ -479,7 +479,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textElement textAlignment="Center">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{medidaItem}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{medidaItem} != null) ?  $F{medidaItem} : ""]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
@@ -758,7 +758,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textElement verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getFacturaVenta().getFecha()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaCredito}.getFacturaVenta() != null) ? $P{notaCredito}.getFacturaVenta().getFecha() : ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="95" width="40" height="12" uuid="e06933f8-0985-4dac-bbb6-4e273d26e38a">
@@ -782,7 +782,8 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<textElement verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Nro: " + $P{notaCredito}.getFacturaVenta().getNumSerie() + " - " + $P{notaCredito}.getFacturaVenta().getNumFactura()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaCredito}.getFacturaVenta() != null) ? 
+"Nro: " + $P{notaCredito}.getFacturaVenta().getNumSerie() + " - " + $P{notaCredito}.getFacturaVenta().getNumFactura() : ""]]></textFieldExpression>
 			</textField>
 		</band>
 	</lastPageFooter>

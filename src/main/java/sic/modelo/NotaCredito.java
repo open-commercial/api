@@ -11,15 +11,18 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.DecimalMin;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
 @Table(name = "notacredito")
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true, exclude = "renglonesNotaCredito")
+@ToString(callSuper = true)
 public class NotaCredito extends Nota implements Serializable {
 
   @Column(nullable = false)
@@ -27,23 +30,29 @@ public class NotaCredito extends Nota implements Serializable {
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "idNota")
-  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+  @JsonProperty(access = JsonProperty.Access.READ_WRITE)
   @Column(nullable = false)
+  @NotEmpty(message = "{mensaje_nota_de_renglones_vacio}")
   private List<RenglonNotaCredito> renglonesNotaCredito;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_subtotal_negativo}")
   private BigDecimal subTotal;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_recargo_porcentaje_negativo}")
   private BigDecimal recargoPorcentaje;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_recargo_neto_negativo}")
   private BigDecimal recargoNeto;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_descuento_porcentaje_negativo}")
   private BigDecimal descuentoPorcentaje;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_descuento_neto_negativo}")
   private BigDecimal descuentoNeto;
 
   public NotaCredito() {}

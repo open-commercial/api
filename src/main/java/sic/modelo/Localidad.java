@@ -18,7 +18,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.validator.constraints.NotBlank;
 
 @Entity
 @Table(name = "localidad")
@@ -35,8 +34,6 @@ public class Localidad implements Serializable {
   @Column(nullable = false)
   private String nombre;
 
-  @Column(nullable = false)
-  @NotBlank(message = "{mensaje_ubicacion_codigo_postal_vacio}")
   private String codigoPostal;
 
   @ManyToOne

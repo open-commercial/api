@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.querydsl.core.annotations.QueryInit;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.NotBlank;
 
 import javax.persistence.*;
 import javax.validation.constraints.DecimalMax;
@@ -43,12 +42,11 @@ public class Ubicacion implements Serializable {
   private Double longitud;
 
   @Length(max = 255, message = "{mensaje_ubicacion_longitud_calle}")
-  @NotBlank(message = "{mensaje_ubicacion_calle_vacia}")
   private String calle;
 
-  private int numero;
+  private Integer numero;
 
-  private Integer piso;
+  private String piso;
 
   @Length(max = 255, message = "{mensaje_ubicacion_longitud_departamento}")
   private String departamento;
@@ -80,13 +78,11 @@ public class Ubicacion implements Serializable {
 
   @Override
   public String toString() {
-    return calle
-        + " "
-        + numero
-        + (piso != null ? ", " + piso : "")
-        + (departamento != null ? departamento: "")
-        + (localidad != null ?  ", " + localidad.getNombre() : " ")
-        + " "
-        + (localidad != null ? localidad.getProvincia().getNombre() : " ");
+    return (calle != null ? calle + " " : "")
+        + (numero != null ? numero + " ": "")
+        + (piso != null ? piso + " ": "")
+        + (departamento != null ? departamento + " ": "")
+        + (localidad != null ?  localidad.getNombre() + " " : "")
+        + (localidad != null ? localidad.getProvincia().getNombre() : "");
   }
 }

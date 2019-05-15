@@ -12,7 +12,7 @@ public class UbicacionBuilder {
   private Double longitud = -58.834360;
   private String calle = "Pedernera";
   private Integer numero = 4585;
-  private Integer piso = 0;
+  private String piso = "local 4";
   private String departamento = "no posee";
 
   public Ubicacion build() {
@@ -63,7 +63,7 @@ public class UbicacionBuilder {
     return this;
   }
 
-  public UbicacionBuilder withPiso(Integer piso) {
+  public UbicacionBuilder withPiso(String piso) {
     this.piso = piso;
     return this;
   }

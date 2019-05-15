@@ -27,7 +27,7 @@ class NotaServiceImplTest {
   @InjectMocks private NotaServiceImpl notaServiceImpl;
 
   @Test
-  void shouldGetTipoNotaWhenEmpresaYClienteDiscriminanIVA() {
+  void shouldGetTipoNotaCreditoWhenEmpresaYClienteDiscriminanIVA() {
     Empresa empresa = new EmpresaBuilder().build();
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
@@ -37,16 +37,29 @@ class NotaServiceImplTest {
       TipoDeComprobante.NOTA_CREDITO_A,
       TipoDeComprobante.NOTA_CREDITO_X,
       TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO,
-      TipoDeComprobante.NOTA_DEBITO_A,
-      TipoDeComprobante.NOTA_DEBITO_X,
-      TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCliente(1L, 1L);
+    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCreditoCliente(1L, 1L);
     assertArrayEquals(expResult, result);
   }
 
   @Test
-  void shouldGetTipoNotaWhenEmpresaDiscriminaYClienteNoIVA() {
+  void shouldGetTipoNotaDebitoWhenEmpresaYClienteDiscriminanIVA() {
+    Empresa empresa = new EmpresaBuilder().build();
+    Cliente cliente = new Cliente();
+    cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
+    when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
+    when(clienteService.getClientePorId(1L)).thenReturn(cliente);
+    TipoDeComprobante[] expResult = {
+      TipoDeComprobante.NOTA_DEBITO_A,
+      TipoDeComprobante.NOTA_DEBITO_X,
+      TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
+    };
+    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaDebitoCliente(1L, 1L);
+    assertArrayEquals(expResult, result);
+  }
+
+  @Test
+  void shouldGetTipoNotaCreditoWhenEmpresaDiscriminaYClienteNoIVA() {
     Empresa empresa = new EmpresaBuilder().build();
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
@@ -56,16 +69,29 @@ class NotaServiceImplTest {
       TipoDeComprobante.NOTA_CREDITO_B,
       TipoDeComprobante.NOTA_CREDITO_X,
       TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO,
-      TipoDeComprobante.NOTA_DEBITO_B,
-      TipoDeComprobante.NOTA_DEBITO_X,
-      TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCliente(1L, 1L);
+    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCreditoCliente(1L, 1L);
     assertArrayEquals(expResult, result);
   }
 
   @Test
-  void shouldGetTipoNotaWhenEmpresaNoDiscriminaYClienteSiIVA() {
+  void shouldGetTipoNotaDebitoWhenEmpresaDiscriminaYClienteNoIVA() {
+    Empresa empresa = new EmpresaBuilder().build();
+    Cliente cliente = new Cliente();
+    cliente.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
+    when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
+    when(clienteService.getClientePorId(1L)).thenReturn(cliente);
+    TipoDeComprobante[] expResult = {
+      TipoDeComprobante.NOTA_DEBITO_B,
+      TipoDeComprobante.NOTA_DEBITO_X,
+      TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
+    };
+    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaDebitoCliente(1L, 1L);
+    assertArrayEquals(expResult, result);
+  }
+
+  @Test
+  void shouldGetTipoNotaCreditoWhenEmpresaNoDiscriminaYClienteSiIVA() {
     Empresa empresa = new EmpresaBuilder().build();
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
@@ -75,15 +101,29 @@ class NotaServiceImplTest {
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.NOTA_CREDITO_X,
       TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO,
-      TipoDeComprobante.NOTA_DEBITO_X,
-      TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCliente(1L, 1L);
+    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCreditoCliente(1L, 1L);
     assertArrayEquals(expResult, result);
   }
 
   @Test
-  void shouldGetTipoNotaWhenEmpresaNoDiscriminaYClienteNoIVA() {
+  void shouldGetTipoNotaDebitoWhenEmpresaNoDiscriminaYClienteSiIVA() {
+    Empresa empresa = new EmpresaBuilder().build();
+    Cliente cliente = new Cliente();
+    cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
+    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
+    when(clienteService.getClientePorId(1L)).thenReturn(cliente);
+    TipoDeComprobante[] expResult = {
+      TipoDeComprobante.NOTA_DEBITO_X,
+      TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
+    };
+    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaDebitoCliente(1L, 1L);
+    assertArrayEquals(expResult, result);
+  }
+
+  @Test
+  void shouldGetTipoNotaCreditoWhenEmpresaNoDiscriminaYClienteNoIVA() {
     Empresa empresa = new EmpresaBuilder().withId_Empresa(1L).build();
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
@@ -92,11 +132,25 @@ class NotaServiceImplTest {
     when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.NOTA_CREDITO_X,
-      TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO,
+      TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO
+    };
+    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCreditoCliente(1L, 1L);
+    assertArrayEquals(expResult, result);
+  }
+
+  @Test
+  void shouldGetTipoNotaDebitoWhenEmpresaNoDiscriminaYClienteNoIVA() {
+    Empresa empresa = new EmpresaBuilder().withId_Empresa(1L).build();
+    Cliente cliente = new Cliente();
+    cliente.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
+    when(clienteService.getClientePorId(1L)).thenReturn(cliente);
+    TipoDeComprobante[] expResult = {
       TipoDeComprobante.NOTA_DEBITO_X,
       TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCliente(1L, 1L);
+    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaDebitoCliente(1L, 1L);
     assertArrayEquals(expResult, result);
   }
 
