@@ -77,7 +77,6 @@ class ProductoServiceImplTest {
     producto.setCantidad(BigDecimal.TEN);
     producto.setIlimitado(false);
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
-    when(productoService.getProductoPorId(1)).thenReturn(producto);
     long[] idProducto = {1};
     BigDecimal[] cantidad = {BigDecimal.TEN.add(BigDecimal.ONE)};
     Map<Long, BigDecimal> resultadoObtenido =

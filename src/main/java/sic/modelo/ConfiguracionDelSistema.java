@@ -24,7 +24,7 @@ import org.hibernate.validator.constraints.Email;
 public class ConfiguracionDelSistema implements Serializable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id_ConfiguracionDelSistema;
 
     private boolean usarFacturaVentaPreImpresa;

@@ -58,11 +58,10 @@ public class GastoServiceImpl implements IGastoService {
   @Override
   public void validarOperacion(Gasto gasto) {
     this.cajaService.validarMovimiento(gasto.getFecha(), gasto.getEmpresa().getId_Empresa());
-    gastoRepository
-        .findById(gasto.getId_Gasto())
-        .orElseThrow(
-            () ->
-                new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_gasto_duplicada")));
+    if (gastoRepository.findById(gasto.getId_Gasto()).isPresent()) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_gasto_duplicada"));
+    }
   }
 
   @Override
@@ -127,8 +126,8 @@ public class GastoServiceImpl implements IGastoService {
   @Override
   @Transactional
   public Gasto guardar(@Valid Gasto gasto) {
-    this.validarOperacion(gasto);
     gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getEmpresa().getId_Empresa()) + 1);
+    this.validarOperacion(gasto);
     gasto = gastoRepository.save(gasto);
     logger.warn("El Gasto {} se guardó correctamente.", gasto);
     return gasto;

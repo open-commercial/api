@@ -29,7 +29,7 @@ import sic.controller.Views;
 public class Producto implements Serializable {
 
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @JsonView(Views.Public.class)
   private long idProducto;
 

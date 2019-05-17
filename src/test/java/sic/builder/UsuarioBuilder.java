@@ -1,9 +1,7 @@
 package sic.builder;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
 
@@ -15,10 +13,10 @@ public class UsuarioBuilder {
   private String nombre = "Daenerys";
   private String apellido = "Targaryen";
   private String email = "daenerys@gmail.com";
-  private String token = "yJhbGci1NiIsInR5cCI6IkpXVCJ9.eyJub21icmUiOiJjZWNpbGlvIn0.MCfaorSC7Wdc8rSW7BJizasfzsm";
+  private String token = null;
   private String passwordRecoveryKey = "";
   private Date passwordRecoveryKeyExpirationDate = new Date();
-  private List<Rol> roles = new ArrayList<>(Arrays.asList(Rol.ADMINISTRADOR));
+  private List<Rol> roles = Collections.singletonList(Rol.ADMINISTRADOR);
   private boolean habilitado = true;
   private boolean eliminado = false;
   private long idEmpresa = 0L;

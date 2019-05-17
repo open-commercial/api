@@ -38,7 +38,9 @@ public abstract class Nota implements Serializable {
     return this.getClass().getSimpleName();
   }
 
-  @Id @GeneratedValue private Long idNota;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long idNota;
 
   @Column(nullable = false)
   private long serie;

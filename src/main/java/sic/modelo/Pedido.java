@@ -38,7 +38,9 @@ import sic.modelo.dto.UbicacionDTO;
 @JsonIgnoreProperties({"cliente", "usuario", "empresa", "tipoDeEnvio"})
 public class Pedido implements Serializable {
 
-  @Id @GeneratedValue private long id_Pedido;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private long id_Pedido;
 
   private long nroPedido;
 

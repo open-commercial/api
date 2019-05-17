@@ -29,7 +29,7 @@ import org.hibernate.validator.constraints.NotBlank;
 @JsonIgnoreProperties({"empresa", "viajante", "credencial", "eliminado"})
 public class Cliente implements Serializable {
 
-  @Id @GeneratedValue private long id_Cliente;
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private long id_Cliente;
 
   @Column(precision = 25, scale = 15)
   @NotNull(message = "{mensaje_cliente_vacio_bonificacion}")

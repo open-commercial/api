@@ -25,7 +25,9 @@ import org.hibernate.validator.constraints.NotEmpty;
 @JsonIgnoreProperties({"empresa", "eliminado"})
 public class Proveedor implements Serializable {
 
-  @Id @GeneratedValue private long id_Proveedor;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private long id_Proveedor;
 
   @Column(nullable = false)
   private String codigo;

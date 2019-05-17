@@ -25,7 +25,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class Usuario implements Serializable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id_Usuario;
     
     @Column(nullable = false)

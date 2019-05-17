@@ -25,7 +25,9 @@ import org.hibernate.validator.constraints.NotEmpty;
 @JsonIgnoreProperties("eliminada")
 public class Empresa implements Serializable {
 
-  @Id @GeneratedValue private long id_Empresa;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private long id_Empresa;
 
   @NotNull(message = "{mensaje_empresa_nombre_vacio}")
   @NotEmpty(message = "{mensaje_empresa_nombre_vacio}")
