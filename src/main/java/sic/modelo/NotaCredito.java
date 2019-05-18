@@ -32,7 +32,6 @@ public class NotaCredito extends Nota implements Serializable {
   @JoinColumn(name = "idNota")
   @JsonProperty(access = JsonProperty.Access.READ_WRITE)
   @Column(nullable = false)
-  @NotEmpty(message = "{mensaje_nota_de_renglones_vacio}")
   private List<RenglonNotaCredito> renglonesNotaCredito;
 
   @Column(precision = 25, scale = 15)

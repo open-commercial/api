@@ -29,7 +29,6 @@ public class NotaDebito extends Nota implements Serializable {
   @JoinColumn(name = "idNota")
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   @Column(nullable = false)
-  @NotEmpty(message = "{mensaje_nota_de_renglones_vacio}")
   private List<RenglonNotaDebito> renglonesNotaDebito;
 
   @Column(precision = 25, scale = 15)
