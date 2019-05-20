@@ -307,6 +307,7 @@ public class NotaController {
     notaCreditoNueva.setRenglonesNotaCredito(renglones);
     if (notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_A
         || notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B
+      || notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_C
         || notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_Y
         || notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO) {
       notaCreditoNueva.setSubTotal(
@@ -323,7 +324,8 @@ public class NotaController {
     notaCreditoNueva.setIva21Neto(notaCreditoNueva.getRenglonesNotaCredito().get(0).getIvaNeto());
     BigDecimal subTotalBruto = notaCreditoNueva.getSubTotal();
     if (notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B
-      || notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO) {
+        || notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_C
+        || notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO) {
       subTotalBruto = subTotalBruto.subtract(notaCreditoNueva.getIva21Neto());
     }
     notaCreditoNueva.setSubTotalBruto(subTotalBruto);

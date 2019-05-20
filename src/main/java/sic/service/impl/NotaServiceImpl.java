@@ -353,9 +353,10 @@ public class NotaServiceImpl implements INotaService {
       tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
       return tiposPermitidos;
     } else {
-      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[2];
-      tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_X;
-      tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
+      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
+      tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_C;
+      tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_X;
+      tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
       return tiposPermitidos;
     }
   }
@@ -379,9 +380,10 @@ public class NotaServiceImpl implements INotaService {
       tiposPermitidos[2] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
       return tiposPermitidos;
     } else {
-      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[2];
-      tiposPermitidos[0] = TipoDeComprobante.NOTA_DEBITO_X;
-      tiposPermitidos[1] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
+      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
+      tiposPermitidos[0] = TipoDeComprobante.NOTA_DEBITO_C;
+      tiposPermitidos[1] = TipoDeComprobante.NOTA_DEBITO_X;
+      tiposPermitidos[2] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
       return tiposPermitidos;
     }
   }
@@ -554,6 +556,7 @@ public class NotaServiceImpl implements INotaService {
     BigDecimal iva105 = BigDecimal.ZERO;
     if (notaCredito.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_A
         || notaCredito.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B
+        || notaCredito.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_C
         || notaCredito.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_Y
         || notaCredito.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO) {
       BigDecimal[] ivaPorcentajes = new BigDecimal[sizeRenglonesCredito];
@@ -827,6 +830,8 @@ public class NotaServiceImpl implements INotaService {
         return TipoDeComprobante.FACTURA_A;
       case NOTA_CREDITO_B:
         return TipoDeComprobante.FACTURA_B;
+      case NOTA_CREDITO_C:
+        return TipoDeComprobante.FACTURA_C;
       case NOTA_CREDITO_X:
         return TipoDeComprobante.FACTURA_X;
       case NOTA_CREDITO_Y:
@@ -845,6 +850,8 @@ public class NotaServiceImpl implements INotaService {
         return TipoDeComprobante.NOTA_CREDITO_A;
       case FACTURA_B:
         return TipoDeComprobante.NOTA_CREDITO_B;
+      case FACTURA_C:
+        return TipoDeComprobante.NOTA_CREDITO_C;
       case FACTURA_X:
         return TipoDeComprobante.NOTA_CREDITO_X;
       case FACTURA_Y:
@@ -887,8 +894,10 @@ public class NotaServiceImpl implements INotaService {
         configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(nota.getEmpresa());
     params.put("preImpresa", cds.isUsarFacturaVentaPreImpresa());
     if (nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_B)
+        || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_C)
         || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_X)
         || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_B)
+        || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_C)
         || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_X)
         || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO)
         || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO)) {
@@ -898,8 +907,10 @@ public class NotaServiceImpl implements INotaService {
     }
     if (nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_A)
         || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_B)
+        || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_C)
         || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_A)
-        || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_B)) {
+        || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_B)
+        || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_C)) {
       if (nota.getNumSerieAfip() != 0 && nota.getNumNotaAfip() != 0) {
         params.put("serie", nota.getNumSerieAfip());
         params.put("nroNota", nota.getNumNotaAfip());
@@ -982,6 +993,7 @@ public class NotaServiceImpl implements INotaService {
         renglonNota.setIvaNeto(
             (tipo == TipoDeComprobante.FACTURA_A
                     || tipo == TipoDeComprobante.FACTURA_B
+                    || tipo == TipoDeComprobante.FACTURA_C
                     || tipo == TipoDeComprobante.PRESUPUESTO)
                 ? renglonFactura.getIvaNeto()
                 : BigDecimal.ZERO);
@@ -990,7 +1002,9 @@ public class NotaServiceImpl implements INotaService {
             renglonNota
                 .getImporte()
                 .subtract(renglonNota.getDescuentoNeto().multiply(cantidad[i])));
-        if (tipo == TipoDeComprobante.FACTURA_B || tipo == TipoDeComprobante.PRESUPUESTO) {
+        if (tipo == TipoDeComprobante.FACTURA_B
+            || tipo == TipoDeComprobante.FACTURA_C
+            || tipo == TipoDeComprobante.PRESUPUESTO) {
           renglonNota.setImporteNeto(renglonNota.getImporteBruto());
         } else {
           renglonNota.setImporteNeto(
@@ -1018,6 +1032,7 @@ public class NotaServiceImpl implements INotaService {
             .divide(new BigDecimal("121"), 15, RoundingMode.HALF_UP);
     renglonNota.setPrecioUnitario(
         (tipo == TipoDeComprobante.NOTA_CREDITO_B
+                || tipo == TipoDeComprobante.NOTA_CREDITO_C
                 || tipo == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO)
             ? monto
             : subTotal);
@@ -1028,21 +1043,25 @@ public class NotaServiceImpl implements INotaService {
     renglonNota.setIvaPorcentaje(
         (tipo == TipoDeComprobante.NOTA_CREDITO_A
                 || tipo == TipoDeComprobante.NOTA_CREDITO_B
+                || tipo == TipoDeComprobante.NOTA_CREDITO_C
                 || tipo == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO)
             ? new BigDecimal("21")
             : BigDecimal.ZERO);
     renglonNota.setIvaNeto(monto.subtract(subTotal));
     renglonNota.setImporte(
         (tipo == TipoDeComprobante.NOTA_CREDITO_B
+                || tipo == TipoDeComprobante.NOTA_CREDITO_C
                 || tipo == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO)
             ? monto
             : subTotal);
     renglonNota.setImporteBruto(
         (tipo == TipoDeComprobante.NOTA_CREDITO_B
+                || tipo == TipoDeComprobante.NOTA_CREDITO_C
                 || tipo == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO)
             ? monto
             : subTotal);
     if (tipo == TipoDeComprobante.NOTA_CREDITO_B
+        || tipo == TipoDeComprobante.NOTA_CREDITO_C
         || tipo == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO) {
       renglonNota.setImporteNeto(renglonNota.getImporteBruto());
     } else {
@@ -1055,6 +1074,7 @@ public class NotaServiceImpl implements INotaService {
     TipoDeComprobante[] tiposPermitidos = {
       TipoDeComprobante.NOTA_CREDITO_A,
       TipoDeComprobante.NOTA_CREDITO_B,
+      TipoDeComprobante.NOTA_CREDITO_C,
       TipoDeComprobante.NOTA_CREDITO_Y,
       TipoDeComprobante.NOTA_CREDITO_X,
       TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO,
@@ -1138,7 +1158,7 @@ public class NotaServiceImpl implements INotaService {
     for (int i = 0; i < indice; i++) {
       if (ivaPorcentajeRenglones[i].compareTo(ivaPorcentaje) == 0) {
         if (tipoDeComprobante == TipoDeComprobante.NOTA_CREDITO_A || tipoDeComprobante == TipoDeComprobante.NOTA_CREDITO_B
-          || tipoDeComprobante == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO) {
+          || tipoDeComprobante == TipoDeComprobante.NOTA_CREDITO_C || tipoDeComprobante == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO) {
           resultado = resultado.add(cantidades[i].multiply(ivaNetoRenglones[i]
             .subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
             .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
@@ -1160,6 +1180,7 @@ public class NotaServiceImpl implements INotaService {
       BigDecimal iva21Neto) {
     BigDecimal resultado = subTotal.add(recargoNeto).subtract(descuentoNeto);
     if (tipoDeComprobante == TipoDeComprobante.FACTURA_B
+        || tipoDeComprobante == TipoDeComprobante.FACTURA_C
         || tipoDeComprobante == TipoDeComprobante.PRESUPUESTO) {
       resultado = resultado.subtract(iva105Neto.add(iva21Neto));
     }

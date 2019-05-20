@@ -279,6 +279,7 @@ public class ProductoServiceImpl implements IProductoService {
             Arrays.asList(
               TipoDeComprobante.NOTA_CREDITO_A,
               TipoDeComprobante.NOTA_CREDITO_B,
+              TipoDeComprobante.NOTA_CREDITO_C,
               TipoDeComprobante.NOTA_CREDITO_X,
               TipoDeComprobante.NOTA_CREDITO_X,
               TipoDeComprobante.NOTA_CREDITO_Y,

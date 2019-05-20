@@ -3315,7 +3315,50 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldCrearNotaCreditoVentaDeFactura() {
+  void shouldCrearNotaCreditoVentaDeFacturaA() {
+    this.shouldCrearFacturaVentaA();
+    List<FacturaVenta> facturasRecuperadas =
+      restTemplate
+        .exchange(
+          apiPrefix
+            + "/facturas/venta/busqueda/criteria?idEmpresa=1"
+            + "&tipoFactura="
+            + TipoDeComprobante.FACTURA_A
+            + "&nroSerie=0"
+            + "&nroFactura=1",
+          HttpMethod.GET,
+          null,
+          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+        .getBody()
+        .getContent();
+    Long[] idsRenglonesFacutura = new Long[1];
+    idsRenglonesFacutura[0] = 1L;
+    BigDecimal[] cantidades = new BigDecimal[1];
+    cantidades[0] = new BigDecimal("5");
+    NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
+      NuevaNotaCreditoDeFacturaDTO.builder()
+        .idFactura(facturasRecuperadas.get(0).getId_Factura())
+        .idsRenglonesFactura(idsRenglonesFacutura)
+        .cantidades(cantidades)
+        .modificaStock(true)
+        .motivo("Color equivocado.")
+        .build();
+    NotaCreditoDTO notaCreditoParaPersistir =
+      restTemplate.postForObject(
+        apiPrefix + "/notas/credito/calculos", nuevaNotaCreditoDTO, NotaCreditoDTO.class);
+    NotaCreditoDTO notaGuardada =
+      restTemplate.postForObject(
+        apiPrefix
+          + "/notas/credito",
+        notaCreditoParaPersistir,
+        NotaCreditoDTO.class);
+    notaCreditoParaPersistir.setNroNota(notaGuardada.getNroNota());
+    assertEquals(notaCreditoParaPersistir, notaGuardada);
+    restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
+  }
+
+  @Test
+  void shouldCrearNotaCreditoVentaDeFacturaB() {
     this.shouldCrearFacturaVentaB();
     List<FacturaVenta> facturasRecuperadas =
         restTemplate
@@ -3358,6 +3401,49 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldCrearNotaCreditoVentaDeFacturaC() {
+    this.shouldCrearFacturaVentaC();
+    List<FacturaVenta> facturasRecuperadas =
+      restTemplate
+        .exchange(
+          apiPrefix
+            + "/facturas/venta/busqueda/criteria?idEmpresa=1"
+            + "&tipoFactura="
+            + TipoDeComprobante.FACTURA_C
+            + "&nroSerie=0"
+            + "&nroFactura=1",
+          HttpMethod.GET,
+          null,
+          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+        .getBody()
+        .getContent();
+    Long[] idsRenglonesFacutura = new Long[1];
+    idsRenglonesFacutura[0] = 1L;
+    BigDecimal[] cantidades = new BigDecimal[1];
+    cantidades[0] = new BigDecimal("5");
+    NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
+      NuevaNotaCreditoDeFacturaDTO.builder()
+        .idFactura(facturasRecuperadas.get(0).getId_Factura())
+        .idsRenglonesFactura(idsRenglonesFacutura)
+        .cantidades(cantidades)
+        .modificaStock(true)
+        .motivo("Color equivocado.")
+        .build();
+    NotaCreditoDTO notaCreditoParaPersistir =
+      restTemplate.postForObject(
+        apiPrefix + "/notas/credito/calculos", nuevaNotaCreditoDTO, NotaCreditoDTO.class);
+    NotaCreditoDTO notaGuardada =
+      restTemplate.postForObject(
+        apiPrefix
+          + "/notas/credito",
+        notaCreditoParaPersistir,
+        NotaCreditoDTO.class);
+    notaCreditoParaPersistir.setNroNota(notaGuardada.getNroNota());
+    assertEquals(notaCreditoParaPersistir, notaGuardada);
+    restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
+  }
+
+  @Test
   void shouldCrearNotaCreditoVentaSinFactura() {
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO =
@@ -3384,7 +3470,7 @@ class AppIntegrationTest {
 
   @Test
   void shouldVerificarStockNotaCreditoVenta() {
-    this.shouldCrearNotaCreditoVentaDeFactura();
+    this.shouldCrearNotaCreditoVentaDeFacturaB();
     ProductoDTO producto1 =
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO producto2 =

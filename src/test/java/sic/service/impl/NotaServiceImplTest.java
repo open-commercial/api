@@ -99,6 +99,7 @@ class NotaServiceImplTest {
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(clienteService.getClientePorId(1L)).thenReturn(cliente);
     TipoDeComprobante[] expResult = {
+      TipoDeComprobante.NOTA_CREDITO_C,
       TipoDeComprobante.NOTA_CREDITO_X,
       TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO,
     };
@@ -115,6 +116,7 @@ class NotaServiceImplTest {
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(clienteService.getClientePorId(1L)).thenReturn(cliente);
     TipoDeComprobante[] expResult = {
+      TipoDeComprobante.NOTA_DEBITO_C,
       TipoDeComprobante.NOTA_DEBITO_X,
       TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
     };
@@ -131,6 +133,7 @@ class NotaServiceImplTest {
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(clienteService.getClientePorId(1L)).thenReturn(cliente);
     TipoDeComprobante[] expResult = {
+      TipoDeComprobante.NOTA_CREDITO_C,
       TipoDeComprobante.NOTA_CREDITO_X,
       TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO
     };
@@ -147,6 +150,7 @@ class NotaServiceImplTest {
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(clienteService.getClientePorId(1L)).thenReturn(cliente);
     TipoDeComprobante[] expResult = {
+      TipoDeComprobante.NOTA_DEBITO_C,
       TipoDeComprobante.NOTA_DEBITO_X,
       TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
     };
