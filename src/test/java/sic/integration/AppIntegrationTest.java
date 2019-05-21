@@ -4288,4 +4288,27 @@ class AppIntegrationTest {
     assertEquals(59, fechaCierre.get(Calendar.MINUTE));
     assertEquals(59, fechaCierre.get(Calendar.SECOND));
   }
+
+  @Test
+  void shouldAgregarItemsAlCarritoCompra() {
+    this.crearProductos();
+    restTemplate.postForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=5", null, ItemCarritoCompra.class);
+    restTemplate.postForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/2?cantidad=9", null, ItemCarritoCompra.class);
+    ItemCarritoCompra item1 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
+    assertEquals(1L, item1.getProducto().getIdProducto());
+    assertEquals(5, item1.getCantidad().doubleValue());
+    ItemCarritoCompra item2 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/2", ItemCarritoCompra.class);
+    assertEquals(2L, item2.getProducto().getIdProducto());
+    assertEquals(9, item2.getCantidad().doubleValue());
+  }
+
+  @Test
+  void shouldGenerarPedidoConItemsDelCarrito() {
+    this.shouldAgregarItemsAlCarritoCompra();
+    PedidoDTO pedido = restTemplate.postForObject(apiPrefix
+      + "/carrito-compra?idEmpresa=1&idUsuario=1&idCliente=1&tipoDeEnvio=RETIRO_EN_SUCURSAL&idSucursal=1",
+      "probando pedido desde carrito", PedidoDTO.class);
+    assertEquals(14, pedido.getCantidadArticulos().doubleValue());
+    assertEquals(new BigDecimal("14395.500000000000000000000000000000000000000000000"), pedido.getTotalActual());
+  }
 }
