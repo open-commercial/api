@@ -2,6 +2,7 @@ package sic.controller;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -95,6 +96,7 @@ public class CarritoCompraController {
       @RequestBody(required = false) String observaciones) {
     CarritoCompraDTO carritoCompraDTO = carritoCompraService.getCarritoCompra(idUsuario, idCliente);
     Pedido pedido = new Pedido();
+    pedido.setFecha(new Date());
     pedido.setCliente(clienteService.getClientePorId(idCliente));
     pedido.setObservaciones(observaciones);
     pedido.setSubTotal(carritoCompraDTO.getSubtotal());
