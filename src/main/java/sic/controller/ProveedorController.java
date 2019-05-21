@@ -50,7 +50,7 @@ public class ProveedorController {
   @GetMapping("/proveedores/{idProveedor}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Proveedor getProveedorPorId(@PathVariable long idProveedor) {
-    return this.proveedorService.getProveedorPorId(idProveedor);
+    return this.proveedorService.getProveedorNoEliminadoPorId(idProveedor);
   }
 
   @PostMapping("/proveedores")
@@ -75,7 +75,7 @@ public class ProveedorController {
   public void actualizar(
     @RequestBody ProveedorDTO proveedorDTO) {
     Proveedor proveedorPersistido =
-      proveedorService.getProveedorPorId(proveedorDTO.getId_Proveedor());
+      proveedorService.getProveedorNoEliminadoPorId(proveedorDTO.getId_Proveedor());
     Proveedor proveedorPorActualizar = modelMapper.map(proveedorDTO, Proveedor.class);
     if (proveedorPorActualizar.getRazonSocial() == null
       || proveedorPorActualizar.getRazonSocial().isEmpty()) {
@@ -103,7 +103,7 @@ public class ProveedorController {
     } else {
       proveedorPorActualizar.setUbicacion(proveedorPersistido.getUbicacion());
     }
-    if (proveedorService.getProveedorPorId(proveedorPorActualizar.getId_Proveedor()) != null) {
+    if (proveedorService.getProveedorNoEliminadoPorId(proveedorPorActualizar.getId_Proveedor()) != null) {
       proveedorService.actualizar(proveedorPorActualizar);
     }
   }

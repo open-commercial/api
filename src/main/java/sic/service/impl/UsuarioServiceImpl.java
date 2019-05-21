@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
@@ -25,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.service.*;
-import sic.util.Validator;
 import sic.repository.UsuarioRepository;
 
 @Service
@@ -69,13 +69,15 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public Usuario getUsuarioPorId(Long idUsuario) {
-    return usuarioRepository
-        .findById(idUsuario)
-        .orElseThrow(
-            () ->
-                new EntityNotFoundException(
-                    RESOURCE_BUNDLE.getString("mensaje_usuario_no_existente")));
+  public Usuario getUsuarioNoEliminadoPorId(Long idUsuario) {
+    Optional<Usuario> usuario = usuarioRepository
+      .findById(idUsuario);
+    if (usuario.isPresent() && !usuario.get().isEliminado()) {
+      return usuario.get();
+    } else {
+      throw new EntityNotFoundException(
+        RESOURCE_BUNDLE.getString("mensaje_usuario_no_existente"));
+    }
   }
 
   @Override
@@ -296,7 +298,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public void eliminar(long idUsuario) {
-    Usuario usuario = this.getUsuarioPorId(idUsuario);
+    Usuario usuario = this.getUsuarioNoEliminadoPorId(idUsuario);
     this.validarOperacion(TipoDeOperacion.ELIMINACION, usuario);
     Cliente clienteVinculado = clienteService.getClientePorCredencial(usuario);
     if (clienteVinculado != null)

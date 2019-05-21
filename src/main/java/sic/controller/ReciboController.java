@@ -66,7 +66,7 @@ public class ReciboController {
     Rol.COMPRADOR
   })
   public Recibo getReciboPorId(@PathVariable long idRecibo) {
-    return reciboService.getById(idRecibo);
+    return reciboService.getReciboNoEliminadoPorId(idRecibo);
   }
 
   @GetMapping("/recibos/venta/busqueda/criteria")
@@ -285,10 +285,10 @@ public class ReciboController {
     Recibo recibo = modelMapper.map(reciboDTO, Recibo.class);
     recibo.setEmpresa(empresaService.getEmpresaPorId(reciboDTO.getIdEmpresa()));
     recibo.setCliente(clienteService.getClienteNoEliminadoPorId(reciboDTO.getIdCliente()));
-    recibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(reciboDTO.getIdFormaDePago()));
+    recibo.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(reciboDTO.getIdFormaDePago()));
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     recibo.setUsuario(
-        usuarioService.getUsuarioPorId(((Integer) claims.get("idUsuario")).longValue()));
+        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     return reciboService.guardar(recibo);
   }
 
@@ -299,11 +299,11 @@ public class ReciboController {
       @RequestHeader("Authorization") String authorizationHeader) {
     Recibo recibo = modelMapper.map(reciboDTO, Recibo.class);
     recibo.setEmpresa(empresaService.getEmpresaPorId(reciboDTO.getIdEmpresa()));
-    recibo.setProveedor(proveedorService.getProveedorPorId(reciboDTO.getIdProveedor()));
-    recibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(reciboDTO.getIdFormaDePago()));
+    recibo.setProveedor(proveedorService.getProveedorNoEliminadoPorId(reciboDTO.getIdProveedor()));
+    recibo.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(reciboDTO.getIdFormaDePago()));
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     recibo.setUsuario(
-        usuarioService.getUsuarioPorId(((Integer) claims.get("idUsuario")).longValue()));
+        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     return reciboService.guardar(recibo);
   }
 
@@ -326,7 +326,7 @@ public class ReciboController {
     headers.setContentType(MediaType.APPLICATION_PDF);
     headers.add("content-disposition", "inline; filename=Recibo.pdf");
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-    byte[] reportePDF = reciboService.getReporteRecibo(reciboService.getById(idRecibo));
+    byte[] reportePDF = reciboService.getReporteRecibo(reciboService.getReciboNoEliminadoPorId(idRecibo));
     return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
   }
 }

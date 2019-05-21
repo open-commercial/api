@@ -46,13 +46,15 @@ public class GastoServiceImpl implements IGastoService {
   }
 
   @Override
-  public Gasto getGastoPorId(Long idGasto) {
-    return gastoRepository
-        .findById(idGasto)
-        .orElseThrow(
-            () ->
-                new EntityNotFoundException(
-                    ResourceBundle.getBundle("Mensajes").getString("mensaje_gasto_no_existente")));
+  public Gasto getGastoNoEliminadoPorId(Long idGasto) {
+    Optional<Gasto> gasto = gastoRepository
+      .findById(idGasto);
+    if (gasto.isPresent() && !gasto.get().isEliminado()) {
+      return gasto.get();
+    } else {
+      throw new EntityNotFoundException(
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_gasto_no_existente"));
+    }
   }
 
   @Override
@@ -149,7 +151,7 @@ public class GastoServiceImpl implements IGastoService {
   @Override
   @Transactional
   public void eliminar(long idGasto) {
-    Gasto gastoParaEliminar = this.getGastoPorId(idGasto);
+    Gasto gastoParaEliminar = this.getGastoNoEliminadoPorId(idGasto);
     if (this.cajaService
         .getUltimaCaja(gastoParaEliminar.getEmpresa().getId_Empresa())
         .getEstado()

@@ -14,8 +14,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
@@ -63,7 +61,7 @@ public class FacturaController {
     @GetMapping("/facturas/{idFactura}")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Factura getFacturaPorId(@PathVariable long idFactura) {
-        return facturaService.getFacturaPorId(idFactura);
+        return facturaService.getFacturaNoEliminadaPorId(idFactura);
     }
 
   @PostMapping("/facturas/venta")
@@ -87,10 +85,10 @@ public class FacturaController {
           ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_facturacion_vacia"));
     }
     fv.setCliente(cliente);
-    fv.setTransportista(transportistaService.getTransportistaPorId(facturaVentaDTO.getIdTransportista()));
+    fv.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(facturaVentaDTO.getIdTransportista()));
     fv.setFecha(new Date());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    fv.setUsuario(usuarioService.getUsuarioPorId(((Integer) claims.get("idUsuario")).longValue()));
+    fv.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     List<FacturaVenta> facturasGuardadas;
     if (indices != null) {
       facturasGuardadas =
@@ -131,11 +129,11 @@ public class FacturaController {
       @RequestHeader("Authorization") String authorizationHeader) {
     FacturaCompra fc = modelMapper.map(facturaCompraDTO, FacturaCompra.class);
     fc.setEmpresa(empresaService.getEmpresaPorId(facturaCompraDTO.getIdEmpresa()));
-    fc.setProveedor(proveedorService.getProveedorPorId(facturaCompraDTO.getIdProveedor()));
+    fc.setProveedor(proveedorService.getProveedorNoEliminadoPorId(facturaCompraDTO.getIdProveedor()));
     fc.setTransportista(
-        transportistaService.getTransportistaPorId(facturaCompraDTO.getIdTransportista()));
+        transportistaService.getTransportistaNoEliminadoPorId(facturaCompraDTO.getIdTransportista()));
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    fc.setUsuario(usuarioService.getUsuarioPorId(((Integer) claims.get("idUsuario")).longValue()));
+    fc.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     List<FacturaCompra> facturas = new ArrayList<>();
     facturas.add(fc);
     return facturaService.guardar(facturas);
@@ -144,7 +142,7 @@ public class FacturaController {
     @PostMapping("/facturas/{idFactura}/autorizacion")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public FacturaVenta autorizarFactura(@PathVariable long idFactura) {
-        return facturaService.autorizarFacturaVenta((FacturaVenta) facturaService.getFacturaPorId(idFactura));
+        return facturaService.autorizarFacturaVenta((FacturaVenta) facturaService.getFacturaNoEliminadaPorId(idFactura));
     }
 
     @GetMapping("/facturas/{idFactura}/renglones")
@@ -284,7 +282,7 @@ public class FacturaController {
     @GetMapping("/facturas/compra/tipos/empresas/{idEmpresa}/proveedores/{idProveedor}")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public TipoDeComprobante[] getTipoFacturaCompra(@PathVariable long idEmpresa, @PathVariable long idProveedor) {
-        return facturaService.getTipoFacturaCompra(empresaService.getEmpresaPorId(idEmpresa), proveedorService.getProveedorPorId(idProveedor));
+        return facturaService.getTipoFacturaCompra(empresaService.getEmpresaPorId(idEmpresa), proveedorService.getProveedorNoEliminadoPorId(idProveedor));
     }
 
   @GetMapping("/facturas/venta/tipos/empresas/{idEmpresa}/clientes/{idCliente}")
@@ -296,7 +294,7 @@ public class FacturaController {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuario = (int) claims.get("idUsuario");
     List<Rol> rolesDeUsuario =
-        usuarioService.getUsuarioPorId(idUsuario).getRoles();
+        usuarioService.getUsuarioNoEliminadoPorId(idUsuario).getRoles();
     if (rolesDeUsuario.contains(Rol.ADMINISTRADOR)
         || rolesDeUsuario.contains(Rol.ENCARGADO)
         || rolesDeUsuario.contains(Rol.VENDEDOR)) {
@@ -322,7 +320,7 @@ public class FacturaController {
         headers.setContentType(MediaType.APPLICATION_PDF);        
         headers.add("content-disposition", "inline; filename=Factura.pdf");
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        byte[] reportePDF = facturaService.getReporteFacturaVenta(facturaService.getFacturaPorId(idFactura));
+        byte[] reportePDF = facturaService.getReporteFacturaVenta(facturaService.getFacturaNoEliminadaPorId(idFactura));
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
     }
     

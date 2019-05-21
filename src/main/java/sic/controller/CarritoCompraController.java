@@ -105,7 +105,7 @@ public class CarritoCompraController {
     pedido.setTotalActual(carritoCompraDTO.getTotal());
     pedido.setTotalEstimado(pedido.getTotalActual());
     pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
+    pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     Pageable pageable =
         PageRequest.of(0, Integer.MAX_VALUE, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
     List<ItemCarritoCompra> items =

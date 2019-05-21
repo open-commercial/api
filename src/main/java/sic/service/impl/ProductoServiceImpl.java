@@ -334,7 +334,7 @@ public class ProductoServiceImpl implements IProductoService {
     }
     List<Producto> productos = new ArrayList<>();
     for (Long i : idProducto) {
-      Producto producto = this.getProductoPorId(i);
+      Producto producto = this.getProductoNoEliminadoPorId(i);
       if (producto == null) {
         throw new EntityNotFoundException(
             RESOURCE_BUNDLE.getString("mensaje_producto_no_existente"));
@@ -371,7 +371,7 @@ public class ProductoServiceImpl implements IProductoService {
     }
     List<Producto> productos = new ArrayList<>();
     for (long i : productosParaActualizarDTO.getIdProducto()) {
-      productos.add(this.getProductoPorId(i));
+      productos.add(this.getProductoNoEliminadoPorId(i));
     }
     BigDecimal multiplicador = BigDecimal.ZERO;
     if (aplicaDescuentoRecargoPorcentaje) {
@@ -393,15 +393,15 @@ public class ProductoServiceImpl implements IProductoService {
     }
     for (Producto p : productos) {
       if (productosParaActualizarDTO.getIdMedida() != null) {
-        p.setMedida(medidaService.getMedidaPorId(productosParaActualizarDTO.getIdMedida()));
+        p.setMedida(medidaService.getMedidaNoEliminadaPorId(productosParaActualizarDTO.getIdMedida()));
       }
       if (productosParaActualizarDTO.getIdRubro() != null) {
-        Rubro rubro = rubroService.getRubroPorId(productosParaActualizarDTO.getIdRubro());
+        Rubro rubro = rubroService.getRubroNoEliminadoPorId(productosParaActualizarDTO.getIdRubro());
         p.setRubro(rubro);
       }
       if (productosParaActualizarDTO.getIdProveedor() != null) {
         Proveedor proveedor =
-            proveedorService.getProveedorPorId(productosParaActualizarDTO.getIdProveedor());
+            proveedorService.getProveedorNoEliminadoPorId(productosParaActualizarDTO.getIdProveedor());
         p.setProveedor(proveedor);
       }
       if (actualizaPrecios) {
@@ -459,7 +459,7 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Producto getProductoPorId(long idProducto) {
+  public Producto getProductoNoEliminadoPorId(long idProducto) {
     Optional<Producto> producto = productoRepository.findById(idProducto);
     if (producto.isPresent()) {
       if (producto.get().getCantidad().compareTo(BigDecimal.ZERO) > 0) {
@@ -513,7 +513,7 @@ public class ProductoServiceImpl implements IProductoService {
     int longitudCantidades = cantidad.length;
     if (longitudIds == longitudCantidades) {
       for (int i = 0; i < longitudIds; i++) {
-        Producto p = this.getProductoPorId(idProducto[i]);
+        Producto p = this.getProductoNoEliminadoPorId(idProducto[i]);
         if (!p.isIlimitado() && p.getCantidad().compareTo(cantidad[i]) < 0) {
           productos.put(p.getIdProducto(), cantidad[i]);
         }

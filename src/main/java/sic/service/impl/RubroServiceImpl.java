@@ -1,6 +1,7 @@
 package sic.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
@@ -31,13 +32,15 @@ public class RubroServiceImpl implements IRubroService {
   }
 
   @Override
-  public Rubro getRubroPorId(Long idRubro) {
-    return rubroRepository
-        .findById(idRubro)
-        .orElseThrow(
-            () ->
-                new EntityNotFoundException(
-                    ResourceBundle.getBundle("Mensajes").getString("mensaje_rubro_no_existente")));
+  public Rubro getRubroNoEliminadoPorId(Long idRubro) {
+    Optional<Rubro> rubro = rubroRepository
+      .findById(idRubro);
+    if (rubro.isPresent() && !rubro.get().isEliminado()) {
+      return rubro.get();
+    } else {
+      throw new EntityNotFoundException(
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_rubro_no_existente"));
+    }
   }
 
   @Override
@@ -84,7 +87,7 @@ public class RubroServiceImpl implements IRubroService {
   @Override
   @Transactional
   public void eliminar(long idRubro) {
-    Rubro rubro = this.getRubroPorId(idRubro);
+    Rubro rubro = this.getRubroNoEliminadoPorId(idRubro);
     if (rubro == null) {
       throw new EntityNotFoundException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_no_existente"));

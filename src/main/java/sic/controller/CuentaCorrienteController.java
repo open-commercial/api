@@ -192,7 +192,7 @@ public class CuentaCorrienteController {
   })
   public CuentaCorrienteProveedor getCuentaCorrientePorProveedor(@PathVariable Long idProveedor) {
     return cuentaCorrienteService.getCuentaCorrientePorProveedor(
-        proveedorService.getProveedorPorId(idProveedor));
+        proveedorService.getProveedorNoEliminadoPorId(idProveedor));
   }
 
   @GetMapping("/cuentas-corriente/clientes/{idCliente}/saldo")
@@ -219,7 +219,7 @@ public class CuentaCorrienteController {
   })
   public BigDecimal getSaldoCuentaCorrienteProveedor(@PathVariable long idProveedor) {
     return cuentaCorrienteService
-        .getCuentaCorrientePorProveedor(proveedorService.getProveedorPorId(idProveedor))
+        .getCuentaCorrientePorProveedor(proveedorService.getProveedorNoEliminadoPorId(idProveedor))
         .getSaldo();
   }
 

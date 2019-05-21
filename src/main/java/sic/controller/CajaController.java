@@ -55,7 +55,7 @@ public class CajaController {
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
     return cajaService.abrirCaja(
         empresaService.getEmpresaPorId(idEmpresa),
-        usuarioService.getUsuarioPorId(idUsuarioLoggedIn),
+        usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn),
         saldoApertura);
   }
 
@@ -120,7 +120,7 @@ public class CajaController {
     if (caja.getFechaCierre() != null) fechaHasta = caja.getFechaCierre();
     return cajaService.getMovimientosPorFormaDePagoEntreFechas(
         caja.getEmpresa(),
-        formaDePagoService.getFormasDePagoPorId(idFormaDePago),
+        formaDePagoService.getFormasDePagoNoEliminadoPorId(idFormaDePago),
         caja.getFechaApertura(),
         fechaHasta);
   }

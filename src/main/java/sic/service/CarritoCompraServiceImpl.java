@@ -62,7 +62,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
       long idUsuario, long idCliente, Pageable pageable) {
     Page<ItemCarritoCompra> items =
         carritoCompraRepository.findAllByUsuario(
-            usuarioService.getUsuarioPorId(idUsuario), pageable);
+            usuarioService.getUsuarioNoEliminadoPorId(idUsuario), pageable);
     Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     BigDecimal bonificacion = cliente.getBonificacion();
     items.forEach(
@@ -103,8 +103,8 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   @Override
   public void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad) {
-    Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
-    Producto producto = productoService.getProductoPorId(idProducto);
+    Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
+    Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
     if (item == null) {
       BigDecimal importe = producto.getPrecioLista().multiply(cantidad);

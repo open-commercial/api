@@ -91,9 +91,9 @@ public class FacturaServiceImpl implements IFacturaService {
   }
 
   @Override
-  public Factura getFacturaPorId(long idFactura) {
+  public Factura getFacturaNoEliminadaPorId(long idFactura) {
     Optional<Factura> factura = facturaRepository.findById(idFactura);
-    if (factura.isPresent()) {
+    if (factura.isPresent() && !factura.get().isEliminada()) {
       return factura.get();
     } else {
       throw new EntityNotFoundException(
@@ -104,7 +104,7 @@ public class FacturaServiceImpl implements IFacturaService {
   @Override
   public List<Factura> getFacturasDelPedido(Long idPedido) {
     return facturaVentaRepository.findAllByPedidoAndEliminada(
-        pedidoService.getPedidoPorId(idPedido), false);
+        pedidoService.getPedidoNoEliminadoPorId(idPedido), false);
   }
 
   @Override
@@ -188,7 +188,7 @@ public class FacturaServiceImpl implements IFacturaService {
 
     @Override
     public List<RenglonFactura> getRenglonesDeLaFactura(Long idFactura) {
-        return this.getFacturaPorId(idFactura).getRenglones();
+        return this.getFacturaNoEliminadaPorId(idFactura).getRenglones();
     }
 
     @Override
@@ -199,7 +199,7 @@ public class FacturaServiceImpl implements IFacturaService {
     @Override
     public RenglonFactura getRenglonFactura(Long idRenglonFactura) {
         return renglonFacturaRepository.findById(idRenglonFactura)
-          .orElse(null);
+          .orElse(null); // orElseThrow
     }
 
     @Override
@@ -327,7 +327,7 @@ public class FacturaServiceImpl implements IFacturaService {
       builder.and(qFacturaVenta.pedido.nroPedido.eq(criteria.getNroPedido()));
     if (criteria.isBuscaPorProducto())
       builder.and(qFacturaVenta.renglones.any().idProductoItem.eq(criteria.getIdProducto()));
-    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     BooleanBuilder rsPredicate = new BooleanBuilder();
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
@@ -394,7 +394,7 @@ public class FacturaServiceImpl implements IFacturaService {
                 Movimiento.VENTA,
                 f.getTipoComprobante()));
     if (idPedido != null) {
-      Pedido pedido = pedidoService.getPedidoPorId(idPedido);
+      Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
       facturas.forEach(f -> f.setPedido(pedido));
       for (Factura f : facturas) {
         FacturaVenta facturaGuardada =
@@ -933,7 +933,7 @@ public class FacturaServiceImpl implements IFacturaService {
       long idProducto,
       BigDecimal descuentoPorcentaje,
       boolean dividiendoRenglonFactura) {
-    Producto producto = productoService.getProductoPorId(idProducto);
+    Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     /*if (dividiendoRenglonFactura == false && cantidad < producto.getBulto()
             && (movimiento == Movimiento.VENTA || movimiento == Movimiento.PEDIDO)) {
         throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")

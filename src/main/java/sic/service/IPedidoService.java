@@ -12,7 +12,7 @@ import javax.validation.Valid;
 
 public interface IPedidoService {
 
-  Pedido getPedidoPorId(long id);
+  Pedido getPedidoNoEliminadoPorId(long id);
 
   void actualizar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal);
 

@@ -17,7 +17,7 @@ public interface INotaService {
 
   byte[] getReporteNota(Nota nota);
 
-  Nota getNotaPorId(long idNota);
+  Nota getNotaNoEliminadaPorId(long idNota);
 
   Page<Nota> buscarNotas(BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn);
 

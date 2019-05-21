@@ -9,6 +9,7 @@ import sic.modelo.*;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
@@ -20,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.service.IProveedorService;
 import sic.service.BusinessServiceException;
-import sic.util.Validator;
 import sic.repository.ProveedorRepository;
 import sic.service.ICuentaCorrienteService;
 import sic.service.IUbicacionService;
@@ -46,14 +46,16 @@ public class ProveedorServiceImpl implements IProveedorService {
   }
 
   @Override
-  public Proveedor getProveedorPorId(long idProveedor) {
-    return proveedorRepository
-        .findById(idProveedor)
-        .orElseThrow(
-            () ->
-                new EntityNotFoundException(
-                    ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_proveedor_no_existente")));
+  public Proveedor getProveedorNoEliminadoPorId(long idProveedor) {
+    Optional<Proveedor> proveedor = proveedorRepository
+      .findById(idProveedor);
+    if (proveedor.isPresent() && !proveedor.get().isEliminado()) {
+      return proveedor.get();
+    } else {
+      throw new EntityNotFoundException(
+        ResourceBundle.getBundle("Mensajes")
+          .getString("mensaje_proveedor_no_existente"));
+    }
   }
 
   @Override
@@ -193,7 +195,7 @@ public class ProveedorServiceImpl implements IProveedorService {
   @Override
   @Transactional
   public void eliminar(long idProveedor) {
-    Proveedor proveedor = this.getProveedorPorId(idProveedor);
+    Proveedor proveedor = this.getProveedorNoEliminadoPorId(idProveedor);
     if (proveedor == null) {
       throw new EntityNotFoundException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_no_existente"));

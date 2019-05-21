@@ -71,7 +71,6 @@ class AppIntegrationTest {
 
   private final String apiPrefix = "/api/v1";
 
-  private static final Double DELTA = 0.0000000000001;
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
   private static final BigDecimal CIEN = new BigDecimal("100");
@@ -3973,8 +3972,7 @@ class AppIntegrationTest {
       0,
       restTemplate
         .getForObject(apiPrefix + "/cuentas-corriente/proveedores/1/saldo", BigDecimal.class)
-        .doubleValue(),
-      DELTA);
+        .doubleValue());
     restTemplate.delete(apiPrefix + "/recibos/1");
     assertEquals(
       new BigDecimal("-599.250000000000000"),
@@ -4011,11 +4009,11 @@ class AppIntegrationTest {
                 new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {})
             .getBody()
             .getContent();
-    assertEquals(-87.85, renglonesCuentaCorriente.get(0).getSaldo(), DELTA);
-    assertEquals(-499.25, renglonesCuentaCorriente.get(1).getSaldo(), DELTA);
-    assertEquals(100, renglonesCuentaCorriente.get(2).getSaldo(), DELTA);
-    assertEquals(-100, renglonesCuentaCorriente.get(3).getSaldo(), DELTA);
-    assertEquals(-599.25, renglonesCuentaCorriente.get(4).getSaldo(), DELTA);
+    assertEquals(-87.85, renglonesCuentaCorriente.get(0).getSaldo().doubleValue());
+    assertEquals(-499.25, renglonesCuentaCorriente.get(1).getSaldo().doubleValue());
+    assertEquals(100, renglonesCuentaCorriente.get(2).getSaldo().doubleValue());
+    assertEquals(-100, renglonesCuentaCorriente.get(3).getSaldo().doubleValue());
+    assertEquals(-599.25, renglonesCuentaCorriente.get(4).getSaldo().doubleValue());
     this.crearNotaDebitoParaProveedor();
     renglonesCuentaCorriente =
         restTemplate
@@ -4026,12 +4024,12 @@ class AppIntegrationTest {
                 new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {})
             .getBody()
             .getContent();
-    assertEquals(-408.85, renglonesCuentaCorriente.get(0).getSaldo(), DELTA);
-    assertEquals(-87.85, renglonesCuentaCorriente.get(1).getSaldo(), DELTA);
-    assertEquals(-499.25, renglonesCuentaCorriente.get(2).getSaldo(), DELTA);
-    assertEquals(100, renglonesCuentaCorriente.get(3).getSaldo(), DELTA);
-    assertEquals(-100, renglonesCuentaCorriente.get(4).getSaldo(), DELTA);
-    assertEquals(-599.25, renglonesCuentaCorriente.get(5).getSaldo(), DELTA);
+    assertEquals(-408.85, renglonesCuentaCorriente.get(0).getSaldo().doubleValue());
+    assertEquals(-87.85, renglonesCuentaCorriente.get(1).getSaldo().doubleValue());
+    assertEquals(-499.25, renglonesCuentaCorriente.get(2).getSaldo().doubleValue());
+    assertEquals(100, renglonesCuentaCorriente.get(3).getSaldo().doubleValue());
+    assertEquals(-100, renglonesCuentaCorriente.get(4).getSaldo().doubleValue());
+    assertEquals(-599.25, renglonesCuentaCorriente.get(5).getSaldo().doubleValue());
   }
 
   @Test

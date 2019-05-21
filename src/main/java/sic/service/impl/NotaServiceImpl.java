@@ -85,9 +85,9 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
-  public Nota getNotaPorId(long idNota) {
+  public Nota getNotaNoEliminadaPorId(long idNota) {
     Optional<Nota> nota = notaRepository.findById(idNota);
-    if (nota.isPresent()) {
+    if (nota.isPresent() && !nota.get().isEliminada()) {
       return nota.get();
     } else {
       throw new EntityNotFoundException(
@@ -161,7 +161,7 @@ public class NotaServiceImpl implements INotaService {
       builder
           .and(qNota.serie.eq(criteria.getNumSerie()))
           .and(qNota.nroNota.eq(criteria.getNumNota()));
-    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     BooleanBuilder rsPredicate = new BooleanBuilder();
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
@@ -232,7 +232,7 @@ public class NotaServiceImpl implements INotaService {
       builder
           .and(qNotaCredito.serie.eq(criteria.getNumSerie()))
           .and(qNotaCredito.nroNota.eq(criteria.getNumNota()));
-    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     BooleanBuilder rsPredicate = new BooleanBuilder();
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
@@ -303,7 +303,7 @@ public class NotaServiceImpl implements INotaService {
       builder
           .and(qNotDebito.serie.eq(criteria.getNumSerie()))
           .and(qNotDebito.nroNota.eq(criteria.getNumNota()));
-    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     BooleanBuilder rsPredicate = new BooleanBuilder();
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
@@ -400,7 +400,7 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public List<NotaCredito> getNotasCreditoPorFactura(Long idFactura) {
     List<NotaCredito> notasCredito = new ArrayList<>();
-    Factura factura = facturaService.getFacturaPorId(idFactura);
+    Factura factura = facturaService.getFacturaNoEliminadaPorId(idFactura);
     if (factura instanceof FacturaVenta) {
       notasCredito =
           notaCreditoRepository.findAllByFacturaVentaAndEliminada((FacturaVenta) factura, false);
@@ -1091,7 +1091,7 @@ public class NotaServiceImpl implements INotaService {
       long idRecibo, BigDecimal monto, BigDecimal ivaPorcentaje) {
     List<RenglonNotaDebito> renglonesNota = new ArrayList<>();
     RenglonNotaDebito renglonNota;
-    Recibo r = reciboService.getById(idRecibo);
+    Recibo r = reciboService.getReciboNoEliminadoPorId(idRecibo);
     renglonNota = new RenglonNotaDebito();
     String descripcion =
         "Recibo Nº "

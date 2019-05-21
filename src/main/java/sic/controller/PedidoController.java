@@ -52,7 +52,7 @@ public class PedidoController {
     @GetMapping("/pedidos/{idPedido}")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Pedido getPedidoPorId(@PathVariable long idPedido) {
-        return pedidoService.getPedidoPorId(idPedido);
+        return pedidoService.getPedidoNoEliminadoPorId(idPedido);
     }
     
     @GetMapping("/pedidos/{idPedido}/renglones")
@@ -78,9 +78,9 @@ public class PedidoController {
                          @RequestBody PedidoDTO pedidoDTO) {
     Pedido pedido = modelMapper.map(pedidoDTO, Pedido.class);
     pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
+    pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     pedido.setCliente(clienteService.getClienteNoEliminadoPorId(idCliente));
-    pedido.setDetalleEnvio(pedidoService.getPedidoPorId(pedidoDTO.getId_Pedido()).getDetalleEnvio());
+    pedido.setDetalleEnvio(pedidoService.getPedidoNoEliminadoPorId(pedidoDTO.getId_Pedido()).getDetalleEnvio());
     //Las facturas se recuperan para evitar cambios no deseados.
     pedido.setFacturas(pedidoService.getFacturasDelPedido(pedido.getId_Pedido()));
     //Si los renglones vienen null, recupera los renglones del pedido para actualizarLocalidad
@@ -113,7 +113,7 @@ public class PedidoController {
     pedido.setTotalActual(nuevoPedidoDTO.getTotal());
     Empresa empresaParaPedido = empresaService.getEmpresaPorId(nuevoPedidoDTO.getIdEmpresa());
     pedido.setEmpresa(empresaParaPedido);
-    pedido.setUsuario(usuarioService.getUsuarioPorId(nuevoPedidoDTO.getIdUsuario()));
+    pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(nuevoPedidoDTO.getIdUsuario()));
     Cliente cliente = clienteService.getClienteNoEliminadoPorId(nuevoPedidoDTO.getIdCliente());
     pedido.setCliente(cliente);
     pedido.setFecha(new Date());
@@ -190,7 +190,7 @@ public class PedidoController {
         headers.setContentType(MediaType.APPLICATION_PDF);        
         headers.add("content-disposition", "inline; filename=Pedido.pdf");
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        byte[] reportePDF = pedidoService.getReportePedido(pedidoService.getPedidoPorId(idPedido));
+        byte[] reportePDF = pedidoService.getReportePedido(pedidoService.getPedidoNoEliminadoPorId(idPedido));
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
     }
     

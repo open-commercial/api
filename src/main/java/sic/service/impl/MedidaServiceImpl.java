@@ -1,6 +1,7 @@
 package sic.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
@@ -31,13 +32,15 @@ public class MedidaServiceImpl implements IMedidaService {
   }
 
   @Override
-  public Medida getMedidaPorId(Long idMedida) {
-    return medidaRepository
-        .findById(idMedida)
-        .orElseThrow(
-            () ->
-                new EntityNotFoundException(
-                    ResourceBundle.getBundle("Mensajes").getString("mensaje_medida_no_existente")));
+  public Medida getMedidaNoEliminadaPorId(Long idMedida) {
+    Optional<Medida> medida = medidaRepository
+      .findById(idMedida);
+    if (medida.isPresent() && !medida.get().isEliminada()) {
+      return medida.get();
+    } else {
+      throw new EntityNotFoundException(
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_medida_no_existente"));
+    }
   }
 
   @Override
@@ -86,7 +89,7 @@ public class MedidaServiceImpl implements IMedidaService {
   @Override
   @Transactional
   public void eliminar(long idMedida) {
-    Medida medida = this.getMedidaPorId(idMedida);
+    Medida medida = this.getMedidaNoEliminadaPorId(idMedida);
     if (medida == null) {
       throw new EntityNotFoundException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_medida_no_existente"));

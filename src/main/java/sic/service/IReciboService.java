@@ -11,7 +11,7 @@ import javax.validation.Valid;
 
 public interface IReciboService {
 
-  Recibo getById(long idRecibo);
+  Recibo getReciboNoEliminadoPorId(long idRecibo);
 
   Page<Recibo> buscarRecibos(BusquedaReciboCriteria criteria);
 

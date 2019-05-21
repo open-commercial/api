@@ -1,6 +1,7 @@
 package sic.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
@@ -35,14 +36,16 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
   }
 
   @Override
-  public FormaDePago getFormasDePagoPorId(long idFormaDePago) {
-    return formaDePagoRepository
-        .findById(idFormaDePago)
-        .orElseThrow(
-            () ->
-                new EntityNotFoundException(
-                    ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_formaDePago_no_existente")));
+  public FormaDePago getFormasDePagoNoEliminadoPorId(long idFormaDePago) {
+    Optional<FormaDePago> formaDePago = formaDePagoRepository
+      .findById(idFormaDePago);
+    if (formaDePago.isPresent() && !formaDePago.get().isEliminada()) {
+      return formaDePago.get();
+    } else {
+      throw new EntityNotFoundException(
+        ResourceBundle.getBundle("Mensajes")
+          .getString("mensaje_formaDePago_no_existente"));
+    }
   }
 
   @Override
@@ -103,7 +106,7 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
   @Override
   @Transactional
   public void eliminar(long idFormaDePago) {
-    FormaDePago formaDePago = this.getFormasDePagoPorId(idFormaDePago);
+    FormaDePago formaDePago = this.getFormasDePagoNoEliminadoPorId(idFormaDePago);
     if (formaDePago == null) {
       throw new EntityNotFoundException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_formaDePago_no_existente"));

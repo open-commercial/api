@@ -150,7 +150,7 @@ public class ClienteController {
     if (nuevoCliente.getIdCredencial() != null) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
-      Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+      Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
       if (nuevoCliente.getIdCredencial() != idUsuarioLoggedIn
           && !(usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
               || usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)
@@ -158,7 +158,7 @@ public class ClienteController {
         throw new ForbiddenException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
       } else {
-        Usuario usuarioCredencial = usuarioService.getUsuarioPorId(nuevoCliente.getIdCredencial());
+        Usuario usuarioCredencial = usuarioService.getUsuarioNoEliminadoPorId(nuevoCliente.getIdCredencial());
         cliente.setCredencial(usuarioCredencial);
       }
     }
@@ -177,7 +177,7 @@ public class ClienteController {
     }
     cliente.setEmpresa(empresaService.getEmpresaPorId(nuevoCliente.getIdEmpresa()));
     if (nuevoCliente.getIdViajante() != null) {
-      cliente.setViajante(usuarioService.getUsuarioPorId(nuevoCliente.getIdViajante()));
+      cliente.setViajante(usuarioService.getUsuarioNoEliminadoPorId(nuevoCliente.getIdViajante()));
     }
     return clienteService.guardar(cliente);
   }
@@ -198,7 +198,7 @@ public class ClienteController {
     if (clienteDTO.getIdCredencial() != null) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
-      Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+      Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
       if (clienteDTO.getIdCredencial() != idUsuarioLoggedIn
           && clientePersistido.getCredencial() != null
           && clientePersistido.getCredencial().getId_Usuario() != clienteDTO.getIdCredencial()
@@ -208,7 +208,7 @@ public class ClienteController {
         throw new ForbiddenException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
       } else {
-        Usuario usuarioCredencial = usuarioService.getUsuarioPorId(clienteDTO.getIdCredencial());
+        Usuario usuarioCredencial = usuarioService.getUsuarioNoEliminadoPorId(clienteDTO.getIdCredencial());
         clientePorActualizar.setCredencial(usuarioCredencial);
       }
     } else {
@@ -219,7 +219,7 @@ public class ClienteController {
             != 0) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
-      Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+      Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
       if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
           && !usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)) {
         throw new ForbiddenException(
@@ -249,7 +249,7 @@ public class ClienteController {
       clientePorActualizar.setEmpresa(clientePersistido.getEmpresa());
     }
     if (clienteDTO.getIdViajante() != null) {
-      clientePorActualizar.setViajante(usuarioService.getUsuarioPorId(clienteDTO.getIdViajante()));
+      clientePorActualizar.setViajante(usuarioService.getUsuarioNoEliminadoPorId(clienteDTO.getIdViajante()));
     } else {
       clientePorActualizar.setViajante(null);
     }

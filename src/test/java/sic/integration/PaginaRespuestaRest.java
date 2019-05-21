@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class PaginaRespuestaRest<T> {
+class PaginaRespuestaRest<T> {
     
     private List<T> content;
     private boolean first;
