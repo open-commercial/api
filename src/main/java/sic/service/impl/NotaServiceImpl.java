@@ -1018,6 +1018,7 @@ public class NotaServiceImpl implements INotaService {
             .divide(new BigDecimal("121"), 15, RoundingMode.HALF_UP);
     renglonNota.setPrecioUnitario(
         (tipo == TipoDeComprobante.NOTA_CREDITO_B
+                || tipo == TipoDeComprobante.NOTA_CREDITO_X
                 || tipo == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO)
             ? monto
             : subTotal);
@@ -1031,14 +1032,17 @@ public class NotaServiceImpl implements INotaService {
                 || tipo == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO)
             ? new BigDecimal("21")
             : BigDecimal.ZERO);
-    renglonNota.setIvaNeto(monto.subtract(subTotal));
+    renglonNota.setIvaNeto(
+        (tipo == TipoDeComprobante.NOTA_CREDITO_X) ? BigDecimal.ZERO : monto.subtract(subTotal));
     renglonNota.setImporte(
         (tipo == TipoDeComprobante.NOTA_CREDITO_B
+                || tipo == TipoDeComprobante.NOTA_CREDITO_X
                 || tipo == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO)
             ? monto
             : subTotal);
     renglonNota.setImporteBruto(
         (tipo == TipoDeComprobante.NOTA_CREDITO_B
+                || tipo == TipoDeComprobante.NOTA_CREDITO_X
                 || tipo == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO)
             ? monto
             : subTotal);
