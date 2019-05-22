@@ -96,7 +96,6 @@ public class CarritoCompraController {
       @RequestBody(required = false) String observaciones) {
     CarritoCompraDTO carritoCompraDTO = carritoCompraService.getCarritoCompra(idUsuario, idCliente);
     Pedido pedido = new Pedido();
-    pedido.setFecha(new Date());
     pedido.setCliente(clienteService.getClientePorId(idCliente));
     pedido.setObservaciones(observaciones);
     pedido.setSubTotal(carritoCompraDTO.getSubtotal());
