@@ -41,6 +41,7 @@ public class NotaServiceImpl implements INotaService {
   private final NotaDebitoRepository notaDebitoRepository;
   private final IFacturaService facturaService;
   private final IClienteService clienteService;
+  private final IProveedorService proveedorService;
   private final IEmpresaService empresaService;
   private final IUsuarioService usuarioService;
   private final IProductoService productoService;
@@ -62,6 +63,7 @@ public class NotaServiceImpl implements INotaService {
       NotaDebitoRepository notaDebitoRepository,
       IFacturaService facturaService,
       IClienteService clienteService,
+      IProveedorService proveedorService,
       IUsuarioService usuarioService,
       IProductoService productoService,
       IEmpresaService empresaService,
@@ -74,6 +76,7 @@ public class NotaServiceImpl implements INotaService {
     this.notaDebitoRepository = notaDebitoRepository;
     this.facturaService = facturaService;
     this.clienteService = clienteService;
+    this.proveedorService = proveedorService;
     this.usuarioService = usuarioService;
     this.empresaService = empresaService;
     this.productoService = productoService;
@@ -385,6 +388,76 @@ public class NotaServiceImpl implements INotaService {
       tiposPermitidos[1] = TipoDeComprobante.NOTA_DEBITO_X;
       tiposPermitidos[2] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
       return tiposPermitidos;
+    }
+  }
+
+  @Override
+  public TipoDeComprobante[] getTipoNotaCreditoProveedor(Long idProveedor, Long idEmpresa) {
+    Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
+    Proveedor proveedor = proveedorService.getProveedorPorId(idProveedor);
+    if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())) {
+      if (CategoriaIVA.discriminaIVA(proveedor.getCategoriaIVA())) {
+        TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
+        tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_A;
+        tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_X;
+        tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
+        return tiposPermitidos;
+      } else {
+        TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
+        tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_C;
+        tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_X;
+        tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
+        return tiposPermitidos;
+      }
+    } else {
+      if (CategoriaIVA.discriminaIVA(proveedor.getCategoriaIVA())) {
+        TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
+        tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_B;
+        tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_X;
+        tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
+        return tiposPermitidos;
+      } else {
+        TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
+        tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_C;
+        tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_X;
+        tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
+        return tiposPermitidos;
+      }
+    }
+  }
+
+  @Override
+  public TipoDeComprobante[] getTipoNotaDebitoProveedor(Long idProveedor, Long idEmpresa) {
+    Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
+    Proveedor proveedor = proveedorService.getProveedorPorId(idProveedor);
+    if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())) {
+      if (CategoriaIVA.discriminaIVA(proveedor.getCategoriaIVA())) {
+        TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
+        tiposPermitidos[0] = TipoDeComprobante.NOTA_DEBITO_A;
+        tiposPermitidos[1] = TipoDeComprobante.NOTA_DEBITO_X;
+        tiposPermitidos[2] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
+        return tiposPermitidos;
+      } else {
+        TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
+        tiposPermitidos[0] = TipoDeComprobante.NOTA_DEBITO_C;
+        tiposPermitidos[1] = TipoDeComprobante.NOTA_DEBITO_X;
+        tiposPermitidos[2] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
+        return tiposPermitidos;
+      }
+    } else {
+      if (CategoriaIVA.discriminaIVA(proveedor.getCategoriaIVA())) {
+        TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
+        tiposPermitidos[0] = TipoDeComprobante.NOTA_DEBITO_B;
+        tiposPermitidos[1] = TipoDeComprobante.NOTA_DEBITO_X;
+        tiposPermitidos[2] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
+        return tiposPermitidos;
+      } else {
+        TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
+        tiposPermitidos[0] = TipoDeComprobante.NOTA_DEBITO_C;
+        tiposPermitidos[1] = TipoDeComprobante.NOTA_DEBITO_X;
+        tiposPermitidos[2] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
+        return tiposPermitidos;
+      }
     }
   }
 
@@ -739,7 +812,7 @@ public class NotaServiceImpl implements INotaService {
     this.validarOperacion(notaDebito);
     if (notaDebito.getMovimiento().equals(Movimiento.VENTA)) {
       notaDebito.setTipoComprobante(
-          this.getTipoDeNotaDebito(
+          this.getTipoDeNotaDebitoSegunFactura(
               this.facturaService
                   .getTipoFacturaVenta(notaDebito.getEmpresa(), notaDebito.getCliente())[0]));
       notaDebito.setSerie(
@@ -751,7 +824,7 @@ public class NotaServiceImpl implements INotaService {
               notaDebito.getIdEmpresa(), notaDebito.getTipoComprobante()));
     } else if (notaDebito.getMovimiento().equals(Movimiento.COMPRA)) {
       notaDebito.setTipoComprobante(
-          this.getTipoDeNotaDebito(
+          this.getTipoDeNotaDebitoSegunFactura(
               this.facturaService
                   .getTipoFacturaCompra(notaDebito.getEmpresa(), notaDebito.getProveedor())[0]));
     }
@@ -807,7 +880,7 @@ public class NotaServiceImpl implements INotaService {
     return nota;
   }
 
-  private TipoDeComprobante getTipoDeNotaDebito(TipoDeComprobante tipo) {
+  private TipoDeComprobante getTipoDeNotaDebitoSegunFactura(TipoDeComprobante tipo) {
     switch (tipo) {
       case FACTURA_A:
         return TipoDeComprobante.NOTA_DEBITO_A;

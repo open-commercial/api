@@ -24,6 +24,8 @@ class NotaServiceImplTest {
 
   @Mock private ClienteServiceImpl clienteService;
 
+  @Mock private ProveedorServiceImpl proveedorService;
+
   @InjectMocks private NotaServiceImpl notaServiceImpl;
 
   @Test
@@ -164,5 +166,137 @@ class NotaServiceImplTest {
     List<RenglonNotaCredito> renglones = new ArrayList<>();
     renglones.add(renglonNotaCredito);
     assertEquals((new BigDecimal("172.062")).compareTo(notaServiceImpl.calcularTotalNota(renglones)), 0);
+  }
+
+  @Test
+  void shouldGetTipoNotaCreditoWhenEmpresaYProveedorDiscriminanIVA() {
+    Empresa empresa = new EmpresaBuilder().build();
+    Proveedor proveedor = new Proveedor();
+    proveedor.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
+    when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
+    when(proveedorService.getProveedorPorId(1L)).thenReturn(proveedor);
+    TipoDeComprobante[] expResult = {
+      TipoDeComprobante.NOTA_CREDITO_A,
+      TipoDeComprobante.NOTA_CREDITO_X,
+      TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO,
+    };
+    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCreditoProveedor(1L, 1L);
+    assertArrayEquals(expResult, result);
+  }
+
+  @Test
+  void shouldGetTipoNotaDebitoWhenEmpresaYProveedorDiscriminanIVA() {
+    Empresa empresa = new EmpresaBuilder().build();
+    Proveedor proveedor = new Proveedor();
+    proveedor.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
+    when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
+    when(proveedorService.getProveedorPorId(1L)).thenReturn(proveedor);
+    TipoDeComprobante[] expResult = {
+      TipoDeComprobante.NOTA_DEBITO_A,
+      TipoDeComprobante.NOTA_DEBITO_X,
+      TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
+    };
+    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaDebitoProveedor(1L, 1L);
+    assertArrayEquals(expResult, result);
+  }
+
+  @Test
+  void shouldGetTipoNotaCreditoWhenEmpresaDiscriminaYProveedorNoIVA() {
+    Empresa empresa = new EmpresaBuilder().build();
+    Proveedor proveedor = new Proveedor();
+    proveedor.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
+    when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
+    when(proveedorService.getProveedorPorId(1L)).thenReturn(proveedor);
+    TipoDeComprobante[] expResult = {
+      TipoDeComprobante.NOTA_CREDITO_C,
+      TipoDeComprobante.NOTA_CREDITO_X,
+      TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO,
+    };
+    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCreditoProveedor(1L, 1L);
+    assertArrayEquals(expResult, result);
+  }
+
+  @Test
+  void shouldGetTipoNotaDebitoWhenEmpresaDiscriminaYProveedorNoIVA() {
+    Empresa empresa = new EmpresaBuilder().build();
+    Proveedor proveedor = new Proveedor();
+    proveedor.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
+    when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
+    when(proveedorService.getProveedorPorId(1L)).thenReturn(proveedor);
+    TipoDeComprobante[] expResult = {
+      TipoDeComprobante.NOTA_DEBITO_C,
+      TipoDeComprobante.NOTA_DEBITO_X,
+      TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
+    };
+    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaDebitoProveedor(1L, 1L);
+    assertArrayEquals(expResult, result);
+  }
+
+  @Test
+  void shouldGetTipoNotaCreditoWhenEmpresaNoDiscriminaYProveedorSiIVA() {
+    Empresa empresa = new EmpresaBuilder().build();
+    Proveedor proveedor = new Proveedor();
+    proveedor.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
+    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
+    when(proveedorService.getProveedorPorId(1L)).thenReturn(proveedor);
+    TipoDeComprobante[] expResult = {
+      TipoDeComprobante.NOTA_CREDITO_B,
+      TipoDeComprobante.NOTA_CREDITO_X,
+      TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO,
+    };
+    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCreditoProveedor(1L, 1L);
+    assertArrayEquals(expResult, result);
+  }
+
+  @Test
+  void shouldGetTipoNotaDebitoWhenEmpresaNoDiscriminaYProveedorSiIVA() {
+    Empresa empresa = new EmpresaBuilder().build();
+    Proveedor proveedor = new Proveedor();
+    proveedor.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
+    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
+    when(proveedorService.getProveedorPorId(1L)).thenReturn(proveedor);
+    TipoDeComprobante[] expResult = {
+      TipoDeComprobante.NOTA_DEBITO_B,
+      TipoDeComprobante.NOTA_DEBITO_X,
+      TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
+    };
+    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaDebitoProveedor(1L, 1L);
+    assertArrayEquals(expResult, result);
+  }
+
+  @Test
+  void shouldGetTipoNotaCreditoWhenEmpresaNoDiscriminaYProveedorNoIVA() {
+    Empresa empresa = new EmpresaBuilder().withId_Empresa(1L).build();
+    Proveedor proveedor = new Proveedor();
+    proveedor.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
+    when(proveedorService.getProveedorPorId(1L)).thenReturn(proveedor);
+    TipoDeComprobante[] expResult = {
+      TipoDeComprobante.NOTA_CREDITO_C,
+      TipoDeComprobante.NOTA_CREDITO_X,
+      TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO
+    };
+    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCreditoProveedor(1L, 1L);
+    assertArrayEquals(expResult, result);
+  }
+
+  @Test
+  void shouldGetTipoNotaDebitoWhenEmpresaNoDiscriminaYProveedorNoIVA() {
+    Empresa empresa = new EmpresaBuilder().withId_Empresa(1L).build();
+    Proveedor proveedor = new Proveedor();
+    proveedor.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
+    when(proveedorService.getProveedorPorId(1L)).thenReturn(proveedor);
+    TipoDeComprobante[] expResult = {
+      TipoDeComprobante.NOTA_DEBITO_C,
+      TipoDeComprobante.NOTA_DEBITO_X,
+      TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
+    };
+    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaDebitoProveedor(1L, 1L);
+    assertArrayEquals(expResult, result);
   }
 }

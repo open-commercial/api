@@ -35,6 +35,10 @@ public interface INotaService {
 
   TipoDeComprobante[] getTipoNotaDebitoCliente(Long idCliente, Long idEmpresa);
 
+  TipoDeComprobante[] getTipoNotaCreditoProveedor(Long idProveedor, Long idEmpresa);
+
+  TipoDeComprobante[] getTipoNotaDebitoProveedor(Long idProveedor, Long idEmpresa);
+
   TipoDeComprobante[] getTiposNota(Empresa empresa);
 
   TipoDeComprobante getTipoDeNotaCreditoSegunFactura(TipoDeComprobante tipo);

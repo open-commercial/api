@@ -177,7 +177,7 @@ public class NotaController {
     return notaService.existsNotaDebitoPorRecibo(reciboService.getById(idRecibo));
   }
 
-  @GetMapping("/notas/tipos/credito")
+  @GetMapping("/notas/clientes/tipos/credito")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -190,7 +190,7 @@ public class NotaController {
     return notaService.getTipoNotaCreditoCliente(idCliente, idEmpresa);
   }
 
-  @GetMapping("/notas/tipos/debito")
+  @GetMapping("/notas/clientes/tipos/debito")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -201,6 +201,32 @@ public class NotaController {
   public TipoDeComprobante[] getTipoNotaDebitoCliente(
     @RequestParam long idCliente, @RequestParam long idEmpresa) {
     return notaService.getTipoNotaDebitoCliente(idCliente, idEmpresa);
+  }
+
+  @GetMapping("/notas/proveedores/tipos/credito")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public TipoDeComprobante[] getTipoNotaCreditoProveedor(
+    @RequestParam long idProveedor, @RequestParam long idEmpresa) {
+    return notaService.getTipoNotaCreditoProveedor(idProveedor, idEmpresa);
+  }
+
+  @GetMapping("/notas/proveedores/tipos/debito")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public TipoDeComprobante[] getTipoNotaDebitoProveedor(
+    @RequestParam long idProveedor, @RequestParam long idEmpresa) {
+    return notaService.getTipoNotaDebitoProveedor(idProveedor, idEmpresa);
   }
 
   @GetMapping("/notas/renglones/credito/{idNotaCredito}")
