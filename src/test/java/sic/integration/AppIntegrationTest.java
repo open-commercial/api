@@ -3354,6 +3354,13 @@ class AppIntegrationTest {
         NotaCreditoDTO.class);
     notaCreditoParaPersistir.setNroNota(notaGuardada.getNroNota());
     assertEquals(notaCreditoParaPersistir, notaGuardada);
+    assertEquals(new BigDecimal("4500.000000000000000000000000000000"), notaGuardada.getSubTotal());
+    assertEquals(new BigDecimal("450.000000000000000"), notaGuardada.getRecargoNeto());
+    assertEquals(new BigDecimal("1125.000000000000000"), notaGuardada.getDescuentoNeto());
+    assertEquals(new BigDecimal("3825.000000000000000000000000000000"), notaGuardada.getSubTotalBruto());
+    assertEquals(new BigDecimal("803.250000000000000000000000000000"), notaGuardada.getIva21Neto());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getIva105Neto());
+    assertEquals(new BigDecimal("4628.250000000000000000000000000000"), notaGuardada.getTotal());
     restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
   }
 
@@ -3397,6 +3404,13 @@ class AppIntegrationTest {
             NotaCreditoDTO.class);
     notaCreditoParaPersistir.setNroNota(notaGuardada.getNroNota());
     assertEquals(notaCreditoParaPersistir, notaGuardada);
+    assertEquals(new BigDecimal("4840.000000000000000000000000000000"), notaGuardada.getSubTotal());
+    assertEquals(new BigDecimal("484.000000000000000"), notaGuardada.getRecargoNeto());
+    assertEquals(new BigDecimal("1210.000000000000000"), notaGuardada.getDescuentoNeto());
+    assertEquals(new BigDecimal("3400.000000000000000000000000000000"), notaGuardada.getSubTotalBruto());
+    assertEquals(new BigDecimal("714.000000000000000000000000000000"), notaGuardada.getIva21Neto());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getIva105Neto());
+    assertEquals(new BigDecimal("4114.000000000000000000000000000000"), notaGuardada.getTotal());
     restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
   }
 
@@ -3440,6 +3454,13 @@ class AppIntegrationTest {
         NotaCreditoDTO.class);
     notaCreditoParaPersistir.setNroNota(notaGuardada.getNroNota());
     assertEquals(notaCreditoParaPersistir, notaGuardada);
+    assertEquals(new BigDecimal("4500.000000000000000000000000000000"), notaGuardada.getSubTotal());
+    assertEquals(new BigDecimal("450.000000000000000"), notaGuardada.getRecargoNeto());
+    assertEquals(new BigDecimal("1125.000000000000000"), notaGuardada.getDescuentoNeto());
+    assertEquals(new BigDecimal("3825.000000000000000000000000000000"), notaGuardada.getSubTotalBruto());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getIva21Neto());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getIva105Neto());
+    assertEquals(new BigDecimal("3825.000000000000000000000000000000"), notaGuardada.getTotal());
     restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
   }
 
