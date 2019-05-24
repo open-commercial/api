@@ -229,7 +229,7 @@ public class NotaController {
   }
 
   @PostMapping("/notas/credito/calculos")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public NotaCredito calcularNotaCreditoConFactura(
     @RequestBody NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO,
     @RequestHeader("Authorization") String authorizationHeader) {
@@ -295,7 +295,7 @@ public class NotaController {
   }
 
   @PostMapping("/notas/credito/calculos-sin-factura")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public NotaCredito calcularNotaCreditoSinFactura(
       @RequestBody NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -363,7 +363,7 @@ public class NotaController {
   }
 
   @PostMapping("/notas/credito")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Nota guardarNotaCredito(
       @RequestBody NotaCreditoDTO notaCreditoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -396,7 +396,7 @@ public class NotaController {
   }
 
   @PostMapping("/notas/debito/clientes")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Nota guardarNotaDebitoCliente(
       @RequestBody NotaDebitoDTO notaDebitoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
