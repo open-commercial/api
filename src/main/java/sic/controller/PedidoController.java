@@ -116,7 +116,6 @@ public class PedidoController {
     pedido.setUsuario(usuarioService.getUsuarioPorId(nuevoPedidoDTO.getIdUsuario()));
     Cliente cliente = clienteService.getClientePorId(nuevoPedidoDTO.getIdCliente());
     pedido.setCliente(cliente);
-    pedido.setFecha(new Date());
     return pedidoService.guardar(pedido, nuevoPedidoDTO.getTipoDeEnvio(), nuevoPedidoDTO.getIdSucursal());
   }
 

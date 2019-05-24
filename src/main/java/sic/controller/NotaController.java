@@ -257,18 +257,18 @@ public class NotaController {
   @PostMapping("/notas/credito/calculos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public NotaCredito calcularNotaCreditoConFactura(
-    @RequestBody NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO,
-    @RequestHeader("Authorization") String authorizationHeader) {
+      @RequestBody NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO,
+      @RequestHeader("Authorization") String authorizationHeader) {
     NotaCredito notaCreditoNueva = new NotaCredito();
     Factura factura = facturaService.getFacturaPorId(nuevaNotaCreditoDeFacturaDTO.getIdFactura());
-    if (nuevaNotaCreditoDeFacturaDTO.getCantidades().length == 0
-        || nuevaNotaCreditoDeFacturaDTO.getIdsRenglonesFactura().length == 0) {
+    if (Arrays.asList(nuevaNotaCreditoDeFacturaDTO.getCantidades()).contains(null)
+        || Arrays.asList(nuevaNotaCreditoDeFacturaDTO.getIdsRenglonesFactura()).contains(null)) {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_nota_de_renglones_vacio"));
     } else {
       notaCreditoNueva.setRenglonesNotaCredito(
           notaService.calcularRenglonCreditoProducto(
-              factura.getTipoComprobante(),
+              notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()),
               nuevaNotaCreditoDeFacturaDTO.getCantidades(),
               nuevaNotaCreditoDeFacturaDTO.getIdsRenglonesFactura()));
     }
@@ -276,31 +276,34 @@ public class NotaController {
     List<BigDecimal> cantidades = new ArrayList<>();
     List<BigDecimal> ivaPorcentajeRenglones = new ArrayList<>();
     List<BigDecimal> ivaNetoRenglones = new ArrayList<>();
-    notaCreditoNueva.getRenglonesNotaCredito().forEach(r ->
-      {
-        importes.add(r.getImporteBruto());
-        cantidades.add(r.getCantidad());
-        ivaPorcentajeRenglones.add(r.getIvaPorcentaje());
-        ivaNetoRenglones.add(r.getIvaNeto());
-      }
-    );
-    notaCreditoNueva.setSubTotal(notaService.calcularSubTotalCredito(importes.toArray(new BigDecimal[notaCreditoNueva.getRenglonesNotaCredito().size()])));
+    notaCreditoNueva
+        .getRenglonesNotaCredito()
+        .forEach(
+            r -> {
+              importes.add(r.getImporteBruto());
+              cantidades.add(r.getCantidad());
+              ivaPorcentajeRenglones.add(r.getIvaPorcentaje());
+              ivaNetoRenglones.add(r.getIvaNeto());
+            });
+    notaCreditoNueva.setSubTotal(
+        notaService.calcularSubTotalCredito(
+            importes.toArray(new BigDecimal[notaCreditoNueva.getRenglonesNotaCredito().size()])));
     notaCreditoNueva.setDescuentoPorcentaje(factura.getDescuentoPorcentaje());
     notaCreditoNueva.setDescuentoNeto(notaService.calcularDecuentoNetoCredito(notaCreditoNueva.getSubTotal(), notaCreditoNueva.getDescuentoPorcentaje()));
     notaCreditoNueva.setRecargoPorcentaje(factura.getRecargoPorcentaje());
     notaCreditoNueva.setRecargoNeto(notaService.calcularRecargoNetoCredito(notaCreditoNueva.getSubTotal(), notaCreditoNueva.getRecargoPorcentaje()));
     notaCreditoNueva.setTipoComprobante(notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()));
-    notaCreditoNueva.setIva105Neto(notaService.calcularIVANetoCredito(factura.getTipoComprobante(),
+    notaCreditoNueva.setIva105Neto(notaService.calcularIVANetoCredito(notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()),
       cantidades.toArray(new BigDecimal[0]),
       ivaPorcentajeRenglones.toArray(new BigDecimal[0]),
       ivaNetoRenglones.toArray(new BigDecimal[0]), IVA_105, factura.getDescuentoPorcentaje(),
       factura.getRecargoPorcentaje()));
-    notaCreditoNueva.setIva21Neto(notaService.calcularIVANetoCredito(factura.getTipoComprobante(),
+    notaCreditoNueva.setIva21Neto(notaService.calcularIVANetoCredito(notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()),
       cantidades.toArray(new BigDecimal[0]),
       ivaPorcentajeRenglones.toArray(new BigDecimal[0]),
       ivaNetoRenglones.toArray(new BigDecimal[0]), IVA_21, factura.getDescuentoPorcentaje(),
       factura.getRecargoPorcentaje()));
-    notaCreditoNueva.setSubTotalBruto(notaService.calcularSubTotalBrutoCredito(factura.getTipoComprobante(),
+    notaCreditoNueva.setSubTotalBruto(notaService.calcularSubTotalBrutoCredito(notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()),
       notaCreditoNueva.getSubTotal(), notaCreditoNueva.getRecargoNeto(), notaCreditoNueva.getDescuentoNeto(),
       notaCreditoNueva.getIva105Neto(), notaCreditoNueva.getIva21Neto()));
     notaCreditoNueva.setTotal(notaService.calcularTotalCredito(notaCreditoNueva.getSubTotalBruto(), notaCreditoNueva.getIva105Neto(), notaCreditoNueva.getIva21Neto()));

@@ -135,11 +135,6 @@ public class GastoServiceImpl implements IGastoService {
         return gastoRepository.getGastosEntreFechasPorFormaDePago(empresa.getId_Empresa(), formaDePago.getId_FormaDePago(), desde, hasta);
     }
 
-    @Override
-    @Transactional
-    public void actualizar(@Valid Gasto gasto) {
-        gastoRepository.save(gasto);
-    }
 
   @Override
   @Transactional

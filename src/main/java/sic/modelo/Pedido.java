@@ -15,7 +15,6 @@ import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.DecimalMin;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -44,7 +43,6 @@ public class Pedido implements Serializable {
 
   @Column(nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
-  @NotNull(message = "{mensaje_pedido_fecha_vacia}")
   private Date fecha;
 
   @Temporal(TemporalType.TIMESTAMP)
