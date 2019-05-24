@@ -199,21 +199,8 @@ public class NotaController {
     Rol.COMPRADOR
   })
   public TipoDeComprobante[] getTipoNotaDebitoCliente(
-    @RequestParam long idCliente, @RequestParam long idEmpresa) {
+      @RequestParam long idCliente, @RequestParam long idEmpresa) {
     return notaService.getTipoNotaDebitoCliente(idCliente, idEmpresa);
-  }
-
-  @GetMapping("/notas/renglones/credito/{idNotaCredito}")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
-  public List<RenglonNotaCredito> getRenglonesDeNotaCreditoCliente(
-      @PathVariable long idNotaCredito) {
-    return notaService.getRenglonesDeNotaCredito(idNotaCredito);
   }
 
   @GetMapping("/notas/renglones/debito/{idNotaDebito}")
@@ -412,7 +399,7 @@ public class NotaController {
   }
 
   @PostMapping("/notas/debito/proveedores")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Nota guardarNotaDebitoProveedor(
       @RequestBody NotaDebitoDTO notaDebitoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -453,7 +440,7 @@ public class NotaController {
   }
 
   @GetMapping("/notas/renglon/debito/recibo/{idRecibo}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public List<RenglonNotaDebito> calcularRenglonNotaDebito(
       @PathVariable long idRecibo,
       @RequestParam BigDecimal monto,
