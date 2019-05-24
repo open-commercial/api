@@ -4635,6 +4635,28 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldAgregarMasDeUnMismoItemAlCarrito() {
+    this.crearProductos();
+    this.shouldAgregarItemsAlCarritoCompra();
+    restTemplate.postForObject(
+        apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=10",
+        null,
+        ItemCarritoCompra.class);
+    ItemCarritoCompra item1 =
+        restTemplate.getForObject(
+            apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
+    assertEquals(15, item1.getCantidad().doubleValue());
+    restTemplate.postForObject(
+        apiPrefix + "/carrito-compra/usuarios/1/productos/2?cantidad=5",
+        null,
+        ItemCarritoCompra.class);
+    ItemCarritoCompra item2 =
+        restTemplate.getForObject(
+            apiPrefix + "/carrito-compra/usuarios/1/productos/2", ItemCarritoCompra.class);
+    assertEquals(14, item2.getCantidad().doubleValue());
+  }
+
+  @Test
   void shouldGenerarPedidoConItemsDelCarrito() {
     this.shouldAgregarItemsAlCarritoCompra();
     PedidoDTO pedido = restTemplate.postForObject(apiPrefix
