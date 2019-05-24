@@ -235,9 +235,17 @@ public class NotaController {
     @RequestHeader("Authorization") String authorizationHeader) {
     NotaCredito notaCreditoNueva = new NotaCredito();
     Factura factura = facturaService.getFacturaPorId(nuevaNotaCreditoDeFacturaDTO.getIdFactura());
-    notaCreditoNueva.setRenglonesNotaCredito(
-      notaService.calcularRenglonCreditoProducto(notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()),
-        nuevaNotaCreditoDeFacturaDTO.getCantidades(), nuevaNotaCreditoDeFacturaDTO.getIdsRenglonesFactura()));
+    if (Arrays.asList(nuevaNotaCreditoDeFacturaDTO.getCantidades()).contains(null)
+        || Arrays.asList(nuevaNotaCreditoDeFacturaDTO.getIdsRenglonesFactura()).contains(null)) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_nota_de_renglones_vacio"));
+    } else {
+      notaCreditoNueva.setRenglonesNotaCredito(
+          notaService.calcularRenglonCreditoProducto(
+              notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()),
+              nuevaNotaCreditoDeFacturaDTO.getCantidades(),
+              nuevaNotaCreditoDeFacturaDTO.getIdsRenglonesFactura()));
+    }
     List<BigDecimal> importes = new ArrayList<>();
     List<BigDecimal> cantidades = new ArrayList<>();
     List<BigDecimal> ivaPorcentajeRenglones = new ArrayList<>();

@@ -3567,6 +3567,82 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldNotCrearNotaCreditoVentaSinRenglonesDeFacturaA() {
+    this.shouldCrearFacturaVentaA();
+    List<FacturaVenta> facturasRecuperadas =
+      restTemplate
+        .exchange(
+          apiPrefix
+            + "/facturas/venta/busqueda/criteria?idEmpresa=1"
+            + "&tipoFactura="
+            + TipoDeComprobante.FACTURA_A
+            + "&nroSerie=0"
+            + "&nroFactura=1",
+          HttpMethod.GET,
+          null,
+          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+        .getBody()
+        .getContent();
+    Long[] idsRenglonesFacutura = new Long[1];
+    idsRenglonesFacutura[0] = 1L;
+    BigDecimal[] cantidades = new BigDecimal[1];
+    cantidades[0] = new BigDecimal("5");
+    NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
+      NuevaNotaCreditoDeFacturaDTO.builder()
+        .idFactura(facturasRecuperadas.get(0).getId_Factura())
+        .idsRenglonesFactura(idsRenglonesFacutura)
+        .cantidades(cantidades)
+        .modificaStock(true)
+        .motivo("Color equivocado.")
+        .build();
+    NotaCreditoDTO notaCreditoParaPersistir =
+      restTemplate.postForObject(
+        apiPrefix + "/notas/credito/calculos", nuevaNotaCreditoDTO, NotaCreditoDTO.class);
+    notaCreditoParaPersistir.setRenglonesNotaCredito(null);
+    try {
+      restTemplate.postForObject(
+          apiPrefix + "/notas/credito", notaCreditoParaPersistir, NotaCreditoDTO.class);
+    } catch (RestClientResponseException ex) {
+      assertTrue(ex.getMessage().startsWith("Los renglones de la nota se encuentran vacios."));
+    }
+  }
+
+  @Test
+  void shouldNotCalcularNotaCreditoVentaSinRenglonesDeFacturaA() {
+    this.shouldCrearFacturaVentaA();
+    List<FacturaVenta> facturasRecuperadas =
+        restTemplate
+            .exchange(
+                apiPrefix
+                    + "/facturas/venta/busqueda/criteria?idEmpresa=1"
+                    + "&tipoFactura="
+                    + TipoDeComprobante.FACTURA_A
+                    + "&nroSerie=0"
+                    + "&nroFactura=1",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+            .getBody()
+            .getContent();
+    Long[] idsRenglonesFacutura = new Long[1];
+    BigDecimal[] cantidades = new BigDecimal[1];
+    NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
+        NuevaNotaCreditoDeFacturaDTO.builder()
+            .idFactura(facturasRecuperadas.get(0).getId_Factura())
+            .idsRenglonesFactura(idsRenglonesFacutura)
+            .cantidades(cantidades)
+            .modificaStock(true)
+            .motivo("Color equivocado.")
+            .build();
+    try {
+      restTemplate.postForObject(
+          apiPrefix + "/notas/credito/calculos", nuevaNotaCreditoDTO, NotaCreditoDTO.class);
+    } catch (RestClientResponseException ex) {
+      assertTrue(ex.getMessage().startsWith("Los renglones de la nota se encuentran vacios."));
+    }
+  }
+
+  @Test
   void shouldVerificarStockNotaCreditoVenta() {
     this.shouldCrearNotaCreditoVentaDeFacturaB();
     ProductoDTO producto1 =
