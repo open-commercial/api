@@ -529,12 +529,14 @@ public class NotaServiceImpl implements INotaService {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_nota_de_motivo_vacio"));
     }
     if (nota instanceof NotaCredito) {
-      if (((NotaCredito) nota).getRenglonesNotaCredito() == null) {
+      if (((NotaCredito) nota).getRenglonesNotaCredito() == null
+          || ((NotaCredito) nota).getRenglonesNotaCredito().isEmpty()) {
         throw new BusinessServiceException(
             RESOURCE_BUNDLE.getString("mensaje_nota_de_renglones_vacio"));
       }
     } else {
-      if (((NotaDebito) nota).getRenglonesNotaDebito() == null) {
+      if (((NotaDebito) nota).getRenglonesNotaDebito() == null
+          || ((NotaDebito) nota).getRenglonesNotaDebito().isEmpty()) {
         throw new BusinessServiceException(
             RESOURCE_BUNDLE.getString("mensaje_nota_de_renglones_vacio"));
       }
