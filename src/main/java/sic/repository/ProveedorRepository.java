@@ -14,7 +14,7 @@ public interface ProveedorRepository
   @Query("SELECT p FROM Proveedor p WHERE p.id_Proveedor = :idProveedor AND p.eliminado = false")
   Proveedor findById(@Param("idProveedor") long idProveedor);
 
-  Proveedor findByCodigoAndEmpresaAndEliminado(String codigo, Empresa empresa, boolean eliminado);
+  Proveedor findByNroProveedorAndEmpresaAndEliminado(String nroProveedor, Empresa empresa, boolean eliminado);
 
   Proveedor findByIdFiscalAndEmpresaAndEliminado(
       Long idFiscal, Empresa empresa, boolean eliminado);

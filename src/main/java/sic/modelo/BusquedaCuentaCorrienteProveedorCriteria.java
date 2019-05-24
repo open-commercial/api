@@ -11,8 +11,8 @@ import org.springframework.data.domain.Pageable;
 @NoArgsConstructor
 @Builder
 public class BusquedaCuentaCorrienteProveedorCriteria {
-  private boolean buscaPorCodigo;
-  private String codigo;
+  private boolean buscaPorNroProveedor;
+  private String nroProveedor;
   private boolean buscaPorRazonSocial;
   private String razonSocial;
   private boolean buscaPorIdFiscal;

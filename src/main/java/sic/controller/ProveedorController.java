@@ -112,7 +112,7 @@ public class ProveedorController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Page<Proveedor> buscarProveedores(
     @RequestParam(value = "idEmpresa") long idEmpresa,
-    @RequestParam(required = false) String codigo,
+    @RequestParam(required = false) String nroProveedor,
     @RequestParam(required = false) String razonSocial,
     @RequestParam(required = false) Long idFiscal,
     @RequestParam(required = false) Long idProvincia,
@@ -142,8 +142,8 @@ public class ProveedorController {
     }
     BusquedaProveedorCriteria criteria =
       BusquedaProveedorCriteria.builder()
-        .buscaPorCodigo(codigo != null)
-        .codigo(codigo)
+        .buscaPorNroProveedor(nroProveedor != null)
+        .nroProveedor(nroProveedor)
         .buscaPorRazonSocial(razonSocial != null)
         .razonSocial(razonSocial)
         .buscaPorIdFiscal(idFiscal != null)

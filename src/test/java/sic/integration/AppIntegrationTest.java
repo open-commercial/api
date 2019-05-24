@@ -525,7 +525,6 @@ class AppIntegrationTest {
     restTemplate.postForObject(apiPrefix + "/medidas?idEmpresa=1", medidaKilo, MedidaDTO.class);
     ProveedorDTO proveedorDTO =
         ProveedorDTO.builder()
-            .codigo("ABC123")
             .razonSocial("Chamaco S.R.L.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
             .idFiscal(23127895679L)
@@ -1082,7 +1081,6 @@ class AppIntegrationTest {
     ProveedorDTO proveedor =
       ProveedorDTO.builder()
         .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-        .codigo("555888")
         .contacto("Ricardo")
         .email("ricardodelbarrio@gmail.com")
         .telPrimario("4512778851")
@@ -1108,7 +1106,6 @@ class AppIntegrationTest {
     ProveedorDTO proveedor =
       ProveedorDTO.builder()
         .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-        .codigo("555888")
         .contacto("Ricardo")
         .email("ricardodelbarrio@gmail.com")
         .telPrimario("4512778851")
@@ -1284,7 +1281,6 @@ class AppIntegrationTest {
     ProveedorDTO proveedor =
       ProveedorDTO.builder()
         .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-        .codigo("555888")
         .contacto("Ricardo")
         .email("ricardodelbarrio@gmail.com")
         .telPrimario("4512778851")
@@ -2945,7 +2941,6 @@ class AppIntegrationTest {
     long[] idsProductos = {1L, 2L};
     ProveedorDTO proveedor =
       ProveedorDTO.builder()
-        .codigo("QWE456")
         .razonSocial("Chamigo S.R.L.")
         .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
         .idFiscal(99999999999L)

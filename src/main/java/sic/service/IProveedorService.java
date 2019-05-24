@@ -19,8 +19,6 @@ public interface IProveedorService {
 
   void eliminar(long idProveedor);
 
-  Proveedor getProveedorPorCodigo(String codigo, Empresa empresa);
-
   Proveedor getProveedorPorIdFiscal(Long idFiscal, Empresa empresa);
 
   Proveedor getProveedorPorRazonSocial(String razonSocial, Empresa empresa);
@@ -28,5 +26,6 @@ public interface IProveedorService {
   List<Proveedor> getProveedores(Empresa empresa);
 
   Proveedor guardar(@Valid Proveedor proveedor);
-  
+
+  String generarNroDeProveedor(Empresa empresa);
 }
