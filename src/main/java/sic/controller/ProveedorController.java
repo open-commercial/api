@@ -77,6 +77,7 @@ public class ProveedorController {
     Proveedor proveedorPersistido =
       proveedorService.getProveedorPorId(proveedorDTO.getId_Proveedor());
     Proveedor proveedorPorActualizar = modelMapper.map(proveedorDTO, Proveedor.class);
+    proveedorPorActualizar.setNroProveedor(proveedorPersistido.getNroProveedor());
     if (proveedorPorActualizar.getRazonSocial() == null
       || proveedorPorActualizar.getRazonSocial().isEmpty()) {
       proveedorPorActualizar.setRazonSocial(proveedorPersistido.getRazonSocial());
