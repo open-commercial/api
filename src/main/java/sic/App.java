@@ -21,7 +21,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import sic.interceptor.JwtInterceptor;
 import sic.modelo.Ubicacion;
 import sic.modelo.dto.UbicacionDTO;
@@ -33,31 +33,32 @@ import java.time.Clock;
 @SpringBootApplication
 @EnableScheduling
 @EnableAsync
-public class App extends WebMvcConfigurerAdapter {
+public class App implements WebMvcConfigurer {
 
-    @Bean
-    public JwtInterceptor jwtInterceptor() {
-        return new JwtInterceptor();
-    }
+  @Bean
+  public JwtInterceptor jwtInterceptor() {
+    return new JwtInterceptor();
+  }
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(this.jwtInterceptor())
-                .addPathPatterns("/api/**")
-                .excludePathPatterns("/api/*/login")
-                .excludePathPatterns("/api/*/logout")
-                .excludePathPatterns("/api/*/password-recovery")
-                .excludePathPatterns("/api/*/registracion")
-                .excludePathPatterns("/api/*/public/**");
-    }
+  @Override
+  public void addInterceptors(InterceptorRegistry registry) {
+    registry
+        .addInterceptor(this.jwtInterceptor())
+        .addPathPatterns("/api/**")
+        .excludePathPatterns("/api/*/login")
+        .excludePathPatterns("/api/*/logout")
+        .excludePathPatterns("/api/*/password-recovery")
+        .excludePathPatterns("/api/*/registracion")
+        .excludePathPatterns("/api/*/public/**");
+  }
 
-    @Bean
-    public Jaxb2Marshaller marshaller() {
-        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-        // this package must match the package in the <generatePackage> specified in pom.xml        
-        marshaller.setContextPaths("afip.wsaa.wsdl", "afip.wsfe.wsdl");
-        return marshaller;
-    }
+  @Bean
+  public Jaxb2Marshaller marshaller() {
+    Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
+    // this package must match the package in the <generatePackage> specified in pom.xml
+    marshaller.setContextPaths("afip.wsaa.wsdl", "afip.wsfe.wsdl");
+    return marshaller;
+  }
 
   @Bean
   public Module springDataPageModule() {
@@ -84,51 +85,50 @@ public class App extends WebMvcConfigurerAdapter {
             });
   }
 
-    @Bean
-    public AfipWebServiceSOAPClient afipWebServiceSOAPClient(Jaxb2Marshaller marshaller) {
-        AfipWebServiceSOAPClient afipClient = new AfipWebServiceSOAPClient();
-        afipClient.setMarshaller(marshaller);
-        afipClient.setUnmarshaller(marshaller);
-        return afipClient;
-    }
+  @Bean
+  public AfipWebServiceSOAPClient afipWebServiceSOAPClient(Jaxb2Marshaller marshaller) {
+    AfipWebServiceSOAPClient afipClient = new AfipWebServiceSOAPClient();
+    afipClient.setMarshaller(marshaller);
+    afipClient.setUnmarshaller(marshaller);
+    return afipClient;
+  }
 
-    @Bean
-    public FilterRegistrationBean corsFilter() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration().applyPermitDefaultValues();
-        config.addAllowedMethod(HttpMethod.PUT);
-        config.addAllowedMethod(HttpMethod.DELETE);
-        source.registerCorsConfiguration("/**", config);
-        FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
-        bean.setOrder(0);
-        return bean;
-    }
+  @Bean
+  public FilterRegistrationBean corsFilter() {
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    CorsConfiguration config = new CorsConfiguration().applyPermitDefaultValues();
+    config.addAllowedMethod(HttpMethod.PUT);
+    config.addAllowedMethod(HttpMethod.DELETE);
+    source.registerCorsConfiguration("/**", config);
+    FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
+    bean.setOrder(0);
+    return bean;
+  }
 
-    @Bean
-    public ModelMapper modelMapper() {
-      ModelMapper modelMapper = new ModelMapper();
-      PropertyMap<Ubicacion, UbicacionDTO> ubicacionMapping = new PropertyMap<Ubicacion, UbicacionDTO>(){
-        protected void configure() {
-          map(source.getLocalidad().getNombre(), destination.getNombreLocalidad());
-        }
-      };
-      modelMapper.addMappings(ubicacionMapping);
-      return modelMapper;
-    }
+  @Bean
+  public ModelMapper modelMapper() {
+    ModelMapper modelMapper = new ModelMapper();
+    PropertyMap<Ubicacion, UbicacionDTO> ubicacionMapping =
+        new PropertyMap<Ubicacion, UbicacionDTO>() {
+          protected void configure() {
+            map(source.getLocalidad().getNombre(), destination.getNombreLocalidad());
+          }
+        };
+    modelMapper.addMappings(ubicacionMapping);
+    return modelMapper;
+  }
 
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
+  @Bean
+  public RestTemplate restTemplate() {
+    return new RestTemplate();
+  }
 
   @Bean
   public Clock clock() {
     return Clock.systemDefaultZone();
   }
 
-    public static void main(String[] args) {
-        SpringApplication.run(App.class, args);
-    }
-
+  public static void main(String[] args) {
+    SpringApplication.run(App.class, args);
+  }
 }
-
