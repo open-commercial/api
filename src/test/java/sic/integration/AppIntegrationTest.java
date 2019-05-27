@@ -4659,6 +4659,51 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldCrearGasto() {
+    this.abrirCaja();
+    GastoDTO gasto =
+      GastoDTO.builder()
+        .concepto("Gasto test")
+        .fecha(new Date())
+        .monto(new BigDecimal("200.000000000000000"))
+        .build();
+    restTemplate.postForObject(
+      apiPrefix + "/gastos?idEmpresa=1&idFormaDePago=1", gasto, GastoDTO.class);
+    assertEquals(
+      new BigDecimal("-200.000000000000000"),
+      restTemplate.getForObject(apiPrefix + "/cajas/1/saldo-sistema", BigDecimal.class));
+    GastoDTO gastoRecuperado =  restTemplate.getForObject(apiPrefix + "/gastos/1", GastoDTO.class);
+    assertEquals(gasto, gastoRecuperado);
+  }
+
+  @Test
+  void shouldEliminarGasto() {
+    this.shouldCrearGasto();
+    restTemplate.delete(apiPrefix + "/gastos/1");
+    try {
+      restTemplate.getForObject(apiPrefix + "/gastos/1", GastoDTO.class);
+    } catch (RestClientResponseException ex) {
+      assertTrue(ex.getMessage().startsWith("El gasto no existe o se encuentra eliminado."));
+    }
+  }
+
+  @Test
+  void shouldRecuperarGastoPorEmpresa() {
+    this.shouldCrearGasto();
+    List<GastoDTO> gastos =
+        restTemplate
+            .exchange(
+                apiPrefix + "/gastos/busqueda/criteria?idEmpresa=1",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<PaginaRespuestaRest<GastoDTO>>() {})
+            .getBody()
+            .getContent();
+    GastoDTO gastoRecuperado = restTemplate.getForObject(apiPrefix + "/gastos/1", GastoDTO.class);
+    assertEquals(gastoRecuperado, gastos.get(0));
+  }
+
+  @Test
   void shouldModificarCostoEnvioDeLocalidad() {
     LocalidadDTO localidad = restTemplate.getForObject(apiPrefix + "/ubicaciones/localidades/1", LocalidadDTO.class);
     localidad.setEnvioGratuito(true);
