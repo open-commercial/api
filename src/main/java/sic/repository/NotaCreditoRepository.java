@@ -8,9 +8,6 @@ import java.util.List;
 public interface NotaCreditoRepository
     extends NotaRepository<NotaCredito>, NotaCreditoRepositoryCustom {
 
-  @Query("SELECT nc FROM NotaCredito nc WHERE nc.idNota = :idNotaCredito AND nc.eliminada = false")
-  NotaCredito getById(@Param("idNotaCredito") long idNotaCredito);
-
   List<NotaCredito> findAllByFacturaVentaAndEliminada(FacturaVenta factura, boolean eliminada);
 
   @Query(

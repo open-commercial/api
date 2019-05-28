@@ -36,14 +36,14 @@ public class ProductoController {
 
   @Autowired
   public ProductoController(
-      IProductoService productoService,
-      IMedidaService medidaService,
-      IRubroService rubroService,
-      IProveedorService proveedorService,
-      IEmpresaService empresaService,
-      IClienteService clienteService,
-      IAuthService authService,
-      ModelMapper modelMapper) {
+    IProductoService productoService,
+    IMedidaService medidaService,
+    IRubroService rubroService,
+    IProveedorService proveedorService,
+    IEmpresaService empresaService,
+    IClienteService clienteService,
+    IAuthService authService,
+    ModelMapper modelMapper) {
     this.productoService = productoService;
     this.medidaService = medidaService;
     this.rubroService = rubroService;
@@ -59,9 +59,8 @@ public class ProductoController {
   public Producto getProductoPorIdPublic(
     @PathVariable long idProducto,
     @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
-    Producto producto = productoService.getProductoPorId(idProducto);
-    if (authorizationHeader != null) {
-      authService.validarToken(authorizationHeader);
+    Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
+    if (authorizationHeader != null && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente =
         clienteService.getClientePorIdUsuarioYidEmpresa(
@@ -102,8 +101,7 @@ public class ProductoController {
         null,
         null,
         null);
-    if (authorizationHeader != null) {
-      authService.validarToken(authorizationHeader);
+    if (authorizationHeader != null && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente =
         clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idEmpresa);
@@ -129,7 +127,7 @@ public class ProductoController {
       @PathVariable long idProducto,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    Producto producto = productoService.getProductoPorId(idProducto);
+    Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     Cliente cliente =
         clienteService.getClientePorIdUsuarioYidEmpresa(
             (int) claims.get("idUsuario"), producto.getEmpresa().getId_Empresa());
@@ -218,17 +216,17 @@ public class ProductoController {
     String ordenDefault = "descripcion";
     Pageable pageable;
     if (ordenarPor == null || sentido == null) {
-      pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenDefault));
+      pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenDefault));
     } else {
       switch (sentido) {
         case "ASC":
-          pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenarPor));
+          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenarPor));
           break;
         case "DESC":
-          pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenarPor));
+          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenarPor));
           break;
         default:
-          pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenDefault));
+          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenDefault));
           break;
       }
     }
@@ -269,13 +267,13 @@ public class ProductoController {
       @RequestParam(required = false) Long idEmpresa) {
     Producto productoPorActualizar = modelMapper.map(productoDTO, Producto.class);
     Producto productoPersistido =
-        productoService.getProductoPorId(productoPorActualizar.getIdProducto());
+        productoService.getProductoNoEliminadoPorId(productoPorActualizar.getIdProducto());
     if (productoPersistido != null) {
-      if (idMedida != null) productoPorActualizar.setMedida(medidaService.getMedidaPorId(idMedida));
+      if (idMedida != null) productoPorActualizar.setMedida(medidaService.getMedidaNoEliminadaPorId(idMedida));
       else productoPorActualizar.setMedida(productoPersistido.getMedida());
-      if (idRubro != null) productoPorActualizar.setRubro(rubroService.getRubroPorId(idRubro));
+      if (idRubro != null) productoPorActualizar.setRubro(rubroService.getRubroNoEliminadoPorId(idRubro));
       else productoPorActualizar.setRubro(productoPersistido.getRubro());
-      if (idProveedor != null) productoPorActualizar.setProveedor(proveedorService.getProveedorPorId(idProveedor));
+      if (idProveedor != null) productoPorActualizar.setProveedor(proveedorService.getProveedorNoEliminadoPorId(idProveedor));
       else productoPorActualizar.setProveedor(productoPersistido.getProveedor());
       if (idEmpresa != null)
         productoPorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
@@ -293,9 +291,9 @@ public class ProductoController {
     @RequestParam Long idProveedor,
     @RequestParam Long idEmpresa) {
     Producto producto = new Producto();
-    producto.setMedida(medidaService.getMedidaPorId(idMedida));
-    producto.setRubro(rubroService.getRubroPorId(idRubro));
-    producto.setProveedor(proveedorService.getProveedorPorId(idProveedor));
+    producto.setMedida(medidaService.getMedidaNoEliminadaPorId(idMedida));
+    producto.setRubro(rubroService.getRubroNoEliminadoPorId(idRubro));
+    producto.setProveedor(proveedorService.getProveedorNoEliminadoPorId(idProveedor));
     producto.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     producto.setCodigo(nuevoProductoDTO.getCodigo());
     producto.setDescripcion(nuevoProductoDTO.getDescripcion());

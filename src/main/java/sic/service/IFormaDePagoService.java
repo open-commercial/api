@@ -4,6 +4,8 @@ import java.util.List;
 import sic.modelo.Empresa;
 import sic.modelo.FormaDePago;
 
+import javax.validation.Valid;
+
 public interface IFormaDePagoService {
 
     void eliminar(long idFormaDePago);
@@ -12,9 +14,9 @@ public interface IFormaDePagoService {
 
     List<FormaDePago> getFormasDePago(Empresa empresa);
 
-    FormaDePago getFormasDePagoPorId(long id);
+    FormaDePago getFormasDePagoNoEliminadoPorId(long id);
 
-    FormaDePago guardar(FormaDePago formaDePago);
+    FormaDePago guardar(@Valid FormaDePago formaDePago);
 
     void setFormaDePagoPredeterminada(FormaDePago formaDePago);
     

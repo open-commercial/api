@@ -8,6 +8,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.export.*;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
 import java.math.BigDecimal;
@@ -18,6 +19,7 @@ import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
+import javax.validation.Valid;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -35,6 +37,7 @@ import sic.util.Validator;
 import sic.repository.ProductoRepository;
 
 @Service
+@Validated
 public class ProductoServiceImpl implements IProductoService {
 
   private final ProductoRepository productoRepository;
@@ -221,7 +224,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public Producto guardar(Producto producto) {
+  public Producto guardar(@Valid Producto producto) {
     if (producto.getCodigo() == null) producto.setCodigo("");
     producto.setFechaAlta(new Date());
     producto.setFechaUltimaModificacion(new Date());
@@ -235,7 +238,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public void actualizar(Producto productoPorActualizar, Producto productoPersistido) {
+  public void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido) {
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
     productoPorActualizar.setFechaUltimaModificacion(new Date());
@@ -259,11 +262,8 @@ public class ProductoServiceImpl implements IProductoService {
     TipoDeComprobante tipoDeComprobante) {
     idsYCantidades.forEach(
       (idProducto, cantidad) -> {
-        Producto producto = productoRepository.findById(idProducto);
-        if (producto == null) {
-          logger.warn("Se intenta actualizar el stock de un producto eliminado.");
-        }
-        if (producto != null && !producto.isIlimitado()) {
+        Optional<Producto> producto = productoRepository.findById(idProducto);
+        if (producto.isPresent() && !producto.get().isIlimitado()) {
           List<TipoDeComprobante> tiposDeFactura =
             Arrays.asList(
               TipoDeComprobante.FACTURA_A,
@@ -283,25 +283,27 @@ public class ProductoServiceImpl implements IProductoService {
           switch (movimiento) {
             case VENTA:
               if (tiposDeFactura.contains(tipoDeComprobante)) {
-                this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(operacion, producto, cantidad);
+                this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(operacion, producto.get(), cantidad);
               }
               if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
-                this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(operacion, producto, cantidad);
+                this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(operacion, producto.get(), cantidad);
               }
               break;
             case COMPRA:
               if (tiposDeFactura.contains(tipoDeComprobante)) {
-                this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(operacion, producto, cantidad);
+                this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(operacion, producto.get(), cantidad);
               }
               if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
-                this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(operacion, producto, cantidad);
+                this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(operacion, producto.get(), cantidad);
               }
               break;
             default:
               throw new BusinessServiceException(
                 RESOURCE_BUNDLE.getString("mensaje_movimiento_no_valido"));
           }
-          productoRepository.save(producto);
+          productoRepository.save(producto.get());
+        } else {
+          logger.warn("Se intenta actualizar el stock de un producto eliminado.");
         }
       });
   }
@@ -332,7 +334,7 @@ public class ProductoServiceImpl implements IProductoService {
     }
     List<Producto> productos = new ArrayList<>();
     for (Long i : idProducto) {
-      Producto producto = this.getProductoPorId(i);
+      Producto producto = this.getProductoNoEliminadoPorId(i);
       if (producto == null) {
         throw new EntityNotFoundException(
             RESOURCE_BUNDLE.getString("mensaje_producto_no_existente"));
@@ -344,7 +346,7 @@ public class ProductoServiceImpl implements IProductoService {
       }
       productos.add(producto);
     }
-    productoRepository.save(productos);
+    productoRepository.saveAll(productos);
   }
 
   @Override
@@ -369,7 +371,7 @@ public class ProductoServiceImpl implements IProductoService {
     }
     List<Producto> productos = new ArrayList<>();
     for (long i : productosParaActualizarDTO.getIdProducto()) {
-      productos.add(this.getProductoPorId(i));
+      productos.add(this.getProductoNoEliminadoPorId(i));
     }
     BigDecimal multiplicador = BigDecimal.ZERO;
     if (aplicaDescuentoRecargoPorcentaje) {
@@ -391,15 +393,15 @@ public class ProductoServiceImpl implements IProductoService {
     }
     for (Producto p : productos) {
       if (productosParaActualizarDTO.getIdMedida() != null) {
-        p.setMedida(medidaService.getMedidaPorId(productosParaActualizarDTO.getIdMedida()));
+        p.setMedida(medidaService.getMedidaNoEliminadaPorId(productosParaActualizarDTO.getIdMedida()));
       }
       if (productosParaActualizarDTO.getIdRubro() != null) {
-        Rubro rubro = rubroService.getRubroPorId(productosParaActualizarDTO.getIdRubro());
+        Rubro rubro = rubroService.getRubroNoEliminadoPorId(productosParaActualizarDTO.getIdRubro());
         p.setRubro(rubro);
       }
       if (productosParaActualizarDTO.getIdProveedor() != null) {
         Proveedor proveedor =
-            proveedorService.getProveedorPorId(productosParaActualizarDTO.getIdProveedor());
+            proveedorService.getProveedorNoEliminadoPorId(productosParaActualizarDTO.getIdProveedor());
         p.setProveedor(proveedor);
       }
       if (actualizaPrecios) {
@@ -433,7 +435,7 @@ public class ProductoServiceImpl implements IProductoService {
       }
       this.validarOperacion(TipoDeOperacion.ACTUALIZACION, p);
     }
-    productoRepository.save(productos);
+    productoRepository.saveAll(productos);
     logger.warn("Los Productos {} se modificaron correctamente.", productos);
     return productos;
   }
@@ -457,17 +459,18 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Producto getProductoPorId(long idProducto) {
-    Producto producto = productoRepository.findById(idProducto);
-    if (producto == null) {
-      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_producto_no_existente"));
-    }
-    if (producto.getCantidad().compareTo(BigDecimal.ZERO) > 0) {
-      producto.setHayStock(true);
-      return producto;
+  public Producto getProductoNoEliminadoPorId(long idProducto) {
+    Optional<Producto> producto = productoRepository.findById(idProducto);
+    if (producto.isPresent()) {
+      if (producto.get().getCantidad().compareTo(BigDecimal.ZERO) > 0) {
+        producto.get().setHayStock(true);
+        return producto.get();
+      } else {
+        producto.get().setHayStock(false);
+        return producto.get();
+      }
     } else {
-      producto.setHayStock(false);
-      return producto;
+      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_producto_no_existente"));
     }
   }
 
@@ -510,7 +513,7 @@ public class ProductoServiceImpl implements IProductoService {
     int longitudCantidades = cantidad.length;
     if (longitudIds == longitudCantidades) {
       for (int i = 0; i < longitudIds; i++) {
-        Producto p = this.getProductoPorId(idProducto[i]);
+        Producto p = this.getProductoNoEliminadoPorId(idProducto[i]);
         if (!p.isIlimitado() && p.getCantidad().compareTo(cantidad[i]) < 0) {
           productos.put(p.getIdProducto(), cantidad[i]);
         }

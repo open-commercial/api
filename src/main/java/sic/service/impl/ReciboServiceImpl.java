@@ -6,7 +6,9 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.util.*;
 import javax.imageio.ImageIO;
+import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
+import javax.validation.Valid;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.DateExpression;
@@ -21,12 +23,14 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.repository.ReciboRepository;
 import sic.service.*;
 import sic.util.FormatterFechaHora;
 
 @Service
+@Validated
 public class ReciboServiceImpl implements IReciboService {
 
   private final ReciboRepository reciboRepository;
@@ -59,8 +63,15 @@ public class ReciboServiceImpl implements IReciboService {
   }
 
   @Override
-  public Recibo getById(long idRecibo) {
-    return reciboRepository.findById(idRecibo);
+  public Recibo getReciboNoEliminadoPorId(long idRecibo) {
+    Optional<Recibo> recibo = reciboRepository.findById(idRecibo);
+    if (recibo.isPresent() && !recibo.get().isEliminado()) {
+      return recibo.get();
+    } else {
+      throw new EntityNotFoundException(
+        ResourceBundle.getBundle("Mensajes")
+          .getString("mensaje_recibo_no_existente"));
+    }
   }
 
   private BooleanBuilder getBuilder(BusquedaReciboCriteria criteria) {
@@ -131,7 +142,7 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   @Transactional
-  public Recibo guardar(Recibo recibo) {
+  public Recibo guardar(@Valid Recibo recibo) {
     recibo.setNumSerie(
         configuracionDelSistemaService
             .getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa())
@@ -143,7 +154,7 @@ public class ReciboServiceImpl implements IReciboService {
                 .getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa())
                 .getNroPuntoDeVentaAfip()));
     recibo.setFecha(new Date());
-    this.validarRecibo(recibo);
+    this.validarOperacion(recibo);
     recibo = reciboRepository.save(recibo);
     this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
     logger.warn("El Recibo {} se guardó correctamente.", recibo);
@@ -151,14 +162,7 @@ public class ReciboServiceImpl implements IReciboService {
   }
 
   @Override
-  public void validarRecibo(Recibo recibo) {
-    if (recibo.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_recibo_monto_igual_menor_cero"));
-    }
-    if (recibo.getEmpresa() == null) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_recibo_empresa_vacia"));
-    }
+  public void validarOperacion(Recibo recibo) {
     this.cajaService.validarMovimiento(recibo.getFecha(), recibo.getEmpresa().getId_Empresa());
     if (recibo.getCliente() == null && recibo.getProveedor() == null) {
       throw new BusinessServiceException(
@@ -167,17 +171,6 @@ public class ReciboServiceImpl implements IReciboService {
     if (recibo.getCliente() != null && recibo.getProveedor() != null) {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_recibo_cliente_proveedor_simultaneos"));
-    }
-    if (recibo.getUsuario() == null) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_recibo_usuario_vacio"));
-    }
-    if (recibo.getFormaDePago() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_recibo_forma_de_pago_vacia"));
-    }
-    if (recibo.getConcepto() == null || recibo.getConcepto().equals("")) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_recibo_concepto_vacio"));
     }
   }
 
@@ -219,7 +212,7 @@ public class ReciboServiceImpl implements IReciboService {
         recibo.setUsuario(usuario);
         recibo.setEmpresa(empresa);
         recibo.setFecha(fecha);
-        FormaDePago fdp = formaDePagoService.getFormasDePagoPorId(idFormaDePago);
+        FormaDePago fdp = formaDePagoService.getFormasDePagoNoEliminadoPorId(idFormaDePago);
         recibo.setFormaDePago(fdp);
         recibo.setMonto(montos[i]);
         recibo.setNumSerie(
@@ -239,7 +232,7 @@ public class ReciboServiceImpl implements IReciboService {
   @Override
   @Transactional
   public void eliminar(long idRecibo) {
-    Recibo r = reciboRepository.findById(idRecibo);
+    Recibo r = this.getReciboNoEliminadoPorId(idRecibo);
     if (!notaService.existsNotaDebitoPorRecibo(r)) {
       r.setEliminado(true);
       this.cuentaCorrienteService.asentarEnCuentaCorriente(r, TipoDeOperacion.ELIMINACION);

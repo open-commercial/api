@@ -2,19 +2,22 @@ package sic.service.impl;
 
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.ConfiguracionDelSistema;
 import sic.modelo.Empresa;
-import sic.modelo.TipoDeOperacion;
 import sic.service.IConfiguracionDelSistemaService;
 import sic.repository.ConfiguracionDelSistemaRepository;
 import sic.service.BusinessServiceException;
 
 @Service
+@Validated
 public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSistemaService {
 
   private final ConfiguracionDelSistemaRepository configuracionRepository;
@@ -29,11 +32,11 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
 
   @Override
   public ConfiguracionDelSistema getConfiguracionDelSistemaPorId(long idConfiguracionDelSistema) {
-    ConfiguracionDelSistema cds = configuracionRepository.findOne(idConfiguracionDelSistema);
-    if (cds == null) {
-      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_cds_no_existente"));
-    }
-    return cds;
+    return configuracionRepository
+        .findById(idConfiguracionDelSistema)
+        .orElseThrow(
+            () ->
+                new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_cds_no_existente")));
   }
 
   @Override
@@ -43,8 +46,8 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
 
   @Override
   @Transactional
-  public ConfiguracionDelSistema guardar(ConfiguracionDelSistema cds) {
-    this.validarCds(TipoDeOperacion.ALTA, cds);
+  public ConfiguracionDelSistema guardar(@Valid ConfiguracionDelSistema cds) {
+    this.validarOperacion(cds);
     cds = configuracionRepository.save(cds);
     logger.warn("La Configuracion del Sistema {} se guardó correctamente.", cds);
     return cds;
@@ -52,8 +55,8 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
 
   @Override
   @Transactional
-  public void actualizar(ConfiguracionDelSistema cds) {
-    this.validarCds(TipoDeOperacion.ACTUALIZACION, cds);
+  public void actualizar(@Valid ConfiguracionDelSistema cds) {
+    this.validarOperacion(cds);
     if (cds.getPasswordCertificadoAfip() != null) {
       cds.setPasswordCertificadoAfip(cds.getPasswordCertificadoAfip());
     }
@@ -70,23 +73,7 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
   }
 
   @Override
-  public void validarCds(TipoDeOperacion tipoOperacion, ConfiguracionDelSistema cds) {
-    if (tipoOperacion.equals(TipoDeOperacion.ACTUALIZACION)) {
-      if (cds.isFacturaElectronicaHabilitada() || cds.isEmailSenderHabilitado()) {
-        ConfiguracionDelSistema cdsRecuperado =
-            this.getConfiguracionDelSistemaPorId(cds.getId_ConfiguracionDelSistema());
-        if (cds.isFacturaElectronicaHabilitada() && cds.getPasswordCertificadoAfip().equals("")) {
-          cds.setPasswordCertificadoAfip(cdsRecuperado.getPasswordCertificadoAfip());
-        }
-        if (cds.isEmailSenderHabilitado() && cds.getEmailPassword().equals("")) {
-          cds.setEmailPassword(cdsRecuperado.getEmailPassword());
-        }
-      }
-    } else if (tipoOperacion.equals(TipoDeOperacion.ALTA)
-        && cds.isEmailSenderHabilitado()
-        && !cds.getEmailPassword().equals("")) {
-      cds.setEmailPassword(cds.getEmailPassword());
-    }
+  public void validarOperacion(ConfiguracionDelSistema cds) {
     if (cds.isFacturaElectronicaHabilitada()) {
       if (cds.getCertificadoAfip() == null) {
         throw new BusinessServiceException(

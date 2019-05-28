@@ -5,11 +5,13 @@ import sic.modelo.BusquedaTransportistaCriteria;
 import sic.modelo.Empresa;
 import sic.modelo.Transportista;
 
+import javax.validation.Valid;
+
 public interface ITransportistaService {
 
-    Transportista getTransportistaPorId(long id_Transportista);
+    Transportista getTransportistaNoEliminadoPorId(long id_Transportista);
             
-    void actualizar(Transportista transportista);
+    void actualizar(@Valid Transportista transportista);
 
     List<Transportista> buscarTransportistas(BusquedaTransportistaCriteria criteria);
 
@@ -19,6 +21,6 @@ public interface ITransportistaService {
 
     List<Transportista> getTransportistas(Empresa empresa);
 
-    Transportista guardar(Transportista transportista);
+    Transportista guardar(@Valid Transportista transportista);
     
 }

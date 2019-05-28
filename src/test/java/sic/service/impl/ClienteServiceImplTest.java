@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.builder.ClienteBuilder;
 import sic.builder.EmpresaBuilder;
-import sic.builder.LocalidadBuilder;
 import sic.modelo.Cliente;
 import sic.service.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
@@ -34,62 +33,6 @@ class ClienteServiceImplTest {
     Cliente resultadoObtenido =
         clienteServiceImpl.getClientePredeterminado((new EmpresaBuilder()).build());
     assertEquals(resultadoEsperado, resultadoObtenido);
-  }
-
-  @Test
-  void shouldLanzarExceptionWhenEmailInvalido() {
-    BusinessServiceException thrown =
-        assertThrows(
-            BusinessServiceException.class,
-            () ->
-                clienteServiceImpl.validarOperacion(
-                    TipoDeOperacion.ELIMINACION, new ClienteBuilder().withEmail("@@.com").build()));
-    assertTrue(
-        thrown
-            .getMessage()
-            .contains(
-                ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_email_invalido")));
-  }
-
-  @Test
-  void shouldLanzarExceptionWhenCondicionIVAesNull() {
-    BusinessServiceException thrown =
-        assertThrows(
-            BusinessServiceException.class,
-            () ->
-                clienteServiceImpl.validarOperacion(
-                    TipoDeOperacion.ELIMINACION,
-                    new ClienteBuilder()
-                        .withCategoriaIVA(null)
-                        .withEmail("soporte@gmail.com")
-                        .withNombreFiscal("Ferreteria Julian")
-                        .build()));
-    assertTrue(
-        thrown
-            .getMessage()
-            .contains(
-                ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_cliente_vacio_categoriaIVA")));
-  }
-
-  @Test
-  void shouldLanzarExceptionWhenEmpresaEsNull() {
-    BusinessServiceException thrown =
-      assertThrows(
-        BusinessServiceException.class,
-        () ->
-          clienteServiceImpl.validarOperacion(
-            TipoDeOperacion.ELIMINACION,
-            new ClienteBuilder()
-              .withEmail("soporte@gmail.com")
-              .withNombreFiscal("Ferreteria Julian")
-              .withEmpresa(null)
-              .build()));
-    assertTrue(
-      thrown
-        .getMessage()
-        .contains(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_empresa")));
   }
 
   @Test

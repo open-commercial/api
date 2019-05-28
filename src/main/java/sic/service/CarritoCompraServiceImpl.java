@@ -2,7 +2,6 @@ package sic.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ResourceBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,6 @@ import sic.modelo.Producto;
 import sic.modelo.Usuario;
 import sic.modelo.dto.CarritoCompraDTO;
 import sic.repository.CarritoCompraRepository;
-import javax.persistence.EntityNotFoundException;
 
 @Service
 @Transactional
@@ -31,10 +29,10 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   @Autowired
   public CarritoCompraServiceImpl(
-      CarritoCompraRepository carritoCompraRepository,
-      IUsuarioService usuarioService,
-      IClienteService clienteService,
-      IProductoService productoService) {
+    CarritoCompraRepository carritoCompraRepository,
+    IUsuarioService usuarioService,
+    IClienteService clienteService,
+    IProductoService productoService) {
     this.carritoCompraRepository = carritoCompraRepository;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
@@ -51,35 +49,41 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     BigDecimal subtotal = carritoCompraRepository.calcularSubtotal(idUsuario);
     if (subtotal == null) subtotal = BigDecimal.ZERO;
     carritoCompraDTO.setSubtotal(subtotal);
-    Cliente cliente = clienteService.getClientePorId(idCliente);
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     carritoCompraDTO.setBonificacionPorcentaje(cliente.getBonificacion());
     carritoCompraDTO.setBonificacionNeto(
-        subtotal.multiply(cliente.getBonificacion()).divide(CIEN, RoundingMode.HALF_UP));
+      subtotal.multiply(cliente.getBonificacion()).divide(CIEN, RoundingMode.HALF_UP));
     carritoCompraDTO.setTotal(subtotal.subtract(carritoCompraDTO.getBonificacionNeto()));
     return carritoCompraDTO;
   }
 
   @Override
   public Page<ItemCarritoCompra> getItemsDelCaritoCompra(
-      long idUsuario, long idCliente, Pageable pageable) {
+    long idUsuario, long idCliente, Pageable pageable) {
     Page<ItemCarritoCompra> items =
         carritoCompraRepository.findAllByUsuario(
-            usuarioService.getUsuarioPorId(idUsuario), pageable);
-    Cliente cliente = clienteService.getClientePorId(idCliente);
+            usuarioService.getUsuarioNoEliminadoPorId(idUsuario), pageable);
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     BigDecimal bonificacion = cliente.getBonificacion();
     items.forEach(
-        i -> {
-          i.getProducto()
-              .setPrecioBonificado(
-                  i.getProducto()
-                      .getPrecioLista()
-                      .multiply(
-                          BigDecimal.ONE.subtract(
-                              bonificacion.divide(CIEN, RoundingMode.HALF_UP))));
-          i.setImporte(i.getProducto().getPrecioLista().multiply(i.getCantidad()));
-          i.setImporteBonificado(i.getProducto().getPrecioBonificado().multiply(i.getCantidad()));
-        });
+      i -> {
+        i.getProducto()
+          .setPrecioBonificado(
+            i.getProducto()
+              .getPrecioLista()
+              .multiply(
+                BigDecimal.ONE.subtract(
+                  bonificacion.divide(CIEN, RoundingMode.HALF_UP))));
+        i.setImporte(i.getProducto().getPrecioLista().multiply(i.getCantidad()));
+        i.setImporteBonificado(i.getProducto().getPrecioBonificado().multiply(i.getCantidad()));
+      });
     return items;
+  }
+
+  @Override
+  public ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(
+    long idUsuario, long idProducto) {
+    return this.carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
   }
 
   @Override
@@ -99,14 +103,14 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   @Override
   public void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad) {
-    Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
-    Producto producto = productoService.getProductoPorId(idProducto);
-    ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(usuario, producto);
+    Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
+    Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
+    ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
     if (item == null) {
       BigDecimal importe = producto.getPrecioLista().multiply(cantidad);
       ItemCarritoCompra itemCC =
-          carritoCompraRepository.save(
-              new ItemCarritoCompra(null, cantidad, producto, importe, null, usuario));
+        carritoCompraRepository.save(
+          new ItemCarritoCompra(null, cantidad, producto, importe, null, usuario));
       logger.warn("Nuevo item de carrito de compra agregado: {}", itemCC);
     } else {
       BigDecimal nuevaCantidad = item.getCantidad().add(cantidad);
@@ -118,25 +122,6 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
       item.setImporte(producto.getPrecioLista().multiply(nuevaCantidad));
       ItemCarritoCompra itemCC = carritoCompraRepository.save(item);
       logger.warn("Item de carrito de compra modificado: {}", itemCC);
-    }
-  }
-
-  @Override
-  public void modificarCantidadItem(long idUsuario, long idProducto, BigDecimal cantidad) {
-    Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
-    Producto producto = productoService.getProductoPorId(idProducto);
-    ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(usuario, producto);
-    if (item != null) {
-      if (cantidad.compareTo(BigDecimal.ZERO) < 0) {
-        item.setCantidad(BigDecimal.ZERO);
-      } else {
-        item.setCantidad(cantidad);
-      }
-      item.setImporte(producto.getPrecioLista().multiply(cantidad));
-      carritoCompraRepository.save(item);
-    } else {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_item_no_existente"));
     }
   }
 }

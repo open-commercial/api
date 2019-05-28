@@ -3,11 +3,15 @@ package sic.service.impl;
 import com.querydsl.core.BooleanBuilder;
 import java.util.ArrayList;
 
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +20,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.service.ITransportistaService;
 import sic.service.BusinessServiceException;
-import sic.service.IUbicacionService;
-import sic.util.Validator;
 import sic.repository.TransportistaRepository;
+import sic.service.IUbicacionService;
 
 @Service
+@Validated
 public class TransportistaServiceImpl implements ITransportistaService {
 
   private final TransportistaRepository transportistaRepository;
@@ -35,13 +39,16 @@ public class TransportistaServiceImpl implements ITransportistaService {
   }
 
   @Override
-  public Transportista getTransportistaPorId(long idTransportista) {
-    Transportista transportista = transportistaRepository.findOne(idTransportista);
-    if (transportista == null) {
+  public Transportista getTransportistaNoEliminadoPorId(long idTransportista) {
+    Optional<Transportista> transportista = transportistaRepository
+      .findById(idTransportista);
+    if (transportista.isPresent() && !transportista.get().isEliminado()) {
+      return transportista.get();
+    } else {
       throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_transportista_no_existente"));
+        ResourceBundle.getBundle("Mensajes")
+          .getString("mensaje_transportista_no_existente"));
     }
-    return transportista;
   }
 
   @Override
@@ -94,15 +101,6 @@ public class TransportistaServiceImpl implements ITransportistaService {
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Transportista transportista) {
-    // Requeridos
-    if (Validator.esVacio(transportista.getNombre())) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_transportista_nombre_vacio"));
-    }
-    if (transportista.getEmpresa() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_transportista_empresa_vacia"));
-    }
     // Duplicados
     // Nombre
     Transportista transportistaDuplicado =
@@ -127,7 +125,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
 
   @Override
   @Transactional
-  public Transportista guardar(Transportista transportista) {
+  public Transportista guardar(@Valid Transportista transportista) {
     if (transportista.getUbicacion() != null
         && transportista.getUbicacion().getIdLocalidad() != null) {
       transportista
@@ -143,7 +141,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
 
   @Override
   @Transactional
-  public void actualizar(Transportista transportista) {
+  public void actualizar(@Valid Transportista transportista) {
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, transportista);
     transportistaRepository.save(transportista);
   }
@@ -151,7 +149,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
   @Override
   @Transactional
   public void eliminar(long idTransportista) {
-    Transportista transportista = this.getTransportistaPorId(idTransportista);
+    Transportista transportista = this.getTransportistaNoEliminadoPorId(idTransportista);
     if (transportista == null) {
       throw new EntityNotFoundException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_transportista_no_existente"));

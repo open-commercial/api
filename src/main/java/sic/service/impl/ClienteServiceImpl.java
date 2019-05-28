@@ -5,8 +5,10 @@ import com.querydsl.core.BooleanBuilder;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.Date;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,12 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.service.*;
-import sic.util.Validator;
 import sic.repository.ClienteRepository;
 
 @Service
+@Validated
 public class ClienteServiceImpl implements IClienteService {
 
   private final ClienteRepository clienteRepository;
@@ -42,12 +45,13 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public Cliente getClientePorId(long idCliente) {
-    Cliente cliente = clienteRepository.findOne(idCliente);
-    if (cliente == null) {
+  public Cliente getClienteNoEliminadoPorId(long idCliente) {
+    Optional<Cliente> cliente = clienteRepository.findById(idCliente);
+    if (cliente.isPresent() && !cliente.get().isEliminado()) {
+      return cliente.get();
+    } else {
       throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_cliente_no_existente"));
     }
-    return cliente;
   }
 
   @Override
@@ -122,7 +126,7 @@ public class ClienteServiceImpl implements IClienteService {
     if (criteria.isBuscaPorProvincia())
       builder.and(
           qCliente.ubicacionEnvio.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
-    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
         && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
@@ -153,31 +157,8 @@ public class ClienteServiceImpl implements IClienteService {
 
   @Override
   public void validarOperacion(TipoDeOperacion operacion, Cliente cliente) {
-    // Entrada de Datos
-    if (cliente.getEmail() != null
-        && !cliente.getEmail().equals("")
-        && !Validator.esEmailValido(cliente.getEmail())) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_email_invalido"));
-    }
     // Requeridos
-    if (cliente.getCategoriaIVA() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_categoriaIVA"));
-    }
-    if (Validator.esVacio(cliente.getNombreFiscal())) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_nombreFiscal"));
-    }
-    if (Validator.esVacio(cliente.getTelefono())) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_telefono"));
-    }
-    if (cliente.getEmpresa() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_empresa"));
-    }
-    if (cliente.getCredencial() == null) {
+    if (operacion == TipoDeOperacion.ALTA && cliente.getCredencial() == null) {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_credencial"));
     }
@@ -224,7 +205,7 @@ public class ClienteServiceImpl implements IClienteService {
 
   @Override
   @Transactional
-  public Cliente guardar(Cliente cliente) {
+  public Cliente guardar(@Valid Cliente cliente) {
     cliente.setFechaAlta(new Date());
     cliente.setEliminado(false);
     cliente.setNroCliente(this.generarNroDeCliente(cliente.getEmpresa()));
@@ -265,6 +246,7 @@ public class ClienteServiceImpl implements IClienteService {
         }
       }
     }
+    cuentaCorrienteCliente.setFechaApertura(cuentaCorrienteCliente.getCliente().getFechaAlta());
     cliente = clienteRepository.save(cliente);
     cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);
     logger.warn("El Cliente {} se guardó correctamente.", cliente);
@@ -273,7 +255,7 @@ public class ClienteServiceImpl implements IClienteService {
 
   @Override
   @Transactional
-  public void actualizar(Cliente clientePorActualizar, Cliente clientePersistido) {
+  public void actualizar(@Valid Cliente clientePorActualizar, Cliente clientePersistido) {
     clientePorActualizar.setNroCliente(clientePersistido.getNroCliente());
     clientePorActualizar.setFechaAlta(clientePersistido.getFechaAlta());
     clientePorActualizar.setPredeterminado(clientePersistido.isPredeterminado());
@@ -305,7 +287,7 @@ public class ClienteServiceImpl implements IClienteService {
   @Override
   @Transactional
   public void eliminar(long idCliente) {
-    Cliente cliente = this.getClientePorId(idCliente);
+    Cliente cliente = this.getClienteNoEliminadoPorId(idCliente);
     if (cliente == null) {
       throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_cliente_no_existente"));
     }

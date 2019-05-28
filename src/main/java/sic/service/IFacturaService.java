@@ -8,9 +8,11 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 
+import javax.validation.Valid;
+
 public interface IFacturaService {
 
-  Factura getFacturaPorId(Long idFactura);
+  Factura getFacturaNoEliminadaPorId(long idFactura);
 
   List<Factura> getFacturasDelPedido(Long idPedido);
 
@@ -30,9 +32,9 @@ public interface IFacturaService {
 
   Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
 
-  List<FacturaVenta> guardar(List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos);
+  List<FacturaVenta> guardar(@Valid List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos);
 
-  List<FacturaCompra> guardar(List<FacturaCompra> facturas);
+  List<FacturaCompra> guardar(@Valid List<FacturaCompra> facturas);
 
   FacturaVenta autorizarFacturaVenta(FacturaVenta fv);
 

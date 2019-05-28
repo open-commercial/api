@@ -11,10 +11,7 @@ import sic.modelo.Pedido;
 import sic.modelo.TipoDeComprobante;
 
 public interface FacturaRepository<T extends Factura> extends PagingAndSortingRepository<T, Long> {
-    
-    @Query("SELECT f FROM Factura f WHERE f.id_Factura = :idFactura AND f.eliminada = false")
-    Factura findById(@Param("idFactura") long idFactura);
-    
+
     @Query("SELECT f.total FROM Factura f WHERE f.id_Factura = :idFactura AND f.eliminada = false")
     BigDecimal getTotalById(@Param("idFactura") long idFactura);
     

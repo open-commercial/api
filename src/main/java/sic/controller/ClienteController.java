@@ -52,7 +52,7 @@ public class ClienteController {
     Rol.COMPRADOR
   })
   public Cliente getCliente(@PathVariable long idCliente) {
-    return clienteService.getClientePorId(idCliente);
+    return clienteService.getClienteNoEliminadoPorId(idCliente);
   }
 
   @GetMapping("/clientes/busqueda/criteria")
@@ -73,23 +73,23 @@ public class ClienteController {
     Pageable pageable;
     if (ordenarPor == null || sentido == null) {
       pageable =
-          new PageRequest(
+          PageRequest.of(
               pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombreFiscal"));
     } else {
       switch (sentido) {
         case "ASC":
           pageable =
-              new PageRequest(
+              PageRequest.of(
                   pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
           break;
         case "DESC":
           pageable =
-              new PageRequest(
+              PageRequest.of(
                   pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
           break;
         default:
           pageable =
-              new PageRequest(
+              PageRequest.of(
                   pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombreFiscal"));
           break;
       }
@@ -150,7 +150,7 @@ public class ClienteController {
     if (nuevoCliente.getIdCredencial() != null) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
-      Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+      Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
       if (nuevoCliente.getIdCredencial() != idUsuarioLoggedIn
           && !(usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
               || usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)
@@ -158,7 +158,7 @@ public class ClienteController {
         throw new ForbiddenException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
       } else {
-        Usuario usuarioCredencial = usuarioService.getUsuarioPorId(nuevoCliente.getIdCredencial());
+        Usuario usuarioCredencial = usuarioService.getUsuarioNoEliminadoPorId(nuevoCliente.getIdCredencial());
         cliente.setCredencial(usuarioCredencial);
       }
     }
@@ -177,7 +177,7 @@ public class ClienteController {
     }
     cliente.setEmpresa(empresaService.getEmpresaPorId(nuevoCliente.getIdEmpresa()));
     if (nuevoCliente.getIdViajante() != null) {
-      cliente.setViajante(usuarioService.getUsuarioPorId(nuevoCliente.getIdViajante()));
+      cliente.setViajante(usuarioService.getUsuarioNoEliminadoPorId(nuevoCliente.getIdViajante()));
     }
     return clienteService.guardar(cliente);
   }
@@ -194,12 +194,11 @@ public class ClienteController {
       @RequestBody ClienteDTO clienteDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     Cliente clientePorActualizar = modelMapper.map(clienteDTO, Cliente.class);
-    Cliente clientePersistido =
-        clienteService.getClientePorId(clientePorActualizar.getId_Cliente());
+    Cliente clientePersistido = clienteService.getClienteNoEliminadoPorId(clientePorActualizar.getId_Cliente());
     if (clienteDTO.getIdCredencial() != null) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
-      Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+      Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
       if (clienteDTO.getIdCredencial() != idUsuarioLoggedIn
           && clientePersistido.getCredencial() != null
           && clientePersistido.getCredencial().getId_Usuario() != clienteDTO.getIdCredencial()
@@ -209,7 +208,7 @@ public class ClienteController {
         throw new ForbiddenException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
       } else {
-        Usuario usuarioCredencial = usuarioService.getUsuarioPorId(clienteDTO.getIdCredencial());
+        Usuario usuarioCredencial = usuarioService.getUsuarioNoEliminadoPorId(clienteDTO.getIdCredencial());
         clientePorActualizar.setCredencial(usuarioCredencial);
       }
     } else {
@@ -220,7 +219,7 @@ public class ClienteController {
             != 0) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
-      Usuario usuarioLoggedIn = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+      Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
       if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
           && !usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)) {
         throw new ForbiddenException(
@@ -250,7 +249,7 @@ public class ClienteController {
       clientePorActualizar.setEmpresa(clientePersistido.getEmpresa());
     }
     if (clienteDTO.getIdViajante() != null) {
-      clientePorActualizar.setViajante(usuarioService.getUsuarioPorId(clienteDTO.getIdViajante()));
+      clientePorActualizar.setViajante(usuarioService.getUsuarioNoEliminadoPorId(clienteDTO.getIdViajante()));
     } else {
       clientePorActualizar.setViajante(null);
     }
@@ -260,7 +259,7 @@ public class ClienteController {
   @PutMapping("/clientes/{idCliente}/predeterminado")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void setClientePredeterminado(@PathVariable long idCliente) {
-    clienteService.setClientePredeterminado(clienteService.getClientePorId(idCliente));
+    clienteService.setClientePredeterminado(clienteService.getClienteNoEliminadoPorId(idCliente));
   }
 
   @GetMapping("/clientes/pedidos/{idPedido}")

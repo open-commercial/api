@@ -5,11 +5,13 @@ import java.util.List;
 import sic.modelo.Empresa;
 import sic.modelo.Medida;
 
+import javax.validation.Valid;
+
 public interface IMedidaService {
     
-    Medida getMedidaPorId(Long id_Medida);
+    Medida getMedidaNoEliminadaPorId(Long id_Medida);
 
-    void actualizar(Medida medida);
+    void actualizar(@Valid Medida medida);
 
     void eliminar(long idMedida);
 
@@ -17,7 +19,7 @@ public interface IMedidaService {
 
     List<Medida> getUnidadMedidas(Empresa empresa);
 
-    Medida guardar(Medida medida);
+    Medida guardar(@Valid Medida medida);
 
     void validarOperacion(TipoDeOperacion operacion, Medida medida);
 

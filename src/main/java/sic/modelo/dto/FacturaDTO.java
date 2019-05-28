@@ -15,7 +15,7 @@ import sic.modelo.RenglonFactura;
 import sic.modelo.TipoDeComprobante;
 
 @Data
-@EqualsAndHashCode(exclude = {"id_Factura", "fecha", "numSerie", "numFactura", "nombreTransportista", "renglones", "nombreEmpresa", "nombreUsuario"})
+@EqualsAndHashCode(exclude = {"id_Factura", "fecha", "numSerie", "numFactura", "nombreTransportista", "renglones", "nombreEmpresa", "idUsuario" ,"nombreUsuario", "cantidadArticulos"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Factura", scope = FacturaDTO.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
@@ -30,6 +30,9 @@ public abstract class FacturaDTO implements Serializable {
     private long numSerie;
     private long numFactura;
     private Date fechaVencimiento;
+    private Long nroPedido;
+    private long idTransportista;
+    private String nombreTransportista;
     private List<RenglonFactura> renglones;
     private BigDecimal subTotal;
     private BigDecimal recargoPorcentaje;
@@ -42,11 +45,10 @@ public abstract class FacturaDTO implements Serializable {
     private BigDecimal impuestoInternoNeto;
     private BigDecimal total;
     private String observaciones;
-    private Long idEmpresa;
+    private BigDecimal cantidadArticulos;
+    private long idEmpresa;
     private String nombreEmpresa;
     private Long idUsuario;
     private String nombreUsuario;
-    private Long idTransportista;
-    private String nombreTransportista;
     private boolean eliminada;
 }

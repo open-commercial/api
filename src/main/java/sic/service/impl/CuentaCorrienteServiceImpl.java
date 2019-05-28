@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.validation.Valid;
 
 import com.querydsl.core.BooleanBuilder;
 import net.sf.jasperreports.engine.JRException;
@@ -26,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.repository.CuentaCorrienteClienteRepository;
 import sic.repository.CuentaCorrienteProveedorRepository;
@@ -34,6 +36,7 @@ import sic.repository.RenglonCuentaCorrienteRepository;
 import sic.service.*;
 
 @Service
+@Validated
 public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   private final CuentaCorrienteRepository cuentaCorrienteRepository;
@@ -63,20 +66,20 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   }
 
   @Override
+  @Transactional
   public CuentaCorrienteCliente guardarCuentaCorrienteCliente(
-      CuentaCorrienteCliente cuentaCorrienteCliente) {
-    cuentaCorrienteCliente.setFechaApertura(cuentaCorrienteCliente.getCliente().getFechaAlta());
-    this.validarCuentaCorriente(cuentaCorrienteCliente);
+      @Valid CuentaCorrienteCliente cuentaCorrienteCliente) {
+    this.validarOperacion(cuentaCorrienteCliente);
     cuentaCorrienteCliente = cuentaCorrienteClienteRepository.save(cuentaCorrienteCliente);
     logger.warn("La Cuenta Corriente Cliente {} se guardó correctamente.", cuentaCorrienteCliente);
     return cuentaCorrienteCliente;
   }
 
   @Override
+  @Transactional
   public CuentaCorrienteProveedor guardarCuentaCorrienteProveedor(
-      CuentaCorrienteProveedor cuentaCorrienteProveedor) {
-    cuentaCorrienteProveedor.setFechaApertura(new Date());
-    this.validarCuentaCorriente(cuentaCorrienteProveedor);
+      @Valid CuentaCorrienteProveedor cuentaCorrienteProveedor) {
+    this.validarOperacion(cuentaCorrienteProveedor);
     cuentaCorrienteProveedor = cuentaCorrienteProveedorRepository.save(cuentaCorrienteProveedor);
     logger.warn(
         "La Cuenta Corriente Proveedor {} se guardó correctamente.", cuentaCorrienteProveedor);
@@ -84,30 +87,11 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   }
 
   @Override
-  public void validarCuentaCorriente(CuentaCorriente cuentaCorriente) {
-    // Entrada de Datos
-    // Requeridos
-    if (cuentaCorriente.getFechaApertura() == null) {
-      throw new BusinessServiceException(
-              RESOURCE_BUNDLE.getString("mensaje_cuenta_corriente_fecha_vacia"));
-    }
-    if (cuentaCorriente.getEmpresa() == null) {
-      throw new BusinessServiceException(
-              RESOURCE_BUNDLE.getString("mensaje_caja_empresa_vacia"));
-    }
-    if (cuentaCorriente instanceof CuentaCorrienteCliente) {
-      if (((CuentaCorrienteCliente) cuentaCorriente).getCliente() == null) {
-        throw new BusinessServiceException(
-                RESOURCE_BUNDLE.getString("mensaje_cliente_vacio"));
-      }
-    } else if (cuentaCorriente instanceof CuentaCorrienteProveedor
-        && ((CuentaCorrienteProveedor) cuentaCorriente).getProveedor() == null) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_proveedor_vacio"));
-    }
+  public void validarOperacion(CuentaCorriente cuentaCorriente) {
     // Duplicados
-    if (cuentaCorriente.getIdCuentaCorriente() != null && cuentaCorrienteRepository.findById(cuentaCorriente.getIdCuentaCorriente()) != null) {
+    if (cuentaCorriente.getIdCuentaCorriente() != null && cuentaCorrienteRepository.findById(cuentaCorriente.getIdCuentaCorriente()).isPresent()) {
       throw new BusinessServiceException(
-              RESOURCE_BUNDLE.getString("mensaje_cuenta_corriente_duplicada"));
+        RESOURCE_BUNDLE.getString("mensaje_cuenta_corriente_duplicada"));
     }
   }
 
@@ -159,7 +143,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       builder.and(
           qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.provincia.idProvincia.eq(
               criteria.getIdProvincia()));
-    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
         && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
@@ -199,9 +183,10 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     QCuentaCorrienteProveedor qCuentaCorrienteProveedor =
         QCuentaCorrienteProveedor.cuentaCorrienteProveedor;
     BooleanBuilder builder = new BooleanBuilder();
-    if (criteria.isBuscaPorCodigo())
+    if (criteria.isBuscaPorNroProveedor())
       builder.or(
-          qCuentaCorrienteProveedor.proveedor.codigo.containsIgnoreCase(criteria.getCodigo()));
+          qCuentaCorrienteProveedor.proveedor.nroProveedor.containsIgnoreCase(
+              criteria.getNroProveedor()));
     if (criteria.isBuscaPorRazonSocial()) {
       String[] terminos = criteria.getRazonSocial().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
@@ -253,7 +238,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     rcc.setFechaVencimiento(facturaVenta.getFechaVencimiento());
     rcc.setIdMovimiento(facturaVenta.getId_Factura());
     rcc.setMonto(facturaVenta.getTotal().negate());
-    CuentaCorriente cc = this.getCuentaCorrientePorCliente(clienteService.getClientePorId(facturaVenta.getIdCliente()));
+    CuentaCorriente cc = this.getCuentaCorrientePorCliente(clienteService.getClienteNoEliminadoPorId(facturaVenta.getIdCliente()));
     cc.getRenglones().add(rcc);
     cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));
     cc.setFechaUltimoMovimiento(facturaVenta.getFecha());
@@ -386,7 +371,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     ClassLoader classLoader = CuentaCorrienteServiceImpl.class.getClassLoader();
     InputStream isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/CuentaCorriente.jasper");
-    page = new PageRequest(0, (page.getPageNumber() + 1) * page.getPageSize());
+    page = PageRequest.of(0, (page.getPageNumber() + 1) * page.getPageSize());
     JRBeanCollectionDataSource ds =
         new JRBeanCollectionDataSource(
             this.getRenglonesCuentaCorriente(cuentaCorrienteCliente.getIdCuentaCorriente(), page)

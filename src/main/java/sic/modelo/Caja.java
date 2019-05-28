@@ -3,18 +3,8 @@ package sic.modelo;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -35,11 +25,12 @@ import lombok.ToString;
 public class Caja implements Serializable {
 
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long id_Caja;
 
   @Column(nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
+  @NotNull(message = "{mensaje_caja_fecha_apertura_vacia}")
   private Date fechaApertura;
 
   @Temporal(TemporalType.TIMESTAMP)
@@ -47,10 +38,12 @@ public class Caja implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+  @NotNull(message = "{mensaje_caja_empresa_vacia}")
   private Empresa empresa;
 
   @OneToOne
   @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
+  @NotNull(message = "{mensaje_caja_usuario_vacio}")
   private Usuario usuarioAbreCaja;
 
   @OneToOne

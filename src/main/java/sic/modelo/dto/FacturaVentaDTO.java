@@ -2,9 +2,7 @@ package sic.modelo.dto;
 
 import java.io.Serializable;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import sic.modelo.CategoriaIVA;
 
 @Data
@@ -20,6 +18,8 @@ import sic.modelo.CategoriaIVA;
       "ubicacionFacturacion"
     })
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class FacturaVentaDTO extends FacturaDTO implements Serializable {
 
   private Long idCliente;

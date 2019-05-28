@@ -7,17 +7,17 @@ import sic.modelo.BusquedaProveedorCriteria;
 import sic.modelo.Empresa;
 import sic.modelo.Proveedor;
 
+import javax.validation.Valid;
+
 public interface IProveedorService {
 
-  Proveedor getProveedorPorId(Long id_Proveedor);
+  Proveedor getProveedorNoEliminadoPorId(long id_Proveedor);
 
-  void actualizar(Proveedor proveedor);
+  void actualizar(@Valid Proveedor proveedor);
 
   Page<Proveedor> buscarProveedores(BusquedaProveedorCriteria criteria);
 
   void eliminar(long idProveedor);
-
-  Proveedor getProveedorPorCodigo(String codigo, Empresa empresa);
 
   Proveedor getProveedorPorIdFiscal(Long idFiscal, Empresa empresa);
 
@@ -25,6 +25,7 @@ public interface IProveedorService {
 
   List<Proveedor> getProveedores(Empresa empresa);
 
-  Proveedor guardar(Proveedor proveedor);
-  
+  Proveedor guardar(@Valid Proveedor proveedor);
+
+  String generarNroDeProveedor(Empresa empresa);
 }

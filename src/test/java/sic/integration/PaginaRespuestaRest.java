@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class PaginaRespuestaRest<T> {
+class PaginaRespuestaRest<T> {
     
     private List<T> content;
     private boolean first;
@@ -14,16 +14,13 @@ public class PaginaRespuestaRest<T> {
     private int numberOfElements;
     private int size;
     private int number;
-    private List<Ordenamiento> sort;
+    private Ordenamiento sort;
 }
 
 @Data
 class Ordenamiento {
 
-    private String direction;
-    private String property;
-    private boolean ignoreCase;
-    private String nullHandling;
-    private boolean ascending;
-    private boolean descending;
+    private boolean sorted;
+    private boolean unsorted;
+    private boolean empty;
 }

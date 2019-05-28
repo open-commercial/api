@@ -16,6 +16,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "cliente")
@@ -27,7 +29,7 @@ import lombok.ToString;
 @JsonIgnoreProperties({"empresa", "viajante", "credencial", "eliminado"})
 public class Cliente implements Serializable {
 
-  @Id @GeneratedValue private long id_Cliente;
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private long id_Cliente;
 
   @Column(precision = 25, scale = 15)
   @NotNull(message = "{mensaje_cliente_vacio_bonificacion}")
@@ -38,18 +40,22 @@ public class Cliente implements Serializable {
   private String nroCliente;
 
   @Column(nullable = false)
+  @NotBlank(message = "{mensaje_cliente_vacio_nombreFiscal}")
   private String nombreFiscal;
 
   private String nombreFantasia;
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
+  @NotNull(message = "{mensaje_cliente_vacio_categoriaIVA}")
   private CategoriaIVA categoriaIVA;
 
   private Long idFiscal;
 
+  @Email(message = "{mensaje_correo_formato_incorrecto}")
   private String email;
 
+  @NotBlank(message = "{mensaje_cliente_vacio_telefono}")
   private String telefono;
 
   @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
@@ -70,6 +76,7 @@ public class Cliente implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+  @NotNull(message = "{mensaje_cliente_vacio_empresa}")
   private Empresa empresa;
 
   @ManyToOne

@@ -1,13 +1,8 @@
 package sic.modelo;
 
 import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -16,6 +11,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import javax.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "medida")
@@ -27,13 +23,18 @@ import lombok.ToString;
 @JsonIgnoreProperties({"empresa", "eliminada"})
 public class Medida implements Serializable {
 
-  @Id @GeneratedValue private long id_Medida;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private long id_Medida;
 
   @Column(nullable = false)
+  @NotNull(message = "{mensaje_medida_vacio_nombre}")
+  @NotEmpty(message = "{mensaje_medida_vacio_nombre}")
   private String nombre;
 
   @ManyToOne
   @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+  @NotNull(message = "{mensaje_medida_empresa_vacia}")
   private Empresa empresa;
 
   private boolean eliminada;

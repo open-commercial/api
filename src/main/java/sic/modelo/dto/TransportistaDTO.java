@@ -1,8 +1,6 @@
 package sic.modelo.dto;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 @Data
 @EqualsAndHashCode(
@@ -12,6 +10,8 @@ import lombok.EqualsAndHashCode;
       "nombreEmpresa"
     })
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class TransportistaDTO {
 
   private long id_Transportista;

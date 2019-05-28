@@ -25,6 +25,7 @@ public class FacturaVentaBuilder {
     private Pedido pedido =  null;
     private Transportista transportista = new TransportistaBuilder().build();
     private List<RenglonFactura> renglones;
+    private Cliente cliente = new ClienteBuilder().build();
     private ClienteDTO clienteDTO = ClienteDTO.builder().build();
     private Usuario usuario = new UsuarioBuilder().build();
     private BigDecimal subTotal = new BigDecimal("6500");
@@ -38,6 +39,7 @@ public class FacturaVentaBuilder {
     private BigDecimal impuestoInterno_neto = BigDecimal.ZERO;
     private BigDecimal total = new BigDecimal("7865");
     private String observaciones = "Factura por Default";
+    private BigDecimal cantidadArticulos = new BigDecimal("3");
     private Empresa empresa = new EmpresaBuilder().build();
     private boolean eliminada = false;
     private long CAE = 21064126523746l;
@@ -60,14 +62,39 @@ public class FacturaVentaBuilder {
             renglonesFactura.add(renglon2);
             this.renglones = renglonesFactura;
         }
-        FacturaVenta factura = new FacturaVenta(clienteDTO, usuario, id_Factura, fecha,
-                tipoFactura, numSerie, numFactura, fechaVencimiento, pedido, transportista,
-                renglones, subTotal, recargo_porcentaje, recargo_neto, descuento_porcentaje, 
-                descuento_neto, subTotal_neto, iva_105_neto, iva_21_neto, impuestoInterno_neto, total, 
-                observaciones, empresa, eliminada, CAE, vencimientoCAE, numSerieAfip, numFacturaAfip);
-        return factura;
-    }
-    
+    return new FacturaVenta(
+        clienteDTO,
+        cliente,
+        usuario,
+        id_Factura,
+        fecha,
+        tipoFactura,
+        numSerie,
+        numFactura,
+        fechaVencimiento,
+        pedido,
+        transportista,
+        renglones,
+        subTotal,
+        recargo_porcentaje,
+        recargo_neto,
+        descuento_porcentaje,
+        descuento_neto,
+        subTotal_neto,
+        iva_105_neto,
+        iva_21_neto,
+        impuestoInterno_neto,
+        total,
+        observaciones,
+        cantidadArticulos,
+        empresa,
+        eliminada,
+        CAE,
+        vencimientoCAE,
+        numSerieAfip,
+        numFacturaAfip);
+  }
+
     public FacturaVentaBuilder withId_Factura(long idFactura) {
         this.id_Factura = idFactura;
         return this;
@@ -175,6 +202,11 @@ public class FacturaVentaBuilder {
 
     public FacturaVentaBuilder withObservaciones(String observarciones) {
         this.observaciones = observarciones;
+        return this;
+    }
+
+    public FacturaVentaBuilder withCantidadArticulos(BigDecimal cantidadArticulos) {
+        this.cantidadArticulos = cantidadArticulos;
         return this;
     }
 

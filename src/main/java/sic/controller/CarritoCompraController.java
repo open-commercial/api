@@ -2,6 +2,7 @@ package sic.controller;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -56,9 +57,15 @@ public class CarritoCompraController {
       @RequestParam(required = false) Integer pagina) {
     if (pagina == null || pagina < 0) pagina = 0;
     Pageable pageable =
-        new PageRequest(
+        PageRequest.of(
             pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
     return carritoCompraService.getItemsDelCaritoCompra(idUsuario, idCliente, pageable);
+  }
+
+  @JsonView(Views.Public.class)
+  @GetMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
+  public ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(@PathVariable long idUsuario, @PathVariable long idProducto) {
+    return carritoCompraService.getItemCarritoDeCompraDeUsuarioPorIdProducto(idUsuario, idProducto);
   }
 
   @DeleteMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
@@ -79,14 +86,6 @@ public class CarritoCompraController {
     carritoCompraService.agregarOrModificarItem(idUsuario, idProducto, cantidad);
   }
 
-  @PutMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
-  public void modificarCantidadItem(
-      @PathVariable long idUsuario,
-      @PathVariable long idProducto,
-      @RequestParam BigDecimal cantidad) {
-    carritoCompraService.modificarCantidadItem(idUsuario, idProducto, cantidad);
-  }
-
   @PostMapping("/carrito-compra")
   public Pedido generarPedidoConItemsDelCarrito(
       @RequestParam Long idEmpresa,
@@ -97,7 +96,7 @@ public class CarritoCompraController {
       @RequestBody(required = false) String observaciones) {
     CarritoCompraDTO carritoCompraDTO = carritoCompraService.getCarritoCompra(idUsuario, idCliente);
     Pedido pedido = new Pedido();
-    pedido.setCliente(clienteService.getClientePorId(idCliente));
+    pedido.setCliente(clienteService.getClienteNoEliminadoPorId(idCliente));
     pedido.setObservaciones(observaciones);
     pedido.setSubTotal(carritoCompraDTO.getSubtotal());
     pedido.setRecargoPorcentaje(BigDecimal.ZERO);
@@ -107,9 +106,9 @@ public class CarritoCompraController {
     pedido.setTotalActual(carritoCompraDTO.getTotal());
     pedido.setTotalEstimado(pedido.getTotalActual());
     pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    pedido.setUsuario(usuarioService.getUsuarioPorId(idUsuario));
+    pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     Pageable pageable =
-        new PageRequest(0, Integer.MAX_VALUE, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
+        PageRequest.of(0, Integer.MAX_VALUE, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
     List<ItemCarritoCompra> items =
         carritoCompraService.getItemsDelCaritoCompra(idUsuario, idCliente, pageable).getContent();
     pedido.setRenglones(new ArrayList<>());

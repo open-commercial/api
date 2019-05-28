@@ -44,14 +44,14 @@ public class TransportistaController {
   @GetMapping("/transportistas/{idTransportista}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Transportista getTransportistaPorId(@PathVariable long idTransportista) {
-    return transportistaService.getTransportistaPorId(idTransportista);
+    return transportistaService.getTransportistaNoEliminadoPorId(idTransportista);
   }
 
   @PutMapping("/transportistas")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(@RequestBody TransportistaDTO transportistaDTO) {
     Transportista transportistaPersistido =
-        transportistaService.getTransportistaPorId(transportistaDTO.getId_Transportista());
+        transportistaService.getTransportistaNoEliminadoPorId(transportistaDTO.getId_Transportista());
     Transportista transportistaPorActualizar =
         modelMapper.map(transportistaDTO, Transportista.class);
     if (transportistaPorActualizar.getNombre() == null
@@ -78,7 +78,7 @@ public class TransportistaController {
       transportistaPorActualizar.setEmpresa(
           empresaService.getEmpresaPorId(transportistaDTO.getIdEmpresa()));
     }
-    if (transportistaService.getTransportistaPorId(transportistaPorActualizar.getId_Transportista())
+    if (transportistaService.getTransportistaNoEliminadoPorId(transportistaPorActualizar.getId_Transportista())
         != null) {
       transportistaService.actualizar(transportistaPorActualizar);
     }

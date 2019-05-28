@@ -1,5 +1,7 @@
 package sic.modelo;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.Date;
@@ -9,7 +11,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.validator.constraints.Email;
+import javax.validation.constraints.Email;
 
 @Entity
 @Table(name = "configuraciondelsistema")
@@ -18,10 +20,11 @@ import org.hibernate.validator.constraints.Email;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"id_ConfiguracionDelSistema", "empresa"})
 @ToString(exclude = "certificadoAfip")
+@JsonIgnoreProperties({"tokenWSAA", "signTokenWSAA", "fechaGeneracionTokenWSAA", "fechaVencimientoTokenWSAA", "empresa"})
 public class ConfiguracionDelSistema implements Serializable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id_ConfiguracionDelSistema;
 
     private boolean usarFacturaVentaPreImpresa;
@@ -31,6 +34,7 @@ public class ConfiguracionDelSistema implements Serializable {
     private boolean facturaElectronicaHabilitada;
 
     @Lob
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private byte[] certificadoAfip;
 
     private String firmanteCertificadoAfip;
@@ -62,5 +66,20 @@ public class ConfiguracionDelSistema implements Serializable {
     @ManyToOne
     @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
     private Empresa empresa;
+
+    @JsonGetter("idEmpresa")
+    public Long getIdEmpresa() {
+        return empresa.getId_Empresa();
+    }
+
+    @JsonGetter("nombreEmpresa")
+    public String getNombreEmpresa() {
+        return empresa.getNombre();
+    }
+
+    @JsonGetter("existeCertificado")
+    public boolean isExisteCertificado() {
+        return (certificadoAfip != null);
+    }
 
 }

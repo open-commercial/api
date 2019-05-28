@@ -5,17 +5,19 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 
+import javax.validation.Valid;
+
 public interface INotaService {
 
-  Nota guardarNotaCredito(NotaCredito nota);
+  Nota guardarNotaCredito(@Valid NotaCredito nota);
 
-  Nota guardarNotaDebito(NotaDebito nota);
+  Nota guardarNotaDebito(@Valid NotaDebito nota);
 
   Nota autorizarNota(Nota nota);
 
   byte[] getReporteNota(Nota nota);
 
-  Nota getNotaPorId(Long idNota);
+  Nota getNotaNoEliminadaPorId(long idNota);
 
   Page<Nota> buscarNotas(BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn);
 
@@ -23,30 +25,32 @@ public interface INotaService {
 
   boolean existsNotaDebitoPorRecibo(Recibo recibo);
 
-  boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta);
-
   List<NotaCredito> getNotasCreditoPorFactura(Long idFactura);
 
   long getSiguienteNumeroNotaDebitoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
 
   long getSiguienteNumeroNotaCreditoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
 
-  TipoDeComprobante[] getTipoNotaCliente(Long idCliente, Long idEmpresa);
+  TipoDeComprobante[] getTipoNotaCreditoCliente(Long idCliente, Long idEmpresa);
+
+  TipoDeComprobante[] getTipoNotaDebitoCliente(Long idCliente, Long idEmpresa);
 
   TipoDeComprobante[] getTiposNota(Empresa empresa);
 
+  TipoDeComprobante getTipoDeNotaCreditoSegunFactura(TipoDeComprobante tipo);
+
   List<RenglonNotaCredito> getRenglonesDeNotaCredito(Long idNota);
 
-  List<RenglonNotaDebito> getRenglonesDeNotaDebito(Long idNota);
+  List<RenglonNotaDebito> getRenglonesDeNotaDebito(long idNota);
 
   List<RenglonFactura> getRenglonesFacturaModificadosParaNotaCredito(long idFactura);
 
   BigDecimal calcularTotalNota(List<RenglonNotaCredito> renglonesNota);
 
-  BigDecimal getIvaNetoNota(Long idNota);
+  List<RenglonNotaCredito> calcularRenglonCreditoProducto(
+      TipoDeComprobante tipo, BigDecimal[] cantidad, Long[] idRenglonFactura);
 
-  List<RenglonNotaCredito> calcularRenglonCredito(
-      TipoDeComprobante tipo, BigDecimal[] cantidad, long[] idRenglonFactura);
+  RenglonNotaCredito calcularRenglonCredito(TipoDeComprobante tipo, String Detalle, BigDecimal monto);
 
   List<RenglonNotaDebito> calcularRenglonDebito(
       long idRecibo, BigDecimal monto, BigDecimal ivaPorcentaje);

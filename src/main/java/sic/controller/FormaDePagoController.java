@@ -39,7 +39,7 @@ public class FormaDePagoController {
     Rol.COMPRADOR
   })
   public FormaDePago getFormaDePagoPorId(@PathVariable long idFormaDePago) {
-    return formaDePagoService.getFormasDePagoPorId(idFormaDePago);
+    return formaDePagoService.getFormasDePagoNoEliminadoPorId(idFormaDePago);
   }
 
   @DeleteMapping("/formas-de-pago/{idFormaDePago}")
@@ -85,6 +85,6 @@ public class FormaDePagoController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void setFormaDePagoPredeterminada(@PathVariable long idFormaDePago) {
     formaDePagoService.setFormaDePagoPredeterminada(
-        formaDePagoService.getFormasDePagoPorId(idFormaDePago));
+        formaDePagoService.getFormasDePagoNoEliminadoPorId(idFormaDePago));
   }
 }

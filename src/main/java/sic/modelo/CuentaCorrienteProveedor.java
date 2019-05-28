@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import com.querydsl.core.annotations.QueryInit;
 import lombok.Data;
@@ -26,6 +27,7 @@ public class CuentaCorrienteProveedor extends CuentaCorriente implements Seriali
     @OneToOne
     @JoinColumn(name = "id_Proveedor", referencedColumnName = "id_Proveedor")
     @QueryInit("ubicacion.localidad.provincia")
+    @NotNull(message = "{mensaje_cuenta_corriente_proveedor_vacio}")
     private Proveedor proveedor;
 
     public CuentaCorrienteProveedor() {}

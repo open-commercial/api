@@ -33,8 +33,8 @@ public class FacturaController {
   private final IUsuarioService usuarioService;
   private final ITransportistaService transportistaService;
   private final IReciboService reciboService;
-  private final IAuthService authService;
   private final ModelMapper modelMapper;
+  private final IAuthService authService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
@@ -62,7 +62,7 @@ public class FacturaController {
     @GetMapping("/facturas/{idFactura}")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Factura getFacturaPorId(@PathVariable long idFactura) {
-        return facturaService.getFacturaPorId(idFactura);
+        return facturaService.getFacturaNoEliminadaPorId(idFactura);
     }
 
   @PostMapping("/facturas/venta")
@@ -72,11 +72,12 @@ public class FacturaController {
       @RequestParam(required = false) long[] idsFormaDePago,
       @RequestParam(required = false) BigDecimal[] montos,
       @RequestParam(required = false) int[] indices,
-      @RequestParam(required = false) Long idPedido) {
+      @RequestParam(required = false) Long idPedido,
+      @RequestHeader("Authorization") String authorizationHeader) {
     FacturaVenta fv = modelMapper.map(facturaVentaDTO, FacturaVenta.class);
     Empresa empresa = empresaService.getEmpresaPorId(facturaVentaDTO.getIdEmpresa());
     fv.setEmpresa(empresa);
-    Cliente cliente = clienteService.getClientePorId(facturaVentaDTO.getIdCliente());
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(facturaVentaDTO.getIdCliente());
     if (cliente.getUbicacionFacturacion() == null
         && (fv.getTipoComprobante() == TipoDeComprobante.FACTURA_A
             || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_B
@@ -86,8 +87,12 @@ public class FacturaController {
     }
     fv.setCliente(cliente);
     fv.setClienteDTO(modelMapper.map(cliente, ClienteDTO.class));
-    fv.setUsuario(usuarioService.getUsuarioPorId(facturaVentaDTO.getIdUsuario()));
-    fv.setTransportista(transportistaService.getTransportistaPorId(facturaVentaDTO.getIdTransportista()));
+    fv.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(facturaVentaDTO.getIdUsuario()));
+    fv.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(facturaVentaDTO.getIdTransportista()));
+    fv.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(facturaVentaDTO.getIdTransportista()));
+    fv.setFecha(new Date());
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    fv.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     List<FacturaVenta> facturasGuardadas;
     if (indices != null) {
       facturasGuardadas =
@@ -124,12 +129,15 @@ public class FacturaController {
   @PostMapping("/facturas/compra")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public List<FacturaCompra> guardarFacturaCompra(
-      @RequestBody FacturaCompraDTO facturaCompraDTO) {
+      @RequestBody FacturaCompraDTO facturaCompraDTO,
+      @RequestHeader("Authorization") String authorizationHeader) {
     FacturaCompra fc = modelMapper.map(facturaCompraDTO, FacturaCompra.class);
     fc.setEmpresa(empresaService.getEmpresaPorId(facturaCompraDTO.getIdEmpresa()));
-    fc.setProveedor(proveedorService.getProveedorPorId(facturaCompraDTO.getIdProveedor()));
-    fc.setUsuario(usuarioService.getUsuarioPorId(facturaCompraDTO.getIdUsuario()));
-    fc.setTransportista(transportistaService.getTransportistaPorId(facturaCompraDTO.getIdTransportista()));
+    fc.setProveedor(proveedorService.getProveedorNoEliminadoPorId(facturaCompraDTO.getIdProveedor()));
+    fc.setTransportista(
+        transportistaService.getTransportistaNoEliminadoPorId(facturaCompraDTO.getIdTransportista()));
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    fc.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     List<FacturaCompra> facturas = new ArrayList<>();
     facturas.add(fc);
     return facturaService.guardar(facturas);
@@ -138,7 +146,7 @@ public class FacturaController {
     @PostMapping("/facturas/{idFactura}/autorizacion")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public FacturaVenta autorizarFactura(@PathVariable long idFactura) {
-        return facturaService.autorizarFacturaVenta((FacturaVenta) facturaService.getFacturaPorId(idFactura));
+        return facturaService.autorizarFacturaVenta((FacturaVenta) facturaService.getFacturaNoEliminadaPorId(idFactura));
     }
 
     @GetMapping("/facturas/{idFactura}/renglones")
@@ -146,13 +154,13 @@ public class FacturaController {
     public List<RenglonFactura> getRenglonesDeLaFactura(@PathVariable long idFactura) {
             return facturaService.getRenglonesDeLaFactura(idFactura);
     }
-    
-    @GetMapping("/facturas/{idFactura}/renglones/notas/credito")
 
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-    public List<RenglonFactura> getRenglonesDeLaFacturaModificadosParaCredito(@PathVariable long idFactura) {
-            return facturaService.getRenglonesDeLaFacturaModificadosParaCredito(idFactura);
-    }
+  @GetMapping("/facturas/{idFactura}/renglones/notas/credito")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public List<RenglonFactura> getRenglonesDeLaFacturaModificadosParaCredito(
+      @PathVariable long idFactura) {
+    return facturaService.getRenglonesDeLaFacturaModificadosParaCredito(idFactura);
+  }
 
   @GetMapping("/facturas/compra/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
@@ -262,15 +270,15 @@ public class FacturaController {
   private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
     String ordenDefault = "fecha";
     if (ordenarPor == null || sentido == null) {
-      return new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
     } else {
       switch (sentido) {
         case "ASC":
-          return new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
         case "DESC":
-          return new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
         default:
-          return new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
       }
     }
   }
@@ -278,7 +286,7 @@ public class FacturaController {
     @GetMapping("/facturas/compra/tipos/empresas/{idEmpresa}/proveedores/{idProveedor}")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
     public TipoDeComprobante[] getTipoFacturaCompra(@PathVariable long idEmpresa, @PathVariable long idProveedor) {
-        return facturaService.getTipoFacturaCompra(empresaService.getEmpresaPorId(idEmpresa), proveedorService.getProveedorPorId(idProveedor));
+        return facturaService.getTipoFacturaCompra(empresaService.getEmpresaPorId(idEmpresa), proveedorService.getProveedorNoEliminadoPorId(idProveedor));
     }
 
   @GetMapping("/facturas/venta/tipos/empresas/{idEmpresa}/clientes/{idCliente}")
@@ -290,12 +298,12 @@ public class FacturaController {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuario = (int) claims.get("idUsuario");
     List<Rol> rolesDeUsuario =
-        usuarioService.getUsuarioPorId(idUsuario).getRoles();
+        usuarioService.getUsuarioNoEliminadoPorId(idUsuario).getRoles();
     if (rolesDeUsuario.contains(Rol.ADMINISTRADOR)
         || rolesDeUsuario.contains(Rol.ENCARGADO)
         || rolesDeUsuario.contains(Rol.VENDEDOR)) {
       return facturaService.getTipoFacturaVenta(
-          empresaService.getEmpresaPorId(idEmpresa), clienteService.getClientePorId(idCliente));
+          empresaService.getEmpresaPorId(idEmpresa), clienteService.getClienteNoEliminadoPorId(idCliente));
     } else if (rolesDeUsuario.contains(Rol.VIAJANTE)
             || rolesDeUsuario.contains(Rol.COMPRADOR)) {
       return new TipoDeComprobante[] {TipoDeComprobante.PEDIDO};
@@ -316,7 +324,7 @@ public class FacturaController {
         headers.setContentType(MediaType.APPLICATION_PDF);        
         headers.add("content-disposition", "inline; filename=Factura.pdf");
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        byte[] reportePDF = facturaService.getReporteFacturaVenta(facturaService.getFacturaPorId(idFactura));
+        byte[] reportePDF = facturaService.getReporteFacturaVenta(facturaService.getFacturaNoEliminadaPorId(idFactura));
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
     }
     

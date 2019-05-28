@@ -3,6 +3,8 @@ package sic.service.impl;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +14,6 @@ import sic.modelo.ConfiguracionDelSistema;
 import sic.modelo.Empresa;
 import sic.service.*;
 import sic.modelo.TipoDeOperacion;
-import sic.util.Validator;
 import sic.repository.EmpresaRepository;
 
 @Service
@@ -39,11 +40,12 @@ public class EmpresaServiceImpl implements IEmpresaService {
 
   @Override
   public Empresa getEmpresaPorId(Long idEmpresa) {
-    Empresa empresa = empresaRepository.findById(idEmpresa);
-    if (empresa == null) {
-      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_empresa_no_existente"));
-    }
-    return empresa;
+    return empresaRepository
+        .findById(idEmpresa)
+        .orElseThrow(
+            () ->
+                new EntityNotFoundException(
+                    RESOURCE_BUNDLE.getString("mensaje_empresa_no_existente")));
   }
 
   @Override
@@ -62,17 +64,6 @@ public class EmpresaServiceImpl implements IEmpresaService {
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Empresa empresa) {
-    // Entrada de Datos
-    if (empresa.getEmail() != null && !empresa.getEmail().equals("")) {
-      if (!Validator.esEmailValido(empresa.getEmail())) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_empresa_email_invalido"));
-      }
-    }
-    // Requeridos
-    if (Validator.esVacio(empresa.getNombre())) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_empresa_vacio_nombre"));
-    }
     // Duplicados
     // Nombre
     Empresa empresaDuplicada = this.getEmpresaPorNombre(empresa.getNombre());
@@ -119,7 +110,7 @@ public class EmpresaServiceImpl implements IEmpresaService {
 
   @Override
   @Transactional
-  public Empresa guardar(Empresa empresa) {
+  public Empresa guardar(@Valid Empresa empresa) {
     if (empresa.getUbicacion() != null && empresa.getUbicacion().getIdLocalidad() != null) {
       empresa
           .getUbicacion()
@@ -135,7 +126,7 @@ public class EmpresaServiceImpl implements IEmpresaService {
 
   @Override
   @Transactional
-  public void actualizar(Empresa empresaParaActualizar, Empresa empresaPersistida) {
+  public void actualizar(@Valid Empresa empresaParaActualizar, Empresa empresaPersistida) {
     if (empresaPersistida.getLogo() != null
         && !empresaPersistida.getLogo().isEmpty()
         && (empresaParaActualizar.getLogo() == null || empresaParaActualizar.getLogo().isEmpty())) {

@@ -58,23 +58,23 @@ public class CuentaCorrienteController {
     Pageable pageable;
     if (ordenarPor == null || sentido == null) {
       pageable =
-          new PageRequest(
+          PageRequest.of(
               pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "cliente.nombreFiscal"));
     } else {
       switch (sentido) {
         case "ASC":
           pageable =
-              new PageRequest(
+              PageRequest.of(
                   pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
           break;
         case "DESC":
           pageable =
-              new PageRequest(
+              PageRequest.of(
                   pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
           break;
         default:
           pageable =
-              new PageRequest(
+              PageRequest.of(
                   pagina,
                   TAMANIO_PAGINA_DEFAULT,
                   new Sort(Sort.Direction.ASC, "cliente.nombreFiscal"));
@@ -112,7 +112,7 @@ public class CuentaCorrienteController {
   })
   public Page<CuentaCorrienteProveedor> buscarConCriteria(
       @RequestParam Long idEmpresa,
-      @RequestParam(required = false) String codigo,
+      @RequestParam(required = false) String nroProveedor,
       @RequestParam(required = false) String razonSocial,
       @RequestParam(required = false) Long idFiscal,
       @RequestParam(required = false) Long idProvincia,
@@ -124,7 +124,7 @@ public class CuentaCorrienteController {
     Pageable pageable;
     if (ordenarPor == null || sentido == null) {
       pageable =
-          new PageRequest(
+          PageRequest.of(
               pagina,
               TAMANIO_PAGINA_DEFAULT,
               new Sort(Sort.Direction.ASC, "proveedor.razonSocial"));
@@ -132,17 +132,17 @@ public class CuentaCorrienteController {
       switch (sentido) {
         case "ASC":
           pageable =
-              new PageRequest(
+              PageRequest.of(
                   pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
           break;
         case "DESC":
           pageable =
-              new PageRequest(
+              PageRequest.of(
                   pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
           break;
         default:
           pageable =
-              new PageRequest(
+              PageRequest.of(
                   pagina,
                   TAMANIO_PAGINA_DEFAULT,
                   new Sort(Sort.Direction.ASC, "proveedor.razonSocial"));
@@ -151,8 +151,8 @@ public class CuentaCorrienteController {
     }
     BusquedaCuentaCorrienteProveedorCriteria criteria =
         BusquedaCuentaCorrienteProveedorCriteria.builder()
-            .buscaPorCodigo(codigo != null)
-            .codigo(codigo)
+            .buscaPorNroProveedor(nroProveedor != null)
+            .nroProveedor(nroProveedor)
             .buscaPorRazonSocial(razonSocial != null)
             .razonSocial(razonSocial)
             .buscaPorIdFiscal(idFiscal != null)
@@ -179,7 +179,7 @@ public class CuentaCorrienteController {
   })
   public CuentaCorrienteCliente getCuentaCorrientePorCliente(@PathVariable Long idCliente) {
     return cuentaCorrienteService.getCuentaCorrientePorCliente(
-        clienteService.getClientePorId(idCliente));
+        clienteService.getClienteNoEliminadoPorId(idCliente));
   }
 
   @GetMapping("/cuentas-corriente/proveedores/{idProveedor}")
@@ -192,7 +192,7 @@ public class CuentaCorrienteController {
   })
   public CuentaCorrienteProveedor getCuentaCorrientePorProveedor(@PathVariable Long idProveedor) {
     return cuentaCorrienteService.getCuentaCorrientePorProveedor(
-        proveedorService.getProveedorPorId(idProveedor));
+        proveedorService.getProveedorNoEliminadoPorId(idProveedor));
   }
 
   @GetMapping("/cuentas-corriente/clientes/{idCliente}/saldo")
@@ -205,7 +205,7 @@ public class CuentaCorrienteController {
   })
   public BigDecimal getSaldoCuentaCorrienteCliente(@PathVariable long idCliente) {
     return cuentaCorrienteService
-        .getCuentaCorrientePorCliente(clienteService.getClientePorId(idCliente))
+        .getCuentaCorrientePorCliente(clienteService.getClienteNoEliminadoPorId(idCliente))
         .getSaldo();
   }
 
@@ -219,7 +219,7 @@ public class CuentaCorrienteController {
   })
   public BigDecimal getSaldoCuentaCorrienteProveedor(@PathVariable long idProveedor) {
     return cuentaCorrienteService
-        .getCuentaCorrientePorProveedor(proveedorService.getProveedorPorId(idProveedor))
+        .getCuentaCorrientePorProveedor(proveedorService.getProveedorNoEliminadoPorId(idProveedor))
         .getSaldo();
   }
 
@@ -235,7 +235,7 @@ public class CuentaCorrienteController {
       @PathVariable long idCuentaCorriente,
       @RequestParam(required = false) Integer pagina) {
     if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable = new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT);
+    Pageable pageable = PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT);
     return cuentaCorrienteService.getRenglonesCuentaCorriente(idCuentaCorriente, pageable);
   }
 
@@ -252,7 +252,7 @@ public class CuentaCorrienteController {
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) String formato) {
     if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable = new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT);
+    Pageable pageable = PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT);
     HttpHeaders headers = new HttpHeaders();
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
     switch (formato) {
@@ -262,7 +262,7 @@ public class CuentaCorrienteController {
         byte[] reporteXls =
             cuentaCorrienteService.getReporteCuentaCorrienteCliente(
                 cuentaCorrienteService.getCuentaCorrientePorCliente(
-                    clienteService.getClientePorId(idCliente)),
+                    clienteService.getClienteNoEliminadoPorId(idCliente)),
                 pageable,
                 formato);
         headers.setContentLength(reporteXls.length);
@@ -273,7 +273,7 @@ public class CuentaCorrienteController {
         byte[] reportePDF =
             cuentaCorrienteService.getReporteCuentaCorrienteCliente(
                 cuentaCorrienteService.getCuentaCorrientePorCliente(
-                    clienteService.getClientePorId(idCliente)),
+                    clienteService.getClienteNoEliminadoPorId(idCliente)),
                 pageable,
                 formato);
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);

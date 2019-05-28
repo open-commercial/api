@@ -12,26 +12,16 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import javax.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "factura")
@@ -41,131 +31,157 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"fecha", "tipoComprobante", "numSerie", "numFactura", "empresa"})
 @ToString(exclude = {"renglones"})
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Factura", scope = Factura.class)
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.PropertyGenerator.class,
+    property = "id_Factura",
+    scope = Factura.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-@JsonSubTypes({
-  @Type(value = FacturaCompra.class), 
-  @Type(value = FacturaVenta.class) 
-})
+@JsonSubTypes({@Type(value = FacturaCompra.class), @Type(value = FacturaVenta.class)})
 public abstract class Factura implements Serializable {
 
-    // bug: https://jira.spring.io/browse/DATAREST-304
-    @JsonGetter(value = "type")
-    public String getType() {
-        return this.getClass().getSimpleName();
-    }
-    
-    @Id
-    @GeneratedValue
-    private long id_Factura;
+  // bug: https://jira.spring.io/browse/DATAREST-304
+  @JsonGetter(value = "type")
+  public String getType() {
+    return this.getClass().getSimpleName();
+  }
 
-    @ManyToOne
-    @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
-    private Usuario usuario;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private long id_Factura;
 
-    @Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fecha;
+  @ManyToOne
+  @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
+  @NotNull(message = "{mensaje_factura_usuario_vacio}")
+  private Usuario usuario;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private TipoDeComprobante tipoComprobante;
+  @Column(nullable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  @NotNull(message = "{mensaje_factura_fecha_vacia}")
+  private Date fecha;
 
-    private long numSerie;
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  @NotNull(message = "{mensaje_factura_tipo_factura_vacia}")
+  private TipoDeComprobante tipoComprobante;
 
-    private long numFactura;
+  private long numSerie;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fechaVencimiento;
-    
-    @ManyToOne
-    @JoinColumn(name = "id_Pedido", referencedColumnName = "id_Pedido")    
-    private Pedido pedido;
+  private long numFactura;
 
-    @ManyToOne
-    @JoinColumn(name = "id_Transportista", referencedColumnName = "id_Transportista")
-    private Transportista transportista;
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date fechaVencimiento;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "id_Factura")
-    @JsonProperty(access = Access.WRITE_ONLY)
-    private List<RenglonFactura> renglones;
+  @ManyToOne
+  @JoinColumn(name = "id_Pedido", referencedColumnName = "id_Pedido")
+  private Pedido pedido;
 
-    @Column(precision = 25, scale = 15)
-    private BigDecimal subTotal;
-    
-    @Column(precision = 25, scale = 15)
-    private BigDecimal recargoPorcentaje;
-    
-    @Column(precision = 25, scale = 15)
-    private BigDecimal recargoNeto;
-    
-    @Column(precision = 25, scale = 15)
-    private BigDecimal descuentoPorcentaje;
-    
-    @Column(precision = 25, scale = 15)
-    private BigDecimal descuentoNeto;
-    
-    @Column(precision = 25, scale = 15)
-    private BigDecimal subTotalBruto;
-    
-    @Column(precision = 25, scale = 15)
-    private BigDecimal iva105Neto;
-    
-    @Column(precision = 25, scale = 15)
-    private BigDecimal iva21Neto;
-    
-    @Column(precision = 25, scale = 15)
-    private BigDecimal impuestoInternoNeto;
-    
-    @Column(precision = 25, scale = 15)
-    private BigDecimal total;
+  @ManyToOne
+  @JoinColumn(name = "id_Transportista", referencedColumnName = "id_Transportista")
+  @NotNull(message = "{mensaje_factura_transportista_vacio}")
+  private Transportista transportista;
 
-    @Column(nullable = false)
-    private String observaciones;
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "id_Factura")
+  @JsonProperty(access = Access.WRITE_ONLY)
+  @NotEmpty(message = "{mensaje_factura_renglones_vacio}")
+  private List<RenglonFactura> renglones;
 
-    @ManyToOne
-    @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")    
-    private Empresa empresa;
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_subtotal_negativo}")
+  private BigDecimal subTotal;
 
-    private boolean eliminada;
-    
-    private long CAE;
-    
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date vencimientoCAE;
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_recargo_porcentaje_negativo}")
+  private BigDecimal recargoPorcentaje;
 
-    private long numSerieAfip;
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_recargo_neto_negativo}")
+  private BigDecimal recargoNeto;
 
-    private long numFacturaAfip;
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_descuento_porcentaje_negativo}")
+  @DecimalMax(value = "100", message = "{mensaje_descuento_porcentaje_superior_100}")
+  private BigDecimal descuentoPorcentaje;
 
-    @JsonGetter("nombreEmpresa")
-    public String getNombreEmpresa() {
-        return empresa.getNombre();
-    }
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_descuento_neto_negativo}")
+  private BigDecimal descuentoNeto;
 
-    @JsonGetter("idEmpresa")
-    public Long getIdEmpresa() {
-        return empresa.getId_Empresa();
-    }
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_sub_total_bruto}")
+  private BigDecimal subTotalBruto;
 
-    @JsonGetter("nombreUsuario")
-    public String getNombreUsuario() {
-        return usuario.getNombre() + " " + usuario.getApellido() + " (" + usuario.getUsername() + ")";
-    }
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_iva_105_neto_negativo}")
+  private BigDecimal iva105Neto;
 
-    @JsonGetter("idUsuario")
-    public Long getIdUsuario() {
-        return usuario.getId_Usuario();
-    }
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_iva_21_neto_negativo}")
+  private BigDecimal iva21Neto;
 
-    @JsonGetter("nombreTransportista")
-    public String getNombreTransportista() {
-        return transportista.getNombre();
-    }
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_factura_impuesto_interno_neto}")
+  private BigDecimal impuestoInternoNeto;
 
-    @JsonGetter("idTransportista")
-    public Long getIdTransportista() {
-        return transportista.getId_Transportista();
-    }
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_total_negativo}")
+  private BigDecimal total;
+
+  @Column(nullable = false)
+  private String observaciones;
+
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_cantidad_de_productos_negativa}", inclusive = false)
+  private BigDecimal cantidadArticulos;
+
+  @ManyToOne
+  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+  @NotNull(message = "{mensaje_factura_empresa_vacia}")
+  private Empresa empresa;
+
+  private boolean eliminada;
+
+  private long CAE;
+
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date vencimientoCAE;
+
+  private long numSerieAfip;
+
+  private long numFacturaAfip;
+
+  @JsonGetter("nroPedido")
+  public Long getNroPedido() {
+    return (this.pedido != null ? this.pedido.getNroPedido() : null);
+  }
+
+  @JsonGetter("idTransportista")
+  public long getIdTransportista() {
+    return transportista.getId_Transportista();
+  }
+
+  @JsonGetter("nombreTransportista")
+  public String getNombreTransportista() {
+    return transportista.getNombre();
+  }
+
+  @JsonGetter("idEmpresa")
+  public Long getIdEmpresa() {
+    return empresa.getId_Empresa();
+  }
+
+  @JsonGetter("nombreEmpresa")
+  public String getNombreEmpresa() {
+    return empresa.getNombre();
+  }
+
+  @JsonGetter("nombreUsuario")
+  public String getNombreUsuario() {
+    return usuario.getNombre() + " " + usuario.getApellido() + " (" + usuario.getUsername() + ")";
+  }
+
+  @JsonGetter("idUsuario")
+  public Long getIdUsuario() {
+    return usuario.getId_Usuario();
+  }
 }
