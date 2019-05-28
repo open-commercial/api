@@ -9,7 +9,7 @@ import javax.validation.Valid;
 
 public interface IMedidaService {
     
-    Medida getMedidaPorId(Long id_Medida);
+    Medida getMedidaNoEliminadaPorId(Long id_Medida);
 
     void actualizar(@Valid Medida medida);
 

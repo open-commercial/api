@@ -21,7 +21,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
-import org.springframework.web.client.RestTemplate;
 import sic.builder.*;
 import sic.modelo.*;
 import sic.modelo.dto.*;
@@ -908,7 +907,7 @@ class AppIntegrationTest {
     restTemplate.put(apiPrefix + "/clientes", clienteRecuperado);
     clienteRecuperado = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class);
     assertEquals("14 de Julio", clienteRecuperado.getUbicacionFacturacion().getCalle());
-    assertEquals(785, clienteRecuperado.getUbicacionFacturacion().getNumero());
+    assertEquals(785, clienteRecuperado.getUbicacionFacturacion().getNumero().intValue());
   }
 
   @Test
@@ -943,7 +942,7 @@ class AppIntegrationTest {
     restTemplate.put(apiPrefix + "/clientes", clienteRecuperado);
     clienteRecuperado = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class);
     assertEquals("8 de Agosto", clienteRecuperado.getUbicacionEnvio().getCalle());
-    assertEquals(964, clienteRecuperado.getUbicacionEnvio().getNumero());
+    assertEquals(964, clienteRecuperado.getUbicacionEnvio().getNumero().intValue());
   }
 
   @Test
@@ -980,9 +979,9 @@ class AppIntegrationTest {
     restTemplate.put(apiPrefix + "/clientes", clienteRecuperado);
     clienteRecuperado = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class);
     assertEquals("Santa Cruz", clienteRecuperado.getUbicacionFacturacion().getCalle());
-    assertEquals(1247, clienteRecuperado.getUbicacionFacturacion().getNumero());
+    assertEquals(1247, clienteRecuperado.getUbicacionFacturacion().getNumero().intValue());
     assertEquals("8 de Agosto", clienteRecuperado.getUbicacionEnvio().getCalle());
-    assertEquals(964, clienteRecuperado.getUbicacionEnvio().getNumero());
+    assertEquals(964, clienteRecuperado.getUbicacionEnvio().getNumero().intValue());
   }
 
   @Test
@@ -2450,7 +2449,7 @@ class AppIntegrationTest {
     facturaCompraB.setRazonSocialProveedor("Chamaco S.R.L.");
     assertEquals(facturaCompraB, facturas[0]);
     ProveedorDTO proveedor =
-      restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
+        restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     UsuarioDTO usuario = restTemplate.getForObject(apiPrefix + "/usuarios/2", UsuarioDTO.class);
     TransportistaDTO transportista =
@@ -3155,6 +3154,40 @@ class AppIntegrationTest {
     } catch (RestClientResponseException ex) {
       assertTrue(ex.getMessage().startsWith("El producto solicitado no existe."));
     }
+  }
+
+  @Test
+  void shouldVerificarProductoSinStockDisponible() {
+    NuevoProductoDTO productoTestSinStock =
+        NuevoProductoDTO.builder()
+            .codigo(RandomStringUtils.random(10, false, true))
+            .descripcion(RandomStringUtils.random(10, true, false))
+            .cantidad(BigDecimal.ZERO)
+            .bulto(BigDecimal.ONE)
+            .precioCosto(CIEN)
+            .gananciaPorcentaje(new BigDecimal("900"))
+            .gananciaNeto(new BigDecimal("900"))
+            .precioVentaPublico(new BigDecimal("1000"))
+            .ivaPorcentaje(new BigDecimal("21.0"))
+            .ivaNeto(new BigDecimal("210"))
+            .precioLista(new BigDecimal("1210"))
+            .nota("ProductoTestSinStock")
+            .publico(true)
+            .destacado(true)
+            .build();
+    ProductoDTO productoSinStock =
+        restTemplate.postForObject(
+            apiPrefix + "/productos?idMedida=1&idRubro=1&idProveedor=1&idEmpresa=1",
+            productoTestSinStock,
+            ProductoDTO.class);
+    Map faltante =
+        restTemplate.getForObject(
+            apiPrefix
+                + "/productos/disponibilidad-stock?idProducto="
+                + productoSinStock.getIdProducto()
+                + "&cantidad=1",
+            Map.class);
+    assertFalse(faltante.isEmpty(), "Debería no devolver faltantes");
   }
 
   @Test
@@ -4342,8 +4375,7 @@ class AppIntegrationTest {
       0,
       restTemplate
         .getForObject(apiPrefix + "/cuentas-corriente/proveedores/1/saldo", BigDecimal.class)
-        .doubleValue(),
-      0);
+        .doubleValue());
     restTemplate.delete(apiPrefix + "/recibos/1");
     assertEquals(
       new BigDecimal("-599.250000000000000"),
@@ -4380,11 +4412,11 @@ class AppIntegrationTest {
                 new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {})
             .getBody()
             .getContent();
-    assertEquals(-87.85, renglonesCuentaCorriente.get(0).getSaldo(), 0);
-    assertEquals(-499.25, renglonesCuentaCorriente.get(1).getSaldo(), 0);
-    assertEquals(100, renglonesCuentaCorriente.get(2).getSaldo(), 0);
-    assertEquals(-100, renglonesCuentaCorriente.get(3).getSaldo(), 0);
-    assertEquals(-599.25, renglonesCuentaCorriente.get(4).getSaldo(), 0);
+    assertEquals(-87.85, renglonesCuentaCorriente.get(0).getSaldo().doubleValue());
+    assertEquals(-499.25, renglonesCuentaCorriente.get(1).getSaldo().doubleValue());
+    assertEquals(100, renglonesCuentaCorriente.get(2).getSaldo().doubleValue());
+    assertEquals(-100, renglonesCuentaCorriente.get(3).getSaldo().doubleValue());
+    assertEquals(-599.25, renglonesCuentaCorriente.get(4).getSaldo().doubleValue());
     this.crearNotaDebitoParaProveedor();
     renglonesCuentaCorriente =
         restTemplate
@@ -4395,12 +4427,12 @@ class AppIntegrationTest {
                 new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {})
             .getBody()
             .getContent();
-    assertEquals(-408.85, renglonesCuentaCorriente.get(0).getSaldo(), 0);
-    assertEquals(-87.85, renglonesCuentaCorriente.get(1).getSaldo(), 0);
-    assertEquals(-499.25, renglonesCuentaCorriente.get(2).getSaldo(), 0);
-    assertEquals(100, renglonesCuentaCorriente.get(3).getSaldo(), 0);
-    assertEquals(-100, renglonesCuentaCorriente.get(4).getSaldo(), 0);
-    assertEquals(-599.25, renglonesCuentaCorriente.get(5).getSaldo(), 0);
+    assertEquals(-408.85, renglonesCuentaCorriente.get(0).getSaldo().doubleValue());
+    assertEquals(-87.85, renglonesCuentaCorriente.get(1).getSaldo().doubleValue());
+    assertEquals(-499.25, renglonesCuentaCorriente.get(2).getSaldo().doubleValue());
+    assertEquals(100, renglonesCuentaCorriente.get(3).getSaldo().doubleValue());
+    assertEquals(-100, renglonesCuentaCorriente.get(4).getSaldo().doubleValue());
+    assertEquals(-599.25, renglonesCuentaCorriente.get(5).getSaldo().doubleValue());
   }
 
   @Test

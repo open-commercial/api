@@ -14,7 +14,7 @@ import javax.validation.Valid;
 
 public interface IGastoService {
     
-    Gasto getGastoPorId(Long id);
+    Gasto getGastoNoEliminadoPorId(Long id);
     
     void eliminar(long idGasto);
 

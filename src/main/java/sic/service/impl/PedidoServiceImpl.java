@@ -106,12 +106,15 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public Pedido getPedidoPorId(Long idPedido) {
-    Pedido pedido = pedidoRepository.findById(idPedido);
-    if (pedido == null) {
-      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_pedido_no_existente"));
+  public Pedido getPedidoNoEliminadoPorId(long idPedido) {
+    Optional<Pedido> pedido = pedidoRepository
+      .findById(idPedido);
+    if (pedido.isPresent() && !pedido.get().isEliminado()) {
+      return pedido.get();
+    } else {
+      throw new EntityNotFoundException(
+        RESOURCE_BUNDLE.getString("mensaje_pedido_no_existente"));
     }
-    return pedido;
   }
 
   @Override
@@ -285,16 +288,19 @@ public class PedidoServiceImpl implements IPedidoService {
               formateadorFecha.format(criteria.getFechaHasta()));
       builder.and(qPedido.fecha.between(fDesde, fHasta));
     }
-    if (criteria.isBuscaCliente()) builder.and(qPedido.cliente.id_Cliente.eq(criteria.getIdCliente()));
-    if (criteria.isBuscaUsuario()) builder.and(qPedido.usuario.id_Usuario.eq(criteria.getIdUsuario()));
-    if (criteria.isBuscaPorViajante()) builder.and(qPedido.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
+    if (criteria.isBuscaCliente())
+      builder.and(qPedido.cliente.id_Cliente.eq(criteria.getIdCliente()));
+    if (criteria.isBuscaUsuario())
+      builder.and(qPedido.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+    if (criteria.isBuscaPorViajante())
+      builder.and(qPedido.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaPorNroPedido()) builder.and(qPedido.nroPedido.eq(criteria.getNroPedido()));
     if (criteria.isBuscaPorEstadoPedido())
       builder.and(qPedido.estado.eq(criteria.getEstadoPedido()));
     if (criteria.isBuscaPorEnvio()) builder.and(qPedido.tipoDeEnvio.eq(criteria.getTipoDeEnvio()));
     if (criteria.isBuscaPorProducto())
       builder.and(qPedido.renglones.any().idProductoItem.eq(criteria.getIdProducto()));
-    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     BooleanBuilder rsPredicate = new BooleanBuilder();
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
@@ -341,7 +347,7 @@ public class PedidoServiceImpl implements IPedidoService {
   @Override
   @Transactional
   public boolean eliminar(long idPedido) {
-    Pedido pedido = this.getPedidoPorId(idPedido);
+    Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
     if (pedido.getEstado() == EstadoPedido.ABIERTO) {
       pedido.setEliminado(true);
       pedidoRepository.save(pedido);
@@ -439,7 +445,7 @@ public class PedidoServiceImpl implements IPedidoService {
   public RenglonPedido calcularRenglonPedido(
       long idProducto, BigDecimal cantidad, BigDecimal descuentoPorcentaje) {
     RenglonPedido nuevoRenglon = new RenglonPedido();
-    Producto producto = productoService.getProductoPorId(idProducto);
+    Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     nuevoRenglon.setIdProductoItem(producto.getIdProducto());
     nuevoRenglon.setCantidad(cantidad);
     nuevoRenglon.setCodigoItem(producto.getCodigo());

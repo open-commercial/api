@@ -8,7 +8,7 @@ import javax.validation.Valid;
 
 public interface IRubroService {
 
-    Rubro getRubroPorId(Long idRubro);
+    Rubro getRubroNoEliminadoPorId(Long idRubro);
     
     void actualizar(@Valid Rubro rubro);
 

@@ -1,6 +1,7 @@
 package sic.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
@@ -23,7 +24,7 @@ import sic.repository.MedidaRepository;
 public class MedidaServiceImpl implements IMedidaService {
 
   private final MedidaRepository medidaRepository;
-  private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
   public MedidaServiceImpl(MedidaRepository medidaRepository) {
@@ -31,13 +32,15 @@ public class MedidaServiceImpl implements IMedidaService {
   }
 
   @Override
-  public Medida getMedidaPorId(Long idMedida) {
-    Medida medida = medidaRepository.findById(idMedida);
-    if (medida == null) {
+  public Medida getMedidaNoEliminadaPorId(Long idMedida) {
+    Optional<Medida> medida = medidaRepository
+      .findById(idMedida);
+    if (medida.isPresent() && !medida.get().isEliminada()) {
+      return medida.get();
+    } else {
       throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_medida_no_existente"));
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_medida_no_existente"));
     }
-    return medida;
   }
 
   @Override
@@ -79,14 +82,14 @@ public class MedidaServiceImpl implements IMedidaService {
   public Medida guardar(@Valid Medida medida) {
     this.validarOperacion(TipoDeOperacion.ALTA, medida);
     medida = medidaRepository.save(medida);
-    LOGGER.warn("La Medida {} se guardó correctamente.", medida);
+    logger.warn("La Medida {} se guardó correctamente.", medida);
     return medida;
   }
 
   @Override
   @Transactional
   public void eliminar(long idMedida) {
-    Medida medida = this.getMedidaPorId(idMedida);
+    Medida medida = this.getMedidaNoEliminadaPorId(idMedida);
     if (medida == null) {
       throw new EntityNotFoundException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_medida_no_existente"));

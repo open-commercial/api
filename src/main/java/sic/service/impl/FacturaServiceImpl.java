@@ -12,14 +12,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
@@ -97,20 +90,21 @@ public class FacturaServiceImpl implements IFacturaService {
     this.clienteService = clienteService;
   }
 
-    @Override
-    public Factura getFacturaPorId(Long idFactura) {
-        Factura factura = facturaRepository.findById(idFactura);
-        if (factura == null) {
-            throw new EntityNotFoundException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_eliminada"));
-        }
-        return factura;
+  @Override
+  public Factura getFacturaNoEliminadaPorId(long idFactura) {
+    Optional<Factura> factura = facturaRepository.findById(idFactura);
+    if (factura.isPresent() && !factura.get().isEliminada()) {
+      return factura.get();
+    } else {
+      throw new EntityNotFoundException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_factura_eliminada"));
     }
+  }
 
   @Override
   public List<Factura> getFacturasDelPedido(Long idPedido) {
     return facturaVentaRepository.findAllByPedidoAndEliminada(
-        pedidoService.getPedidoPorId(idPedido), false);
+        pedidoService.getPedidoNoEliminadoPorId(idPedido), false);
   }
 
   @Override
@@ -194,7 +188,7 @@ public class FacturaServiceImpl implements IFacturaService {
 
     @Override
     public List<RenglonFactura> getRenglonesDeLaFactura(Long idFactura) {
-        return this.getFacturaPorId(idFactura).getRenglones();
+        return this.getFacturaNoEliminadaPorId(idFactura).getRenglones();
     }
 
     @Override
@@ -204,7 +198,8 @@ public class FacturaServiceImpl implements IFacturaService {
 
     @Override
     public RenglonFactura getRenglonFactura(Long idRenglonFactura) {
-        return renglonFacturaRepository.findOne(idRenglonFactura);
+        return renglonFacturaRepository.findById(idRenglonFactura)
+          .orElse(null); // orElseThrow
     }
 
     @Override
@@ -332,7 +327,7 @@ public class FacturaServiceImpl implements IFacturaService {
       builder.and(qFacturaVenta.pedido.nroPedido.eq(criteria.getNroPedido()));
     if (criteria.isBuscaPorProducto())
       builder.and(qFacturaVenta.renglones.any().idProductoItem.eq(criteria.getIdProducto()));
-    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     BooleanBuilder rsPredicate = new BooleanBuilder();
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
@@ -399,7 +394,7 @@ public class FacturaServiceImpl implements IFacturaService {
                 Movimiento.VENTA,
                 f.getTipoComprobante()));
     if (idPedido != null) {
-      Pedido pedido = pedidoService.getPedidoPorId(idPedido);
+      Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
       facturas.forEach(f -> f.setPedido(pedido));
       for (Factura f : facturas) {
         FacturaVenta facturaGuardada =
@@ -938,7 +933,7 @@ public class FacturaServiceImpl implements IFacturaService {
       long idProducto,
       BigDecimal descuentoPorcentaje,
       boolean dividiendoRenglonFactura) {
-    Producto producto = productoService.getProductoPorId(idProducto);
+    Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     /*if (dividiendoRenglonFactura == false && cantidad < producto.getBulto()
             && (movimiento == Movimiento.VENTA || movimiento == Movimiento.PEDIDO)) {
         throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")

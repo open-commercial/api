@@ -40,11 +40,12 @@ public class EmpresaServiceImpl implements IEmpresaService {
 
   @Override
   public Empresa getEmpresaPorId(Long idEmpresa) {
-    Empresa empresa = empresaRepository.findById(idEmpresa);
-    if (empresa == null) {
-      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_empresa_no_existente"));
-    }
-    return empresa;
+    return empresaRepository
+        .findById(idEmpresa)
+        .orElseThrow(
+            () ->
+                new EntityNotFoundException(
+                    RESOURCE_BUNDLE.getString("mensaje_empresa_no_existente")));
   }
 
   @Override

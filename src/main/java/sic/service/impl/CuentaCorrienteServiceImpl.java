@@ -89,9 +89,9 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   @Override
   public void validarOperacion(CuentaCorriente cuentaCorriente) {
     // Duplicados
-    if (cuentaCorriente.getIdCuentaCorriente() != null && cuentaCorrienteRepository.findById(cuentaCorriente.getIdCuentaCorriente()) != null) {
+    if (cuentaCorriente.getIdCuentaCorriente() != null && cuentaCorrienteRepository.findById(cuentaCorriente.getIdCuentaCorriente()).isPresent()) {
       throw new BusinessServiceException(
-              RESOURCE_BUNDLE.getString("mensaje_cuenta_corriente_duplicada"));
+        RESOURCE_BUNDLE.getString("mensaje_cuenta_corriente_duplicada"));
     }
   }
 
@@ -143,7 +143,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       builder.and(
           qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.provincia.idProvincia.eq(
               criteria.getIdProvincia()));
-    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
         && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
@@ -371,7 +371,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     ClassLoader classLoader = CuentaCorrienteServiceImpl.class.getClassLoader();
     InputStream isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/CuentaCorriente.jasper");
-    page = new PageRequest(0, (page.getPageNumber() + 1) * page.getPageSize());
+    page = PageRequest.of(0, (page.getPageNumber() + 1) * page.getPageSize());
     JRBeanCollectionDataSource ds =
         new JRBeanCollectionDataSource(
             this.getRenglonesCuentaCorriente(cuentaCorrienteCliente.getIdCuentaCorriente(), page)

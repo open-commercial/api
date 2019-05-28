@@ -8,20 +8,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
+import java.util.*;
 
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.service.*;
 
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 
@@ -139,7 +131,7 @@ public class CajaServiceImpl implements ICajaService {
 
   @Override
   public Caja getUltimaCaja(long idEmpresa) {
-    Pageable pageable = new PageRequest(0, 1);
+    Pageable pageable = PageRequest.of(0, 1);
     List<Caja> topCaja =
         cajaRepository
             .findTopByEmpresaAndEliminadaOrderByIdCajaDesc(idEmpresa, pageable)
@@ -149,11 +141,13 @@ public class CajaServiceImpl implements ICajaService {
 
   @Override
   public Caja getCajaPorId(Long idCaja) {
-    Caja caja = cajaRepository.findById(idCaja);
-    if (caja == null) {
-      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_caja_no_existente"));
+    Optional<Caja> caja = cajaRepository.findById(idCaja);
+    if (caja.isPresent() && !caja.get().isEliminada()) {
+      return caja.get();
+    } else {
+      throw new EntityNotFoundException(
+        RESOURCE_BUNDLE.getString("mensaje_caja_no_existente"));
     }
-    return caja;
   }
 
   @Override
@@ -166,7 +160,7 @@ public class CajaServiceImpl implements ICajaService {
       pageSize = criteria.getPageable().getPageSize();
       sorting = criteria.getPageable().getSort();
     }
-    Pageable pageable = new PageRequest(pageNumber, pageSize, sorting);
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, sorting);
     return cajaRepository.findAll(getBuilder(criteria), pageable);
   }
 
@@ -241,7 +235,7 @@ public class CajaServiceImpl implements ICajaService {
       cajaACerrar.setFechaCierre(this.clockService.getFechaActual());
     }
     if (idUsuario != null) {
-      cajaACerrar.setUsuarioCierraCaja(usuarioService.getUsuarioPorId(idUsuario));
+      cajaACerrar.setUsuarioCierraCaja(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     }
     cajaACerrar.setSaldoSistema(this.getSaldoSistema(cajaACerrar));
     cajaACerrar.setEstado(EstadoCaja.CERRADA);

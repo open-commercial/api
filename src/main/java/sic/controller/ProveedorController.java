@@ -50,7 +50,7 @@ public class ProveedorController {
   @GetMapping("/proveedores/{idProveedor}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Proveedor getProveedorPorId(@PathVariable long idProveedor) {
-    return this.proveedorService.getProveedorPorId(idProveedor);
+    return this.proveedorService.getProveedorNoEliminadoPorId(idProveedor);
   }
 
   @PostMapping("/proveedores")
@@ -75,7 +75,7 @@ public class ProveedorController {
   public void actualizar(
     @RequestBody ProveedorDTO proveedorDTO) {
     Proveedor proveedorPersistido =
-      proveedorService.getProveedorPorId(proveedorDTO.getId_Proveedor());
+      proveedorService.getProveedorNoEliminadoPorId(proveedorDTO.getId_Proveedor());
     Proveedor proveedorPorActualizar = modelMapper.map(proveedorDTO, Proveedor.class);
     proveedorPorActualizar.setNroProveedor(proveedorPersistido.getNroProveedor());
     if (proveedorPorActualizar.getRazonSocial() == null
@@ -104,7 +104,7 @@ public class ProveedorController {
     } else {
       proveedorPorActualizar.setUbicacion(proveedorPersistido.getUbicacion());
     }
-    if (proveedorService.getProveedorPorId(proveedorPorActualizar.getId_Proveedor()) != null) {
+    if (proveedorService.getProveedorNoEliminadoPorId(proveedorPorActualizar.getId_Proveedor()) != null) {
       proveedorService.actualizar(proveedorPorActualizar);
     }
   }
@@ -127,17 +127,17 @@ public class ProveedorController {
     if (pagina == null || pagina < 0) pagina = 0;
     Pageable pageable;
     if (ordenarPor == null || sentido == null) {
-      pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "razonSocial"));
+      pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.ASC, "razonSocial"));
     } else {
       switch (sentido) {
         case "ASC":
-          pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenarPor));
+          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenarPor));
           break;
         case "DESC":
-          pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenarPor));
+          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenarPor));
           break;
         default:
-          pageable = new PageRequest(pagina, tamanio, new Sort(Sort.Direction.ASC, "razonSocial"));
+          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.ASC, "razonSocial"));
           break;
       }
     }

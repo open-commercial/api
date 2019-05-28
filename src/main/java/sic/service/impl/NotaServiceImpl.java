@@ -7,6 +7,7 @@ import java.math.RoundingMode;
 import java.net.URL;
 import java.util.*;
 import javax.imageio.ImageIO;
+import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
 import javax.validation.Valid;
 
@@ -84,8 +85,14 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
-  public Nota getNotaPorId(Long idNota) {
-    return this.notaRepository.findById(idNota);
+  public Nota getNotaNoEliminadaPorId(long idNota) {
+    Optional<Nota> nota = notaRepository.findById(idNota);
+    if (nota.isPresent() && !nota.get().isEliminada()) {
+      return nota.get();
+    } else {
+      throw new EntityNotFoundException(
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_factura_eliminada"));
+    }
   }
 
   @Override
@@ -154,7 +161,7 @@ public class NotaServiceImpl implements INotaService {
       builder
           .and(qNota.serie.eq(criteria.getNumSerie()))
           .and(qNota.nroNota.eq(criteria.getNumNota()));
-    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     BooleanBuilder rsPredicate = new BooleanBuilder();
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
@@ -225,7 +232,7 @@ public class NotaServiceImpl implements INotaService {
       builder
           .and(qNotaCredito.serie.eq(criteria.getNumSerie()))
           .and(qNotaCredito.nroNota.eq(criteria.getNumNota()));
-    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     BooleanBuilder rsPredicate = new BooleanBuilder();
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
@@ -296,7 +303,7 @@ public class NotaServiceImpl implements INotaService {
       builder
           .and(qNotDebito.serie.eq(criteria.getNumSerie()))
           .and(qNotDebito.nroNota.eq(criteria.getNumNota()));
-    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     BooleanBuilder rsPredicate = new BooleanBuilder();
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
@@ -325,8 +332,12 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public Factura getFacturaDeLaNotaCredito(Long idNota) {
-    NotaCredito nota = this.notaCreditoRepository.getById(idNota);
-    return (nota.getFacturaVenta() != null ? nota.getFacturaVenta() : nota.getFacturaCompra());
+    Optional<NotaCredito> nc = this.notaCreditoRepository.findById(idNota);
+    if (nc.isPresent()) {
+      return (nc.get().getFacturaVenta() != null ? nc.get().getFacturaVenta() : nc.get().getFacturaCompra());
+    } else {
+     return null;
+    }
   }
 
   @Override
@@ -337,7 +348,7 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public TipoDeComprobante[] getTipoNotaCreditoCliente(Long idCliente, Long idEmpresa) {
     Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
-    Cliente cliente = clienteService.getClientePorId(idCliente);
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())
         && CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
       TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
@@ -363,7 +374,7 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public TipoDeComprobante[] getTipoNotaDebitoCliente(Long idCliente, Long idEmpresa) {
     Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
-    Cliente cliente = clienteService.getClientePorId(idCliente);
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())
       && CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
       TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
@@ -389,7 +400,7 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public List<NotaCredito> getNotasCreditoPorFactura(Long idFactura) {
     List<NotaCredito> notasCredito = new ArrayList<>();
-    Factura factura = facturaService.getFacturaPorId(idFactura);
+    Factura factura = facturaService.getFacturaNoEliminadaPorId(idFactura);
     if (factura instanceof FacturaVenta) {
       notasCredito =
           notaCreditoRepository.findAllByFacturaVentaAndEliminada((FacturaVenta) factura, false);
@@ -496,12 +507,22 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public List<RenglonNotaCredito> getRenglonesDeNotaCredito(Long idNota) {
-    return this.notaCreditoRepository.getById(idNota).getRenglonesNotaCredito();
+    Optional<NotaCredito> nc = this.notaCreditoRepository.findById(idNota);
+    if (nc.isPresent()) {
+      return nc.get().getRenglonesNotaCredito();
+    } else {
+      return Collections.emptyList();
+    }
   }
 
   @Override
-  public List<RenglonNotaDebito> getRenglonesDeNotaDebito(Long idNota) {
-    return this.notaDebitoRepository.getById(idNota).getRenglonesNotaDebito();
+  public List<RenglonNotaDebito> getRenglonesDeNotaDebito(long idNota) {
+    Optional<NotaDebito> nd = this.notaDebitoRepository.findById(idNota);
+    if (nd.isPresent()) {
+      return nd.get().getRenglonesNotaDebito();
+    } else {
+      return Collections.emptyList();
+    }
   }
 
   private void validarOperacion(Nota nota) {
@@ -1069,7 +1090,7 @@ public class NotaServiceImpl implements INotaService {
       long idRecibo, BigDecimal monto, BigDecimal ivaPorcentaje) {
     List<RenglonNotaDebito> renglonesNota = new ArrayList<>();
     RenglonNotaDebito renglonNota;
-    Recibo r = reciboService.getById(idRecibo);
+    Recibo r = reciboService.getReciboNoEliminadoPorId(idRecibo);
     renglonNota = new RenglonNotaDebito();
     String descripcion =
         "Recibo Nº "

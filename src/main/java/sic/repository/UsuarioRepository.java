@@ -4,7 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.Rol;
@@ -13,10 +13,7 @@ import sic.modelo.Usuario;
 import java.util.Date;
 
 public interface UsuarioRepository
-    extends PagingAndSortingRepository<Usuario, Long>, QueryDslPredicateExecutor<Usuario> {
-
-  @Query("SELECT u FROM Usuario u WHERE u.id_Usuario = :idUsuario AND u.eliminado = false")
-  Usuario findById(@Param("idUsuario") long idUsuario);
+    extends PagingAndSortingRepository<Usuario, Long>, QuerydslPredicateExecutor<Usuario> {
 
   @Query(
       "SELECT u FROM Usuario u "
@@ -43,9 +40,11 @@ public interface UsuarioRepository
   int updateToken(String token, long idUsuario);
 
   @Modifying
-  @Query("UPDATE Usuario u SET u.passwordRecoveryKey = ?1, u.passwordRecoveryKeyExpirationDate = ?2 "
+  @Query(
+      "UPDATE Usuario u SET u.passwordRecoveryKey = ?1, u.passwordRecoveryKeyExpirationDate = ?2 "
           + "WHERE u.id_Usuario = ?3")
-  int updatePasswordRecoveryKey(String passwordRecoveryKey, Date passwordRecoveryKeyExpirationDate, long idUsuario);
+  int updatePasswordRecoveryKey(
+      String passwordRecoveryKey, Date passwordRecoveryKeyExpirationDate, long idUsuario);
 
   @Modifying
   @Query(

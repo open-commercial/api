@@ -9,6 +9,7 @@ import sic.modelo.*;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
@@ -45,13 +46,16 @@ public class ProveedorServiceImpl implements IProveedorService {
   }
 
   @Override
-  public Proveedor getProveedorPorId(Long idProveedor) {
-    Proveedor proveedor = proveedorRepository.findById(idProveedor);
-    if (proveedor == null) {
+  public Proveedor getProveedorNoEliminadoPorId(long idProveedor) {
+    Optional<Proveedor> proveedor = proveedorRepository
+      .findById(idProveedor);
+    if (proveedor.isPresent() && !proveedor.get().isEliminado()) {
+      return proveedor.get();
+    } else {
       throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_no_existente"));
+        ResourceBundle.getBundle("Mensajes")
+          .getString("mensaje_proveedor_no_existente"));
     }
-    return proveedor;
   }
 
   @Override
@@ -169,7 +173,7 @@ public class ProveedorServiceImpl implements IProveedorService {
   @Override
   @Transactional
   public void eliminar(long idProveedor) {
-    Proveedor proveedor = this.getProveedorPorId(idProveedor);
+    Proveedor proveedor = this.getProveedorNoEliminadoPorId(idProveedor);
     if (proveedor == null) {
       throw new EntityNotFoundException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_no_existente"));

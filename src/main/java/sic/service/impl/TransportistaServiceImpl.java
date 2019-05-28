@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
@@ -38,13 +39,16 @@ public class TransportistaServiceImpl implements ITransportistaService {
   }
 
   @Override
-  public Transportista getTransportistaPorId(long idTransportista) {
-    Transportista transportista = transportistaRepository.findOne(idTransportista);
-    if (transportista == null) {
+  public Transportista getTransportistaNoEliminadoPorId(long idTransportista) {
+    Optional<Transportista> transportista = transportistaRepository
+      .findById(idTransportista);
+    if (transportista.isPresent() && !transportista.get().isEliminado()) {
+      return transportista.get();
+    } else {
       throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_transportista_no_existente"));
+        ResourceBundle.getBundle("Mensajes")
+          .getString("mensaje_transportista_no_existente"));
     }
-    return transportista;
   }
 
   @Override
@@ -145,7 +149,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
   @Override
   @Transactional
   public void eliminar(long idTransportista) {
-    Transportista transportista = this.getTransportistaPorId(idTransportista);
+    Transportista transportista = this.getTransportistaNoEliminadoPorId(idTransportista);
     if (transportista == null) {
       throw new EntityNotFoundException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_transportista_no_existente"));

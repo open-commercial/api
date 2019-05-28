@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.builder.ClienteBuilder;
 import sic.builder.EmpresaBuilder;
-import sic.builder.LocalidadBuilder;
 import sic.modelo.Cliente;
 import sic.service.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;

@@ -3,18 +3,9 @@ package sic.modelo;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -24,7 +15,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "gasto")
@@ -36,7 +27,9 @@ import org.hibernate.validator.constraints.NotEmpty;
 @JsonIgnoreProperties({"empresa", "eliminado", "usuario"})
 public class Gasto implements Serializable {
 
-  @Id @GeneratedValue private long id_Gasto;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private long id_Gasto;
 
   private long nroGasto;
 

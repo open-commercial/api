@@ -31,14 +31,14 @@ public class RubroController {
   @GetMapping("/rubros/{idRubro}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Rubro getRubroPorId(@PathVariable long idRubro) {
-    return rubroService.getRubroPorId(idRubro);
+    return rubroService.getRubroNoEliminadoPorId(idRubro);
   }
 
   @PutMapping("/rubros")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(
       @RequestBody RubroDTO rubroDTO, @RequestParam(required = false) Long idEmpresa) {
-    Rubro rubroPersistido = rubroService.getRubroPorId(rubroDTO.getId_Rubro());
+    Rubro rubroPersistido = rubroService.getRubroNoEliminadoPorId(rubroDTO.getId_Rubro());
     Rubro rubroPorActualizar = modelMapper.map(rubroDTO, Rubro.class);
     if (rubroPorActualizar.getNombre() == null || rubroPorActualizar.getNombre().isEmpty()) {
       rubroPorActualizar.setNombre(rubroPersistido.getNombre());

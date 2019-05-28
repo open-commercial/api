@@ -32,7 +32,7 @@ class NotaServiceImplTest {
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
-    when(clienteService.getClientePorId(1L)).thenReturn(cliente);
+    when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.NOTA_CREDITO_A,
       TipoDeComprobante.NOTA_CREDITO_X,
@@ -48,7 +48,7 @@ class NotaServiceImplTest {
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
-    when(clienteService.getClientePorId(1L)).thenReturn(cliente);
+    when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.NOTA_DEBITO_A,
       TipoDeComprobante.NOTA_DEBITO_X,
@@ -64,7 +64,7 @@ class NotaServiceImplTest {
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
-    when(clienteService.getClientePorId(1L)).thenReturn(cliente);
+    when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.NOTA_CREDITO_B,
       TipoDeComprobante.NOTA_CREDITO_X,
@@ -80,7 +80,7 @@ class NotaServiceImplTest {
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
-    when(clienteService.getClientePorId(1L)).thenReturn(cliente);
+    when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.NOTA_DEBITO_B,
       TipoDeComprobante.NOTA_DEBITO_X,
@@ -97,7 +97,7 @@ class NotaServiceImplTest {
     cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
-    when(clienteService.getClientePorId(1L)).thenReturn(cliente);
+    when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.NOTA_CREDITO_X,
       TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO,
@@ -113,7 +113,7 @@ class NotaServiceImplTest {
     cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
-    when(clienteService.getClientePorId(1L)).thenReturn(cliente);
+    when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.NOTA_DEBITO_X,
       TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
@@ -129,7 +129,7 @@ class NotaServiceImplTest {
     cliente.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
-    when(clienteService.getClientePorId(1L)).thenReturn(cliente);
+    when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.NOTA_CREDITO_X,
       TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO
@@ -145,7 +145,7 @@ class NotaServiceImplTest {
     cliente.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
-    when(clienteService.getClientePorId(1L)).thenReturn(cliente);
+    when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.NOTA_DEBITO_X,
       TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO

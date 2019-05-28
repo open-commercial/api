@@ -12,7 +12,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "transportista")
@@ -24,7 +24,9 @@ import org.hibernate.validator.constraints.NotEmpty;
 @JsonIgnoreProperties({"localidad", "empresa", "eliminado"})
 public class Transportista implements Serializable {
 
-  @Id @GeneratedValue private long id_Transportista;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private long id_Transportista;
 
   @Column(nullable = false)
   @NotNull(message = "{mensaje_transportista_nombre_vacio}")

@@ -49,7 +49,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     BigDecimal subtotal = carritoCompraRepository.calcularSubtotal(idUsuario);
     if (subtotal == null) subtotal = BigDecimal.ZERO;
     carritoCompraDTO.setSubtotal(subtotal);
-    Cliente cliente = clienteService.getClientePorId(idCliente);
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     carritoCompraDTO.setBonificacionPorcentaje(cliente.getBonificacion());
     carritoCompraDTO.setBonificacionNeto(
       subtotal.multiply(cliente.getBonificacion()).divide(CIEN, RoundingMode.HALF_UP));
@@ -61,9 +61,9 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   public Page<ItemCarritoCompra> getItemsDelCaritoCompra(
     long idUsuario, long idCliente, Pageable pageable) {
     Page<ItemCarritoCompra> items =
-      carritoCompraRepository.findAllByUsuario(
-        usuarioService.getUsuarioPorId(idUsuario), pageable);
-    Cliente cliente = clienteService.getClientePorId(idCliente);
+        carritoCompraRepository.findAllByUsuario(
+            usuarioService.getUsuarioNoEliminadoPorId(idUsuario), pageable);
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     BigDecimal bonificacion = cliente.getBonificacion();
     items.forEach(
       i -> {
@@ -103,10 +103,9 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   @Override
   public void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad) {
-    Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
-    Producto producto = productoService.getProductoPorId(idProducto);
-    ItemCarritoCompra item =
-      carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
+    Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
+    Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
+    ItemCarritoCompra item = carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
     if (item == null) {
       BigDecimal importe = producto.getPrecioLista().multiply(cantidad);
       ItemCarritoCompra itemCC =

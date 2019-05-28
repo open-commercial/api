@@ -58,7 +58,7 @@ public class AuthServiceImpl implements IAuthService {
     }
     final long idUsuario;
     idUsuario = (int) this.getClaimsDelToken(authorizationHeader).get("idUsuario");
-    Usuario usuario = usuarioService.getUsuarioPorId(idUsuario);
+    Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
     final String token = authorizationHeader.substring(7); // The part after "Bearer "
     if (!token.equalsIgnoreCase(usuario.getToken())) {
       return false;

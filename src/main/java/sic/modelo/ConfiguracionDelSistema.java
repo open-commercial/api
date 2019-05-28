@@ -11,7 +11,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.validator.constraints.Email;
+import javax.validation.constraints.Email;
 
 @Entity
 @Table(name = "configuraciondelsistema")
@@ -24,7 +24,7 @@ import org.hibernate.validator.constraints.Email;
 public class ConfiguracionDelSistema implements Serializable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id_ConfiguracionDelSistema;
 
     private boolean usarFacturaVentaPreImpresa;

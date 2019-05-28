@@ -12,8 +12,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.validator.constraints.Email;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "empresa")
@@ -25,7 +25,9 @@ import org.hibernate.validator.constraints.NotEmpty;
 @JsonIgnoreProperties("eliminada")
 public class Empresa implements Serializable {
 
-  @Id @GeneratedValue private long id_Empresa;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private long id_Empresa;
 
   @NotNull(message = "{mensaje_empresa_nombre_vacio}")
   @NotEmpty(message = "{mensaje_empresa_nombre_vacio}")

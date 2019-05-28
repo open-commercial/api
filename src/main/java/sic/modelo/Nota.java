@@ -12,7 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "nota")
@@ -38,7 +38,9 @@ public abstract class Nota implements Serializable {
     return this.getClass().getSimpleName();
   }
 
-  @Id @GeneratedValue private Long idNota;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long idNota;
 
   @Column(nullable = false)
   private long serie;
