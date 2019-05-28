@@ -183,9 +183,10 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     QCuentaCorrienteProveedor qCuentaCorrienteProveedor =
         QCuentaCorrienteProveedor.cuentaCorrienteProveedor;
     BooleanBuilder builder = new BooleanBuilder();
-    if (criteria.isBuscaPorCodigo())
+    if (criteria.isBuscaPorNroProveedor())
       builder.or(
-          qCuentaCorrienteProveedor.proveedor.codigo.containsIgnoreCase(criteria.getCodigo()));
+          qCuentaCorrienteProveedor.proveedor.nroProveedor.containsIgnoreCase(
+              criteria.getNroProveedor()));
     if (criteria.isBuscaPorRazonSocial()) {
       String[] terminos = criteria.getRazonSocial().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();

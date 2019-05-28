@@ -112,7 +112,7 @@ public class CuentaCorrienteController {
   })
   public Page<CuentaCorrienteProveedor> buscarConCriteria(
       @RequestParam Long idEmpresa,
-      @RequestParam(required = false) String codigo,
+      @RequestParam(required = false) String nroProveedor,
       @RequestParam(required = false) String razonSocial,
       @RequestParam(required = false) Long idFiscal,
       @RequestParam(required = false) Long idProvincia,
@@ -151,8 +151,8 @@ public class CuentaCorrienteController {
     }
     BusquedaCuentaCorrienteProveedorCriteria criteria =
         BusquedaCuentaCorrienteProveedorCriteria.builder()
-            .buscaPorCodigo(codigo != null)
-            .codigo(codigo)
+            .buscaPorNroProveedor(nroProveedor != null)
+            .nroProveedor(nroProveedor)
             .buscaPorRazonSocial(razonSocial != null)
             .razonSocial(razonSocial)
             .buscaPorIdFiscal(idFiscal != null)

@@ -524,7 +524,6 @@ class AppIntegrationTest {
     restTemplate.postForObject(apiPrefix + "/medidas?idEmpresa=1", medidaKilo, MedidaDTO.class);
     ProveedorDTO proveedorDTO =
         ProveedorDTO.builder()
-            .codigo("ABC123")
             .razonSocial("Chamaco S.R.L.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
             .idFiscal(23127895679L)
@@ -1081,7 +1080,6 @@ class AppIntegrationTest {
     ProveedorDTO proveedor =
       ProveedorDTO.builder()
         .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-        .codigo("555888")
         .contacto("Ricardo")
         .email("ricardodelbarrio@gmail.com")
         .telPrimario("4512778851")
@@ -1107,7 +1105,6 @@ class AppIntegrationTest {
     ProveedorDTO proveedor =
       ProveedorDTO.builder()
         .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-        .codigo("555888")
         .contacto("Ricardo")
         .email("ricardodelbarrio@gmail.com")
         .telPrimario("4512778851")
@@ -1283,7 +1280,6 @@ class AppIntegrationTest {
     ProveedorDTO proveedor =
       ProveedorDTO.builder()
         .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-        .codigo("555888")
         .contacto("Ricardo")
         .email("ricardodelbarrio@gmail.com")
         .telPrimario("4512778851")
@@ -2944,7 +2940,6 @@ class AppIntegrationTest {
     long[] idsProductos = {1L, 2L};
     ProveedorDTO proveedor =
       ProveedorDTO.builder()
-        .codigo("QWE456")
         .razonSocial("Chamigo S.R.L.")
         .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
         .idFiscal(99999999999L)
@@ -3348,7 +3343,58 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldCrearNotaCreditoVentaDeFactura() {
+  void shouldCrearNotaCreditoVentaDeFacturaA() {
+    this.shouldCrearFacturaVentaA();
+    List<FacturaVenta> facturasRecuperadas =
+      restTemplate
+        .exchange(
+          apiPrefix
+            + "/facturas/venta/busqueda/criteria?idEmpresa=1"
+            + "&tipoFactura="
+            + TipoDeComprobante.FACTURA_A
+            + "&nroSerie=0"
+            + "&nroFactura=1",
+          HttpMethod.GET,
+          null,
+          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+        .getBody()
+        .getContent();
+    Long[] idsRenglonesFacutura = new Long[1];
+    idsRenglonesFacutura[0] = 1L;
+    BigDecimal[] cantidades = new BigDecimal[1];
+    cantidades[0] = new BigDecimal("5");
+    NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
+      NuevaNotaCreditoDeFacturaDTO.builder()
+        .idFactura(facturasRecuperadas.get(0).getId_Factura())
+        .idsRenglonesFactura(idsRenglonesFacutura)
+        .cantidades(cantidades)
+        .modificaStock(true)
+        .motivo("Color equivocado.")
+        .build();
+    NotaCreditoDTO notaCreditoParaPersistir =
+      restTemplate.postForObject(
+        apiPrefix + "/notas/credito/calculos", nuevaNotaCreditoDTO, NotaCreditoDTO.class);
+    NotaCreditoDTO notaGuardada =
+      restTemplate.postForObject(
+        apiPrefix
+          + "/notas/credito",
+        notaCreditoParaPersistir,
+        NotaCreditoDTO.class);
+    notaCreditoParaPersistir.setNroNota(notaGuardada.getNroNota());
+    assertEquals(notaCreditoParaPersistir, notaGuardada);
+    assertEquals(new BigDecimal("4500.000000000000000000000000000000"), notaGuardada.getSubTotal());
+    assertEquals(new BigDecimal("450.000000000000000"), notaGuardada.getRecargoNeto());
+    assertEquals(new BigDecimal("1125.000000000000000"), notaGuardada.getDescuentoNeto());
+    assertEquals(new BigDecimal("3825.000000000000000000000000000000"), notaGuardada.getSubTotalBruto());
+    assertEquals(new BigDecimal("803.250000000000000000000000000000"), notaGuardada.getIva21Neto());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getIva105Neto());
+    assertEquals(new BigDecimal("4628.250000000000000000000000000000"), notaGuardada.getTotal());
+    assertEquals(TipoDeComprobante.NOTA_CREDITO_A, notaGuardada.getTipoComprobante());
+    restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
+  }
+
+  @Test
+  void shouldCrearNotaCreditoVentaDeFacturaB() {
     this.shouldCrearFacturaVentaB();
     List<FacturaVenta> facturasRecuperadas =
         restTemplate
@@ -3387,11 +3433,70 @@ class AppIntegrationTest {
             NotaCreditoDTO.class);
     notaCreditoParaPersistir.setNroNota(notaGuardada.getNroNota());
     assertEquals(notaCreditoParaPersistir, notaGuardada);
+    assertEquals(new BigDecimal("4840.000000000000000000000000000000"), notaGuardada.getSubTotal());
+    assertEquals(new BigDecimal("484.000000000000000"), notaGuardada.getRecargoNeto());
+    assertEquals(new BigDecimal("1210.000000000000000"), notaGuardada.getDescuentoNeto());
+    assertEquals(new BigDecimal("3400.000000000000000000000000000000"), notaGuardada.getSubTotalBruto());
+    assertEquals(new BigDecimal("714.000000000000000000000000000000"), notaGuardada.getIva21Neto());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getIva105Neto());
+    assertEquals(new BigDecimal("4114.000000000000000000000000000000"), notaGuardada.getTotal());
+    assertEquals(TipoDeComprobante.NOTA_CREDITO_B, notaGuardada.getTipoComprobante());
     restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
   }
 
   @Test
-  void shouldCrearNotaCreditoVentaSinFactura() {
+  void shouldCrearNotaCreditoVentaDeFacturaX() {
+    this.shouldCrearFacturaVentaX();
+    List<FacturaVenta> facturasRecuperadas =
+      restTemplate
+        .exchange(
+          apiPrefix
+            + "/facturas/venta/busqueda/criteria?idEmpresa=1"
+            + "&tipoFactura="
+            + TipoDeComprobante.FACTURA_X
+            + "&nroSerie=0"
+            + "&nroFactura=1",
+          HttpMethod.GET,
+          null,
+          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+        .getBody()
+        .getContent();
+    Long[] idsRenglonesFacutura = new Long[1];
+    idsRenglonesFacutura[0] = 1L;
+    BigDecimal[] cantidades = new BigDecimal[1];
+    cantidades[0] = new BigDecimal("5");
+    NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
+      NuevaNotaCreditoDeFacturaDTO.builder()
+        .idFactura(facturasRecuperadas.get(0).getId_Factura())
+        .idsRenglonesFactura(idsRenglonesFacutura)
+        .cantidades(cantidades)
+        .modificaStock(true)
+        .motivo("Color equivocado.")
+        .build();
+    NotaCreditoDTO notaCreditoParaPersistir =
+      restTemplate.postForObject(
+        apiPrefix + "/notas/credito/calculos", nuevaNotaCreditoDTO, NotaCreditoDTO.class);
+    NotaCreditoDTO notaGuardada =
+      restTemplate.postForObject(
+        apiPrefix
+          + "/notas/credito",
+        notaCreditoParaPersistir,
+        NotaCreditoDTO.class);
+    notaCreditoParaPersistir.setNroNota(notaGuardada.getNroNota());
+    assertEquals(notaCreditoParaPersistir, notaGuardada);
+    assertEquals(new BigDecimal("4500.000000000000000000000000000000"), notaGuardada.getSubTotal());
+    assertEquals(new BigDecimal("450.000000000000000"), notaGuardada.getRecargoNeto());
+    assertEquals(new BigDecimal("1125.000000000000000"), notaGuardada.getDescuentoNeto());
+    assertEquals(new BigDecimal("3825.000000000000000000000000000000"), notaGuardada.getSubTotalBruto());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getIva21Neto());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getIva105Neto());
+    assertEquals(new BigDecimal("3825.000000000000000000000000000000"), notaGuardada.getTotal());
+    assertEquals(TipoDeComprobante.NOTA_CREDITO_X, notaGuardada.getTipoComprobante());
+    restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
+  }
+
+  @Test
+  void shouldCrearNotaCreditoVentaASinFactura() {
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO =
         NuevaNotaCreditoSinFacturaDTO.builder()
@@ -3412,12 +3517,162 @@ class AppIntegrationTest {
             apiPrefix + "/notas/credito", notaPorGuardar, NotaCreditoDTO.class);
     notaPorGuardar.setNroNota(notaGuardada.getNroNota());
     assertEquals(notaPorGuardar, notaGuardada);
+    assertEquals(new BigDecimal("826.446280991735537"), notaGuardada.getSubTotal());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getRecargoNeto());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getDescuentoNeto());
+    assertEquals(new BigDecimal("826.446280991735537"), notaGuardada.getSubTotalBruto());
+    assertEquals(new BigDecimal("173.553719008264463"), notaGuardada.getIva21Neto());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getIva105Neto());
+    assertEquals(new BigDecimal("1000.000000000000000"), notaGuardada.getTotal());
+    assertEquals(TipoDeComprobante.NOTA_CREDITO_A, notaGuardada.getTipoComprobante());
     restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
   }
 
   @Test
+  void shouldCrearNotaCreditoVentaBSinFactura() {
+    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO =
+      NuevaNotaCreditoSinFacturaDTO.builder()
+        .detalle("Diferencia de precio")
+        .monto(new BigDecimal("1000"))
+        .tipo(TipoDeComprobante.NOTA_CREDITO_B)
+        .idCliente(1L)
+        .idEmpresa(empresa.getId_Empresa())
+        .motivo("Descuento mal aplicado")
+        .build();
+    NotaCreditoDTO notaPorGuardar =
+      restTemplate.postForObject(
+        apiPrefix + "/notas/credito/calculos-sin-factura",
+        nuevaNotaCreditoSinFacturaDTO,
+        NotaCreditoDTO.class);
+    NotaCreditoDTO notaGuardada =
+      restTemplate.postForObject(
+        apiPrefix + "/notas/credito", notaPorGuardar, NotaCreditoDTO.class);
+    notaPorGuardar.setNroNota(notaGuardada.getNroNota());
+    assertEquals(notaPorGuardar, notaGuardada);
+    assertEquals(new BigDecimal("1000"), notaGuardada.getSubTotal());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getRecargoNeto());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getDescuentoNeto());
+    assertEquals(new BigDecimal("826.446280991735537"), notaGuardada.getSubTotalBruto());
+    assertEquals(new BigDecimal("173.553719008264463"), notaGuardada.getIva21Neto());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getIva105Neto());
+    assertEquals(new BigDecimal("1000"), notaGuardada.getTotal());
+    assertEquals(TipoDeComprobante.NOTA_CREDITO_B, notaGuardada.getTipoComprobante());
+    restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
+  }
+
+  @Test
+  void shouldCrearNotaCreditoVentaXSinFactura() {
+    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO =
+      NuevaNotaCreditoSinFacturaDTO.builder()
+        .detalle("Diferencia de precio")
+        .monto(new BigDecimal("1000"))
+        .tipo(TipoDeComprobante.NOTA_CREDITO_X)
+        .idCliente(1L)
+        .idEmpresa(empresa.getId_Empresa())
+        .motivo("Descuento mal aplicado")
+        .build();
+    NotaCreditoDTO notaPorGuardar =
+      restTemplate.postForObject(
+        apiPrefix + "/notas/credito/calculos-sin-factura",
+        nuevaNotaCreditoSinFacturaDTO,
+        NotaCreditoDTO.class);
+    NotaCreditoDTO notaGuardada =
+      restTemplate.postForObject(
+        apiPrefix + "/notas/credito", notaPorGuardar, NotaCreditoDTO.class);
+    notaPorGuardar.setNroNota(notaGuardada.getNroNota());
+    assertEquals(notaPorGuardar, notaGuardada);
+    assertEquals(new BigDecimal("1000"), notaGuardada.getSubTotal());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getRecargoNeto());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getDescuentoNeto());
+    assertEquals(new BigDecimal("1000"), notaGuardada.getSubTotalBruto());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getIva21Neto());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getIva105Neto());
+    assertEquals(new BigDecimal("1000"), notaGuardada.getTotal());
+    assertEquals(TipoDeComprobante.NOTA_CREDITO_X, notaGuardada.getTipoComprobante());
+    restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
+  }
+
+  @Test
+  void shouldNotCrearNotaCreditoVentaSinRenglonesDeFacturaA() {
+    this.shouldCrearFacturaVentaA();
+    List<FacturaVenta> facturasRecuperadas =
+      restTemplate
+        .exchange(
+          apiPrefix
+            + "/facturas/venta/busqueda/criteria?idEmpresa=1"
+            + "&tipoFactura="
+            + TipoDeComprobante.FACTURA_A
+            + "&nroSerie=0"
+            + "&nroFactura=1",
+          HttpMethod.GET,
+          null,
+          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+        .getBody()
+        .getContent();
+    Long[] idsRenglonesFacutura = new Long[1];
+    idsRenglonesFacutura[0] = 1L;
+    BigDecimal[] cantidades = new BigDecimal[1];
+    cantidades[0] = new BigDecimal("5");
+    NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
+      NuevaNotaCreditoDeFacturaDTO.builder()
+        .idFactura(facturasRecuperadas.get(0).getId_Factura())
+        .idsRenglonesFactura(idsRenglonesFacutura)
+        .cantidades(cantidades)
+        .modificaStock(true)
+        .motivo("Color equivocado.")
+        .build();
+    NotaCreditoDTO notaCreditoParaPersistir =
+      restTemplate.postForObject(
+        apiPrefix + "/notas/credito/calculos", nuevaNotaCreditoDTO, NotaCreditoDTO.class);
+    notaCreditoParaPersistir.setRenglonesNotaCredito(null);
+    try {
+      restTemplate.postForObject(
+          apiPrefix + "/notas/credito", notaCreditoParaPersistir, NotaCreditoDTO.class);
+    } catch (RestClientResponseException ex) {
+      assertTrue(ex.getMessage().startsWith("Los renglones de la nota se encuentran vacios."));
+    }
+  }
+
+  @Test
+  void shouldNotCalcularNotaCreditoVentaSinRenglonesDeFacturaA() {
+    this.shouldCrearFacturaVentaA();
+    List<FacturaVenta> facturasRecuperadas =
+        restTemplate
+            .exchange(
+                apiPrefix
+                    + "/facturas/venta/busqueda/criteria?idEmpresa=1"
+                    + "&tipoFactura="
+                    + TipoDeComprobante.FACTURA_A
+                    + "&nroSerie=0"
+                    + "&nroFactura=1",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+            .getBody()
+            .getContent();
+    Long[] idsRenglonesFacutura = new Long[1];
+    BigDecimal[] cantidades = new BigDecimal[1];
+    NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
+        NuevaNotaCreditoDeFacturaDTO.builder()
+            .idFactura(facturasRecuperadas.get(0).getId_Factura())
+            .idsRenglonesFactura(idsRenglonesFacutura)
+            .cantidades(cantidades)
+            .modificaStock(true)
+            .motivo("Color equivocado.")
+            .build();
+    try {
+      restTemplate.postForObject(
+          apiPrefix + "/notas/credito/calculos", nuevaNotaCreditoDTO, NotaCreditoDTO.class);
+    } catch (RestClientResponseException ex) {
+      assertTrue(ex.getMessage().startsWith("Los renglones de la nota se encuentran vacios."));
+    }
+  }
+
+  @Test
   void shouldVerificarStockNotaCreditoVenta() {
-    this.shouldCrearNotaCreditoVentaDeFactura();
+    this.shouldCrearNotaCreditoVentaDeFacturaB();
     ProductoDTO producto1 =
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO producto2 =
@@ -3427,7 +3682,42 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldCrearNotaCreditoCompraConFactura() {
+  void shouldCrearNotaCreditoCompraConFacturaA() {
+    this.shouldCrearFacturaCompraA();
+    Long[] idsFactura = new Long[1];
+    idsFactura[0] = 1L;
+    BigDecimal[] cantidades = new BigDecimal[1];
+    cantidades[0] = new BigDecimal("3");
+    NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
+      NuevaNotaCreditoDeFacturaDTO.builder()
+        .idFactura(1L)
+        .idsRenglonesFactura(idsFactura)
+        .cantidades(cantidades)
+        .modificaStock(true)
+        .motivo("Devolución")
+        .build();
+    NotaCreditoDTO notaCreditoParaPersistir =
+      restTemplate.postForObject(
+        apiPrefix + "/notas/credito/calculos", nuevaNotaCreditoDTO, NotaCreditoDTO.class);
+    NotaCreditoDTO notaCreditoRecuperada =
+      restTemplate.postForObject(
+        apiPrefix
+          + "/notas/credito",
+        notaCreditoParaPersistir,
+        NotaCreditoDTO.class);
+    assertEquals(notaCreditoParaPersistir, notaCreditoRecuperada);
+    assertEquals(new BigDecimal("240.000000000000000000000000000000"), notaCreditoRecuperada.getSubTotal());
+    assertEquals(new BigDecimal("24.000000000000000"), notaCreditoRecuperada.getRecargoNeto());
+    assertEquals(new BigDecimal("60.000000000000000"), notaCreditoRecuperada.getDescuentoNeto());
+    assertEquals(new BigDecimal("204.000000000000000000000000000000"), notaCreditoRecuperada.getSubTotalBruto());
+    assertEquals(new BigDecimal("42.840000000000000000000000000000"), notaCreditoRecuperada.getIva21Neto());
+    assertEquals(BigDecimal.ZERO, notaCreditoRecuperada.getIva105Neto());
+    assertEquals(new BigDecimal("246.840000000000000000000000000000"), notaCreditoRecuperada.getTotal());
+    assertEquals(TipoDeComprobante.NOTA_CREDITO_A, notaCreditoRecuperada.getTipoComprobante());
+  }
+
+  @Test
+  void shouldCrearNotaCreditoCompraConFacturaB() {
     this.shouldCrearFacturaCompraB();
     Long[] idsFactura = new Long[1];
     idsFactura[0] = 1L;
@@ -3451,16 +3741,59 @@ class AppIntegrationTest {
         notaCreditoParaPersistir,
         NotaCreditoDTO.class);
     assertEquals(notaCreditoParaPersistir, notaCreditoRecuperada);
+    assertEquals(new BigDecimal("290.400000000000000000000000000000"), notaCreditoRecuperada.getSubTotal());
+    assertEquals(new BigDecimal("29.040000000000000"), notaCreditoRecuperada.getRecargoNeto());
+    assertEquals(new BigDecimal("72.600000000000000"), notaCreditoRecuperada.getDescuentoNeto());
+    assertEquals(new BigDecimal("204.000000000000000000000000000000"), notaCreditoRecuperada.getSubTotalBruto());
+    assertEquals(new BigDecimal("42.840000000000000000000000000000"), notaCreditoRecuperada.getIva21Neto());
+    assertEquals(BigDecimal.ZERO, notaCreditoRecuperada.getIva105Neto());
+    assertEquals(new BigDecimal("246.840000000000000000000000000000"), notaCreditoRecuperada.getTotal());
+    assertEquals(TipoDeComprobante.NOTA_CREDITO_B, notaCreditoRecuperada.getTipoComprobante());
   }
 
   @Test
-  void shouldCrearNotaCreditoCompraSinFactura() {
+  void shouldCrearNotaCreditoCompraConFacturaX() {
+    this.shouldCrearFacturaCompraX();
+    Long[] idsFactura = new Long[1];
+    idsFactura[0] = 1L;
+    BigDecimal[] cantidades = new BigDecimal[1];
+    cantidades[0] = new BigDecimal("3");
+    NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
+      NuevaNotaCreditoDeFacturaDTO.builder()
+        .idFactura(1L)
+        .idsRenglonesFactura(idsFactura)
+        .cantidades(cantidades)
+        .modificaStock(true)
+        .motivo("Devolución")
+        .build();
+    NotaCreditoDTO notaCreditoParaPersistir =
+      restTemplate.postForObject(
+        apiPrefix + "/notas/credito/calculos", nuevaNotaCreditoDTO, NotaCreditoDTO.class);
+    NotaCreditoDTO notaCreditoRecuperada =
+      restTemplate.postForObject(
+        apiPrefix
+          + "/notas/credito",
+        notaCreditoParaPersistir,
+        NotaCreditoDTO.class);
+    assertEquals(notaCreditoParaPersistir, notaCreditoRecuperada);
+    assertEquals(new BigDecimal("240.000000000000000000000000000000"), notaCreditoRecuperada.getSubTotal());
+    assertEquals(new BigDecimal("24.000000000000000"), notaCreditoRecuperada.getRecargoNeto());
+    assertEquals(new BigDecimal("60.000000000000000"), notaCreditoRecuperada.getDescuentoNeto());
+    assertEquals(new BigDecimal("204.000000000000000000000000000000"), notaCreditoRecuperada.getSubTotalBruto());
+    assertEquals(BigDecimal.ZERO, notaCreditoRecuperada.getIva21Neto());
+    assertEquals(BigDecimal.ZERO, notaCreditoRecuperada.getIva105Neto());
+    assertEquals(new BigDecimal("204.000000000000000000000000000000"), notaCreditoRecuperada.getTotal());
+    assertEquals(TipoDeComprobante.NOTA_CREDITO_X, notaCreditoRecuperada.getTipoComprobante());
+  }
+
+  @Test
+  void shouldCrearNotaCreditoCompraASinFactura() {
     NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO =
         NuevaNotaCreditoSinFacturaDTO.builder()
             .detalle("RenglonNotaCredito")
             .monto(new BigDecimal("1000"))
-            .tipo(TipoDeComprobante.NOTA_CREDITO_B)
-            .idCliente(1L)
+            .tipo(TipoDeComprobante.NOTA_CREDITO_A)
+            .idProveedor(1L)
             .idEmpresa(1L)
             .motivo("Descuento mal aplicado")
             .build();
@@ -3474,11 +3807,81 @@ class AppIntegrationTest {
             apiPrefix + "/notas/credito", notaPorGuardar, NotaCreditoDTO.class);
     notaPorGuardar.setNroNota(notaCreditoRecuperada.getNroNota());
     assertEquals(notaPorGuardar, notaCreditoRecuperada);
+    assertEquals(new BigDecimal("826.446280991735537"), notaCreditoRecuperada.getSubTotal());
+    assertEquals(BigDecimal.ZERO, notaCreditoRecuperada.getRecargoNeto());
+    assertEquals(BigDecimal.ZERO, notaCreditoRecuperada.getDescuentoNeto());
+    assertEquals(new BigDecimal("826.446280991735537"), notaCreditoRecuperada.getSubTotalBruto());
+    assertEquals(new BigDecimal("173.553719008264463"), notaCreditoRecuperada.getIva21Neto());
+    assertEquals(BigDecimal.ZERO, notaCreditoRecuperada.getIva105Neto());
+    assertEquals(new BigDecimal("1000.000000000000000"), notaCreditoRecuperada.getTotal());
+    assertEquals(TipoDeComprobante.NOTA_CREDITO_A, notaCreditoRecuperada.getTipoComprobante());
+  }
+
+  @Test
+  void shouldCrearNotaCreditoCompraBSinFactura() {
+    NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO =
+      NuevaNotaCreditoSinFacturaDTO.builder()
+        .detalle("RenglonNotaCredito")
+        .monto(new BigDecimal("1000"))
+        .tipo(TipoDeComprobante.NOTA_CREDITO_B)
+        .idProveedor(1L)
+        .idEmpresa(1L)
+        .motivo("Descuento mal aplicado")
+        .build();
+    NotaCreditoDTO notaPorGuardar =
+      restTemplate.postForObject(
+        apiPrefix + "/notas/credito/calculos-sin-factura",
+        nuevaNotaCreditoSinFacturaDTO,
+        NotaCreditoDTO.class);
+    NotaCreditoDTO notaCreditoRecuperada =
+      restTemplate.postForObject(
+        apiPrefix + "/notas/credito", notaPorGuardar, NotaCreditoDTO.class);
+    notaPorGuardar.setNroNota(notaCreditoRecuperada.getNroNota());
+    assertEquals(notaPorGuardar, notaCreditoRecuperada);
+    assertEquals(new BigDecimal("1000"), notaCreditoRecuperada.getSubTotal());
+    assertEquals(BigDecimal.ZERO, notaCreditoRecuperada.getRecargoNeto());
+    assertEquals(BigDecimal.ZERO, notaCreditoRecuperada.getDescuentoNeto());
+    assertEquals(new BigDecimal("826.446280991735537"), notaCreditoRecuperada.getSubTotalBruto());
+    assertEquals(new BigDecimal("173.553719008264463"), notaCreditoRecuperada.getIva21Neto());
+    assertEquals(BigDecimal.ZERO, notaCreditoRecuperada.getIva105Neto());
+    assertEquals(new BigDecimal("1000"), notaCreditoRecuperada.getTotal());
+    assertEquals(TipoDeComprobante.NOTA_CREDITO_B, notaCreditoRecuperada.getTipoComprobante());
+  }
+
+  @Test
+  void shouldCrearNotaCreditoCompraXSinFactura() {
+    NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO =
+      NuevaNotaCreditoSinFacturaDTO.builder()
+        .detalle("RenglonNotaCredito")
+        .monto(new BigDecimal("1000"))
+        .tipo(TipoDeComprobante.NOTA_CREDITO_X)
+        .idCliente(1L)
+        .idEmpresa(1L)
+        .motivo("Descuento mal aplicado")
+        .build();
+    NotaCreditoDTO notaPorGuardar =
+      restTemplate.postForObject(
+        apiPrefix + "/notas/credito/calculos-sin-factura",
+        nuevaNotaCreditoSinFacturaDTO,
+        NotaCreditoDTO.class);
+    NotaCreditoDTO notaCreditoRecuperada =
+      restTemplate.postForObject(
+        apiPrefix + "/notas/credito", notaPorGuardar, NotaCreditoDTO.class);
+    notaPorGuardar.setNroNota(notaCreditoRecuperada.getNroNota());
+    assertEquals(notaPorGuardar, notaCreditoRecuperada);
+    assertEquals(new BigDecimal("1000"), notaCreditoRecuperada.getSubTotal());
+    assertEquals(BigDecimal.ZERO, notaCreditoRecuperada.getRecargoNeto());
+    assertEquals(BigDecimal.ZERO, notaCreditoRecuperada.getDescuentoNeto());
+    assertEquals(new BigDecimal("1000"), notaCreditoRecuperada.getSubTotalBruto());
+    assertEquals(BigDecimal.ZERO, notaCreditoRecuperada.getIva21Neto());
+    assertEquals(BigDecimal.ZERO, notaCreditoRecuperada.getIva105Neto());
+    assertEquals(new BigDecimal("1000"), notaCreditoRecuperada.getTotal());
+    assertEquals(TipoDeComprobante.NOTA_CREDITO_X, notaCreditoRecuperada.getTipoComprobante());
   }
 
   @Test
   void shouldVerificarStockNotaCreditoCompra() {
-    this.shouldCrearNotaCreditoCompraConFactura();
+    this.shouldCrearNotaCreditoCompraConFacturaB();
     ProductoDTO producto1 =
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO producto2 =
@@ -4283,6 +4686,51 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldCrearGasto() {
+    this.abrirCaja();
+    GastoDTO gasto =
+      GastoDTO.builder()
+        .concepto("Gasto test")
+        .fecha(new Date())
+        .monto(new BigDecimal("200.000000000000000"))
+        .build();
+    restTemplate.postForObject(
+      apiPrefix + "/gastos?idEmpresa=1&idFormaDePago=1", gasto, GastoDTO.class);
+    assertEquals(
+      new BigDecimal("-200.000000000000000"),
+      restTemplate.getForObject(apiPrefix + "/cajas/1/saldo-sistema", BigDecimal.class));
+    GastoDTO gastoRecuperado =  restTemplate.getForObject(apiPrefix + "/gastos/1", GastoDTO.class);
+    assertEquals(gasto, gastoRecuperado);
+  }
+
+  @Test
+  void shouldEliminarGasto() {
+    this.shouldCrearGasto();
+    restTemplate.delete(apiPrefix + "/gastos/1");
+    try {
+      restTemplate.getForObject(apiPrefix + "/gastos/1", GastoDTO.class);
+    } catch (RestClientResponseException ex) {
+      assertTrue(ex.getMessage().startsWith("El gasto no existe o se encuentra eliminado."));
+    }
+  }
+
+  @Test
+  void shouldRecuperarGastoPorEmpresa() {
+    this.shouldCrearGasto();
+    List<GastoDTO> gastos =
+        restTemplate
+            .exchange(
+                apiPrefix + "/gastos/busqueda/criteria?idEmpresa=1",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<PaginaRespuestaRest<GastoDTO>>() {})
+            .getBody()
+            .getContent();
+    GastoDTO gastoRecuperado = restTemplate.getForObject(apiPrefix + "/gastos/1", GastoDTO.class);
+    assertEquals(gastoRecuperado, gastos.get(0));
+  }
+
+  @Test
   void shouldModificarCostoEnvioDeLocalidad() {
     LocalidadDTO localidad = restTemplate.getForObject(apiPrefix + "/ubicaciones/localidades/1", LocalidadDTO.class);
     localidad.setEnvioGratuito(true);
@@ -4319,5 +4767,50 @@ class AppIntegrationTest {
     assertEquals(23, fechaCierre.get(Calendar.HOUR_OF_DAY));
     assertEquals(59, fechaCierre.get(Calendar.MINUTE));
     assertEquals(59, fechaCierre.get(Calendar.SECOND));
+  }
+
+  @Test
+  void shouldAgregarItemsAlCarritoCompra() {
+    this.crearProductos();
+    restTemplate.postForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=5", null, ItemCarritoCompra.class);
+    restTemplate.postForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/2?cantidad=9", null, ItemCarritoCompra.class);
+    ItemCarritoCompra item1 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
+    assertEquals(1L, item1.getProducto().getIdProducto());
+    assertEquals(5, item1.getCantidad().doubleValue());
+    ItemCarritoCompra item2 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/2", ItemCarritoCompra.class);
+    assertEquals(2L, item2.getProducto().getIdProducto());
+    assertEquals(9, item2.getCantidad().doubleValue());
+  }
+
+  @Test
+  void shouldAgregarMasDeUnMismoItemAlCarrito() {
+    this.crearProductos();
+    this.shouldAgregarItemsAlCarritoCompra();
+    restTemplate.postForObject(
+        apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=10",
+        null,
+        ItemCarritoCompra.class);
+    ItemCarritoCompra item1 =
+        restTemplate.getForObject(
+            apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
+    assertEquals(15, item1.getCantidad().doubleValue());
+    restTemplate.postForObject(
+        apiPrefix + "/carrito-compra/usuarios/1/productos/2?cantidad=5",
+        null,
+        ItemCarritoCompra.class);
+    ItemCarritoCompra item2 =
+        restTemplate.getForObject(
+            apiPrefix + "/carrito-compra/usuarios/1/productos/2", ItemCarritoCompra.class);
+    assertEquals(14, item2.getCantidad().doubleValue());
+  }
+
+  @Test
+  void shouldGenerarPedidoConItemsDelCarrito() {
+    this.shouldAgregarItemsAlCarritoCompra();
+    PedidoDTO pedido = restTemplate.postForObject(apiPrefix
+      + "/carrito-compra?idEmpresa=1&idUsuario=1&idCliente=1&tipoDeEnvio=RETIRO_EN_SUCURSAL&idSucursal=1",
+      "probando pedido desde carrito", PedidoDTO.class);
+    assertEquals(14, pedido.getCantidadArticulos().doubleValue());
+    assertEquals(new BigDecimal("14395.500000000000000000000000000000000000000000000"), pedido.getTotalActual());
   }
 }

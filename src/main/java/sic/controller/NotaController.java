@@ -199,21 +199,8 @@ public class NotaController {
     Rol.COMPRADOR
   })
   public TipoDeComprobante[] getTipoNotaDebitoCliente(
-    @RequestParam long idCliente, @RequestParam long idEmpresa) {
+      @RequestParam long idCliente, @RequestParam long idEmpresa) {
     return notaService.getTipoNotaDebitoCliente(idCliente, idEmpresa);
-  }
-
-  @GetMapping("/notas/renglones/credito/{idNotaCredito}")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
-  public List<RenglonNotaCredito> getRenglonesDeNotaCreditoCliente(
-      @PathVariable long idNotaCredito) {
-    return notaService.getRenglonesDeNotaCredito(idNotaCredito);
   }
 
   @GetMapping("/notas/renglones/debito/{idNotaDebito}")
@@ -229,15 +216,23 @@ public class NotaController {
   }
 
   @PostMapping("/notas/credito/calculos")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public NotaCredito calcularNotaCreditoConFactura(
     @RequestBody NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO,
     @RequestHeader("Authorization") String authorizationHeader) {
     NotaCredito notaCreditoNueva = new NotaCredito();
     Factura factura = facturaService.getFacturaNoEliminadaPorId(nuevaNotaCreditoDeFacturaDTO.getIdFactura());
-    notaCreditoNueva.setRenglonesNotaCredito(
-      notaService.calcularRenglonCreditoProducto(factura.getTipoComprobante(),
-        nuevaNotaCreditoDeFacturaDTO.getCantidades(), nuevaNotaCreditoDeFacturaDTO.getIdsRenglonesFactura()));
+    if (Arrays.asList(nuevaNotaCreditoDeFacturaDTO.getCantidades()).contains(null)
+        || Arrays.asList(nuevaNotaCreditoDeFacturaDTO.getIdsRenglonesFactura()).contains(null)) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_nota_de_renglones_vacio"));
+    } else {
+      notaCreditoNueva.setRenglonesNotaCredito(
+          notaService.calcularRenglonCreditoProducto(
+              notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()),
+              nuevaNotaCreditoDeFacturaDTO.getCantidades(),
+              nuevaNotaCreditoDeFacturaDTO.getIdsRenglonesFactura()));
+    }
     List<BigDecimal> importes = new ArrayList<>();
     List<BigDecimal> cantidades = new ArrayList<>();
     List<BigDecimal> ivaPorcentajeRenglones = new ArrayList<>();
@@ -256,17 +251,17 @@ public class NotaController {
     notaCreditoNueva.setRecargoPorcentaje(factura.getRecargoPorcentaje());
     notaCreditoNueva.setRecargoNeto(notaService.calcularRecargoNetoCredito(notaCreditoNueva.getSubTotal(), notaCreditoNueva.getRecargoPorcentaje()));
     notaCreditoNueva.setTipoComprobante(notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()));
-    notaCreditoNueva.setIva105Neto(notaService.calcularIVANetoCredito(factura.getTipoComprobante(),
+    notaCreditoNueva.setIva105Neto(notaService.calcularIVANetoCredito(notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()),
       cantidades.toArray(new BigDecimal[0]),
       ivaPorcentajeRenglones.toArray(new BigDecimal[0]),
       ivaNetoRenglones.toArray(new BigDecimal[0]), IVA_105, factura.getDescuentoPorcentaje(),
       factura.getRecargoPorcentaje()));
-    notaCreditoNueva.setIva21Neto(notaService.calcularIVANetoCredito(factura.getTipoComprobante(),
+    notaCreditoNueva.setIva21Neto(notaService.calcularIVANetoCredito(notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()),
       cantidades.toArray(new BigDecimal[0]),
       ivaPorcentajeRenglones.toArray(new BigDecimal[0]),
       ivaNetoRenglones.toArray(new BigDecimal[0]), IVA_21, factura.getDescuentoPorcentaje(),
       factura.getRecargoPorcentaje()));
-    notaCreditoNueva.setSubTotalBruto(notaService.calcularSubTotalBrutoCredito(factura.getTipoComprobante(),
+    notaCreditoNueva.setSubTotalBruto(notaService.calcularSubTotalBrutoCredito(notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()),
       notaCreditoNueva.getSubTotal(), notaCreditoNueva.getRecargoNeto(), notaCreditoNueva.getDescuentoNeto(),
       notaCreditoNueva.getIva105Neto(), notaCreditoNueva.getIva21Neto()));
     notaCreditoNueva.setTotal(notaService.calcularTotalCredito(notaCreditoNueva.getSubTotalBruto(), notaCreditoNueva.getIva105Neto(), notaCreditoNueva.getIva21Neto()));
@@ -287,7 +282,7 @@ public class NotaController {
   }
 
   @PostMapping("/notas/credito/calculos-sin-factura")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public NotaCredito calcularNotaCreditoSinFactura(
       @RequestBody NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -355,7 +350,7 @@ public class NotaController {
   }
 
   @PostMapping("/notas/credito")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Nota guardarNotaCredito(
       @RequestBody NotaCreditoDTO notaCreditoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -388,7 +383,7 @@ public class NotaController {
   }
 
   @PostMapping("/notas/debito/clientes")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Nota guardarNotaDebitoCliente(
       @RequestBody NotaDebitoDTO notaDebitoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -404,7 +399,7 @@ public class NotaController {
   }
 
   @PostMapping("/notas/debito/proveedores")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Nota guardarNotaDebitoProveedor(
       @RequestBody NotaDebitoDTO notaDebitoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -445,7 +440,7 @@ public class NotaController {
   }
 
   @GetMapping("/notas/renglon/debito/recibo/{idRecibo}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public List<RenglonNotaDebito> calcularRenglonNotaDebito(
       @PathVariable long idRecibo,
       @RequestParam BigDecimal monto,

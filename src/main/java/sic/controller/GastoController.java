@@ -135,40 +135,13 @@ public class GastoController {
   @GetMapping("/gastos/total/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public BigDecimal getTotalGastos(
-    @RequestParam Long idEmpresa,
-    @RequestParam(required = false) Long desde,
-    @RequestParam(required = false) Long hasta,
-    @RequestParam(required = false) String concepto,
-    @RequestParam(required = false) Long idUsuario,
-    @RequestParam(required = false) Long idFormaDePago,
-    @RequestParam(required = false) Long nroGasto,
-    @RequestParam(required = false) Integer pagina,
-    @RequestParam(required = false) String ordenarPor,
-    @RequestParam(required = false) String sentido) {
-    if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable;
-    if (ordenarPor == null || sentido == null) {
-      pageable =
-        PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "fecha"));
-    } else {
-      switch (sentido) {
-        case "ASC":
-          pageable =
-            PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
-          break;
-        case "DESC":
-          pageable =
-            PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
-          break;
-        default:
-          pageable =
-            PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "fecha"));
-          break;
-      }
-    }
+      @RequestParam Long idEmpresa,
+      @RequestParam(required = false) Long desde,
+      @RequestParam(required = false) Long hasta,
+      @RequestParam(required = false) String concepto,
+      @RequestParam(required = false) Long idUsuario,
+      @RequestParam(required = false) Long idFormaDePago,
+      @RequestParam(required = false) Long nroGasto) {
     Calendar fechaDesde = Calendar.getInstance();
     Calendar fechaHasta = Calendar.getInstance();
     if ((desde != null) && (hasta != null)) {
@@ -176,21 +149,20 @@ public class GastoController {
       fechaHasta.setTimeInMillis(hasta);
     }
     BusquedaGastoCriteria criteria =
-      BusquedaGastoCriteria.builder()
-        .buscaPorFecha((desde != null) && (hasta != null))
-        .fechaDesde(fechaDesde.getTime())
-        .fechaHasta(fechaHasta.getTime())
-        .buscaPorConcepto(concepto != null)
-        .concepto(concepto)
-        .buscaPorUsuario(idUsuario != null)
-        .idUsuario(idUsuario)
-        .buscarPorFormaDePago(idFormaDePago != null)
-        .idFormaDePago(idFormaDePago)
-        .buscaPorNro(nroGasto != null)
-        .nroGasto(nroGasto)
-        .idEmpresa(idEmpresa)
-        .pageable(pageable)
-        .build();
+        BusquedaGastoCriteria.builder()
+            .buscaPorFecha((desde != null) && (hasta != null))
+            .fechaDesde(fechaDesde.getTime())
+            .fechaHasta(fechaHasta.getTime())
+            .buscaPorConcepto(concepto != null)
+            .concepto(concepto)
+            .buscaPorUsuario(idUsuario != null)
+            .idUsuario(idUsuario)
+            .buscarPorFormaDePago(idFormaDePago != null)
+            .idFormaDePago(idFormaDePago)
+            .buscaPorNro(nroGasto != null)
+            .nroGasto(nroGasto)
+            .idEmpresa(idEmpresa)
+            .build();
     return gastoService.getTotalGastos(criteria);
   }
 }

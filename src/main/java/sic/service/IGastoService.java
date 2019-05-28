@@ -16,8 +16,6 @@ public interface IGastoService {
     
     Gasto getGastoNoEliminadoPorId(Long id);
     
-    void actualizar(@Valid Gasto gasto);
-    
     void eliminar(long idGasto);
 
     List<Gasto> getGastosEntreFechasYFormaDePago(Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta);

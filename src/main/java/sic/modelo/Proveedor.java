@@ -30,7 +30,7 @@ public class Proveedor implements Serializable {
   private long id_Proveedor;
 
   @Column(nullable = false)
-  private String codigo;
+  private String nroProveedor;
 
   @Column(nullable = false)
   @NotEmpty(message = "{mensaje_proveedor_razonSocial_vacia}")

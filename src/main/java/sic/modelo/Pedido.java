@@ -45,7 +45,6 @@ public class Pedido implements Serializable {
 
   @Column(nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
-  @NotNull(message = "{mensaje_pedido_fecha_vacia}")
   private Date fecha;
 
   @Temporal(TemporalType.TIMESTAMP)

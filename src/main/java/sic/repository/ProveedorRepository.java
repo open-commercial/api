@@ -9,7 +9,7 @@ import sic.modelo.Proveedor;
 public interface ProveedorRepository
     extends PagingAndSortingRepository<Proveedor, Long>, QuerydslPredicateExecutor<Proveedor> {
 
-  Proveedor findByCodigoAndEmpresaAndEliminado(String codigo, Empresa empresa, boolean eliminado);
+  Proveedor findByNroProveedorAndEmpresaAndEliminado(String nroProveedor, Empresa empresa, boolean eliminado);
 
   Proveedor findByIdFiscalAndEmpresaAndEliminado(Long idFiscal, Empresa empresa, boolean eliminado);
 

@@ -144,12 +144,6 @@ public class GastoServiceImpl implements IGastoService {
 
   @Override
   @Transactional
-  public void actualizar(@Valid Gasto gasto) {
-    gastoRepository.save(gasto);
-  }
-
-  @Override
-  @Transactional
   public void eliminar(long idGasto) {
     Gasto gastoParaEliminar = this.getGastoNoEliminadoPorId(idGasto);
     if (this.cajaService
