@@ -27,7 +27,7 @@ public class NotaDebito extends Nota implements Serializable {
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "idNota")
-  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+  //@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   @Column(nullable = false)
   private List<RenglonNotaDebito> renglonesNotaDebito;
 

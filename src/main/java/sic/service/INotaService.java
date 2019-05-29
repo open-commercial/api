@@ -35,6 +35,10 @@ public interface INotaService {
 
   TipoDeComprobante[] getTipoNotaDebitoCliente(Long idCliente, Long idEmpresa);
 
+  TipoDeComprobante[] getTipoNotaCreditoProveedor(Long idCliente, Long idEmpresa);
+
+  TipoDeComprobante[] getTipoNotaDebitoProveedor(Long idCliente, Long idEmpresa);
+
   TipoDeComprobante[] getTiposNota(Empresa empresa);
 
   TipoDeComprobante getTipoDeNotaCreditoSegunFactura(TipoDeComprobante tipo);
@@ -53,7 +57,7 @@ public interface INotaService {
   RenglonNotaCredito calcularRenglonCredito(TipoDeComprobante tipo, String Detalle, BigDecimal monto);
 
   List<RenglonNotaDebito> calcularRenglonDebito(
-      long idRecibo, BigDecimal monto, BigDecimal ivaPorcentaje);
+      Recibo recibo, BigDecimal monto, BigDecimal ivaPorcentaje);
 
   BigDecimal calcularSubTotalCredito(BigDecimal[] importesBrutos);
 

@@ -45,8 +45,8 @@ public class NotaServiceImpl implements INotaService {
   private final IEmpresaService empresaService;
   private final IUsuarioService usuarioService;
   private final IProductoService productoService;
+  private final IProveedorService proveedorService;
   private final ICuentaCorrienteService cuentaCorrienteService;
-  private final IReciboService reciboService;
   private final IConfiguracionDelSistemaService configuracionDelSistemaService;
   private final IAfipService afipService;
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
@@ -65,9 +65,9 @@ public class NotaServiceImpl implements INotaService {
       IClienteService clienteService,
       IUsuarioService usuarioService,
       IProductoService productoService,
+      IProveedorService proveedorService,
       IEmpresaService empresaService,
       ICuentaCorrienteService cuentaCorrienteService,
-      IReciboService reciboService,
       IConfiguracionDelSistemaService cds,
       IAfipService afipService) {
     this.notaRepository = notaRepository;
@@ -78,8 +78,8 @@ public class NotaServiceImpl implements INotaService {
     this.usuarioService = usuarioService;
     this.empresaService = empresaService;
     this.productoService = productoService;
+    this.proveedorService = proveedorService;
     this.cuentaCorrienteService = cuentaCorrienteService;
-    this.reciboService = reciboService;
     this.configuracionDelSistemaService = cds;
     this.afipService = afipService;
   }
@@ -394,6 +394,72 @@ public class NotaServiceImpl implements INotaService {
       tiposPermitidos[0] = TipoDeComprobante.NOTA_DEBITO_X;
       tiposPermitidos[1] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
       return tiposPermitidos;
+    }
+  }
+
+  @Override
+  public TipoDeComprobante[] getTipoNotaCreditoProveedor(Long idProveedor, Long idEmpresa) {
+    Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
+    Proveedor proveedor = proveedorService.getProveedorNoEliminadoPorId(idProveedor);
+    if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())) {
+      if (CategoriaIVA.discriminaIVA(proveedor.getCategoriaIVA())) {
+        TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
+        tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_A;
+        tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_X;
+        tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
+        return tiposPermitidos;
+      } else {
+        TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[2];
+        tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_X;
+        tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
+        return tiposPermitidos;
+      }
+    } else {
+      if (CategoriaIVA.discriminaIVA(proveedor.getCategoriaIVA())) {
+        TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
+        tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_B;
+        tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_X;
+        tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
+        return tiposPermitidos;
+      } else {
+        TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[2];
+        tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_X;
+        tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
+        return tiposPermitidos;
+      }
+    }
+  }
+
+  @Override
+  public TipoDeComprobante[] getTipoNotaDebitoProveedor(Long idProveedor, Long idEmpresa) {
+    Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
+    Proveedor proveedor = proveedorService.getProveedorNoEliminadoPorId(idProveedor);
+    if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())) {
+      if (CategoriaIVA.discriminaIVA(proveedor.getCategoriaIVA())) {
+        TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
+        tiposPermitidos[0] = TipoDeComprobante.NOTA_DEBITO_A;
+        tiposPermitidos[1] = TipoDeComprobante.NOTA_DEBITO_X;
+        tiposPermitidos[2] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
+        return tiposPermitidos;
+      } else {
+        TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[2];
+        tiposPermitidos[0] = TipoDeComprobante.NOTA_DEBITO_X;
+        tiposPermitidos[1] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
+        return tiposPermitidos;
+      }
+    } else {
+      if (CategoriaIVA.discriminaIVA(proveedor.getCategoriaIVA())) {
+        TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
+        tiposPermitidos[0] = TipoDeComprobante.NOTA_DEBITO_B;
+        tiposPermitidos[1] = TipoDeComprobante.NOTA_DEBITO_X;
+        tiposPermitidos[2] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
+        return tiposPermitidos;
+      } else {
+        TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[2];
+        tiposPermitidos[0] = TipoDeComprobante.NOTA_DEBITO_X;
+        tiposPermitidos[1] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
+        return tiposPermitidos;
+      }
     }
   }
 
@@ -752,9 +818,7 @@ public class NotaServiceImpl implements INotaService {
     this.validarOperacion(notaDebito);
     if (notaDebito.getMovimiento().equals(Movimiento.VENTA)) {
       notaDebito.setTipoComprobante(
-          this.getTipoDeNotaDebito(
-              this.facturaService
-                  .getTipoFacturaVenta(notaDebito.getEmpresa(), notaDebito.getCliente())[0]));
+          this.getTipoNotaDebitoCliente(notaDebito.getCliente().getId_Cliente(), notaDebito.getEmpresa().getId_Empresa())[0]);
       notaDebito.setSerie(
           configuracionDelSistemaService
               .getConfiguracionDelSistemaPorEmpresa(notaDebito.getEmpresa())
@@ -762,11 +826,6 @@ public class NotaServiceImpl implements INotaService {
       notaDebito.setNroNota(
           this.getSiguienteNumeroNotaDebitoCliente(
               notaDebito.getIdEmpresa(), notaDebito.getTipoComprobante()));
-    } else if (notaDebito.getMovimiento().equals(Movimiento.COMPRA)) {
-      notaDebito.setTipoComprobante(
-          this.getTipoDeNotaDebito(
-              this.facturaService
-                  .getTipoFacturaCompra(notaDebito.getEmpresa(), notaDebito.getProveedor())[0]));
     }
     this.validarCalculosDebito(notaDebito);
     notaDebito = notaDebitoRepository.save(notaDebito);
@@ -818,40 +877,6 @@ public class NotaServiceImpl implements INotaService {
           RESOURCE_BUNDLE.getString("mensaje_comprobanteAFIP_invalido"));
     }
     return nota;
-  }
-
-  private TipoDeComprobante getTipoDeNotaDebito(TipoDeComprobante tipo) {
-    switch (tipo) {
-      case FACTURA_A:
-        return TipoDeComprobante.NOTA_DEBITO_A;
-      case FACTURA_B:
-        return TipoDeComprobante.NOTA_DEBITO_B;
-      case FACTURA_X:
-        return TipoDeComprobante.NOTA_DEBITO_X;
-      case FACTURA_Y:
-        return TipoDeComprobante.NOTA_DEBITO_Y;
-      case PRESUPUESTO:
-        return TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
-      default:
-        throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_nota_tipo_no_valido"));
-    }
-  }
-
-  private TipoDeComprobante getTipoDeComprobanteFacturaSegunNotaCredito(TipoDeComprobante tipo) {
-    switch (tipo) {
-      case NOTA_CREDITO_A:
-        return TipoDeComprobante.FACTURA_A;
-      case NOTA_CREDITO_B:
-        return TipoDeComprobante.FACTURA_B;
-      case NOTA_CREDITO_X:
-        return TipoDeComprobante.FACTURA_X;
-      case NOTA_CREDITO_Y:
-        return TipoDeComprobante.FACTURA_X;
-      case NOTA_CREDITO_PRESUPUESTO:
-        return TipoDeComprobante.PRESUPUESTO;
-      default:
-        throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_nota_tipo_no_valido"));
-    }
   }
 
   @Override
@@ -1087,23 +1112,22 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public List<RenglonNotaDebito> calcularRenglonDebito(
-      long idRecibo, BigDecimal monto, BigDecimal ivaPorcentaje) {
+      Recibo recibo, BigDecimal monto, BigDecimal ivaPorcentaje) {
     List<RenglonNotaDebito> renglonesNota = new ArrayList<>();
     RenglonNotaDebito renglonNota;
-    Recibo r = reciboService.getReciboNoEliminadoPorId(idRecibo);
     renglonNota = new RenglonNotaDebito();
     String descripcion =
         "Recibo Nº "
-            + r.getNumRecibo()
+            + recibo.getNumRecibo()
             + " "
             + (new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHA_HISPANO))
-                .format(r.getFecha());
+                .format(recibo.getFecha());
     renglonNota.setDescripcion(descripcion);
-    renglonNota.setMonto(r.getMonto());
+    renglonNota.setMonto(recibo.getMonto());
     renglonNota.setImporteBruto(renglonNota.getMonto());
     renglonNota.setIvaPorcentaje(BigDecimal.ZERO);
     renglonNota.setIvaNeto(BigDecimal.ZERO);
-    renglonNota.setImporteNeto(r.getMonto());
+    renglonNota.setImporteNeto(recibo.getMonto());
     renglonesNota.add(renglonNota);
     renglonNota = new RenglonNotaDebito();
     renglonNota.setDescripcion("Gasto Administrativo");
