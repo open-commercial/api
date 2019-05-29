@@ -4783,25 +4783,25 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldAgregarMasDeUnMismoItemAlCarrito() {
+  void shouldModificarCantidadesDeUnItemDelCarrito() {
     this.crearProductos();
     this.shouldAgregarItemsAlCarritoCompra();
     restTemplate.postForObject(
-        apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=10",
+        apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=2",
         null,
         ItemCarritoCompra.class);
     ItemCarritoCompra item1 =
         restTemplate.getForObject(
             apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
-    assertEquals(15, item1.getCantidad().doubleValue());
+    assertEquals(2, item1.getCantidad().doubleValue());
     restTemplate.postForObject(
-        apiPrefix + "/carrito-compra/usuarios/1/productos/2?cantidad=5",
+        apiPrefix + "/carrito-compra/usuarios/1/productos/2?cantidad=-3",
         null,
         ItemCarritoCompra.class);
     ItemCarritoCompra item2 =
         restTemplate.getForObject(
             apiPrefix + "/carrito-compra/usuarios/1/productos/2", ItemCarritoCompra.class);
-    assertEquals(14, item2.getCantidad().doubleValue());
+    assertEquals(new BigDecimal("0E-15"), item2.getCantidad());
   }
 
   @Test
