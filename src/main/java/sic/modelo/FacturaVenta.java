@@ -20,12 +20,12 @@ import sic.modelo.dto.UbicacionDTO;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@JsonIgnoreProperties({"cliente", "usuario", "empresa", "pedido", "transportista"})
+@JsonIgnoreProperties({"cliente", "usuario", "empresa", "pedido", "transportista", "clienteEmbedded"})
 public class FacturaVenta extends Factura implements Serializable {
 
   @AttributeOverride(name = "id_Cliente", column = @Column(name = "idClienteEmbedded"))
   @Embedded
-  private ClienteDTO clienteDTO;
+  private ClienteDTO clienteEmbedded;
 
   @ManyToOne
   @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
@@ -35,10 +35,10 @@ public class FacturaVenta extends Factura implements Serializable {
   public FacturaVenta() {}
 
   public FacturaVenta(
-    ClienteDTO clienteDTO,
+    long id_Factura,
+    ClienteDTO clienteEmbedded,
     Cliente cliente,
     Usuario usuario,
-    long id_Factura,
     Date fecha,
     TipoDeComprobante tipoComprobante,
     long numSerie,
@@ -95,42 +95,42 @@ public class FacturaVenta extends Factura implements Serializable {
       vencimientoCAE,
       numSerieAfip,
       numFacturaAfip);
-    this.clienteDTO = clienteDTO;
+    this.clienteEmbedded = clienteEmbedded;
     this.cliente = cliente;
   }
 
   @JsonGetter("idCliente")
   public Long getIdCliente() {
-    return clienteDTO.getId_Cliente();
+    return clienteEmbedded.getId_Cliente();
   }
 
   @JsonGetter("nombreFiscalCliente")
   public String getNombreFiscalCliente() {
-    return clienteDTO.getNombreFiscal();
+    return clienteEmbedded.getNombreFiscal();
   }
 
   @JsonGetter("nroDeCliente")
   public String getNroDeCliente() {
-    return clienteDTO.getNroCliente();
+    return clienteEmbedded.getNroCliente();
   }
 
   @JsonGetter("categoriaIVA")
   public CategoriaIVA getCategoriaIVA() {
-    return clienteDTO.getCategoriaIVA();
+    return clienteEmbedded.getCategoriaIVA();
   }
 
   @JsonGetter("idViajante")
   public Long getIdViajante() {
-    return clienteDTO.getIdViajante();
+    return clienteEmbedded.getIdViajante();
   }
 
   @JsonGetter("nombreViajante")
   public String getNombreViajante() {
-    return clienteDTO.getNombreViajante();
+    return clienteEmbedded.getNombreViajante();
   }
 
   @JsonGetter("ubicacionFacturacion")
   public UbicacionDTO getUbicacionFacturacion() {
-    return clienteDTO.getUbicacionFacturacion();
+    return clienteEmbedded.getUbicacionFacturacion();
   }
 }

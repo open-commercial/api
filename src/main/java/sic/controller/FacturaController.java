@@ -86,7 +86,7 @@ public class FacturaController {
           ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_facturacion_vacia"));
     }
     fv.setCliente(cliente);
-    fv.setClienteDTO(modelMapper.map(cliente, ClienteDTO.class));
+    fv.setClienteEmbedded(modelMapper.map(cliente, ClienteDTO.class));
     fv.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(facturaVentaDTO.getIdUsuario()));
     fv.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(facturaVentaDTO.getIdTransportista()));
     fv.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(facturaVentaDTO.getIdTransportista()));

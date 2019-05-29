@@ -63,10 +63,10 @@ public class FacturaVentaBuilder {
             this.renglones = renglonesFactura;
         }
     return new FacturaVenta(
+        id_Factura,
         clienteDTO,
         cliente,
         usuario,
-        id_Factura,
         fecha,
         tipoFactura,
         numSerie,

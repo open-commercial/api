@@ -978,13 +978,13 @@ public class FacturaServiceImpl implements IFacturaService {
     @Override
     public List<FacturaVenta> dividirFactura(FacturaVenta facturaADividir, int[] indices) {
         FacturaVenta facturaSinIVA = new FacturaVenta();
-        facturaSinIVA.setClienteDTO(facturaADividir.getClienteDTO());
+        facturaSinIVA.setClienteEmbedded(facturaADividir.getClienteEmbedded());
         facturaSinIVA.setUsuario(facturaADividir.getUsuario());
         facturaSinIVA.setPedido(facturaADividir.getPedido());
         facturaSinIVA.setDescuentoPorcentaje(facturaADividir.getDescuentoPorcentaje());
         facturaSinIVA.setRecargoPorcentaje(facturaADividir.getRecargoPorcentaje());
         FacturaVenta facturaConIVA = new FacturaVenta();
-        facturaConIVA.setClienteDTO(facturaADividir.getClienteDTO());
+        facturaConIVA.setClienteEmbedded(facturaADividir.getClienteEmbedded());
         facturaConIVA.setUsuario(facturaADividir.getUsuario());
         facturaConIVA.setPedido(facturaADividir.getPedido());
         facturaConIVA.setTipoComprobante(facturaADividir.getTipoComprobante());
