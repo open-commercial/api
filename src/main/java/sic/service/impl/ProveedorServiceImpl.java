@@ -9,6 +9,7 @@ import sic.modelo.*;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
@@ -45,13 +46,16 @@ public class ProveedorServiceImpl implements IProveedorService {
   }
 
   @Override
-  public Proveedor getProveedorPorId(Long idProveedor) {
-    Proveedor proveedor = proveedorRepository.findById(idProveedor);
-    if (proveedor == null) {
+  public Proveedor getProveedorNoEliminadoPorId(long idProveedor) {
+    Optional<Proveedor> proveedor = proveedorRepository
+      .findById(idProveedor);
+    if (proveedor.isPresent() && !proveedor.get().isEliminado()) {
+      return proveedor.get();
+    } else {
       throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_no_existente"));
+        ResourceBundle.getBundle("Mensajes")
+          .getString("mensaje_proveedor_no_existente"));
     }
-    return proveedor;
   }
 
   @Override
@@ -72,8 +76,8 @@ public class ProveedorServiceImpl implements IProveedorService {
       builder.or(rsPredicate);
     }
     if (criteria.isBuscaPorIdFiscal()) builder.or(qProveedor.idFiscal.eq(criteria.getIdFiscal()));
-    if (criteria.isBuscaPorCodigo())
-      builder.or(qProveedor.codigo.containsIgnoreCase(criteria.getCodigo()));
+    if (criteria.isBuscaPorNroProveedor())
+      builder.or(qProveedor.nroProveedor.containsIgnoreCase(criteria.getNroProveedor()));
     if (criteria.isBuscaPorLocalidad())
       builder.and(qProveedor.ubicacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
@@ -89,11 +93,6 @@ public class ProveedorServiceImpl implements IProveedorService {
   }
 
   @Override
-  public Proveedor getProveedorPorCodigo(String codigo, Empresa empresa) {
-    return proveedorRepository.findByCodigoAndEmpresaAndEliminado(codigo, empresa, false);
-  }
-
-  @Override
   public Proveedor getProveedorPorIdFiscal(Long idFiscal, Empresa empresa) {
     return proveedorRepository.findByIdFiscalAndEmpresaAndEliminado(idFiscal, empresa, false);
   }
@@ -105,23 +104,6 @@ public class ProveedorServiceImpl implements IProveedorService {
 
   private void validarOperacion(TipoDeOperacion operacion, Proveedor proveedor) {
     // Duplicados
-    // Codigo
-    if (!proveedor.getCodigo().equals("")) {
-      Proveedor proveedorDuplicado =
-          this.getProveedorPorCodigo(proveedor.getCodigo(), proveedor.getEmpresa());
-      if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
-          && proveedorDuplicado != null
-          && proveedorDuplicado.getId_Proveedor() != proveedor.getId_Proveedor()) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_proveedor_duplicado_codigo"));
-      }
-      if (operacion.equals(TipoDeOperacion.ALTA)
-          && proveedorDuplicado != null
-          && !proveedor.getCodigo().equals("")) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_proveedor_duplicado_codigo"));
-      }
-    }
     // ID Fiscal
     if (proveedor.getIdFiscal() != null) {
       Proveedor proveedorDuplicado =
@@ -162,7 +144,7 @@ public class ProveedorServiceImpl implements IProveedorService {
   @Override
   @Transactional
   public Proveedor guardar(@Validated Proveedor proveedor) {
-    if (proveedor.getCodigo() == null) proveedor.setCodigo("");
+    proveedor.setNroProveedor(this.generarNroDeProveedor(proveedor.getEmpresa()));
     if (proveedor.getUbicacion() != null && proveedor.getUbicacion().getIdLocalidad() != null) {
       proveedor
           .getUbicacion()
@@ -191,7 +173,7 @@ public class ProveedorServiceImpl implements IProveedorService {
   @Override
   @Transactional
   public void eliminar(long idProveedor) {
-    Proveedor proveedor = this.getProveedorPorId(idProveedor);
+    Proveedor proveedor = this.getProveedorNoEliminadoPorId(idProveedor);
     if (proveedor == null) {
       throw new EntityNotFoundException(
           ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_no_existente"));
@@ -200,5 +182,22 @@ public class ProveedorServiceImpl implements IProveedorService {
     proveedor.setEliminado(true);
     proveedor.setUbicacion(null);
     proveedorRepository.save(proveedor);
+  }
+
+  @Override
+  public String generarNroDeProveedor(Empresa empresa) {
+    long min = 1L;
+    long max = 99999L; // 5 digitos
+    long randomLong = 0L;
+    boolean esRepetido = true;
+    while (esRepetido) {
+      randomLong = min + (long) (Math.random() * (max - min));
+      String nroProveedor = Long.toString(randomLong);
+      Proveedor p =
+          proveedorRepository.findByNroProveedorAndEmpresaAndEliminado(
+              nroProveedor, empresa, false);
+      if (p == null) esRepetido = false;
+    }
+    return Long.toString(randomLong);
   }
 }

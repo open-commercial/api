@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.util.*;
 import javax.imageio.ImageIO;
+import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
 import javax.validation.Valid;
 
@@ -62,8 +63,15 @@ public class ReciboServiceImpl implements IReciboService {
   }
 
   @Override
-  public Recibo getById(long idRecibo) {
-    return reciboRepository.findById(idRecibo);
+  public Recibo getReciboNoEliminadoPorId(long idRecibo) {
+    Optional<Recibo> recibo = reciboRepository.findById(idRecibo);
+    if (recibo.isPresent() && !recibo.get().isEliminado()) {
+      return recibo.get();
+    } else {
+      throw new EntityNotFoundException(
+        ResourceBundle.getBundle("Mensajes")
+          .getString("mensaje_recibo_no_existente"));
+    }
   }
 
   private BooleanBuilder getBuilder(BusquedaReciboCriteria criteria) {
@@ -204,7 +212,7 @@ public class ReciboServiceImpl implements IReciboService {
         recibo.setUsuario(usuario);
         recibo.setEmpresa(empresa);
         recibo.setFecha(fecha);
-        FormaDePago fdp = formaDePagoService.getFormasDePagoPorId(idFormaDePago);
+        FormaDePago fdp = formaDePagoService.getFormasDePagoNoEliminadoPorId(idFormaDePago);
         recibo.setFormaDePago(fdp);
         recibo.setMonto(montos[i]);
         recibo.setNumSerie(
@@ -224,7 +232,7 @@ public class ReciboServiceImpl implements IReciboService {
   @Override
   @Transactional
   public void eliminar(long idRecibo) {
-    Recibo r = reciboRepository.findById(idRecibo);
+    Recibo r = this.getReciboNoEliminadoPorId(idRecibo);
     if (!notaService.existsNotaDebitoPorRecibo(r)) {
       r.setEliminado(true);
       this.cuentaCorrienteService.asentarEnCuentaCorriente(r, TipoDeOperacion.ELIMINACION);

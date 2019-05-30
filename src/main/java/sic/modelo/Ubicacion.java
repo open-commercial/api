@@ -22,7 +22,7 @@ import java.io.Serializable;
 public class Ubicacion implements Serializable {
 
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long idUbicacion;
 
   @ManyToOne

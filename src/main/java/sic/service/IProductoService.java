@@ -46,7 +46,7 @@ public interface IProductoService {
 
   Producto getProductoPorDescripcion(String descripcion, Empresa empresa);
 
-  Producto getProductoPorId(long idProducto);
+  Producto getProductoNoEliminadoPorId(long idProducto);
 
   Page<Producto> getProductosConPrecioBonificado(Page<Producto> productos, Cliente cliente);
 

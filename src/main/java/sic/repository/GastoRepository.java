@@ -4,16 +4,13 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.Empresa;
 import sic.modelo.Gasto;
 
-public interface GastoRepository extends PagingAndSortingRepository<Gasto, Long>, QueryDslPredicateExecutor<Gasto>, GastoRepositoryCustom {
-
-    @Query("SELECT g FROM Gasto g WHERE g.id_Gasto = :idGasto AND g.eliminado = false")
-    Gasto findById(@Param("idGasto") long idGasto);
+public interface GastoRepository extends PagingAndSortingRepository<Gasto, Long>, QuerydslPredicateExecutor<Gasto>, GastoRepositoryCustom {
 
     @Query("SELECT g FROM Gasto g " +
             "WHERE g.empresa.id_Empresa = :idEmpresa " +

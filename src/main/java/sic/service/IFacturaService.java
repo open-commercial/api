@@ -12,7 +12,7 @@ import javax.validation.Valid;
 
 public interface IFacturaService {
 
-  Factura getFacturaPorId(Long idFactura);
+  Factura getFacturaNoEliminadaPorId(long idFactura);
 
   List<Factura> getFacturasDelPedido(Long idPedido);
 

@@ -22,7 +22,9 @@ import sic.controller.Views;
 @ToString
 public class ItemCarritoCompra implements Serializable {
 
-  @Id @GeneratedValue private Long idItemCarritoCompra;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long idItemCarritoCompra;
 
   @JsonView(Views.Public.class)
   @Column(precision = 25, scale = 15)

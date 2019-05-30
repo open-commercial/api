@@ -37,7 +37,7 @@ public class UsuarioController {
 
   @GetMapping("/usuarios/{idUsuario}")
   public Usuario getUsuarioPorId(@PathVariable long idUsuario) {
-    return usuarioService.getUsuarioPorId(idUsuario);
+    return usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
   }
 
   @GetMapping("/usuarios/busqueda/criteria")
@@ -55,22 +55,22 @@ public class UsuarioController {
     Pageable pageable;
     if (ordenarPor == null || sentido == null) {
       pageable =
-          new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombre"));
+          PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombre"));
     } else {
       switch (sentido) {
         case "ASC":
           pageable =
-              new PageRequest(
+              PageRequest.of(
                   pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
           break;
         case "DESC":
           pageable =
-              new PageRequest(
+              PageRequest.of(
                   pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
           break;
         default:
           pageable =
-              new PageRequest(
+              PageRequest.of(
                   pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombre"));
           break;
       }
@@ -125,7 +125,7 @@ public class UsuarioController {
         usuarioLoggedIn.getId_Usuario() == usuarioDTO.getId_Usuario();
     if (usuarioSeModificaASiMismo || usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
       Usuario usuarioPorActualizar = modelMapper.map(usuarioDTO, Usuario.class);
-      Usuario usuarioPersistido = usuarioService.getUsuarioPorId(usuarioDTO.getId_Usuario());
+      Usuario usuarioPersistido = usuarioService.getUsuarioNoEliminadoPorId(usuarioDTO.getId_Usuario());
       if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
         usuarioPorActualizar.setRoles(usuarioPersistido.getRoles());
       }

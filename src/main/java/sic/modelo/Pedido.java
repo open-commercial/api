@@ -20,7 +20,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 import sic.modelo.dto.UbicacionDTO;
 
 @Entity
@@ -37,7 +37,9 @@ import sic.modelo.dto.UbicacionDTO;
 @JsonIgnoreProperties({"cliente", "usuario", "empresa", "tipoDeEnvio"})
 public class Pedido implements Serializable {
 
-  @Id @GeneratedValue private long id_Pedido;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private long id_Pedido;
 
   private long nroPedido;
 

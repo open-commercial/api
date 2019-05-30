@@ -72,7 +72,7 @@ public class NotaController {
     Rol.COMPRADOR
   })
   public Nota getNota(@PathVariable long idNota) {
-    return notaService.getNotaPorId(idNota);
+    return notaService.getNotaNoEliminadaPorId(idNota);
   }
 
   @GetMapping("/notas/busqueda/criteria")
@@ -134,15 +134,15 @@ public class NotaController {
   private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
     String ordenDefault = "fecha";
     if (ordenarPor == null || sentido == null) {
-      return new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
     } else {
       switch (sentido) {
         case "ASC":
-          return new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
         case "DESC":
-          return new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
         default:
-          return new PageRequest(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
       }
     }
   }
@@ -174,7 +174,7 @@ public class NotaController {
     Rol.COMPRADOR
   })
   public boolean existeNotaDebitoRecibo(@PathVariable long idRecibo) {
-    return notaService.existsNotaDebitoPorRecibo(reciboService.getById(idRecibo));
+    return notaService.existsNotaDebitoPorRecibo(reciboService.getReciboNoEliminadoPorId(idRecibo));
   }
 
   @GetMapping("/notas/clientes/tipos/credito")
@@ -199,7 +199,7 @@ public class NotaController {
     Rol.COMPRADOR
   })
   public TipoDeComprobante[] getTipoNotaDebitoCliente(
-    @RequestParam long idCliente, @RequestParam long idEmpresa) {
+      @RequestParam long idCliente, @RequestParam long idEmpresa) {
     return notaService.getTipoNotaDebitoCliente(idCliente, idEmpresa);
   }
 
@@ -255,12 +255,12 @@ public class NotaController {
   }
 
   @PostMapping("/notas/credito/calculos")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public NotaCredito calcularNotaCreditoConFactura(
       @RequestBody NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     NotaCredito notaCreditoNueva = new NotaCredito();
-    Factura factura = facturaService.getFacturaPorId(nuevaNotaCreditoDeFacturaDTO.getIdFactura());
+    Factura factura = facturaService.getFacturaNoEliminadaPorId(nuevaNotaCreditoDeFacturaDTO.getIdFactura());
     if (Arrays.asList(nuevaNotaCreditoDeFacturaDTO.getCantidades()).contains(null)
         || Arrays.asList(nuevaNotaCreditoDeFacturaDTO.getIdsRenglonesFactura()).contains(null)) {
       throw new BusinessServiceException(
@@ -309,22 +309,22 @@ public class NotaController {
     notaCreditoNueva.setTotal(notaService.calcularTotalCredito(notaCreditoNueva.getSubTotalBruto(), notaCreditoNueva.getIva105Neto(), notaCreditoNueva.getIva21Neto()));
     notaCreditoNueva.setFecha(new Date());
     if (factura instanceof FacturaVenta) {
-      notaCreditoNueva.setCliente(clienteService.getClientePorId(((FacturaVenta)factura).getIdCliente()));
+      notaCreditoNueva.setCliente(clienteService.getClienteNoEliminadoPorId(((FacturaVenta)factura).getIdCliente()));
       notaCreditoNueva.setFacturaVenta((FacturaVenta)factura);
     } else if (factura instanceof FacturaCompra) {
-      notaCreditoNueva.setProveedor(proveedorService.getProveedorPorId(((FacturaCompra)factura).getIdProveedor()));
+      notaCreditoNueva.setProveedor(proveedorService.getProveedorNoEliminadoPorId(((FacturaCompra)factura).getIdProveedor()));
       notaCreditoNueva.setFacturaCompra((FacturaCompra) factura);
     }
     notaCreditoNueva.setEmpresa(factura.getEmpresa());
     notaCreditoNueva.setModificaStock(nuevaNotaCreditoDeFacturaDTO.isModificaStock());
     notaCreditoNueva.setMotivo(nuevaNotaCreditoDeFacturaDTO.getMotivo());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    notaCreditoNueva.setUsuario(usuarioService.getUsuarioPorId(((Integer) claims.get("idUsuario")).longValue()));
+    notaCreditoNueva.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     return notaCreditoNueva;
   }
 
   @PostMapping("/notas/credito/calculos-sin-factura")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public NotaCredito calcularNotaCreditoSinFactura(
       @RequestBody NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -377,24 +377,24 @@ public class NotaController {
     }
     if (nuevaNotaCreditoSinFacturaDTO.getIdCliente() != null) {
       notaCreditoNueva.setCliente(
-          clienteService.getClientePorId(nuevaNotaCreditoSinFacturaDTO.getIdCliente()));
+          clienteService.getClienteNoEliminadoPorId(nuevaNotaCreditoSinFacturaDTO.getIdCliente()));
     }
     if (nuevaNotaCreditoSinFacturaDTO.getIdProveedor() != null) {
       notaCreditoNueva.setProveedor(
-          proveedorService.getProveedorPorId(nuevaNotaCreditoSinFacturaDTO.getIdProveedor()));
+          proveedorService.getProveedorNoEliminadoPorId(nuevaNotaCreditoSinFacturaDTO.getIdProveedor()));
     }
     notaCreditoNueva.setEmpresa(
         empresaService.getEmpresaPorId(nuevaNotaCreditoSinFacturaDTO.getIdEmpresa()));
     notaCreditoNueva.setModificaStock(false);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     notaCreditoNueva.setUsuario(
-        usuarioService.getUsuarioPorId(((Integer) claims.get("idUsuario")).longValue()));
+        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     notaCreditoNueva.setMotivo(nuevaNotaCreditoSinFacturaDTO.getMotivo());
     return notaCreditoNueva;
   }
 
   @PostMapping("/notas/credito")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Nota guardarNotaCredito(
       @RequestBody NotaCreditoDTO notaCreditoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -405,56 +405,56 @@ public class NotaController {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_nota_cliente_proveedor_juntos"));
     }
     if (notaCreditoDTO.getIdCliente() != null) {
-      nota.setCliente(clienteService.getClientePorId(notaCreditoDTO.getIdCliente()));
+      nota.setCliente(clienteService.getClienteNoEliminadoPorId(notaCreditoDTO.getIdCliente()));
       nota.setMovimiento(Movimiento.VENTA);
       if (notaCreditoDTO.getIdFacturaVenta() != null) {
         nota.setFacturaVenta(
-            (FacturaVenta) facturaService.getFacturaPorId(notaCreditoDTO.getIdFacturaVenta()));
+            (FacturaVenta) facturaService.getFacturaNoEliminadaPorId(notaCreditoDTO.getIdFacturaVenta()));
       }
     }
     if (notaCreditoDTO.getIdProveedor() != null) {
-      nota.setProveedor(proveedorService.getProveedorPorId(notaCreditoDTO.getIdProveedor()));
+      nota.setProveedor(proveedorService.getProveedorNoEliminadoPorId(notaCreditoDTO.getIdProveedor()));
       nota.setMovimiento(Movimiento.COMPRA);
       if (notaCreditoDTO.getIdFacturaCompra() != null) {
         nota.setFacturaCompra(
-            (FacturaCompra) facturaService.getFacturaPorId(notaCreditoDTO.getIdFacturaCompra()));
+            (FacturaCompra) facturaService.getFacturaNoEliminadaPorId(notaCreditoDTO.getIdFacturaCompra()));
       }
     }
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     nota.setUsuario(
-        usuarioService.getUsuarioPorId(((Integer) claims.get("idUsuario")).longValue()));
+        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     return notaService.guardarNotaCredito(nota);
   }
 
   @PostMapping("/notas/debito/clientes")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Nota guardarNotaDebitoCliente(
       @RequestBody NotaDebitoDTO notaDebitoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     NotaDebito nota = modelMapper.map(notaDebitoDTO, NotaDebito.class);
     nota.setEmpresa(empresaService.getEmpresaPorId(notaDebitoDTO.getIdEmpresa()));
-    nota.setCliente(clienteService.getClientePorId(notaDebitoDTO.getIdCliente()));
+    nota.setCliente(clienteService.getClienteNoEliminadoPorId(notaDebitoDTO.getIdCliente()));
     nota.setMovimiento(Movimiento.VENTA);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     nota.setUsuario(
-        usuarioService.getUsuarioPorId(((Integer) claims.get("idUsuario")).longValue()));
-    nota.setRecibo(reciboService.getById(notaDebitoDTO.getIdRecibo()));
+        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+    nota.setRecibo(reciboService.getReciboNoEliminadoPorId(notaDebitoDTO.getIdRecibo()));
     return notaService.guardarNotaDebito(nota);
   }
 
   @PostMapping("/notas/debito/proveedores")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Nota guardarNotaDebitoProveedor(
       @RequestBody NotaDebitoDTO notaDebitoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     NotaDebito nota = modelMapper.map(notaDebitoDTO, NotaDebito.class);
     nota.setEmpresa(empresaService.getEmpresaPorId(notaDebitoDTO.getIdEmpresa()));
-    nota.setProveedor(proveedorService.getProveedorPorId(notaDebitoDTO.getIdProveedor()));
+    nota.setProveedor(proveedorService.getProveedorNoEliminadoPorId(notaDebitoDTO.getIdProveedor()));
     nota.setMovimiento(Movimiento.COMPRA);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     nota.setUsuario(
-        usuarioService.getUsuarioPorId(((Integer) claims.get("idUsuario")).longValue()));
-    nota.setRecibo(reciboService.getById(notaDebitoDTO.getIdRecibo()));
+        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+    nota.setRecibo(reciboService.getReciboNoEliminadoPorId(notaDebitoDTO.getIdRecibo()));
     return notaService.guardarNotaDebito(nota);
   }
 
@@ -469,7 +469,7 @@ public class NotaController {
   public ResponseEntity<byte[]> getReporteNota(@PathVariable long idNota) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_PDF);
-    Nota nota = notaService.getNotaPorId(idNota);
+    Nota nota = notaService.getNotaNoEliminadaPorId(idNota);
     String fileName = (nota instanceof NotaCredito) ? "NotaCredito.pdf" : "NotaDebito.pdf";
     headers.add("content-disposition", "inline; filename=" + fileName);
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
@@ -480,11 +480,11 @@ public class NotaController {
   @PostMapping("/notas/{idNota}/autorizacion")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Nota autorizarNota(@PathVariable long idNota) {
-    return notaService.autorizarNota(notaService.getNotaPorId(idNota));
+    return notaService.autorizarNota(notaService.getNotaNoEliminadaPorId(idNota));
   }
 
   @GetMapping("/notas/renglon/debito/recibo/{idRecibo}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public List<RenglonNotaDebito> calcularRenglonNotaDebito(
       @PathVariable long idRecibo,
       @RequestParam BigDecimal monto,

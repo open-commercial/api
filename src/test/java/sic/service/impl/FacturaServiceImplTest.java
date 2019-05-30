@@ -191,7 +191,7 @@ class FacturaServiceImplTest {
     when(producto.getPrecioVentaPublico()).thenReturn(BigDecimal.ONE);
     when(producto.getIvaPorcentaje()).thenReturn(new BigDecimal("21.00"));
     when(producto.getPrecioLista()).thenReturn(BigDecimal.ONE);
-    when(productoService.getProductoPorId(1L)).thenReturn(producto);
+    when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(producto);
     when(renglon1.getIdProductoItem()).thenReturn(1L);
     when(renglon1.getIvaNeto()).thenReturn(new BigDecimal("21"));
     when(renglon1.getDescuentoPorcentaje()).thenReturn(BigDecimal.ZERO);

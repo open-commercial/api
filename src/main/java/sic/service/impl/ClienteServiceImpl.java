@@ -5,6 +5,7 @@ import com.querydsl.core.BooleanBuilder;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.Date;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
@@ -18,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.service.*;
-import sic.util.Validator;
 import sic.repository.ClienteRepository;
 
 @Service
@@ -45,12 +45,13 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public Cliente getClientePorId(long idCliente) {
-    Cliente cliente = clienteRepository.findOne(idCliente);
-    if (cliente == null) {
+  public Cliente getClienteNoEliminadoPorId(long idCliente) {
+    Optional<Cliente> cliente = clienteRepository.findById(idCliente);
+    if (cliente.isPresent() && !cliente.get().isEliminado()) {
+      return cliente.get();
+    } else {
       throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_cliente_no_existente"));
     }
-    return cliente;
   }
 
   @Override
@@ -125,7 +126,7 @@ public class ClienteServiceImpl implements IClienteService {
     if (criteria.isBuscaPorProvincia())
       builder.and(
           qCliente.ubicacionEnvio.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
-    Usuario usuarioLogueado = usuarioService.getUsuarioPorId(idUsuarioLoggedIn);
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
         && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
@@ -286,7 +287,7 @@ public class ClienteServiceImpl implements IClienteService {
   @Override
   @Transactional
   public void eliminar(long idCliente) {
-    Cliente cliente = this.getClientePorId(idCliente);
+    Cliente cliente = this.getClienteNoEliminadoPorId(idCliente);
     if (cliente == null) {
       throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_cliente_no_existente"));
     }

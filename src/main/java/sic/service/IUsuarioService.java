@@ -7,7 +7,7 @@ import javax.validation.Valid;
 
 public interface IUsuarioService {
 
-  Usuario getUsuarioPorId(Long idUsuario);
+  Usuario getUsuarioNoEliminadoPorId(Long idUsuario);
 
   Usuario getUsuarioPorUsername(String username);
 

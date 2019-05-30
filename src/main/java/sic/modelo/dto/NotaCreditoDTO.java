@@ -4,13 +4,13 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import sic.modelo.RenglonNotaCredito;
 
 @Data
 @EqualsAndHashCode(callSuper = true, exclude = {"renglonesNotaCredito"})
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class NotaCreditoDTO extends NotaDTO implements Serializable {
     

@@ -21,7 +21,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
-import org.springframework.web.client.RestTemplate;
 import sic.builder.*;
 import sic.modelo.*;
 import sic.modelo.dto.*;
@@ -525,7 +524,6 @@ class AppIntegrationTest {
     restTemplate.postForObject(apiPrefix + "/medidas?idEmpresa=1", medidaKilo, MedidaDTO.class);
     ProveedorDTO proveedorDTO =
         ProveedorDTO.builder()
-            .codigo("ABC123")
             .razonSocial("Chamaco S.R.L.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
             .idFiscal(23127895679L)
@@ -909,7 +907,7 @@ class AppIntegrationTest {
     restTemplate.put(apiPrefix + "/clientes", clienteRecuperado);
     clienteRecuperado = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class);
     assertEquals("14 de Julio", clienteRecuperado.getUbicacionFacturacion().getCalle());
-    assertEquals(785, clienteRecuperado.getUbicacionFacturacion().getNumero());
+    assertEquals(785, clienteRecuperado.getUbicacionFacturacion().getNumero().intValue());
   }
 
   @Test
@@ -944,7 +942,7 @@ class AppIntegrationTest {
     restTemplate.put(apiPrefix + "/clientes", clienteRecuperado);
     clienteRecuperado = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class);
     assertEquals("8 de Agosto", clienteRecuperado.getUbicacionEnvio().getCalle());
-    assertEquals(964, clienteRecuperado.getUbicacionEnvio().getNumero());
+    assertEquals(964, clienteRecuperado.getUbicacionEnvio().getNumero().intValue());
   }
 
   @Test
@@ -981,9 +979,9 @@ class AppIntegrationTest {
     restTemplate.put(apiPrefix + "/clientes", clienteRecuperado);
     clienteRecuperado = restTemplate.getForObject(apiPrefix + "/clientes/3", ClienteDTO.class);
     assertEquals("Santa Cruz", clienteRecuperado.getUbicacionFacturacion().getCalle());
-    assertEquals(1247, clienteRecuperado.getUbicacionFacturacion().getNumero());
+    assertEquals(1247, clienteRecuperado.getUbicacionFacturacion().getNumero().intValue());
     assertEquals("8 de Agosto", clienteRecuperado.getUbicacionEnvio().getCalle());
-    assertEquals(964, clienteRecuperado.getUbicacionEnvio().getNumero());
+    assertEquals(964, clienteRecuperado.getUbicacionEnvio().getNumero().intValue());
   }
 
   @Test
@@ -1082,7 +1080,6 @@ class AppIntegrationTest {
     ProveedorDTO proveedor =
       ProveedorDTO.builder()
         .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-        .codigo("555888")
         .contacto("Ricardo")
         .email("ricardodelbarrio@gmail.com")
         .telPrimario("4512778851")
@@ -1108,7 +1105,6 @@ class AppIntegrationTest {
     ProveedorDTO proveedor =
       ProveedorDTO.builder()
         .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-        .codigo("555888")
         .contacto("Ricardo")
         .email("ricardodelbarrio@gmail.com")
         .telPrimario("4512778851")
@@ -1284,7 +1280,6 @@ class AppIntegrationTest {
     ProveedorDTO proveedor =
       ProveedorDTO.builder()
         .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-        .codigo("555888")
         .contacto("Ricardo")
         .email("ricardodelbarrio@gmail.com")
         .telPrimario("4512778851")
@@ -2454,7 +2449,7 @@ class AppIntegrationTest {
     facturaCompraB.setRazonSocialProveedor("Chamaco S.R.L.");
     assertEquals(facturaCompraB, facturas[0]);
     ProveedorDTO proveedor =
-      restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
+        restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     UsuarioDTO usuario = restTemplate.getForObject(apiPrefix + "/usuarios/2", UsuarioDTO.class);
     TransportistaDTO transportista =
@@ -2945,7 +2940,6 @@ class AppIntegrationTest {
     long[] idsProductos = {1L, 2L};
     ProveedorDTO proveedor =
       ProveedorDTO.builder()
-        .codigo("QWE456")
         .razonSocial("Chamigo S.R.L.")
         .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
         .idFiscal(99999999999L)
@@ -3160,6 +3154,40 @@ class AppIntegrationTest {
     } catch (RestClientResponseException ex) {
       assertTrue(ex.getMessage().startsWith("El producto solicitado no existe."));
     }
+  }
+
+  @Test
+  void shouldVerificarProductoSinStockDisponible() {
+    NuevoProductoDTO productoTestSinStock =
+        NuevoProductoDTO.builder()
+            .codigo(RandomStringUtils.random(10, false, true))
+            .descripcion(RandomStringUtils.random(10, true, false))
+            .cantidad(BigDecimal.ZERO)
+            .bulto(BigDecimal.ONE)
+            .precioCosto(CIEN)
+            .gananciaPorcentaje(new BigDecimal("900"))
+            .gananciaNeto(new BigDecimal("900"))
+            .precioVentaPublico(new BigDecimal("1000"))
+            .ivaPorcentaje(new BigDecimal("21.0"))
+            .ivaNeto(new BigDecimal("210"))
+            .precioLista(new BigDecimal("1210"))
+            .nota("ProductoTestSinStock")
+            .publico(true)
+            .destacado(true)
+            .build();
+    ProductoDTO productoSinStock =
+        restTemplate.postForObject(
+            apiPrefix + "/productos?idMedida=1&idRubro=1&idProveedor=1&idEmpresa=1",
+            productoTestSinStock,
+            ProductoDTO.class);
+    Map faltante =
+        restTemplate.getForObject(
+            apiPrefix
+                + "/productos/disponibilidad-stock?idProducto="
+                + productoSinStock.getIdProducto()
+                + "&cantidad=1",
+            Map.class);
+    assertFalse(faltante.isEmpty(), "Debería no devolver faltantes");
   }
 
   @Test
@@ -4398,8 +4426,7 @@ class AppIntegrationTest {
       0,
       restTemplate
         .getForObject(apiPrefix + "/cuentas-corriente/proveedores/1/saldo", BigDecimal.class)
-        .doubleValue(),
-      0);
+        .doubleValue());
     restTemplate.delete(apiPrefix + "/recibos/1");
     assertEquals(
       new BigDecimal("-599.250000000000000"),
@@ -4436,11 +4463,11 @@ class AppIntegrationTest {
                 new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {})
             .getBody()
             .getContent();
-    assertEquals(-87.85, renglonesCuentaCorriente.get(0).getSaldo(), 0);
-    assertEquals(-499.25, renglonesCuentaCorriente.get(1).getSaldo(), 0);
-    assertEquals(100, renglonesCuentaCorriente.get(2).getSaldo(), 0);
-    assertEquals(-100, renglonesCuentaCorriente.get(3).getSaldo(), 0);
-    assertEquals(-599.25, renglonesCuentaCorriente.get(4).getSaldo(), 0);
+    assertEquals(-87.85, renglonesCuentaCorriente.get(0).getSaldo().doubleValue());
+    assertEquals(-499.25, renglonesCuentaCorriente.get(1).getSaldo().doubleValue());
+    assertEquals(100, renglonesCuentaCorriente.get(2).getSaldo().doubleValue());
+    assertEquals(-100, renglonesCuentaCorriente.get(3).getSaldo().doubleValue());
+    assertEquals(-599.25, renglonesCuentaCorriente.get(4).getSaldo().doubleValue());
     this.crearNotaDebitoParaProveedor();
     renglonesCuentaCorriente =
         restTemplate
@@ -4451,12 +4478,12 @@ class AppIntegrationTest {
                 new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {})
             .getBody()
             .getContent();
-    assertEquals(-408.85, renglonesCuentaCorriente.get(0).getSaldo(), 0);
-    assertEquals(-87.85, renglonesCuentaCorriente.get(1).getSaldo(), 0);
-    assertEquals(-499.25, renglonesCuentaCorriente.get(2).getSaldo(), 0);
-    assertEquals(100, renglonesCuentaCorriente.get(3).getSaldo(), 0);
-    assertEquals(-100, renglonesCuentaCorriente.get(4).getSaldo(), 0);
-    assertEquals(-599.25, renglonesCuentaCorriente.get(5).getSaldo(), 0);
+    assertEquals(-408.85, renglonesCuentaCorriente.get(0).getSaldo().doubleValue());
+    assertEquals(-87.85, renglonesCuentaCorriente.get(1).getSaldo().doubleValue());
+    assertEquals(-499.25, renglonesCuentaCorriente.get(2).getSaldo().doubleValue());
+    assertEquals(100, renglonesCuentaCorriente.get(3).getSaldo().doubleValue());
+    assertEquals(-100, renglonesCuentaCorriente.get(4).getSaldo().doubleValue());
+    assertEquals(-599.25, renglonesCuentaCorriente.get(5).getSaldo().doubleValue());
   }
 
   @Test
@@ -4710,6 +4737,51 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldCrearGasto() {
+    this.abrirCaja();
+    GastoDTO gasto =
+      GastoDTO.builder()
+        .concepto("Gasto test")
+        .fecha(new Date())
+        .monto(new BigDecimal("200.000000000000000"))
+        .build();
+    restTemplate.postForObject(
+      apiPrefix + "/gastos?idEmpresa=1&idFormaDePago=1", gasto, GastoDTO.class);
+    assertEquals(
+      new BigDecimal("-200.000000000000000"),
+      restTemplate.getForObject(apiPrefix + "/cajas/1/saldo-sistema", BigDecimal.class));
+    GastoDTO gastoRecuperado =  restTemplate.getForObject(apiPrefix + "/gastos/1", GastoDTO.class);
+    assertEquals(gasto, gastoRecuperado);
+  }
+
+  @Test
+  void shouldEliminarGasto() {
+    this.shouldCrearGasto();
+    restTemplate.delete(apiPrefix + "/gastos/1");
+    try {
+      restTemplate.getForObject(apiPrefix + "/gastos/1", GastoDTO.class);
+    } catch (RestClientResponseException ex) {
+      assertTrue(ex.getMessage().startsWith("El gasto no existe o se encuentra eliminado."));
+    }
+  }
+
+  @Test
+  void shouldRecuperarGastoPorEmpresa() {
+    this.shouldCrearGasto();
+    List<GastoDTO> gastos =
+        restTemplate
+            .exchange(
+                apiPrefix + "/gastos/busqueda/criteria?idEmpresa=1",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<PaginaRespuestaRest<GastoDTO>>() {})
+            .getBody()
+            .getContent();
+    GastoDTO gastoRecuperado = restTemplate.getForObject(apiPrefix + "/gastos/1", GastoDTO.class);
+    assertEquals(gastoRecuperado, gastos.get(0));
+  }
+
+  @Test
   void shouldModificarCostoEnvioDeLocalidad() {
     LocalidadDTO localidad = restTemplate.getForObject(apiPrefix + "/ubicaciones/localidades/1", LocalidadDTO.class);
     localidad.setEnvioGratuito(true);
@@ -4762,25 +4834,25 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldAgregarMasDeUnMismoItemAlCarrito() {
+  void shouldModificarCantidadesDeUnItemDelCarrito() {
     this.crearProductos();
     this.shouldAgregarItemsAlCarritoCompra();
     restTemplate.postForObject(
-        apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=10",
+        apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=2",
         null,
         ItemCarritoCompra.class);
     ItemCarritoCompra item1 =
         restTemplate.getForObject(
             apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
-    assertEquals(15, item1.getCantidad().doubleValue());
+    assertEquals(2, item1.getCantidad().doubleValue());
     restTemplate.postForObject(
-        apiPrefix + "/carrito-compra/usuarios/1/productos/2?cantidad=5",
+        apiPrefix + "/carrito-compra/usuarios/1/productos/2?cantidad=-3",
         null,
         ItemCarritoCompra.class);
     ItemCarritoCompra item2 =
         restTemplate.getForObject(
             apiPrefix + "/carrito-compra/usuarios/1/productos/2", ItemCarritoCompra.class);
-    assertEquals(14, item2.getCantidad().doubleValue());
+    assertEquals(new BigDecimal("0E-15"), item2.getCantidad());
   }
 
   @Test

@@ -30,34 +30,39 @@ import sic.util.FormatterFechaHora;
 @Validated
 public class GastoServiceImpl implements IGastoService {
 
-    private final GastoRepository gastoRepository;
-    private final IEmpresaService empresaService;
-    private final ICajaService cajaService;
-    private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private final GastoRepository gastoRepository;
+  private final IEmpresaService empresaService;
+  private final ICajaService cajaService;
+  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
-    @Lazy
-    public GastoServiceImpl(GastoRepository gastoRepository, IEmpresaService empresaService, ICajaService cajaService) {
-        this.gastoRepository = gastoRepository;
-        this.empresaService = empresaService;
-        this.cajaService = cajaService;
-    }
+  @Autowired
+  @Lazy
+  public GastoServiceImpl(
+      GastoRepository gastoRepository, IEmpresaService empresaService, ICajaService cajaService) {
+    this.gastoRepository = gastoRepository;
+    this.empresaService = empresaService;
+    this.cajaService = cajaService;
+  }
 
   @Override
-  public Gasto getGastoPorId(Long idGasto) {
-    Gasto gasto = gastoRepository.findById(idGasto);
-    if (gasto == null) {
-      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_gasto_no_existente"));
+  public Gasto getGastoNoEliminadoPorId(Long idGasto) {
+    Optional<Gasto> gasto = gastoRepository
+      .findById(idGasto);
+    if (gasto.isPresent() && !gasto.get().isEliminado()) {
+      return gasto.get();
+    } else {
+      throw new EntityNotFoundException(
+        ResourceBundle.getBundle("Mensajes").getString("mensaje_gasto_no_existente"));
     }
-    return gasto;
   }
 
   @Override
   public void validarOperacion(Gasto gasto) {
     this.cajaService.validarMovimiento(gasto.getFecha(), gasto.getEmpresa().getId_Empresa());
-    if (gastoRepository.findOne(gasto.getId_Gasto()) != null) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_gasto_duplicada"));
+    if (gastoRepository.findById(gasto.getId_Gasto()).isPresent()) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_gasto_duplicada"));
     }
   }
 
@@ -120,26 +125,27 @@ public class GastoServiceImpl implements IGastoService {
     return builder;
   }
 
-    @Override
-    @Transactional
-    public Gasto guardar(@Valid Gasto gasto) {
-        this.validarOperacion(gasto);
-        gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getEmpresa().getId_Empresa()) + 1);
-        gasto = gastoRepository.save(gasto);
-        logger.warn("El Gasto {} se guardó correctamente.", gasto);
-        return gasto;
-    }
+  @Override
+  @Transactional
+  public Gasto guardar(@Valid Gasto gasto) {
+    gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getEmpresa().getId_Empresa()) + 1);
+    this.validarOperacion(gasto);
+    gasto = gastoRepository.save(gasto);
+    logger.warn("El Gasto {} se guardó correctamente.", gasto);
+    return gasto;
+  }
 
-    @Override
-    public List<Gasto> getGastosEntreFechasYFormaDePago(Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta) {
-        return gastoRepository.getGastosEntreFechasPorFormaDePago(empresa.getId_Empresa(), formaDePago.getId_FormaDePago(), desde, hasta);
-    }
-
+  @Override
+  public List<Gasto> getGastosEntreFechasYFormaDePago(
+      Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta) {
+    return gastoRepository.getGastosEntreFechasPorFormaDePago(
+        empresa.getId_Empresa(), formaDePago.getId_FormaDePago(), desde, hasta);
+  }
 
   @Override
   @Transactional
   public void eliminar(long idGasto) {
-    Gasto gastoParaEliminar = this.getGastoPorId(idGasto);
+    Gasto gastoParaEliminar = this.getGastoNoEliminadoPorId(idGasto);
     if (this.cajaService
         .getUltimaCaja(gastoParaEliminar.getEmpresa().getId_Empresa())
         .getEstado()
@@ -150,34 +156,40 @@ public class GastoServiceImpl implements IGastoService {
     gastoRepository.save(gastoParaEliminar);
   }
 
-    @Override
-    public long getUltimoNumeroDeGasto(long idEmpresa) {
-        Gasto gasto =
-          gastoRepository.findTopByEmpresaAndEliminadoOrderByNroGastoDesc(empresaService.getEmpresaPorId(idEmpresa), false);
-        if (gasto == null) {
-            return 1; // No existe ningun Gasto anterior
-        } else {
-            return 1 + gasto.getNroGasto();
-        }
+  @Override
+  public long getUltimoNumeroDeGasto(long idEmpresa) {
+    Gasto gasto =
+        gastoRepository.findTopByEmpresaAndEliminadoOrderByNroGastoDesc(
+            empresaService.getEmpresaPorId(idEmpresa), false);
+    if (gasto == null) {
+      return 1; // No existe ningun Gasto anterior
+    } else {
+      return 1 + gasto.getNroGasto();
     }
+  }
 
-    @Override
-    public BigDecimal getTotalGastosEntreFechasYFormaDePago(long idEmpresa, long idFormaDePago, Date desde, Date hasta) {
-        BigDecimal total = gastoRepository.getTotalGastosEntreFechasPorFormaDePago(idEmpresa, idFormaDePago, desde, hasta);
-        return (total == null) ? BigDecimal.ZERO : total;
-    }
+  @Override
+  public BigDecimal getTotalGastosEntreFechasYFormaDePago(
+      long idEmpresa, long idFormaDePago, Date desde, Date hasta) {
+    BigDecimal total =
+        gastoRepository.getTotalGastosEntreFechasPorFormaDePago(
+            idEmpresa, idFormaDePago, desde, hasta);
+    return (total == null) ? BigDecimal.ZERO : total;
+  }
 
-    @Override
-    public BigDecimal getTotalGastosQueAfectanCajaEntreFechas(long idEmpresa, Date desde, Date hasta) {
-        BigDecimal total = gastoRepository.getTotalGastosQueAfectanCajaEntreFechas(idEmpresa, desde, hasta);
-        return (total == null) ? BigDecimal.ZERO : total;
-    }
+  @Override
+  public BigDecimal getTotalGastosQueAfectanCajaEntreFechas(
+      long idEmpresa, Date desde, Date hasta) {
+    BigDecimal total =
+        gastoRepository.getTotalGastosQueAfectanCajaEntreFechas(idEmpresa, desde, hasta);
+    return (total == null) ? BigDecimal.ZERO : total;
+  }
 
-    @Override
-    public BigDecimal getTotalGastosEntreFechas(long idEmpresa, Date desde, Date hasta) {
-        BigDecimal total = gastoRepository.getTotalGastosEntreFechas(idEmpresa, desde, hasta);
-        return (total == null) ? BigDecimal.ZERO : total;
-    }
+  @Override
+  public BigDecimal getTotalGastosEntreFechas(long idEmpresa, Date desde, Date hasta) {
+    BigDecimal total = gastoRepository.getTotalGastosEntreFechas(idEmpresa, desde, hasta);
+    return (total == null) ? BigDecimal.ZERO : total;
+  }
 
   @Override
   public BigDecimal getTotalGastos(BusquedaGastoCriteria criteria) {

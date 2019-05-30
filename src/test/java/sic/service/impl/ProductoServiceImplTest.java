@@ -2,6 +2,7 @@ package sic.service.impl;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -75,8 +76,7 @@ class ProductoServiceImplTest {
     producto.setIdProducto(1);
     producto.setCantidad(BigDecimal.TEN);
     producto.setIlimitado(false);
-    when(productoRepository.findById(1L)).thenReturn(producto);
-    when(productoService.getProductoPorId(1)).thenReturn(producto);
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
     long[] idProducto = {1};
     BigDecimal[] cantidad = {BigDecimal.TEN.add(BigDecimal.ONE)};
     Map<Long, BigDecimal> resultadoObtenido =

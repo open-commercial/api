@@ -13,7 +13,7 @@ public interface IClienteService {
 
   void eliminar(long idCliente);
 
-  Cliente getClientePorId(long idCliente);
+  Cliente getClienteNoEliminadoPorId(long idCliente);
 
   Cliente getClientePorIdFiscal(Long idFiscal, Empresa empresa);
 

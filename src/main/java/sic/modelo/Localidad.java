@@ -2,13 +2,7 @@ package sic.modelo;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.DecimalMin;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -29,7 +23,9 @@ import lombok.ToString;
 @JsonIgnoreProperties("provincia")
 public class Localidad implements Serializable {
 
-  @Id @GeneratedValue private long idLocalidad;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private long idLocalidad;
 
   @Column(nullable = false)
   private String nombre;
