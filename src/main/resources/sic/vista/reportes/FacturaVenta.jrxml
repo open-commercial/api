@@ -720,7 +720,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{facturaVenta}.getCAE() == 0l)? "":$P{facturaVenta}.getCAE()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{facturaVenta}.getCae() == 0l)? "":$P{facturaVenta}.getCae()]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy">
 				<reportElement x="190" y="96" width="70" height="15" uuid="c76bf386-4a1c-4295-9d8e-bbf0dcf2b951">
@@ -731,7 +731,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{facturaVenta}.getVencimientoCAE() == null)?"":$P{facturaVenta}.getVencimientoCAE()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{facturaVenta}.getVencimientoCae() == null)?"":$P{facturaVenta}.getVencimientoCae()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="96" width="20" height="15" uuid="d5f954da-00dd-4d74-b2d1-436a48c8b1ec">
@@ -741,7 +741,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{facturaVenta}.getCAE() == 0l)? "":"CAE:"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{facturaVenta}.getCae() == 0l)? "":"CAE:"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="110" y="96" width="80" height="15" uuid="2c838051-1ca0-4a7f-836c-c29ecd4a55ca">
@@ -750,7 +750,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{facturaVenta}.getCAE() == 0l)? "":"Vencimiento CAE:"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{facturaVenta}.getCae() == 0l)? "":"Vencimiento CAE:"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="111" width="40" height="12" uuid="30130b08-8be7-47f8-8066-3714bda02db8">

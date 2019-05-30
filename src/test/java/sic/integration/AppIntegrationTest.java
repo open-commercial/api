@@ -349,7 +349,7 @@ class AppIntegrationTest {
 
   private void crearNotaDebitoParaProveedor() {
     NotaDebitoDTO notaDebito = new NotaDebitoDTO();
-    notaDebito.setCAE(0L);
+    notaDebito.setCae(0L);
     notaDebito.setFecha(new Date());
     List<RenglonNotaDebito> renglonesCalculados =
       Arrays.asList(

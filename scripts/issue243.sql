@@ -174,3 +174,7 @@ fv.nombreLocalidadEnvio = localidad.nombre,
 fv.nombreProvinciaEnvio = provincia.nombre;
 
 SET SQL_SAFE_UPDATES = 1;
+
+ALTER TABLE factura CHANGE `CAE` `cae` bigint(20);
+ALTER TABLE nota CHANGE `CAE` `cae` bigint(20);
+ALTER TABLE rengloncuentacorriente CHANGE `CAE` `cae` bigint(20);

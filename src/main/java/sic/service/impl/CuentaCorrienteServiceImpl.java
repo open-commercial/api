@@ -288,7 +288,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     rcc.setNota(nota);
     rcc.setFecha(nota.getFecha());
     rcc.setIdMovimiento(nota.getIdNota());
-    if (nota.getMovimiento() == Movimiento.COMPRA) rcc.setCAE(nota.getCAE());
+    if (nota.getMovimiento() == Movimiento.COMPRA) rcc.setCae(nota.getCae());
     cc.getRenglones().add(rcc);
     rcc.setCuentaCorriente(cc);
     this.renglonCuentaCorrienteRepository.save(rcc);

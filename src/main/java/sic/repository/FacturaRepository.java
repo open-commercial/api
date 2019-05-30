@@ -20,7 +20,7 @@ public interface FacturaRepository<T extends Factura> extends PagingAndSortingRe
     
     List<Factura> findAllByPedidoAndEliminada(Pedido pedido, boolean eliminada);
     
-    @Query("SELECT f.CAE FROM Factura f WHERE f.id_Factura = :idFactura AND f.eliminada = false")
-    Long getCAEById(@Param("idFactura") long idFactura);
+    @Query("SELECT f.cae FROM Factura f WHERE f.id_Factura = :idFactura AND f.eliminada = false")
+    Long getCaeById(@Param("idFactura") long idFactura);
     
 }

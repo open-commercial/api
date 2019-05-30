@@ -487,7 +487,7 @@ public class FacturaServiceImpl implements IFacturaService {
     }
     if (factura instanceof FacturaVenta) {
       FacturaVenta facturaVenta = (FacturaVenta) factura;
-      if (facturaVenta.getCAE() != 0L) {
+      if (facturaVenta.getCae() != 0L) {
         throw new BusinessServiceException(
             ResourceBundle.getBundle("Mensajes").getString("mensaje_factura_venta_CAE"));
       }
@@ -590,8 +590,8 @@ public class FacturaServiceImpl implements IFacturaService {
     ComprobanteAFIP comprobante = ComprobanteAFIP.builder()
                 .fecha(fv.getFecha())
                 .tipoComprobante(fv.getTipoComprobante())
-                .CAE(fv.getCAE())
-                .vencimientoCAE(fv.getVencimientoCAE())
+                .CAE(fv.getCae())
+                .vencimientoCAE(fv.getVencimientoCae())
                 .numSerieAfip(fv.getNumSerieAfip())
                 .numFacturaAfip(fv.getNumFacturaAfip())
                 .empresa(fv.getEmpresa())
@@ -603,8 +603,8 @@ public class FacturaServiceImpl implements IFacturaService {
                 .total(fv.getTotal())
                 .build();
         afipService.autorizar(comprobante);
-        fv.setCAE(comprobante.getCAE());
-        fv.setVencimientoCAE(comprobante.getVencimientoCAE());
+        fv.setCae(comprobante.getCAE());
+        fv.setVencimientoCae(comprobante.getVencimientoCAE());
         fv.setNumSerieAfip(comprobante.getNumSerieAfip());
         fv.setNumFacturaAfip(comprobante.getNumFacturaAfip());
         cuentaCorrienteService.updateCAEFactura(fv.getId_Factura(), comprobante.getCAE());

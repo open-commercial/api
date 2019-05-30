@@ -532,7 +532,7 @@ public class NotaServiceImpl implements INotaService {
         throw new BusinessServiceException(
             RESOURCE_BUNDLE.getString("mensaje_nota_fecha_incorrecta"));
       }
-      if (nota.getCAE() != 0L) {
+      if (nota.getCae() != 0L) {
         throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_nota_cliente_CAE"));
       }
     } else if (nota instanceof NotaCredito && nota.getMovimiento().equals(Movimiento.COMPRA)) {
@@ -783,7 +783,7 @@ public class NotaServiceImpl implements INotaService {
           (nota instanceof NotaDebito) ? ((NotaDebito) nota).getMontoNoGravado() : BigDecimal.ZERO;
       Cliente cliente;
       if (nota instanceof NotaCredito) {
-        if (nota.getFacturaVenta() != null && nota.getFacturaVenta().getCAE() == 0L) {
+        if (nota.getFacturaVenta() != null && nota.getFacturaVenta().getCae() == 0L) {
           throw new BusinessServiceException(
               RESOURCE_BUNDLE.getString("mensaje_nota_factura_relacionada_sin_CAE"));
         }
@@ -795,8 +795,8 @@ public class NotaServiceImpl implements INotaService {
           ComprobanteAFIP.builder()
               .fecha(nota.getFecha())
               .tipoComprobante(nota.getTipoComprobante())
-              .CAE(nota.getCAE())
-              .vencimientoCAE(nota.getVencimientoCAE())
+              .CAE(nota.getCae())
+              .vencimientoCAE(nota.getVencimientoCae())
               .numSerieAfip(nota.getNumSerieAfip())
               .numFacturaAfip(nota.getNumNotaAfip())
               .empresa(nota.getEmpresa())
@@ -808,8 +808,8 @@ public class NotaServiceImpl implements INotaService {
               .total(nota.getTotal())
               .build();
       afipService.autorizar(comprobante);
-      nota.setCAE(comprobante.getCAE());
-      nota.setVencimientoCAE(comprobante.getVencimientoCAE());
+      nota.setCae(comprobante.getCAE());
+      nota.setVencimientoCae(comprobante.getVencimientoCAE());
       nota.setNumSerieAfip(comprobante.getNumSerieAfip());
       nota.setNumNotaAfip(comprobante.getNumFacturaAfip());
       cuentaCorrienteService.updateCAENota(nota.getIdNota(), comprobante.getCAE());

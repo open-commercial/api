@@ -141,10 +141,10 @@ public abstract class Factura implements Serializable {
 
   private boolean eliminada;
 
-  private long CAE;
+  private long cae;
 
   @Temporal(TemporalType.TIMESTAMP)
-  private Date vencimientoCAE;
+  private Date vencimientoCae;
 
   private long numSerieAfip;
 
