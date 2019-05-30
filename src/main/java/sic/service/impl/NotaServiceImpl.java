@@ -744,13 +744,19 @@ public class NotaServiceImpl implements INotaService {
 
   private void validarCalculosDebito(NotaDebito notaDebito) {
     // monto no gravado
-    BigDecimal montoComprobante = BigDecimal.ZERO;
-    if (notaDebito.getRecibo() != null) {
-      montoComprobante = notaDebito.getRecibo().getMonto();
-    }
-    if (notaDebito.getMontoNoGravado().compareTo(montoComprobante) != 0) {
+    if (notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C
+        && notaDebito.getMontoNoGravado().compareTo(BigDecimal.ZERO) != 0) {
       throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_nota_monto_no_gravado_no_valido"));
+          RESOURCE_BUNDLE.getString("mensaje_nota_tipo_c_monto_no_gravado_no_valido"));
+    } else if (notaDebito.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_C) {
+      BigDecimal montoComprobante = BigDecimal.ZERO;
+      if (notaDebito.getRecibo() != null) {
+        montoComprobante = notaDebito.getRecibo().getMonto();
+      }
+      if (notaDebito.getMontoNoGravado().compareTo(montoComprobante) != 0) {
+        throw new BusinessServiceException(
+            RESOURCE_BUNDLE.getString("mensaje_nota_monto_no_gravado_no_valido"));
+      }
     }
     // iva 21
     BigDecimal iva21 = BigDecimal.ZERO;
@@ -770,13 +776,17 @@ public class NotaServiceImpl implements INotaService {
       }
     }
     // total
-    if (notaDebito
-            .getTotal()
-            .compareTo(
-                this.calcularTotalDebito(notaDebito.getSubTotalBruto(), iva21, montoComprobante))
-        != 0) {
+    if ((notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C
+        && notaDebito.getSubTotalBruto().compareTo(notaDebito.getTotal()) != 0)) {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_nota_total_no_valido"));
     }
+    if (notaDebito.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_C
+        && (notaDebito
+                .getTotal()
+                .compareTo(
+                    this.calcularTotalDebito(
+                        notaDebito.getSubTotalBruto(), iva21, notaDebito.getRecibo().getMonto()))
+            != 0)) {}
   }
 
   @Override
@@ -902,31 +912,14 @@ public class NotaServiceImpl implements INotaService {
         return TipoDeComprobante.NOTA_DEBITO_A;
       case FACTURA_B:
         return TipoDeComprobante.NOTA_DEBITO_B;
+      case FACTURA_C:
+        return TipoDeComprobante.NOTA_DEBITO_C;
       case FACTURA_X:
         return TipoDeComprobante.NOTA_DEBITO_X;
       case FACTURA_Y:
         return TipoDeComprobante.NOTA_DEBITO_Y;
       case PRESUPUESTO:
         return TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
-      default:
-        throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_nota_tipo_no_valido"));
-    }
-  }
-
-  private TipoDeComprobante getTipoDeComprobanteFacturaSegunNotaCredito(TipoDeComprobante tipo) {
-    switch (tipo) {
-      case NOTA_CREDITO_A:
-        return TipoDeComprobante.FACTURA_A;
-      case NOTA_CREDITO_B:
-        return TipoDeComprobante.FACTURA_B;
-      case NOTA_CREDITO_C:
-        return TipoDeComprobante.FACTURA_C;
-      case NOTA_CREDITO_X:
-        return TipoDeComprobante.FACTURA_X;
-      case NOTA_CREDITO_Y:
-        return TipoDeComprobante.FACTURA_X;
-      case NOTA_CREDITO_PRESUPUESTO:
-        return TipoDeComprobante.PRESUPUESTO;
       default:
         throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_nota_tipo_no_valido"));
     }
