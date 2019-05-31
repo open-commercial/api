@@ -31,13 +31,13 @@ public interface INotaService {
 
   long getSiguienteNumeroNotaCreditoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
 
-  TipoDeComprobante[] getTipoNotaCreditoCliente(Long idCliente, Long idEmpresa);
+  List<TipoDeComprobante> getTipoNotaCreditoCliente(Long idCliente, Long idEmpresa);
 
-  TipoDeComprobante[] getTipoNotaDebitoCliente(Long idCliente, Long idEmpresa);
+  List<TipoDeComprobante> getTipoNotaDebitoCliente(Long idCliente, Long idEmpresa);
 
-  TipoDeComprobante[] getTipoNotaCreditoProveedor(Long idProveedor, Long idEmpresa);
+  List<TipoDeComprobante> getTipoNotaCreditoProveedor(Long idProveedor, Long idEmpresa);
 
-  TipoDeComprobante[] getTipoNotaDebitoProveedor(Long idProveedor, Long idEmpresa);
+  List<TipoDeComprobante> getTipoNotaDebitoProveedor(Long idProveedor, Long idEmpresa);
 
   TipoDeComprobante[] getTiposNota(Empresa empresa);
 

@@ -183,7 +183,7 @@ public class NotaController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public TipoDeComprobante[] getTipoNotaCreditoCliente(
+  public List<TipoDeComprobante> getTipoNotaCreditoCliente(
       @RequestParam long idCliente, @RequestParam long idEmpresa) {
     return notaService.getTipoNotaCreditoCliente(idCliente, idEmpresa);
   }
@@ -196,7 +196,7 @@ public class NotaController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public TipoDeComprobante[] getTipoNotaDebitoCliente(
+  public List<TipoDeComprobante> getTipoNotaDebitoCliente(
       @RequestParam long idCliente, @RequestParam long idEmpresa) {
     return notaService.getTipoNotaDebitoCliente(idCliente, idEmpresa);
   }
@@ -209,7 +209,7 @@ public class NotaController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public TipoDeComprobante[] getTipoNotaCreditoProveedor(
+  public List<TipoDeComprobante> getTipoNotaCreditoProveedor(
     @RequestParam long idProveedor, @RequestParam long idEmpresa) {
     return notaService.getTipoNotaCreditoProveedor(idProveedor, idEmpresa);
   }
@@ -222,7 +222,7 @@ public class NotaController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public TipoDeComprobante[] getTipoNotaDebitoProveedor(
+  public List<TipoDeComprobante> getTipoNotaDebitoProveedor(
     @RequestParam long idProveedor, @RequestParam long idEmpresa) {
     return notaService.getTipoNotaDebitoProveedor(idProveedor, idEmpresa);
   }
@@ -398,41 +398,70 @@ public class NotaController {
       @RequestHeader("Authorization") String authorizationHeader) {
     NotaDebito notaDebitoCalculada = new NotaDebito();
     notaDebitoCalculada.setFecha(new Date());
-    notaDebitoCalculada.setIva21Neto(
-        nuevaNotaDebitoDeReciboDTO
-            .getGastoAdministrativo()
-            .multiply(IVA_21.divide(new BigDecimal("100"), 15, RoundingMode.HALF_UP)));
-    notaDebitoCalculada.setIva105Neto(BigDecimal.ZERO);
     Recibo reciboRelacionado =
         reciboService.getReciboNoEliminadoPorId(nuevaNotaDebitoDeReciboDTO.getIdRecibo());
-    notaDebitoCalculada.setMontoNoGravado(reciboRelacionado.getMonto());
+    if (reciboRelacionado.getCliente() != null) {
+      notaDebitoCalculada.setCliente(reciboRelacionado.getCliente());
+      notaDebitoCalculada.setMovimiento(Movimiento.VENTA);
+      if (!this.getTipoNotaDebitoCliente(
+              reciboRelacionado.getIdCliente(), reciboRelacionado.getIdEmpresa())
+          .contains(nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante())) {
+        throw new BusinessServiceException(
+            RESOURCE_BUNDLE.getString("mensaje_nota_tipo_no_valido"));
+      }
+    } else if (reciboRelacionado.getProveedor() != null
+        && nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante() != null) {
+      notaDebitoCalculada.setProveedor(reciboRelacionado.getProveedor());
+      notaDebitoCalculada.setMovimiento(Movimiento.COMPRA);
+      if (!this.getTipoNotaDebitoProveedor(
+              reciboRelacionado.getIdProveedor(), reciboRelacionado.getIdEmpresa())
+          .contains(nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante())) {
+        throw new BusinessServiceException(
+            RESOURCE_BUNDLE.getString("mensaje_nota_tipo_no_valido"));
+      }
+    } else {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_nota_parametros_faltantes"));
+    }
+    notaDebitoCalculada.setTipoComprobante(nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante());
+    notaDebitoCalculada.setIva21Neto(
+        (notaDebitoCalculada.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C
+                || notaDebitoCalculada.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X)
+            ? BigDecimal.ZERO
+            : nuevaNotaDebitoDeReciboDTO
+                .getGastoAdministrativo()
+                .multiply(IVA_21.divide(new BigDecimal("100"), 15, RoundingMode.HALF_UP)));
+
+    notaDebitoCalculada.setIva105Neto(BigDecimal.ZERO);
+    notaDebitoCalculada.setMontoNoGravado(
+        (notaDebitoCalculada.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C
+                || notaDebitoCalculada.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X)
+            ? BigDecimal.ZERO
+            : reciboRelacionado.getMonto());
+
     notaDebitoCalculada.setMotivo(nuevaNotaDebitoDeReciboDTO.getMotivo());
+
     notaDebitoCalculada.setRenglonesNotaDebito(
         notaService.calcularRenglonDebito(
-            reciboRelacionado, nuevaNotaDebitoDeReciboDTO.getGastoAdministrativo(), IVA_21));
-    notaDebitoCalculada.setSubTotalBruto(nuevaNotaDebitoDeReciboDTO.getGastoAdministrativo());
+            reciboRelacionado,
+            nuevaNotaDebitoDeReciboDTO.getGastoAdministrativo(),
+            (notaDebitoCalculada.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C
+                    || notaDebitoCalculada.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X)
+                ? BigDecimal.ZERO
+                : IVA_21));
+
+    notaDebitoCalculada.setSubTotalBruto(
+        (notaDebitoCalculada.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C
+                || notaDebitoCalculada.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X)
+            ? reciboRelacionado.getMonto().add(nuevaNotaDebitoDeReciboDTO.getGastoAdministrativo())
+            : nuevaNotaDebitoDeReciboDTO.getGastoAdministrativo());
+
     notaDebitoCalculada.setTotal(
         notaService.calcularTotalDebito(
             notaDebitoCalculada.getSubTotalBruto(),
             notaDebitoCalculada.getIva21Neto(),
             notaDebitoCalculada.getMontoNoGravado()));
-    if (reciboRelacionado.getCliente() != null) {
-      notaDebitoCalculada.setCliente(reciboRelacionado.getCliente());
-      notaDebitoCalculada.setMovimiento(Movimiento.VENTA);
-      notaDebitoCalculada.setTipoComprobante(
-          notaService
-              .getTipoNotaCreditoCliente(
-                  reciboRelacionado.getCliente().getId_Cliente(),
-                  reciboRelacionado.getEmpresa().getId_Empresa())[0]);
-    } else if (reciboRelacionado.getProveedor() != null
-        && nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante() != null) {
-      notaDebitoCalculada.setProveedor(reciboRelacionado.getProveedor());
-      notaDebitoCalculada.setMovimiento(Movimiento.COMPRA);
-      notaDebitoCalculada.setTipoComprobante(nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante());
-    } else {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_nota_parametros_faltantes"));
-    }
+
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     notaDebitoCalculada.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));

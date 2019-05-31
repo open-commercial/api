@@ -245,12 +245,12 @@ class AppIntegrationTest {
         apiPrefix + "/facturas/venta?idPedido=1", facturaVentaB, FacturaVenta[].class);
   }
 
-  private void crearReciboParaCliente(double monto) {
+  private void crearReciboParaCliente(double monto, long idEmpresa) {
     ReciboDTO recibo =
         ReciboDTO.builder()
             .concepto("Recibo Test")
             .monto(monto)
-            .idEmpresa(1L)
+            .idEmpresa(idEmpresa)
             .idCliente(1L)
             .idFormaDePago(1L)
             .build();
@@ -262,6 +262,7 @@ class AppIntegrationTest {
       .idRecibo(1L)
       .motivo("Test alta nota debito - Cheque rechazado")
       .gastoAdministrativo(new BigDecimal("100"))
+      .tipoDeComprobante(TipoDeComprobante.NOTA_DEBITO_A)
       .build();
     NotaDebitoDTO notaDebitoCliente =
       restTemplate.postForObject(apiPrefix + "/notas/debito/calculos", nuevaNotaDebitoDeReciboDTO, NotaDebitoDTO.class);
@@ -578,6 +579,26 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldCrearEmpresaMonotributista() {
+    EmpresaDTO empresaNueva =
+      EmpresaDTO.builder()
+        .telefono("3795221144")
+        .email("empresa@nuevaMonotribustista.com")
+        .fechaInicioActividad(new Date())
+        .ingresosBrutos(23335577L)
+        .idFiscal(7599541775766L)
+        .categoriaIVA(CategoriaIVA.MONOTRIBUTO)
+        .lema("Hoy no se fía, mañana tampoco.")
+        .nombre("Se me prendió el foquito.")
+        .ubicacion(
+          UbicacionDTO.builder().idLocalidad(1L).calle("Rio Naranja").numero(345).build())
+        .build();
+    EmpresaDTO empresaGuardada =
+      restTemplate.postForObject(apiPrefix + "/empresas", empresaNueva, EmpresaDTO.class);
+    assertEquals(empresaNueva, empresaGuardada);
+  }
+
+  @Test
   void shouldCrearEmpresaConUbicacion() {
     EmpresaDTO empresaNueva =
         EmpresaDTO.builder()
@@ -660,6 +681,38 @@ class AppIntegrationTest {
             .build();
     ClienteDTO clienteRecuperado =
         restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class);
+    assertEquals(cliente, clienteRecuperado);
+    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    assertEquals(empresa.getNombre(), clienteRecuperado.getNombreEmpresa());
+  }
+
+  @Test
+  void shouldCrearClienteResponsableMonotributista() {
+    UsuarioDTO credencial =
+      UsuarioDTO.builder()
+        .username("elaltoRicardo")
+        .password("RicardoTapia")
+        .nombre("Ricardo")
+        .apellido("Tapia")
+        .email("tapia@outlook.com.cl")
+        .roles(new ArrayList<>(Collections.singletonList(Rol.COMPRADOR)))
+        .build();
+    credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
+    ClienteDTO cliente =
+      ClienteDTO.builder()
+        .bonificacion(BigDecimal.TEN)
+        .nombreFiscal("Ricardo Tapia")
+        .nombreFantasia("Menos mal que estan ellos.")
+        .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+        .idFiscal(1244557L)
+        .email("tapia@outlook.com.cl")
+        .telefono("3745112324")
+        .contacto("Ricardo, trabaja por encargo.")
+        .idEmpresa(1L)
+        .idCredencial(credencial.getId_Usuario())
+        .build();
+    ClienteDTO clienteRecuperado =
+      restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class);
     assertEquals(cliente, clienteRecuperado);
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     assertEquals(empresa.getNombre(), clienteRecuperado.getNombreEmpresa());
@@ -3395,6 +3448,9 @@ class AppIntegrationTest {
     idsRenglonesFacutura[0] = 1L;
     BigDecimal[] cantidades = new BigDecimal[1];
     cantidades[0] = new BigDecimal("5");
+    ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", ClienteDTO.class);
+    cliente.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/clientes", cliente);
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
         NuevaNotaCreditoDeFacturaDTO.builder()
             .idFactura(facturasRecuperadas.get(0).getId_Factura())
@@ -3505,6 +3561,9 @@ class AppIntegrationTest {
         .modificaStock(true)
         .motivo("Color equivocado.")
         .build();
+    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/empresas", empresa);
     NotaCreditoDTO notaCreditoParaPersistir =
       restTemplate.postForObject(
         apiPrefix + "/notas/credito/calculos", nuevaNotaCreditoDTO, NotaCreditoDTO.class);
@@ -3562,6 +3621,9 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearNotaCreditoVentaBSinFactura() {
+    ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", ClienteDTO.class);
+    cliente.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/clientes", cliente);
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO =
       NuevaNotaCreditoSinFacturaDTO.builder()
@@ -3851,6 +3913,9 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearNotaCreditoCompraBSinFactura() {
+    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/empresas", empresa);
     NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO =
       NuevaNotaCreditoSinFacturaDTO.builder()
         .detalle("RenglonNotaCredito")
@@ -3911,6 +3976,31 @@ class AppIntegrationTest {
     assertEquals(TipoDeComprobante.NOTA_CREDITO_X, notaCreditoRecuperada.getTipoComprobante());
   }
 
+//  @Test
+//  void shouldCrearNotaDebitoC() {
+//    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+//    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+//    restTemplate.put(apiPrefix + "/empresas", empresa);
+//    this.abrirCaja();
+//    this.shouldCrearClienteResponsableInscripto();
+//    ReciboDTO recibo =
+//      ReciboDTO.builder()
+//        .concepto("Recibo Test")
+//        .monto(1000)
+//        .idEmpresa(1L)
+//        .idCliente(3L)
+//        .idFormaDePago(1L)
+//        .build();
+//    recibo = restTemplate.postForObject(apiPrefix + "/recibos/clientes", recibo, ReciboDTO.class);
+//    System.out.print(recibo);
+////    NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO = NuevaNotaDebitoDeReciboDTO.builder()
+////      .idRecibo(1L)
+////      .gastoAdministrativo(new BigDecimal("100"))
+////      .motivo("Nunca pagó absolutamente nada")
+////      .
+////      .build();
+//  }
+
   @Test
   void shouldVerificarStockNotaCreditoCompra() {
     this.shouldCrearNotaCreditoCompraConFacturaB();
@@ -3930,7 +4020,7 @@ class AppIntegrationTest {
       new BigDecimal("-5992.500000000000000"),
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
-    this.crearReciboParaCliente(5992.5);
+    this.crearReciboParaCliente(5992.5, 1L);
     assertEquals(
       new BigDecimal("0E-15"),
       restTemplate.getForObject(
@@ -3940,7 +4030,7 @@ class AppIntegrationTest {
       new BigDecimal("-6113.500000000000000"),
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
-    this.crearReciboParaCliente(6113.5);
+    this.crearReciboParaCliente(6113.5, 1L);
     assertEquals(
       new BigDecimal("0E-15"),
       restTemplate.getForObject(
@@ -3961,9 +4051,9 @@ class AppIntegrationTest {
   void shouldComprobarSaldoParcialCuentaCorrienteCliente() {
     this.abrirCaja();
     this.shouldCrearFacturaVentaB();
-    this.crearReciboParaCliente(5992.5);
+    this.crearReciboParaCliente(5992.5, 1L);
     this.crearNotaDebitoParaCliente();
-    this.crearReciboParaCliente(6113.5);
+    this.crearReciboParaCliente(6113.5, 1L);
     this.crearNotaCreditoParaCliente();
     List<RenglonCuentaCorriente> renglonesCuentaCorriente =
       restTemplate
@@ -4427,6 +4517,9 @@ class AppIntegrationTest {
 
   @Test
   void shouldComprobarSaldoParcialCuentaCorrienteProveedor() {
+    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/empresas", empresa);
     this.abrirCaja();
     this.shouldCrearFacturaCompraB();
     this.crearReciboParaProveedor(599.25);
@@ -4533,7 +4626,7 @@ class AppIntegrationTest {
     FacturaVentaDTO facturaVentaDTO =
       restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaVentaDTO.class);
     assertEquals(facturaVentaDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
-    this.crearReciboParaCliente(5992.5);
+    this.crearReciboParaCliente(5992.5, 1L);
     ccCliente =
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/clientes/1", CuentaCorriente.class);
@@ -4546,7 +4639,7 @@ class AppIntegrationTest {
     NotaDebitoDTO notaDebitoDTO =
       restTemplate.getForObject(apiPrefix + "/notas/1", NotaDebitoDTO.class);
     assertEquals(notaDebitoDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
-    this.crearReciboParaCliente(6113.5);
+    this.crearReciboParaCliente(6113.5, 1L);
     ccCliente =
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/clientes/1", CuentaCorriente.class);
@@ -4696,7 +4789,7 @@ class AppIntegrationTest {
         null,
         CajaDTO.class);
     assertEquals(new BigDecimal("200"), caja.getSaldoApertura());
-    this.crearReciboParaCliente(300);
+    this.crearReciboParaCliente(300, 1L);
     assertEquals(
       new BigDecimal("500.000000000000000"),
       restTemplate.getForObject(apiPrefix + "/cajas/1/saldo-sistema", BigDecimal.class));

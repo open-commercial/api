@@ -2,6 +2,8 @@ package sic.service.impl;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -35,13 +37,14 @@ class NotaServiceImplTest {
     cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
-    TipoDeComprobante[] expResult = {
+    TipoDeComprobante[] array = {
       TipoDeComprobante.NOTA_CREDITO_A,
       TipoDeComprobante.NOTA_CREDITO_X,
       TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO,
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCreditoCliente(1L, 1L);
-    assertArrayEquals(expResult, result);
+    List<TipoDeComprobante> expResult = Arrays.asList(array);
+    List<TipoDeComprobante> result = notaServiceImpl.getTipoNotaCreditoCliente(1L, 1L);
+    assertEquals(expResult, result);
   }
 
   @Test
@@ -51,13 +54,14 @@ class NotaServiceImplTest {
     cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
-    TipoDeComprobante[] expResult = {
+    TipoDeComprobante[] array = {
       TipoDeComprobante.NOTA_DEBITO_A,
       TipoDeComprobante.NOTA_DEBITO_X,
       TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaDebitoCliente(1L, 1L);
-    assertArrayEquals(expResult, result);
+    List<TipoDeComprobante> expResult = Arrays.asList(array);
+    List<TipoDeComprobante> result =notaServiceImpl.getTipoNotaDebitoCliente(1L, 1L);
+    assertEquals(expResult, result);
   }
 
   @Test
@@ -67,13 +71,14 @@ class NotaServiceImplTest {
     cliente.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
-    TipoDeComprobante[] expResult = {
+    TipoDeComprobante[] array = {
       TipoDeComprobante.NOTA_CREDITO_B,
       TipoDeComprobante.NOTA_CREDITO_X,
       TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO,
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCreditoCliente(1L, 1L);
-    assertArrayEquals(expResult, result);
+    List<TipoDeComprobante> expResult = Arrays.asList(array);
+    List<TipoDeComprobante> result = notaServiceImpl.getTipoNotaCreditoCliente(1L, 1L);
+    assertEquals(expResult, result);
   }
 
   @Test
@@ -83,13 +88,14 @@ class NotaServiceImplTest {
     cliente.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
-    TipoDeComprobante[] expResult = {
+    TipoDeComprobante[] array = {
       TipoDeComprobante.NOTA_DEBITO_B,
       TipoDeComprobante.NOTA_DEBITO_X,
       TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaDebitoCliente(1L, 1L);
-    assertArrayEquals(expResult, result);
+    List<TipoDeComprobante> expResult = Arrays.asList(array);
+    List<TipoDeComprobante> result = notaServiceImpl.getTipoNotaDebitoCliente(1L, 1L);
+    assertEquals(expResult, result);
   }
 
   @Test
@@ -100,13 +106,14 @@ class NotaServiceImplTest {
     empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
-    TipoDeComprobante[] expResult = {
+    TipoDeComprobante[] array = {
       TipoDeComprobante.NOTA_CREDITO_C,
       TipoDeComprobante.NOTA_CREDITO_X,
       TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO,
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCreditoCliente(1L, 1L);
-    assertArrayEquals(expResult, result);
+    List<TipoDeComprobante> expResult = Arrays.asList(array);
+    List<TipoDeComprobante> result = notaServiceImpl.getTipoNotaCreditoCliente(1L, 1L);
+    assertEquals(expResult, result);
   }
 
   @Test
@@ -117,13 +124,14 @@ class NotaServiceImplTest {
     empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
-    TipoDeComprobante[] expResult = {
+    TipoDeComprobante[] array = {
       TipoDeComprobante.NOTA_DEBITO_C,
       TipoDeComprobante.NOTA_DEBITO_X,
       TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaDebitoCliente(1L, 1L);
-    assertArrayEquals(expResult, result);
+    List<TipoDeComprobante> expResult = Arrays.asList(array);
+    List<TipoDeComprobante> result = notaServiceImpl.getTipoNotaDebitoCliente(1L, 1L);
+    assertEquals(expResult, result);
   }
 
   @Test
@@ -134,13 +142,14 @@ class NotaServiceImplTest {
     empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
-    TipoDeComprobante[] expResult = {
+    TipoDeComprobante[] array = {
       TipoDeComprobante.NOTA_CREDITO_C,
       TipoDeComprobante.NOTA_CREDITO_X,
       TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCreditoCliente(1L, 1L);
-    assertArrayEquals(expResult, result);
+    List<TipoDeComprobante> expResult = Arrays.asList(array);
+    List<TipoDeComprobante> result = notaServiceImpl.getTipoNotaCreditoCliente(1L, 1L);
+    assertEquals(expResult, result);
   }
 
   @Test
@@ -151,13 +160,14 @@ class NotaServiceImplTest {
     empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
-    TipoDeComprobante[] expResult = {
+    TipoDeComprobante[] array = {
       TipoDeComprobante.NOTA_DEBITO_C,
       TipoDeComprobante.NOTA_DEBITO_X,
       TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaDebitoCliente(1L, 1L);
-    assertArrayEquals(expResult, result);
+    List<TipoDeComprobante> expResult = Arrays.asList(array);
+    List<TipoDeComprobante> result = notaServiceImpl.getTipoNotaDebitoCliente(1L, 1L);
+    assertEquals(expResult, result);
   }
 
   @Test
@@ -175,13 +185,14 @@ class NotaServiceImplTest {
     proveedor.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(proveedorService.getProveedorNoEliminadoPorId(1L)).thenReturn(proveedor);
-    TipoDeComprobante[] expResult = {
+    TipoDeComprobante[] array = {
       TipoDeComprobante.NOTA_CREDITO_A,
       TipoDeComprobante.NOTA_CREDITO_X,
       TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO,
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCreditoProveedor(1L, 1L);
-    assertArrayEquals(expResult, result);
+    List<TipoDeComprobante> expResult = Arrays.asList(array);
+    List<TipoDeComprobante> result = notaServiceImpl.getTipoNotaCreditoProveedor(1L, 1L);
+    assertEquals(expResult, result);
   }
 
   @Test
@@ -191,13 +202,14 @@ class NotaServiceImplTest {
     proveedor.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(proveedorService.getProveedorNoEliminadoPorId(1L)).thenReturn(proveedor);
-    TipoDeComprobante[] expResult = {
+    TipoDeComprobante[] array = {
       TipoDeComprobante.NOTA_DEBITO_A,
       TipoDeComprobante.NOTA_DEBITO_X,
       TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaDebitoProveedor(1L, 1L);
-    assertArrayEquals(expResult, result);
+    List<TipoDeComprobante> expResult = Arrays.asList(array);
+    List<TipoDeComprobante> result = notaServiceImpl.getTipoNotaDebitoProveedor(1L, 1L);
+    assertEquals(expResult, result);
   }
 
   @Test
@@ -207,13 +219,14 @@ class NotaServiceImplTest {
     proveedor.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(proveedorService.getProveedorNoEliminadoPorId(1L)).thenReturn(proveedor);
-    TipoDeComprobante[] expResult = {
+    TipoDeComprobante[] array = {
       TipoDeComprobante.NOTA_CREDITO_C,
       TipoDeComprobante.NOTA_CREDITO_X,
       TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO,
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCreditoProveedor(1L, 1L);
-    assertArrayEquals(expResult, result);
+    List<TipoDeComprobante> expResult = Arrays.asList(array);
+    List<TipoDeComprobante> result = notaServiceImpl.getTipoNotaCreditoProveedor(1L, 1L);
+    assertEquals(expResult, result);
   }
 
   @Test
@@ -223,13 +236,14 @@ class NotaServiceImplTest {
     proveedor.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(proveedorService.getProveedorNoEliminadoPorId(1L)).thenReturn(proveedor);
-    TipoDeComprobante[] expResult = {
+    TipoDeComprobante[] array = {
       TipoDeComprobante.NOTA_DEBITO_C,
       TipoDeComprobante.NOTA_DEBITO_X,
       TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaDebitoProveedor(1L, 1L);
-    assertArrayEquals(expResult, result);
+    List<TipoDeComprobante> expResult = Arrays.asList(array);
+    List<TipoDeComprobante> result = notaServiceImpl.getTipoNotaDebitoProveedor(1L, 1L);
+    assertEquals(expResult, result);
   }
 
   @Test
@@ -240,13 +254,14 @@ class NotaServiceImplTest {
     empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(proveedorService.getProveedorNoEliminadoPorId(1L)).thenReturn(proveedor);
-    TipoDeComprobante[] expResult = {
+    TipoDeComprobante[] array = {
       TipoDeComprobante.NOTA_CREDITO_B,
       TipoDeComprobante.NOTA_CREDITO_X,
       TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO,
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCreditoProveedor(1L, 1L);
-    assertArrayEquals(expResult, result);
+    List<TipoDeComprobante> expResult = Arrays.asList(array);
+    List<TipoDeComprobante> result = notaServiceImpl.getTipoNotaCreditoProveedor(1L, 1L);
+    assertEquals(expResult, result);
   }
 
   @Test
@@ -257,13 +272,14 @@ class NotaServiceImplTest {
     empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(proveedorService.getProveedorNoEliminadoPorId(1L)).thenReturn(proveedor);
-    TipoDeComprobante[] expResult = {
+    TipoDeComprobante[] array = {
       TipoDeComprobante.NOTA_DEBITO_B,
       TipoDeComprobante.NOTA_DEBITO_X,
       TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaDebitoProveedor(1L, 1L);
-    assertArrayEquals(expResult, result);
+    List<TipoDeComprobante> expResult = Arrays.asList(array);
+    List<TipoDeComprobante> result = notaServiceImpl.getTipoNotaDebitoProveedor(1L, 1L);
+    assertEquals(expResult, result);
   }
 
   @Test
@@ -274,13 +290,14 @@ class NotaServiceImplTest {
     empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(proveedorService.getProveedorNoEliminadoPorId(1L)).thenReturn(proveedor);
-    TipoDeComprobante[] expResult = {
+    TipoDeComprobante[] array = {
       TipoDeComprobante.NOTA_CREDITO_C,
       TipoDeComprobante.NOTA_CREDITO_X,
       TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaCreditoProveedor(1L, 1L);
-    assertArrayEquals(expResult, result);
+    List<TipoDeComprobante> expResult = Arrays.asList(array);
+    List<TipoDeComprobante> result = notaServiceImpl.getTipoNotaCreditoProveedor(1L, 1L);
+    assertEquals(expResult, result);
   }
 
   @Test
@@ -291,12 +308,13 @@ class NotaServiceImplTest {
     empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     when(empresaServiceImpl.getEmpresaPorId(1L)).thenReturn(empresa);
     when(proveedorService.getProveedorNoEliminadoPorId(1L)).thenReturn(proveedor);
-    TipoDeComprobante[] expResult = {
+    TipoDeComprobante[] array = {
       TipoDeComprobante.NOTA_DEBITO_C,
       TipoDeComprobante.NOTA_DEBITO_X,
       TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
     };
-    TipoDeComprobante[] result = notaServiceImpl.getTipoNotaDebitoProveedor(1L, 1L);
-    assertArrayEquals(expResult, result);
+    List<TipoDeComprobante> expResult = Arrays.asList(array);
+    List<TipoDeComprobante> result = notaServiceImpl.getTipoNotaDebitoProveedor(1L, 1L);
+    assertEquals(expResult, result);
   }
 }
