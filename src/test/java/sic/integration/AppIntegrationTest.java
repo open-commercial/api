@@ -258,22 +258,13 @@ class AppIntegrationTest {
   }
 
   private void crearNotaDebitoParaCliente() {
-    NotaDebitoDTO notaDebitoCliente = new NotaDebitoDTO();
-    List<RenglonNotaDebito> renglonesCalculados =
-      Arrays.asList(
-        restTemplate.getForObject(
-          apiPrefix + "/notas/renglon/debito/recibo/1?monto=100&ivaPorcentaje=21",
-          RenglonNotaDebito[].class));
-    notaDebitoCliente.setRenglonesNotaDebito(renglonesCalculados);
-    notaDebitoCliente.setIva105Neto(BigDecimal.ZERO);
-    notaDebitoCliente.setIva21Neto(new BigDecimal("21"));
-    notaDebitoCliente.setMontoNoGravado(new BigDecimal("5992.5"));
-    notaDebitoCliente.setMotivo("Test alta nota debito - Cheque rechazado");
-    notaDebitoCliente.setSubTotalBruto(new BigDecimal("100"));
-    notaDebitoCliente.setTotal(new BigDecimal("6113.5"));
-    notaDebitoCliente.setIdEmpresa(1L);
-    notaDebitoCliente.setIdCliente(1L);
-    notaDebitoCliente.setIdRecibo(1L);
+    NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO = NuevaNotaDebitoDeReciboDTO.builder()
+      .idRecibo(1L)
+      .motivo("Test alta nota debito - Cheque rechazado")
+      .gastoAdministrativo(new BigDecimal("100"))
+      .build();
+    NotaDebitoDTO notaDebitoCliente =
+      restTemplate.postForObject(apiPrefix + "/notas/debito/calculos", nuevaNotaDebitoDeReciboDTO, NotaDebitoDTO.class);
     restTemplate.postForObject(
       apiPrefix + "/notas/debito/clientes",
       notaDebitoCliente,
@@ -333,29 +324,19 @@ class AppIntegrationTest {
   }
 
   private void crearNotaDebitoParaProveedor() {
-    NotaDebitoDTO notaDebito = new NotaDebitoDTO();
-    notaDebito.setCAE(0L);
-    notaDebito.setFecha(new Date());
-    List<RenglonNotaDebito> renglonesCalculados =
-      Arrays.asList(
-        restTemplate.getForObject(
-          apiPrefix + "/notas/renglon/debito/recibo/3?monto=1000&ivaPorcentaje=21",
-          RenglonNotaDebito[].class));
-    notaDebito.setRenglonesNotaDebito(renglonesCalculados);
-    notaDebito.setIva105Neto(BigDecimal.ZERO);
-    notaDebito.setIva21Neto(new BigDecimal("21"));
-    notaDebito.setMontoNoGravado(new BigDecimal("200"));
-    notaDebito.setMotivo("Test alta nota debito - Cheque rechazado");
-    notaDebito.setSubTotalBruto(new BigDecimal("100"));
-    notaDebito.setTotal(new BigDecimal("321"));
-    notaDebito.setTipoComprobante(TipoDeComprobante.NOTA_DEBITO_B);
-    notaDebito.setIdRecibo(3L);
-    notaDebito.setIdEmpresa(1L);
-    notaDebito.setIdProveedor(1L);
+    NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO = NuevaNotaDebitoDeReciboDTO.builder()
+      .idRecibo(3L)
+      .motivo("Test alta nota debito - Cheque rechazado")
+      .gastoAdministrativo(new BigDecimal("100"))
+      .tipoDeComprobante(TipoDeComprobante.NOTA_DEBITO_B)
+      .build();
+    NotaDebitoDTO notaDebitoProveedor =
+      restTemplate.postForObject(apiPrefix + "/notas/debito/calculos", nuevaNotaDebitoDeReciboDTO, NotaDebitoDTO.class);
     restTemplate.postForObject(
       apiPrefix + "/notas/debito/proveedores",
-      notaDebito,
-      NotaDebito.class);
+      notaDebitoProveedor,
+      Nota.class);
+    restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
   }
 
   private void crearNotaCreditoParaProveedor() {

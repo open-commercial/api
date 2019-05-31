@@ -47,7 +47,6 @@ public class NotaServiceImpl implements INotaService {
   private final IUsuarioService usuarioService;
   private final IProductoService productoService;
   private final ICuentaCorrienteService cuentaCorrienteService;
-  private final IReciboService reciboService;
   private final IConfiguracionDelSistemaService configuracionDelSistemaService;
   private final IAfipService afipService;
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
@@ -69,7 +68,6 @@ public class NotaServiceImpl implements INotaService {
       IProductoService productoService,
       IEmpresaService empresaService,
       ICuentaCorrienteService cuentaCorrienteService,
-      IReciboService reciboService,
       IConfiguracionDelSistemaService cds,
       IAfipService afipService) {
     this.notaRepository = notaRepository;
@@ -82,7 +80,6 @@ public class NotaServiceImpl implements INotaService {
     this.empresaService = empresaService;
     this.productoService = productoService;
     this.cuentaCorrienteService = cuentaCorrienteService;
-    this.reciboService = reciboService;
     this.configuracionDelSistemaService = cds;
     this.afipService = afipService;
   }
@@ -838,9 +835,7 @@ public class NotaServiceImpl implements INotaService {
     this.validarOperacion(notaDebito);
     if (notaDebito.getMovimiento().equals(Movimiento.VENTA)) {
       notaDebito.setTipoComprobante(
-          this.getTipoDeNotaDebitoSegunFactura(
-              this.facturaService
-                  .getTipoFacturaVenta(notaDebito.getEmpresa(), notaDebito.getCliente())[0]));
+          this.getTipoNotaDebitoCliente(notaDebito.getCliente().getId_Cliente(), notaDebito.getEmpresa().getId_Empresa())[0]);
       notaDebito.setSerie(
           configuracionDelSistemaService
               .getConfiguracionDelSistemaPorEmpresa(notaDebito.getEmpresa())
@@ -1173,23 +1168,22 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public List<RenglonNotaDebito> calcularRenglonDebito(
-      long idRecibo, BigDecimal monto, BigDecimal ivaPorcentaje) {
+      Recibo recibo, BigDecimal monto, BigDecimal ivaPorcentaje) {
     List<RenglonNotaDebito> renglonesNota = new ArrayList<>();
     RenglonNotaDebito renglonNota;
-    Recibo r = reciboService.getReciboNoEliminadoPorId(idRecibo);
     renglonNota = new RenglonNotaDebito();
     String descripcion =
         "Recibo Nº "
-            + r.getNumRecibo()
+            + recibo.getNumRecibo()
             + " "
             + (new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHA_HISPANO))
-                .format(r.getFecha());
+                .format(recibo.getFecha());
     renglonNota.setDescripcion(descripcion);
-    renglonNota.setMonto(r.getMonto());
+    renglonNota.setMonto(recibo.getMonto());
     renglonNota.setImporteBruto(renglonNota.getMonto());
     renglonNota.setIvaPorcentaje(BigDecimal.ZERO);
     renglonNota.setIvaNeto(BigDecimal.ZERO);
-    renglonNota.setImporteNeto(r.getMonto());
+    renglonNota.setImporteNeto(recibo.getMonto());
     renglonesNota.add(renglonNota);
     renglonNota = new RenglonNotaDebito();
     renglonNota.setDescripcion("Gasto Administrativo");

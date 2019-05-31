@@ -1,6 +1,7 @@
 package sic.controller;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 import io.jsonwebtoken.Claims;
@@ -17,10 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
-import sic.modelo.dto.NotaCreditoDTO;
-import sic.modelo.dto.NotaDebitoDTO;
-import sic.modelo.dto.NuevaNotaCreditoDeFacturaDTO;
-import sic.modelo.dto.NuevaNotaCreditoSinFacturaDTO;
+import sic.modelo.dto.*;
 import sic.service.*;
 
 @RestController
@@ -393,6 +391,56 @@ public class NotaController {
     return notaCreditoNueva;
   }
 
+  @PostMapping("/notas/debito/calculos")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public NotaDebito calcularNotaDebito(
+      @RequestBody NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO,
+      @RequestHeader("Authorization") String authorizationHeader) {
+    NotaDebito notaDebitoCalculada = new NotaDebito();
+    notaDebitoCalculada.setFecha(new Date());
+    notaDebitoCalculada.setIva21Neto(
+        nuevaNotaDebitoDeReciboDTO
+            .getGastoAdministrativo()
+            .multiply(IVA_21.divide(new BigDecimal("100"), 15, RoundingMode.HALF_UP)));
+    notaDebitoCalculada.setIva105Neto(BigDecimal.ZERO);
+    Recibo reciboRelacionado =
+        reciboService.getReciboNoEliminadoPorId(nuevaNotaDebitoDeReciboDTO.getIdRecibo());
+    notaDebitoCalculada.setMontoNoGravado(reciboRelacionado.getMonto());
+    notaDebitoCalculada.setMotivo(nuevaNotaDebitoDeReciboDTO.getMotivo());
+    notaDebitoCalculada.setRenglonesNotaDebito(
+        notaService.calcularRenglonDebito(
+            reciboRelacionado, nuevaNotaDebitoDeReciboDTO.getGastoAdministrativo(), IVA_21));
+    notaDebitoCalculada.setSubTotalBruto(nuevaNotaDebitoDeReciboDTO.getGastoAdministrativo());
+    notaDebitoCalculada.setTotal(
+        notaService.calcularTotalDebito(
+            notaDebitoCalculada.getSubTotalBruto(),
+            notaDebitoCalculada.getIva21Neto(),
+            notaDebitoCalculada.getMontoNoGravado()));
+    if (reciboRelacionado.getCliente() != null) {
+      notaDebitoCalculada.setCliente(reciboRelacionado.getCliente());
+      notaDebitoCalculada.setMovimiento(Movimiento.VENTA);
+      notaDebitoCalculada.setTipoComprobante(
+          notaService
+              .getTipoNotaCreditoCliente(
+                  reciboRelacionado.getCliente().getId_Cliente(),
+                  reciboRelacionado.getEmpresa().getId_Empresa())[0]);
+    } else if (reciboRelacionado.getProveedor() != null
+        && nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante() != null) {
+      notaDebitoCalculada.setProveedor(reciboRelacionado.getProveedor());
+      notaDebitoCalculada.setMovimiento(Movimiento.COMPRA);
+      notaDebitoCalculada.setTipoComprobante(nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante());
+    } else {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_nota_parametros_faltantes"));
+    }
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    notaDebitoCalculada.setUsuario(
+        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+    notaDebitoCalculada.setRecibo(reciboRelacionado);
+    notaDebitoCalculada.setEmpresa(reciboRelacionado.getEmpresa());
+    return notaDebitoCalculada;
+  }
+
   @PostMapping("/notas/credito")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Nota guardarNotaCredito(
@@ -481,15 +529,6 @@ public class NotaController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Nota autorizarNota(@PathVariable long idNota) {
     return notaService.autorizarNota(notaService.getNotaNoEliminadaPorId(idNota));
-  }
-
-  @GetMapping("/notas/renglon/debito/recibo/{idRecibo}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public List<RenglonNotaDebito> calcularRenglonNotaDebito(
-      @PathVariable long idRecibo,
-      @RequestParam BigDecimal monto,
-      @RequestParam BigDecimal ivaPorcentaje) {
-    return notaService.calcularRenglonDebito(idRecibo, monto, ivaPorcentaje);
   }
 
   @GetMapping("/notas/debito/total")
