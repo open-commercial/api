@@ -56,8 +56,10 @@ public interface INotaService {
 
   RenglonNotaCredito calcularRenglonCredito(TipoDeComprobante tipo, String Detalle, BigDecimal monto);
 
-  List<RenglonNotaDebito> calcularRenglonDebito(
-      Recibo recibo, BigDecimal monto, BigDecimal ivaPorcentaje);
+  RenglonNotaDebito calcularRenglonDebitoConRecibo(Recibo recibo) ;
+
+  RenglonNotaDebito calcularRenglonDebito(
+    BigDecimal monto, TipoDeComprobante tipoDeComprobante, String descripcionRenglon);
 
   BigDecimal calcularSubTotalCredito(BigDecimal[] importesBrutos);
 

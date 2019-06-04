@@ -245,13 +245,13 @@ class AppIntegrationTest {
         apiPrefix + "/facturas/venta?idPedido=1", facturaVentaB, FacturaVenta[].class);
   }
 
-  private void crearReciboParaCliente(double monto, long idEmpresa) {
+  private void crearReciboParaCliente(double monto, long idEmpresa, long idCliente) {
     ReciboDTO recibo =
         ReciboDTO.builder()
             .concepto("Recibo Test")
             .monto(monto)
             .idEmpresa(idEmpresa)
-            .idCliente(1L)
+            .idCliente(idCliente)
             .idFormaDePago(1L)
             .build();
     restTemplate.postForObject(apiPrefix + "/recibos/clientes", recibo, ReciboDTO.class);
@@ -261,13 +261,13 @@ class AppIntegrationTest {
     NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO = NuevaNotaDebitoDeReciboDTO.builder()
       .idRecibo(1L)
       .motivo("Test alta nota debito - Cheque rechazado")
-      .gastoAdministrativo(new BigDecimal("100"))
+      .gastoAdministrativo(new BigDecimal("121"))
       .tipoDeComprobante(TipoDeComprobante.NOTA_DEBITO_A)
       .build();
     NotaDebitoDTO notaDebitoCliente =
       restTemplate.postForObject(apiPrefix + "/notas/debito/calculos", nuevaNotaDebitoDeReciboDTO, NotaDebitoDTO.class);
     restTemplate.postForObject(
-      apiPrefix + "/notas/debito/clientes",
+      apiPrefix + "/notas/debito",
       notaDebitoCliente,
       Nota.class);
     restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
@@ -328,13 +328,13 @@ class AppIntegrationTest {
     NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO = NuevaNotaDebitoDeReciboDTO.builder()
       .idRecibo(3L)
       .motivo("Test alta nota debito - Cheque rechazado")
-      .gastoAdministrativo(new BigDecimal("100"))
+      .gastoAdministrativo(new BigDecimal("121"))
       .tipoDeComprobante(TipoDeComprobante.NOTA_DEBITO_B)
       .build();
     NotaDebitoDTO notaDebitoProveedor =
       restTemplate.postForObject(apiPrefix + "/notas/debito/calculos", nuevaNotaDebitoDeReciboDTO, NotaDebitoDTO.class);
     restTemplate.postForObject(
-      apiPrefix + "/notas/debito/proveedores",
+      apiPrefix + "/notas/debito",
       notaDebitoProveedor,
       Nota.class);
     restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
@@ -3976,30 +3976,134 @@ class AppIntegrationTest {
     assertEquals(TipoDeComprobante.NOTA_CREDITO_X, notaCreditoRecuperada.getTipoComprobante());
   }
 
-//  @Test
-//  void shouldCrearNotaDebitoC() {
-//    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-//    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
-//    restTemplate.put(apiPrefix + "/empresas", empresa);
-//    this.abrirCaja();
-//    this.shouldCrearClienteResponsableInscripto();
-//    ReciboDTO recibo =
-//      ReciboDTO.builder()
-//        .concepto("Recibo Test")
-//        .monto(1000)
-//        .idEmpresa(1L)
-//        .idCliente(3L)
-//        .idFormaDePago(1L)
-//        .build();
-//    recibo = restTemplate.postForObject(apiPrefix + "/recibos/clientes", recibo, ReciboDTO.class);
-//    System.out.print(recibo);
-////    NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO = NuevaNotaDebitoDeReciboDTO.builder()
-////      .idRecibo(1L)
-////      .gastoAdministrativo(new BigDecimal("100"))
-////      .motivo("Nunca pagó absolutamente nada")
-////      .
-////      .build();
-//  }
+  @Test
+  void shouldCrearNotaDebitoAConRecibo() {
+    this.abrirCaja();
+    this.crearReciboParaCliente(100, 1L, 1L);
+    NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO =
+      NuevaNotaDebitoDeReciboDTO.builder()
+        .idRecibo(1L)
+        .gastoAdministrativo(new BigDecimal("1500.00"))
+        .motivo("Tiene una deuda muy vieja que no paga.")
+        .tipoDeComprobante(TipoDeComprobante.NOTA_DEBITO_A)
+        .build();
+    NotaDebitoDTO notaDebitoCalculada =
+      restTemplate.postForObject(apiPrefix + "/notas/debito/calculos", nuevaNotaDebitoDeReciboDTO, NotaDebitoDTO.class);
+    NotaDebitoDTO notaDebitoGuardada =restTemplate.postForObject(apiPrefix + "/notas/debito", notaDebitoCalculada, NotaDebitoDTO.class);
+    assertEquals(new BigDecimal("1239.669421487603306"), notaDebitoGuardada.getSubTotalBruto());
+    assertEquals(new BigDecimal("260.330578512396694260000000000000"), notaDebitoGuardada.getIva21Neto());
+    assertEquals(new BigDecimal("1600.000000000000000260000000000000"), notaDebitoGuardada.getTotal());
+    assertEquals(notaDebitoCalculada, notaDebitoGuardada);
+  }
+
+  @Test
+  void shouldCrearNotaDebitoBConRecibo() {
+    ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", ClienteDTO.class);
+    cliente.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/clientes", cliente);
+    this.abrirCaja();
+    this.crearReciboParaCliente(100, 1L, 1L);
+    NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO =
+      NuevaNotaDebitoDeReciboDTO.builder()
+        .idRecibo(1L)
+        .gastoAdministrativo(new BigDecimal("1500.00"))
+        .motivo("Tiene una deuda muy vieja que no paga.")
+        .tipoDeComprobante(TipoDeComprobante.NOTA_DEBITO_B)
+        .build();
+    NotaDebitoDTO notaDebitoCalculada =
+      restTemplate.postForObject(apiPrefix + "/notas/debito/calculos", nuevaNotaDebitoDeReciboDTO, NotaDebitoDTO.class);
+    NotaDebitoDTO notaDebitoGuardada =restTemplate.postForObject(apiPrefix + "/notas/debito", notaDebitoCalculada, NotaDebitoDTO.class);
+    assertEquals(new BigDecimal("1239.669421487603306"), notaDebitoGuardada.getSubTotalBruto());
+    assertEquals(new BigDecimal("260.330578512396694260000000000000"), notaDebitoGuardada.getIva21Neto());
+    assertEquals(new BigDecimal("1600.000000000000000260000000000000"), notaDebitoGuardada.getTotal());
+    assertEquals(notaDebitoCalculada, notaDebitoGuardada);
+  }
+
+  @Test
+  void shouldCrearNotaDebitoCDeRecibo() {
+    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/empresas", empresa);
+    this.abrirCaja();
+    this.crearReciboParaCliente(100, 1L, 1L);
+    NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO =
+      NuevaNotaDebitoDeReciboDTO.builder()
+        .idRecibo(1L)
+        .gastoAdministrativo(new BigDecimal("1500.00"))
+        .motivo("Tiene una deuda muy vieja que no paga.")
+        .tipoDeComprobante(TipoDeComprobante.NOTA_DEBITO_C)
+        .build();
+    NotaDebitoDTO notaDebitoCalculada =
+      restTemplate.postForObject(apiPrefix + "/notas/debito/calculos", nuevaNotaDebitoDeReciboDTO, NotaDebitoDTO.class);
+    NotaDebitoDTO notaDebitoGuardada =restTemplate.postForObject(apiPrefix + "/notas/debito", notaDebitoCalculada, NotaDebitoDTO.class);
+    assertEquals(new BigDecimal("1600.000000000000000"), notaDebitoGuardada.getSubTotalBruto());
+    assertEquals(BigDecimal.ZERO, notaDebitoGuardada.getIva21Neto());
+    assertEquals(new BigDecimal("1600.000000000000000"), notaDebitoGuardada.getTotal());
+    assertEquals(notaDebitoCalculada, notaDebitoGuardada);
+  }
+
+  @Test
+  void shouldCrearNotaDebitoASinRecibo() {
+    NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDeCliente =
+      NuevaNotaDebitoSinReciboDTO.builder()
+        .idCliente(1L)
+        .motivo("Tiene una deuda muy vieja que no paga.")
+        .detalleRenglon("Ultimo pago, 21 de enero del 2017.")
+        .gastoAdministrativo(new BigDecimal("1500.00"))
+        .tipoDeComprobante(TipoDeComprobante.NOTA_DEBITO_A)
+        .build();
+    NotaDebitoDTO notaDebitoCalculada =
+      restTemplate.postForObject(apiPrefix + "/notas/debito/calculos-sin-recibo", nuevaNotaDebitoSinReciboDeCliente, NotaDebitoDTO.class);
+    NotaDebitoDTO notaDebitoGuardada =restTemplate.postForObject(apiPrefix + "/notas/debito", notaDebitoCalculada, NotaDebitoDTO.class);
+    assertEquals(new BigDecimal("1239.669421487603306"), notaDebitoGuardada.getSubTotalBruto());
+    assertEquals(new BigDecimal("260.330578512396694260000000000000"), notaDebitoGuardada.getIva21Neto());
+    assertEquals(new BigDecimal("1500.000000000000000260000000000000"), notaDebitoGuardada.getTotal());
+    assertEquals(notaDebitoCalculada, notaDebitoGuardada);
+  }
+
+  @Test
+  void shouldCrearNotaDebitoBSinRecibo() {
+    ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", ClienteDTO.class);
+    cliente.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/clientes", cliente);
+    NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDeCliente =
+      NuevaNotaDebitoSinReciboDTO.builder()
+        .idCliente(1L)
+        .motivo("Tiene una deuda muy vieja que no paga.")
+        .detalleRenglon("Ultimo pago, 21 de enero del 2017.")
+        .gastoAdministrativo(new BigDecimal("1500.00"))
+        .tipoDeComprobante(TipoDeComprobante.NOTA_DEBITO_B)
+        .build();
+    NotaDebitoDTO notaDebitoCalculada =
+      restTemplate.postForObject(apiPrefix + "/notas/debito/calculos-sin-recibo", nuevaNotaDebitoSinReciboDeCliente, NotaDebitoDTO.class);
+    NotaDebitoDTO notaDebitoGuardada =restTemplate.postForObject(apiPrefix + "/notas/debito", notaDebitoCalculada, NotaDebitoDTO.class);
+    assertEquals(new BigDecimal("1239.669421487603306"), notaDebitoGuardada.getSubTotalBruto());
+    assertEquals(new BigDecimal("260.330578512396694260000000000000"), notaDebitoGuardada.getIva21Neto());
+    assertEquals(new BigDecimal("1500.000000000000000260000000000000"), notaDebitoGuardada.getTotal());
+    assertEquals(notaDebitoCalculada, notaDebitoGuardada);
+  }
+
+  @Test
+  void shouldCrearNotaDebitoCSinRecibo() {
+    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/empresas", empresa);
+    NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDeCliente =
+      NuevaNotaDebitoSinReciboDTO.builder()
+        .idCliente(1L)
+        .motivo("Tiene una deuda muy vieja que no paga.")
+        .detalleRenglon("Ultimo pago, 21 de enero del 2017.")
+        .gastoAdministrativo(new BigDecimal("1000"))
+        .tipoDeComprobante(TipoDeComprobante.NOTA_DEBITO_C)
+        .build();
+    NotaDebitoDTO notaDebitoCalculada =
+      restTemplate.postForObject(apiPrefix + "/notas/debito/calculos-sin-recibo", nuevaNotaDebitoSinReciboDeCliente, NotaDebitoDTO.class);
+    NotaDebitoDTO notaDebitoGuardada =restTemplate.postForObject(apiPrefix + "/notas/debito", notaDebitoCalculada, NotaDebitoDTO.class);
+    assertEquals(new BigDecimal("1000"), notaDebitoGuardada.getSubTotalBruto());
+    assertEquals(BigDecimal.ZERO, notaDebitoGuardada.getIva21Neto());
+    assertEquals(new BigDecimal("1000"), notaDebitoGuardada.getTotal());
+    assertEquals(notaDebitoCalculada, notaDebitoGuardada);
+  }
 
   @Test
   void shouldVerificarStockNotaCreditoCompra() {
@@ -4020,7 +4124,7 @@ class AppIntegrationTest {
       new BigDecimal("-5992.500000000000000"),
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
-    this.crearReciboParaCliente(5992.5, 1L);
+    this.crearReciboParaCliente(5992.5, 1L, 1L);
     assertEquals(
       new BigDecimal("0E-15"),
       restTemplate.getForObject(
@@ -4030,7 +4134,7 @@ class AppIntegrationTest {
       new BigDecimal("-6113.500000000000000"),
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
-    this.crearReciboParaCliente(6113.5, 1L);
+    this.crearReciboParaCliente(6113.5, 1L, 1L);
     assertEquals(
       new BigDecimal("0E-15"),
       restTemplate.getForObject(
@@ -4051,9 +4155,9 @@ class AppIntegrationTest {
   void shouldComprobarSaldoParcialCuentaCorrienteCliente() {
     this.abrirCaja();
     this.shouldCrearFacturaVentaB();
-    this.crearReciboParaCliente(5992.5, 1L);
+    this.crearReciboParaCliente(5992.5, 1L, 1L);
     this.crearNotaDebitoParaCliente();
-    this.crearReciboParaCliente(6113.5, 1L);
+    this.crearReciboParaCliente(6113.5, 1L, 1L);
     this.crearNotaCreditoParaCliente();
     List<RenglonCuentaCorriente> renglonesCuentaCorriente =
       restTemplate
@@ -4626,7 +4730,7 @@ class AppIntegrationTest {
     FacturaVentaDTO facturaVentaDTO =
       restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaVentaDTO.class);
     assertEquals(facturaVentaDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
-    this.crearReciboParaCliente(5992.5, 1L);
+    this.crearReciboParaCliente(5992.5, 1L, 1L);
     ccCliente =
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/clientes/1", CuentaCorriente.class);
@@ -4639,7 +4743,7 @@ class AppIntegrationTest {
     NotaDebitoDTO notaDebitoDTO =
       restTemplate.getForObject(apiPrefix + "/notas/1", NotaDebitoDTO.class);
     assertEquals(notaDebitoDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
-    this.crearReciboParaCliente(6113.5, 1L);
+    this.crearReciboParaCliente(6113.5, 1L, 1L);
     ccCliente =
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/clientes/1", CuentaCorriente.class);
@@ -4789,7 +4893,7 @@ class AppIntegrationTest {
         null,
         CajaDTO.class);
     assertEquals(new BigDecimal("200"), caja.getSaldoApertura());
-    this.crearReciboParaCliente(300, 1L);
+    this.crearReciboParaCliente(300, 1L, 1L);
     assertEquals(
       new BigDecimal("500.000000000000000"),
       restTemplate.getForObject(apiPrefix + "/cajas/1/saldo-sistema", BigDecimal.class));

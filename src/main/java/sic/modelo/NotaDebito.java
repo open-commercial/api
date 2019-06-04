@@ -146,6 +146,6 @@ public class NotaDebito extends Nota implements Serializable {
 
   @JsonGetter("idRecibo")
   public Long getIdRecibo() {
-    return recibo.getIdRecibo();
+    return (recibo != null) ? recibo.getIdRecibo() : null;
   }
 }

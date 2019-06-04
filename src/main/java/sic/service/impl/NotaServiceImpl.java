@@ -738,6 +738,7 @@ public class NotaServiceImpl implements INotaService {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_nota_total_no_valido"));
     }
     if (notaDebito.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_C
+        && notaDebito.getRecibo() != null
         && (notaDebito
                 .getTotal()
                 .compareTo(
@@ -1154,11 +1155,8 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
-  public List<RenglonNotaDebito> calcularRenglonDebito(
-      Recibo recibo, BigDecimal monto, BigDecimal ivaPorcentaje) {
-    List<RenglonNotaDebito> renglonesNota = new ArrayList<>();
-    RenglonNotaDebito renglonNota;
-    renglonNota = new RenglonNotaDebito();
+  public RenglonNotaDebito calcularRenglonDebitoConRecibo(Recibo recibo) {
+    RenglonNotaDebito renglonNota = new RenglonNotaDebito();
     String descripcion =
         "Recibo Nº "
             + recibo.getNumRecibo()
@@ -1171,16 +1169,45 @@ public class NotaServiceImpl implements INotaService {
     renglonNota.setIvaPorcentaje(BigDecimal.ZERO);
     renglonNota.setIvaNeto(BigDecimal.ZERO);
     renglonNota.setImporteNeto(recibo.getMonto());
-    renglonesNota.add(renglonNota);
-    renglonNota = new RenglonNotaDebito();
-    renglonNota.setDescripcion("Gasto Administrativo");
-    renglonNota.setMonto(monto);
-    renglonNota.setIvaPorcentaje(ivaPorcentaje);
-    renglonNota.setIvaNeto(monto.multiply(ivaPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)));
-    renglonNota.setImporteBruto(monto);
+    return renglonNota;
+  }
+
+  @Override
+  public RenglonNotaDebito calcularRenglonDebito(
+      BigDecimal monto, TipoDeComprobante tipoDeComprobante, String descripcionRenglon) {
+    RenglonNotaDebito renglonNota = new RenglonNotaDebito();
+    renglonNota.setDescripcion(descripcionRenglon);
+    switch (tipoDeComprobante) {
+//      case NOTA_DEBITO_A:
+//      case NOTA_DEBITO_B:
+//      case NOTA_DEBITO_PRESUPUESTO:
+//        renglonNota.setMonto(
+//            monto.multiply(CIEN).divide(new BigDecimal("121"), 15, RoundingMode.HALF_UP));
+//        renglonNota.setIvaPorcentaje(IVA_21);
+//        renglonNota.setIvaNeto(monto.multiply(IVA_21.divide(CIEN, 15, RoundingMode.HALF_UP)));
+//        break;
+      case NOTA_DEBITO_C:
+      case NOTA_DEBITO_X:
+        renglonNota.setMonto(monto);
+        renglonNota.setIvaPorcentaje(BigDecimal.ZERO);
+        renglonNota.setIvaNeto(BigDecimal.ZERO);
+        break;
+      case NOTA_DEBITO_Y:
+        renglonNota.setMonto(
+          monto.multiply(CIEN).divide(new BigDecimal("110.5"), 15, RoundingMode.HALF_UP));
+        renglonNota.setIvaPorcentaje(IVA_105);
+        renglonNota.setIvaNeto(renglonNota.getMonto().multiply(IVA_105.divide(CIEN, 15, RoundingMode.HALF_UP)));
+        break;
+      default:
+        renglonNota.setMonto(
+          monto.multiply(CIEN).divide(new BigDecimal("121"), 15, RoundingMode.HALF_UP));
+        renglonNota.setIvaPorcentaje(IVA_21);
+        renglonNota.setIvaNeto(renglonNota.getMonto().multiply(IVA_21.divide(CIEN, 15, RoundingMode.HALF_UP)));
+        break;
+    }
+    renglonNota.setImporteBruto(renglonNota.getMonto());
     renglonNota.setImporteNeto(renglonNota.getIvaNeto().add(renglonNota.getImporteBruto()));
-    renglonesNota.add(renglonNota);
-    return renglonesNota;
+    return renglonNota;
   }
 
   @Override
