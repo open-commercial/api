@@ -14,6 +14,8 @@ public interface IFormaDePagoService {
 
     List<FormaDePago> getFormasDePago(Empresa empresa);
 
+    List<FormaDePago> getFormasDePagoNoEliminadas(Empresa empresa);
+
     FormaDePago getFormasDePagoNoEliminadoPorId(long id);
 
     FormaDePago guardar(@Valid FormaDePago formaDePago);
