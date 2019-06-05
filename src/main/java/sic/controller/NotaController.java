@@ -402,7 +402,7 @@ public class NotaController {
     if (reciboRelacionado.getCliente() != null) {
       notaDebitoCalculada.setCliente(reciboRelacionado.getCliente());
       notaDebitoCalculada.setMovimiento(Movimiento.VENTA);
-      if (!this.getTipoNotaDebitoCliente(
+      if (!notaService.getTipoNotaDebitoCliente(
               reciboRelacionado.getIdCliente(), reciboRelacionado.getIdEmpresa())
           .contains(nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante())) {
         throw new BusinessServiceException(
@@ -412,7 +412,7 @@ public class NotaController {
         && nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante() != null) {
       notaDebitoCalculada.setProveedor(reciboRelacionado.getProveedor());
       notaDebitoCalculada.setMovimiento(Movimiento.COMPRA);
-      if (!this.getTipoNotaDebitoProveedor(
+      if (!notaService.getTipoNotaDebitoProveedor(
               reciboRelacionado.getIdProveedor(), reciboRelacionado.getIdEmpresa())
           .contains(nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante())) {
         throw new BusinessServiceException(
