@@ -39,7 +39,7 @@ public class FormaDePagoController {
     Rol.COMPRADOR
   })
   public FormaDePago getFormaDePagoPorId(@PathVariable long idFormaDePago) {
-    return formaDePagoService.getFormasDePagoNoEliminadoPorId(idFormaDePago);
+    return formaDePagoService.getFormasDePagoPorId(idFormaDePago);
   }
 
   @DeleteMapping("/formas-de-pago/{idFormaDePago}")

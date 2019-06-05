@@ -54,6 +54,17 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
   }
 
   @Override
+  public FormaDePago getFormasDePagoPorId(long idFormaDePago) {
+    Optional<FormaDePago> formaDePago = formaDePagoRepository.findById(idFormaDePago);
+    if (formaDePago.isPresent()) {
+      return formaDePago.get();
+    } else {
+      throw new EntityNotFoundException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_formaDePago_no_existente"));
+    }
+  }
+
+  @Override
   public FormaDePago getFormaDePagoPredeterminada(Empresa empresa) {
     FormaDePago formaDePago =
         formaDePagoRepository.findByAndEmpresaAndPredeterminadoAndEliminada(empresa, true, false);

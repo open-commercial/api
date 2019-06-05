@@ -120,7 +120,7 @@ public class CajaController {
     if (caja.getFechaCierre() != null) fechaHasta = caja.getFechaCierre();
     return cajaService.getMovimientosPorFormaDePagoEntreFechas(
         caja.getEmpresa(),
-        formaDePagoService.getFormasDePagoNoEliminadoPorId(idFormaDePago),
+        formaDePagoService.getFormasDePagoPorId(idFormaDePago),
         caja.getFechaApertura(),
         fechaHasta);
   }

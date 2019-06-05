@@ -18,6 +18,8 @@ public interface IFormaDePagoService {
 
     FormaDePago getFormasDePagoNoEliminadoPorId(long id);
 
+    FormaDePago getFormasDePagoPorId(long id);
+
     FormaDePago guardar(@Valid FormaDePago formaDePago);
 
     void setFormaDePagoPredeterminada(FormaDePago formaDePago);
