@@ -17,7 +17,6 @@ public class NuevaNotaDebitoSinReciboDTO {
   private Long idCliente;
   private Long idProveedor;
   private String motivo;
-  private String detalleRenglon;
   private BigDecimal gastoAdministrativo;
   private TipoDeComprobante tipoDeComprobante;
 

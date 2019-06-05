@@ -4048,7 +4048,6 @@ class AppIntegrationTest {
       NuevaNotaDebitoSinReciboDTO.builder()
         .idCliente(1L)
         .motivo("Tiene una deuda muy vieja que no paga.")
-        .detalleRenglon("Ultimo pago, 21 de enero del 2017.")
         .gastoAdministrativo(new BigDecimal("1500.00"))
         .tipoDeComprobante(TipoDeComprobante.NOTA_DEBITO_A)
         .build();
@@ -4070,7 +4069,6 @@ class AppIntegrationTest {
       NuevaNotaDebitoSinReciboDTO.builder()
         .idCliente(1L)
         .motivo("Tiene una deuda muy vieja que no paga.")
-        .detalleRenglon("Ultimo pago, 21 de enero del 2017.")
         .gastoAdministrativo(new BigDecimal("1500.00"))
         .tipoDeComprobante(TipoDeComprobante.NOTA_DEBITO_B)
         .build();
@@ -4092,7 +4090,6 @@ class AppIntegrationTest {
       NuevaNotaDebitoSinReciboDTO.builder()
         .idCliente(1L)
         .motivo("Tiene una deuda muy vieja que no paga.")
-        .detalleRenglon("Ultimo pago, 21 de enero del 2017.")
         .gastoAdministrativo(new BigDecimal("1000"))
         .tipoDeComprobante(TipoDeComprobante.NOTA_DEBITO_C)
         .build();

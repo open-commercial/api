@@ -9,9 +9,9 @@ import javax.validation.Valid;
 
 public interface INotaService {
 
-  Nota guardarNotaCredito(@Valid NotaCredito nota);
+  NotaCredito guardarNotaCredito(@Valid NotaCredito nota);
 
-  Nota guardarNotaDebito(@Valid NotaDebito nota);
+  NotaDebito guardarNotaDebito(@Valid NotaDebito nota);
 
   Nota autorizarNota(Nota nota);
 
@@ -59,7 +59,7 @@ public interface INotaService {
   RenglonNotaDebito calcularRenglonDebitoConRecibo(Recibo recibo) ;
 
   RenglonNotaDebito calcularRenglonDebito(
-    BigDecimal monto, TipoDeComprobante tipoDeComprobante, String descripcionRenglon);
+    BigDecimal monto, TipoDeComprobante tipoDeComprobante);
 
   BigDecimal calcularSubTotalCredito(BigDecimal[] importesBrutos);
 

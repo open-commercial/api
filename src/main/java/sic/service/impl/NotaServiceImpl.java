@@ -751,7 +751,7 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   @Transactional
-  public Nota guardarNotaCredito(@Valid NotaCredito notaCredito) {
+  public NotaCredito guardarNotaCredito(@Valid NotaCredito notaCredito) {
     if (notaCredito.getFecha() == null) {
       notaCredito.setFecha(new Date());
     }
@@ -1174,18 +1174,18 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public RenglonNotaDebito calcularRenglonDebito(
-      BigDecimal monto, TipoDeComprobante tipoDeComprobante, String descripcionRenglon) {
+      BigDecimal monto, TipoDeComprobante tipoDeComprobante) {
     RenglonNotaDebito renglonNota = new RenglonNotaDebito();
-    renglonNota.setDescripcion(descripcionRenglon);
+    renglonNota.setDescripcion("Gasto Administrativo");
     switch (tipoDeComprobante) {
-//      case NOTA_DEBITO_A:
-//      case NOTA_DEBITO_B:
-//      case NOTA_DEBITO_PRESUPUESTO:
-//        renglonNota.setMonto(
-//            monto.multiply(CIEN).divide(new BigDecimal("121"), 15, RoundingMode.HALF_UP));
-//        renglonNota.setIvaPorcentaje(IVA_21);
-//        renglonNota.setIvaNeto(monto.multiply(IVA_21.divide(CIEN, 15, RoundingMode.HALF_UP)));
-//        break;
+      case NOTA_DEBITO_A:
+      case NOTA_DEBITO_B:
+      case NOTA_DEBITO_PRESUPUESTO:
+        renglonNota.setMonto(
+            monto.multiply(CIEN).divide(new BigDecimal("121"), 15, RoundingMode.HALF_UP));
+        renglonNota.setIvaPorcentaje(IVA_21);
+        renglonNota.setIvaNeto(renglonNota.getMonto().multiply(IVA_21.divide(CIEN, 15, RoundingMode.HALF_UP)));
+        break;
       case NOTA_DEBITO_C:
       case NOTA_DEBITO_X:
         renglonNota.setMonto(monto);
@@ -1199,11 +1199,8 @@ public class NotaServiceImpl implements INotaService {
         renglonNota.setIvaNeto(renglonNota.getMonto().multiply(IVA_105.divide(CIEN, 15, RoundingMode.HALF_UP)));
         break;
       default:
-        renglonNota.setMonto(
-          monto.multiply(CIEN).divide(new BigDecimal("121"), 15, RoundingMode.HALF_UP));
-        renglonNota.setIvaPorcentaje(IVA_21);
-        renglonNota.setIvaNeto(renglonNota.getMonto().multiply(IVA_21.divide(CIEN, 15, RoundingMode.HALF_UP)));
-        break;
+        throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_tipo_de_comprobante_no_valido"));
     }
     renglonNota.setImporteBruto(renglonNota.getMonto());
     renglonNota.setImporteNeto(renglonNota.getIvaNeto().add(renglonNota.getImporteBruto()));
