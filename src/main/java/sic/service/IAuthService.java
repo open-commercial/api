@@ -14,4 +14,6 @@ public interface IAuthService {
   boolean esTokenValido(String authorizationHeader);
 
   Claims getClaimsDelToken(String authorizationHeader);
+
+  void validarRecaptcha(String recaptcha);
 }

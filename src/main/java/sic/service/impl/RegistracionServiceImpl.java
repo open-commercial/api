@@ -9,6 +9,7 @@ import sic.modelo.Cliente;
 import sic.modelo.Usuario;
 import sic.service.*;
 
+import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
@@ -40,6 +41,7 @@ public class RegistracionServiceImpl implements IRegistracionService {
     usuario.setUsername(this.generarUsername(usuario.getNombre(), usuario.getApellido()));
     Usuario credencial = usuarioService.guardar(usuario);
     cliente.setCredencial(credencial);
+    cliente.setBonificacion(BigDecimal.ZERO);
     clienteService.guardar(cliente);
     correoElectronicoService.enviarMailPorEmpresa(
         cliente.getEmpresa().getId_Empresa(),

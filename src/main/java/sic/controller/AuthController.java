@@ -1,17 +1,13 @@
 package sic.controller;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import sic.modelo.*;
 import sic.modelo.dto.RecoveryPasswordDTO;
 import sic.modelo.dto.RegistracionClienteAndUsuarioDTO;
@@ -28,28 +24,18 @@ public class AuthController {
   private final IEmpresaService empresaService;
   private final IRegistracionService registracionService;
   private final IAuthService authService;
-  private final RestTemplate restTemplate;
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
-  private static final String URL_RECAPTCHA = "https://www.google.com/recaptcha/api/siteverify";
-
-  @Value("${RECAPTCHA_SECRET_KEY}")
-  private String recaptchaSecretkey;
-
-  @Value("${RECAPTCHA_TEST_KEY}")
-  private String recaptchaTestKey;
 
   @Autowired
   public AuthController(
       IUsuarioService usuarioService,
       IEmpresaService empresaService,
       IRegistracionService registracionService,
-      IAuthService authService,
-      RestTemplate restTemplate) {
+      IAuthService authService) {
     this.usuarioService = usuarioService;
     this.empresaService = empresaService;
     this.registracionService = registracionService;
     this.authService = authService;
-    this.restTemplate = restTemplate;
   }
 
   @PostMapping("/login")
@@ -101,52 +87,34 @@ public class AuthController {
   @PostMapping("/registracion")
   public void registrarse(
       @RequestBody RegistracionClienteAndUsuarioDTO registracionClienteAndUsuarioDTO) {
-    String params =
-        "?secret="
-            + recaptchaSecretkey
-            + "&response="
-            + registracionClienteAndUsuarioDTO.getRecaptcha();
-    boolean recaptchaIsSuccess;
-    if (registracionClienteAndUsuarioDTO.getRecaptcha().equals(recaptchaTestKey)) {
-      recaptchaIsSuccess = true;
-    } else {
-      ReCaptchaResponse reCaptchaResponse =
-          restTemplate
-              .exchange(URL_RECAPTCHA + params, HttpMethod.POST, null, ReCaptchaResponse.class)
-              .getBody();
-      recaptchaIsSuccess = reCaptchaResponse.isSuccess();
+    authService.validarRecaptcha(registracionClienteAndUsuarioDTO.getRecaptcha());
+    Usuario nuevoUsuario = new Usuario();
+    nuevoUsuario.setHabilitado(true);
+    nuevoUsuario.setNombre(registracionClienteAndUsuarioDTO.getNombre());
+    nuevoUsuario.setApellido(registracionClienteAndUsuarioDTO.getApellido());
+    nuevoUsuario.setEmail(registracionClienteAndUsuarioDTO.getEmail());
+    nuevoUsuario.setPassword(registracionClienteAndUsuarioDTO.getPassword());
+    nuevoUsuario.setRoles(Collections.singletonList(Rol.COMPRADOR));
+    nuevoUsuario.setIdEmpresaPredeterminada(registracionClienteAndUsuarioDTO.getIdEmpresa());
+    Cliente nuevoCliente = new Cliente();
+    nuevoCliente.setTelefono(registracionClienteAndUsuarioDTO.getTelefono());
+    nuevoCliente.setEmail(registracionClienteAndUsuarioDTO.getEmail());
+    nuevoCliente.setEmpresa(
+        empresaService.getEmpresaPorId(registracionClienteAndUsuarioDTO.getIdEmpresa()));
+    CategoriaIVA categoriaIVA = registracionClienteAndUsuarioDTO.getCategoriaIVA();
+    if (categoriaIVA == CategoriaIVA.CONSUMIDOR_FINAL) {
+      nuevoCliente.setNombreFiscal(
+          registracionClienteAndUsuarioDTO.getNombre()
+              + " "
+              + registracionClienteAndUsuarioDTO.getApellido());
+      nuevoCliente.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
+    } else if (categoriaIVA == CategoriaIVA.RESPONSABLE_INSCRIPTO
+        || categoriaIVA == CategoriaIVA.MONOTRIBUTO
+        || categoriaIVA == CategoriaIVA.EXENTO) {
+      nuevoCliente.setNombreFiscal(registracionClienteAndUsuarioDTO.getNombreFiscal());
+      nuevoCliente.setCategoriaIVA(categoriaIVA);
+      nuevoCliente.setBonificacion(BigDecimal.ZERO);
     }
-    if (recaptchaIsSuccess) {
-      Usuario nuevoUsuario = new Usuario();
-      nuevoUsuario.setHabilitado(true);
-      nuevoUsuario.setNombre(registracionClienteAndUsuarioDTO.getNombre());
-      nuevoUsuario.setApellido(registracionClienteAndUsuarioDTO.getApellido());
-      nuevoUsuario.setEmail(registracionClienteAndUsuarioDTO.getEmail());
-      nuevoUsuario.setPassword(registracionClienteAndUsuarioDTO.getPassword());
-      nuevoUsuario.setRoles(Collections.singletonList(Rol.COMPRADOR));
-      nuevoUsuario.setIdEmpresaPredeterminada(registracionClienteAndUsuarioDTO.getIdEmpresa());
-      Cliente nuevoCliente = new Cliente();
-      nuevoCliente.setTelefono(registracionClienteAndUsuarioDTO.getTelefono());
-      nuevoCliente.setEmail(registracionClienteAndUsuarioDTO.getEmail());
-      nuevoCliente.setEmpresa(
-          empresaService.getEmpresaPorId(registracionClienteAndUsuarioDTO.getIdEmpresa()));
-      CategoriaIVA categoriaIVA = registracionClienteAndUsuarioDTO.getCategoriaIVA();
-      if (categoriaIVA == CategoriaIVA.CONSUMIDOR_FINAL) {
-        nuevoCliente.setNombreFiscal(
-            registracionClienteAndUsuarioDTO.getNombre()
-                + " "
-                + registracionClienteAndUsuarioDTO.getApellido());
-        nuevoCliente.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
-      } else if (categoriaIVA == CategoriaIVA.RESPONSABLE_INSCRIPTO
-          || categoriaIVA == CategoriaIVA.MONOTRIBUTO
-          || categoriaIVA == CategoriaIVA.EXENTO) {
-        nuevoCliente.setNombreFiscal(registracionClienteAndUsuarioDTO.getNombreFiscal());
-        nuevoCliente.setCategoriaIVA(categoriaIVA);
-        nuevoCliente.setBonificacion(BigDecimal.ZERO);
-      }
-      this.registracionService.crearCuentaConClienteAndUsuario(nuevoCliente, nuevoUsuario);
-    } else {
-      throw new UnauthorizedException(RESOURCE_BUNDLE.getString("mensaje_recaptcha_no_valido"));
-    }
+    this.registracionService.crearCuentaConClienteAndUsuario(nuevoCliente, nuevoUsuario);
   }
 }

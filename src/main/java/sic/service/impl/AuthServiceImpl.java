@@ -8,10 +8,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 import sic.controller.UnauthorizedException;
+import sic.modelo.ReCaptchaResponse;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
+import sic.service.BusinessServiceException;
 import sic.service.IAuthService;
 import sic.service.IUsuarioService;
 
@@ -24,15 +29,24 @@ import java.util.ResourceBundle;
 public class AuthServiceImpl implements IAuthService {
 
   private final IUsuarioService usuarioService;
+  private final RestTemplate restTemplate;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+  private static final String URL_RECAPTCHA = "https://www.google.com/recaptcha/api/siteverify";
+
+  @Value("${RECAPTCHA_SECRET_KEY}")
+  private String recaptchaSecretkey;
+
+  @Value("${RECAPTCHA_TEST_KEY}")
+  private String recaptchaTestKey;
 
   @Value("${SIC_JWT_KEY}")
   private String secretkey;
 
   @Autowired
-  public AuthServiceImpl(IUsuarioService usuarioService) {
+  public AuthServiceImpl(IUsuarioService usuarioService, RestTemplate restTemplate) {
     this.usuarioService = usuarioService;
+    this.restTemplate = restTemplate;
   }
 
   @Override
@@ -93,5 +107,24 @@ public class AuthServiceImpl implements IAuthService {
         .setSigningKey(secretkey)
         .parseClaimsJws(authorizationHeader.substring(7))
         .getBody();
+  }
+
+  @Override
+  public void validarRecaptcha(String recaptcha) {
+    if (!recaptcha.equals(recaptchaTestKey)) {
+      String params = "?secret=" + recaptchaSecretkey + "&response=" + recaptcha;
+      ReCaptchaResponse reCaptchaResponse = null;
+      try {
+        reCaptchaResponse =
+            restTemplate
+                .exchange(URL_RECAPTCHA + params, HttpMethod.POST, null, ReCaptchaResponse.class)
+                .getBody();
+      } catch (RestClientException ex) {
+        logger.error(ex.getMessage());
+      }
+      if (reCaptchaResponse == null || !reCaptchaResponse.isSuccess()) {
+        throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_recaptcha_no_valido"));
+      }
+    }
   }
 }
