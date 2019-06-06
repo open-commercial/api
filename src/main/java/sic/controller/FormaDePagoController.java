@@ -39,7 +39,7 @@ public class FormaDePagoController {
     Rol.COMPRADOR
   })
   public FormaDePago getFormaDePagoPorId(@PathVariable long idFormaDePago) {
-    return formaDePagoService.getFormasDePagoNoEliminadoPorId(idFormaDePago);
+    return formaDePagoService.getFormasDePagoPorId(idFormaDePago);
   }
 
   @DeleteMapping("/formas-de-pago/{idFormaDePago}")
@@ -70,7 +70,7 @@ public class FormaDePagoController {
     Rol.COMPRADOR
   })
   public List<FormaDePago> getFormasDePago(@PathVariable long idEmpresa) {
-    return formaDePagoService.getFormasDePago(empresaService.getEmpresaPorId(idEmpresa));
+    return formaDePagoService.getFormasDePagoNoEliminadas(empresaService.getEmpresaPorId(idEmpresa));
   }
 
   @PostMapping("/formas-de-pago")

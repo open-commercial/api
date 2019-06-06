@@ -32,6 +32,11 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
 
   @Override
   public List<FormaDePago> getFormasDePago(Empresa empresa) {
+    return formaDePagoRepository.findAllByAndEmpresaOrderByNombreAsc(empresa);
+  }
+
+  @Override
+  public List<FormaDePago> getFormasDePagoNoEliminadas(Empresa empresa) {
     return formaDePagoRepository.findAllByAndEmpresaAndEliminadaOrderByNombreAsc(empresa, false);
   }
 
@@ -45,6 +50,17 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
       throw new EntityNotFoundException(
         ResourceBundle.getBundle("Mensajes")
           .getString("mensaje_formaDePago_no_existente"));
+    }
+  }
+
+  @Override
+  public FormaDePago getFormasDePagoPorId(long idFormaDePago) {
+    Optional<FormaDePago> formaDePago = formaDePagoRepository.findById(idFormaDePago);
+    if (formaDePago.isPresent()) {
+      return formaDePago.get();
+    } else {
+      throw new EntityNotFoundException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_formaDePago_no_existente"));
     }
   }
 
