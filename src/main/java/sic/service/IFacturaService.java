@@ -74,4 +74,6 @@ public interface IFacturaService {
     BigDecimal descuentoPorcentaje,
     boolean dividiendoRenglonFactura);
 
+  void asignarClienteEmbeddable(FacturaVenta fv, Cliente cliente);
+
 }

@@ -13,6 +13,7 @@ import sic.modelo.TipoDeComprobante;
 import sic.modelo.Transportista;
 import sic.modelo.Usuario;
 import sic.modelo.dto.ClienteDTO;
+import sic.modelo.embeddable.ClienteEmbeddable;
 
 public class FacturaVentaBuilder {
     
@@ -26,7 +27,7 @@ public class FacturaVentaBuilder {
     private Transportista transportista = new TransportistaBuilder().build();
     private List<RenglonFactura> renglones;
     private Cliente cliente = new ClienteBuilder().build();
-    private ClienteDTO clienteDTO = ClienteDTO.builder().build();
+    private ClienteEmbeddable clienteEmbeddable = ClienteEmbeddable.builder().build();
     private Usuario usuario = new UsuarioBuilder().build();
     private BigDecimal subTotal = new BigDecimal("6500");
     private BigDecimal recargo_porcentaje = BigDecimal.ZERO;
@@ -64,7 +65,7 @@ public class FacturaVentaBuilder {
         }
     return new FacturaVenta(
         id_Factura,
-        clienteDTO,
+        clienteEmbeddable,
         cliente,
         usuario,
         fecha,
@@ -140,8 +141,8 @@ public class FacturaVentaBuilder {
         return this;
     }  
     
-    public FacturaVentaBuilder withCliente(ClienteDTO clienteDTO) {
-        this.clienteDTO = clienteDTO;
+    public FacturaVentaBuilder withClienteEmbeddable(ClienteEmbeddable clienteEmbeddable) {
+        this.clienteEmbeddable = clienteEmbeddable;
         return this;
     }
 

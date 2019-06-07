@@ -14,6 +14,8 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import sic.modelo.dto.ClienteDTO;
 import sic.modelo.dto.UbicacionDTO;
+import sic.modelo.embeddable.ClienteEmbeddable;
+import sic.modelo.embeddable.UbicacionEmbeddable;
 
 @Entity
 @Table(name = "facturaventa")
@@ -23,9 +25,8 @@ import sic.modelo.dto.UbicacionDTO;
 @JsonIgnoreProperties({"cliente", "usuario", "empresa", "pedido", "transportista", "clienteEmbedded"})
 public class FacturaVenta extends Factura implements Serializable {
 
-  @AttributeOverride(name = "id_Cliente", column = @Column(name = "idClienteEmbedded"))
   @Embedded
-  private ClienteDTO clienteEmbedded;
+  private ClienteEmbeddable clienteEmbedded;
 
   @ManyToOne
   @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
@@ -36,7 +37,7 @@ public class FacturaVenta extends Factura implements Serializable {
 
   public FacturaVenta(
     long id_Factura,
-    ClienteDTO clienteEmbedded,
+    ClienteEmbeddable clienteEmbedded,
     Cliente cliente,
     Usuario usuario,
     Date fecha,
@@ -101,7 +102,7 @@ public class FacturaVenta extends Factura implements Serializable {
 
   @JsonGetter("idCliente")
   public Long getIdCliente() {
-    return clienteEmbedded.getId_Cliente();
+    return cliente.getId_Cliente();
   }
 
   @JsonGetter("nombreFiscalCliente")
@@ -121,16 +122,16 @@ public class FacturaVenta extends Factura implements Serializable {
 
   @JsonGetter("idViajante")
   public Long getIdViajante() {
-    return clienteEmbedded.getIdViajante();
+    return cliente.getIdViajante();
   }
 
   @JsonGetter("nombreViajante")
   public String getNombreViajante() {
-    return clienteEmbedded.getNombreViajante();
+    return cliente.getNombreViajante();
   }
 
   @JsonGetter("ubicacionFacturacion")
-  public UbicacionDTO getUbicacionFacturacion() {
-    return clienteEmbedded.getUbicacionFacturacion();
+  public UbicacionEmbeddable getUbicacionFacturacion() {
+    return clienteEmbedded.getUbicacion();
   }
 }

@@ -29,6 +29,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.modelo.embeddable.ClienteEmbeddable;
+import sic.modelo.embeddable.LocalidadEmbeddable;
+import sic.modelo.embeddable.ProvinciaEmbeddable;
+import sic.modelo.embeddable.UbicacionEmbeddable;
 import sic.service.*;
 import sic.util.CalculosComprobante;
 import sic.util.FormatterFechaHora;
@@ -1196,5 +1200,50 @@ public class FacturaServiceImpl implements IFacturaService {
         idProductoItem,
         descuentoPorcentaje,
         dividir);
+  }
+
+  @Override
+  public void asignarClienteEmbeddable(FacturaVenta fv, Cliente cliente) {
+    fv.setClienteEmbedded(
+        ClienteEmbeddable.builder()
+            .nroCliente(cliente.getNroCliente())
+            .nombreFiscal(cliente.getNombreFiscal())
+            .nombreFantasia(cliente.getNombreFantasia())
+            .categoriaIVA(cliente.getCategoriaIVA())
+            .idFiscal(cliente.getIdFiscal())
+            .email(cliente.getEmail())
+            .telefono(cliente.getTelefono())
+            .build());
+    if (cliente.getUbicacionFacturacion() != null) {
+      fv.getClienteEmbedded()
+          .setUbicacion(
+              UbicacionEmbeddable.builder()
+                  .descripcion(cliente.getUbicacionFacturacion().getDescripcion())
+                  .latitud(cliente.getUbicacionFacturacion().getLatitud())
+                  .longitud(cliente.getUbicacionFacturacion().getLongitud())
+                  .calle(cliente.getUbicacionFacturacion().getCalle())
+                  .numero(cliente.getUbicacionFacturacion().getNumero())
+                  .piso(cliente.getUbicacionFacturacion().getPiso())
+                  .departamento(cliente.getUbicacionFacturacion().getDepartamento())
+                  .localidadEmbeddable(
+                      LocalidadEmbeddable.builder()
+                          .nombreLocalidad(
+                              cliente.getUbicacionFacturacion().getLocalidad().getNombre())
+                          .codigoPostal(
+                              cliente.getUbicacionFacturacion().getLocalidad().getCodigoPostal())
+                          .costoEnvio(
+                              cliente.getUbicacionFacturacion().getLocalidad().getCostoEnvio())
+                          .provinciaEmbeddable(
+                              ProvinciaEmbeddable.builder()
+                                  .nombreProvincia(
+                                      cliente
+                                          .getUbicacionFacturacion()
+                                          .getLocalidad()
+                                          .getProvincia()
+                                          .getNombre())
+                                  .build())
+                          .build())
+                  .build());
+    }
   }
 }
