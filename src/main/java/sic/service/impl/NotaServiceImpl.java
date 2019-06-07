@@ -1109,12 +1109,13 @@ public class NotaServiceImpl implements INotaService {
     renglonNota.setIvaPorcentaje(
         (tipo == TipoDeComprobante.NOTA_CREDITO_A
                 || tipo == TipoDeComprobante.NOTA_CREDITO_B
-                || tipo == TipoDeComprobante.NOTA_CREDITO_C
                 || tipo == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO)
             ? new BigDecimal("21")
             : BigDecimal.ZERO);
     renglonNota.setIvaNeto(
-        (tipo == TipoDeComprobante.NOTA_CREDITO_X) ? BigDecimal.ZERO : monto.subtract(subTotal));
+        (tipo == TipoDeComprobante.NOTA_CREDITO_X || tipo == TipoDeComprobante.NOTA_CREDITO_C)
+            ? BigDecimal.ZERO
+            : monto.subtract(subTotal));
     renglonNota.setImporte(
         (tipo == TipoDeComprobante.NOTA_CREDITO_B
                 || tipo == TipoDeComprobante.NOTA_CREDITO_C

@@ -3656,6 +3656,42 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldCrearNotaCreditoVentaCSinFactura() {
+    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/empresas", empresa);
+    NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO =
+      NuevaNotaCreditoSinFacturaDTO.builder()
+        .detalle("Diferencia de precio")
+        .monto(new BigDecimal("1000"))
+        .tipo(TipoDeComprobante.NOTA_CREDITO_C)
+        .idCliente(1L)
+        .idEmpresa(empresa.getId_Empresa())
+        .motivo("Descuento mal aplicado")
+        .build();
+    NotaCreditoDTO notaPorGuardar =
+      restTemplate.postForObject(
+        apiPrefix + "/notas/credito/calculos-sin-factura",
+        nuevaNotaCreditoSinFacturaDTO,
+        NotaCreditoDTO.class);
+    NotaCreditoDTO notaGuardada =
+      restTemplate.postForObject(
+        apiPrefix + "/notas/credito", notaPorGuardar, NotaCreditoDTO.class);
+    notaPorGuardar.setNroNota(notaGuardada.getNroNota());
+    assertEquals(notaPorGuardar, notaGuardada);
+    assertEquals(new BigDecimal("1000"), notaGuardada.getSubTotal());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getRecargoNeto());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getDescuentoNeto());
+    assertEquals(new BigDecimal("1000"), notaGuardada.getSubTotalBruto());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getIva21Neto());
+    assertEquals(BigDecimal.ZERO, notaGuardada.getIva105Neto());
+    assertEquals(new BigDecimal("1000"), notaGuardada.getTotal());
+    assertEquals(TipoDeComprobante.NOTA_CREDITO_C, notaGuardada.getTipoComprobante());
+    restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
+  }
+
+
+  @Test
   void shouldCrearNotaCreditoVentaXSinFactura() {
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO =

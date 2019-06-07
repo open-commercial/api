@@ -2,11 +2,11 @@ package sic.modelo.dto;
 
 import java.io.Serializable;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true, exclude = {"idCliente", "nombreFiscalCliente", "idViajante", "nombreViajante"})
 @Builder
 public class FacturaVentaDTO extends FacturaDTO implements Serializable {
