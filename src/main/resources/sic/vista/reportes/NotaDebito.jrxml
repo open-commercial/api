@@ -181,7 +181,8 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 					<font size="22" isBold="true" isStrikeThrough="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_A") ? "A" : 
-$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B") ? "B" :  ""]]></textFieldExpression>
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B") ? "B" :
+$P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_C") ? "C" :  ""]]></textFieldExpression>
 			</textField>
 			<textField pattern="#00000000">
 				<reportElement x="510" y="15" width="45" height="15" uuid="a3046cbb-4b9c-4ffb-9c57-c20771497933">

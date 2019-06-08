@@ -717,20 +717,20 @@ public class NotaServiceImpl implements INotaService {
     }
     // iva 21
     BigDecimal iva21 = BigDecimal.ZERO;
-    if (notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X
-        || notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_A
+    if (notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_A
         || notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_B
         || notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_Y
-        || notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO
-        || notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_X
-        || notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_A
-        || notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B
-        || notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO) {
+        || notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO) {
       iva21 = notaDebito.getSubTotalBruto().multiply(new BigDecimal("0.21"));
       if (notaDebito.getIva21Neto().compareTo(iva21) != 0) {
         throw new BusinessServiceException(
             RESOURCE_BUNDLE.getString("mensaje_nota_iva21_no_valido"));
       }
+    }
+    if ((notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C
+            || notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X)
+        && notaDebito.getIva21Neto().compareTo(BigDecimal.ZERO) != 0) {
+      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_nota_iva21_no_valido"));
     }
     // total
     if ((notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C

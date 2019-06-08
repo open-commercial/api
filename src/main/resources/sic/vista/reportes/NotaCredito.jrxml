@@ -29,7 +29,8 @@
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") 
+|| $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font size="8"/>
@@ -59,7 +60,8 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") 
+|| $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="true"/>
@@ -70,7 +72,8 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<reportElement x="0" y="115" width="555" height="15" uuid="6fb6fe21-b26a-4f5f-8847-da585e165dae">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") 
+|| $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -82,7 +85,8 @@ $P{notaCredito}.getEmpresa().getUbicacion()  : ""]]></textFieldExpression>
 				<reportElement x="0" y="130" width="555" height="15" uuid="3c596225-a4e6-4283-92e6-74a5552f2211">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") 
+|| $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -98,7 +102,8 @@ $P{notaCredito}.getEmpresa().getCategoriaIVA().toString().equals("MONOTRIBUTO") 
 			<image>
 				<reportElement x="0" y="0" width="200" height="100" uuid="a3439a7b-148b-4af2-8d4b-612d8d0beb47">
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") 
+|| $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<imageExpression><![CDATA[$P{logo}]]></imageExpression>
 			</image>
@@ -106,7 +111,8 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<reportElement x="459" y="45" width="96" height="15" uuid="4d472ca2-fe0a-4f11-b2c2-eaff1fd6d51e">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") 
+|| $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font size="8"/>
@@ -117,7 +123,8 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<reportElement x="459" y="60" width="96" height="15" uuid="4630ada4-f911-45f3-bf8d-1026e289cc77">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") 
+|| $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font size="8"/>
@@ -128,7 +135,8 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<reportElement x="459" y="75" width="96" height="15" uuid="71f82348-4ecf-4a46-9fcc-3681e588c04e">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") 
+|| $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font size="8"/>
@@ -139,7 +147,8 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<reportElement x="0" y="145" width="279" height="15" uuid="0ac9e3dd-2252-49da-8d4a-ae5da578c748">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") 
+|| $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -150,7 +159,8 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 				<reportElement x="279" y="145" width="276" height="15" uuid="ecc2a8ba-e539-458c-93ed-17ae5e7a70df">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") 
+|| $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -160,7 +170,8 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 			<textField>
 				<reportElement mode="Transparent" x="360" y="15" width="99" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="442e3a2d-471d-4b31-8fae-035b876966d7">
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") 
+|| $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<box padding="0" topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
@@ -172,7 +183,8 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 			<textField>
 				<reportElement x="250" y="0" width="36" height="30" uuid="e6a58b5a-ea5b-4de7-99e7-b470b9799cd7">
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") 
+|| $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<box leftPadding="0">
 					<pen lineWidth="1.0" lineStyle="Solid"/>
@@ -185,7 +197,8 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 					<font size="22" isBold="true" isStrikeThrough="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ? "A" : 
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") ? "B" : ""]]></textFieldExpression>
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") ? "B" : 
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_C") ? "C" :""]]></textFieldExpression>
 			</textField>
 			<textField pattern="#00000000">
 				<reportElement x="510" y="15" width="45" height="15" uuid="a3046cbb-4b9c-4ffb-9c57-c20771497933">
@@ -193,7 +206,8 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") ? "B" :
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") 
+|| $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font size="8"/>
@@ -205,7 +219,8 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") 
+|| $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right" verticalAlignment="Justified">
 					<font size="8"/>
@@ -285,7 +300,8 @@ $P{notaCredito}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") 
 			<staticText>
 				<reportElement mode="Transparent" x="360" y="45" width="99" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="9e7dfcda-5c8c-4987-88c2-2b820976c1bf">
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") 
+|| $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<box padding="0" topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
@@ -297,7 +313,8 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 			<staticText>
 				<reportElement mode="Transparent" x="360" y="60" width="99" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="b14c524c-faa9-4313-afa5-6d41ff2095b7">
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") 
+|| $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<box padding="0" topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
@@ -309,7 +326,8 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></pr
 			<staticText>
 				<reportElement mode="Transparent" x="360" y="75" width="99" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="65b16deb-9ce0-4137-ad4c-53495b7cdeaa">
 					<printWhenExpression><![CDATA[!$P{preImpresa} && ($P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_A") ||
-$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B"))]]></printWhenExpression>
+$P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B") 
+|| $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<box padding="0" topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
