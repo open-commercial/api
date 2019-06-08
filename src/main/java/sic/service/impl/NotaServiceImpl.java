@@ -832,10 +832,6 @@ public class NotaServiceImpl implements INotaService {
         throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_nota_tipo_no_valido"));
       }
-      notaDebito.setTipoComprobante(
-          this.getTipoDeNotaDebitoSegunFactura(
-              this.facturaService
-                  .getTipoFacturaCompra(notaDebito.getEmpresa(), notaDebito.getProveedor())[0]));
     }
     this.validarCalculosDebito(notaDebito);
     notaDebito = notaDebitoRepository.save(notaDebito);
