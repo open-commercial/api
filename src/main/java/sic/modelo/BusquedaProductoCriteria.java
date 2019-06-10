@@ -22,6 +22,7 @@ public class BusquedaProductoCriteria {
   private Long idProveedor;
   private long idEmpresa;
   private boolean listarSoloFaltantes;
+  private boolean listarSoloEnStock;
   private boolean buscaPorVisibilidad;
   private Boolean publico;
   private boolean buscaPorDestacado;
