@@ -13,6 +13,7 @@ ADD `descripcion` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
 ADD `latitud` double DEFAULT NULL,
 ADD `longitud` double DEFAULT NULL,
 ADD `nombreLocalidad` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+ADD `costoEnvio` decimal(25,15) COLLATE utf8_unicode_ci DEFAULT NULL,
 ADD `nombreProvincia` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
 ADD `numero` int(11) DEFAULT NULL,
 ADD `piso` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL;
@@ -31,34 +32,6 @@ fv.telefono = c.telefono;
 UPDATE
 facturaventa fv inner join cliente c  
 on c.id_Cliente = fv.id_Cliente
-inner join usuario usuarioCliente on c.id_Usuario_Credencial = usuarioCliente.id_Usuario
-SET 
-fv.categoriaIVA = c.categoriaIVA,
-fv.email = c.email,
-fv.idFiscal = c.idFiscal,
-fv.nroCliente = c.nroCliente,
-fv.telefono = c.telefono,
-fv.nombreFantasia = c.nombreFantasia,
-fv.nombreFiscal = c.nombreFiscal;
-
-UPDATE
-facturaventa fv inner join cliente c  
-on c.id_Cliente = fv.id_Cliente
-inner join usuario usuarioViajante on c.id_Usuario_Viajante = usuarioViajante.id_Usuario
-SET 
-fv.categoriaIVA = c.categoriaIVA,
-fv.email = c.email,
-fv.idFiscal = c.idFiscal,
-fv.nroCliente = c.nroCliente,
-fv.telefono = c.telefono,
-fv.nombreFantasia = c.nombreFantasia,
-fv.nombreFiscal = c.nombreFiscal;
-
-UPDATE
-facturaventa fv inner join cliente c  
-on c.id_Cliente = fv.id_Cliente
-inner join usuario usuarioCliente on c.id_Usuario_Credencial = usuarioCliente.id_Usuario
-inner join usuario usuarioViajante on c.id_Usuario_Viajante = usuarioViajante.id_Usuario
 SET 
 fv.categoriaIVA = c.categoriaIVA,
 fv.email = c.email,
@@ -76,13 +49,15 @@ facturaventa fv inner join cliente c on c.id_Cliente = fv.id_Cliente
  inner join provincia on provincia.idProvincia = localidad.idProvincia
 SET 
 fv.calle = ubicacion.calle,
+fv.numero = ubicacion.numero,
 fv.codigoPostal = localidad.codigoPostal,
 fv.departamento = ubicacion.departamento,
 fv.descripcion = ubicacion.descripcion,
 fv.latitud = ubicacion.latitud,
 fv.longitud = ubicacion.longitud,
 fv.nombreLocalidad = localidad.nombre,
-fv.nombreProvincia = provincia.nombre;
+fv.nombreProvincia = provincia.nombre,
+fv.costoEnvio = localidad.costoEnvio;
 
 SET SQL_SAFE_UPDATES = 1;
 
