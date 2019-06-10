@@ -4148,6 +4148,46 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldCrearNotaDebitoXParaClienteDeRecibo() {
+    this.abrirCaja();
+    this.crearReciboParaCliente(100, 1L, 1L);
+    NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO =
+      NuevaNotaDebitoDeReciboDTO.builder()
+        .idRecibo(1L)
+        .gastoAdministrativo(new BigDecimal("1500.00"))
+        .motivo("Tiene una deuda muy vieja que no paga.")
+        .tipoDeComprobante(TipoDeComprobante.NOTA_DEBITO_X)
+        .build();
+    NotaDebitoDTO notaDebitoCalculada =
+      restTemplate.postForObject(apiPrefix + "/notas/debito/calculos", nuevaNotaDebitoDeReciboDTO, NotaDebitoDTO.class);
+    NotaDebitoDTO notaDebitoGuardada =restTemplate.postForObject(apiPrefix + "/notas/debito", notaDebitoCalculada, NotaDebitoDTO.class);
+    assertEquals(new BigDecimal("1600.000000000000000"), notaDebitoGuardada.getSubTotalBruto());
+    assertEquals(BigDecimal.ZERO, notaDebitoGuardada.getIva21Neto());
+    assertEquals(new BigDecimal("1600.000000000000000"), notaDebitoGuardada.getTotal());
+    assertEquals(notaDebitoCalculada, notaDebitoGuardada);
+  }
+
+  @Test
+  void shouldCrearNotaDebitoXParaProveedorDeRecibo() {
+    this.abrirCaja();
+    this.crearReciboParaProveedor(100, 1L, 1L);
+    NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO =
+      NuevaNotaDebitoDeReciboDTO.builder()
+        .idRecibo(1L)
+        .gastoAdministrativo(new BigDecimal("1500.00"))
+        .motivo("Tiene una deuda muy vieja que no paga.")
+        .tipoDeComprobante(TipoDeComprobante.NOTA_DEBITO_X)
+        .build();
+    NotaDebitoDTO notaDebitoCalculada =
+      restTemplate.postForObject(apiPrefix + "/notas/debito/calculos", nuevaNotaDebitoDeReciboDTO, NotaDebitoDTO.class);
+    NotaDebitoDTO notaDebitoGuardada =restTemplate.postForObject(apiPrefix + "/notas/debito", notaDebitoCalculada, NotaDebitoDTO.class);
+    assertEquals(new BigDecimal("1600.000000000000000"), notaDebitoGuardada.getSubTotalBruto());
+    assertEquals(BigDecimal.ZERO, notaDebitoGuardada.getIva21Neto());
+    assertEquals(new BigDecimal("1600.000000000000000"), notaDebitoGuardada.getTotal());
+    assertEquals(notaDebitoCalculada, notaDebitoGuardada);
+  }
+
+  @Test
   void shouldCrearNotaDebitoAParaClienteSinRecibo() {
     NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDeCliente =
       NuevaNotaDebitoSinReciboDTO.builder()
@@ -4260,6 +4300,42 @@ class AppIntegrationTest {
         .motivo("Tiene una deuda muy vieja que no paga.")
         .gastoAdministrativo(new BigDecimal("1000"))
         .tipoDeComprobante(TipoDeComprobante.NOTA_DEBITO_C)
+        .build();
+    NotaDebitoDTO notaDebitoCalculada =
+      restTemplate.postForObject(apiPrefix + "/notas/debito/calculos-sin-recibo", nuevaNotaDebitoSinReciboDeCliente, NotaDebitoDTO.class);
+    NotaDebitoDTO notaDebitoGuardada =restTemplate.postForObject(apiPrefix + "/notas/debito", notaDebitoCalculada, NotaDebitoDTO.class);
+    assertEquals(new BigDecimal("1000"), notaDebitoGuardada.getSubTotalBruto());
+    assertEquals(BigDecimal.ZERO, notaDebitoGuardada.getIva21Neto());
+    assertEquals(new BigDecimal("1000"), notaDebitoGuardada.getTotal());
+    assertEquals(notaDebitoCalculada, notaDebitoGuardada);
+  }
+
+  @Test
+  void shouldCrearNotaDebitoXParaClienteSinRecibo() {
+    NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDeCliente =
+      NuevaNotaDebitoSinReciboDTO.builder()
+        .idCliente(1L)
+        .motivo("Tiene una deuda muy vieja que no paga.")
+        .gastoAdministrativo(new BigDecimal("1000"))
+        .tipoDeComprobante(TipoDeComprobante.NOTA_DEBITO_X)
+        .build();
+    NotaDebitoDTO notaDebitoCalculada =
+      restTemplate.postForObject(apiPrefix + "/notas/debito/calculos-sin-recibo", nuevaNotaDebitoSinReciboDeCliente, NotaDebitoDTO.class);
+    NotaDebitoDTO notaDebitoGuardada =restTemplate.postForObject(apiPrefix + "/notas/debito", notaDebitoCalculada, NotaDebitoDTO.class);
+    assertEquals(new BigDecimal("1000"), notaDebitoGuardada.getSubTotalBruto());
+    assertEquals(BigDecimal.ZERO, notaDebitoGuardada.getIva21Neto());
+    assertEquals(new BigDecimal("1000"), notaDebitoGuardada.getTotal());
+    assertEquals(notaDebitoCalculada, notaDebitoGuardada);
+  }
+
+  @Test
+  void shouldCrearNotaDebitoXParaProveedorSinRecibo() {
+    NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDeCliente =
+      NuevaNotaDebitoSinReciboDTO.builder()
+        .idCliente(1L)
+        .motivo("Tiene una deuda muy vieja que no paga.")
+        .gastoAdministrativo(new BigDecimal("1000"))
+        .tipoDeComprobante(TipoDeComprobante.NOTA_DEBITO_X)
         .build();
     NotaDebitoDTO notaDebitoCalculada =
       restTemplate.postForObject(apiPrefix + "/notas/debito/calculos-sin-recibo", nuevaNotaDebitoSinReciboDeCliente, NotaDebitoDTO.class);

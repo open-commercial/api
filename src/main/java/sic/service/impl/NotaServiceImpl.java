@@ -701,11 +701,13 @@ public class NotaServiceImpl implements INotaService {
 
   private void validarCalculosDebito(NotaDebito notaDebito) {
     // monto no gravado
-    if (notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C
+    if ((notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C
+            || notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X)
         && notaDebito.getMontoNoGravado().compareTo(BigDecimal.ZERO) != 0) {
       throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_nota_tipo_c_monto_no_gravado_no_valido"));
-    } else if (notaDebito.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_C) {
+          RESOURCE_BUNDLE.getString("mensaje_nota_c_x_monto_no_gravado_no_valido"));
+    } else if ((notaDebito.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_C
+        && notaDebito.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_X)) {
       BigDecimal montoComprobante = BigDecimal.ZERO;
       if (notaDebito.getRecibo() != null) {
         montoComprobante = notaDebito.getRecibo().getMonto();
@@ -738,6 +740,7 @@ public class NotaServiceImpl implements INotaService {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_nota_total_no_valido"));
     }
     if (notaDebito.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_C
+        && notaDebito.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_X
         && notaDebito.getRecibo() != null
         && (notaDebito
                 .getTotal()
