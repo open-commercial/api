@@ -18,5 +18,5 @@ public class LocalidadEmbeddable {
   private String nombreLocalidad;
   private String codigoPostal;
   private BigDecimal costoEnvio;
-  private ProvinciaEmbeddable provinciaEmbeddable;
+  private ProvinciaEmbeddable provincia;
 }

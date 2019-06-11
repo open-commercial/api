@@ -21,7 +21,7 @@ public class UbicacionEmbeddable {
   private Integer numero;
   private String piso;
   private String departamento;
-  private LocalidadEmbeddable localidadEmbeddable;
+  private LocalidadEmbeddable localidad;
 
   @Override
   public String toString() {
@@ -29,11 +29,10 @@ public class UbicacionEmbeddable {
         + (numero != null ? numero + " " : "")
         + (piso != null ? piso + " " : "")
         + (departamento != null ? departamento + " " : "")
-        + (localidadEmbeddable.getNombreLocalidad() != null
-            ? localidadEmbeddable.getNombreLocalidad() + " "
-            : "")
-        + (localidadEmbeddable.getProvinciaEmbeddable().getNombreProvincia() != null
-            ? localidadEmbeddable.getProvinciaEmbeddable().getNombreProvincia()
+        + ((descripcion != null && !descripcion.isEmpty())? "(" + descripcion + ")" + " " : "")
+        + (localidad.getNombreLocalidad() != null ? localidad.getNombreLocalidad() + " " : "")
+        + (localidad.getProvincia().getNombreProvincia() != null
+            ? localidad.getProvincia().getNombreProvincia()
             : "");
   }
 }

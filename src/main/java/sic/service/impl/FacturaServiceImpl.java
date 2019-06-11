@@ -1225,7 +1225,7 @@ public class FacturaServiceImpl implements IFacturaService {
                   .numero(cliente.getUbicacionFacturacion().getNumero())
                   .piso(cliente.getUbicacionFacturacion().getPiso())
                   .departamento(cliente.getUbicacionFacturacion().getDepartamento())
-                  .localidadEmbeddable(
+                  .localidad(
                       LocalidadEmbeddable.builder()
                           .nombreLocalidad(
                               cliente.getUbicacionFacturacion().getLocalidad().getNombre())
@@ -1233,7 +1233,7 @@ public class FacturaServiceImpl implements IFacturaService {
                               cliente.getUbicacionFacturacion().getLocalidad().getCodigoPostal())
                           .costoEnvio(
                               cliente.getUbicacionFacturacion().getLocalidad().getCostoEnvio())
-                          .provinciaEmbeddable(
+                          .provincia(
                               ProvinciaEmbeddable.builder()
                                   .nombreProvincia(
                                       cliente

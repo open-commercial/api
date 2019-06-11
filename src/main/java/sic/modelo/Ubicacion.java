@@ -79,10 +79,11 @@ public class Ubicacion implements Serializable {
   @Override
   public String toString() {
     return (calle != null ? calle + " " : "")
-        + (numero != null ? numero + " ": "")
-        + (piso != null ? piso + " ": "")
-        + (departamento != null ? departamento + " ": "")
-        + (localidad != null ?  localidad.getNombre() + " " : "")
+        + (numero != null ? numero + " " : "")
+        + (piso != null ? piso + " " : "")
+        + (departamento != null ? departamento + " " : "")
+        + ((descripcion != null && !descripcion.isEmpty())? "(" + descripcion + ")" + " " : "")
+        + (localidad != null ? localidad.getNombre() + " " : "")
         + (localidad != null ? localidad.getProvincia().getNombre() : "");
   }
 }

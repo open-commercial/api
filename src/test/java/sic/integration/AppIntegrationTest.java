@@ -1548,6 +1548,7 @@ class AppIntegrationTest {
     facturaVentaA.setIdTransportista(transportista.getId_Transportista());
     restTemplate.postForObject(
         apiPrefix + "/facturas/venta", facturaVentaA, FacturaVentaDTO[].class);
+    String ubicacionSinModificacion = cliente.getUbicacionFacturacion().toString();
     cliente.setNombreFiscal("Superior Spider Man");
     cliente.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
     cliente.getUbicacionFacturacion().setCalle("Rio Torcuato");
@@ -1559,7 +1560,7 @@ class AppIntegrationTest {
     assertEquals(CategoriaIVA.RESPONSABLE_INSCRIPTO, facturaVenta.getCategoriaIVA());
     assertEquals("test test (test)",
       facturaVenta.getNombreUsuario());
-    assertEquals("Rio Parana", facturaVenta.getUbicacionFacturacion().getCalle());
+    assertEquals(ubicacionSinModificacion, facturaVenta.getUbicacion());
   }
 
   @Test

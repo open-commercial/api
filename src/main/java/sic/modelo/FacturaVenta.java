@@ -12,10 +12,7 @@ import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import sic.modelo.dto.ClienteDTO;
-import sic.modelo.dto.UbicacionDTO;
 import sic.modelo.embeddable.ClienteEmbeddable;
-import sic.modelo.embeddable.UbicacionEmbeddable;
 
 @Entity
 @Table(name = "facturaventa")
@@ -130,8 +127,8 @@ public class FacturaVenta extends Factura implements Serializable {
     return cliente.getNombreViajante();
   }
 
-  @JsonGetter("ubicacionFacturacion")
-  public UbicacionEmbeddable getUbicacionFacturacion() {
-    return clienteEmbedded.getUbicacion();
+  @JsonGetter("ubicacion")
+  public String getUbicacionFacturacion() {
+    return (clienteEmbedded.getUbicacion() != null) ? clienteEmbedded.getUbicacion().toString() : null;
   }
 }

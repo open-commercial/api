@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import lombok.*;
 import sic.modelo.CategoriaIVA;
-import sic.modelo.embeddable.UbicacionEmbeddable;
 
 @Data
 @EqualsAndHashCode(
@@ -16,7 +15,7 @@ import sic.modelo.embeddable.UbicacionEmbeddable;
       "categoriaIVA",
       "idViajante",
       "nombreViajante",
-      "ubicacionFacturacion"
+      "ubicacion"
     })
 @Builder
 @AllArgsConstructor
@@ -29,5 +28,5 @@ public class FacturaVentaDTO extends FacturaDTO implements Serializable {
   private CategoriaIVA categoriaIVA;
   private Long idViajante;
   private String nombreViajante;
-  private UbicacionEmbeddable ubicacionFacturacion;
+  private String ubicacion;
 }
