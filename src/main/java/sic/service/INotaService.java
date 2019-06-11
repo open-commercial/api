@@ -9,9 +9,9 @@ import javax.validation.Valid;
 
 public interface INotaService {
 
-  Nota guardarNotaCredito(@Valid NotaCredito nota);
+  NotaCredito guardarNotaCredito(@Valid NotaCredito nota);
 
-  Nota guardarNotaDebito(@Valid NotaDebito nota);
+  NotaDebito guardarNotaDebito(@Valid NotaDebito nota);
 
   Nota autorizarNota(Nota nota);
 
@@ -31,9 +31,13 @@ public interface INotaService {
 
   long getSiguienteNumeroNotaCreditoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
 
-  TipoDeComprobante[] getTipoNotaCreditoCliente(Long idCliente, Long idEmpresa);
+  List<TipoDeComprobante> getTipoNotaCreditoCliente(Long idCliente, Long idEmpresa);
 
-  TipoDeComprobante[] getTipoNotaDebitoCliente(Long idCliente, Long idEmpresa);
+  List<TipoDeComprobante> getTipoNotaDebitoCliente(Long idCliente, Long idEmpresa);
+
+  List<TipoDeComprobante> getTipoNotaCreditoProveedor(Long idProveedor, Long idEmpresa);
+
+  List<TipoDeComprobante> getTipoNotaDebitoProveedor(Long idProveedor, Long idEmpresa);
 
   TipoDeComprobante[] getTiposNota(Empresa empresa);
 
@@ -52,8 +56,10 @@ public interface INotaService {
 
   RenglonNotaCredito calcularRenglonCredito(TipoDeComprobante tipo, String Detalle, BigDecimal monto);
 
-  List<RenglonNotaDebito> calcularRenglonDebito(
-      long idRecibo, BigDecimal monto, BigDecimal ivaPorcentaje);
+  RenglonNotaDebito calcularRenglonDebitoConRecibo(Recibo recibo) ;
+
+  RenglonNotaDebito calcularRenglonDebito(
+    BigDecimal monto, TipoDeComprobante tipoDeComprobante);
 
   BigDecimal calcularSubTotalCredito(BigDecimal[] importesBrutos);
 

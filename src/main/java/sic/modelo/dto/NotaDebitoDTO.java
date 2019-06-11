@@ -8,12 +8,12 @@ import lombok.EqualsAndHashCode;
 import sic.modelo.RenglonNotaDebito;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = {"renglonesNotaDebito"})
 public class NotaDebitoDTO extends NotaDTO implements Serializable {
     
     private List<RenglonNotaDebito> renglonesNotaDebito;
     private BigDecimal montoNoGravado;
-    private long idRecibo;
+    private Long idRecibo;
     private boolean pagada;
     
 }

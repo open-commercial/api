@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import org.apache.poi.ss.formula.functions.T;
 import sic.modelo.*;
 import sic.service.IAfipService;
 import afip.wsaa.wsdl.LoginCms;
@@ -124,7 +125,9 @@ public class AfipServiceImpl implements IAfipService {
         && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_CREDITO_A
         && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_A
         && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_CREDITO_B
-        && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_B) {
+        && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_B
+        && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_CREDITO_C
+        && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_C) {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_comprobanteAFIP_invalido"));
     }
@@ -220,6 +223,12 @@ public class AfipServiceImpl implements IAfipService {
       case FACTURA_C:
         solicitud.setCbteTipo(11);
         break;
+      case NOTA_DEBITO_C:
+        solicitud.setCbteTipo(12);
+        break;
+      case NOTA_CREDITO_C:
+        solicitud.setCbteTipo(13);
+        break;
       default:
         throw new BusinessServiceException(
             RESOURCE_BUNDLE.getString("mensaje_comprobanteAFIP_invalido"));
@@ -246,7 +255,7 @@ public class AfipServiceImpl implements IAfipService {
     FECAECabRequest cabecera = new FECAECabRequest();
     FECAEDetRequest detalle = new FECAEDetRequest();
     // CbteTipo = 1: Factura A, 2: Nota de Débito A, 3: Nota de Crédito A, 6: Factura B,
-    //    7: Nota de Débito B 8: Nota de Crédito B. 11: Factura C
+    //    7: Nota de Débito B 8: Nota de Crédito B. 11: Factura C. 12: Nota Debito C. 13: Nota Credito C.
     // DocTipo = 80: CUIT, 86: CUIL, 96: DNI, 99: Doc.(Otro)
     int docTipo = (comprobante.getCliente().getCategoriaIVA() == CategoriaIVA.CONSUMIDOR_FINAL) ? 96 : 80;
     switch (comprobante.getTipoComprobante()) {
@@ -312,8 +321,45 @@ public class AfipServiceImpl implements IAfipService {
         break;
       case FACTURA_C:
         cabecera.setCbteTipo(11);
-        detalle.setDocTipo(0);
-        detalle.setDocNro(0);
+        if (comprobante.getTotal().compareTo(LIMITE_MONTO_CONSUMIDOR_FINAL) < 0) {
+          detalle.setDocTipo(99);
+          detalle.setDocNro(0);
+        } else {
+          if (comprobante.getCliente().getIdFiscal() == null) {
+            throw new BusinessServiceException(
+              RESOURCE_BUNDLE.getString("mensaje_cliente_sin_idFiscal_error"));
+          }
+          detalle.setDocTipo(docTipo);
+          detalle.setDocNro(comprobante.getCliente().getIdFiscal());
+        }
+        break;
+      case NOTA_DEBITO_C:
+        cabecera.setCbteTipo(12);
+        if (comprobante.getTotal().compareTo(LIMITE_MONTO_CONSUMIDOR_FINAL) < 0) {
+          detalle.setDocTipo(99);
+          detalle.setDocNro(0);
+        } else {
+          if (comprobante.getCliente().getIdFiscal() == null) {
+            throw new BusinessServiceException(
+              RESOURCE_BUNDLE.getString("mensaje_cliente_sin_idFiscal_error"));
+          }
+          detalle.setDocTipo(docTipo);
+          detalle.setDocNro(comprobante.getCliente().getIdFiscal());
+        }
+        break;
+      case NOTA_CREDITO_C:
+        cabecera.setCbteTipo(13);
+        if (comprobante.getTotal().compareTo(LIMITE_MONTO_CONSUMIDOR_FINAL) < 0) {
+          detalle.setDocTipo(99);
+          detalle.setDocNro(0);
+        } else {
+          if (comprobante.getCliente().getIdFiscal() == null) {
+            throw new BusinessServiceException(
+              RESOURCE_BUNDLE.getString("mensaje_cliente_sin_idFiscal_error"));
+          }
+          detalle.setDocTipo(docTipo);
+          detalle.setDocNro(comprobante.getCliente().getIdFiscal());
+        }
         break;
       default:
         throw new BusinessServiceException(
@@ -335,7 +381,10 @@ public class AfipServiceImpl implements IAfipService {
     detalle.setCbteFch(
         sdf.format(comprobante.getFecha()).replace("/", ""));
     ArrayOfAlicIva arrayIVA = new ArrayOfAlicIva();
-    if (comprobante.getIva21neto().compareTo(BigDecimal.ZERO) != 0) {
+    if (comprobante.getIva21neto().compareTo(BigDecimal.ZERO) != 0
+        && (comprobante.getTipoComprobante() != TipoDeComprobante.FACTURA_C
+            && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_CREDITO_C
+            && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_C)) {
       AlicIva alicIVA21 = new AlicIva();
       // Valores: 5 (21%), 4 (10.5%)
       alicIVA21.setId(5);
@@ -350,7 +399,10 @@ public class AfipServiceImpl implements IAfipService {
           comprobante.getIva21neto().setScale(2, RoundingMode.HALF_UP).doubleValue());
       arrayIVA.getAlicIva().add(alicIVA21);
     }
-    if (comprobante.getIva105neto().compareTo(BigDecimal.ZERO) != 0) {
+    if (comprobante.getIva105neto().compareTo(BigDecimal.ZERO) != 0
+        && (comprobante.getTipoComprobante() != TipoDeComprobante.FACTURA_C
+            && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_CREDITO_C
+            && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_C)) {
       AlicIva alicIVA105 = new AlicIva();
       // Valores: 5 (21%), 4 (10.5%)
       alicIVA105.setId(4);
@@ -368,7 +420,13 @@ public class AfipServiceImpl implements IAfipService {
     // Array para informar las alícuotas y sus importes asociados a un comprobante
     // <AlicIva>. Para comprobantes tipo C y Bienes Usados – Emisor Monotributista no
     // debe informar el array.
-    detalle.setIva(arrayIVA);
+    if (comprobante.getTipoComprobante() == TipoDeComprobante.FACTURA_C
+        || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_C
+        || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C) {
+      detalle.setIva(null);
+    } else {
+      detalle.setIva(arrayIVA);
+    }
     // Suma de los importes del array de IVA. Para comprobantes tipo C debe
     // ser igual a cero (0).
     detalle.setImpIVA(
@@ -387,11 +445,14 @@ public class AfipServiceImpl implements IAfipService {
             .doubleValue());
     // El campo “Importe neto no gravado” <ImpTotConc>. No puede ser menor
     // a cero(0). Para comprobantes tipo C debe ser igual a cero (0).
-    detalle.setImpTotConc(
-        comprobante
-            .getMontoNoGravado()
-            .setScale(2, RoundingMode.HALF_UP)
-            .doubleValue());
+    if (comprobante.getTipoComprobante() == TipoDeComprobante.FACTURA_C
+        || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_C
+        || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C) {
+      detalle.setImpTotConc(0);
+    } else {
+      detalle.setImpTotConc(
+          comprobante.getMontoNoGravado().setScale(2, RoundingMode.HALF_UP).doubleValue());
+    }
     // Importe total del comprobante, Debe ser igual a Importe neto no
     // gravado + Importe exento + Importe neto gravado + todos los campos
     // de IVA al XX% + Importe de tributos
