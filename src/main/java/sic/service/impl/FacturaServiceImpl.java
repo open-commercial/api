@@ -121,18 +121,14 @@ public class FacturaServiceImpl implements IFacturaService {
           TipoDeOperacion.ELIMINACION,
           Movimiento.VENTA,
           factura.getTipoComprobante());
-    } else if (factura instanceof FacturaCompra) {
-      this.cuentaCorrienteService.asentarEnCuentaCorriente(
-          (FacturaCompra) factura, TipoDeOperacion.ELIMINACION);
-      productoService.actualizarStock(
-          this.getIdsProductosYCantidades(factura),
-          TipoDeOperacion.ELIMINACION,
-          Movimiento.COMPRA,
-          factura.getTipoComprobante());
-    }
-    factura.setEliminada(true);
-    if (factura.getPedido() != null) {
-      pedidoService.actualizarEstadoPedido(factura.getPedido());
+      factura.setEliminada(true);
+      if (factura.getPedido() != null) {
+        pedidoService.actualizarEstadoPedido(factura.getPedido());
+      }
+      facturaRepository.save(factura);
+    } else {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_tipo_de_comprobante_no_valido"));
     }
   }
 

@@ -235,7 +235,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
           RESOURCE_BUNDLE.getString("mensaje_cuenta_corriente_no_existente"));
     }
     if (tipo == TipoDeOperacion.ALTA) {
-      this.altaRenglonCuentaCorrienteDeFactura(facturaVenta, cc);
+      this.guardarRenglonCuentaCorrienteDeFactura(facturaVenta, cc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
       cc = this.getCuentaCorrientePorCliente(facturaVenta.getCliente());
@@ -256,7 +256,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
           RESOURCE_BUNDLE.getString("mensaje_cuenta_corriente_no_existente"));
     }
     if (tipo == TipoDeOperacion.ALTA) {
-      this.altaRenglonCuentaCorrienteDeFactura(facturaCompra, cc);
+      this.guardarRenglonCuentaCorrienteDeFactura(facturaCompra, cc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
       cc = this.getCuentaCorrientePorProveedor(facturaCompra.getProveedor());
@@ -268,7 +268,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     }
   }
 
-  private void altaRenglonCuentaCorrienteDeFactura(Factura factura, CuentaCorriente cc) {
+  private void guardarRenglonCuentaCorrienteDeFactura(Factura factura, CuentaCorriente cc) {
     RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
     rcc.setTipoComprobante(factura.getTipoComprobante());
     rcc.setSerie(factura.getNumSerie());

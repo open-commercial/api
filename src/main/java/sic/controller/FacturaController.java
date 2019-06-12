@@ -64,9 +64,9 @@ public class FacturaController {
         return facturaService.getFacturaNoEliminadaPorId(idFactura);
     }
 
-  @DeleteMapping("/facturas")
+  @DeleteMapping("/facturas/{idFactura}")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-  public void eliminar(@RequestParam long idFactura) {
+  public void eliminar(@PathVariable long idFactura) {
     facturaService.eliminar(idFactura);
   }
 
