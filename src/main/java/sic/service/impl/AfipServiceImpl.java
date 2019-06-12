@@ -1,6 +1,5 @@
 package sic.service.impl;
 
-import org.apache.poi.ss.formula.functions.T;
 import sic.modelo.*;
 import sic.service.*;
 import afip.wsaa.wsdl.LoginCms;
@@ -41,6 +40,7 @@ public class AfipServiceImpl implements IAfipService {
   private final AfipWebServiceSOAPClient afipWebServiceSOAPClient;
   private final IConfiguracionDelSistemaService configuracionDelSistemaService;
   private final IFacturaService facturaService;
+  private final INotaService notaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final String WEBSERVICE_FACTURA_ELECTRONICA = "wsfe";
   private static final BigDecimal LIMITE_MONTO_CONSUMIDOR_FINAL = new BigDecimal(5000);
@@ -49,10 +49,11 @@ public class AfipServiceImpl implements IAfipService {
   @Autowired
   public AfipServiceImpl(
       AfipWebServiceSOAPClient afipWebServiceSOAPClient, IConfiguracionDelSistemaService cds,
-      IFacturaService facturaService) {
+      IFacturaService facturaService, INotaService notaService) {
     this.afipWebServiceSOAPClient = afipWebServiceSOAPClient;
     this.configuracionDelSistemaService = cds;
     this.facturaService = facturaService;
+    this.notaService = notaService;
   }
 
   @Override
@@ -138,6 +139,22 @@ public class AfipServiceImpl implements IAfipService {
         throw new BusinessServiceException(
             ResourceBundle.getBundle("Mensajes")
                 .getString("mensaje_existe_comprobante_anterior_sin_autorizar"));
+      }
+      if ((comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_A
+              || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B
+              || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_C)
+          && notaService.existeNotaCreditoAnteriorSinAutorizar(comprobante)) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes")
+                .getString("mensaje_existe_comprobante_anterior_sin_autorizar"));
+      }
+      if ((comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_A
+        || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_B
+        || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C)
+        && notaService.existeNotaDebitoAnteriorSinAutorizar(comprobante)) {
+        throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes")
+            .getString("mensaje_existe_comprobante_anterior_sin_autorizar"));
       }
     }
     if (comprobante.getCAE() != 0) {

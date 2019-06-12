@@ -101,4 +101,8 @@ public interface INotaService {
   BigDecimal calcularTotalIVACredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
 
   BigDecimal calcularTotalIVADebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn);
+
+  boolean existeNotaCreditoAnteriorSinAutorizar(ComprobanteAFIP comprobante);
+
+  boolean existeNotaDebitoAnteriorSinAutorizar(ComprobanteAFIP comprobante);
 }

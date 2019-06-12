@@ -106,7 +106,7 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
                 formaDePago.getEmpresa(), true, false)
             != null)) {
       throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_forma_de_pago_empresa_vacia"));
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_formaDePago_predeterminada_existente"));
     }
   }
 

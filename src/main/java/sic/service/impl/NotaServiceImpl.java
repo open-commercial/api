@@ -1434,4 +1434,34 @@ public class NotaServiceImpl implements INotaService {
             });
     return (ivaNotaDebito != null ? ivaNotaDebito : BigDecimal.ZERO);
   }
+
+  @Override
+  public boolean existeNotaCreditoAnteriorSinAutorizar(ComprobanteAFIP comprobante) {
+    List<NotaCredito> notasTop2 =
+        notaCreditoRepository.findTop2ByTipoComprobanteAndEliminadaAndEmpresaOrderByFechaDesc(
+            comprobante.getTipoComprobante(), false, comprobante.getEmpresa());
+    if (notasTop2.get(0).getIdNota() == comprobante.getIdComprobante()) {
+      if (notasTop2.size() == 2) {
+        return notasTop2.get(1).getCAE() == 0L;
+      }
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  @Override
+  public boolean existeNotaDebitoAnteriorSinAutorizar(ComprobanteAFIP comprobante) {
+    List<NotaDebito> notasTop2 =
+        notaDebitoRepository.findTop2ByTipoComprobanteAndEliminadaAndEmpresaOrderByFechaDesc(
+            comprobante.getTipoComprobante(), false, comprobante.getEmpresa());
+    if (notasTop2.get(0).getIdNota() == comprobante.getIdComprobante()) {
+      if (notasTop2.size() == 2) {
+        return notasTop2.get(1).getCAE() == 0L;
+      }
+      return false;
+    } else {
+      return true;
+    }
+  }
 }

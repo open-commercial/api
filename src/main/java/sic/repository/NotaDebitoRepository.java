@@ -4,6 +4,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.*;
 
+import java.util.List;
+
 public interface NotaDebitoRepository
     extends NotaRepository<NotaDebito>, NotaDebitoRepositoryCustom {
 
@@ -17,4 +19,6 @@ public interface NotaDebitoRepository
       @Param("idEmpresa") long idEmpresa);
 
   boolean existsByReciboAndEliminada(Recibo recibo, boolean eliminada);
+
+  List<NotaDebito> findTop2ByTipoComprobanteAndEliminadaAndEmpresaOrderByFechaDesc(TipoDeComprobante tipo, boolean eliminada, Empresa empresa);
 }

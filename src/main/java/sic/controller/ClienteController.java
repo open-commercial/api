@@ -171,10 +171,6 @@ public class ClienteController {
     if (nuevoCliente.getUbicacionEnvio() != null) {
       cliente.setUbicacionEnvio(modelMapper.map(nuevoCliente.getUbicacionEnvio(), Ubicacion.class));
     }
-    if (nuevoCliente.getIdEmpresa() == null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_cliente_vacio_empresa"));
-    }
     cliente.setEmpresa(empresaService.getEmpresaPorId(nuevoCliente.getIdEmpresa()));
     if (nuevoCliente.getIdViajante() != null) {
       cliente.setViajante(usuarioService.getUsuarioNoEliminadoPorId(nuevoCliente.getIdViajante()));
