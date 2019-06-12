@@ -96,6 +96,43 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
+  @Transactional
+  public void eliminarNota(long idNota) {
+      Nota nota = this.getNotaNoEliminadaPorId(idNota);
+      if (nota != null) {
+        if (nota.getMovimiento() == Movimiento.VENTA) {
+          if (nota.getCAE() != 0L) {
+            throw new BusinessServiceException(
+              ResourceBundle.getBundle("Mensajes").getString("mensaje_eliminar_nota_aprobada"));
+          }
+          if (nota instanceof NotaCredito) {
+            NotaCredito nc = (NotaCredito) nota;
+            if (nc.isModificaStock()) {
+              this.actualizarStock(
+                nc.getRenglonesNotaCredito(),
+                TipoDeOperacion.ELIMINACION,
+                nota.getMovimiento(),
+                nota.getTipoComprobante());
+            }
+          }
+        } else if (nota.getMovimiento() == Movimiento.COMPRA && nota instanceof NotaCredito) {
+          NotaCredito nc = (NotaCredito) nota;
+          if (nc.isModificaStock()) {
+            this.actualizarStock(
+              nc.getRenglonesNotaCredito(),
+              TipoDeOperacion.ELIMINACION,
+              nota.getMovimiento(),
+              nota.getTipoComprobante());
+          }
+        }
+        nota.setEliminada(true);
+        this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ELIMINACION);
+        notaRepository.save(nota);
+        logger.warn("La Nota {} se eliminó correctamente.", nota);
+      }
+  }
+
+  @Override
   public boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta) {
     return notaCreditoRepository.existsByFacturaVentaAndEliminada(facturaVenta, false);
   }
@@ -807,7 +844,7 @@ public class NotaServiceImpl implements INotaService {
     }
     this.validarCalculosCredito(notaCredito);
     notaCredito = notaCreditoRepository.save(notaCredito);
-    this.cuentaCorrienteService.asentarEnCuentaCorriente(notaCredito);
+    this.cuentaCorrienteService.asentarEnCuentaCorriente(notaCredito, TipoDeOperacion.ALTA);
     logger.warn("La Nota {} se guardó correctamente.", notaCredito);
     return notaCredito;
   }
@@ -843,7 +880,7 @@ public class NotaServiceImpl implements INotaService {
     }
     this.validarCalculosDebito(notaDebito);
     notaDebito = notaDebitoRepository.save(notaDebito);
-    cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito);
+    cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito, TipoDeOperacion.ALTA);
     logger.warn("La Nota {} se guardó correctamente.", notaDebito);
     return notaDebito;
   }

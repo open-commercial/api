@@ -288,29 +288,38 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   @Transactional
-  public void asentarEnCuentaCorriente(Nota nota) {
-    RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
-    rcc.setTipoComprobante(nota.getTipoComprobante());
-    rcc.setSerie(nota.getSerie());
-    rcc.setNumero(nota.getNroNota());
+  public void asentarEnCuentaCorriente(Nota nota, TipoDeOperacion tipo) {
     CuentaCorriente cc = this.getCuentaCorrientePorNota(nota);
-    if (nota instanceof NotaCredito) {
-      rcc.setMonto(nota.getTotal());
+    if (tipo == TipoDeOperacion.ALTA) {
+      RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
+      rcc.setTipoComprobante(nota.getTipoComprobante());
+      rcc.setSerie(nota.getSerie());
+      rcc.setNumero(nota.getNroNota());
+      if (nota instanceof NotaCredito) {
+        rcc.setMonto(nota.getTotal());
+      }
+      if (nota instanceof NotaDebito) {
+        rcc.setMonto(nota.getTotal().negate());
+      }
+      cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));
+      cc.setFechaUltimoMovimiento(nota.getFecha());
+      rcc.setDescripcion(nota.getMotivo());
+      rcc.setNota(nota);
+      rcc.setFecha(nota.getFecha());
+      rcc.setIdMovimiento(nota.getIdNota());
+      if (nota.getMovimiento() == Movimiento.COMPRA) rcc.setCAE(nota.getCAE());
+      cc.getRenglones().add(rcc);
+      rcc.setCuentaCorriente(cc);
+      this.renglonCuentaCorrienteRepository.save(rcc);
+      logger.warn(RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
     }
-    if (nota instanceof NotaDebito) {
-      rcc.setMonto(nota.getTotal().negate());
+    if (tipo == TipoDeOperacion.ELIMINACION) {
+      RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeNota(nota, false);
+      cc.setSaldo(cc.getSaldo().subtract(rcc.getMonto()));
+      this.cambiarFechaUltimoComprobante(cc, rcc);
+      rcc.setEliminado(true);
+      logger.warn(RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_eliminado"), rcc);
     }
-    cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));
-    cc.setFechaUltimoMovimiento(nota.getFecha());
-    rcc.setDescripcion(nota.getMotivo());
-    rcc.setNota(nota);
-    rcc.setFecha(nota.getFecha());
-    rcc.setIdMovimiento(nota.getIdNota());
-    if (nota.getMovimiento() == Movimiento.COMPRA) rcc.setCAE(nota.getCAE());
-    cc.getRenglones().add(rcc);
-    rcc.setCuentaCorriente(cc);
-    this.renglonCuentaCorrienteRepository.save(rcc);
-    logger.warn(RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
   }
 
   private CuentaCorriente getCuentaCorrientePorNota(Nota nota) {

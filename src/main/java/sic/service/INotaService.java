@@ -21,6 +21,8 @@ public interface INotaService {
 
   Nota getNotaNoEliminadaPorId(long idNota);
 
+  void eliminarNota(long idNota);
+
   Page<Nota> buscarNotas(BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn);
 
   Factura getFacturaDeLaNotaCredito(Long idNota);

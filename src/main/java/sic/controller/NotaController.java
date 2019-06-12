@@ -72,6 +72,13 @@ public class NotaController {
     return notaService.getNotaNoEliminadaPorId(idNota);
   }
 
+  @DeleteMapping("/notas")
+  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
+  public void eliminarNota(@RequestParam long idNota) {
+    notaService.eliminarNota(idNota);
+  }
+
+
   @GetMapping("/notas/busqueda/criteria")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,

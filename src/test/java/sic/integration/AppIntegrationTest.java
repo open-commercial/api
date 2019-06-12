@@ -3841,6 +3841,11 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
     assertEquals(new BigDecimal("10.000000000000000"), producto1.getCantidad());
     assertEquals(new BigDecimal("4.000000000000000"), producto2.getCantidad());
+    restTemplate.delete(apiPrefix + "/notas?idNota=1");
+    producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    producto2 = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
+    assertEquals(new BigDecimal("5.000000000000000"), producto1.getCantidad());
+    assertEquals(new BigDecimal("4.000000000000000"), producto2.getCantidad());
   }
 
   @Test
@@ -4386,6 +4391,11 @@ class AppIntegrationTest {
     ProductoDTO producto2 =
       restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
     assertEquals(new BigDecimal("12.000000000000000"), producto1.getCantidad());
+    assertEquals(new BigDecimal("8.000000000000000"), producto2.getCantidad());
+    restTemplate.delete(apiPrefix + "/notas?idNota=1");
+    producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    producto2 = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
+    assertEquals(new BigDecimal("15.000000000000000"), producto1.getCantidad());
     assertEquals(new BigDecimal("8.000000000000000"), producto2.getCantidad());
   }
 
@@ -4981,6 +4991,35 @@ class AppIntegrationTest {
     assertEquals(100, renglonesCuentaCorriente.get(2).getSaldo().doubleValue());
     assertEquals(699.25, renglonesCuentaCorriente.get(3).getSaldo().doubleValue());
     assertEquals(499.25, renglonesCuentaCorriente.get(4).getSaldo().doubleValue());
+    restTemplate.delete(apiPrefix + "/notas/?idNota=2");
+    renglonesCuentaCorriente =
+      restTemplate
+        .exchange(
+          apiPrefix + "/cuentas-corriente/2/renglones" + "?pagina=" + 0 + "&tamanio=" + 50,
+          HttpMethod.GET,
+          null,
+          new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {
+          })
+        .getBody()
+        .getContent();
+    assertEquals(511.4, renglonesCuentaCorriente.get(0).getSaldo().doubleValue());
+    assertEquals(100, renglonesCuentaCorriente.get(1).getSaldo().doubleValue());
+    assertEquals(699.25, renglonesCuentaCorriente.get(2).getSaldo().doubleValue());
+    assertEquals(499.25, renglonesCuentaCorriente.get(3).getSaldo().doubleValue());
+    restTemplate.delete(apiPrefix + "/notas/?idNota=1");
+    renglonesCuentaCorriente =
+      restTemplate
+        .exchange(
+          apiPrefix + "/cuentas-corriente/2/renglones" + "?pagina=" + 0 + "&tamanio=" + 50,
+          HttpMethod.GET,
+          null,
+          new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {
+          })
+        .getBody()
+        .getContent();
+    assertEquals(100, renglonesCuentaCorriente.get(0).getSaldo().doubleValue());
+    assertEquals(699.25, renglonesCuentaCorriente.get(1).getSaldo().doubleValue());
+    assertEquals(499.25, renglonesCuentaCorriente.get(2).getSaldo().doubleValue());
   }
 
   @Test
@@ -5075,6 +5114,11 @@ class AppIntegrationTest {
     NotaCreditoDTO notaCreditoDTO =
       restTemplate.getForObject(apiPrefix + "/notas/2", NotaCreditoDTO.class);
     assertEquals(notaCreditoDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
+    restTemplate.delete(apiPrefix + "/notas?idNota=2");
+    ccCliente =
+      restTemplate.getForObject(
+        apiPrefix + "/cuentas-corriente/clientes/1", CuentaCorriente.class);
+    assertEquals(reciboDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
   }
 
   @Test
