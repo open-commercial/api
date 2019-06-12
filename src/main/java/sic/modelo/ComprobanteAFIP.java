@@ -8,7 +8,8 @@ import lombok.Data;
 @Data
 @Builder
 public class ComprobanteAFIP {
-    
+
+    private long idComprobante;
     private Date fecha;
     private TipoDeComprobante tipoComprobante;
     private long CAE;

@@ -895,6 +895,7 @@ public class NotaServiceImpl implements INotaService {
       }
       ComprobanteAFIP comprobante =
           ComprobanteAFIP.builder()
+              .idComprobante(nota.getIdNota())
               .fecha(nota.getFecha())
               .tipoComprobante(nota.getTipoComprobante())
               .CAE(nota.getCAE())

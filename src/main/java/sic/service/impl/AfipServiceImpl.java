@@ -2,7 +2,7 @@ package sic.service.impl;
 
 import org.apache.poi.ss.formula.functions.T;
 import sic.modelo.*;
-import sic.service.IAfipService;
+import sic.service.*;
 import afip.wsaa.wsdl.LoginCms;
 import afip.wsfe.wsdl.AlicIva;
 import afip.wsfe.wsdl.ArrayOfAlicIva;
@@ -33,9 +33,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ws.client.WebServiceClientException;
-import sic.service.BusinessServiceException;
-import sic.service.IConfiguracionDelSistemaService;
-import sic.service.ServiceException;
 import sic.util.FormatterFechaHora;
 
 @Service
@@ -43,6 +40,7 @@ public class AfipServiceImpl implements IAfipService {
 
   private final AfipWebServiceSOAPClient afipWebServiceSOAPClient;
   private final IConfiguracionDelSistemaService configuracionDelSistemaService;
+  private final IFacturaService facturaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final String WEBSERVICE_FACTURA_ELECTRONICA = "wsfe";
   private static final BigDecimal LIMITE_MONTO_CONSUMIDOR_FINAL = new BigDecimal(5000);
@@ -50,9 +48,11 @@ public class AfipServiceImpl implements IAfipService {
 
   @Autowired
   public AfipServiceImpl(
-      AfipWebServiceSOAPClient afipWebServiceSOAPClient, IConfiguracionDelSistemaService cds) {
+      AfipWebServiceSOAPClient afipWebServiceSOAPClient, IConfiguracionDelSistemaService cds,
+      IFacturaService facturaService) {
     this.afipWebServiceSOAPClient = afipWebServiceSOAPClient;
     this.configuracionDelSistemaService = cds;
+    this.facturaService = facturaService;
   }
 
   @Override
@@ -130,6 +130,15 @@ public class AfipServiceImpl implements IAfipService {
         && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_C) {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_comprobanteAFIP_invalido"));
+    } else {
+      if ((comprobante.getTipoComprobante() == TipoDeComprobante.FACTURA_A
+              || comprobante.getTipoComprobante() == TipoDeComprobante.FACTURA_B
+              || comprobante.getTipoComprobante() == TipoDeComprobante.FACTURA_C)
+          && facturaService.existeFacturaVentaAnteriorSinAutorizar(comprobante)) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes")
+                .getString("mensaje_existe_comprobante_anterior_sin_autorizar"));
+      }
     }
     if (comprobante.getCAE() != 0) {
       throw new BusinessServiceException(

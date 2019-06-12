@@ -614,13 +614,9 @@ public class FacturaServiceImpl implements IFacturaService {
   @Override
   @Transactional
   public FacturaVenta autorizarFacturaVenta(FacturaVenta fv) {
-    if (this.existeFacturaVentaAnteriorSinAutorizar(fv)) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_existe_comprobante_anterior_sin_autorizar"));
-    } else {
       ComprobanteAFIP comprobante =
           ComprobanteAFIP.builder()
+              .idComprobante(fv.getId_Factura())
               .fecha(fv.getFecha())
               .tipoComprobante(fv.getTipoComprobante())
               .CAE(fv.getCAE())
@@ -641,7 +637,6 @@ public class FacturaServiceImpl implements IFacturaService {
       fv.setNumSerieAfip(comprobante.getNumSerieAfip());
       fv.setNumFacturaAfip(comprobante.getNumFacturaAfip());
       cuentaCorrienteService.updateCAEFactura(fv.getId_Factura(), comprobante.getCAE());
-    }
     return fv;
   }
 
@@ -1233,11 +1228,11 @@ public class FacturaServiceImpl implements IFacturaService {
   }
 
   @Override
-  public boolean existeFacturaVentaAnteriorSinAutorizar(FacturaVenta fv) {
+  public boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAFIP comprobante) {
     List<FacturaVenta> facturasTop2 =
         facturaVentaRepository.findTop2ByTipoComprobanteAndEliminadaAndEmpresaOrderByFechaDesc(
-            fv.getTipoComprobante(), false, fv.getEmpresa());
-    if (facturasTop2.get(0).getId_Factura() == fv.getId_Factura()) {
+          comprobante.getTipoComprobante(), false, comprobante.getEmpresa());
+    if (facturasTop2.get(0).getId_Factura() == comprobante.getIdComprobante()) {
       if (facturasTop2.size() == 2) {
         return facturasTop2.get(1).getCAE() == 0L;
       }
