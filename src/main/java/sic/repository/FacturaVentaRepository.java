@@ -4,10 +4,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
-import sic.modelo.Factura;
-import sic.modelo.FacturaVenta;
-import sic.modelo.Pedido;
-import sic.modelo.TipoDeComprobante;
+import sic.modelo.*;
 
 public interface FacturaVentaRepository
     extends FacturaRepository<FacturaVenta>,
@@ -23,4 +20,6 @@ public interface FacturaVentaRepository
       @Param("tipoComprobante") TipoDeComprobante tipoComprobante,
       @Param("numSerie") long numSerie,
       @Param("idEmpresa") long idEmpresa);
+
+  List<FacturaVenta> findTop2ByTipoComprobanteAndEliminadaAndEmpresaOrderByFechaDesc(TipoDeComprobante tipo, boolean eliminada, Empresa empresa);
 }

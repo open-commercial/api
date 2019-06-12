@@ -67,7 +67,7 @@ public class FacturaController {
   @DeleteMapping("/facturas/{idFactura}")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void eliminar(@PathVariable long idFactura) {
-    facturaService.eliminar(idFactura);
+    facturaService.eliminarFactura(idFactura);
   }
 
   @PostMapping("/facturas/venta")

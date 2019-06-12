@@ -238,7 +238,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       this.guardarRenglonCuentaCorrienteDeFactura(facturaVenta, cc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
-      cc = this.getCuentaCorrientePorCliente(facturaVenta.getCliente());
       cc.setSaldo(cc.getSaldo().subtract(facturaVenta.getTotal()));
       RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeFactura(facturaVenta, false);
       this.cambiarFechaUltimoComprobante(cc, rcc);
@@ -249,23 +248,13 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   @Transactional
-  public void asentarEnCuentaCorriente(FacturaCompra facturaCompra, TipoDeOperacion tipo) {
+  public void asentarEnCuentaCorriente(FacturaCompra facturaCompra) {
     CuentaCorriente cc = this.getCuentaCorrientePorProveedor(facturaCompra.getProveedor());
     if (null == cc) {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_cuenta_corriente_no_existente"));
     }
-    if (tipo == TipoDeOperacion.ALTA) {
       this.guardarRenglonCuentaCorrienteDeFactura(facturaCompra, cc);
-    }
-    if (tipo == TipoDeOperacion.ELIMINACION) {
-      cc = this.getCuentaCorrientePorProveedor(facturaCompra.getProveedor());
-      cc.setSaldo(cc.getSaldo().subtract(facturaCompra.getTotal()));
-      RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeFactura(facturaCompra, false);
-      this.cambiarFechaUltimoComprobante(cc, rcc);
-      rcc.setEliminado(true);
-      logger.warn(RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_eliminado"), rcc);
-    }
   }
 
   private void guardarRenglonCuentaCorrienteDeFactura(Factura factura, CuentaCorriente cc) {
@@ -313,7 +302,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       this.renglonCuentaCorrienteRepository.save(rcc);
       logger.warn(RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
     }
-    if (tipo == TipoDeOperacion.ELIMINACION) {
+    if (tipo == TipoDeOperacion.ELIMINACION && nota.getCliente() != null) {
       RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeNota(nota, false);
       cc.setSaldo(cc.getSaldo().subtract(rcc.getMonto()));
       this.cambiarFechaUltimoComprobante(cc, rcc);

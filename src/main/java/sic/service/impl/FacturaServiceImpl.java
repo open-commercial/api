@@ -103,7 +103,7 @@ public class FacturaServiceImpl implements IFacturaService {
 
   @Override
   @Transactional
-  public void eliminar(long idFactura) {
+  public void eliminarFactura(long idFactura) {
     Factura factura = this.getFacturaNoEliminadaPorId(idFactura);
     if (factura instanceof FacturaVenta) {
       if (factura.getCAE() != 0L) {
@@ -471,7 +471,7 @@ public class FacturaServiceImpl implements IFacturaService {
       FacturaCompra facturaGuardada = null;
       if (f instanceof FacturaCompra) {
         facturaGuardada = facturaCompraRepository.save((FacturaCompra) this.procesarFactura(f));
-        this.cuentaCorrienteService.asentarEnCuentaCorriente(facturaGuardada, TipoDeOperacion.ALTA);
+        this.cuentaCorrienteService.asentarEnCuentaCorriente(facturaGuardada);
       }
       facturasProcesadas.add(facturaGuardada);
     }
@@ -611,32 +611,39 @@ public class FacturaServiceImpl implements IFacturaService {
     }
   }
 
-    @Override
-    @Transactional
-    public FacturaVenta autorizarFacturaVenta(FacturaVenta fv) {
-        ComprobanteAFIP comprobante = ComprobanteAFIP.builder()
-                .fecha(fv.getFecha())
-                .tipoComprobante(fv.getTipoComprobante())
-                .CAE(fv.getCAE())
-                .vencimientoCAE(fv.getVencimientoCAE())
-                .numSerieAfip(fv.getNumSerieAfip())
-                .numFacturaAfip(fv.getNumFacturaAfip())
-                .empresa(fv.getEmpresa())
-                .cliente(fv.getCliente())
-                .subtotalBruto(fv.getSubTotalBruto())
-                .iva105neto(fv.getIva105Neto())
-                .iva21neto(fv.getIva21Neto())
-                .montoNoGravado(BigDecimal.ZERO)
-                .total(fv.getTotal())
-                .build();
-        afipService.autorizar(comprobante);
-        fv.setCAE(comprobante.getCAE());
-        fv.setVencimientoCAE(comprobante.getVencimientoCAE());
-        fv.setNumSerieAfip(comprobante.getNumSerieAfip());
-        fv.setNumFacturaAfip(comprobante.getNumFacturaAfip());
-        cuentaCorrienteService.updateCAEFactura(fv.getId_Factura(), comprobante.getCAE());
-        return fv;
+  @Override
+  @Transactional
+  public FacturaVenta autorizarFacturaVenta(FacturaVenta fv) {
+    if (this.existeFacturaVentaAnteriorSinAutorizar(fv)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_existe_comprobante_anterior_sin_autorizar"));
+    } else {
+      ComprobanteAFIP comprobante =
+          ComprobanteAFIP.builder()
+              .fecha(fv.getFecha())
+              .tipoComprobante(fv.getTipoComprobante())
+              .CAE(fv.getCAE())
+              .vencimientoCAE(fv.getVencimientoCAE())
+              .numSerieAfip(fv.getNumSerieAfip())
+              .numFacturaAfip(fv.getNumFacturaAfip())
+              .empresa(fv.getEmpresa())
+              .cliente(fv.getCliente())
+              .subtotalBruto(fv.getSubTotalBruto())
+              .iva105neto(fv.getIva105Neto())
+              .iva21neto(fv.getIva21Neto())
+              .montoNoGravado(BigDecimal.ZERO)
+              .total(fv.getTotal())
+              .build();
+      afipService.autorizar(comprobante);
+      fv.setCAE(comprobante.getCAE());
+      fv.setVencimientoCAE(comprobante.getVencimientoCAE());
+      fv.setNumSerieAfip(comprobante.getNumSerieAfip());
+      fv.setNumFacturaAfip(comprobante.getNumFacturaAfip());
+      cuentaCorrienteService.updateCAEFactura(fv.getId_Factura(), comprobante.getCAE());
     }
+    return fv;
+  }
 
     @Override
     public BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
@@ -1223,5 +1230,20 @@ public class FacturaServiceImpl implements IFacturaService {
         idProductoItem,
         descuentoPorcentaje,
         dividir);
+  }
+
+  @Override
+  public boolean existeFacturaVentaAnteriorSinAutorizar(FacturaVenta fv) {
+    List<FacturaVenta> facturasTop2 =
+        facturaVentaRepository.findTop2ByTipoComprobanteAndEliminadaAndEmpresaOrderByFechaDesc(
+            fv.getTipoComprobante(), false, fv.getEmpresa());
+    if (facturasTop2.get(0).getId_Factura() == fv.getId_Factura()) {
+      if (facturasTop2.size() == 2) {
+        return facturasTop2.get(1).getCAE() == 0L;
+      }
+      return false;
+    } else {
+      return true;
+    }
   }
 }

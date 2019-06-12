@@ -14,7 +14,7 @@ public interface IFacturaService {
 
   Factura getFacturaNoEliminadaPorId(long idFactura);
 
-  void eliminar(long idFactura);
+  void eliminarFactura(long idFactura);
 
   List<Factura> getFacturasDelPedido(Long idPedido);
 
@@ -75,5 +75,7 @@ public interface IFacturaService {
     long idProducto,
     BigDecimal descuentoPorcentaje,
     boolean dividiendoRenglonFactura);
+
+  boolean existeFacturaVentaAnteriorSinAutorizar(FacturaVenta facturaVenta);
 
 }

@@ -99,31 +99,28 @@ public class NotaServiceImpl implements INotaService {
   @Transactional
   public void eliminarNota(long idNota) {
     Nota nota = this.getNotaNoEliminadaPorId(idNota);
-    if (nota != null) {
-      if (nota.getMovimiento() == Movimiento.VENTA) {
-        if (nota.getCAE() != 0L) {
-          throw new BusinessServiceException(
-              ResourceBundle.getBundle("Mensajes").getString("mensaje_eliminar_nota_aprobada"));
-        }
-        if (nota instanceof NotaCredito) {
-          NotaCredito nc = (NotaCredito) nota;
-          if (nc.isModificaStock()) {
-            this.actualizarStock(
-                nc.getRenglonesNotaCredito(),
-                TipoDeOperacion.ELIMINACION,
-                nota.getMovimiento(),
-                nota.getTipoComprobante());
-          }
-        }
-        nota.setEliminada(true);
-        this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ELIMINACION);
-        notaRepository.save(nota);
-        logger.warn("La Nota {} se eliminó correctamente.", nota);
-      } else {
+    if (nota.getMovimiento() == Movimiento.VENTA) {
+      if (nota.getCAE() != 0L) {
         throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes")
-                .getString("mensaje_tipo_de_comprobante_no_valido"));
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_eliminar_nota_aprobada"));
       }
+      this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ELIMINACION);
+      if (nota instanceof NotaCredito) {
+        NotaCredito nc = (NotaCredito) nota;
+        if (nc.isModificaStock()) {
+          this.actualizarStock(
+              nc.getRenglonesNotaCredito(),
+              TipoDeOperacion.ELIMINACION,
+              nota.getMovimiento(),
+              nota.getTipoComprobante());
+        }
+      }
+      nota.setEliminada(true);
+      notaRepository.save(nota);
+      logger.warn("La Nota {} se eliminó correctamente.", nota);
+    } else {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes").getString("mensaje_tipo_de_comprobante_no_valido"));
     }
   }
 
