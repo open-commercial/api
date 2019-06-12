@@ -96,6 +96,11 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
+  public boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta) {
+    return notaCreditoRepository.existsByFacturaVentaAndEliminada(facturaVenta, false);
+  }
+
+  @Override
   public Page<Nota> buscarNotas(BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn) {
     // Fecha de Nota
     if (busquedaNotaCriteria.isBuscaPorFecha()

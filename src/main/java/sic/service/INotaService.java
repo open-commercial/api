@@ -13,6 +13,8 @@ public interface INotaService {
 
   NotaDebito guardarNotaDebito(@Valid NotaDebito nota);
 
+  boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta);
+
   Nota autorizarNota(Nota nota);
 
   byte[] getReporteNota(Nota nota);

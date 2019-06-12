@@ -102,6 +102,41 @@ public class FacturaServiceImpl implements IFacturaService {
   }
 
   @Override
+  @Transactional
+  public void eliminar(long idFactura) {
+    Factura factura = this.getFacturaNoEliminadaPorId(idFactura);
+    if (factura instanceof FacturaVenta) {
+      if (factura.getCAE() != 0L) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_eliminar_factura_aprobada"));
+      }
+      if (notaService.existsByFacturaVentaAndEliminada((FacturaVenta) factura)) {
+        throw new BusinessServiceException(
+            ResourceBundle.getBundle("Mensajes").getString("mensaje_no_se_puede_eliminar"));
+      }
+      this.cuentaCorrienteService.asentarEnCuentaCorriente(
+          (FacturaVenta) factura, TipoDeOperacion.ELIMINACION);
+      productoService.actualizarStock(
+          this.getIdsProductosYCantidades(factura),
+          TipoDeOperacion.ELIMINACION,
+          Movimiento.VENTA,
+          factura.getTipoComprobante());
+    } else if (factura instanceof FacturaCompra) {
+      this.cuentaCorrienteService.asentarEnCuentaCorriente(
+          (FacturaCompra) factura, TipoDeOperacion.ELIMINACION);
+      productoService.actualizarStock(
+          this.getIdsProductosYCantidades(factura),
+          TipoDeOperacion.ELIMINACION,
+          Movimiento.COMPRA,
+          factura.getTipoComprobante());
+    }
+    factura.setEliminada(true);
+    if (factura.getPedido() != null) {
+      pedidoService.actualizarEstadoPedido(factura.getPedido());
+    }
+  }
+
+  @Override
   public List<Factura> getFacturasDelPedido(Long idPedido) {
     return facturaVentaRepository.findAllByPedidoAndEliminada(
         pedidoService.getPedidoNoEliminadoPorId(idPedido), false);
@@ -399,7 +434,7 @@ public class FacturaServiceImpl implements IFacturaService {
       for (Factura f : facturas) {
         FacturaVenta facturaGuardada =
             facturaVentaRepository.save((FacturaVenta) this.procesarFactura(f));
-        this.cuentaCorrienteService.asentarEnCuentaCorriente(facturaGuardada);
+        this.cuentaCorrienteService.asentarEnCuentaCorriente(facturaGuardada, TipoDeOperacion.ALTA);
         facturasProcesadas.add(facturaGuardada);
         if (recibos != null) {
           recibos.forEach(reciboService::guardar);
@@ -414,7 +449,7 @@ public class FacturaServiceImpl implements IFacturaService {
       for (Factura f : facturas) {
         FacturaVenta facturaGuardada;
         facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFactura(f));
-        this.cuentaCorrienteService.asentarEnCuentaCorriente(facturaGuardada);
+        this.cuentaCorrienteService.asentarEnCuentaCorriente(facturaGuardada, TipoDeOperacion.ALTA);
         facturasProcesadas.add(facturaGuardada);
         logger.warn("La Factura {} se guardó correctamente.", facturaGuardada);
         if (recibos != null) {
@@ -440,7 +475,7 @@ public class FacturaServiceImpl implements IFacturaService {
       FacturaCompra facturaGuardada = null;
       if (f instanceof FacturaCompra) {
         facturaGuardada = facturaCompraRepository.save((FacturaCompra) this.procesarFactura(f));
-        this.cuentaCorrienteService.asentarEnCuentaCorriente(facturaGuardada);
+        this.cuentaCorrienteService.asentarEnCuentaCorriente(facturaGuardada, TipoDeOperacion.ALTA);
       }
       facturasProcesadas.add(facturaGuardada);
     }

@@ -14,6 +14,8 @@ public interface IFacturaService {
 
   Factura getFacturaNoEliminadaPorId(long idFactura);
 
+  void eliminar(long idFactura);
+
   List<Factura> getFacturasDelPedido(Long idPedido);
 
   TipoDeComprobante[] getTipoFacturaCompra(Empresa empresa, Proveedor proveedor);

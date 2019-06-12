@@ -228,41 +228,59 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   @Transactional
-  public void asentarEnCuentaCorriente(FacturaVenta facturaVenta) {
-    RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
-    rcc.setTipoComprobante(facturaVenta.getTipoComprobante());
-    rcc.setSerie(facturaVenta.getNumSerie());
-    rcc.setNumero(facturaVenta.getNumFactura());
-    rcc.setFactura(facturaVenta);
-    rcc.setFecha(facturaVenta.getFecha());
-    rcc.setFechaVencimiento(facturaVenta.getFechaVencimiento());
-    rcc.setIdMovimiento(facturaVenta.getId_Factura());
-    rcc.setMonto(facturaVenta.getTotal().negate());
+  public void asentarEnCuentaCorriente(FacturaVenta facturaVenta, TipoDeOperacion tipo) {
     CuentaCorriente cc = this.getCuentaCorrientePorCliente(facturaVenta.getCliente());
-    cc.getRenglones().add(rcc);
-    cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));
-    cc.setFechaUltimoMovimiento(facturaVenta.getFecha());
-    rcc.setCuentaCorriente(cc);
-    this.renglonCuentaCorrienteRepository.save(rcc);
-    logger.warn(RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
+    if (null == cc) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_cuenta_corriente_no_existente"));
+    }
+    if (tipo == TipoDeOperacion.ALTA) {
+      this.altaRenglonCuentaCorrienteDeFactura(facturaVenta, cc);
+    }
+    if (tipo == TipoDeOperacion.ELIMINACION) {
+      cc = this.getCuentaCorrientePorCliente(facturaVenta.getCliente());
+      cc.setSaldo(cc.getSaldo().subtract(facturaVenta.getTotal()));
+      RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeFactura(facturaVenta, false);
+      this.cambiarFechaUltimoComprobante(cc, rcc);
+      rcc.setEliminado(true);
+      logger.warn(RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_eliminado"), rcc);
+    }
   }
 
   @Override
   @Transactional
-  public void asentarEnCuentaCorriente(FacturaCompra facturaCompra) {
-    RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
-    rcc.setTipoComprobante(facturaCompra.getTipoComprobante());
-    rcc.setSerie(facturaCompra.getNumSerie());
-    rcc.setNumero(facturaCompra.getNumFactura());
-    rcc.setFactura(facturaCompra);
-    rcc.setFecha(facturaCompra.getFecha());
-    rcc.setFechaVencimiento(facturaCompra.getFechaVencimiento());
-    rcc.setIdMovimiento(facturaCompra.getId_Factura());
-    rcc.setMonto(facturaCompra.getTotal().negate());
+  public void asentarEnCuentaCorriente(FacturaCompra facturaCompra, TipoDeOperacion tipo) {
     CuentaCorriente cc = this.getCuentaCorrientePorProveedor(facturaCompra.getProveedor());
+    if (null == cc) {
+      throw new BusinessServiceException(
+          RESOURCE_BUNDLE.getString("mensaje_cuenta_corriente_no_existente"));
+    }
+    if (tipo == TipoDeOperacion.ALTA) {
+      this.altaRenglonCuentaCorrienteDeFactura(facturaCompra, cc);
+    }
+    if (tipo == TipoDeOperacion.ELIMINACION) {
+      cc = this.getCuentaCorrientePorProveedor(facturaCompra.getProveedor());
+      cc.setSaldo(cc.getSaldo().subtract(facturaCompra.getTotal()));
+      RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeFactura(facturaCompra, false);
+      this.cambiarFechaUltimoComprobante(cc, rcc);
+      rcc.setEliminado(true);
+      logger.warn(RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_eliminado"), rcc);
+    }
+  }
+
+  private void altaRenglonCuentaCorrienteDeFactura(Factura factura, CuentaCorriente cc) {
+    RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
+    rcc.setTipoComprobante(factura.getTipoComprobante());
+    rcc.setSerie(factura.getNumSerie());
+    rcc.setNumero(factura.getNumFactura());
+    rcc.setFactura(factura);
+    rcc.setFecha(factura.getFecha());
+    rcc.setFechaVencimiento(factura.getFechaVencimiento());
+    rcc.setIdMovimiento(factura.getId_Factura());
+    rcc.setMonto(factura.getTotal().negate());
     cc.getRenglones().add(rcc);
     cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));
-    cc.setFechaUltimoMovimiento(facturaCompra.getFecha());
+    cc.setFechaUltimoMovimiento(factura.getFecha());
     rcc.setCuentaCorriente(cc);
     this.renglonCuentaCorrienteRepository.save(rcc);
     logger.warn(RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
