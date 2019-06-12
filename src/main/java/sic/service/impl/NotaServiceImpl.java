@@ -612,9 +612,6 @@ public class NotaServiceImpl implements INotaService {
             RESOURCE_BUNDLE.getString("mensaje_nota_fecha_incorrecta"));
       }
     }
-    if (nota.getMotivo() == null || nota.getMotivo().isEmpty()) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_nota_de_motivo_vacio"));
-    }
     if (nota instanceof NotaCredito) {
       if (((NotaCredito) nota).getRenglonesNotaCredito() == null
           || ((NotaCredito) nota).getRenglonesNotaCredito().isEmpty()) {

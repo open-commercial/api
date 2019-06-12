@@ -131,12 +131,7 @@ public class TransportistaController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Transportista guardar(@RequestBody TransportistaDTO transportistaDTO) {
     Transportista transportista = modelMapper.map(transportistaDTO, Transportista.class);
-    if (transportistaDTO.getIdEmpresa() != null) {
-      transportista.setEmpresa(empresaService.getEmpresaPorId(transportistaDTO.getIdEmpresa()));
-    } else {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_transportista_empresa_vacia"));
-    }
+    transportista.setEmpresa(empresaService.getEmpresaPorId(transportistaDTO.getIdEmpresa()));
     transportista.setUbicacion(null);
     if (transportistaDTO.getUbicacion() != null) {
       transportista.setUbicacion(modelMapper.map(transportistaDTO.getUbicacion(), Ubicacion.class));

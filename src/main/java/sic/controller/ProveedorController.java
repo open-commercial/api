@@ -57,12 +57,7 @@ public class ProveedorController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Proveedor guardar(@RequestBody ProveedorDTO proveedorDTO) {
     Proveedor proveedor = modelMapper.map(proveedorDTO, Proveedor.class);
-    if (proveedorDTO.getIdEmpresa() != null) {
-      proveedor.setEmpresa(empresaService.getEmpresaPorId(proveedorDTO.getIdEmpresa()));
-    } else {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_empresa_vacia"));
-    }
+    proveedor.setEmpresa(empresaService.getEmpresaPorId(proveedorDTO.getIdEmpresa()));
     proveedor.setUbicacion(null);
     if (proveedorDTO.getUbicacion() != null) {
       proveedor.setUbicacion(modelMapper.map(proveedorDTO.getUbicacion(), Ubicacion.class));
