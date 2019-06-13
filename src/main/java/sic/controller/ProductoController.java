@@ -95,6 +95,7 @@ public class ProductoController {
         null,
         null,
         false,
+        false,
         true,
         destacados,
         pagina,
@@ -156,6 +157,7 @@ public class ProductoController {
       @RequestParam(required = false) Long idRubro,
       @RequestParam(required = false) Long idProveedor,
       @RequestParam(required = false) boolean soloFantantes,
+      @RequestParam(required = false) boolean soloEnStock,
       @RequestParam(required = false) Boolean publicos,
       @RequestParam(required = false) Boolean destacados,
       @RequestParam(required = false) Integer pagina,
@@ -173,6 +175,7 @@ public class ProductoController {
             idRubro,
             idProveedor,
             soloFantantes,
+            soloEnStock,
             publicos,
             destacados,
             pagina,
@@ -205,6 +208,7 @@ public class ProductoController {
       Long idRubro,
       Long idProveedor,
       boolean soloFantantes,
+      boolean enStock,
       Boolean publicos,
       Boolean destacados,
       Integer pagina,
@@ -242,6 +246,7 @@ public class ProductoController {
             .idProveedor(idProveedor)
             .idEmpresa(idEmpresa)
             .listarSoloFaltantes(soloFantantes)
+            .listarSoloEnStock(enStock)
             .buscaPorVisibilidad(publicos != null)
             .publico(publicos)
             .buscaPorDestacado(destacados != null)
@@ -340,6 +345,7 @@ public class ProductoController {
       @RequestParam(required = false) Long idRubro,
       @RequestParam(required = false) Long idProveedor,
       @RequestParam(required = false) boolean soloFantantes,
+      @RequestParam(required = false) boolean enStock,
       @RequestParam(required = false) Boolean publicos,
       @RequestParam(required = false) Boolean destacados) {
     BusquedaProductoCriteria criteria =
@@ -354,6 +360,7 @@ public class ProductoController {
             .idProveedor(idProveedor)
             .idEmpresa(idEmpresa)
             .listarSoloFaltantes(soloFantantes)
+            .listarSoloEnStock(enStock)
             .buscaPorVisibilidad(publicos != null)
             .publico(publicos)
             .buscaPorDestacado(destacados != null)
@@ -390,6 +397,7 @@ public class ProductoController {
       @RequestParam(required = false) Long idRubro,
       @RequestParam(required = false) Long idProveedor,
       @RequestParam(required = false) boolean soloFantantes,
+      @RequestParam(required = false) boolean soloEnStock,
       @RequestParam(required = false) Boolean publicos,
       @RequestParam(required = false) Boolean destacados,
       @RequestParam(required = false) String ordenarPor,
@@ -410,6 +418,7 @@ public class ProductoController {
                     idRubro,
                     idProveedor,
                     soloFantantes,
+                    soloEnStock,
                     publicos,
                     destacados,
                     0,
@@ -433,6 +442,7 @@ public class ProductoController {
                     idRubro,
                     idProveedor,
                     soloFantantes,
+                    soloEnStock,
                     publicos,
                     destacados,
                     0,
