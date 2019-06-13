@@ -19,6 +19,4 @@ public interface NotaDebitoRepository
       @Param("idEmpresa") long idEmpresa);
 
   boolean existsByReciboAndEliminada(Recibo recibo, boolean eliminada);
-
-  List<NotaDebito> findTop2ByTipoComprobanteAndEliminadaAndEmpresaOrderByFechaDesc(TipoDeComprobante tipo, boolean eliminada, Empresa empresa);
 }

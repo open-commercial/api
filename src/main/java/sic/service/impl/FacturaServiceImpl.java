@@ -5,6 +5,8 @@ import java.io.IOException;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.DateExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
@@ -1229,16 +1231,17 @@ public class FacturaServiceImpl implements IFacturaService {
 
   @Override
   public boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAFIP comprobante) {
-    List<FacturaVenta> facturasTop2 =
-        facturaVentaRepository.findTop2ByTipoComprobanteAndEliminadaAndEmpresaOrderByFechaDesc(
-          comprobante.getTipoComprobante(), false, comprobante.getEmpresa());
-    if (facturasTop2.get(0).getId_Factura() == comprobante.getIdComprobante()) {
-      if (facturasTop2.size() == 2) {
-        return facturasTop2.get(1).getCAE() == 0L;
-      }
-      return false;
-    } else {
-      return true;
-    }
+    QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
+    BooleanBuilder builder = new BooleanBuilder();
+    builder.and(
+        qFacturaVenta
+            .id_Factura
+            .lt(comprobante.getIdComprobante())
+            .and(qFacturaVenta.eliminada.eq(false))
+            .and(qFacturaVenta.tipoComprobante.eq(comprobante.getTipoComprobante())));
+    Page<FacturaVenta> facturaAnterior =
+        facturaVentaRepository.findAll(
+            builder, PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "fecha")));
+    return facturaAnterior.getContent().get(0).getCAE() == 0L;
   }
 }

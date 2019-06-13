@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -1434,31 +1436,33 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public boolean existeNotaCreditoAnteriorSinAutorizar(ComprobanteAFIP comprobante) {
-    List<NotaCredito> notasTop2 =
-        notaCreditoRepository.findTop2ByTipoComprobanteAndEliminadaAndEmpresaOrderByFechaDesc(
-            comprobante.getTipoComprobante(), false, comprobante.getEmpresa());
-    if (notasTop2.get(0).getIdNota() == comprobante.getIdComprobante()) {
-      if (notasTop2.size() == 2) {
-        return notasTop2.get(1).getCAE() == 0L;
-      }
-      return false;
-    } else {
-      return true;
-    }
+    QNotaCredito qNotaCredito = QNotaCredito.notaCredito;
+    BooleanBuilder builder = new BooleanBuilder();
+    builder.and(
+      qNotaCredito
+        .idNota
+        .lt(comprobante.getIdComprobante())
+        .and(qNotaCredito.eliminada.eq(false))
+        .and(qNotaCredito.tipoComprobante.eq(comprobante.getTipoComprobante())));
+    Page<NotaCredito> notaAnterior =
+      notaCreditoRepository.findAll(
+        builder, PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "fecha")));
+    return notaAnterior.getContent().get(0).getCAE() == 0L;
   }
 
   @Override
   public boolean existeNotaDebitoAnteriorSinAutorizar(ComprobanteAFIP comprobante) {
-    List<NotaDebito> notasTop2 =
-        notaDebitoRepository.findTop2ByTipoComprobanteAndEliminadaAndEmpresaOrderByFechaDesc(
-            comprobante.getTipoComprobante(), false, comprobante.getEmpresa());
-    if (notasTop2.get(0).getIdNota() == comprobante.getIdComprobante()) {
-      if (notasTop2.size() == 2) {
-        return notasTop2.get(1).getCAE() == 0L;
-      }
-      return false;
-    } else {
-      return true;
-    }
+    QNotaDebito qNotaDebito = QNotaDebito.notaDebito;
+    BooleanBuilder builder = new BooleanBuilder();
+    builder.and(
+        qNotaDebito
+            .idNota
+            .lt(comprobante.getIdComprobante())
+            .and(qNotaDebito.eliminada.eq(false))
+            .and(qNotaDebito.tipoComprobante.eq(comprobante.getTipoComprobante())));
+    Page<NotaDebito> notaAnterior =
+        notaDebitoRepository.findAll(
+            builder, PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "fecha")));
+    return notaAnterior.getContent().get(0).getCAE() == 0L;
   }
 }
