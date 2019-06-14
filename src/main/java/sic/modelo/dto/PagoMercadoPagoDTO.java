@@ -13,5 +13,6 @@ public class PagoMercadoPagoDTO {
 
   private String token;
   private String paymentMethodId;
+  private String issuerId;
   private Integer installments;
 }

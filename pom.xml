@@ -157,7 +157,12 @@
             <groupId>org.springframework.ws</groupId>
             <artifactId>spring-ws-core</artifactId>
         </dependency>
-    </dependencies>                  
+        <dependency>
+            <groupId>com.mercadopago</groupId>
+            <artifactId>dx-java</artifactId>
+            <version>1.0.33</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
@@ -249,7 +254,6 @@
                             <overWriteSnapshots>false</overWriteSnapshots>
                             <overWriteIfNewer>true</overWriteIfNewer>
                             <outputDirectory>${project.basedir}</outputDirectory>
-                            <destFileName>newrelic</destFileName>
                         </configuration>
                     </execution>
                 </executions>
