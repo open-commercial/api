@@ -461,6 +461,9 @@ public class AfipServiceImpl implements IAfipService {
             .add(comprobante.getIva21neto())
             .setScale(2, RoundingMode.HALF_UP)
             .doubleValue());
+    if (detalle.getImpIVA() == 0) {
+      detalle.setIva(null);
+    }
     // Importe neto gravado. Debe ser menor o igual a Importe total y no
     // puede ser menor a cero. Para comprobantes tipo C este campo
     // corresponde al Importe del Sub Total
