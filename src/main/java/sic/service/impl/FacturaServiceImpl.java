@@ -1238,6 +1238,7 @@ public class FacturaServiceImpl implements IFacturaService {
             .id_Factura
             .lt(comprobante.getIdComprobante())
             .and(qFacturaVenta.eliminada.eq(false))
+            .and(qFacturaVenta.empresa.id_Empresa.eq(comprobante.getEmpresa().getId_Empresa()))
             .and(qFacturaVenta.tipoComprobante.eq(comprobante.getTipoComprobante())));
     Page<FacturaVenta> facturaAnterior =
         facturaVentaRepository.findAll(

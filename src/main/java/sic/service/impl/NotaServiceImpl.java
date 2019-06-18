@@ -1443,6 +1443,7 @@ public class NotaServiceImpl implements INotaService {
         .idNota
         .lt(comprobante.getIdComprobante())
         .and(qNotaCredito.eliminada.eq(false))
+        .and(qNotaCredito.empresa.id_Empresa.eq(comprobante.getEmpresa().getId_Empresa()))
         .and(qNotaCredito.tipoComprobante.eq(comprobante.getTipoComprobante())));
     Page<NotaCredito> notaAnterior =
       notaCreditoRepository.findAll(
@@ -1459,6 +1460,7 @@ public class NotaServiceImpl implements INotaService {
             .idNota
             .lt(comprobante.getIdComprobante())
             .and(qNotaDebito.eliminada.eq(false))
+            .and(qNotaDebito.empresa.id_Empresa.eq(comprobante.getEmpresa().getId_Empresa()))
             .and(qNotaDebito.tipoComprobante.eq(comprobante.getTipoComprobante())));
     Page<NotaDebito> notaAnterior =
         notaDebitoRepository.findAll(

@@ -1,11 +1,11 @@
 package sic.modelo.dto;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 @Data
 @EqualsAndHashCode(exclude = {"id_Medida", "idEmpresa", "nombreEmpresa"})
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class MedidaDTO {
 
