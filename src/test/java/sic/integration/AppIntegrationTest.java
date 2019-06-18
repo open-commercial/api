@@ -5004,7 +5004,7 @@ class AppIntegrationTest {
     try {
       restTemplate.delete(apiPrefix + "/proveedores/1");
     } catch (RestClientResponseException ex) {
-      assertTrue(ex.getMessage().startsWith("No posee permisos para realizar esta operación"));
+      assertTrue(ex.getMessage().startsWith("No posee permisos para realizar"));
     }
   }
 
