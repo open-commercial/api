@@ -43,7 +43,7 @@ public class AfipServiceImpl implements IAfipService {
   private final INotaService notaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final String WEBSERVICE_FACTURA_ELECTRONICA = "wsfe";
-  private static final BigDecimal LIMITE_MONTO_CONSUMIDOR_FINAL = new BigDecimal(5000);
+  private static final BigDecimal LIMITE_MONTO_CONSUMIDOR_FINAL = new BigDecimal(10000);
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Autowired
