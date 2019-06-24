@@ -2,7 +2,6 @@ package sic.controller;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -14,7 +13,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
-import sic.modelo.TipoDeEnvio;
 import sic.modelo.dto.CarritoCompraDTO;
 import sic.modelo.dto.NuevaOrdenDeCarritoDeCompraDTO;
 import sic.service.*;
@@ -28,6 +26,7 @@ public class CarritoCompraController {
   private final IEmpresaService empresaService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
+  private final IPagoMercadoPagoService pagoMercadoPagoService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
@@ -36,12 +35,14 @@ public class CarritoCompraController {
       IPedidoService pedidoService,
       IEmpresaService empresaService,
       IUsuarioService usuarioService,
-      IClienteService clienteService) {
+      IClienteService clienteService,
+      IPagoMercadoPagoService pagoMercadoPagoService) {
     this.carritoCompraService = carritoCompraService;
     this.pedidoService = pedidoService;
     this.empresaService = empresaService;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
+    this.pagoMercadoPagoService = pagoMercadoPagoService;
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/clientes/{idCliente}")
@@ -133,6 +134,12 @@ public class CarritoCompraController {
             nuevaOrdenDeCarritoDeCompraDTO.getIdSucursal());
     carritoCompraService.eliminarTodosLosItemsDelUsuario(
         nuevaOrdenDeCarritoDeCompraDTO.getIdUsuario());
+    if (nuevaOrdenDeCarritoDeCompraDTO.getPago() != null) {
+      pagoMercadoPagoService.crearNuevoPago(
+          nuevaOrdenDeCarritoDeCompraDTO.getPago(),
+          p.getCliente(),
+          p.getTotalEstimado().floatValue());
+    }
     return p;
   }
 }
