@@ -1,6 +1,5 @@
 package sic.builder;
 
-import sic.modelo.Empresa;
 import sic.modelo.FormaDePago;
 
 public class FormaDePagoBuilder {
@@ -9,11 +8,10 @@ public class FormaDePagoBuilder {
     private String nombre = "Efectivo";
     private boolean afectaCaja = true;
     private boolean predeterminado = true;
-    private Empresa empresa = new EmpresaBuilder().build();
     private boolean eliminada = false;
     
     public FormaDePago build() {
-        return new FormaDePago(id_FormaDePago, nombre, afectaCaja, predeterminado, empresa, eliminada);
+        return new FormaDePago(id_FormaDePago, nombre, afectaCaja, predeterminado, eliminada);
     }
     
     public FormaDePagoBuilder withId_FormaDePago(long idFormaDePago) {
@@ -32,11 +30,6 @@ public class FormaDePagoBuilder {
     }
     public FormaDePagoBuilder withPredeterminado(boolean predeterminado) {
         this.predeterminado = predeterminado;
-        return this;
-    }
-    
-    public FormaDePagoBuilder withEmpresa(Empresa empresa) {
-        this.empresa = empresa;
         return this;
     }
     

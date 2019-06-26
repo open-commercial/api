@@ -24,6 +24,7 @@ import org.springframework.web.client.RestClientResponseException;
 import sic.builder.*;
 import sic.modelo.*;
 import sic.modelo.dto.*;
+import sic.repository.FormaDePagoRepository;
 import sic.repository.LocalidadRepository;
 import sic.repository.ProvinciaRepository;
 import sic.repository.UsuarioRepository;
@@ -59,6 +60,9 @@ class AppIntegrationTest {
 
   @Autowired
   private LocalidadRepository localidadRepository;
+
+  @Autowired
+  private FormaDePagoRepository formaDePagoRepository;
 
   @Autowired
   private TestRestTemplate restTemplate;
@@ -452,13 +456,21 @@ class AppIntegrationTest {
             .telefono("379 4895549")
             .ubicacion(UbicacionDTO.builder().calle("Napoles").numero(5600).idLocalidad(1L).build())
             .build();
+
+
+//    FormaDePagoDTO formaDePago =
+//      FormaDePagoDTO.builder().afectaCaja(true).nombre("Efectivo").predeterminado(true).build();
+    FormaDePago formaDePago = new FormaDePagoBuilder().build();
+
+    formaDePagoRepository.save(formaDePago);
+
+//
+//    restTemplate.postForObject(
+//      apiPrefix + "/formas-de-pago?idEmpresa=" + empresaDTO.getId_Empresa(),
+//      formaDePago,
+//      FormaDePagoDTO.class);
+
     empresaDTO = restTemplate.postForObject(apiPrefix + "/empresas", empresaDTO, EmpresaDTO.class);
-    FormaDePagoDTO formaDePago =
-      FormaDePagoDTO.builder().afectaCaja(true).nombre("Efectivo").predeterminado(true).build();
-    restTemplate.postForObject(
-      apiPrefix + "/formas-de-pago?idEmpresa=" + empresaDTO.getId_Empresa(),
-      formaDePago,
-      FormaDePagoDTO.class);
     UsuarioDTO credencial =
         UsuarioDTO.builder()
             .username("marce")
@@ -524,16 +536,6 @@ class AppIntegrationTest {
     RubroDTO rubro = RubroDTO.builder().nombre("Ferreteria").eliminado(false).build();
     restTemplate.postForObject(apiPrefix + "/rubros?idEmpresa=1", rubro, RubroDTO.class);
     this.vincularClienteParaUsuarioInicial();
-  }
-
-  @Test
-  void shouldCrearFormaDePagoChequeQueAfectaCaja() {
-    FormaDePagoDTO formaDePagoDTO =
-      FormaDePagoDTO.builder().nombre("Cheque").afectaCaja(true).build();
-    FormaDePagoDTO formaDePagoRecuperada =
-      restTemplate.postForObject(
-        apiPrefix + "/formas-de-pago?idEmpresa=1", formaDePagoDTO, FormaDePagoDTO.class);
-    assertEquals(formaDePagoDTO, formaDePagoRecuperada);
   }
 
   @Test
