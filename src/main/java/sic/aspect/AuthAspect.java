@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import sic.controller.ForbiddenException;
+import sic.exception.ForbiddenException;
 import sic.modelo.Rol;
 import sic.service.IAuthService;
 

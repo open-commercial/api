@@ -19,6 +19,7 @@ import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductoDTO;
 import sic.service.*;
+import sic.exception.BusinessServiceException;
 
 @RestController
 @RequestMapping("/api/v1")

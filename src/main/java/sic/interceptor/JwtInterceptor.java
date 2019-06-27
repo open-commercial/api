@@ -4,7 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
-import sic.controller.UnauthorizedException;
+import sic.exception.UnauthorizedException;
 import sic.service.IAuthService;
 
 import java.util.ResourceBundle;

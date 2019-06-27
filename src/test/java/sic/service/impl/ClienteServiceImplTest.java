@@ -12,7 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.builder.ClienteBuilder;
 import sic.builder.EmpresaBuilder;
 import sic.modelo.Cliente;
-import sic.service.BusinessServiceException;
+import sic.exception.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
 import sic.repository.ClienteRepository;
 

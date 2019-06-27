@@ -1,21 +1,22 @@
 package sic.service.impl;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.Empresa;
 import sic.modelo.Medida;
 import sic.service.IMedidaService;
-import sic.service.BusinessServiceException;
+import sic.exception.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
 import sic.repository.MedidaRepository;
 
@@ -25,10 +26,13 @@ public class MedidaServiceImpl implements IMedidaService {
 
   private final MedidaRepository medidaRepository;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private final MessageSource messageSource;
 
   @Autowired
-  public MedidaServiceImpl(MedidaRepository medidaRepository) {
+  public MedidaServiceImpl(MedidaRepository medidaRepository,
+                           MessageSource messageSource) {
     this.medidaRepository = medidaRepository;
+    this.messageSource = messageSource;
   }
 
   @Override
@@ -38,8 +42,8 @@ public class MedidaServiceImpl implements IMedidaService {
     if (medida.isPresent() && !medida.get().isEliminada()) {
       return medida.get();
     } else {
-      throw new EntityNotFoundException(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_medida_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_medida_no_existente", null, Locale.getDefault()));
     }
   }
 
@@ -59,14 +63,14 @@ public class MedidaServiceImpl implements IMedidaService {
     // Nombre
     Medida medidaDuplicada = this.getMedidaPorNombre(medida.getNombre(), medida.getEmpresa());
     if (operacion.equals(TipoDeOperacion.ALTA) && medidaDuplicada != null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_medida_duplicada_nombre"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_medida_duplicada_nombre", null, Locale.getDefault()));
     }
     if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
         && medidaDuplicada != null
         && medidaDuplicada.getId_Medida() != medida.getId_Medida()) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_medida_duplicada_nombre"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_medida_duplicada_nombre", null, Locale.getDefault()));
     }
   }
 
@@ -91,8 +95,8 @@ public class MedidaServiceImpl implements IMedidaService {
   public void eliminar(long idMedida) {
     Medida medida = this.getMedidaNoEliminadaPorId(idMedida);
     if (medida == null) {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_medida_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_medida_no_existente", null, Locale.getDefault()));
     }
     medida.setEliminada(true);
     medidaRepository.save(medida);

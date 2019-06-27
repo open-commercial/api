@@ -1,6 +1,6 @@
 package sic.modelo;
 
-import sic.service.BusinessServiceException;
+import sic.exception.BusinessServiceException;
 
 import java.util.ResourceBundle;
 

@@ -1,12 +1,12 @@
 package sic.service.impl;
 
-import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -14,7 +14,9 @@ import sic.modelo.ConfiguracionDelSistema;
 import sic.modelo.Empresa;
 import sic.service.IConfiguracionDelSistemaService;
 import sic.repository.ConfiguracionDelSistemaRepository;
-import sic.service.BusinessServiceException;
+import sic.exception.BusinessServiceException;
+
+import java.util.Locale;
 
 @Service
 @Validated
@@ -22,12 +24,13 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
 
   private final ConfiguracionDelSistemaRepository configuracionRepository;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+  private final MessageSource messageSource;
 
   @Autowired
   public ConfiguracionDelSistemaServiceImpl(
-      ConfiguracionDelSistemaRepository configuracionRepository) {
+      ConfiguracionDelSistemaRepository configuracionRepository, MessageSource messageSource) {
     this.configuracionRepository = configuracionRepository;
+    this.messageSource = messageSource;
   }
 
   @Override
@@ -35,8 +38,8 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
     return configuracionRepository
         .findById(idConfiguracionDelSistema)
         .orElseThrow(
-            () ->
-                new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_cds_no_existente")));
+            () -> new EntityNotFoundException(messageSource.getMessage(
+                  "mensaje_cds_no_existente", null, Locale.getDefault())));
   }
 
   @Override
@@ -76,27 +79,30 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
   public void validarOperacion(ConfiguracionDelSistema cds) {
     if (cds.isFacturaElectronicaHabilitada()) {
       if (cds.getCertificadoAfip() == null) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_cds_certificado_vacio"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_cds_certificado_vacio", null, Locale.getDefault()));
       }
       if (cds.getFirmanteCertificadoAfip().isEmpty()) {
-        throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_cds_firmante_vacio"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_cds_firmante_vacio", null, Locale.getDefault()));
       }
       if (cds.getPasswordCertificadoAfip() == null || cds.getPasswordCertificadoAfip().isEmpty()) {
-        throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_cds_password_vacio"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_cds_password_vacio", null, Locale.getDefault()));
       }
       if (cds.getNroPuntoDeVentaAfip() <= 0) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_cds_punto_venta_invalido"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_cds_punto_venta_invalido", null, Locale.getDefault()));
       }
     }
     if (cds.isEmailSenderHabilitado()) {
       if (cds.getEmailUsername() == null || cds.getEmailUsername().isEmpty()) {
-        throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_cds_email_vacio"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_cds_email_vacio", null, Locale.getDefault()));
       }
       if (cds.getEmailPassword() == null || cds.getEmailPassword().isEmpty()) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_cds_email_password_vacio"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_cds_email_password_vacio", null, Locale.getDefault()));
       }
     }
   }

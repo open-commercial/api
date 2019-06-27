@@ -11,6 +11,7 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.dto.LocalidadDTO;
 import sic.service.*;
+import sic.exception.BusinessServiceException;
 
 import java.util.List;
 import java.util.ResourceBundle;

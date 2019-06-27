@@ -1,4 +1,4 @@
-package sic.controller;
+package sic.exception;
 
 public class UnauthorizedException extends RuntimeException {
     

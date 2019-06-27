@@ -13,7 +13,7 @@ import static org.mockito.Mockito.when;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.builder.MedidaBuilder;
 import sic.modelo.Medida;
-import sic.service.BusinessServiceException;
+import sic.exception.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
 import sic.repository.MedidaRepository;
 

@@ -2,6 +2,7 @@ package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
 
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
@@ -9,8 +10,8 @@ import sic.modelo.*;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 
@@ -20,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.service.IProveedorService;
-import sic.service.BusinessServiceException;
+import sic.exception.BusinessServiceException;
 import sic.repository.ProveedorRepository;
 import sic.service.ICuentaCorrienteService;
 import sic.service.IUbicacionService;
@@ -32,17 +33,19 @@ public class ProveedorServiceImpl implements IProveedorService {
   private final ProveedorRepository proveedorRepository;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IUbicacionService ubicacionService;
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private final MessageSource messageSource;
 
   @Autowired
   public ProveedorServiceImpl(
       ProveedorRepository proveedorRepository,
       ICuentaCorrienteService cuentaCorrienteService,
-      IUbicacionService ubicacionService) {
+      IUbicacionService ubicacionService,
+      MessageSource messageSource) {
     this.proveedorRepository = proveedorRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.ubicacionService = ubicacionService;
+    this.messageSource = messageSource;
   }
 
   @Override
@@ -52,9 +55,8 @@ public class ProveedorServiceImpl implements IProveedorService {
     if (proveedor.isPresent() && !proveedor.get().isEliminado()) {
       return proveedor.get();
     } else {
-      throw new EntityNotFoundException(
-        ResourceBundle.getBundle("Mensajes")
-          .getString("mensaje_proveedor_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_proveedor_no_existente", null, Locale.getDefault()));
     }
   }
 
@@ -88,8 +90,7 @@ public class ProveedorServiceImpl implements IProveedorService {
             .id_Empresa
             .eq(criteria.getIdEmpresa())
             .and(qProveedor.eliminado.eq(false)));
-    Page<Proveedor> proveedores = proveedorRepository.findAll(builder, criteria.getPageable());
-    return proveedores;
+    return proveedorRepository.findAll(builder, criteria.getPageable());
   }
 
   @Override
@@ -111,33 +112,33 @@ public class ProveedorServiceImpl implements IProveedorService {
       if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
           && proveedorDuplicado != null
           && proveedorDuplicado.getId_Proveedor() != proveedor.getId_Proveedor()) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_proveedor_duplicado_idFiscal"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_proveedor_duplicado_idFiscal", null, Locale.getDefault()));
       }
       if (operacion.equals(TipoDeOperacion.ALTA)
           && proveedorDuplicado != null
           && proveedor.getIdFiscal() != null) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_proveedor_duplicado_idFiscal"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_proveedor_duplicado_idFiscal", null, Locale.getDefault()));
       }
     }
     // Razon social
     Proveedor proveedorDuplicado =
         this.getProveedorPorRazonSocial(proveedor.getRazonSocial(), proveedor.getEmpresa());
     if (operacion == TipoDeOperacion.ALTA && proveedorDuplicado != null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_proveedor_duplicado_razonSocial"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_proveedor_duplicado_razonSocial", null, Locale.getDefault()));
     }
     if (operacion == TipoDeOperacion.ACTUALIZACION
         && proveedorDuplicado != null
         && proveedorDuplicado.getId_Proveedor() != proveedor.getId_Proveedor()) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_proveedor_duplicado_razonSocial"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_proveedor_duplicado_razonSocial", null, Locale.getDefault()));
     }
     // Ubicacion
     if (proveedor.getUbicacion() != null && proveedor.getUbicacion().getLocalidad() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_ubicacion_sin_localidad"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_ubicacion_sin_localidad", null, Locale.getDefault()));
     }
   }
 
@@ -175,8 +176,8 @@ public class ProveedorServiceImpl implements IProveedorService {
   public void eliminar(long idProveedor) {
     Proveedor proveedor = this.getProveedorNoEliminadoPorId(idProveedor);
     if (proveedor == null) {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_proveedor_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_proveedor_no_existente", null, Locale.getDefault()));
     }
     cuentaCorrienteService.eliminarCuentaCorrienteProveedor(idProveedor);
     proveedor.setEliminado(true);
