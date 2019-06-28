@@ -160,7 +160,12 @@
         <dependency>
             <groupId>com.mercadopago</groupId>
             <artifactId>dx-java</artifactId>
-            <version>1.0.33</version>
+            <version>1.0.36</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
         </dependency>
     </dependencies>
 

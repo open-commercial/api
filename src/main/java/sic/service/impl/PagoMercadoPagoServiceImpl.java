@@ -2,9 +2,13 @@ package sic.service.impl;
 
 import com.mercadopago.MercadoPago;
 import com.mercadopago.core.MPApiResponse;
+import com.mercadopago.exceptions.MPConfException;
+import com.mercadopago.exceptions.MPException;
 import com.mercadopago.exceptions.MPRestException;
 import com.mercadopago.resources.Payment;
 import com.mercadopago.resources.datastructures.payment.Payer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -28,6 +32,7 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
 
   private final IReciboService reciboService;
   private final IFormaDePagoService formaDePagoService;
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
   public PagoMercadoPagoServiceImpl(IReciboService reciboService,
@@ -39,11 +44,6 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
   @Override
   public boolean crearNuevoPago(PagoMercadoPagoDTO pagoMercadoPagoDTO, Cliente cliente, Float monto) {
     MercadoPago.SDK.configure(mercadoPagoAccesToken);
-//    try {
-//      MPApiResponse paymentMethods = MercadoPago.SDK.Get("/v1/payment_methods"); ///v1/payment_methods
-//    } catch (MPRestException e) {
-//      e.printStackTrace();
-//    }
     Payment payment = new Payment();
     if (pagoMercadoPagoDTO.getToken() != null && !pagoMercadoPagoDTO.getToken().isEmpty()){
     payment
@@ -73,6 +73,7 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
         nuevoRecibo.setFecha(new Date());
         nuevoRecibo.setConcepto("probando pago");
         nuevoRecibo.setMonto(new BigDecimal(Float.toString(monto)));
+        reciboService.guardar(nuevoRecibo);
         operacionExitosa = true;
       }
     } catch (Exception e) {
