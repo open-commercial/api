@@ -6,8 +6,6 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = {"id_Medida", "idEmpresa", "nombreEmpresa"})
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
 public class MedidaDTO {
 

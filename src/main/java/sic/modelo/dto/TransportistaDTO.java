@@ -3,8 +3,6 @@ package sic.modelo.dto;
 import lombok.*;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @EqualsAndHashCode(
     exclude = {
       "id_Transportista",
