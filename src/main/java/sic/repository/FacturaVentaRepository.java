@@ -20,6 +20,4 @@ public interface FacturaVentaRepository
       @Param("tipoComprobante") TipoDeComprobante tipoComprobante,
       @Param("numSerie") long numSerie,
       @Param("idEmpresa") long idEmpresa);
-
-  List<FacturaVenta> findTop2ByTipoComprobanteAndEliminadaAndEmpresaOrderByFechaDesc(TipoDeComprobante tipo, boolean eliminada, Empresa empresa);
 }

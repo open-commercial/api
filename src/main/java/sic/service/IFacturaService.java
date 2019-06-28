@@ -76,6 +76,6 @@ public interface IFacturaService {
     BigDecimal descuentoPorcentaje,
     boolean dividiendoRenglonFactura);
 
-  boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAFIP comprobante);
+  boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAFIP comprobante);;
 
 }

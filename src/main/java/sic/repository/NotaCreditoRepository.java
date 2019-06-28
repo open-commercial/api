@@ -24,6 +24,4 @@ public interface NotaCreditoRepository
   boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta, boolean eliminada);
 
   List<NotaCredito> findAllByFacturaCompraAndEliminada(FacturaCompra factura, boolean eliminada);
-
-  List<NotaCredito> findTop2ByTipoComprobanteAndEliminadaAndEmpresaOrderByFechaDesc(TipoDeComprobante tipo, boolean eliminada, Empresa empresa);
 }

@@ -11,6 +11,8 @@ import lombok.*;
       "idEmpresa",
       "nombreEmpresa"
     })
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class TransportistaDTO {
 
