@@ -59,8 +59,7 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
         throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pago_sin_issuer_id"));
       }
       if (pagoMercadoPagoDTO.getInstallments() != null) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_pago_sin_installments"));
+        pagoMercadoPagoDTO.setInstallments(1);
       }
       payment
           .setTransactionAmount(monto)

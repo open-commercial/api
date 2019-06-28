@@ -163,7 +163,7 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public void validarOperacion(Recibo recibo) {
-    this.cajaService.validarMovimiento(recibo.getFecha(), recibo.getEmpresa().getId_Empresa());
+    //this.cajaService.validarMovimiento(recibo.getFecha(), recibo.getEmpresa().getId_Empresa());
     if (recibo.getCliente() == null && recibo.getProveedor() == null) {
       throw new BusinessServiceException(
           RESOURCE_BUNDLE.getString("mensaje_recibo_cliente_proveedor_vacio"));
