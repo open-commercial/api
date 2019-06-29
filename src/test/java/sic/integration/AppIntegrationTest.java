@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.context.MessageSource;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
@@ -45,30 +46,17 @@ import static org.junit.jupiter.api.Assertions.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class AppIntegrationTest {
 
-  @Autowired
-  private UsuarioRepository usuarioRepository;
-
-  @Autowired
-  private IProductoService productoService;
-
-  @Autowired
-  private IPedidoService pedidoService;
-
-  @Autowired
-  private ProvinciaRepository provinciaRepository;
-
-  @Autowired
-  private LocalidadRepository localidadRepository;
-
-  @Autowired
-  private TestRestTemplate restTemplate;
-
+  @Autowired private UsuarioRepository usuarioRepository;
+  @Autowired private IProductoService productoService;
+  @Autowired private IPedidoService pedidoService;
+  @Autowired private ProvinciaRepository provinciaRepository;
+  @Autowired private LocalidadRepository localidadRepository;
+  @Autowired private TestRestTemplate restTemplate;
   @Autowired private IClockService clockService;
-
   @Autowired private ICajaService cajaService;
+  @Autowired private MessageSource messageSource;
 
   private String token;
-
   private final String apiPrefix = "/api/v1";
 
   private static final BigDecimal IVA_21 = new BigDecimal("21");
@@ -526,7 +514,7 @@ class AppIntegrationTest {
     this.vincularClienteParaUsuarioInicial();
   }
 
-  @Test
+  @Test()
   void shouldCrearFormaDePagoChequeQueAfectaCaja() {
     FormaDePagoDTO formaDePagoDTO =
       FormaDePagoDTO.builder().nombre("Cheque").afectaCaja(true).build();
@@ -850,7 +838,7 @@ class AppIntegrationTest {
             .build();
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
     UbicacionDTO ubicacionDeFacturacion =
-      UbicacionDTO.builder().calle("Sarmiento").numero(789).build();
+        UbicacionDTO.builder().calle("Sarmiento").numero(789).build();
     ClienteDTO cliente =
         ClienteDTO.builder()
             .bonificacion(BigDecimal.TEN)
@@ -865,13 +853,17 @@ class AppIntegrationTest {
             .idCredencial(credencial.getId_Usuario())
             .ubicacionFacturacion(ubicacionDeFacturacion)
             .build();
-    try {
-      restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class);
-    } catch (RestClientResponseException ex) {
-      assertTrue(
-          ex.getMessage()
-              .startsWith("La ubicacion de facturacion debe poseer una localidad asociada."));
-    }
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class,
+            () -> restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_ubicacion_facturacion_sin_localidad", null, Locale.getDefault())));
   }
 
   @Test
@@ -901,12 +893,17 @@ class AppIntegrationTest {
         .idCredencial(credencial.getId_Usuario())
         .ubicacionEnvio(ubicacionDeEnvio)
         .build();
-    try {
-      restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class);
-    } catch (RestClientResponseException ex) {
-      assertTrue(
-          ex.getMessage().startsWith("La ubicacion de envio debe poseer una localidad asociada."));
-    }
+    RestClientResponseException thrown =
+      assertThrows(
+        RestClientResponseException.class,
+        () -> restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+      thrown
+        .getMessage()
+        .contains(
+          messageSource.getMessage(
+            "mensaje_ubicacion_envio_sin_localidad", null, Locale.getDefault())));
   }
 
   @Test
@@ -1288,25 +1285,39 @@ class AppIntegrationTest {
 
   @Test
   void shouldGetExceptionYaExisteRubroConElNombreIngresadoEnAlta() {
-    try {
-      this.shouldCrearRubro();
-      RubroDTO rubro = RubroDTO.builder().nombre("Reparación de Ovnis").build();
-      restTemplate.postForObject(apiPrefix + "/rubros?idEmpresa=1", rubro, RubroDTO.class);
-    } catch (RestClientResponseException ex) {
-      assertTrue(ex.getMessage().startsWith("Ya existe un rubro con el nombre ingresado."));
-    }
+    this.shouldCrearRubro();
+    RubroDTO rubro = RubroDTO.builder().nombre("Reparación de Ovnis").build();
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class,
+            () ->
+                restTemplate.postForObject(
+                    apiPrefix + "/rubros?idEmpresa=1", rubro, RubroDTO.class));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_rubro_nombre_duplicado", null, Locale.getDefault())));
   }
 
   @Test
   void shouldGetExceptionYaExisteRubroConElNombreIngresadoEnModificacion() {
-    try {
-      this.shouldCrearRubro();
-      RubroDTO rubro = restTemplate.getForObject(apiPrefix + "/rubros/2", RubroDTO.class);
-      rubro.setNombre("Ferreteria");
-      restTemplate.put(apiPrefix + "/rubros", rubro);
-    } catch (RestClientResponseException ex) {
-      assertTrue(ex.getMessage().startsWith("Ya existe un rubro con el nombre ingresado."));
-    }
+    this.shouldCrearRubro();
+    RubroDTO rubro = restTemplate.getForObject(apiPrefix + "/rubros/2", RubroDTO.class);
+    rubro.setNombre("Ferreteria");
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class,
+            () -> restTemplate.put(apiPrefix + "/rubros", rubro));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_rubro_nombre_duplicado", null, Locale.getDefault())));
   }
 
   @Test
@@ -2058,11 +2069,16 @@ class AppIntegrationTest {
   void shouldCrearYEliminarFacturaVenta() {
     this.shouldCrearFacturaVentaA();
     restTemplate.delete(apiPrefix + "/facturas/1");
-    try {
-      restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaDTO.class);
-    } catch (RestClientResponseException ex) {
-      assertTrue(ex.getMessage().startsWith("La factura no existe o se encuentra eliminada."));
-    }
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class,
+            () -> restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaDTO.class));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage("mensaje_factura_eliminada", null, Locale.getDefault())));
   }
 
   @Test
@@ -2156,35 +2172,35 @@ class AppIntegrationTest {
     this.shouldCrearClienteResponsableInscripto();
     this.crearProductos();
     ProductoDTO productoUno =
-      restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+        restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO productoDos =
-      restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
+        restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
     RenglonFactura renglonUno =
-      restTemplate.getForObject(
-        apiPrefix
-          + "/facturas/renglon?"
-          + "idProducto="
-          + productoUno.getIdProducto()
-          + "&tipoDeComprobante="
-          + TipoDeComprobante.FACTURA_A
-          + "&movimiento="
-          + Movimiento.VENTA
-          + "&cantidad=6"
-          + "&descuentoPorcentaje=10",
-        RenglonFactura.class);
+        restTemplate.getForObject(
+            apiPrefix
+                + "/facturas/renglon?"
+                + "idProducto="
+                + productoUno.getIdProducto()
+                + "&tipoDeComprobante="
+                + TipoDeComprobante.FACTURA_A
+                + "&movimiento="
+                + Movimiento.VENTA
+                + "&cantidad=6"
+                + "&descuentoPorcentaje=10",
+            RenglonFactura.class);
     RenglonFactura renglonDos =
-      restTemplate.getForObject(
-        apiPrefix
-          + "/facturas/renglon?"
-          + "idProducto="
-          + productoDos.getIdProducto()
-          + "&tipoDeComprobante="
-          + TipoDeComprobante.FACTURA_A
-          + "&movimiento="
-          + Movimiento.VENTA
-          + "&cantidad=3"
-          + "&descuentoPorcentaje=5",
-        RenglonFactura.class);
+        restTemplate.getForObject(
+            apiPrefix
+                + "/facturas/renglon?"
+                + "idProducto="
+                + productoDos.getIdProducto()
+                + "&tipoDeComprobante="
+                + TipoDeComprobante.FACTURA_A
+                + "&movimiento="
+                + Movimiento.VENTA
+                + "&cantidad=3"
+                + "&descuentoPorcentaje=5",
+            RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
     renglones.add(renglonDos);
@@ -2204,46 +2220,45 @@ class AppIntegrationTest {
     BigDecimal descuentoPorcentaje = new BigDecimal("25");
     BigDecimal recargoPorcentaje = new BigDecimal("10");
     BigDecimal descuento_neto =
-      subTotal.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+        subTotal.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal recargo_neto =
-      subTotal.multiply(recargoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+        subTotal.multiply(recargoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
     indice = cantidades.length;
     BigDecimal iva_105_netoFactura = BigDecimal.ZERO;
     BigDecimal iva_21_netoFactura = BigDecimal.ZERO;
     for (int i = 0; i < indice; i++) {
       if (ivaPorcentajeRenglones[i].compareTo(IVA_105) == 0) {
         iva_105_netoFactura =
-          iva_105_netoFactura.add(
-            cantidades[i].multiply(
-              ivaNetoRenglones[i]
-                .subtract(
-                  ivaNetoRenglones[i].multiply(
-                    descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
-                .add(
-                  ivaNetoRenglones[i].multiply(
-                    recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
+            iva_105_netoFactura.add(
+                cantidades[i].multiply(
+                    ivaNetoRenglones[i]
+                        .subtract(
+                            ivaNetoRenglones[i].multiply(
+                                descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
+                        .add(
+                            ivaNetoRenglones[i].multiply(
+                                recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
       } else if (ivaPorcentajeRenglones[i].compareTo(IVA_21) == 0) {
         iva_21_netoFactura =
-          iva_21_netoFactura.add(
-            cantidades[i].multiply(
-              ivaNetoRenglones[i]
-                .subtract(
-                  ivaNetoRenglones[i].multiply(
-                    descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
-                .add(
-                  ivaNetoRenglones[i].multiply(
-                    recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
+            iva_21_netoFactura.add(
+                cantidades[i].multiply(
+                    ivaNetoRenglones[i]
+                        .subtract(
+                            ivaNetoRenglones[i].multiply(
+                                descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
+                        .add(
+                            ivaNetoRenglones[i].multiply(
+                                recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
       }
     }
     BigDecimal subTotalBruto = subTotal.add(recargo_neto).subtract(descuento_neto);
     BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/2", Cliente.class);
-    UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
     Transportista transportista =
-      restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
+        restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     FacturaVentaDTO facturaVentaA =
-      FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
+        FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
     facturaVentaA.setIdEmpresa(empresa.getId_Empresa());
     facturaVentaA.setIdTransportista(transportista.getId_Transportista());
     facturaVentaA.setObservaciones("Factura Venta A test");
@@ -2258,13 +2273,19 @@ class AppIntegrationTest {
     facturaVentaA.setIva105Neto(iva_105_netoFactura);
     facturaVentaA.setIva21Neto(iva_21_netoFactura);
     facturaVentaA.setTotal(total);
-    try {
-      restTemplate.postForObject(
-          apiPrefix + "/facturas/venta", facturaVentaA, FacturaVentaDTO[].class);
-    } catch (RestClientResponseException ex) {
-      assertTrue(
-          ex.getMessage().startsWith("La ubicacion de facturacion se encuentra vacia."));
-    }
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class,
+            () ->
+                restTemplate.postForObject(
+                    apiPrefix + "/facturas/venta", facturaVentaA, FacturaVentaDTO[].class));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault())));
   }
 
   @Test
@@ -3166,39 +3187,57 @@ class AppIntegrationTest {
     productoAModificar.setDestacado(true);
     productoAModificar.setUrlImagen(null);
     productoAModificar.setCodigo("666");
-    try {
-      restTemplate.put(apiPrefix + "/productos?idMedida=2", productoAModificar);
-    } catch (RestClientResponseException ex) {
-      assertTrue(ex.getMessage().startsWith("Para poder marcarlo como Destacado, debe ser Publico y tener imagen asignada."));
-    }
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class,
+            () -> restTemplate.put(apiPrefix + "/productos?idMedida=2", productoAModificar));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_producto_destacado_privado_o_sin_imagen", null, Locale.getDefault())));
   }
 
   @Test
   void shouldNotModificarProductoComoDestacadoSiNoTieneImagen() {
     this.shouldCrearProductoConIva21();
     ProductoDTO productoAModificar =
-      restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+        restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     productoAModificar.setDescripcion("PRODUCTO MODIFICADO.");
     productoAModificar.setCantidad(new BigDecimal("52"));
     productoAModificar.setPublico(false);
     productoAModificar.setDestacado(true);
     productoAModificar.setCodigo("666");
-    try {
-      restTemplate.put(apiPrefix + "/productos?idMedida=2", productoAModificar);
-    } catch (RestClientResponseException ex) {
-      assertTrue(ex.getMessage().startsWith("Para poder marcarlo como Destacado, debe ser Publico y tener imagen asignada."));
-    }
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class,
+            () -> restTemplate.put(apiPrefix + "/productos?idMedida=2", productoAModificar));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_producto_destacado_privado_o_sin_imagen", null, Locale.getDefault())));
   }
 
   @Test
   void shouldEliminarProducto() {
     this.shouldCrearProductoConIva21();
     restTemplate.delete(apiPrefix + "/productos?idProducto=1");
-    try {
-      restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
-    } catch (RestClientResponseException ex) {
-      assertTrue(ex.getMessage().startsWith("El producto solicitado no existe."));
-    }
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class,
+            () -> restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_producto_no_existente", null, Locale.getDefault())));
   }
 
   @Test
@@ -3744,41 +3783,48 @@ class AppIntegrationTest {
   void shouldNotCrearNotaCreditoVentaSinRenglonesDeFacturaA() {
     this.shouldCrearFacturaVentaA();
     List<FacturaVenta> facturasRecuperadas =
-      restTemplate
-        .exchange(
-          apiPrefix
-            + "/facturas/venta/busqueda/criteria?idEmpresa=1"
-            + "&tipoFactura="
-            + TipoDeComprobante.FACTURA_A
-            + "&nroSerie=0"
-            + "&nroFactura=1",
-          HttpMethod.GET,
-          null,
-          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
-        .getBody()
-        .getContent();
+        restTemplate
+            .exchange(
+                apiPrefix
+                    + "/facturas/venta/busqueda/criteria?idEmpresa=1"
+                    + "&tipoFactura="
+                    + TipoDeComprobante.FACTURA_A
+                    + "&nroSerie=0"
+                    + "&nroFactura=1",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+            .getBody()
+            .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
     idsRenglonesFacutura[0] = 1L;
     BigDecimal[] cantidades = new BigDecimal[1];
     cantidades[0] = new BigDecimal("5");
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
-      NuevaNotaCreditoDeFacturaDTO.builder()
-        .idFactura(facturasRecuperadas.get(0).getId_Factura())
-        .idsRenglonesFactura(idsRenglonesFacutura)
-        .cantidades(cantidades)
-        .modificaStock(true)
-        .motivo("Color equivocado.")
-        .build();
+        NuevaNotaCreditoDeFacturaDTO.builder()
+            .idFactura(facturasRecuperadas.get(0).getId_Factura())
+            .idsRenglonesFactura(idsRenglonesFacutura)
+            .cantidades(cantidades)
+            .modificaStock(true)
+            .motivo("Color equivocado.")
+            .build();
     NotaCreditoDTO notaCreditoParaPersistir =
-      restTemplate.postForObject(
-        apiPrefix + "/notas/credito/calculos", nuevaNotaCreditoDTO, NotaCreditoDTO.class);
+        restTemplate.postForObject(
+            apiPrefix + "/notas/credito/calculos", nuevaNotaCreditoDTO, NotaCreditoDTO.class);
     notaCreditoParaPersistir.setRenglonesNotaCredito(null);
-    try {
-      restTemplate.postForObject(
-          apiPrefix + "/notas/credito", notaCreditoParaPersistir, NotaCreditoDTO.class);
-    } catch (RestClientResponseException ex) {
-      assertTrue(ex.getMessage().startsWith("Los renglones de la nota se encuentran vacios."));
-    }
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class,
+            () ->
+                restTemplate.postForObject(
+                    apiPrefix + "/notas/credito", notaCreditoParaPersistir, NotaCreditoDTO.class));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_nota_de_renglones_vacio", null, Locale.getDefault())));
   }
 
   @Test
@@ -3808,12 +3854,21 @@ class AppIntegrationTest {
             .modificaStock(true)
             .motivo("Color equivocado.")
             .build();
-    try {
-      restTemplate.postForObject(
-          apiPrefix + "/notas/credito/calculos", nuevaNotaCreditoDTO, NotaCreditoDTO.class);
-    } catch (RestClientResponseException ex) {
-      assertTrue(ex.getMessage().startsWith("Los renglones de la nota se encuentran vacios."));
-    }
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class,
+            () ->
+                restTemplate.postForObject(
+                    apiPrefix + "/notas/credito/calculos",
+                    nuevaNotaCreditoDTO,
+                    NotaCreditoDTO.class));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_nota_de_renglones_vacio", null, Locale.getDefault())));
   }
 
   @Test
@@ -4549,14 +4604,21 @@ class AppIntegrationTest {
                 null,
                 new ParameterizedTypeReference<List<RenglonPedidoDTO>>() {})
             .getBody());
-    try {
-      restTemplate.put(
-          apiPrefix
-              + "/pedidos?idEmpresa=1&idUsuario=2&idCliente=1&tipoDeEnvio=USAR_UBICACION_FACTURACION",
-          pedidoRecuperado);
-    } catch (RestClientResponseException ex) {
-      assertTrue(ex.getMessage().startsWith("El pedido solicitado no existe."));
-    }
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class,
+            () ->
+                restTemplate.put(
+                    apiPrefix
+                        + "/pedidos?idEmpresa=1&idUsuario=2&idCliente=1&tipoDeEnvio=USAR_UBICACION_FACTURACION",
+                    pedidoRecuperado));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_pedido_no_existente", null, Locale.getDefault())));
   }
 
   @Test
@@ -4987,25 +5049,31 @@ class AppIntegrationTest {
   @Test
   void shouldValidarPermisosUsuarioAlEliminarProveedor() {
     UsuarioDTO nuevoUsuario =
-      UsuarioDTO.builder()
-        .username("wicca")
-        .password("Salem123")
-        .nombre("Sabrina")
-        .apellido("Spellman")
-        .email("Witch@gmail.com")
-        .roles(Collections.singletonList(Rol.VENDEDOR))
-        .habilitado(true)
-        .build();
+        UsuarioDTO.builder()
+            .username("wicca")
+            .password("Salem123")
+            .nombre("Sabrina")
+            .apellido("Spellman")
+            .email("Witch@gmail.com")
+            .roles(Collections.singletonList(Rol.VENDEDOR))
+            .habilitado(true)
+            .build();
     restTemplate.postForObject(apiPrefix + "/usuarios", nuevoUsuario, UsuarioDTO.class);
     this.token =
-      restTemplate
-        .postForEntity(apiPrefix + "/login", new Credencial("wicca", "Salem123"), String.class)
-        .getBody();
-    try {
-      restTemplate.delete(apiPrefix + "/proveedores/1");
-    } catch (RestClientResponseException ex) {
-      assertTrue(ex.getMessage().startsWith("No posee permisos para realizar"));
-    }
+        restTemplate
+            .postForEntity(apiPrefix + "/login", new Credencial("wicca", "Salem123"), String.class)
+            .getBody();
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class,
+            () -> restTemplate.delete(apiPrefix + "/proveedores/1"));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_usuario_rol_no_valido", null, Locale.getDefault())));
   }
 
   @Test
@@ -5229,11 +5297,16 @@ class AppIntegrationTest {
   void shouldEliminarGasto() {
     this.shouldCrearGasto();
     restTemplate.delete(apiPrefix + "/gastos/1");
-    try {
-      restTemplate.getForObject(apiPrefix + "/gastos/1", GastoDTO.class);
-    } catch (RestClientResponseException ex) {
-      assertTrue(ex.getMessage().startsWith("El gasto no existe o se encuentra eliminado."));
-    }
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class,
+            () -> restTemplate.getForObject(apiPrefix + "/gastos/1", GastoDTO.class));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage("mensaje_gasto_no_existente", null, Locale.getDefault())));
   }
 
   @Test
