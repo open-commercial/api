@@ -1439,12 +1439,13 @@ public class NotaServiceImpl implements INotaService {
     QNotaCredito qNotaCredito = QNotaCredito.notaCredito;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
-      qNotaCredito
-        .idNota
-        .lt(comprobante.getIdComprobante())
-        .and(qNotaCredito.eliminada.eq(false))
-        .and(qNotaCredito.empresa.id_Empresa.eq(comprobante.getEmpresa().getId_Empresa()))
-        .and(qNotaCredito.tipoComprobante.eq(comprobante.getTipoComprobante())));
+        qNotaCredito
+            .idNota
+            .lt(comprobante.getIdComprobante())
+            .and(qNotaCredito.eliminada.eq(false))
+            .and(qNotaCredito.empresa.id_Empresa.eq(comprobante.getEmpresa().getId_Empresa()))
+            .and(qNotaCredito.tipoComprobante.eq(comprobante.getTipoComprobante()))
+            .and(qNotaCredito.cliente.isNotNull()));
     Page<NotaCredito> notaAnterior =
       notaCreditoRepository.findAll(
         builder, PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "fecha")));
