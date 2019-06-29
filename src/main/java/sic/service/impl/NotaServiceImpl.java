@@ -1462,7 +1462,8 @@ public class NotaServiceImpl implements INotaService {
             .lt(comprobante.getIdComprobante())
             .and(qNotaDebito.eliminada.eq(false))
             .and(qNotaDebito.empresa.id_Empresa.eq(comprobante.getEmpresa().getId_Empresa()))
-            .and(qNotaDebito.tipoComprobante.eq(comprobante.getTipoComprobante())));
+            .and(qNotaDebito.tipoComprobante.eq(comprobante.getTipoComprobante()))
+            .and(qNotaDebito.cliente.isNotNull()));
     Page<NotaDebito> notaAnterior =
         notaDebitoRepository.findAll(
             builder, PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "fecha")));
