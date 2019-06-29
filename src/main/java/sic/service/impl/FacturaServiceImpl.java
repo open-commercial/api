@@ -975,8 +975,8 @@ public class FacturaServiceImpl implements IFacturaService {
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     /*if (dividiendoRenglonFactura == false && cantidad < producto.getBulto()
             && (movimiento == Movimiento.VENTA || movimiento == Movimiento.PEDIDO)) {
-        throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                .getString("mensaje_producto_cantidad_menor_a_minima"));
+        throw new BusinessServiceException(messageSource.getMessage(
+            "mensaje_producto_cantidad_menor_a_minima", null, Locale.getDefault()));
     }*/
     RenglonFactura nuevoRenglon = new RenglonFactura();
     nuevoRenglon.setIdProductoItem(producto.getIdProducto());

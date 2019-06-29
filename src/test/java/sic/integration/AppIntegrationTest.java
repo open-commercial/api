@@ -2268,7 +2268,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shloudVerificarCantidadDeArticulosEnFacturaA() {
+  void shouldVerificarCantidadDeArticulosEnFacturaA() {
     this.shouldCrearFacturaVentaA();
     FacturaDTO facturaDTO = restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaDTO.class);
     assertEquals(new BigDecimal("9.000000000000000"), facturaDTO.getCantidadArticulos());

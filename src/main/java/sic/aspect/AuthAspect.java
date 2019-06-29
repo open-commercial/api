@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -13,17 +14,19 @@ import sic.service.IAuthService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.ResourceBundle;
+import java.util.Locale;
 
 @Aspect
 @Component
 public class AuthAspect {
 
   private final IAuthService authService;
+  private final MessageSource messageSource;
 
   @Autowired
-  public AuthAspect(IAuthService authService) {
+  public AuthAspect(IAuthService authService, MessageSource messageSource) {
     this.authService = authService;
+    this.messageSource = messageSource;
   }
 
   @Before("@annotation(AccesoRolesPermitidos)")
@@ -40,6 +43,6 @@ public class AuthAspect {
     }
     if (accesoDenegado)
       throw new ForbiddenException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+          messageSource.getMessage("mensaje_usuario_rol_no_valido", null, Locale.getDefault()));
   }
 }

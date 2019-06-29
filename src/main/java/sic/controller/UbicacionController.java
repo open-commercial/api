@@ -2,6 +2,7 @@ package sic.controller;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +15,7 @@ import sic.service.*;
 import sic.exception.BusinessServiceException;
 
 import java.util.List;
-import java.util.ResourceBundle;
+import java.util.Locale;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -23,13 +24,16 @@ public class UbicacionController {
   private final IUbicacionService ubicacionService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final ModelMapper modelMapper;
+  private final MessageSource messageSource;
 
   @Autowired
   public UbicacionController(
     IUbicacionService ubicacionService,
-    ModelMapper modelMapper) {
+    ModelMapper modelMapper,
+    MessageSource messageSource) {
     this.ubicacionService = ubicacionService;
     this.modelMapper = modelMapper;
+    this.messageSource = messageSource;
   }
 
   @GetMapping("/ubicaciones/{idUbicacion}")
@@ -89,8 +93,8 @@ public class UbicacionController {
     Localidad localidadPorActualizar = modelMapper.map(localidadDTO, Localidad.class);
     if (localidadPorActualizar.getNombre() != null
       && !localidadPorActualizar.getNombre().equals(localidadPersistida.getNombre())) {
-      throw new BusinessServiceException(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_localidad_cambio_nombre"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_localidad_cambio_nombre", null, Locale.getDefault()));
     }
     if (localidadPorActualizar.getCodigoPostal() == null) {
       localidadPorActualizar.setCodigoPostal(localidadPersistida.getCodigoPostal());

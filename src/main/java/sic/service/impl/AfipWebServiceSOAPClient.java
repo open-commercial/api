@@ -60,15 +60,12 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
     private final Logger loggerSoapClient = LoggerFactory.getLogger(this.getClass());
     private static final String SOAP_ACTION_FECAESolicitar = "http://ar.gov.afip.dif.FEV1/FECAESolicitar";
     private static final String SOAP_ACTION_FECompUltimoAutorizado = "http://ar.gov.afip.dif.FEV1/FECompUltimoAutorizado";
-    private final MessageSource messageSource;
+
+    @Autowired
+    private MessageSource messageSource;
 
     @Value("${SIC_AFIP_ENV}")
     private String afipEnvironment;
-
-    @Autowired
-    public AfipWebServiceSOAPClient(MessageSource messageSource) {
-        this.messageSource = messageSource;
-    }
 
     public String getWSAA_URI() {
         if (afipEnvironment.equals("production")) {

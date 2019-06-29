@@ -1,28 +1,36 @@
 package sic.service.impl;
 
-import java.util.ResourceBundle;
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
+import org.springframework.context.MessageSource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.builder.MedidaBuilder;
 import sic.modelo.Medida;
 import sic.exception.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
 import sic.repository.MedidaRepository;
+import java.util.Locale;
 
 @ExtendWith(SpringExtension.class)
 class MedidaServiceImplTest {
 
+  @Mock private MessageSource messageSource;
   @Mock private MedidaRepository medidaRepository;
-
   @InjectMocks private MedidaServiceImpl medidaService;
+
+  private String mensaje_medida_duplicada_nombre = "Ya existe una medida con el nombre ingresado.";
+
+  @BeforeEach
+  void setup() {
+    when(messageSource.getMessage("mensaje_medida_duplicada_nombre", null, Locale.getDefault()))
+        .thenReturn(mensaje_medida_duplicada_nombre);
+  }
 
   @Test
   void shouldLanzarExceptionWhenNombreDuplicadoEnAlta() {
@@ -38,11 +46,7 @@ class MedidaServiceImplTest {
               medidaNueva.setNombre("Unidad");
               medidaService.validarOperacion(TipoDeOperacion.ALTA, medidaNueva);
             });
-    assertTrue(
-        thrown
-            .getMessage()
-            .contains(
-                ResourceBundle.getBundle("Mensajes").getString("mensaje_medida_duplicada_nombre")));
+    assertTrue(thrown.getMessage().contains(mensaje_medida_duplicada_nombre));
   }
 
   @Test
@@ -66,10 +70,6 @@ class MedidaServiceImplTest {
               medidaDuplicada.setEmpresa(medidaNueva.getEmpresa());
               medidaService.validarOperacion(TipoDeOperacion.ACTUALIZACION, medidaDuplicada);
             });
-    assertTrue(
-        thrown
-            .getMessage()
-            .contains(
-                ResourceBundle.getBundle("Mensajes").getString("mensaje_medida_duplicada_nombre")));
+    assertTrue(thrown.getMessage().contains(mensaje_medida_duplicada_nombre));
   }
 }

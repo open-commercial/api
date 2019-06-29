@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,7 @@ public class ProductoController {
   private final IAuthService authService;
   private final ModelMapper modelMapper;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
+  private final MessageSource messageSource;
 
   @Autowired
   public ProductoController(
@@ -44,7 +46,8 @@ public class ProductoController {
     IEmpresaService empresaService,
     IClienteService clienteService,
     IAuthService authService,
-    ModelMapper modelMapper) {
+    ModelMapper modelMapper,
+    MessageSource messageSource) {
     this.productoService = productoService;
     this.medidaService = medidaService;
     this.rubroService = rubroService;
@@ -53,6 +56,7 @@ public class ProductoController {
     this.clienteService = clienteService;
     this.authService = authService;
     this.modelMapper = modelMapper;
+    this.messageSource = messageSource;
   }
 
   @JsonView(Views.Public.class)
@@ -455,8 +459,8 @@ public class ProductoController {
             productoService.getListaDePreciosPorEmpresa(productos, idEmpresa, formato);
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
       default:
-        throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_formato_no_valido"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_formato_no_valido", null, Locale.getDefault()));
     }
   }
 }

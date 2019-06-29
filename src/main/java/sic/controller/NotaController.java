@@ -271,8 +271,8 @@ public class NotaController {
     Factura factura = facturaService.getFacturaNoEliminadaPorId(nuevaNotaCreditoDeFacturaDTO.getIdFactura());
     if (Arrays.asList(nuevaNotaCreditoDeFacturaDTO.getCantidades()).contains(null)
         || Arrays.asList(nuevaNotaCreditoDeFacturaDTO.getIdsRenglonesFactura()).contains(null)) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_nota_de_renglones_vacio"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_nota_de_renglones_vacio", null, Locale.getDefault()));
     } else {
       notaCreditoNueva.setRenglonesNotaCredito(
           notaService.calcularRenglonCreditoProducto(
@@ -339,8 +339,8 @@ public class NotaController {
     NotaCredito notaCreditoNueva = new NotaCredito();
     if (nuevaNotaCreditoSinFacturaDTO.getDetalle() == null
         || nuevaNotaCreditoSinFacturaDTO.getDetalle().isEmpty()) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_nota_renglon_sin_descripcion"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_nota_renglon_sin_descripcion", null, Locale.getDefault()));
     }
     List<RenglonNotaCredito> renglones = new ArrayList<>();
     notaCreditoNueva.setTipoComprobante(nuevaNotaCreditoSinFacturaDTO.getTipo());
@@ -381,7 +381,8 @@ public class NotaController {
             && nuevaNotaCreditoSinFacturaDTO.getIdProveedor() != null)
         || (nuevaNotaCreditoSinFacturaDTO.getIdCliente() == null
             && nuevaNotaCreditoSinFacturaDTO.getIdProveedor() == null)) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_nota_cliente_proveedor_juntos"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_nota_cliente_proveedor_juntos", null, Locale.getDefault()));
     }
     if (nuevaNotaCreditoSinFacturaDTO.getIdCliente() != null) {
       notaCreditoNueva.setCliente(
@@ -416,8 +417,8 @@ public class NotaController {
       if (!notaService.getTipoNotaDebitoCliente(
               reciboRelacionado.getIdCliente(), reciboRelacionado.getIdEmpresa())
           .contains(nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante())) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_nota_tipo_no_valido"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
       }
     } else if (reciboRelacionado.getProveedor() != null
         && nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante() != null) {
@@ -426,12 +427,12 @@ public class NotaController {
       if (!notaService.getTipoNotaDebitoProveedor(
               reciboRelacionado.getIdProveedor(), reciboRelacionado.getIdEmpresa())
           .contains(nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante())) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_nota_tipo_no_valido"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
       }
     } else {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_nota_parametros_faltantes"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_nota_parametros_faltantes", null, Locale.getDefault()));
     }
     notaDebitoCalculada.setTipoComprobante(nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante());
     List<RenglonNotaDebito> renglones = new ArrayList<>();
@@ -486,8 +487,8 @@ public class NotaController {
         if (!this.getTipoNotaDebitoCliente(
                 nuevaNotaDebitoSinReciboDTO.getIdCliente(), cliente.getIdEmpresa())
             .contains(nuevaNotaDebitoSinReciboDTO.getTipoDeComprobante())) {
-          throw new BusinessServiceException(
-              RESOURCE_BUNDLE.getString("mensaje_nota_tipo_no_valido"));
+          throw new BusinessServiceException(messageSource.getMessage(
+            "mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
         }
       } else if (nuevaNotaDebitoSinReciboDTO.getIdProveedor() != null) {
         Proveedor proveedor =
@@ -499,13 +500,13 @@ public class NotaController {
         if (!this.getTipoNotaDebitoProveedor(
                 nuevaNotaDebitoSinReciboDTO.getIdProveedor(), proveedor.getIdEmpresa())
             .contains(nuevaNotaDebitoSinReciboDTO.getTipoDeComprobante())) {
-          throw new BusinessServiceException(
-              RESOURCE_BUNDLE.getString("mensaje_nota_tipo_no_valido"));
+          throw new BusinessServiceException(messageSource.getMessage(
+            "mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
         }
       }
     } else {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_nota_parametros_faltantes"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_nota_parametros_faltantes", null, Locale.getDefault()));
     }
     notaDebitoCalculada.setTipoComprobante(nuevaNotaDebitoSinReciboDTO.getTipoDeComprobante());
     notaDebitoCalculada.setIva105Neto(BigDecimal.ZERO);
@@ -539,7 +540,8 @@ public class NotaController {
     notaCredito.setEmpresa(empresaService.getEmpresaPorId(notaCreditoDTO.getIdEmpresa()));
     if ((notaCreditoDTO.getIdCliente() != null && notaCreditoDTO.getIdProveedor() != null)
         || (notaCreditoDTO.getIdCliente() == null && notaCreditoDTO.getIdProveedor() == null)) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_nota_cliente_proveedor_juntos"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_nota_cliente_proveedor_juntos", null, Locale.getDefault()));
     }
     if (notaCreditoDTO.getIdCliente() != null) {
       notaCredito.setCliente(clienteService.getClienteNoEliminadoPorId(notaCreditoDTO.getIdCliente()));
