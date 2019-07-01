@@ -6,6 +6,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.DateExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
@@ -43,23 +44,24 @@ import sic.repository.RenglonFacturaRepository;
 @Validated
 public class FacturaServiceImpl implements IFacturaService {
 
-    private final FacturaRepository facturaRepository;
-    private final FacturaVentaRepository facturaVentaRepository;
-    private final FacturaCompraRepository facturaCompraRepository;
-    private final RenglonFacturaRepository renglonFacturaRepository;
-    private final IProductoService productoService;
-    private final IConfiguracionDelSistemaService configuracionDelSistemaService;
-    private final IPedidoService pedidoService;
-    private final INotaService notaService;
-    private final ICuentaCorrienteService cuentaCorrienteService;
-    private final IAfipService afipService;
-    private final IReciboService reciboService;
-    private final IUsuarioService usuarioService;
-    private final IClienteService clienteService;
-    private static final BigDecimal IVA_21 = new BigDecimal("21");
-    private static final BigDecimal IVA_105 = new BigDecimal("10.5");
-    private static final BigDecimal CIEN = new BigDecimal("100");
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private final FacturaRepository facturaRepository;
+  private final FacturaVentaRepository facturaVentaRepository;
+  private final FacturaCompraRepository facturaCompraRepository;
+  private final RenglonFacturaRepository renglonFacturaRepository;
+  private final IProductoService productoService;
+  private final IConfiguracionDelSistemaService configuracionDelSistemaService;
+  private final IPedidoService pedidoService;
+  private final INotaService notaService;
+  private final ICuentaCorrienteService cuentaCorrienteService;
+  private final IAfipService afipService;
+  private final IReciboService reciboService;
+  private final IUsuarioService usuarioService;
+  private final IClienteService clienteService;
+  private static final BigDecimal IVA_21 = new BigDecimal("21");
+  private static final BigDecimal IVA_105 = new BigDecimal("10.5");
+  private static final BigDecimal CIEN = new BigDecimal("100");
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
   @Lazy
@@ -235,51 +237,83 @@ public class FacturaServiceImpl implements IFacturaService {
           .orElse(null); // orElseThrow
     }
 
-    @Override
-    public Page<FacturaCompra> buscarFacturaCompra(BusquedaFacturaCompraCriteria criteria) {
-        //Fecha de Factura
-        if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_fechas_busqueda_invalidas"));
-        }
-        if (criteria.isBuscaPorFecha()) {
-            Calendar cal = new GregorianCalendar();
-            cal.setTime(criteria.getFechaDesde());
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            criteria.setFechaDesde(cal.getTime());
-            cal.setTime(criteria.getFechaHasta());
-            cal.set(Calendar.HOUR_OF_DAY, 23);
-            cal.set(Calendar.MINUTE, 59);
-            cal.set(Calendar.SECOND, 59);
-            criteria.setFechaHasta(cal.getTime());
-        }
-        return facturaCompraRepository.findAll(this.getBuilderCompra(criteria), criteria.getPageable());
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+    String ordenDefault = "fecha";
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
     }
+  }
 
-    @Override
-    public Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
-        //Fecha de Factura
-        if (criteria.isBuscaPorFecha() && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes")
-                    .getString("mensaje_factura_fechas_busqueda_invalidas"));
-        }
-        if (criteria.isBuscaPorFecha()) {
-            Calendar cal = new GregorianCalendar();
-            cal.setTime(criteria.getFechaDesde());
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            criteria.setFechaDesde(cal.getTime());
-            cal.setTime(criteria.getFechaHasta());
-            cal.set(Calendar.HOUR_OF_DAY, 23);
-            cal.set(Calendar.MINUTE, 59);
-            cal.set(Calendar.SECOND, 59);
-            criteria.setFechaHasta(cal.getTime());
-        }
-        return facturaVentaRepository.findAll(this.getBuilderVenta(criteria, idUsuarioLoggedIn), criteria.getPageable());
+  @Override
+  public Page<FacturaCompra> buscarFacturaCompra(BusquedaFacturaCompraCriteria criteria) {
+    // Fecha de Factura
+    if (criteria.isBuscaPorFecha()
+        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_factura_fechas_busqueda_invalidas"));
     }
+    if (criteria.isBuscaPorFecha()) {
+      Calendar cal = new GregorianCalendar();
+      cal.setTime(criteria.getFechaDesde());
+      cal.set(Calendar.HOUR_OF_DAY, 0);
+      cal.set(Calendar.MINUTE, 0);
+      cal.set(Calendar.SECOND, 0);
+      criteria.setFechaDesde(cal.getTime());
+      cal.setTime(criteria.getFechaHasta());
+      cal.set(Calendar.HOUR_OF_DAY, 23);
+      cal.set(Calendar.MINUTE, 59);
+      cal.set(Calendar.SECOND, 59);
+      criteria.setFechaHasta(cal.getTime());
+    }
+    // orden, numero de pagina y sentido
+    return facturaCompraRepository.findAll(
+        this.getBuilderCompra(criteria),
+        this.getPageable(
+            (criteria.getPagina() == null || criteria.getPagina() < 0) ? 0 : criteria.getPagina(),
+            criteria.getOrdenarPor(),
+            criteria.getSentido()));
+  }
+
+  @Override
+  public Page<FacturaVenta> buscarFacturaVenta(
+      BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
+    // Fecha de Factura
+    if (criteria.isBuscaPorFecha()
+        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
+      throw new BusinessServiceException(
+          ResourceBundle.getBundle("Mensajes")
+              .getString("mensaje_factura_fechas_busqueda_invalidas"));
+    }
+    if (criteria.isBuscaPorFecha()) {
+      Calendar cal = new GregorianCalendar();
+      cal.setTime(criteria.getFechaDesde());
+      cal.set(Calendar.HOUR_OF_DAY, 0);
+      cal.set(Calendar.MINUTE, 0);
+      cal.set(Calendar.SECOND, 0);
+      criteria.setFechaDesde(cal.getTime());
+      cal.setTime(criteria.getFechaHasta());
+      cal.set(Calendar.HOUR_OF_DAY, 23);
+      cal.set(Calendar.MINUTE, 59);
+      cal.set(Calendar.SECOND, 59);
+      criteria.setFechaHasta(cal.getTime());
+    }
+    return facturaVentaRepository.findAll(
+        this.getBuilderVenta(criteria, idUsuarioLoggedIn),
+        this.getPageable(
+            (criteria.getPagina() == null || criteria.getPagina() < 0) ? 0 : criteria.getPagina(),
+            criteria.getOrdenarPor(),
+            criteria.getSentido()));
+  }
 
   private BooleanBuilder getBuilderCompra(BusquedaFacturaCompraCriteria criteria) {
     QFacturaCompra qFacturaCompra = QFacturaCompra.facturaCompra;

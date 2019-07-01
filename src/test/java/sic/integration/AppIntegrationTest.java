@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
@@ -274,21 +275,23 @@ class AppIntegrationTest {
   }
 
   private void crearNotaCreditoParaCliente() {
+    BusquedaFacturaVentaCriteria criteria =
+      BusquedaFacturaVentaCriteria.builder()
+        .tipoComprobante(TipoDeComprobante.FACTURA_B)
+        .numSerie(0L)
+        .numFactura(1L)
+        .idEmpresa(1L)
+        .build();
+    HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
     List<FacturaVenta> facturasRecuperadas =
-      restTemplate
-        .exchange(
-          apiPrefix
-            + "/facturas/venta/busqueda/criteria?idEmpresa=1"
-            + "&tipoFactura="
-            + TipoDeComprobante.FACTURA_B
-            + "&nroSerie=0"
-            + "&nroFactura=1",
-          HttpMethod.GET,
-          null,
-          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {
-          })
-        .getBody()
-        .getContent();
+        restTemplate
+            .exchange(
+                apiPrefix + "/facturas/venta/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+            .getBody()
+            .getContent();
     Long[] idsFactura = new Long[1];
     idsFactura[0] = 1L;
     BigDecimal[] cantidades = new BigDecimal[1];
@@ -3395,20 +3398,24 @@ class AppIntegrationTest {
   @Test
   void shouldCrearNotaCreditoVentaDeFacturaA() {
     this.shouldCrearFacturaVentaA();
+    BusquedaFacturaVentaCriteria criteria =
+      BusquedaFacturaVentaCriteria.builder()
+        .idEmpresa(1L)
+        .tipoComprobante(TipoDeComprobante.FACTURA_A)
+        .numSerie(0L)
+        .numFactura(1L)
+        .build();
+    HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
     List<FacturaVenta> facturasRecuperadas =
-      restTemplate
-        .exchange(
-          apiPrefix
-            + "/facturas/venta/busqueda/criteria?idEmpresa=1"
-            + "&tipoFactura="
-            + TipoDeComprobante.FACTURA_A
-            + "&nroSerie=0"
-            + "&nroFactura=1",
-          HttpMethod.GET,
-          null,
-          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
-        .getBody()
-        .getContent();
+        restTemplate
+            .exchange(
+                apiPrefix
+                    + "/facturas/venta/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+            .getBody()
+            .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
     idsRenglonesFacutura[0] = 1L;
     BigDecimal[] cantidades = new BigDecimal[1];
@@ -3446,17 +3453,20 @@ class AppIntegrationTest {
   @Test
   void shouldCrearNotaCreditoVentaDeFacturaB() {
     this.shouldCrearFacturaVentaB();
+    BusquedaFacturaVentaCriteria criteria =
+      BusquedaFacturaVentaCriteria.builder()
+        .tipoComprobante(TipoDeComprobante.FACTURA_B)
+        .numSerie(0L)
+        .numFactura(1L)
+        .idEmpresa(1L)
+        .build();
+    HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
     List<FacturaVenta> facturasRecuperadas =
         restTemplate
             .exchange(
-                apiPrefix
-                    + "/facturas/venta/busqueda/criteria?idEmpresa=1"
-                    + "&tipoFactura="
-                    + TipoDeComprobante.FACTURA_B
-                    + "&nroSerie=0"
-                    + "&nroFactura=1",
-                HttpMethod.GET,
-                null,
+                apiPrefix + "/facturas/venta/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
             .getBody()
             .getContent();
@@ -3500,20 +3510,23 @@ class AppIntegrationTest {
   @Test
   void shouldCrearNotaCreditoVentaDeFacturaX() {
     this.shouldCrearFacturaVentaX();
+    BusquedaFacturaVentaCriteria criteria =
+        BusquedaFacturaVentaCriteria.builder()
+            .tipoComprobante(TipoDeComprobante.FACTURA_X)
+            .numSerie(0L)
+            .numFactura(1L)
+            .idEmpresa(1L)
+            .build();
+    HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
     List<FacturaVenta> facturasRecuperadas =
-      restTemplate
-        .exchange(
-          apiPrefix
-            + "/facturas/venta/busqueda/criteria?idEmpresa=1"
-            + "&tipoFactura="
-            + TipoDeComprobante.FACTURA_X
-            + "&nroSerie=0"
-            + "&nroFactura=1",
-          HttpMethod.GET,
-          null,
-          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
-        .getBody()
-        .getContent();
+        restTemplate
+            .exchange(
+                apiPrefix + "/facturas/venta/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+            .getBody()
+            .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
     idsRenglonesFacutura[0] = 1L;
     BigDecimal[] cantidades = new BigDecimal[1];
@@ -3551,20 +3564,23 @@ class AppIntegrationTest {
   @Test
   void shouldCrearNotaCreditoVentaDeFacturaC() {
     this.shouldCrearFacturaVentaC();
+    BusquedaFacturaVentaCriteria criteria =
+      BusquedaFacturaVentaCriteria.builder()
+        .tipoComprobante(TipoDeComprobante.FACTURA_C)
+        .numSerie(0L)
+        .numFactura(1L)
+        .idEmpresa(1L)
+        .build();
+    HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
     List<FacturaVenta> facturasRecuperadas =
-      restTemplate
-        .exchange(
-          apiPrefix
-            + "/facturas/venta/busqueda/criteria?idEmpresa=1"
-            + "&tipoFactura="
-            + TipoDeComprobante.FACTURA_C
-            + "&nroSerie=0"
-            + "&nroFactura=1",
-          HttpMethod.GET,
-          null,
-          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
-        .getBody()
-        .getContent();
+        restTemplate
+            .exchange(
+                apiPrefix + "/facturas/venta/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+            .getBody()
+            .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
     idsRenglonesFacutura[0] = 1L;
     BigDecimal[] cantidades = new BigDecimal[1];
@@ -3743,17 +3759,21 @@ class AppIntegrationTest {
   @Test
   void shouldNotCrearNotaCreditoVentaSinRenglonesDeFacturaA() {
     this.shouldCrearFacturaVentaA();
+    BusquedaFacturaVentaCriteria criteria =
+      BusquedaFacturaVentaCriteria.builder()
+        .tipoComprobante(TipoDeComprobante.FACTURA_A)
+        .numSerie(0L)
+        .numFactura(1L)
+        .idEmpresa(1L)
+        .build();
+    HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
     List<FacturaVenta> facturasRecuperadas =
       restTemplate
         .exchange(
           apiPrefix
-            + "/facturas/venta/busqueda/criteria?idEmpresa=1"
-            + "&tipoFactura="
-            + TipoDeComprobante.FACTURA_A
-            + "&nroSerie=0"
-            + "&nroFactura=1",
-          HttpMethod.GET,
-          null,
+            + "/facturas/venta/busqueda/criteria",
+          HttpMethod.POST,
+          requestEntity,
           new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
         .getBody()
         .getContent();
@@ -3784,17 +3804,20 @@ class AppIntegrationTest {
   @Test
   void shouldNotCalcularNotaCreditoVentaSinRenglonesDeFacturaA() {
     this.shouldCrearFacturaVentaA();
+    BusquedaFacturaVentaCriteria criteria =
+        BusquedaFacturaVentaCriteria.builder()
+            .tipoComprobante(TipoDeComprobante.FACTURA_A)
+            .numSerie(0L)
+            .numFactura(1L)
+            .idEmpresa(1L)
+            .build();
+    HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
     List<FacturaVenta> facturasRecuperadas =
         restTemplate
             .exchange(
-                apiPrefix
-                    + "/facturas/venta/busqueda/criteria?idEmpresa=1"
-                    + "&tipoFactura="
-                    + TipoDeComprobante.FACTURA_A
-                    + "&nroSerie=0"
-                    + "&nroFactura=1",
-                HttpMethod.GET,
-                null,
+                apiPrefix + "/facturas/venta/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
             .getBody()
             .getContent();
@@ -4841,20 +4864,21 @@ class AppIntegrationTest {
         restTemplate.getForObject(
             apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
     assertEquals(EstadoPedido.CERRADO, pedidoRecuperado.getEstado());
+    BusquedaFacturaVentaCriteria criteria =
+      BusquedaFacturaVentaCriteria.builder()
+        .nroPedido(pedidoRecuperado.getNroPedido())
+        .idEmpresa(1L)
+        .build();
+    HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
     List<FacturaVenta> facturasRecuperadas =
-      restTemplate
-        .exchange(
-          apiPrefix
-            + "/facturas/venta/busqueda/criteria?"
-            + "idEmpresa=1"
-            + "&nroPedido="
-            + pedidoRecuperado.getNroPedido(),
-          HttpMethod.GET,
-          null,
-          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {
-          })
-        .getBody()
-        .getContent();
+        restTemplate
+            .exchange(
+                apiPrefix + "/facturas/venta/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+            .getBody()
+            .getContent();
     restTemplate.delete(
       apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getId_Factura());
     pedidoRecuperado =
@@ -5100,30 +5124,32 @@ class AppIntegrationTest {
 
   @Test
   void shouldVerificarTotalizadoresVenta() {
+    BusquedaFacturaVentaCriteria criteria =
+      BusquedaFacturaVentaCriteria.builder().idEmpresa(1L).build();
     BigDecimal totalFacturadoVenta =
-      restTemplate.getForObject(
-        apiPrefix + "/facturas/total-facturado-venta/criteria?idEmpresa=1", BigDecimal.class);
+      restTemplate.postForObject(
+        apiPrefix + "/facturas/total-facturado-venta/criteria", criteria, BigDecimal.class);
     BigDecimal totalIvaVenta =
-      restTemplate.getForObject(
-        apiPrefix + "/facturas/total-iva-venta/criteria?idEmpresa=1", BigDecimal.class);
+      restTemplate.postForObject(
+        apiPrefix + "/facturas/total-iva-venta/criteria", criteria, BigDecimal.class);
     BigDecimal gananciaTotal =
-      restTemplate.getForObject(
-        apiPrefix + "/facturas/ganancia-total/criteria?idEmpresa=1", BigDecimal.class);
+      restTemplate.postForObject(
+        apiPrefix + "/facturas/ganancia-total/criteria", criteria, BigDecimal.class);
     assertEquals(BigDecimal.ZERO, totalFacturadoVenta);
     assertEquals(BigDecimal.ZERO, totalIvaVenta);
     assertEquals(BigDecimal.ZERO, gananciaTotal);
     this.shouldCrearFacturaVentaA();
     totalFacturadoVenta =
-      restTemplate.getForObject(
-        apiPrefix + "/facturas/total-facturado-venta/criteria?idEmpresa=1", BigDecimal.class);
+      restTemplate.postForObject(
+        apiPrefix + "/facturas/total-facturado-venta/criteria", criteria, BigDecimal.class);
     assertEquals(new BigDecimal("8230.762500000000000"), totalFacturadoVenta);
     totalIvaVenta =
-      restTemplate.getForObject(
-        apiPrefix + "/facturas/total-iva-venta/criteria?idEmpresa=1", BigDecimal.class);
+      restTemplate.postForObject(
+        apiPrefix + "/facturas/total-iva-venta/criteria", criteria, BigDecimal.class);
     assertEquals(new BigDecimal("1218.262500000000000"), totalIvaVenta);
     gananciaTotal =
-      restTemplate.getForObject(
-        apiPrefix + "/facturas/ganancia-total/criteria?idEmpresa=1", BigDecimal.class);
+      restTemplate.postForObject(
+        apiPrefix + "/facturas/ganancia-total/criteria", criteria, BigDecimal.class);
     assertEquals(new BigDecimal("8100.000000000000000000000000000000"), gananciaTotal);
     ProductoDTO producto1 =
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
@@ -5135,46 +5161,48 @@ class AppIntegrationTest {
     restTemplate.put(apiPrefix + "/productos", producto2);
     this.shouldCrearFacturaVentaPresupuesto();
     totalFacturadoVenta =
-      restTemplate.getForObject(
-        apiPrefix + "/facturas/total-facturado-venta/criteria?idEmpresa=1", BigDecimal.class);
+      restTemplate.postForObject(
+        apiPrefix + "/facturas/total-facturado-venta/criteria", criteria, BigDecimal.class);
     assertEquals(new BigDecimal("14223.262500000000000"), totalFacturadoVenta);
     totalIvaVenta =
-      restTemplate.getForObject(
-        apiPrefix + "/facturas/total-iva-venta/criteria?idEmpresa=1", BigDecimal.class);
+      restTemplate.postForObject(
+        apiPrefix + "/facturas/total-iva-venta/criteria", criteria, BigDecimal.class);
     assertEquals(new BigDecimal("1218.262500000000000"), totalIvaVenta);
     gananciaTotal =
-      restTemplate.getForObject(
-        apiPrefix + "/facturas/ganancia-total/criteria?idEmpresa=1", BigDecimal.class);
+      restTemplate.postForObject(
+        apiPrefix + "/facturas/ganancia-total/criteria", criteria, BigDecimal.class);
     assertEquals(new BigDecimal("14400.000000000000000000000000000000"), gananciaTotal);
   }
 
   @Test
   void shouldVerificarTotalizadoresCompra() {
+    BusquedaFacturaCompraCriteria criteria =
+        BusquedaFacturaCompraCriteria.builder().idEmpresa(1L).build();
     BigDecimal totalFacturadoCompra =
-      restTemplate.getForObject(
-        apiPrefix + "/facturas/total-facturado-venta/criteria?idEmpresa=1", BigDecimal.class);
+        restTemplate.postForObject(
+            apiPrefix + "/facturas/total-facturado-compra/criteria", criteria, BigDecimal.class);
     BigDecimal totalIvaCompra =
-      restTemplate.getForObject(
-        apiPrefix + "/facturas/total-iva-compra/criteria?idEmpresa=1", BigDecimal.class);
+        restTemplate.postForObject(
+            apiPrefix + "/facturas/total-iva-compra/criteria", criteria, BigDecimal.class);
     assertEquals(BigDecimal.ZERO, totalFacturadoCompra);
     assertEquals(BigDecimal.ZERO, totalIvaCompra);
     this.shouldCrearFacturaCompraA();
     totalFacturadoCompra =
-      restTemplate.getForObject(
-        apiPrefix + "/facturas/total-facturado-compra/criteria?idEmpresa=1", BigDecimal.class);
+        restTemplate.postForObject(
+            apiPrefix + "/facturas/total-facturado-compra/criteria", criteria, BigDecimal.class);
     assertEquals(new BigDecimal("610.895000000000000"), totalFacturadoCompra);
     totalIvaCompra =
-      restTemplate.getForObject(
-        apiPrefix + "/facturas/total-iva-compra/criteria?idEmpresa=1", BigDecimal.class);
+        restTemplate.postForObject(
+            apiPrefix + "/facturas/total-iva-compra/criteria", criteria, BigDecimal.class);
     assertEquals(new BigDecimal("83.895000000000000"), totalIvaCompra);
     this.shouldCrearFacturaCompraPresupuesto();
     totalFacturadoCompra =
-      restTemplate.getForObject(
-        apiPrefix + "/facturas/total-facturado-compra/criteria?idEmpresa=1", BigDecimal.class);
+        restTemplate.postForObject(
+            apiPrefix + "/facturas/total-facturado-compra/criteria", criteria, BigDecimal.class);
     assertEquals(new BigDecimal("1210.145000000000000"), totalFacturadoCompra);
     totalIvaCompra =
-      restTemplate.getForObject(
-        apiPrefix + "/facturas/total-iva-compra/criteria?idEmpresa=1", BigDecimal.class);
+        restTemplate.postForObject(
+            apiPrefix + "/facturas/total-iva-compra/criteria", criteria, BigDecimal.class);
     assertEquals(new BigDecimal("83.895000000000000"), totalIvaCompra);
   }
 
