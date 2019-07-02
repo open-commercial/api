@@ -26,7 +26,6 @@ public class CarritoCompraController {
   private final IEmpresaService empresaService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
-  private final IPagoMercadoPagoService pagoMercadoPagoService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
@@ -35,14 +34,12 @@ public class CarritoCompraController {
       IPedidoService pedidoService,
       IEmpresaService empresaService,
       IUsuarioService usuarioService,
-      IClienteService clienteService,
-      IPagoMercadoPagoService pagoMercadoPagoService) {
+      IClienteService clienteService) {
     this.carritoCompraService = carritoCompraService;
     this.pedidoService = pedidoService;
     this.empresaService = empresaService;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
-    this.pagoMercadoPagoService = pagoMercadoPagoService;
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/clientes/{idCliente}")
@@ -134,12 +131,6 @@ public class CarritoCompraController {
             nuevaOrdenDeCarritoDeCompraDTO.getIdSucursal());
     carritoCompraService.eliminarTodosLosItemsDelUsuario(
         nuevaOrdenDeCarritoDeCompraDTO.getIdUsuario());
-    if (nuevaOrdenDeCarritoDeCompraDTO.getPago() != null) {
-      pagoMercadoPagoService.crearNuevoPago(
-          nuevaOrdenDeCarritoDeCompraDTO.getPago(),
-          p.getCliente(),
-          p.getTotalEstimado().floatValue());
-    }
     return p;
   }
 }

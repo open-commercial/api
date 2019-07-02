@@ -15,4 +15,6 @@ public class PagoMercadoPagoDTO {
   private String paymentMethodId;
   private String issuerId;
   private Integer installments;
+  private long idCliente;
+  private Float monto;
 }

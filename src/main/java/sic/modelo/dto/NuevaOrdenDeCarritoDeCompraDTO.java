@@ -18,5 +18,4 @@ public class NuevaOrdenDeCarritoDeCompraDTO {
   private TipoDeEnvio tipoDeEnvio;
   private Long idSucursal;
   private String observaciones;
-  private PagoMercadoPagoDTO pago;
 }

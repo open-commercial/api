@@ -1,10 +1,7 @@
 package sic.service.impl;
 
 import com.mercadopago.MercadoPago;
-import com.mercadopago.core.MPApiResponse;
-import com.mercadopago.exceptions.MPConfException;
 import com.mercadopago.exceptions.MPException;
-import com.mercadopago.exceptions.MPRestException;
 import com.mercadopago.resources.Payment;
 import com.mercadopago.resources.datastructures.payment.Payer;
 import org.slf4j.Logger;
@@ -16,10 +13,7 @@ import org.springframework.validation.annotation.Validated;
 import sic.modelo.Cliente;
 import sic.modelo.Recibo;
 import sic.modelo.dto.PagoMercadoPagoDTO;
-import sic.service.BusinessServiceException;
-import sic.service.IFormaDePagoService;
-import sic.service.IPagoMercadoPagoService;
-import sic.service.IReciboService;
+import sic.service.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -34,19 +28,22 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
 
   private final IReciboService reciboService;
   private final IFormaDePagoService formaDePagoService;
+  private final IClienteService clienteService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Autowired
   public PagoMercadoPagoServiceImpl(IReciboService reciboService,
-                                    IFormaDePagoService formaDePagoService) {
+                                    IFormaDePagoService formaDePagoService,
+                                    IClienteService clienteService) {
     this.reciboService = reciboService;
     this.formaDePagoService = formaDePagoService;
+    this.clienteService = clienteService;
   }
 
   @Override
-  public boolean crearNuevoPago(
-      PagoMercadoPagoDTO pagoMercadoPagoDTO, Cliente cliente, Float monto) {
+  public boolean crearNuevoPago(PagoMercadoPagoDTO pagoMercadoPagoDTO) {
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(pagoMercadoPagoDTO.getIdCliente());
     MercadoPago.SDK.configure(mercadoPagoAccesToken);
     Payment payment = new Payment();
     if (pagoMercadoPagoDTO.getPaymentMethodId() != null
@@ -62,7 +59,7 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
         pagoMercadoPagoDTO.setInstallments(1);
       }
       payment
-          .setTransactionAmount(monto)
+          .setTransactionAmount(pagoMercadoPagoDTO.getMonto())
           .setToken(pagoMercadoPagoDTO.getToken())
           .setDescription("Pago Mercado Pago - TESTING con token")
           .setInstallments(pagoMercadoPagoDTO.getInstallments())
@@ -72,7 +69,7 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
           .setPayer(new Payer().setEmail(cliente.getEmail()));
     } else if (pagoMercadoPagoDTO.getToken() == null || pagoMercadoPagoDTO.getToken().isEmpty()) {
       payment
-          .setTransactionAmount(monto)
+          .setTransactionAmount(pagoMercadoPagoDTO.getMonto())
           .setDescription("Pago Mercado Pago - TESTING sin token")
           .setPaymentMethodId(pagoMercadoPagoDTO.getPaymentMethodId())
           .setPayer(new Payer().setEmail(cliente.getEmail()));
@@ -91,7 +88,8 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
         nuevoRecibo.setCliente(cliente);
         nuevoRecibo.setFecha(new Date());
         nuevoRecibo.setConcepto("probando pago");
-        nuevoRecibo.setMonto(new BigDecimal(Float.toString(monto)));
+        nuevoRecibo.setMonto(new BigDecimal(Float.toString(pagoMercadoPagoDTO.getMonto())));
+        nuevoRecibo.setIdPagoMercadoPago(new Long(payment.getId()));
         reciboService.guardar(nuevoRecibo);
         operacionExitosa = true;
       } else {
