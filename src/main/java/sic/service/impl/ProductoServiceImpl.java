@@ -471,7 +471,7 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   public Producto getProductoNoEliminadoPorId(long idProducto) {
     Optional<Producto> producto = productoRepository.findById(idProducto);
-    if (producto.isPresent()) {
+    if (producto.isPresent() && !producto.get().isEliminado()) {
       if (producto.get().getCantidad().compareTo(BigDecimal.ZERO) > 0) {
         producto.get().setHayStock(true);
         return producto.get();

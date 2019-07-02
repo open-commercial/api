@@ -262,7 +262,7 @@ class AppIntegrationTest {
   }
 
   private void crearNotaCreditoParaCliente() {
-    List<FacturaVenta> facturasRecuperadas =
+    List<FacturaVentaDTO> facturasRecuperadas =
       restTemplate
         .exchange(
           apiPrefix
@@ -273,7 +273,7 @@ class AppIntegrationTest {
             + "&nroFactura=1",
           HttpMethod.GET,
           null,
-          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {
+          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {
           })
         .getBody()
         .getContent();
@@ -3038,7 +3038,7 @@ class AppIntegrationTest {
     Medida medida = restTemplate.getForObject(apiPrefix + "/medidas/1", Medida.class);
     NuevoProductoDTO productoUno =
       NuevoProductoDTO.builder()
-        .codigo(RandomStringUtils.random(10, false, true))
+        .codigo("123test")
         .descripcion(RandomStringUtils.random(10, true, false))
         .cantidad(BigDecimal.TEN)
         .bulto(BigDecimal.ONE)
@@ -3226,11 +3226,24 @@ class AppIntegrationTest {
   @Test
   void shouldEliminarProducto() {
     this.shouldCrearProductoConIva21();
-    restTemplate.delete(apiPrefix + "/productos?idProducto=1");
+    List<ProductoDTO> productosRecuperados =
+        restTemplate
+            .exchange(
+                apiPrefix + "/productos/busqueda/criteria?idEmpresa=1" + "&codigo=123test",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<PaginaRespuestaRest<ProductoDTO>>() {})
+            .getBody()
+            .getContent();
+    restTemplate.delete(
+        apiPrefix + "/productos?idProducto=" + productosRecuperados.get(0).getIdProducto());
     RestClientResponseException thrown =
         assertThrows(
             RestClientResponseException.class,
-            () -> restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class));
+            () ->
+                restTemplate.getForObject(
+                    apiPrefix + "/productos/" + productosRecuperados.get(0).getIdProducto(),
+                    ProductoDTO.class));
     assertNotNull(thrown.getMessage());
     assertTrue(
         thrown
@@ -3434,7 +3447,7 @@ class AppIntegrationTest {
   @Test
   void shouldCrearNotaCreditoVentaDeFacturaA() {
     this.shouldCrearFacturaVentaA();
-    List<FacturaVenta> facturasRecuperadas =
+    List<FacturaVentaDTO> facturasRecuperadas =
       restTemplate
         .exchange(
           apiPrefix
@@ -3445,7 +3458,7 @@ class AppIntegrationTest {
             + "&nroFactura=1",
           HttpMethod.GET,
           null,
-          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
         .getBody()
         .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -3485,7 +3498,7 @@ class AppIntegrationTest {
   @Test
   void shouldCrearNotaCreditoVentaDeFacturaB() {
     this.shouldCrearFacturaVentaB();
-    List<FacturaVenta> facturasRecuperadas =
+    List<FacturaVentaDTO> facturasRecuperadas =
         restTemplate
             .exchange(
                 apiPrefix
@@ -3496,7 +3509,7 @@ class AppIntegrationTest {
                     + "&nroFactura=1",
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
             .getBody()
             .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -3539,7 +3552,7 @@ class AppIntegrationTest {
   @Test
   void shouldCrearNotaCreditoVentaDeFacturaX() {
     this.shouldCrearFacturaVentaX();
-    List<FacturaVenta> facturasRecuperadas =
+    List<FacturaVentaDTO> facturasRecuperadas =
       restTemplate
         .exchange(
           apiPrefix
@@ -3550,7 +3563,7 @@ class AppIntegrationTest {
             + "&nroFactura=1",
           HttpMethod.GET,
           null,
-          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
         .getBody()
         .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -3590,7 +3603,7 @@ class AppIntegrationTest {
   @Test
   void shouldCrearNotaCreditoVentaDeFacturaC() {
     this.shouldCrearFacturaVentaC();
-    List<FacturaVenta> facturasRecuperadas =
+    List<FacturaVentaDTO> facturasRecuperadas =
       restTemplate
         .exchange(
           apiPrefix
@@ -3601,7 +3614,7 @@ class AppIntegrationTest {
             + "&nroFactura=1",
           HttpMethod.GET,
           null,
-          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
         .getBody()
         .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -3782,7 +3795,7 @@ class AppIntegrationTest {
   @Test
   void shouldNotCrearNotaCreditoVentaSinRenglonesDeFacturaA() {
     this.shouldCrearFacturaVentaA();
-    List<FacturaVenta> facturasRecuperadas =
+    List<FacturaVentaDTO> facturasRecuperadas =
         restTemplate
             .exchange(
                 apiPrefix
@@ -3793,7 +3806,7 @@ class AppIntegrationTest {
                     + "&nroFactura=1",
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
             .getBody()
             .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -3830,7 +3843,7 @@ class AppIntegrationTest {
   @Test
   void shouldNotCalcularNotaCreditoVentaSinRenglonesDeFacturaA() {
     this.shouldCrearFacturaVentaA();
-    List<FacturaVenta> facturasRecuperadas =
+    List<FacturaVentaDTO> facturasRecuperadas =
         restTemplate
             .exchange(
                 apiPrefix
@@ -3841,7 +3854,7 @@ class AppIntegrationTest {
                     + "&nroFactura=1",
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
             .getBody()
             .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -4903,7 +4916,7 @@ class AppIntegrationTest {
         restTemplate.getForObject(
             apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
     assertEquals(EstadoPedido.CERRADO, pedidoRecuperado.getEstado());
-    List<FacturaVenta> facturasRecuperadas =
+    List<FacturaVentaDTO> facturasRecuperadas =
       restTemplate
         .exchange(
           apiPrefix
@@ -4913,7 +4926,7 @@ class AppIntegrationTest {
             + pedidoRecuperado.getNroPedido(),
           HttpMethod.GET,
           null,
-          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {
+          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {
           })
         .getBody()
         .getContent();
