@@ -238,7 +238,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       this.guardarRenglonCuentaCorrienteDeFactura(facturaVenta, cc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
-      cc.setSaldo(cc.getSaldo().subtract(facturaVenta.getTotal()));
+      cc.setSaldo(cc.getSaldo().add(facturaVenta.getTotal()));
       RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeFactura(facturaVenta, false);
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);

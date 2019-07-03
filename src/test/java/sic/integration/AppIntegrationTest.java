@@ -280,9 +280,7 @@ class AppIntegrationTest {
           apiPrefix
             + "/facturas/venta/busqueda/criteria?idEmpresa=1"
             + "&tipoFactura="
-            + TipoDeComprobante.FACTURA_B
-            + "&nroSerie=0"
-            + "&nroFactura=1",
+            + TipoDeComprobante.FACTURA_B,
           HttpMethod.GET,
           null,
           new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {
@@ -290,7 +288,9 @@ class AppIntegrationTest {
         .getBody()
         .getContent();
     Long[] idsFactura = new Long[1];
-    idsFactura[0] = 1L;
+    RenglonFactura[] renglones =
+      restTemplate.getForObject(apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getId_Factura() + "/renglones", RenglonFactura[].class);
+    idsFactura[0] = renglones[0].getId_RenglonFactura();
     BigDecimal[] cantidades = new BigDecimal[1];
     cantidades[0] = new BigDecimal("5");
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
@@ -4383,34 +4383,40 @@ class AppIntegrationTest {
     this.abrirCaja();
     this.shouldCrearFacturaVentaB();
     assertEquals(
-      new BigDecimal("-5992.500000000000000"),
-      restTemplate.getForObject(
-        apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
+        new BigDecimal("-5992.500000000000000"),
+        restTemplate.getForObject(
+            apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
     this.crearReciboParaCliente(5992.5, 1L, 1L);
     assertEquals(
-      new BigDecimal("0E-15"),
-      restTemplate.getForObject(
-        apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
+        new BigDecimal("0E-15"),
+        restTemplate.getForObject(
+            apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
+    restTemplate.delete(apiPrefix + "/facturas/1");
+    assertEquals(
+      new BigDecimal("5992.500000000000000"),
+        restTemplate.getForObject(
+            apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
     this.crearNotaDebitoParaCliente();
     assertEquals(
-      new BigDecimal("-6113.500000000000000"),
-      restTemplate.getForObject(
-        apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
+        new BigDecimal("-121.000000000000000"),
+        restTemplate.getForObject(
+            apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
     this.crearReciboParaCliente(6113.5, 1L, 1L);
     assertEquals(
-      new BigDecimal("0E-15"),
-      restTemplate.getForObject(
-        apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
+        new BigDecimal("5992.500000000000000"),
+        restTemplate.getForObject(
+            apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
+    this.shouldCrearFacturaVentaB();
     this.crearNotaCreditoParaCliente();
     assertEquals(
-      new BigDecimal("4114.000000000000000"),
-      restTemplate.getForObject(
-        apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
+        new BigDecimal("4114.000000000000000"),
+        restTemplate.getForObject(
+            apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
     this.shouldCrearFacturaVentaA();
     assertEquals(
-      new BigDecimal("-4116.762500000000000"),
-      restTemplate.getForObject(
-        apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
+        new BigDecimal("-4116.762500000000000"),
+        restTemplate.getForObject(
+            apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
   }
 
   @Test
