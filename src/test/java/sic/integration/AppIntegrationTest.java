@@ -3226,23 +3226,16 @@ class AppIntegrationTest {
   @Test
   void shouldEliminarProducto() {
     this.shouldCrearProductoConIva21();
-    List<ProductoDTO> productosRecuperados =
-        restTemplate
-            .exchange(
-                apiPrefix + "/productos/busqueda/criteria?idEmpresa=1" + "&codigo=123test",
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<PaginaRespuestaRest<ProductoDTO>>() {})
-            .getBody()
-            .getContent();
-    restTemplate.delete(
-        apiPrefix + "/productos?idProducto=" + productosRecuperados.get(0).getIdProducto());
+    ProductoDTO productoRecuperado =
+        restTemplate.getForObject(
+            apiPrefix + "/productos/busqueda?idEmpresa=1&codigo=123test", ProductoDTO.class);
+    restTemplate.delete(apiPrefix + "/productos?idProducto=" + productoRecuperado.getIdProducto());
     RestClientResponseException thrown =
         assertThrows(
             RestClientResponseException.class,
             () ->
                 restTemplate.getForObject(
-                    apiPrefix + "/productos/" + productosRecuperados.get(0).getIdProducto(),
+                    apiPrefix + "/productos/" + productoRecuperado.getIdProducto(),
                     ProductoDTO.class));
     assertNotNull(thrown.getMessage());
     assertTrue(
