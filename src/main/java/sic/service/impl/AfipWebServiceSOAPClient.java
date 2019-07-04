@@ -10,6 +10,8 @@ import afip.wsfe.wsdl.FECompUltimoAutorizadoResponse;
 import afip.wsfe.wsdl.FERecuperaLastCbteResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 
 import java.io.ByteArrayInputStream;
@@ -31,7 +33,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.ResourceBundle;
+import java.util.Locale;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -47,7 +49,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ws.WebServiceMessage;
 import org.springframework.ws.soap.SoapMessage;
 import org.springframework.xml.transform.StringResult;
-import sic.service.BusinessServiceException;
+import sic.exception.BusinessServiceException;
 
 public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
 
@@ -58,6 +60,9 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
     private final Logger loggerSoapClient = LoggerFactory.getLogger(this.getClass());
     private static final String SOAP_ACTION_FECAESolicitar = "http://ar.gov.afip.dif.FEV1/FECAESolicitar";
     private static final String SOAP_ACTION_FECompUltimoAutorizado = "http://ar.gov.afip.dif.FEV1/FECompUltimoAutorizado";
+
+    @Autowired
+    private MessageSource messageSource;
 
     @Value("${SIC_AFIP_ENV}")
     private String afipEnvironment;
@@ -110,7 +115,8 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException
                 | UnrecoverableKeyException | InvalidAlgorithmParameterException | NoSuchProviderException ex) {
             loggerSoapClient.error(ex.getMessage());
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_certificado_error"));
+            throw new BusinessServiceException(messageSource.getMessage(
+              "mensaje_certificado_error", null, Locale.getDefault()));
         }
         String loginTicketRequestXml = this.crearTicketRequerimientoAcceso(service, ticketTime);
         try {
@@ -122,7 +128,8 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
             asn1Cms = signed.getEncoded();
         } catch (IllegalArgumentException | CertStoreException | CMSException | NoSuchAlgorithmException | NoSuchProviderException | IOException ex) {
             loggerSoapClient.error(ex.getMessage());
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_firmando_certificado_error"));
+            throw new BusinessServiceException(messageSource.getMessage(
+              "mensaje_firmando_certificado_error", null, Locale.getDefault()));
         }
         return asn1Cms;
     }
@@ -138,16 +145,17 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
             datatypeFactory = DatatypeFactory.newInstance();
         } catch (DatatypeConfigurationException ex) {
             loggerSoapClient.error(ex.getMessage());
-            throw new BusinessServiceException(ResourceBundle.getBundle("Mensajes").getString("mensaje_error_xml_factory"));
+            throw new BusinessServiceException(messageSource.getMessage(
+              "mensaje_error_xml_factory", null, Locale.getDefault()));
         }
-        XMLGregorianCalendar XMLGenTime = datatypeFactory.newXMLGregorianCalendar(genenerationTime);
-        XMLGregorianCalendar XMLExpTime = datatypeFactory.newXMLGregorianCalendar(expirationTime);
+        XMLGregorianCalendar xmlgentime = datatypeFactory.newXMLGregorianCalendar(genenerationTime);
+        XMLGregorianCalendar xmlexptime = datatypeFactory.newXMLGregorianCalendar(expirationTime);
         return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
                 + "<loginTicketRequest version=\"1.0\">"
                 + "<header>"
                 + "<uniqueId>" + uniqueId + "</uniqueId>"
-                + "<generationTime>" + XMLGenTime + "</generationTime>"
-                + "<expirationTime>" + XMLExpTime + "</expirationTime>"
+                + "<generationTime>" + xmlgentime + "</generationTime>"
+                + "<expirationTime>" + xmlexptime + "</expirationTime>"
                 + "</header>"
                 + "<service>" + service + "</service>"
                 + "</loginTicketRequest>";

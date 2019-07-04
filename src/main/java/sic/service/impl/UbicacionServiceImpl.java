@@ -4,6 +4,7 @@ import com.querydsl.core.BooleanBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,13 +14,13 @@ import sic.repository.LocalidadRepository;
 import sic.repository.ProvinciaRepository;
 import sic.repository.UbicacionRepository;
 import sic.service.*;
+import sic.exception.BusinessServiceException;
 import sic.util.Validator;
 
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.Locale;
 
 @Service
 @Validated
@@ -29,16 +30,18 @@ public class UbicacionServiceImpl implements IUbicacionService {
   private final LocalidadRepository localidadRepository;
   private final ProvinciaRepository provinciaRepository;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+  private final MessageSource messageSource;
 
   @Autowired
   public UbicacionServiceImpl(
       UbicacionRepository ubicacionRepository,
       LocalidadRepository localidadRepository,
-      ProvinciaRepository provinciaRepository) {
+      ProvinciaRepository provinciaRepository,
+      MessageSource messageSource) {
     this.ubicacionRepository = ubicacionRepository;
     this.localidadRepository = localidadRepository;
     this.provinciaRepository = provinciaRepository;
+    this.messageSource = messageSource;
   }
 
   @Override
@@ -61,8 +64,8 @@ public class UbicacionServiceImpl implements IUbicacionService {
         .findById(idLocalidad)
         .orElseThrow(
             () ->
-                new EntityNotFoundException(
-                    RESOURCE_BUNDLE.getString("mensaje_localidad_no_existente")));
+                new EntityNotFoundException(messageSource.getMessage(
+                  "mensaje_localidad_no_existente", null, Locale.getDefault())));
   }
 
   @Override
@@ -86,9 +89,8 @@ public class UbicacionServiceImpl implements IUbicacionService {
         .findById(idProvincia)
         .orElseThrow(
             () ->
-                new EntityNotFoundException(
-                    ResourceBundle.getBundle("Mensajes")
-                        .getString("mensaje_provincia_no_existente")));
+                new EntityNotFoundException(messageSource.getMessage(
+                  "mensaje_provincia_no_existente", null, Locale.getDefault())));
   }
 
   @Override
@@ -107,35 +109,34 @@ public class UbicacionServiceImpl implements IUbicacionService {
   public void validarOperacion(TipoDeOperacion operacion, Localidad localidad) {
     // Requeridos
     if (Validator.esVacio(localidad.getNombre())) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_localidad_vacio_nombre"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_localidad_vacio_nombre", null, Locale.getDefault()));
     }
     if (localidad.getProvincia() == null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_localidad_provincia_vacio"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_localidad_provincia_vacio", null, Locale.getDefault()));
     }
     // Duplicados
     // Nombre
     Localidad localidadDuplicada =
         this.getLocalidadPorNombre(localidad.getNombre(), localidad.getProvincia());
     if (operacion.equals(TipoDeOperacion.ALTA) && localidadDuplicada != null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_localidad_duplicado_nombre"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_localidad_duplicado_nombre", null, Locale.getDefault()));
     }
     if (operacion.equals(TipoDeOperacion.ACTUALIZACION)) {
       if (localidadDuplicada != null
           && localidadDuplicada.getIdLocalidad() != localidad.getIdLocalidad()) {
-        throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_localidad_duplicado_nombre"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_localidad_duplicado_nombre", null, Locale.getDefault()));
       }
     }
     // Codigo Postal
     if (localidad.getCodigoPostal() != null) {
       localidadDuplicada = this.getLocalidadPorCodigoPostal(localidad.getCodigoPostal());
       if (operacion.equals(TipoDeOperacion.ALTA) && localidadDuplicada != null) {
-        throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes")
-                .getString("mensaje_localidad_duplicado_codigo_postal"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_localidad_duplicado_codigo_postal", null, Locale.getDefault()));
       }
     }
   }

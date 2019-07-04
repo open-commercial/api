@@ -7,7 +7,9 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.web.bind.annotation.*;
+import sic.exception.UnauthorizedException;
 import sic.modelo.*;
 import sic.modelo.dto.RecoveryPasswordDTO;
 import sic.modelo.dto.RegistracionClienteAndUsuarioDTO;
@@ -24,18 +26,20 @@ public class AuthController {
   private final IEmpresaService empresaService;
   private final IRegistracionService registracionService;
   private final IAuthService authService;
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+  private final MessageSource messageSource;
 
   @Autowired
   public AuthController(
       IUsuarioService usuarioService,
       IEmpresaService empresaService,
       IRegistracionService registracionService,
-      IAuthService authService) {
+      IAuthService authService,
+      MessageSource messageSource) {
     this.usuarioService = usuarioService;
     this.empresaService = empresaService;
     this.registracionService = registracionService;
     this.authService = authService;
+    this.messageSource = messageSource;
   }
 
   @PostMapping("/login")
@@ -78,8 +82,8 @@ public class AuthController {
       usuarioService.actualizarToken(token, usuario.getId_Usuario());
       usuarioService.actualizarPasswordRecoveryKey(null, recoveryPasswordDTO.getId());
     } else {
-      throw new UnauthorizedException(
-          RESOURCE_BUNDLE.getString("mensaje_error_passwordRecoveryKey"));
+      throw new UnauthorizedException(messageSource.getMessage(
+        "mensaje_error_passwordRecoveryKey", null, Locale.getDefault()));
     }
     return token;
   }

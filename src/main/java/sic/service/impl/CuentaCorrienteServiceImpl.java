@@ -21,6 +21,7 @@ import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +35,8 @@ import sic.repository.CuentaCorrienteProveedorRepository;
 import sic.repository.CuentaCorrienteRepository;
 import sic.repository.RenglonCuentaCorrienteRepository;
 import sic.service.*;
+import sic.exception.BusinessServiceException;
+import sic.exception.ServiceException;
 
 @Service
 @Validated
@@ -46,7 +49,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+  private final MessageSource messageSource;
 
   @Autowired
   @Lazy
@@ -55,14 +58,15 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository,
       CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository,
       RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository,
-      IUsuarioService usuarioService, IClienteService clienteService) {
-
+      IUsuarioService usuarioService, IClienteService clienteService,
+      MessageSource messageSource) {
     this.cuentaCorrienteRepository = cuentaCorrienteRepository;
     this.cuentaCorrienteClienteRepository = cuentaCorrienteClienteRepository;
     this.cuentaCorrienteProveedorRepository = cuentaCorrienteProveedorRepository;
     this.renglonCuentaCorrienteRepository = renglonCuentaCorrienteRepository;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
+    this.messageSource = messageSource;
   }
 
   @Override
@@ -89,9 +93,10 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   @Override
   public void validarOperacion(CuentaCorriente cuentaCorriente) {
     // Duplicados
-    if (cuentaCorriente.getIdCuentaCorriente() != null && cuentaCorrienteRepository.findById(cuentaCorriente.getIdCuentaCorriente()).isPresent()) {
-      throw new BusinessServiceException(
-        RESOURCE_BUNDLE.getString("mensaje_cuenta_corriente_duplicada"));
+    if (cuentaCorriente.getIdCuentaCorriente() != null
+        && cuentaCorrienteRepository.findById(cuentaCorriente.getIdCuentaCorriente()).isPresent()) {
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_cuenta_corriente_duplicada", null, Locale.getDefault()));
     }
   }
 
@@ -231,8 +236,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   public void asentarEnCuentaCorriente(FacturaVenta facturaVenta, TipoDeOperacion tipo) {
     CuentaCorriente cc = this.getCuentaCorrientePorCliente(facturaVenta.getCliente());
     if (null == cc) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cuenta_corriente_no_existente"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_cuenta_corriente_no_existente", null, Locale.getDefault()));
     }
     if (tipo == TipoDeOperacion.ALTA) {
       this.guardarRenglonCuentaCorrienteDeFactura(facturaVenta, cc);
@@ -242,7 +247,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeFactura(facturaVenta, false);
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      logger.warn(RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_eliminado"), rcc);
+      logger.warn(messageSource.getMessage(
+        "mensaje_reglon_cuenta_corriente_eliminado", null, Locale.getDefault()), rcc);
     }
   }
 
@@ -251,8 +257,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   public void asentarEnCuentaCorriente(FacturaCompra facturaCompra) {
     CuentaCorriente cc = this.getCuentaCorrientePorProveedor(facturaCompra.getProveedor());
     if (null == cc) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cuenta_corriente_no_existente"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_cuenta_corriente_no_existente", null, Locale.getDefault()));
     }
       this.guardarRenglonCuentaCorrienteDeFactura(facturaCompra, cc);
   }
@@ -272,7 +278,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     cc.setFechaUltimoMovimiento(factura.getFecha());
     rcc.setCuentaCorriente(cc);
     this.renglonCuentaCorrienteRepository.save(rcc);
-    logger.warn(RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
+    logger.warn(messageSource.getMessage(
+      "mensaje_reglon_cuenta_corriente_guardado", null, Locale.getDefault()), rcc);
   }
 
   @Override
@@ -300,14 +307,16 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.getRenglones().add(rcc);
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      logger.warn(RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
+      logger.warn(messageSource.getMessage(
+        "mensaje_reglon_cuenta_corriente_guardado", null, Locale.getDefault()), rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION && nota.getCliente() != null) {
       RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeNota(nota, false);
       cc.setSaldo(cc.getSaldo().subtract(rcc.getMonto()));
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      logger.warn(RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_eliminado"), rcc);
+      logger.warn(messageSource.getMessage(
+        "mensaje_reglon_cuenta_corriente_eliminado", null, Locale.getDefault()), rcc);
     }
   }
 
@@ -341,16 +350,16 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         cc = this.getCuentaCorrientePorProveedor(recibo.getProveedor());
       }
       if (cc == null) {
-        throw new BusinessServiceException(
-                RESOURCE_BUNDLE.getString("mensaje_cuenta_corriente_no_existente"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_cuenta_corriente_no_existente", null, Locale.getDefault()));
       }
       cc.getRenglones().add(rcc);
       cc.setSaldo(cc.getSaldo().add(recibo.getMonto()));
       cc.setFechaUltimoMovimiento(recibo.getFecha());
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      logger.warn(
-              RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_guardado"), rcc);
+      logger.warn(messageSource.getMessage(
+        "mensaje_reglon_cuenta_corriente_guardado", null, Locale.getDefault()), rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
       CuentaCorriente cc = null;
@@ -360,21 +369,25 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         cc = this.getCuentaCorrientePorProveedor(recibo.getProveedor());
       }
       if (null == cc) {
-        throw new BusinessServiceException(
-                RESOURCE_BUNDLE.getString("mensaje_cuenta_corriente_no_existente"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_cuenta_corriente_no_existente", null, Locale.getDefault()));
       }
       cc.setSaldo(cc.getSaldo().subtract(recibo.getMonto()));
       rcc = this.getRenglonCuentaCorrienteDeRecibo(recibo, false);
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      logger.warn(
-              RESOURCE_BUNDLE.getString("mensaje_reglon_cuenta_corriente_eliminado"), rcc);
+      logger.warn(messageSource.getMessage(
+        "mensaje_reglon_cuenta_corriente_eliminado", null, Locale.getDefault()), rcc);
     }
   }
 
   private void cambiarFechaUltimoComprobante(CuentaCorriente cc, RenglonCuentaCorriente rcc) {
     List<RenglonCuentaCorriente> ultimosDosMovimientos = this.getUltimosDosMovimientos(cc);
-    if (ultimosDosMovimientos.size() == 2 && ultimosDosMovimientos.get(0).getIdRenglonCuentaCorriente().equals(rcc.getIdRenglonCuentaCorriente())) {
+    if (ultimosDosMovimientos.size() == 2
+        && ultimosDosMovimientos
+            .get(0)
+            .getIdRenglonCuentaCorriente()
+            .equals(rcc.getIdRenglonCuentaCorriente())) {
       cc.setFechaUltimoMovimiento(ultimosDosMovimientos.get(1).getFecha());
     } else if (ultimosDosMovimientos.size() == 1) {
       cc.setFechaUltimoMovimiento(null);
@@ -402,8 +415,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                 .getImage());
       } catch (IOException ex) {
         logger.error(ex.getMessage());
-        throw new ServiceException(
-                RESOURCE_BUNDLE.getString("mensaje_empresa_404_logo"), ex);
+        throw new ServiceException(messageSource.getMessage(
+          "mensaje_empresa_404_logo", null, Locale.getDefault()), ex);
       }
     }
     switch (formato) {
@@ -412,8 +425,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
           return xlsReportToArray(JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
           logger.error(ex.getMessage());
-          throw new ServiceException(
-                  RESOURCE_BUNDLE.getString("mensaje_error_reporte"), ex);
+          throw new ServiceException(messageSource.getMessage(
+            "mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
       case "pdf":
         try {
@@ -421,12 +434,12 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                   JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
           logger.error(ex.getMessage());
-          throw new ServiceException(
-                  RESOURCE_BUNDLE.getString("mensaje_error_reporte"), ex);
+          throw new ServiceException(messageSource.getMessage(
+            "mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
       default:
-        throw new BusinessServiceException(
-                RESOURCE_BUNDLE.getString("mensaje_formato_no_valido"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_formato_no_valido", null, Locale.getDefault()));
     }
   }
 
@@ -444,8 +457,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       out.close();
     } catch (JRException ex) {
       logger.error(ex.getMessage());
-      throw new ServiceException(
-              RESOURCE_BUNDLE.getString("mensaje_error_reporte"), ex);
+      throw new ServiceException(messageSource.getMessage(
+        "mensaje_error_reporte", null, Locale.getDefault()), ex);
     } catch (IOException ex) {
       logger.error(ex.getMessage());
     }
@@ -483,16 +496,18 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   public List<RenglonCuentaCorriente> getUltimosDosMovimientos(CuentaCorriente cuentaCorriente) {
-    return renglonCuentaCorrienteRepository.findTop2ByAndCuentaCorrienteAndEliminadoOrderByIdRenglonCuentaCorrienteDesc(cuentaCorriente, false);
+    return renglonCuentaCorrienteRepository
+        .findTop2ByAndCuentaCorrienteAndEliminadoOrderByIdRenglonCuentaCorrienteDesc(
+            cuentaCorriente, false);
   }
 
   @Override
-  public int updateCAEFactura(long idFactura, long CAE) {
-    return renglonCuentaCorrienteRepository.updateCAEFactura(idFactura, CAE);
+  public int updateCAEFactura(long idFactura, long cae) {
+    return renglonCuentaCorrienteRepository.updateCAEFactura(idFactura, cae);
   }
 
   @Override
-  public int updateCAENota(long idNota, long CAE) {
-    return renglonCuentaCorrienteRepository.updateCAENota(idNota, CAE);
+  public int updateCAENota(long idNota, long cae) {
+    return renglonCuentaCorrienteRepository.updateCAENota(idNota, cae);
   }
 }

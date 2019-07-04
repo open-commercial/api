@@ -1,4 +1,4 @@
-package sic.service;
+package sic.service.impl;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -15,6 +15,10 @@ import sic.modelo.Producto;
 import sic.modelo.Usuario;
 import sic.modelo.dto.CarritoCompraDTO;
 import sic.repository.CarritoCompraRepository;
+import sic.service.ICarritoCompraService;
+import sic.service.IClienteService;
+import sic.service.IProductoService;
+import sic.service.IUsuarioService;
 
 @Service
 @Transactional
