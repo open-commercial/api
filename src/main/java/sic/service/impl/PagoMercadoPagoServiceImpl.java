@@ -1,7 +1,9 @@
 package sic.service.impl;
 
+import com.google.gson.JsonElement;
 import com.mercadopago.MercadoPago;
 import com.mercadopago.exceptions.MPException;
+import com.mercadopago.exceptions.MPRestException;
 import com.mercadopago.resources.Payment;
 import com.mercadopago.resources.datastructures.payment.Payer;
 import org.slf4j.Logger;
@@ -99,5 +101,17 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
       logger.error(e.toString());
     }
     return operacionExitosa;
+  }
+
+  @Override
+  public Payment recuperarPago(String idPago) {
+    MercadoPago.SDK.configure(mercadoPagoAccesToken);
+    Payment pagoRecuperado = null;
+    try {
+      pagoRecuperado = Payment.findById(idPago);
+    } catch (MPException e) {
+      e.printStackTrace();
+    }
+    return pagoRecuperado;
   }
 }

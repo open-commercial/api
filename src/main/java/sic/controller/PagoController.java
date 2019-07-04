@@ -1,10 +1,8 @@
 package sic.controller;
 
+import com.mercadopago.resources.Payment;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Rol;
 import sic.modelo.dto.PagoMercadoPagoDTO;
@@ -31,5 +29,17 @@ public class PagoController {
   })
   public boolean agregarOrModificarItem(@RequestBody PagoMercadoPagoDTO pagoMercadoPagoDTO) {
     return pagoMercadoPagoService.crearNuevoPago(pagoMercadoPagoDTO);
+  }
+
+  @GetMapping("/pagos/mercado-pago/{idPagoMercadoPago}")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public Payment recuperarPago(@PathVariable String idPagoMercadoPago) {
+    return pagoMercadoPagoService.recuperarPago(idPagoMercadoPago);
   }
 }
