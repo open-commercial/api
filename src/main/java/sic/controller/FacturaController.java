@@ -33,7 +33,6 @@ public class FacturaController {
   private final IReciboService reciboService;
   private final ModelMapper modelMapper;
   private final IAuthService authService;
-  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
   @Autowired
