@@ -4,6 +4,7 @@ import com.mercadopago.resources.Payment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
+import sic.modelo.Recibo;
 import sic.modelo.Rol;
 import sic.modelo.dto.PagoMercadoPagoDTO;
 import sic.service.IPagoMercadoPagoService;
@@ -27,7 +28,7 @@ public class PagoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public boolean agregarOrModificarItem(@RequestBody PagoMercadoPagoDTO pagoMercadoPagoDTO) {
+  public Recibo agregarOrModificarItem(@RequestBody PagoMercadoPagoDTO pagoMercadoPagoDTO) {
     return pagoMercadoPagoService.crearNuevoPago(pagoMercadoPagoDTO);
   }
 

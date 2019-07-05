@@ -1,11 +1,11 @@
 package sic.service;
 
-import com.mercadopago.resources.Payment;
+import sic.modelo.Recibo;
 import sic.modelo.dto.PagoMercadoPagoDTO;
 
 public interface IPagoMercadoPagoService {
 
-  boolean crearNuevoPago(PagoMercadoPagoDTO pagoMercadoPagoDTO);
+  Recibo crearNuevoPago(PagoMercadoPagoDTO pagoMercadoPagoDTO);
 
-  Payment recuperarPago(String idPago);
+  PagoMercadoPagoDTO recuperarPago(String idPago);
 }

@@ -29,7 +29,7 @@ UPDATE formadepago SET eliminada=true WHERE id_FormaDePago= 10;
 UPDATE formadepago SET eliminada=true WHERE id_FormaDePago=56;
 
 ALTER TABLE `recibo` 
-ADD COLUMN `idPagoMercadoPago` BIGINT(20) AFTER `numRecibo`;
+ADD COLUMN `idPagoMercadoPago` varchar(255) AFTER `numRecibo`;
 
 
 SET SQL_SAFE_UPDATES = 1;

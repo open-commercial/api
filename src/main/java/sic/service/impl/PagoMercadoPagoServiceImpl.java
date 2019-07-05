@@ -1,9 +1,7 @@
 package sic.service.impl;
 
-import com.google.gson.JsonElement;
 import com.mercadopago.MercadoPago;
 import com.mercadopago.exceptions.MPException;
-import com.mercadopago.exceptions.MPRestException;
 import com.mercadopago.resources.Payment;
 import com.mercadopago.resources.datastructures.payment.Payer;
 import org.slf4j.Logger;
@@ -35,16 +33,17 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
 
   @Autowired
-  public PagoMercadoPagoServiceImpl(IReciboService reciboService,
-                                    IFormaDePagoService formaDePagoService,
-                                    IClienteService clienteService) {
+  public PagoMercadoPagoServiceImpl(
+      IReciboService reciboService,
+      IFormaDePagoService formaDePagoService,
+      IClienteService clienteService) {
     this.reciboService = reciboService;
     this.formaDePagoService = formaDePagoService;
     this.clienteService = clienteService;
   }
 
   @Override
-  public boolean crearNuevoPago(PagoMercadoPagoDTO pagoMercadoPagoDTO) {
+  public Recibo crearNuevoPago(PagoMercadoPagoDTO pagoMercadoPagoDTO) {
     Cliente cliente = clienteService.getClienteNoEliminadoPorId(pagoMercadoPagoDTO.getIdCliente());
     MercadoPago.SDK.configure(mercadoPagoAccesToken);
     Payment payment = new Payment();
@@ -63,7 +62,7 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
       payment
           .setTransactionAmount(pagoMercadoPagoDTO.getMonto())
           .setToken(pagoMercadoPagoDTO.getToken())
-          .setDescription("Pago Mercado Pago - TESTING con token")
+          .setDescription("Pago a Globo de Oro - Credito")
           .setInstallments(pagoMercadoPagoDTO.getInstallments())
           .setIssuerId(pagoMercadoPagoDTO.getIssuerId())
           .setPaymentMethodId(pagoMercadoPagoDTO.getPaymentMethodId())
@@ -72,18 +71,17 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
     } else if (pagoMercadoPagoDTO.getToken() == null || pagoMercadoPagoDTO.getToken().isEmpty()) {
       payment
           .setTransactionAmount(pagoMercadoPagoDTO.getMonto())
-          .setDescription("Pago Mercado Pago - TESTING sin token")
+          .setDescription("Pago a Globo de Oro - Debito")
           .setPaymentMethodId(pagoMercadoPagoDTO.getPaymentMethodId())
           .setPayer(new Payer().setEmail(cliente.getEmail()));
     } else {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pago_no_soportado"));
     }
-    boolean operacionExitosa = false;
+    Recibo nuevoRecibo = new Recibo();
     try {
       payment = payment.save();
       if (payment.getStatus() == Payment.Status.approved) {
         logger.warn("El pago de mercadopago {} se aprobó correctamente.", payment);
-        Recibo nuevoRecibo = new Recibo();
         nuevoRecibo.setEmpresa(cliente.getEmpresa());
         nuevoRecibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(16));
         nuevoRecibo.setUsuario(cliente.getCredencial());
@@ -91,26 +89,31 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
         nuevoRecibo.setFecha(new Date());
         nuevoRecibo.setConcepto("probando pago");
         nuevoRecibo.setMonto(new BigDecimal(Float.toString(pagoMercadoPagoDTO.getMonto())));
-        nuevoRecibo.setIdPagoMercadoPago(new Long(payment.getId()));
-        reciboService.guardar(nuevoRecibo);
-        operacionExitosa = true;
+        nuevoRecibo.setIdPagoMercadoPago(payment.getId());
+        nuevoRecibo = reciboService.guardar(nuevoRecibo);
       } else {
-        logger.warn("El pago {} no se aprobó.", payment);
+        throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pago_no_aprobado"));
       }
     } catch (MPException e) {
       logger.error(e.toString());
     }
-    return operacionExitosa;
+    return nuevoRecibo;
   }
 
   @Override
-  public Payment recuperarPago(String idPago) {
+  public PagoMercadoPagoDTO recuperarPago(String idPago) {
     MercadoPago.SDK.configure(mercadoPagoAccesToken);
-    Payment pagoRecuperado = null;
+    PagoMercadoPagoDTO pagoRecuperado = new PagoMercadoPagoDTO();
     try {
-      pagoRecuperado = Payment.findById(idPago);
-    } catch (MPException e) {
-      e.printStackTrace();
+      Payment pagoMP = Payment.findById(idPago);
+      Recibo reciboDeMercadoPago = reciboService.getReciboPorIdMercadoPago(idPago);
+      pagoRecuperado.setInstallments(pagoMP.getInstallments());
+      pagoRecuperado.setIdCliente(reciboDeMercadoPago.getIdCliente());
+      pagoRecuperado.setIssuerId(pagoMP.getIssuerId());
+      pagoRecuperado.setMonto(reciboDeMercadoPago.getMonto().floatValue());
+      pagoRecuperado.setPaymentMethodId(pagoMP.getPaymentMethodId());
+    } catch (MPException | NullPointerException e) {
+      logger.error("El pago no se pudo recuperar.");
     }
     return pagoRecuperado;
   }
