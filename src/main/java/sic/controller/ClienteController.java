@@ -3,17 +3,19 @@ package sic.controller;
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
+import sic.exception.ForbiddenException;
 import sic.modelo.*;
 import sic.modelo.dto.ClienteDTO;
 import sic.service.*;
 
-import java.util.ResourceBundle;
+import java.util.Locale;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -26,6 +28,7 @@ public class ClienteController {
   private final IAuthService authService;
   private final ModelMapper modelMapper;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
+  private final MessageSource messageSource;
 
   @Autowired
   public ClienteController(
@@ -34,13 +37,15 @@ public class ClienteController {
       IUsuarioService usuarioService,
       IUbicacionService ubicacionService,
       IAuthService authService,
-      ModelMapper modelMapper) {
+      ModelMapper modelMapper,
+      MessageSource messageSource) {
     this.clienteService = clienteService;
     this.empresaService = empresaService;
     this.usuarioService = usuarioService;
     this.ubicacionService = ubicacionService;
     this.authService = authService;
     this.modelMapper = modelMapper;
+    this.messageSource = messageSource;
   }
 
   @GetMapping("/clientes/{idCliente}")
@@ -155,8 +160,8 @@ public class ClienteController {
           && !(usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
               || usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)
               || usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR))) {
-        throw new ForbiddenException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+        throw new ForbiddenException(messageSource.getMessage(
+          "mensaje_usuario_rol_no_valido", null, Locale.getDefault()));
       } else {
         Usuario usuarioCredencial = usuarioService.getUsuarioNoEliminadoPorId(nuevoCliente.getIdCredencial());
         cliente.setCredencial(usuarioCredencial);
@@ -201,8 +206,8 @@ public class ClienteController {
           && !(usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
               || usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)
               || usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR))) {
-        throw new ForbiddenException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+        throw new ForbiddenException(messageSource.getMessage(
+          "mensaje_usuario_rol_no_valido", null, Locale.getDefault()));
       } else {
         Usuario usuarioCredencial = usuarioService.getUsuarioNoEliminadoPorId(clienteDTO.getIdCredencial());
         clientePorActualizar.setCredencial(usuarioCredencial);
@@ -218,8 +223,8 @@ public class ClienteController {
       Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
       if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
           && !usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)) {
-        throw new ForbiddenException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+        throw new ForbiddenException(messageSource.getMessage(
+          "mensaje_usuario_rol_no_valido", null, Locale.getDefault()));
       }
     } else {
       clientePorActualizar.setBonificacion(clientePersistido.getBonificacion());

@@ -6,6 +6,7 @@ import java.util.*;
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ import sic.modelo.*;
 import sic.modelo.dto.FacturaCompraDTO;
 import sic.modelo.dto.FacturaVentaDTO;
 import sic.service.*;
+import sic.exception.BusinessServiceException;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -35,6 +37,7 @@ public class FacturaController {
   private final ModelMapper modelMapper;
   private final IAuthService authService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
+  private final MessageSource messageSource;
 
   @Autowired
   public FacturaController(
@@ -46,7 +49,8 @@ public class FacturaController {
       ITransportistaService transportistaService,
       IReciboService reciboService,
       ModelMapper modelMapper,
-      IAuthService authService) {
+      IAuthService authService,
+      MessageSource messageSource) {
     this.facturaService = facturaService;
     this.empresaService = empresaService;
     this.proveedorService = proveedorService;
@@ -56,6 +60,7 @@ public class FacturaController {
     this.reciboService = reciboService;
     this.authService = authService;
     this.modelMapper = modelMapper;
+    this.messageSource = messageSource;
   }
 
     @GetMapping("/facturas/{idFactura}")
@@ -87,8 +92,8 @@ public class FacturaController {
         && (fv.getTipoComprobante() == TipoDeComprobante.FACTURA_A
             || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_B
             || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_C)) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_facturacion_vacia"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault()));
     }
     fv.setCliente(cliente);
     fv.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(facturaVentaDTO.getIdTransportista()));

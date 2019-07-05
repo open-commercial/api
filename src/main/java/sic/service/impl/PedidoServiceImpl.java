@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.text.MessageFormat;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -24,6 +23,7 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +34,8 @@ import sic.modelo.dto.UbicacionDTO;
 import sic.repository.RenglonPedidoRepository;
 import sic.service.*;
 import sic.repository.PedidoRepository;
+import sic.exception.BusinessServiceException;
+import sic.exception.ServiceException;
 import sic.util.CalculosComprobante;
 import sic.util.FormatterFechaHora;
 
@@ -52,7 +54,7 @@ public class PedidoServiceImpl implements IPedidoService {
   private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+  private final MessageSource messageSource;
 
   @Autowired
   public PedidoServiceImpl(
@@ -64,7 +66,8 @@ public class PedidoServiceImpl implements IPedidoService {
       IProductoService productoService,
       ICorreoElectronicoService correoElectronicoService,
       IEmpresaService empresaService,
-      ModelMapper modelMapper) {
+      ModelMapper modelMapper,
+      MessageSource messageSource) {
     this.facturaService = facturaService;
     this.pedidoRepository = pedidoRepository;
     this.renglonPedidoRepository = renglonPedidoRepository;
@@ -74,6 +77,7 @@ public class PedidoServiceImpl implements IPedidoService {
     this.correoElectronicoService = correoElectronicoService;
     this.empresaService = empresaService;
     this.modelMapper = modelMapper;
+    this.messageSource = messageSource;
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Pedido pedido) {
@@ -83,25 +87,28 @@ public class PedidoServiceImpl implements IPedidoService {
     if ((estado != EstadoPedido.ABIERTO)
         && (estado != EstadoPedido.ACTIVO)
         && (estado != EstadoPedido.CERRADO)) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaja_estado_no_valido"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaja_estado_no_valido", null, Locale.getDefault()));
     }
     // Duplicados
     if (operacion == TipoDeOperacion.ALTA
         && pedidoRepository.findByNroPedidoAndEmpresaAndEliminado(
                 pedido.getNroPedido(), pedido.getEmpresa(), false)
             != null) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_duplicado"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_pedido_duplicado", null, Locale.getDefault()));
     }
     if (operacion == TipoDeOperacion.ACTUALIZACION
         && pedidoRepository.findByNroPedidoAndEmpresaAndEliminado(
                 pedido.getNroPedido(), pedido.getEmpresa(), false)
             == null) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pedido_no_existente"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_pedido_no_existente", null, Locale.getDefault()));
     }
     // DetalleEnvío
     if (pedido.getDetalleEnvio() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_pedido_detalle_envio_vacio"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_pedido_detalle_envio_vacio", null, Locale.getDefault()));
     }
   }
 
@@ -112,8 +119,8 @@ public class PedidoServiceImpl implements IPedidoService {
     if (pedido.isPresent() && !pedido.get().isEliminado()) {
       return pedido.get();
     } else {
-      throw new EntityNotFoundException(
-        RESOURCE_BUNDLE.getString("mensaje_pedido_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_pedido_no_existente", null, Locale.getDefault()));
     }
   }
 
@@ -198,10 +205,12 @@ public class PedidoServiceImpl implements IPedidoService {
           emailCliente,
           "",
           "Nuevo Pedido Ingresado",
-          MessageFormat.format(
-              RESOURCE_BUNDLE.getString("mensaje_correo_pedido_recibido"),
-              pedido.getCliente().getNombreFiscal(),
-              "Pedido Nº " + pedido.getNroPedido()),
+          messageSource.getMessage(
+              "mensaje_correo_pedido_recibido",
+              new Object[] {
+                pedido.getCliente().getNombreFiscal(), "Pedido Nº " + pedido.getNroPedido()
+              },
+              Locale.getDefault()),
           this.getReportePedido(pedido),
           "Reporte");
       logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
@@ -220,17 +229,17 @@ public class PedidoServiceImpl implements IPedidoService {
   private void asignarDetalleEnvio(Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal) {
     if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_FACTURACION
         && pedido.getCliente().getUbicacionFacturacion() == null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_facturacion_vacia"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault()));
     }
     if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_ENVIO
         && pedido.getCliente().getUbicacionEnvio() == null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_envio_vacia"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_ubicacion_envio_vacia", null, Locale.getDefault()));
     }
     if (tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL && idSucursal == null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_ubicacion_sucursal_vacia"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_ubicacion_sucursal_vacia", null, Locale.getDefault()));
     }
     if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_FACTURACION) {
       pedido.setDetalleEnvio(
@@ -253,8 +262,8 @@ public class PedidoServiceImpl implements IPedidoService {
     // Fecha
     if (criteria.isBuscaPorFecha()
         && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_pedido_fechas_busqueda_invalidas"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_pedido_fechas_busqueda_invalidas", null, Locale.getDefault()));
     }
     if (criteria.isBuscaPorFecha()) {
       Calendar cal = new GregorianCalendar();
@@ -409,7 +418,8 @@ public class PedidoServiceImpl implements IPedidoService {
             "logo", new ImageIcon(ImageIO.read(new URL(pedido.getEmpresa().getLogo()))).getImage());
       } catch (IOException ex) {
         logger.error(ex.getMessage());
-        throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_empresa_404_logo"), ex);
+        throw new ServiceException(messageSource.getMessage(
+          "mensaje_empresa_404_logo", null, Locale.getDefault()), ex);
       }
     }
     String detalleEnvio;
@@ -426,7 +436,8 @@ public class PedidoServiceImpl implements IPedidoService {
           JasperFillManager.fillReport(isFileReport, params, ds));
     } catch (JRException ex) {
       logger.error(ex.getMessage());
-      throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_error_reporte"), ex);
+      throw new ServiceException(messageSource.getMessage(
+        "mensaje_error_reporte", null, Locale.getDefault()), ex);
     }
   }
 

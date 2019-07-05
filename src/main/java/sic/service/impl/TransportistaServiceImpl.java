@@ -3,12 +3,13 @@ package sic.service.impl;
 import com.querydsl.core.BooleanBuilder;
 import java.util.ArrayList;
 
+import org.springframework.context.MessageSource;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 
@@ -19,7 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.service.ITransportistaService;
-import sic.service.BusinessServiceException;
+import sic.exception.BusinessServiceException;
 import sic.repository.TransportistaRepository;
 import sic.service.IUbicacionService;
 
@@ -30,12 +31,15 @@ public class TransportistaServiceImpl implements ITransportistaService {
   private final TransportistaRepository transportistaRepository;
   private final IUbicacionService ubicacionService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+  private final MessageSource messageSource;
 
   @Autowired
-  public TransportistaServiceImpl(TransportistaRepository transportistaRepository, IUbicacionService ubicacionService) {
+  public TransportistaServiceImpl(TransportistaRepository transportistaRepository,
+                                  IUbicacionService ubicacionService,
+                                  MessageSource messageSource) {
     this.transportistaRepository = transportistaRepository;
     this.ubicacionService = ubicacionService;
+    this.messageSource = messageSource;
   }
 
   @Override
@@ -45,9 +49,8 @@ public class TransportistaServiceImpl implements ITransportistaService {
     if (transportista.isPresent() && !transportista.get().isEliminado()) {
       return transportista.get();
     } else {
-      throw new EntityNotFoundException(
-        ResourceBundle.getBundle("Mensajes")
-          .getString("mensaje_transportista_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_transportista_no_existente", null, Locale.getDefault()));
     }
   }
 
@@ -56,8 +59,8 @@ public class TransportistaServiceImpl implements ITransportistaService {
     List<Transportista> transportista =
         transportistaRepository.findAllByAndEmpresaAndEliminadoOrderByNombreAsc(empresa, false);
     if (transportista == null) {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_transportista_ninguno_cargado"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_transportista_ninguno_cargado", null, Locale.getDefault()));
     }
     return transportista;
   }
@@ -106,20 +109,20 @@ public class TransportistaServiceImpl implements ITransportistaService {
     Transportista transportistaDuplicado =
         this.getTransportistaPorNombre(transportista.getNombre(), transportista.getEmpresa());
     if (operacion.equals(TipoDeOperacion.ALTA) && transportistaDuplicado != null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_transportista_duplicado_nombre"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_transportista_duplicado_nombre", null, Locale.getDefault()));
     }
     if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
         && (transportistaDuplicado != null
             && transportistaDuplicado.getId_Transportista()
                 != transportista.getId_Transportista())) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_transportista_duplicado_nombre"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_transportista_duplicado_nombre", null, Locale.getDefault()));
     }
     if (transportista.getUbicacion() != null
         && transportista.getUbicacion().getLocalidad() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_ubicacion_sin_localidad"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_ubicacion_sin_localidad", null, Locale.getDefault()));
     }
   }
 
@@ -151,8 +154,8 @@ public class TransportistaServiceImpl implements ITransportistaService {
   public void eliminar(long idTransportista) {
     Transportista transportista = this.getTransportistaNoEliminadoPorId(idTransportista);
     if (transportista == null) {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_transportista_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_transportista_no_existente", null, Locale.getDefault()));
     }
     transportista.setEliminado(true);
     transportista.setUbicacion(null);

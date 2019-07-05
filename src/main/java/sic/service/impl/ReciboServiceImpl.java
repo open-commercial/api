@@ -19,6 +19,7 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,8 @@ import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.repository.ReciboRepository;
 import sic.service.*;
+import sic.exception.BusinessServiceException;
+import sic.exception.ServiceException;
 import sic.util.FormatterFechaHora;
 
 @Service
@@ -41,7 +44,7 @@ public class ReciboServiceImpl implements IReciboService {
   private final IFormaDePagoService formaDePagoService;
   private final ICajaService cajaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+  private final MessageSource messageSource;
 
   @Autowired
   @Lazy
@@ -52,7 +55,8 @@ public class ReciboServiceImpl implements IReciboService {
       IConfiguracionDelSistemaService cds,
       INotaService notaService,
       IFormaDePagoService formaDePagoService,
-      ICajaService cajaService) {
+      ICajaService cajaService,
+      MessageSource messageSource) {
     this.reciboRepository = reciboRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.empresaService = empresaService;
@@ -60,6 +64,7 @@ public class ReciboServiceImpl implements IReciboService {
     this.notaService = notaService;
     this.formaDePagoService = formaDePagoService;
     this.cajaService = cajaService;
+    this.messageSource = messageSource;
   }
 
   @Override
@@ -68,9 +73,8 @@ public class ReciboServiceImpl implements IReciboService {
     if (recibo.isPresent() && !recibo.get().isEliminado()) {
       return recibo.get();
     } else {
-      throw new EntityNotFoundException(
-        ResourceBundle.getBundle("Mensajes")
-          .getString("mensaje_recibo_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_recibo_no_existente", null, Locale.getDefault()));
     }
   }
 
@@ -170,12 +174,12 @@ public class ReciboServiceImpl implements IReciboService {
   public void validarOperacion(Recibo recibo) {
     //this.cajaService.validarMovimiento(recibo.getFecha(), recibo.getEmpresa().getId_Empresa());
     if (recibo.getCliente() == null && recibo.getProveedor() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_recibo_cliente_proveedor_vacio"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_recibo_cliente_proveedor_vacio", null, Locale.getDefault()));
     }
     if (recibo.getCliente() != null && recibo.getProveedor() != null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_recibo_cliente_proveedor_simultaneos"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_recibo_cliente_proveedor_simultaneos", null, Locale.getDefault()));
     }
   }
 
@@ -207,8 +211,8 @@ public class ReciboServiceImpl implements IReciboService {
         totalMontos = totalMontos.add(monto);
       }
       if (totalMontos.compareTo(totalFactura) > 0 || totalMontos.compareTo(BigDecimal.ZERO) < 0) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_recibo_superan_total_factura"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_recibo_superan_total_factura", null, Locale.getDefault()));
       }
       int i = 0;
       for (long idFormaDePago : idsFormaDePago) {
@@ -245,7 +249,8 @@ public class ReciboServiceImpl implements IReciboService {
       reciboRepository.save(r);
       logger.warn("El Recibo {} se eliminó correctamente.", r);
     } else {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_no_se_puede_eliminar"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_no_se_puede_eliminar", null, Locale.getDefault()));
     }
   }
 
@@ -275,8 +280,8 @@ public class ReciboServiceImpl implements IReciboService {
   @Override
   public byte[] getReporteRecibo(Recibo recibo) {
     if (recibo.getProveedor() != null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_recibo_reporte_proveedor"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_recibo_reporte_proveedor", null, Locale.getDefault()));
     }
     ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
     InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Recibo.jasper");
@@ -288,7 +293,8 @@ public class ReciboServiceImpl implements IReciboService {
             "logo", new ImageIcon(ImageIO.read(new URL(recibo.getEmpresa().getLogo()))).getImage());
       } catch (IOException ex) {
         logger.error(ex.getMessage());
-        throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_empresa_404_logo"), ex);
+        throw new ServiceException(messageSource.getMessage(
+          "mensaje_empresa_404_logo", null, Locale.getDefault()), ex);
       }
     }
     try {
@@ -296,7 +302,8 @@ public class ReciboServiceImpl implements IReciboService {
           JasperFillManager.fillReport(isFileReport, params));
     } catch (JRException ex) {
       logger.error(ex.getMessage());
-      throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_error_reporte"), ex);
+      throw new ServiceException(messageSource.getMessage(
+        "mensaje_error_reporte", null, Locale.getDefault()), ex);
     }
   }
 

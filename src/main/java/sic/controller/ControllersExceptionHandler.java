@@ -6,18 +6,27 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import sic.service.ServiceException;
+import sic.exception.ForbiddenException;
+import sic.exception.UnauthorizedException;
+import sic.exception.ServiceException;
 
 @ControllerAdvice
 public class ControllersExceptionHandler {
 
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+  private final MessageSource messageSource;
+
+  @Autowired
+  public ControllersExceptionHandler(MessageSource messageSource) {
+    this.messageSource = messageSource;
+  }
 
   private String log(Exception ex) {
     String mensaje = ex.getMessage() + "\n(Transaction ID: " + new Date().getTime() + ")";
@@ -70,6 +79,7 @@ public class ControllersExceptionHandler {
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ResponseBody
   public String handleException(Exception ex) {
-    return log(new Exception(RESOURCE_BUNDLE.getString("mensaje_error_request"), ex));
+    return log(new Exception(messageSource.getMessage(
+      "mensaje_error_request", null, Locale.getDefault()), ex));
   }
 }

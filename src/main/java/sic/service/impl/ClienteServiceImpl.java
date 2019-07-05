@@ -3,16 +3,16 @@ package sic.service.impl;
 import com.querydsl.core.BooleanBuilder;
 
 import java.math.BigDecimal;
-import java.text.MessageFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.service.*;
 import sic.repository.ClienteRepository;
+import sic.exception.BusinessServiceException;
 
 @Service
 @Validated
@@ -30,18 +31,20 @@ public class ClienteServiceImpl implements IClienteService {
   private final IUsuarioService usuarioService;
   private final IUbicacionService ubicacionService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+  private final MessageSource messageSource;
 
   @Autowired
   public ClienteServiceImpl(
       ClienteRepository clienteRepository,
       ICuentaCorrienteService cuentaCorrienteService,
       IUsuarioService usuarioService,
-      IUbicacionService ubicacionService) {
+      IUbicacionService ubicacionService,
+      MessageSource messageSource) {
     this.clienteRepository = clienteRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.usuarioService = usuarioService;
     this.ubicacionService = ubicacionService;
+    this.messageSource = messageSource;
   }
 
   @Override
@@ -50,7 +53,8 @@ public class ClienteServiceImpl implements IClienteService {
     if (cliente.isPresent() && !cliente.get().isEliminado()) {
       return cliente.get();
     } else {
-      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_cliente_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_cliente_no_existente", null, Locale.getDefault()));
     }
   }
 
@@ -64,8 +68,8 @@ public class ClienteServiceImpl implements IClienteService {
     Cliente cliente =
         clienteRepository.findByEmpresaAndPredeterminadoAndEliminado(empresa, true, false);
     if (cliente == null) {
-      throw new EntityNotFoundException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_sin_predeterminado"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_cliente_sin_predeterminado", null, Locale.getDefault()));
     }
     return cliente;
   }
@@ -159,8 +163,8 @@ public class ClienteServiceImpl implements IClienteService {
   public void validarOperacion(TipoDeOperacion operacion, Cliente cliente) {
     // Requeridos
     if (operacion == TipoDeOperacion.ALTA && cliente.getCredencial() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_cliente_vacio_credencial"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_cliente_vacio_credencial", null, Locale.getDefault()));
     }
     // Duplicados
     // ID Fiscal
@@ -170,14 +174,14 @@ public class ClienteServiceImpl implements IClienteService {
       if (operacion == TipoDeOperacion.ACTUALIZACION
           && clienteDuplicado != null
           && clienteDuplicado.getId_Cliente() != cliente.getId_Cliente()) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_cliente_duplicado_idFiscal"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_cliente_duplicado_idFiscal", null, Locale.getDefault()));
       }
       if (operacion == TipoDeOperacion.ALTA
           && clienteDuplicado != null
           && cliente.getIdFiscal() != null) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_cliente_duplicado_idFiscal"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_cliente_duplicado_idFiscal", null, Locale.getDefault()));
       }
     }
     // Ubicacion
@@ -188,18 +192,18 @@ public class ClienteServiceImpl implements IClienteService {
         && (cliente.getUbicacionEnvio().getIdUbicacion() != 0L)
         && (cliente.getUbicacionFacturacion().getIdUbicacion()
             == cliente.getUbicacionEnvio().getIdUbicacion())) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_ubicacion_facturacion_envio_iguales"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_ubicacion_facturacion_envio_iguales", null, Locale.getDefault()));
     }
     if (cliente.getUbicacionFacturacion() != null
         && cliente.getUbicacionFacturacion().getLocalidad() == null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_ubicacion_facturacion_sin_localidad"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_ubicacion_facturacion_sin_localidad", null, Locale.getDefault()));
     }
     if (cliente.getUbicacionEnvio() != null
       && cliente.getUbicacionEnvio().getLocalidad() == null) {
-      throw new BusinessServiceException(
-        RESOURCE_BUNDLE.getString("mensaje_ubicacion_envio_sin_localidad"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_ubicacion_envio_sin_localidad", null, Locale.getDefault()));
     }
   }
 
@@ -236,10 +240,8 @@ public class ClienteServiceImpl implements IClienteService {
           this.getClientePorIdUsuarioYidEmpresa(
               cliente.getCredencial().getId_Usuario(), cliente.getEmpresa().getId_Empresa());
       if (clienteYaAsignado != null) {
-        throw new BusinessServiceException(
-            MessageFormat.format(
-                RESOURCE_BUNDLE.getString("mensaje_cliente_credencial_no_valida"),
-                clienteYaAsignado.getNombreFiscal()));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_cliente_credencial_no_valida", new Object[] {clienteYaAsignado.getNombreFiscal()}, Locale.getDefault()));
       } else {
         if (!cliente.getCredencial().getRoles().contains(Rol.COMPRADOR)) {
           cliente.getCredencial().getRoles().add(Rol.COMPRADOR);
@@ -270,10 +272,8 @@ public class ClienteServiceImpl implements IClienteService {
               clientePorActualizar.getEmpresa().getId_Empresa());
       if (clienteYaAsignado != null
           && clienteYaAsignado.getId_Cliente() != clientePorActualizar.getId_Cliente()) {
-        throw new BusinessServiceException(
-            MessageFormat.format(
-                RESOURCE_BUNDLE.getString("mensaje_cliente_credencial_no_valida"),
-                clienteYaAsignado.getNombreFiscal()));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_cliente_credencial_no_valida", new Object[] {clienteYaAsignado.getNombreFiscal()}, Locale.getDefault()));
       } else {
         if (!clientePorActualizar.getCredencial().getRoles().contains(Rol.COMPRADOR)) {
           clientePorActualizar.getCredencial().getRoles().add(Rol.COMPRADOR);
@@ -289,7 +289,8 @@ public class ClienteServiceImpl implements IClienteService {
   public void eliminar(long idCliente) {
     Cliente cliente = this.getClienteNoEliminadoPorId(idCliente);
     if (cliente == null) {
-      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_cliente_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_cliente_no_existente", null, Locale.getDefault()));
     }
     cuentaCorrienteService.eliminarCuentaCorrienteCliente(idCliente);
     cliente.setCredencial(null);

@@ -3,7 +3,6 @@ package sic.service.impl;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -23,11 +22,8 @@ import sic.modelo.*;
 class NotaServiceImplTest {
 
   @Mock private EmpresaServiceImpl empresaServiceImpl;
-
   @Mock private ClienteServiceImpl clienteService;
-
   @Mock private ProveedorServiceImpl proveedorService;
-
   @InjectMocks private NotaServiceImpl notaServiceImpl;
 
   @Test

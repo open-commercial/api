@@ -1,18 +1,21 @@
 package sic.service.impl;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.Empresa;
 import sic.modelo.FormaDePago;
 import sic.service.IFormaDePagoService;
-import sic.service.BusinessServiceException;
+import sic.exception.BusinessServiceException;
 import sic.repository.FormaDePagoRepository;
 
 @Service
@@ -20,10 +23,15 @@ import sic.repository.FormaDePagoRepository;
 public class FormaDePagoServiceImpl implements IFormaDePagoService {
 
   private final FormaDePagoRepository formaDePagoRepository;
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private final MessageSource messageSource;
+
 
   @Autowired
-  public FormaDePagoServiceImpl(FormaDePagoRepository formaDePagoRepository) {
+  public FormaDePagoServiceImpl(FormaDePagoRepository formaDePagoRepository,
+                                MessageSource messageSource) {
     this.formaDePagoRepository = formaDePagoRepository;
+    this.messageSource = messageSource;
   }
 
   @Override
@@ -43,9 +51,8 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
     if (formaDePago.isPresent() && !formaDePago.get().isEliminada()) {
       return formaDePago.get();
     } else {
-      throw new EntityNotFoundException(
-        ResourceBundle.getBundle("Mensajes")
-          .getString("mensaje_formaDePago_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_formaDePago_no_existente", null, Locale.getDefault()));
     }
   }
 
@@ -55,8 +62,8 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
     if (formaDePago.isPresent()) {
       return formaDePago.get();
     } else {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_formaDePago_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_formaDePago_no_existente", null, Locale.getDefault()));
     }
   }
 
@@ -66,7 +73,8 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
         formaDePagoRepository.findByAndPredeterminadoAndEliminada(true, false);
     if (formaDePago == null) {
       throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_formaDePago_sin_predeterminada"));
+          messageSource.getMessage(
+              "mensaje_formaDePago_sin_predeterminada", null, Locale.getDefault()));
     }
     return formaDePago;
   }
@@ -86,19 +94,4 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
     formaDePagoRepository.save(formaDePago);
   }
 
-  private void validarOperacion(FormaDePago formaDePago) {
-    // Duplicados
-    // Nombre
-    if (formaDePagoRepository.findByNombreAndEliminada(formaDePago.getNombre(), false) != null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_formaDePago_duplicado_nombre"));
-    }
-    // Predeterminado
-    if (formaDePago.isPredeterminado()
-        && (formaDePagoRepository.findByAndPredeterminadoAndEliminada(true, false) != null)) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_formaDePago_predeterminada_existente"));
-    }
-  }
 }

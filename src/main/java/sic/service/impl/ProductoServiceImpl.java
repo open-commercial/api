@@ -7,6 +7,7 @@ import java.io.*;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.export.*;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
@@ -14,7 +15,6 @@ import sic.modelo.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.text.MessageFormat;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -33,6 +33,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.service.*;
+import sic.exception.BusinessServiceException;
+import sic.exception.ServiceException;
 import sic.util.Validator;
 import sic.repository.ProductoRepository;
 
@@ -50,18 +52,19 @@ public class ProductoServiceImpl implements IProductoService {
   private final IMedidaService medidaService;
   private final ICarritoCompraService carritoCompraService;
   private final IPhotoVideoUploader photoVideoUploader;
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+  private final MessageSource messageSource;
 
   @Autowired
   @Lazy
   public ProductoServiceImpl(
-      ProductoRepository productoRepository,
-      IEmpresaService empresaService,
-      IRubroService rubroService,
-      IProveedorService proveedorService,
-      IMedidaService medidaService,
-      ICarritoCompraService carritoCompraService,
-      IPhotoVideoUploader photoVideoUploader) {
+    ProductoRepository productoRepository,
+    IEmpresaService empresaService,
+    IRubroService rubroService,
+    IProveedorService proveedorService,
+    IMedidaService medidaService,
+    ICarritoCompraService carritoCompraService,
+    IPhotoVideoUploader photoVideoUploader,
+    MessageSource messageSource) {
     this.productoRepository = productoRepository;
     this.empresaService = empresaService;
     this.rubroService = rubroService;
@@ -69,6 +72,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.medidaService = medidaService;
     this.carritoCompraService = carritoCompraService;
     this.photoVideoUploader = photoVideoUploader;
+    this.messageSource = messageSource;
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
@@ -77,7 +81,8 @@ public class ProductoServiceImpl implements IProductoService {
             && (!producto.isPublico()
                 || (producto.getUrlImagen() == null || producto.getUrlImagen().isEmpty())))) {
       throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_producto_destacado_privado_o_sin_imagen"));
+          messageSource.getMessage(
+              "mensaje_producto_destacado_privado_o_sin_imagen", null, Locale.getDefault()));
     }
     // Duplicados
     // Codigo
@@ -88,37 +93,37 @@ public class ProductoServiceImpl implements IProductoService {
           && productoDuplicado != null
           && productoDuplicado.getIdProducto() != producto.getIdProducto()) {
         throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_producto_duplicado_codigo"));
+        messageSource.getMessage(
+          "mensaje_producto_duplicado_codigo", null, Locale.getDefault()));
       }
       if (operacion.equals(TipoDeOperacion.ALTA)
           && productoDuplicado != null
           && !producto.getCodigo().equals("")) {
         throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_producto_duplicado_codigo"));
+          messageSource.getMessage(
+            "mensaje_producto_duplicado_codigo", null, Locale.getDefault()));
       }
     }
     // Descripcion
     Producto productoDuplicado =
         this.getProductoPorDescripcion(producto.getDescripcion(), producto.getEmpresa());
     if (operacion.equals(TipoDeOperacion.ALTA) && productoDuplicado != null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_producto_duplicado_descripcion"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()));
     }
     if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
         && productoDuplicado != null
         && productoDuplicado.getIdProducto() != producto.getIdProducto())
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_producto_duplicado_descripcion"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()));
     this.validarCalculos(producto);
   }
 
   private void validarCalculos(Producto producto) {
     Double[] iva = {10.5, 21.0, 0.0};
     if (!Arrays.asList(iva).contains(producto.getIvaPorcentaje().doubleValue())) {
-      throw new BusinessServiceException(
-          MessageFormat.format(
-              RESOURCE_BUNDLE.getString("mensaje_producto_ganancia_neta_incorrecta"),
-              producto.getDescripcion()));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_error_iva_no_valido", new Object[] {producto.getDescripcion()}, Locale.getDefault()));
     }
     if (producto
             .getGananciaNeto()
@@ -128,10 +133,8 @@ public class ProductoServiceImpl implements IProductoService {
                         producto.getPrecioCosto(), producto.getGananciaPorcentaje())
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
-      throw new BusinessServiceException(
-          MessageFormat.format(
-              RESOURCE_BUNDLE.getString("mensaje_producto_ganancia_neta_incorrecta"),
-              producto.getDescripcion()));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_producto_ganancia_neta_incorrecta", new Object[] {producto.getDescripcion()}, Locale.getDefault()));
     }
     if (producto
             .getPrecioVentaPublico()
@@ -141,9 +144,10 @@ public class ProductoServiceImpl implements IProductoService {
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-          MessageFormat.format(
-              RESOURCE_BUNDLE.getString("mensaje_precio_venta_publico_incorrecto"),
-              producto.getDescripcion()));
+          messageSource.getMessage(
+              "mensaje_precio_venta_publico_incorrecto",
+              new Object[] {producto.getDescripcion()},
+              Locale.getDefault()));
     }
     if (producto
             .getIvaNeto()
@@ -153,9 +157,10 @@ public class ProductoServiceImpl implements IProductoService {
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-          MessageFormat.format(
-              RESOURCE_BUNDLE.getString("mensaje_producto_iva_neto_incorrecto"),
-              producto.getDescripcion()));
+        messageSource.getMessage(
+          "mensaje_producto_iva_neto_incorrecto",
+          new Object[] {producto.getDescripcion()},
+          Locale.getDefault()));
     }
     if (producto
             .getPrecioLista()
@@ -166,9 +171,10 @@ public class ProductoServiceImpl implements IProductoService {
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-          MessageFormat.format(
-              RESOURCE_BUNDLE.getString("mensaje_producto_precio_lista_incorrecto"),
-              producto.getDescripcion()));
+        messageSource.getMessage(
+          "mensaje_producto_precio_lista_incorrecto",
+          new Object[] {producto.getDescripcion()},
+          Locale.getDefault()));
     }
   }
 
@@ -301,8 +307,8 @@ public class ProductoServiceImpl implements IProductoService {
               }
               break;
             default:
-              throw new BusinessServiceException(
-                RESOURCE_BUNDLE.getString("mensaje_movimiento_no_valido"));
+              throw new BusinessServiceException(messageSource.getMessage(
+                "mensaje_movimiento_no_valido", null, Locale.getDefault()));
           }
           productoRepository.save(producto.get());
         } else {
@@ -333,14 +339,15 @@ public class ProductoServiceImpl implements IProductoService {
   @Transactional
   public void eliminarMultiplesProductos(long[] idProducto) {
     if (Validator.tieneDuplicados(idProducto)) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_error_ids_duplicados"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_error_ids_duplicados", null, Locale.getDefault()));
     }
     List<Producto> productos = new ArrayList<>();
     for (Long i : idProducto) {
       Producto producto = this.getProductoNoEliminadoPorId(i);
       if (producto == null) {
-        throw new EntityNotFoundException(
-            RESOURCE_BUNDLE.getString("mensaje_producto_no_existente"));
+        throw new EntityNotFoundException(messageSource.getMessage(
+          "mensaje_producto_no_existente", null, Locale.getDefault()));
       }
       carritoCompraService.eliminarItem(i);
       producto.setEliminado(true);
@@ -364,13 +371,13 @@ public class ProductoServiceImpl implements IProductoService {
       && productosParaActualizarDTO.getPrecioVentaPublico() != null;
     boolean aplicaDescuentoRecargoPorcentaje = productosParaActualizarDTO.getDescuentoRecargoPorcentaje() != null;
     if (aplicaDescuentoRecargoPorcentaje && actualizaPrecios) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes")
-              .getString("mensaje_modificar_producto_no_permitido"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_modificar_producto_no_permitido", null, Locale.getDefault()));
     }
     // Requeridos
     if (Validator.tieneDuplicados(productosParaActualizarDTO.getIdProducto())) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_error_ids_duplicados"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_error_ids_duplicados", null, Locale.getDefault()));
     }
     List<Producto> productos = new ArrayList<>();
     for (long i : productosParaActualizarDTO.getIdProducto()) {
@@ -447,8 +454,8 @@ public class ProductoServiceImpl implements IProductoService {
   @Transactional
   public String subirImagenProducto(long idProducto, byte[] imagen) {
     if (imagen.length > TAMANIO_MAXIMO_IMAGEN)
-      throw new BusinessServiceException(
-        RESOURCE_BUNDLE.getString("mensaje_error_tamanio_no_valido"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_error_tamanio_no_valido", null, Locale.getDefault()));
     String urlImagen = photoVideoUploader.subirImagen(Producto.class.getSimpleName() + idProducto, imagen);
     productoRepository.actualizarUrlImagen(idProducto, urlImagen);
     return urlImagen;
@@ -464,7 +471,7 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   public Producto getProductoNoEliminadoPorId(long idProducto) {
     Optional<Producto> producto = productoRepository.findById(idProducto);
-    if (producto.isPresent()) {
+    if (producto.isPresent() && !producto.get().isEliminado()) {
       if (producto.get().getCantidad().compareTo(BigDecimal.ZERO) > 0) {
         producto.get().setHayStock(true);
         return producto.get();
@@ -473,7 +480,8 @@ public class ProductoServiceImpl implements IProductoService {
         return producto.get();
       }
     } else {
-      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_producto_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_producto_no_existente", null, Locale.getDefault()));
     }
   }
 
@@ -522,8 +530,8 @@ public class ProductoServiceImpl implements IProductoService {
         }
       }
     } else {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_error_logitudes_arrays"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_error_logitudes_arrays", null, Locale.getDefault()));
     }
     return productos;
   }
@@ -603,7 +611,8 @@ public class ProductoServiceImpl implements IProductoService {
         params.put("logo", new ImageIcon(ImageIO.read(new URL(empresa.getLogo()))).getImage());
       } catch (IOException ex) {
         logger.error(ex.getMessage());
-        throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_empresa_404_logo"), ex);
+        throw new ServiceException(messageSource.getMessage(
+          "mensaje_empresa_404_logo", null, Locale.getDefault()), ex);
       }
     }
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(productos);
@@ -613,7 +622,8 @@ public class ProductoServiceImpl implements IProductoService {
           return xlsReportToArray(JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
           logger.error(ex.getMessage());
-          throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_error_reporte"), ex);
+          throw new ServiceException(messageSource.getMessage(
+            "mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
       case "pdf":
         try {
@@ -621,10 +631,12 @@ public class ProductoServiceImpl implements IProductoService {
               JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
           logger.error(ex.getMessage());
-          throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_error_reporte"), ex);
+          throw new ServiceException(messageSource.getMessage(
+            "mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
       default:
-        throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_formato_no_valido"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_formato_no_valido", null, Locale.getDefault()));
     }
   }
 
@@ -642,7 +654,8 @@ public class ProductoServiceImpl implements IProductoService {
       out.close();
     } catch (JRException ex) {
       logger.error(ex.getMessage());
-      throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_error_reporte"), ex);
+      throw new ServiceException(messageSource.getMessage(
+        "mensaje_error_reporte", null, Locale.getDefault()), ex);
     } catch (IOException ex) {
       logger.error(ex.getMessage());
     }
