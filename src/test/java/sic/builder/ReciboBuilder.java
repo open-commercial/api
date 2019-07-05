@@ -14,7 +14,7 @@ public class ReciboBuilder {
   private Long idRecibo = 0L;
   private final long serie = 1L;
   private long nroRecibo = 1L;
-  private Long idPagoMercadoPago;
+  private String idPagoMercadoPago;
   private boolean eliminado = false;
   private String concepto = "Recibo por contratar al GOLDEN ARMY";
   private FormaDePago formaDePago = new FormaDePagoBuilder().build();
@@ -57,7 +57,7 @@ public class ReciboBuilder {
     return this;
   }
 
-  public ReciboBuilder withIdPagoMercadoPago(Long idPagoMercadoPago) {
+  public ReciboBuilder withIdPagoMercadoPago(String idPagoMercadoPago) {
     this.idPagoMercadoPago = idPagoMercadoPago;
     return this;
   }

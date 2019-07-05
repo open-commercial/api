@@ -47,6 +47,10 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
     Cliente cliente = clienteService.getClienteNoEliminadoPorId(pagoMercadoPagoDTO.getIdCliente());
     MercadoPago.SDK.configure(mercadoPagoAccesToken);
     Payment payment = new Payment();
+    Payer payer = new Payer();
+    payer.setFirstName(cliente.getNombreFiscal());
+    payer.setLastName(cliente.getNombreFantasia());
+    payer.setEmail(cliente.getEmail());
     if (pagoMercadoPagoDTO.getPaymentMethodId() != null
         && pagoMercadoPagoDTO.getPaymentMethodId().isEmpty()) {
       throw new BusinessServiceException(
@@ -67,13 +71,13 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
           .setIssuerId(pagoMercadoPagoDTO.getIssuerId())
           .setPaymentMethodId(pagoMercadoPagoDTO.getPaymentMethodId())
           .setBinaryMode(true)
-          .setPayer(new Payer().setEmail(cliente.getEmail()));
+          .setPayer(payer);
     } else if (pagoMercadoPagoDTO.getToken() == null || pagoMercadoPagoDTO.getToken().isEmpty()) {
       payment
           .setTransactionAmount(pagoMercadoPagoDTO.getMonto())
           .setDescription("Pago a Globo de Oro - Debito")
           .setPaymentMethodId(pagoMercadoPagoDTO.getPaymentMethodId())
-          .setPayer(new Payer().setEmail(cliente.getEmail()));
+          .setPayer(payer);
     } else {
       throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_pago_no_soportado"));
     }

@@ -15,7 +15,7 @@ public interface ReciboRepository
         QuerydslPredicateExecutor<Recibo>,
         ReciboRepositoryCustom {
 
-  Recibo findReciboByIdPagoMercadoPagoAAndEliminado(String idPagoMercadoPago, boolean eliminado);
+  Recibo findReciboByIdPagoMercadoPagoAndEliminado(String idPagoMercadoPago, boolean eliminado);
 
   Recibo findTopByEmpresaAndNumSerieOrderByNumReciboDesc(Empresa empresa, long serie);
 

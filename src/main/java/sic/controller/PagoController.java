@@ -40,7 +40,7 @@ public class PagoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public Payment recuperarPago(@PathVariable String idPagoMercadoPago) {
+  public PagoMercadoPagoDTO recuperarPago(@PathVariable String idPagoMercadoPago) {
     return pagoMercadoPagoService.recuperarPago(idPagoMercadoPago);
   }
 }
