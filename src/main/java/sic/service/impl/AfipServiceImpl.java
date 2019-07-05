@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import org.springframework.context.MessageSource;
 import sic.modelo.*;
 import sic.service.*;
 import afip.wsaa.wsdl.LoginCms;
@@ -23,7 +24,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
-import java.util.ResourceBundle;
+import java.util.Locale;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
@@ -32,6 +33,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ws.client.WebServiceClientException;
+import sic.exception.BusinessServiceException;
+import sic.exception.ServiceException;
 import sic.util.FormatterFechaHora;
 
 @Service
@@ -44,16 +47,20 @@ public class AfipServiceImpl implements IAfipService {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final String WEBSERVICE_FACTURA_ELECTRONICA = "wsfe";
   private static final BigDecimal LIMITE_MONTO_CONSUMIDOR_FINAL = new BigDecimal(10000);
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+  private final MessageSource messageSource;
 
   @Autowired
   public AfipServiceImpl(
-      AfipWebServiceSOAPClient afipWebServiceSOAPClient, IConfiguracionDelSistemaService cds,
-      IFacturaService facturaService, INotaService notaService) {
+      AfipWebServiceSOAPClient afipWebServiceSOAPClient,
+      IConfiguracionDelSistemaService cds,
+      IFacturaService facturaService,
+      INotaService notaService,
+      MessageSource messageSource) {
     this.afipWebServiceSOAPClient = afipWebServiceSOAPClient;
     this.configuracionDelSistemaService = cds;
     this.facturaService = facturaService;
     this.notaService = notaService;
+    this.messageSource = messageSource;
   }
 
   @Override
@@ -70,8 +77,8 @@ public class AfipServiceImpl implements IAfipService {
     } else {
       byte[] p12file = cds.getCertificadoAfip();
       if (p12file.length == 0) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_cds_certificado_vacio"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_cds_certificado_vacio", null, Locale.getDefault()));
       }
       String p12signer = cds.getFirmanteCertificadoAfip();
       String p12pass = cds.getPasswordCertificadoAfip();
@@ -102,13 +109,16 @@ public class AfipServiceImpl implements IAfipService {
         return feAuthRequest;
       } catch (DocumentException | IOException ex) {
         logger.error(ex.getMessage());
-        throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_error_procesando_xml"), ex);
+        throw new ServiceException(messageSource.getMessage(
+          "mensaje_error_procesando_xml", null, Locale.getDefault()), ex);
       } catch (ParseException ex) {
         logger.error(ex.getMessage());
-        throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_error_procesando_fecha"), ex);
+        throw new ServiceException(messageSource.getMessage(
+          "mensaje_error_procesando_fecha", null, Locale.getDefault()), ex);
       } catch (WebServiceClientException ex) {
         logger.error(ex.getMessage());
-        throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_token_wsaa_error"), ex);
+        throw new ServiceException(messageSource.getMessage(
+          "mensaje_token_wsaa_error", null, Locale.getDefault()), ex);
       }
     }
   }
@@ -118,7 +128,8 @@ public class AfipServiceImpl implements IAfipService {
     if (!configuracionDelSistemaService
         .getConfiguracionDelSistemaPorEmpresa(comprobante.getEmpresa())
         .isFacturaElectronicaHabilitada()) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_cds_fe_habilitada"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_cds_fe_habilitada", null, Locale.getDefault()));
     }
     if (comprobante.getTipoComprobante() != TipoDeComprobante.FACTURA_A
         && comprobante.getTipoComprobante() != TipoDeComprobante.FACTURA_B
@@ -129,37 +140,34 @@ public class AfipServiceImpl implements IAfipService {
         && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_B
         && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_CREDITO_C
         && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_C) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_comprobanteAFIP_invalido"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_comprobanteAFIP_invalido", null, Locale.getDefault()));
     } else {
       if ((comprobante.getTipoComprobante() == TipoDeComprobante.FACTURA_A
               || comprobante.getTipoComprobante() == TipoDeComprobante.FACTURA_B
               || comprobante.getTipoComprobante() == TipoDeComprobante.FACTURA_C)
           && facturaService.existeFacturaVentaAnteriorSinAutorizar(comprobante)) {
-        throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes")
-                .getString("mensaje_existe_comprobante_anterior_sin_autorizar"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_existe_comprobante_anterior_sin_autorizar", null, Locale.getDefault()));
       }
       if ((comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_A
               || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B
               || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_C)
           && notaService.existeNotaCreditoAnteriorSinAutorizar(comprobante)) {
-        throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes")
-                .getString("mensaje_existe_comprobante_anterior_sin_autorizar"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_existe_comprobante_anterior_sin_autorizar", null, Locale.getDefault()));
       }
       if ((comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_A
         || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_B
         || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C)
         && notaService.existeNotaDebitoAnteriorSinAutorizar(comprobante)) {
-        throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes")
-            .getString("mensaje_existe_comprobante_anterior_sin_autorizar"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_existe_comprobante_anterior_sin_autorizar", null, Locale.getDefault()));
       }
     }
     if (comprobante.getCAE() != 0) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_comprobanteAFIP_autorizado"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_comprobanteAFIP_autorizado", null, Locale.getDefault()));
     }
     FECAESolicitar fecaeSolicitud = new FECAESolicitar();
     FEAuthRequest feAuthRequest =
@@ -212,13 +220,16 @@ public class AfipServiceImpl implements IAfipService {
       comprobante.setNumFacturaAfip(siguienteNroComprobante);
     } catch (WebServiceClientException ex) {
       logger.error(ex.getMessage());
-      throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_autorizacion_error"), ex);
+      throw new ServiceException(messageSource.getMessage(
+        "mensaje_autorizacion_error", null, Locale.getDefault()), ex);
     } catch (ParseException ex) {
       logger.error(ex.getMessage());
-      throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_error_procesando_fecha"), ex);
+      throw new ServiceException(messageSource.getMessage(
+        "mensaje_error_procesando_fecha", null, Locale.getDefault()), ex);
     } catch (IOException ex) {
       logger.error(ex.getMessage());
-      throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_error_procesando_xml"), ex);
+      throw new ServiceException(messageSource.getMessage(
+        "mensaje_error_procesando_xml", null, Locale.getDefault()), ex);
     }
   }
 
@@ -256,8 +267,8 @@ public class AfipServiceImpl implements IAfipService {
         solicitud.setCbteTipo(13);
         break;
       default:
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_comprobanteAFIP_invalido"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_comprobanteAFIP_invalido", null, Locale.getDefault()));
     }
     solicitud.setPtoVta(nroPuntoDeVentaAfip);
     try {
@@ -266,11 +277,12 @@ public class AfipServiceImpl implements IAfipService {
       return response.getCbteNro() + 1;
     } catch (WebServiceClientException ex) {
       logger.error(ex.getMessage());
-      throw new ServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_siguiente_nro_comprobante_error"), ex);
+      throw new ServiceException(messageSource.getMessage(
+        "mensaje_siguiente_nro_comprobante_error", null, Locale.getDefault()));
     } catch (IOException ex) {
       logger.error(ex.getMessage());
-      throw new ServiceException(RESOURCE_BUNDLE.getString("mensaje_error_procesando_xml"), ex);
+      throw new ServiceException(messageSource.getMessage(
+        "mensaje_error_procesando_xml", null, Locale.getDefault()));
     }
   }
 
@@ -308,8 +320,8 @@ public class AfipServiceImpl implements IAfipService {
           detalle.setDocNro(0);
         } else {
           if (comprobante.getCliente().getIdFiscal() == null) {
-            throw new BusinessServiceException(
-                RESOURCE_BUNDLE.getString("mensaje_cliente_sin_idFiscal_error"));
+            throw new BusinessServiceException(messageSource.getMessage(
+              "mensaje_cliente_sin_idFiscal_error", null, Locale.getDefault()));
           }
           detalle.setDocTipo(docTipo);
           detalle.setDocNro(comprobante.getCliente().getIdFiscal());
@@ -323,8 +335,8 @@ public class AfipServiceImpl implements IAfipService {
           detalle.setDocNro(0);
         } else {
           if (comprobante.getCliente().getIdFiscal() == null) {
-            throw new BusinessServiceException(
-                RESOURCE_BUNDLE.getString("mensaje_cliente_sin_idFiscal_error"));
+            throw new BusinessServiceException(messageSource.getMessage(
+              "mensaje_cliente_sin_idFiscal_error", null, Locale.getDefault()));
           }
           detalle.setDocTipo(docTipo);
           detalle.setDocNro(comprobante.getCliente().getIdFiscal());
@@ -338,8 +350,8 @@ public class AfipServiceImpl implements IAfipService {
           detalle.setDocNro(0);
         } else {
           if (comprobante.getCliente().getIdFiscal() == null) {
-            throw new BusinessServiceException(
-                RESOURCE_BUNDLE.getString("mensaje_cliente_sin_idFiscal_error"));
+            throw new BusinessServiceException(messageSource.getMessage(
+              "mensaje_cliente_sin_idFiscal_error", null, Locale.getDefault()));
           }
           detalle.setDocTipo(docTipo);
           detalle.setDocNro(comprobante.getCliente().getIdFiscal());
@@ -352,8 +364,8 @@ public class AfipServiceImpl implements IAfipService {
           detalle.setDocNro(0);
         } else {
           if (comprobante.getCliente().getIdFiscal() == null) {
-            throw new BusinessServiceException(
-              RESOURCE_BUNDLE.getString("mensaje_cliente_sin_idFiscal_error"));
+            throw new BusinessServiceException(messageSource.getMessage(
+              "mensaje_cliente_sin_idFiscal_error", null, Locale.getDefault()));
           }
           detalle.setDocTipo(docTipo);
           detalle.setDocNro(comprobante.getCliente().getIdFiscal());
@@ -366,8 +378,8 @@ public class AfipServiceImpl implements IAfipService {
           detalle.setDocNro(0);
         } else {
           if (comprobante.getCliente().getIdFiscal() == null) {
-            throw new BusinessServiceException(
-              RESOURCE_BUNDLE.getString("mensaje_cliente_sin_idFiscal_error"));
+            throw new BusinessServiceException(messageSource.getMessage(
+              "mensaje_cliente_sin_idFiscal_error", null, Locale.getDefault()));
           }
           detalle.setDocTipo(docTipo);
           detalle.setDocNro(comprobante.getCliente().getIdFiscal());
@@ -380,16 +392,16 @@ public class AfipServiceImpl implements IAfipService {
           detalle.setDocNro(0);
         } else {
           if (comprobante.getCliente().getIdFiscal() == null) {
-            throw new BusinessServiceException(
-              RESOURCE_BUNDLE.getString("mensaje_cliente_sin_idFiscal_error"));
+            throw new BusinessServiceException(messageSource.getMessage(
+              "mensaje_cliente_sin_idFiscal_error", null, Locale.getDefault()));
           }
           detalle.setDocTipo(docTipo);
           detalle.setDocNro(comprobante.getCliente().getIdFiscal());
         }
         break;
       default:
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_comprobanteAFIP_invalido"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_comprobanteAFIP_invalido", null, Locale.getDefault()));
     }
     // Cantidad de registros del detalle del comprobante o lote de comprobantes de ingreso
     cabecera.setCantReg(1);

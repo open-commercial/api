@@ -25,9 +25,7 @@ import sic.util.CalculosComprobante;
 class FacturaServiceImplTest {
 
   @Mock private FacturaVentaRepository facturaVentaRepository;
-
   @Mock private ProductoServiceImpl productoService;
-
   @InjectMocks private FacturaServiceImpl facturaService;
 
   @Test

@@ -1,21 +1,22 @@
 package sic.service.impl;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.Empresa;
 import sic.modelo.Rubro;
 import sic.service.IRubroService;
-import sic.service.BusinessServiceException;
+import sic.exception.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
 import sic.repository.RubroRepository;
 
@@ -25,10 +26,13 @@ public class RubroServiceImpl implements IRubroService {
 
   private final RubroRepository rubroRepository;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private final MessageSource messageSource;
 
   @Autowired
-  public RubroServiceImpl(RubroRepository rubroRepository) {
+  public RubroServiceImpl(RubroRepository rubroRepository,
+                          MessageSource messageSource) {
     this.rubroRepository = rubroRepository;
+    this.messageSource = messageSource;
   }
 
   @Override
@@ -38,8 +42,8 @@ public class RubroServiceImpl implements IRubroService {
     if (rubro.isPresent() && !rubro.get().isEliminado()) {
       return rubro.get();
     } else {
-      throw new EntityNotFoundException(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_rubro_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_rubro_no_existente", null, Locale.getDefault()));
     }
   }
 
@@ -58,13 +62,13 @@ public class RubroServiceImpl implements IRubroService {
     // Nombre
     Rubro rubroDuplicado = this.getRubroPorNombre(rubro.getNombre(), rubro.getEmpresa());
     if (operacion.equals(TipoDeOperacion.ALTA) && rubroDuplicado != null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_rubro_nombre_duplicado"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_rubro_nombre_duplicado", null, Locale.getDefault()));
     }
     if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
         && (rubroDuplicado != null && rubroDuplicado.getId_Rubro() != rubro.getId_Rubro())) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_rubro_nombre_duplicado"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_rubro_nombre_duplicado", null, Locale.getDefault()));
     }
   }
 
@@ -89,8 +93,8 @@ public class RubroServiceImpl implements IRubroService {
   public void eliminar(long idRubro) {
     Rubro rubro = this.getRubroNoEliminadoPorId(idRubro);
     if (rubro == null) {
-      throw new EntityNotFoundException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_pedido_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_pedido_no_existente", null, Locale.getDefault()));
     }
     rubro.setEliminado(true);
     rubroRepository.save(rubro);

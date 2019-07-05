@@ -1,4 +1,4 @@
-package sic.service;
+package sic.exception;
 
 public class ServiceException extends RuntimeException {
 

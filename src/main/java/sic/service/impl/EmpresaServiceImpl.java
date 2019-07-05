@@ -1,13 +1,14 @@
 package sic.service.impl;
 
 import java.util.List;
-import java.util.ResourceBundle;
+import java.util.Locale;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.ConfiguracionDelSistema;
@@ -15,6 +16,7 @@ import sic.modelo.Empresa;
 import sic.service.*;
 import sic.modelo.TipoDeOperacion;
 import sic.repository.EmpresaRepository;
+import sic.exception.BusinessServiceException;
 
 @Service
 public class EmpresaServiceImpl implements IEmpresaService {
@@ -23,19 +25,21 @@ public class EmpresaServiceImpl implements IEmpresaService {
   private final IConfiguracionDelSistemaService configuracionDelSistemaService;
   private final IPhotoVideoUploader photoVideoUploader;
   private final IUbicacionService ubicacionService;
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
-  private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private final MessageSource messageSource;
 
   @Autowired
   public EmpresaServiceImpl(
       EmpresaRepository empresaRepository,
       IConfiguracionDelSistemaService configuracionDelSistemaService,
       IUbicacionService ubicacionService,
-      IPhotoVideoUploader photoVideoUploader) {
+      IPhotoVideoUploader photoVideoUploader,
+      MessageSource messageSource) {
     this.empresaRepository = empresaRepository;
     this.configuracionDelSistemaService = configuracionDelSistemaService;
     this.ubicacionService = ubicacionService;
     this.photoVideoUploader = photoVideoUploader;
+    this.messageSource = messageSource;
   }
 
   @Override
@@ -44,8 +48,8 @@ public class EmpresaServiceImpl implements IEmpresaService {
         .findById(idEmpresa)
         .orElseThrow(
             () ->
-                new EntityNotFoundException(
-                    RESOURCE_BUNDLE.getString("mensaje_empresa_no_existente")));
+                new EntityNotFoundException(messageSource.getMessage(
+                  "mensaje_empresa_no_existente", null, Locale.getDefault())));
   }
 
   @Override
@@ -68,13 +72,13 @@ public class EmpresaServiceImpl implements IEmpresaService {
     // Nombre
     Empresa empresaDuplicada = this.getEmpresaPorNombre(empresa.getNombre());
     if (operacion == TipoDeOperacion.ALTA && empresaDuplicada != null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_empresa_duplicado_nombre"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_empresa_duplicado_nombre", null, Locale.getDefault()));
     }
     if (operacion == TipoDeOperacion.ACTUALIZACION) {
       if (empresaDuplicada != null && empresaDuplicada.getId_Empresa() != empresa.getId_Empresa()) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_empresa_duplicado_nombre"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_empresa_duplicado_nombre", null, Locale.getDefault()));
       }
     }
     // ID Fiscal
@@ -82,20 +86,20 @@ public class EmpresaServiceImpl implements IEmpresaService {
     if (operacion == TipoDeOperacion.ALTA
         && empresaDuplicada != null
         && empresa.getIdFiscal() != null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_empresa_duplicado_cuip"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_empresa_duplicado_cuip", null, Locale.getDefault()));
     }
     if (operacion == TipoDeOperacion.ACTUALIZACION
         && empresaDuplicada != null
         && empresaDuplicada.getId_Empresa() != empresa.getId_Empresa()
         && empresa.getIdFiscal() != null) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_empresa_duplicado_cuip"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_empresa_duplicado_cuip", null, Locale.getDefault()));
     }
     if (empresa.getUbicacion() != null
       && empresa.getUbicacion().getLocalidad() == null) {
-      throw new BusinessServiceException(
-        RESOURCE_BUNDLE.getString("mensaje_ubicacion_sin_localidad"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_ubicacion_sin_localidad", null, Locale.getDefault()));
     }
   }
 
@@ -120,7 +124,7 @@ public class EmpresaServiceImpl implements IEmpresaService {
     validarOperacion(TipoDeOperacion.ALTA, empresa);
     empresa = empresaRepository.save(empresa);
     crearConfiguracionDelSistema(empresa);
-    LOGGER.warn("La Empresa {} se guardó correctamente.", empresa);
+    logger.warn("La Empresa {} se guardó correctamente.", empresa);
     return empresa;
   }
 
@@ -154,8 +158,8 @@ public class EmpresaServiceImpl implements IEmpresaService {
   @Override
   public String guardarLogo(long idEmpresa, byte[] imagen) {
     if (imagen.length > 1024000L)
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_error_tamanio_no_valido"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_error_tamanio_no_valido", null, Locale.getDefault()));
     return photoVideoUploader.subirImagen(Empresa.class.getSimpleName() + idEmpresa, imagen);
   }
 }

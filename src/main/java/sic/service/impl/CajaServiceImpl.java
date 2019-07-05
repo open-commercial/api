@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
+import org.springframework.context.MessageSource;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.service.*;
@@ -27,6 +28,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.exception.BusinessServiceException;
 import sic.util.FormatterFechaHora;
 import sic.util.Validator;
 import sic.repository.CajaRepository;
@@ -43,7 +45,7 @@ public class CajaServiceImpl implements ICajaService {
   private final IReciboService reciboService;
   private final IClockService clockService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+  private final MessageSource messageSource;
 
   @Autowired
   public CajaServiceImpl(
@@ -53,7 +55,8 @@ public class CajaServiceImpl implements ICajaService {
       IEmpresaService empresaService,
       IUsuarioService usuarioService,
       IReciboService reciboService,
-      IClockService clockService) {
+      IClockService clockService,
+      MessageSource messageSource) {
     this.cajaRepository = cajaRepository;
     this.formaDePagoService = formaDePagoService;
     this.gastoService = gastoService;
@@ -61,6 +64,7 @@ public class CajaServiceImpl implements ICajaService {
     this.usuarioService = usuarioService;
     this.reciboService = reciboService;
     this.clockService = clockService;
+    this.messageSource = messageSource;
   }
 
   @Override
@@ -69,17 +73,18 @@ public class CajaServiceImpl implements ICajaService {
     Caja ultimaCaja = this.getUltimaCaja(caja.getEmpresa().getId_Empresa());
     if (ultimaCaja != null) {
       if (ultimaCaja.getEstado() == EstadoCaja.ABIERTA) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_caja_anterior_abierta"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_caja_anterior_abierta", null, Locale.getDefault()));
       }
       if (Validator.compararDias(ultimaCaja.getFechaApertura(), caja.getFechaApertura()) >= 0) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_fecha_apertura_no_valida"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_fecha_apertura_no_valida", null, Locale.getDefault()));
       }
     }
     // Duplicados
     if (cajaRepository.findById(caja.getId_Caja()) != null) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_caja_duplicada"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_caja_duplicada", null, Locale.getDefault()));
     }
   }
 
@@ -87,16 +92,16 @@ public class CajaServiceImpl implements ICajaService {
   public void validarMovimiento(Date fechaMovimiento, long idEmpresa) {
     Caja caja = this.getUltimaCaja(idEmpresa);
     if (caja == null) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_caja_no_existente"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_caja_no_existente", null, Locale.getDefault()));
     }
     if (caja.getEstado().equals(EstadoCaja.CERRADA)) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_caja_cerrada"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_caja_cerrada", null, Locale.getDefault()));
     }
     if (fechaMovimiento.before(caja.getFechaApertura())) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_caja_movimiento_fecha_no_valida"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_caja_movimiento_fecha_no_valida", null, Locale.getDefault()));
     }
   }
 
@@ -123,7 +128,8 @@ public class CajaServiceImpl implements ICajaService {
   public void eliminar(Long idCaja) {
     Caja caja = this.getCajaPorId(idCaja);
     if (caja == null) {
-      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_caja_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_caja_no_existente", null, Locale.getDefault()));
     }
     caja.setEliminada(true);
     this.actualizar(caja);
@@ -145,8 +151,8 @@ public class CajaServiceImpl implements ICajaService {
     if (caja.isPresent() && !caja.get().isEliminada()) {
       return caja.get();
     } else {
-      throw new EntityNotFoundException(
-        RESOURCE_BUNDLE.getString("mensaje_caja_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_caja_no_existente", null, Locale.getDefault()));
     }
   }
 
@@ -168,8 +174,8 @@ public class CajaServiceImpl implements ICajaService {
     // Fecha
     if (criteria.isBuscaPorFecha()
         && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_caja_fechas_invalidas"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_caja_fechas_invalidas", null, Locale.getDefault()));
     }
     if (criteria.isBuscaPorFecha()) {
       Calendar cal = new GregorianCalendar();
@@ -405,7 +411,8 @@ public class CajaServiceImpl implements ICajaService {
     Caja caja = getCajaPorId(idCaja);
     Caja ultimaCaja = this.getUltimaCaja(caja.getEmpresa().getId_Empresa());
     if (ultimaCaja == null) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_caja_no_existente"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_caja_no_existente", null, Locale.getDefault()));
     }
     if (caja.getId_Caja() == ultimaCaja.getId_Caja()) {
       caja.setSaldoSistema(null);
@@ -416,8 +423,8 @@ public class CajaServiceImpl implements ICajaService {
       caja.setFechaCierre(null);
       this.actualizar(caja);
     } else {
-      throw new EntityNotFoundException(
-          RESOURCE_BUNDLE.getString("mensaje_caja_re_apertura_no_valida"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_caja_re_apertura_no_valida", null, Locale.getDefault()));
     }
   }
 

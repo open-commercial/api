@@ -5,25 +5,33 @@ import com.cloudinary.Transformation;
 import com.cloudinary.utils.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
-import sic.service.BusinessServiceException;
 import sic.service.IPhotoVideoUploader;
+import sic.exception.ServiceException;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 @Service
 public class PhotoVideoUploaderImpl implements IPhotoVideoUploader {
 
   @Value("${CLOUDINARY_URL}")
   private String cloudinaryUrl;
+
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+  private final MessageSource messageSource;
+
+  @Autowired
+  public PhotoVideoUploaderImpl(MessageSource messageSource) {
+    this.messageSource = messageSource;
+  }
 
   @Override
   public String subirImagen(String nombreImagen, byte[] imagen) {
@@ -40,8 +48,8 @@ public class PhotoVideoUploaderImpl implements IPhotoVideoUploader {
       logger.warn("La imagen {} se guardó correctamente.", nombreImagen);
       Files.delete(path);
     } catch (IOException ex) {
-      throw new BusinessServiceException(
-              RESOURCE_BUNDLE.getString("mensaje_error_al_subir_imagen"), ex);
+      throw new ServiceException(messageSource.getMessage(
+        "mensaje_error_al_subir_imagen", null, Locale.getDefault()), ex);
     }
     return urlImagen;
   }
@@ -53,8 +61,8 @@ public class PhotoVideoUploaderImpl implements IPhotoVideoUploader {
       cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
       logger.warn("La imagen {} se eliminó correctamente.", publicId);
     } catch (IOException ex) {
-      throw new BusinessServiceException(
-              RESOURCE_BUNDLE.getString("mensaje_error_al_borrar_imagen"), ex);
+      throw new ServiceException(messageSource.getMessage(
+        "mensaje_error_al_borrar_imagen", null, Locale.getDefault()), ex);
     }
   }
 }

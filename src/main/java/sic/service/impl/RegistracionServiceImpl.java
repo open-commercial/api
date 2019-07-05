@@ -3,6 +3,7 @@ package sic.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Cliente;
@@ -10,8 +11,7 @@ import sic.modelo.Usuario;
 import sic.service.*;
 
 import java.math.BigDecimal;
-import java.text.MessageFormat;
-import java.util.ResourceBundle;
+import java.util.Locale;
 
 @Service
 @Transactional
@@ -22,18 +22,20 @@ public class RegistracionServiceImpl implements IRegistracionService {
   private final ICorreoElectronicoService correoElectronicoService;
   private final IConfiguracionDelSistemaService configuracionDelSistemaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+  private final MessageSource messageSource;
 
   @Autowired
   public RegistracionServiceImpl(
       IUsuarioService usuarioService,
       IClienteService clienteService,
       ICorreoElectronicoService correoElectronicoService,
-      IConfiguracionDelSistemaService cds) {
+      IConfiguracionDelSistemaService cds,
+      MessageSource messageSource) {
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
     this.correoElectronicoService = correoElectronicoService;
     this.configuracionDelSistemaService = cds;
+    this.messageSource = messageSource;
   }
 
   @Override
@@ -50,13 +52,16 @@ public class RegistracionServiceImpl implements IRegistracionService {
             .getConfiguracionDelSistemaPorEmpresa(cliente.getEmpresa())
             .getEmailUsername(),
         "Registración de cuenta nueva",
-        MessageFormat.format(
-            RESOURCE_BUNDLE.getString("mensaje_correo_registracion"),
-            usuario.getNombre() + " " + usuario.getApellido(),
-            cliente.getCategoriaIVA(),
-            cliente.getNombreFiscal(),
-            cliente.getTelefono(),
-            usuario.getUsername()),
+        messageSource.getMessage(
+            "mensaje_correo_registracion",
+            new Object[] {
+              usuario.getNombre() + " " + usuario.getApellido(),
+              cliente.getCategoriaIVA(),
+              cliente.getNombreFiscal(),
+              cliente.getTelefono(),
+              usuario.getUsername(),
+            },
+            Locale.getDefault()),
         null,
         null);
     logger.warn("El mail de registración para el usuario {} se envió.", usuario.getUsername());

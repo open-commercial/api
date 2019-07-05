@@ -1,16 +1,19 @@
 package sic.controller;
 
 import java.util.List;
-import java.util.ResourceBundle;
+import java.util.Locale;
+
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
+import sic.exception.ForbiddenException;
 import sic.modelo.BusquedaUsuarioCriteria;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
@@ -26,13 +29,18 @@ public class UsuarioController {
   private final IAuthService authService;
   private final ModelMapper modelMapper;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
+  private final MessageSource messageSource;
 
   @Autowired
   public UsuarioController(
-      IUsuarioService usuarioService, IAuthService authService, ModelMapper modelMapper) {
+      IUsuarioService usuarioService,
+      IAuthService authService,
+      ModelMapper modelMapper,
+      MessageSource messageSource) {
     this.usuarioService = usuarioService;
     this.authService = authService;
     this.modelMapper = modelMapper;
+    this.messageSource = messageSource;
   }
 
   @GetMapping("/usuarios/{idUsuario}")
@@ -101,8 +109,8 @@ public class UsuarioController {
     Usuario usuarioLoggedIn = this.getUsuarioPorId((int) claims.get("idUsuario"));
     if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
         && (usuarioDTO.getRoles().size() != 1 || !usuarioDTO.getRoles().contains(Rol.COMPRADOR))) {
-      throw new ForbiddenException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+      throw new ForbiddenException(messageSource.getMessage(
+        "mensaje_usuario_rol_no_valido", null, Locale.getDefault()));
     }
     Usuario usuario = modelMapper.map(usuarioDTO, Usuario.class);
     return usuarioService.guardar(usuario);
@@ -143,8 +151,8 @@ public class UsuarioController {
       if (!usuarioSeModificaASiMismo)
         usuarioService.actualizarToken("", usuarioPorActualizar.getId_Usuario());
     } else {
-      throw new ForbiddenException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_usuario_rol_no_valido"));
+      throw new ForbiddenException(messageSource.getMessage(
+        "mensaje_usuario_rol_no_valido", null, Locale.getDefault()));
     }
   }
 

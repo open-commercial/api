@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.DateExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
@@ -20,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.service.BusinessServiceException;
+import sic.exception.BusinessServiceException;
 import sic.repository.GastoRepository;
 import sic.service.ICajaService;
 import sic.service.IEmpresaService;
@@ -33,16 +34,20 @@ public class GastoServiceImpl implements IGastoService {
   private final GastoRepository gastoRepository;
   private final IEmpresaService empresaService;
   private final ICajaService cajaService;
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private final MessageSource messageSource;
 
   @Autowired
   @Lazy
   public GastoServiceImpl(
-      GastoRepository gastoRepository, IEmpresaService empresaService, ICajaService cajaService) {
+      GastoRepository gastoRepository,
+      IEmpresaService empresaService,
+      ICajaService cajaService,
+      MessageSource messageSource) {
     this.gastoRepository = gastoRepository;
     this.empresaService = empresaService;
     this.cajaService = cajaService;
+    this.messageSource = messageSource;
   }
 
   @Override
@@ -52,8 +57,8 @@ public class GastoServiceImpl implements IGastoService {
     if (gasto.isPresent() && !gasto.get().isEliminado()) {
       return gasto.get();
     } else {
-      throw new EntityNotFoundException(
-        ResourceBundle.getBundle("Mensajes").getString("mensaje_gasto_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_gasto_no_existente", null, Locale.getDefault()));
     }
   }
 
@@ -61,8 +66,8 @@ public class GastoServiceImpl implements IGastoService {
   public void validarOperacion(Gasto gasto) {
     this.cajaService.validarMovimiento(gasto.getFecha(), gasto.getEmpresa().getId_Empresa());
     if (gastoRepository.findById(gasto.getId_Gasto()).isPresent()) {
-      throw new BusinessServiceException(
-          ResourceBundle.getBundle("Mensajes").getString("mensaje_gasto_duplicada"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_gasto_duplicada", null, Locale.getDefault()));
     }
   }
 
@@ -74,8 +79,8 @@ public class GastoServiceImpl implements IGastoService {
   private BooleanBuilder getBuilder(BusquedaGastoCriteria criteria) {
     if (criteria.isBuscaPorFecha()
         && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_pedido_fechas_busqueda_invalidas"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_pedido_fechas_busqueda_invalidas", null, Locale.getDefault()));
     }
     if (criteria.isBuscaPorFecha()) {
       Calendar cal = new GregorianCalendar();
@@ -150,7 +155,8 @@ public class GastoServiceImpl implements IGastoService {
         .getUltimaCaja(gastoParaEliminar.getEmpresa().getId_Empresa())
         .getEstado()
         .equals(EstadoCaja.CERRADA)) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_caja_cerrada"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_caja_cerrada", null, Locale.getDefault()));
     }
     gastoParaEliminar.setEliminado(true);
     gastoRepository.save(gastoParaEliminar);

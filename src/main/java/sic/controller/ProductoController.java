@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductoDTO;
 import sic.service.*;
+import sic.exception.BusinessServiceException;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -33,6 +35,7 @@ public class ProductoController {
   private final IAuthService authService;
   private final ModelMapper modelMapper;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
+  private final MessageSource messageSource;
 
   @Autowired
   public ProductoController(
@@ -43,7 +46,8 @@ public class ProductoController {
     IEmpresaService empresaService,
     IClienteService clienteService,
     IAuthService authService,
-    ModelMapper modelMapper) {
+    ModelMapper modelMapper,
+    MessageSource messageSource) {
     this.productoService = productoService;
     this.medidaService = medidaService;
     this.rubroService = rubroService;
@@ -52,6 +56,7 @@ public class ProductoController {
     this.clienteService = clienteService;
     this.authService = authService;
     this.modelMapper = modelMapper;
+    this.messageSource = messageSource;
   }
 
   @JsonView(Views.Public.class)
@@ -208,7 +213,7 @@ public class ProductoController {
       Long idRubro,
       Long idProveedor,
       boolean soloFantantes,
-      boolean enStock,
+      boolean soloEnStock,
       Boolean publicos,
       Boolean destacados,
       Integer pagina,
@@ -246,7 +251,7 @@ public class ProductoController {
             .idProveedor(idProveedor)
             .idEmpresa(idEmpresa)
             .listarSoloFaltantes(soloFantantes)
-            .listarSoloEnStock(enStock)
+            .listarSoloEnStock(soloEnStock)
             .buscaPorVisibilidad(publicos != null)
             .publico(publicos)
             .buscaPorDestacado(destacados != null)
@@ -345,7 +350,7 @@ public class ProductoController {
       @RequestParam(required = false) Long idRubro,
       @RequestParam(required = false) Long idProveedor,
       @RequestParam(required = false) boolean soloFantantes,
-      @RequestParam(required = false) boolean enStock,
+      @RequestParam(required = false) boolean soloEnStock,
       @RequestParam(required = false) Boolean publicos,
       @RequestParam(required = false) Boolean destacados) {
     BusquedaProductoCriteria criteria =
@@ -360,7 +365,7 @@ public class ProductoController {
             .idProveedor(idProveedor)
             .idEmpresa(idEmpresa)
             .listarSoloFaltantes(soloFantantes)
-            .listarSoloEnStock(enStock)
+            .listarSoloEnStock(soloEnStock)
             .buscaPorVisibilidad(publicos != null)
             .publico(publicos)
             .buscaPorDestacado(destacados != null)
@@ -454,8 +459,8 @@ public class ProductoController {
             productoService.getListaDePreciosPorEmpresa(productos, idEmpresa, formato);
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
       default:
-        throw new BusinessServiceException(
-            ResourceBundle.getBundle("Mensajes").getString("mensaje_formato_no_valido"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_formato_no_valido", null, Locale.getDefault()));
     }
   }
 }

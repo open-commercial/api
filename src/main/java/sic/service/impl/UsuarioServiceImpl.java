@@ -2,13 +2,12 @@ package sic.service.impl;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 
@@ -17,6 +16,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +27,8 @@ import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.service.*;
 import sic.repository.UsuarioRepository;
+import sic.exception.BusinessServiceException;
+import sic.exception.ServiceException;
 
 @Service
 @Transactional
@@ -38,7 +40,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   private final IClienteService clienteService;
   private final ICorreoElectronicoService correoElectronicoService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("Mensajes");
+  private final MessageSource messageSource;
 
   @Autowired
   @Lazy
@@ -46,11 +48,13 @@ public class UsuarioServiceImpl implements IUsuarioService {
       UsuarioRepository usuarioRepository,
       IEmpresaService empresaService,
       IClienteService clienteService,
-      ICorreoElectronicoService correoElectronicoService) {
+      ICorreoElectronicoService correoElectronicoService,
+      MessageSource messageSource) {
     this.usuarioRepository = usuarioRepository;
     this.empresaService = empresaService;
     this.clienteService = clienteService;
     this.correoElectronicoService = correoElectronicoService;
+    this.messageSource = messageSource;
   }
 
   public String encriptarConMD5(String password) {
@@ -63,8 +67,9 @@ public class UsuarioServiceImpl implements IUsuarioService {
       }
       return sb.toString();
     } catch (NoSuchAlgorithmException ex) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_encriptacion_no_disponible"));
+      throw new ServiceException(
+          messageSource.getMessage("mensaje_encriptacion_no_disponible", null, Locale.getDefault()),
+          ex);
     }
   }
 
@@ -75,8 +80,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
     if (usuario.isPresent() && !usuario.get().isEliminado()) {
       return usuario.get();
     } else {
-      throw new EntityNotFoundException(
-        RESOURCE_BUNDLE.getString("mensaje_usuario_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_usuario_no_existente", null, Locale.getDefault()));
     }
   }
 
@@ -100,10 +105,12 @@ public class UsuarioServiceImpl implements IUsuarioService {
             credencial.getUsername(),
             this.encriptarConMD5(credencial.getPassword()));
     if (usuario == null) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_usuario_logInInvalido"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_usuario_logInInvalido", null, Locale.getDefault()));
     }
     if (!usuario.isHabilitado()) {
-      throw new BusinessServiceException(RESOURCE_BUNDLE.getString("mensaje_usuario_no_habilitado"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_usuario_no_habilitado", null, Locale.getDefault()));
     }
     return usuario;
   }
@@ -175,20 +182,20 @@ public class UsuarioServiceImpl implements IUsuarioService {
   public void validarOperacion(TipoDeOperacion operacion, Usuario usuario) {
     // Username sin espacios en blanco
     if (usuario.getUsername().contains(" ")) {
-      throw new BusinessServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_usuario_username_con_espacios"));
+      throw new BusinessServiceException(messageSource.getMessage(
+        "mensaje_usuario_username_con_espacios", null, Locale.getDefault()));
     }
     // Duplicados
     if (operacion == TipoDeOperacion.ALTA) {
       // username
       if (usuarioRepository.findByUsernameAndEliminado(usuario.getUsername(), false) != null) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_usuario_duplicado_username"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_usuario_duplicado_username", null, Locale.getDefault()));
       }
       // email
       if (usuarioRepository.findByEmailAndEliminado(usuario.getEmail(), false) != null) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_usuario_duplicado_email"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_usuario_duplicado_email", null, Locale.getDefault()));
       }
     }
     if (operacion == TipoDeOperacion.ACTUALIZACION) {
@@ -196,14 +203,14 @@ public class UsuarioServiceImpl implements IUsuarioService {
       Usuario usuarioGuardado =
           usuarioRepository.findByUsernameAndEliminado(usuario.getUsername(), false);
       if (usuarioGuardado != null && usuarioGuardado.getId_Usuario() != usuario.getId_Usuario()) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_usuario_duplicado_username"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_usuario_duplicado_username", null, Locale.getDefault()));
       }
       // email
       usuarioGuardado = usuarioRepository.findByEmailAndEliminado(usuario.getEmail(), false);
       if (usuarioGuardado != null && usuarioGuardado.getId_Usuario() != usuario.getId_Usuario()) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_usuario_duplicado_email"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_usuario_duplicado_email", null, Locale.getDefault()));
       }
     }
     // Ultimo usuario administrador
@@ -214,8 +221,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
       List<Usuario> administradores = this.getUsuariosPorRol(Rol.ADMINISTRADOR).getContent();
       if (administradores.size() == 1
           && administradores.get(0).getId_Usuario() == usuario.getId_Usuario()) {
-        throw new BusinessServiceException(
-            RESOURCE_BUNDLE.getString("mensaje_usuario_ultimoAdmin"));
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_usuario_ultimoAdmin", null, Locale.getDefault()));
       }
     }
   }
@@ -257,7 +264,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
   @Override
   public int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada) {
     if (empresaService.getEmpresaPorId(idEmpresaPredeterminada) == null) {
-      throw new EntityNotFoundException(RESOURCE_BUNDLE.getString("mensaje_empresa_no_existente"));
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_empresa_no_existente", null, Locale.getDefault()));
     }
     return usuarioRepository.updateIdEmpresa(idUsuario, idEmpresaPredeterminada);
   }
@@ -266,8 +274,9 @@ public class UsuarioServiceImpl implements IUsuarioService {
   public void enviarEmailDeRecuperacion(long idEmpresa, String email, String host) {
     Usuario usuario = usuarioRepository.findByEmailAndEliminado(email, false);
     if (usuario == null || !usuario.isHabilitado()) {
-      throw new ServiceException(
-          RESOURCE_BUNDLE.getString("mensaje_correo_no_existente_or_deshabilitado"));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_correo_no_existente_or_deshabilitado", null, Locale.getDefault()));
     }
     String passwordRecoveryKey = RandomStringUtils.random(250, true, true);
     this.actualizarPasswordRecoveryKey(passwordRecoveryKey, usuario.getId_Usuario());
@@ -276,11 +285,10 @@ public class UsuarioServiceImpl implements IUsuarioService {
         usuario.getEmail(),
         "",
         "Recuperación de contraseña",
-        MessageFormat.format(
-            RESOURCE_BUNDLE.getString("mensaje_correo_recuperacion"),
-            host,
-            passwordRecoveryKey,
-            usuario.getId_Usuario()),
+        messageSource.getMessage(
+            "mensaje_correo_recuperacion",
+            new Object[] {host, passwordRecoveryKey, usuario.getId_Usuario()},
+            Locale.getDefault()),
         null,
         null);
   }
@@ -303,9 +311,10 @@ public class UsuarioServiceImpl implements IUsuarioService {
     Cliente clienteVinculado = clienteService.getClientePorCredencial(usuario);
     if (clienteVinculado != null)
       throw new BusinessServiceException(
-          MessageFormat.format(
-              RESOURCE_BUNDLE.getString("mensaje_usuario_eliminar_con_credencial"),
-              clienteVinculado.getNombreFiscal()));
+          messageSource.getMessage(
+              "mensaje_usuario_eliminar_con_credencial",
+              new Object[] {clienteVinculado.getNombreFiscal()},
+              Locale.getDefault()));
     usuario.setEliminado(true);
     usuarioRepository.save(usuario);
     logger.warn("El Usuario {} se eliminó correctamente.", usuario);
