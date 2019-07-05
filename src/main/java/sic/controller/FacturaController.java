@@ -8,9 +8,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -36,7 +33,6 @@ public class FacturaController {
   private final IReciboService reciboService;
   private final ModelMapper modelMapper;
   private final IAuthService authService;
-  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
   @Autowired
@@ -169,51 +165,21 @@ public class FacturaController {
     return facturaService.getRenglonesDeLaFacturaModificadosParaCredito(idFactura);
   }
 
-  @GetMapping("/facturas/compra/busqueda/criteria")
+  @PostMapping("/facturas/compra/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Page<FacturaCompra> buscarFacturaCompra(
-    @RequestParam Long idEmpresa,
-    @RequestParam(required = false) Long desde,
-    @RequestParam(required = false) Long hasta,
-    @RequestParam(required = false) Long idProveedor,
-    @RequestParam(required = false) Integer nroSerie,
-    @RequestParam(required = false) Integer nroFactura,
-    @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-    @RequestParam(required = false) Long idProducto,
-    @RequestParam(required = false) Integer pagina,
-    @RequestParam(required = false) String ordenarPor,
-    @RequestParam(required = false) String sentido) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if ((desde != null) && (hasta != null)) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    if (pagina == null || pagina < 0) {
-      pagina = 0;
-    }
-    BusquedaFacturaCompraCriteria criteria =
-      BusquedaFacturaCompraCriteria.builder()
-        .idEmpresa(idEmpresa)
-        .buscaPorFecha((desde != null) && (hasta != null))
-        .fechaDesde(fechaDesde.getTime())
-        .fechaHasta(fechaHasta.getTime())
-        .buscaPorProveedor(idProveedor != null)
-        .idProveedor(idProveedor)
-        .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
-        .numSerie((nroSerie != null) ? nroSerie : 0)
-        .numFactura((nroFactura != null) ? nroFactura : 0)
-        .buscaPorProducto(idProducto != null)
-        .idProducto(idProducto)
-        .buscaPorTipoComprobante(tipoDeComprobante != null)
-        .tipoComprobante(tipoDeComprobante)
-        .cantRegistros(0)
-        .pageable(this.getPageable(pagina, ordenarPor, sentido))
-        .build();
+      @RequestBody BusquedaFacturaCompraCriteria criteria) {
+    criteria.setBuscaPorFecha(
+        (criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null));
+    criteria.setBuscaPorProveedor(criteria.getIdProveedor() != null);
+    criteria.setBuscaPorNumeroFactura(
+        (criteria.getNumSerie() != 0L) && (criteria.getNumFactura() != 0L));
+    criteria.setBuscaPorProducto(criteria.getIdProducto() != null);
+    criteria.setBuscaPorTipoComprobante(criteria.getTipoComprobante() != null);
     return facturaService.buscarFacturaCompra(criteria);
   }
 
-  @GetMapping("/facturas/venta/busqueda/criteria")
+  @PostMapping("/facturas/venta/busqueda/criteria")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -222,72 +188,20 @@ public class FacturaController {
     Rol.COMPRADOR
   })
   public Page<FacturaVenta> buscarFacturaVenta(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) Long idCliente,
-      @RequestParam(required = false) Integer nroSerie,
-      @RequestParam(required = false) Integer nroFactura,
-      @RequestParam(required = false) Long idViajante,
-      @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-      @RequestParam(required = false) Long idUsuario,
-      @RequestParam(required = false) Long nroPedido,
-      @RequestParam(required = false) Long idProducto,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido,
+      @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if ((desde != null) && (hasta != null)) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    if (pagina == null || pagina < 0) {
-      pagina = 0;
-    }
-    BusquedaFacturaVentaCriteria criteria =
-        BusquedaFacturaVentaCriteria.builder()
-            .idEmpresa(idEmpresa)
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .buscaCliente(idCliente != null)
-            .idCliente(idCliente)
-            .buscaUsuario(idUsuario != null)
-            .idUsuario(idUsuario)
-            .buscaViajante(idViajante != null)
-            .idViajante(idViajante)
-            .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
-            .numSerie((nroSerie != null) ? nroSerie : 0)
-            .numFactura((nroFactura != null) ? nroFactura : 0)
-            .buscarPorPedido(nroPedido != null)
-            .nroPedido((nroPedido != null) ? nroPedido : 0)
-            .buscaPorProducto(idProducto != null)
-            .idProducto(idProducto)
-            .buscaPorTipoComprobante(tipoDeComprobante != null)
-            .tipoComprobante(tipoDeComprobante)
-            .cantRegistros(0)
-            .pageable(this.getPageable(pagina, ordenarPor, sentido))
-            .build();
+    criteria.setBuscaPorFecha(
+      (criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null));
+    criteria.setBuscaCliente(criteria.getIdCliente() != null);
+    criteria.setBuscaPorNumeroFactura(
+      (criteria.getNumSerie() != 0L) && (criteria.getNumFactura() != 0L));
+    criteria.setBuscaPorProducto(criteria.getIdProducto() != null);
+    criteria.setBuscaPorTipoComprobante(criteria.getTipoComprobante() != null);
+    criteria.setBuscaUsuario(criteria.getIdUsuario() != null);
+    criteria.setBuscaViajante(criteria.getIdViajante() != null);
+    criteria.setBuscarPorPedido(criteria.getNroPedido() != 0L);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return facturaService.buscarFacturaVenta(criteria, (int) claims.get("idUsuario"));
-  }
-
-  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
-    String ordenDefault = "fecha";
-    if (ordenarPor == null || sentido == null) {
-      return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
-    } else {
-      switch (sentido) {
-        case "ASC":
-          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
-        case "DESC":
-          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
-        default:
-          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
-      }
-    }
   }
 
     @GetMapping("/facturas/compra/tipos/empresas/{idEmpresa}/proveedores/{idProveedor}")
@@ -352,7 +266,7 @@ public class FacturaController {
         return facturaService.calcularRenglon(tipoDeComprobante, movimiento, cantidad, idProducto, descuentoPorcentaje, false);
     }
 
-  @GetMapping("/facturas/total-facturado-venta/criteria")
+  @PostMapping("/facturas/total-facturado-venta/criteria")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -361,217 +275,83 @@ public class FacturaController {
     Rol.COMPRADOR
   })
   public BigDecimal calcularTotalFacturadoVenta(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) Long idCliente,
-      @RequestParam(required = false) Integer nroSerie,
-      @RequestParam(required = false) Integer nroFactura,
-      @RequestParam(required = false) Long idViajante,
-      @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-      @RequestParam(required = false) Long idUsuario,
-      @RequestParam(required = false) Long nroPedido,
-      @RequestParam(required = false) Long idProducto,
+      @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if ((desde != null) && (hasta != null)) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    BusquedaFacturaVentaCriteria criteria =
-        BusquedaFacturaVentaCriteria.builder()
-            .idEmpresa(idEmpresa)
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .buscaCliente(idCliente != null)
-            .idCliente(idCliente)
-            .buscaUsuario(idUsuario != null)
-            .idUsuario(idUsuario)
-            .buscaViajante(idViajante != null)
-            .idViajante(idViajante)
-            .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
-            .numSerie((nroSerie != null) ? nroSerie : 0)
-            .numFactura((nroFactura != null) ? nroFactura : 0)
-            .buscarPorPedido(nroPedido != null)
-            .nroPedido((nroPedido != null) ? nroPedido : 0)
-            .buscaPorProducto(idProducto !=null)
-            .idProducto((idProducto != null) ? idProducto : 0)
-            .buscaPorTipoComprobante(tipoDeComprobante != null)
-            .tipoComprobante(tipoDeComprobante)
-            .cantRegistros(0)
-            .build();
+    criteria.setBuscaPorFecha(
+      (criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null));
+    criteria.setBuscaCliente(criteria.getIdCliente() != null);
+    criteria.setBuscaPorNumeroFactura(
+      (criteria.getNumSerie() != 0L) && (criteria.getNumFactura() != 0L));
+    criteria.setBuscaPorProducto(criteria.getIdProducto() != null);
+    criteria.setBuscaPorTipoComprobante(criteria.getTipoComprobante() != null);
+    criteria.setBuscaUsuario(criteria.getIdUsuario() != null);
+    criteria.setBuscaViajante(criteria.getIdViajante() != null);
+    criteria.setBuscarPorPedido(criteria.getNroPedido() != 0L);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return facturaService.calcularTotalFacturadoVenta(criteria, (int) claims.get("idUsuario"));
   }
 
-  @GetMapping("/facturas/total-facturado-compra/criteria")
+  @PostMapping("/facturas/total-facturado-compra/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public BigDecimal calcularTotalFacturadoCompra(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-      @RequestParam(required = false) Integer nroSerie,
-      @RequestParam(required = false) Integer nroFactura,
-      @RequestParam(required = false) Long idProducto) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if ((desde != null) && (hasta != null)) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    BusquedaFacturaCompraCriteria criteria =
-        BusquedaFacturaCompraCriteria.builder()
-            .idEmpresa(idEmpresa)
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .buscaPorProveedor(idProveedor != null)
-            .idProveedor(idProveedor)
-            .buscaPorTipoComprobante(tipoDeComprobante != null)
-            .tipoComprobante(tipoDeComprobante)
-            .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
-            .numSerie((nroSerie != null) ? nroSerie : 0)
-            .numFactura((nroFactura != null) ? nroFactura : 0)
-            .cantRegistros(0)
-            .buscaPorProducto(idProducto != null)
-            .idProducto((idProducto != null) ? idProducto : 0)
-            .build();
+      @RequestBody BusquedaFacturaCompraCriteria criteria) {
+    criteria.setBuscaPorFecha(
+        (criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null));
+    criteria.setBuscaPorProveedor(criteria.getIdProveedor() != null);
+    criteria.setBuscaPorNumeroFactura(
+        (criteria.getNumSerie() != 0L) && (criteria.getNumFactura() != 0L));
+    criteria.setBuscaPorProducto(criteria.getIdProducto() != null);
+    criteria.setBuscaPorTipoComprobante(criteria.getTipoComprobante() != null);
     return facturaService.calcularTotalFacturadoCompra(criteria);
   }
 
-  @GetMapping("/facturas/total-iva-venta/criteria")
+  @PostMapping("/facturas/total-iva-venta/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public BigDecimal calcularIvaVenta(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) Long idCliente,
-      @RequestParam(required = false) Integer nroSerie,
-      @RequestParam(required = false) Integer nroFactura,
-      @RequestParam(required = false) Long idViajante,
-      @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-      @RequestParam(required = false) Long idUsuario,
-      @RequestParam(required = false) Long nroPedido,
-      @RequestParam(required = false) Long idProducto,
+      @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if ((desde != null) && (hasta != null)) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    BusquedaFacturaVentaCriteria criteria =
-        BusquedaFacturaVentaCriteria.builder()
-            .idEmpresa(idEmpresa)
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .buscaCliente(idCliente != null)
-            .idCliente(idCliente)
-            .buscaUsuario(idUsuario != null)
-            .idUsuario(idUsuario)
-            .buscaViajante(idViajante != null)
-            .idViajante(idViajante)
-            .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
-            .numSerie((nroSerie != null) ? nroSerie : 0)
-            .numFactura((nroFactura != null) ? nroFactura : 0)
-            .buscarPorPedido(nroPedido != null)
-            .nroPedido((nroPedido != null) ? nroPedido : 0)
-            .buscaPorProducto(idProducto != null)
-            .idProducto((idProducto != null) ? idProducto : 0)
-            .buscaPorTipoComprobante(tipoDeComprobante != null)
-            .tipoComprobante(tipoDeComprobante)
-            .cantRegistros(0)
-            .build();
+    criteria.setBuscaPorFecha(
+      (criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null));
+    criteria.setBuscaCliente(criteria.getIdCliente() != null);
+    criteria.setBuscaPorNumeroFactura(
+      (criteria.getNumSerie() != 0L) && (criteria.getNumFactura() != 0L));
+    criteria.setBuscaPorProducto(criteria.getIdProducto() != null);
+    criteria.setBuscaPorTipoComprobante(criteria.getTipoComprobante() != null);
+    criteria.setBuscaUsuario(criteria.getIdUsuario() != null);
+    criteria.setBuscaViajante(criteria.getIdViajante() != null);
+    criteria.setBuscarPorPedido(criteria.getNroPedido() != 0L);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return facturaService.calcularIvaVenta(criteria, (int) claims.get("idUsuario"));
   }
 
-  @GetMapping("/facturas/total-iva-compra/criteria")
+  @PostMapping("/facturas/total-iva-compra/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public BigDecimal calcularTotalIvaCompra(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-      @RequestParam(required = false) Integer nroSerie,
-      @RequestParam(required = false) Integer nroFactura,
-      @RequestParam(required = false) Long idProducto) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if ((desde != null) && (hasta != null)) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    BusquedaFacturaCompraCriteria criteria =
-        BusquedaFacturaCompraCriteria.builder()
-            .idEmpresa(idEmpresa)
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .buscaPorProveedor(idProveedor != null)
-            .idProveedor(idProveedor)
-            .buscaPorTipoComprobante(tipoDeComprobante != null)
-            .tipoComprobante(tipoDeComprobante)
-            .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
-            .numSerie((nroSerie != null) ? nroSerie : 0)
-            .numFactura((nroFactura != null) ? nroFactura : 0)
-            .cantRegistros(0)
-            .buscaPorProducto(idProducto != null)
-            .idProducto((idProducto != null) ? idProducto : 0)
-            .build();
+  public BigDecimal calcularTotalIvaCompra(@RequestBody BusquedaFacturaCompraCriteria criteria) {
+    criteria.setBuscaPorFecha(
+        (criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null));
+    criteria.setBuscaPorProveedor(criteria.getIdProveedor() != null);
+    criteria.setBuscaPorNumeroFactura(
+        (criteria.getNumSerie() != 0L) && (criteria.getNumFactura() != 0L));
+    criteria.setBuscaPorProducto(criteria.getIdProducto() != null);
+    criteria.setBuscaPorTipoComprobante(criteria.getTipoComprobante() != null);
     return facturaService.calcularIvaCompra(criteria);
   }
 
-  @GetMapping("/facturas/ganancia-total/criteria")
+  @PostMapping("/facturas/ganancia-total/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public BigDecimal calcularGananciaTotal(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) Long idCliente,
-      @RequestParam(required = false) Integer nroSerie,
-      @RequestParam(required = false) Integer nroFactura,
-      @RequestParam(required = false) Long idViajante,
-      @RequestParam(required = false) TipoDeComprobante tipoDeComprobante,
-      @RequestParam(required = false) Long idUsuario,
-      @RequestParam(required = false) Long nroPedido,
-      @RequestParam(required = false) Long idProducto,
+      @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if ((desde != null) && (hasta != null)) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    BusquedaFacturaVentaCriteria criteria =
-        BusquedaFacturaVentaCriteria.builder()
-            .idEmpresa(idEmpresa)
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .buscaCliente(idCliente != null)
-            .idCliente(idCliente)
-            .buscaUsuario(idUsuario != null)
-            .idUsuario(idUsuario)
-            .buscaViajante(idViajante != null)
-            .idViajante(idViajante)
-            .buscaPorNumeroFactura((nroSerie != null) && (nroFactura != null))
-            .numSerie((nroSerie != null) ? nroSerie : 0)
-            .numFactura((nroFactura != null) ? nroFactura : 0)
-            .buscarPorPedido(nroPedido != null)
-            .nroPedido((nroPedido != null) ? nroPedido : 0)
-            .buscaPorProducto(idProducto != null)
-            .idProducto((idProducto != null) ? idProducto : 0)
-            .buscaPorTipoComprobante(tipoDeComprobante != null)
-            .tipoComprobante(tipoDeComprobante)
-            .cantRegistros(0)
-            .build();
+    criteria.setBuscaPorFecha(
+        (criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null));
+    criteria.setBuscaCliente(criteria.getIdCliente() != null);
+    criteria.setBuscaPorNumeroFactura(
+        (criteria.getNumSerie() != 0L) && (criteria.getNumFactura() != 0L));
+    criteria.setBuscaPorProducto(criteria.getIdProducto() != null);
+    criteria.setBuscaPorTipoComprobante(criteria.getTipoComprobante() != null);
+    criteria.setBuscaUsuario(criteria.getIdUsuario() != null);
+    criteria.setBuscaViajante(criteria.getIdViajante() != null);
+    criteria.setBuscarPorPedido(criteria.getNroPedido() != 0L);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return facturaService.calcularGananciaTotal(criteria, (int) claims.get("idUsuario"));
   }
