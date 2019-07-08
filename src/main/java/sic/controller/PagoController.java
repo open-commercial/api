@@ -42,4 +42,10 @@ public class PagoController {
   public PagoMercadoPagoDTO recuperarPago(@PathVariable String idPagoMercadoPago) {
     return pagoMercadoPagoService.recuperarPago(idPagoMercadoPago);
   }
+
+  @PutMapping("/pagos/mercado-pago/{idPagoMercadoPago}")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
+  public PagoMercadoPagoDTO devolverPago(@PathVariable String idPagoMercadoPago) {
+    return pagoMercadoPagoService.devolverPago(idPagoMercadoPago);
+  }
 }

@@ -128,7 +128,26 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
       pagoRecuperado.setMonto(reciboDeMercadoPago.getMonto().floatValue());
       pagoRecuperado.setPaymentMethodId(pagoMP.getPaymentMethodId());
     } catch (MPException | NullPointerException e) {
-      logger.error("El pago no se pudo recuperar.");
+      logger.error(e.toString());
+    }
+    return pagoRecuperado;
+  }
+
+  @Override
+  public PagoMercadoPagoDTO devolverPago(String idPago) {
+    MercadoPago.SDK.configure(mercadoPagoAccesToken);
+    PagoMercadoPagoDTO pagoRecuperado = new PagoMercadoPagoDTO();
+    try {
+      Payment pagoMP = Payment.findById(idPago);
+      pagoMP = pagoMP.refund();
+      Recibo reciboDeMercadoPago = reciboService.getReciboPorIdMercadoPago(idPago);
+      pagoRecuperado.setInstallments(pagoMP.getInstallments());
+      pagoRecuperado.setIdCliente(reciboDeMercadoPago.getIdCliente());
+      pagoRecuperado.setIssuerId(pagoMP.getIssuerId());
+      pagoRecuperado.setMonto(reciboDeMercadoPago.getMonto().floatValue());
+      pagoRecuperado.setPaymentMethodId(pagoMP.getPaymentMethodId());
+    } catch (MPException | NullPointerException e) {
+      logger.error(e.toString());
     }
     return pagoRecuperado;
   }
