@@ -27,7 +27,7 @@ public class PagoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public Recibo agregarOrModificarItem(@RequestBody PagoMercadoPagoDTO pagoMercadoPagoDTO) {
+  public Recibo crearPago(@RequestBody PagoMercadoPagoDTO pagoMercadoPagoDTO) {
     return pagoMercadoPagoService.crearNuevoPago(pagoMercadoPagoDTO);
   }
 
