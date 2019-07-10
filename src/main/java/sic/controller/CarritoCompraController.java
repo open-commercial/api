@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
 import sic.modelo.dto.CarritoCompraDTO;
-import sic.modelo.dto.NuevaOrdenDeCarritoDeCompraDTO;
+import sic.modelo.dto.NuevaOrdenDeCompraDTO;
 import sic.service.*;
 
 @RestController
@@ -87,15 +87,15 @@ public class CarritoCompraController {
 
   @PostMapping("/carrito-compra")
   public Pedido generarPedidoConItemsDelCarrito(
-      @RequestBody NuevaOrdenDeCarritoDeCompraDTO nuevaOrdenDeCarritoDeCompraDTO) {
+      @RequestBody NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO) {
     CarritoCompraDTO carritoCompraDTO =
         carritoCompraService.getCarritoCompra(
-            nuevaOrdenDeCarritoDeCompraDTO.getIdUsuario(),
-            nuevaOrdenDeCarritoDeCompraDTO.getIdCliente());
+            nuevaOrdenDeCompraDTO.getIdUsuario(),
+            nuevaOrdenDeCompraDTO.getIdCliente());
     Pedido pedido = new Pedido();
     pedido.setCliente(
-        clienteService.getClienteNoEliminadoPorId(nuevaOrdenDeCarritoDeCompraDTO.getIdCliente()));
-    pedido.setObservaciones(nuevaOrdenDeCarritoDeCompraDTO.getObservaciones());
+        clienteService.getClienteNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdCliente()));
+    pedido.setObservaciones(nuevaOrdenDeCompraDTO.getObservaciones());
     pedido.setSubTotal(carritoCompraDTO.getSubtotal());
     pedido.setRecargoPorcentaje(BigDecimal.ZERO);
     pedido.setRecargoNeto(BigDecimal.ZERO);
@@ -104,16 +104,16 @@ public class CarritoCompraController {
     pedido.setTotalActual(carritoCompraDTO.getTotal());
     pedido.setTotalEstimado(pedido.getTotalActual());
     pedido.setEmpresa(
-        empresaService.getEmpresaPorId(nuevaOrdenDeCarritoDeCompraDTO.getIdEmpresa()));
+        empresaService.getEmpresaPorId(nuevaOrdenDeCompraDTO.getIdEmpresa()));
     pedido.setUsuario(
-        usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCarritoDeCompraDTO.getIdUsuario()));
+        usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario()));
     Pageable pageable =
         PageRequest.of(0, Integer.MAX_VALUE, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
     List<ItemCarritoCompra> items =
         carritoCompraService
             .getItemsDelCaritoCompra(
-                nuevaOrdenDeCarritoDeCompraDTO.getIdUsuario(),
-                nuevaOrdenDeCarritoDeCompraDTO.getIdCliente(),
+                nuevaOrdenDeCompraDTO.getIdUsuario(),
+                nuevaOrdenDeCompraDTO.getIdCliente(),
                 pageable)
             .getContent();
     pedido.setRenglones(new ArrayList<>());
@@ -127,10 +127,10 @@ public class CarritoCompraController {
     Pedido p =
         pedidoService.guardar(
             pedido,
-            nuevaOrdenDeCarritoDeCompraDTO.getTipoDeEnvio(),
-            nuevaOrdenDeCarritoDeCompraDTO.getIdSucursal());
+            nuevaOrdenDeCompraDTO.getTipoDeEnvio(),
+            nuevaOrdenDeCompraDTO.getIdSucursal());
     carritoCompraService.eliminarTodosLosItemsDelUsuario(
-        nuevaOrdenDeCarritoDeCompraDTO.getIdUsuario());
+        nuevaOrdenDeCompraDTO.getIdUsuario());
     return p;
   }
 }

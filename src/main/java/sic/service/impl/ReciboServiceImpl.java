@@ -172,6 +172,7 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public void validarOperacion(Recibo recibo) {
+    //"Muteado momentaneamente por el problema del alta de recibo generado por sic-com cuando la caja esta cerrada"
     //this.cajaService.validarMovimiento(recibo.getFecha(), recibo.getEmpresa().getId_Empresa());
     if (recibo.getCliente() == null && recibo.getProveedor() == null) {
       throw new BusinessServiceException(messageSource.getMessage(

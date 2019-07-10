@@ -15,7 +15,6 @@ import org.springframework.validation.annotation.Validated;
 import sic.modelo.Empresa;
 import sic.modelo.FormaDePago;
 import sic.service.IFormaDePagoService;
-import sic.exception.BusinessServiceException;
 import sic.repository.FormaDePagoRepository;
 
 @Service
@@ -23,7 +22,6 @@ import sic.repository.FormaDePagoRepository;
 public class FormaDePagoServiceImpl implements IFormaDePagoService {
 
   private final FormaDePagoRepository formaDePagoRepository;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
 
 

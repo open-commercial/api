@@ -19,7 +19,6 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
@@ -444,20 +443,8 @@ class AppIntegrationTest {
             .telefono("379 4895549")
             .ubicacion(UbicacionDTO.builder().calle("Napoles").numero(5600).idLocalidad(1L).build())
             .build();
-
-
-//    FormaDePagoDTO formaDePago =
-//      FormaDePagoDTO.builder().afectaCaja(true).nombre("Efectivo").predeterminado(true).build();
     FormaDePago formaDePago = new FormaDePagoBuilder().build();
-
     formaDePagoRepository.save(formaDePago);
-
-//
-//    restTemplate.postForObject(
-//      apiPrefix + "/formas-de-pago?idEmpresa=" + empresaDTO.getId_Empresa(),
-//      formaDePago,
-//      FormaDePagoDTO.class);
-
     empresaDTO = restTemplate.postForObject(apiPrefix + "/empresas", empresaDTO, EmpresaDTO.class);
     UsuarioDTO credencial =
         UsuarioDTO.builder()
@@ -5416,7 +5403,7 @@ class AppIntegrationTest {
   @Test
   void shouldGenerarPedidoConItemsDelCarrito() {
     this.shouldAgregarItemsAlCarritoCompra();
-    NuevaOrdenDeCarritoDeCompraDTO nuevaOrdenDeCarritoDeCompraDTO = NuevaOrdenDeCarritoDeCompraDTO.builder()
+    NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO = NuevaOrdenDeCompraDTO.builder()
       .idEmpresa(1L)
       .idCliente(1L)
       .idUsuario(1L)
@@ -5426,7 +5413,7 @@ class AppIntegrationTest {
       .build();
     PedidoDTO pedido =
         restTemplate.postForObject(
-            apiPrefix + "/carrito-compra", nuevaOrdenDeCarritoDeCompraDTO, PedidoDTO.class);
+            apiPrefix + "/carrito-compra", nuevaOrdenDeCompraDTO, PedidoDTO.class);
     assertEquals(14, pedido.getCantidadArticulos().doubleValue());
     assertEquals(new BigDecimal("14395.500000000000000000000000000000000000000000000"), pedido.getTotalActual());
   }
