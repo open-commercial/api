@@ -4,6 +4,10 @@ import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
+import sic.modelo.dto.NuevaNotaCreditoDeFacturaDTO;
+import sic.modelo.dto.NuevaNotaCreditoSinFacturaDTO;
+import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
+import sic.modelo.dto.NuevaNotaDebitoSinReciboDTO;
 
 import javax.validation.Valid;
 
@@ -12,6 +16,14 @@ public interface INotaService {
   NotaCredito guardarNotaCredito(@Valid NotaCredito nota);
 
   NotaDebito guardarNotaDebito(@Valid NotaDebito nota);
+
+  NotaCredito calcularNotaCreditoConFactura(NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO, Usuario usuario);
+
+  NotaCredito calcularNotaCreditoSinFactura(NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO, Usuario usuario);
+
+  NotaDebito calcularNotaDebitoConRecibo(NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO, Usuario usuario);
+
+  NotaDebito calcularNotaDebitoSinRecibo(NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDTO, Usuario usuario);
 
   boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta);
 

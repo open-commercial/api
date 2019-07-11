@@ -30,6 +30,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
+import sic.modelo.dto.NuevaNotaCreditoDeFacturaDTO;
+import sic.modelo.dto.NuevaNotaCreditoSinFacturaDTO;
+import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
+import sic.modelo.dto.NuevaNotaDebitoSinReciboDTO;
 import sic.repository.NotaCreditoRepository;
 import sic.repository.NotaDebitoRepository;
 import sic.service.*;
@@ -46,6 +50,8 @@ public class NotaServiceImpl implements INotaService {
   private final NotaCreditoRepository notaCreditoRepository;
   private final NotaDebitoRepository notaDebitoRepository;
   private final IFacturaService facturaService;
+  private final INotaService notaService;
+  private final IReciboService reciboService;
   private final IClienteService clienteService;
   private final IProveedorService proveedorService;
   private final IEmpresaService empresaService;
@@ -67,6 +73,8 @@ public class NotaServiceImpl implements INotaService {
       NotaCreditoRepository notaCreditoRepository,
       NotaDebitoRepository notaDebitoRepository,
       IFacturaService facturaService,
+      INotaService notaService,
+      IReciboService reciboService,
       IClienteService clienteService,
       IProveedorService proveedorService,
       IUsuarioService usuarioService,
@@ -80,6 +88,8 @@ public class NotaServiceImpl implements INotaService {
     this.notaCreditoRepository = notaCreditoRepository;
     this.notaDebitoRepository = notaDebitoRepository;
     this.facturaService = facturaService;
+    this.notaService = notaService;
+    this.reciboService = reciboService;
     this.clienteService = clienteService;
     this.proveedorService = proveedorService;
     this.usuarioService = usuarioService;
@@ -851,6 +861,299 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
+  public NotaCredito calcularNotaCreditoConFactura(
+      NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO, Usuario usuario) {
+    NotaCredito notaCreditoNueva = new NotaCredito();
+    Factura factura =
+        facturaService.getFacturaNoEliminadaPorId(nuevaNotaCreditoDeFacturaDTO.getIdFactura());
+    if (Arrays.asList(nuevaNotaCreditoDeFacturaDTO.getCantidades()).contains(null)
+        || Arrays.asList(nuevaNotaCreditoDeFacturaDTO.getIdsRenglonesFactura()).contains(null)) {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_nota_de_renglones_vacio", null, Locale.getDefault()));
+    } else {
+      notaCreditoNueva.setRenglonesNotaCredito(
+          notaService.calcularRenglonCreditoProducto(
+              notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()),
+              nuevaNotaCreditoDeFacturaDTO.getCantidades(),
+              nuevaNotaCreditoDeFacturaDTO.getIdsRenglonesFactura()));
+    }
+    List<BigDecimal> importes = new ArrayList<>();
+    List<BigDecimal> cantidades = new ArrayList<>();
+    List<BigDecimal> ivaPorcentajeRenglones = new ArrayList<>();
+    List<BigDecimal> ivaNetoRenglones = new ArrayList<>();
+    notaCreditoNueva
+        .getRenglonesNotaCredito()
+        .forEach(
+            r -> {
+              importes.add(r.getImporteBruto());
+              cantidades.add(r.getCantidad());
+              ivaPorcentajeRenglones.add(r.getIvaPorcentaje());
+              ivaNetoRenglones.add(r.getIvaNeto());
+            });
+    notaCreditoNueva.setSubTotal(
+        notaService.calcularSubTotalCredito(
+            importes.toArray(new BigDecimal[notaCreditoNueva.getRenglonesNotaCredito().size()])));
+    notaCreditoNueva.setDescuentoPorcentaje(factura.getDescuentoPorcentaje());
+    notaCreditoNueva.setDescuentoNeto(
+        notaService.calcularDecuentoNetoCredito(
+            notaCreditoNueva.getSubTotal(), notaCreditoNueva.getDescuentoPorcentaje()));
+    notaCreditoNueva.setRecargoPorcentaje(factura.getRecargoPorcentaje());
+    notaCreditoNueva.setRecargoNeto(
+        notaService.calcularRecargoNetoCredito(
+            notaCreditoNueva.getSubTotal(), notaCreditoNueva.getRecargoPorcentaje()));
+    notaCreditoNueva.setTipoComprobante(
+        notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()));
+    notaCreditoNueva.setIva105Neto(
+        notaService.calcularIVANetoCredito(
+            notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()),
+            cantidades.toArray(new BigDecimal[0]),
+            ivaPorcentajeRenglones.toArray(new BigDecimal[0]),
+            ivaNetoRenglones.toArray(new BigDecimal[0]),
+            IVA_105,
+            factura.getDescuentoPorcentaje(),
+            factura.getRecargoPorcentaje()));
+    notaCreditoNueva.setIva21Neto(
+        notaService.calcularIVANetoCredito(
+            notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()),
+            cantidades.toArray(new BigDecimal[0]),
+            ivaPorcentajeRenglones.toArray(new BigDecimal[0]),
+            ivaNetoRenglones.toArray(new BigDecimal[0]),
+            IVA_21,
+            factura.getDescuentoPorcentaje(),
+            factura.getRecargoPorcentaje()));
+    notaCreditoNueva.setSubTotalBruto(
+        notaService.calcularSubTotalBrutoCredito(
+            notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()),
+            notaCreditoNueva.getSubTotal(),
+            notaCreditoNueva.getRecargoNeto(),
+            notaCreditoNueva.getDescuentoNeto(),
+            notaCreditoNueva.getIva105Neto(),
+            notaCreditoNueva.getIva21Neto()));
+    notaCreditoNueva.setTotal(
+        notaService.calcularTotalCredito(
+            notaCreditoNueva.getSubTotalBruto(),
+            notaCreditoNueva.getIva105Neto(),
+            notaCreditoNueva.getIva21Neto()));
+    notaCreditoNueva.setFecha(new Date());
+    if (factura instanceof FacturaVenta) {
+      notaCreditoNueva.setCliente(
+          clienteService.getClienteNoEliminadoPorId(((FacturaVenta) factura).getIdCliente()));
+      notaCreditoNueva.setFacturaVenta((FacturaVenta) factura);
+    } else if (factura instanceof FacturaCompra) {
+      notaCreditoNueva.setProveedor(
+          proveedorService.getProveedorNoEliminadoPorId(
+              ((FacturaCompra) factura).getIdProveedor()));
+      notaCreditoNueva.setFacturaCompra((FacturaCompra) factura);
+    }
+    notaCreditoNueva.setEmpresa(factura.getEmpresa());
+    notaCreditoNueva.setModificaStock(nuevaNotaCreditoDeFacturaDTO.isModificaStock());
+    notaCreditoNueva.setMotivo(nuevaNotaCreditoDeFacturaDTO.getMotivo());
+    notaCreditoNueva.setUsuario(usuario);
+    return notaCreditoNueva;
+  }
+
+  @Override
+  public NotaCredito calcularNotaCreditoSinFactura(
+      NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO, Usuario usuario) {
+    NotaCredito notaCreditoNueva = new NotaCredito();
+    if (nuevaNotaCreditoSinFacturaDTO.getDetalle() == null
+        || nuevaNotaCreditoSinFacturaDTO.getDetalle().isEmpty()) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_nota_renglon_sin_descripcion", null, Locale.getDefault()));
+    }
+    List<RenglonNotaCredito> renglones = new ArrayList<>();
+    notaCreditoNueva.setTipoComprobante(nuevaNotaCreditoSinFacturaDTO.getTipo());
+    renglones.add(
+        notaService.calcularRenglonCredito(
+            nuevaNotaCreditoSinFacturaDTO.getTipo(),
+            nuevaNotaCreditoSinFacturaDTO.getDetalle(),
+            nuevaNotaCreditoSinFacturaDTO.getMonto()));
+    notaCreditoNueva.setRenglonesNotaCredito(renglones);
+    if (notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_A
+        || notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B
+        || notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_C
+        || notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_Y
+        || notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO) {
+      notaCreditoNueva.setSubTotal(
+          notaCreditoNueva.getRenglonesNotaCredito().get(0).getImporteBruto());
+    } else if (notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_X) {
+      notaCreditoNueva.setSubTotal(
+          notaCreditoNueva.getRenglonesNotaCredito().get(0).getImporteNeto());
+    }
+    notaCreditoNueva.setDescuentoPorcentaje(BigDecimal.ZERO);
+    notaCreditoNueva.setDescuentoNeto(BigDecimal.ZERO);
+    notaCreditoNueva.setRecargoPorcentaje(BigDecimal.ZERO);
+    notaCreditoNueva.setRecargoNeto(BigDecimal.ZERO);
+    notaCreditoNueva.setIva105Neto(BigDecimal.ZERO);
+    notaCreditoNueva.setIva21Neto(notaCreditoNueva.getRenglonesNotaCredito().get(0).getIvaNeto());
+    BigDecimal subTotalBruto = notaCreditoNueva.getSubTotal();
+    if (notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B
+        || notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_C
+        || notaCreditoNueva.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO) {
+      subTotalBruto = subTotalBruto.subtract(notaCreditoNueva.getIva21Neto());
+    }
+    notaCreditoNueva.setSubTotalBruto(subTotalBruto);
+    notaCreditoNueva.setTotal(
+        notaService.calcularTotalNota(notaCreditoNueva.getRenglonesNotaCredito()));
+    notaCreditoNueva.setFecha(new Date());
+    if ((nuevaNotaCreditoSinFacturaDTO.getIdCliente() != null
+            && nuevaNotaCreditoSinFacturaDTO.getIdProveedor() != null)
+        || (nuevaNotaCreditoSinFacturaDTO.getIdCliente() == null
+            && nuevaNotaCreditoSinFacturaDTO.getIdProveedor() == null)) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_nota_cliente_proveedor_juntos", null, Locale.getDefault()));
+    }
+    if (nuevaNotaCreditoSinFacturaDTO.getIdCliente() != null) {
+      notaCreditoNueva.setCliente(
+          clienteService.getClienteNoEliminadoPorId(nuevaNotaCreditoSinFacturaDTO.getIdCliente()));
+    }
+    if (nuevaNotaCreditoSinFacturaDTO.getIdProveedor() != null) {
+      notaCreditoNueva.setProveedor(
+          proveedorService.getProveedorNoEliminadoPorId(
+              nuevaNotaCreditoSinFacturaDTO.getIdProveedor()));
+    }
+    notaCreditoNueva.setEmpresa(
+        empresaService.getEmpresaPorId(nuevaNotaCreditoSinFacturaDTO.getIdEmpresa()));
+    notaCreditoNueva.setModificaStock(false);
+    notaCreditoNueva.setUsuario(usuario);
+    notaCreditoNueva.setMotivo(nuevaNotaCreditoSinFacturaDTO.getMotivo());
+    return notaCreditoNueva;
+  }
+
+  @Override
+  public NotaDebito calcularNotaDebitoConRecibo(
+      NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO, Usuario usuario) {
+    NotaDebito notaDebitoCalculada = new NotaDebito();
+    notaDebitoCalculada.setFecha(new Date());
+    Recibo reciboRelacionado =
+        reciboService.getReciboNoEliminadoPorId(nuevaNotaDebitoDeReciboDTO.getIdRecibo());
+    if (reciboRelacionado.getCliente() != null) {
+      notaDebitoCalculada.setCliente(reciboRelacionado.getCliente());
+      notaDebitoCalculada.setMovimiento(Movimiento.VENTA);
+      if (!notaService
+          .getTipoNotaDebitoCliente(
+              reciboRelacionado.getIdCliente(), reciboRelacionado.getIdEmpresa())
+          .contains(nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante())) {
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
+      }
+    } else if (reciboRelacionado.getProveedor() != null
+        && nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante() != null) {
+      notaDebitoCalculada.setProveedor(reciboRelacionado.getProveedor());
+      notaDebitoCalculada.setMovimiento(Movimiento.COMPRA);
+      if (!notaService
+          .getTipoNotaDebitoProveedor(
+              reciboRelacionado.getIdProveedor(), reciboRelacionado.getIdEmpresa())
+          .contains(nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante())) {
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
+      }
+    } else {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_nota_parametros_faltantes", null, Locale.getDefault()));
+    }
+    notaDebitoCalculada.setTipoComprobante(nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante());
+    List<RenglonNotaDebito> renglones = new ArrayList<>();
+    renglones.add(notaService.calcularRenglonDebitoConRecibo(reciboRelacionado));
+    renglones.add(
+        notaService.calcularRenglonDebito(
+            nuevaNotaDebitoDeReciboDTO.getGastoAdministrativo(),
+            nuevaNotaDebitoDeReciboDTO.getTipoDeComprobante()));
+    notaDebitoCalculada.setRenglonesNotaDebito(renglones);
+    notaDebitoCalculada.setMontoNoGravado(
+        (notaDebitoCalculada.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C
+                || notaDebitoCalculada.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X)
+            ? BigDecimal.ZERO
+            : reciboRelacionado.getMonto());
+    notaDebitoCalculada.setIva21Neto(
+        notaDebitoCalculada.getRenglonesNotaDebito().get(1).getIvaNeto());
+    notaDebitoCalculada.setIva105Neto(BigDecimal.ZERO);
+    notaDebitoCalculada.setMotivo(nuevaNotaDebitoDeReciboDTO.getMotivo());
+    if (notaDebitoCalculada.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C
+        || notaDebitoCalculada.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X) {
+      notaDebitoCalculada.setSubTotalBruto(
+          notaDebitoCalculada
+              .getRenglonesNotaDebito()
+              .get(0)
+              .getImporteBruto()
+              .add(notaDebitoCalculada.getRenglonesNotaDebito().get(1).getImporteBruto()));
+    } else {
+      notaDebitoCalculada.setSubTotalBruto(
+          notaDebitoCalculada.getRenglonesNotaDebito().get(1).getImporteBruto());
+    }
+    notaDebitoCalculada.setTotal(
+        notaService.calcularTotalDebito(
+            notaDebitoCalculada.getSubTotalBruto(),
+            notaDebitoCalculada.getIva21Neto(),
+            notaDebitoCalculada.getMontoNoGravado()));
+    notaDebitoCalculada.setUsuario(usuario);
+    notaDebitoCalculada.setRecibo(reciboRelacionado);
+    notaDebitoCalculada.setEmpresa(reciboRelacionado.getEmpresa());
+    return notaDebitoCalculada;
+  }
+
+  @Override
+  public NotaDebito calcularNotaDebitoSinRecibo(
+      NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDTO, Usuario usuario) {
+    NotaDebito notaDebitoCalculada = new NotaDebito();
+    notaDebitoCalculada.setFecha(new Date());
+    if (nuevaNotaDebitoSinReciboDTO.getTipoDeComprobante() != null) {
+      if (nuevaNotaDebitoSinReciboDTO.getIdCliente() != null) {
+        Cliente cliente =
+            clienteService.getClienteNoEliminadoPorId(nuevaNotaDebitoSinReciboDTO.getIdCliente());
+        notaDebitoCalculada.setCliente(cliente);
+        notaDebitoCalculada.setMovimiento(Movimiento.VENTA);
+        notaDebitoCalculada.setEmpresa(cliente.getEmpresa());
+        if (!this.getTipoNotaDebitoCliente(
+                nuevaNotaDebitoSinReciboDTO.getIdCliente(), cliente.getIdEmpresa())
+            .contains(nuevaNotaDebitoSinReciboDTO.getTipoDeComprobante())) {
+          throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
+        }
+      } else if (nuevaNotaDebitoSinReciboDTO.getIdProveedor() != null) {
+        Proveedor proveedor =
+            proveedorService.getProveedorNoEliminadoPorId(
+                nuevaNotaDebitoSinReciboDTO.getIdProveedor());
+        notaDebitoCalculada.setProveedor(proveedor);
+        notaDebitoCalculada.setMovimiento(Movimiento.COMPRA);
+        notaDebitoCalculada.setEmpresa(proveedor.getEmpresa());
+        if (!this.getTipoNotaDebitoProveedor(
+                nuevaNotaDebitoSinReciboDTO.getIdProveedor(), proveedor.getIdEmpresa())
+            .contains(nuevaNotaDebitoSinReciboDTO.getTipoDeComprobante())) {
+          throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
+        }
+      }
+    } else {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_nota_parametros_faltantes", null, Locale.getDefault()));
+    }
+    notaDebitoCalculada.setTipoComprobante(nuevaNotaDebitoSinReciboDTO.getTipoDeComprobante());
+    notaDebitoCalculada.setIva105Neto(BigDecimal.ZERO);
+    notaDebitoCalculada.setMontoNoGravado(BigDecimal.ZERO);
+    notaDebitoCalculada.setMotivo(nuevaNotaDebitoSinReciboDTO.getMotivo());
+    List<RenglonNotaDebito> renglones = new ArrayList<>();
+    renglones.add(
+        notaService.calcularRenglonDebito(
+            nuevaNotaDebitoSinReciboDTO.getGastoAdministrativo(),
+            nuevaNotaDebitoSinReciboDTO.getTipoDeComprobante()));
+    notaDebitoCalculada.setRenglonesNotaDebito(renglones);
+    notaDebitoCalculada.setIva21Neto(
+        notaDebitoCalculada.getRenglonesNotaDebito().get(0).getIvaNeto());
+    notaDebitoCalculada.setSubTotalBruto(
+        notaDebitoCalculada.getRenglonesNotaDebito().get(0).getImporteBruto());
+    notaDebitoCalculada.setTotal(
+        notaService.calcularTotalDebito(
+            notaDebitoCalculada.getSubTotalBruto(),
+            notaDebitoCalculada.getIva21Neto(),
+            notaDebitoCalculada.getMontoNoGravado()));
+    notaDebitoCalculada.setUsuario(usuario);
+    return notaDebitoCalculada;
+  }
+
+  @Override
   @Transactional
   public NotaDebito guardarNotaDebito(@Valid NotaDebito notaDebito) {
     if (notaDebito.getFecha() == null) {
@@ -861,8 +1164,8 @@ public class NotaServiceImpl implements INotaService {
       if (!this.getTipoNotaDebitoCliente(
               notaDebito.getCliente().getId_Cliente(), notaDebito.getEmpresa().getId_Empresa())
           .contains(notaDebito.getTipoComprobante())) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
       }
       notaDebito.setSerie(
           configuracionDelSistemaService
@@ -873,10 +1176,10 @@ public class NotaServiceImpl implements INotaService {
               notaDebito.getIdEmpresa(), notaDebito.getTipoComprobante()));
     } else if (notaDebito.getMovimiento().equals(Movimiento.COMPRA)) {
       if (!this.getTipoNotaDebitoProveedor(
-        notaDebito.getProveedor().getId_Proveedor(), notaDebito.getEmpresa().getId_Empresa())
-        .contains(notaDebito.getTipoComprobante())) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
+              notaDebito.getProveedor().getId_Proveedor(), notaDebito.getEmpresa().getId_Empresa())
+          .contains(notaDebito.getTipoComprobante())) {
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
       }
     }
     this.validarCalculosDebito(notaDebito);

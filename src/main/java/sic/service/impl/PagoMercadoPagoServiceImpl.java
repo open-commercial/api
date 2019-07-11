@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import sic.exception.BusinessServiceException;
 import sic.modelo.Cliente;
 import sic.modelo.Recibo;
+import sic.modelo.Usuario;
+import sic.modelo.dto.NuevaNotaDebitoSinReciboDTO;
 import sic.modelo.dto.PagoMercadoPagoDTO;
 import sic.service.*;
 
@@ -32,6 +34,7 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
   private final IReciboService reciboService;
   private final IFormaDePagoService formaDePagoService;
   private final IClienteService clienteService;
+  private final INotaService notaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
 
@@ -40,10 +43,12 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
       IReciboService reciboService,
       IFormaDePagoService formaDePagoService,
       IClienteService clienteService,
+      INotaService notaService,
       MessageSource messageSource) {
     this.reciboService = reciboService;
     this.formaDePagoService = formaDePagoService;
     this.clienteService = clienteService;
+    this.notaService = notaService;
     this.messageSource = messageSource;
   }
 
@@ -146,7 +151,7 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
   }
 
   @Override
-  public PagoMercadoPagoDTO devolverPago(String idPago) {
+  public PagoMercadoPagoDTO devolverPago(String idPago, Usuario usuario) {
     MercadoPago.SDK.configure(mercadoPagoAccesToken);
     PagoMercadoPagoDTO pagoRecuperado = new PagoMercadoPagoDTO();
     try {
@@ -158,7 +163,20 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
       pagoRecuperado.setIssuerId(pagoMP.getIssuerId());
       pagoRecuperado.setMonto(reciboDeMercadoPago.getMonto().floatValue());
       pagoRecuperado.setPaymentMethodId(pagoMP.getPaymentMethodId());
-      //nota credito
+      NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDTO =
+          NuevaNotaDebitoSinReciboDTO.builder()
+              .idCliente(reciboDeMercadoPago.getIdCliente())
+              .motivo("Devolución de pago por MercadoPago")
+              .gastoAdministrativo(BigDecimal.ZERO)
+              .tipoDeComprobante(
+                  notaService
+                      .getTipoNotaDebitoCliente(
+                          reciboDeMercadoPago.getIdCliente(),
+                          reciboDeMercadoPago.getEmpresa().getId_Empresa())
+                      .get(0))
+              .build();
+      notaService.guardarNotaDebito(
+          notaService.calcularNotaDebitoSinRecibo(nuevaNotaDebitoSinReciboDTO, usuario));
     } catch (MPException | NullPointerException e) {
       logger.error(e.toString());
     }

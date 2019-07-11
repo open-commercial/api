@@ -1,22 +1,31 @@
 package sic.controller;
 
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Recibo;
 import sic.modelo.Rol;
 import sic.modelo.dto.PagoMercadoPagoDTO;
+import sic.service.IAuthService;
 import sic.service.IPagoMercadoPagoService;
+import sic.service.IUsuarioService;
 
 @RestController
 @RequestMapping("/api/v1")
 public class PagoController {
 
   private final IPagoMercadoPagoService pagoMercadoPagoService;
+  private IUsuarioService usuarioService;
+  private IAuthService authService;
 
   @Autowired
-  public PagoController(IPagoMercadoPagoService pagoMercadoPagoService) {
+  public PagoController(IPagoMercadoPagoService pagoMercadoPagoService,
+                        IAuthService authService,
+                        IUsuarioService usuarioService) {
     this.pagoMercadoPagoService = pagoMercadoPagoService;
+    this.authService = authService;
+    this.usuarioService = usuarioService;
   }
 
   @PostMapping("/pagos/mercado-pago")
@@ -45,7 +54,12 @@ public class PagoController {
 
   @PutMapping("/pagos/mercado-pago/{idPagoMercadoPago}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
-  public PagoMercadoPagoDTO devolverPago(@PathVariable String idPagoMercadoPago) {
-    return pagoMercadoPagoService.devolverPago(idPagoMercadoPago);
+  public PagoMercadoPagoDTO devolverPago(
+      @PathVariable String idPagoMercadoPago,
+      @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    return pagoMercadoPagoService.devolverPago(
+        idPagoMercadoPago,
+        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
   }
 }
