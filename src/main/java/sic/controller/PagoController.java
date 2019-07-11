@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Recibo;
 import sic.modelo.Rol;
+import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
 import sic.modelo.dto.PagoMercadoPagoDTO;
 import sic.service.IAuthService;
 import sic.service.IPagoMercadoPagoService;
@@ -36,8 +37,13 @@ public class PagoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public Recibo crearPago(@RequestBody PagoMercadoPagoDTO pagoMercadoPagoDTO) {
-    return pagoMercadoPagoService.crearNuevoPago(pagoMercadoPagoDTO);
+  public Recibo crearPago(
+      @RequestBody NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO,
+      @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    return pagoMercadoPagoService.crearNuevoPago(
+      nuevoPagoMercadoPagoDTO,
+        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
   }
 
   @GetMapping("/pagos/mercado-pago/{idPagoMercadoPago}")
@@ -54,12 +60,24 @@ public class PagoController {
 
   @PutMapping("/pagos/mercado-pago/{idPagoMercadoPago}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
-  public PagoMercadoPagoDTO devolverPago(
+  public NuevoPagoMercadoPagoDTO devolverPago(
       @PathVariable String idPagoMercadoPago,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return pagoMercadoPagoService.devolverPago(
         idPagoMercadoPago,
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+  }
+
+  @GetMapping("/pagos/mercado-pago/pendientes-por-email")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public PagoMercadoPagoDTO[] recuperarPagosPendientes(@RequestParam String email) {
+    return pagoMercadoPagoService.recuperarPagosPendientesDeClientePorMail(email);
   }
 }

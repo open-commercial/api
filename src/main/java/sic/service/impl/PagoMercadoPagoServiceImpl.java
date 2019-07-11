@@ -5,6 +5,7 @@ import com.mercadopago.core.MPResourceArray;
 import com.mercadopago.exceptions.MPException;
 import com.mercadopago.resources.Payment;
 import com.mercadopago.resources.datastructures.payment.Payer;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,8 @@ import sic.exception.BusinessServiceException;
 import sic.modelo.Cliente;
 import sic.modelo.Recibo;
 import sic.modelo.Usuario;
-import sic.modelo.dto.NuevaNotaDebitoSinReciboDTO;
+import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
+import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
 import sic.modelo.dto.PagoMercadoPagoDTO;
 import sic.service.*;
 
@@ -36,6 +38,7 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
   private final IClienteService clienteService;
   private final INotaService notaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private final ModelMapper modelMapper;
   private final MessageSource messageSource;
 
   @Autowired
@@ -44,18 +47,21 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
       IFormaDePagoService formaDePagoService,
       IClienteService clienteService,
       INotaService notaService,
+      ModelMapper modelMapper,
       MessageSource messageSource) {
     this.reciboService = reciboService;
     this.formaDePagoService = formaDePagoService;
     this.clienteService = clienteService;
     this.notaService = notaService;
+    this.modelMapper = modelMapper;
     this.messageSource = messageSource;
   }
 
   @Override
-  public Recibo crearNuevoPago(PagoMercadoPagoDTO pagoMercadoPagoDTO) {
-    Cliente cliente = clienteService.getClienteNoEliminadoPorId(pagoMercadoPagoDTO.getIdCliente());
-    this.validarOperacion(pagoMercadoPagoDTO, cliente);
+  public Recibo crearNuevoPago(NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Usuario usuario) {
+    Cliente cliente =
+        clienteService.getClienteNoEliminadoPorId(nuevoPagoMercadoPagoDTO.getIdCliente());
+    this.validarOperacion(nuevoPagoMercadoPagoDTO, cliente);
     MercadoPago.SDK.configure(mercadoPagoAccesToken);
     Payment payment = new Payment();
     payment.setDescription(
@@ -64,22 +70,23 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
             + "("
             + cliente.getNroCliente()
             + ") con "
-            + pagoMercadoPagoDTO.getPaymentMethodId());
+            + nuevoPagoMercadoPagoDTO.getPaymentMethodId());
     Payer payer = new Payer();
     payer.setEmail(cliente.getEmail());
     payment.setPayer(payer);
     payment.setBinaryMode(true);
-    if (pagoMercadoPagoDTO.getToken() != null && !pagoMercadoPagoDTO.getToken().isEmpty()) {
+    if (nuevoPagoMercadoPagoDTO.getToken() != null
+        && !nuevoPagoMercadoPagoDTO.getToken().isEmpty()) {
       payment
-          .setTransactionAmount(pagoMercadoPagoDTO.getMonto())
-          .setToken(pagoMercadoPagoDTO.getToken())
-          .setInstallments(pagoMercadoPagoDTO.getInstallments())
-          .setIssuerId(pagoMercadoPagoDTO.getIssuerId())
-          .setPaymentMethodId(pagoMercadoPagoDTO.getPaymentMethodId());
+          .setTransactionAmount(nuevoPagoMercadoPagoDTO.getMonto())
+          .setToken(nuevoPagoMercadoPagoDTO.getToken())
+          .setInstallments(nuevoPagoMercadoPagoDTO.getInstallments())
+          .setIssuerId(nuevoPagoMercadoPagoDTO.getIssuerId())
+          .setPaymentMethodId(nuevoPagoMercadoPagoDTO.getPaymentMethodId());
     } else {
       payment
-          .setTransactionAmount(pagoMercadoPagoDTO.getMonto())
-          .setPaymentMethodId(pagoMercadoPagoDTO.getPaymentMethodId());
+          .setTransactionAmount(nuevoPagoMercadoPagoDTO.getMonto())
+          .setPaymentMethodId(nuevoPagoMercadoPagoDTO.getPaymentMethodId());
     }
     Recibo nuevoRecibo = new Recibo();
     try {
@@ -88,11 +95,11 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
         logger.warn("El pago de mercadopago {} se aprobó correctamente.", payment);
         nuevoRecibo.setEmpresa(cliente.getEmpresa());
         nuevoRecibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(16));
-        nuevoRecibo.setUsuario(cliente.getCredencial());
+        nuevoRecibo.setUsuario(usuario);
         nuevoRecibo.setCliente(cliente);
         nuevoRecibo.setFecha(new Date());
         nuevoRecibo.setConcepto("Pago en Mercadopago");
-        nuevoRecibo.setMonto(new BigDecimal(Float.toString(pagoMercadoPagoDTO.getMonto())));
+        nuevoRecibo.setMonto(new BigDecimal(Float.toString(nuevoPagoMercadoPagoDTO.getMonto())));
         nuevoRecibo.setIdPagoMercadoPago(payment.getId());
         nuevoRecibo = reciboService.guardar(nuevoRecibo);
       } else {
@@ -108,52 +115,47 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
     return nuevoRecibo;
   }
 
-  private void validarOperacion(PagoMercadoPagoDTO pagoMercadoPagoDTO, Cliente cliente) {
+  private void validarOperacion(NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Cliente cliente) {
     if (cliente.getEmail() == null || cliente.getEmail().isEmpty()) {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_pago_cliente_sin_email", null, Locale.getDefault()));
     }
-    if (pagoMercadoPagoDTO.getPaymentMethodId() != null
-        && pagoMercadoPagoDTO.getPaymentMethodId().isEmpty()) {
+    if (nuevoPagoMercadoPagoDTO.getPaymentMethodId() != null
+        && nuevoPagoMercadoPagoDTO.getPaymentMethodId().isEmpty()) {
       throw new BusinessServiceException(
           messageSource.getMessage(
               "mensaje_pago_sin_payment_method_id", null, Locale.getDefault()));
     }
-    if (pagoMercadoPagoDTO.getToken() != null
-        && !pagoMercadoPagoDTO.getToken().isEmpty()
-        && (pagoMercadoPagoDTO.getIssuerId() == null
-            || pagoMercadoPagoDTO.getIssuerId().isEmpty())) {
+    if (nuevoPagoMercadoPagoDTO.getToken() != null
+        && !nuevoPagoMercadoPagoDTO.getToken().isEmpty()
+        && (nuevoPagoMercadoPagoDTO.getIssuerId() == null
+            || nuevoPagoMercadoPagoDTO.getIssuerId().isEmpty())) {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_pago_sin_issuer_id", null, Locale.getDefault()));
     }
-    if (pagoMercadoPagoDTO.getInstallments() != null) {
-      pagoMercadoPagoDTO.setInstallments(1);
+    if (nuevoPagoMercadoPagoDTO.getInstallments() != null) {
+      nuevoPagoMercadoPagoDTO.setInstallments(1);
     }
   }
 
   @Override
   public PagoMercadoPagoDTO recuperarPago(String idPago) {
     MercadoPago.SDK.configure(mercadoPagoAccesToken);
-    PagoMercadoPagoDTO pagoRecuperado = new PagoMercadoPagoDTO();
+    PagoMercadoPagoDTO pagoRecuperado;
     try {
       Payment pagoMP = Payment.findById(idPago);
-      Recibo reciboDeMercadoPago = reciboService.getReciboPorIdMercadoPago(idPago);
-      pagoRecuperado.setInstallments(pagoMP.getInstallments());
-      pagoRecuperado.setIdCliente(reciboDeMercadoPago.getIdCliente());
-      pagoRecuperado.setIssuerId(pagoMP.getIssuerId());
-      pagoRecuperado.setMonto(reciboDeMercadoPago.getMonto().floatValue());
-      pagoRecuperado.setPaymentMethodId(pagoMP.getPaymentMethodId());
+      pagoRecuperado = modelMapper.map(pagoMP, PagoMercadoPagoDTO.class);
     } catch (MPException e) {
       throw new BusinessServiceException(
-        messageSource.getMessage(e.getStatusCode().toString(), null, Locale.getDefault()));
+          messageSource.getMessage(e.getStatusCode().toString(), null, Locale.getDefault()));
     }
     return pagoRecuperado;
   }
 
   @Override
-  public PagoMercadoPagoDTO devolverPago(String idPago, Usuario usuario) {
+  public NuevoPagoMercadoPagoDTO devolverPago(String idPago, Usuario usuario) {
     MercadoPago.SDK.configure(mercadoPagoAccesToken);
-    PagoMercadoPagoDTO pagoRecuperado = new PagoMercadoPagoDTO();
+    NuevoPagoMercadoPagoDTO pagoRecuperado = new NuevoPagoMercadoPagoDTO();
     try {
       Payment pagoMP = Payment.findById(idPago);
       pagoMP = pagoMP.refund();
@@ -163,11 +165,11 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
       pagoRecuperado.setIssuerId(pagoMP.getIssuerId());
       pagoRecuperado.setMonto(reciboDeMercadoPago.getMonto().floatValue());
       pagoRecuperado.setPaymentMethodId(pagoMP.getPaymentMethodId());
-      NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDTO =
-          NuevaNotaDebitoSinReciboDTO.builder()
-              .idCliente(reciboDeMercadoPago.getIdCliente())
-              .motivo("Devolución de pago por MercadoPago")
+      NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO =
+          NuevaNotaDebitoDeReciboDTO.builder()
+              .idRecibo(reciboDeMercadoPago.getIdRecibo())
               .gastoAdministrativo(BigDecimal.ZERO)
+              .motivo("Devolución de pago por MercadoPago")
               .tipoDeComprobante(
                   notaService
                       .getTipoNotaDebitoCliente(
@@ -176,7 +178,7 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
                       .get(0))
               .build();
       notaService.guardarNotaDebito(
-          notaService.calcularNotaDebitoSinRecibo(nuevaNotaDebitoSinReciboDTO, usuario));
+          notaService.calcularNotaDebitoConRecibo(nuevaNotaDebitoDeReciboDTO, usuario));
     } catch (MPException | NullPointerException e) {
       logger.error(e.toString());
     }
@@ -184,16 +186,17 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
   }
 
   @Override
-  public MPResourceArray recuperarPagosPendientesDeClientePorMail(@Email String email) {
+  public PagoMercadoPagoDTO[] recuperarPagosPendientesDeClientePorMail(@Email String email) {
+    MercadoPago.SDK.configure(mercadoPagoAccesToken);
     HashMap<String, String> filtros = new HashMap<>();
     filtros.put("payer.email", email);
+    filtros.put("status", "refunded");
     MPResourceArray resultados = null;
     try {
       resultados = Payment.search(filtros, true);
     } catch (MPException e) {
       logger.error(e.toString());
     }
-    return resultados;
+    return (resultados != null) ? modelMapper.map(resultados.resources(), PagoMercadoPagoDTO[].class) : null;
   }
-
 }
