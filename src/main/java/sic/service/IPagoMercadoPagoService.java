@@ -5,8 +5,6 @@ import sic.modelo.Usuario;
 import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
 import sic.modelo.dto.PagoMercadoPagoDTO;
 
-import javax.validation.constraints.Email;
-
 public interface IPagoMercadoPagoService {
 
   Recibo crearNuevoPago(NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Usuario usuario);
@@ -15,5 +13,5 @@ public interface IPagoMercadoPagoService {
 
   NuevoPagoMercadoPagoDTO devolverPago(String idPago, Usuario usuario);
 
-  PagoMercadoPagoDTO[] recuperarPagosPendientesDeClientePorMail(@Email String email);
+  PagoMercadoPagoDTO[] recuperarPagosPendientesDeClientePorMail(String email);
 }

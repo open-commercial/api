@@ -21,7 +21,6 @@ import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
 import sic.modelo.dto.PagoMercadoPagoDTO;
 import sic.service.*;
 
-import javax.validation.constraints.Email;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
@@ -65,12 +64,9 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
     MercadoPago.SDK.configure(mercadoPagoAccesToken);
     Payment payment = new Payment();
     payment.setDescription(
-        "Pago de "
-            + cliente.getNombreFiscal()
-            + "("
-            + cliente.getNroCliente()
-            + ") con "
-            + nuevoPagoMercadoPagoDTO.getPaymentMethodId());
+            "("+ cliente.getNroCliente()+")"
+            + " " + cliente.getNombreFiscal()
+            + (cliente.getNombreFantasia() != null ? cliente.getNombreFantasia() : ""));
     Payer payer = new Payer();
     payer.setEmail(cliente.getEmail());
     payment.setPayer(payer);
@@ -103,9 +99,10 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
         nuevoRecibo.setIdPagoMercadoPago(payment.getId());
         nuevoRecibo = reciboService.guardar(nuevoRecibo);
       } else {
-        throw new BusinessServiceException(
-            messageSource.getMessage(payment.getStatusDetail(), null, Locale.getDefault()));
+        logger.warn("El pago {} no fue aprobado", payment);
+        this.procesarMensajeNoAprobado(payment);
       }
+
     } catch (MPException exception) {
       logger.error(exception.toString());
       throw new BusinessServiceException(
@@ -113,6 +110,34 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
               exception.getStatusCode().toString(), null, Locale.getDefault()));
     }
     return nuevoRecibo;
+  }
+
+  private void procesarMensajeNoAprobado(Payment payment) {
+    switch (payment.getStatusDetail()) {
+      case "cc_rejected_card_disabled":
+      case "cc_rejected_insufficient_amount":
+      case "cc_rejected_other_reason":
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                payment.getStatusDetail(),
+                new Object[] {payment.getPaymentMethodId()},
+                Locale.getDefault()));
+      case "cc_rejected_call_for_authorize":
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                payment.getStatusDetail(),
+                new Object[] {payment.getPaymentMethodId(), payment.getTransactionAmount()},
+                Locale.getDefault()));
+      case "cc_rejected_invalid_installments":
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                payment.getStatusDetail(),
+                new Object[] {payment.getPaymentMethodId(), payment.getInstallments()},
+                Locale.getDefault()));
+      default:
+        throw new BusinessServiceException(
+            messageSource.getMessage(payment.getStatusDetail(), null, Locale.getDefault()));
+    }
   }
 
   private void validarOperacion(NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Cliente cliente) {
@@ -186,17 +211,19 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
   }
 
   @Override
-  public PagoMercadoPagoDTO[] recuperarPagosPendientesDeClientePorMail(@Email String email) {
+  public PagoMercadoPagoDTO[] recuperarPagosPendientesDeClientePorMail(String email) {
     MercadoPago.SDK.configure(mercadoPagoAccesToken);
     HashMap<String, String> filtros = new HashMap<>();
     filtros.put("payer.email", email);
-    filtros.put("status", "refunded");
+    filtros.put("status", "in_mediation");
     MPResourceArray resultados = null;
     try {
-      resultados = Payment.search(filtros, true);
+      resultados = Payment.search(filtros, false);
     } catch (MPException e) {
       logger.error(e.toString());
     }
-    return (resultados != null) ? modelMapper.map(resultados.resources(), PagoMercadoPagoDTO[].class) : null;
+    return (resultados != null)
+        ? modelMapper.map(resultados.resources(), PagoMercadoPagoDTO[].class)
+        : null;
   }
 }
