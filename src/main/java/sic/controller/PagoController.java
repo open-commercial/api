@@ -40,12 +40,12 @@ public class PagoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public Recibo crearPago(
+  public void crearPago(
       @RequestBody NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return pagoMercadoPagoService.crearNuevoRecibo(
-      nuevoPagoMercadoPagoDTO,
+    pagoMercadoPagoService.crearNuevoRecibo(
+        nuevoPagoMercadoPagoDTO,
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
   }
 
