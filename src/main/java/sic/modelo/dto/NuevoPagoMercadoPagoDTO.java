@@ -13,6 +13,7 @@ public class NuevoPagoMercadoPagoDTO {
 
   private String token;
   private String paymentMethodId;
+  private String paymentTypeId;
   private String issuerId;
   private Integer installments;
   private long idCliente;

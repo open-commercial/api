@@ -6,11 +6,14 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Recibo;
 import sic.modelo.Rol;
+import sic.modelo.dto.NotificacionMercadoPagoDTO;
 import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
 import sic.modelo.dto.PagoMercadoPagoDTO;
 import sic.service.IAuthService;
 import sic.service.IPagoMercadoPagoService;
 import sic.service.IUsuarioService;
+
+import javax.servlet.annotation.HttpMethodConstraint;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -41,7 +44,7 @@ public class PagoController {
       @RequestBody NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return pagoMercadoPagoService.crearNuevoPago(
+    return pagoMercadoPagoService.crearNuevoRecibo(
       nuevoPagoMercadoPagoDTO,
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
   }
@@ -69,15 +72,8 @@ public class PagoController {
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
   }
 
-  @GetMapping("/pagos/mercado-pago/pendientes-por-email")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
-  public PagoMercadoPagoDTO[] recuperarPagosPendientes(@RequestParam String email) {
-    return pagoMercadoPagoService.recuperarPagosPendientesDeClientePorMail(email);
+  @PostMapping("/pagos/notificacion")
+  public void crearReciboPorNotificacion(@RequestBody NotificacionMercadoPagoDTO notificacion) {
+    pagoMercadoPagoService.crearReciboPorNotificacion(notificacion);
   }
 }
