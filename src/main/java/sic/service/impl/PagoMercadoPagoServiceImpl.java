@@ -192,6 +192,9 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_pago_cliente_sin_email", null, Locale.getDefault()));
     }
+    if (nuevoPagoMercadoPagoDTO.getInstallments() == null) {
+      nuevoPagoMercadoPagoDTO.setInstallments(1);
+    }
     if (nuevoPagoMercadoPagoDTO.getPaymentMethodId() != null
         && nuevoPagoMercadoPagoDTO.getPaymentMethodId().isEmpty()) {
       throw new BusinessServiceException(
@@ -204,9 +207,6 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
             || nuevoPagoMercadoPagoDTO.getIssuerId().isEmpty())) {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_pago_sin_issuer_id", null, Locale.getDefault()));
-    }
-    if (nuevoPagoMercadoPagoDTO.getInstallments() != null) {
-      nuevoPagoMercadoPagoDTO.setInstallments(1);
     }
   }
 
