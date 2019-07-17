@@ -4,7 +4,6 @@ import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.Recibo;
 import sic.modelo.Rol;
 import sic.modelo.dto.NotificacionMercadoPagoDTO;
 import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
@@ -13,7 +12,6 @@ import sic.service.IAuthService;
 import sic.service.IPagoMercadoPagoService;
 import sic.service.IUsuarioService;
 
-import javax.servlet.annotation.HttpMethodConstraint;
 
 @RestController
 @RequestMapping("/api/v1")

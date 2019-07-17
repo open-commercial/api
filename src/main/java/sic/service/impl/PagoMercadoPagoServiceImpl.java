@@ -31,8 +31,7 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
 
   @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
   private String mercadoPagoAccesToken;
-
-  private final String[] pagosEnEfectivoPermitidos =
+  private  static final String[] pagosEnEfectivoPermitidos =
       new String[] {"pagofacil", "rapipago", "cobroexpress", "cargavirtual"};
   private final IReciboService reciboService;
   private final IFormaDePagoService formaDePagoService;
@@ -83,8 +82,9 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
           .setToken(nuevoPagoMercadoPagoDTO.getToken())
           .setInstallments(nuevoPagoMercadoPagoDTO.getInstallments())
           .setIssuerId(nuevoPagoMercadoPagoDTO.getIssuerId())
-          .setPaymentMethodId(nuevoPagoMercadoPagoDTO.getPaymentMethodId());
-    } else if (Arrays.asList(this.pagosEnEfectivoPermitidos)
+          .setPaymentMethodId(nuevoPagoMercadoPagoDTO.getPaymentMethodId())
+          .setBinaryMode(true);
+    } else if (Arrays.asList(pagosEnEfectivoPermitidos)
         .contains(nuevoPagoMercadoPagoDTO.getPaymentMethodId())) {
       payment
           .setTransactionAmount(nuevoPagoMercadoPagoDTO.getMonto())
@@ -95,8 +95,7 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
     }
     try {
       payment = payment.save();
-      this.crearReciboDePagoMercadoPago(
-          payment, usuario, cliente, nuevoPagoMercadoPagoDTO.getMonto());
+      this.crearReciboDePagoMercadoPago(payment, usuario, cliente);
     } catch (MPException exception) {
       logger.error(exception.toString());
       throw new BusinessServiceException(
@@ -111,36 +110,21 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
     try {
       MercadoPago.SDK.configure(mercadoPagoAccesToken);
       payment = Payment.findById(notificacion.getData().getId());
-      if (reciboService.getReciboPorIdMercadoPago(notificacion.getData().getId()) == null
-          && payment.getStatus() == Payment.Status.approved) {
-        logger.warn("El pago de mercadopago {} se aprobó correctamente.", payment);
-        Cliente cliente =
-            clienteService.getClienteNoEliminadoPorId(Long.valueOf(payment.getExternalReference()));
-        Recibo nuevoRecibo = new Recibo();
-        nuevoRecibo.setEmpresa(cliente.getEmpresa());
-        nuevoRecibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(16));
-        nuevoRecibo.setUsuario(cliente.getCredencial());
-        nuevoRecibo.setCliente(cliente);
-        nuevoRecibo.setFecha(new Date());
-        nuevoRecibo.setConcepto("Pago en Mercadopago");
-        nuevoRecibo.setMonto(new BigDecimal(Float.toString(payment.getTransactionAmount())));
-        nuevoRecibo.setIdPagoMercadoPago(payment.getId());
-        reciboService.guardar(nuevoRecibo);
+      Cliente cliente =
+          clienteService.getClienteNoEliminadoPorId(Long.valueOf(payment.getExternalReference()));
+      if (reciboService.getReciboPorIdMercadoPago(notificacion.getData().getId()) == null) {
+        this.crearReciboDePagoMercadoPago(payment, cliente.getCredencial(), cliente);
       } else {
-        logger.warn(
-            "El recibo del {} no fue creado {}",
-            payment,
-            payment.getLastApiResponse().getStringResponse());
-        this.procesarMensajeNoAprobado(payment);
+        logger.warn("El recibo del {} ya existe.", payment);
       }
     } catch (MPException e) {
+      logger.warn("Ocurrió un error al recuperar el Payment. {}", e.getMessage());
       throw new BusinessServiceException(
           messageSource.getMessage(e.getStatusCode().toString(), null, Locale.getDefault()));
     }
   }
 
-  private void crearReciboDePagoMercadoPago(
-      Payment payment, Usuario usuario, Cliente cliente, Float monto) {
+  private void crearReciboDePagoMercadoPago(Payment payment, Usuario usuario, Cliente cliente) {
     switch (payment.getStatus()) {
       case approved:
         logger.warn("El pago de mercadopago {} se aprobó correctamente.", payment);
@@ -151,17 +135,20 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
         nuevoRecibo.setCliente(cliente);
         nuevoRecibo.setFecha(new Date());
         nuevoRecibo.setConcepto("Pago en Mercadopago");
-        nuevoRecibo.setMonto(new BigDecimal(Float.toString(monto)));
+        nuevoRecibo.setMonto(new BigDecimal(Float.toString(payment.getTransactionAmount())));
         nuevoRecibo.setIdPagoMercadoPago(payment.getId());
         reciboService.guardar(nuevoRecibo);
         break;
       case pending:
-        if (!payment.getStatusDetail().equals("pending_waiting_payment")) {
-          logger.warn("El pago {} no está pendiente", payment);
+        if (payment.getStatusDetail().equals("pending_waiting_payment")) {
+          logger.warn("El pago {} está pendiente", payment);
+        } else {
+          logger.warn("El pago {} no fué aprobado", payment);
+          this.procesarMensajeNoAprobado(payment);
         }
         break;
       default:
-        logger.warn("El pago {} no fue aprobado", payment);
+        logger.warn("El pago {} no fué aprobado", payment);
         this.procesarMensajeNoAprobado(payment);
     }
   }
