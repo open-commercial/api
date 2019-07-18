@@ -23,13 +23,13 @@ UPDATE gasto SET id_FormaDePago = 15 where id_FormaDePago = 55;
 UPDATE gasto SET id_FormaDePago = 61 
 where id_FormaDePago = 19 or id_FormaDePago = 20 or id_FormaDePago = 51 or id_FormaDePago = 52;
 
-UPDATE recibo SET recibo.concepto = CONCAT(recibo.concepto," Forma de pago anterior: Cheque Globo Distribuciones")
+UPDATE recibo SET recibo.concepto = CONCAT("(Cheque Globo Distribuciones) ", recibo.concepto)
 where id_FormaDePago = 19;
-UPDATE recibo SET recibo.concepto = CONCAT(recibo.concepto, " Forma de pago anterior: Cheque Calvano Mario R")
+UPDATE recibo SET recibo.concepto = CONCAT("(Cheque Calvano Mario R) ", recibo.concepto)
 where id_FormaDePago = 20;
-UPDATE recibo SET recibo.concepto = CONCAT(recibo.concepto, " Forma de pago anterior: Cheque para Pagos")
+UPDATE recibo SET recibo.concepto = CONCAT("(Cheque para Pagos) ", recibo.concepto)
 where id_FormaDePago = 51;
-UPDATE recibo SET recibo.concepto = CONCAT(recibo.concepto, " Forma de pago anterior: Cheque")
+UPDATE recibo SET recibo.concepto = CONCAT("(Cheque) ", recibo.concepto)
 where  id_FormaDePago = 52;
 
 UPDATE recibo SET id_FormaDePago = 39 where id_FormaDePago = 53;
