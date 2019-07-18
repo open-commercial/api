@@ -106,14 +106,14 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
   }
 
   @Override
-  public void crearReciboPorNotificacion(NotificacionMercadoPagoDTO notificacion) {
+  public void crearReciboPorNotificacion(String idPayment) {
     Payment payment;
     try {
       MercadoPago.SDK.configure(mercadoPagoAccesToken);
-      payment = Payment.findById(notificacion.getData().getId());
+      payment = Payment.findById(idPayment);
       Cliente cliente =
           clienteService.getClienteNoEliminadoPorId(Long.valueOf(payment.getExternalReference()));
-      if (reciboService.getReciboPorIdMercadoPago(notificacion.getData().getId()) == null) {
+      if (reciboService.getReciboPorIdMercadoPago(idPayment) == null) {
         this.crearReciboDePagoMercadoPago(payment, cliente.getCredencial(), cliente);
       } else {
         logger.warn("El recibo del {} ya existe.", payment);

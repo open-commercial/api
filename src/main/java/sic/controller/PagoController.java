@@ -71,6 +71,8 @@ public class PagoController {
 
   @PostMapping("/pagos/notificacion")
   public void crearReciboPorNotificacion(@RequestBody NotificacionMercadoPagoDTO notificacion) {
-    pagoMercadoPagoService.crearReciboPorNotificacion(notificacion);
+    if (notificacion.getType().equals("payment")) {
+      pagoMercadoPagoService.crearReciboPorNotificacion(notificacion.getData().getId());
+    }
   }
 }
