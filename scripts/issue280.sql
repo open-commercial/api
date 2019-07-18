@@ -8,13 +8,13 @@ INSERT INTO formadepago (afectaCaja, eliminada, nombre, predeterminado)
 SET SQL_SAFE_UPDATES = 0;
  SET FOREIGN_KEY_CHECKS = 0;
 
-UPDATE gasto SET gasto.concepto = CONCAT(gasto.concepto," Forma de pago anterior: Cheque Globo Distribuciones")
+UPDATE gasto SET gasto.concepto = CONCAT("(Cheque Globo Distribuciones) ",gasto.concepto)
 where id_FormaDePago = 19;
-UPDATE gasto SET gasto.concepto = CONCAT(gasto.concepto, " Forma de pago anterior: Cheque Calvano Mario R")
+UPDATE gasto SET gasto.concepto = CONCAT("(Cheque Calvano Mario R) ",gasto.concepto)
 where id_FormaDePago = 20;
-UPDATE gasto SET gasto.concepto = CONCAT(gasto.concepto, " Forma de pago anterior: Cheque para Pagos")
+UPDATE gasto SET gasto.concepto = CONCAT("(Cheque para Pagos) ",gasto.concepto)
 where id_FormaDePago = 51;
-UPDATE gasto SET gasto.concepto = CONCAT(gasto.concepto, " Forma de pago anterior: Cheque")
+UPDATE gasto SET gasto.concepto = CONCAT("(Cheque) ",gasto.concepto)
 where  id_FormaDePago = 52;
 
 UPDATE gasto SET id_FormaDePago = 39 where id_FormaDePago = 53;
