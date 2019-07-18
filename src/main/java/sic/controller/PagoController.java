@@ -12,7 +12,6 @@ import sic.service.IAuthService;
 import sic.service.IPagoMercadoPagoService;
 import sic.service.IUsuarioService;
 
-
 @RestController
 @RequestMapping("/api/v1")
 public class PagoController {
@@ -59,7 +58,7 @@ public class PagoController {
     return pagoMercadoPagoService.recuperarPago(idPagoMercadoPago);
   }
 
-  @PutMapping("/pagos/mercado-pago/{idPagoMercadoPago}")
+  @PutMapping("/pagos/mercado-pago/{idPagoMercadoPago}/devolucion")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
   public NuevoPagoMercadoPagoDTO devolverPago(
       @PathVariable String idPagoMercadoPago,

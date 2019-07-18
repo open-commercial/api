@@ -4,30 +4,24 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.Empresa;
 import sic.modelo.FormaDePago;
 import sic.service.IFormaDePagoService;
 import sic.repository.FormaDePagoRepository;
 
 @Service
-@Validated
 public class FormaDePagoServiceImpl implements IFormaDePagoService {
 
   private final FormaDePagoRepository formaDePagoRepository;
   private final MessageSource messageSource;
 
-
   @Autowired
-  public FormaDePagoServiceImpl(FormaDePagoRepository formaDePagoRepository,
-                                MessageSource messageSource) {
+  public FormaDePagoServiceImpl(
+      FormaDePagoRepository formaDePagoRepository, MessageSource messageSource) {
     this.formaDePagoRepository = formaDePagoRepository;
     this.messageSource = messageSource;
   }
@@ -44,13 +38,12 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
 
   @Override
   public FormaDePago getFormasDePagoNoEliminadoPorId(long idFormaDePago) {
-    Optional<FormaDePago> formaDePago = formaDePagoRepository
-      .findById(idFormaDePago);
+    Optional<FormaDePago> formaDePago = formaDePagoRepository.findById(idFormaDePago);
     if (formaDePago.isPresent() && !formaDePago.get().isEliminada()) {
       return formaDePago.get();
     } else {
-      throw new EntityNotFoundException(messageSource.getMessage(
-        "mensaje_formaDePago_no_existente", null, Locale.getDefault()));
+      throw new EntityNotFoundException(
+          messageSource.getMessage("mensaje_formaDePago_no_existente", null, Locale.getDefault()));
     }
   }
 
@@ -60,8 +53,8 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
     if (formaDePago.isPresent()) {
       return formaDePago.get();
     } else {
-      throw new EntityNotFoundException(messageSource.getMessage(
-        "mensaje_formaDePago_no_existente", null, Locale.getDefault()));
+      throw new EntityNotFoundException(
+          messageSource.getMessage("mensaje_formaDePago_no_existente", null, Locale.getDefault()));
     }
   }
 
@@ -91,5 +84,4 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
     formaDePago.setPredeterminado(true);
     formaDePagoRepository.save(formaDePago);
   }
-
 }

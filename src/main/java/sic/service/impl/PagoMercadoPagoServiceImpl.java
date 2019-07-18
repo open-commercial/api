@@ -31,7 +31,8 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
 
   @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
   private String mercadoPagoAccesToken;
-  private  static final String[] pagosEnEfectivoPermitidos =
+
+  private static final String[] pagosEnEfectivoPermitidos =
       new String[] {"pagofacil", "rapipago", "cobroexpress", "cargavirtual"};
   private final IReciboService reciboService;
   private final IFormaDePagoService formaDePagoService;
@@ -134,7 +135,7 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
         nuevoRecibo.setUsuario(usuario);
         nuevoRecibo.setCliente(cliente);
         nuevoRecibo.setFecha(new Date());
-        nuevoRecibo.setConcepto("Pago en Mercadopago");
+        nuevoRecibo.setConcepto("Pago en MercadoPago");
         nuevoRecibo.setMonto(new BigDecimal(Float.toString(payment.getTransactionAmount())));
         nuevoRecibo.setIdPagoMercadoPago(payment.getId());
         reciboService.guardar(nuevoRecibo);

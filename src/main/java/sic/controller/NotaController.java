@@ -35,8 +35,6 @@ public class NotaController {
   private final IFacturaService facturaService;
   private final IAuthService authService;
   private final ModelMapper modelMapper;
-  private static final BigDecimal IVA_21 = new BigDecimal("21");
-  private static final BigDecimal IVA_105 = new BigDecimal("10.5");
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 

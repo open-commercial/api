@@ -70,7 +70,7 @@ public interface INotaService {
   List<RenglonNotaCredito> calcularRenglonCreditoProducto(
       TipoDeComprobante tipo, BigDecimal[] cantidad, Long[] idRenglonFactura);
 
-  RenglonNotaCredito calcularRenglonCredito(TipoDeComprobante tipo, String Detalle, BigDecimal monto);
+  RenglonNotaCredito calcularRenglonCredito(TipoDeComprobante tipo, String detalle, BigDecimal monto);
 
   RenglonNotaDebito calcularRenglonDebitoConRecibo(Recibo recibo) ;
 
