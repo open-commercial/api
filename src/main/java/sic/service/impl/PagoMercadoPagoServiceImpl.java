@@ -15,7 +15,6 @@ import sic.exception.BusinessServiceException;
 import sic.modelo.Cliente;
 import sic.modelo.Recibo;
 import sic.modelo.Usuario;
-import sic.modelo.dto.NotificacionMercadoPagoDTO;
 import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
 import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
 import sic.modelo.dto.PagoMercadoPagoDTO;
@@ -98,10 +97,7 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
       payment = payment.save();
       this.crearReciboDePagoMercadoPago(payment, usuario, cliente);
     } catch (MPException exception) {
-      logger.error(exception.toString());
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              exception.getStatusCode().toString(), null, Locale.getDefault()));
+      this.logExceptionMercadoPago(exception);
     }
   }
 
@@ -118,11 +114,61 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
       } else {
         logger.warn("El recibo del {} ya existe.", payment);
       }
-    } catch (MPException e) {
-      logger.warn("Ocurrió un error al recuperar el Payment. {}", e.getMessage());
-      throw new BusinessServiceException(
-          messageSource.getMessage(e.getStatusCode().toString(), null, Locale.getDefault()));
+    } catch (MPException exception) {
+      this.logExceptionMercadoPago(exception);
     }
+  }
+
+  @Override
+  public PagoMercadoPagoDTO recuperarPago(String idPago) {
+    MercadoPago.SDK.configure(mercadoPagoAccesToken);
+    PagoMercadoPagoDTO pagoRecuperado = PagoMercadoPagoDTO.builder().build();
+    try {
+      Payment pagoMP = Payment.findById(idPago);
+      pagoRecuperado = modelMapper.map(pagoMP, PagoMercadoPagoDTO.class);
+    } catch (MPException exception) {
+      this.logExceptionMercadoPago(exception);
+    }
+    return pagoRecuperado;
+  }
+
+  @Override
+  public NuevoPagoMercadoPagoDTO devolverPago(String idPago, Usuario usuario) {
+    MercadoPago.SDK.configure(mercadoPagoAccesToken);
+    NuevoPagoMercadoPagoDTO pagoRecuperado = new NuevoPagoMercadoPagoDTO();
+    try {
+      Payment pagoMP = Payment.findById(idPago);
+      pagoMP = pagoMP.refund();
+      Recibo reciboDeMercadoPago = reciboService.getReciboPorIdMercadoPago(idPago);
+      pagoRecuperado.setInstallments(pagoMP.getInstallments());
+      pagoRecuperado.setIdCliente(reciboDeMercadoPago.getIdCliente());
+      pagoRecuperado.setIssuerId(pagoMP.getIssuerId());
+      pagoRecuperado.setMonto(reciboDeMercadoPago.getMonto().floatValue());
+      pagoRecuperado.setPaymentMethodId(pagoMP.getPaymentMethodId());
+      NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO =
+          NuevaNotaDebitoDeReciboDTO.builder()
+              .idRecibo(reciboDeMercadoPago.getIdRecibo())
+              .gastoAdministrativo(BigDecimal.ZERO)
+              .motivo("Devolución de pago por MercadoPago")
+              .tipoDeComprobante(
+                  notaService
+                      .getTipoNotaDebitoCliente(
+                          reciboDeMercadoPago.getIdCliente(),
+                          reciboDeMercadoPago.getEmpresa().getId_Empresa())
+                      .get(0))
+              .build();
+      notaService.guardarNotaDebito(
+          notaService.calcularNotaDebitoConRecibo(nuevaNotaDebitoDeReciboDTO, usuario));
+    } catch (MPException | NullPointerException e) {
+      logger.error(e.toString());
+    }
+    return pagoRecuperado;
+  }
+
+  private void logExceptionMercadoPago(MPException exception) {
+    logger.warn("Ocurrió un error con MercadoPago. {}", exception);
+    throw new BusinessServiceException(
+      messageSource.getMessage("mensaje_pago_error", null, Locale.getDefault()));
   }
 
   private void crearReciboDePagoMercadoPago(Payment payment, Usuario usuario, Cliente cliente) {
@@ -209,50 +255,4 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
     }
   }
 
-  @Override
-  public PagoMercadoPagoDTO recuperarPago(String idPago) {
-    MercadoPago.SDK.configure(mercadoPagoAccesToken);
-    PagoMercadoPagoDTO pagoRecuperado;
-    try {
-      Payment pagoMP = Payment.findById(idPago);
-      pagoRecuperado = modelMapper.map(pagoMP, PagoMercadoPagoDTO.class);
-    } catch (MPException e) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(e.getStatusCode().toString(), null, Locale.getDefault()));
-    }
-    return pagoRecuperado;
-  }
-
-  @Override
-  public NuevoPagoMercadoPagoDTO devolverPago(String idPago, Usuario usuario) {
-    MercadoPago.SDK.configure(mercadoPagoAccesToken);
-    NuevoPagoMercadoPagoDTO pagoRecuperado = new NuevoPagoMercadoPagoDTO();
-    try {
-      Payment pagoMP = Payment.findById(idPago);
-      pagoMP = pagoMP.refund();
-      Recibo reciboDeMercadoPago = reciboService.getReciboPorIdMercadoPago(idPago);
-      pagoRecuperado.setInstallments(pagoMP.getInstallments());
-      pagoRecuperado.setIdCliente(reciboDeMercadoPago.getIdCliente());
-      pagoRecuperado.setIssuerId(pagoMP.getIssuerId());
-      pagoRecuperado.setMonto(reciboDeMercadoPago.getMonto().floatValue());
-      pagoRecuperado.setPaymentMethodId(pagoMP.getPaymentMethodId());
-      NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO =
-          NuevaNotaDebitoDeReciboDTO.builder()
-              .idRecibo(reciboDeMercadoPago.getIdRecibo())
-              .gastoAdministrativo(BigDecimal.ZERO)
-              .motivo("Devolución de pago por MercadoPago")
-              .tipoDeComprobante(
-                  notaService
-                      .getTipoNotaDebitoCliente(
-                          reciboDeMercadoPago.getIdCliente(),
-                          reciboDeMercadoPago.getEmpresa().getId_Empresa())
-                      .get(0))
-              .build();
-      notaService.guardarNotaDebito(
-          notaService.calcularNotaDebitoConRecibo(nuevaNotaDebitoDeReciboDTO, usuario));
-    } catch (MPException | NullPointerException e) {
-      logger.error(e.toString());
-    }
-    return pagoRecuperado;
-  }
 }
