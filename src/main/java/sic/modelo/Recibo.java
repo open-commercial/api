@@ -35,6 +35,8 @@ public class Recibo implements Serializable {
 
   private long numRecibo;
 
+  private String idPagoMercadoPago;
+
   @Column(nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
   private Date fecha;

@@ -4,7 +4,6 @@ import java.io.Serializable;
 import javax.validation.constraints.NotNull;
 import javax.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,7 +17,7 @@ import javax.validation.constraints.NotEmpty;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"nombre", "empresa"})
+@EqualsAndHashCode(of = "nombre")
 @ToString
 @JsonIgnoreProperties("empresa")
 public class FormaDePago implements Serializable {
@@ -36,21 +35,6 @@ public class FormaDePago implements Serializable {
 
   private boolean predeterminado;
 
-  @ManyToOne
-  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-  @NotNull(message = "{mensaje_forma_de_pago_empresa_vacia}")
-  private Empresa empresa;
-
   private boolean eliminada;
-
-  @JsonGetter("idEmpresa")
-  public Long getIdEmpresa() {
-    return empresa.getId_Empresa();
-  }
-
-  @JsonGetter("nombreEmpresa")
-  public String getNombreEmpresa() {
-    return empresa.getNombre();
-  }
 
 }

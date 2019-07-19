@@ -3,9 +3,9 @@ package sic.modelo.dto;
 import lombok.*;
 
 @Data
-@EqualsAndHashCode(exclude = {"id_Medida", "idEmpresa", "nombreEmpresa"})
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(exclude = {"id_Medida", "idEmpresa", "nombreEmpresa"})
 @Builder
 public class MedidaDTO {
 

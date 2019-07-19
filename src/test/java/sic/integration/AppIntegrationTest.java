@@ -395,16 +395,6 @@ class AppIntegrationTest {
         .getBody();
   }
 
-  @Test()
-  void shouldCrearFormaDePagoChequeQueAfectaCaja() {
-    FormaDePagoDTO formaDePagoDTO =
-      FormaDePagoDTO.builder().nombre("Cheque").afectaCaja(true).build();
-    FormaDePagoDTO formaDePagoRecuperada =
-      restTemplate.postForObject(
-        apiPrefix + "/formas-de-pago?idEmpresa=1", formaDePagoDTO, FormaDePagoDTO.class);
-    assertEquals(formaDePagoDTO, formaDePagoRecuperada);
-  }
-
   @Test
   void shouldRegistrarNuevaCuentaComoResponsableInscripto() {
     RegistracionClienteAndUsuarioDTO registro =
@@ -5320,9 +5310,17 @@ class AppIntegrationTest {
   @Test
   void shouldGenerarPedidoConItemsDelCarrito() {
     this.shouldAgregarItemsAlCarritoCompra();
-    PedidoDTO pedido = restTemplate.postForObject(apiPrefix
-      + "/carrito-compra?idEmpresa=1&idUsuario=1&idCliente=1&tipoDeEnvio=RETIRO_EN_SUCURSAL&idSucursal=1",
-      "probando pedido desde carrito", PedidoDTO.class);
+    NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO = NuevaOrdenDeCompraDTO.builder()
+      .idEmpresa(1L)
+      .idCliente(1L)
+      .idUsuario(1L)
+      .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
+      .idSucursal(1L)
+      .observaciones("probando pedido desde carrito, sin pago")
+      .build();
+    PedidoDTO pedido =
+        restTemplate.postForObject(
+            apiPrefix + "/carrito-compra", nuevaOrdenDeCompraDTO, PedidoDTO.class);
     assertEquals(14, pedido.getCantidadArticulos().doubleValue());
     assertEquals(new BigDecimal("14395.500000000000000000000000000000000000000000000"), pedido.getTotalActual());
   }

@@ -24,8 +24,8 @@ VALUES ('test',false,'test@test.com',true,1,'Empresa Test','098f6bcd4621d373cade
 INSERT INTO rol (`id_usuario`, `nombre`)
 VALUES (1,'ADMINISTRADOR'),(1,'ENCARGADO'),(1,'COMPRADOR'),(2,'COMPRADOR');
 
-INSERT INTO formadepago(`afecta_caja`, `eliminada`, `nombre`, `predeterminado`, `id_Empresa`)
-VALUES (true,false,'Efectivo',true,1);
+INSERT INTO formadepago(`afecta_caja`, `eliminada`, `nombre`, `predeterminado`)
+VALUES (true,false,'Efectivo',true);
 
 INSERT INTO cliente(`bonificacion`, `categoriaIva`, `contacto`, `eliminado`, `email`, `fecha_alta`, `id_fiscal`,
 `nombre_fantasia`, `nombre_fiscal`, `nro_cliente`, `predeterminado`, `telefono`, `id_usuario_credencial`, `id_empresa`,
@@ -33,7 +33,7 @@ INSERT INTO cliente(`bonificacion`, `categoriaIva`, `contacto`, `eliminado`, `em
 VALUES (10.000000000000000,'RESPONSABLE_INSCRIPTO','',false,'','2019-07-18 02:43:38',20362148952,'Peter Parker','Peter Parker','25158',false,'379123452',2,1,1,2,NULL),
 (0.000000000000000,'RESPONSABLE_INSCRIPTO','El señor Oscuro',false,'Cliente@test.com.br','2019-07-18 02:57:38',2355668,'Cliente test','Cliente test','93413',false,'372461245',1,1,NULL,NULL,NULL);
 
-INSERT INTO transportista(eliminado, nombre, telefono, web, id_Empresa, id_ubicacion)
+INSERT INTO transportista(eliminado, nombre, telefono, web, id_empresa, id_ubicacion)
 VALUES (false,'Correo OCA','3795402356','pedidos@oca.com.ar',1,3);
 
 INSERT INTO medida(eliminada, nombre, id_empresa)
