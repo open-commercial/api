@@ -177,11 +177,11 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
         logger.warn("El pago de mercadopago {} se aprobó correctamente.", payment);
         Recibo nuevoRecibo = new Recibo();
         nuevoRecibo.setEmpresa(cliente.getEmpresa());
-        nuevoRecibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(16));
+        nuevoRecibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(60));
         nuevoRecibo.setUsuario(usuario);
         nuevoRecibo.setCliente(cliente);
         nuevoRecibo.setFecha(new Date());
-        nuevoRecibo.setConcepto("Pago en MercadoPago");
+        nuevoRecibo.setConcepto("Pago en MercadoPago (" + payment.getPaymentMethodId() + ")");
         nuevoRecibo.setMonto(new BigDecimal(Float.toString(payment.getTransactionAmount())));
         nuevoRecibo.setIdPagoMercadoPago(payment.getId());
         reciboService.guardar(nuevoRecibo);
