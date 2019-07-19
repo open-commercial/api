@@ -58,7 +58,7 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
   }
 
   @Override
-  public void crearNuevoRecibo(NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Usuario usuario) {
+  public void crearNuevoPayment(NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Usuario usuario) {
     Cliente cliente =
         clienteService.getClienteNoEliminadoPorId(nuevoPagoMercadoPagoDTO.getIdCliente());
     this.validarOperacion(nuevoPagoMercadoPagoDTO, cliente);
@@ -94,8 +94,7 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
           messageSource.getMessage("mensaje_pago_no_soportado", null, Locale.getDefault()));
     }
     try {
-      payment = payment.save();
-      this.crearReciboDePagoMercadoPago(payment, usuario, cliente);
+      payment.save();
     } catch (MPException exception) {
       this.logExceptionMercadoPago(exception);
     }
