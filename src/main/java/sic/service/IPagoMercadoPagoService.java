@@ -6,7 +6,7 @@ import sic.modelo.dto.PagoMercadoPagoDTO;
 
 public interface IPagoMercadoPagoService {
 
-  void crearNuevoPayment(NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Usuario usuario);
+  void crearNuevoPago(NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Usuario usuario);
 
   void crearReciboPorNotificacion(String idPayment);
 

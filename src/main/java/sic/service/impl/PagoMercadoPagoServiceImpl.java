@@ -58,7 +58,7 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
   }
 
   @Override
-  public void crearNuevoPayment(NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Usuario usuario) {
+  public void crearNuevoPago(NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Usuario usuario) {
     Cliente cliente =
         clienteService.getClienteNoEliminadoPorId(nuevoPagoMercadoPagoDTO.getIdCliente());
     this.validarOperacion(nuevoPagoMercadoPagoDTO, cliente);
@@ -94,9 +94,12 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
           messageSource.getMessage("mensaje_pago_no_soportado", null, Locale.getDefault()));
     }
     try {
-      payment.save();
-    } catch (MPException exception) {
-      this.logExceptionMercadoPago(exception);
+      Payment p = payment.save();
+      if (p.getStatus() == Payment.Status.rejected) {
+        this.procesarMensajeNoAprobado(payment);
+      }
+    } catch (MPException ex) {
+      this.logExceptionMercadoPago(ex);
     }
   }
 
@@ -110,13 +113,13 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
         Cliente cliente =
             clienteService.getClienteNoEliminadoPorId(Long.valueOf(payment.getExternalReference()));
         if (reciboService.getReciboPorIdMercadoPago(idPayment) == null) {
-          this.crearReciboDePagoMercadoPago(payment, cliente.getCredencial(), cliente);
+          this.crearReciboDePago(payment, cliente.getCredencial(), cliente);
         } else {
-          logger.warn("El recibo del {} ya existe.", payment);
+          logger.warn("El recibo del pago nro {} ya existe.", payment.getId());
         }
       }
-    } catch (MPException exception) {
-      this.logExceptionMercadoPago(exception);
+    } catch (MPException ex) {
+      this.logExceptionMercadoPago(ex);
     }
   }
 
@@ -127,8 +130,8 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
     try {
       Payment pagoMP = Payment.findById(idPago);
       pagoRecuperado = modelMapper.map(pagoMP, PagoMercadoPagoDTO.class);
-    } catch (MPException exception) {
-      this.logExceptionMercadoPago(exception);
+    } catch (MPException ex) {
+      this.logExceptionMercadoPago(ex);
     }
     return pagoRecuperado;
   }
@@ -160,19 +163,13 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
               .build();
       notaService.guardarNotaDebito(
           notaService.calcularNotaDebitoConRecibo(nuevaNotaDebitoDeReciboDTO, usuario));
-    } catch (MPException | NullPointerException e) {
-      logger.error(e.toString());
+    } catch (MPException | NullPointerException ex) {
+      logger.error(ex.toString());
     }
     return pagoRecuperado;
   }
 
-  private void logExceptionMercadoPago(MPException exception) {
-    logger.warn("Ocurrió un error con MercadoPago. {}", exception);
-    throw new BusinessServiceException(
-      messageSource.getMessage("mensaje_pago_error", null, Locale.getDefault()));
-  }
-
-  private void crearReciboDePagoMercadoPago(Payment payment, Usuario usuario, Cliente cliente) {
+  private void crearReciboDePago(Payment payment, Usuario usuario, Cliente cliente) {
     switch (payment.getStatus()) {
       case approved:
         logger.warn("El pago de mercadopago {} se aprobó correctamente.", payment);
@@ -189,16 +186,22 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
         break;
       case pending:
         if (payment.getStatusDetail().equals("pending_waiting_payment")) {
-          logger.warn("El pago {} está pendiente", payment);
+          logger.warn("El pago {} está pendiente", payment.getId());
         } else {
-          logger.warn("El pago {} no fué aprobado", payment);
+          logger.warn("El pago {} no fué aprobado", payment.getId());
           this.procesarMensajeNoAprobado(payment);
         }
         break;
       default:
-        logger.warn("El pago {} no fué aprobado", payment);
+        logger.warn("El pago {} no fué aprobado", payment.getId());
         this.procesarMensajeNoAprobado(payment);
     }
+  }
+
+  private void logExceptionMercadoPago(MPException ex) {
+    logger.warn("Ocurrió un error con MercadoPago: {}", ex.getMessage());
+    throw new BusinessServiceException(
+      messageSource.getMessage("mensaje_pago_error", null, Locale.getDefault()));
   }
 
   private void procesarMensajeNoAprobado(Payment payment) {

@@ -41,7 +41,7 @@ public class PagoController {
       @RequestBody NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    pagoMercadoPagoService.crearNuevoPayment(
+    pagoMercadoPagoService.crearNuevoPago(
         nuevoPagoMercadoPagoDTO,
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
   }
