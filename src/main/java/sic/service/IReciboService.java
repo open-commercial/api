@@ -13,6 +13,8 @@ public interface IReciboService {
 
   Recibo getReciboNoEliminadoPorId(long idRecibo);
 
+  Recibo getReciboPorIdMercadoPago(String idPagoMercadoPago);
+
   Page<Recibo> buscarRecibos(BusquedaReciboCriteria criteria);
 
   BigDecimal getTotalRecibos(BusquedaReciboCriteria criteria);

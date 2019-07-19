@@ -20,13 +20,13 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
 import sic.builder.*;
 import sic.modelo.*;
 import sic.modelo.dto.*;
+import sic.repository.FormaDePagoRepository;
 import sic.repository.LocalidadRepository;
 import sic.repository.ProvinciaRepository;
 import sic.repository.UsuarioRepository;
@@ -54,6 +54,7 @@ class AppIntegrationTest {
   @Autowired private IPedidoService pedidoService;
   @Autowired private ProvinciaRepository provinciaRepository;
   @Autowired private LocalidadRepository localidadRepository;
+  @Autowired private FormaDePagoRepository formaDePagoRepository;
   @Autowired private TestRestTemplate restTemplate;
   @Autowired private IClockService clockService;
   @Autowired private ICajaService cajaService;
@@ -447,13 +448,9 @@ class AppIntegrationTest {
             .telefono("379 4895549")
             .ubicacion(UbicacionDTO.builder().calle("Napoles").numero(5600).idLocalidad(1L).build())
             .build();
+    FormaDePago formaDePago = new FormaDePagoBuilder().build();
+    formaDePagoRepository.save(formaDePago);
     empresaDTO = restTemplate.postForObject(apiPrefix + "/empresas", empresaDTO, EmpresaDTO.class);
-    FormaDePagoDTO formaDePago =
-      FormaDePagoDTO.builder().afectaCaja(true).nombre("Efectivo").predeterminado(true).build();
-    restTemplate.postForObject(
-      apiPrefix + "/formas-de-pago?idEmpresa=" + empresaDTO.getId_Empresa(),
-      formaDePago,
-      FormaDePagoDTO.class);
     UsuarioDTO credencial =
         UsuarioDTO.builder()
             .username("marce")
@@ -519,16 +516,6 @@ class AppIntegrationTest {
     RubroDTO rubro = RubroDTO.builder().nombre("Ferreteria").eliminado(false).build();
     restTemplate.postForObject(apiPrefix + "/rubros?idEmpresa=1", rubro, RubroDTO.class);
     this.vincularClienteParaUsuarioInicial();
-  }
-
-  @Test()
-  void shouldCrearFormaDePagoChequeQueAfectaCaja() {
-    FormaDePagoDTO formaDePagoDTO =
-      FormaDePagoDTO.builder().nombre("Cheque").afectaCaja(true).build();
-    FormaDePagoDTO formaDePagoRecuperada =
-      restTemplate.postForObject(
-        apiPrefix + "/formas-de-pago?idEmpresa=1", formaDePagoDTO, FormaDePagoDTO.class);
-    assertEquals(formaDePagoDTO, formaDePagoRecuperada);
   }
 
   @Test
@@ -5446,9 +5433,17 @@ class AppIntegrationTest {
   @Test
   void shouldGenerarPedidoConItemsDelCarrito() {
     this.shouldAgregarItemsAlCarritoCompra();
-    PedidoDTO pedido = restTemplate.postForObject(apiPrefix
-      + "/carrito-compra?idEmpresa=1&idUsuario=1&idCliente=1&tipoDeEnvio=RETIRO_EN_SUCURSAL&idSucursal=1",
-      "probando pedido desde carrito", PedidoDTO.class);
+    NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO = NuevaOrdenDeCompraDTO.builder()
+      .idEmpresa(1L)
+      .idCliente(1L)
+      .idUsuario(1L)
+      .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
+      .idSucursal(1L)
+      .observaciones("probando pedido desde carrito, sin pago")
+      .build();
+    PedidoDTO pedido =
+        restTemplate.postForObject(
+            apiPrefix + "/carrito-compra", nuevaOrdenDeCompraDTO, PedidoDTO.class);
     assertEquals(14, pedido.getCantidadArticulos().doubleValue());
     assertEquals(new BigDecimal("14395.500000000000000000000000000000000000000000000"), pedido.getTotalActual());
   }
