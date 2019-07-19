@@ -107,12 +107,14 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
     try {
       MercadoPago.SDK.configure(mercadoPagoAccesToken);
       payment = Payment.findById(idPayment);
-      Cliente cliente =
-          clienteService.getClienteNoEliminadoPorId(Long.valueOf(payment.getExternalReference()));
-      if (reciboService.getReciboPorIdMercadoPago(idPayment) == null) {
-        this.crearReciboDePagoMercadoPago(payment, cliente.getCredencial(), cliente);
-      } else {
-        logger.warn("El recibo del {} ya existe.", payment);
+      if (payment.getId() != null && payment.getExternalReference() != null) {
+        Cliente cliente =
+            clienteService.getClienteNoEliminadoPorId(Long.valueOf(payment.getExternalReference()));
+        if (reciboService.getReciboPorIdMercadoPago(idPayment) == null) {
+          this.crearReciboDePagoMercadoPago(payment, cliente.getCredencial(), cliente);
+        } else {
+          logger.warn("El recibo del {} ya existe.", payment);
+        }
       }
     } catch (MPException exception) {
       this.logExceptionMercadoPago(exception);

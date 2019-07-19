@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,7 +14,8 @@ public class NotificacionMercadoPagoDTO {
   private String id;
   private boolean live_mode;
   private String type;
-  private Date date_created;
+  //La fecha enviada tiene el siguiente formato -> 2017-03-10 02:02:02 +0000 UTC. y no serializa a java.util.Date
+  private String date_created;
   private String application_id;
   private String user_id;
   private String version;
