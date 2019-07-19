@@ -27,9 +27,6 @@ import org.springframework.web.client.RestClientResponseException;
 import sic.builder.*;
 import sic.modelo.*;
 import sic.modelo.dto.*;
-import sic.repository.LocalidadRepository;
-import sic.repository.ProvinciaRepository;
-import sic.repository.UsuarioRepository;
 import sic.service.ICajaService;
 import sic.service.IClockService;
 import sic.service.IPedidoService;
@@ -46,14 +43,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-// @Sql("/data-test.sql")
+@Sql("/data-test.sql")
 class AppIntegrationTest {
 
-  @Autowired private UsuarioRepository usuarioRepository;
   @Autowired private IProductoService productoService;
   @Autowired private IPedidoService pedidoService;
-  @Autowired private ProvinciaRepository provinciaRepository;
-  @Autowired private LocalidadRepository localidadRepository;
   @Autowired private TestRestTemplate restTemplate;
   @Autowired private IClockService clockService;
   @Autowired private ICajaService cajaService;
@@ -355,41 +349,12 @@ class AppIntegrationTest {
         apiPrefix + "/notas/credito", notaCreditoParaPersistir, NotaCreditoDTO.class);
   }
 
-  private void vincularClienteParaUsuarioInicial() {
-    ClienteDTO cliente =
-      ClienteDTO.builder()
-        .bonificacion(BigDecimal.TEN)
-        .nombreFiscal("Cliente test")
-        .nombreFantasia("Cliente test.")
-        .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-        .idFiscal(2355668L)
-        .email("Cliente@test.com.br")
-        .telefono("372461245")
-        .contacto("El señor Oscuro")
-        .idEmpresa(1L)
-        .idCredencial(1L)
-        .build();
-    restTemplate.postForObject(
-      apiPrefix + "/clientes",
-      cliente,
-      ClienteDTO.class);
-  }
-
   private void abrirCaja() {
     restTemplate.postForObject(apiPrefix + "/cajas/apertura/empresas/1?saldoApertura=0", null, CajaDTO.class);
   }
 
   @BeforeEach
   void setup() {
-    String md5Test = "098f6bcd4621d373cade4e832627b4f6";
-    usuarioRepository.save(
-      new UsuarioBuilder()
-        .withUsername("test")
-        .withPassword(md5Test)
-        .withNombre("test")
-        .withApellido("test")
-        .withHabilitado(true)
-        .build());
     // Interceptor de RestTemplate para JWT
     List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
     interceptors.add(
@@ -428,97 +393,6 @@ class AppIntegrationTest {
       restTemplate
         .postForEntity(apiPrefix + "/login", new Credencial("test", "test"), String.class)
         .getBody();
-    provinciaRepository.save(new ProvinciaBuilder().withNombre("Corrientes").build());
-    provinciaRepository.save(new ProvinciaBuilder().withNombre("Misiones").build());
-    provinciaRepository.save(new ProvinciaBuilder().withNombre("Chaco").build());
-    localidadRepository.save(new LocalidadBuilder().withProvincia(provinciaRepository.findById(1L)).withNombre("Corrientes").withCodigoPostal("N3400").build());
-    localidadRepository.save(new LocalidadBuilder().withProvincia(provinciaRepository.findById(1L)).withNombre("Mercedes").withCodigoPostal("W3470").build());
-    localidadRepository.save(new LocalidadBuilder().withProvincia(provinciaRepository.findById(2L)).withNombre("Posadas").withCodigoPostal("N3300").build());
-    localidadRepository.save(new LocalidadBuilder().withProvincia(provinciaRepository.findById(3L)).withNombre("Resistencia").withCodigoPostal("H3500").build());
-    EmpresaDTO empresaDTO =
-        EmpresaDTO.builder()
-            .nombre("Globo Corporation")
-            .lema("Enjoy the life")
-            .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-            .idFiscal(23154587589L)
-            .ingresosBrutos(123456789L)
-            .fechaInicioActividad(new Date(539924400000L))
-            .email("support@globocorporation.com")
-            .telefono("379 4895549")
-            .ubicacion(UbicacionDTO.builder().calle("Napoles").numero(5600).idLocalidad(1L).build())
-            .build();
-    empresaDTO = restTemplate.postForObject(apiPrefix + "/empresas", empresaDTO, EmpresaDTO.class);
-    FormaDePagoDTO formaDePago =
-      FormaDePagoDTO.builder().afectaCaja(true).nombre("Efectivo").predeterminado(true).build();
-    restTemplate.postForObject(
-      apiPrefix + "/formas-de-pago?idEmpresa=" + empresaDTO.getId_Empresa(),
-      formaDePago,
-      FormaDePagoDTO.class);
-    UsuarioDTO credencial =
-        UsuarioDTO.builder()
-            .username("marce")
-            .password("marce123")
-            .nombre("Marcelo")
-            .apellido("Rockefeller")
-            .email("marce.r@gmail.com")
-            .roles(new ArrayList<>(Collections.singletonList(Rol.COMPRADOR)))
-            .build();
-    credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
-    ClienteDTO cliente =
-        ClienteDTO.builder()
-            .bonificacion(BigDecimal.TEN)
-            .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-            .nombreFiscal("Peter Parker")
-            .idFiscal(20362148952L)
-            .telefono("379123452")
-            .idEmpresa(empresaDTO.getId_Empresa())
-            .idCredencial(credencial.getId_Usuario())
-            .ubicacionFacturacion(
-                UbicacionDTO.builder().calle("Rio Parana").numero(14500).idLocalidad(1L).build())
-            .ubicacionEnvio(
-                UbicacionDTO.builder().calle("Rio Uruguay").numero(15000).idLocalidad(1L).build())
-            .build();
-    restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class);
-    TransportistaDTO transportistaDTO =
-        TransportistaDTO.builder()
-            .nombre("Correo OCA")
-            .web("pedidos@oca.com.ar")
-            .telefono("379 5402356")
-            .eliminado(false)
-            .idEmpresa(1L)
-            .ubicacion(
-                UbicacionDTO.builder()
-                    .calle("Rio Chico 15000")
-                    .numero(4589)
-                    .idLocalidad(1L)
-                    .build())
-            .build();
-    restTemplate.postForObject(
-        apiPrefix + "/transportistas?idEmpresa=1", transportistaDTO, TransportistaDTO.class);
-    MedidaDTO medidaMetro = MedidaDTO.builder().nombre("Metro").build();
-    MedidaDTO medidaKilo = MedidaDTO.builder().nombre("Kilo").build();
-    restTemplate.postForObject(apiPrefix + "/medidas?idEmpresa=1", medidaMetro, MedidaDTO.class);
-    restTemplate.postForObject(apiPrefix + "/medidas?idEmpresa=1", medidaKilo, MedidaDTO.class);
-    ProveedorDTO proveedorDTO =
-        ProveedorDTO.builder()
-            .razonSocial("Chamaco S.R.L.")
-            .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-            .idFiscal(23127895679L)
-            .telPrimario("379 4356778")
-            .telSecundario("379 4894514")
-            .contacto("Raul Gamez")
-            .email("chamacosrl@gmail.com")
-            .web("www.chamacosrl.com.ar")
-            .eliminado(false)
-            .saldoCuentaCorriente(BigDecimal.ZERO)
-            .ubicacion(
-                UbicacionDTO.builder().calle("Av armenia").numero(45677).idLocalidad(1L).build())
-            .idEmpresa(1L)
-            .build();
-    restTemplate.postForObject(apiPrefix + "/proveedores", proveedorDTO, Proveedor.class);
-    RubroDTO rubro = RubroDTO.builder().nombre("Ferreteria").eliminado(false).build();
-    restTemplate.postForObject(apiPrefix + "/rubros?idEmpresa=1", rubro, RubroDTO.class);
-    this.vincularClienteParaUsuarioInicial();
   }
 
   @Test()
