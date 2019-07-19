@@ -28,6 +28,6 @@ public class NotificacionMercadoPagoDTO {
   @AllArgsConstructor
   @NoArgsConstructor
   public class Data {
-    public String id;
+    private String id;
   }
 }
