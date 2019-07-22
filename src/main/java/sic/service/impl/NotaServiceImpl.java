@@ -11,6 +11,10 @@ import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
 import javax.validation.Valid;
 
+import com.mercadopago.MercadoPago;
+import com.mercadopago.exceptions.MPException;
+import com.mercadopago.resources.Payment;
+import com.mercadopago.resources.Refund;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.DateExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -21,6 +25,7 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -45,6 +50,9 @@ import sic.util.FormatterFechaHora;
 @Service
 @Validated
 public class NotaServiceImpl implements INotaService {
+
+  @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
+  private String mercadoPagoAccesToken;
 
   private final NotaRepository notaRepository;
   private final NotaCreditoRepository notaCreditoRepository;
@@ -107,8 +115,8 @@ public class NotaServiceImpl implements INotaService {
     if (nota.isPresent() && !nota.get().isEliminada()) {
       return nota.get();
     } else {
-      throw new EntityNotFoundException(messageSource.getMessage(
-        "mensaje_factura_eliminada", null, Locale.getDefault()));
+      throw new EntityNotFoundException(
+          messageSource.getMessage("mensaje_factura_eliminada", null, Locale.getDefault()));
     }
   }
 
@@ -118,8 +126,8 @@ public class NotaServiceImpl implements INotaService {
     Nota nota = this.getNotaNoEliminadaPorId(idNota);
     if (nota.getMovimiento() == Movimiento.VENTA) {
       if (nota.getCAE() != 0L) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_eliminar_nota_aprobada", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_eliminar_nota_aprobada", null, Locale.getDefault()));
       }
       this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ELIMINACION);
       if (nota instanceof NotaCredito) {
@@ -136,8 +144,9 @@ public class NotaServiceImpl implements INotaService {
       notaRepository.save(nota);
       logger.warn("La Nota {} se eliminó correctamente.", nota);
     } else {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
     }
   }
 
@@ -152,8 +161,9 @@ public class NotaServiceImpl implements INotaService {
     if (busquedaNotaCriteria.isBuscaPorFecha()
         && (busquedaNotaCriteria.getFechaDesde() == null
             || busquedaNotaCriteria.getFechaHasta() == null)) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_nota_fechas_busqueda_invalidas", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_nota_fechas_busqueda_invalidas", null, Locale.getDefault()));
     }
     if (busquedaNotaCriteria.isBuscaPorFecha()) {
       Calendar cal = new GregorianCalendar();
@@ -385,9 +395,11 @@ public class NotaServiceImpl implements INotaService {
   public Factura getFacturaDeLaNotaCredito(Long idNota) {
     Optional<NotaCredito> nc = this.notaCreditoRepository.findById(idNota);
     if (nc.isPresent()) {
-      return (nc.get().getFacturaVenta() != null ? nc.get().getFacturaVenta() : nc.get().getFacturaCompra());
+      return (nc.get().getFacturaVenta() != null
+          ? nc.get().getFacturaVenta()
+          : nc.get().getFacturaCompra());
     } else {
-     return null;
+      return null;
     }
   }
 
@@ -416,15 +428,15 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
-  public List<TipoDeComprobante>  getTipoNotaDebitoCliente(Long idCliente, Long idEmpresa) {
+  public List<TipoDeComprobante> getTipoNotaDebitoCliente(Long idCliente, Long idEmpresa) {
     List<TipoDeComprobante> tiposPermitidos = new ArrayList<>();
     Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
     Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())
-      && CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
+        && CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
       tiposPermitidos.add(TipoDeComprobante.NOTA_DEBITO_A);
     } else if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())
-      && !CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
+        && !CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
       tiposPermitidos.add(TipoDeComprobante.NOTA_DEBITO_B);
     } else {
       tiposPermitidos.add(TipoDeComprobante.NOTA_DEBITO_C);
@@ -612,35 +624,35 @@ public class NotaServiceImpl implements INotaService {
     if (nota instanceof NotaCredito && nota.getMovimiento().equals(Movimiento.VENTA)) {
       if (nota.getFacturaVenta() != null
           && nota.getFecha().compareTo(nota.getFacturaVenta().getFecha()) <= 0) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_nota_fecha_incorrecta", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_nota_fecha_incorrecta", null, Locale.getDefault()));
       }
       if (nota.getCAE() != 0L) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_nota_cliente_CAE", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_nota_cliente_CAE", null, Locale.getDefault()));
       }
     } else if (nota instanceof NotaCredito && nota.getMovimiento().equals(Movimiento.COMPRA)) {
       if (nota.getFacturaCompra() != null
           && nota.getFecha().compareTo(nota.getFacturaCompra().getFecha()) < 0) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_nota_fecha_incorrecta", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_nota_fecha_incorrecta", null, Locale.getDefault()));
       }
       if (nota.getFecha().compareTo(new Date()) > 0) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_nota_fecha_incorrecta", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_nota_fecha_incorrecta", null, Locale.getDefault()));
       }
     }
     if (nota instanceof NotaCredito) {
       if (((NotaCredito) nota).getRenglonesNotaCredito() == null
           || ((NotaCredito) nota).getRenglonesNotaCredito().isEmpty()) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_nota_de_renglones_vacio", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_nota_de_renglones_vacio", null, Locale.getDefault()));
       }
     } else {
       if (((NotaDebito) nota).getRenglonesNotaDebito() == null
           || ((NotaDebito) nota).getRenglonesNotaDebito().isEmpty()) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_nota_de_renglones_vacio", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_nota_de_renglones_vacio", null, Locale.getDefault()));
       }
     }
   }
@@ -671,8 +683,9 @@ public class NotaServiceImpl implements INotaService {
       }
       subTotal = this.calcularSubTotalCredito(importes);
       if (notaCredito.getSubTotal().compareTo(subTotal) != 0) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_nota_sub_total_no_valido", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_nota_sub_total_no_valido", null, Locale.getDefault()));
       }
       iva21 =
           this.calcularIVANetoCredito(
@@ -684,8 +697,8 @@ public class NotaServiceImpl implements INotaService {
               notaCredito.getDescuentoPorcentaje(),
               notaCredito.getRecargoPorcentaje());
       if (notaCredito.getIva21Neto().compareTo(iva21) != 0) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_nota_iva21_no_valido", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_nota_iva21_no_valido", null, Locale.getDefault()));
       }
       iva105 =
           this.calcularIVANetoCredito(
@@ -697,8 +710,8 @@ public class NotaServiceImpl implements INotaService {
               notaCredito.getDescuentoPorcentaje(),
               notaCredito.getRecargoPorcentaje());
       if (notaCredito.getIva105Neto().compareTo(iva105) != 0) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_nota_iva105_no_valido", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_nota_iva105_no_valido", null, Locale.getDefault()));
       }
     } else if (notaCredito.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_X) {
       for (RenglonNotaCredito r : renglonesNotaCredito) {
@@ -707,45 +720,49 @@ public class NotaServiceImpl implements INotaService {
       }
       subTotal = this.calcularSubTotalCredito(importes);
       if (notaCredito.getSubTotal().compareTo(subTotal) != 0) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_nota_sub_total_no_valido", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_nota_sub_total_no_valido", null, Locale.getDefault()));
       }
       if (notaCredito.getIva21Neto().compareTo(BigDecimal.ZERO) != 0.0) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_nota_iva21_no_valido", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_nota_iva21_no_valido", null, Locale.getDefault()));
       }
       if (notaCredito.getIva105Neto().compareTo(BigDecimal.ZERO) != 0.0) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_nota_iva105_no_valido", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_nota_iva105_no_valido", null, Locale.getDefault()));
       }
     }
     // DescuentoNeto
     BigDecimal descuentoNeto =
         this.calcularDecuentoNetoCredito(subTotal, notaCredito.getDescuentoPorcentaje());
     if (notaCredito.getDescuentoNeto().compareTo(descuentoNeto) != 0) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_nota_descuento_neto_no_valido", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_nota_descuento_neto_no_valido", null, Locale.getDefault()));
     }
     // RecargoNeto
     BigDecimal recargoNeto =
         this.calcularRecargoNetoCredito(subTotal, notaCredito.getRecargoPorcentaje());
     if (notaCredito.getRecargoNeto().compareTo(recargoNeto) != 0) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_nota_recargo_neto_no_valido", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_nota_recargo_neto_no_valido", null, Locale.getDefault()));
     }
     // subTotalBruto
     BigDecimal subTotalBruto =
         this.calcularSubTotalBrutoCredito(
             notaCredito.getTipoComprobante(), subTotal, recargoNeto, descuentoNeto, iva105, iva21);
     if (notaCredito.getSubTotalBruto().compareTo(subTotalBruto) != 0) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_nota_sub_total_bruto_no_valido", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_nota_sub_total_bruto_no_valido", null, Locale.getDefault()));
     }
     // Total
     if (notaCredito.getTotal().compareTo(this.calcularTotalCredito(subTotalBruto, iva105, iva21))
         != 0) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_nota_total_no_valido", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_nota_total_no_valido", null, Locale.getDefault()));
     }
   }
 
@@ -754,8 +771,9 @@ public class NotaServiceImpl implements INotaService {
     if ((notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C
             || notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X)
         && notaDebito.getMontoNoGravado().compareTo(BigDecimal.ZERO) != 0) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_nota_c_x_monto_no_gravado_no_valido", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_nota_c_x_monto_no_gravado_no_valido", null, Locale.getDefault()));
     } else if ((notaDebito.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_C
         && notaDebito.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_X)) {
       BigDecimal montoComprobante = BigDecimal.ZERO;
@@ -763,8 +781,9 @@ public class NotaServiceImpl implements INotaService {
         montoComprobante = notaDebito.getRecibo().getMonto();
       }
       if (notaDebito.getMontoNoGravado().compareTo(montoComprobante) != 0) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_nota_monto_no_gravado_no_valido", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_nota_monto_no_gravado_no_valido", null, Locale.getDefault()));
       }
     }
     // iva 21
@@ -775,21 +794,21 @@ public class NotaServiceImpl implements INotaService {
         || notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO) {
       iva21 = notaDebito.getSubTotalBruto().multiply(new BigDecimal("0.21"));
       if (notaDebito.getIva21Neto().compareTo(iva21) != 0) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_nota_iva21_no_valido", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_nota_iva21_no_valido", null, Locale.getDefault()));
       }
     }
     if ((notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C
             || notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X)
         && notaDebito.getIva21Neto().compareTo(BigDecimal.ZERO) != 0) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_nota_iva21_no_valido", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_nota_iva21_no_valido", null, Locale.getDefault()));
     }
     // total
     if ((notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C
         && notaDebito.getSubTotalBruto().compareTo(notaDebito.getTotal()) != 0)) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_nota_total_no_valido", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_nota_total_no_valido", null, Locale.getDefault()));
     }
     if (notaDebito.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_C
         && notaDebito.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_X
@@ -800,8 +819,8 @@ public class NotaServiceImpl implements INotaService {
                     this.calcularTotalDebito(
                         notaDebito.getSubTotalBruto(), iva21, notaDebito.getRecibo().getMonto()))
             != 0)) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_nota_total_no_valido", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_nota_total_no_valido", null, Locale.getDefault()));
     }
   }
 
@@ -821,8 +840,8 @@ public class NotaServiceImpl implements INotaService {
         if (!this.getTipoNotaCreditoCliente(
                 notaCredito.getCliente().getId_Cliente(), notaCredito.getEmpresa().getId_Empresa())
             .contains(notaCredito.getTipoComprobante())) {
-          throw new BusinessServiceException(messageSource.getMessage(
-            "mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
+          throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
         }
       }
       notaCredito.setSerie(
@@ -842,8 +861,8 @@ public class NotaServiceImpl implements INotaService {
               notaCredito.getProveedor().getId_Proveedor(),
               notaCredito.getEmpresa().getId_Empresa())
           .contains(notaCredito.getTipoComprobante())) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
       }
     }
     if (notaCredito.isModificaStock()) {
@@ -1174,16 +1193,37 @@ public class NotaServiceImpl implements INotaService {
       notaDebito.setNroNota(
           this.getSiguienteNumeroNotaDebitoCliente(
               notaDebito.getIdEmpresa(), notaDebito.getTipoComprobante()));
-    } else if (notaDebito.getMovimiento().equals(Movimiento.COMPRA)) {
-      if (!this.getTipoNotaDebitoProveedor(
-              notaDebito.getProveedor().getId_Proveedor(), notaDebito.getEmpresa().getId_Empresa())
-          .contains(notaDebito.getTipoComprobante())) {
-        throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
-      }
+    } else if (notaDebito.getMovimiento().equals(Movimiento.COMPRA)
+        && !this.getTipoNotaDebitoProveedor(
+                notaDebito.getProveedor().getId_Proveedor(),
+                notaDebito.getEmpresa().getId_Empresa())
+            .contains(notaDebito.getTipoComprobante())) {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
     }
     this.validarCalculosDebito(notaDebito);
     notaDebito = notaDebitoRepository.save(notaDebito);
+    if (notaDebito.getRecibo() != null
+        && notaDebito.getRecibo().getIdPagoMercadoPago() != null
+        && !notaDebito.getRecibo().getIdPagoMercadoPago().isEmpty()) {
+      try {
+        Payment payment = Payment.findById(notaDebito.getRecibo().getIdPagoMercadoPago());
+        if (payment.getStatus().equals(Payment.Status.approved)) {
+          MercadoPago.SDK.configure(mercadoPagoAccesToken);
+          Refund refund = new Refund();
+          refund.setPaymentId(notaDebito.getRecibo().getIdPagoMercadoPago());
+          refund.save();
+        } else {
+          logger.warn(
+              "El estado del pago al momento de hacer la nota de debito no es aprobado: {}",
+              payment);
+        }
+      } catch (MPException ex) {
+        logger.warn("Ocurrió un error con MercadoPago: {}", ex.getMessage());
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_pago_error", null, Locale.getDefault()));
+      }
+    }
     cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito, TipoDeOperacion.ALTA);
     logger.warn("La Nota {} se guardó correctamente.", notaDebito);
     return notaDebito;
@@ -1198,8 +1238,9 @@ public class NotaServiceImpl implements INotaService {
       Cliente cliente;
       if (nota instanceof NotaCredito) {
         if (nota.getFacturaVenta() != null && nota.getFacturaVenta().getCAE() == 0L) {
-          throw new BusinessServiceException(messageSource.getMessage(
-            "mensaje_nota_factura_relacionada_sin_CAE", null, Locale.getDefault()));
+          throw new BusinessServiceException(
+              messageSource.getMessage(
+                  "mensaje_nota_factura_relacionada_sin_CAE", null, Locale.getDefault()));
         }
         cliente = nota.getCliente();
       } else {
@@ -1229,8 +1270,8 @@ public class NotaServiceImpl implements INotaService {
       nota.setNumNotaAfip(comprobante.getNumFacturaAfip());
       cuentaCorrienteService.updateCAENota(nota.getIdNota(), comprobante.getCAE());
     } else {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_comprobanteAFIP_invalido", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_comprobanteAFIP_invalido", null, Locale.getDefault()));
     }
     return nota;
   }
@@ -1251,8 +1292,8 @@ public class NotaServiceImpl implements INotaService {
       case PRESUPUESTO:
         return TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
       default:
-        throw new ServiceException(messageSource.getMessage(
-          "mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
+        throw new ServiceException(
+            messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
     }
   }
 
@@ -1321,8 +1362,8 @@ public class NotaServiceImpl implements INotaService {
             "logo", new ImageIcon(ImageIO.read(new URL(nota.getEmpresa().getLogo()))).getImage());
       } catch (IOException ex) {
         logger.error(ex.getMessage());
-        throw new ServiceException(messageSource.getMessage(
-          "mensaje_empresa_404_logo", null, Locale.getDefault()), ex);
+        throw new ServiceException(
+            messageSource.getMessage("mensaje_empresa_404_logo", null, Locale.getDefault()), ex);
       }
     }
     try {
@@ -1330,8 +1371,8 @@ public class NotaServiceImpl implements INotaService {
           JasperFillManager.fillReport(isFileReport, params, ds));
     } catch (JRException ex) {
       logger.error(ex.getMessage());
-      throw new ServiceException(messageSource.getMessage(
-        "mensaje_error_reporte", null, Locale.getDefault()), ex);
+      throw new ServiceException(
+          messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
     }
   }
 
@@ -1354,8 +1395,11 @@ public class NotaServiceImpl implements INotaService {
         RenglonFactura renglonFactura = facturaService.getRenglonFactura(idRenglonFactura[i]);
         if (renglonFactura.getCantidad().compareTo(cantidad[i]) < 0
             || cantidad[i].compareTo(BigDecimal.ZERO) < 0) {
-          throw new BusinessServiceException(messageSource.getMessage(
-            "mensaje_nota_de_credito_cantidad_no_valida", new Object[] {renglonFactura.getDescripcionItem()}, Locale.getDefault()));
+          throw new BusinessServiceException(
+              messageSource.getMessage(
+                  "mensaje_nota_de_credito_cantidad_no_valida",
+                  new Object[] {renglonFactura.getDescripcionItem()},
+                  Locale.getDefault()));
         }
         renglonNota = new RenglonNotaCredito();
         renglonNota.setIdProductoItem(renglonFactura.getIdProductoItem());
@@ -1478,8 +1522,9 @@ public class NotaServiceImpl implements INotaService {
       TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO,
     };
     if (!Arrays.asList(tiposPermitidos).contains(tipo)) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
     }
   }
 
@@ -1513,7 +1558,8 @@ public class NotaServiceImpl implements INotaService {
         renglonNota.setMonto(
             monto.multiply(CIEN).divide(new BigDecimal("121"), 15, RoundingMode.HALF_UP));
         renglonNota.setIvaPorcentaje(IVA_21);
-        renglonNota.setIvaNeto(renglonNota.getMonto().multiply(IVA_21.divide(CIEN, 15, RoundingMode.HALF_UP)));
+        renglonNota.setIvaNeto(
+            renglonNota.getMonto().multiply(IVA_21.divide(CIEN, 15, RoundingMode.HALF_UP)));
         break;
       case NOTA_DEBITO_C:
       case NOTA_DEBITO_X:
@@ -1523,13 +1569,15 @@ public class NotaServiceImpl implements INotaService {
         break;
       case NOTA_DEBITO_Y:
         renglonNota.setMonto(
-          monto.multiply(CIEN).divide(new BigDecimal("110.5"), 15, RoundingMode.HALF_UP));
+            monto.multiply(CIEN).divide(new BigDecimal("110.5"), 15, RoundingMode.HALF_UP));
         renglonNota.setIvaPorcentaje(IVA_105);
-        renglonNota.setIvaNeto(renglonNota.getMonto().multiply(IVA_105.divide(CIEN, 15, RoundingMode.HALF_UP)));
+        renglonNota.setIvaNeto(
+            renglonNota.getMonto().multiply(IVA_105.divide(CIEN, 15, RoundingMode.HALF_UP)));
         break;
       default:
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
     }
     renglonNota.setImporteBruto(renglonNota.getMonto());
     renglonNota.setImporteNeto(renglonNota.getIvaNeto().add(renglonNota.getImporteBruto()));
@@ -1566,22 +1614,31 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public BigDecimal calcularIVANetoCredito(
-    TipoDeComprobante tipoDeComprobante,
-    BigDecimal[] cantidades,
-    BigDecimal[] ivaPorcentajeRenglones,
-    BigDecimal[] ivaNetoRenglones,
-    BigDecimal ivaPorcentaje,
-    BigDecimal descuentoPorcentaje,
-    BigDecimal recargoPorcentaje) {
+      TipoDeComprobante tipoDeComprobante,
+      BigDecimal[] cantidades,
+      BigDecimal[] ivaPorcentajeRenglones,
+      BigDecimal[] ivaNetoRenglones,
+      BigDecimal ivaPorcentaje,
+      BigDecimal descuentoPorcentaje,
+      BigDecimal recargoPorcentaje) {
     BigDecimal resultado = BigDecimal.ZERO;
     int indice = cantidades.length;
     for (int i = 0; i < indice; i++) {
       if (ivaPorcentajeRenglones[i].compareTo(ivaPorcentaje) == 0) {
-        if (tipoDeComprobante == TipoDeComprobante.NOTA_CREDITO_A || tipoDeComprobante == TipoDeComprobante.NOTA_CREDITO_B
-          || tipoDeComprobante == TipoDeComprobante.NOTA_CREDITO_C || tipoDeComprobante == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO) {
-          resultado = resultado.add(cantidades[i].multiply(ivaNetoRenglones[i]
-            .subtract(ivaNetoRenglones[i].multiply(descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
-            .add(ivaNetoRenglones[i].multiply(recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
+        if (tipoDeComprobante == TipoDeComprobante.NOTA_CREDITO_A
+            || tipoDeComprobante == TipoDeComprobante.NOTA_CREDITO_B
+            || tipoDeComprobante == TipoDeComprobante.NOTA_CREDITO_C
+            || tipoDeComprobante == TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO) {
+          resultado =
+              resultado.add(
+                  cantidades[i].multiply(
+                      ivaNetoRenglones[i]
+                          .subtract(
+                              ivaNetoRenglones[i].multiply(
+                                  descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
+                          .add(
+                              ivaNetoRenglones[i].multiply(
+                                  recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
         } else {
           resultado = resultado.add(cantidades[i].multiply(ivaNetoRenglones[i]));
         }
@@ -1623,8 +1680,9 @@ public class NotaServiceImpl implements INotaService {
   public BigDecimal calcularTotalCredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
     if (criteria.isBuscaPorFecha()
         && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_nota_fechas_busqueda_invalidas", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_nota_fechas_busqueda_invalidas", null, Locale.getDefault()));
     }
     if (criteria.isBuscaPorFecha()) {
       Calendar cal = new GregorianCalendar();
@@ -1649,8 +1707,9 @@ public class NotaServiceImpl implements INotaService {
   public BigDecimal calcularTotalDebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
     if (criteria.isBuscaPorFecha()
         && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_nota_fechas_busqueda_invalidas", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_nota_fechas_busqueda_invalidas", null, Locale.getDefault()));
     }
     if (criteria.isBuscaPorFecha()) {
       Calendar cal = new GregorianCalendar();
@@ -1675,8 +1734,9 @@ public class NotaServiceImpl implements INotaService {
   public BigDecimal calcularTotalIVACredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
     if (criteria.isBuscaPorFecha()
         && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_nota_fechas_busqueda_invalidas", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_nota_fechas_busqueda_invalidas", null, Locale.getDefault()));
     }
     if (criteria.isBuscaPorFecha()) {
       Calendar cal = new GregorianCalendar();
@@ -1704,8 +1764,9 @@ public class NotaServiceImpl implements INotaService {
   public BigDecimal calcularTotalIVADebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
     if (criteria.isBuscaPorFecha()
         && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_nota_fechas_busqueda_invalidas", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_nota_fechas_busqueda_invalidas", null, Locale.getDefault()));
     }
     if (criteria.isBuscaPorFecha()) {
       Calendar cal = new GregorianCalendar();
@@ -1742,8 +1803,8 @@ public class NotaServiceImpl implements INotaService {
             .and(qNotaCredito.tipoComprobante.eq(comprobante.getTipoComprobante()))
             .and(qNotaCredito.cliente.isNotNull()));
     Page<NotaCredito> notaAnterior =
-      notaCreditoRepository.findAll(
-        builder, PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "fecha")));
+        notaCreditoRepository.findAll(
+            builder, PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "fecha")));
     return notaAnterior.getContent().get(0).getCAE() == 0L;
   }
 

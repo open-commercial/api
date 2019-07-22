@@ -27,7 +27,7 @@ import java.util.Date;
 import java.util.Locale;
 
 @Service
-public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
+public class MercadoPagoServiceImpl implements IPagoMercadoPagoService {
 
   @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
   private String mercadoPagoAccesToken;
@@ -43,7 +43,7 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
   private final MessageSource messageSource;
 
   @Autowired
-  public PagoMercadoPagoServiceImpl(
+  public MercadoPagoServiceImpl(
       IReciboService reciboService,
       IFormaDePagoService formaDePagoService,
       IClienteService clienteService,
