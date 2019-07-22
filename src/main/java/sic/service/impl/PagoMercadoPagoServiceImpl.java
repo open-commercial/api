@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import sic.exception.BusinessServiceException;
 import sic.modelo.Cliente;
@@ -104,7 +105,8 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
   }
 
   @Override
-  public void crearReciboPorNotificacion(String idPayment) {
+  @Async
+  public void crearComprobantePorNotificacion(String idPayment) {
     Payment payment;
     try {
       MercadoPago.SDK.configure(mercadoPagoAccesToken);
@@ -112,10 +114,39 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
       if (payment.getId() != null && payment.getExternalReference() != null) {
         Cliente cliente =
             clienteService.getClienteNoEliminadoPorId(Long.valueOf(payment.getExternalReference()));
-        if (reciboService.getReciboPorIdMercadoPago(idPayment) == null) {
-          this.crearReciboDePago(payment, cliente.getCredencial(), cliente);
-        } else {
-          logger.warn("El recibo del pago nro {} ya existe.", payment.getId());
+        switch (payment.getStatus()) {
+          case approved:
+            if (reciboService.getReciboPorIdMercadoPago(idPayment) == null) {
+              this.crearReciboDePago(payment, cliente.getCredencial(), cliente);
+            } else {
+              logger.warn("El recibo del pago nro {} ya existe.", payment.getId());
+            }
+            break;
+          case refunded:
+            Recibo reciboDeMercadoPago = reciboService.getReciboPorIdMercadoPago(idPayment);
+            if (!notaService.existsNotaDebitoPorRecibo(reciboDeMercadoPago)) {
+              NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO =
+                  NuevaNotaDebitoDeReciboDTO.builder()
+                      .idRecibo(reciboDeMercadoPago.getIdRecibo())
+                      .gastoAdministrativo(BigDecimal.ZERO)
+                      .motivo("Devolución de pago por MercadoPago")
+                      .tipoDeComprobante(
+                          notaService
+                              .getTipoNotaDebitoCliente(
+                                  reciboDeMercadoPago.getIdCliente(),
+                                  reciboDeMercadoPago.getEmpresa().getId_Empresa())
+                              .get(0))
+                      .build();
+              notaService.guardarNotaDebito(
+                  notaService.calcularNotaDebitoConRecibo(
+                      nuevaNotaDebitoDeReciboDTO, cliente.getCredencial()));
+            } else {
+              logger.warn("La nota del pago nro {} ya existe.", payment.getId());
+            }
+            break;
+          default:
+            logger.warn("El status del pago nro {} no es soportado.", payment.getId());
+            messageSource.getMessage("mensaje_pago_no_soportado", null, Locale.getDefault());
         }
       }
     } catch (MPException ex) {
@@ -132,39 +163,6 @@ public class PagoMercadoPagoServiceImpl implements IPagoMercadoPagoService {
       pagoRecuperado = modelMapper.map(pagoMP, PagoMercadoPagoDTO.class);
     } catch (MPException ex) {
       this.logExceptionMercadoPago(ex);
-    }
-    return pagoRecuperado;
-  }
-
-  @Override
-  public NuevoPagoMercadoPagoDTO devolverPago(String idPago, Usuario usuario) {
-    MercadoPago.SDK.configure(mercadoPagoAccesToken);
-    NuevoPagoMercadoPagoDTO pagoRecuperado = new NuevoPagoMercadoPagoDTO();
-    try {
-      Payment pagoMP = Payment.findById(idPago);
-      pagoMP = pagoMP.refund();
-      Recibo reciboDeMercadoPago = reciboService.getReciboPorIdMercadoPago(idPago);
-      pagoRecuperado.setInstallments(pagoMP.getInstallments());
-      pagoRecuperado.setIdCliente(reciboDeMercadoPago.getIdCliente());
-      pagoRecuperado.setIssuerId(pagoMP.getIssuerId());
-      pagoRecuperado.setMonto(reciboDeMercadoPago.getMonto().floatValue());
-      pagoRecuperado.setPaymentMethodId(pagoMP.getPaymentMethodId());
-      NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO =
-          NuevaNotaDebitoDeReciboDTO.builder()
-              .idRecibo(reciboDeMercadoPago.getIdRecibo())
-              .gastoAdministrativo(BigDecimal.ZERO)
-              .motivo("Devolución de pago por MercadoPago")
-              .tipoDeComprobante(
-                  notaService
-                      .getTipoNotaDebitoCliente(
-                          reciboDeMercadoPago.getIdCliente(),
-                          reciboDeMercadoPago.getEmpresa().getId_Empresa())
-                      .get(0))
-              .build();
-      notaService.guardarNotaDebito(
-          notaService.calcularNotaDebitoConRecibo(nuevaNotaDebitoDeReciboDTO, usuario));
-    } catch (MPException | NullPointerException ex) {
-      logger.error(ex.toString());
     }
     return pagoRecuperado;
   }

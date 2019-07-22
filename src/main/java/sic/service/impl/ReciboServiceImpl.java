@@ -80,7 +80,14 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public Recibo getReciboPorIdMercadoPago(String idPagoMercadoPago) {
-    return reciboRepository.findReciboByIdPagoMercadoPagoAndEliminado(idPagoMercadoPago, false);
+    Recibo recibo =
+        reciboRepository.findReciboByIdPagoMercadoPagoAndEliminado(idPagoMercadoPago, false);
+    if (recibo != null) {
+      return recibo;
+    } else {
+      throw new EntityNotFoundException(
+          messageSource.getMessage("mensaje_recibo_no_existente", null, Locale.getDefault()));
+    }
   }
 
   private BooleanBuilder getBuilder(BusquedaReciboCriteria criteria) {

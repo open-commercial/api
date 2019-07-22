@@ -8,9 +8,7 @@ public interface IPagoMercadoPagoService {
 
   void crearNuevoPago(NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Usuario usuario);
 
-  void crearReciboPorNotificacion(String idPayment);
+  void crearComprobantePorNotificacion(String idPayment);
 
   PagoMercadoPagoDTO recuperarPago(String idPayment);
-
-  NuevoPagoMercadoPagoDTO devolverPago(String idPago, Usuario usuario);
 }

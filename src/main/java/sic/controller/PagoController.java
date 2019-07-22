@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Rol;
-import sic.modelo.dto.NotificacionMercadoPagoDTO;
 import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
 import sic.modelo.dto.PagoMercadoPagoDTO;
 import sic.service.IAuthService;
@@ -58,21 +57,11 @@ public class PagoController {
     return pagoMercadoPagoService.recuperarPago(idPagoMercadoPago);
   }
 
-  @PutMapping("/pagos/mercado-pago/{idPagoMercadoPago}/devolucion")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
-  public NuevoPagoMercadoPagoDTO devolverPago(
-      @PathVariable String idPagoMercadoPago,
-      @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return pagoMercadoPagoService.devolverPago(
-        idPagoMercadoPago,
-        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
-  }
-
   @PostMapping("/pagos/notificacion")
-  public void crearReciboPorNotificacion(@RequestBody NotificacionMercadoPagoDTO notificacion) {
-    if (notificacion.getType().equals("payment")) {
-      pagoMercadoPagoService.crearReciboPorNotificacion(notificacion.getData().getId());
+  public void crearComprobantePorNotificacion(
+      @RequestParam(name = "data.id") String id, @RequestParam String type) {
+    if (type.equals("payment")) {
+      pagoMercadoPagoService.crearComprobantePorNotificacion(id);
     }
   }
 }
