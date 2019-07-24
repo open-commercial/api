@@ -9,9 +9,10 @@ public class FormaDePagoBuilder {
     private boolean afectaCaja = true;
     private boolean predeterminado = true;
     private boolean eliminada = false;
+    private String paymentMethodId = "";
     
     public FormaDePago build() {
-        return new FormaDePago(id_FormaDePago, nombre, afectaCaja, predeterminado, eliminada);
+        return new FormaDePago(id_FormaDePago, nombre, afectaCaja, predeterminado, eliminada, paymentMethodId);
     }
     
     public FormaDePagoBuilder withId_FormaDePago(long idFormaDePago) {
@@ -35,6 +36,11 @@ public class FormaDePagoBuilder {
     
     public FormaDePagoBuilder withEliminada(boolean eliminada) {
         this.eliminada = eliminada;
+        return this;
+    }
+
+    public FormaDePagoBuilder withPaymentMethodId(String paymentMethodId) {
+        this.paymentMethodId = paymentMethodId;
         return this;
     }
 }

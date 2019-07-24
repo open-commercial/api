@@ -84,4 +84,9 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
     formaDePago.setPredeterminado(true);
     formaDePagoRepository.save(formaDePago);
   }
+
+  @Override
+  public FormaDePago getFormaDePago(String paymentMethodId) {
+    return formaDePagoRepository.findByPaymentMethodIdAndEliminada(paymentMethodId, false);
+  }
 }

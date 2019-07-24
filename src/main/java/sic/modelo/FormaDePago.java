@@ -37,4 +37,5 @@ public class FormaDePago implements Serializable {
 
   private boolean eliminada;
 
+  private String paymentMethodId;
 }

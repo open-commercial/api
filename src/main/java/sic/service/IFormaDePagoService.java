@@ -17,5 +17,6 @@ public interface IFormaDePagoService {
     FormaDePago getFormasDePagoPorId(long id);
 
     void setFormaDePagoPredeterminada(FormaDePago formaDePago);
-    
+
+  FormaDePago getFormaDePago(String paymentMethodId);
 }

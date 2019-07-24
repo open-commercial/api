@@ -11,4 +11,6 @@ public interface FormaDePagoRepository extends PagingAndSortingRepository<FormaD
   List<FormaDePago> findAllByAndEliminadaOrderByNombreAsc(boolean eliminada);
 
   List<FormaDePago> findAllByOrderByNombreAsc();
+
+  FormaDePago findByPaymentMethodIdAndEliminada(String nombre, boolean eliminada);
 }
