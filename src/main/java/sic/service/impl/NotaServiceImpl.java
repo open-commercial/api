@@ -51,9 +51,6 @@ import sic.util.FormatterFechaHora;
 @Validated
 public class NotaServiceImpl implements INotaService {
 
-  @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
-  private String mercadoPagoAccesToken;
-
   private final NotaRepository notaRepository;
   private final NotaCreditoRepository notaCreditoRepository;
   private final NotaDebitoRepository notaDebitoRepository;
@@ -66,6 +63,7 @@ public class NotaServiceImpl implements INotaService {
   private final IUsuarioService usuarioService;
   private final IProductoService productoService;
   private final ICuentaCorrienteService cuentaCorrienteService;
+  private final IMercadoPagoService mercadoPagoService;
   private final IConfiguracionDelSistemaService configuracionDelSistemaService;
   private final IAfipService afipService;
   private static final BigDecimal IVA_21 = new BigDecimal("21");
@@ -89,6 +87,7 @@ public class NotaServiceImpl implements INotaService {
       IProductoService productoService,
       IEmpresaService empresaService,
       ICuentaCorrienteService cuentaCorrienteService,
+      IMercadoPagoService mercadoPagoService,
       IConfiguracionDelSistemaService cds,
       IAfipService afipService,
       MessageSource messageSource) {
@@ -104,6 +103,7 @@ public class NotaServiceImpl implements INotaService {
     this.empresaService = empresaService;
     this.productoService = productoService;
     this.cuentaCorrienteService = cuentaCorrienteService;
+    this.mercadoPagoService = mercadoPagoService;
     this.configuracionDelSistemaService = cds;
     this.afipService = afipService;
     this.messageSource = messageSource;
@@ -1206,23 +1206,7 @@ public class NotaServiceImpl implements INotaService {
     if (notaDebito.getRecibo() != null
         && notaDebito.getRecibo().getIdPagoMercadoPago() != null
         && !notaDebito.getRecibo().getIdPagoMercadoPago().isEmpty()) {
-      try {
-        Payment payment = Payment.findById(notaDebito.getRecibo().getIdPagoMercadoPago());
-        if (payment.getStatus().equals(Payment.Status.approved)) {
-          MercadoPago.SDK.configure(mercadoPagoAccesToken);
-          Refund refund = new Refund();
-          refund.setPaymentId(notaDebito.getRecibo().getIdPagoMercadoPago());
-          refund.save();
-        } else {
-          logger.warn(
-              "El estado del pago al momento de hacer la nota de debito no es aprobado: {}",
-              payment);
-        }
-      } catch (MPException ex) {
-        logger.warn("Ocurrió un error con MercadoPago: {}", ex.getMessage());
-        throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_pago_error", null, Locale.getDefault()));
-      }
+      mercadoPagoService.devolverPago(notaDebito.getRecibo().getIdPagoMercadoPago());
     }
     cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito, TipoDeOperacion.ALTA);
     logger.warn("La Nota {} se guardó correctamente.", notaDebito);

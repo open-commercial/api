@@ -3,6 +3,7 @@ package sic.service.impl;
 import com.mercadopago.MercadoPago;
 import com.mercadopago.exceptions.MPException;
 import com.mercadopago.resources.Payment;
+import com.mercadopago.resources.Refund;
 import com.mercadopago.resources.datastructures.payment.Payer;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ import java.util.Date;
 import java.util.Locale;
 
 @Service
-public class MercadoPagoServiceImpl implements IPagoMercadoPagoService {
+public class MercadoPagoServiceImpl implements IMercadoPagoService {
 
   @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
   private String mercadoPagoAccesToken;
@@ -165,6 +166,26 @@ public class MercadoPagoServiceImpl implements IPagoMercadoPagoService {
       this.logExceptionMercadoPago(ex);
     }
     return pagoRecuperado;
+  }
+
+  @Override
+  public void devolverPago(String idPayment) {
+    try {
+      Payment payment = Payment.findById(idPayment);
+      if (payment.getStatus().equals(Payment.Status.approved)) {
+        MercadoPago.SDK.configure(mercadoPagoAccesToken);
+        Refund refund = new Refund();
+        refund.setPaymentId(idPayment);
+        refund.save();
+      } else {
+        logger.warn(
+            "El estado del pago al momento de hacer la nota de debito no es aprobado: {}", payment);
+      }
+    } catch (MPException ex) {
+      logger.warn("Ocurrió un error con MercadoPago: {}", ex.getMessage());
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_pago_error", null, Locale.getDefault()));
+    }
   }
 
   private void crearReciboDePago(Payment payment, Usuario usuario, Cliente cliente) {

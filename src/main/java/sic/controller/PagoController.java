@@ -8,19 +8,19 @@ import sic.modelo.Rol;
 import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
 import sic.modelo.dto.PagoMercadoPagoDTO;
 import sic.service.IAuthService;
-import sic.service.IPagoMercadoPagoService;
+import sic.service.IMercadoPagoService;
 import sic.service.IUsuarioService;
 
 @RestController
 @RequestMapping("/api/v1")
 public class PagoController {
 
-  private final IPagoMercadoPagoService pagoMercadoPagoService;
+  private final IMercadoPagoService pagoMercadoPagoService;
   private IUsuarioService usuarioService;
   private IAuthService authService;
 
   @Autowired
-  public PagoController(IPagoMercadoPagoService pagoMercadoPagoService,
+  public PagoController(IMercadoPagoService pagoMercadoPagoService,
                         IAuthService authService,
                         IUsuarioService usuarioService) {
     this.pagoMercadoPagoService = pagoMercadoPagoService;
