@@ -3,6 +3,7 @@ package sic.service;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
@@ -13,7 +14,7 @@ public interface IReciboService {
 
   Recibo getReciboNoEliminadoPorId(long idRecibo);
 
-  Recibo getReciboPorIdMercadoPago(String idPagoMercadoPago);
+  Optional<Recibo> getReciboPorIdMercadoPago(String idPagoMercadoPago);
 
   Page<Recibo> buscarRecibos(BusquedaReciboCriteria criteria);
 

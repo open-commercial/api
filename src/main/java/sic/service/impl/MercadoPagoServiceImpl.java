@@ -20,10 +20,12 @@ import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
 import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
 import sic.service.*;
 
+import javax.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Optional;
 
 @Service
 public class MercadoPagoServiceImpl implements IMercadoPagoService {
@@ -108,29 +110,33 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       MercadoPago.SDK.configure(mercadoPagoAccesToken);
       payment = Payment.findById(idPayment);
       if (payment.getId() != null && payment.getExternalReference() != null) {
+        Optional<Recibo> reciboMP = reciboService.getReciboPorIdMercadoPago(idPayment);
         Cliente cliente =
             clienteService.getClienteNoEliminadoPorId(Long.valueOf(payment.getExternalReference()));
         switch (payment.getStatus()) {
           case approved:
-            if (reciboService.getReciboPorIdMercadoPago(idPayment) == null) {
-              this.crearReciboDePago(payment, cliente.getCredencial(), cliente);
-            } else {
+            if (reciboMP.isPresent()) {
               logger.warn("El recibo del pago nro {} ya existe.", payment.getId());
+            } else {
+              this.crearReciboDePago(payment, cliente.getCredencial(), cliente);
             }
             break;
           case refunded:
-            Recibo reciboDeMercadoPago = reciboService.getReciboPorIdMercadoPago(idPayment);
-            if (!notaService.existsNotaDebitoPorRecibo(reciboDeMercadoPago)) {
+            if (!reciboMP.isPresent())
+              throw new EntityNotFoundException(
+                  messageSource.getMessage(
+                      "mensaje_recibo_no_existente", null, Locale.getDefault()));
+            if (!notaService.existsNotaDebitoPorRecibo(reciboMP.get())) {
               NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO =
                   NuevaNotaDebitoDeReciboDTO.builder()
-                      .idRecibo(reciboDeMercadoPago.getIdRecibo())
+                      .idRecibo(reciboMP.get().getIdRecibo())
                       .gastoAdministrativo(BigDecimal.ZERO)
                       .motivo("Devolución de pago por MercadoPago")
                       .tipoDeComprobante(
                           notaService
                               .getTipoNotaDebitoCliente(
-                                  reciboDeMercadoPago.getIdCliente(),
-                                  reciboDeMercadoPago.getEmpresa().getId_Empresa())
+                                reciboMP.get().getIdCliente(),
+                                reciboMP.get().getEmpresa().getId_Empresa())
                               .get(0))
                       .build();
               notaService.guardarNotaDebito(

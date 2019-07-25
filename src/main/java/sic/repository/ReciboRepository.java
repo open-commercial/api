@@ -3,6 +3,8 @@ package sic.repository;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -15,7 +17,7 @@ public interface ReciboRepository
         QuerydslPredicateExecutor<Recibo>,
         ReciboRepositoryCustom {
 
-  Recibo findReciboByIdPagoMercadoPagoAndEliminado(String idPagoMercadoPago, boolean eliminado);
+  Optional<Recibo> findReciboByIdPagoMercadoPagoAndEliminado(String idPagoMercadoPago, boolean eliminado);
 
   Recibo findTopByEmpresaAndNumSerieOrderByNumReciboDesc(Empresa empresa, long serie);
 
