@@ -35,7 +35,9 @@ public interface INotaService {
 
   void eliminarNota(long idNota);
 
-  Page<Nota> buscarNotas(BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn);
+  Page<NotaCredito> buscarNotasCredito(BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn);
+
+  Page<NotaDebito> buscarNotasDebito(BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn);
 
   Factura getFacturaDeLaNotaCredito(Long idNota);
 
@@ -55,7 +57,9 @@ public interface INotaService {
 
   List<TipoDeComprobante> getTipoNotaDebitoProveedor(Long idProveedor, Long idEmpresa);
 
-  TipoDeComprobante[] getTiposNota(Empresa empresa);
+  TipoDeComprobante[] getTiposNotaCredito(Empresa empresa);
+
+  TipoDeComprobante[] getTiposNotaDebito(Empresa empresa);
 
   TipoDeComprobante getTipoDeNotaCreditoSegunFactura(TipoDeComprobante tipo);
 

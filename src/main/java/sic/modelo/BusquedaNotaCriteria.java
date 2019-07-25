@@ -33,6 +33,8 @@ public class BusquedaNotaCriteria {
   private Long idCliente;
   private boolean buscaViajante;
   private Long idViajante;
-  private Pageable pageable;
+  private Integer pagina;
+  private String ordenarPor;
+  private String sentido;
 
 }
