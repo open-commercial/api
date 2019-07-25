@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Rol;
 import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
-import sic.modelo.dto.PagoMercadoPagoDTO;
 import sic.service.IAuthService;
 import sic.service.IMercadoPagoService;
 import sic.service.IUsuarioService;
@@ -43,18 +42,6 @@ public class PagoController {
     pagoMercadoPagoService.crearNuevoPago(
         nuevoPagoMercadoPagoDTO,
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
-  }
-
-  @GetMapping("/pagos/mercado-pago/{idPagoMercadoPago}")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
-  public PagoMercadoPagoDTO recuperarPago(@PathVariable String idPagoMercadoPago) {
-    return pagoMercadoPagoService.recuperarPago(idPagoMercadoPago);
   }
 
   @PostMapping("/pagos/notificacion")

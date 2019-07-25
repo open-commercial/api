@@ -19,7 +19,6 @@ import sic.modelo.Recibo;
 import sic.modelo.Usuario;
 import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
 import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
-import sic.modelo.dto.PagoMercadoPagoDTO;
 import sic.service.*;
 
 import java.math.BigDecimal;
@@ -153,19 +152,6 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     } catch (MPException ex) {
       this.logExceptionMercadoPago(ex);
     }
-  }
-
-  @Override
-  public PagoMercadoPagoDTO recuperarPago(String idPago) {
-    MercadoPago.SDK.configure(mercadoPagoAccesToken);
-    PagoMercadoPagoDTO pagoRecuperado = PagoMercadoPagoDTO.builder().build();
-    try {
-      Payment pagoMP = Payment.findById(idPago);
-      pagoRecuperado = modelMapper.map(pagoMP, PagoMercadoPagoDTO.class);
-    } catch (MPException ex) {
-      this.logExceptionMercadoPago(ex);
-    }
-    return pagoRecuperado;
   }
 
   @Override
