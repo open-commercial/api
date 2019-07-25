@@ -11,10 +11,6 @@ import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
 import javax.validation.Valid;
 
-import com.mercadopago.MercadoPago;
-import com.mercadopago.exceptions.MPException;
-import com.mercadopago.resources.Payment;
-import com.mercadopago.resources.Refund;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.DateExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -25,7 +21,6 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
