@@ -5,7 +5,6 @@ import com.mercadopago.exceptions.MPException;
 import com.mercadopago.resources.Payment;
 import com.mercadopago.resources.Refund;
 import com.mercadopago.resources.datastructures.payment.Payer;
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +38,6 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   private final IClienteService clienteService;
   private final INotaService notaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
-  private final ModelMapper modelMapper;
   private final MessageSource messageSource;
 
   @Autowired
@@ -48,13 +46,11 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       IFormaDePagoService formaDePagoService,
       IClienteService clienteService,
       INotaService notaService,
-      ModelMapper modelMapper,
       MessageSource messageSource) {
     this.reciboService = reciboService;
     this.formaDePagoService = formaDePagoService;
     this.clienteService = clienteService;
     this.notaService = notaService;
-    this.modelMapper = modelMapper;
     this.messageSource = messageSource;
   }
 
