@@ -167,7 +167,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
         refund.save();
       } else {
         logger.warn(
-            "El estado del pago al momento de hacer la nota de debito no es aprobado: {}", payment);
+            "El estado del payment al momento de hacer la nota de debito es {}. payment : {}", payment.getStatus(), payment);
       }
     } catch (MPException ex) {
       logger.warn("Ocurrió un error con MercadoPago: {}", ex.getMessage());
