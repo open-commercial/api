@@ -10,10 +10,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import sic.exception.BusinessServiceException;
 import sic.modelo.Cliente;
+import sic.modelo.NotaDebito;
 import sic.modelo.Recibo;
 import sic.modelo.Usuario;
 import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
@@ -103,7 +103,6 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   }
 
   @Override
-  @Async
   public void crearComprobantePorNotificacion(String idPayment) {
     Payment payment;
     try {
@@ -135,13 +134,15 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                       .tipoDeComprobante(
                           notaService
                               .getTipoNotaDebitoCliente(
-                                reciboMP.get().getIdCliente(),
-                                reciboMP.get().getEmpresa().getId_Empresa())
+                                  reciboMP.get().getIdCliente(),
+                                  reciboMP.get().getEmpresa().getId_Empresa())
                               .get(0))
                       .build();
-              notaService.guardarNotaDebito(
-                  notaService.calcularNotaDebitoConRecibo(
-                      nuevaNotaDebitoDeReciboDTO, cliente.getCredencial()));
+              NotaDebito notaGuardada =
+                  notaService.guardarNotaDebito(
+                      notaService.calcularNotaDebitoConRecibo(
+                          nuevaNotaDebitoDeReciboDTO, cliente.getCredencial()));
+              notaService.autorizarNota(notaGuardada);
             } else {
               logger.warn("La nota del pago nro {} ya existe.", payment.getId());
             }
@@ -165,9 +166,6 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
         Refund refund = new Refund();
         refund.setPaymentId(idPayment);
         refund.save();
-      } else {
-        logger.warn(
-            "El estado del payment al momento de hacer la nota de debito es {}. payment : {}", payment.getStatus(), payment);
       }
     } catch (MPException ex) {
       logger.warn("Ocurrió un error con MercadoPago: {}", ex.getMessage());
