@@ -74,11 +74,6 @@ public class UbicacionServiceImpl implements IUbicacionService {
   }
 
   @Override
-  public Localidad getLocalidadPorCodigoPostal(String codigoPostal) {
-    return localidadRepository.findByCodigoPostal(codigoPostal);
-  }
-
-  @Override
   public List<Localidad> getLocalidadesDeLaProvincia(Provincia provincia) {
     return localidadRepository.findAllByAndProvinciaOrderByNombreAsc(provincia);
   }
@@ -129,14 +124,6 @@ public class UbicacionServiceImpl implements IUbicacionService {
           && localidadDuplicada.getIdLocalidad() != localidad.getIdLocalidad()) {
         throw new BusinessServiceException(messageSource.getMessage(
           "mensaje_localidad_duplicado_nombre", null, Locale.getDefault()));
-      }
-    }
-    // Codigo Postal
-    if (localidad.getCodigoPostal() != null) {
-      localidadDuplicada = this.getLocalidadPorCodigoPostal(localidad.getCodigoPostal());
-      if (operacion.equals(TipoDeOperacion.ALTA) && localidadDuplicada != null) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_localidad_duplicado_codigo_postal", null, Locale.getDefault()));
       }
     }
   }
