@@ -5,10 +5,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.*;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -44,6 +46,12 @@ public class Producto implements Serializable {
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_producto_cantidad_negativa}")
   private BigDecimal cantidad;
+
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "idProducto")
+  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+  @NotEmpty//(message = "{mensaje_factura_renglones_vacio}")
+  private List<CantidadSucursal> cantidadSucursales;
 
   @Transient
   @JsonView(Views.Public.class)
