@@ -51,7 +51,7 @@ public class Producto implements Serializable {
   @JoinColumn(name = "idProducto")
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   @NotEmpty//(message = "{mensaje_factura_renglones_vacio}")
-  private List<CantidadSucursal> cantidadSucursales;
+  private List<CantidadEnSucursal> cantidadSucursales;
 
   @Transient
   @JsonView(Views.Public.class)
