@@ -317,17 +317,14 @@ public class AfipServiceImpl implements IAfipService {
         break;
       case FACTURA_B:
         cabecera.setCbteTipo(6);
-        // menor a $5000, si DocTipo = 99 DocNro debe ser igual a 0 (simula un consumidor final ???)
         this.procesarDetalle(detalle, comprobante);
         break;
       case NOTA_DEBITO_B:
         cabecera.setCbteTipo(7);
-        // menor a $5000, si DocTipo = 99 DocNro debe ser igual a 0 (simula un consumidor final ???)
         this.procesarDetalle(detalle, comprobante);
         break;
       case NOTA_CREDITO_B:
         cabecera.setCbteTipo(8);
-        // menor a $5000, si DocTipo = 99 DocNro debe ser igual a 0 (simula un consumidor final ???)
         this.procesarDetalle(detalle, comprobante);
         break;
       case FACTURA_C:
@@ -455,6 +452,7 @@ public class AfipServiceImpl implements IAfipService {
   }
 
   private void procesarDetalle(FECAEDetRequest detalle, ComprobanteAFIP comprobante) {
+    // menor a LIMITE_MONTO_CONSUMIDOR_FINAL, si DocTipo = 99 DocNro debe ser igual a 0 (simula un consumidor final ???)
     if (comprobante.getTotal().compareTo(LIMITE_MONTO_CONSUMIDOR_FINAL) < 0) {
       detalle.setDocTipo(99);
       detalle.setDocNro(0);
