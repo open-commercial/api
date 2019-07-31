@@ -211,10 +211,10 @@ public class ReciboServiceImpl implements IReciboService {
       for (BigDecimal monto : montos) {
         totalMontos = totalMontos.add(monto);
       }
-      if (totalMontos.compareTo(totalFactura) > 0 || totalMontos.compareTo(BigDecimal.ZERO) < 0) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_recibo_superan_total_factura", null, Locale.getDefault()));
-      }
+//      if (totalMontos.compareTo(totalFactura) > 0 || totalMontos.compareTo(BigDecimal.ZERO) < 0) {
+//        throw new BusinessServiceException(messageSource.getMessage(
+//          "mensaje_recibo_superan_total_factura", null, Locale.getDefault()));
+//      }
       int i = 0;
       for (long idFormaDePago : idsFormaDePago) {
         Recibo recibo = new Recibo();
