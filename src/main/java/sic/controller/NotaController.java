@@ -8,9 +8,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -90,7 +87,7 @@ public class NotaController {
   public Page<NotaCredito> buscarNotasCredito(
       @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    this.tratarBooleansDeCriteria(busquedaNotaCriteria);
+    this.procesarCriteriaDeBusqueda(busquedaNotaCriteria);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.buscarNotasCredito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
@@ -106,7 +103,7 @@ public class NotaController {
   public Page<NotaDebito> buscarNotasDebito(
     @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
     @RequestHeader("Authorization") String authorizationHeader) {
-    this.tratarBooleansDeCriteria(busquedaNotaCriteria);
+    this.procesarCriteriaDeBusqueda(busquedaNotaCriteria);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.buscarNotasDebito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
@@ -365,7 +362,7 @@ public class NotaController {
   public BigDecimal getTotalNotasCredito(
       @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    this.tratarBooleansDeCriteria(busquedaNotaCriteria);
+    this.procesarCriteriaDeBusqueda(busquedaNotaCriteria);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalCredito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
@@ -375,7 +372,7 @@ public class NotaController {
   public BigDecimal getTotalNotasDebito(
       @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    this.tratarBooleansDeCriteria(busquedaNotaCriteria);
+    this.procesarCriteriaDeBusqueda(busquedaNotaCriteria);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalDebito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
@@ -385,7 +382,7 @@ public class NotaController {
   public BigDecimal getTotalIvaCredito(
       @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    this.tratarBooleansDeCriteria(busquedaNotaCriteria);
+    this.procesarCriteriaDeBusqueda(busquedaNotaCriteria);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalIVACredito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
@@ -395,12 +392,12 @@ public class NotaController {
   public BigDecimal getTotalIvaDebito(
       @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    this.tratarBooleansDeCriteria(busquedaNotaCriteria);
+    this.procesarCriteriaDeBusqueda(busquedaNotaCriteria);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalIVADebito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
 
-  private void tratarBooleansDeCriteria(BusquedaNotaCriteria busquedaNotaCriteria) {
+  private void procesarCriteriaDeBusqueda(BusquedaNotaCriteria busquedaNotaCriteria) {
     busquedaNotaCriteria.setBuscaPorFecha(
         (busquedaNotaCriteria.getFechaDesde() != null)
             && (busquedaNotaCriteria.getFechaHasta() != null));
