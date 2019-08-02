@@ -16,13 +16,13 @@ public interface IProductoService {
   void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido);
 
   void actualizarStock(
-      Map<Long, BigDecimal> idsYCantidades, TipoDeOperacion operacion, Movimiento movimiento, TipoDeComprobante tipoDeComprobante);
+      Map<Long, BigDecimal> idsYCantidades, Long idSucursal, TipoDeOperacion operacion, Movimiento movimiento, TipoDeComprobante tipoDeComprobante);
 
   Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
 
   BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal ganancia_porcentaje);
 
-  Map<Long, BigDecimal> getProductosSinStockDisponible(long[] idProducto, BigDecimal[] cantidad);
+  Map<Long, BigDecimal> getProductosSinStockDisponible(Long idSucursal, long[] idProducto, BigDecimal[] cantidad);
 
   BigDecimal calcularGananciaPorcentaje(
       BigDecimal precioDeListaNuevo,
@@ -42,9 +42,9 @@ public interface IProductoService {
 
   void eliminarMultiplesProductos(long[] idProducto);
 
-  Producto getProductoPorCodigo(String codigo, long idEmpresa);
+  Producto getProductoPorCodigo(String codigo);
 
-  Producto getProductoPorDescripcion(String descripcion, Empresa empresa);
+  Producto getProductoPorDescripcion(String descripciona);
 
   Producto getProductoNoEliminadoPorId(long idProducto);
 

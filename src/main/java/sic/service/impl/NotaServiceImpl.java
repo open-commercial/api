@@ -131,6 +131,7 @@ public class NotaServiceImpl implements INotaService {
         if (nc.isModificaStock()) {
           this.actualizarStock(
               nc.getRenglonesNotaCredito(),
+              nota.getIdEmpresa(),
               TipoDeOperacion.ELIMINACION,
               nota.getMovimiento(),
               nota.getTipoComprobante());
@@ -864,6 +865,7 @@ public class NotaServiceImpl implements INotaService {
     if (notaCredito.isModificaStock()) {
       this.actualizarStock(
           notaCredito.getRenglonesNotaCredito(),
+          notaCredito.getIdEmpresa(),
           TipoDeOperacion.ALTA,
           notaCredito.getMovimiento(),
           notaCredito.getTipoComprobante());
@@ -1279,12 +1281,14 @@ public class NotaServiceImpl implements INotaService {
 
   private void actualizarStock(
       List<RenglonNotaCredito> renglonesNotaCredito,
+      Long idSucursal,
       TipoDeOperacion tipoOperacion,
       Movimiento movimiento,
       TipoDeComprobante tipoDeComprobante) {
     HashMap<Long, BigDecimal> idsYCantidades = new HashMap<>();
     renglonesNotaCredito.forEach(r -> idsYCantidades.put(r.getIdProductoItem(), r.getCantidad()));
-    productoService.actualizarStock(idsYCantidades, tipoOperacion, movimiento, tipoDeComprobante);
+    productoService.actualizarStock(
+        idsYCantidades, idSucursal, tipoOperacion, movimiento, tipoDeComprobante);
   }
 
   @Override

@@ -117,17 +117,19 @@ public class FacturaServiceImpl implements IFacturaService {
     Factura factura = this.getFacturaNoEliminadaPorId(idFactura);
     if (factura instanceof FacturaVenta) {
       if (factura.getCAE() != 0L) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_eliminar_factura_aprobada", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_eliminar_factura_aprobada", null, Locale.getDefault()));
       }
       if (notaService.existsByFacturaVentaAndEliminada((FacturaVenta) factura)) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_no_se_puede_eliminar", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_no_se_puede_eliminar", null, Locale.getDefault()));
       }
       this.cuentaCorrienteService.asentarEnCuentaCorriente(
           (FacturaVenta) factura, TipoDeOperacion.ELIMINACION);
       productoService.actualizarStock(
           this.getIdsProductosYCantidades(factura),
+          factura.getIdEmpresa(),
           TipoDeOperacion.ELIMINACION,
           Movimiento.VENTA,
           factura.getTipoComprobante());
@@ -137,8 +139,9 @@ public class FacturaServiceImpl implements IFacturaService {
       }
       facturaRepository.save(factura);
     } else {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
     }
   }
 
@@ -463,6 +466,7 @@ public class FacturaServiceImpl implements IFacturaService {
         f ->
             productoService.actualizarStock(
                 this.getIdsProductosYCantidades(f),
+                f.getIdEmpresa(),
                 TipoDeOperacion.ALTA,
                 Movimiento.VENTA,
                 f.getTipoComprobante()));
@@ -506,6 +510,7 @@ public class FacturaServiceImpl implements IFacturaService {
         f ->
             productoService.actualizarStock(
                 this.getIdsProductosYCantidades(f),
+                f.getEmpresa().getId_Empresa(),
                 TipoDeOperacion.ALTA,
                 Movimiento.COMPRA,
                 f.getTipoComprobante()));

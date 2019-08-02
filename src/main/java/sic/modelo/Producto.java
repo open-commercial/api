@@ -25,15 +25,15 @@ import sic.controller.Views;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = {"descripcion", "empresa"})
+@EqualsAndHashCode(of = "descripcion")
 @ToString
-@JsonIgnoreProperties({"medida", "rubro", "proveedor", "empresa"})
+@JsonIgnoreProperties({"medida", "rubro", "proveedor", "empresa", "cantidadSucursales"})
 public class Producto implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @JsonView(Views.Public.class)
-  private long idProducto;
+  private Long idProducto;
 
   @JsonView(Views.Public.class)
   private String codigo;
@@ -43,15 +43,21 @@ public class Producto implements Serializable {
   @JsonView(Views.Public.class)
   private String descripcion;
 
-  @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_producto_cantidad_negativa}")
-  private BigDecimal cantidad;
-
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "idProducto")
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-  @NotEmpty//(message = "{mensaje_factura_renglones_vacio}")
+  @NotEmpty
   private List<CantidadEnSucursal> cantidadSucursales;
+
+  @Transient
+  private BigDecimal cantidadEnSucursal;
+
+  @Transient
+  private BigDecimal cantidadEnOtrasSucursales;
+
+  @Transient
+  @JsonView(Views.Public.class)
+  private BigDecimal cantidadTotalEnSucursales;
 
   @Transient
   @JsonView(Views.Public.class)
@@ -121,9 +127,9 @@ public class Producto implements Serializable {
   @Temporal(TemporalType.TIMESTAMP)
   private Date fechaUltimaModificacion;
 
-  private String estanteria;
-
-  private String estante;
+//  private String estanteria;
+//
+//  private String estante;
 
   @ManyToOne
   @JoinColumn(name = "id_Proveedor", referencedColumnName = "id_Proveedor")
@@ -140,10 +146,10 @@ public class Producto implements Serializable {
   @Temporal(TemporalType.TIMESTAMP)
   private Date fechaVencimiento;
 
-  @ManyToOne
-  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-  @NotNull(message = "{mensaje_producto_vacio_empresa}")
-  private Empresa empresa;
+//  @ManyToOne
+//  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+//  @NotNull(message = "{mensaje_producto_vacio_empresa}")
+//  private Empresa empresa;
 
   private boolean eliminado;
 

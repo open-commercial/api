@@ -87,14 +87,13 @@ public class ProductoServiceImpl implements IProductoService {
     // Duplicados
     // Codigo
     if (!producto.getCodigo().equals("")) {
-      Producto productoDuplicado =
-          this.getProductoPorCodigo(producto.getCodigo(), producto.getEmpresa().getId_Empresa());
+      Producto productoDuplicado = this.getProductoPorCodigo(producto.getCodigo());
       if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
           && productoDuplicado != null
           && productoDuplicado.getIdProducto() != producto.getIdProducto()) {
         throw new BusinessServiceException(
-        messageSource.getMessage(
-          "mensaje_producto_duplicado_codigo", null, Locale.getDefault()));
+            messageSource.getMessage(
+                "mensaje_producto_duplicado_codigo", null, Locale.getDefault()));
       }
       if (operacion.equals(TipoDeOperacion.ALTA)
           && productoDuplicado != null
@@ -105,17 +104,18 @@ public class ProductoServiceImpl implements IProductoService {
       }
     }
     // Descripcion
-    Producto productoDuplicado =
-        this.getProductoPorDescripcion(producto.getDescripcion(), producto.getEmpresa());
+    Producto productoDuplicado = this.getProductoPorDescripcion(producto.getDescripcion());
     if (operacion.equals(TipoDeOperacion.ALTA) && productoDuplicado != null) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()));
     }
     if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
         && productoDuplicado != null
         && productoDuplicado.getIdProducto() != producto.getIdProducto())
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()));
     this.validarCalculos(producto);
   }
 
@@ -186,12 +186,7 @@ public class ProductoServiceImpl implements IProductoService {
   private BooleanBuilder getBuilder(BusquedaProductoCriteria criteria) {
     QProducto qProducto = QProducto.producto;
     BooleanBuilder builder = new BooleanBuilder();
-    builder.and(
-        qProducto
-            .empresa
-            .id_Empresa
-            .eq(criteria.getIdEmpresa())
-            .and(qProducto.eliminado.eq(false)));
+    builder.and(qProducto.eliminado.eq(false));
     if (criteria.isBuscarPorCodigo() && criteria.isBuscarPorDescripcion())
       builder.and(
           qProducto
@@ -209,9 +204,9 @@ public class ProductoServiceImpl implements IProductoService {
     if (criteria.isBuscarPorProveedor())
       builder.and(qProducto.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
     if (criteria.isListarSoloFaltantes())
-      builder.and(qProducto.cantidad.loe(qProducto.cantMinima)).and(qProducto.ilimitado.eq(false));
+      builder.and(qProducto.cantidadSucursales.any().cantidad.loe(qProducto.cantMinima)).and(qProducto.ilimitado.eq(false));
     if (criteria.isListarSoloEnStock())
-      builder.and(qProducto.cantidad.gt(BigDecimal.ZERO)).and(qProducto.ilimitado.eq(false));
+      builder.and(qProducto.cantidadSucursales.any().cantidad.gt(BigDecimal.ZERO)).and(qProducto.ilimitado.eq(false));
     if (criteria.isBuscaPorVisibilidad())
       if (criteria.getPublico()) builder.and(qProducto.publico.isTrue());
       else builder.and(qProducto.publico.isFalse());
@@ -264,74 +259,112 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public void actualizarStock(
-    Map<Long, BigDecimal> idsYCantidades,
-    TipoDeOperacion operacion,
-    Movimiento movimiento,
-    TipoDeComprobante tipoDeComprobante) {
+      Map<Long, BigDecimal> idsYCantidades,
+      Long idSucursal,
+      TipoDeOperacion operacion,
+      Movimiento movimiento,
+      TipoDeComprobante tipoDeComprobante) {
     idsYCantidades.forEach(
-      (idProducto, cantidad) -> {
-        Optional<Producto> producto = productoRepository.findById(idProducto);
-        if (producto.isPresent() && !producto.get().isIlimitado()) {
-          List<TipoDeComprobante> tiposDeFactura =
-            Arrays.asList(
-              TipoDeComprobante.FACTURA_A,
-              TipoDeComprobante.FACTURA_B,
-              TipoDeComprobante.FACTURA_C,
-              TipoDeComprobante.FACTURA_X,
-              TipoDeComprobante.FACTURA_Y,
-              TipoDeComprobante.PRESUPUESTO);
-          List<TipoDeComprobante> tiposDeNotaCreditoQueAfectanStock =
-            Arrays.asList(
-              TipoDeComprobante.NOTA_CREDITO_A,
-              TipoDeComprobante.NOTA_CREDITO_B,
-              TipoDeComprobante.NOTA_CREDITO_C,
-              TipoDeComprobante.NOTA_CREDITO_X,
-              TipoDeComprobante.NOTA_CREDITO_X,
-              TipoDeComprobante.NOTA_CREDITO_Y,
-              TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO);
-          switch (movimiento) {
-            case VENTA:
-              if (tiposDeFactura.contains(tipoDeComprobante)) {
-                this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(operacion, producto.get(), cantidad);
-              }
-              if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
-                this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(operacion, producto.get(), cantidad);
-              }
-              break;
-            case COMPRA:
-              if (tiposDeFactura.contains(tipoDeComprobante)) {
-                this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(operacion, producto.get(), cantidad);
-              }
-              if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
-                this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(operacion, producto.get(), cantidad);
-              }
-              break;
-            default:
-              throw new BusinessServiceException(messageSource.getMessage(
-                "mensaje_movimiento_no_valido", null, Locale.getDefault()));
+        (idProducto, cantidad) -> {
+          Optional<Producto> producto = productoRepository.findById(idProducto);
+          if (producto.isPresent() && !producto.get().isIlimitado()) {
+            List<TipoDeComprobante> tiposDeFactura =
+                Arrays.asList(
+                    TipoDeComprobante.FACTURA_A,
+                    TipoDeComprobante.FACTURA_B,
+                    TipoDeComprobante.FACTURA_C,
+                    TipoDeComprobante.FACTURA_X,
+                    TipoDeComprobante.FACTURA_Y,
+                    TipoDeComprobante.PRESUPUESTO);
+            List<TipoDeComprobante> tiposDeNotaCreditoQueAfectanStock =
+                Arrays.asList(
+                    TipoDeComprobante.NOTA_CREDITO_A,
+                    TipoDeComprobante.NOTA_CREDITO_B,
+                    TipoDeComprobante.NOTA_CREDITO_C,
+                    TipoDeComprobante.NOTA_CREDITO_X,
+                    TipoDeComprobante.NOTA_CREDITO_X,
+                    TipoDeComprobante.NOTA_CREDITO_Y,
+                    TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO);
+            switch (movimiento) {
+              case VENTA:
+                if (tiposDeFactura.contains(tipoDeComprobante)) {
+                  this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(
+                      idSucursal, operacion, producto.get(), cantidad);
+                }
+                if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
+                  this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(
+                      idSucursal, operacion, producto.get(), cantidad);
+                }
+                break;
+              case COMPRA:
+                if (tiposDeFactura.contains(tipoDeComprobante)) {
+                  this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(
+                      idSucursal, operacion, producto.get(), cantidad);
+                }
+                if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
+                  this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(
+                      idSucursal, operacion, producto.get(), cantidad);
+                }
+                break;
+              default:
+                throw new BusinessServiceException(
+                    messageSource.getMessage(
+                        "mensaje_movimiento_no_valido", null, Locale.getDefault()));
+            }
+            productoRepository.save(producto.get());
+          } else {
+            logger.warn("Se intenta actualizar el stock de un producto eliminado.");
           }
-          productoRepository.save(producto.get());
-        } else {
-          logger.warn("Se intenta actualizar el stock de un producto eliminado.");
-        }
-      });
+        });
   }
 
-  private void cambiaStockPorFacturaVentaOrNotaCreditoCompra(TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
+  private void cambiaStockPorFacturaVentaOrNotaCreditoCompra(
+      Long idSucursal, TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
     if (operacion == TipoDeOperacion.ALTA) {
-      producto.setCantidad(producto.getCantidad().subtract(cantidad));
+      producto
+          .getCantidadSucursales()
+          .forEach(
+              cantidadEnSucursal -> {
+                if (cantidadEnSucursal.getEmpresa().getId_Empresa() == idSucursal) {
+                  cantidadEnSucursal.setCantidad(
+                      cantidadEnSucursal.getCantidad().subtract(cantidad));
+                }
+              });
     }
     if (operacion == TipoDeOperacion.ELIMINACION) {
-      producto.setCantidad(producto.getCantidad().add(cantidad));
+      producto
+          .getCantidadSucursales()
+          .forEach(
+              cantidadEnSucursal -> {
+                if (cantidadEnSucursal.getEmpresa().getId_Empresa() == idSucursal) {
+                  cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().add(cantidad));
+                }
+              });
     }
   }
 
-  private void cambiaStockPorFacturaCompraOrNotaCreditoVenta(TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
+  private void cambiaStockPorFacturaCompraOrNotaCreditoVenta(
+      Long idSucursal, TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
     if (operacion == TipoDeOperacion.ALTA) {
-      producto.setCantidad(producto.getCantidad().add(cantidad));
+      producto
+          .getCantidadSucursales()
+          .forEach(
+              cantidadEnSucursal -> {
+                if (cantidadEnSucursal.getEmpresa().getId_Empresa() == idSucursal) {
+                  cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().add(cantidad));
+                }
+              });
     }
     if (operacion == TipoDeOperacion.ELIMINACION) {
-      producto.setCantidad(producto.getCantidad().subtract(cantidad));
+      producto
+          .getCantidadSucursales()
+          .forEach(
+              cantidadEnSucursal -> {
+                if (cantidadEnSucursal.getEmpresa().getId_Empresa() == idSucursal) {
+                  cantidadEnSucursal.setCantidad(
+                      cantidadEnSucursal.getCantidad().subtract(cantidad));
+                }
+              });
     }
   }
 
@@ -472,16 +505,20 @@ public class ProductoServiceImpl implements IProductoService {
   public Producto getProductoNoEliminadoPorId(long idProducto) {
     Optional<Producto> producto = productoRepository.findById(idProducto);
     if (producto.isPresent() && !producto.get().isEliminado()) {
-      if (producto.get().getCantidad().compareTo(BigDecimal.ZERO) > 0) {
-        producto.get().setHayStock(true);
-        return producto.get();
-      } else {
-        producto.get().setHayStock(false);
-        return producto.get();
-      }
+      producto.get().setHayStock(false);
+      producto
+          .get()
+          .getCantidadSucursales()
+          .forEach(
+              cantidadEnSucursal -> {
+                if (cantidadEnSucursal.getCantidad().compareTo(BigDecimal.ZERO) > 0) {
+                  producto.get().setHayStock(true);
+                }
+              });
+      return producto.get();
     } else {
-      throw new EntityNotFoundException(messageSource.getMessage(
-        "mensaje_producto_no_existente", null, Locale.getDefault()));
+      throw new EntityNotFoundException(
+          messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
     }
   }
 
@@ -497,18 +534,17 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Producto getProductoPorCodigo(String codigo, long idEmpresa) {
+  public Producto getProductoPorCodigo(String codigo) {
     if (codigo.isEmpty()) {
       return null;
     } else {
-      Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
-      return productoRepository.findByCodigoAndEmpresaAndEliminado(codigo, empresa, false);
+      return productoRepository.findByCodigoAndEliminado(codigo, false);
     }
   }
 
   @Override
-  public Producto getProductoPorDescripcion(String descripcion, Empresa empresa) {
-    return productoRepository.findByDescripcionAndEmpresaAndEliminado(descripcion, empresa, false);
+  public Producto getProductoPorDescripcion(String descripcion) {
+    return productoRepository.findByDescripcionAndEliminado(descripcion, false);
   }
 
   @Override
@@ -518,20 +554,27 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public Map<Long, BigDecimal> getProductosSinStockDisponible(
-      long[] idProducto, BigDecimal[] cantidad) {
+      Long idSucursal, long[] idProducto, BigDecimal[] cantidad) {
     Map<Long, BigDecimal> productos = new HashMap<>();
     int longitudIds = idProducto.length;
     int longitudCantidades = cantidad.length;
     if (longitudIds == longitudCantidades) {
       for (int i = 0; i < longitudIds; i++) {
         Producto p = this.getProductoNoEliminadoPorId(idProducto[i]);
-        if (!p.isIlimitado() && p.getCantidad().compareTo(cantidad[i]) < 0) {
-          productos.put(p.getIdProducto(), cantidad[i]);
-        }
+        BigDecimal cantidadLambda = cantidad[i];
+        p.getCantidadSucursales()
+            .forEach(
+                cantidadEnSucursal -> {
+                  if (cantidadEnSucursal.getEmpresa().getId_Empresa() == idSucursal
+                      && !p.isIlimitado()
+                      && cantidadEnSucursal.getCantidad().compareTo(cantidadLambda) < 0) {
+                    productos.put(p.getIdProducto(), cantidadLambda);
+                  }
+                });
       }
     } else {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_error_logitudes_arrays", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_error_logitudes_arrays", null, Locale.getDefault()));
     }
     return productos;
   }

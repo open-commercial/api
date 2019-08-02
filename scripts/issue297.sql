@@ -36,6 +36,16 @@ SELECT
    from cantidadensucursal inner join
  productoAux on cantidadensucursal.codigo = productoAux.codigo;
  
- ALTER TABLE cantidadensucursal DROP codigo;
+ALTER TABLE cantidadensucursal DROP codigo;
  
- DROP TABLE IF EXISTS productoAux; 
+DROP TABLE IF EXISTS productoAux; 
+ 
+ALTER TABLE producto DROP cantMinima;
+ALTER TABLE producto DROP estante;
+ALTER TABLE producto DROP estanteria;
+ 
+ALTER TABLE producto
+	DROP FOREIGN KEY FKmicsquyd17liutvxtw6uao7fo;
+    
+ALTER TABLE producto DROP id_Empresa;
+ 

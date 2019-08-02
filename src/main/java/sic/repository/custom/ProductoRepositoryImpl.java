@@ -18,7 +18,7 @@ public class ProductoRepositoryImpl implements ProductoRepositoryCustom {
   public BigDecimal calcularValorStock(BooleanBuilder builder) {
     QProducto qProducto = QProducto.producto;
     JPAQueryFactory queryFactory = new JPAQueryFactory(em);
-    return queryFactory.select(qProducto.cantidad.multiply(qProducto.precioCosto).sum())
+    return queryFactory.select(qProducto.cantidadSucursales.any().cantidad.multiply(qProducto.precioCosto).sum())
       .from(qProducto)
       .where(builder)
       .fetch().get(0);

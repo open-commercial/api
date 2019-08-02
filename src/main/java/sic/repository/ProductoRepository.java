@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import sic.modelo.Empresa;
 import sic.modelo.Producto;
 
 import java.util.List;
@@ -13,9 +12,9 @@ import java.util.List;
 public interface ProductoRepository extends PagingAndSortingRepository<Producto, Long>,
   QuerydslPredicateExecutor<Producto>, ProductoRepositoryCustom {
 
-  Producto findByCodigoAndEmpresaAndEliminado(String codigo, Empresa empresa, boolean eliminado);
+  Producto findByCodigoAndEliminado(String codigo, boolean eliminado);
 
-  Producto findByDescripcionAndEmpresaAndEliminado(String descripcion, Empresa empresa, boolean eliminado);
+  Producto findByDescripcionAndEliminado(String descripcion, boolean eliminado);
 
   List<Producto> findByIdProductoInOrderByIdProductoAsc(List<Long> idsProductos);
 
