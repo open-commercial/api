@@ -13,7 +13,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import sic.modelo.Empresa;
 import sic.modelo.Medida;
 import sic.service.IMedidaService;
 import sic.exception.BusinessServiceException;
@@ -48,20 +47,20 @@ public class MedidaServiceImpl implements IMedidaService {
   }
 
   @Override
-  public List<Medida> getUnidadMedidas(Empresa empresa) {
-    return medidaRepository.findAllByAndEmpresaAndEliminadaOrderByNombreAsc(empresa, false);
+  public List<Medida> getUnidadMedidas() {
+    return medidaRepository.findAllByAndEliminadaOrderByNombreAsc(false);
   }
 
   @Override
-  public Medida getMedidaPorNombre(String nombre, Empresa empresa) {
-    return medidaRepository.findByNombreAndEmpresaAndEliminada(nombre, empresa, false);
+  public Medida getMedidaPorNombre(String nombre) {
+    return medidaRepository.findByNombreAndEliminada(nombre, false);
   }
 
   @Override
   public void validarOperacion(TipoDeOperacion operacion, Medida medida) {
     // Duplicados
     // Nombre
-    Medida medidaDuplicada = this.getMedidaPorNombre(medida.getNombre(), medida.getEmpresa());
+    Medida medidaDuplicada = this.getMedidaPorNombre(medida.getNombre());
     if (operacion.equals(TipoDeOperacion.ALTA) && medidaDuplicada != null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_medida_duplicada_nombre", null, Locale.getDefault()));

@@ -17,7 +17,6 @@ public class NuevoProductoDTO {
   private String codigo;
   private String descripcion;
   private BigDecimal cantidad;
-
   private boolean hayStock;
   private BigDecimal precioBonificado;
   private BigDecimal cantMinima;

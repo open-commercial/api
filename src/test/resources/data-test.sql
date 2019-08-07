@@ -39,16 +39,16 @@ VALUES (10.000000000000000,'RESPONSABLE_INSCRIPTO','',false,'','2019-07-18 02:43
 INSERT INTO transportista(eliminado, nombre, telefono, web, id_empresa, id_ubicacion)
 VALUES (false,'Correo OCA','3795402356','pedidos@oca.com.ar',1,3);
 
-INSERT INTO medida(eliminada, nombre, id_empresa)
-VALUES (false,'Metro',1),(false,'Kilo',1);
+INSERT INTO medida(eliminada, nombre)
+VALUES (false,'Metro'),(false,'Kilo');
 
 INSERT INTO proveedor(categoriaIva, contacto, eliminado, email, id_fiscal, razon_social, tel_primario, tel_secundario,
     web, id_Empresa, id_ubicacion, nro_proveedor)
 VALUES ('RESPONSABLE_INSCRIPTO','Raul Gamez',false,'chamacosrl@gmail.com',23127895679,'Chamaco S.R.L.','3794356778',
     '123456','www.chamacosrl.com.ar',1,4,1);
 
-INSERT INTO rubro(eliminado, nombre, id_Empresa)
-VALUES (false,'Ferreteria',1);
+INSERT INTO rubro(eliminado, nombre)
+VALUES (false,'Ferreteria');
 
 INSERT INTO configuraciondelsistema(cantidad_maxima_de_renglones_en_factura, certificado_afip, email_password,
     email_sender_habilitado, email_username,factura_electronica_habilitada, fecha_generacion_tokenWsaa,

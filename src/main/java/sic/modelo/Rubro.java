@@ -18,7 +18,7 @@ import javax.validation.constraints.NotEmpty;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"nombre", "empresa"})
+@EqualsAndHashCode(of = "nombre")
 @ToString
 @JsonIgnoreProperties({"idEmpresa", "nombreEmpresa"})
 public class Rubro implements Serializable {
@@ -32,21 +32,6 @@ public class Rubro implements Serializable {
     @NotEmpty(message = "{mensaje_rubro_nombre_vacio}")
     private String nombre;
 
-    @ManyToOne
-    @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-    @NotNull(message = "{mensaje_rubro_empresa_vacia}")
-    private Empresa empresa;
-
     private boolean eliminado;
-
-    @JsonGetter("nombreEmpresa")
-    public String getNombreEmpresa() {
-        return empresa.getNombre();
-    }
-
-    @JsonGetter("idEmpresa")
-    public long getIdEmpresa() {
-        return empresa.getId_Empresa();
-    }
 
 }

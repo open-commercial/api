@@ -40,8 +40,7 @@ class MedidaServiceImplTest {
         assertThrows(
             BusinessServiceException.class,
             () -> {
-              when(medidaRepository.findByNombreAndEmpresaAndEliminada(
-                      "Unidad", medidaNueva.getEmpresa(), false))
+              when(medidaRepository.findByNombreAndEliminada("Unidad", false))
                   .thenReturn(medidaMock);
               medidaNueva.setNombre("Unidad");
               medidaService.validarOperacion(TipoDeOperacion.ALTA, medidaNueva);
@@ -57,17 +56,14 @@ class MedidaServiceImplTest {
         assertThrows(
             BusinessServiceException.class,
             () -> {
-              when(medidaRepository.findByNombreAndEmpresaAndEliminada(
-                      "Metro", medidaNueva.getEmpresa(), false))
+              when(medidaRepository.findByNombreAndEliminada("Metro", false))
                   .thenReturn(medidaMock);
               medidaNueva.setId_Medida(1L);
               medidaNueva.setNombre("Metro");
-              when(medidaService.getMedidaPorNombre("Metro", medidaNueva.getEmpresa()))
-                  .thenReturn(medidaNueva);
+              when(medidaService.getMedidaPorNombre("Metro")).thenReturn(medidaNueva);
               Medida medidaDuplicada = new Medida();
               medidaDuplicada.setId_Medida(2L);
               medidaDuplicada.setNombre("Metro");
-              medidaDuplicada.setEmpresa(medidaNueva.getEmpresa());
               medidaService.validarOperacion(TipoDeOperacion.ACTUALIZACION, medidaDuplicada);
             });
     assertTrue(thrown.getMessage().contains(mensaje_medida_duplicada_nombre));

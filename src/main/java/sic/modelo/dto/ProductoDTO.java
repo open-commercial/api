@@ -16,7 +16,9 @@ public class ProductoDTO implements Serializable {
   private Long idProducto;
   private String codigo;
   private String descripcion;
-  private BigDecimal cantidad;
+  private BigDecimal cantidadEnSucursal;
+  private BigDecimal cantidadEnOtrasSucursales;
+  private BigDecimal cantidadTotalEnSucursales;
   private boolean hayStock;
   private BigDecimal cantMinima;
   private BigDecimal bulto;

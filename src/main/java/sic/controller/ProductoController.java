@@ -123,7 +123,7 @@ public class ProductoController {
     }
   }
 
-  @GetMapping("/productos/{idProducto}/empresas/{idEmpresa}")
+  @GetMapping("/productos/{idProducto}/sucursales/{idSucursal}")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -133,12 +133,13 @@ public class ProductoController {
   })
   public Producto getProductoPorId(
       @PathVariable long idProducto,
-      @PathVariable long idEmpresa,
+      @PathVariable long idSucursal,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
+    this.procesarCantidadesDeProducto(producto, idSucursal);
     Cliente cliente =
-        clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idEmpresa);
+        clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idSucursal);
     if (cliente != null) {
       Page<Producto> productos =
           productoService.getProductosConPrecioBonificado(
@@ -147,6 +148,19 @@ public class ProductoController {
     } else {
       return producto;
     }
+  }
+
+  private void procesarCantidadesDeProducto(Producto producto, Long idSucursal) {
+    BigDecimal cantidadEnOtrasSucursales = BigDecimal.ZERO;
+    for (CantidadEnSucursal cantidadEnSucursal : producto.getCantidadSucursales()) {
+      cantidadEnOtrasSucursales = cantidadEnOtrasSucursales.add(cantidadEnSucursal.getCantidad());
+      if (cantidadEnSucursal.getEmpresa().getId_Empresa() == idSucursal) {
+        producto.setCantidadEnSucursal(cantidadEnSucursal.getCantidad());
+      }
+    }
+    producto.setCantidadEnOtrasSucursales(cantidadEnOtrasSucursales);
+    producto.setCantidadTotalEnSucursales(
+      cantidadEnOtrasSucursales.add(producto.getCantidadEnSucursal()));
   }
 
   @GetMapping("/productos/busqueda/criteria")
@@ -158,7 +172,7 @@ public class ProductoController {
     Rol.COMPRADOR
   })
   public Page<Producto> buscarProductos(
-      @RequestParam long idEmpresa,
+      @RequestParam long idSucursal,
       @RequestParam(required = false) String codigo,
       @RequestParam(required = false) String descripcion,
       @RequestParam(required = false) Long idRubro,
@@ -173,10 +187,10 @@ public class ProductoController {
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Cliente cliente =
-        clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idEmpresa);
+        clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idSucursal);
     Page<Producto> productos =
         this.buscar(
-            idEmpresa,
+            idSucursal,
             codigo,
             descripcion,
             idRubro,
@@ -276,27 +290,24 @@ public class ProductoController {
       @RequestParam(required = false) Long idMedida,
       @RequestParam(required = false) Long idRubro,
       @RequestParam(required = false) Long idProveedor,
-      @RequestParam Long idEmpresa) {
+      @RequestParam(required = false) Long idSucursal) {
     Producto productoPorActualizar = modelMapper.map(productoDTO, Producto.class);
     Producto productoPersistido =
         productoService.getProductoNoEliminadoPorId(productoPorActualizar.getIdProducto());
-    if (productoPersistido != null) {
       if (idMedida != null) productoPorActualizar.setMedida(medidaService.getMedidaNoEliminadaPorId(idMedida));
       else productoPorActualizar.setMedida(productoPersistido.getMedida());
       if (idRubro != null) productoPorActualizar.setRubro(rubroService.getRubroNoEliminadoPorId(idRubro));
       else productoPorActualizar.setRubro(productoPersistido.getRubro());
       if (idProveedor != null) productoPorActualizar.setProveedor(proveedorService.getProveedorNoEliminadoPorId(idProveedor));
       else productoPorActualizar.setProveedor(productoPersistido.getProveedor());
-      //      if (idEmpresa != null)
-      //        productoPorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-      //      else productoPorActualizar.setEmpresa(productoPersistido.getEmpresa());
       productoPorActualizar.setCantidadSucursales(productoPersistido.getCantidadSucursales());
       boolean existeCantidadDeSucursal = false;
+      if (idSucursal != null){
       for (CantidadEnSucursal cantidadEnSucursal : productoPersistido.getCantidadSucursales()) {
         if (cantidadEnSucursal
           .getEmpresa()
-          .equals(empresaService.getEmpresaPorId(idEmpresa))) {
-          cantidadEnSucursal.setCantidad(productoDTO.getCantidad());
+          .equals(empresaService.getEmpresaPorId(idSucursal))) {
+          cantidadEnSucursal.setCantidad(productoDTO.getCantidadEnSucursal());
           cantidadEnSucursal.setEstanteria(productoDTO.getEstanteria());
           cantidadEnSucursal.setEstante(productoDTO.getEstante());
           existeCantidadDeSucursal = true;
@@ -307,21 +318,21 @@ public class ProductoController {
           CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
           cantidadEnSucursal.setEstante(productoDTO.getEstante());
           cantidadEnSucursal.setEstanteria(productoDTO.getEstanteria());
-          cantidadEnSucursal.setCantidad(productoDTO.getCantidad());
-          cantidadEnSucursal.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+          cantidadEnSucursal.setCantidad(productoDTO.getCantidadEnSucursal());
+          cantidadEnSucursal.setEmpresa(empresaService.getEmpresaPorId(idSucursal));
           productoPersistido.getCantidadSucursales().add(cantidadEnSucursal);
         } else {
           List<CantidadEnSucursal> cantidadEnSucursal = new ArrayList<>();
           CantidadEnSucursal cantidad = new CantidadEnSucursal();
-          cantidad.setCantidad(productoDTO.getCantidad());
-          cantidad.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+          cantidad.setCantidad(productoDTO.getCantidadEnSucursal());
+          cantidad.setEmpresa(empresaService.getEmpresaPorId(idSucursal));
           cantidad.setEstante(productoDTO.getEstante());
           cantidad.setEstanteria(productoDTO.getEstanteria());
           productoPersistido.setCantidadSucursales(cantidadEnSucursal);
         }
       }
+      }
       productoService.actualizar(productoPorActualizar, productoPersistido);
-    }
   }
 
   @PostMapping("/productos")
@@ -331,7 +342,7 @@ public class ProductoController {
     @RequestParam Long idMedida,
     @RequestParam Long idRubro,
     @RequestParam Long idProveedor,
-    @RequestParam Long idEmpresa) {
+    @RequestParam Long idSucursal) {
     Producto producto = new Producto();
     producto.setMedida(medidaService.getMedidaNoEliminadaPorId(idMedida));
     producto.setRubro(rubroService.getRubroNoEliminadoPorId(idRubro));
@@ -341,9 +352,10 @@ public class ProductoController {
     List<CantidadEnSucursal> cantidadEnSucursal = new ArrayList<>();
     CantidadEnSucursal cantidad = new CantidadEnSucursal();
     cantidad.setCantidad(nuevoProductoDTO.getCantidad());
-    cantidad.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    cantidad.setEmpresa(empresaService.getEmpresaPorId(idSucursal));
     cantidad.setEstante(nuevoProductoDTO.getEstante());
     cantidad.setEstanteria(nuevoProductoDTO.getEstanteria());
+    cantidadEnSucursal.add(cantidad);
     producto.setCantidadSucursales(cantidadEnSucursal);
     producto.setHayStock(nuevoProductoDTO.isHayStock());
     producto.setPrecioBonificado(nuevoProductoDTO.getPrecioBonificado());
@@ -360,7 +372,9 @@ public class ProductoController {
     producto.setPublico(nuevoProductoDTO.isPublico());
     producto.setNota(nuevoProductoDTO.getNota());
     producto.setFechaVencimiento(nuevoProductoDTO.getFechaVencimiento());
-    return productoService.guardar(producto);
+    producto = productoService.guardar(producto);
+    this.procesarCantidadesDeProducto(producto, idSucursal);
+    return producto;
   }
 
   @PostMapping("/productos/{idProducto}/imagenes")
@@ -409,7 +423,7 @@ public class ProductoController {
     return productoService.calcularValorStock(criteria);
   }
 
-  @GetMapping("/productos/disponibilidad-stock/sucursal/{idSucursal}")
+  @GetMapping("/productos/disponibilidad-stock/sucursales/{idSucursal}")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,

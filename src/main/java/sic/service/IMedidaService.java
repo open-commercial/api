@@ -15,9 +15,9 @@ public interface IMedidaService {
 
     void eliminar(long idMedida);
 
-    Medida getMedidaPorNombre(String nombre, Empresa empresa);
+    Medida getMedidaPorNombre(String nombre);
 
-    List<Medida> getUnidadMedidas(Empresa empresa);
+    List<Medida> getUnidadMedidas();
 
     Medida guardar(@Valid Medida medida);
 

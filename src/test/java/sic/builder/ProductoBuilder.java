@@ -9,7 +9,9 @@ public class ProductoBuilder {
     private Long idProducto = 0L;
     private String codigo = "ABC123";
     private String descripcion = "Cinta adhesiva doble faz 3M";
-    private BigDecimal cantidad = BigDecimal.TEN;
+    private BigDecimal cantidadEnSucursal;
+    private BigDecimal cantidadEnOtrasSucursales;
+    private BigDecimal cantidadTotalEnSucursales;
     private boolean hayStock = true;
     private BigDecimal cantMinima = new BigDecimal("2");    
     private BigDecimal bulto = BigDecimal.ONE;
@@ -34,17 +36,44 @@ public class ProductoBuilder {
     private Date fechaVencimiento = new Date(1597892400000L); // 20-08-2020
     private boolean eliminado = false;
     private String urlImagen;
-    
-    public ProductoDTO build() {
-        return new ProductoDTO(idProducto, codigo, descripcion, cantidad, hayStock, cantMinima, bulto, nombreMedida,
-                precioCosto, ganancia_porcentaje, ganancia_neto, precioVentaPublico, iva_porcentaje, iva_neto,
-                precioLista, nombreRubro, ilimitado, publico, destacado, fechaUltimaModificacion, estanteria, estante, razonSocialProveedor,
-                nota, fechaAlta, fechaVencimiento, eliminado, urlImagen);
-    }
-    
-    public ProductoBuilder withId_Producto(Long idProducto) {
-        this.idProducto = idProducto;
-        return this;
+
+  public ProductoDTO build() {
+    return new ProductoDTO(
+        idProducto,
+        codigo,
+        descripcion,
+        cantidadEnSucursal,
+        cantidadEnOtrasSucursales,
+        cantidadTotalEnSucursales,
+        hayStock,
+        cantMinima,
+        bulto,
+        nombreMedida,
+        precioCosto,
+        ganancia_porcentaje,
+        ganancia_neto,
+        precioVentaPublico,
+        iva_porcentaje,
+        iva_neto,
+        precioLista,
+        nombreRubro,
+        ilimitado,
+        publico,
+        destacado,
+        fechaUltimaModificacion,
+        estanteria,
+        estante,
+        razonSocialProveedor,
+        nota,
+        fechaAlta,
+        fechaVencimiento,
+        eliminado,
+        urlImagen);
+  }
+
+  public ProductoBuilder withId_Producto(Long idProducto) {
+    this.idProducto = idProducto;
+    return this;
     }
     
     public ProductoBuilder withCodigo(String codigo) {
@@ -57,8 +86,18 @@ public class ProductoBuilder {
         return this;
     }
     
-    public ProductoBuilder withCantidad(BigDecimal cantidad) {
-        this.cantidad = cantidad;
+    public ProductoBuilder withCantidadEnSucursal(BigDecimal cantidadEnSucursal) {
+        this.cantidadEnSucursal = cantidadEnSucursal;
+        return this;
+    }
+
+    public ProductoBuilder withCantidadEnOtrasSucursales(BigDecimal cantidadEnOtrasSucursales) {
+        this.cantidadEnOtrasSucursales = cantidadEnOtrasSucursales;
+        return this;
+    }
+
+    public ProductoBuilder withCantidadEnSucursales(BigDecimal cantidadTotalEnSucursales) {
+        this.cantidadTotalEnSucursales = cantidadTotalEnSucursales;
         return this;
     }
 
