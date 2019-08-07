@@ -2,6 +2,9 @@ package sic.builder;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
+
+import sic.modelo.dto.CantidadEnSucursalDTO;
 import sic.modelo.dto.ProductoDTO;
 
 public class ProductoBuilder {
@@ -9,9 +12,7 @@ public class ProductoBuilder {
     private Long idProducto = 0L;
     private String codigo = "ABC123";
     private String descripcion = "Cinta adhesiva doble faz 3M";
-    private BigDecimal cantidadEnSucursal;
-    private BigDecimal cantidadEnOtrasSucursales;
-    private BigDecimal cantidadTotalEnSucursales;
+    private List<CantidadEnSucursalDTO> cantidadSucursales;
     private boolean hayStock = true;
     private BigDecimal cantMinima = new BigDecimal("2");    
     private BigDecimal bulto = BigDecimal.ONE;
@@ -42,9 +43,7 @@ public class ProductoBuilder {
         idProducto,
         codigo,
         descripcion,
-        cantidadEnSucursal,
-        cantidadEnOtrasSucursales,
-        cantidadTotalEnSucursales,
+        cantidadSucursales,
         hayStock,
         cantMinima,
         bulto,
@@ -86,18 +85,8 @@ public class ProductoBuilder {
         return this;
     }
     
-    public ProductoBuilder withCantidadEnSucursal(BigDecimal cantidadEnSucursal) {
-        this.cantidadEnSucursal = cantidadEnSucursal;
-        return this;
-    }
-
-    public ProductoBuilder withCantidadEnOtrasSucursales(BigDecimal cantidadEnOtrasSucursales) {
-        this.cantidadEnOtrasSucursales = cantidadEnOtrasSucursales;
-        return this;
-    }
-
-    public ProductoBuilder withCantidadEnSucursales(BigDecimal cantidadTotalEnSucursales) {
-        this.cantidadTotalEnSucursales = cantidadTotalEnSucursales;
+    public ProductoBuilder withCantidadSucursales(List<CantidadEnSucursalDTO> cantidadSucursales) {
+        this.cantidadSucursales = cantidadSucursales;
         return this;
     }
 

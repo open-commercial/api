@@ -27,7 +27,7 @@ import sic.controller.Views;
 @AllArgsConstructor
 @EqualsAndHashCode(of = "descripcion")
 @ToString
-@JsonIgnoreProperties({"medida", "rubro", "proveedor", "empresa", "cantidadSucursales"})
+@JsonIgnoreProperties({"medida", "rubro", "proveedor", "empresa"})
 public class Producto implements Serializable {
 
   @Id
@@ -45,19 +45,19 @@ public class Producto implements Serializable {
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "idProducto")
-  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+  @JsonProperty(access = JsonProperty.Access.READ_WRITE)
   @NotEmpty
   private List<CantidadEnSucursal> cantidadSucursales;
 
-  @Transient
-  private BigDecimal cantidadEnSucursal;
-
-  @Transient
-  private BigDecimal cantidadEnOtrasSucursales;
-
-  @Transient
-  @JsonView(Views.Public.class)
-  private BigDecimal cantidadTotalEnSucursales;
+//  @Transient
+//  private BigDecimal cantidadEnSucursal;
+//
+//  @Transient
+//  private BigDecimal cantidadEnOtrasSucursales;
+//
+//  @Transient
+//  @JsonView(Views.Public.class)
+//  private BigDecimal cantidadTotalEnSucursales;
 
   @Transient
   @JsonView(Views.Public.class)

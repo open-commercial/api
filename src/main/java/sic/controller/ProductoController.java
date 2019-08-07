@@ -1,11 +1,13 @@
 package sic.controller;
 
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.*;
@@ -137,7 +139,6 @@ public class ProductoController {
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
-    this.procesarCantidadesDeProducto(producto, idSucursal);
     Cliente cliente =
         clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idSucursal);
     if (cliente != null) {
@@ -148,19 +149,6 @@ public class ProductoController {
     } else {
       return producto;
     }
-  }
-
-  private void procesarCantidadesDeProducto(Producto producto, Long idSucursal) {
-    BigDecimal cantidadEnOtrasSucursales = BigDecimal.ZERO;
-    for (CantidadEnSucursal cantidadEnSucursal : producto.getCantidadSucursales()) {
-      cantidadEnOtrasSucursales = cantidadEnOtrasSucursales.add(cantidadEnSucursal.getCantidad());
-      if (cantidadEnSucursal.getEmpresa().getId_Empresa() == idSucursal) {
-        producto.setCantidadEnSucursal(cantidadEnSucursal.getCantidad());
-      }
-    }
-    producto.setCantidadEnOtrasSucursales(cantidadEnOtrasSucursales);
-    producto.setCantidadTotalEnSucursales(
-      cantidadEnOtrasSucursales.add(producto.getCantidadEnSucursal()));
   }
 
   @GetMapping("/productos/busqueda/criteria")
@@ -289,8 +277,7 @@ public class ProductoController {
       @RequestBody ProductoDTO productoDTO,
       @RequestParam(required = false) Long idMedida,
       @RequestParam(required = false) Long idRubro,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) Long idSucursal) {
+      @RequestParam(required = false) Long idProveedor) {
     Producto productoPorActualizar = modelMapper.map(productoDTO, Producto.class);
     Producto productoPersistido =
         productoService.getProductoNoEliminadoPorId(productoPorActualizar.getIdProducto());
@@ -298,41 +285,24 @@ public class ProductoController {
       else productoPorActualizar.setMedida(productoPersistido.getMedida());
       if (idRubro != null) productoPorActualizar.setRubro(rubroService.getRubroNoEliminadoPorId(idRubro));
       else productoPorActualizar.setRubro(productoPersistido.getRubro());
-      if (idProveedor != null) productoPorActualizar.setProveedor(proveedorService.getProveedorNoEliminadoPorId(idProveedor));
-      else productoPorActualizar.setProveedor(productoPersistido.getProveedor());
-      productoPorActualizar.setCantidadSucursales(productoPersistido.getCantidadSucursales());
-      boolean existeCantidadDeSucursal = false;
-      if (idSucursal != null){
-      for (CantidadEnSucursal cantidadEnSucursal : productoPersistido.getCantidadSucursales()) {
-        if (cantidadEnSucursal
-          .getEmpresa()
-          .equals(empresaService.getEmpresaPorId(idSucursal))) {
-          cantidadEnSucursal.setCantidad(productoDTO.getCantidadEnSucursal());
-          cantidadEnSucursal.setEstanteria(productoDTO.getEstanteria());
-          cantidadEnSucursal.setEstante(productoDTO.getEstante());
-          existeCantidadDeSucursal = true;
-        }
-      }
-      if (!existeCantidadDeSucursal) {
-        if (productoPorActualizar.getCantidadSucursales() != null) {
-          CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
-          cantidadEnSucursal.setEstante(productoDTO.getEstante());
-          cantidadEnSucursal.setEstanteria(productoDTO.getEstanteria());
-          cantidadEnSucursal.setCantidad(productoDTO.getCantidadEnSucursal());
-          cantidadEnSucursal.setEmpresa(empresaService.getEmpresaPorId(idSucursal));
-          productoPersistido.getCantidadSucursales().add(cantidadEnSucursal);
-        } else {
-          List<CantidadEnSucursal> cantidadEnSucursal = new ArrayList<>();
-          CantidadEnSucursal cantidad = new CantidadEnSucursal();
-          cantidad.setCantidad(productoDTO.getCantidadEnSucursal());
-          cantidad.setEmpresa(empresaService.getEmpresaPorId(idSucursal));
-          cantidad.setEstante(productoDTO.getEstante());
-          cantidad.setEstanteria(productoDTO.getEstanteria());
-          productoPersistido.setCantidadSucursales(cantidadEnSucursal);
-        }
-      }
-      }
-      productoService.actualizar(productoPorActualizar, productoPersistido);
+    if (idProveedor != null)
+      productoPorActualizar.setProveedor(
+          proveedorService.getProveedorNoEliminadoPorId(idProveedor));
+    else productoPorActualizar.setProveedor(productoPersistido.getProveedor());
+    List<CantidadEnSucursal> cantidadEnSucursales = new ArrayList<>();
+    productoDTO
+        .getCantidadSucursales()
+        .forEach(
+            cantidadEnSucursalDTO -> {
+              cantidadEnSucursales.add(
+                  modelMapper.map(cantidadEnSucursalDTO, CantidadEnSucursal.class));
+              cantidadEnSucursales
+                  .get(cantidadEnSucursales.size() - 1)
+                  .setEmpresa(
+                      empresaService.getEmpresaPorId(cantidadEnSucursalDTO.getIdSucursal()));
+            });
+    productoPorActualizar.setCantidadSucursales(cantidadEnSucursales);
+    productoService.actualizar(productoPorActualizar, productoPersistido);
   }
 
   @PostMapping("/productos")
@@ -349,6 +319,7 @@ public class ProductoController {
     producto.setProveedor(proveedorService.getProveedorNoEliminadoPorId(idProveedor));
     producto.setCodigo(nuevoProductoDTO.getCodigo());
     producto.setDescripcion(nuevoProductoDTO.getDescripcion());
+
     List<CantidadEnSucursal> cantidadEnSucursal = new ArrayList<>();
     CantidadEnSucursal cantidad = new CantidadEnSucursal();
     cantidad.setCantidad(nuevoProductoDTO.getCantidad());
@@ -357,6 +328,7 @@ public class ProductoController {
     cantidad.setEstanteria(nuevoProductoDTO.getEstanteria());
     cantidadEnSucursal.add(cantidad);
     producto.setCantidadSucursales(cantidadEnSucursal);
+
     producto.setHayStock(nuevoProductoDTO.isHayStock());
     producto.setPrecioBonificado(nuevoProductoDTO.getPrecioBonificado());
     producto.setCantMinima(nuevoProductoDTO.getCantMinima());
@@ -372,9 +344,7 @@ public class ProductoController {
     producto.setPublico(nuevoProductoDTO.isPublico());
     producto.setNota(nuevoProductoDTO.getNota());
     producto.setFechaVencimiento(nuevoProductoDTO.getFechaVencimiento());
-    producto = productoService.guardar(producto);
-    this.procesarCantidadesDeProducto(producto, idSucursal);
-    return producto;
+    return productoService.guardar(producto);
   }
 
   @PostMapping("/productos/{idProducto}/imagenes")

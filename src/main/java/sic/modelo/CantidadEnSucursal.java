@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"idCantidadSucursal", "empresa"})
 @ToString
-@JsonIgnoreProperties("empresa")
 public class CantidadEnSucursal implements Serializable {
 
   @Id
@@ -37,9 +36,13 @@ public class CantidadEnSucursal implements Serializable {
 
   private String estante;
 
+  @JsonGetter("idSucursal")
+  public Long getIdSucursal() {
+    return empresa.getId_Empresa();
+  }
+
   @JsonGetter("nombreSucursal")
   public String getNombreSucursal() {
     return empresa.getNombre();
   }
-
 }
