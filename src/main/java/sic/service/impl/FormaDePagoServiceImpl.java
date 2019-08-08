@@ -61,19 +61,27 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
 
   @Override
   public FormaDePago getFormaDePagoPorNombre(FormaDePagoEnum formaDePagoEnum) {
-    return formaDePagoRepository.findByNombreAndEliminada(formaDePagoEnum.toString(), false);
+    Optional<FormaDePago> formaDePago =
+        formaDePagoRepository.findByNombreAndEliminada(formaDePagoEnum.toString(), false);
+    if (formaDePago.isPresent() && !formaDePago.get().isEliminada()) {
+      return formaDePago.get();
+    } else {
+      throw new EntityNotFoundException(
+          messageSource.getMessage("mensaje_formaDePago_no_existente", null, Locale.getDefault()));
+    }
   }
 
   @Override
   public FormaDePago getFormaDePagoPredeterminada(Empresa empresa) {
-    FormaDePago formaDePago =
+    Optional<FormaDePago> formaDePago =
         formaDePagoRepository.findByAndPredeterminadoAndEliminada(true, false);
-    if (formaDePago == null) {
+    if (formaDePago.isPresent()) {
+      return formaDePago.get();
+    } else {
       throw new EntityNotFoundException(
           messageSource.getMessage(
               "mensaje_formaDePago_sin_predeterminada", null, Locale.getDefault()));
     }
-    return formaDePago;
   }
 
   @Override
@@ -81,11 +89,11 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
   public void setFormaDePagoPredeterminada(FormaDePago formaDePago) {
     // antes de setear como predeterminado, busca si ya existe
     // otro como predeterminado y cambia su estado.
-    FormaDePago formaPredeterminadaAnterior =
+    Optional<FormaDePago> formaPredeterminadaAnterior =
         formaDePagoRepository.findByAndPredeterminadoAndEliminada(true, false);
-    if (formaPredeterminadaAnterior != null) {
-      formaPredeterminadaAnterior.setPredeterminado(false);
-      formaDePagoRepository.save(formaPredeterminadaAnterior);
+    if (formaPredeterminadaAnterior.isPresent()) {
+      formaPredeterminadaAnterior.get().setPredeterminado(false);
+      formaDePagoRepository.save(formaPredeterminadaAnterior.get());
     }
     formaDePago.setPredeterminado(true);
     formaDePagoRepository.save(formaDePago);
