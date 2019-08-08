@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Empresa;
 import sic.modelo.FormaDePago;
+import sic.modelo.FormaDePagoEnum;
 import sic.service.IFormaDePagoService;
 import sic.repository.FormaDePagoRepository;
 
@@ -59,6 +60,11 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
   }
 
   @Override
+  public FormaDePago getFormaDePagoPorNombre(FormaDePagoEnum formaDePagoEnum) {
+    return formaDePagoRepository.findByNombreAndEliminada(formaDePagoEnum.toString(), false);
+  }
+
+  @Override
   public FormaDePago getFormaDePagoPredeterminada(Empresa empresa) {
     FormaDePago formaDePago =
         formaDePagoRepository.findByAndPredeterminadoAndEliminada(true, false);
@@ -69,7 +75,7 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
     }
     return formaDePago;
   }
-  //
+
   @Override
   @Transactional
   public void setFormaDePagoPredeterminada(FormaDePago formaDePago) {
