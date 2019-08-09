@@ -370,7 +370,7 @@ public class CajaServiceImpl implements ICajaService {
     Caja caja = cajaRepository.findById(idCaja);
     Map<Long, BigDecimal> totalesPorFomaDePago = new HashMap<>();
     formaDePagoService
-        .getFormasDePago(caja.getEmpresa())
+        .getFormasDePago()
         .forEach(
             fdp -> {
               BigDecimal total = this.getTotalMovimientosPorFormaDePago(caja, fdp);
