@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.Empresa;
 import sic.modelo.FormaDePago;
+import sic.modelo.FormaDePagoEnum;
 import sic.service.IFormaDePagoService;
 import sic.repository.FormaDePagoRepository;
 
@@ -27,12 +27,12 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
   }
 
   @Override
-  public List<FormaDePago> getFormasDePago(Empresa empresa) {
+  public List<FormaDePago> getFormasDePago() {
     return formaDePagoRepository.findAllByOrderByNombreAsc();
   }
 
   @Override
-  public List<FormaDePago> getFormasDePagoNoEliminadas(Empresa empresa) {
+  public List<FormaDePago> getFormasDePagoNoEliminadas() {
     return formaDePagoRepository.findAllByAndEliminadaOrderByNombreAsc(false);
   }
 
@@ -59,27 +59,38 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
   }
 
   @Override
-  public FormaDePago getFormaDePagoPredeterminada(Empresa empresa) {
-    FormaDePago formaDePago =
+  public FormaDePago getFormaDePagoPorNombre(FormaDePagoEnum formaDePagoEnum) {
+    Optional<FormaDePago> formaDePago =
+        formaDePagoRepository.findByNombreAndEliminada(formaDePagoEnum.toString(), false);
+    if (formaDePago.isPresent() && !formaDePago.get().isEliminada()) {
+      return formaDePago.get();
+    } else {
+      throw new EntityNotFoundException(
+          messageSource.getMessage("mensaje_formaDePago_no_existente", null, Locale.getDefault()));
+    }
+  }
+
+  @Override
+  public FormaDePago getFormaDePagoPredeterminada() {
+    Optional<FormaDePago> formaDePago =
         formaDePagoRepository.findByAndPredeterminadoAndEliminada(true, false);
-    if (formaDePago == null) {
+    if (formaDePago.isPresent()) {
+      return formaDePago.get();
+    } else {
       throw new EntityNotFoundException(
           messageSource.getMessage(
               "mensaje_formaDePago_sin_predeterminada", null, Locale.getDefault()));
     }
-    return formaDePago;
   }
-  //
+
   @Override
   @Transactional
   public void setFormaDePagoPredeterminada(FormaDePago formaDePago) {
-    // antes de setear como predeterminado, busca si ya existe
-    // otro como predeterminado y cambia su estado.
-    FormaDePago formaPredeterminadaAnterior =
+    Optional<FormaDePago> formaPredeterminadaAnterior =
         formaDePagoRepository.findByAndPredeterminadoAndEliminada(true, false);
-    if (formaPredeterminadaAnterior != null) {
-      formaPredeterminadaAnterior.setPredeterminado(false);
-      formaDePagoRepository.save(formaPredeterminadaAnterior);
+    if (formaPredeterminadaAnterior.isPresent()) {
+      formaPredeterminadaAnterior.get().setPredeterminado(false);
+      formaDePagoRepository.save(formaPredeterminadaAnterior.get());
     }
     formaDePago.setPredeterminado(true);
     formaDePagoRepository.save(formaDePago);

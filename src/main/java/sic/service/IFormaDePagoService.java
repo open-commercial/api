@@ -1,21 +1,22 @@
 package sic.service;
 
 import java.util.List;
-import sic.modelo.Empresa;
 import sic.modelo.FormaDePago;
+import sic.modelo.FormaDePagoEnum;
 
 public interface IFormaDePagoService {
 
-    FormaDePago getFormaDePagoPredeterminada(Empresa empresa);
+  FormaDePago getFormaDePagoPredeterminada();
 
-    List<FormaDePago> getFormasDePago(Empresa empresa);
+  List<FormaDePago> getFormasDePago();
 
-    List<FormaDePago> getFormasDePagoNoEliminadas(Empresa empresa);
+  List<FormaDePago> getFormasDePagoNoEliminadas();
 
-    FormaDePago getFormasDePagoNoEliminadoPorId(long id);
+  FormaDePago getFormasDePagoNoEliminadoPorId(long id);
 
-    FormaDePago getFormasDePagoPorId(long id);
+  FormaDePago getFormasDePagoPorId(long id);
 
-    void setFormaDePagoPredeterminada(FormaDePago formaDePago);
-    
+  FormaDePago getFormaDePagoPorNombre(FormaDePagoEnum formaDePagoEnum);
+
+  void setFormaDePagoPredeterminada(FormaDePago formaDePago);
 }

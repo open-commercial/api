@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.FormaDePago;
 import sic.modelo.Rol;
-import sic.service.IEmpresaService;
 import sic.service.IFormaDePagoService;
 
 @RestController
@@ -15,14 +14,11 @@ import sic.service.IFormaDePagoService;
 public class FormaDePagoController {
 
   private final IFormaDePagoService formaDePagoService;
-  private final IEmpresaService empresaService;
 
   @Autowired
   public FormaDePagoController(
-      IFormaDePagoService formaDePagoService,
-      IEmpresaService empresaService) {
+      IFormaDePagoService formaDePagoService) {
     this.formaDePagoService = formaDePagoService;
-    this.empresaService = empresaService;
   }
 
   @GetMapping("/formas-de-pago/{idFormaDePago}")
@@ -37,7 +33,7 @@ public class FormaDePagoController {
     return formaDePagoService.getFormasDePagoPorId(idFormaDePago);
   }
 
-  @GetMapping("/formas-de-pago/predeterminada/empresas/{idEmpresa}")
+  @GetMapping("/formas-de-pago/predeterminada")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -45,12 +41,11 @@ public class FormaDePagoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public FormaDePago getFormaDePagoPredeterminada(@PathVariable long idEmpresa) {
-    return formaDePagoService.getFormaDePagoPredeterminada(
-        empresaService.getEmpresaPorId(idEmpresa));
+  public FormaDePago getFormaDePagoPredeterminada() {
+    return formaDePagoService.getFormaDePagoPredeterminada();
   }
 
-  @GetMapping("/formas-de-pago/empresas/{idEmpresa}")
+  @GetMapping("/formas-de-pago")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -58,8 +53,8 @@ public class FormaDePagoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public List<FormaDePago> getFormasDePago(@PathVariable long idEmpresa) {
-    return formaDePagoService.getFormasDePagoNoEliminadas(empresaService.getEmpresaPorId(idEmpresa));
+  public List<FormaDePago> getFormasDePago() {
+    return formaDePagoService.getFormasDePagoNoEliminadas();
   }
 
   @PutMapping("/formas-de-pago/predeterminada/{idFormaDePago}")
