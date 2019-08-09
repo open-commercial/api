@@ -49,16 +49,6 @@ public class Producto implements Serializable {
   @NotEmpty
   private List<CantidadEnSucursal> cantidadSucursales;
 
-//  @Transient
-//  private BigDecimal cantidadEnSucursal;
-//
-//  @Transient
-//  private BigDecimal cantidadEnOtrasSucursales;
-//
-//  @Transient
-//  @JsonView(Views.Public.class)
-//  private BigDecimal cantidadTotalEnSucursales;
-
   @Transient
   @JsonView(Views.Public.class)
   private boolean hayStock;
