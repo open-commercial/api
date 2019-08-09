@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.Empresa;
 import sic.modelo.FormaDePago;
 import sic.modelo.FormaDePagoEnum;
 import sic.service.IFormaDePagoService;
@@ -87,8 +86,6 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
   @Override
   @Transactional
   public void setFormaDePagoPredeterminada(FormaDePago formaDePago) {
-    // antes de setear como predeterminado, busca si ya existe
-    // otro como predeterminado y cambia su estado.
     Optional<FormaDePago> formaPredeterminadaAnterior =
         formaDePagoRepository.findByAndPredeterminadoAndEliminada(true, false);
     if (formaPredeterminadaAnterior.isPresent()) {

@@ -1,7 +1,7 @@
 package sic.modelo;
 
 public enum FormaDePagoEnum {
-  CONTRA_REEMBOLSO("Contrareembolso"),
+  CONTRAREEMBOLSO("Contrareembolso"),
   TRANSFERENCIA_BANCARIA("Transferencia Bancaria"),
   EFECTIVO("Efectivo"),
   DEPOSITO_BANCARIO("Deposito Bancario"),
