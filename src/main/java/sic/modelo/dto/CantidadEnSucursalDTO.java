@@ -1,6 +1,8 @@
 package sic.modelo.dto;
 
 import lombok.*;
+
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Data

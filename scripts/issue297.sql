@@ -15,7 +15,7 @@ CREATE TABLE cantidadensucursal (
 
 insert into cantidadensucursal(cantidad, estante, estanteria, id_Empresa, idProducto, codigo)
 select producto.cantidad, producto.estante, producto.estanteria, producto.id_Empresa, producto.idProducto, producto.codigo
-from producto;
+from producto where producto.id_Empresa = 5;
 
 CREATE TABLE productoAux (
   idProducto bigint(20),
@@ -39,8 +39,11 @@ SELECT
 ALTER TABLE cantidadensucursal DROP codigo;
  
 DROP TABLE IF EXISTS productoAux; 
+
+insert into cantidadensucursal(cantidad, estante, estanteria, id_Empresa, idProducto)
+select producto.cantidad, producto.estante, producto.estanteria, producto.id_Empresa, producto.idProducto
+from producto where producto.id_Empresa = 1;
  
-ALTER TABLE producto DROP cantMinima;
 ALTER TABLE producto DROP estante;
 ALTER TABLE producto DROP estanteria;
  
@@ -51,29 +54,29 @@ ALTER TABLE producto DROP id_Empresa;
 
 alter TABLE rubro DROP FOREIGN KEY  FKjqodxje0wqn40nptfj4sij5al;
 alter TABLE rubro drop column id_Empresa;
-UPDATE producto SET id_Rubro = 15 where id_FormaDePago = 32;
-UPDATE producto SET id_Rubro = 3 where id_FormaDePago = 34;
-UPDATE producto SET id_Rubro = 1 where id_FormaDePago = 37;
-UPDATE producto SET id_Rubro = 4 where id_FormaDePago = 39;
-UPDATE producto SET id_Rubro = 7 where id_FormaDePago = 41;
-UPDATE producto SET id_Rubro = 5 where id_FormaDePago = 53;
-UPDATE producto SET id_Rubro = 11 where id_FormaDePago = 69;
-UPDATE producto SET id_Rubro = 8 where id_FormaDePago = 70;
-UPDATE producto SET id_Rubro = 12 where id_FormaDePago = 71;
-UPDATE producto SET id_Rubro = 6 where id_FormaDePago = 72;
-UPDATE producto SET id_Rubro = 9 where id_FormaDePago = 74;
+UPDATE producto SET id_Rubro = 15 where id_Rubro = 32;
+UPDATE producto SET id_Rubro = 3 where id_Rubro = 34;
+UPDATE producto SET id_Rubro = 1 where id_Rubro = 37;
+UPDATE producto SET id_Rubro = 4 where id_Rubro = 39;
+UPDATE producto SET id_Rubro = 7 where id_Rubro = 41;
+UPDATE producto SET id_Rubro = 5 where id_Rubro = 53;
+UPDATE producto SET id_Rubro = 11 where id_Rubro = 69;
+UPDATE producto SET id_Rubro = 8 where id_Rubro = 70;
+UPDATE producto SET id_Rubro = 12 where id_Rubro = 71;
+UPDATE producto SET id_Rubro = 6 where id_Rubro = 72;
+UPDATE producto SET id_Rubro = 9 where id_Rubro = 74;
+
+-- 
+-- DELETE FROM rubro WHERE id_Rubro = 15 
+-- or id_Rubro = 3 or id_Rubro = 1 or id_Rubro = 4 or id_Rubro = 7 
+-- or id_Rubro = 5 or id_Rubro = 11 or id_Rubro = 8 or id_Rubro = 12 or id_Rubro = 6
+--  or id_Rubro = 9;
 
 
-DELETE FROM rubro WHERE id_Rubro = 15 
-or id_FormaDePago = 3 or id_FormaDePago = 1 or id_FormaDePago = 4 or id_FormaDePago = 7 
-or id_FormaDePago = 5 or id_FormaDePago = 11 or id_FormaDePago = 8 or id_FormaDePago = 12 or id_FormaDePago = 6
- or id_FormaDePago = 9;
-
-
-alter TABLE medida DROP FOREIGN KEY FK3gu6hhvw1rjp04xmv3iojobov;
+alter TABLE medida DROP FOREIGN KEY FK5jsf5bmdsydn5wfvlgsofl4vf;
 alter TABLE medida drop column id_Empresa;
-UPDATE producto SET id_Medida = 1 where id_FormaDePago = 18;
-UPDATE producto SET id_Medida = 6 where id_FormaDePago = 19;
+UPDATE producto SET id_Medida = 1 where id_Medida = 18;
+UPDATE producto SET id_Medida = 6 where id_Medida = 19;
 
 
 DELETE FROM medida WHERE id_Medida = 18 

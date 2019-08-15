@@ -204,9 +204,9 @@ public class ProductoServiceImpl implements IProductoService {
     if (criteria.isBuscarPorProveedor())
       builder.and(qProducto.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
     if (criteria.isListarSoloFaltantes())
-      builder.and(qProducto.cantidadSucursales.any().cantidad.loe(qProducto.cantMinima)).and(qProducto.ilimitado.eq(false));
+      builder.and(qProducto.cantidadEnSucursales.any().cantidad.loe(qProducto.cantMinima)).and(qProducto.ilimitado.eq(false));
     if (criteria.isListarSoloEnStock())
-      builder.and(qProducto.cantidadSucursales.any().cantidad.gt(BigDecimal.ZERO)).and(qProducto.ilimitado.eq(false));
+      builder.and(qProducto.cantidadEnSucursales.any().cantidad.gt(BigDecimal.ZERO)).and(qProducto.ilimitado.eq(false));
     if (criteria.isBuscaPorVisibilidad())
       if (criteria.getPublico()) builder.and(qProducto.publico.isTrue());
       else builder.and(qProducto.publico.isFalse());
@@ -323,7 +323,7 @@ public class ProductoServiceImpl implements IProductoService {
       Long idSucursal, TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
     if (operacion == TipoDeOperacion.ALTA) {
       producto
-          .getCantidadSucursales()
+          .getCantidadEnSucursales()
           .forEach(
               cantidadEnSucursal -> {
                 if (cantidadEnSucursal.getEmpresa().getId_Empresa() == idSucursal) {
@@ -334,7 +334,7 @@ public class ProductoServiceImpl implements IProductoService {
     }
     if (operacion == TipoDeOperacion.ELIMINACION) {
       producto
-          .getCantidadSucursales()
+          .getCantidadEnSucursales()
           .forEach(
               cantidadEnSucursal -> {
                 if (cantidadEnSucursal.getEmpresa().getId_Empresa() == idSucursal) {
@@ -342,13 +342,19 @@ public class ProductoServiceImpl implements IProductoService {
                 }
               });
     }
+    producto.setCantidad(
+        producto
+            .getCantidadEnSucursales()
+            .stream()
+            .map(CantidadEnSucursal::getCantidad)
+            .reduce(BigDecimal.ZERO, BigDecimal::add));
   }
 
   private void cambiaStockPorFacturaCompraOrNotaCreditoVenta(
       Long idSucursal, TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
     if (operacion == TipoDeOperacion.ALTA) {
       producto
-          .getCantidadSucursales()
+          .getCantidadEnSucursales()
           .forEach(
               cantidadEnSucursal -> {
                 if (cantidadEnSucursal.getEmpresa().getId_Empresa() == idSucursal) {
@@ -358,7 +364,7 @@ public class ProductoServiceImpl implements IProductoService {
     }
     if (operacion == TipoDeOperacion.ELIMINACION) {
       producto
-          .getCantidadSucursales()
+          .getCantidadEnSucursales()
           .forEach(
               cantidadEnSucursal -> {
                 if (cantidadEnSucursal.getEmpresa().getId_Empresa() == idSucursal) {
@@ -367,6 +373,12 @@ public class ProductoServiceImpl implements IProductoService {
                 }
               });
     }
+    producto.setCantidad(
+        producto
+            .getCantidadEnSucursales()
+            .stream()
+            .map(CantidadEnSucursal::getCantidad)
+            .reduce(BigDecimal.ZERO, BigDecimal::add));
   }
 
   @Override
@@ -506,16 +518,7 @@ public class ProductoServiceImpl implements IProductoService {
   public Producto getProductoNoEliminadoPorId(long idProducto) {
     Optional<Producto> producto = productoRepository.findById(idProducto);
     if (producto.isPresent() && !producto.get().isEliminado()) {
-      producto.get().setHayStock(false);
-      producto
-          .get()
-          .getCantidadSucursales()
-          .forEach(
-              cantidadEnSucursal -> {
-                if (cantidadEnSucursal.getCantidad().compareTo(BigDecimal.ZERO) > 0) {
-                  producto.get().setHayStock(true);
-                }
-              });
+      producto.get().setHayStock(producto.get().getCantidad().compareTo(BigDecimal.ZERO) > 0);
       return producto.get();
     } else {
       throw new EntityNotFoundException(
@@ -563,7 +566,7 @@ public class ProductoServiceImpl implements IProductoService {
       for (int i = 0; i < longitudIds; i++) {
         Producto p = this.getProductoNoEliminadoPorId(idProducto[i]);
         BigDecimal cantidadLambda = cantidad[i];
-        p.getCantidadSucursales()
+        p.getCantidadEnSucursales()
             .forEach(
                 cantidadEnSucursal -> {
                   if (cantidadEnSucursal.getEmpresa().getId_Empresa() == idSucursal

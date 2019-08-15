@@ -12,7 +12,8 @@ public class ProductoBuilder {
     private Long idProducto = 0L;
     private String codigo = "ABC123";
     private String descripcion = "Cinta adhesiva doble faz 3M";
-    private List<CantidadEnSucursalDTO> cantidadSucursales;
+    private List<CantidadEnSucursalDTO> cantidadEnSucursales;
+    private BigDecimal cantidad;
     private boolean hayStock = true;
     private BigDecimal cantMinima = new BigDecimal("2");    
     private BigDecimal bulto = BigDecimal.ONE;
@@ -43,7 +44,8 @@ public class ProductoBuilder {
         idProducto,
         codigo,
         descripcion,
-        cantidadSucursales,
+        cantidadEnSucursales,
+        cantidad,
         hayStock,
         cantMinima,
         bulto,
@@ -85,10 +87,15 @@ public class ProductoBuilder {
         return this;
     }
     
-    public ProductoBuilder withCantidadSucursales(List<CantidadEnSucursalDTO> cantidadSucursales) {
-        this.cantidadSucursales = cantidadSucursales;
+    public ProductoBuilder withCantidadSucursales(List<CantidadEnSucursalDTO> cantidadEnSucursales) {
+        this.cantidadEnSucursales = cantidadEnSucursales;
         return this;
     }
+
+  public ProductoBuilder withCantidad(BigDecimal cantidad) {
+    this.cantidad = cantidad;
+    return this;
+  }
 
     public ProductoBuilder whitHayStock(boolean hayStock) {
         this.hayStock = hayStock;

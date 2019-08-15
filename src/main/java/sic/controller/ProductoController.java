@@ -1,13 +1,11 @@
 package sic.controller;
 
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.*;
@@ -62,7 +60,7 @@ public class ProductoController {
   }
 
   @JsonView(Views.Public.class)
-  @GetMapping("/public/productos/{idProducto}/sucursal/{idSucursal}")
+  @GetMapping("/public/productos/{idProducto}/sucursales/{idSucursal}")
   public Producto getProductoPorIdPublic(
       @PathVariable long idProducto,
       @PathVariable long idSucursal,
@@ -291,7 +289,7 @@ public class ProductoController {
     else productoPorActualizar.setProveedor(productoPersistido.getProveedor());
     List<CantidadEnSucursal> cantidadEnSucursales = new ArrayList<>();
     productoDTO
-        .getCantidadSucursales()
+        .getCantidadEnSucursales()
         .forEach(
             cantidadEnSucursalDTO -> {
               cantidadEnSucursales.add(
@@ -301,7 +299,12 @@ public class ProductoController {
                   .setEmpresa(
                       empresaService.getEmpresaPorId(cantidadEnSucursalDTO.getIdSucursal()));
             });
-    productoPorActualizar.setCantidadSucursales(cantidadEnSucursales);
+    productoPorActualizar.setCantidadEnSucursales(cantidadEnSucursales);
+    productoPorActualizar.setCantidad(
+        cantidadEnSucursales
+            .stream()
+            .map(CantidadEnSucursal::getCantidad)
+            .reduce(BigDecimal.ZERO, BigDecimal::add));
     productoService.actualizar(productoPorActualizar, productoPersistido);
   }
 
@@ -319,7 +322,6 @@ public class ProductoController {
     producto.setProveedor(proveedorService.getProveedorNoEliminadoPorId(idProveedor));
     producto.setCodigo(nuevoProductoDTO.getCodigo());
     producto.setDescripcion(nuevoProductoDTO.getDescripcion());
-
     List<CantidadEnSucursal> cantidadEnSucursal = new ArrayList<>();
     CantidadEnSucursal cantidad = new CantidadEnSucursal();
     cantidad.setCantidad(nuevoProductoDTO.getCantidad());
@@ -327,9 +329,9 @@ public class ProductoController {
     cantidad.setEstante(nuevoProductoDTO.getEstante());
     cantidad.setEstanteria(nuevoProductoDTO.getEstanteria());
     cantidadEnSucursal.add(cantidad);
-    producto.setCantidadSucursales(cantidadEnSucursal);
-
-    producto.setHayStock(nuevoProductoDTO.isHayStock());
+    producto.setCantidadEnSucursales(cantidadEnSucursal);
+    producto.setCantidad(nuevoProductoDTO.getCantidad());
+    producto.setHayStock(producto.getCantidad().compareTo(BigDecimal.ZERO) > 0);
     producto.setPrecioBonificado(nuevoProductoDTO.getPrecioBonificado());
     producto.setCantMinima(nuevoProductoDTO.getCantMinima());
     producto.setBulto(nuevoProductoDTO.getBulto());
@@ -363,7 +365,7 @@ public class ProductoController {
   @GetMapping("/productos/valor-stock/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public BigDecimal calcularValorStock(
-      @RequestParam long idEmpresa,
+      @RequestParam long idSucursal,
       @RequestParam(required = false) String codigo,
       @RequestParam(required = false) String descripcion,
       @RequestParam(required = false) Long idRubro,
@@ -382,7 +384,7 @@ public class ProductoController {
             .idRubro(idRubro)
             .buscarPorProveedor(idProveedor != null)
             .idProveedor(idProveedor)
-            .idEmpresa(idEmpresa)
+            .idEmpresa(idSucursal)
             .listarSoloFaltantes(soloFantantes)
             .listarSoloEnStock(soloEnStock)
             .buscaPorVisibilidad(publicos != null)

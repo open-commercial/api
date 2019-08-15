@@ -47,7 +47,15 @@ public class Producto implements Serializable {
   @JoinColumn(name = "idProducto")
   @JsonProperty(access = JsonProperty.Access.READ_WRITE)
   @NotEmpty
-  private List<CantidadEnSucursal> cantidadSucursales;
+  private List<CantidadEnSucursal> cantidadEnSucursales;
+
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_producto_cantidad_negativa}")
+  private BigDecimal cantidad;
+
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_producto_cantidadMinima_negativa}")
+  private BigDecimal cantMinima;
 
   @Transient
   @JsonView(Views.Public.class)
@@ -56,10 +64,6 @@ public class Producto implements Serializable {
   @Transient
   @JsonView(Views.Public.class)
   private BigDecimal precioBonificado;
-
-  @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_producto_cantidadMinima_negativa}")
-  private BigDecimal cantMinima;
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(
