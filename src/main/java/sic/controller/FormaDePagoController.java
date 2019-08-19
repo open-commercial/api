@@ -37,7 +37,7 @@ public class FormaDePagoController {
     return formaDePagoService.getFormasDePagoPorId(idFormaDePago);
   }
 
-  @GetMapping("/formas-de-pago/predeterminada/sucursales/{idSucursal}")
+  @GetMapping("/formas-de-pago/predeterminada")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -45,12 +45,11 @@ public class FormaDePagoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public FormaDePago getFormaDePagoPredeterminada(@PathVariable long idSucursal) {
-    return formaDePagoService.getFormaDePagoPredeterminada(
-        sucursalService.getSucursalPorId(idSucursal));
+  public FormaDePago getFormaDePagoPredeterminada() {
+    return formaDePagoService.getFormaDePagoPredeterminada();
   }
 
-  @GetMapping("/formas-de-pago/sucursales/{idSucursal}")
+  @GetMapping("/formas-de-pago")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -58,8 +57,8 @@ public class FormaDePagoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public List<FormaDePago> getFormasDePago(@PathVariable long idSucursal) {
-    return formaDePagoService.getFormasDePagoNoEliminadas(sucursalService.getSucursalPorId(idSucursal));
+  public List<FormaDePago> getFormasDePago() {
+    return formaDePagoService.getFormasDePagoNoEliminadas();
   }
 
   @PutMapping("/formas-de-pago/predeterminada/{idFormaDePago}")

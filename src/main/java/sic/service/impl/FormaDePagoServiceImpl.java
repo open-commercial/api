@@ -27,12 +27,12 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
   }
 
   @Override
-  public List<FormaDePago> getFormasDePago(Sucursal sucursal) {
+  public List<FormaDePago> getFormasDePago() {
     return formaDePagoRepository.findAllByOrderByNombreAsc();
   }
 
   @Override
-  public List<FormaDePago> getFormasDePagoNoEliminadas(Sucursal sucursal) {
+  public List<FormaDePago> getFormasDePagoNoEliminadas() {
     return formaDePagoRepository.findAllByAndEliminadaOrderByNombreAsc(false);
   }
 
@@ -59,7 +59,7 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
   }
 
   @Override
-  public FormaDePago getFormaDePagoPredeterminada(Sucursal sucursal) {
+  public FormaDePago getFormaDePagoPredeterminada() {
     FormaDePago formaDePago =
         formaDePagoRepository.findByAndPredeterminadoAndEliminada(true, false);
     if (formaDePago == null) {
