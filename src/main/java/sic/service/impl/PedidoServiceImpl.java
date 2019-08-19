@@ -186,8 +186,8 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public Pedido guardar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal) {
-    this.asignarDetalleEnvio(pedido, tipoDeEnvio, idSucursal);
+  public Pedido guardar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursalEnvio) {
+    this.asignarDetalleEnvio(pedido, tipoDeEnvio, idSucursalEnvio);
     this.calcularCantidadDeArticulos(pedido);
     pedido.setFecha(new Date());
     pedido.setNroPedido(this.generarNumeroPedido(pedido.getSucursal()));

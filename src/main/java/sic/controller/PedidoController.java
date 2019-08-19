@@ -115,7 +115,7 @@ public class PedidoController {
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(nuevoPedidoDTO.getIdUsuario()));
     Cliente cliente = clienteService.getClienteNoEliminadoPorId(nuevoPedidoDTO.getIdCliente());
     pedido.setCliente(cliente);
-    return pedidoService.guardar(pedido, nuevoPedidoDTO.getTipoDeEnvio(), nuevoPedidoDTO.getIdSucursal());
+    return pedidoService.guardar(pedido, nuevoPedidoDTO.getTipoDeEnvio(), nuevoPedidoDTO.getIdSucursalEnvio());
   }
 
   @GetMapping("/pedidos/busqueda/criteria")

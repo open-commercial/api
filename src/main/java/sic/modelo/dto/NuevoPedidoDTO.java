@@ -19,9 +19,10 @@ public class NuevoPedidoDTO {
   private Date fechaVencimiento;
   private String observaciones;
   private Long idSucursal;
+  private Long idSucursalEnvio;
+  private TipoDeEnvio tipoDeEnvio;
   private Long idUsuario;
   private Long idCliente;
-  private TipoDeEnvio tipoDeEnvio;
   private List<RenglonPedidoDTO> renglones;
   private BigDecimal subTotal;
   private BigDecimal recargoPorcentaje;

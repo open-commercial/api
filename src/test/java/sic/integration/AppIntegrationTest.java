@@ -429,7 +429,7 @@ class AppIntegrationTest {
             .lema("Hoy no se fía, mañana si.")
             .nombre("La gran idea")
             .ubicacion(
-                UbicacionDTO.builder().idLocalidad(1L).calle("Rio Piacentin").numero(345).build())
+                UbicacionDTO.builder().idLocalidad(1L).calle("Rio Chico").numero(6211).build())
             .build();
     SucursalDTO sucursalGuardada =
       restTemplate.postForObject(apiPrefix + "/sucursales", sucursalNueva, SucursalDTO.class);
@@ -4696,13 +4696,14 @@ class AppIntegrationTest {
         .idCliente(1L)
         .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
         .idSucursal(1L)
+        .idSucursalEnvio(2L)
         .build();
     PedidoDTO pedidoRecuperado =
       restTemplate.postForObject(
         apiPrefix + "/pedidos",
         nuevoPedidoDTO,
         PedidoDTO.class);
-    assertEquals("Rio Piacentin 345 Corrientes Corrientes", pedidoRecuperado.getDetalleEnvio());
+    assertEquals("Rio Chico 6211 Corrientes Corrientes", pedidoRecuperado.getDetalleEnvio());
   }
 
   @Test
