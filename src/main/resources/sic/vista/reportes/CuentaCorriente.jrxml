@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="CuentaCorriente" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e47a212f-3954-4de9-aca2-5bd71a6098c5">
 	<property name="ireport.zoom" value="3.0"/>
 	<property name="ireport.x" value="0"/>
@@ -39,7 +39,7 @@
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getEmpresa().getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getSucursal().getNombre()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="115" width="800" height="15" uuid="6fb6fe21-b26a-4f5f-8847-da585e165dae">
@@ -48,8 +48,8 @@
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{cuentaCorrienteCliente}.getEmpresa().getUbicacion() != null) ? 
-$P{cuentaCorrienteCliente}.getEmpresa().getUbicacion()  : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{cuentaCorrienteCliente}.getSucursal().getUbicacion() != null) ? 
+$P{cuentaCorrienteCliente}.getSucursal().getUbicacion()  : ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="130" width="800" height="15" uuid="3c596225-a4e6-4283-92e6-74a5552f2211">
@@ -58,10 +58,10 @@ $P{cuentaCorrienteCliente}.getEmpresa().getUbicacion()  : ""]]></textFieldExpres
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("RESPONSABLE_INSCRIPTO") ? "Responsable Inscripto" :
-$P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("EXENTO") ? "Exento" :
-$P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("CONSUMIDOR_FINAL") ? "Consumidor Final" :
-$P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getSucursal().getCategoriaIVA().toString().equals("RESPONSABLE_INSCRIPTO") ? "Responsable Inscripto" :
+$P{cuentaCorrienteCliente}.getSucursal().getCategoriaIVA().toString().equals("EXENTO") ? "Exento" :
+$P{cuentaCorrienteCliente}.getSucursal().getCategoriaIVA().toString().equals("CONSUMIDOR_FINAL") ? "Consumidor Final" :
+$P{cuentaCorrienteCliente}.getSucursal().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" : ""]]></textFieldExpression>
 			</textField>
 			<line>
 				<reportElement x="0" y="160" width="799" height="1" uuid="bbd9e748-9b14-42c1-b03e-08e8289d6627"/>
@@ -77,7 +77,7 @@ $P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("MON
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getEmpresa().getIdFiscal() == null ? "" : $P{cuentaCorrienteCliente}.getEmpresa().getIdFiscal()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getSucursal().getIdFiscal() == null ? "" : $P{cuentaCorrienteCliente}.getSucursal().getIdFiscal()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="710" y="15" width="96" height="15" uuid="4630ada4-f911-45f3-bf8d-1026e289cc77">
@@ -86,7 +86,7 @@ $P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("MON
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getEmpresa().getIngresosBrutos()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getSucursal().getIngresosBrutos()]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
 				<reportElement x="710" y="30" width="96" height="15" uuid="71f82348-4ecf-4a46-9fcc-3681e588c04e">
@@ -95,7 +95,7 @@ $P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("MON
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getEmpresa().getFechaInicioActividad()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getSucursal().getFechaInicioActividad()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="145" width="279" height="15" uuid="0ac9e3dd-2252-49da-8d4a-ae5da578c748">
@@ -104,7 +104,7 @@ $P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("MON
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getEmpresa().getTelefono()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getSucursal().getTelefono()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="279" y="145" width="276" height="15" uuid="ecc2a8ba-e539-458c-93ed-17ae5e7a70df">
@@ -113,7 +113,7 @@ $P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("MON
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getEmpresa().getEmail()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getSucursal().getEmail()]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement positionType="FixRelativeToBottom" x="0" y="161" width="50" height="15" uuid="c23ab30f-f1da-44d0-b751-12dab0ff3001">

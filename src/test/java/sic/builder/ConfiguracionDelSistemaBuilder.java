@@ -1,7 +1,8 @@
 package sic.builder;
 
 import sic.modelo.ConfiguracionDelSistema;
-import sic.modelo.Empresa;
+import sic.modelo.Sucursal;
+
 import java.util.Date;
 
 public class ConfiguracionDelSistemaBuilder {
@@ -21,7 +22,7 @@ public class ConfiguracionDelSistemaBuilder {
   private String emailPassword = "password";
   private Date fechaGeneracionTokenWSAA = null;
   private Date fechaVencimientoTokenWSAA = null;
-  private Empresa empresa = new EmpresaBuilder().build();
+  private Sucursal sucursal = new SucursalBuilder().build();
 
   public ConfiguracionDelSistema build() {
     return new ConfiguracionDelSistema(
@@ -40,7 +41,7 @@ public class ConfiguracionDelSistemaBuilder {
         emailPassword,
         fechaGeneracionTokenWSAA,
         fechaVencimientoTokenWSAA,
-        empresa);
+      sucursal);
   }
 
   public ConfiguracionDelSistemaBuilder withIdConfiguracionDelSistema(long idCds) {
@@ -125,8 +126,8 @@ public class ConfiguracionDelSistemaBuilder {
     return this;
   }
 
-  public ConfiguracionDelSistemaBuilder withEmpresa(Empresa empresa) {
-    this.empresa = empresa;
+  public ConfiguracionDelSistemaBuilder withSucursal(Sucursal sucursal) {
+    this.sucursal = sucursal;
     return this;
   }
 }

@@ -20,7 +20,7 @@ import javax.validation.constraints.NotEmpty;
 @NoArgsConstructor
 @EqualsAndHashCode(of = "nombre")
 @ToString
-@JsonIgnoreProperties({"idEmpresa", "nombreEmpresa"})
+@JsonIgnoreProperties({"idSucursal", "nombreSucursal"})
 public class Rubro implements Serializable {
 
     @Id

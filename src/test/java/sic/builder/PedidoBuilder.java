@@ -8,7 +8,6 @@ import java.util.List;
 import sic.modelo.EstadoPedido;
 import sic.modelo.dto.PedidoDTO;
 import sic.modelo.dto.RenglonPedidoDTO;
-import sic.modelo.dto.UbicacionDTO;
 
 public class PedidoBuilder {
 
@@ -17,7 +16,7 @@ public class PedidoBuilder {
   private Date fecha = new Date();
   private Date fechaVencimiento;
   private String observaciones = "Los precios se encuentran sujetos a modificaciones.";
-  private String nombreEmpresa = "Globo Corporation";
+  private String nombreSucursal = "Globo Corporation";
   private String detalleEnvio;
   private boolean eliminado = false;
   private String nombreFiscalCliente = "Construcciones S.A.";
@@ -53,7 +52,7 @@ public class PedidoBuilder {
       fecha,
       fechaVencimiento,
       observaciones,
-      nombreEmpresa,
+      nombreSucursal,
       detalleEnvio,
       eliminado,
       nombreFiscalCliente,
@@ -95,8 +94,8 @@ public class PedidoBuilder {
     return this;
   }
 
-  public PedidoBuilder withNombreEmpresa(String nombreEmpresa) {
-    this.nombreEmpresa = nombreEmpresa;
+  public PedidoBuilder withNombreSucursal(String nombreSucursal) {
+    this.nombreSucursal = nombreSucursal;
     return this;
   }
 

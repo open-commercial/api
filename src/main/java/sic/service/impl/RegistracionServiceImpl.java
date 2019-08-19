@@ -45,11 +45,11 @@ public class RegistracionServiceImpl implements IRegistracionService {
     cliente.setCredencial(credencial);
     cliente.setBonificacion(BigDecimal.ZERO);
     clienteService.guardar(cliente);
-    correoElectronicoService.enviarMailPorEmpresa(
-        cliente.getEmpresa().getId_Empresa(),
+    correoElectronicoService.enviarMailPorSucursal(
+        cliente.getSucursal().getIdSucursal(),
         usuario.getEmail(),
         configuracionDelSistemaService
-            .getConfiguracionDelSistemaPorEmpresa(cliente.getEmpresa())
+            .getConfiguracionDelSistemaPorSucursal(cliente.getSucursal())
             .getEmailUsername(),
         "Registración de cuenta nueva",
         messageSource.getMessage(

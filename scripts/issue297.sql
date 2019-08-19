@@ -81,4 +81,23 @@ UPDATE producto SET id_Medida = 6 where id_Medida = 19;
 
 DELETE FROM medida WHERE id_Medida = 18 
 or id_Medida = 19;
+
+RENAME TABLE empresa TO sucursal;
+
+ALTER TABLE sucursal CHANGE id_Empresa idSucursal bigint(20) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE caja CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
+ALTER TABLE cantidadensucursal CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
+ALTER TABLE cliente CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
+ALTER TABLE configuraciondelsistema CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
+ALTER TABLE cuentacorriente CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
+ALTER TABLE factura CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
+ALTER TABLE gasto CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
+ALTER TABLE nota CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
+ALTER TABLE pedido CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
+ALTER TABLE proveedor CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
+ALTER TABLE recibo CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
+ALTER TABLE transportista CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
+ALTER TABLE usuario CHANGE idEmpresaPredeterminada idSucursalPredeterminada bigint(20) NOT NULL;
+
  

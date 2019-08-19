@@ -15,7 +15,7 @@ import sic.modelo.EstadoPedido;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = {"renglones", "cantidadArticulos"})
-@EqualsAndHashCode(of = {"nroPedido", "nombreEmpresa"})
+@EqualsAndHashCode(of = {"nroPedido", "nombreSucursal"})
 @JsonIdentityInfo(
     generator = ObjectIdGenerators.PropertyGenerator.class,
     property = "id_Pedido",
@@ -28,7 +28,7 @@ public class PedidoDTO implements Serializable {
   private Date fecha;
   private Date fechaVencimiento;
   private String observaciones;
-  private String nombreEmpresa;
+  private String nombreSucursal;
   private String detalleEnvio;
   private boolean eliminado;
   private String nombreFiscalCliente;

@@ -30,7 +30,7 @@ public class BusquedaPedidoCriteria {
     private TipoDeEnvio tipoDeEnvio;
     private boolean buscaPorProducto;
     private Long idProducto;
-    private Long idEmpresa;
+    private Long idSucursal;
     private int cantRegistros;    
     private Pageable pageable;
 }

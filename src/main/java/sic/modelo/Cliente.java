@@ -24,9 +24,9 @@ import javax.validation.constraints.NotBlank;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"nombreFiscal", "idFiscal", "empresa"})
+@EqualsAndHashCode(of = {"nombreFiscal", "idFiscal", "sucursal"})
 @ToString
-@JsonIgnoreProperties({"empresa", "viajante", "credencial", "eliminado"})
+@JsonIgnoreProperties({"sucursal", "viajante", "credencial", "eliminado"})
 public class Cliente implements Serializable {
 
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private long id_Cliente;
@@ -75,9 +75,9 @@ public class Cliente implements Serializable {
   private Date fechaAlta;
 
   @ManyToOne
-  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-  @NotNull(message = "{mensaje_cliente_vacio_empresa}")
-  private Empresa empresa;
+  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
+  @NotNull(message = "{mensaje_cliente_vacio_sucursal}")
+  private Sucursal sucursal;
 
   @ManyToOne
   @JoinColumn(name = "id_Usuario_Viajante", referencedColumnName = "id_Usuario")
@@ -91,14 +91,14 @@ public class Cliente implements Serializable {
 
   private boolean predeterminado;
 
-  @JsonGetter("idEmpresa")
-  public Long getIdEmpresa() {
-    return empresa.getId_Empresa();
+  @JsonGetter("idSucursal")
+  public Long getIdSucursal() {
+    return sucursal.getIdSucursal();
   }
 
-  @JsonGetter("nombreEmpresa")
-  public String getNombreEmpresa() {
-    return empresa.getNombre();
+  @JsonGetter("nombreSucursal")
+  public String getNombreSucursal() {
+    return sucursal.getNombre();
   }
 
   @JsonGetter("idViajante")

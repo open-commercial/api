@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
-@EqualsAndHashCode(exclude = {"id_Gasto", "nroGasto", "idEmpresa", "nombreEmpresa", "fecha", "idUsuario", "nombreUsuario", "idFormaDePago", "nombreFormaDePago"})
+@EqualsAndHashCode(exclude = {"id_Gasto", "nroGasto", "idSucursal", "nombreSucursal", "fecha", "idUsuario", "nombreUsuario", "idFormaDePago", "nombreFormaDePago"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -16,8 +16,8 @@ public class GastoDTO {
   private long nroGasto;
   private Date fecha;
   private String concepto;
-  private Long idEmpresa;
-  private String nombreEmpresa;
+  private Long idSucursal;
+  private String nombreSucursal;
   private Long idUsuario;
   private String nombreUsuario;
   private Long idFormaDePago;

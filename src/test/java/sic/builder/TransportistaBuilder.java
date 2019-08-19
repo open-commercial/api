@@ -1,7 +1,6 @@
 package sic.builder;
 
-import sic.modelo.Empresa;
-import sic.modelo.Localidad;
+import sic.modelo.Sucursal;
 import sic.modelo.Transportista;
 import sic.modelo.Ubicacion;
 
@@ -12,12 +11,12 @@ public class TransportistaBuilder {
   private Ubicacion ubicacion = new UbicacionBuilder().build();
   private String web = "pedidos@oca.com.ar";
   private String telefono = "379 5402356";
-  private Empresa empresa = new EmpresaBuilder().build();
+  private Sucursal sucursal = new SucursalBuilder().build();
   private boolean eliminado = false;
 
   public Transportista build() {
     return new Transportista(
-        id_Transportista, nombre, ubicacion, web, telefono, empresa, eliminado);
+        id_Transportista, nombre, ubicacion, web, telefono, sucursal, eliminado);
   }
 
   public TransportistaBuilder withId_Transportista(long idTransportista) {
@@ -45,8 +44,8 @@ public class TransportistaBuilder {
     return this;
   }
 
-  public TransportistaBuilder withEmpresa(Empresa empresa) {
-    this.empresa = empresa;
+  public TransportistaBuilder withEmpresa(Sucursal sucursal) {
+    this.sucursal = sucursal;
     return this;
   }
 

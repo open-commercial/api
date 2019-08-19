@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"idCantidadSucursal", "empresa"})
+@EqualsAndHashCode(of = {"idCantidadSucursal", "sucursal"})
 @ToString
 public class CantidadEnSucursal implements Serializable {
 
@@ -23,9 +23,9 @@ public class CantidadEnSucursal implements Serializable {
   private Long idCantidadSucursal;
 
   @ManyToOne
-  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
   @NotNull
-  private Empresa empresa;
+  private Sucursal sucursal;
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_producto_cantidad_negativa}")
@@ -37,11 +37,11 @@ public class CantidadEnSucursal implements Serializable {
 
   @JsonGetter("idSucursal")
   public Long getIdSucursal() {
-    return empresa.getId_Empresa();
+    return sucursal.getIdSucursal();
   }
 
   @JsonGetter("nombreSucursal")
   public String getNombreSucursal() {
-    return empresa.getNombre();
+    return sucursal.getNombre();
   }
 }

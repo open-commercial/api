@@ -15,9 +15,10 @@ public interface FacturaVentaRepository
   List<Factura> findAllByPedidoAndEliminada(Pedido pedido, boolean eliminada);
 
   @Query(
-      "SELECT max(fv.numFactura) FROM FacturaVenta fv WHERE fv.tipoComprobante = :tipoComprobante AND fv.numSerie = :numSerie AND fv.empresa.id_Empresa = :idEmpresa")
+      "SELECT max(fv.numFactura) FROM FacturaVenta fv " +
+        "WHERE fv.tipoComprobante = :tipoComprobante AND fv.numSerie = :numSerie AND fv.sucursal.idSucursal = :idSucursal")
   Long buscarMayorNumFacturaSegunTipo(
       @Param("tipoComprobante") TipoDeComprobante tipoComprobante,
       @Param("numSerie") long numSerie,
-      @Param("idEmpresa") long idEmpresa);
+      @Param("idSucursal") long idSucursal);
 }

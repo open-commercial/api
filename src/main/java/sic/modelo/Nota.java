@@ -20,7 +20,7 @@ import javax.validation.constraints.NotBlank;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"fecha", "tipoComprobante", "serie", "nroNota", "empresa"})
+@EqualsAndHashCode(of = {"fecha", "tipoComprobante", "serie", "nroNota", "sucursal"})
 @JsonIdentityInfo(
     generator = ObjectIdGenerators.PropertyGenerator.class,
     property = "idNota",
@@ -30,7 +30,7 @@ import javax.validation.constraints.NotBlank;
   @JsonSubTypes.Type(value = NotaCredito.class),
   @JsonSubTypes.Type(value = NotaDebito.class)
 })
-@JsonIgnoreProperties({"cliente", "empresa", "usuario","facturaVenta", "proveedor", "facturaCompra", "recibo"})
+@JsonIgnoreProperties({"cliente", "sucursal", "usuario","facturaVenta", "proveedor", "facturaCompra", "recibo"})
 public abstract class Nota implements Serializable {
 
   @JsonGetter(value = "type")
@@ -59,8 +59,8 @@ public abstract class Nota implements Serializable {
   private Date fecha;
 
   @ManyToOne
-  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-  private Empresa empresa;
+  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
+  private Sucursal sucursal;
 
   @ManyToOne
   @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
@@ -117,14 +117,14 @@ public abstract class Nota implements Serializable {
 
   private long numNotaAfip;
 
-  @JsonGetter("idEmpresa")
-  public Long getIdEmpresa() {
-    return empresa.getId_Empresa();
+  @JsonGetter("idSucursal")
+  public Long getIdSucursal() {
+    return sucursal.getIdSucursal();
   }
 
-  @JsonGetter("nombreEmpresa")
-  public String getNombreEmpresa() {
-    return empresa.getNombre();
+  @JsonGetter("nombreSucursal")
+  public String getNombreSucursal() {
+    return sucursal.getNombre();
   }
 
   @JsonGetter("idCliente")

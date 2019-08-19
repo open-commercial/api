@@ -19,7 +19,7 @@ import javax.validation.constraints.NotEmpty;
 @NoArgsConstructor
 @EqualsAndHashCode(of = "nombre")
 @ToString
-@JsonIgnoreProperties("empresa")
+@JsonIgnoreProperties("sucursal")
 public class FormaDePago implements Serializable {
 
   @Id

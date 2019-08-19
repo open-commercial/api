@@ -20,7 +20,7 @@ import javax.validation.constraints.NotEmpty;
 @NoArgsConstructor
 @EqualsAndHashCode(of = "nombre")
 @ToString
-@JsonIgnoreProperties({"empresa", "eliminada"})
+@JsonIgnoreProperties({"sucursal", "eliminada"})
 public class Medida implements Serializable {
 
   @Id

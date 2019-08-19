@@ -160,8 +160,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             break;
           case COMPRADOR:
             Cliente clienteRelacionado =
-                clienteService.getClientePorIdUsuarioYidEmpresa(
-                    idUsuarioLoggedIn, criteria.getIdEmpresa());
+                clienteService.getClientePorIdUsuarioYidSucursal(
+                    idUsuarioLoggedIn, criteria.getIdSucursal());
             if (clienteRelacionado != null) {
               rsPredicate.or(qCuentaCorrienteCliente.cliente.eq(clienteRelacionado));
             }
@@ -175,9 +175,9 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     }
     builder.and(
         qCuentaCorrienteCliente
-            .empresa
-            .id_Empresa
-            .eq(criteria.getIdEmpresa())
+            .sucursal
+            .idSucursal
+            .eq(criteria.getIdSucursal())
             .and(qCuentaCorrienteCliente.eliminada.eq(false)));
     return cuentaCorrienteClienteRepository.findAll(builder, criteria.getPageable());
   }
@@ -212,23 +212,23 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
               criteria.getIdProvincia()));
     builder.and(
         qCuentaCorrienteProveedor
-            .empresa
-            .id_Empresa
-            .eq(criteria.getIdEmpresa())
+            .sucursal
+            .idSucursal
+            .eq(criteria.getIdSucursal())
             .and(qCuentaCorrienteProveedor.eliminada.eq(false)));
     return cuentaCorrienteProveedorRepository.findAll(builder, criteria.getPageable());
   }
 
   @Override
   public CuentaCorrienteCliente getCuentaCorrientePorCliente(Cliente cliente) {
-    return cuentaCorrienteClienteRepository.findByClienteAndEmpresaAndEliminada(
-            cliente, cliente.getEmpresa(), false);
+    return cuentaCorrienteClienteRepository.findByClienteAndSucursalAndEliminada(
+            cliente, cliente.getSucursal(), false);
   }
 
   @Override
   public CuentaCorrienteProveedor getCuentaCorrientePorProveedor(Proveedor proveedor) {
-    return cuentaCorrienteProveedorRepository.findByProveedorAndEmpresaAndEliminada(
-            proveedor, proveedor.getEmpresa(), false);
+    return cuentaCorrienteProveedorRepository.findByProveedorAndSucursalAndEliminada(
+            proveedor, proveedor.getSucursal(), false);
   }
 
   @Override
@@ -407,16 +407,16 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                 .getContent());
     Map<String, Object> params = new HashMap<>();
     params.put("cuentaCorrienteCliente", cuentaCorrienteCliente);
-    if (cuentaCorrienteCliente.getEmpresa().getLogo() != null && !cuentaCorrienteCliente.getEmpresa().getLogo().isEmpty()) {
+    if (cuentaCorrienteCliente.getSucursal().getLogo() != null && !cuentaCorrienteCliente.getSucursal().getLogo().isEmpty()) {
       try {
         params.put(
             "logo",
-            new ImageIcon(ImageIO.read(new URL(cuentaCorrienteCliente.getEmpresa().getLogo())))
+            new ImageIcon(ImageIO.read(new URL(cuentaCorrienteCliente.getSucursal().getLogo())))
                 .getImage());
       } catch (IOException ex) {
         logger.error(ex.getMessage());
         throw new ServiceException(messageSource.getMessage(
-          "mensaje_empresa_404_logo", null, Locale.getDefault()), ex);
+          "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
       }
     }
     switch (formato) {

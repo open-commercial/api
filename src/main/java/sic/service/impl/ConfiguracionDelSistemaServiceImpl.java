@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.ConfiguracionDelSistema;
-import sic.modelo.Empresa;
+import sic.modelo.Sucursal;
 import sic.service.IConfiguracionDelSistemaService;
 import sic.repository.ConfiguracionDelSistemaRepository;
 import sic.exception.BusinessServiceException;
@@ -43,8 +43,8 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
   }
 
   @Override
-  public ConfiguracionDelSistema getConfiguracionDelSistemaPorEmpresa(Empresa empresa) {
-    return configuracionRepository.findByEmpresa(empresa);
+  public ConfiguracionDelSistema getConfiguracionDelSistemaPorSucursal(Sucursal sucursal) {
+    return configuracionRepository.findBySucursal(sucursal);
   }
 
   @Override
@@ -108,12 +108,12 @@ public class ConfiguracionDelSistemaServiceImpl implements IConfiguracionDelSist
   }
 
   @Override
-  public int getCantidadMaximaDeRenglonesPorIdEmpresa(long idEmpresa) {
-    return configuracionRepository.getCantidadMaximaDeRenglones(idEmpresa);
+  public int getCantidadMaximaDeRenglonesPorIdSucursal(long idSucursal) {
+    return configuracionRepository.getCantidadMaximaDeRenglones(idSucursal);
   }
 
   @Override
-  public boolean isFacturaElectronicaHabilitada(long idEmpresa) {
-    return configuracionRepository.isFacturaElectronicaHabilitada(idEmpresa);
+  public boolean isFacturaElectronicaHabilitada(long idSucursal) {
+    return configuracionRepository.isFacturaElectronicaHabilitada(idSucursal);
   }
 }

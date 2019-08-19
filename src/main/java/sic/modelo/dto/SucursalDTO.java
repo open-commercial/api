@@ -6,13 +6,13 @@ import sic.modelo.CategoriaIVA;
 import java.util.Date;
 
 @Data
-@EqualsAndHashCode(exclude = {"id_Empresa" , "ubicacion"})
+@EqualsAndHashCode(exclude = {"idSucursal" , "ubicacion"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class EmpresaDTO {
+public class SucursalDTO {
 
-  private long id_Empresa;
+  private long idSucursal;
   private String nombre;
   private String lema;
   private CategoriaIVA categoriaIVA;

@@ -30,7 +30,7 @@ public class ProductoController {
   private final IMedidaService medidaService;
   private final IRubroService rubroService;
   private final IProveedorService proveedorService;
-  private final IEmpresaService empresaService;
+  private final ISucursalService sucursalService;
   private final IClienteService clienteService;
   private final IAuthService authService;
   private final ModelMapper modelMapper;
@@ -43,7 +43,7 @@ public class ProductoController {
     IMedidaService medidaService,
     IRubroService rubroService,
     IProveedorService proveedorService,
-    IEmpresaService empresaService,
+    ISucursalService sucursalService,
     IClienteService clienteService,
     IAuthService authService,
     ModelMapper modelMapper,
@@ -52,7 +52,7 @@ public class ProductoController {
     this.medidaService = medidaService;
     this.rubroService = rubroService;
     this.proveedorService = proveedorService;
-    this.empresaService = empresaService;
+    this.sucursalService = sucursalService;
     this.clienteService = clienteService;
     this.authService = authService;
     this.modelMapper = modelMapper;
@@ -70,7 +70,7 @@ public class ProductoController {
         && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente =
-          clienteService.getClientePorIdUsuarioYidEmpresa(
+          clienteService.getClientePorIdUsuarioYidSucursal(
               (int) claims.get("idUsuario"), idSucursal);
       if (cliente != null) {
         Page<Producto> productos =
@@ -112,7 +112,7 @@ public class ProductoController {
     if (authorizationHeader != null && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente =
-        clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idSucursal);
+        clienteService.getClientePorIdUsuarioYidSucursal((int) claims.get("idUsuario"), idSucursal);
       if (cliente != null) {
         return productoService.getProductosConPrecioBonificado(productos, cliente);
       } else {
@@ -138,7 +138,7 @@ public class ProductoController {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     Cliente cliente =
-        clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idSucursal);
+        clienteService.getClientePorIdUsuarioYidSucursal((int) claims.get("idUsuario"), idSucursal);
     if (cliente != null) {
       Page<Producto> productos =
           productoService.getProductosConPrecioBonificado(
@@ -173,7 +173,7 @@ public class ProductoController {
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Cliente cliente =
-        clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idSucursal);
+        clienteService.getClientePorIdUsuarioYidSucursal((int) claims.get("idUsuario"), idSucursal);
     Page<Producto> productos =
         this.buscar(
             idSucursal,
@@ -209,7 +209,7 @@ public class ProductoController {
   }
 
   private Page<Producto> buscar(
-      long idEmpresa,
+      long idSucursal,
       String codigo,
       String descripcion,
       Long idRubro,
@@ -251,7 +251,7 @@ public class ProductoController {
             .idRubro(idRubro)
             .buscarPorProveedor(idProveedor != null)
             .idProveedor(idProveedor)
-            .idEmpresa(idEmpresa)
+            .idSucursal(idSucursal)
             .listarSoloFaltantes(soloFantantes)
             .listarSoloEnStock(soloEnStock)
             .buscaPorVisibilidad(publicos != null)
@@ -296,8 +296,8 @@ public class ProductoController {
                   modelMapper.map(cantidadEnSucursalDTO, CantidadEnSucursal.class));
               cantidadEnSucursales
                   .get(cantidadEnSucursales.size() - 1)
-                  .setEmpresa(
-                      empresaService.getEmpresaPorId(cantidadEnSucursalDTO.getIdSucursal()));
+                  .setSucursal(
+                      sucursalService.getSucursalPorId(cantidadEnSucursalDTO.getIdSucursal()));
             });
     productoPorActualizar.setCantidadEnSucursales(cantidadEnSucursales);
     productoPorActualizar.setCantidad(
@@ -325,7 +325,7 @@ public class ProductoController {
     List<CantidadEnSucursal> cantidadEnSucursal = new ArrayList<>();
     CantidadEnSucursal cantidad = new CantidadEnSucursal();
     cantidad.setCantidad(nuevoProductoDTO.getCantidad());
-    cantidad.setEmpresa(empresaService.getEmpresaPorId(idSucursal));
+    cantidad.setSucursal(sucursalService.getSucursalPorId(idSucursal));
     cantidad.setEstante(nuevoProductoDTO.getEstante());
     cantidad.setEstanteria(nuevoProductoDTO.getEstanteria());
     cantidadEnSucursal.add(cantidad);
@@ -384,7 +384,7 @@ public class ProductoController {
             .idRubro(idRubro)
             .buscarPorProveedor(idProveedor != null)
             .idProveedor(idProveedor)
-            .idEmpresa(idSucursal)
+            .idSucursal(idSucursal)
             .listarSoloFaltantes(soloFantantes)
             .listarSoloEnStock(soloEnStock)
             .buscaPorVisibilidad(publicos != null)
@@ -417,7 +417,7 @@ public class ProductoController {
     Rol.COMPRADOR
   })
   public ResponseEntity<byte[]> getListaDePrecios(
-      @RequestParam long idEmpresa,
+      @RequestParam long idSucursal,
       @RequestParam(required = false) String codigo,
       @RequestParam(required = false) String descripcion,
       @RequestParam(required = false) Long idRubro,
@@ -438,7 +438,7 @@ public class ProductoController {
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
         productos =
             this.buscar(
-                    idEmpresa,
+                    idSucursal,
                     codigo,
                     descripcion,
                     idRubro,
@@ -453,7 +453,7 @@ public class ProductoController {
                     sentido)
                 .getContent();
         byte[] reporteXls =
-            productoService.getListaDePreciosPorEmpresa(productos, idEmpresa, formato);
+            productoService.getListaDePreciosPorSucursal(productos, idSucursal, formato);
         headers.setContentLength(reporteXls.length);
         return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
       case "pdf":
@@ -462,7 +462,7 @@ public class ProductoController {
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
         productos =
             this.buscar(
-                    idEmpresa,
+                    idSucursal,
                     codigo,
                     descripcion,
                     idRubro,
@@ -477,7 +477,7 @@ public class ProductoController {
                     sentido)
                 .getContent();
         byte[] reportePDF =
-            productoService.getListaDePreciosPorEmpresa(productos, idEmpresa, formato);
+            productoService.getListaDePreciosPorSucursal(productos, idSucursal, formato);
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
       default:
         throw new BusinessServiceException(messageSource.getMessage(

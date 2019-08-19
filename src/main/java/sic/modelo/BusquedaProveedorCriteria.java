@@ -22,6 +22,6 @@ public class BusquedaProveedorCriteria {
   private Long idProvincia;
   private boolean buscaPorLocalidad;
   private Long idLocalidad;
-  private Long idEmpresa;
+  private Long idSucursal;
   private Pageable pageable;
 }

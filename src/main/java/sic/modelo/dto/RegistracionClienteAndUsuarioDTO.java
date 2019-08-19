@@ -21,6 +21,6 @@ public class RegistracionClienteAndUsuarioDTO implements Serializable {
   private CategoriaIVA categoriaIVA;
   private String nombreFiscal;
   private String password;
-  private long idEmpresa;
+  private long idSucursal;
   private String recaptcha;
 }

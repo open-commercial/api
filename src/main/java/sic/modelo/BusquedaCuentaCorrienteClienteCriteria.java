@@ -26,6 +26,6 @@ public class BusquedaCuentaCorrienteClienteCriteria {
   private Long idLocalidad;
   private boolean buscarPorNroDeCliente;
   private String nroDeCliente;
-  private Long idEmpresa;
+  private Long idSucursal;
   private Pageable pageable;
 }

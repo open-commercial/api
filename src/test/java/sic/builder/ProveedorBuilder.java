@@ -15,7 +15,7 @@ public class ProveedorBuilder {
   private String email = "chamacosrl@gmail.com";
   private String web = "www.chamacosrl.com.ar";
   private Ubicacion ubicacion = new UbicacionBuilder().build();
-  private Empresa empresa = new EmpresaBuilder().build();
+  private Sucursal sucursal = new SucursalBuilder().build();
   private boolean eliminado = false;
 
   public Proveedor build() {
@@ -31,7 +31,7 @@ public class ProveedorBuilder {
         email,
         web,
         ubicacion,
-        empresa,
+      sucursal,
         eliminado);
   }
 
@@ -90,8 +90,8 @@ public class ProveedorBuilder {
     return this;
   }
 
-  public ProveedorBuilder withEmpresa(Empresa empresa) {
-    this.empresa = empresa;
+  public ProveedorBuilder withSucursal(Sucursal sucursal) {
+    this.sucursal = sucursal;
     return this;
   }
 

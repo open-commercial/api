@@ -26,35 +26,35 @@ public interface IReciboService {
 
   List<Recibo> construirRecibos(
       long[] formaDePago,
-      Empresa empresa,
+      Sucursal sucursal,
       Cliente cliente,
       Usuario usuario,
       BigDecimal[] monto,
       BigDecimal totalFactura,
       Date fecha);
 
-  long getSiguienteNumeroRecibo(long idEmpresa, long serie);
+  long getSiguienteNumeroRecibo(long idSucursal, long serie);
 
   void eliminar(long idRecibo);
 
   byte[] getReporteRecibo(Recibo recibo);
 
   BigDecimal getTotalRecibosClientesEntreFechasPorFormaDePago(
-      long idEmpresa, long idFormaDePago, Date desde, Date hasta);
+      long idSucursal, long idFormaDePago, Date desde, Date hasta);
 
   BigDecimal getTotalRecibosProveedoresEntreFechasPorFormaDePago(
-      long idEmpresa, long idFormaDePago, Date desde, Date hasta);
+      long idSucursal, long idFormaDePago, Date desde, Date hasta);
 
   List<Recibo> getRecibosEntreFechasPorFormaDePago(
-      Date desde, Date hasta, FormaDePago formaDePago, Empresa empresa);
+      Date desde, Date hasta, FormaDePago formaDePago, Sucursal sucursal);
 
   BigDecimal getTotalRecibosClientesQueAfectanCajaEntreFechas(
-      long idEmpresa, Date desde, Date hasta);
+      long idSucursal, Date desde, Date hasta);
 
   BigDecimal getTotalRecibosProveedoresQueAfectanCajaEntreFechas(
-      long idEmpresa, Date desde, Date hasta);
+      long idSucursal, Date desde, Date hasta);
 
-  BigDecimal getTotalRecibosClientesEntreFechas(long idEmpresa, Date desde, Date hasta);
+  BigDecimal getTotalRecibosClientesEntreFechas(long idSucursal, Date desde, Date hasta);
 
-  BigDecimal getTotalRecibosProveedoresEntreFechas(long idEmpresa, Date desde, Date hasta);
+  BigDecimal getTotalRecibosProveedoresEntreFechas(long idSucursal, Date desde, Date hasta);
 }

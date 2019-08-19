@@ -29,7 +29,7 @@ import javax.validation.constraints.NotEmpty;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"fecha", "tipoComprobante", "numSerie", "numFactura", "empresa"})
+@EqualsAndHashCode(of = {"fecha", "tipoComprobante", "numSerie", "numFactura", "sucursal"})
 @ToString(exclude = {"renglones"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Factura", scope = Factura.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
@@ -135,9 +135,9 @@ public abstract class Factura implements Serializable {
     private BigDecimal cantidadArticulos;
 
     @ManyToOne
-    @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-    @NotNull(message = "{mensaje_factura_empresa_vacia}")
-    private Empresa empresa;
+    @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
+    @NotNull(message = "{mensaje_factura_sucursal_vacia}")
+    private Sucursal sucursal;
 
     private boolean eliminada;
     
@@ -165,14 +165,14 @@ public abstract class Factura implements Serializable {
         return transportista.getNombre();
     }
 
-    @JsonGetter("idEmpresa")
-    public long getIdEmpresa() {
-        return empresa.getId_Empresa();
+    @JsonGetter("idSucursal")
+    public long getIdSucursal() {
+        return sucursal.getIdSucursal();
     }
 
-    @JsonGetter("nombreEmpresa")
-    public String getNombreEmpresa() {
-        return empresa.getNombre();
+    @JsonGetter("nombreSucursal")
+    public String getNombreSucursal() {
+        return sucursal.getNombre();
     }
 
     @JsonGetter("nombreUsuario")

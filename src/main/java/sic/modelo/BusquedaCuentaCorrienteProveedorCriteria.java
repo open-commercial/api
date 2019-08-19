@@ -21,6 +21,6 @@ public class BusquedaCuentaCorrienteProveedorCriteria {
   private Long idProvincia;
   private boolean buscaPorLocalidad;
   private Long idLocalidad;
-  private Long idEmpresa;
+  private Long idSucursal;
   private Pageable pageable;
 }

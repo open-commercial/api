@@ -17,7 +17,7 @@ public class BusquedaGastoCriteria {
   private boolean buscaPorFecha;
   private Date fechaDesde;
   private Date fechaHasta;
-  private Long idEmpresa;
+  private Long idSucursal;
   private boolean buscaPorUsuario;
   private Long idUsuario;
   private boolean buscarPorFormaDePago;

@@ -14,7 +14,7 @@ import sic.modelo.*;
 import sic.modelo.dto.RecoveryPasswordDTO;
 import sic.modelo.dto.RegistracionClienteAndUsuarioDTO;
 import sic.service.IAuthService;
-import sic.service.IEmpresaService;
+import sic.service.ISucursalService;
 import sic.service.IRegistracionService;
 import sic.service.IUsuarioService;
 
@@ -23,7 +23,7 @@ import sic.service.IUsuarioService;
 public class AuthController {
 
   private final IUsuarioService usuarioService;
-  private final IEmpresaService empresaService;
+  private final ISucursalService sucursalService;
   private final IRegistracionService registracionService;
   private final IAuthService authService;
   private final MessageSource messageSource;
@@ -31,12 +31,12 @@ public class AuthController {
   @Autowired
   public AuthController(
       IUsuarioService usuarioService,
-      IEmpresaService empresaService,
+      ISucursalService sucursalService,
       IRegistracionService registracionService,
       IAuthService authService,
       MessageSource messageSource) {
     this.usuarioService = usuarioService;
-    this.empresaService = empresaService;
+    this.sucursalService = sucursalService;
     this.registracionService = registracionService;
     this.authService = authService;
     this.messageSource = messageSource;
@@ -65,10 +65,10 @@ public class AuthController {
 
   @GetMapping("/password-recovery")
   public void recuperarPassword(
-      @RequestParam String email, @RequestParam long idEmpresa, HttpServletRequest request) {
+      @RequestParam String email, @RequestParam long idSucursal, HttpServletRequest request) {
     String origin = request.getHeader("Origin");
     if (origin == null) origin = request.getHeader("Host");
-    usuarioService.enviarEmailDeRecuperacion(idEmpresa, email, origin);
+    usuarioService.enviarEmailDeRecuperacion(idSucursal, email, origin);
   }
 
   @PostMapping("/password-recovery")
@@ -99,12 +99,12 @@ public class AuthController {
     nuevoUsuario.setEmail(registracionClienteAndUsuarioDTO.getEmail());
     nuevoUsuario.setPassword(registracionClienteAndUsuarioDTO.getPassword());
     nuevoUsuario.setRoles(Collections.singletonList(Rol.COMPRADOR));
-    nuevoUsuario.setIdEmpresaPredeterminada(registracionClienteAndUsuarioDTO.getIdEmpresa());
+    nuevoUsuario.setIdSucursalPredeterminada(registracionClienteAndUsuarioDTO.getIdSucursal());
     Cliente nuevoCliente = new Cliente();
     nuevoCliente.setTelefono(registracionClienteAndUsuarioDTO.getTelefono());
     nuevoCliente.setEmail(registracionClienteAndUsuarioDTO.getEmail());
-    nuevoCliente.setEmpresa(
-        empresaService.getEmpresaPorId(registracionClienteAndUsuarioDTO.getIdEmpresa()));
+    nuevoCliente.setSucursal(
+        sucursalService.getSucursalPorId(registracionClienteAndUsuarioDTO.getIdSucursal()));
     CategoriaIVA categoriaIVA = registracionClienteAndUsuarioDTO.getCategoriaIVA();
     if (categoriaIVA == CategoriaIVA.CONSUMIDOR_FINAL) {
       nuevoCliente.setNombreFiscal(

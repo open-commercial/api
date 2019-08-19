@@ -23,7 +23,7 @@ public class CarritoCompraController {
 
   private final ICarritoCompraService carritoCompraService;
   private final IPedidoService pedidoService;
-  private final IEmpresaService empresaService;
+  private final ISucursalService sucursalService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
@@ -32,12 +32,12 @@ public class CarritoCompraController {
   public CarritoCompraController(
       ICarritoCompraService carritoCompraService,
       IPedidoService pedidoService,
-      IEmpresaService empresaService,
+      ISucursalService sucursalService,
       IUsuarioService usuarioService,
       IClienteService clienteService) {
     this.carritoCompraService = carritoCompraService;
     this.pedidoService = pedidoService;
-    this.empresaService = empresaService;
+    this.sucursalService = sucursalService;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
   }
@@ -103,8 +103,8 @@ public class CarritoCompraController {
     pedido.setDescuentoNeto(carritoCompraDTO.getBonificacionNeto());
     pedido.setTotalActual(carritoCompraDTO.getTotal());
     pedido.setTotalEstimado(pedido.getTotalActual());
-    pedido.setEmpresa(
-        empresaService.getEmpresaPorId(nuevaOrdenDeCompraDTO.getIdEmpresa()));
+    pedido.setSucursal(
+        sucursalService.getSucursalPorId(nuevaOrdenDeCompraDTO.getIdSucursal()));
     pedido.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario()));
     Pageable pageable =

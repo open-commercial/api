@@ -18,9 +18,9 @@ import javax.validation.constraints.Email;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"id_ConfiguracionDelSistema", "empresa"})
+@EqualsAndHashCode(of = {"id_ConfiguracionDelSistema", "sucursal"})
 @ToString(exclude = "certificadoAfip")
-@JsonIgnoreProperties({"tokenWSAA", "signTokenWSAA", "fechaGeneracionTokenWSAA", "fechaVencimientoTokenWSAA", "empresa"})
+@JsonIgnoreProperties({"tokenWSAA", "signTokenWSAA", "fechaGeneracionTokenWSAA", "fechaVencimientoTokenWSAA", "sucursal"})
 public class ConfiguracionDelSistema implements Serializable {
 
     @Id
@@ -64,17 +64,17 @@ public class ConfiguracionDelSistema implements Serializable {
     private Date fechaVencimientoTokenWSAA;
 
     @ManyToOne
-    @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-    private Empresa empresa;
+    @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
+    private Sucursal sucursal;
 
-    @JsonGetter("idEmpresa")
-    public Long getIdEmpresa() {
-        return empresa.getId_Empresa();
+    @JsonGetter("idSucursal")
+    public Long getIdSucursal() {
+        return sucursal.getIdSucursal();
     }
 
-    @JsonGetter("nombreEmpresa")
-    public String getNombreEmpresa() {
-        return empresa.getNombre();
+    @JsonGetter("nombreSucursal")
+    public String getNombreSucursal() {
+        return sucursal.getNombre();
     }
 
     @JsonGetter("existeCertificado")

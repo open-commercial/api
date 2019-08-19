@@ -18,11 +18,11 @@ public interface IFacturaService {
 
   List<Factura> getFacturasDelPedido(Long idPedido);
 
-  TipoDeComprobante[] getTipoFacturaCompra(Empresa empresa, Proveedor proveedor);
+  TipoDeComprobante[] getTipoFacturaCompra(Sucursal sucursal, Proveedor proveedor);
 
-  TipoDeComprobante[] getTipoFacturaVenta(Empresa empresa, Cliente cliente);
+  TipoDeComprobante[] getTipoFacturaVenta(Sucursal sucursal, Cliente cliente);
 
-  TipoDeComprobante[] getTiposFacturaSegunEmpresa(Empresa empresa);
+  TipoDeComprobante[] getTiposFacturaSegunSucursal(Sucursal sucursal);
 
   List<RenglonFactura> getRenglonesDeLaFactura(Long idFactura);
 
@@ -58,7 +58,7 @@ public interface IFacturaService {
 
   BigDecimal calcularPrecioUnitario(Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto);
 
-  long calcularNumeroFacturaVenta(TipoDeComprobante tipoDeComprobante, long serie, long idEmpresa);
+  long calcularNumeroFacturaVenta(TipoDeComprobante tipoDeComprobante, long serie, long idSucursal);
 
   byte[] getReporteFacturaVenta(Factura factura);
 

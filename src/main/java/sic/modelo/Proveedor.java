@@ -20,9 +20,9 @@ import javax.validation.constraints.NotEmpty;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"razonSocial", "empresa"})
+@EqualsAndHashCode(of = {"razonSocial", "sucursal"})
 @ToString
-@JsonIgnoreProperties({"empresa", "eliminado"})
+@JsonIgnoreProperties({"sucursal", "eliminado"})
 public class Proveedor implements Serializable {
 
   @Id
@@ -65,19 +65,19 @@ public class Proveedor implements Serializable {
   private Ubicacion ubicacion;
 
   @ManyToOne
-  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-  @NotNull(message = "{mensaje_proveedor_empresa_vacia}")
-  private Empresa empresa;
+  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
+  @NotNull(message = "{mensaje_proveedor_sucursal_vacia}")
+  private Sucursal sucursal;
 
   private boolean eliminado;
 
-  @JsonGetter("nombreEmpresa")
-  public String getNombreEmpresa() {
-    return empresa.getNombre();
+  @JsonGetter("nombreSucursal")
+  public String getNombreSucursal() {
+    return sucursal.getNombre();
   }
 
-  @JsonGetter("idEmpresa")
-  public long getIdEmpresa() {
-    return empresa.getId_Empresa();
+  @JsonGetter("idSucursal")
+  public long getIdSucursal() {
+    return sucursal.getIdSucursal();
   }
 }

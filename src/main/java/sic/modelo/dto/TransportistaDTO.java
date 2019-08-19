@@ -6,8 +6,8 @@ import lombok.*;
 @EqualsAndHashCode(
     exclude = {
       "id_Transportista",
-      "idEmpresa",
-      "nombreEmpresa"
+      "idSucursal",
+      "nombreSucursal"
     })
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,7 +19,7 @@ public class TransportistaDTO {
   private UbicacionDTO ubicacion;
   private String web;
   private String telefono;
-  private Long idEmpresa;
-  private String nombreEmpresa;
+  private Long idSucursal;
+  private String nombreSucursal;
   private boolean eliminado;
 }

@@ -14,12 +14,12 @@ public interface NotaCreditoRepository
       "SELECT max(nc.nroNota) FROM NotaCredito nc "
           + "WHERE nc.tipoComprobante = :tipoComprobante "
           + "AND nc.serie = :serie "
-          + "AND nc.empresa.id_Empresa = :idEmpresa "
+          + "AND nc.sucursal.idSucursal = :idSucursal "
           + "AND nc.cliente IS NOT null")
   Long buscarMayorNumNotaCreditoClienteSegunTipo(
       @Param("tipoComprobante") TipoDeComprobante tipoComprobante,
       @Param("serie") long serie,
-      @Param("idEmpresa") long idEmpresa);
+      @Param("idSucursal") long idSucursal);
 
   boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta, boolean eliminada);
 

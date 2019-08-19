@@ -29,7 +29,7 @@ import sic.service.*;
 public class PedidoController {
     
     private final IPedidoService pedidoService;
-    private final IEmpresaService empresaService;
+    private final ISucursalService sucursalService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
     private final IAuthService authService;
@@ -37,11 +37,11 @@ public class PedidoController {
     private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
     @Autowired
-    public PedidoController(IPedidoService pedidoService, IEmpresaService empresaService,
+    public PedidoController(IPedidoService pedidoService, ISucursalService sucursalService,
                             IUsuarioService usuarioService, IClienteService clienteService,
                             IAuthService authService, ModelMapper modelMapper) {
         this.pedidoService = pedidoService;
-        this.empresaService = empresaService;
+        this.sucursalService = sucursalService;
         this.usuarioService = usuarioService;
         this.clienteService = clienteService;
         this.authService = authService;
@@ -69,14 +69,14 @@ public class PedidoController {
 
   @PutMapping("/pedidos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
-  public void actualizar(@RequestParam Long idEmpresa,
+  public void actualizar(@RequestParam Long idSucursal,
                          @RequestParam Long idUsuario,
                          @RequestParam Long idCliente,
                          @RequestParam TipoDeEnvio tipoDeEnvio,
-                         @RequestParam(required = false) Long idSucursal,
+                         @RequestParam(required = false) Long idSucursalEnvio,
                          @RequestBody PedidoDTO pedidoDTO) {
     Pedido pedido = modelMapper.map(pedidoDTO, Pedido.class);
-    pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    pedido.setSucursal(sucursalService.getSucursalPorId(idSucursal));
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     pedido.setCliente(clienteService.getClienteNoEliminadoPorId(idCliente));
     pedido.setDetalleEnvio(pedidoService.getPedidoNoEliminadoPorId(pedidoDTO.getId_Pedido()).getDetalleEnvio());
@@ -84,7 +84,7 @@ public class PedidoController {
     pedido.setFacturas(pedidoService.getFacturasDelPedido(pedido.getId_Pedido()));
     //Si los renglones vienen null, recupera los renglones del pedido para actualizarLocalidad
     //caso contrario, ultiliza los renglones del pedido.
-    pedidoService.actualizar(pedido, tipoDeEnvio, idSucursal);
+    pedidoService.actualizar(pedido, tipoDeEnvio, idSucursalEnvio);
     }
 
   @PostMapping("/pedidos")
@@ -110,8 +110,8 @@ public class PedidoController {
     pedido.setDescuentoNeto(nuevoPedidoDTO.getDescuentoNeto());
     pedido.setTotalEstimado(nuevoPedidoDTO.getTotal());
     pedido.setTotalActual(nuevoPedidoDTO.getTotal());
-    Empresa empresaParaPedido = empresaService.getEmpresaPorId(nuevoPedidoDTO.getIdEmpresa());
-    pedido.setEmpresa(empresaParaPedido);
+    Sucursal sucursalParaPedido = sucursalService.getSucursalPorId(nuevoPedidoDTO.getIdSucursal());
+    pedido.setSucursal(sucursalParaPedido);
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(nuevoPedidoDTO.getIdUsuario()));
     Cliente cliente = clienteService.getClienteNoEliminadoPorId(nuevoPedidoDTO.getIdCliente());
     pedido.setCliente(cliente);
@@ -127,7 +127,7 @@ public class PedidoController {
     Rol.COMPRADOR
   })
   public Page<Pedido> buscarConCriteria(
-      @RequestParam Long idEmpresa,
+      @RequestParam Long idSursal,
       @RequestParam(required = false) Long desde,
       @RequestParam(required = false) Long hasta,
       @RequestParam(required = false) Long idCliente,
@@ -168,7 +168,7 @@ public class PedidoController {
             .tipoDeEnvio(tipoDeEnvio)
             .buscaPorProducto(idProducto != null)
             .idProducto(idProducto)
-            .idEmpresa(idEmpresa)
+            .idSucursal(idSursal)
             .pageable(pageable)
             .build();
     Claims claims = authService.getClaimsDelToken(authorizationHeader);

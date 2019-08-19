@@ -40,7 +40,7 @@ public class CajaServiceImpl implements ICajaService {
   private final CajaRepository cajaRepository;
   private final IFormaDePagoService formaDePagoService;
   private final IGastoService gastoService;
-  private final IEmpresaService empresaService;
+  private final ISucursalService sucursalService;
   private final IUsuarioService usuarioService;
   private final IReciboService reciboService;
   private final IClockService clockService;
@@ -52,7 +52,7 @@ public class CajaServiceImpl implements ICajaService {
       CajaRepository cajaRepository,
       IFormaDePagoService formaDePagoService,
       IGastoService gastoService,
-      IEmpresaService empresaService,
+      ISucursalService sucursalService,
       IUsuarioService usuarioService,
       IReciboService reciboService,
       IClockService clockService,
@@ -60,7 +60,7 @@ public class CajaServiceImpl implements ICajaService {
     this.cajaRepository = cajaRepository;
     this.formaDePagoService = formaDePagoService;
     this.gastoService = gastoService;
-    this.empresaService = empresaService;
+    this.sucursalService = sucursalService;
     this.usuarioService = usuarioService;
     this.reciboService = reciboService;
     this.clockService = clockService;
@@ -70,7 +70,7 @@ public class CajaServiceImpl implements ICajaService {
   @Override
   public void validarOperacion(@Valid Caja caja) {
     // Una Caja por dia
-    Caja ultimaCaja = this.getUltimaCaja(caja.getEmpresa().getId_Empresa());
+    Caja ultimaCaja = this.getUltimaCaja(caja.getSucursal().getIdSucursal());
     if (ultimaCaja != null) {
       if (ultimaCaja.getEstado() == EstadoCaja.ABIERTA) {
         throw new BusinessServiceException(messageSource.getMessage(
@@ -89,8 +89,8 @@ public class CajaServiceImpl implements ICajaService {
   }
 
   @Override
-  public void validarMovimiento(Date fechaMovimiento, long idEmpresa) {
-    Caja caja = this.getUltimaCaja(idEmpresa);
+  public void validarMovimiento(Date fechaMovimiento, long idSucursal) {
+    Caja caja = this.getUltimaCaja(idSucursal);
     if (caja == null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_caja_no_existente", null, Locale.getDefault()));
@@ -107,10 +107,10 @@ public class CajaServiceImpl implements ICajaService {
 
   @Override
   @Transactional
-  public Caja abrirCaja(Empresa empresa, Usuario usuarioApertura, BigDecimal saldoApertura) {
+  public Caja abrirCaja(Sucursal sucursal, Usuario usuarioApertura, BigDecimal saldoApertura) {
     Caja caja = new Caja();
     caja.setEstado(EstadoCaja.ABIERTA);
-    caja.setEmpresa(empresa);
+    caja.setSucursal(sucursal);
     caja.setSaldoApertura(saldoApertura);
     caja.setUsuarioAbreCaja(usuarioApertura);
     caja.setFechaApertura(this.clockService.getFechaActual());
@@ -136,11 +136,11 @@ public class CajaServiceImpl implements ICajaService {
   }
 
   @Override
-  public Caja getUltimaCaja(long idEmpresa) {
+  public Caja getUltimaCaja(long idSucursal) {
     Pageable pageable = PageRequest.of(0, 1);
     List<Caja> topCaja =
         cajaRepository
-            .findTopByEmpresaAndEliminadaOrderByIdCajaDesc(idEmpresa, pageable)
+            .findTopBySucursalAndEliminadaOrderByIdCajaDesc(idSucursal, pageable)
             .getContent();
     return (topCaja.isEmpty()) ? null : topCaja.get(0);
   }
@@ -193,7 +193,7 @@ public class CajaServiceImpl implements ICajaService {
     QCaja qcaja = QCaja.caja;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
-        qcaja.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qcaja.eliminada.eq(false)));
+        qcaja.sucursal.idSucursal.eq(criteria.getIdSucursal()).and(qcaja.eliminada.eq(false)));
     if (criteria.isBuscaPorUsuarioApertura() && !criteria.isBuscaPorUsuarioCierre()) {
       builder.and(qcaja.usuarioAbreCaja.id_Usuario.eq(criteria.getIdUsuarioApertura()));
     }
@@ -253,23 +253,23 @@ public class CajaServiceImpl implements ICajaService {
   @Scheduled(cron = "30 0 0 * * *") // Todos los dias a las 00:00:30
   public void cerrarCajas() {
     logger.warn("Cierre automático de Cajas a las {}", LocalDateTime.now());
-    List<Empresa> empresas = this.empresaService.getEmpresas();
-    empresas
+    List<Sucursal> sucursals = this.sucursalService.getSucusales();
+    sucursals
         .stream()
-        .map(empresa -> this.getUltimaCaja(empresa.getId_Empresa()))
+        .map(sucursal -> this.getUltimaCaja(sucursal.getIdSucursal()))
         .filter(
-            ultimaCajaDeEmpresa ->
-                ((ultimaCajaDeEmpresa != null)
-                    && (ultimaCajaDeEmpresa.getEstado() == EstadoCaja.ABIERTA)))
+            ultimaCajaDeSucursal ->
+                ((ultimaCajaDeSucursal != null)
+                    && (ultimaCajaDeSucursal.getEstado() == EstadoCaja.ABIERTA)))
         .forEachOrdered(
-            ultimaCajaDeEmpresa -> {
+            ultimaCajaDeSucursal -> {
               LocalDate fechaActual =
                   LocalDate.of(
                       LocalDate.now().getYear(),
                       LocalDate.now().getMonth(),
                       LocalDate.now().getDayOfMonth());
               Calendar fechaHoraCaja = new GregorianCalendar();
-              fechaHoraCaja.setTime(ultimaCajaDeEmpresa.getFechaApertura());
+              fechaHoraCaja.setTime(ultimaCajaDeSucursal.getFechaApertura());
               LocalDate fechaCaja =
                   LocalDate.of(
                       fechaHoraCaja.get(Calendar.YEAR),
@@ -277,9 +277,9 @@ public class CajaServiceImpl implements ICajaService {
                       fechaHoraCaja.get(Calendar.DAY_OF_MONTH));
               if (fechaCaja.compareTo(fechaActual) < 0) {
                 this.cerrarCaja(
-                    ultimaCajaDeEmpresa.getId_Caja(),
-                    this.getSaldoQueAfectaCaja(ultimaCajaDeEmpresa),
-                    ultimaCajaDeEmpresa.getUsuarioAbreCaja().getId_Usuario(),
+                    ultimaCajaDeSucursal.getId_Caja(),
+                    this.getSaldoQueAfectaCaja(ultimaCajaDeSucursal),
+                    ultimaCajaDeSucursal.getUsuarioAbreCaja().getId_Usuario(),
                     true);
               }
             });
@@ -293,13 +293,13 @@ public class CajaServiceImpl implements ICajaService {
     }
     BigDecimal totalRecibosCliente =
         reciboService.getTotalRecibosClientesQueAfectanCajaEntreFechas(
-            caja.getEmpresa().getId_Empresa(), caja.getFechaApertura(), fechaHasta);
+            caja.getSucursal().getIdSucursal(), caja.getFechaApertura(), fechaHasta);
     BigDecimal totalRecibosProveedor =
         reciboService.getTotalRecibosProveedoresQueAfectanCajaEntreFechas(
-            caja.getEmpresa().getId_Empresa(), caja.getFechaApertura(), fechaHasta);
+            caja.getSucursal().getIdSucursal(), caja.getFechaApertura(), fechaHasta);
     BigDecimal totalGastos =
         gastoService.getTotalGastosQueAfectanCajaEntreFechas(
-            caja.getEmpresa().getId_Empresa(), caja.getFechaApertura(), fechaHasta);
+            caja.getSucursal().getIdSucursal(), caja.getFechaApertura(), fechaHasta);
     return caja.getSaldoApertura()
         .add(totalRecibosCliente)
         .subtract(totalRecibosProveedor)
@@ -315,13 +315,13 @@ public class CajaServiceImpl implements ICajaService {
       }
       BigDecimal totalRecibosCliente =
           reciboService.getTotalRecibosClientesEntreFechas(
-              caja.getEmpresa().getId_Empresa(), caja.getFechaApertura(), fechaHasta);
+              caja.getSucursal().getIdSucursal(), caja.getFechaApertura(), fechaHasta);
       BigDecimal totalRecibosProveedor =
           reciboService.getTotalRecibosProveedoresEntreFechas(
-              caja.getEmpresa().getId_Empresa(), caja.getFechaApertura(), fechaHasta);
+              caja.getSucursal().getIdSucursal(), caja.getFechaApertura(), fechaHasta);
       BigDecimal totalGastos =
           gastoService.getTotalGastosEntreFechas(
-              caja.getEmpresa().getId_Empresa(), caja.getFechaApertura(), fechaHasta);
+              caja.getSucursal().getIdSucursal(), caja.getFechaApertura(), fechaHasta);
       return caja.getSaldoApertura()
           .add(totalRecibosCliente)
           .subtract(totalRecibosProveedor)
@@ -332,10 +332,10 @@ public class CajaServiceImpl implements ICajaService {
   }
 
   @Override
-  public boolean isUltimaCajaAbierta(long idEmpresa) {
-    Caja caja = cajaRepository.isUltimaCajaAbierta(idEmpresa);
+  public boolean isUltimaCajaAbierta(long idSucursal) {
+    Caja caja = cajaRepository.isUltimaCajaAbierta(idSucursal);
     return (caja != null)
-        && cajaRepository.isUltimaCajaAbierta(idEmpresa).getEstado().equals(EstadoCaja.ABIERTA);
+        && cajaRepository.isUltimaCajaAbierta(idSucursal).getEstado().equals(EstadoCaja.ABIERTA);
   }
 
   private BigDecimal getTotalMovimientosPorFormaDePago(Caja caja, FormaDePago fdp) {
@@ -346,19 +346,19 @@ public class CajaServiceImpl implements ICajaService {
     BigDecimal recibosTotal =
         reciboService
             .getTotalRecibosClientesEntreFechasPorFormaDePago(
-                caja.getEmpresa().getId_Empresa(),
+                caja.getSucursal().getIdSucursal(),
                 fdp.getId_FormaDePago(),
                 caja.getFechaApertura(),
                 fechaHasta)
             .subtract(
                 reciboService.getTotalRecibosProveedoresEntreFechasPorFormaDePago(
-                    caja.getEmpresa().getId_Empresa(),
+                    caja.getSucursal().getIdSucursal(),
                     fdp.getId_FormaDePago(),
                     caja.getFechaApertura(),
                     fechaHasta));
     BigDecimal gastosTotal =
         gastoService.getTotalGastosEntreFechasYFormaDePago(
-            caja.getEmpresa().getId_Empresa(),
+            caja.getSucursal().getIdSucursal(),
             fdp.getId_FormaDePago(),
             caja.getFechaApertura(),
             fechaHasta);
@@ -370,7 +370,7 @@ public class CajaServiceImpl implements ICajaService {
     Caja caja = cajaRepository.findById(idCaja);
     Map<Long, BigDecimal> totalesPorFomaDePago = new HashMap<>();
     formaDePagoService
-        .getFormasDePago(caja.getEmpresa())
+        .getFormasDePago(caja.getSucursal())
         .forEach(
             fdp -> {
               BigDecimal total = this.getTotalMovimientosPorFormaDePago(caja, fdp);
@@ -393,13 +393,13 @@ public class CajaServiceImpl implements ICajaService {
 
   @Override
   public List<MovimientoCaja> getMovimientosPorFormaDePagoEntreFechas(
-      Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta) {
+    Sucursal sucursal, FormaDePago formaDePago, Date desde, Date hasta) {
     List<MovimientoCaja> movimientos = new ArrayList<>();
     gastoService
-        .getGastosEntreFechasYFormaDePago(empresa, formaDePago, desde, hasta)
+        .getGastosEntreFechasYFormaDePago(sucursal, formaDePago, desde, hasta)
         .forEach(gasto -> movimientos.add(new MovimientoCaja(gasto)));
     reciboService
-        .getRecibosEntreFechasPorFormaDePago(desde, hasta, formaDePago, empresa)
+        .getRecibosEntreFechasPorFormaDePago(desde, hasta, formaDePago, sucursal)
         .forEach(recibo -> movimientos.add(new MovimientoCaja(recibo)));
     Collections.sort(movimientos);
     return movimientos;
@@ -409,7 +409,7 @@ public class CajaServiceImpl implements ICajaService {
   @Transactional
   public void reabrirCaja(long idCaja, BigDecimal saldoAperturaNuevo) {
     Caja caja = getCajaPorId(idCaja);
-    Caja ultimaCaja = this.getUltimaCaja(caja.getEmpresa().getId_Empresa());
+    Caja ultimaCaja = this.getUltimaCaja(caja.getSucursal().getIdSucursal());
     if (ultimaCaja == null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_caja_no_existente", null, Locale.getDefault()));
@@ -430,9 +430,9 @@ public class CajaServiceImpl implements ICajaService {
 
   @Override
   public Caja encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(
-      long idEmpresa, Date fecha) {
+    long idSucursal, Date fecha) {
     return cajaRepository.encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(
-        idEmpresa, fecha);
+      idSucursal, fecha);
   }
 
   @Override

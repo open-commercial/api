@@ -50,7 +50,7 @@ public class PedidoServiceImpl implements IPedidoService {
   private final IClienteService clienteService;
   private final IProductoService productoService;
   private final ICorreoElectronicoService correoElectronicoService;
-  private final IEmpresaService empresaService;
+  private final ISucursalService sucursalService;
   private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -65,7 +65,7 @@ public class PedidoServiceImpl implements IPedidoService {
       IClienteService clienteService,
       IProductoService productoService,
       ICorreoElectronicoService correoElectronicoService,
-      IEmpresaService empresaService,
+      ISucursalService sucursalService,
       ModelMapper modelMapper,
       MessageSource messageSource) {
     this.facturaService = facturaService;
@@ -75,7 +75,7 @@ public class PedidoServiceImpl implements IPedidoService {
     this.clienteService = clienteService;
     this.productoService = productoService;
     this.correoElectronicoService = correoElectronicoService;
-    this.empresaService = empresaService;
+    this.sucursalService = sucursalService;
     this.modelMapper = modelMapper;
     this.messageSource = messageSource;
   }
@@ -92,15 +92,15 @@ public class PedidoServiceImpl implements IPedidoService {
     }
     // Duplicados
     if (operacion == TipoDeOperacion.ALTA
-        && pedidoRepository.findByNroPedidoAndEmpresaAndEliminado(
-                pedido.getNroPedido(), pedido.getEmpresa(), false)
+        && pedidoRepository.findByNroPedidoAndSucursalAndEliminado(
+                pedido.getNroPedido(), pedido.getSucursal(), false)
             != null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_pedido_duplicado", null, Locale.getDefault()));
     }
     if (operacion == TipoDeOperacion.ACTUALIZACION
-        && pedidoRepository.findByNroPedidoAndEmpresaAndEliminado(
-                pedido.getNroPedido(), pedido.getEmpresa(), false)
+        && pedidoRepository.findByNroPedidoAndSucursalAndEliminado(
+                pedido.getNroPedido(), pedido.getSucursal(), false)
             == null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_pedido_no_existente", null, Locale.getDefault()));
@@ -166,14 +166,14 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public long generarNumeroPedido(Empresa empresa) {
+  public long generarNumeroPedido(Sucursal sucursal) {
     long min = 1L;
     long max = 9999999999L; // 10 digitos
     long randomLong = 0L;
     boolean esRepetido = true;
     while (esRepetido) {
       randomLong = min + (long) (Math.random() * (max - min));
-      Pedido p = pedidoRepository.findByNroPedidoAndEmpresaAndEliminado(randomLong, empresa, false);
+      Pedido p = pedidoRepository.findByNroPedidoAndSucursalAndEliminado(randomLong, sucursal, false);
       if (p == null) esRepetido = false;
     }
     return randomLong;
@@ -190,7 +190,7 @@ public class PedidoServiceImpl implements IPedidoService {
     this.asignarDetalleEnvio(pedido, tipoDeEnvio, idSucursal);
     this.calcularCantidadDeArticulos(pedido);
     pedido.setFecha(new Date());
-    pedido.setNroPedido(this.generarNumeroPedido(pedido.getEmpresa()));
+    pedido.setNroPedido(this.generarNumeroPedido(pedido.getSucursal()));
     pedido.setEstado(EstadoPedido.ABIERTO);
     if (pedido.getObservaciones() == null || pedido.getObservaciones().equals("")) {
       pedido.setObservaciones("Los precios se encuentran sujetos a modificaciones.");
@@ -200,8 +200,8 @@ public class PedidoServiceImpl implements IPedidoService {
     logger.warn("El Pedido {} se guardó correctamente.", pedido);
     String emailCliente = pedido.getCliente().getEmail();
     if (emailCliente != null && !emailCliente.isEmpty()) {
-      correoElectronicoService.enviarMailPorEmpresa(
-          pedido.getEmpresa().getId_Empresa(),
+      correoElectronicoService.enviarMailPorSucursal(
+          pedido.getSucursal().getIdSucursal(),
           emailCliente,
           "",
           "Nuevo Pedido Ingresado",
@@ -226,7 +226,7 @@ public class PedidoServiceImpl implements IPedidoService {
             r -> pedido.setCantidadArticulos(pedido.getCantidadArticulos().add(r.getCantidad())));
   }
 
-  private void asignarDetalleEnvio(Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal) {
+  private void asignarDetalleEnvio(Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursalEnvio) {
     if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_FACTURACION
         && pedido.getCliente().getUbicacionFacturacion() == null) {
       throw new BusinessServiceException(messageSource.getMessage(
@@ -237,7 +237,7 @@ public class PedidoServiceImpl implements IPedidoService {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_ubicacion_envio_vacia", null, Locale.getDefault()));
     }
-    if (tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL && idSucursal == null) {
+    if (tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL && idSucursalEnvio == null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_ubicacion_sucursal_vacia", null, Locale.getDefault()));
     }
@@ -252,7 +252,7 @@ public class PedidoServiceImpl implements IPedidoService {
     if (tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
       pedido.setDetalleEnvio(
           modelMapper.map(
-              empresaService.getEmpresaPorId(idSucursal).getUbicacion(), UbicacionDTO.class));
+              sucursalService.getSucursalPorId(idSucursalEnvio).getUbicacion(), UbicacionDTO.class));
     }
     pedido.setTipoDeEnvio(tipoDeEnvio);
   }
@@ -281,7 +281,7 @@ public class PedidoServiceImpl implements IPedidoService {
     QPedido qPedido = QPedido.pedido;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
-        qPedido.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qPedido.eliminado.eq(false)));
+        qPedido.sucursal.idSucursal.eq(criteria.getIdSucursal()).and(qPedido.eliminado.eq(false)));
     if (criteria.isBuscaPorFecha()) {
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
@@ -321,8 +321,8 @@ public class PedidoServiceImpl implements IPedidoService {
             break;
           case COMPRADOR:
             Cliente clienteRelacionado =
-                clienteService.getClientePorIdUsuarioYidEmpresa(
-                    idUsuarioLoggedIn, criteria.getIdEmpresa());
+                clienteService.getClientePorIdUsuarioYidSucursal(
+                    idUsuarioLoggedIn, criteria.getIdSucursal());
             if (clienteRelacionado != null) {
               rsPredicate.or(qPedido.cliente.eq(clienteRelacionado));
             }
@@ -338,8 +338,8 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public void actualizar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal) {
-    this.asignarDetalleEnvio(pedido, tipoDeEnvio, idSucursal);
+  public void actualizar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucusalEnvio) {
+    this.asignarDetalleEnvio(pedido, tipoDeEnvio, idSucusalEnvio);
     this.calcularCantidadDeArticulos(pedido);
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, pedido);
     pedidoRepository.save(pedido);
@@ -412,14 +412,14 @@ public class PedidoServiceImpl implements IPedidoService {
     InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Pedido.jasper");
     Map<String, Object> params = new HashMap<>();
     params.put("pedido", pedido);
-    if (pedido.getEmpresa().getLogo() != null && !pedido.getEmpresa().getLogo().isEmpty()) {
+    if (pedido.getSucursal().getLogo() != null && !pedido.getSucursal().getLogo().isEmpty()) {
       try {
         params.put(
-            "logo", new ImageIcon(ImageIO.read(new URL(pedido.getEmpresa().getLogo()))).getImage());
+            "logo", new ImageIcon(ImageIO.read(new URL(pedido.getSucursal().getLogo()))).getImage());
       } catch (IOException ex) {
         logger.error(ex.getMessage());
         throw new ServiceException(messageSource.getMessage(
-          "mensaje_empresa_404_logo", null, Locale.getDefault()), ex);
+          "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
       }
     }
     String detalleEnvio;

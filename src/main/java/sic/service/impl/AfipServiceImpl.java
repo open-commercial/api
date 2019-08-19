@@ -64,15 +64,15 @@ public class AfipServiceImpl implements IAfipService {
   }
 
   @Override
-  public FEAuthRequest getFEAuth(String afipNombreServicio, Empresa empresa) {
+  public FEAuthRequest getFEAuth(String afipNombreServicio, Sucursal sucursal) {
     FEAuthRequest feAuthRequest = new FEAuthRequest();
     ConfiguracionDelSistema cds =
-        configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa);
+        configuracionDelSistemaService.getConfiguracionDelSistemaPorSucursal(sucursal);
     Date fechaVencimientoToken = cds.getFechaVencimientoTokenWSAA();
     if (fechaVencimientoToken != null && fechaVencimientoToken.after(new Date())) {
       feAuthRequest.setToken(cds.getTokenWSAA());
       feAuthRequest.setSign(cds.getSignTokenWSAA());
-      feAuthRequest.setCuit(empresa.getIdFiscal());
+      feAuthRequest.setCuit(sucursal.getIdFiscal());
       return feAuthRequest;
     } else {
       byte[] p12file = cds.getCertificadoAfip();
@@ -96,7 +96,7 @@ public class AfipServiceImpl implements IAfipService {
         String signTokenWSAA = tokenDoc.valueOf("/loginTicketResponse/credentials/sign");
         feAuthRequest.setToken(tokenWSAA);
         feAuthRequest.setSign(signTokenWSAA);
-        feAuthRequest.setCuit(empresa.getIdFiscal());
+        feAuthRequest.setCuit(sucursal.getIdFiscal());
         cds.setTokenWSAA(tokenWSAA);
         cds.setSignTokenWSAA(signTokenWSAA);
         String generationTime = tokenDoc.valueOf("/loginTicketResponse/header/generationTime");
@@ -126,7 +126,7 @@ public class AfipServiceImpl implements IAfipService {
   @Override
   public void autorizar(ComprobanteAFIP comprobante) {
     if (!configuracionDelSistemaService
-        .getConfiguracionDelSistemaPorEmpresa(comprobante.getEmpresa())
+        .getConfiguracionDelSistemaPorSucursal(comprobante.getSucursal())
         .isFacturaElectronicaHabilitada()) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_cds_fe_habilitada", null, Locale.getDefault()));
@@ -171,11 +171,11 @@ public class AfipServiceImpl implements IAfipService {
     }
     FECAESolicitar fecaeSolicitud = new FECAESolicitar();
     FEAuthRequest feAuthRequest =
-        this.getFEAuth(WEBSERVICE_FACTURA_ELECTRONICA, comprobante.getEmpresa());
+        this.getFEAuth(WEBSERVICE_FACTURA_ELECTRONICA, comprobante.getSucursal());
     fecaeSolicitud.setAuth(feAuthRequest);
     int nroPuntoDeVentaAfip =
         configuracionDelSistemaService
-            .getConfiguracionDelSistemaPorEmpresa(comprobante.getEmpresa())
+            .getConfiguracionDelSistemaPorSucursal(comprobante.getSucursal())
             .getNroPuntoDeVentaAfip();
     int siguienteNroComprobante =
         this.getSiguienteNroComprobante(

@@ -28,7 +28,7 @@ import java.util.Calendar;
 public class ReciboController {
 
   private final IReciboService reciboService;
-  private final IEmpresaService empresaService;
+  private final ISucursalService sucursalService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
   private final IProveedorService proveedorService;
@@ -40,7 +40,7 @@ public class ReciboController {
   @Autowired
   public ReciboController(
       IReciboService reciboService,
-      IEmpresaService empresaService,
+      ISucursalService sucursalService,
       IUsuarioService usuarioService,
       IClienteService clienteService,
       IProveedorService proveedorService,
@@ -48,7 +48,7 @@ public class ReciboController {
       IAuthService authService,
       ModelMapper modelMapper) {
     this.reciboService = reciboService;
-    this.empresaService = empresaService;
+    this.sucursalService = sucursalService;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
     this.formaDePagoService = formaDePagoService;
@@ -72,7 +72,7 @@ public class ReciboController {
   @GetMapping("/recibos/venta/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Page<Recibo> buscarConCriteriaVenta(
-      @RequestParam Long idEmpresa,
+      @RequestParam Long idSucursal,
       @RequestParam(required = false) Long desde,
       @RequestParam(required = false) Long hasta,
       @RequestParam(required = false) String concepto,
@@ -129,7 +129,7 @@ public class ReciboController {
             .idUsuario(idUsuario)
             .buscaPorViajante(idViajante != null)
             .idViajante(idViajante)
-            .idEmpresa(idEmpresa)
+            .idSucursal(idSucursal)
             .pageable(pageable)
             .movimiento(Movimiento.VENTA)
             .build();
@@ -139,7 +139,7 @@ public class ReciboController {
   @GetMapping("/recibos/compra/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Page<Recibo> buscarConCriteriaCompra(
-      @RequestParam Long idEmpresa,
+      @RequestParam Long idSucursal,
       @RequestParam(required = false) Long desde,
       @RequestParam(required = false) Long hasta,
       @RequestParam(required = false) String concepto,
@@ -194,7 +194,7 @@ public class ReciboController {
             .idProveedor(idProveedor)
             .buscaPorUsuario(idUsuario != null)
             .idUsuario(idUsuario)
-            .idEmpresa(idEmpresa)
+            .idSucursal(idSucursal)
             .pageable(pageable)
             .movimiento(Movimiento.COMPRA)
             .build();
@@ -204,7 +204,7 @@ public class ReciboController {
   @GetMapping("/recibos/compra/total/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getTotalRecibosCompra(
-      @RequestParam Long idEmpresa,
+      @RequestParam Long idSucursal,
       @RequestParam(required = false) Long desde,
       @RequestParam(required = false) Long hasta,
       @RequestParam(required = false) String concepto,
@@ -233,7 +233,7 @@ public class ReciboController {
             .idProveedor(idProveedor)
             .buscaPorUsuario(idUsuario != null)
             .idUsuario(idUsuario)
-            .idEmpresa(idEmpresa)
+            .idSucursal(idSucursal)
             .movimiento(Movimiento.COMPRA)
             .build();
     return reciboService.getTotalRecibos(criteria);
@@ -242,7 +242,7 @@ public class ReciboController {
   @GetMapping("/recibos/venta/total/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getTotalRecibosVenta(
-      @RequestParam Long idEmpresa,
+      @RequestParam Long idSucursal,
       @RequestParam(required = false) Long desde,
       @RequestParam(required = false) Long hasta,
       @RequestParam(required = false) String concepto,
@@ -271,7 +271,7 @@ public class ReciboController {
             .idCliente(idCliente)
             .buscaPorUsuario(idUsuario != null)
             .idUsuario(idUsuario)
-            .idEmpresa(idEmpresa)
+            .idSucursal(idSucursal)
             .movimiento(Movimiento.VENTA)
             .build();
     return reciboService.getTotalRecibos(criteria);
@@ -283,7 +283,7 @@ public class ReciboController {
       @RequestBody ReciboDTO reciboDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     Recibo recibo = modelMapper.map(reciboDTO, Recibo.class);
-    recibo.setEmpresa(empresaService.getEmpresaPorId(reciboDTO.getIdEmpresa()));
+    recibo.setSucursal(sucursalService.getSucursalPorId(reciboDTO.getIdSucursal()));
     recibo.setCliente(clienteService.getClienteNoEliminadoPorId(reciboDTO.getIdCliente()));
     recibo.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(reciboDTO.getIdFormaDePago()));
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
@@ -298,7 +298,7 @@ public class ReciboController {
       @RequestBody ReciboDTO reciboDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     Recibo recibo = modelMapper.map(reciboDTO, Recibo.class);
-    recibo.setEmpresa(empresaService.getEmpresaPorId(reciboDTO.getIdEmpresa()));
+    recibo.setSucursal(sucursalService.getSucursalPorId(reciboDTO.getIdSucursal()));
     recibo.setProveedor(proveedorService.getProveedorNoEliminadoPorId(reciboDTO.getIdProveedor()));
     recibo.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(reciboDTO.getIdFormaDePago()));
     Claims claims = authService.getClaimsDelToken(authorizationHeader);

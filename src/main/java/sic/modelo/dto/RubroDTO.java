@@ -11,6 +11,6 @@ public class RubroDTO {
 
   private long id_Rubro;
   private String nombre;
-  private String nombreEmpresa;
+  private String nombreSucursal;
   private boolean eliminado;
 }

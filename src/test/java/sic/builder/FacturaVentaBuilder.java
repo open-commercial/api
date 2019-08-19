@@ -4,14 +4,9 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import sic.modelo.Cliente;
-import sic.modelo.Empresa;
-import sic.modelo.FacturaVenta;
-import sic.modelo.Pedido;
-import sic.modelo.RenglonFactura;
-import sic.modelo.TipoDeComprobante;
-import sic.modelo.Transportista;
-import sic.modelo.Usuario;
+
+import sic.modelo.*;
+import sic.modelo.Sucursal;
 
 public class FacturaVentaBuilder {
     
@@ -38,7 +33,7 @@ public class FacturaVentaBuilder {
     private BigDecimal total = new BigDecimal("7865");
     private String observaciones = "Factura por Default";
     private BigDecimal cantidadArticulos = new BigDecimal("3");
-    private Empresa empresa = new EmpresaBuilder().build();
+    private Sucursal sucursal = new SucursalBuilder().build();
     private boolean eliminada = false;
     private long CAE = 21064126523746l;
     private Date vencimientoCAE = null;
@@ -86,7 +81,7 @@ public class FacturaVentaBuilder {
             total,
             observaciones,
             cantidadArticulos,
-            empresa,
+          sucursal,
             eliminada,
             CAE,
             vencimientoCAE,
@@ -210,8 +205,8 @@ public class FacturaVentaBuilder {
         return this;
     }
 
-    public FacturaVentaBuilder withEmpresa(Empresa empresa) {
-        this.empresa = empresa;
+    public FacturaVentaBuilder withEmpresa(Sucursal sucursal) {
+        this.sucursal = sucursal;
         return this;
     }
 

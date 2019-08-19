@@ -13,7 +13,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import sic.modelo.Empresa;
 import sic.modelo.Rubro;
 import sic.service.IRubroService;
 import sic.exception.BusinessServiceException;

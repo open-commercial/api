@@ -2,8 +2,8 @@ package sic.service;
 
 public interface ICorreoElectronicoService {
 
-  void enviarMailPorEmpresa(
-      long idEmpresa,
+  void enviarMailPorSucursal(
+      long idSucursal,
       String toEmail,
       String bbc,
       String subject,

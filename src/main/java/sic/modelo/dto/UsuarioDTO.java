@@ -19,7 +19,7 @@ public class UsuarioDTO implements Serializable {
   private String apellido;
   private String email;
   private String token;
-  private long idEmpresaPredeterminada;
+  private long idSucursalPredeterminada;
   private long passwordRecoveryKey;
   private List<Rol> roles;
   private boolean habilitado;

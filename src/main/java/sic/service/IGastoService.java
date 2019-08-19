@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import sic.modelo.BusquedaGastoCriteria;
-import sic.modelo.Empresa;
+import sic.modelo.Sucursal;
 import sic.modelo.FormaDePago;
 import sic.modelo.Gasto;
 
@@ -18,7 +18,7 @@ public interface IGastoService {
     
     void eliminar(long idGasto);
 
-    List<Gasto> getGastosEntreFechasYFormaDePago(Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta);
+    List<Gasto> getGastosEntreFechasYFormaDePago(Sucursal sucursal, FormaDePago formaDePago, Date desde, Date hasta);
 
     Gasto guardar(@Valid Gasto gasto);
 
@@ -26,13 +26,13 @@ public interface IGastoService {
 
     Page<Gasto> buscarGastos(BusquedaGastoCriteria criteria);
 
-    long getUltimoNumeroDeGasto(long id_empresa);
+    long getUltimoNumeroDeGasto(long idSucursal);
 
-    BigDecimal getTotalGastosEntreFechasYFormaDePago(long idEmpresa, long idFormaDePago, Date desde, Date hasta);
+    BigDecimal getTotalGastosEntreFechasYFormaDePago(long idSucursal, long idFormaDePago, Date desde, Date hasta);
 
-    BigDecimal getTotalGastosQueAfectanCajaEntreFechas(long idEmpresa, Date desde, Date hasta);
+    BigDecimal getTotalGastosQueAfectanCajaEntreFechas(long idSucursal, Date desde, Date hasta);
 
-    BigDecimal getTotalGastosEntreFechas(long idEmpresa, Date desde, Date hasta);
+    BigDecimal getTotalGastosEntreFechas(long idSucursal, Date desde, Date hasta);
 
     BigDecimal getTotalGastos(BusquedaGastoCriteria criteria);
 

@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.builder.ClienteBuilder;
-import sic.builder.EmpresaBuilder;
+import sic.builder.SucursalBuilder;
 import sic.modelo.Cliente;
 import sic.exception.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
@@ -36,11 +36,11 @@ class ClienteServiceImplTest {
   void shouldSetClientePredeterminado() {
     Cliente resultadoEsperado = new ClienteBuilder().build();
     clienteServiceImpl.setClientePredeterminado(resultadoEsperado);
-    when(clienteRepository.findByEmpresaAndPredeterminadoAndEliminado(
-            (new EmpresaBuilder()).build(), true, false))
+    when(clienteRepository.findBySucursalAndPredeterminadoAndEliminado(
+            (new SucursalBuilder()).build(), true, false))
         .thenReturn((new ClienteBuilder()).build());
     Cliente resultadoObtenido =
-        clienteServiceImpl.getClientePredeterminado((new EmpresaBuilder()).build());
+        clienteServiceImpl.getClientePredeterminado((new SucursalBuilder()).build());
     assertEquals(resultadoEsperado, resultadoObtenido);
   }
 
@@ -52,8 +52,8 @@ class ClienteServiceImplTest {
         assertThrows(
             BusinessServiceException.class,
             () -> {
-              when(clienteRepository.findByIdFiscalAndEmpresaAndEliminado(
-                      clienteNuevo.getIdFiscal(), clienteNuevo.getEmpresa(), false))
+              when(clienteRepository.findByIdFiscalAndSucursalAndEliminado(
+                      clienteNuevo.getIdFiscal(), clienteNuevo.getSucursal(), false))
                   .thenReturn(clienteNuevo);
               clienteServiceImpl.validarOperacion(TipoDeOperacion.ALTA, clienteDuplicado);
             });
@@ -78,8 +78,8 @@ class ClienteServiceImplTest {
         assertThrows(
             BusinessServiceException.class,
             () -> {
-              when(clienteRepository.findByIdFiscalAndEmpresaAndEliminado(
-                      clienteNuevo.getIdFiscal(), clienteNuevo.getEmpresa(), false))
+              when(clienteRepository.findByIdFiscalAndSucursalAndEliminado(
+                      clienteNuevo.getIdFiscal(), clienteNuevo.getSucursal(), false))
                   .thenReturn(clienteNuevo);
               clienteServiceImpl.validarOperacion(TipoDeOperacion.ACTUALIZACION, clienteDuplicado);
             });

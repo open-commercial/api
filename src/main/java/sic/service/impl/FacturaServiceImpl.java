@@ -129,7 +129,7 @@ public class FacturaServiceImpl implements IFacturaService {
           (FacturaVenta) factura, TipoDeOperacion.ELIMINACION);
       productoService.actualizarStock(
           this.getIdsProductosYCantidades(factura),
-          factura.getIdEmpresa(),
+          factura.getIdSucursal(),
           TipoDeOperacion.ELIMINACION,
           Movimiento.VENTA,
           factura.getTipoComprobante());
@@ -152,8 +152,8 @@ public class FacturaServiceImpl implements IFacturaService {
   }
 
   @Override
-  public TipoDeComprobante[] getTipoFacturaCompra(Empresa empresa, Proveedor proveedor) {
-    if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())) {
+  public TipoDeComprobante[] getTipoFacturaCompra(Sucursal sucursal, Proveedor proveedor) {
+    if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())) {
       if (CategoriaIVA.discriminaIVA(proveedor.getCategoriaIVA())) {
         TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
         tiposPermitidos[0] = TipoDeComprobante.FACTURA_A;
@@ -186,8 +186,8 @@ public class FacturaServiceImpl implements IFacturaService {
   }
 
   @Override
-  public TipoDeComprobante[] getTipoFacturaVenta(Empresa empresa, Cliente cliente) {
-    if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())) {
+  public TipoDeComprobante[] getTipoFacturaVenta(Sucursal sucursal, Cliente cliente) {
+    if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())) {
       if (CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
         TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
         tiposPermitidos[0] = TipoDeComprobante.FACTURA_A;
@@ -211,8 +211,8 @@ public class FacturaServiceImpl implements IFacturaService {
   }
 
   @Override
-  public TipoDeComprobante[] getTiposFacturaSegunEmpresa(Empresa empresa) {
-    if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())) {
+  public TipoDeComprobante[] getTiposFacturaSegunSucursal(Sucursal sucursal) {
+    if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())) {
       TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[5];
       tiposPermitidos[0] = TipoDeComprobante.FACTURA_A;
       tiposPermitidos[1] = TipoDeComprobante.FACTURA_B;
@@ -329,9 +329,9 @@ public class FacturaServiceImpl implements IFacturaService {
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
         qFacturaCompra
-            .empresa
-            .id_Empresa
-            .eq(criteria.getIdEmpresa())
+            .sucursal
+            .idSucursal
+            .eq(criteria.getIdSucursal())
             .and(qFacturaCompra.eliminada.eq(false)));
     // Fecha
     if (criteria.isBuscaPorFecha()) {
@@ -367,9 +367,9 @@ public class FacturaServiceImpl implements IFacturaService {
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
         qFacturaVenta
-            .empresa
-            .id_Empresa
-            .eq(criteria.getIdEmpresa())
+            .sucursal
+            .idSucursal
+            .eq(criteria.getIdSucursal())
             .and(qFacturaVenta.eliminada.eq(false)));
     // Fecha
     if (criteria.isBuscaPorFecha()) {
@@ -415,8 +415,8 @@ public class FacturaServiceImpl implements IFacturaService {
             break;
           case COMPRADOR:
             Cliente clienteRelacionado =
-                clienteService.getClientePorIdUsuarioYidEmpresa(
-                    idUsuarioLoggedIn, criteria.getIdEmpresa());
+                clienteService.getClientePorIdUsuarioYidSucursal(
+                    idUsuarioLoggedIn, criteria.getIdSucursal());
             if (clienteRelacionado != null) {
               rsPredicate.or(qFacturaVenta.cliente.eq(clienteRelacionado));
             } else {
@@ -436,13 +436,13 @@ public class FacturaServiceImpl implements IFacturaService {
       factura.setFecha(new Date());
       factura.setNumSerie(
           configuracionDelSistemaService
-              .getConfiguracionDelSistemaPorEmpresa(factura.getEmpresa())
+              .getConfiguracionDelSistemaPorSucursal(factura.getSucursal())
               .getNroPuntoDeVentaAfip());
       factura.setNumFactura(
           this.calcularNumeroFacturaVenta(
               factura.getTipoComprobante(),
               factura.getNumSerie(),
-              factura.getEmpresa().getId_Empresa()));
+              factura.getSucursal().getIdSucursal()));
     }
     this.calcularCantidadDeArticulos(factura);
     this.validarOperacion(factura);
@@ -466,7 +466,7 @@ public class FacturaServiceImpl implements IFacturaService {
         f ->
             productoService.actualizarStock(
                 this.getIdsProductosYCantidades(f),
-                f.getIdEmpresa(),
+                f.getIdSucursal(),
                 TipoDeOperacion.ALTA,
                 Movimiento.VENTA,
                 f.getTipoComprobante()));
@@ -510,7 +510,7 @@ public class FacturaServiceImpl implements IFacturaService {
         f ->
             productoService.actualizarStock(
                 this.getIdsProductosYCantidades(f),
-                f.getEmpresa().getId_Empresa(),
+                f.getSucursal().getIdSucursal(),
                 TipoDeOperacion.ALTA,
                 Movimiento.COMPRA,
                 f.getTipoComprobante()));
@@ -668,7 +668,7 @@ public class FacturaServiceImpl implements IFacturaService {
               .vencimientoCAE(fv.getVencimientoCAE())
               .numSerieAfip(fv.getNumSerieAfip())
               .numFacturaAfip(fv.getNumFacturaAfip())
-              .empresa(fv.getEmpresa())
+              .sucursal(fv.getSucursal())
               .cliente(fv.getCliente())
               .subtotalBruto(fv.getSubTotalBruto())
               .iva105neto(fv.getIva105Neto())
@@ -882,8 +882,8 @@ public class FacturaServiceImpl implements IFacturaService {
     }
 
     @Override
-    public long calcularNumeroFacturaVenta(TipoDeComprobante tipoDeComprobante, long serie, long idEmpresa) {
-        Long numeroFactura = facturaVentaRepository.buscarMayorNumFacturaSegunTipo(tipoDeComprobante, serie, idEmpresa);
+    public long calcularNumeroFacturaVenta(TipoDeComprobante tipoDeComprobante, long serie, long idSucursal) {
+        Long numeroFactura = facturaVentaRepository.buscarMayorNumFacturaSegunTipo(tipoDeComprobante, serie, idSucursal);
         if (numeroFactura == null) {
             return 1; // No existe ninguna Factura anterior
         } else {
@@ -896,7 +896,7 @@ public class FacturaServiceImpl implements IFacturaService {
         ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
         InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/FacturaVenta.jasper");
         Map<String, Object> params = new HashMap<>();
-        ConfiguracionDelSistema cds = configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(factura.getEmpresa());
+        ConfiguracionDelSistema cds = configuracionDelSistemaService.getConfiguracionDelSistemaPorSucursal(factura.getSucursal());
         params.put("preImpresa", cds.isUsarFacturaVentaPreImpresa());
         if (factura.getTipoComprobante().equals(TipoDeComprobante.FACTURA_B) || factura.getTipoComprobante().equals(TipoDeComprobante.PRESUPUESTO)) {
             factura.setSubTotalBruto(factura.getTotal());
@@ -917,13 +917,13 @@ public class FacturaServiceImpl implements IFacturaService {
             params.put("nroSerie", factura.getNumSerie());
             params.put("nroFactura", factura.getNumFactura());
         }
-        if (factura.getEmpresa().getLogo() != null && !factura.getEmpresa().getLogo().isEmpty()) {
+        if (factura.getSucursal().getLogo() != null && !factura.getSucursal().getLogo().isEmpty()) {
             try {
-                params.put("logo", new ImageIcon(ImageIO.read(new URL(factura.getEmpresa().getLogo()))).getImage());
+                params.put("logo", new ImageIcon(ImageIO.read(new URL(factura.getSucursal().getLogo()))).getImage());
             } catch (IOException ex) {
                 logger.error(ex.getMessage());
                 throw new ServiceException(messageSource.getMessage(
-                  "mensaje_empresa_404_logo", null, Locale.getDefault()), ex);
+                  "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
             }
         }
         List<RenglonFactura> renglones = this.getRenglonesDeLaFactura(factura.getId_Factura());
@@ -1108,7 +1108,7 @@ public class FacturaServiceImpl implements IFacturaService {
                 facturaSinIVA.getRecargoNeto(), facturaSinIVA.getDescuentoNeto(), facturaSinIVA.getIva105Neto(), facturaSinIVA.getIva21Neto()));
         facturaSinIVA.setTotal(CalculosComprobante.calcularTotal(facturaSinIVA.getSubTotalBruto(), facturaSinIVA.getIva105Neto(), facturaSinIVA.getIva21Neto()));
         facturaSinIVA.setObservaciones(facturaADividir.getObservaciones());
-        facturaSinIVA.setEmpresa(facturaADividir.getEmpresa());
+        facturaSinIVA.setSucursal(facturaADividir.getSucursal());
         facturaSinIVA.setEliminada(facturaADividir.isEliminada());
         return facturaSinIVA;
     }
@@ -1145,7 +1145,7 @@ public class FacturaServiceImpl implements IFacturaService {
                 facturaConIVA.getRecargoNeto(), facturaConIVA.getDescuentoNeto(), facturaConIVA.getIva105Neto(), facturaConIVA.getIva21Neto()));
         facturaConIVA.setTotal(CalculosComprobante.calcularTotal(facturaConIVA.getSubTotalBruto(), facturaConIVA.getIva105Neto(), facturaConIVA.getIva21Neto()));
         facturaConIVA.setObservaciones(facturaADividir.getObservaciones());
-        facturaConIVA.setEmpresa(facturaADividir.getEmpresa());
+        facturaConIVA.setSucursal(facturaADividir.getSucursal());
         facturaConIVA.setEliminada(facturaADividir.isEliminada());
         return facturaConIVA;
     }
@@ -1281,7 +1281,7 @@ public class FacturaServiceImpl implements IFacturaService {
             .id_Factura
             .lt(comprobante.getIdComprobante())
             .and(qFacturaVenta.eliminada.eq(false))
-            .and(qFacturaVenta.empresa.id_Empresa.eq(comprobante.getEmpresa().getId_Empresa()))
+            .and(qFacturaVenta.sucursal.idSucursal.eq(comprobante.getSucursal().getIdSucursal()))
             .and(qFacturaVenta.tipoComprobante.eq(comprobante.getTipoComprobante())));
     Page<FacturaVenta> facturaAnterior =
         facturaVentaRepository.findAll(

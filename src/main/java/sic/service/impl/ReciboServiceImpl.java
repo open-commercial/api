@@ -38,7 +38,7 @@ public class ReciboServiceImpl implements IReciboService {
 
   private final ReciboRepository reciboRepository;
   private final ICuentaCorrienteService cuentaCorrienteService;
-  private final IEmpresaService empresaService;
+  private final ISucursalService sucursalService;
   private final IConfiguracionDelSistemaService configuracionDelSistemaService;
   private final INotaService notaService;
   private final IFormaDePagoService formaDePagoService;
@@ -51,7 +51,7 @@ public class ReciboServiceImpl implements IReciboService {
   public ReciboServiceImpl(
       ReciboRepository reciboRepository,
       ICuentaCorrienteService cuentaCorrienteService,
-      IEmpresaService empresaService,
+      ISucursalService sucursalService,
       IConfiguracionDelSistemaService cds,
       INotaService notaService,
       IFormaDePagoService formaDePagoService,
@@ -59,7 +59,7 @@ public class ReciboServiceImpl implements IReciboService {
       MessageSource messageSource) {
     this.reciboRepository = reciboRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
-    this.empresaService = empresaService;
+    this.sucursalService = sucursalService;
     this.configuracionDelSistemaService = cds;
     this.notaService = notaService;
     this.formaDePagoService = formaDePagoService;
@@ -135,7 +135,7 @@ public class ReciboServiceImpl implements IReciboService {
     if (criteria.getMovimiento() == Movimiento.VENTA) builder.and(qRecibo.proveedor.isNull());
     else if (criteria.getMovimiento() == Movimiento.COMPRA) builder.and(qRecibo.cliente.isNull());
     builder.and(
-      qRecibo.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qRecibo.eliminado.eq(false)));
+      qRecibo.sucursal.idSucursal.eq(criteria.getIdSucursal()).and(qRecibo.eliminado.eq(false)));
     return builder;
   }
 
@@ -154,13 +154,13 @@ public class ReciboServiceImpl implements IReciboService {
   public Recibo guardar(@Valid Recibo recibo) {
     recibo.setNumSerie(
         configuracionDelSistemaService
-            .getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa())
+            .getConfiguracionDelSistemaPorSucursal(recibo.getSucursal())
             .getNroPuntoDeVentaAfip());
     recibo.setNumRecibo(
         this.getSiguienteNumeroRecibo(
-            recibo.getEmpresa().getId_Empresa(),
+            recibo.getSucursal().getIdSucursal(),
             configuracionDelSistemaService
-                .getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa())
+                .getConfiguracionDelSistemaPorSucursal(recibo.getSucursal())
                 .getNroPuntoDeVentaAfip()));
     recibo.setFecha(new Date());
     this.validarOperacion(recibo);
@@ -173,7 +173,7 @@ public class ReciboServiceImpl implements IReciboService {
   @Override
   public void validarOperacion(Recibo recibo) {
     // Muteado momentaneamente por el problema del alta de recibo generado por sic-com cuando la caja esta cerrada
-    // this.cajaService.validarMovimiento(recibo.getFecha(), recibo.getEmpresa().getId_Empresa());
+    // this.cajaService.validarMovimiento(recibo.getFecha(), recibo.getSucursal().getIdSucursal());
     if (recibo.getCliente() == null && recibo.getProveedor() == null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_recibo_cliente_proveedor_vacio", null, Locale.getDefault()));
@@ -185,10 +185,10 @@ public class ReciboServiceImpl implements IReciboService {
   }
 
   @Override
-  public long getSiguienteNumeroRecibo(long idEmpresa, long serie) {
+  public long getSiguienteNumeroRecibo(long idSucursal, long serie) {
     Recibo recibo =
-      reciboRepository.findTopByEmpresaAndNumSerieOrderByNumReciboDesc(
-        empresaService.getEmpresaPorId(idEmpresa), serie);
+      reciboRepository.findTopBySucursalAndNumSerieOrderByNumReciboDesc(
+        sucursalService.getSucursalPorId(idSucursal), serie);
     if (recibo == null) {
       return 1; // No existe ningun Recibo anterior
     } else {
@@ -199,7 +199,7 @@ public class ReciboServiceImpl implements IReciboService {
   @Override
   public List<Recibo> construirRecibos(
       long[] idsFormaDePago,
-      Empresa empresa,
+      Sucursal sucursal,
       Cliente cliente,
       Usuario usuario,
       BigDecimal[] montos,
@@ -220,17 +220,17 @@ public class ReciboServiceImpl implements IReciboService {
         Recibo recibo = new Recibo();
         recibo.setCliente(cliente);
         recibo.setUsuario(usuario);
-        recibo.setEmpresa(empresa);
+        recibo.setSucursal(sucursal);
         recibo.setFecha(fecha);
         FormaDePago fdp = formaDePagoService.getFormasDePagoNoEliminadoPorId(idFormaDePago);
         recibo.setFormaDePago(fdp);
         recibo.setMonto(montos[i]);
         recibo.setNumSerie(
             configuracionDelSistemaService
-                .getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa())
+                .getConfiguracionDelSistemaPorSucursal(recibo.getSucursal())
                 .getNroPuntoDeVentaAfip());
         recibo.setNumRecibo(
-            this.getSiguienteNumeroRecibo(empresa.getId_Empresa(), recibo.getNumSerie()));
+            this.getSiguienteNumeroRecibo(sucursal.getIdSucursal(), recibo.getNumSerie()));
         recibo.setConcepto("SALDO.");
         recibos.add(recibo);
         i++;
@@ -258,7 +258,7 @@ public class ReciboServiceImpl implements IReciboService {
   private void actualizarCajaPorEliminacionDeRecibo(Recibo recibo) {
     Caja caja =
         this.cajaService.encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(
-            recibo.getEmpresa().getId_Empresa(), recibo.getFecha());
+            recibo.getSucursal().getIdSucursal(), recibo.getFecha());
     BigDecimal monto = BigDecimal.ZERO;
     if (caja != null && caja.getEstado().equals(EstadoCaja.CERRADA)) {
       if (recibo.getCliente() != null) {
@@ -273,9 +273,9 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public List<Recibo> getRecibosEntreFechasPorFormaDePago(
-      Date desde, Date hasta, FormaDePago formaDePago, Empresa empresa) {
+      Date desde, Date hasta, FormaDePago formaDePago, Sucursal sucursal) {
     return reciboRepository.getRecibosEntreFechasPorFormaDePago(
-        empresa.getId_Empresa(), formaDePago.getId_FormaDePago(), desde, hasta);
+        sucursal.getIdSucursal(), formaDePago.getId_FormaDePago(), desde, hasta);
   }
 
   @Override
@@ -288,14 +288,14 @@ public class ReciboServiceImpl implements IReciboService {
     InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Recibo.jasper");
     Map<String, Object> params = new HashMap<>();
     params.put("recibo", recibo);
-    if (recibo.getEmpresa().getLogo() != null && !recibo.getEmpresa().getLogo().isEmpty()) {
+    if (recibo.getSucursal().getLogo() != null && !recibo.getSucursal().getLogo().isEmpty()) {
       try {
         params.put(
-            "logo", new ImageIcon(ImageIO.read(new URL(recibo.getEmpresa().getLogo()))).getImage());
+            "logo", new ImageIcon(ImageIO.read(new URL(recibo.getSucursal().getLogo()))).getImage());
       } catch (IOException ex) {
         logger.error(ex.getMessage());
         throw new ServiceException(messageSource.getMessage(
-          "mensaje_empresa_404_logo", null, Locale.getDefault()), ex);
+          "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
       }
     }
     try {
@@ -310,49 +310,49 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public BigDecimal getTotalRecibosClientesEntreFechasPorFormaDePago(
-      long idEmpresa, long idFormaDePago, Date desde, Date hasta) {
+      long idSucursal, long idFormaDePago, Date desde, Date hasta) {
     BigDecimal total =
         reciboRepository.getTotalRecibosClientesEntreFechasPorFormaDePago(
-            idEmpresa, idFormaDePago, desde, hasta);
+            idSucursal, idFormaDePago, desde, hasta);
     return (total == null) ? BigDecimal.ZERO : total;
   }
 
   @Override
   public BigDecimal getTotalRecibosProveedoresEntreFechasPorFormaDePago(
-      long idEmpresa, long idFormaDePago, Date desde, Date hasta) {
+      long idSucursal, long idFormaDePago, Date desde, Date hasta) {
     BigDecimal total =
         reciboRepository.getTotalRecibosProveedoresEntreFechasPorFormaDePago(
-            idEmpresa, idFormaDePago, desde, hasta);
+            idSucursal, idFormaDePago, desde, hasta);
     return (total == null) ? BigDecimal.ZERO : total;
   }
 
   @Override
   public BigDecimal getTotalRecibosClientesQueAfectanCajaEntreFechas(
-      long idEmpresa, Date desde, Date hasta) {
+      long idSucursal, Date desde, Date hasta) {
     BigDecimal total =
-        reciboRepository.getTotalRecibosClientesQueAfectanCajaEntreFechas(idEmpresa, desde, hasta);
+        reciboRepository.getTotalRecibosClientesQueAfectanCajaEntreFechas(idSucursal, desde, hasta);
     return (total == null) ? BigDecimal.ZERO : total;
   }
 
   @Override
   public BigDecimal getTotalRecibosProveedoresQueAfectanCajaEntreFechas(
-      long idEmpresa, Date desde, Date hasta) {
+      long idSucursal, Date desde, Date hasta) {
     BigDecimal total =
         reciboRepository.getTotalRecibosProveedoresQueAfectanCajaEntreFechas(
-            idEmpresa, desde, hasta);
+            idSucursal, desde, hasta);
     return (total == null) ? BigDecimal.ZERO : total;
   }
 
   @Override
-  public BigDecimal getTotalRecibosClientesEntreFechas(long idEmpresa, Date desde, Date hasta) {
-    BigDecimal total = reciboRepository.getTotalRecibosClientesEntreFechas(idEmpresa, desde, hasta);
+  public BigDecimal getTotalRecibosClientesEntreFechas(long idSucursal, Date desde, Date hasta) {
+    BigDecimal total = reciboRepository.getTotalRecibosClientesEntreFechas(idSucursal, desde, hasta);
     return (total == null) ? BigDecimal.ZERO : total;
   }
 
   @Override
-  public BigDecimal getTotalRecibosProveedoresEntreFechas(long idEmpresa, Date desde, Date hasta) {
+  public BigDecimal getTotalRecibosProveedoresEntreFechas(long idSucursal, Date desde, Date hasta) {
     BigDecimal total =
-        reciboRepository.getTotalRecibosProveedoresEntreFechas(idEmpresa, desde, hasta);
+        reciboRepository.getTotalRecibosProveedoresEntreFechas(idSucursal, desde, hasta);
     return (total == null) ? BigDecimal.ZERO : total;
   }
 }

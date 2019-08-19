@@ -19,7 +19,7 @@ public class ClienteBuilder {
   private Ubicacion ubicacionEnvio = new UbicacionBuilder().build();
   private String contacto = "Facundo Pastore";
   private Date fechaAlta = new Date(1458010800000L);
-  private Empresa empresa = new EmpresaBuilder().build();
+  private Sucursal sucursal = new SucursalBuilder().build();
   private Usuario viajante = new UsuarioBuilder().build();
   private Usuario credencial = new UsuarioBuilder().build();
   private boolean eliminado = false;
@@ -40,7 +40,7 @@ public class ClienteBuilder {
         ubicacionEnvio,
         contacto,
         fechaAlta,
-        empresa,
+      sucursal,
         viajante,
         credencial,
         eliminado,
@@ -112,8 +112,8 @@ public class ClienteBuilder {
     return this;
   }
 
-  public ClienteBuilder withEmpresa(Empresa empresa) {
-    this.empresa = empresa;
+  public ClienteBuilder withSucursal(Sucursal sucursal) {
+    this.sucursal = sucursal;
     return this;
   }
 

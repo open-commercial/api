@@ -47,7 +47,7 @@ public class CuentaCorrienteController {
 
   @GetMapping("/cuentas-corriente/clientes/busqueda/criteria")
   public Page<CuentaCorrienteCliente> buscarConCriteria(
-      @RequestParam Long idEmpresa,
+      @RequestParam Long idSucursal,
       @RequestParam(required = false) String nroCliente,
       @RequestParam(required = false) String nombreFiscal,
       @RequestParam(required = false) String nombreFantasia,
@@ -102,7 +102,7 @@ public class CuentaCorrienteController {
             .idLocalidad(idLocalidad)
             .buscarPorNroDeCliente(nroCliente != null)
             .nroDeCliente(nroCliente)
-            .idEmpresa(idEmpresa)
+            .idSucursal(idSucursal)
             .pageable(pageable)
             .build();
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
@@ -116,7 +116,7 @@ public class CuentaCorrienteController {
     Rol.ENCARGADO,
   })
   public Page<CuentaCorrienteProveedor> buscarConCriteria(
-      @RequestParam Long idEmpresa,
+      @RequestParam Long idSucursal,
       @RequestParam(required = false) String nroProveedor,
       @RequestParam(required = false) String razonSocial,
       @RequestParam(required = false) Long idFiscal,
@@ -168,7 +168,7 @@ public class CuentaCorrienteController {
             .idProvincia(idProvincia)
             .buscaPorLocalidad(idLocalidad != null)
             .idLocalidad(idLocalidad)
-            .idEmpresa(idEmpresa)
+            .idSucursal(idSucursal)
             .pageable(pageable)
             .build();
     return cuentaCorrienteService.buscarCuentaCorrienteProveedor(criteria);

@@ -52,15 +52,13 @@ public interface IProductoService {
 
   BigDecimal calcularValorStock(BusquedaProductoCriteria criteria);
 
-  byte[] getListaDePreciosPorEmpresa(List<Producto> productos, long idEmpresa, String formato);
+  byte[] getListaDePreciosPorSucursal(List<Producto> productos, long idSucursal, String formato);
 
   Producto guardar(@Valid Producto producto);
 
   List<Producto> actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO);
 
   String subirImagenProducto(long idProducto, byte[] imagen);
-
-  void eliminarImagenProducto(long idProducto);
 
   List<Producto> getMultiplesProductosPorId(List<Long> idsProductos);
 

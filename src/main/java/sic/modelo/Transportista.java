@@ -19,9 +19,9 @@ import javax.validation.constraints.NotEmpty;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"nombre", "empresa"})
+@EqualsAndHashCode(of = {"nombre", "sucursal"})
 @ToString
-@JsonIgnoreProperties({"localidad", "empresa", "eliminado"})
+@JsonIgnoreProperties({"localidad", "sucursal", "eliminado"})
 public class Transportista implements Serializable {
 
   @Id
@@ -45,20 +45,20 @@ public class Transportista implements Serializable {
   private String telefono;
 
   @ManyToOne
-  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-  @NotNull(message = "{mensaje_transportista_empresa_vacia}")
-  private Empresa empresa;
+  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
+  @NotNull(message = "{mensaje_transportista_sucursal_vacia}")
+  private Sucursal sucursal;
 
   private boolean eliminado;
 
 
-  @JsonGetter("idEmpresa")
-  public Long getIdEmpresa() {
-    return empresa.getId_Empresa();
+  @JsonGetter("idSucursal")
+  public Long getIdSucursal() {
+    return sucursal.getIdSucursal();
   }
 
-  @JsonGetter("nombreEmpresa")
-  public String getNombreEmpresa() {
-    return empresa.getNombre();
+  @JsonGetter("nombreSucursal")
+  public String getNombreSucursal() {
+    return sucursal.getNombre();
   }
 }

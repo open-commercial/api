@@ -14,23 +14,23 @@ import sic.modelo.ConfiguracionDelSistema;
 import sic.modelo.Rol;
 import sic.modelo.dto.ConfiguracionDelSistemaDTO;
 import sic.service.IConfiguracionDelSistemaService;
-import sic.service.IEmpresaService;
+import sic.service.ISucursalService;
 
 @RestController
 @RequestMapping("/api/v1")
 public class ConfiguracionDelSistemaController {
 
   private final IConfiguracionDelSistemaService configuracionDelSistemaService;
-  private final IEmpresaService empresaService;
+  private final ISucursalService sucursalService;
   private final ModelMapper modelMapper;
 
   @Autowired
   public ConfiguracionDelSistemaController(
       IConfiguracionDelSistemaService configuracionDelSistemaService,
-      IEmpresaService empresaService,
+      ISucursalService sucursalService,
       ModelMapper modelMapper) {
     this.configuracionDelSistemaService = configuracionDelSistemaService;
-    this.empresaService = empresaService;
+    this.sucursalService = sucursalService;
     this.modelMapper = modelMapper;
   }
 
@@ -42,7 +42,7 @@ public class ConfiguracionDelSistemaController {
     ConfiguracionDelSistema cdsRecuperado =
         configuracionDelSistemaService.getConfiguracionDelSistemaPorId(
             configuracionDelSistemaDTO.getId_ConfiguracionDelSistema());
-    configuracionDelSistema.setEmpresa(cdsRecuperado.getEmpresa());
+    configuracionDelSistema.setSucursal(cdsRecuperado.getSucursal());
     if (configuracionDelSistema.isFacturaElectronicaHabilitada()) {
       if (configuracionDelSistema.getPasswordCertificadoAfip().equals("")) {
         configuracionDelSistema.setPasswordCertificadoAfip(
@@ -75,23 +75,23 @@ public class ConfiguracionDelSistemaController {
     return configuracionDelSistemaService.guardar(configuracionDelSistema);
   }
 
-  @GetMapping("/configuraciones-del-sistema/empresas/{idEmpresa}")
+  @GetMapping("/configuraciones-del-sistema/sucursales/{idSucursal}")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-  public ConfiguracionDelSistema getconfiguracionDelSistemaPorEmpresa(
-      @PathVariable long idEmpresa) {
-    return configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(
-        empresaService.getEmpresaPorId(idEmpresa));
+  public ConfiguracionDelSistema getconfiguracionDelSistemaPorSucursal(
+      @PathVariable long idSucursal) {
+    return configuracionDelSistemaService.getConfiguracionDelSistemaPorSucursal(
+        sucursalService.getSucursalPorId(idSucursal));
   }
 
-  @GetMapping("/configuraciones-del-sistema/empresas/{idEmpresa}/cantidad-renglones")
+  @GetMapping("/configuraciones-del-sistema/sucursales/{idSucursal}/cantidad-renglones")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
-  public int getCantidadMaximaDeRenglonesPorIdEmpresa(@PathVariable long idEmpresa) {
-    return configuracionDelSistemaService.getCantidadMaximaDeRenglonesPorIdEmpresa(idEmpresa);
+  public int getCantidadMaximaDeRenglonesPorIdSucursal(@PathVariable long idSucursal) {
+    return configuracionDelSistemaService.getCantidadMaximaDeRenglonesPorIdSucursal(idSucursal);
   }
 
-  @GetMapping("/configuraciones-del-sistema/empresas/{idEmpresa}/factura-electronica-habilitada")
+  @GetMapping("/configuraciones-del-sistema/sucursales/{idSucursal}/factura-electronica-habilitada")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public boolean isFacturaElectronicaHabilitada(@PathVariable long idEmpresa) {
-    return configuracionDelSistemaService.isFacturaElectronicaHabilitada(idEmpresa);
+  public boolean isFacturaElectronicaHabilitada(@PathVariable long idSucursal) {
+    return configuracionDelSistemaService.isFacturaElectronicaHabilitada(idSucursal);
   }
 }

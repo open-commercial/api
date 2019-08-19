@@ -16,21 +16,21 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
 @Entity
-@Table(name = "empresa")
+@Table(name = "sucursal")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombre"})
 @ToString
 @JsonIgnoreProperties("eliminada")
-public class Empresa implements Serializable {
+public class Sucursal implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id_Empresa;
+  private long idSucursal;
 
-  @NotNull(message = "{mensaje_empresa_nombre_vacio}")
-  @NotEmpty(message = "{mensaje_empresa_nombre_vacio}")
+  @NotNull(message = "{mensaje_sucursal_nombre_vacio}")
+  @NotEmpty(message = "{mensaje_sucursal_nombre_vacio}")
   @Column(nullable = false)
   private String nombre;
 
@@ -39,7 +39,7 @@ public class Empresa implements Serializable {
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
-  @NotNull(message = "{mensaje_empresa_condicion_iva_vacia}")
+  @NotNull(message = "{mensaje_sucursal_condicion_iva_vacia}")
   private CategoriaIVA categoriaIVA;
 
   private Long idFiscal;

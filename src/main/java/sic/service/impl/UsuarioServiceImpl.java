@@ -36,7 +36,7 @@ import sic.exception.ServiceException;
 public class UsuarioServiceImpl implements IUsuarioService {
 
   private final UsuarioRepository usuarioRepository;
-  private final IEmpresaService empresaService;
+  private final ISucursalService sucursalService;
   private final IClienteService clienteService;
   private final ICorreoElectronicoService correoElectronicoService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -46,12 +46,12 @@ public class UsuarioServiceImpl implements IUsuarioService {
   @Lazy
   public UsuarioServiceImpl(
       UsuarioRepository usuarioRepository,
-      IEmpresaService empresaService,
+      ISucursalService sucursalService,
       IClienteService clienteService,
       ICorreoElectronicoService correoElectronicoService,
       MessageSource messageSource) {
     this.usuarioRepository = usuarioRepository;
-    this.empresaService = empresaService;
+    this.sucursalService = sucursalService;
     this.clienteService = clienteService;
     this.correoElectronicoService = correoElectronicoService;
     this.messageSource = messageSource;
@@ -262,16 +262,16 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada) {
-    if (empresaService.getEmpresaPorId(idEmpresaPredeterminada) == null) {
+  public int actualizarIdSucursalDeUsuario(long idUsuario, long idSucursalPredeterminada) {
+    if (sucursalService.getSucursalPorId(idSucursalPredeterminada) == null) {
       throw new EntityNotFoundException(messageSource.getMessage(
-        "mensaje_empresa_no_existente", null, Locale.getDefault()));
+        "mensaje_sucursal_no_existente", null, Locale.getDefault()));
     }
-    return usuarioRepository.updateIdEmpresa(idUsuario, idEmpresaPredeterminada);
+    return usuarioRepository.updateIdSucursal(idUsuario, idSucursalPredeterminada);
   }
 
   @Override
-  public void enviarEmailDeRecuperacion(long idEmpresa, String email, String host) {
+  public void enviarEmailDeRecuperacion(long idSucursal, String email, String host) {
     Usuario usuario = usuarioRepository.findByEmailAndEliminado(email, false);
     if (usuario == null || !usuario.isHabilitado()) {
       throw new BusinessServiceException(
@@ -280,8 +280,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
     String passwordRecoveryKey = RandomStringUtils.random(250, true, true);
     this.actualizarPasswordRecoveryKey(passwordRecoveryKey, usuario.getId_Usuario());
-    correoElectronicoService.enviarMailPorEmpresa(
-        idEmpresa,
+    correoElectronicoService.enviarMailPorSucursal(
+        idSucursal,
         usuario.getEmail(),
         "",
         "Recuperación de contraseña",

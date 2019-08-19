@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.Empresa;
+import sic.modelo.Sucursal;
 import sic.modelo.FormaDePago;
 import sic.service.IFormaDePagoService;
 import sic.repository.FormaDePagoRepository;
@@ -27,12 +27,12 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
   }
 
   @Override
-  public List<FormaDePago> getFormasDePago(Empresa empresa) {
+  public List<FormaDePago> getFormasDePago(Sucursal sucursal) {
     return formaDePagoRepository.findAllByOrderByNombreAsc();
   }
 
   @Override
-  public List<FormaDePago> getFormasDePagoNoEliminadas(Empresa empresa) {
+  public List<FormaDePago> getFormasDePagoNoEliminadas(Sucursal sucursal) {
     return formaDePagoRepository.findAllByAndEliminadaOrderByNombreAsc(false);
   }
 
@@ -59,7 +59,7 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
   }
 
   @Override
-  public FormaDePago getFormaDePagoPredeterminada(Empresa empresa) {
+  public FormaDePago getFormaDePagoPredeterminada(Sucursal sucursal) {
     FormaDePago formaDePago =
         formaDePagoRepository.findByAndPredeterminadoAndEliminada(true, false);
     if (formaDePago == null) {

@@ -28,13 +28,13 @@ import sic.modelo.dto.UbicacionDTO;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"nroPedido", "empresa"})
+@EqualsAndHashCode(of = {"nroPedido", "sucursal"})
 @ToString(exclude = {"facturas", "renglones"})
 @JsonIdentityInfo(
     generator = ObjectIdGenerators.PropertyGenerator.class,
     property = "id_Pedido",
     scope = Pedido.class)
-@JsonIgnoreProperties({"cliente", "usuario", "empresa", "tipoDeEnvio"})
+@JsonIgnoreProperties({"cliente", "usuario", "sucursal", "tipoDeEnvio"})
 public class Pedido implements Serializable {
 
   @Id
@@ -54,9 +54,9 @@ public class Pedido implements Serializable {
   private String observaciones;
 
   @ManyToOne
-  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-  @NotNull(message = "{mensaje_pedido_empresa_vacia}")
-  private Empresa empresa;
+  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
+  @NotNull(message = "{mensaje_pedido_sucursal_vacia}")
+  private Sucursal sucursal;
 
   @Embedded
   private UbicacionDTO detalleEnvio;
@@ -123,9 +123,9 @@ public class Pedido implements Serializable {
   @DecimalMin(value = "0", message = "{mensaje_cantidad_de_productos_negativa}", inclusive = false)
   private BigDecimal cantidadArticulos;
 
-  @JsonGetter("nombreEmpresa")
-  public String getNombreEmpresa() {
-    return empresa.getNombre();
+  @JsonGetter("nombreSucursal")
+  public String getNombreSucursal() {
+    return sucursal.getNombre();
   }
 
   @JsonGetter("nombreFiscalCliente")

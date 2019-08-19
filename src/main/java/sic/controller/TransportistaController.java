@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.dto.TransportistaDTO;
-import sic.service.IEmpresaService;
+import sic.service.ISucursalService;
 import sic.service.ITransportistaService;
 import sic.service.IUbicacionService;
 
@@ -25,16 +25,16 @@ import sic.service.IUbicacionService;
 public class TransportistaController {
 
   private final ITransportistaService transportistaService;
-  private final IEmpresaService empresaService;
+  private final ISucursalService sucursalService;
   private final IUbicacionService ubicacionService;
   private final ModelMapper modelMapper;
 
   @Autowired
   public TransportistaController(
-    ITransportistaService transportistaService, IEmpresaService empresaService,
+    ITransportistaService transportistaService, ISucursalService sucursalService,
     IUbicacionService ubicacionService, ModelMapper modelMapper) {
     this.transportistaService = transportistaService;
-    this.empresaService = empresaService;
+    this.sucursalService = sucursalService;
     this.ubicacionService = ubicacionService;
     this.modelMapper = modelMapper;
   }
@@ -70,11 +70,11 @@ public class TransportistaController {
     if (transportistaPorActualizar.getTelefono() == null) {
       transportistaPorActualizar.setTelefono(transportistaPersistido.getTelefono());
     }
-    if (transportistaDTO.getIdEmpresa() == null) {
-      transportistaPorActualizar.setEmpresa(transportistaPersistido.getEmpresa());
+    if (transportistaDTO.getIdSucursal() == null) {
+      transportistaPorActualizar.setSucursal(transportistaPersistido.getSucursal());
     } else {
-      transportistaPorActualizar.setEmpresa(
-          empresaService.getEmpresaPorId(transportistaDTO.getIdEmpresa()));
+      transportistaPorActualizar.setSucursal(
+          sucursalService.getSucursalPorId(transportistaDTO.getIdSucursal()));
     }
     if (transportistaService.getTransportistaNoEliminadoPorId(transportistaPorActualizar.getId_Transportista())
         != null) {
@@ -91,7 +91,7 @@ public class TransportistaController {
     Rol.COMPRADOR
   })
   public List<Transportista> buscarTransportista(
-    @RequestParam long idEmpresa,
+    @RequestParam long idSucursal,
     @RequestParam(required = false) String nombre,
     @RequestParam(required = false) Long idProvincia,
     @RequestParam(required = false) Long idLocalidad) {
@@ -103,7 +103,7 @@ public class TransportistaController {
         idProvincia,
         (idLocalidad != null),
         idLocalidad,
-        idEmpresa);
+        idSucursal);
     return transportistaService.buscarTransportistas(criteria);
   }
 
@@ -113,7 +113,7 @@ public class TransportistaController {
     transportistaService.eliminar(idTransportista);
   }
 
-  @GetMapping("/transportistas/empresas/{idEmpresa}")
+  @GetMapping("/transportistas/sucursales/{idSucursal}")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -121,15 +121,15 @@ public class TransportistaController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public List<Transportista> getTransportistas(@PathVariable long idEmpresa) {
-    return transportistaService.getTransportistas(empresaService.getEmpresaPorId(idEmpresa));
+  public List<Transportista> getTransportistas(@PathVariable long idSucursal) {
+    return transportistaService.getTransportistas(sucursalService.getSucursalPorId(idSucursal));
   }
 
   @PostMapping("/transportistas")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Transportista guardar(@RequestBody TransportistaDTO transportistaDTO) {
     Transportista transportista = modelMapper.map(transportistaDTO, Transportista.class);
-    transportista.setEmpresa(empresaService.getEmpresaPorId(transportistaDTO.getIdEmpresa()));
+    transportista.setSucursal(sucursalService.getSucursalPorId(transportistaDTO.getIdSucursal()));
     transportista.setUbicacion(null);
     if (transportistaDTO.getUbicacion() != null) {
       transportista.setUbicacion(modelMapper.map(transportistaDTO.getUbicacion(), Ubicacion.class));

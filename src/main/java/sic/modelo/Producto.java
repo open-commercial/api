@@ -27,7 +27,7 @@ import sic.controller.Views;
 @AllArgsConstructor
 @EqualsAndHashCode(of = "descripcion")
 @ToString
-@JsonIgnoreProperties({"medida", "rubro", "proveedor", "empresa"})
+@JsonIgnoreProperties({"medida", "rubro", "proveedor", "sucursal"})
 public class Producto implements Serializable {
 
   @Id
@@ -139,11 +139,6 @@ public class Producto implements Serializable {
 
   @Temporal(TemporalType.TIMESTAMP)
   private Date fechaVencimiento;
-
-//  @ManyToOne
-//  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-//  @NotNull(message = "{mensaje_producto_vacio_empresa}")
-//  private Empresa empresa;
 
   private boolean eliminado;
 

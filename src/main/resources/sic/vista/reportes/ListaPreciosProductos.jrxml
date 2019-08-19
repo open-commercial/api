@@ -4,7 +4,7 @@
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<parameter name="empresa" class="sic.modelo.Empresa"/>
+	<parameter name="sucursal" class="sic.modelo.Sucursal"/>
 	<parameter name="logo" class="java.awt.Image"/>
 	<queryString language="hql">
 		<![CDATA[]]>
@@ -48,39 +48,39 @@
 				<textElement>
 					<font size="17" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{empresa}.getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{sucursal}.getNombre()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="168" y="34" width="370" height="20" uuid="4ea3b2e1-db3c-40cd-b1b1-cdbe17e8586f"/>
 				<textElement>
 					<font size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{empresa}.getLema()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{sucursal}.getLema()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="168" y="54" width="370" height="20" uuid="3f11ebb5-bc76-4af0-856d-6e1cade8efd7"/>
 				<textElement>
 					<font size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{empresa}.getUbicacion() !=  null) ?
-$P{empresa}.getUbicacion() : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{sucursal}.getUbicacion() !=  null) ?
+$P{sucursal}.getUbicacion() : ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="168" y="74" width="370" height="20" uuid="0ea1d205-1cbf-4268-8f06-c4c760bcb0a1"/>
 				<textElement>
 					<font size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{empresa}.getCategoriaIVA().toString().equals("RESPONSABLE_INSCRIPTO") ? "Responsable Inscripto" :
-$P{empresa}.getCategoriaIVA().toString().equals("EXENTO") ? "Exento" :
-$P{empresa}.getCategoriaIVA().toString().equals("CONSUMIDOR_FINAL") ? "Consumidor Final" :
-$P{empresa}.getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{sucursal}.getCategoriaIVA().toString().equals("RESPONSABLE_INSCRIPTO") ? "Responsable Inscripto" :
+$P{sucursal}.getCategoriaIVA().toString().equals("EXENTO") ? "Exento" :
+$P{sucursal}.getCategoriaIVA().toString().equals("CONSUMIDOR_FINAL") ? "Consumidor Final" :
+$P{sucursal}.getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" : ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="168" y="94" width="162" height="20" uuid="bf12b167-4c5f-4a38-a849-46625cef8b3d"/>
 				<textElement>
 					<font size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{empresa}.getIdFiscal() == null ? "" : $P{empresa}.getIdFiscal()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{sucursal}.getIdFiscal() == null ? "" : $P{sucursal}.getIdFiscal()]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="150" width="555" height="25" uuid="ff46f7f7-85b2-4514-afda-a8394f7c5111"/>

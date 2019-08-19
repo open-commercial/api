@@ -1,7 +1,7 @@
 package sic.service;
 
 import sic.modelo.ConfiguracionDelSistema;
-import sic.modelo.Empresa;
+import sic.modelo.Sucursal;
 
 import javax.validation.Valid;
 
@@ -9,7 +9,7 @@ public interface IConfiguracionDelSistemaService {
 
   void actualizar(@Valid ConfiguracionDelSistema cds);
 
-  ConfiguracionDelSistema getConfiguracionDelSistemaPorEmpresa(Empresa empresa);
+  ConfiguracionDelSistema getConfiguracionDelSistemaPorSucursal(Sucursal sucursal);
 
   ConfiguracionDelSistema getConfiguracionDelSistemaPorId(long idConfiguracionDelSistema);
 
@@ -19,7 +19,7 @@ public interface IConfiguracionDelSistemaService {
 
   void validarOperacion(ConfiguracionDelSistema cds);
 
-  int getCantidadMaximaDeRenglonesPorIdEmpresa(long idEmpresa);
+  int getCantidadMaximaDeRenglonesPorIdSucursal(long idSucursal);
 
-  boolean isFacturaElectronicaHabilitada(long idEmpresa);
+  boolean isFacturaElectronicaHabilitada(long idSucursal);
 }

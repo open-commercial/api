@@ -5,15 +5,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.CuentaCorrienteProveedor;
-import sic.modelo.Empresa;
+import sic.modelo.Sucursal;
 import sic.modelo.Proveedor;
 
 public interface CuentaCorrienteProveedorRepository
     extends CuentaCorrienteRepository<CuentaCorrienteProveedor>,
         QuerydslPredicateExecutor<CuentaCorrienteProveedor> {
 
-  CuentaCorrienteProveedor findByProveedorAndEmpresaAndEliminada(
-      Proveedor proveedor, Empresa empresa, boolean eliminada);
+  CuentaCorrienteProveedor findByProveedorAndSucursalAndEliminada(
+    Proveedor proveedor, Sucursal sucursal, boolean eliminada);
 
   @Modifying
   @Query(

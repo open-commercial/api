@@ -61,8 +61,8 @@ public class ProveedorServiceImpl implements IProveedorService {
   }
 
   @Override
-  public List<Proveedor> getProveedores(Empresa empresa) {
-    return proveedorRepository.findAllByAndEmpresaAndEliminadoOrderByRazonSocialAsc(empresa, false);
+  public List<Proveedor> getProveedores(Sucursal sucursal) {
+    return proveedorRepository.findAllByAndSucursalAndEliminadoOrderByRazonSocialAsc(sucursal, false);
   }
 
   @Override
@@ -86,21 +86,21 @@ public class ProveedorServiceImpl implements IProveedorService {
       builder.and(qProveedor.ubicacion.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
     builder.and(
         qProveedor
-            .empresa
-            .id_Empresa
-            .eq(criteria.getIdEmpresa())
+            .sucursal
+            .idSucursal
+            .eq(criteria.getIdSucursal())
             .and(qProveedor.eliminado.eq(false)));
     return proveedorRepository.findAll(builder, criteria.getPageable());
   }
 
   @Override
-  public Proveedor getProveedorPorIdFiscal(Long idFiscal, Empresa empresa) {
-    return proveedorRepository.findByIdFiscalAndEmpresaAndEliminado(idFiscal, empresa, false);
+  public Proveedor getProveedorPorIdFiscal(Long idFiscal, Sucursal sucursal) {
+    return proveedorRepository.findByIdFiscalAndSucursalAndEliminado(idFiscal, sucursal, false);
   }
 
   @Override
-  public Proveedor getProveedorPorRazonSocial(String razonSocial, Empresa empresa) {
-    return proveedorRepository.findByRazonSocialAndEmpresaAndEliminado(razonSocial, empresa, false);
+  public Proveedor getProveedorPorRazonSocial(String razonSocial, Sucursal sucursal) {
+    return proveedorRepository.findByRazonSocialAndSucursalAndEliminado(razonSocial, sucursal, false);
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Proveedor proveedor) {
@@ -108,7 +108,7 @@ public class ProveedorServiceImpl implements IProveedorService {
     // ID Fiscal
     if (proveedor.getIdFiscal() != null) {
       Proveedor proveedorDuplicado =
-          this.getProveedorPorIdFiscal(proveedor.getIdFiscal(), proveedor.getEmpresa());
+          this.getProveedorPorIdFiscal(proveedor.getIdFiscal(), proveedor.getSucursal());
       if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
           && proveedorDuplicado != null
           && proveedorDuplicado.getId_Proveedor() != proveedor.getId_Proveedor()) {
@@ -124,7 +124,7 @@ public class ProveedorServiceImpl implements IProveedorService {
     }
     // Razon social
     Proveedor proveedorDuplicado =
-        this.getProveedorPorRazonSocial(proveedor.getRazonSocial(), proveedor.getEmpresa());
+        this.getProveedorPorRazonSocial(proveedor.getRazonSocial(), proveedor.getSucursal());
     if (operacion == TipoDeOperacion.ALTA && proveedorDuplicado != null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_proveedor_duplicado_razonSocial", null, Locale.getDefault()));
@@ -145,7 +145,7 @@ public class ProveedorServiceImpl implements IProveedorService {
   @Override
   @Transactional
   public Proveedor guardar(@Validated Proveedor proveedor) {
-    proveedor.setNroProveedor(this.generarNroDeProveedor(proveedor.getEmpresa()));
+    proveedor.setNroProveedor(this.generarNroDeProveedor(proveedor.getSucursal()));
     if (proveedor.getUbicacion() != null && proveedor.getUbicacion().getIdLocalidad() != null) {
       proveedor
           .getUbicacion()
@@ -156,7 +156,7 @@ public class ProveedorServiceImpl implements IProveedorService {
     proveedor = proveedorRepository.save(proveedor);
     CuentaCorrienteProveedor cuentaCorrienteProveedor = new CuentaCorrienteProveedor();
     cuentaCorrienteProveedor.setProveedor(proveedor);
-    cuentaCorrienteProveedor.setEmpresa(proveedor.getEmpresa());
+    cuentaCorrienteProveedor.setSucursal(proveedor.getSucursal());
     cuentaCorrienteProveedor.setSaldo(BigDecimal.ZERO);
     cuentaCorrienteProveedor.setFechaApertura(new Date());
     cuentaCorrienteService.guardarCuentaCorrienteProveedor(cuentaCorrienteProveedor);
@@ -186,7 +186,7 @@ public class ProveedorServiceImpl implements IProveedorService {
   }
 
   @Override
-  public String generarNroDeProveedor(Empresa empresa) {
+  public String generarNroDeProveedor(Sucursal sucursal) {
     long min = 1L;
     long max = 99999L; // 5 digitos
     long randomLong = 0L;
@@ -195,8 +195,8 @@ public class ProveedorServiceImpl implements IProveedorService {
       randomLong = min + (long) (Math.random() * (max - min));
       String nroProveedor = Long.toString(randomLong);
       Proveedor p =
-          proveedorRepository.findByNroProveedorAndEmpresaAndEliminado(
-              nroProveedor, empresa, false);
+          proveedorRepository.findByNroProveedorAndSucursalAndEliminado(
+              nroProveedor, sucursal, false);
       if (p == null) esRepetido = false;
     }
     return Long.toString(randomLong);

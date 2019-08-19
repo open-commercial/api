@@ -17,11 +17,11 @@ import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Transport;
 import sic.modelo.ConfiguracionDelSistema;
-import sic.modelo.Empresa;
+import sic.modelo.Sucursal;
 import sic.exception.BusinessServiceException;
 import sic.service.IConfiguracionDelSistemaService;
 import sic.service.ICorreoElectronicoService;
-import sic.service.IEmpresaService;
+import sic.service.ISucursalService;
 
 import java.util.Locale;
 import java.util.Properties;
@@ -33,33 +33,33 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
   private String mailEnv;
 
   private final IConfiguracionDelSistemaService configuracionDelSistemaService;
-  private final IEmpresaService empresaService;
+  private final ISucursalService sucursalService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
 
   @Autowired
   public CorreoElectronicoServiceImpl(
       IConfiguracionDelSistemaService configuracionDelSistemaService,
-      IEmpresaService empresaService,
+      ISucursalService sucursalService,
       MessageSource messageSource) {
     this.configuracionDelSistemaService = configuracionDelSistemaService;
-    this.empresaService = empresaService;
+    this.sucursalService = sucursalService;
     this.messageSource = messageSource;
   }
 
   @Override
   @Async
-  public void enviarMailPorEmpresa(
-      long idEmpresa,
+  public void enviarMailPorSucursal(
+      long idSucursal,
       String toEmail,
       String bbc,
       String subject,
       String mensaje,
       byte[] byteArray,
       String attachmentDescription) {
-    Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
+    Sucursal sucursal = sucursalService.getSucursalPorId(idSucursal);
     ConfiguracionDelSistema cds =
-        configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa);
+        configuracionDelSistemaService.getConfiguracionDelSistemaPorSucursal(sucursal);
     if (mailEnv.equals("production") && cds.isEmailSenderHabilitado()) {
       Properties props = new Properties();
       props.put("mail.smtp.host", "smtp.gmail.com");
@@ -79,7 +79,7 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setFrom(
             configuracionDelSistemaService
-                .getConfiguracionDelSistemaPorId(idEmpresa)
+                .getConfiguracionDelSistemaPorId(idSucursal)
                 .getEmailUsername());
         helper.setTo(toEmail);
         if (bbc != null && !bbc.isEmpty()) helper.setBcc(bbc);

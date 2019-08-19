@@ -30,7 +30,7 @@ public class BusquedaFacturaVentaCriteria {
   private long nroPedido;
   private boolean buscaPorProducto;
   private Long idProducto;
-  private Long idEmpresa;
+  private Long idSucursal;
   private Integer pagina;
   private String ordenarPor;
   private String sentido;

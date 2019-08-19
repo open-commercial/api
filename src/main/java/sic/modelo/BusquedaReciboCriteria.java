@@ -17,7 +17,7 @@ public class BusquedaReciboCriteria {
   private boolean buscaPorFecha;
   private Date fechaDesde;
   private Date fechaHasta;
-  private Long idEmpresa;
+  private Long idSucursal;
   private boolean buscaPorNumeroRecibo;
   private long numSerie;
   private long numRecibo;

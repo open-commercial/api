@@ -55,9 +55,9 @@ public class TransportistaServiceImpl implements ITransportistaService {
   }
 
   @Override
-  public List<Transportista> getTransportistas(Empresa empresa) {
+  public List<Transportista> getTransportistas(Sucursal sucursal) {
     List<Transportista> transportista =
-        transportistaRepository.findAllByAndEmpresaAndEliminadoOrderByNombreAsc(empresa, false);
+        transportistaRepository.findAllByAndSucursalAndEliminadoOrderByNombreAsc(sucursal, false);
     if (transportista == null) {
       throw new EntityNotFoundException(messageSource.getMessage(
         "mensaje_transportista_ninguno_cargado", null, Locale.getDefault()));
@@ -71,9 +71,9 @@ public class TransportistaServiceImpl implements ITransportistaService {
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
         qTransportista
-            .empresa
-            .id_Empresa
-            .eq(criteria.getIdEmpresa())
+            .sucursal
+            .idSucursal
+            .eq(criteria.getIdSucursal())
             .and(qTransportista.eliminado.eq(false)));
     if (criteria.isBuscarPorNombre())
       builder.and(this.buildPredicadoNombre(criteria.getNombre(), qTransportista));
@@ -99,15 +99,15 @@ public class TransportistaServiceImpl implements ITransportistaService {
   }
 
   @Override
-  public Transportista getTransportistaPorNombre(String nombre, Empresa empresa) {
-    return transportistaRepository.findByNombreAndEmpresaAndEliminado(nombre, empresa, false);
+  public Transportista getTransportistaPorNombre(String nombre, Sucursal sucursal) {
+    return transportistaRepository.findByNombreAndSucursalAndEliminado(nombre, sucursal, false);
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Transportista transportista) {
     // Duplicados
     // Nombre
     Transportista transportistaDuplicado =
-        this.getTransportistaPorNombre(transportista.getNombre(), transportista.getEmpresa());
+        this.getTransportistaPorNombre(transportista.getNombre(), transportista.getSucursal());
     if (operacion.equals(TipoDeOperacion.ALTA) && transportistaDuplicado != null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_transportista_duplicado_nombre", null, Locale.getDefault()));

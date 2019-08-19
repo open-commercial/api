@@ -48,11 +48,11 @@ public interface UsuarioRepository
 
   @Modifying
   @Query(
-      "UPDATE Usuario u SET u.idEmpresaPredeterminada = :idEmpresaPredeterminada "
+      "UPDATE Usuario u SET u.idSucursalPredeterminada = :idSucursalPredeterminada "
           + "WHERE u.id_Usuario = :idUsuario")
-  int updateIdEmpresa(
+  int updateIdSucursal(
       @Param("idUsuario") long idUsuario,
-      @Param("idEmpresaPredeterminada") long idEmpresaPredeterminada);
+      @Param("idSucursalPredeterminada") long idSucursalPredeterminada);
 
   Page<Usuario> findAllByRolesContainsAndEliminado(Rol rol, boolean eliminado, Pageable pageable);
 }

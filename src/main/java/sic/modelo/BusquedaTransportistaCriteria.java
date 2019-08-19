@@ -15,5 +15,5 @@ public class BusquedaTransportistaCriteria {
     private Long idProvincia;
     private boolean buscarPorLocalidad;
     private Long idLocalidad;
-    private Long idEmpresa;
+    private Long idSucursal;
 }

@@ -59,14 +59,14 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public Cliente getClientePorIdFiscal(Long idFiscal, Empresa empresa) {
-    return clienteRepository.findByIdFiscalAndEmpresaAndEliminado(idFiscal, empresa, false);
+  public Cliente getClientePorIdFiscal(Long idFiscal, Sucursal sucursal) {
+    return clienteRepository.findByIdFiscalAndSucursalAndEliminado(idFiscal, sucursal, false);
   }
 
   @Override
-  public Cliente getClientePredeterminado(Empresa empresa) {
+  public Cliente getClientePredeterminado(Sucursal sucursal) {
     Cliente cliente =
-        clienteRepository.findByEmpresaAndPredeterminadoAndEliminado(empresa, true, false);
+        clienteRepository.findBySucursalAndPredeterminadoAndEliminado(sucursal, true, false);
     if (cliente == null) {
       throw new EntityNotFoundException(messageSource.getMessage(
         "mensaje_cliente_sin_predeterminado", null, Locale.getDefault()));
@@ -75,16 +75,16 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public boolean existeClientePredeterminado(Empresa empresa) {
-    return clienteRepository.existsByEmpresaAndPredeterminadoAndEliminado(empresa, true, false);
+  public boolean existeClientePredeterminado(Sucursal sucursal) {
+    return clienteRepository.existsBySucursalAndPredeterminadoAndEliminado(sucursal, true, false);
   }
 
   @Override
   @Transactional
   public void setClientePredeterminado(Cliente cliente) {
     Cliente clientePredeterminadoAnterior =
-        clienteRepository.findByEmpresaAndPredeterminadoAndEliminado(
-            cliente.getEmpresa(), true, false);
+        clienteRepository.findBySucursalAndPredeterminadoAndEliminado(
+            cliente.getSucursal(), true, false);
     if (clientePredeterminadoAnterior != null) {
       clientePredeterminadoAnterior.setPredeterminado(false);
       clienteRepository.save(clientePredeterminadoAnterior);
@@ -142,7 +142,7 @@ public class ClienteServiceImpl implements IClienteService {
             break;
           case COMPRADOR:
             Cliente clienteRelacionado =
-                this.getClientePorIdUsuarioYidEmpresa(idUsuarioLoggedIn, criteria.getIdEmpresa());
+                this.getClientePorIdUsuarioYidSucursal(idUsuarioLoggedIn, criteria.getIdSucursal());
             if (clienteRelacionado != null) {
               rsPredicate.or(qCliente.eq(clienteRelacionado));
             }
@@ -155,7 +155,7 @@ public class ClienteServiceImpl implements IClienteService {
       builder.and(rsPredicate);
     }
     builder.and(
-        qCliente.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qCliente.eliminado.eq(false)));
+        qCliente.sucursal.idSucursal.eq(criteria.getIdSucursal()).and(qCliente.eliminado.eq(false)));
     return clienteRepository.findAll(builder, criteria.getPageable());
   }
 
@@ -170,7 +170,7 @@ public class ClienteServiceImpl implements IClienteService {
     // ID Fiscal
     if (cliente.getIdFiscal() != null) {
       Cliente clienteDuplicado =
-          this.getClientePorIdFiscal(cliente.getIdFiscal(), cliente.getEmpresa());
+          this.getClientePorIdFiscal(cliente.getIdFiscal(), cliente.getSucursal());
       if (operacion == TipoDeOperacion.ACTUALIZACION
           && clienteDuplicado != null
           && clienteDuplicado.getId_Cliente() != cliente.getId_Cliente()) {
@@ -212,7 +212,7 @@ public class ClienteServiceImpl implements IClienteService {
   public Cliente guardar(@Valid Cliente cliente) {
     cliente.setFechaAlta(new Date());
     cliente.setEliminado(false);
-    cliente.setNroCliente(this.generarNroDeCliente(cliente.getEmpresa()));
+    cliente.setNroCliente(this.generarNroDeCliente(cliente.getSucursal()));
     if (cliente.getBonificacion() == null) cliente.setBonificacion(BigDecimal.ZERO);
     if (cliente.getUbicacionFacturacion() != null
         && cliente.getUbicacionFacturacion().getIdLocalidad() != null) {
@@ -232,13 +232,13 @@ public class ClienteServiceImpl implements IClienteService {
     this.validarOperacion(TipoDeOperacion.ALTA, cliente);
     CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
     cuentaCorrienteCliente.setCliente(cliente);
-    cuentaCorrienteCliente.setEmpresa(cliente.getEmpresa());
+    cuentaCorrienteCliente.setSucursal(cliente.getSucursal());
     cuentaCorrienteCliente.setFechaApertura(cliente.getFechaAlta());
     cuentaCorrienteCliente.setSaldo(BigDecimal.ZERO);
     if (cliente.getCredencial() != null) {
       Cliente clienteYaAsignado =
-          this.getClientePorIdUsuarioYidEmpresa(
-              cliente.getCredencial().getId_Usuario(), cliente.getEmpresa().getId_Empresa());
+          this.getClientePorIdUsuarioYidSucursal(
+              cliente.getCredencial().getId_Usuario(), cliente.getSucursal().getIdSucursal());
       if (clienteYaAsignado != null) {
         throw new BusinessServiceException(messageSource.getMessage(
           "mensaje_cliente_credencial_no_valida", new Object[] {clienteYaAsignado.getNombreFiscal()}, Locale.getDefault()));
@@ -267,9 +267,9 @@ public class ClienteServiceImpl implements IClienteService {
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, clientePorActualizar);
     if (clientePorActualizar.getCredencial() != null) {
       Cliente clienteYaAsignado =
-          this.getClientePorIdUsuarioYidEmpresa(
+          this.getClientePorIdUsuarioYidSucursal(
               clientePorActualizar.getCredencial().getId_Usuario(),
-              clientePorActualizar.getEmpresa().getId_Empresa());
+              clientePorActualizar.getSucursal().getIdSucursal());
       if (clienteYaAsignado != null
           && clienteYaAsignado.getId_Cliente() != clientePorActualizar.getId_Cliente()) {
         throw new BusinessServiceException(messageSource.getMessage(
@@ -307,8 +307,8 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public Cliente getClientePorIdUsuarioYidEmpresa(long idUsuario, long idEmpresa) {
-    return clienteRepository.findClienteByIdUsuarioYidEmpresa(idUsuario, idEmpresa);
+  public Cliente getClientePorIdUsuarioYidSucursal(long idUsuario, long idSucursal) {
+    return clienteRepository.findClienteByIdUsuarioYidSucursal(idUsuario, idSucursal);
   }
 
   @Override
@@ -327,7 +327,7 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public String generarNroDeCliente(Empresa empresa) {
+  public String generarNroDeCliente(Sucursal sucursal) {
     long min = 1L;
     long max = 99999L; // 5 digitos
     long randomLong = 0L;
@@ -336,7 +336,7 @@ public class ClienteServiceImpl implements IClienteService {
       randomLong = min + (long) (Math.random() * (max - min));
       String nroCliente = Long.toString(randomLong);
       Cliente c =
-          clienteRepository.findByNroClienteAndEmpresaAndEliminado(nroCliente, empresa, false);
+          clienteRepository.findByNroClienteAndSucursalAndEliminado(nroCliente, sucursal, false);
       if (c == null) esRepetido = false;
     }
     return Long.toString(randomLong);

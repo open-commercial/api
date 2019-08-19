@@ -20,7 +20,7 @@ public interface IPedidoService {
 
   Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn);
 
-  long generarNumeroPedido(Empresa empresa);
+  long generarNumeroPedido(Sucursal sucursal);
 
   Pedido actualizarEstadoPedido(Pedido pedido);
 

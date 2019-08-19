@@ -23,7 +23,7 @@ import java.util.Calendar;
 public class GastoController {
     
     private final IGastoService gastoService;
-    private final IEmpresaService empresaService;
+    private final ISucursalService sucursalService;
     private final IFormaDePagoService formaDePagoService;
     private final IUsuarioService usuarioService;
     private final IAuthService authService;
@@ -32,10 +32,10 @@ public class GastoController {
     
     @Autowired
     public GastoController(IGastoService gastoService, ModelMapper modelMapper,
-                           IEmpresaService empresaService, IFormaDePagoService formaDePagoService,
+                           ISucursalService sucursalService, IFormaDePagoService formaDePagoService,
                            IUsuarioService usuarioService, IAuthService authService) {
         this.gastoService = gastoService;
-        this.empresaService = empresaService;
+        this.sucursalService = sucursalService;
         this.formaDePagoService = formaDePagoService;
         this.usuarioService = usuarioService;
         this.authService = authService;
@@ -51,7 +51,7 @@ public class GastoController {
     @GetMapping("/gastos/busqueda/criteria")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Page<Gasto> buscarConCriteria(
-      @RequestParam Long idEmpresa,
+      @RequestParam Long idSucursal,
       @RequestParam(required = false) Long desde,
       @RequestParam(required = false) Long hasta,
       @RequestParam(required = false) String concepto,
@@ -105,7 +105,7 @@ public class GastoController {
           .idFormaDePago(idFormaDePago)
           .buscaPorNro(nroGasto != null)
           .nroGasto(nroGasto)
-          .idEmpresa(idEmpresa)
+          .idSucursal(idSucursal)
           .pageable(pageable)
           .build();
       return gastoService.buscarGastos(criteria);
@@ -120,11 +120,11 @@ public class GastoController {
     @PostMapping("/gastos")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public Gasto guardar(@RequestBody GastoDTO gastoDTO,
-                         @RequestParam Long idEmpresa,
+                         @RequestParam Long idSucursal,
                          @RequestParam Long idFormaDePago,
                          @RequestHeader(name = "Authorization") String authorizationHeader) {
         Gasto gasto = modelMapper.map(gastoDTO, Gasto.class);
-        gasto.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+        gasto.setSucursal(sucursalService.getSucursalPorId(idSucursal));
         gasto.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(idFormaDePago));
         Claims claims = authService.getClaimsDelToken(authorizationHeader);
         long idUsuarioLoggedIn = (int) claims.get("idUsuario");
@@ -135,7 +135,7 @@ public class GastoController {
   @GetMapping("/gastos/total/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public BigDecimal getTotalGastos(
-      @RequestParam Long idEmpresa,
+      @RequestParam Long idSucursal,
       @RequestParam(required = false) Long desde,
       @RequestParam(required = false) Long hasta,
       @RequestParam(required = false) String concepto,
@@ -161,7 +161,7 @@ public class GastoController {
             .idFormaDePago(idFormaDePago)
             .buscaPorNro(nroGasto != null)
             .nroGasto(nroGasto)
-            .idEmpresa(idEmpresa)
+            .idSucursal(idSucursal)
             .build();
     return gastoService.getTotalGastos(criteria);
   }

@@ -46,7 +46,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final BigDecimal CIEN = new BigDecimal("100");
   private static final long TAMANIO_MAXIMO_IMAGEN = 1024000L;
-  private final IEmpresaService empresaService;
+  private final ISucursalService sucursalService;
   private final IRubroService rubroService;
   private final IProveedorService proveedorService;
   private final IMedidaService medidaService;
@@ -58,7 +58,7 @@ public class ProductoServiceImpl implements IProductoService {
   @Lazy
   public ProductoServiceImpl(
     ProductoRepository productoRepository,
-    IEmpresaService empresaService,
+    ISucursalService sucursalService,
     IRubroService rubroService,
     IProveedorService proveedorService,
     IMedidaService medidaService,
@@ -66,7 +66,7 @@ public class ProductoServiceImpl implements IProductoService {
     IPhotoVideoUploader photoVideoUploader,
     MessageSource messageSource) {
     this.productoRepository = productoRepository;
-    this.empresaService = empresaService;
+    this.sucursalService = sucursalService;
     this.rubroService = rubroService;
     this.proveedorService = proveedorService;
     this.medidaService = medidaService;
@@ -326,7 +326,7 @@ public class ProductoServiceImpl implements IProductoService {
           .getCantidadEnSucursales()
           .forEach(
               cantidadEnSucursal -> {
-                if (cantidadEnSucursal.getEmpresa().getId_Empresa() == idSucursal) {
+                if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
                   cantidadEnSucursal.setCantidad(
                       cantidadEnSucursal.getCantidad().subtract(cantidad));
                 }
@@ -337,7 +337,7 @@ public class ProductoServiceImpl implements IProductoService {
           .getCantidadEnSucursales()
           .forEach(
               cantidadEnSucursal -> {
-                if (cantidadEnSucursal.getEmpresa().getId_Empresa() == idSucursal) {
+                if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
                   cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().add(cantidad));
                 }
               });
@@ -357,7 +357,7 @@ public class ProductoServiceImpl implements IProductoService {
           .getCantidadEnSucursales()
           .forEach(
               cantidadEnSucursal -> {
-                if (cantidadEnSucursal.getEmpresa().getId_Empresa() == idSucursal) {
+                if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
                   cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().add(cantidad));
                 }
               });
@@ -367,7 +367,7 @@ public class ProductoServiceImpl implements IProductoService {
           .getCantidadEnSucursales()
           .forEach(
               cantidadEnSucursal -> {
-                if (cantidadEnSucursal.getEmpresa().getId_Empresa() == idSucursal) {
+                if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
                   cantidadEnSucursal.setCantidad(
                       cantidadEnSucursal.getCantidad().subtract(cantidad));
                 }
@@ -508,13 +508,6 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  @Transactional
-  public void eliminarImagenProducto(long idProducto) {
-    photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + idProducto);
-    productoRepository.actualizarUrlImagen(idProducto, null);
-  }
-
-  @Override
   public Producto getProductoNoEliminadoPorId(long idProducto) {
     Optional<Producto> producto = productoRepository.findById(idProducto);
     if (producto.isPresent() && !producto.get().isEliminado()) {
@@ -569,7 +562,7 @@ public class ProductoServiceImpl implements IProductoService {
         p.getCantidadEnSucursales()
             .forEach(
                 cantidadEnSucursal -> {
-                  if (cantidadEnSucursal.getEmpresa().getId_Empresa() == idSucursal
+                  if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal
                       && !p.isIlimitado()
                       && cantidadEnSucursal.getCantidad().compareTo(cantidadLambda) < 0) {
                     productos.put(p.getIdProducto(), cantidadLambda);
@@ -645,21 +638,21 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public byte[] getListaDePreciosPorEmpresa(
-      List<Producto> productos, long idEmpresa, String formato) {
-    Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
+  public byte[] getListaDePreciosPorSucursal(
+    List<Producto> productos, long idSucursal, String formato) {
+    Sucursal sucursal = sucursalService.getSucursalPorId(idSucursal);
     ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
     InputStream isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");
     Map<String, Object> params = new HashMap<>();
-    params.put("empresa", empresa);
-    if (empresa.getLogo() != null && !empresa.getLogo().isEmpty()) {
+    params.put("sucursal", sucursal);
+    if (sucursal.getLogo() != null && !sucursal.getLogo().isEmpty()) {
       try {
-        params.put("logo", new ImageIcon(ImageIO.read(new URL(empresa.getLogo()))).getImage());
+        params.put("logo", new ImageIcon(ImageIO.read(new URL(sucursal.getLogo()))).getImage());
       } catch (IOException ex) {
         logger.error(ex.getMessage());
         throw new ServiceException(messageSource.getMessage(
-          "mensaje_empresa_404_logo", null, Locale.getDefault()), ex);
+          "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
       }
     }
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(productos);

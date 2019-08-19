@@ -24,7 +24,6 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
-import sic.builder.*;
 import sic.modelo.*;
 import sic.modelo.dto.*;
 import sic.service.ICajaService;
@@ -97,7 +96,7 @@ class AppIntegrationTest {
         .nota("ProductoTest2")
         .destacado(false)
         .build();
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     RubroDTO rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", RubroDTO.class);
     ProveedorDTO proveedor =
       restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
@@ -111,7 +110,7 @@ class AppIntegrationTest {
         + "&idProveedor="
         + proveedor.getId_Proveedor()
         + "&idSucursal="
-        + empresa.getId_Empresa(),
+        + sucursal.getIdSucursal(),
       productoUno,
       ProductoDTO.class);
     restTemplate.postForObject(
@@ -123,7 +122,7 @@ class AppIntegrationTest {
         + "&idProveedor="
         + proveedor.getId_Proveedor()
         + "&idSucursal="
-        + empresa.getId_Empresa(),
+        + sucursal.getIdSucursal(),
       productoDos,
       ProductoDTO.class);
   }
@@ -175,7 +174,7 @@ class AppIntegrationTest {
     FacturaVentaDTO facturaVentaA = FacturaVentaDTO.builder()
       .idCliente(1L)
       .build();
-    facturaVentaA.setIdEmpresa(1L);
+    facturaVentaA.setIdSucursal(1L);
     facturaVentaA.setIdTransportista(1L);
     facturaVentaA.setObservaciones("Factura A del Pedido");
     facturaVentaA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
@@ -209,7 +208,7 @@ class AppIntegrationTest {
     FacturaVentaDTO facturaVentaB = FacturaVentaDTO.builder()
       .idCliente(1L)
       .build();
-    facturaVentaB.setIdEmpresa(1L);
+    facturaVentaB.setIdSucursal(1L);
     facturaVentaB.setIdTransportista(1L);
     facturaVentaB.setObservaciones("Factura B del Pedido");
     facturaVentaB.setTipoComprobante(TipoDeComprobante.FACTURA_B);
@@ -230,12 +229,12 @@ class AppIntegrationTest {
         apiPrefix + "/facturas/venta?idPedido=1", facturaVentaB, FacturaVenta[].class);
   }
 
-  private void crearReciboParaCliente(double monto, long idEmpresa, long idCliente) {
+  private void crearReciboParaCliente(double monto, long idSucursal, long idCliente) {
     ReciboDTO recibo =
         ReciboDTO.builder()
             .concepto("Recibo Test")
             .monto(monto)
-            .idEmpresa(idEmpresa)
+            .idSucursal(idSucursal)
             .idCliente(idCliente)
             .idFormaDePago(1L)
             .build();
@@ -264,7 +263,7 @@ class AppIntegrationTest {
         .tipoComprobante(TipoDeComprobante.FACTURA_B)
         .numSerie(0L)
         .numFactura(1L)
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
     List<FacturaVenta> facturasRecuperadas =
@@ -301,12 +300,12 @@ class AppIntegrationTest {
     restTemplate.getForObject(apiPrefix + "/notas/2/reporte", byte[].class);
   }
 
-  private void crearReciboParaProveedor(double monto, long idEmpresa, long idProveedor) {
+  private void crearReciboParaProveedor(double monto, long idSucursal, long idProveedor) {
     ReciboDTO recibo =
         ReciboDTO.builder()
             .monto(monto)
             .concepto("Recibo para proveedor")
-            .idEmpresa(idEmpresa)
+            .idSucursal(idSucursal)
             .idProveedor(idProveedor)
             .idFormaDePago(1L)
             .build();
@@ -350,7 +349,7 @@ class AppIntegrationTest {
   }
 
   private void abrirCaja() {
-    restTemplate.postForObject(apiPrefix + "/cajas/apertura/empresas/1?saldoApertura=0", null, CajaDTO.class);
+    restTemplate.postForObject(apiPrefix + "/cajas/apertura/sucursales/1?saldoApertura=0", null, CajaDTO.class);
   }
 
   @BeforeEach
@@ -402,7 +401,7 @@ class AppIntegrationTest {
         .apellido("Stark")
         .nombre("Sansa")
         .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .email("sansa@got.com")
         .telefono("415789966")
         .password("caraDeMala")
@@ -418,11 +417,11 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldCrearEmpresaResponsableInscripto() {
-    EmpresaDTO empresaNueva =
-        EmpresaDTO.builder()
+  void shouldCrearSucursalResponsableInscripto() {
+    SucursalDTO sucursalNueva =
+        SucursalDTO.builder()
             .telefono("3795221144")
-            .email("empresa@nueva.com")
+            .email("sucursal@nueva.com")
             .fechaInicioActividad(new Date())
             .ingresosBrutos(21112244L)
             .idFiscal(7488521665766L)
@@ -432,17 +431,17 @@ class AppIntegrationTest {
             .ubicacion(
                 UbicacionDTO.builder().idLocalidad(1L).calle("Rio Piacentin").numero(345).build())
             .build();
-    EmpresaDTO empresaGuardada =
-      restTemplate.postForObject(apiPrefix + "/empresas", empresaNueva, EmpresaDTO.class);
-    assertEquals(empresaNueva, empresaGuardada);
+    SucursalDTO sucursalGuardada =
+      restTemplate.postForObject(apiPrefix + "/sucursales", sucursalNueva, SucursalDTO.class);
+    assertEquals(sucursalNueva, sucursalGuardada);
   }
 
   @Test
-  void shouldCrearEmpresaMonotributista() {
-    EmpresaDTO empresaNueva =
-      EmpresaDTO.builder()
+  void shouldCrearSucursalMonotributista() {
+    SucursalDTO sucursalNueva =
+      SucursalDTO.builder()
         .telefono("3795221144")
-        .email("empresa@nuevaMonotribustista.com")
+        .email("sucursal@nuevaMonotribustista.com")
         .fechaInicioActividad(new Date())
         .ingresosBrutos(23335577L)
         .idFiscal(7599541775766L)
@@ -452,17 +451,17 @@ class AppIntegrationTest {
         .ubicacion(
           UbicacionDTO.builder().idLocalidad(1L).calle("Rio Naranja").numero(345).build())
         .build();
-    EmpresaDTO empresaGuardada =
-      restTemplate.postForObject(apiPrefix + "/empresas", empresaNueva, EmpresaDTO.class);
-    assertEquals(empresaNueva, empresaGuardada);
+    SucursalDTO sucursalGuardada =
+      restTemplate.postForObject(apiPrefix + "/sucursales", sucursalNueva, SucursalDTO.class);
+    assertEquals(sucursalNueva, sucursalGuardada);
   }
 
   @Test
-  void shouldCrearEmpresaConUbicacion() {
-    EmpresaDTO empresaNueva =
-        EmpresaDTO.builder()
+  void shouldCrearSucursalConUbicacion() {
+    SucursalDTO sucursalNueva =
+        SucursalDTO.builder()
             .telefono("3795221144")
-            .email("empresa@nueva.com")
+            .email("sucursal@nueva.com")
             .fechaInicioActividad(new Date())
             .ingresosBrutos(21112244L)
             .idFiscal(7488521665766L)
@@ -476,17 +475,17 @@ class AppIntegrationTest {
                     .idLocalidad(1L)
                     .build())
             .build();
-    EmpresaDTO empresaGuardada =
-        restTemplate.postForObject(apiPrefix + "/empresas", empresaNueva, EmpresaDTO.class);
-    assertEquals(empresaNueva, empresaGuardada);
+    SucursalDTO sucursalGuardada =
+        restTemplate.postForObject(apiPrefix + "/sucursales", sucursalNueva, SucursalDTO.class);
+    assertEquals(sucursalNueva, sucursalGuardada);
   }
 
   @Test
-  void shouldEditarUbicacionDeEmpresa() {
-    EmpresaDTO empresaNueva =
-        EmpresaDTO.builder()
+  void shouldEditarUbicacionDeSucursal() {
+    SucursalDTO sucursalNueva =
+        SucursalDTO.builder()
             .telefono("3795221144")
-            .email("empresa@nueva.com")
+            .email("sucursal@nueva.com")
             .fechaInicioActividad(new Date())
             .ingresosBrutos(21112244L)
             .idFiscal(7488521665766L)
@@ -500,17 +499,17 @@ class AppIntegrationTest {
                     .idLocalidad(1L)
                     .build())
             .build();
-    EmpresaDTO empresaGuardada =
-        restTemplate.postForObject(apiPrefix + "/empresas", empresaNueva, EmpresaDTO.class);
-    UbicacionDTO ubicacion = empresaGuardada.getUbicacion();
+    SucursalDTO sucursalGuardada =
+        restTemplate.postForObject(apiPrefix + "/sucursales", sucursalNueva, SucursalDTO.class);
+    UbicacionDTO ubicacion = sucursalGuardada.getUbicacion();
     ubicacion.setCalle("Los Rios Negros");
     ubicacion.setNumero(1456);
-    empresaGuardada.setUbicacion(ubicacion);
-    restTemplate.put(apiPrefix + "/empresas", empresaGuardada);
-    empresaGuardada =
+    sucursalGuardada.setUbicacion(ubicacion);
+    restTemplate.put(apiPrefix + "/sucursales", sucursalGuardada);
+    sucursalGuardada =
         restTemplate.getForObject(
-            apiPrefix + "/empresas/" + empresaGuardada.getId_Empresa(), EmpresaDTO.class);
-    assertEquals(ubicacion, empresaGuardada.getUbicacion());
+            apiPrefix + "/sucursales/" + sucursalGuardada.getIdSucursal(), SucursalDTO.class);
+    assertEquals(ubicacion, sucursalGuardada.getUbicacion());
   }
 
   @Test
@@ -535,14 +534,14 @@ class AppIntegrationTest {
             .email("caniete@yahoo.com.br")
             .telefono("3785663322")
             .contacto("Ramon el hermano de Juan")
-            .idEmpresa(1L)
+            .idSucursal(1L)
             .idCredencial(credencial.getId_Usuario())
             .build();
     ClienteDTO clienteRecuperado =
         restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class);
     assertEquals(cliente, clienteRecuperado);
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    assertEquals(empresa.getNombre(), clienteRecuperado.getNombreEmpresa());
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
+    assertEquals(sucursal.getNombre(), clienteRecuperado.getNombreSucursal());
   }
 
   @Test
@@ -567,14 +566,14 @@ class AppIntegrationTest {
         .email("tapia@outlook.com.cl")
         .telefono("3745112324")
         .contacto("Ricardo, trabaja por encargo.")
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .idCredencial(credencial.getId_Usuario())
         .build();
     ClienteDTO clienteRecuperado =
       restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class);
     assertEquals(cliente, clienteRecuperado);
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    assertEquals(empresa.getNombre(), clienteRecuperado.getNombreEmpresa());
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
+    assertEquals(sucursal.getNombre(), clienteRecuperado.getNombreSucursal());
   }
 
   @Test
@@ -609,7 +608,7 @@ class AppIntegrationTest {
             .email("caniete@yahoo.com.br")
             .telefono("3785663322")
             .contacto("Ramon el hermano de Juan")
-            .idEmpresa(1L)
+            .idSucursal(1L)
             .idCredencial(credencial.getId_Usuario())
             .ubicacionFacturacion(ubicacionDeFacturacion)
             .ubicacionEnvio(ubicacionDeEnvio)
@@ -647,7 +646,7 @@ class AppIntegrationTest {
             .email("caniete@yahoo.com.br")
             .telefono("3785663322")
             .contacto("Ramon el hermano de Juan")
-            .idEmpresa(1L)
+            .idSucursal(1L)
             .idCredencial(credencial.getId_Usuario())
             .ubicacionFacturacion(ubicacionDeFacturacion)
             .build();
@@ -685,7 +684,7 @@ class AppIntegrationTest {
             .email("caniete@yahoo.com.br")
             .telefono("3785663322")
             .contacto("Ramon el hermano de Juan")
-            .idEmpresa(1L)
+            .idSucursal(1L)
             .idCredencial(credencial.getId_Usuario())
             .ubicacionEnvio(ubicacionDeEnvio)
             .build();
@@ -720,7 +719,7 @@ class AppIntegrationTest {
             .email("caniete@yahoo.com.br")
             .telefono("3785663322")
             .contacto("Ramon el hermano de Juan")
-            .idEmpresa(1L)
+            .idSucursal(1L)
             .idCredencial(credencial.getId_Usuario())
             .ubicacionFacturacion(ubicacionDeFacturacion)
             .build();
@@ -760,7 +759,7 @@ class AppIntegrationTest {
         .email("caniete@yahoo.com.br")
         .telefono("3785663322")
         .contacto("Ramon el hermano de Juan")
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .idCredencial(credencial.getId_Usuario())
         .ubicacionEnvio(ubicacionDeEnvio)
         .build();
@@ -799,7 +798,7 @@ class AppIntegrationTest {
             .email("caniete@yahoo.com.br")
             .telefono("3785663322")
             .contacto("Ramon el hermano de Juan")
-            .idEmpresa(1L)
+            .idSucursal(1L)
             .idCredencial(credencial.getId_Usuario())
             .build();
     ClienteDTO clienteRecuperado =
@@ -834,7 +833,7 @@ class AppIntegrationTest {
             .email("caniete@yahoo.com.br")
             .telefono("3785663322")
             .contacto("Ramon el hermano de Juan")
-            .idEmpresa(1L)
+            .idSucursal(1L)
             .idCredencial(credencial.getId_Usuario())
             .build();
     ClienteDTO clienteRecuperado =
@@ -869,7 +868,7 @@ class AppIntegrationTest {
         .email("caniete@yahoo.com.br")
         .telefono("3785663322")
         .contacto("Ramon el hermano de Juan")
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .idCredencial(credencial.getId_Usuario())
         .build();
     ClienteDTO clienteRecuperado =
@@ -912,7 +911,7 @@ class AppIntegrationTest {
                 UbicacionDTO.builder().calle("Sarmiento").numero(789).idLocalidad(1L).build())
             .ubicacionEnvio(
                 UbicacionDTO.builder().calle("Belgrano").numero(456).idLocalidad(1L).build())
-            .idEmpresa(1L)
+            .idSucursal(1L)
             .idCredencial(credencial.getId_Usuario())
             .build();
     ClienteDTO clienteRecuperado =
@@ -957,7 +956,7 @@ class AppIntegrationTest {
                 UbicacionDTO.builder().calle("Sarmiento").numero(789).idLocalidad(1L).build())
             .ubicacionEnvio(
                 UbicacionDTO.builder().calle("Belgrano").numero(456).idLocalidad(1L).build())
-            .idEmpresa(1L)
+            .idSucursal(1L)
             .idCredencial(credencial.getId_Usuario())
             .build();
     ClienteDTO clienteRecuperado =
@@ -989,7 +988,7 @@ class AppIntegrationTest {
         .web("")
         .razonSocial("Migral Compuesto")
         .ubicacion(ubicacion)
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .build();
     ProveedorDTO proveedorRecuperado =
       restTemplate.postForObject(
@@ -1014,7 +1013,7 @@ class AppIntegrationTest {
         .web("")
         .razonSocial("Migral Compuesto")
         .ubicacion(ubicacion)
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .build();
     ProveedorDTO proveedorRecuperado =
       restTemplate.postForObject(
@@ -1035,7 +1034,7 @@ class AppIntegrationTest {
             .telefono("78946551122")
             .web("Ronollega.com")
             .nombre("Transporte Segu Ronollega")
-            .idEmpresa(1L)
+            .idSucursal(1L)
             .build();
     TransportistaDTO transportistaRecuperado =
         restTemplate.postForObject(
@@ -1050,7 +1049,7 @@ class AppIntegrationTest {
             .telefono("78946551122")
             .web("Ronollega.com")
             .nombre("Transporte Segu Ronollega")
-            .idEmpresa(1L)
+            .idSucursal(1L)
             .ubicacion(
                 UbicacionDTO.builder()
                     .calle("Los Rios Puros Nacidos del Mar de la Calma")
@@ -1071,7 +1070,7 @@ class AppIntegrationTest {
             .telefono("78946551122")
             .web("Ronollega.com")
             .nombre("Transporte Segu Ronollega")
-            .idEmpresa(1L)
+            .idSucursal(1L)
             .ubicacion(
                 UbicacionDTO.builder()
                     .calle("Los Rios Puros Nacidos del Mar de la Calma")
@@ -1103,9 +1102,9 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldEliminarUbicacionesDelEmpresaAlEliminarla() {
-    this.shouldCrearEmpresaResponsableInscripto();
-    restTemplate.delete(apiPrefix + "/empresas/2");
+  void shouldEliminarUbicacionesDelSucursalAlEliminarla() {
+    this.shouldCrearSucursalResponsableInscripto();
+    restTemplate.delete(apiPrefix + "/sucursales/2");
     assertNull(restTemplate.getForObject(apiPrefix + "/ubicaciones/6", UbicacionDTO.class));
   }
 
@@ -1127,7 +1126,7 @@ class AppIntegrationTest {
   void shouldCrearMedida() {
     MedidaDTO medida = MedidaDTO.builder().nombre("Longitud de Plank").build();
     MedidaDTO medidaRecuperada =
-      restTemplate.postForObject(apiPrefix + "/medidas?idEmpresa=1", medida, MedidaDTO.class);
+      restTemplate.postForObject(apiPrefix + "/medidas?idSucursal=1", medida, MedidaDTO.class);
     assertEquals(medida, medidaRecuperada);
   }
 
@@ -1135,12 +1134,12 @@ class AppIntegrationTest {
   void shouldCrearRubro() {
     RubroDTO rubro = RubroDTO.builder().nombre("Reparación de Ovnis").build();
     RubroDTO rubroRecuperado =
-      restTemplate.postForObject(apiPrefix + "/rubros?idEmpresa=1", rubro, RubroDTO.class);
+      restTemplate.postForObject(apiPrefix + "/rubros?idSucursal=1", rubro, RubroDTO.class);
     assertEquals(rubro, rubroRecuperado);
   }
 
   @Test
-  void shouldGetRubrosDeEmpresa() {
+  void shouldGetRubrosDeSucursal() {
     this.shouldCrearRubro();
     List<RubroDTO> rubrosRecuperados =
         restTemplate
@@ -1163,7 +1162,7 @@ class AppIntegrationTest {
             RestClientResponseException.class,
             () ->
                 restTemplate.postForObject(
-                    apiPrefix + "/rubros?idEmpresa=1", rubro, RubroDTO.class));
+                    apiPrefix + "/rubros?idSucursal=1", rubro, RubroDTO.class));
     assertNotNull(thrown.getMessage());
     assertTrue(
         thrown
@@ -1202,7 +1201,7 @@ class AppIntegrationTest {
         .telSecundario("784551122")
         .web("")
         .razonSocial("Migral Compuesto")
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .build();
     ProveedorDTO proveedorRecuperado =
       restTemplate.postForObject(
@@ -1303,7 +1302,7 @@ class AppIntegrationTest {
       FacturaVentaDTO.builder().nombreFiscalCliente(cliente.getNombreFiscal())
         .idCliente(cliente.getId_Cliente())
         .build();
-    facturaVentaA.setIdEmpresa(1L);
+    facturaVentaA.setIdSucursal(1L);
     facturaVentaA.setIdTransportista(transportista.getId_Transportista());
     facturaVentaA.setObservaciones("Factura Venta A test");
     facturaVentaA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
@@ -1317,13 +1316,13 @@ class AppIntegrationTest {
     facturaVentaA.setIva105Neto(iva_105_netoFactura);
     facturaVentaA.setIva21Neto(iva_21_netoFactura);
     facturaVentaA.setTotal(total);
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     FacturaVentaDTO[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/venta", facturaVentaA, FacturaVentaDTO[].class);
     assertEquals(facturaVentaA, facturas[0]);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
-    assertEquals(empresa.getNombre(), facturas[0].getNombreEmpresa());
+    assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(
       credencial.getNombre()
         + " "
@@ -1433,12 +1432,12 @@ class AppIntegrationTest {
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", Cliente.class);
     Transportista transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     FacturaVentaDTO facturaVentaB =
       FacturaVentaDTO.builder()
         .idCliente(cliente.getId_Cliente())
         .build();
-    facturaVentaB.setIdEmpresa(empresa.getId_Empresa());
+    facturaVentaB.setIdSucursal(sucursal.getIdSucursal());
     facturaVentaB.setIdTransportista(transportista.getId_Transportista());
     facturaVentaB.setObservaciones("Factura Venta B test");
     facturaVentaB.setTipoComprobante(TipoDeComprobante.FACTURA_B);
@@ -1458,7 +1457,7 @@ class AppIntegrationTest {
             apiPrefix + "/facturas/venta", facturaVentaB, FacturaVentaDTO[].class);
     assertEquals(facturaVentaB, facturas[0]);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
-    assertEquals(empresa.getNombre(), facturas[0].getNombreEmpresa());
+    assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(
       credencial.getNombre()
         + " "
@@ -1562,11 +1561,11 @@ class AppIntegrationTest {
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", Cliente.class);
     Transportista transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     FacturaVentaDTO facturaVentaC =
         FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
     facturaVentaC.setIdTransportista(transportista.getId_Transportista());
-    facturaVentaC.setIdEmpresa(empresa.getId_Empresa());
+    facturaVentaC.setIdSucursal(sucursal.getIdSucursal());
     facturaVentaC.setObservaciones("Factura Venta C test");
     facturaVentaC.setTipoComprobante(TipoDeComprobante.FACTURA_C);
     facturaVentaC.setRenglones(renglones);
@@ -1585,7 +1584,7 @@ class AppIntegrationTest {
             apiPrefix + "/facturas/venta", facturaVentaC, FacturaVentaDTO[].class);
     assertEquals(facturaVentaC, facturas[0]);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
-    assertEquals(empresa.getNombre(), facturas[0].getNombreEmpresa());
+    assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(
       credencial.getNombre()
         + " "
@@ -1647,10 +1646,10 @@ class AppIntegrationTest {
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", Cliente.class);
     Transportista transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     FacturaVentaDTO facturaVentaX =
       FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
-    facturaVentaX.setIdEmpresa(empresa.getId_Empresa());
+    facturaVentaX.setIdSucursal(sucursal.getIdSucursal());
     facturaVentaX.setIdTransportista(transportista.getId_Transportista());
     facturaVentaX.setObservaciones("Factura Venta X test");
     facturaVentaX.setTipoComprobante(TipoDeComprobante.FACTURA_X);
@@ -1670,7 +1669,7 @@ class AppIntegrationTest {
             apiPrefix + "/facturas/venta", facturaVentaX, FacturaVentaDTO[].class);
     assertEquals(facturaVentaX, facturas[0]);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
-    assertEquals(empresa.getNombre(), facturas[0].getNombreEmpresa());
+    assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(
       credencial.getNombre()
         + " "
@@ -1774,10 +1773,10 @@ class AppIntegrationTest {
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", Cliente.class);
     Transportista transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     FacturaVentaDTO facturaVentaY =
       FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
-    facturaVentaY.setIdEmpresa(empresa.getId_Empresa());
+    facturaVentaY.setIdSucursal(sucursal.getIdSucursal());
     facturaVentaY.setIdTransportista(transportista.getId_Transportista());
     facturaVentaY.setObservaciones("Factura Venta Y test");
     facturaVentaY.setTipoComprobante(TipoDeComprobante.FACTURA_Y);
@@ -1797,7 +1796,7 @@ class AppIntegrationTest {
             apiPrefix + "/facturas/venta", facturaVentaY, FacturaVentaDTO[].class);
     assertEquals(facturaVentaY, facturas[0]);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
-    assertEquals(empresa.getNombre(), facturas[0].getNombreEmpresa());
+    assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(
       credencial.getNombre()
         + " "
@@ -1901,10 +1900,10 @@ class AppIntegrationTest {
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", Cliente.class);
     Transportista transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     FacturaVentaDTO facturaVentaPresupuesto =
       FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
-    facturaVentaPresupuesto.setIdEmpresa(empresa.getId_Empresa());
+    facturaVentaPresupuesto.setIdSucursal(sucursal.getIdSucursal());
     facturaVentaPresupuesto.setIdTransportista(transportista.getId_Transportista());
     facturaVentaPresupuesto.setObservaciones("Factura Venta Presupuesto test");
     facturaVentaPresupuesto.setTipoComprobante(TipoDeComprobante.PRESUPUESTO);
@@ -1924,7 +1923,7 @@ class AppIntegrationTest {
             apiPrefix + "/facturas/venta", facturaVentaPresupuesto, FacturaVentaDTO[].class);
     assertEquals(facturaVentaPresupuesto, facturas[0]);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
-    assertEquals(empresa.getNombre(), facturas[0].getNombreEmpresa());
+    assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(
       credencial.getNombre()
         + " "
@@ -2003,10 +2002,10 @@ class AppIntegrationTest {
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/2", Cliente.class);
     Transportista transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     FacturaVentaDTO facturaVentaX =
       FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
-    facturaVentaX.setIdEmpresa(empresa.getId_Empresa());
+    facturaVentaX.setIdSucursal(sucursal.getIdSucursal());
     facturaVentaX.setIdTransportista(transportista.getId_Transportista());
     facturaVentaX.setObservaciones("Factura Venta X test");
     facturaVentaX.setTipoComprobante(TipoDeComprobante.FACTURA_X);
@@ -2026,7 +2025,7 @@ class AppIntegrationTest {
             apiPrefix + "/facturas/venta", facturaVentaX, FacturaVentaDTO[].class);
     assertEquals(facturaVentaX, facturas[0]);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
-    assertEquals(empresa.getNombre(), facturas[0].getNombreEmpresa());
+    assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(
       credencial.getNombre()
         + " "
@@ -2127,10 +2126,10 @@ class AppIntegrationTest {
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/2", Cliente.class);
     Transportista transportista =
         restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     FacturaVentaDTO facturaVentaA =
         FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
-    facturaVentaA.setIdEmpresa(empresa.getId_Empresa());
+    facturaVentaA.setIdSucursal(sucursal.getIdSucursal());
     facturaVentaA.setIdTransportista(transportista.getId_Transportista());
     facturaVentaA.setObservaciones("Factura Venta A test");
     facturaVentaA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
@@ -2250,7 +2249,7 @@ class AppIntegrationTest {
     FacturaCompraDTO facturaCompraA = FacturaCompraDTO.builder()
       .idProveedor(1L)
       .build();
-    facturaCompraA.setIdEmpresa(1L);
+    facturaCompraA.setIdSucursal(1L);
     facturaCompraA.setIdTransportista(1L);
     facturaCompraA.setObservaciones("Factura Compra A test");
     facturaCompraA.setRazonSocialProveedor(proveedor.getRazonSocial());
@@ -2270,12 +2269,11 @@ class AppIntegrationTest {
         restTemplate.postForObject(
             apiPrefix + "/facturas/compra", facturaCompraA, FacturaCompraDTO[].class);
     assertEquals(facturaCompraA, facturas[0]);
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    UsuarioDTO usuario = restTemplate.getForObject(apiPrefix + "/usuarios/2", UsuarioDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     TransportistaDTO transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", TransportistaDTO.class);
     assertEquals(proveedor.getRazonSocial(), facturas[0].getRazonSocialProveedor());
-    assertEquals(empresa.getNombre(), facturas[0].getNombreEmpresa());
+    assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(transportista.getNombre(), facturas[0].getNombreTransportista());
   }
 
@@ -2365,7 +2363,7 @@ class AppIntegrationTest {
     FacturaCompraDTO facturaCompraB = FacturaCompraDTO.builder()
       .idProveedor(1L)
       .build();
-    facturaCompraB.setIdEmpresa(1L);
+    facturaCompraB.setIdSucursal(1L);
     facturaCompraB.setIdTransportista(1L);
     facturaCompraB.setObservaciones("Factura Compra B test");
     facturaCompraB.setFecha(new Date());
@@ -2387,12 +2385,11 @@ class AppIntegrationTest {
     assertEquals(facturaCompraB, facturas[0]);
     ProveedorDTO proveedor =
         restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    UsuarioDTO usuario = restTemplate.getForObject(apiPrefix + "/usuarios/2", UsuarioDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     TransportistaDTO transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", TransportistaDTO.class);
     assertEquals(proveedor.getRazonSocial(), facturas[0].getRazonSocialProveedor());
-    assertEquals(empresa.getNombre(), facturas[0].getNombreEmpresa());
+    assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(transportista.getNombre(), facturas[0].getNombreTransportista());
   }
 
@@ -2483,7 +2480,7 @@ class AppIntegrationTest {
       .idProveedor(1L)
       .build();
     facturaCompraC.setIdTransportista(1L);
-    facturaCompraC.setIdEmpresa(1L);
+    facturaCompraC.setIdSucursal(1L);
     facturaCompraC.setObservaciones("Factura Compra C test");
     facturaCompraC.setFecha(new Date());
     facturaCompraC.setTipoComprobante(TipoDeComprobante.FACTURA_C);
@@ -2504,12 +2501,11 @@ class AppIntegrationTest {
     assertEquals(facturaCompraC, facturas[0]);
     ProveedorDTO proveedor =
       restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    UsuarioDTO usuario = restTemplate.getForObject(apiPrefix + "/usuarios/2", UsuarioDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     TransportistaDTO transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", TransportistaDTO.class);
     assertEquals(proveedor.getRazonSocial(), facturas[0].getRazonSocialProveedor());
-    assertEquals(empresa.getNombre(), facturas[0].getNombreEmpresa());
+    assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(transportista.getNombre(), facturas[0].getNombreTransportista());
   }
 
@@ -2599,7 +2595,7 @@ class AppIntegrationTest {
     FacturaCompraDTO facturaCompraX = FacturaCompraDTO.builder()
       .idProveedor(1L)
       .build();
-    facturaCompraX.setIdEmpresa(1L);
+    facturaCompraX.setIdSucursal(1L);
     facturaCompraX.setIdTransportista(1L);
     facturaCompraX.setObservaciones("Factura Compra X test");
     facturaCompraX.setFecha(new Date());
@@ -2621,12 +2617,11 @@ class AppIntegrationTest {
     assertEquals(facturaCompraX, facturas[0]);
     ProveedorDTO proveedor =
       restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    UsuarioDTO usuario = restTemplate.getForObject(apiPrefix + "/usuarios/2", UsuarioDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     TransportistaDTO transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", TransportistaDTO.class);
     assertEquals(proveedor.getRazonSocial(), facturas[0].getRazonSocialProveedor());
-    assertEquals(empresa.getNombre(), facturas[0].getNombreEmpresa());
+    assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(transportista.getNombre(), facturas[0].getNombreTransportista());
   }
 
@@ -2716,7 +2711,7 @@ class AppIntegrationTest {
     FacturaCompraDTO facturaCompraPresupuesto = FacturaCompraDTO.builder()
       .idProveedor(1L)
       .build();
-    facturaCompraPresupuesto.setIdEmpresa(1L);
+    facturaCompraPresupuesto.setIdSucursal(1L);
     facturaCompraPresupuesto.setIdTransportista(1L);
     facturaCompraPresupuesto.setObservaciones("Factura Compra Presupuesto test");
     facturaCompraPresupuesto.setFecha(new Date());
@@ -2738,12 +2733,11 @@ class AppIntegrationTest {
     assertEquals(facturaCompraPresupuesto, facturas[0]);
     ProveedorDTO proveedor =
       restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    UsuarioDTO usuario = restTemplate.getForObject(apiPrefix + "/usuarios/2", UsuarioDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     TransportistaDTO transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", TransportistaDTO.class);
     assertEquals(proveedor.getRazonSocial(), facturas[0].getRazonSocialProveedor());
-    assertEquals(empresa.getNombre(), facturas[0].getNombreEmpresa());
+    assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(transportista.getNombre(), facturas[0].getNombreTransportista());
   }
 
@@ -2782,7 +2776,7 @@ class AppIntegrationTest {
         .nota("ProductoTest2")
         .destacado(false)
         .build();
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     RubroDTO rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", RubroDTO.class);
     ProveedorDTO proveedor =
       restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
@@ -2796,7 +2790,7 @@ class AppIntegrationTest {
         + "&idProveedor="
         + proveedor.getId_Proveedor()
         + "&idSucursal="
-        + empresa.getId_Empresa(),
+        + sucursal.getIdSucursal(),
       productoUno,
       ProductoDTO.class);
     restTemplate.postForObject(
@@ -2808,7 +2802,7 @@ class AppIntegrationTest {
         + "&idProveedor="
         + proveedor.getId_Proveedor()
         + "&idSucursal="
-        + empresa.getId_Empresa(),
+        + sucursal.getIdSucursal(),
       productoDos,
       ProductoDTO.class);
     long[] idsProductos = {1L, 2L};
@@ -2872,7 +2866,7 @@ class AppIntegrationTest {
     MedidaDTO medida = MedidaDTO.builder()
       .nombre("Distancia de Plank")
       .build();
-    medida = restTemplate.postForObject(apiPrefix + "/medidas?idEmpresa=1", medida, MedidaDTO.class);
+    medida = restTemplate.postForObject(apiPrefix + "/medidas?idSucursal=1", medida, MedidaDTO.class);
     ProductosParaActualizarDTO productosParaActualizarDTO = ProductosParaActualizarDTO.builder()
       .idProducto(idsProductos)
       .idMedida(medida.getId_Medida()).build();
@@ -2890,7 +2884,7 @@ class AppIntegrationTest {
     RubroDTO rubro = RubroDTO.builder()
       .nombre("Telefonía Galactica")
       .build();
-    rubro = restTemplate.postForObject(apiPrefix + "/rubros?idEmpresa=1", rubro, RubroDTO.class);
+    rubro = restTemplate.postForObject(apiPrefix + "/rubros?idSucursal=1", rubro, RubroDTO.class);
     ProductosParaActualizarDTO productosParaActualizarDTO = ProductosParaActualizarDTO.builder()
       .idProducto(idsProductos)
       .idRubro(rubro.getId_Rubro()).build();
@@ -2917,7 +2911,7 @@ class AppIntegrationTest {
         .web("www.chamigosrl.com.ar")
         .eliminado(false)
         .saldoCuentaCorriente(BigDecimal.ZERO)
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .build();
     proveedor = restTemplate.postForObject(apiPrefix + "/proveedores", proveedor, ProveedorDTO.class);
     ProductosParaActualizarDTO productosParaActualizarDTO = ProductosParaActualizarDTO.builder()
@@ -2932,7 +2926,7 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearProductoConIva21() {
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     Rubro rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", Rubro.class);
     ProveedorDTO proveedor =
       restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
@@ -2962,7 +2956,7 @@ class AppIntegrationTest {
           + "&idProveedor="
           + proveedor.getId_Proveedor()
           + "&idSucursal="
-          + empresa.getId_Empresa(),
+          + sucursal.getIdSucursal(),
         productoUno,
         ProductoDTO.class);
     assertEquals(productoUno.getCantidad(), productoRecuperado.getCantidadEnSucursales().get(0).getCantidad());
@@ -2984,7 +2978,7 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearProductoConIva105() {
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     Rubro rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", Rubro.class);
     ProveedorDTO proveedor =
       restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
@@ -3014,7 +3008,7 @@ class AppIntegrationTest {
           + "&idProveedor="
           + proveedor.getId_Proveedor()
           + "&idSucursal="
-          + empresa.getId_Empresa(),
+          + sucursal.getIdSucursal(),
         productoUno,
         ProductoDTO.class);
     assertEquals(new BigDecimal("10.5"), productoRecuperado.getIvaPorcentaje());
@@ -3023,7 +3017,7 @@ class AppIntegrationTest {
 
   @Test
   void shouldNotCrearProductoDestacado() {
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     Rubro rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", Rubro.class);
     ProveedorDTO proveedor =
         restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
@@ -3054,7 +3048,7 @@ class AppIntegrationTest {
                 + "&idProveedor="
                 + proveedor.getId_Proveedor()
                 + "&idSucursal="
-                + empresa.getId_Empresa(),
+                + sucursal.getIdSucursal(),
             productoUno,
             ProductoDTO.class);
     assertFalse(productoRecuperado.isDestacado());
@@ -3314,14 +3308,14 @@ class AppIntegrationTest {
     facturaVentaA.setTotal(total);
     Transportista transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     restTemplate.postForObject(
       apiPrefix
         + "/facturas/venta?"
         + "idCliente="
         + cliente.getId_Cliente()
-        + "&idEmpresa="
-        + empresa.getId_Empresa()
+        + "&idSucursal="
+        + sucursal.getIdSucursal()
         + "&idUsuario="
         + credencial.getId_Usuario()
         + "&idTransportista="
@@ -3340,7 +3334,7 @@ class AppIntegrationTest {
     this.shouldCrearFacturaVentaA();
     BusquedaFacturaVentaCriteria criteria =
       BusquedaFacturaVentaCriteria.builder()
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .tipoComprobante(TipoDeComprobante.FACTURA_A)
         .numSerie(0L)
         .numFactura(1L)
@@ -3398,7 +3392,7 @@ class AppIntegrationTest {
         .tipoComprobante(TipoDeComprobante.FACTURA_B)
         .numSerie(0L)
         .numFactura(1L)
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
     List<FacturaVenta> facturasRecuperadas =
@@ -3455,7 +3449,7 @@ class AppIntegrationTest {
             .tipoComprobante(TipoDeComprobante.FACTURA_X)
             .numSerie(0L)
             .numFactura(1L)
-            .idEmpresa(1L)
+            .idSucursal(1L)
             .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
     List<FacturaVenta> facturasRecuperadas =
@@ -3509,7 +3503,7 @@ class AppIntegrationTest {
         .tipoComprobante(TipoDeComprobante.FACTURA_C)
         .numSerie(0L)
         .numFactura(1L)
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
     List<FacturaVenta> facturasRecuperadas =
@@ -3533,9 +3527,9 @@ class AppIntegrationTest {
         .modificaStock(true)
         .motivo("Color equivocado.")
         .build();
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
-    restTemplate.put(apiPrefix + "/empresas", empresa);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/sucursales", sucursal);
     NotaCreditoDTO notaCreditoParaPersistir =
       restTemplate.postForObject(
         apiPrefix + "/notas/credito/calculos", nuevaNotaCreditoDTO, NotaCreditoDTO.class);
@@ -3560,14 +3554,14 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearNotaCreditoVentaASinFactura() {
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO =
         NuevaNotaCreditoSinFacturaDTO.builder()
             .detalle("Diferencia de precio")
             .monto(new BigDecimal("1000"))
             .tipo(TipoDeComprobante.NOTA_CREDITO_A)
             .idCliente(1L)
-            .idEmpresa(empresa.getId_Empresa())
+            .idSucursal(sucursal.getIdSucursal())
             .motivo("Descuento mal aplicado")
             .build();
     NotaCreditoDTO notaPorGuardar =
@@ -3596,14 +3590,14 @@ class AppIntegrationTest {
     ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", ClienteDTO.class);
     cliente.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     restTemplate.put(apiPrefix + "/clientes", cliente);
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO =
       NuevaNotaCreditoSinFacturaDTO.builder()
         .detalle("Diferencia de precio")
         .monto(new BigDecimal("1000"))
         .tipo(TipoDeComprobante.NOTA_CREDITO_B)
         .idCliente(1L)
-        .idEmpresa(empresa.getId_Empresa())
+        .idSucursal(sucursal.getIdSucursal())
         .motivo("Descuento mal aplicado")
         .build();
     NotaCreditoDTO notaPorGuardar =
@@ -3629,16 +3623,16 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearNotaCreditoVentaCSinFactura() {
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
-    restTemplate.put(apiPrefix + "/empresas", empresa);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/sucursales", sucursal);
     NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO =
       NuevaNotaCreditoSinFacturaDTO.builder()
         .detalle("Diferencia de precio")
         .monto(new BigDecimal("1000"))
         .tipo(TipoDeComprobante.NOTA_CREDITO_C)
         .idCliente(1L)
-        .idEmpresa(empresa.getId_Empresa())
+        .idSucursal(sucursal.getIdSucursal())
         .motivo("Descuento mal aplicado")
         .build();
     NotaCreditoDTO notaPorGuardar =
@@ -3665,14 +3659,14 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearNotaCreditoVentaXSinFactura() {
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO =
       NuevaNotaCreditoSinFacturaDTO.builder()
         .detalle("Diferencia de precio")
         .monto(new BigDecimal("1000"))
         .tipo(TipoDeComprobante.NOTA_CREDITO_X)
         .idCliente(1L)
-        .idEmpresa(empresa.getId_Empresa())
+        .idSucursal(sucursal.getIdSucursal())
         .motivo("Descuento mal aplicado")
         .build();
     NotaCreditoDTO notaPorGuardar =
@@ -3704,7 +3698,7 @@ class AppIntegrationTest {
         .tipoComprobante(TipoDeComprobante.FACTURA_A)
         .numSerie(0L)
         .numFactura(1L)
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
     List<FacturaVenta> facturasRecuperadas =
@@ -3756,7 +3750,7 @@ class AppIntegrationTest {
             .tipoComprobante(TipoDeComprobante.FACTURA_A)
             .numSerie(0L)
             .numFactura(1L)
-            .idEmpresa(1L)
+            .idSucursal(1L)
             .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
     List<FacturaVenta> facturasRecuperadas =
@@ -3924,7 +3918,7 @@ class AppIntegrationTest {
             .monto(new BigDecimal("1000"))
             .tipo(TipoDeComprobante.NOTA_CREDITO_A)
             .idProveedor(1L)
-            .idEmpresa(1L)
+            .idSucursal(1L)
             .motivo("Descuento mal aplicado")
             .build();
     NotaCreditoDTO notaPorGuardar =
@@ -3949,16 +3943,16 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearNotaCreditoCompraBSinFactura() {
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
-    restTemplate.put(apiPrefix + "/empresas", empresa);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/sucursales", sucursal);
     NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO =
       NuevaNotaCreditoSinFacturaDTO.builder()
         .detalle("RenglonNotaCredito")
         .monto(new BigDecimal("1000"))
         .tipo(TipoDeComprobante.NOTA_CREDITO_B)
         .idProveedor(1L)
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .motivo("Descuento mal aplicado")
         .build();
     NotaCreditoDTO notaPorGuardar =
@@ -3989,7 +3983,7 @@ class AppIntegrationTest {
         .monto(new BigDecimal("1000"))
         .tipo(TipoDeComprobante.NOTA_CREDITO_X)
         .idCliente(1L)
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .motivo("Descuento mal aplicado")
         .build();
     NotaCreditoDTO notaPorGuardar =
@@ -4077,9 +4071,9 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearNotaDebitoBParaProveedorConRecibo() {
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix +  "/empresas/1", EmpresaDTO.class);
-    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
-    restTemplate.put(apiPrefix + "/empresas", empresa);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix +  "/sucursales/1", SucursalDTO.class);
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/sucursales", sucursal);
     this.abrirCaja();
     this.crearReciboParaProveedor(100, 1L, 1L);
     NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO =
@@ -4100,9 +4094,9 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearNotaDebitoCParaClienteDeRecibo() {
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
-    restTemplate.put(apiPrefix + "/empresas", empresa);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/sucursales", sucursal);
     this.abrirCaja();
     this.crearReciboParaCliente(100, 1L, 1L);
     NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO =
@@ -4123,9 +4117,9 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearNotaDebitoCParaProveedorDeRecibo() {
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
-    restTemplate.put(apiPrefix + "/empresas", empresa);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/sucursales", sucursal);
     ProveedorDTO proveedor = restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
     proveedor.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     restTemplate.put(apiPrefix + "/proveedores", proveedor);
@@ -4246,9 +4240,9 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearNotaDebitoBParaProveedorSinRecibo() {
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
-    restTemplate.put(apiPrefix + "/empresas", empresa);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/sucursales", sucursal);
     NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDeCliente =
       NuevaNotaDebitoSinReciboDTO.builder()
         .idProveedor(1L)
@@ -4267,9 +4261,9 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearNotaDebitoCParaClienteSinRecibo() {
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
-    restTemplate.put(apiPrefix + "/empresas", empresa);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/sucursales", sucursal);
     NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDeCliente =
       NuevaNotaDebitoSinReciboDTO.builder()
         .idCliente(1L)
@@ -4288,9 +4282,9 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearNotaDebitoCParaProveedorSinRecibo() {
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
-    restTemplate.put(apiPrefix + "/empresas", empresa);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/sucursales", sucursal);
     ProveedorDTO proveedor = restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
     proveedor.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     restTemplate.put(apiPrefix + "/proveedores", proveedor);
@@ -4463,7 +4457,7 @@ class AppIntegrationTest {
         .renglones(renglonesPedido)
         .subTotal(importe)
         .total(total)
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .idUsuario(2L)
         .idCliente(1L)
         .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
@@ -4518,7 +4512,7 @@ class AppIntegrationTest {
             .renglones(renglonesPedido)
             .subTotal(importe)
             .total(total)
-            .idEmpresa(1L)
+            .idSucursal(1L)
             .idUsuario(2L)
             .idCliente(1L)
             .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
@@ -4540,7 +4534,7 @@ class AppIntegrationTest {
             () ->
                 restTemplate.put(
                     apiPrefix
-                        + "/pedidos?idEmpresa=1&idUsuario=2&idCliente=1&tipoDeEnvio=USAR_UBICACION_FACTURACION",
+                        + "/pedidos?idSucursal=1&idUsuario=2&idCliente=1&tipoDeEnvio=USAR_UBICACION_FACTURACION",
                     pedidoRecuperado));
     assertNotNull(thrown.getMessage());
     assertTrue(
@@ -4591,7 +4585,7 @@ class AppIntegrationTest {
         .renglones(renglonesPedido)
         .subTotal(importe)
         .total(total)
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .idUsuario(2L)
         .idCliente(1L)
         .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
@@ -4644,7 +4638,7 @@ class AppIntegrationTest {
         .renglones(renglonesPedido)
         .subTotal(importe)
         .total(total)
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .idUsuario(2L)
         .idCliente(1L)
         .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_ENVIO)
@@ -4660,7 +4654,7 @@ class AppIntegrationTest {
   @Test
   void shouldCrearPedidoConUbicacionSucursal() {
     this.crearProductos();
-    this.shouldCrearEmpresaResponsableInscripto();
+    this.shouldCrearSucursalResponsableInscripto();
     List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
@@ -4698,18 +4692,16 @@ class AppIntegrationTest {
         .renglones(renglonesPedido)
         .subTotal(importe)
         .total(total)
-        .idEmpresa(1L)
         .idUsuario(2L)
         .idCliente(1L)
         .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
-        .idSucursal(2L)
+        .idSucursal(1L)
         .build();
     PedidoDTO pedidoRecuperado =
       restTemplate.postForObject(
         apiPrefix + "/pedidos",
         nuevoPedidoDTO,
         PedidoDTO.class);
-    EmpresaDTO empresaDTO = restTemplate.getForObject(apiPrefix + "/empresas/2", EmpresaDTO.class);
     assertEquals("Rio Piacentin 345 Corrientes Corrientes", pedidoRecuperado.getDetalleEnvio());
   }
 
@@ -4770,7 +4762,7 @@ class AppIntegrationTest {
         .renglones(renglonesPedido)
         .subTotal(importe)
         .total(total)
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .idUsuario(1L)
         .idCliente(1L)
         .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
@@ -4809,7 +4801,7 @@ class AppIntegrationTest {
     pedidoRecuperado.setTotalEstimado(total);
     pedidoRecuperado.setRenglones(renglonesPedido);
     pedidoRecuperado.setObservaciones("Cambiando las observaciones del pedido");
-    restTemplate.put(apiPrefix + "/pedidos?idEmpresa=1&idCliente=1&idUsuario=1&tipoDeEnvio=USAR_UBICACION_FACTURACION", pedidoRecuperado);
+    restTemplate.put(apiPrefix + "/pedidos?idSucursal=1&idCliente=1&idUsuario=1&tipoDeEnvio=USAR_UBICACION_FACTURACION", pedidoRecuperado);
     PedidoDTO pedidoModificado =
       restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoDTO.class);
     assertEquals(pedidoRecuperado, pedidoModificado);
@@ -4836,7 +4828,7 @@ class AppIntegrationTest {
     BusquedaFacturaVentaCriteria criteria =
       BusquedaFacturaVentaCriteria.builder()
         .nroPedido(pedidoRecuperado.getNroPedido())
-        .idEmpresa(1L)
+        .idSucursal(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
     List<FacturaVenta> facturasRecuperadas =
@@ -4902,9 +4894,9 @@ class AppIntegrationTest {
 
   @Test
   void shouldComprobarSaldoParcialCuentaCorrienteProveedor() {
-    EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    empresa.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
-    restTemplate.put(apiPrefix + "/empresas", empresa);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    restTemplate.put(apiPrefix + "/sucursales", sucursal);
     this.abrirCaja();
     this.shouldCrearFacturaCompraB();
     this.crearReciboParaProveedor(599.25, 1L, 1L);
@@ -5100,7 +5092,7 @@ class AppIntegrationTest {
   @Test
   void shouldVerificarTotalizadoresVenta() {
     BusquedaFacturaVentaCriteria criteria =
-      BusquedaFacturaVentaCriteria.builder().idEmpresa(1L).build();
+      BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
     BigDecimal totalFacturadoVenta =
       restTemplate.postForObject(
         apiPrefix + "/facturas/total-facturado-venta/criteria", criteria, BigDecimal.class);
@@ -5152,7 +5144,7 @@ class AppIntegrationTest {
   @Test
   void shouldVerificarTotalizadoresCompra() {
     BusquedaFacturaCompraCriteria criteria =
-        BusquedaFacturaCompraCriteria.builder().idEmpresa(1L).build();
+        BusquedaFacturaCompraCriteria.builder().idSucursal(1L).build();
     BigDecimal totalFacturadoCompra =
         restTemplate.postForObject(
             apiPrefix + "/facturas/total-facturado-compra/criteria", criteria, BigDecimal.class);
@@ -5185,7 +5177,7 @@ class AppIntegrationTest {
   void shouldVerificarSaldoCaja() {
     CajaDTO caja =
       restTemplate.postForObject(
-        apiPrefix + "/cajas/apertura/empresas/1?saldoApertura=200",
+        apiPrefix + "/cajas/apertura/sucursales/1?saldoApertura=200",
         null,
         CajaDTO.class);
     assertEquals(new BigDecimal("200"), caja.getSaldoApertura());
@@ -5204,7 +5196,7 @@ class AppIntegrationTest {
         .monto(new BigDecimal("200"))
         .build();
     restTemplate.postForObject(
-      apiPrefix + "/gastos?idEmpresa=1&idFormaDePago=1", gasto, GastoDTO.class);
+      apiPrefix + "/gastos?idSucursal=1&idFormaDePago=1", gasto, GastoDTO.class);
     assertEquals(
       new BigDecimal("-200.000000000000000"),
       restTemplate.getForObject(apiPrefix + "/cajas/1/saldo-sistema", BigDecimal.class));
@@ -5220,7 +5212,7 @@ class AppIntegrationTest {
         .monto(new BigDecimal("200.000000000000000"))
         .build();
     restTemplate.postForObject(
-      apiPrefix + "/gastos?idEmpresa=1&idFormaDePago=1", gasto, GastoDTO.class);
+      apiPrefix + "/gastos?idSucursal=1&idFormaDePago=1", gasto, GastoDTO.class);
     assertEquals(
       new BigDecimal("-200.000000000000000"),
       restTemplate.getForObject(apiPrefix + "/cajas/1/saldo-sistema", BigDecimal.class));
@@ -5245,12 +5237,12 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldRecuperarGastoPorEmpresa() {
+  void shouldRecuperarGastoPorSucursal() {
     this.shouldCrearGasto();
     List<GastoDTO> gastos =
         restTemplate
             .exchange(
-                apiPrefix + "/gastos/busqueda/criteria?idEmpresa=1",
+                apiPrefix + "/gastos/busqueda/criteria?idSucursal=1",
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<PaginaRespuestaRest<GastoDTO>>() {})
@@ -5272,7 +5264,7 @@ class AppIntegrationTest {
 
   @Test
   void shouldVerificarFechaCierreCajaSinScheduling() {
-    restTemplate.postForObject(apiPrefix + "/cajas/apertura/empresas/1?saldoApertura=200", null, CajaDTO.class);
+    restTemplate.postForObject(apiPrefix + "/cajas/apertura/sucursales/1?saldoApertura=200", null, CajaDTO.class);
     clockService.cambiarFechaHora(2030, 9, 24, 23, 59, 59);
     restTemplate.put(apiPrefix + "/cajas/1/cierre?monto=300", CajaDTO.class);
     CajaDTO cajaRecuperada = restTemplate.getForObject(apiPrefix + "/cajas/1", CajaDTO.class);
@@ -5286,7 +5278,7 @@ class AppIntegrationTest {
   @Test
   void shouldVerificarFechaCierreCajaConScheduling() {
     clockService.cambiarFechaHora(2019, 12, 31, 10, 15, 35);
-    restTemplate.postForObject(apiPrefix + "/cajas/apertura/empresas/1?saldoApertura=200", null, CajaDTO.class);
+    restTemplate.postForObject(apiPrefix + "/cajas/apertura/sucursales/1?saldoApertura=200", null, CajaDTO.class);
     cajaService.cerrarCaja(1L, new BigDecimal("300"), 1L, true);
     CajaDTO cajaRecuperada = restTemplate.getForObject(apiPrefix + "/cajas/1", CajaDTO.class);
     Calendar fechaCierre = Calendar.getInstance();
@@ -5338,11 +5330,10 @@ class AppIntegrationTest {
   void shouldGenerarPedidoConItemsDelCarrito() {
     this.shouldAgregarItemsAlCarritoCompra();
     NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO = NuevaOrdenDeCompraDTO.builder()
-      .idEmpresa(1L)
+      .idSucursal(1L)
       .idCliente(1L)
       .idUsuario(1L)
       .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
-      .idSucursal(1L)
       .observaciones("probando pedido desde carrito, sin pago")
       .build();
     PedidoDTO pedido =

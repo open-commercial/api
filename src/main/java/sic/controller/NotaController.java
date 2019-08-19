@@ -28,7 +28,7 @@ public class NotaController {
 
   private final INotaService notaService;
   private final IReciboService reciboService;
-  private final IEmpresaService empresaService;
+  private final ISucursalService sucursalService;
   private final IClienteService clienteService;
   private final IProveedorService proveedorService;
   private final IUsuarioService usuarioService;
@@ -42,7 +42,7 @@ public class NotaController {
   public NotaController(
       INotaService notaService,
       IReciboService reciboService,
-      IEmpresaService empresaService,
+      ISucursalService sucursalService,
       IClienteService clienteService,
       IProveedorService proveedorService,
       IUsuarioService usuarioService,
@@ -52,7 +52,7 @@ public class NotaController {
       MessageSource messageSource) {
     this.notaService = notaService;
     this.reciboService = reciboService;
-    this.empresaService = empresaService;
+    this.sucursalService = sucursalService;
     this.clienteService = clienteService;
     this.proveedorService = proveedorService;
     this.usuarioService = usuarioService;
@@ -90,7 +90,7 @@ public class NotaController {
     Rol.COMPRADOR
   })
   public Page<Nota> buscarNotas(
-    @RequestParam Long idEmpresa,
+    @RequestParam Long idSucursal,
     @RequestParam(required = false) Long desde,
     @RequestParam(required = false) Long hasta,
     @RequestParam(required = false) Long idCliente,
@@ -115,7 +115,7 @@ public class NotaController {
     }
     BusquedaNotaCriteria criteria =
       BusquedaNotaCriteria.builder()
-        .idEmpresa(idEmpresa)
+        .idSucursal(idSucursal)
         .buscaPorFecha((desde != null) && (hasta != null))
         .fechaDesde(fechaDesde.getTime())
         .fechaHasta(fechaHasta.getTime())
@@ -153,10 +153,10 @@ public class NotaController {
     }
   }
 
-  @GetMapping("/notas/tipos/empresas/{idEmpresa}")
+  @GetMapping("/notas/tipos/sucursales/{idSucursal}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public TipoDeComprobante[] getTipoNotaCreditoEmpresa(@PathVariable long idEmpresa) {
-    return notaService.getTiposNota(empresaService.getEmpresaPorId(idEmpresa));
+  public TipoDeComprobante[] getTipoNotaCreditoSucursal(@PathVariable long idSucursal) {
+    return notaService.getTiposNota(sucursalService.getSucursalPorId(idSucursal));
   }
 
   @GetMapping("/notas/{idNota}/facturas")
@@ -192,8 +192,8 @@ public class NotaController {
     Rol.COMPRADOR
   })
   public List<TipoDeComprobante> getTipoNotaCreditoCliente(
-      @RequestParam long idCliente, @RequestParam long idEmpresa) {
-    return notaService.getTipoNotaCreditoCliente(idCliente, idEmpresa);
+      @RequestParam long idCliente, @RequestParam long idSursal) {
+    return notaService.getTipoNotaCreditoCliente(idCliente, idSursal);
   }
 
   @GetMapping("/notas/clientes/tipos/debito")
@@ -205,8 +205,8 @@ public class NotaController {
     Rol.COMPRADOR
   })
   public List<TipoDeComprobante> getTipoNotaDebitoCliente(
-      @RequestParam long idCliente, @RequestParam long idEmpresa) {
-    return notaService.getTipoNotaDebitoCliente(idCliente, idEmpresa);
+      @RequestParam long idCliente, @RequestParam long idSucursal) {
+    return notaService.getTipoNotaDebitoCliente(idCliente, idSucursal);
   }
 
   @GetMapping("/notas/proveedores/tipos/credito")
@@ -218,8 +218,8 @@ public class NotaController {
     Rol.COMPRADOR
   })
   public List<TipoDeComprobante> getTipoNotaCreditoProveedor(
-    @RequestParam long idProveedor, @RequestParam long idEmpresa) {
-    return notaService.getTipoNotaCreditoProveedor(idProveedor, idEmpresa);
+    @RequestParam long idProveedor, @RequestParam long idSucursal) {
+    return notaService.getTipoNotaCreditoProveedor(idProveedor, idSucursal);
   }
 
   @GetMapping("/notas/proveedores/tipos/debito")
@@ -231,8 +231,8 @@ public class NotaController {
     Rol.COMPRADOR
   })
   public List<TipoDeComprobante> getTipoNotaDebitoProveedor(
-    @RequestParam long idProveedor, @RequestParam long idEmpresa) {
-    return notaService.getTipoNotaDebitoProveedor(idProveedor, idEmpresa);
+    @RequestParam long idProveedor, @RequestParam long idSucursal) {
+    return notaService.getTipoNotaDebitoProveedor(idProveedor, idSucursal);
   }
 
   @GetMapping("/notas/renglones/credito/{idNotaCredito}")
@@ -310,7 +310,7 @@ public class NotaController {
       @RequestBody NotaCreditoDTO notaCreditoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     NotaCredito notaCredito = modelMapper.map(notaCreditoDTO, NotaCredito.class);
-    notaCredito.setEmpresa(empresaService.getEmpresaPorId(notaCreditoDTO.getIdEmpresa()));
+    notaCredito.setSucursal(sucursalService.getSucursalPorId(notaCreditoDTO.getIdSucursal()));
     if ((notaCreditoDTO.getIdCliente() != null && notaCreditoDTO.getIdProveedor() != null)
         || (notaCreditoDTO.getIdCliente() == null && notaCreditoDTO.getIdProveedor() == null)) {
       throw new BusinessServiceException(messageSource.getMessage(
@@ -344,7 +344,7 @@ public class NotaController {
       @RequestBody NotaDebitoDTO notaDebitoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     NotaDebito notaDebito = modelMapper.map(notaDebitoDTO, NotaDebito.class);
-    notaDebito.setEmpresa(empresaService.getEmpresaPorId(notaDebitoDTO.getIdEmpresa()));
+    notaDebito.setSucursal(sucursalService.getSucursalPorId(notaDebitoDTO.getIdSucursal()));
     if (notaDebitoDTO.getIdCliente() != null) {
       notaDebito.setCliente(clienteService.getClienteNoEliminadoPorId(notaDebitoDTO.getIdCliente()));
       notaDebito.setMovimiento(Movimiento.VENTA);
@@ -399,7 +399,7 @@ public class NotaController {
   @GetMapping("/notas/total-credito/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getTotalNotasCredito(
-    @RequestParam Long idEmpresa,
+    @RequestParam Long idSucursal,
     @RequestParam(required = false) Long desde,
     @RequestParam(required = false) Long hasta,
     @RequestParam(required = false) Long idCliente,
@@ -424,7 +424,7 @@ public class NotaController {
     }
     BusquedaNotaCriteria criteria =
       BusquedaNotaCriteria.builder()
-        .idEmpresa(idEmpresa)
+        .idSucursal(idSucursal)
         .buscaPorFecha((desde != null) && (hasta != null))
         .fechaDesde(fechaDesde.getTime())
         .fechaHasta(fechaHasta.getTime())
@@ -449,7 +449,7 @@ public class NotaController {
   @GetMapping("/notas/total-debito/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getTotalNotasDebito(
-    @RequestParam Long idEmpresa,
+    @RequestParam Long idSucursal,
     @RequestParam(required = false) Long desde,
     @RequestParam(required = false) Long hasta,
     @RequestParam(required = false) Long idCliente,
@@ -474,7 +474,7 @@ public class NotaController {
     }
     BusquedaNotaCriteria criteria =
       BusquedaNotaCriteria.builder()
-        .idEmpresa(idEmpresa)
+        .idSucursal(idSucursal)
         .buscaPorFecha((desde != null) && (hasta != null))
         .fechaDesde(fechaDesde.getTime())
         .fechaHasta(fechaHasta.getTime())
@@ -499,7 +499,7 @@ public class NotaController {
   @GetMapping("/notas/total-iva-credito/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getTotalIvaCredito(
-    @RequestParam Long idEmpresa,
+    @RequestParam Long idSucursal,
     @RequestParam(required = false) Long desde,
     @RequestParam(required = false) Long hasta,
     @RequestParam(required = false) Long idCliente,
@@ -524,7 +524,7 @@ public class NotaController {
     }
     BusquedaNotaCriteria criteria =
       BusquedaNotaCriteria.builder()
-        .idEmpresa(idEmpresa)
+        .idSucursal(idSucursal)
         .buscaPorFecha((desde != null) && (hasta != null))
         .fechaDesde(fechaDesde.getTime())
         .fechaHasta(fechaHasta.getTime())
@@ -549,7 +549,7 @@ public class NotaController {
   @GetMapping("/notas/total-iva-debito/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getTotalIvaDebito(
-    @RequestParam Long idEmpresa,
+    @RequestParam Long idSucursal,
     @RequestParam(required = false) Long desde,
     @RequestParam(required = false) Long hasta,
     @RequestParam(required = false) Long idCliente,
@@ -574,7 +574,7 @@ public class NotaController {
     }
     BusquedaNotaCriteria criteria =
       BusquedaNotaCriteria.builder()
-        .idEmpresa(idEmpresa)
+        .idSucursal(idSucursal)
         .buscaPorFecha((desde != null) && (hasta != null))
         .fechaDesde(fechaDesde.getTime())
         .fechaHasta(fechaHasta.getTime())

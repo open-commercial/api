@@ -2,12 +2,9 @@ package sic.builder;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import sic.modelo.Cliente;
-import sic.modelo.Empresa;
-import sic.modelo.FormaDePago;
-import sic.modelo.Proveedor;
-import sic.modelo.Recibo;
-import sic.modelo.Usuario;
+
+import sic.modelo.*;
+import sic.modelo.Sucursal;
 
 public class ReciboBuilder {
 
@@ -18,7 +15,7 @@ public class ReciboBuilder {
   private boolean eliminado = false;
   private String concepto = "Recibo por contratar al GOLDEN ARMY";
   private FormaDePago formaDePago = new FormaDePagoBuilder().build();
-  private Empresa empresa = new EmpresaBuilder().build();
+  private Sucursal sucursal = new SucursalBuilder().build();
   private Cliente cliente = new ClienteBuilder().build();
   private Usuario usuario = new UsuarioBuilder().build();
   private Proveedor proveedor = null;
@@ -35,7 +32,7 @@ public class ReciboBuilder {
         eliminado,
         concepto,
         formaDePago,
-        empresa,
+      sucursal,
         cliente,
         proveedor,
         usuario,
@@ -77,8 +74,8 @@ public class ReciboBuilder {
     return this;
   }
 
-  public ReciboBuilder withEmpresa(Empresa empresa) {
-    this.empresa = empresa;
+  public ReciboBuilder withSucursal(Sucursal sucursal) {
+    this.sucursal = sucursal;
     return this;
   }
 

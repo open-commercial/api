@@ -19,7 +19,7 @@ import sic.service.*;
 public class CajaController {
 
   private final ICajaService cajaService;
-  private final IEmpresaService empresaService;
+  private final ISucursalService sucursalService;
   private final IUsuarioService usuarioService;
   private final IFormaDePagoService formaDePagoService;
   private final IAuthService authService;
@@ -28,12 +28,12 @@ public class CajaController {
   @Autowired
   public CajaController(
       ICajaService cajaService,
-      IEmpresaService empresaService,
+      ISucursalService sucursalService,
       IFormaDePagoService formaDePagoService,
       IUsuarioService usuarioService,
       IAuthService authService) {
     this.cajaService = cajaService;
-    this.empresaService = empresaService;
+    this.sucursalService = sucursalService;
     this.formaDePagoService = formaDePagoService;
     this.usuarioService = usuarioService;
     this.authService = authService;
@@ -45,16 +45,16 @@ public class CajaController {
     return cajaService.getCajaPorId(idCaja);
   }
 
-  @PostMapping("/cajas/apertura/empresas/{idEmpresa}")
+  @PostMapping("/cajas/apertura/sucursales/{idSucursal}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Caja abrirCaja(
-      @PathVariable long idEmpresa,
+      @PathVariable long idSucursal,
       @RequestParam BigDecimal saldoApertura,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
     return cajaService.abrirCaja(
-        empresaService.getEmpresaPorId(idEmpresa),
+        sucursalService.getSucursalPorId(idSucursal),
         usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn),
         saldoApertura);
   }
@@ -79,7 +79,7 @@ public class CajaController {
   @GetMapping("/cajas/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Page<Caja> getCajasCriteria(
-      @RequestParam long idEmpresa,
+      @RequestParam long idSucursal,
       @RequestParam(required = false) Long desde,
       @RequestParam(required = false) Long hasta,
       @RequestParam(required = false) Long idUsuarioApertura,
@@ -100,7 +100,7 @@ public class CajaController {
             .buscaPorFecha((desde != null) && (hasta != null))
             .fechaDesde(fechaDesde.getTime())
             .fechaHasta(fechaHasta.getTime())
-            .idEmpresa(idEmpresa)
+            .idSucursal(idSucursal)
             .cantidadDeRegistros(0)
             .buscaPorUsuarioApertura(idUsuarioApertura != null)
             .idUsuarioApertura(idUsuarioApertura)
@@ -119,7 +119,7 @@ public class CajaController {
     Date fechaHasta = new Date();
     if (caja.getFechaCierre() != null) fechaHasta = caja.getFechaCierre();
     return cajaService.getMovimientosPorFormaDePagoEntreFechas(
-        caja.getEmpresa(),
+        caja.getSucursal(),
         formaDePagoService.getFormasDePagoPorId(idFormaDePago),
         caja.getFechaApertura(),
         fechaHasta);
@@ -137,16 +137,16 @@ public class CajaController {
     return cajaService.getSaldoSistema(cajaService.getCajaPorId(idCaja));
   }
 
-  @GetMapping("/cajas/empresas/{idEmpresa}/ultima-caja-abierta")
+  @GetMapping("/cajas/sucursales/{idSucursal}/ultima-caja-abierta")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public boolean getEstadoUltimaCaja(@PathVariable long idEmpresa) {
-    return cajaService.isUltimaCajaAbierta(idEmpresa);
+  public boolean getEstadoUltimaCaja(@PathVariable long idSucursal) {
+    return cajaService.isUltimaCajaAbierta(idSucursal);
   }
 
   @GetMapping("/cajas/saldo-sistema")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public BigDecimal getSaldoSistemaCajas(
-      @RequestParam long idEmpresa,
+      @RequestParam long idSucursal,
       @RequestParam(required = false) Long desde,
       @RequestParam(required = false) Long hasta,
       @RequestParam(required = false) Long idUsuarioApertura,
@@ -162,7 +162,7 @@ public class CajaController {
             .buscaPorFecha((desde != null) && (hasta != null))
             .fechaDesde(fechaDesde.getTime())
             .fechaHasta(fechaHasta.getTime())
-            .idEmpresa(idEmpresa)
+            .idSucursal(idSucursal)
             .cantidadDeRegistros(0)
             .buscaPorUsuarioApertura(idUsuarioApertura != null)
             .idUsuarioApertura(idUsuarioApertura)
@@ -175,7 +175,7 @@ public class CajaController {
   @GetMapping("/cajas/saldo-real")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public BigDecimal getSaldoRealCajas(
-      @RequestParam long idEmpresa,
+      @RequestParam long idSucursal,
       @RequestParam(required = false) Long desde,
       @RequestParam(required = false) Long hasta,
       @RequestParam(required = false) Long idUsuarioApertura,
@@ -191,7 +191,7 @@ public class CajaController {
             .buscaPorFecha((desde != null) && (hasta != null))
             .fechaDesde(fechaDesde.getTime())
             .fechaHasta(fechaHasta.getTime())
-            .idEmpresa(idEmpresa)
+            .idSucursal(idSucursal)
             .cantidadDeRegistros(0)
             .buscaPorUsuarioApertura(idUsuarioApertura != null)
             .idUsuarioApertura(idUsuarioApertura)

@@ -35,8 +35,8 @@ public class ConfiguracionDelSistemaDTO {
 
   private String emailPassword;
 
-  private long idEmpresa;
+  private long idSucursal;
 
-  private String nombreEmpresa;
+  private String nombreSucursal;
 
 }

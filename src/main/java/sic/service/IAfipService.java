@@ -3,14 +3,14 @@ package sic.service;
 import afip.wsfe.wsdl.FEAuthRequest;
 import afip.wsfe.wsdl.FECAERequest;
 import sic.modelo.ComprobanteAFIP;
-import sic.modelo.Empresa;
+import sic.modelo.Sucursal;
 import sic.modelo.TipoDeComprobante;
 
 public interface IAfipService {
 
     void autorizar(ComprobanteAFIP comprobante);
     
-    FEAuthRequest getFEAuth(String afipNombreServicio, Empresa empresa);        
+    FEAuthRequest getFEAuth(String afipNombreServicio, Sucursal sucursal);
     
     int getSiguienteNroComprobante(FEAuthRequest feAuthRequest, TipoDeComprobante tipo, int nroPuntoDeVentaAfip);
     

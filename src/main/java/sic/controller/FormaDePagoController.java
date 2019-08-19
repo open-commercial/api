@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.FormaDePago;
 import sic.modelo.Rol;
-import sic.service.IEmpresaService;
+import sic.service.ISucursalService;
 import sic.service.IFormaDePagoService;
 
 @RestController
@@ -15,14 +15,14 @@ import sic.service.IFormaDePagoService;
 public class FormaDePagoController {
 
   private final IFormaDePagoService formaDePagoService;
-  private final IEmpresaService empresaService;
+  private final ISucursalService sucursalService;
 
   @Autowired
   public FormaDePagoController(
       IFormaDePagoService formaDePagoService,
-      IEmpresaService empresaService) {
+      ISucursalService sucursalService) {
     this.formaDePagoService = formaDePagoService;
-    this.empresaService = empresaService;
+    this.sucursalService = sucursalService;
   }
 
   @GetMapping("/formas-de-pago/{idFormaDePago}")
@@ -37,7 +37,7 @@ public class FormaDePagoController {
     return formaDePagoService.getFormasDePagoPorId(idFormaDePago);
   }
 
-  @GetMapping("/formas-de-pago/predeterminada/empresas/{idEmpresa}")
+  @GetMapping("/formas-de-pago/predeterminada/sucursales/{idSucursal}")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -45,12 +45,12 @@ public class FormaDePagoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public FormaDePago getFormaDePagoPredeterminada(@PathVariable long idEmpresa) {
+  public FormaDePago getFormaDePagoPredeterminada(@PathVariable long idSucursal) {
     return formaDePagoService.getFormaDePagoPredeterminada(
-        empresaService.getEmpresaPorId(idEmpresa));
+        sucursalService.getSucursalPorId(idSucursal));
   }
 
-  @GetMapping("/formas-de-pago/empresas/{idEmpresa}")
+  @GetMapping("/formas-de-pago/sucursales/{idSucursal}")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -58,8 +58,8 @@ public class FormaDePagoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public List<FormaDePago> getFormasDePago(@PathVariable long idEmpresa) {
-    return formaDePagoService.getFormasDePagoNoEliminadas(empresaService.getEmpresaPorId(idEmpresa));
+  public List<FormaDePago> getFormasDePago(@PathVariable long idSucursal) {
+    return formaDePagoService.getFormasDePagoNoEliminadas(sucursalService.getSucursalPorId(idSucursal));
   }
 
   @PutMapping("/formas-de-pago/predeterminada/{idFormaDePago}")

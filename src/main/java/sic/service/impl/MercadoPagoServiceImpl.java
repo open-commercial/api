@@ -135,7 +135,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                           notaService
                               .getTipoNotaDebitoCliente(
                                   reciboMP.get().getIdCliente(),
-                                  reciboMP.get().getEmpresa().getId_Empresa())
+                                  reciboMP.get().getSucursal().getIdSucursal())
                               .get(0))
                       .build();
               NotaDebito notaGuardada =
@@ -179,7 +179,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       case approved:
         logger.warn("El pago de mercadopago {} se aprobó correctamente.", payment);
         Recibo nuevoRecibo = new Recibo();
-        nuevoRecibo.setEmpresa(cliente.getEmpresa());
+        nuevoRecibo.setSucursal(cliente.getSucursal());
         nuevoRecibo.setFormaDePago(formaDePagoService.getFormasDePagoPorId(60));
         nuevoRecibo.setUsuario(usuario);
         nuevoRecibo.setCliente(cliente);
