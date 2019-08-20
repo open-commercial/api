@@ -30,6 +30,15 @@ insert into productoAux(idProducto, cantidad, codigo, estante, estanteria, id_Em
 select producto.idProducto, producto.cantidad, producto.codigo, producto.estante, producto.estante, producto.id_Empresa from producto
 where producto.id_Empresa = 1;
 
+-- Actualizando las cantidades de los productos en el minorista
+SET SQL_SAFE_UPDATES = 0;
+update producto inner join productoAux
+on producto.codigo = productoAux.codigo
+set producto.cantidad = producto.cantidad + productoAux.cantidad
+where producto.id_Empresa = 5;
+SET SQL_SAFE_UPDATES = 1;
+--
+
 INSERT INTO cantidadensucursal(cantidad, estante, estanteria, id_Empresa, idProducto)
 SELECT 
    productoAux.cantidad, productoAux.estante, productoAux.estanteria, productoAux.id_Empresa, cantidadensucursal.idProducto
@@ -37,6 +46,21 @@ SELECT
  productoAux on cantidadensucursal.codigo = productoAux.codigo;
  
 ALTER TABLE cantidadensucursal DROP codigo;
+
+-- eliminar productos del mayorista que cumplen con la condicion de tener codigo en el minorista
+TRUNCATE TABLE productoAux;
+
+insert into productoAux(idProducto, cantidad, codigo, estante, estanteria, id_Empresa)
+select producto.idProducto, producto.cantidad, producto.codigo, producto.estante, producto.estante, producto.id_Empresa from producto
+where producto.id_Empresa = 5;
+
+SET SQL_SAFE_UPDATES = 0;
+update producto inner join productoAux
+on producto.codigo = productoAux.codigo
+set producto.eliminado = 1
+where producto.id_Empresa = 1;
+SET SQL_SAFE_UPDATES = 1;
+--
  
 DROP TABLE IF EXISTS productoAux; 
 
@@ -60,18 +84,12 @@ UPDATE producto SET id_Rubro = 1 where id_Rubro = 37;
 UPDATE producto SET id_Rubro = 4 where id_Rubro = 39;
 UPDATE producto SET id_Rubro = 7 where id_Rubro = 41;
 UPDATE producto SET id_Rubro = 5 where id_Rubro = 53;
+UPDATE producto SET id_Rubro = 10 where id_Rubro = 68;
 UPDATE producto SET id_Rubro = 11 where id_Rubro = 69;
 UPDATE producto SET id_Rubro = 8 where id_Rubro = 70;
 UPDATE producto SET id_Rubro = 12 where id_Rubro = 71;
 UPDATE producto SET id_Rubro = 6 where id_Rubro = 72;
 UPDATE producto SET id_Rubro = 9 where id_Rubro = 74;
-
--- 
--- DELETE FROM rubro WHERE id_Rubro = 15 
--- or id_Rubro = 3 or id_Rubro = 1 or id_Rubro = 4 or id_Rubro = 7 
--- or id_Rubro = 5 or id_Rubro = 11 or id_Rubro = 8 or id_Rubro = 12 or id_Rubro = 6
---  or id_Rubro = 9;
-
 
 alter TABLE medida DROP FOREIGN KEY FK5jsf5bmdsydn5wfvlgsofl4vf;
 alter TABLE medida drop column id_Empresa;
@@ -79,8 +97,8 @@ UPDATE producto SET id_Medida = 1 where id_Medida = 18;
 UPDATE producto SET id_Medida = 6 where id_Medida = 19;
 
 
-DELETE FROM medida WHERE id_Medida = 18 
-or id_Medida = 19;
+DELETE FROM medida WHERE id_Medida = 18; 
+DELETE FROM medida WHERE id_Medida = 19;
 
 RENAME TABLE empresa TO sucursal;
 
