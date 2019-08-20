@@ -55,12 +55,11 @@ public class AuthController {
   }
 
   @PutMapping("/logout")
-  public void logout(@RequestHeader("Authorization") String authorizationHeader) {
-    if (authService.esAuthorizationHeaderValido(authorizationHeader)) {
-        Claims claims = authService.getClaimsDelToken(authorizationHeader);
-        long idUsuario = (int) claims.get("idUsuario");
-        usuarioService.actualizarToken("", idUsuario);
-    }
+  public void logout(
+      @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuario = (int) claims.get("idUsuario");
+    usuarioService.actualizarToken("", idUsuario);
   }
 
   @GetMapping("/password-recovery")

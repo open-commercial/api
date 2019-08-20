@@ -25,6 +25,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,6 +65,7 @@ public class NotaServiceImpl implements INotaService {
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
   private static final BigDecimal CIEN = new BigDecimal("100");
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
 
@@ -152,7 +154,50 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
-  public Page<Nota> buscarNotas(BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn) {
+  public Page<NotaCredito> buscarNotasCredito(
+      BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn) {
+    this.validarFechaDeCriteria(busquedaNotaCriteria);
+    return notaCreditoRepository.findAll(
+        this.getBuilderNotaCredito(busquedaNotaCriteria, idUsuarioLoggedIn),
+        this.getPageable(
+            (busquedaNotaCriteria.getPagina() == null || busquedaNotaCriteria.getPagina() < 0)
+                ? 0
+                : busquedaNotaCriteria.getPagina(),
+            busquedaNotaCriteria.getOrdenarPor(),
+            busquedaNotaCriteria.getSentido()));
+  }
+
+  @Override
+  public Page<NotaDebito> buscarNotasDebito(
+      BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn) {
+    this.validarFechaDeCriteria(busquedaNotaCriteria);
+    return notaDebitoRepository.findAll(
+        this.getBuilderNotaDebito(busquedaNotaCriteria, idUsuarioLoggedIn),
+        this.getPageable(
+            (busquedaNotaCriteria.getPagina() == null || busquedaNotaCriteria.getPagina() < 0)
+                ? 0
+                : busquedaNotaCriteria.getPagina(),
+            busquedaNotaCriteria.getOrdenarPor(),
+            busquedaNotaCriteria.getSentido()));
+  }
+
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+    String ordenDefault = "fecha";
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
+    }
+  }
+
+  private void validarFechaDeCriteria(BusquedaNotaCriteria busquedaNotaCriteria) {
     // Fecha de Nota
     if (busquedaNotaCriteria.isBuscaPorFecha()
         && (busquedaNotaCriteria.getFechaDesde() == null
@@ -174,75 +219,6 @@ public class NotaServiceImpl implements INotaService {
       cal.set(Calendar.SECOND, 59);
       busquedaNotaCriteria.setFechaHasta(cal.getTime());
     }
-    return notaRepository.findAll(
-        this.getBuilderNota(busquedaNotaCriteria, idUsuarioLoggedIn),
-        busquedaNotaCriteria.getPageable());
-  }
-
-  private BooleanBuilder getBuilderNota(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
-    QNota qNota = QNota.nota;
-    BooleanBuilder builder = new BooleanBuilder();
-    builder.and(
-        qNota.sucursal.idSucursal.eq(criteria.getIdSucursal()).and(qNota.eliminada.eq(false)));
-    if (criteria.getMovimiento() == Movimiento.VENTA)
-      builder.and(qNota.movimiento.eq(Movimiento.VENTA));
-    if (criteria.getMovimiento() == Movimiento.COMPRA)
-      builder.and(qNota.movimiento.eq(Movimiento.COMPRA));
-    // Fecha
-    if (criteria.isBuscaPorFecha()) {
-      FormatterFechaHora formateadorFecha =
-          new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
-      DateExpression<Date> fDesde =
-          Expressions.dateTemplate(
-              Date.class,
-              "convert({0}, datetime)",
-              formateadorFecha.format(criteria.getFechaDesde()));
-      DateExpression<Date> fHasta =
-          Expressions.dateTemplate(
-              Date.class,
-              "convert({0}, datetime)",
-              formateadorFecha.format(criteria.getFechaHasta()));
-      builder.and(qNota.fecha.between(fDesde, fHasta));
-    }
-    if (criteria.isBuscaUsuario())
-      builder.and(qNota.usuario.id_Usuario.eq(criteria.getIdUsuario()));
-    if (criteria.isBuscaCliente() && criteria.getMovimiento().equals(Movimiento.VENTA))
-      builder.and(qNota.cliente.id_Cliente.eq(criteria.getIdCliente()));
-    if (criteria.isBuscaViajante() && criteria.getMovimiento().equals(Movimiento.VENTA))
-      builder.and(qNota.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
-    if (criteria.isBuscaProveedor())
-      builder.and(qNota.proveedor.id_Proveedor.eq(criteria.getIdCliente()));
-    if (criteria.isBuscaPorTipoComprobante())
-      builder.and(qNota.tipoComprobante.eq(criteria.getTipoComprobante()));
-    if (criteria.isBuscaPorNumeroNota())
-      builder
-          .and(qNota.serie.eq(criteria.getNumSerie()))
-          .and(qNota.nroNota.eq(criteria.getNumNota()));
-    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
-    BooleanBuilder rsPredicate = new BooleanBuilder();
-    if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
-        && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
-        && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
-      for (Rol rol : usuarioLogueado.getRoles()) {
-        switch (rol) {
-          case VIAJANTE:
-            rsPredicate.or(qNota.cliente.viajante.eq(usuarioLogueado));
-            break;
-          case COMPRADOR:
-            Cliente clienteRelacionado =
-                clienteService.getClientePorIdUsuarioYidSucursal(
-                    idUsuarioLoggedIn, criteria.getIdSucursal());
-            if (clienteRelacionado != null) {
-              rsPredicate.or(qNota.cliente.eq(clienteRelacionado));
-            } else {
-              rsPredicate.or(qNota.cliente.isNull());
-            }
-            break;
-        }
-      }
-      builder.and(rsPredicate);
-    }
-    return builder;
   }
 
   private BooleanBuilder getBuilderNotaCredito(
@@ -318,18 +294,18 @@ public class NotaServiceImpl implements INotaService {
 
   private BooleanBuilder getBuilderNotaDebito(
       BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
-    QNotaDebito qNotDebito = QNotaDebito.notaDebito;
+    QNotaDebito qNotaDebito = QNotaDebito.notaDebito;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
-        qNotDebito
+        qNotaDebito
             .sucursal
             .idSucursal
             .eq(criteria.getIdSucursal())
-            .and(qNotDebito.eliminada.eq(false)));
+            .and(qNotaDebito.eliminada.eq(false)));
     if (criteria.getMovimiento() == Movimiento.VENTA)
-      builder.and(qNotDebito.movimiento.eq(Movimiento.VENTA));
+      builder.and(qNotaDebito.movimiento.eq(Movimiento.VENTA));
     if (criteria.getMovimiento() == Movimiento.COMPRA)
-      builder.and(qNotDebito.movimiento.eq(Movimiento.COMPRA));
+      builder.and(qNotaDebito.movimiento.eq(Movimiento.COMPRA));
     // Fecha
     if (criteria.isBuscaPorFecha()) {
       FormatterFechaHora formateadorFecha =
@@ -344,22 +320,22 @@ public class NotaServiceImpl implements INotaService {
               Date.class,
               "convert({0}, datetime)",
               formateadorFecha.format(criteria.getFechaHasta()));
-      builder.and(qNotDebito.fecha.between(fDesde, fHasta));
+      builder.and(qNotaDebito.fecha.between(fDesde, fHasta));
     }
     if (criteria.isBuscaUsuario())
-      builder.and(qNotDebito.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+      builder.and(qNotaDebito.usuario.id_Usuario.eq(criteria.getIdUsuario()));
     if (criteria.isBuscaCliente())
-      builder.and(qNotDebito.cliente.id_Cliente.eq(criteria.getIdCliente()));
+      builder.and(qNotaDebito.cliente.id_Cliente.eq(criteria.getIdCliente()));
     if (criteria.isBuscaViajante())
-      builder.and(qNotDebito.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
+      builder.and(qNotaDebito.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaProveedor())
-      builder.and(qNotDebito.proveedor.id_Proveedor.eq(criteria.getIdCliente()));
+      builder.and(qNotaDebito.proveedor.id_Proveedor.eq(criteria.getIdCliente()));
     if (criteria.isBuscaPorTipoComprobante())
-      builder.and(qNotDebito.tipoComprobante.eq(criteria.getTipoComprobante()));
+      builder.and(qNotaDebito.tipoComprobante.eq(criteria.getTipoComprobante()));
     if (criteria.isBuscaPorNumeroNota())
       builder
-          .and(qNotDebito.serie.eq(criteria.getNumSerie()))
-          .and(qNotDebito.nroNota.eq(criteria.getNumNota()));
+          .and(qNotaDebito.serie.eq(criteria.getNumSerie()))
+          .and(qNotaDebito.nroNota.eq(criteria.getNumNota()));
     Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     BooleanBuilder rsPredicate = new BooleanBuilder();
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
@@ -368,16 +344,16 @@ public class NotaServiceImpl implements INotaService {
       for (Rol rol : usuarioLogueado.getRoles()) {
         switch (rol) {
           case VIAJANTE:
-            rsPredicate.or(qNotDebito.cliente.viajante.eq(usuarioLogueado));
+            rsPredicate.or(qNotaDebito.cliente.viajante.eq(usuarioLogueado));
             break;
           case COMPRADOR:
             Cliente clienteRelacionado =
                 clienteService.getClientePorIdUsuarioYidSucursal(
                     idUsuarioLoggedIn, criteria.getIdSucursal());
             if (clienteRelacionado != null) {
-              rsPredicate.or(qNotDebito.cliente.eq(clienteRelacionado));
+              rsPredicate.or(qNotaDebito.cliente.eq(clienteRelacionado));
             } else {
-              rsPredicate.or(qNotDebito.cliente.isNull());
+              rsPredicate.or(qNotaDebito.cliente.isNull());
             }
             break;
         }
@@ -566,32 +542,45 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
-  public TipoDeComprobante[] getTiposNota(Sucursal sucursal) {
-    // cuando la Sucursal discrimina IVA
+  public TipoDeComprobante[] getTiposNotaCredito(Sucursal sucursal) {
+    // cuando la Empresa discrimina IVA
     if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())) {
-      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[10];
+      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[5];
       tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_A;
       tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_B;
       tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_X;
       tiposPermitidos[3] = TipoDeComprobante.NOTA_CREDITO_Y;
       tiposPermitidos[4] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
-      tiposPermitidos[5] = TipoDeComprobante.NOTA_DEBITO_A;
-      tiposPermitidos[6] = TipoDeComprobante.NOTA_DEBITO_B;
-      tiposPermitidos[7] = TipoDeComprobante.NOTA_DEBITO_X;
-      tiposPermitidos[8] = TipoDeComprobante.NOTA_DEBITO_Y;
-      tiposPermitidos[9] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
       return tiposPermitidos;
     } else {
-      // cuando la Sucursal NO discrimina IVA
-      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[8];
+      // cuando la Empresa NO discrimina IVA
+      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
       tiposPermitidos[0] = TipoDeComprobante.NOTA_CREDITO_B;
       tiposPermitidos[1] = TipoDeComprobante.NOTA_CREDITO_X;
       tiposPermitidos[2] = TipoDeComprobante.NOTA_CREDITO_Y;
       tiposPermitidos[3] = TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
-      tiposPermitidos[4] = TipoDeComprobante.NOTA_DEBITO_B;
-      tiposPermitidos[5] = TipoDeComprobante.NOTA_DEBITO_X;
-      tiposPermitidos[6] = TipoDeComprobante.NOTA_DEBITO_Y;
-      tiposPermitidos[7] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
+      return tiposPermitidos;
+    }
+  }
+
+  @Override
+  public TipoDeComprobante[] getTiposNotaDebito(Sucursal sucursal) {
+    // cuando la Empresa discrimina IVA
+    if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())) {
+      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[5];
+      tiposPermitidos[0] = TipoDeComprobante.NOTA_DEBITO_A;
+      tiposPermitidos[1] = TipoDeComprobante.NOTA_DEBITO_B;
+      tiposPermitidos[2] = TipoDeComprobante.NOTA_DEBITO_X;
+      tiposPermitidos[3] = TipoDeComprobante.NOTA_DEBITO_Y;
+      tiposPermitidos[4] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
+      return tiposPermitidos;
+    } else {
+      // cuando la Empresa NO discrimina IVA
+      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
+      tiposPermitidos[0] = TipoDeComprobante.NOTA_DEBITO_B;
+      tiposPermitidos[1] = TipoDeComprobante.NOTA_DEBITO_X;
+      tiposPermitidos[2] = TipoDeComprobante.NOTA_DEBITO_Y;
+      tiposPermitidos[3] = TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO;
       return tiposPermitidos;
     }
   }

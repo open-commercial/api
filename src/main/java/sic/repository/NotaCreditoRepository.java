@@ -1,12 +1,13 @@
 package sic.repository;
 
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.*;
 import java.util.List;
 
 public interface NotaCreditoRepository
-    extends NotaRepository<NotaCredito>, NotaCreditoRepositoryCustom {
+    extends NotaRepository<NotaCredito>, NotaCreditoRepositoryCustom, QuerydslPredicateExecutor<NotaCredito> {
 
   List<NotaCredito> findAllByFacturaVentaAndEliminada(FacturaVenta factura, boolean eliminada);
 

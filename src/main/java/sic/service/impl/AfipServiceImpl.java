@@ -298,106 +298,46 @@ public class AfipServiceImpl implements IAfipService {
     int docTipo = (comprobante.getCliente().getCategoriaIVA() == CategoriaIVA.CONSUMIDOR_FINAL) ? 96 : 80;
     switch (comprobante.getTipoComprobante()) {
       case FACTURA_A:
+        this.validarCliente(comprobante.getCliente());
         cabecera.setCbteTipo(1);
         detalle.setDocTipo(docTipo);
         detalle.setDocNro(comprobante.getCliente().getIdFiscal());
         break;
       case NOTA_DEBITO_A:
+        this.validarCliente(comprobante.getCliente());
         cabecera.setCbteTipo(2);
         detalle.setDocTipo(docTipo);
         detalle.setDocNro(comprobante.getCliente().getIdFiscal());
         break;
       case NOTA_CREDITO_A:
+        this.validarCliente(comprobante.getCliente());
         cabecera.setCbteTipo(3);
         detalle.setDocTipo(docTipo);
         detalle.setDocNro(comprobante.getCliente().getIdFiscal());
         break;
       case FACTURA_B:
         cabecera.setCbteTipo(6);
-        // menor a $5000, si DocTipo = 99 DocNro debe ser igual a 0 (simula un consumidor final ???)
-        if (comprobante.getTotal().compareTo(LIMITE_MONTO_CONSUMIDOR_FINAL) < 0) {
-          detalle.setDocTipo(99);
-          detalle.setDocNro(0);
-        } else {
-          if (comprobante.getCliente().getIdFiscal() == null) {
-            throw new BusinessServiceException(messageSource.getMessage(
-              "mensaje_cliente_sin_idFiscal_error", null, Locale.getDefault()));
-          }
-          detalle.setDocTipo(docTipo);
-          detalle.setDocNro(comprobante.getCliente().getIdFiscal());
-        }
+        this.procesarDetalle(detalle, comprobante);
         break;
       case NOTA_DEBITO_B:
         cabecera.setCbteTipo(7);
-        // menor a $5000, si DocTipo = 99 DocNro debe ser igual a 0 (simula un consumidor final ???)
-        if (comprobante.getTotal().compareTo(LIMITE_MONTO_CONSUMIDOR_FINAL) < 0) {
-          detalle.setDocTipo(99);
-          detalle.setDocNro(0);
-        } else {
-          if (comprobante.getCliente().getIdFiscal() == null) {
-            throw new BusinessServiceException(messageSource.getMessage(
-              "mensaje_cliente_sin_idFiscal_error", null, Locale.getDefault()));
-          }
-          detalle.setDocTipo(docTipo);
-          detalle.setDocNro(comprobante.getCliente().getIdFiscal());
-        }
+        this.procesarDetalle(detalle, comprobante);
         break;
       case NOTA_CREDITO_B:
         cabecera.setCbteTipo(8);
-        // menor a $5000, si DocTipo = 99 DocNro debe ser igual a 0 (simula un consumidor final ???)
-        if (comprobante.getTotal().compareTo(LIMITE_MONTO_CONSUMIDOR_FINAL) < 0) {
-          detalle.setDocTipo(99);
-          detalle.setDocNro(0);
-        } else {
-          if (comprobante.getCliente().getIdFiscal() == null) {
-            throw new BusinessServiceException(messageSource.getMessage(
-              "mensaje_cliente_sin_idFiscal_error", null, Locale.getDefault()));
-          }
-          detalle.setDocTipo(docTipo);
-          detalle.setDocNro(comprobante.getCliente().getIdFiscal());
-        }
+        this.procesarDetalle(detalle, comprobante);
         break;
       case FACTURA_C:
         cabecera.setCbteTipo(11);
-        if (comprobante.getTotal().compareTo(LIMITE_MONTO_CONSUMIDOR_FINAL) < 0) {
-          detalle.setDocTipo(99);
-          detalle.setDocNro(0);
-        } else {
-          if (comprobante.getCliente().getIdFiscal() == null) {
-            throw new BusinessServiceException(messageSource.getMessage(
-              "mensaje_cliente_sin_idFiscal_error", null, Locale.getDefault()));
-          }
-          detalle.setDocTipo(docTipo);
-          detalle.setDocNro(comprobante.getCliente().getIdFiscal());
-        }
+        this.procesarDetalle(detalle, comprobante);
         break;
       case NOTA_DEBITO_C:
         cabecera.setCbteTipo(12);
-        if (comprobante.getTotal().compareTo(LIMITE_MONTO_CONSUMIDOR_FINAL) < 0) {
-          detalle.setDocTipo(99);
-          detalle.setDocNro(0);
-        } else {
-          if (comprobante.getCliente().getIdFiscal() == null) {
-            throw new BusinessServiceException(messageSource.getMessage(
-              "mensaje_cliente_sin_idFiscal_error", null, Locale.getDefault()));
-          }
-          detalle.setDocTipo(docTipo);
-          detalle.setDocNro(comprobante.getCliente().getIdFiscal());
-        }
+        this.procesarDetalle(detalle, comprobante);
         break;
       case NOTA_CREDITO_C:
         cabecera.setCbteTipo(13);
-        if (comprobante.getTotal().compareTo(LIMITE_MONTO_CONSUMIDOR_FINAL) < 0) {
-          detalle.setDocTipo(99);
-          detalle.setDocNro(0);
-        } else {
-          if (comprobante.getCliente().getIdFiscal() == null) {
-            throw new BusinessServiceException(messageSource.getMessage(
-              "mensaje_cliente_sin_idFiscal_error", null, Locale.getDefault()));
-          }
-          detalle.setDocTipo(docTipo);
-          detalle.setDocNro(comprobante.getCliente().getIdFiscal());
-        }
+        this.procesarDetalle(detalle, comprobante);
         break;
       default:
         throw new BusinessServiceException(messageSource.getMessage(
@@ -509,5 +449,26 @@ public class AfipServiceImpl implements IAfipService {
     arrayDetalle.getFECAEDetRequest().add(detalle);
     fecaeRequest.setFeDetReq(arrayDetalle);
     return fecaeRequest;
+  }
+
+  private void procesarDetalle(FECAEDetRequest detalle, ComprobanteAFIP comprobante) {
+    // menor a LIMITE_MONTO_CONSUMIDOR_FINAL, si DocTipo = 99 DocNro debe ser igual a 0 (simula un consumidor final ???)
+    if (comprobante.getTotal().compareTo(LIMITE_MONTO_CONSUMIDOR_FINAL) < 0) {
+      detalle.setDocTipo(99);
+      detalle.setDocNro(0);
+    } else {
+      this.validarCliente(comprobante.getCliente());
+      detalle.setDocTipo(
+          (comprobante.getCliente().getCategoriaIVA() == CategoriaIVA.CONSUMIDOR_FINAL) ? 96 : 80);
+      detalle.setDocNro(comprobante.getCliente().getIdFiscal());
+    }
+  }
+
+  private void validarCliente(Cliente cliente) {
+    if (cliente.getIdFiscal() == null) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_cliente_sin_idFiscal_error", null, Locale.getDefault()));
+    }
   }
 }

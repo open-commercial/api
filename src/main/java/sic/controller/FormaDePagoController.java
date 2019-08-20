@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.FormaDePago;
 import sic.modelo.Rol;
-import sic.service.ISucursalService;
 import sic.service.IFormaDePagoService;
 
 @RestController
@@ -15,14 +14,11 @@ import sic.service.IFormaDePagoService;
 public class FormaDePagoController {
 
   private final IFormaDePagoService formaDePagoService;
-  private final ISucursalService sucursalService;
 
   @Autowired
   public FormaDePagoController(
-      IFormaDePagoService formaDePagoService,
-      ISucursalService sucursalService) {
+      IFormaDePagoService formaDePagoService) {
     this.formaDePagoService = formaDePagoService;
-    this.sucursalService = sucursalService;
   }
 
   @GetMapping("/formas-de-pago/{idFormaDePago}")

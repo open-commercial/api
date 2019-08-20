@@ -1,11 +1,12 @@
 package sic.repository;
 
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.*;
 
 public interface NotaDebitoRepository
-    extends NotaRepository<NotaDebito>, NotaDebitoRepositoryCustom {
+    extends NotaRepository<NotaDebito>, NotaDebitoRepositoryCustom, QuerydslPredicateExecutor<NotaDebito> {
 
   @Query(
       "SELECT max(nd.nroNota) FROM NotaDebito nd "
