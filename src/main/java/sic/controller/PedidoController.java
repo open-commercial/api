@@ -127,7 +127,7 @@ public class PedidoController {
     Rol.COMPRADOR
   })
   public Page<Pedido> buscarConCriteria(
-      @RequestParam Long idSursal,
+      @RequestParam Long idSucursal,
       @RequestParam(required = false) Long desde,
       @RequestParam(required = false) Long hasta,
       @RequestParam(required = false) Long idCliente,
@@ -168,7 +168,7 @@ public class PedidoController {
             .tipoDeEnvio(tipoDeEnvio)
             .buscaPorProducto(idProducto != null)
             .idProducto(idProducto)
-            .idSucursal(idSursal)
+            .idSucursal(idSucursal)
             .pageable(pageable)
             .build();
     Claims claims = authService.getClaimsDelToken(authorizationHeader);

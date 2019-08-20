@@ -90,7 +90,7 @@ public class ProductoServiceImpl implements IProductoService {
       Producto productoDuplicado = this.getProductoPorCodigo(producto.getCodigo());
       if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
           && productoDuplicado != null
-          && productoDuplicado.getIdProducto() != producto.getIdProducto()) {
+          && !producto.getIdProducto().equals(productoDuplicado.getIdProducto())) {
         throw new BusinessServiceException(
             messageSource.getMessage(
                 "mensaje_producto_duplicado_codigo", null, Locale.getDefault()));
@@ -112,7 +112,7 @@ public class ProductoServiceImpl implements IProductoService {
     }
     if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
         && productoDuplicado != null
-        && productoDuplicado.getIdProducto() != producto.getIdProducto())
+        && !producto.getIdProducto().equals(productoDuplicado.getIdProducto()))
       throw new BusinessServiceException(
           messageSource.getMessage(
               "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()));
