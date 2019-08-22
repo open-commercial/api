@@ -142,8 +142,10 @@ public class PedidoController {
       @RequestHeader("Authorization") String authorizationHeader) {
     Calendar fechaDesde = Calendar.getInstance();
     Calendar fechaHasta = Calendar.getInstance();
-    if ((desde != null) && (hasta != null)) {
+    if (desde != null) {
       fechaDesde.setTimeInMillis(desde);
+    }
+    if (hasta != null) {
       fechaHasta.setTimeInMillis(hasta);
     }
     Cliente cliente = null;
@@ -152,9 +154,9 @@ public class PedidoController {
     Pageable pageable = PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "fecha"));
     BusquedaPedidoCriteria criteria =
         BusquedaPedidoCriteria.builder()
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
+            .buscaPorFecha((desde != null) || (hasta != null))
+            .fechaDesde((desde != null) ? fechaDesde.getTime() : null)
+            .fechaHasta((hasta != null) ? fechaHasta.getTime() : null)
             .buscaCliente(cliente != null)
             .idCliente(idCliente)
             .buscaUsuario(idUsuario != null)

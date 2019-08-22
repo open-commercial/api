@@ -80,7 +80,7 @@ public class GastoServiceImpl implements IGastoService {
     if (criteria.isBuscaPorFecha()
         && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
       throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_pedido_fechas_busqueda_invalidas", null, Locale.getDefault()));
+        "mensaje_gasto_fechas_busqueda_invalidas", null, Locale.getDefault()));
     }
     if (criteria.isBuscaPorFecha()) {
       Calendar cal = new GregorianCalendar();

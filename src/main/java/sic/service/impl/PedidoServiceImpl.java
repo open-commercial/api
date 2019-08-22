@@ -260,23 +260,22 @@ public class PedidoServiceImpl implements IPedidoService {
   @Override
   public Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
     // Fecha
-    if (criteria.isBuscaPorFecha()
-        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_pedido_fechas_busqueda_invalidas", null, Locale.getDefault()));
-    }
     if (criteria.isBuscaPorFecha()) {
       Calendar cal = new GregorianCalendar();
-      cal.setTime(criteria.getFechaDesde());
-      cal.set(Calendar.HOUR_OF_DAY, 0);
-      cal.set(Calendar.MINUTE, 0);
-      cal.set(Calendar.SECOND, 0);
-      criteria.setFechaDesde(cal.getTime());
-      cal.setTime(criteria.getFechaHasta());
-      cal.set(Calendar.HOUR_OF_DAY, 23);
-      cal.set(Calendar.MINUTE, 59);
-      cal.set(Calendar.SECOND, 59);
-      criteria.setFechaHasta(cal.getTime());
+      if(criteria.getFechaDesde() != null){
+        cal.setTime(criteria.getFechaDesde());
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        criteria.setFechaDesde(cal.getTime());
+      }
+      if(criteria.getFechaHasta() != null) {
+        cal.setTime(criteria.getFechaHasta());
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        criteria.setFechaHasta(cal.getTime());
+      }
     }
     QPedido qPedido = QPedido.pedido;
     BooleanBuilder builder = new BooleanBuilder();
@@ -285,17 +284,33 @@ public class PedidoServiceImpl implements IPedidoService {
     if (criteria.isBuscaPorFecha()) {
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
-      DateExpression<Date> fDesde =
-          Expressions.dateTemplate(
-              Date.class,
-              "convert({0}, datetime)",
-              formateadorFecha.format(criteria.getFechaDesde()));
-      DateExpression<Date> fHasta =
-          Expressions.dateTemplate(
-              Date.class,
-              "convert({0}, datetime)",
-              formateadorFecha.format(criteria.getFechaHasta()));
-      builder.and(qPedido.fecha.between(fDesde, fHasta));
+      if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
+        DateExpression<Date> fDesde =
+            Expressions.dateTemplate(
+                Date.class,
+                "convert({0}, datetime)",
+                formateadorFecha.format(criteria.getFechaDesde()));
+        DateExpression<Date> fHasta =
+            Expressions.dateTemplate(
+                Date.class,
+                "convert({0}, datetime)",
+                formateadorFecha.format(criteria.getFechaHasta()));
+        builder.and(qPedido.fecha.between(fDesde, fHasta));
+      } else if (criteria.getFechaDesde() != null) {
+        DateExpression<Date> fDesde =
+            Expressions.dateTemplate(
+                Date.class,
+                "convert({0}, datetime)",
+                formateadorFecha.format(criteria.getFechaDesde()));
+        builder.and(qPedido.fecha.after(fDesde));
+      } else if (criteria.getFechaHasta() != null) {
+        DateExpression<Date> fHasta =
+            Expressions.dateTemplate(
+                Date.class,
+                "convert({0}, datetime)",
+                formateadorFecha.format(criteria.getFechaHasta()));
+        builder.and(qPedido.fecha.before(fHasta));
+      }
     }
     if (criteria.isBuscaCliente())
       builder.and(qPedido.cliente.id_Cliente.eq(criteria.getIdCliente()));
