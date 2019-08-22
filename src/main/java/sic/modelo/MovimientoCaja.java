@@ -2,11 +2,15 @@ package sic.modelo;
 
 import java.math.BigDecimal;
 import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import sic.controller.Views;
 
 @Data
 @EqualsAndHashCode(of = {"idMovimiento", "tipoComprobante", "fecha"})
+@JsonView(Views.Comprador.class)
 public class MovimientoCaja implements Comparable<MovimientoCaja> {
 
     private long idMovimiento;

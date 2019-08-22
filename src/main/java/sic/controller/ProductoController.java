@@ -59,8 +59,7 @@ public class ProductoController {
     this.messageSource = messageSource;
   }
 
-  @JsonView(Views.Public.class)
-  @GetMapping("/public/productos/{idProducto}")
+  @GetMapping("/productos/{idProducto}")
   public Producto getProductoPorIdPublic(
     @PathVariable long idProducto,
     @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
@@ -83,8 +82,7 @@ public class ProductoController {
     }
   }
 
-  @JsonView(Views.Public.class)
-  @GetMapping("/public/productos/busqueda/criteria")
+  @GetMapping("/productos/busqueda/criteria")
   public Page<Producto> buscarProductosPublic(
       @RequestParam long idEmpresa,
       @RequestParam(required = false) String codigo,
@@ -121,7 +119,7 @@ public class ProductoController {
     }
   }
 
-  @GetMapping("/productos/{idProducto}")
+  /*@GetMapping("/productos/{idProducto}")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -192,7 +190,7 @@ public class ProductoController {
     } else {
      return productos;
     }
-  }
+  }*/
 
   @GetMapping("/productos/busqueda")
   @AccesoRolesPermitidos({

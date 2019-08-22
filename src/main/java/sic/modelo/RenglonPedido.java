@@ -5,10 +5,12 @@ import java.math.BigDecimal;
 import javax.persistence.*;
 import javax.validation.constraints.DecimalMin;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import sic.controller.Views;
 
 @Entity
 @Table(name = "renglonpedido")
@@ -16,6 +18,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@JsonView(Views.Comprador.class)
 public class RenglonPedido implements Serializable {
 
   @Id

@@ -6,11 +6,15 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import sic.controller.Views;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
@@ -21,6 +25,7 @@ import javax.validation.constraints.NotEmpty;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"username", "email"})
 @ToString(exclude = {"roles", "password"})
+@JsonView(Views.Comprador.class)
 @JsonIgnoreProperties({"token", "passwordRecoveryKey", "passwordRecoveryKeyExpirationDate", "eliminado"})
 public class Usuario implements Serializable {
 
@@ -66,6 +71,7 @@ public class Usuario implements Serializable {
     @NotEmpty(message = "{mensaje_usuario_no_selecciono_rol}")
     private List<Rol> roles;
 
+    @JsonView(Views.Administrador.class)
     private boolean habilitado;
     
     private boolean eliminado;

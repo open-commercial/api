@@ -11,16 +11,19 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.QueryInit;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import sic.controller.Views;
 
 @Entity
 @Table(name = "cuentacorrientecliente")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
+@JsonView(Views.Comprador.class)
 @JsonIgnoreProperties({"empresa"})
 public class CuentaCorrienteCliente extends CuentaCorriente implements Serializable {
 
