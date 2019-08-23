@@ -25,20 +25,21 @@ import sic.controller.Views;
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"descripcion", "empresa"})
 @ToString
+@JsonView(Views.Vendedor.class)
 @JsonIgnoreProperties({"medida", "rubro", "proveedor", "empresa"})
 public class Producto implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @JsonView(Views.Public.class)
+  @JsonView(Views.Comprador.class)
   private long idProducto;
 
-  @JsonView(Views.Public.class)
+  @JsonView(Views.Comprador.class)
   private String codigo;
 
   @NotNull(message = "{mensaje_producto_vacio_descripcion}")
   @NotEmpty(message = "{mensaje_producto_vacio_descripcion}")
-  @JsonView(Views.Public.class)
+  @JsonView(Views.Comprador.class)
   private String descripcion;
 
   @Column(precision = 25, scale = 15)
@@ -46,11 +47,11 @@ public class Producto implements Serializable {
   private BigDecimal cantidad;
 
   @Transient
-  @JsonView(Views.Public.class)
+  @JsonView(Views.Comprador.class)
   private boolean hayStock;
 
   @Transient
-  @JsonView(Views.Public.class)
+  @JsonView(Views.Comprador.class)
   private BigDecimal precioBonificado;
 
   @Column(precision = 25, scale = 15)
@@ -62,7 +63,7 @@ public class Producto implements Serializable {
       value = "0",
       inclusive = false,
       message = "{mensaje_producto_cantidad_bulto_invalida}")
-  @JsonView(Views.Public.class)
+  @JsonView(Views.Comprador.class)
   private BigDecimal bulto;
 
   @ManyToOne
@@ -96,7 +97,7 @@ public class Producto implements Serializable {
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_producto_precioLista_negativo}")
-  @JsonView(Views.Public.class)
+  @JsonView(Views.Comprador.class)
   private BigDecimal precioLista;
 
   @ManyToOne
@@ -139,11 +140,11 @@ public class Producto implements Serializable {
 
   private boolean eliminado;
 
-  @JsonView(Views.Public.class)
+  @JsonView(Views.Comprador.class)
   private String urlImagen;
 
   @JsonGetter("nombreMedida")
-  @JsonView(Views.Public.class)
+  @JsonView(Views.Comprador.class)
   public String getNombreMedida() {
     return medida.getNombre();
   }

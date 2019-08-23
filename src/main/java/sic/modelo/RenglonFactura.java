@@ -4,11 +4,14 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import javax.persistence.*;
 import javax.validation.constraints.DecimalMin;
+
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import sic.controller.Views;
 
 @Entity
 @Table(name = "renglonfactura")
@@ -17,6 +20,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"idProductoItem", "codigoItem"})
 @ToString
+@JsonView(Views.Comprador.class)
 public class RenglonFactura implements Serializable {
 
     @Id

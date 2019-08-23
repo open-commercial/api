@@ -2,9 +2,11 @@ package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.QueryInit;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
+import sic.controller.Views;
 
 import javax.persistence.*;
 import javax.validation.constraints.DecimalMax;
@@ -18,6 +20,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"idUbicacion", "localidad"})
+@JsonView(Views.Comprador.class)
 @JsonIgnoreProperties("localidad")
 public class Ubicacion implements Serializable {
 

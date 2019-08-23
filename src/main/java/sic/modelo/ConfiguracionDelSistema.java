@@ -6,11 +6,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import sic.controller.Views;
+
 import javax.validation.constraints.Email;
 
 @Entity
@@ -20,6 +24,7 @@ import javax.validation.constraints.Email;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"id_ConfiguracionDelSistema", "empresa"})
 @ToString(exclude = "certificadoAfip")
+@JsonView(Views.Comprador.class)
 @JsonIgnoreProperties({"tokenWSAA", "signTokenWSAA", "fechaGeneracionTokenWSAA", "fechaVencimientoTokenWSAA", "empresa"})
 public class ConfiguracionDelSistema implements Serializable {
 

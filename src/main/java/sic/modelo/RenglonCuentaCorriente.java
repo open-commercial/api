@@ -6,12 +6,14 @@ import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.Formula;
+import sic.controller.Views;
 
 @Entity
 @Table(name = "rengloncuentacorriente")
@@ -19,6 +21,7 @@ import org.hibernate.annotations.Formula;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"idRenglonCuentaCorriente"})
+@JsonView(Views.Comprador.class)
 @ToString
 public class RenglonCuentaCorriente implements Serializable {
     
