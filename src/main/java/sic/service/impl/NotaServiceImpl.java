@@ -27,7 +27,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -123,7 +122,7 @@ public class NotaServiceImpl implements INotaService {
   public void eliminarNota(long idNota) {
     Nota nota = this.getNotaNoEliminadaPorId(idNota);
     if (nota.getMovimiento() == Movimiento.VENTA) {
-      if (nota.getCAE() != 0L) {
+      if (nota.getCae() != 0L) {
         throw new BusinessServiceException(
             messageSource.getMessage("mensaje_eliminar_nota_aprobada", null, Locale.getDefault()));
       }
@@ -612,7 +611,7 @@ public class NotaServiceImpl implements INotaService {
         throw new BusinessServiceException(
             messageSource.getMessage("mensaje_nota_fecha_incorrecta", null, Locale.getDefault()));
       }
-      if (nota.getCAE() != 0L) {
+      if (nota.getCae() != 0L) {
         throw new BusinessServiceException(
             messageSource.getMessage("mensaje_nota_cliente_CAE", null, Locale.getDefault()));
       }
@@ -1206,7 +1205,7 @@ public class NotaServiceImpl implements INotaService {
           (nota instanceof NotaDebito) ? ((NotaDebito) nota).getMontoNoGravado() : BigDecimal.ZERO;
       Cliente cliente;
       if (nota instanceof NotaCredito) {
-        if (nota.getFacturaVenta() != null && nota.getFacturaVenta().getCAE() == 0L) {
+        if (nota.getFacturaVenta() != null && nota.getFacturaVenta().getCae() == 0L) {
           throw new BusinessServiceException(
               messageSource.getMessage(
                   "mensaje_nota_factura_relacionada_sin_CAE", null, Locale.getDefault()));
@@ -1220,8 +1219,8 @@ public class NotaServiceImpl implements INotaService {
               .idComprobante(nota.getIdNota())
               .fecha(nota.getFecha())
               .tipoComprobante(nota.getTipoComprobante())
-              .CAE(nota.getCAE())
-              .vencimientoCAE(nota.getVencimientoCAE())
+              .CAE(nota.getCae())
+              .vencimientoCAE(nota.getVencimientoCae())
               .numSerieAfip(nota.getNumSerieAfip())
               .numFacturaAfip(nota.getNumNotaAfip())
               .empresa(nota.getEmpresa())
@@ -1233,8 +1232,8 @@ public class NotaServiceImpl implements INotaService {
               .total(nota.getTotal())
               .build();
       afipService.autorizar(comprobante);
-      nota.setCAE(comprobante.getCAE());
-      nota.setVencimientoCAE(comprobante.getVencimientoCAE());
+      nota.setCae(comprobante.getCAE());
+      nota.setVencimientoCae(comprobante.getVencimientoCAE());
       nota.setNumSerieAfip(comprobante.getNumSerieAfip());
       nota.setNumNotaAfip(comprobante.getNumFacturaAfip());
       cuentaCorrienteService.updateCAENota(nota.getIdNota(), comprobante.getCAE());
@@ -1774,7 +1773,7 @@ public class NotaServiceImpl implements INotaService {
     Page<NotaCredito> notaAnterior =
         notaCreditoRepository.findAll(
             builder, PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "fecha")));
-    return notaAnterior.getContent().get(0).getCAE() == 0L;
+    return notaAnterior.getContent().get(0).getCae() == 0L;
   }
 
   @Override
@@ -1792,6 +1791,6 @@ public class NotaServiceImpl implements INotaService {
     Page<NotaDebito> notaAnterior =
         notaDebitoRepository.findAll(
             builder, PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "fecha")));
-    return notaAnterior.getContent().get(0).getCAE() == 0L;
+    return notaAnterior.getContent().get(0).getCae() == 0L;
   }
 }

@@ -234,7 +234,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   @Override
   @Transactional
   public void asentarEnCuentaCorriente(FacturaVenta facturaVenta, TipoDeOperacion tipo) {
-    CuentaCorriente cc = this.getCuentaCorrientePorCliente(facturaVenta.getCliente());
+    CuentaCorriente cc = this.getCuentaCorrientePorCliente(clienteService.getClienteNoEliminadoPorId(facturaVenta.getIdCliente()));
     if (null == cc) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_cuenta_corriente_no_existente", null, Locale.getDefault()));
@@ -303,7 +303,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       rcc.setNota(nota);
       rcc.setFecha(nota.getFecha());
       rcc.setIdMovimiento(nota.getIdNota());
-      if (nota.getMovimiento() == Movimiento.COMPRA) rcc.setCAE(nota.getCAE());
+      if (nota.getMovimiento() == Movimiento.COMPRA) rcc.setCae(nota.getCae());
       cc.getRenglones().add(rcc);
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
@@ -503,11 +503,11 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   public int updateCAEFactura(long idFactura, long cae) {
-    return renglonCuentaCorrienteRepository.updateCAEFactura(idFactura, cae);
+    return renglonCuentaCorrienteRepository.updateCaeFactura(idFactura, cae);
   }
 
   @Override
   public int updateCAENota(long idNota, long cae) {
-    return renglonCuentaCorrienteRepository.updateCAENota(idNota, cae);
+    return renglonCuentaCorrienteRepository.updateCaeNota(idNota, cae);
   }
 }

@@ -6,23 +6,24 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import sic.modelo.embeddable.ClienteEmbeddable;
 
 @Entity
 @Table(name = "facturaventa")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@JsonIgnoreProperties({"cliente", "usuario", "empresa", "pedido", "transportista"})
+@JsonIgnoreProperties({"cliente", "usuario", "empresa", "pedido", "transportista", "clienteEmbedded"})
 public class FacturaVenta extends Factura implements Serializable {
+
+  @Embedded
+  private ClienteEmbeddable clienteEmbedded;
 
   @ManyToOne
   @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
@@ -32,9 +33,10 @@ public class FacturaVenta extends Factura implements Serializable {
   public FacturaVenta() {}
 
   public FacturaVenta(
+      long id_Factura,
+      ClienteEmbeddable clienteEmbedded,
       Cliente cliente,
       Usuario usuario,
-      long id_Factura,
       Date fecha,
       TipoDeComprobante tipoComprobante,
       long numSerie,
@@ -63,34 +65,35 @@ public class FacturaVenta extends Factura implements Serializable {
       long numFacturaAfip) {
 
     super(
-        id_Factura,
-        usuario,
-        fecha,
-        tipoComprobante,
-        numSerie,
-        numFactura,
-        fechaVencimiento,
-        pedido,
-        transportista,
-        renglones,
-        subTotal,
-        recargoPorcentaje,
-        recargoNeto,
-        descuentoPorcentaje,
-        descuentoNeto,
-        subTotalNeto,
-        iva105Neto,
-        iva21Neto,
-        impuestoInternoNeto,
-        total,
-        observaciones,
-        cantidadDeArticulos,
-        empresa,
-        eliminada,
-        CAE,
-        vencimientoCAE,
-        numSerieAfip,
-        numFacturaAfip);
+      id_Factura,
+      usuario,
+      fecha,
+      tipoComprobante,
+      numSerie,
+      numFactura,
+      fechaVencimiento,
+      pedido,
+      transportista,
+      renglones,
+      subTotal,
+      recargoPorcentaje,
+      recargoNeto,
+      descuentoPorcentaje,
+      descuentoNeto,
+      subTotalNeto,
+      iva105Neto,
+      iva21Neto,
+      impuestoInternoNeto,
+      total,
+      observaciones,
+      cantidadDeArticulos,
+      empresa,
+      eliminada,
+      CAE,
+      vencimientoCAE,
+      numSerieAfip,
+      numFacturaAfip);
+    this.clienteEmbedded = clienteEmbedded;
     this.cliente = cliente;
   }
 
@@ -101,7 +104,17 @@ public class FacturaVenta extends Factura implements Serializable {
 
   @JsonGetter("nombreFiscalCliente")
   public String getNombreFiscalCliente() {
-    return cliente.getNombreFiscal();
+    return clienteEmbedded.getNombreFiscal();
+  }
+
+  @JsonGetter("nroDeCliente")
+  public String getNroDeCliente() {
+    return clienteEmbedded.getNroCliente();
+  }
+
+  @JsonGetter("categoriaIVA")
+  public CategoriaIVA getCategoriaIVA() {
+    return clienteEmbedded.getCategoriaIVA();
   }
 
   @JsonGetter("idViajante")
@@ -119,5 +132,10 @@ public class FacturaVenta extends Factura implements Serializable {
             + cliente.getViajante().getUsername()
             + ")"
         : null;
+  }
+
+  @JsonGetter("ubicacion")
+  public String getUbicacionFacturacion() {
+    return (clienteEmbedded.getUbicacion() != null) ? clienteEmbedded.getUbicacion().toString() : null;
   }
 }

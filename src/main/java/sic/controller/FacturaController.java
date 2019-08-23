@@ -92,6 +92,8 @@ public class FacturaController {
         "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault()));
     }
     fv.setCliente(cliente);
+    facturaService.asignarClienteEmbeddable(fv, cliente);
+    fv.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(facturaVentaDTO.getIdUsuario()));
     fv.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(facturaVentaDTO.getIdTransportista()));
     fv.setFecha(new Date());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
@@ -105,7 +107,7 @@ public class FacturaController {
               reciboService.construirRecibos(
                   idsFormaDePago,
                   empresa,
-                  fv.getCliente(),
+                  cliente,
                   fv.getUsuario(),
                   montos,
                   fv.getTotal(),
@@ -120,7 +122,7 @@ public class FacturaController {
               reciboService.construirRecibos(
                   idsFormaDePago,
                   empresa,
-                  fv.getCliente(),
+                  cliente,
                   fv.getUsuario(),
                   montos,
                   fv.getTotal(),

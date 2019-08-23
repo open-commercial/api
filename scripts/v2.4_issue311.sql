@@ -6,7 +6,7 @@ ADD certificadoAfip LONGBLOB, ADD facturaElectronicaHabilitada BIT(1) NOT NULL,
 ADD firmanteCertificadoAfip VARCHAR(255), ADD nroPuntoDeVentaAfip INT(11) NOT NULL,
 ADD passwordCertificadoAfip VARCHAR(255);
 ALTER TABLE factura 
-ADD CAE BIGINT(20) NOT NULL, ADD vencimientoCAE DATETIME,
+ADD cae BIGINT(20) NOT NULL, ADD vencimientoCAE DATETIME,
 ADD numSerieAfip BIGINT(20) NOT NULL, 
 ADD numFacturaAfip BIGINT(20) NOT NULL;
 -- Cambia la serie de las facturas a 0.

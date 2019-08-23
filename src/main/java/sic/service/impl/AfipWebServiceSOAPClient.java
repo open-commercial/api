@@ -176,12 +176,12 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
     public FECAEResponse FECAESolicitar(FECAESolicitar solicitud) throws IOException {
         Result result = new StringResult();
         this.getWebServiceTemplate().getMarshaller().marshal(solicitud, result);
-        loggerSoapClient.warn("SOLICITAR CAE XML REQUEST: {}", result);
+        loggerSoapClient.warn("SOLICITAR cae XML REQUEST: {}", result);
         FECAESolicitarResponse response = (FECAESolicitarResponse)
                 this.getWebServiceTemplate().marshalSendAndReceive(this.getWSFE_URI(), solicitud, (WebServiceMessage message)
                         -> ((SoapMessage) message).setSoapAction(SOAP_ACTION_FECAESolicitar));
         this.getWebServiceTemplate().getMarshaller().marshal(response, result);
-        loggerSoapClient.warn("SOLICITAR CAE XML RESPONSE: {}", result);
+        loggerSoapClient.warn("SOLICITAR cae XML RESPONSE: {}", result);
         return response.getFECAESolicitarResult();
     }
 }

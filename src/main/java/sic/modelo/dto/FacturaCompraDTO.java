@@ -11,7 +11,7 @@ import lombok.*;
 @Builder
 public class FacturaCompraDTO extends FacturaDTO implements Serializable {
 
-    private long idProveedor;
+    private Long idProveedor;
     private String razonSocialProveedor;
     
 }

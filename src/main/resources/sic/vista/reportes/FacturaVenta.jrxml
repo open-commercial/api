@@ -741,7 +741,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{facturaVenta}.getCAE() == 0l)? "":"CAE:"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{facturaVenta}.getCAE() == 0l)? "":"cae:"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="110" y="96" width="80" height="15" uuid="2c838051-1ca0-4a7f-836c-c29ecd4a55ca">
@@ -750,7 +750,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{facturaVenta}.getCAE() == 0l)? "":"Vencimiento CAE:"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{facturaVenta}.getCAE() == 0l)? "":"Vencimiento cae:"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="111" width="40" height="12" uuid="30130b08-8be7-47f8-8066-3714bda02db8">

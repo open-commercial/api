@@ -12,6 +12,7 @@ import sic.modelo.RenglonFactura;
 import sic.modelo.TipoDeComprobante;
 import sic.modelo.Transportista;
 import sic.modelo.Usuario;
+import sic.modelo.embeddable.ClienteEmbeddable;
 
 public class FacturaVentaBuilder {
     
@@ -25,6 +26,7 @@ public class FacturaVentaBuilder {
     private Transportista transportista = new TransportistaBuilder().build();
     private List<RenglonFactura> renglones;
     private Cliente cliente = new ClienteBuilder().build();
+    private ClienteEmbeddable clienteEmbeddable = ClienteEmbeddable.builder().build();
     private Usuario usuario = new UsuarioBuilder().build();
     private BigDecimal subTotal = new BigDecimal("6500");
     private BigDecimal recargo_porcentaje = BigDecimal.ZERO;
@@ -48,51 +50,49 @@ public class FacturaVentaBuilder {
   public FacturaVenta build() {
     if (renglones == null) {
       RenglonFactura renglon1 = new RenglonFacturaBuilder().build();
-      RenglonFactura renglon2 =
-          new RenglonFacturaBuilder()
-              .withCantidad(new BigDecimal("2"))
-              .withId_ProductoItem(890L)
-              .withCodigoItem("mate.0923")
-              .withIVAneto(new BigDecimal("1092"))
-              .withPrecioUnitario(new BigDecimal("5200"))
-              .build();
+      RenglonFactura renglon2 = new RenglonFacturaBuilder()
+        .withCantidad(new BigDecimal("2"))
+        .withId_ProductoItem(890L)
+        .withCodigoItem("mate.0923")
+        .withIVAneto(new BigDecimal("1092"))
+        .withPrecioUnitario(new BigDecimal("5200"))
+        .build();
       List<RenglonFactura> renglonesFactura = new ArrayList<>();
       renglonesFactura.add(renglon1);
       renglonesFactura.add(renglon2);
       this.renglones = renglonesFactura;
     }
-    FacturaVenta factura =
-        new FacturaVenta(
-            cliente,
-            usuario,
-            id_Factura,
-            fecha,
-            tipoFactura,
-            numSerie,
-            numFactura,
-            fechaVencimiento,
-            pedido,
-            transportista,
-            renglones,
-            subTotal,
-            recargo_porcentaje,
-            recargo_neto,
-            descuento_porcentaje,
-            descuento_neto,
-            subTotal_neto,
-            iva_105_neto,
-            iva_21_neto,
-            impuestoInterno_neto,
-            total,
-            observaciones,
-            cantidadArticulos,
-            empresa,
-            eliminada,
-            CAE,
-            vencimientoCAE,
-            numSerieAfip,
-            numFacturaAfip);
-    return factura;
+    return new FacturaVenta(
+      id_Factura,
+      clienteEmbeddable,
+      cliente,
+      usuario,
+      fecha,
+      tipoFactura,
+      numSerie,
+      numFactura,
+      fechaVencimiento,
+      pedido,
+      transportista,
+      renglones,
+      subTotal,
+      recargo_porcentaje,
+      recargo_neto,
+      descuento_porcentaje,
+      descuento_neto,
+      subTotal_neto,
+      iva_105_neto,
+      iva_21_neto,
+      impuestoInterno_neto,
+      total,
+      observaciones,
+      cantidadArticulos,
+      empresa,
+      eliminada,
+      CAE,
+      vencimientoCAE,
+      numSerieAfip,
+      numFacturaAfip);
   }
 
     public FacturaVentaBuilder withId_Factura(long idFactura) {
@@ -145,7 +145,12 @@ public class FacturaVentaBuilder {
         return this;
     }
 
-    public FacturaVentaBuilder withUsuario(Usuario usuario) {
+  public FacturaVentaBuilder withClienteEmbeddable(ClienteEmbeddable clienteEmbeddable) {
+    this.clienteEmbeddable = clienteEmbeddable;
+    return this;
+  }
+
+  public FacturaVentaBuilder withUsuario(Usuario usuario) {
         this.usuario = usuario;
         return this;
     }
