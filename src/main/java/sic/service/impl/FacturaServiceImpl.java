@@ -668,7 +668,7 @@ public class FacturaServiceImpl implements IFacturaService {
             .fecha(fv.getFecha())
             .tipoComprobante(fv.getTipoComprobante())
             .CAE(fv.getCae())
-            .vencimientoCAE(fv.getVencimientoCAE())
+            .vencimientoCAE(fv.getVencimientoCae())
             .numSerieAfip(fv.getNumSerieAfip())
             .numFacturaAfip(fv.getNumFacturaAfip())
             .empresa(fv.getEmpresa())
@@ -681,7 +681,7 @@ public class FacturaServiceImpl implements IFacturaService {
             .build();
     afipService.autorizar(comprobante);
     fv.setCae(comprobante.getCAE());
-    fv.setVencimientoCAE(comprobante.getVencimientoCAE());
+    fv.setVencimientoCae(comprobante.getVencimientoCAE());
     fv.setNumSerieAfip(comprobante.getNumSerieAfip());
     fv.setNumFacturaAfip(comprobante.getNumFacturaAfip());
     cuentaCorrienteService.updateCAEFactura(fv.getId_Factura(), comprobante.getCAE());
