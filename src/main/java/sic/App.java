@@ -54,7 +54,8 @@ public class App implements WebMvcConfigurer {
         .excludePathPatterns("/api/*/password-recovery")
         .excludePathPatterns("/api/*/registracion")
         .excludePathPatterns("/api/*/pagos/notificacion")
-        .excludePathPatterns("/api/*/public/**");
+        .excludePathPatterns("/api/*/productos/*")
+        .excludePathPatterns("/api/*/productos/busqueda/criteria");
   }
 
   @Bean

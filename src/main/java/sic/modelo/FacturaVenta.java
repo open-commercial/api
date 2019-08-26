@@ -9,10 +9,12 @@ import java.util.List;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import sic.modelo.embeddable.ClienteEmbeddable;
+import sic.controller.Views;
 
 @Entity
 @Table(name = "facturaventa")
@@ -20,6 +22,7 @@ import sic.modelo.embeddable.ClienteEmbeddable;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @JsonIgnoreProperties({"cliente", "usuario", "empresa", "pedido", "transportista", "clienteEmbedded"})
+@JsonView(Views.Comprador.class)
 public class FacturaVenta extends Factura implements Serializable {
 
   @Embedded

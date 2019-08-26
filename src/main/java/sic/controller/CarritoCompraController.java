@@ -3,8 +3,6 @@ package sic.controller;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -48,7 +46,6 @@ public class CarritoCompraController {
     return carritoCompraService.getCarritoCompra(idUsuario, idCliente);
   }
 
-  @JsonView(Views.Public.class)
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/clientes/{idCliente}/items")
   public Page<ItemCarritoCompra> getAllItemsDelUsuario(
       @PathVariable long idUsuario,
@@ -61,7 +58,6 @@ public class CarritoCompraController {
     return carritoCompraService.getItemsDelCaritoCompra(idUsuario, idCliente, pageable);
   }
 
-  @JsonView(Views.Public.class)
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
   public ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(@PathVariable long idUsuario, @PathVariable long idProducto) {
     return carritoCompraService.getItemCarritoDeCompraDeUsuarioPorIdProducto(idUsuario, idProducto);

@@ -14,15 +14,18 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import sic.controller.Views;
 
 @Entity
 @Table(name = "notadebito")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true, exclude = "renglonesNotaDebito")
+@JsonView(Views.Comprador.class)
 public class NotaDebito extends Nota implements Serializable {
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
