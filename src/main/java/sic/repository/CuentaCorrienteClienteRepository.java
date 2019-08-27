@@ -6,14 +6,12 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.Cliente;
 import sic.modelo.CuentaCorrienteCliente;
-import sic.modelo.Sucursal;
 
 public interface CuentaCorrienteClienteRepository
     extends CuentaCorrienteRepository<CuentaCorrienteCliente>,
         QuerydslPredicateExecutor<CuentaCorrienteCliente> {
 
-  CuentaCorrienteCliente findByClienteAndSucursalAndEliminada(
-    Cliente cliente, Sucursal sucursal, boolean eliminada);
+  CuentaCorrienteCliente findByClienteAndEliminada(Cliente cliente, boolean eliminada);
 
   @Modifying
   @Query(

@@ -49,6 +49,9 @@ UPDATE producto SET id_Medida = 6 where id_Medida = 19;
 DELETE FROM medida WHERE id_Medida = 18; 
 DELETE FROM medida WHERE id_Medida = 19;
 
+alter TABLE transportista DROP FOREIGN KEY FKphhgo5taxw9nhjkav8ei6b6y9;
+alter TABLE transportista drop column id_Empresa;
+
 RENAME TABLE empresa TO sucursal;
 
 ALTER TABLE sucursal CHANGE id_Empresa idSucursal bigint(20) NOT NULL AUTO_INCREMENT;

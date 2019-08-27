@@ -26,6 +26,5 @@ public class BusquedaClienteCriteria {
     private Long idLocalidad;
     private boolean buscarPorNroDeCliente;
     private String nroDeCliente;
-    private Long idSucursal;
     private Pageable pageable;
 }

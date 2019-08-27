@@ -277,8 +277,7 @@ public class NotaServiceImpl implements INotaService {
             break;
           case COMPRADOR:
             Cliente clienteRelacionado =
-                clienteService.getClientePorIdUsuarioYidSucursal(
-                    idUsuarioLoggedIn, criteria.getIdSucursal());
+                clienteService.getClientePorIdUsuario(idUsuarioLoggedIn);
             if (clienteRelacionado != null) {
               rsPredicate.or(qNotaCredito.cliente.eq(clienteRelacionado));
             } else {
@@ -348,8 +347,7 @@ public class NotaServiceImpl implements INotaService {
             break;
           case COMPRADOR:
             Cliente clienteRelacionado =
-                clienteService.getClientePorIdUsuarioYidSucursal(
-                    idUsuarioLoggedIn, criteria.getIdSucursal());
+                clienteService.getClientePorIdUsuario(idUsuarioLoggedIn);
             if (clienteRelacionado != null) {
               rsPredicate.or(qNotaDebito.cliente.eq(clienteRelacionado));
             } else {
@@ -1104,15 +1102,15 @@ public class NotaServiceImpl implements INotaService {
       NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDTO, Usuario usuario) {
     NotaDebito notaDebitoCalculada = new NotaDebito();
     notaDebitoCalculada.setFecha(new Date());
+    notaDebitoCalculada.setSucursal(sucursalService.getSucursalPorId(nuevaNotaDebitoSinReciboDTO.getIdSucursal()));
     if (nuevaNotaDebitoSinReciboDTO.getTipoDeComprobante() != null) {
       if (nuevaNotaDebitoSinReciboDTO.getIdCliente() != null) {
         Cliente cliente =
             clienteService.getClienteNoEliminadoPorId(nuevaNotaDebitoSinReciboDTO.getIdCliente());
         notaDebitoCalculada.setCliente(cliente);
         notaDebitoCalculada.setMovimiento(Movimiento.VENTA);
-        notaDebitoCalculada.setSucursal(cliente.getSucursal());
         if (!this.getTipoNotaDebitoCliente(
-                nuevaNotaDebitoSinReciboDTO.getIdCliente(), cliente.getIdSucursal())
+                nuevaNotaDebitoSinReciboDTO.getIdCliente(), nuevaNotaDebitoSinReciboDTO.getIdSucursal())
             .contains(nuevaNotaDebitoSinReciboDTO.getTipoDeComprobante())) {
           throw new BusinessServiceException(
               messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
@@ -1123,9 +1121,8 @@ public class NotaServiceImpl implements INotaService {
                 nuevaNotaDebitoSinReciboDTO.getIdProveedor());
         notaDebitoCalculada.setProveedor(proveedor);
         notaDebitoCalculada.setMovimiento(Movimiento.COMPRA);
-        notaDebitoCalculada.setSucursal(proveedor.getSucursal());
         if (!this.getTipoNotaDebitoProveedor(
-                nuevaNotaDebitoSinReciboDTO.getIdProveedor(), proveedor.getIdSucursal())
+                nuevaNotaDebitoSinReciboDTO.getIdProveedor(), nuevaNotaDebitoSinReciboDTO.getIdSucursal())
             .contains(nuevaNotaDebitoSinReciboDTO.getTipoDeComprobante())) {
           throw new BusinessServiceException(
               messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));

@@ -64,20 +64,6 @@ public class Proveedor implements Serializable {
   @QueryInit("localidad.provincia")
   private Ubicacion ubicacion;
 
-  @ManyToOne
-  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
-  @NotNull(message = "{mensaje_proveedor_sucursal_vacia}")
-  private Sucursal sucursal;
-
   private boolean eliminado;
 
-  @JsonGetter("nombreSucursal")
-  public String getNombreSucursal() {
-    return sucursal.getNombre();
-  }
-
-  @JsonGetter("idSucursal")
-  public long getIdSucursal() {
-    return sucursal.getIdSucursal();
-  }
 }

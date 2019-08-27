@@ -21,7 +21,7 @@ import lombok.ToString;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"fechaApertura", "sucursal"})
+@EqualsAndHashCode(of = "fechaApertura")
 @ToString(exclude = {"renglones"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idCuentaCorriente", scope = CuentaCorriente.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
@@ -48,11 +48,6 @@ public abstract class CuentaCorriente implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @NotNull(message = "{mensaje_cuenta_corriente_fecha_vacia}")
     private Date fechaApertura;
-
-    @ManyToOne
-    @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
-    @NotNull(message = "{mensaje_cuenta_corriente_sucursal_vacia}")
-    private Sucursal sucursal;
 
     @Column(precision = 25, scale = 15)
     private BigDecimal saldo;

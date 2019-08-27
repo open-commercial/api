@@ -52,7 +52,7 @@ public interface IProductoService {
 
   BigDecimal calcularValorStock(BusquedaProductoCriteria criteria);
 
-  byte[] getListaDePreciosPorSucursal(List<Producto> productos, long idSucursal, String formato);
+  byte[] getListaDePreciosPorSucursal(List<Producto> productos, String formato);
 
   Producto guardar(@Valid Producto producto);
 

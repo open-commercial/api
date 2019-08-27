@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.dto.ProveedorDTO;
-import sic.service.ISucursalService;
 import sic.service.IProveedorService;
 import sic.service.IUbicacionService;
 
@@ -29,18 +28,15 @@ import sic.service.IUbicacionService;
 public class ProveedorController {
 
   private final IProveedorService proveedorService;
-  private final ISucursalService sucursalService;
   private final IUbicacionService ubicacionService;
   private final ModelMapper modelMapper;
 
   @Autowired
   public ProveedorController(
     IProveedorService proveedorService,
-    ISucursalService sucursalService,
     IUbicacionService ubicacionService,
     ModelMapper modelMapper) {
     this.proveedorService = proveedorService;
-    this.sucursalService = sucursalService;
     this.ubicacionService = ubicacionService;
     this.modelMapper = modelMapper;
   }
@@ -55,7 +51,6 @@ public class ProveedorController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Proveedor guardar(@RequestBody ProveedorDTO proveedorDTO) {
     Proveedor proveedor = modelMapper.map(proveedorDTO, Proveedor.class);
-    proveedor.setSucursal(sucursalService.getSucursalPorId(proveedorDTO.getIdSucursal()));
     proveedor.setUbicacion(null);
     if (proveedorDTO.getUbicacion() != null) {
       proveedor.setUbicacion(modelMapper.map(proveedorDTO.getUbicacion(), Ubicacion.class));
@@ -83,12 +78,6 @@ public class ProveedorController {
     } else {
       proveedorPorActualizar.setUbicacion(null);
     }
-    if (proveedorDTO.getIdSucursal() != null) {
-      proveedorPorActualizar.setSucursal(
-          sucursalService.getSucursalPorId(proveedorDTO.getIdSucursal()));
-    } else {
-      proveedorPorActualizar.setSucursal(proveedorPersistido.getSucursal());
-    }
     Ubicacion ubicacion;
     if (proveedorDTO.getUbicacion() != null) {
       ubicacion = modelMapper.map(proveedorDTO.getUbicacion(), Ubicacion.class);
@@ -105,7 +94,6 @@ public class ProveedorController {
   @GetMapping("/proveedores/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Page<Proveedor> buscarProveedores(
-    @RequestParam(value = "idSucursal") long idSucursal,
     @RequestParam(required = false) String nroProveedor,
     @RequestParam(required = false) String razonSocial,
     @RequestParam(required = false) Long idFiscal,
@@ -146,7 +134,6 @@ public class ProveedorController {
         .idProvincia(idProvincia)
         .buscaPorLocalidad(idLocalidad != null)
         .idLocalidad(idLocalidad)
-        .idSucursal(idSucursal)
         .pageable(pageable)
         .build();
     return proveedorService.buscarProveedores(criteria);
@@ -158,9 +145,9 @@ public class ProveedorController {
     proveedorService.eliminar(idProveedor);
   }
 
-  @GetMapping("/proveedores/sucursales/{idSucursal}")
+  @GetMapping("/proveedores")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public List<Proveedor> getProveedores(@PathVariable long idSucursal) {
-    return proveedorService.getProveedores(sucursalService.getSucursalPorId(idSucursal));
+  public List<Proveedor> getProveedores() {
+    return proveedorService.getProveedores();
   }
 }

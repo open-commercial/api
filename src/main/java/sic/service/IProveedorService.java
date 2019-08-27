@@ -19,13 +19,13 @@ public interface IProveedorService {
 
   void eliminar(long idProveedor);
 
-  Proveedor getProveedorPorIdFiscal(Long idFiscal, Sucursal sucursal);
+  Proveedor getProveedorPorIdFiscal(Long idFiscal);
 
-  Proveedor getProveedorPorRazonSocial(String razonSocial, Sucursal sucursal);
+  Proveedor getProveedorPorRazonSocial(String razonSocial);
 
-  List<Proveedor> getProveedores(Sucursal sucursal);
+  List<Proveedor> getProveedores();
 
   Proveedor guardar(@Valid Proveedor proveedor);
 
-  String generarNroDeProveedor(Sucursal sucursal);
+  String generarNroDeProveedor();
 }

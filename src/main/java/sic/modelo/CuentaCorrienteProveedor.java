@@ -1,6 +1,5 @@
 package sic.modelo;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -21,7 +20,6 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@JsonIgnoreProperties({"sucursal"})
 public class CuentaCorrienteProveedor extends CuentaCorriente implements Serializable {
     
     @OneToOne
@@ -32,10 +30,10 @@ public class CuentaCorrienteProveedor extends CuentaCorriente implements Seriali
 
     public CuentaCorrienteProveedor() {}
 
-    public CuentaCorrienteProveedor(long idCuentaCorriente, boolean eliminada, Date fechaApertura, Sucursal sucursal,
+    public CuentaCorrienteProveedor(long idCuentaCorriente, boolean eliminada, Date fechaApertura,
             BigDecimal saldo, Date fechaUltimoMovimiento, List<RenglonCuentaCorriente> renglones, Proveedor proveedor) {
         
-        super(idCuentaCorriente, eliminada, fechaApertura, sucursal, saldo, fechaUltimoMovimiento, renglones);
+        super(idCuentaCorriente, eliminada, fechaApertura, saldo, fechaUltimoMovimiento, renglones);
         this.proveedor = proveedor;
     }
 

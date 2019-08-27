@@ -321,8 +321,7 @@ public class PedidoServiceImpl implements IPedidoService {
             break;
           case COMPRADOR:
             Cliente clienteRelacionado =
-                clienteService.getClientePorIdUsuarioYidSucursal(
-                    idUsuarioLoggedIn, criteria.getIdSucursal());
+                clienteService.getClientePorIdUsuario(idUsuarioLoggedIn);
             if (clienteRelacionado != null) {
               rsPredicate.or(qPedido.cliente.eq(clienteRelacionado));
             }

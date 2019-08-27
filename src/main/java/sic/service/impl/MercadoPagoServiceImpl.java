@@ -36,6 +36,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   private final IFormaDePagoService formaDePagoService;
   private final IClienteService clienteService;
   private final INotaService notaService;
+  private final ISucursalService sucursalService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
 
@@ -45,11 +46,13 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       IFormaDePagoService formaDePagoService,
       IClienteService clienteService,
       INotaService notaService,
+      ISucursalService sucursalService,
       MessageSource messageSource) {
     this.reciboService = reciboService;
     this.formaDePagoService = formaDePagoService;
     this.clienteService = clienteService;
     this.notaService = notaService;
+    this.sucursalService = sucursalService;
     this.messageSource = messageSource;
   }
 
@@ -176,7 +179,8 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       case approved:
         logger.warn("El pago de mercadopago {} se aprobó correctamente.", payment);
         Recibo nuevoRecibo = new Recibo();
-        nuevoRecibo.setSucursal(cliente.getSucursal());
+        //nuevoRecibo.setSucursal(cliente.getSucursal());
+        nuevoRecibo.setSucursal(sucursalService.getSucursalPorId(usuario.getIdSucursalPredeterminada()));
         nuevoRecibo.setFormaDePago(formaDePagoService.getFormaDePagoPorNombre(FormaDePagoEnum.MERCADO_PAGO));
         nuevoRecibo.setUsuario(usuario);
         nuevoRecibo.setCliente(cliente);

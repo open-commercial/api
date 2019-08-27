@@ -15,11 +15,11 @@ public interface IClienteService {
 
   Cliente getClienteNoEliminadoPorId(long idCliente);
 
-  Cliente getClientePorIdFiscal(Long idFiscal, Sucursal sucursal);
+  Cliente getClientePorIdFiscal(Long idFiscal);
 
-  Cliente getClientePredeterminado(Sucursal sucursal);
+  Cliente getClientePredeterminado();
 
-  boolean existeClientePredeterminado(Sucursal sucursal);
+  boolean existeClientePredeterminado();
 
   void setClientePredeterminado(Cliente cliente);
 
@@ -29,7 +29,7 @@ public interface IClienteService {
 
   Cliente getClientePorIdPedido(long idPedido);
 
-  Cliente getClientePorIdUsuarioYidSucursal(long idUsuario, long idSucursal);
+  Cliente getClientePorIdUsuario(long idUsuario);
 
   Cliente getClientePorCredencial(Usuario usuarioCredencial);
 
@@ -37,5 +37,5 @@ public interface IClienteService {
 
   int desvincularClienteDeCredencial(long idUsuarioCliente);
 
-  String generarNroDeCliente(Sucursal sucursal);
+  String generarNroDeCliente();
 }

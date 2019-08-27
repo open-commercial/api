@@ -19,6 +19,7 @@ public class RegistracionServiceImpl implements IRegistracionService {
 
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
+  private final ISucursalService sucursalService;
   private final ICorreoElectronicoService correoElectronicoService;
   private final IConfiguracionDelSistemaService configuracionDelSistemaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -28,11 +29,13 @@ public class RegistracionServiceImpl implements IRegistracionService {
   public RegistracionServiceImpl(
       IUsuarioService usuarioService,
       IClienteService clienteService,
+      ISucursalService sucursalService,
       ICorreoElectronicoService correoElectronicoService,
       IConfiguracionDelSistemaService cds,
       MessageSource messageSource) {
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
+    this.sucursalService = sucursalService;
     this.correoElectronicoService = correoElectronicoService;
     this.configuracionDelSistemaService = cds;
     this.messageSource = messageSource;
@@ -46,10 +49,10 @@ public class RegistracionServiceImpl implements IRegistracionService {
     cliente.setBonificacion(BigDecimal.ZERO);
     clienteService.guardar(cliente);
     correoElectronicoService.enviarMailPorSucursal(
-        cliente.getSucursal().getIdSucursal(),
+        usuario.getIdSucursalPredeterminada(),
         usuario.getEmail(),
         configuracionDelSistemaService
-            .getConfiguracionDelSistemaPorSucursal(cliente.getSucursal())
+            .getConfiguracionDelSistemaPorSucursal(sucursalService.getSucursalPorId(usuario.getIdSucursalPredeterminada()))
             .getEmailUsername(),
         "Registración de cuenta nueva",
         messageSource.getMessage(

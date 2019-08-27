@@ -415,8 +415,7 @@ public class FacturaServiceImpl implements IFacturaService {
             break;
           case COMPRADOR:
             Cliente clienteRelacionado =
-                clienteService.getClientePorIdUsuarioYidSucursal(
-                    idUsuarioLoggedIn, criteria.getIdSucursal());
+                clienteService.getClientePorIdUsuario(idUsuarioLoggedIn);
             if (clienteRelacionado != null) {
               rsPredicate.or(qFacturaVenta.cliente.eq(clienteRelacionado));
             } else {

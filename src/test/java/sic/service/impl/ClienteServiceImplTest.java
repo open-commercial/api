@@ -36,11 +36,9 @@ class ClienteServiceImplTest {
   void shouldSetClientePredeterminado() {
     Cliente resultadoEsperado = new ClienteBuilder().build();
     clienteServiceImpl.setClientePredeterminado(resultadoEsperado);
-    when(clienteRepository.findBySucursalAndPredeterminadoAndEliminado(
-            (new SucursalBuilder()).build(), true, false))
+    when(clienteRepository.findByAndPredeterminadoAndEliminado(true, false))
         .thenReturn((new ClienteBuilder()).build());
-    Cliente resultadoObtenido =
-        clienteServiceImpl.getClientePredeterminado((new SucursalBuilder()).build());
+    Cliente resultadoObtenido = clienteServiceImpl.getClientePredeterminado();
     assertEquals(resultadoEsperado, resultadoObtenido);
   }
 
@@ -52,8 +50,7 @@ class ClienteServiceImplTest {
         assertThrows(
             BusinessServiceException.class,
             () -> {
-              when(clienteRepository.findByIdFiscalAndSucursalAndEliminado(
-                      clienteNuevo.getIdFiscal(), clienteNuevo.getSucursal(), false))
+              when(clienteRepository.findByIdFiscalAndEliminado(clienteNuevo.getIdFiscal(), false))
                   .thenReturn(clienteNuevo);
               clienteServiceImpl.validarOperacion(TipoDeOperacion.ALTA, clienteDuplicado);
             });
@@ -78,8 +75,7 @@ class ClienteServiceImplTest {
         assertThrows(
             BusinessServiceException.class,
             () -> {
-              when(clienteRepository.findByIdFiscalAndSucursalAndEliminado(
-                      clienteNuevo.getIdFiscal(), clienteNuevo.getSucursal(), false))
+              when(clienteRepository.findByIdFiscalAndEliminado(clienteNuevo.getIdFiscal(), false))
                   .thenReturn(clienteNuevo);
               clienteServiceImpl.validarOperacion(TipoDeOperacion.ACTUALIZACION, clienteDuplicado);
             });

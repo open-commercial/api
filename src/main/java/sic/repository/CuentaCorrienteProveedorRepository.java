@@ -12,8 +12,7 @@ public interface CuentaCorrienteProveedorRepository
     extends CuentaCorrienteRepository<CuentaCorrienteProveedor>,
         QuerydslPredicateExecutor<CuentaCorrienteProveedor> {
 
-  CuentaCorrienteProveedor findByProveedorAndSucursalAndEliminada(
-    Proveedor proveedor, Sucursal sucursal, boolean eliminada);
+  CuentaCorrienteProveedor findByProveedorAndEliminada(Proveedor proveedor, boolean eliminada);
 
   @Modifying
   @Query(

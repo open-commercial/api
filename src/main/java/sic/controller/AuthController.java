@@ -98,12 +98,9 @@ public class AuthController {
     nuevoUsuario.setEmail(registracionClienteAndUsuarioDTO.getEmail());
     nuevoUsuario.setPassword(registracionClienteAndUsuarioDTO.getPassword());
     nuevoUsuario.setRoles(Collections.singletonList(Rol.COMPRADOR));
-    nuevoUsuario.setIdSucursalPredeterminada(registracionClienteAndUsuarioDTO.getIdSucursal());
     Cliente nuevoCliente = new Cliente();
     nuevoCliente.setTelefono(registracionClienteAndUsuarioDTO.getTelefono());
     nuevoCliente.setEmail(registracionClienteAndUsuarioDTO.getEmail());
-    nuevoCliente.setSucursal(
-        sucursalService.getSucursalPorId(registracionClienteAndUsuarioDTO.getIdSucursal()));
     CategoriaIVA categoriaIVA = registracionClienteAndUsuarioDTO.getCategoriaIVA();
     if (categoriaIVA == CategoriaIVA.CONSUMIDOR_FINAL) {
       nuevoCliente.setNombreFiscal(

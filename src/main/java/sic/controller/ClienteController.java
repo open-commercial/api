@@ -22,7 +22,6 @@ import java.util.Locale;
 public class ClienteController {
 
   private final IClienteService clienteService;
-  private final ISucursalService sucursalService;
   private final IUsuarioService usuarioService;
   private final IUbicacionService ubicacionService;
   private final IAuthService authService;
@@ -33,14 +32,12 @@ public class ClienteController {
   @Autowired
   public ClienteController(
       IClienteService clienteService,
-      ISucursalService sucursalService,
       IUsuarioService usuarioService,
       IUbicacionService ubicacionService,
       IAuthService authService,
       ModelMapper modelMapper,
       MessageSource messageSource) {
     this.clienteService = clienteService;
-    this.sucursalService = sucursalService;
     this.usuarioService = usuarioService;
     this.ubicacionService = ubicacionService;
     this.authService = authService;
@@ -62,7 +59,6 @@ public class ClienteController {
 
   @GetMapping("/clientes/busqueda/criteria")
   public Page<Cliente> buscarConCriteria(
-      @RequestParam Long idSucursal,
       @RequestParam(required = false) String nroCliente,
       @RequestParam(required = false) String nombreFiscal,
       @RequestParam(required = false) String nombreFantasia,
@@ -115,23 +111,22 @@ public class ClienteController {
             .idLocalidad(idLocalidad)
             .buscarPorNroDeCliente(nroCliente != null)
             .nroDeCliente(nroCliente)
-            .idSucursal(idSucursal)
             .pageable(pageable)
             .build();
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return clienteService.buscarClientes(criteria, (int) claims.get("idUsuario"));
   }
 
-  @GetMapping("/clientes/predeterminado/sucursales/{idSucursal}")
+  @GetMapping("/clientes/predeterminado")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Cliente getClientePredeterminado(@PathVariable long idSucursal) {
-    return clienteService.getClientePredeterminado(sucursalService.getSucursalPorId(idSucursal));
+  public Cliente getClientePredeterminado() {
+    return clienteService.getClientePredeterminado();
   }
 
-  @GetMapping("/clientes/existe-predeterminado/sucursales/{idSucursal}")
+  @GetMapping("/clientes/existe-predeterminado")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public boolean existeClientePredeterminado(@PathVariable long idSucursal) {
-    return clienteService.existeClientePredeterminado(sucursalService.getSucursalPorId(idSucursal));
+  public boolean existeClientePredeterminado() {
+    return clienteService.existeClientePredeterminado();
   }
 
   @DeleteMapping("/clientes/{idCliente}")
@@ -176,7 +171,6 @@ public class ClienteController {
     if (nuevoCliente.getUbicacionEnvio() != null) {
       cliente.setUbicacionEnvio(modelMapper.map(nuevoCliente.getUbicacionEnvio(), Ubicacion.class));
     }
-    cliente.setSucursal(sucursalService.getSucursalPorId(nuevoCliente.getIdSucursal()));
     if (nuevoCliente.getIdViajante() != null) {
       cliente.setViajante(usuarioService.getUsuarioNoEliminadoPorId(nuevoCliente.getIdViajante()));
     }
@@ -244,11 +238,6 @@ public class ClienteController {
     } else {
       clientePorActualizar.setUbicacionEnvio(clientePersistido.getUbicacionEnvio());
     }
-    if (clienteDTO.getIdSucursal() != null) {
-      clientePorActualizar.setSucursal(sucursalService.getSucursalPorId(clienteDTO.getIdSucursal()));
-    } else {
-      clientePorActualizar.setSucursal(clientePersistido.getSucursal());
-    }
     if (clienteDTO.getIdViajante() != null) {
       clientePorActualizar.setViajante(usuarioService.getUsuarioNoEliminadoPorId(clienteDTO.getIdViajante()));
     } else {
@@ -269,7 +258,7 @@ public class ClienteController {
     return clienteService.getClientePorIdPedido(idPedido);
   }
 
-  @GetMapping("/clientes/usuarios/{idUsuario}/sucursales/{idSucursal}")
+  @GetMapping("/clientes/usuarios/{idUsuario}")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -277,8 +266,7 @@ public class ClienteController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public Cliente getClientePorIdUsuario(
-      @PathVariable long idUsuario, @PathVariable long idSucursal) {
-    return clienteService.getClientePorIdUsuarioYidSucursal(idUsuario, idSucursal);
+  public Cliente getClientePorIdUsuario(@PathVariable long idUsuario) {
+    return clienteService.getClientePorIdUsuario(idUsuario);
   }
 }

@@ -60,18 +60,16 @@ public class ProductoController {
   }
 
   @JsonView(Views.Public.class)
-  @GetMapping("/public/productos/{idProducto}/sucursales/{idSucursal}")
+  @GetMapping("/public/productos/{idProducto}")
   public Producto getProductoPorIdPublic(
       @PathVariable long idProducto,
-      @PathVariable long idSucursal,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     if (authorizationHeader != null
         && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente =
-          clienteService.getClientePorIdUsuarioYidSucursal(
-              (int) claims.get("idUsuario"), idSucursal);
+          clienteService.getClientePorIdUsuario((int) claims.get("idUsuario"));
       if (cliente != null) {
         Page<Producto> productos =
             productoService.getProductosConPrecioBonificado(
@@ -88,7 +86,6 @@ public class ProductoController {
   @JsonView(Views.Public.class)
   @GetMapping("/public/productos/busqueda/criteria")
   public Page<Producto> buscarProductosPublic(
-      @RequestParam long idSucursal,
       @RequestParam(required = false) String codigo,
       @RequestParam(required = false) String descripcion,
       @RequestParam(required = false) Boolean destacados,
@@ -96,7 +93,6 @@ public class ProductoController {
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Page<Producto> productos =
       this.buscar(
-        idSucursal,
         codigo,
         descripcion,
         null,
@@ -112,7 +108,7 @@ public class ProductoController {
     if (authorizationHeader != null && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente =
-        clienteService.getClientePorIdUsuarioYidSucursal((int) claims.get("idUsuario"), idSucursal);
+        clienteService.getClientePorIdUsuario((int) claims.get("idUsuario"));
       if (cliente != null) {
         return productoService.getProductosConPrecioBonificado(productos, cliente);
       } else {
@@ -123,7 +119,7 @@ public class ProductoController {
     }
   }
 
-  @GetMapping("/productos/{idProducto}/sucursales/{idSucursal}")
+  @GetMapping("/productos/{idProducto}")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -133,12 +129,11 @@ public class ProductoController {
   })
   public Producto getProductoPorId(
       @PathVariable long idProducto,
-      @PathVariable long idSucursal,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     Cliente cliente =
-        clienteService.getClientePorIdUsuarioYidSucursal((int) claims.get("idUsuario"), idSucursal);
+        clienteService.getClientePorIdUsuario((int) claims.get("idUsuario"));
     if (cliente != null) {
       Page<Producto> productos =
           productoService.getProductosConPrecioBonificado(
@@ -158,7 +153,6 @@ public class ProductoController {
     Rol.COMPRADOR
   })
   public Page<Producto> buscarProductos(
-      @RequestParam long idSucursal,
       @RequestParam(required = false) String codigo,
       @RequestParam(required = false) String descripcion,
       @RequestParam(required = false) Long idRubro,
@@ -173,10 +167,9 @@ public class ProductoController {
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Cliente cliente =
-        clienteService.getClientePorIdUsuarioYidSucursal((int) claims.get("idUsuario"), idSucursal);
+        clienteService.getClientePorIdUsuario((int) claims.get("idUsuario"));
     Page<Producto> productos =
         this.buscar(
-            idSucursal,
             codigo,
             descripcion,
             idRubro,
@@ -209,7 +202,6 @@ public class ProductoController {
   }
 
   private Page<Producto> buscar(
-      long idSucursal,
       String codigo,
       String descripcion,
       Long idRubro,
@@ -251,7 +243,6 @@ public class ProductoController {
             .idRubro(idRubro)
             .buscarPorProveedor(idProveedor != null)
             .idProveedor(idProveedor)
-            .idSucursal(idSucursal)
             .listarSoloFaltantes(soloFantantes)
             .listarSoloEnStock(soloEnStock)
             .buscaPorVisibilidad(publicos != null)
@@ -365,7 +356,6 @@ public class ProductoController {
   @GetMapping("/productos/valor-stock/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public BigDecimal calcularValorStock(
-      @RequestParam long idSucursal,
       @RequestParam(required = false) String codigo,
       @RequestParam(required = false) String descripcion,
       @RequestParam(required = false) Long idRubro,
@@ -384,7 +374,6 @@ public class ProductoController {
             .idRubro(idRubro)
             .buscarPorProveedor(idProveedor != null)
             .idProveedor(idProveedor)
-            .idSucursal(idSucursal)
             .listarSoloFaltantes(soloFantantes)
             .listarSoloEnStock(soloEnStock)
             .buscaPorVisibilidad(publicos != null)
@@ -417,7 +406,6 @@ public class ProductoController {
     Rol.COMPRADOR
   })
   public ResponseEntity<byte[]> getListaDePrecios(
-      @RequestParam long idSucursal,
       @RequestParam(required = false) String codigo,
       @RequestParam(required = false) String descripcion,
       @RequestParam(required = false) Long idRubro,
@@ -438,7 +426,6 @@ public class ProductoController {
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
         productos =
             this.buscar(
-                    idSucursal,
                     codigo,
                     descripcion,
                     idRubro,
@@ -453,7 +440,7 @@ public class ProductoController {
                     sentido)
                 .getContent();
         byte[] reporteXls =
-            productoService.getListaDePreciosPorSucursal(productos, idSucursal, formato);
+            productoService.getListaDePreciosPorSucursal(productos, formato);
         headers.setContentLength(reporteXls.length);
         return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
       case "pdf":
@@ -462,7 +449,6 @@ public class ProductoController {
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
         productos =
             this.buscar(
-                    idSucursal,
                     codigo,
                     descripcion,
                     idRubro,
@@ -477,7 +463,7 @@ public class ProductoController {
                     sentido)
                 .getContent();
         byte[] reportePDF =
-            productoService.getListaDePreciosPorSucursal(productos, idSucursal, formato);
+            productoService.getListaDePreciosPorSucursal(productos, formato);
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
       default:
         throw new BusinessServiceException(messageSource.getMessage(

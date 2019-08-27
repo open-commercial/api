@@ -21,7 +21,6 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@JsonIgnoreProperties({"sucursal"})
 public class CuentaCorrienteCliente extends CuentaCorriente implements Serializable {
 
     @OneToOne
@@ -32,10 +31,9 @@ public class CuentaCorrienteCliente extends CuentaCorriente implements Serializa
 
     public CuentaCorrienteCliente() {}
 
-    public CuentaCorrienteCliente(long idCuentaCorriente, boolean eliminada, Date fechaApertura, Sucursal sucursal,
+    public CuentaCorrienteCliente(long idCuentaCorriente, boolean eliminada, Date fechaApertura,
             BigDecimal saldo, Date fechaUltimoMovimiento, List<RenglonCuentaCorriente> renglones, Cliente cliente) {
-
-        super(idCuentaCorriente, eliminada, fechaApertura, sucursal, saldo, fechaUltimoMovimiento, renglones);
+        super(idCuentaCorriente, eliminada, fechaApertura, saldo, fechaUltimoMovimiento, renglones);
         this.cliente = cliente;
     }
 
