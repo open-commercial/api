@@ -1034,7 +1034,6 @@ class AppIntegrationTest {
             .telefono("78946551122")
             .web("Ronollega.com")
             .nombre("Transporte Segu Ronollega")
-            .idSucursal(1L)
             .build();
     TransportistaDTO transportistaRecuperado =
         restTemplate.postForObject(
@@ -1049,7 +1048,6 @@ class AppIntegrationTest {
             .telefono("78946551122")
             .web("Ronollega.com")
             .nombre("Transporte Segu Ronollega")
-            .idSucursal(1L)
             .ubicacion(
                 UbicacionDTO.builder()
                     .calle("Los Rios Puros Nacidos del Mar de la Calma")
@@ -1070,7 +1068,6 @@ class AppIntegrationTest {
             .telefono("78946551122")
             .web("Ronollega.com")
             .nombre("Transporte Segu Ronollega")
-            .idSucursal(1L)
             .ubicacion(
                 UbicacionDTO.builder()
                     .calle("Los Rios Puros Nacidos del Mar de la Calma")

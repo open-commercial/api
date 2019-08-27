@@ -9,7 +9,7 @@ import javax.validation.Valid;
 
 public interface ITransportistaService {
 
-    Transportista getTransportistaNoEliminadoPorId(long id_Transportista);
+    Transportista getTransportistaNoEliminadoPorId(long idTransportista);
             
     void actualizar(@Valid Transportista transportista);
 
@@ -17,7 +17,7 @@ public interface ITransportistaService {
 
     void eliminar(long idTransportista);
 
-    Transportista getTransportistaPorNombre(String nombre, Sucursal sucursal);
+    Transportista getTransportistaPorNombre(String nombre);
 
     List<Transportista> getTransportistas(Sucursal sucursal);
 

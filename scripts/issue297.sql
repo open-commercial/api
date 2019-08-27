@@ -15,58 +15,7 @@ CREATE TABLE cantidadensucursal (
 
 insert into cantidadensucursal(cantidad, estante, estanteria, id_Empresa, idProducto, codigo)
 select producto.cantidad, producto.estante, producto.estanteria, producto.id_Empresa, producto.idProducto, producto.codigo
-from producto where producto.id_Empresa = 5;
-
-CREATE TABLE productoAux (
-  idProducto bigint(20),
-  cantidad decimal(25,15) DEFAULT NULL,
-  codigo varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  estante varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  estanteria varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  id_Empresa bigint(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-insert into productoAux(idProducto, cantidad, codigo, estante, estanteria, id_Empresa)
-select producto.idProducto, producto.cantidad, producto.codigo, producto.estante, producto.estante, producto.id_Empresa from producto
-where producto.id_Empresa = 1;
-
--- Actualizando las cantidades de los productos en el minorista
-SET SQL_SAFE_UPDATES = 0;
-update producto inner join productoAux
-on producto.codigo = productoAux.codigo
-set producto.cantidad = producto.cantidad + productoAux.cantidad
-where producto.id_Empresa = 5;
-SET SQL_SAFE_UPDATES = 1;
---
-
-INSERT INTO cantidadensucursal(cantidad, estante, estanteria, id_Empresa, idProducto)
-SELECT 
-   productoAux.cantidad, productoAux.estante, productoAux.estanteria, productoAux.id_Empresa, cantidadensucursal.idProducto
-   from cantidadensucursal inner join
- productoAux on cantidadensucursal.codigo = productoAux.codigo;
- 
-ALTER TABLE cantidadensucursal DROP codigo;
-
--- eliminar productos del mayorista que cumplen con la condicion de tener codigo en el minorista
-TRUNCATE TABLE productoAux;
-
-insert into productoAux(idProducto, cantidad, codigo, estante, estanteria, id_Empresa)
-select producto.idProducto, producto.cantidad, producto.codigo, producto.estante, producto.estante, producto.id_Empresa from producto
-where producto.id_Empresa = 5;
-
-SET SQL_SAFE_UPDATES = 0;
-update producto inner join productoAux
-on producto.codigo = productoAux.codigo
-set producto.eliminado = 1
-where producto.id_Empresa = 1;
-SET SQL_SAFE_UPDATES = 1;
---
- 
-DROP TABLE IF EXISTS productoAux; 
-
-insert into cantidadensucursal(cantidad, estante, estanteria, id_Empresa, idProducto)
-select producto.cantidad, producto.estante, producto.estanteria, producto.id_Empresa, producto.idProducto
-from producto where producto.id_Empresa = 1;
+from producto; -- where producto.id_Empresa = 5;
  
 ALTER TABLE producto DROP estante;
 ALTER TABLE producto DROP estanteria;

@@ -11,12 +11,11 @@ public class TransportistaBuilder {
   private Ubicacion ubicacion = new UbicacionBuilder().build();
   private String web = "pedidos@oca.com.ar";
   private String telefono = "379 5402356";
-  private Sucursal sucursal = new SucursalBuilder().build();
   private boolean eliminado = false;
 
   public Transportista build() {
     return new Transportista(
-        id_Transportista, nombre, ubicacion, web, telefono, sucursal, eliminado);
+        id_Transportista, nombre, ubicacion, web, telefono, eliminado);
   }
 
   public TransportistaBuilder withId_Transportista(long idTransportista) {
@@ -41,11 +40,6 @@ public class TransportistaBuilder {
 
   public TransportistaBuilder withTelefono(String telefono) {
     this.telefono = telefono;
-    return this;
-  }
-
-  public TransportistaBuilder withEmpresa(Sucursal sucursal) {
-    this.sucursal = sucursal;
     return this;
   }
 

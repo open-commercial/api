@@ -70,12 +70,6 @@ public class TransportistaController {
     if (transportistaPorActualizar.getTelefono() == null) {
       transportistaPorActualizar.setTelefono(transportistaPersistido.getTelefono());
     }
-    if (transportistaDTO.getIdSucursal() == null) {
-      transportistaPorActualizar.setSucursal(transportistaPersistido.getSucursal());
-    } else {
-      transportistaPorActualizar.setSucursal(
-          sucursalService.getSucursalPorId(transportistaDTO.getIdSucursal()));
-    }
     if (transportistaService.getTransportistaNoEliminadoPorId(transportistaPorActualizar.getId_Transportista())
         != null) {
       transportistaService.actualizar(transportistaPorActualizar);
@@ -91,19 +85,17 @@ public class TransportistaController {
     Rol.COMPRADOR
   })
   public List<Transportista> buscarTransportista(
-    @RequestParam long idSucursal,
-    @RequestParam(required = false) String nombre,
-    @RequestParam(required = false) Long idProvincia,
-    @RequestParam(required = false) Long idLocalidad) {
+      @RequestParam(required = false) String nombre,
+      @RequestParam(required = false) Long idProvincia,
+      @RequestParam(required = false) Long idLocalidad) {
     BusquedaTransportistaCriteria criteria =
-      new BusquedaTransportistaCriteria(
-        (nombre != null),
-        nombre,
-        (idProvincia != null),
-        idProvincia,
-        (idLocalidad != null),
-        idLocalidad,
-        idSucursal);
+        new BusquedaTransportistaCriteria(
+            (nombre != null),
+            nombre,
+            (idProvincia != null),
+            idProvincia,
+            (idLocalidad != null),
+            idLocalidad);
     return transportistaService.buscarTransportistas(criteria);
   }
 
@@ -129,7 +121,6 @@ public class TransportistaController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Transportista guardar(@RequestBody TransportistaDTO transportistaDTO) {
     Transportista transportista = modelMapper.map(transportistaDTO, Transportista.class);
-    transportista.setSucursal(sucursalService.getSucursalPorId(transportistaDTO.getIdSucursal()));
     transportista.setUbicacion(null);
     if (transportistaDTO.getUbicacion() != null) {
       transportista.setUbicacion(modelMapper.map(transportistaDTO.getUbicacion(), Ubicacion.class));

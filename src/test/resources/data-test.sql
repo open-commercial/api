@@ -36,8 +36,8 @@ VALUES (10.000000000000000,'RESPONSABLE_INSCRIPTO','',false,'','2019-07-18 02:43
     'Peter Parker','25158',false,'379123452',2,1,1,2,NULL),(0.000000000000000,'RESPONSABLE_INSCRIPTO','El señor Oscuro',
     false,'Cliente@test.com.br','2019-07-18 02:57:38',2355668,'Cliente test','Cliente test','93413',false,'372461245',1,1,NULL,NULL,NULL);
 
-INSERT INTO transportista(eliminado, nombre, telefono, web, id_sucursal, id_ubicacion)
-VALUES (false,'Correo OCA','3795402356','pedidos@oca.com.ar',1,3);
+INSERT INTO transportista(eliminado, nombre, telefono, web, id_ubicacion)
+VALUES (false,'Correo OCA','3795402356','pedidos@oca.com.ar',3);
 
 INSERT INTO medida(eliminada, nombre)
 VALUES (false,'Metro'),(false,'Kilo');

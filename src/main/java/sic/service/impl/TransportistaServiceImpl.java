@@ -57,10 +57,11 @@ public class TransportistaServiceImpl implements ITransportistaService {
   @Override
   public List<Transportista> getTransportistas(Sucursal sucursal) {
     List<Transportista> transportista =
-        transportistaRepository.findAllByAndSucursalAndEliminadoOrderByNombreAsc(sucursal, false);
+        transportistaRepository.findAllByAndEliminadoOrderByNombreAsc(false);
     if (transportista == null) {
-      throw new EntityNotFoundException(messageSource.getMessage(
-        "mensaje_transportista_ninguno_cargado", null, Locale.getDefault()));
+      throw new EntityNotFoundException(
+          messageSource.getMessage(
+              "mensaje_transportista_ninguno_cargado", null, Locale.getDefault()));
     }
     return transportista;
   }
@@ -70,11 +71,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
     QTransportista qTransportista = QTransportista.transportista;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
-        qTransportista
-            .sucursal
-            .idSucursal
-            .eq(criteria.getIdSucursal())
-            .and(qTransportista.eliminado.eq(false)));
+        qTransportista.eliminado.eq(false));
     if (criteria.isBuscarPorNombre())
       builder.and(this.buildPredicadoNombre(criteria.getNombre(), qTransportista));
     if (criteria.isBuscarPorLocalidad())
@@ -99,15 +96,14 @@ public class TransportistaServiceImpl implements ITransportistaService {
   }
 
   @Override
-  public Transportista getTransportistaPorNombre(String nombre, Sucursal sucursal) {
-    return transportistaRepository.findByNombreAndSucursalAndEliminado(nombre, sucursal, false);
+  public Transportista getTransportistaPorNombre(String nombre) {
+    return transportistaRepository.findByNombreAndEliminado(nombre, false);
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Transportista transportista) {
     // Duplicados
     // Nombre
-    Transportista transportistaDuplicado =
-        this.getTransportistaPorNombre(transportista.getNombre(), transportista.getSucursal());
+    Transportista transportistaDuplicado = this.getTransportistaPorNombre(transportista.getNombre());
     if (operacion.equals(TipoDeOperacion.ALTA) && transportistaDuplicado != null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_transportista_duplicado_nombre", null, Locale.getDefault()));

@@ -44,21 +44,5 @@ public class Transportista implements Serializable {
   @Column(nullable = false)
   private String telefono;
 
-  @ManyToOne
-  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
-  @NotNull(message = "{mensaje_transportista_sucursal_vacia}")
-  private Sucursal sucursal;
-
   private boolean eliminado;
-
-
-  @JsonGetter("idSucursal")
-  public Long getIdSucursal() {
-    return sucursal.getIdSucursal();
-  }
-
-  @JsonGetter("nombreSucursal")
-  public String getNombreSucursal() {
-    return sucursal.getNombre();
-  }
 }
