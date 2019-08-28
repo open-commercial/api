@@ -1,5 +1,8 @@
 package sic.service.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mercadopago.MercadoPago;
 import com.mercadopago.exceptions.MPException;
 import com.mercadopago.resources.Payment;
@@ -70,7 +73,10 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
             + " "
             + cliente.getNombreFiscal()
             + (cliente.getNombreFantasia() != null ? cliente.getNombreFantasia() : ""));
-    payment.setExternalReference(String.valueOf(cliente.getId_Cliente()));
+    String json = "{ \"idCliente\": "+ nuevoPagoMercadoPagoDTO.getIdCliente()
+      +" , \"idSucursal\": " +nuevoPagoMercadoPagoDTO.getIdSucursal() +"}";
+    JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
+    payment.setExternalReference(jsonObject.getAsString());
     Payer payer = new Payer();
     payer.setEmail(cliente.getEmail());
     payment.setPayer(payer);
@@ -110,14 +116,20 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       payment = Payment.findById(idPayment);
       if (payment.getId() != null && payment.getExternalReference() != null) {
         Optional<Recibo> reciboMP = reciboService.getReciboPorIdMercadoPago(idPayment);
+        JsonObject convertedObject =
+            new Gson().fromJson(payment.getExternalReference(), JsonObject.class);
         Cliente cliente =
-            clienteService.getClienteNoEliminadoPorId(Long.valueOf(payment.getExternalReference()));
+            clienteService.getClienteNoEliminadoPorId(
+                Long.parseLong(convertedObject.get("idCliente").getAsString()));
+        Sucursal sucursal =
+            sucursalService.getSucursalPorId(
+                Long.parseLong(convertedObject.get("idSucursal").getAsString()));
         switch (payment.getStatus()) {
           case approved:
             if (reciboMP.isPresent()) {
               logger.warn("El recibo del pago nro {} ya existe.", payment.getId());
             } else {
-              this.crearReciboDePago(payment, cliente.getCredencial(), cliente);
+              this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
             }
             break;
           case refunded:
@@ -174,13 +186,12 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     }
   }
 
-  private void crearReciboDePago(Payment payment, Usuario usuario, Cliente cliente) {
+  private void crearReciboDePago(Payment payment, Usuario usuario, Cliente cliente, Sucursal sucursal) {
     switch (payment.getStatus()) {
       case approved:
         logger.warn("El pago de mercadopago {} se aprobó correctamente.", payment);
         Recibo nuevoRecibo = new Recibo();
-        //nuevoRecibo.setSucursal(cliente.getSucursal());
-        nuevoRecibo.setSucursal(sucursalService.getSucursalPorId(usuario.getIdSucursalPredeterminada()));
+        nuevoRecibo.setSucursal(sucursal);
         nuevoRecibo.setFormaDePago(formaDePagoService.getFormaDePagoPorNombre(FormaDePagoEnum.MERCADO_PAGO));
         nuevoRecibo.setUsuario(usuario);
         nuevoRecibo.setCliente(cliente);

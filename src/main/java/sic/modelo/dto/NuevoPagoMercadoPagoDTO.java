@@ -17,5 +17,6 @@ public class NuevoPagoMercadoPagoDTO {
   private String issuerId;
   private Integer installments;
   private long idCliente;
+  private long idSucursal;
   private Float monto;
 }

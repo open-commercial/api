@@ -52,6 +52,12 @@ DELETE FROM medida WHERE id_Medida = 19;
 alter TABLE transportista DROP FOREIGN KEY FKphhgo5taxw9nhjkav8ei6b6y9;
 alter TABLE transportista drop column id_Empresa;
 
+alter TABLE cliente DROP FOREIGN KEY FKahu5l6761ite2fsglie24w1bg;
+alter TABLE cliente drop column id_Empresa;
+
+alter TABLE proveedor DROP FOREIGN KEY FK5s5a4d2763thtum39ht6r059q;
+alter TABLE proveedor drop column id_Empresa;
+
 RENAME TABLE empresa TO sucursal;
 
 ALTER TABLE sucursal CHANGE id_Empresa idSucursal bigint(20) NOT NULL AUTO_INCREMENT;

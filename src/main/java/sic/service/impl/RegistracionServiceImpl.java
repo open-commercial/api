@@ -49,10 +49,10 @@ public class RegistracionServiceImpl implements IRegistracionService {
     cliente.setBonificacion(BigDecimal.ZERO);
     clienteService.guardar(cliente);
     correoElectronicoService.enviarMailPorSucursal(
-        usuario.getIdSucursalPredeterminada(),
+        1L,
         usuario.getEmail(),
         configuracionDelSistemaService
-            .getConfiguracionDelSistemaPorSucursal(sucursalService.getSucursalPorId(usuario.getIdSucursalPredeterminada()))
+            .getConfiguracionDelSistemaPorSucursal(sucursalService.getSucursalPorId(1L))
             .getEmailUsername(),
         "Registración de cuenta nueva",
         messageSource.getMessage(

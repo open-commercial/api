@@ -394,7 +394,6 @@ class AppIntegrationTest {
         .getBody();
   }
 
-  @Disabled
   @Test
   void shouldRegistrarNuevaCuentaComoResponsableInscripto() {
     RegistracionClienteAndUsuarioDTO registro =

@@ -52,7 +52,7 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
   public void enviarMailPorSucursal(
       long idSucursal,
       String toEmail,
-      String bbc,
+      String bcc,
       String subject,
       String mensaje,
       byte[] byteArray,
@@ -82,7 +82,7 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
                 .getConfiguracionDelSistemaPorId(idSucursal)
                 .getEmailUsername());
         helper.setTo(toEmail);
-        if (bbc != null && !bbc.isEmpty()) helper.setBcc(bbc);
+        if (bcc != null && !bcc.isEmpty()) helper.setBcc(bcc);
         helper.setSubject(subject);
         helper.setText(mensaje);
         if (byteArray != null) {
