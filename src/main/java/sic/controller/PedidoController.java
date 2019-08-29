@@ -110,8 +110,11 @@ public class PedidoController {
     pedido.setDescuentoNeto(nuevoPedidoDTO.getDescuentoNeto());
     pedido.setTotalEstimado(nuevoPedidoDTO.getTotal());
     pedido.setTotalActual(nuevoPedidoDTO.getTotal());
-    Sucursal sucursalParaPedido = sucursalService.getSucursalPorId(nuevoPedidoDTO.getIdSucursal());
-    pedido.setSucursal(sucursalParaPedido);
+    if (nuevoPedidoDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
+      pedido.setSucursal(sucursalService.getSucursalPorId(nuevoPedidoDTO.getIdSucursalEnvio()));
+    } else {
+      pedido.setSucursal(sucursalService.getSucursalPorId(nuevoPedidoDTO.getIdSucursal()));
+    }
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(nuevoPedidoDTO.getIdUsuario()));
     Cliente cliente = clienteService.getClienteNoEliminadoPorId(nuevoPedidoDTO.getIdCliente());
     pedido.setCliente(cliente);
