@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Embeddable;
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Data
@@ -13,7 +14,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Builder
 @Embeddable
-public class LocalidadEmbeddable {
+public class LocalidadEmbeddable implements Serializable {
 
   private String nombreLocalidad;
   private String codigoPostal;

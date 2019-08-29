@@ -115,17 +115,17 @@ public class FacturaVenta extends Factura implements Serializable {
     return clienteEmbedded.getNroCliente();
   }
 
-  @JsonGetter("categoriaIVA")
+  @JsonGetter("categoriaIVACliente")
   public CategoriaIVA getCategoriaIVA() {
     return clienteEmbedded.getCategoriaIVA();
   }
 
-  @JsonGetter("idViajante")
+  @JsonGetter("idViajanteCliente")
   public Long getIdViajante() {
     return (cliente.getViajante() != null) ? cliente.getViajante().getId_Usuario() : null;
   }
 
-  @JsonGetter("nombreViajante")
+  @JsonGetter("nombreViajanteCliente")
   public String getNombreViajante() {
     return (cliente.getViajante() != null)
         ? cliente.getViajante().getNombre()
@@ -137,7 +137,7 @@ public class FacturaVenta extends Factura implements Serializable {
         : null;
   }
 
-  @JsonGetter("ubicacion")
+  @JsonGetter("ubicacionCliente")
   public String getUbicacionFacturacion() {
     return (clienteEmbedded.getUbicacion() != null) ? clienteEmbedded.getUbicacion().toString() : null;
   }

@@ -565,7 +565,7 @@ public class FacturaServiceImpl implements IFacturaService {
       FacturaVenta facturaVenta = (FacturaVenta) factura;
       if (facturaVenta.getCae() != 0L) {
         throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_factura_venta_CAE", null, Locale.getDefault()));
+          "mensaje_factura_venta_cae", null, Locale.getDefault()));
       }
     }
     this.validarCalculos(factura);

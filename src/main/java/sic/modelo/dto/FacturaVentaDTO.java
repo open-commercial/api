@@ -14,10 +14,10 @@ import sic.modelo.CategoriaIVA;
       "idCliente",
       "nombreFiscalCliente",
       "nroDeCliente",
-      "categoriaIVA",
-      "idViajante",
-      "nombreViajante",
-      "ubicacion"
+      "categoriaIVACliente",
+      "idViajanteCliente",
+      "nombreViajanteCliente",
+      "ubicacionCliente"
     })
 @Builder
 public class FacturaVentaDTO extends FacturaDTO implements Serializable {
@@ -25,8 +25,8 @@ public class FacturaVentaDTO extends FacturaDTO implements Serializable {
   private Long idCliente;
   private String nombreFiscalCliente;
   private String nroDeCliente;
-  private CategoriaIVA categoriaIVA;
-  private Long idViajante;
-  private String nombreViajante;
-  private String ubicacion;
+  private CategoriaIVA categoriaIVACliente;
+  private Long idViajanteCliente;
+  private String nombreViajanteCliente;
+  private String ubicacionCliente;
 }

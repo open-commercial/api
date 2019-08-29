@@ -6,13 +6,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Embeddable;
+import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Embeddable
-public class UbicacionEmbeddable {
+public class UbicacionEmbeddable implements Serializable {
 
   private String descripcion;
   private Double latitud;

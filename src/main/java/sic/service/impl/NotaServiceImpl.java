@@ -613,7 +613,7 @@ public class NotaServiceImpl implements INotaService {
       }
       if (nota.getCae() != 0L) {
         throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_nota_cliente_CAE", null, Locale.getDefault()));
+            messageSource.getMessage("mensaje_nota_cliente_cae", null, Locale.getDefault()));
       }
     } else if (nota instanceof NotaCredito && nota.getMovimiento().equals(Movimiento.COMPRA)) {
       if (nota.getFacturaCompra() != null

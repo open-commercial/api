@@ -9,13 +9,14 @@ import sic.modelo.CategoriaIVA;
 import javax.persistence.Embeddable;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Embeddable
-public class ClienteEmbeddable {
+public class ClienteEmbeddable implements Serializable {
 
   private String nroCliente;
   private String nombreFiscal;

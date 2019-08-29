@@ -3,8 +3,6 @@ package sic.modelo.dto;
 import lombok.*;
 import sic.modelo.CategoriaIVA;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -21,7 +19,6 @@ public class ClienteDTO implements Serializable {
   private String nroCliente;
   private String nombreFiscal;
   private String nombreFantasia;
-  @Enumerated(EnumType.STRING)
   private CategoriaIVA categoriaIVA;
   private Long idFiscal;
   private UbicacionDTO ubicacionFacturacion;
