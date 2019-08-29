@@ -21,12 +21,18 @@ import sic.controller.Views;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@JsonIgnoreProperties({"cliente", "usuario", "empresa", "pedido", "transportista", "clienteEmbedded"})
+@JsonIgnoreProperties({
+  "cliente",
+  "usuario",
+  "empresa",
+  "pedido",
+  "transportista",
+  "clienteEmbedded"
+})
 @JsonView(Views.Comprador.class)
 public class FacturaVenta extends Factura implements Serializable {
 
-  @Embedded
-  private ClienteEmbeddable clienteEmbedded;
+  @Embedded private ClienteEmbeddable clienteEmbedded;
 
   @ManyToOne
   @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
@@ -68,34 +74,34 @@ public class FacturaVenta extends Factura implements Serializable {
       long numFacturaAfip) {
 
     super(
-      id_Factura,
-      usuario,
-      fecha,
-      tipoComprobante,
-      numSerie,
-      numFactura,
-      fechaVencimiento,
-      pedido,
-      transportista,
-      renglones,
-      subTotal,
-      recargoPorcentaje,
-      recargoNeto,
-      descuentoPorcentaje,
-      descuentoNeto,
-      subTotalNeto,
-      iva105Neto,
-      iva21Neto,
-      impuestoInternoNeto,
-      total,
-      observaciones,
-      cantidadDeArticulos,
-      empresa,
-      eliminada,
-      CAE,
-      vencimientoCAE,
-      numSerieAfip,
-      numFacturaAfip);
+        id_Factura,
+        usuario,
+        fecha,
+        tipoComprobante,
+        numSerie,
+        numFactura,
+        fechaVencimiento,
+        pedido,
+        transportista,
+        renglones,
+        subTotal,
+        recargoPorcentaje,
+        recargoNeto,
+        descuentoPorcentaje,
+        descuentoNeto,
+        subTotalNeto,
+        iva105Neto,
+        iva21Neto,
+        impuestoInternoNeto,
+        total,
+        observaciones,
+        cantidadDeArticulos,
+        empresa,
+        eliminada,
+        CAE,
+        vencimientoCAE,
+        numSerieAfip,
+        numFacturaAfip);
     this.clienteEmbedded = clienteEmbedded;
     this.cliente = cliente;
   }
@@ -107,7 +113,7 @@ public class FacturaVenta extends Factura implements Serializable {
 
   @JsonGetter("nombreFiscalCliente")
   public String getNombreFiscalCliente() {
-    return clienteEmbedded.getNombreFiscal();
+    return clienteEmbedded.getNombreFiscalCliente();
   }
 
   @JsonGetter("nroDeCliente")
@@ -117,7 +123,7 @@ public class FacturaVenta extends Factura implements Serializable {
 
   @JsonGetter("categoriaIVACliente")
   public CategoriaIVA getCategoriaIVA() {
-    return clienteEmbedded.getCategoriaIVA();
+    return clienteEmbedded.getCategoriaIVACliente();
   }
 
   @JsonGetter("idViajanteCliente")
@@ -139,6 +145,25 @@ public class FacturaVenta extends Factura implements Serializable {
 
   @JsonGetter("ubicacionCliente")
   public String getUbicacionFacturacion() {
-    return (clienteEmbedded.getUbicacion() != null) ? clienteEmbedded.getUbicacion().toString() : null;
+    return (clienteEmbedded.getCalleCliente() != null
+            ? clienteEmbedded.getCalleCliente() + " "
+            : "")
+        + (clienteEmbedded.getNumeroCliente() != null
+            ? clienteEmbedded.getNumeroCliente() + " "
+            : "")
+        + (clienteEmbedded.getPisoCliente() != null ? clienteEmbedded.getPisoCliente() + " " : "")
+        + (clienteEmbedded.getDepartamentoCliente() != null
+            ? clienteEmbedded.getDepartamentoCliente() + " "
+            : "")
+        + ((clienteEmbedded.getDescripcionCliente() != null
+                && !clienteEmbedded.getDescripcionCliente().isEmpty())
+            ? "(" + clienteEmbedded.getDescripcionCliente() + ")" + " "
+            : "")
+        + (clienteEmbedded.getNombreLocalidadCliente() != null
+            ? clienteEmbedded.getNombreLocalidadCliente() + " "
+            : "")
+        + (clienteEmbedded.getNombreProvinciaCliente() != null
+            ? clienteEmbedded.getNombreProvinciaCliente()
+            : "");
   }
 }

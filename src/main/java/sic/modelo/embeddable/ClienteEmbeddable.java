@@ -10,6 +10,7 @@ import javax.persistence.Embeddable;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Data
 @AllArgsConstructor
@@ -19,12 +20,23 @@ import java.io.Serializable;
 public class ClienteEmbeddable implements Serializable {
 
   private String nroCliente;
-  private String nombreFiscal;
-  private String nombreFantasia;
+  private String nombreFiscalCliente;
+  private String nombreFantasiaCliente;
   @Enumerated(EnumType.STRING)
-  private CategoriaIVA categoriaIVA;
-  private Long idFiscal;
-  private String email;
-  private String telefono;
-  private UbicacionEmbeddable ubicacion;
+  private CategoriaIVA categoriaIVACliente;
+  private Long idFiscalCliente;
+  private String emailCliente;
+  private String telefonoCliente;
+  private String descripcionCliente;
+  private Double latitudCliente;
+  private Double longitudCliente;
+  private String calleCliente;
+  private Integer numeroCliente;
+  private String pisoCliente;
+  private String departamentoCliente;
+  private String nombreLocalidadCliente;
+  private String codigoPostalCliente;
+  private BigDecimal costoEnvioCliente;
+  private String nombreProvinciaCliente;
+  //private UbicacionEmbeddable ubicacion;
 }
