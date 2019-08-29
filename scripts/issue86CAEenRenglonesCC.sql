@@ -5,7 +5,7 @@ SET SQL_SAFE_UPDATES = 0;
 UPDATE 
     rengloncuentacorriente inner join factura on rengloncuentacorriente.id_Factura = factura.id_Factura
 SET 
-	rengloncuentacorriente.cae = factura.CAE
+	rengloncuentacorriente.CAE = factura.CAE
 WHERE factura.CAE > 0;
 UPDATE 
     rengloncuentacorriente inner join nota on rengloncuentacorriente.idNota = nota.idNota
