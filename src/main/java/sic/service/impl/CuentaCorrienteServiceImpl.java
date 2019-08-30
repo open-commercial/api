@@ -393,19 +393,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             this.getRenglonesCuentaCorriente(cuentaCorrienteCliente.getIdCuentaCorriente(), page)
                 .getContent());
     Map<String, Object> params = new HashMap<>();
-//    params.put("cuentaCorrienteCliente", cuentaCorrienteCliente);
-//    if (cuentaCorrienteCliente.getSucursal().getLogo() != null && !cuentaCorrienteCliente.getSucursal().getLogo().isEmpty()) {
-//      try {
-//        params.put(
-//            "logo",
-//            new ImageIcon(ImageIO.read(new URL(cuentaCorrienteCliente.getSucursal().getLogo())))
-//                .getImage());
-//      } catch (IOException ex) {
-//        logger.error(ex.getMessage());
-//        throw new ServiceException(messageSource.getMessage(
-//          "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
-//      }
-//    }
+    params.put("cuentaCorrienteCliente", cuentaCorrienteCliente);
     switch (formato) {
       case "xlsx":
         try {

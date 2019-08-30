@@ -40,48 +40,6 @@
 				<reportElement x="0" y="0" width="158" height="142" uuid="33e8c96a-1306-4242-b063-7ea538992edc"/>
 				<imageExpression><![CDATA["https://res.cloudinary.com/hf0vu1bg2/image/upload/v1557317348/assets/logo-globodeoro-500x500px.png"]]></imageExpression>
 			</image>
-			<rectangle>
-				<reportElement x="158" y="0" width="397" height="120" uuid="17eeab7f-475f-47f7-a9cb-fe3e752d1203"/>
-			</rectangle>
-			<textField>
-				<reportElement x="168" y="7" width="370" height="27" uuid="bca1cc0f-82e0-4c5e-b252-bb5e6bb24856"/>
-				<textElement>
-					<font size="17" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{sucursal}.getNombre()]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="168" y="34" width="370" height="20" uuid="4ea3b2e1-db3c-40cd-b1b1-cdbe17e8586f"/>
-				<textElement>
-					<font size="12"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{sucursal}.getLema()]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="168" y="54" width="370" height="20" uuid="3f11ebb5-bc76-4af0-856d-6e1cade8efd7"/>
-				<textElement>
-					<font size="12"/>
-				</textElement>
-				<textFieldExpression><![CDATA[($P{sucursal}.getUbicacion() !=  null) ?
-$P{sucursal}.getUbicacion() : ""]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="168" y="74" width="370" height="20" uuid="0ea1d205-1cbf-4268-8f06-c4c760bcb0a1"/>
-				<textElement>
-					<font size="12"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{sucursal}.getCategoriaIVA().toString().equals("RESPONSABLE_INSCRIPTO") ? "Responsable Inscripto" :
-$P{sucursal}.getCategoriaIVA().toString().equals("EXENTO") ? "Exento" :
-$P{sucursal}.getCategoriaIVA().toString().equals("CONSUMIDOR_FINAL") ? "Consumidor Final" :
-$P{sucursal}.getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" : ""]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="168" y="94" width="162" height="20" uuid="bf12b167-4c5f-4a38-a849-46625cef8b3d"/>
-				<textElement>
-					<font size="12"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{sucursal}.getIdFiscal() == null ? "" : $P{sucursal}.getIdFiscal()]]></textFieldExpression>
-			</textField>
 			<staticText>
 				<reportElement x="0" y="150" width="555" height="25" uuid="ff46f7f7-85b2-4514-afda-a8394f7c5111"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">

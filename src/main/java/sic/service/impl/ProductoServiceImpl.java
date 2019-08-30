@@ -639,21 +639,10 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public byte[] getListaDePreciosPorSucursal(List<Producto> productos, String formato) {
-    //Sucursal sucursal = sucursalService.getSucursalPorId(idSucursal);
     ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
     InputStream isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");
     Map<String, Object> params = new HashMap<>();
-//    params.put("sucursal", sucursal);
-//    if (sucursal.getLogo() != null && !sucursal.getLogo().isEmpty()) {
-//      try {
-//        params.put("logo", new ImageIcon(ImageIO.read(new URL(sucursal.getLogo()))).getImage());
-//      } catch (IOException ex) {
-//        logger.error(ex.getMessage());
-//        throw new ServiceException(messageSource.getMessage(
-//          "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
-//      }
-//    }
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(productos);
     switch (formato) {
       case "xlsx":
