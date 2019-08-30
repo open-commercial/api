@@ -5,7 +5,6 @@ CREATE TABLE cantidadensucursal (
   estanteria varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   id_Empresa bigint(20) NOT NULL,
   idProducto bigint(20) DEFAULT NULL,
-  codigo varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (idCantidadSucursal),
   KEY FKah2gat74y707din7l3k4lqd0d (id_Empresa),
   KEY FKlbd386vgya8ugkt0ynp67k8wl (idProducto),
@@ -13,8 +12,8 @@ CREATE TABLE cantidadensucursal (
   CONSTRAINT FKlbd386vgya8ugkt0ynp67k8wl FOREIGN KEY (idProducto) REFERENCES producto (idProducto)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-insert into cantidadensucursal(cantidad, estante, estanteria, id_Empresa, idProducto, codigo)
-select producto.cantidad, producto.estante, producto.estanteria, producto.id_Empresa, producto.idProducto, producto.codigo
+insert into cantidadensucursal(cantidad, estante, estanteria, id_Empresa, idProducto)
+select producto.cantidad, producto.estante, producto.estanteria, producto.id_Empresa, producto.idProducto
 from producto; -- where producto.id_Empresa = 5;
  
 ALTER TABLE producto DROP estante;
@@ -52,6 +51,9 @@ DELETE FROM medida WHERE id_Medida = 19;
 alter TABLE transportista DROP FOREIGN KEY FKphhgo5taxw9nhjkav8ei6b6y9;
 alter TABLE transportista drop column id_Empresa;
 
+update cliente 
+set cliente.predeterminado = false
+where cliente.id_Empresa = 5;
 alter TABLE cliente DROP FOREIGN KEY FKahu5l6761ite2fsglie24w1bg;
 alter TABLE cliente drop column id_Empresa;
 
