@@ -10,11 +10,14 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import sic.controller.Views;
+
 import javax.validation.constraints.NotBlank;
 
 @Entity
@@ -25,6 +28,7 @@ import javax.validation.constraints.NotBlank;
 @ToString
 @EqualsAndHashCode(of = {"numSerie", "numRecibo", "sucursal", "fecha"})
 @JsonIgnoreProperties({"formaDePago", "sucursal", "cliente", "usuario", "proveedor"})
+@JsonView(Views.Comprador.class)
 public class Recibo implements Serializable {
 
   @Id

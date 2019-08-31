@@ -5,11 +5,14 @@ import javax.validation.constraints.NotNull;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import sic.controller.Views;
+
 import javax.validation.constraints.NotEmpty;
 
 @Entity
@@ -19,7 +22,7 @@ import javax.validation.constraints.NotEmpty;
 @NoArgsConstructor
 @EqualsAndHashCode(of = "nombre")
 @ToString
-@JsonIgnoreProperties("sucursal")
+@JsonView(Views.Comprador.class)
 public class FormaDePago implements Serializable {
 
   @Id

@@ -6,11 +6,14 @@ import javax.persistence.*;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import sic.controller.Views;
+
 import javax.validation.constraints.NotEmpty;
 
 @Entity
@@ -20,6 +23,7 @@ import javax.validation.constraints.NotEmpty;
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"idProductoItem", "codigoItem"})
 @ToString
+@JsonView(Views.Comprador.class)
 public class RenglonNotaCredito implements Serializable {
     
     @Id

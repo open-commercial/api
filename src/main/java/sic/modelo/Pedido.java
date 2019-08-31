@@ -1,11 +1,7 @@
 package sic.modelo;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -21,6 +17,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import javax.validation.constraints.NotEmpty;
+
+import sic.controller.Views;
 import sic.modelo.dto.UbicacionDTO;
 
 @Entity
@@ -30,6 +28,7 @@ import sic.modelo.dto.UbicacionDTO;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nroPedido", "sucursal"})
 @ToString(exclude = {"facturas", "renglones"})
+@JsonView(Views.Comprador.class)
 @JsonIdentityInfo(
     generator = ObjectIdGenerators.PropertyGenerator.class,
     property = "id_Pedido",

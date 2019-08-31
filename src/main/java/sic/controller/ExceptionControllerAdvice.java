@@ -9,22 +9,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import sic.exception.ForbiddenException;
 import sic.exception.UnauthorizedException;
 import sic.exception.ServiceException;
 
-@ControllerAdvice
-public class ControllersExceptionHandler {
+@RestControllerAdvice
+public class ExceptionControllerAdvice {
 
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
 
   @Autowired
-  public ControllersExceptionHandler(MessageSource messageSource) {
+  public ExceptionControllerAdvice(MessageSource messageSource) {
     this.messageSource = messageSource;
   }
 
@@ -36,7 +35,6 @@ public class ControllersExceptionHandler {
 
   @ExceptionHandler(ConstraintViolationException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  @ResponseBody
   public String handleConstraintViolationException(ConstraintViolationException ex) {
     String mensaje = "";
     for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
@@ -49,35 +47,30 @@ public class ControllersExceptionHandler {
 
   @ExceptionHandler(ServiceException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  @ResponseBody
   public String handleServiceException(ServiceException ex) {
     return this.log(ex);
   }
 
   @ExceptionHandler(UnauthorizedException.class)
   @ResponseStatus(HttpStatus.UNAUTHORIZED)
-  @ResponseBody
   public String handleUnauthorizedException(UnauthorizedException ex) {
     return this.log(ex);
   }
 
   @ExceptionHandler(ForbiddenException.class)
   @ResponseStatus(HttpStatus.FORBIDDEN)
-  @ResponseBody
   public String handleForbiddenException(ForbiddenException ex) {
     return this.log(ex);
   }
 
   @ExceptionHandler(EntityNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ResponseBody
   public String handleEntityNotFoundException(EntityNotFoundException ex) {
     return this.log(ex);
   }
 
   @ExceptionHandler(Exception.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  @ResponseBody
   public String handleException(Exception ex) {
     return log(new Exception(messageSource.getMessage(
       "mensaje_error_request", null, Locale.getDefault()), ex));

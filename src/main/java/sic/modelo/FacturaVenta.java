@@ -12,9 +12,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import sic.controller.Views;
 
 @Entity
 @Table(name = "facturaventa")
@@ -22,6 +24,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @JsonIgnoreProperties({"cliente", "usuario", "sucursal", "pedido", "transportista"})
+@JsonView(Views.Comprador.class)
 public class FacturaVenta extends Factura implements Serializable {
 
   @ManyToOne

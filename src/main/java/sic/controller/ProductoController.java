@@ -2,8 +2,6 @@ package sic.controller;
 
 import java.math.BigDecimal;
 import java.util.*;
-
-import com.fasterxml.jackson.annotation.JsonView;
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,74 +57,7 @@ public class ProductoController {
     this.messageSource = messageSource;
   }
 
-  @JsonView(Views.Public.class)
-  @GetMapping("/public/productos/{idProducto}")
-  public Producto getProductoPorIdPublic(
-      @PathVariable long idProducto,
-      @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
-    Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
-    if (authorizationHeader != null
-        && authService.esAuthorizationHeaderValido(authorizationHeader)) {
-      Claims claims = authService.getClaimsDelToken(authorizationHeader);
-      Cliente cliente =
-          clienteService.getClientePorIdUsuario((int) claims.get("idUsuario"));
-      if (cliente != null) {
-        Page<Producto> productos =
-            productoService.getProductosConPrecioBonificado(
-                new PageImpl<>(Collections.singletonList(producto)), cliente);
-        return productos.getContent().get(0);
-      } else {
-        return producto;
-      }
-    } else {
-      return producto;
-    }
-  }
-
-  @JsonView(Views.Public.class)
-  @GetMapping("/public/productos/busqueda/criteria")
-  public Page<Producto> buscarProductosPublic(
-      @RequestParam(required = false) String codigo,
-      @RequestParam(required = false) String descripcion,
-      @RequestParam(required = false) Boolean destacados,
-      @RequestParam(required = false) Integer pagina,
-      @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
-    Page<Producto> productos =
-      this.buscar(
-        codigo,
-        descripcion,
-        null,
-        null,
-        false,
-        false,
-        true,
-        destacados,
-        pagina,
-        null,
-        null,
-        null);
-    if (authorizationHeader != null && authService.esAuthorizationHeaderValido(authorizationHeader)) {
-      Claims claims = authService.getClaimsDelToken(authorizationHeader);
-      Cliente cliente =
-        clienteService.getClientePorIdUsuario((int) claims.get("idUsuario"));
-      if (cliente != null) {
-        return productoService.getProductosConPrecioBonificado(productos, cliente);
-      } else {
-        return productos;
-      }
-    } else {
-      return productos;
-    }
-  }
-
   @GetMapping("/productos/{idProducto}")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Producto getProductoPorId(
       @PathVariable long idProducto,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -145,13 +76,6 @@ public class ProductoController {
   }
 
   @GetMapping("/productos/busqueda/criteria")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Page<Producto> buscarProductos(
       @RequestParam(required = false) String codigo,
       @RequestParam(required = false) String descripcion,

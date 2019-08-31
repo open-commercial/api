@@ -2,6 +2,7 @@ package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.QueryInit;
 import java.io.Serializable;
 import javax.persistence.*;
@@ -12,6 +13,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import sic.controller.Views;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
@@ -20,9 +23,10 @@ import javax.validation.constraints.NotEmpty;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"razonSocial", "sucursal"})
+@EqualsAndHashCode(of = "razonSocial")
 @ToString
-@JsonIgnoreProperties({"sucursal", "eliminado"})
+@JsonIgnoreProperties("eliminado")
+@JsonView(Views.Comprador.class)
 public class Proveedor implements Serializable {
 
   @Id

@@ -2,6 +2,7 @@ package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.QueryInit;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -16,6 +17,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import sic.controller.Views;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
@@ -26,10 +29,13 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombreFiscal", "idFiscal"})
 @ToString
-@JsonIgnoreProperties({"sucursal", "viajante", "credencial", "eliminado"})
+@JsonIgnoreProperties({"viajante", "credencial", "eliminado"})
+@JsonView(Views.Comprador.class)
 public class Cliente implements Serializable {
 
-  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private long id_Cliente;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private long id_Cliente;
 
   @Column(precision = 25, scale = 15)
   @NotNull(message = "{mensaje_cliente_vacio_bonificacion}")

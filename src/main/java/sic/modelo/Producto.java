@@ -28,25 +28,27 @@ import sic.controller.Views;
 @EqualsAndHashCode(of = "descripcion")
 @ToString
 @JsonIgnoreProperties({"medida", "rubro", "proveedor"})
+@JsonView(Views.Vendedor.class)
 public class Producto implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @JsonView(Views.Public.class)
+  @JsonView(Views.Comprador.class)
   private Long idProducto;
 
-  @JsonView(Views.Public.class)
+  @JsonView(Views.Comprador.class)
   private String codigo;
 
   @NotNull(message = "{mensaje_producto_vacio_descripcion}")
   @NotEmpty(message = "{mensaje_producto_vacio_descripcion}")
-  @JsonView(Views.Public.class)
+  @JsonView(Views.Comprador.class)
   private String descripcion;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "idProducto")
   @JsonProperty(access = JsonProperty.Access.READ_WRITE)
   @NotEmpty
+  @JsonView(Views.Comprador.class)
   private List<CantidadEnSucursal> cantidadEnSucursales;
 
   @Column(precision = 25, scale = 15)
@@ -58,11 +60,11 @@ public class Producto implements Serializable {
   private BigDecimal cantMinima;
 
   @Transient
-  @JsonView(Views.Public.class)
+  @JsonView(Views.Comprador.class)
   private boolean hayStock;
 
   @Transient
-  @JsonView(Views.Public.class)
+  @JsonView(Views.Comprador.class)
   private BigDecimal precioBonificado;
 
   @Column(precision = 25, scale = 15)
@@ -70,7 +72,7 @@ public class Producto implements Serializable {
       value = "0",
       inclusive = false,
       message = "{mensaje_producto_cantidad_bulto_invalida}")
-  @JsonView(Views.Public.class)
+  @JsonView(Views.Comprador.class)
   private BigDecimal bulto;
 
   @ManyToOne
@@ -104,7 +106,7 @@ public class Producto implements Serializable {
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_producto_precioLista_negativo}")
-  @JsonView(Views.Public.class)
+  @JsonView(Views.Comprador.class)
   private BigDecimal precioLista;
 
   @ManyToOne
@@ -138,11 +140,11 @@ public class Producto implements Serializable {
 
   private boolean eliminado;
 
-  @JsonView(Views.Public.class)
+  @JsonView(Views.Comprador.class)
   private String urlImagen;
 
   @JsonGetter("nombreMedida")
-  @JsonView(Views.Public.class)
+  @JsonView(Views.Comprador.class)
   public String getNombreMedida() {
     return medida.getNombre();
   }

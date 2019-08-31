@@ -236,7 +236,6 @@ public class ProductoServiceImpl implements IProductoService {
     this.validarOperacion(TipoDeOperacion.ALTA, producto);
     producto = productoRepository.save(producto);
     logger.warn("El Producto {} se guardó correctamente.", producto);
-
     return producto;
   }
 

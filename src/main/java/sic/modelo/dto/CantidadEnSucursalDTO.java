@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"idCantidadSucursal", "idSucursal"})
 @Builder
-public class CantidadEnSucursalDTO {
+public class CantidadEnSucursalDTO implements Serializable {
 
   private Long idCantidadSucursal;
   private BigDecimal cantidad;

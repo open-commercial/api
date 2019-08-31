@@ -8,11 +8,13 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import sic.controller.Views;
 
 @Entity
 @Table(name = "caja")
@@ -22,6 +24,7 @@ import lombok.ToString;
 @EqualsAndHashCode(of = {"id_Caja", "sucursal"})
 @ToString
 @JsonIgnoreProperties({"sucursal", "usuarioAbreCaja", "usuarioCierraCaja", "eliminada"})
+@JsonView(Views.Comprador.class)
 public class Caja implements Serializable {
 
   @Id
