@@ -108,10 +108,10 @@ public abstract class Nota implements Serializable {
   @DecimalMin(value = "0", message = "{mensaje_total_negativo}")
   private BigDecimal total;
 
-  private long CAE;
+  private long cae;
 
   @Temporal(TemporalType.TIMESTAMP)
-  private Date vencimientoCAE;
+  private Date vencimientoCae;
 
   private long numSerieAfip;
 

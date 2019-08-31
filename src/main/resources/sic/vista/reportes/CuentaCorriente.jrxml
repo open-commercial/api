@@ -22,7 +22,7 @@
 	<field name="serie" class="java.lang.Long"/>
 	<field name="numero" class="java.lang.Long"/>
 	<field name="fechaVencimiento" class="java.util.Date"/>
-	<field name="CAE" class="java.lang.Long"/>
+	<field name="cae" class="java.lang.Long"/>
 	<field name="descripcion" class="java.lang.String"/>
 	<field name="monto" class="java.math.BigDecimal"/>
 	<field name="saldo" class="java.lang.Double"/>
@@ -306,7 +306,7 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[CAE]]></text>
+				<text><![CDATA[cae]]></text>
 			</staticText>
 			<line>
 				<reportElement x="0" y="253" width="800" height="3" uuid="11ca4359-6606-44e0-bf65-0eb1f4a2a410"/>
@@ -377,7 +377,7 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				<textElement textAlignment="Center">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CAE} == null ? "": $F{CAE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{cae} == null ? "": $F{cae}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy HH:mm:ss">
 				<reportElement stretchType="ElementGroupHeight" x="1" y="0" width="87" height="15" uuid="40bb9abf-b844-4456-aeda-6e3608ffb5e0">

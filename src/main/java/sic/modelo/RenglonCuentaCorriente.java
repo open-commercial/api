@@ -74,7 +74,7 @@ public class RenglonCuentaCorriente implements Serializable {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Recibo recibo;
     
-    private Long CAE;
+    private Long cae;
 
     // Formula de Hibernate no coloca en la consulta el mismo alias para los campos que Spring Data.
     @Formula(value = "(SELECT SUM(r.monto) "

@@ -19,7 +19,7 @@ import sic.modelo.TipoDeComprobante;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"id_Factura", "fecha", "numSerie", "numFactura", "nombreTransportista", "renglones", "nombreEmpresa", "nombreUsuario", "cantidadArticulos"})
+@EqualsAndHashCode(exclude = {"id_Factura", "fecha", "numSerie", "numFactura", "nombreTransportista", "renglones", "nombreEmpresa", "idUsuario", "nombreUsuario", "cantidadArticulos"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Factura", scope = FacturaDTO.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
@@ -52,6 +52,9 @@ public abstract class FacturaDTO implements Serializable {
     private BigDecimal cantidadArticulos;
     private long idEmpresa;
     private String nombreEmpresa;
+    private Long idUsuario;
     private String nombreUsuario;
     private boolean eliminada;
+    private long cae;
+    private Date vencimientoCae;
 }
