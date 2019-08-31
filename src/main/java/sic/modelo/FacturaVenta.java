@@ -145,19 +145,19 @@ public class FacturaVenta extends Factura implements Serializable {
 
   @JsonGetter("ubicacionCliente")
   public String getUbicacionFacturacion() {
-    return (clienteEmbedded.getCalleCliente() != null
-            ? clienteEmbedded.getCalleCliente() + " "
+    return (clienteEmbedded.getCalleUbicacionCliente() != null
+            ? clienteEmbedded.getCalleUbicacionCliente() + " "
             : "")
-        + (clienteEmbedded.getNumeroCliente() != null
-            ? clienteEmbedded.getNumeroCliente() + " "
+        + (clienteEmbedded.getNumeroUbicacionCliente() != null
+            ? clienteEmbedded.getNumeroUbicacionCliente() + " "
             : "")
-        + (clienteEmbedded.getPisoCliente() != null ? clienteEmbedded.getPisoCliente() + " " : "")
-        + (clienteEmbedded.getDepartamentoCliente() != null
-            ? clienteEmbedded.getDepartamentoCliente() + " "
+        + (clienteEmbedded.getPisoUbicacionCliente() != null ? clienteEmbedded.getPisoUbicacionCliente() + " " : "")
+        + (clienteEmbedded.getDepartamentoUbicacionCliente() != null
+            ? clienteEmbedded.getDepartamentoUbicacionCliente() + " "
             : "")
-        + ((clienteEmbedded.getDescripcionCliente() != null
-                && !clienteEmbedded.getDescripcionCliente().isEmpty())
-            ? "(" + clienteEmbedded.getDescripcionCliente() + ")" + " "
+        + ((clienteEmbedded.getDescripcionUbicacionCliente() != null
+                && !clienteEmbedded.getDescripcionUbicacionCliente().isEmpty())
+            ? "(" + clienteEmbedded.getDescripcionUbicacionCliente() + ")" + " "
             : "")
         + (clienteEmbedded.getNombreLocalidadCliente() != null
             ? clienteEmbedded.getNombreLocalidadCliente() + " "

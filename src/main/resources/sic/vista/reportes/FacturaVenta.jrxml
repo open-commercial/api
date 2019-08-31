@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="FacturaVenta" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e47a212f-3954-4de9-aca2-5bd71a6098c5">
 	<property name="ireport.zoom" value="3.0"/>
 	<property name="ireport.x" value="0"/>
@@ -244,7 +244,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getClienteEmbedded().getNombreFiscal() + "  (" + $P{facturaVenta}.getClienteEmbedded().getNroCliente() + ")"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getClienteEmbedded().getNombreFiscalCliente() + "  (" + $P{facturaVenta}.getClienteEmbedded().getNroCliente() + ")"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="176" width="50" height="15" uuid="07575dbb-0de5-4177-afb0-35b170670748">
@@ -264,8 +264,8 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{facturaVenta}.getClienteEmbedded().getUbicacion() != null) ? 
-$P{facturaVenta}.getClienteEmbedded().getUbicacion() : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getUbicacionFacturacion()
+]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="50" y="191" width="505" height="15" uuid="cb8691ce-a678-4cf1-a2c7-4938068372c4">
@@ -274,10 +274,10 @@ $P{facturaVenta}.getClienteEmbedded().getUbicacion() : ""]]></textFieldExpressio
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getClienteEmbedded().getCategoriaIVA().toString().equals("RESPONSABLE_INSCRIPTO") ? "Responsable Inscripto" :
-$P{facturaVenta}.getClienteEmbedded().getCategoriaIVA().toString().equals("EXENTO") ? "Exento" :
-$P{facturaVenta}.getClienteEmbedded().getCategoriaIVA().toString().equals("CONSUMIDOR_FINAL") ? "Consumidor Final" :
-$P{facturaVenta}.getClienteEmbedded().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getClienteEmbedded().getCategoriaIVACliente().toString().equals("RESPONSABLE_INSCRIPTO") ? "Responsable Inscripto" :
+$P{facturaVenta}.getClienteEmbedded().getCategoriaIVACliente().toString().equals("EXENTO") ? "Exento" :
+$P{facturaVenta}.getClienteEmbedded().getCategoriaIVACliente().toString().equals("CONSUMIDOR_FINAL") ? "Consumidor Final" :
+$P{facturaVenta}.getClienteEmbedded().getCategoriaIVACliente().toString().equals("MONOTRIBUTO") ? "Monotributo" : ""]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="191" width="50" height="15" uuid="f0b344fb-6370-43de-819b-3c1edd682fe1">
@@ -295,7 +295,7 @@ $P{facturaVenta}.getClienteEmbedded().getCategoriaIVA().toString().equals("MONOT
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getClienteEmbedded().getIdFiscal() == null ? "" : $P{facturaVenta}.getClienteEmbedded().getIdFiscal()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getClienteEmbedded().getIdFiscalCliente() == null ? "" : $P{facturaVenta}.getClienteEmbedded().getIdFiscalCliente()]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement mode="Transparent" x="360" y="45" width="99" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="9e7dfcda-5c8c-4987-88c2-2b820976c1bf">
@@ -741,7 +741,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{facturaVenta}.getCae() == 0l)? "":"cae:"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{facturaVenta}.getCae() == 0l)? "":"CAE:"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="110" y="96" width="80" height="15" uuid="2c838051-1ca0-4a7f-836c-c29ecd4a55ca">
@@ -751,7 +751,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($P{facturaVenta}.getCae() == 0l
-)? "":"Vencimiento cae:"]]></textFieldExpression>
+)? "":"Vencimiento CAE:"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="111" width="40" height="12" uuid="30130b08-8be7-47f8-8066-3714bda02db8">

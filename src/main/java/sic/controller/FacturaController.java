@@ -93,7 +93,6 @@ public class FacturaController {
     }
     fv.setCliente(cliente);
     facturaService.asignarClienteEmbeddable(fv, cliente);
-    fv.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(facturaVentaDTO.getIdUsuario()));
     fv.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(facturaVentaDTO.getIdTransportista()));
     fv.setFecha(new Date());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);

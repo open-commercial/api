@@ -6,17 +6,17 @@ ADD `nombreFantasiaCliente` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
 ADD `nombreFiscalCliente` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
 ADD `nroCliente` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
 ADD `telefonoCliente` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-ADD `calleCliente` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-ADD `codigoPostalCliente` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-ADD `departamentoCliente` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-ADD `descripcionCliente` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-ADD `latitudCliente` double DEFAULT NULL,
-ADD `longitudCliente` double DEFAULT NULL,
+ADD `calleUbicacionCliente` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+ADD `codigoPostalLocalidadCliente` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+ADD `departamentoUbicacionCliente` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+ADD `descripcionUbicacionCliente` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+ADD `latitudUbicacionCliente` double DEFAULT NULL,
+ADD `longitudUbicacionCliente` double DEFAULT NULL,
 ADD `nombreLocalidadCliente` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-ADD `costoEnvioCliente` decimal(25,15) COLLATE utf8_unicode_ci DEFAULT NULL,
+ADD `costoEnvioLocalidadCliente` decimal(25,15) COLLATE utf8_unicode_ci DEFAULT NULL,
 ADD `nombreProvinciaCliente` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-ADD `numeroCliente` int(11) DEFAULT NULL,
-ADD `pisoCliente` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL;
+ADD `numeroUbicacionCliente` int(11) DEFAULT NULL,
+ADD `pisoUbicacionCliente` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL;
 
 SET SQL_SAFE_UPDATES = 0;
 
@@ -39,16 +39,16 @@ facturaventa fv inner join cliente c on c.id_Cliente = fv.id_Cliente
  inner join localidad on localidad.idLocalidad = ubicacion.idLocalidad
  inner join provincia on provincia.idProvincia = localidad.idProvincia
 SET 
-fv.calleCliente = ubicacion.calle,
-fv.numeroCliente = ubicacion.numero,
-fv.codigoPostalCliente = localidad.codigoPostal,
-fv.departamentoCliente = ubicacion.departamento,
-fv.descripcionCliente = ubicacion.descripcion,
-fv.latitudCliente = ubicacion.latitud,
-fv.longitudCliente = ubicacion.longitud,
+fv.calleUbicacionCliente = ubicacion.calle,
+fv.numeroUbicacionCliente = ubicacion.numero,
+fv.codigoPostalLocalidadCliente = localidad.codigoPostal,
+fv.departamentoUbicacionCliente = ubicacion.departamento,
+fv.descripcionUbicacionCliente = ubicacion.descripcion,
+fv.latitudUbicacionCliente = ubicacion.latitud,
+fv.longitudUbicacionCliente = ubicacion.longitud,
 fv.nombreLocalidadCliente = localidad.nombre,
 fv.nombreProvinciaCliente = provincia.nombre,
-fv.costoEnvioCliente = localidad.costoEnvio;
+fv.costoEnvioLocalidadCliente = localidad.costoEnvio;
 
 SET SQL_SAFE_UPDATES = 1;
 
