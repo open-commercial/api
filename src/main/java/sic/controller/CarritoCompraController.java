@@ -103,8 +103,11 @@ public class CarritoCompraController {
     pedido.setDescuentoNeto(carritoCompraDTO.getBonificacionNeto());
     pedido.setTotalActual(carritoCompraDTO.getTotal());
     pedido.setTotalEstimado(pedido.getTotalActual());
-    pedido.setSucursal(
-        sucursalService.getSucursalPorId(nuevaOrdenDeCompraDTO.getIdSucursal()));
+    if (nuevaOrdenDeCompraDTO.getIdSucursal() != null) {
+      pedido.setSucursal(sucursalService.getSucursalPorId(nuevaOrdenDeCompraDTO.getIdSucursal()));
+    } else {
+      pedido.setSucursal(sucursalService.getSucursalPorId(1L));
+    }
     pedido.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario()));
     Pageable pageable =

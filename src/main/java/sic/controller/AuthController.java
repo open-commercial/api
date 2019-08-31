@@ -23,7 +23,6 @@ import sic.service.IUsuarioService;
 public class AuthController {
 
   private final IUsuarioService usuarioService;
-  private final ISucursalService sucursalService;
   private final IRegistracionService registracionService;
   private final IAuthService authService;
   private final MessageSource messageSource;
@@ -31,12 +30,10 @@ public class AuthController {
   @Autowired
   public AuthController(
       IUsuarioService usuarioService,
-      ISucursalService sucursalService,
       IRegistracionService registracionService,
       IAuthService authService,
       MessageSource messageSource) {
     this.usuarioService = usuarioService;
-    this.sucursalService = sucursalService;
     this.registracionService = registracionService;
     this.authService = authService;
     this.messageSource = messageSource;
