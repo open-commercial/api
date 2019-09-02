@@ -1,7 +1,7 @@
 package sic.service;
 
 import java.util.List;
-import sic.modelo.BusquedaTransportistaCriteria;
+import sic.modelo.criteria.BusquedaTransportistaCriteria;
 import sic.modelo.Sucursal;
 import sic.modelo.Transportista;
 

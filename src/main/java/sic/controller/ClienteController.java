@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.exception.ForbiddenException;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaClienteCriteria;
 import sic.modelo.dto.ClienteDTO;
 import sic.service.*;
 

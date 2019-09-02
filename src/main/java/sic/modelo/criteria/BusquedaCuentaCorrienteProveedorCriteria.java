@@ -1,4 +1,4 @@
-package sic.modelo;
+package sic.modelo.criteria;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,8 +10,7 @@ import org.springframework.data.domain.Pageable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BusquedaProveedorCriteria {
-  
+public class BusquedaCuentaCorrienteProveedorCriteria {
   private boolean buscaPorNroProveedor;
   private String nroProveedor;
   private boolean buscaPorRazonSocial;

@@ -1,4 +1,4 @@
-package sic.modelo;
+package sic.modelo.criteria;
 
 import java.util.Date;
 import lombok.AllArgsConstructor;
@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import sic.modelo.EstadoPedido;
+import sic.modelo.TipoDeEnvio;
 
 @Data
 @AllArgsConstructor

@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaNotaCriteria;
 import sic.modelo.dto.*;
 import sic.service.*;
 import sic.exception.BusinessServiceException;

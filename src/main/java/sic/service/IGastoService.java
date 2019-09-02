@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import sic.modelo.BusquedaGastoCriteria;
+import sic.modelo.criteria.BusquedaGastoCriteria;
 import sic.modelo.Sucursal;
 import sic.modelo.FormaDePago;
 import sic.modelo.Gasto;

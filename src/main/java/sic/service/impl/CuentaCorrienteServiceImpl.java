@@ -3,10 +3,7 @@ package sic.service.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.*;
-import javax.imageio.ImageIO;
-import javax.swing.*;
 import javax.validation.Valid;
 
 import com.querydsl.core.BooleanBuilder;
@@ -30,6 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaCuentaCorrienteClienteCriteria;
+import sic.modelo.criteria.BusquedaCuentaCorrienteProveedorCriteria;
 import sic.repository.CuentaCorrienteClienteRepository;
 import sic.repository.CuentaCorrienteProveedorRepository;
 import sic.repository.CuentaCorrienteRepository;
@@ -112,7 +111,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   public Page<CuentaCorrienteCliente> buscarCuentaCorrienteCliente(
-      BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn) {
+    BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn) {
     QCuentaCorrienteCliente qCuentaCorrienteCliente =
         QCuentaCorrienteCliente.cuentaCorrienteCliente;
     BooleanBuilder builder = new BooleanBuilder();

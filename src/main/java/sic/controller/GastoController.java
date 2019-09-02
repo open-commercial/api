@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.BusquedaGastoCriteria;
+import sic.modelo.criteria.BusquedaGastoCriteria;
 import sic.modelo.Gasto;
 import sic.modelo.Rol;
 import sic.modelo.dto.GastoDTO;

@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.modelo.criteria.BusquedaTransportistaCriteria;
 import sic.service.ITransportistaService;
 import sic.exception.BusinessServiceException;
 import sic.repository.TransportistaRepository;

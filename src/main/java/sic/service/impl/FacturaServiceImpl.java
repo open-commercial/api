@@ -33,6 +33,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
+import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
@@ -295,7 +297,7 @@ public class FacturaServiceImpl implements IFacturaService {
 
   @Override
   public Page<FacturaVenta> buscarFacturaVenta(
-      BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
+    BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
     // Fecha de Factura
     if (criteria.isBuscaPorFecha()
         && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {

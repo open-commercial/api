@@ -1,4 +1,4 @@
-package sic.modelo;
+package sic.modelo.criteria;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

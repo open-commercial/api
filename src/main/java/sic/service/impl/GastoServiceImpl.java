@@ -9,6 +9,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaGastoCriteria;
 import sic.service.IGastoService;
 
 import java.util.*;

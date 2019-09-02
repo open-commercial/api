@@ -2,6 +2,7 @@ package sic.service;
 
 import sic.modelo.*;
 import org.springframework.data.domain.Page;
+import sic.modelo.criteria.BusquedaClienteCriteria;
 
 import javax.validation.Valid;
 

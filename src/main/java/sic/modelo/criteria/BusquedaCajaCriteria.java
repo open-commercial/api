@@ -1,4 +1,4 @@
-package sic.modelo;
+package sic.modelo.criteria;
 
 import java.util.Date;
 import lombok.AllArgsConstructor;

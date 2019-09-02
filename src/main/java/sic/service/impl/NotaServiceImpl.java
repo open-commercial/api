@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaNotaCriteria;
 import sic.modelo.dto.NuevaNotaCreditoDeFacturaDTO;
 import sic.modelo.dto.NuevaNotaCreditoSinFacturaDTO;
 import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
@@ -155,7 +156,7 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public Page<NotaCredito> buscarNotasCredito(
-      BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn) {
+    BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn) {
     this.validarFechaDeCriteria(busquedaNotaCriteria);
     return notaCreditoRepository.findAll(
         this.getBuilderNotaCredito(busquedaNotaCriteria, idUsuarioLoggedIn),

@@ -14,11 +14,8 @@ import sic.modelo.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.URL;
 import java.util.*;
-import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
-import javax.swing.ImageIcon;
 import javax.validation.Valid;
 
 import net.sf.jasperreports.engine.JRException;
@@ -31,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.modelo.criteria.BusquedaProductoCriteria;
 import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
