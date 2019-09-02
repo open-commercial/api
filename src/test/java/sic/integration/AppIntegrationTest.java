@@ -4567,6 +4567,13 @@ class AppIntegrationTest {
     assertEquals(new Double(0), renglonesCuentaCorriente.get(3).getSaldo());
     assertEquals(new Double(-5992.5), renglonesCuentaCorriente.get(4).getSaldo());
   }
+  
+  @Test
+  void shouldCrearReporteCuentaCorrienteCliente() {
+    this.shouldComprobarSaldoParcialCuentaCorrienteCliente();
+    restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1/reporte?pagina=0&formato=xlsx", byte[].class);
+    restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1/reporte?pagina=0&formato=pdf", byte[].class);
+  }
 
   @Test
   void shouldCrearPedido() {
