@@ -83,26 +83,33 @@ public class ProductoController {
   @GetMapping("/productos/busqueda/criteria")
   public Page<Producto> buscarProductosPublic(
       @RequestParam long idEmpresa,
+      @RequestParam(required = false) Long idRubro,
+      @RequestParam(required = false) Long idProveedor,
       @RequestParam(required = false) String codigo,
       @RequestParam(required = false) String descripcion,
+      @RequestParam(required = false) boolean soloFaltantes,
+      @RequestParam(required = false) boolean soloEnStock,
       @RequestParam(required = false) Boolean destacados,
+      @RequestParam(required = false) Boolean publicos,
       @RequestParam(required = false) Integer pagina,
+      @RequestParam(required = false) String ordenarPor,
+      @RequestParam(required = false) String sentido,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Page<Producto> productos =
       this.buscar(
         idEmpresa,
         codigo,
         descripcion,
-        null,
-        null,
-        false,
-        false,
-        true,
+        idRubro,
+        idProveedor,
+        soloFaltantes,
+        soloEnStock,
+        publicos,
         destacados,
         pagina,
-        null,
-        null,
-        null);
+        TAMANIO_PAGINA_DEFAULT,
+        ordenarPor,
+        sentido);
     if (authorizationHeader != null && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente =
