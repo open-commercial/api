@@ -6,16 +6,14 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import sic.modelo.embeddable.ClienteEmbeddable;
 import sic.controller.Views;
 
 @Entity
@@ -23,9 +21,18 @@ import sic.controller.Views;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@JsonIgnoreProperties({"cliente", "usuario", "sucursal", "pedido", "transportista"})
+@JsonIgnoreProperties({
+  "cliente",
+  "usuario",
+  "sucursal",
+  "pedido",
+  "transportista",
+  "clienteEmbedded"
+})
 @JsonView(Views.Comprador.class)
 public class FacturaVenta extends Factura implements Serializable {
+
+  @Embedded private ClienteEmbeddable clienteEmbedded;
 
   @ManyToOne
   @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
@@ -35,9 +42,10 @@ public class FacturaVenta extends Factura implements Serializable {
   public FacturaVenta() {}
 
   public FacturaVenta(
+      long id_Factura,
+      ClienteEmbeddable clienteEmbedded,
       Cliente cliente,
       Usuario usuario,
-      long id_Factura,
       Date fecha,
       TipoDeComprobante tipoComprobante,
       long numSerie,
@@ -88,12 +96,13 @@ public class FacturaVenta extends Factura implements Serializable {
         total,
         observaciones,
         cantidadDeArticulos,
-      sucursal,
+        sucursal,
         eliminada,
         CAE,
         vencimientoCAE,
         numSerieAfip,
         numFacturaAfip);
+    this.clienteEmbedded = clienteEmbedded;
     this.cliente = cliente;
   }
 
@@ -104,15 +113,25 @@ public class FacturaVenta extends Factura implements Serializable {
 
   @JsonGetter("nombreFiscalCliente")
   public String getNombreFiscalCliente() {
-    return cliente.getNombreFiscal();
+    return clienteEmbedded.getNombreFiscalCliente();
   }
 
-  @JsonGetter("idViajante")
+  @JsonGetter("nroDeCliente")
+  public String getNroDeCliente() {
+    return clienteEmbedded.getNroCliente();
+  }
+
+  @JsonGetter("categoriaIVACliente")
+  public CategoriaIVA getCategoriaIVA() {
+    return clienteEmbedded.getCategoriaIVACliente();
+  }
+
+  @JsonGetter("idViajanteCliente")
   public Long getIdViajante() {
     return (cliente.getViajante() != null) ? cliente.getViajante().getId_Usuario() : null;
   }
 
-  @JsonGetter("nombreViajante")
+  @JsonGetter("nombreViajanteCliente")
   public String getNombreViajante() {
     return (cliente.getViajante() != null)
         ? cliente.getViajante().getNombre()
@@ -122,5 +141,29 @@ public class FacturaVenta extends Factura implements Serializable {
             + cliente.getViajante().getUsername()
             + ")"
         : null;
+  }
+
+  @JsonGetter("ubicacionCliente")
+  public String getUbicacionFacturacion() {
+    return (clienteEmbedded.getCalleUbicacionCliente() != null
+            ? clienteEmbedded.getCalleUbicacionCliente() + " "
+            : "")
+        + (clienteEmbedded.getNumeroUbicacionCliente() != null
+            ? clienteEmbedded.getNumeroUbicacionCliente() + " "
+            : "")
+        + (clienteEmbedded.getPisoUbicacionCliente() != null ? clienteEmbedded.getPisoUbicacionCliente() + " " : "")
+        + (clienteEmbedded.getDepartamentoUbicacionCliente() != null
+            ? clienteEmbedded.getDepartamentoUbicacionCliente() + " "
+            : "")
+        + ((clienteEmbedded.getDescripcionUbicacionCliente() != null
+                && !clienteEmbedded.getDescripcionUbicacionCliente().isEmpty())
+            ? "(" + clienteEmbedded.getDescripcionUbicacionCliente() + ")" + " "
+            : "")
+        + (clienteEmbedded.getNombreLocalidadCliente() != null
+            ? clienteEmbedded.getNombreLocalidadCliente() + " "
+            : "")
+        + (clienteEmbedded.getNombreProvinciaCliente() != null
+            ? clienteEmbedded.getNombreProvinciaCliente()
+            : "");
   }
 }

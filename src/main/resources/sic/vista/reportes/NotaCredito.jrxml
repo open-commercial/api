@@ -645,7 +645,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{notaCredito}.getCAE() == 0l)? "":$P{notaCredito}.getCAE()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaCredito}.getCae() == 0l)? "":$P{notaCredito}.getCae()]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy">
 				<reportElement x="180" y="80" width="70" height="15" uuid="c76bf386-4a1c-4295-9d8e-bbf0dcf2b951">
@@ -656,7 +656,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{notaCredito}.getVencimientoCAE() == null)?"":$P{notaCredito}.getVencimientoCAE()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaCredito}.getVencimientoCae() == null)?"":$P{notaCredito}.getVencimientoCae()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="80" width="20" height="15" uuid="d5f954da-00dd-4d74-b2d1-436a48c8b1ec">
@@ -666,7 +666,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{notaCredito}.getCAE() == 0l)? "":"CAE:"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaCredito}.getCae() == 0l)? "":"cae:"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="100" y="80" width="80" height="15" uuid="2c838051-1ca0-4a7f-836c-c29ecd4a55ca">
@@ -675,7 +675,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{notaCredito}.getCAE() == 0l)? "":"Vencimiento CAE:"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaCredito}.getCae() == 0l)? "":"Vencimiento cae:"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="360" y="1" width="70" height="15" uuid="ef436b89-cce3-4a3e-be8d-19d9f11fc3f4">

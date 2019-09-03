@@ -26,4 +26,14 @@ public class UbicacionDTO implements Serializable {
   private String codigoPostal;
   private Long idProvincia;
   private String nombreProvincia;
+
+  @Override
+  public String toString() {
+    return (calle != null ? calle + " " : "")
+      + (numero != null ? numero + " ": "")
+      + (piso != null ? piso + " ": "")
+      + (departamento != null ? departamento + " ": "")
+      + (nombreLocalidad != null ?  nombreLocalidad+ " " : "")
+      + (nombreProvincia != null ? nombreProvincia : "");
+  }
 }

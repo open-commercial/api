@@ -26,7 +26,9 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import sic.interceptor.JwtInterceptor;
+import sic.modelo.Cliente;
 import sic.modelo.Ubicacion;
+import sic.modelo.dto.ClienteDTO;
 import sic.modelo.dto.UbicacionDTO;
 import sic.service.impl.AfipWebServiceSOAPClient;
 import java.io.IOException;
@@ -118,7 +120,15 @@ public class App implements WebMvcConfigurer {
             map(source.getLocalidad().getNombre(), destination.getNombreLocalidad());
           }
         };
+    PropertyMap<Cliente, ClienteDTO> clienteMapping =
+        new PropertyMap<Cliente, ClienteDTO>() {
+          protected void configure() {
+            map(source.getViajante().getNombre(), destination.getNombreViajante());
+            map(source.getCredencial().getNombre(), destination.getNombreCredencial());
+          }
+        };
     modelMapper.addMappings(ubicacionMapping);
+    modelMapper.addMappings(clienteMapping);
     return modelMapper;
   }
 

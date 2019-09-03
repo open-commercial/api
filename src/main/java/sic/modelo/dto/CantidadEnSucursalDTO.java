@@ -8,11 +8,11 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"idCantidadSucursal", "idSucursal"})
+@EqualsAndHashCode(of = {"idCantidadEnSucursal", "idSucursal"})
 @Builder
 public class CantidadEnSucursalDTO implements Serializable {
 
-  private Long idCantidadSucursal;
+  private Long idCantidadEnSucursal;
   private BigDecimal cantidad;
   private String estanteria;
   private String estante;

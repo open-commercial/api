@@ -1,5 +1,5 @@
 CREATE TABLE cantidadensucursal (
-  idCantidadSucursal bigint(20) NOT NULL AUTO_INCREMENT,
+  idCantidadEnSucursal bigint(20) NOT NULL AUTO_INCREMENT,
   cantidad decimal(25,15) DEFAULT NULL,
   estante varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   estanteria varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,

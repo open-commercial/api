@@ -52,6 +52,9 @@ public abstract class FacturaDTO implements Serializable {
     private BigDecimal cantidadArticulos;
     private long idSucursal;
     private String nombreSucursal;
+    private Long idUsuario;
     private String nombreUsuario;
     private boolean eliminada;
+    private long cae;
+    private Date vencimientoCae;
 }

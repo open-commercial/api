@@ -537,7 +537,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{notaDebito}.getCAE() == 0l)? "":$P{notaDebito}.getCAE()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaDebito}.getCae() == 0l)? "":$P{notaDebito}.getCae()]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy">
 				<reportElement x="180" y="36" width="70" height="15" uuid="c76bf386-4a1c-4295-9d8e-bbf0dcf2b951">
@@ -548,7 +548,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{notaDebito}.getVencimientoCAE() == null)?"":$P{notaDebito}.getVencimientoCAE()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaDebito}.getVencimientoCae() == null)?"":$P{notaDebito}.getVencimientoCae()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="36" width="20" height="15" uuid="d5f954da-00dd-4d74-b2d1-436a48c8b1ec">
@@ -558,7 +558,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{notaDebito}.getCAE() == 0l)? "":"CAE:"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaDebito}.getCae() == 0l)? "":"cae:"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="100" y="36" width="80" height="15" uuid="2c838051-1ca0-4a7f-836c-c29ecd4a55ca">
@@ -567,7 +567,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{notaDebito}.getCAE() == 0l)? "":"Vencimiento CAE:"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaDebito}.getCae() == 0l)? "":"Vencimiento cae:"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="360" y="32" width="70" height="15" uuid="6608dece-0755-488c-8a8e-56e5d8ee7ef9">

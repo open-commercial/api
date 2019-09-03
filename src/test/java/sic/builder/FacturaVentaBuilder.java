@@ -5,40 +5,48 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import sic.modelo.*;
 import sic.modelo.Sucursal;
+import sic.modelo.Cliente;
+import sic.modelo.FacturaVenta;
+import sic.modelo.Pedido;
+import sic.modelo.RenglonFactura;
+import sic.modelo.TipoDeComprobante;
+import sic.modelo.Transportista;
+import sic.modelo.Usuario;
+import sic.modelo.embeddable.ClienteEmbeddable;
 
 public class FacturaVentaBuilder {
-    
-    private long id_Factura = 0L;
-    private Date fecha = new Date();
-    private TipoDeComprobante tipoFactura = TipoDeComprobante.FACTURA_A;
-    private long numSerie = 0;
-    private long numFactura = 1;
-    private Date fechaVencimiento = new Date();    
-    private Pedido pedido =  null;
-    private Transportista transportista = new TransportistaBuilder().build();
-    private List<RenglonFactura> renglones;
-    private Cliente cliente = new ClienteBuilder().build();
-    private Usuario usuario = new UsuarioBuilder().build();
-    private BigDecimal subTotal = new BigDecimal("6500");
-    private BigDecimal recargo_porcentaje = BigDecimal.ZERO;
-    private BigDecimal recargo_neto = BigDecimal.ZERO;
-    private BigDecimal descuento_porcentaje = BigDecimal.ZERO;
-    private BigDecimal descuento_neto = BigDecimal.ZERO;
-    private BigDecimal subTotal_neto = new BigDecimal("6500");
-    private BigDecimal iva_105_neto = BigDecimal.ZERO;
-    private BigDecimal iva_21_neto = new BigDecimal("1365");
-    private BigDecimal impuestoInterno_neto = BigDecimal.ZERO;
-    private BigDecimal total = new BigDecimal("7865");
-    private String observaciones = "Factura por Default";
-    private BigDecimal cantidadArticulos = new BigDecimal("3");
-    private Sucursal sucursal = new SucursalBuilder().build();
-    private boolean eliminada = false;
-    private long CAE = 21064126523746l;
-    private Date vencimientoCAE = null;
-    private long numSerieAfip = 0;
-    private long numFacturaAfip = 0;
+
+  private long id_Factura = 0L;
+  private Date fecha = new Date();
+  private TipoDeComprobante tipoFactura = TipoDeComprobante.FACTURA_A;
+  private long numSerie = 0;
+  private long numFactura = 1;
+  private Date fechaVencimiento = new Date();
+  private Pedido pedido = null;
+  private Transportista transportista = new TransportistaBuilder().build();
+  private List<RenglonFactura> renglones;
+  private Cliente cliente = new ClienteBuilder().build();
+  private ClienteEmbeddable clienteEmbeddable = ClienteEmbeddable.builder().build();
+  private Usuario usuario = new UsuarioBuilder().build();
+  private BigDecimal subTotal = new BigDecimal("6500");
+  private BigDecimal recargo_porcentaje = BigDecimal.ZERO;
+  private BigDecimal recargo_neto = BigDecimal.ZERO;
+  private BigDecimal descuento_porcentaje = BigDecimal.ZERO;
+  private BigDecimal descuento_neto = BigDecimal.ZERO;
+  private BigDecimal subTotal_neto = new BigDecimal("6500");
+  private BigDecimal iva_105_neto = BigDecimal.ZERO;
+  private BigDecimal iva_21_neto = new BigDecimal("1365");
+  private BigDecimal impuestoInterno_neto = BigDecimal.ZERO;
+  private BigDecimal total = new BigDecimal("7865");
+  private String observaciones = "Factura por Default";
+  private BigDecimal cantidadArticulos = new BigDecimal("3");
+  private Sucursal sucursal = new SucursalBuilder().build();
+  private boolean eliminada = false;
+  private long CAE = 21064126523746l;
+  private Date vencimientoCAE = null;
+  private long numSerieAfip = 0;
+  private long numFacturaAfip = 0;
 
   public FacturaVenta build() {
     if (renglones == null) {
@@ -56,38 +64,37 @@ public class FacturaVentaBuilder {
       renglonesFactura.add(renglon2);
       this.renglones = renglonesFactura;
     }
-    FacturaVenta factura =
-        new FacturaVenta(
-            cliente,
-            usuario,
-            id_Factura,
-            fecha,
-            tipoFactura,
-            numSerie,
-            numFactura,
-            fechaVencimiento,
-            pedido,
-            transportista,
-            renglones,
-            subTotal,
-            recargo_porcentaje,
-            recargo_neto,
-            descuento_porcentaje,
-            descuento_neto,
-            subTotal_neto,
-            iva_105_neto,
-            iva_21_neto,
-            impuestoInterno_neto,
-            total,
-            observaciones,
-            cantidadArticulos,
-          sucursal,
-            eliminada,
-            CAE,
-            vencimientoCAE,
-            numSerieAfip,
-            numFacturaAfip);
-    return factura;
+    return new FacturaVenta(
+        id_Factura,
+        clienteEmbeddable,
+        cliente,
+        usuario,
+        fecha,
+        tipoFactura,
+        numSerie,
+        numFactura,
+        fechaVencimiento,
+        pedido,
+        transportista,
+        renglones,
+        subTotal,
+        recargo_porcentaje,
+        recargo_neto,
+        descuento_porcentaje,
+        descuento_neto,
+        subTotal_neto,
+        iva_105_neto,
+        iva_21_neto,
+        impuestoInterno_neto,
+        total,
+        observaciones,
+        cantidadArticulos,
+        sucursal,
+        eliminada,
+        CAE,
+        vencimientoCAE,
+        numSerieAfip,
+        numFacturaAfip);
   }
 
     public FacturaVentaBuilder withId_Factura(long idFactura) {
@@ -140,7 +147,12 @@ public class FacturaVentaBuilder {
         return this;
     }
 
-    public FacturaVentaBuilder withUsuario(Usuario usuario) {
+  public FacturaVentaBuilder withClienteEmbeddable(ClienteEmbeddable clienteEmbeddable) {
+    this.clienteEmbeddable = clienteEmbeddable;
+    return this;
+  }
+
+  public FacturaVentaBuilder withUsuario(Usuario usuario) {
         this.usuario = usuario;
         return this;
     }

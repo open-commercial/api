@@ -89,7 +89,7 @@ public class ProductoController {
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
-      @RequestHeader("Authorization") String authorizationHeader) {
+      @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Cliente cliente =
         clienteService.getClientePorIdUsuario((int) claims.get("idUsuario"));

@@ -50,8 +50,8 @@ public abstract class NotaDTO implements Serializable {
   private BigDecimal iva21Neto;
   private BigDecimal iva105Neto;
   private BigDecimal total;
-  private long CAE;
-  private Date vencimientoCAE;
+  private long cae;
+  private Date vencimientoCae;
   private long numSerieAfip;
   private long numNotaAfip;
 

@@ -177,6 +177,7 @@ class AppIntegrationTest {
       .idCliente(1L)
       .build();
     facturaVentaA.setIdSucursal(1L);
+    facturaVentaA.setIdCliente(1L);
     facturaVentaA.setIdTransportista(1L);
     facturaVentaA.setObservaciones("Factura A del Pedido");
     facturaVentaA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
@@ -196,7 +197,10 @@ class AppIntegrationTest {
     facturaVentaA.setTotal(total);
     facturaVentaA.setFecha(new Date());
     this.abrirCaja();
-    restTemplate.postForObject(apiPrefix + "/facturas/venta?idPedido=1", facturaVentaA, FacturaVenta[].class);
+    restTemplate.postForObject(
+        apiPrefix + "/facturas/venta?idPedido=1" + "&idsFormaDePago=1" + "&montos=" + total,
+        facturaVentaA,
+        FacturaVenta[].class);
   }
 
   private void crearFacturaTipoBDePedido() {
@@ -211,6 +215,7 @@ class AppIntegrationTest {
       .idCliente(1L)
       .build();
     facturaVentaB.setIdSucursal(1L);
+    facturaVentaB.setIdUsuario(2L);
     facturaVentaB.setIdTransportista(1L);
     facturaVentaB.setObservaciones("Factura B del Pedido");
     facturaVentaB.setTipoComprobante(TipoDeComprobante.FACTURA_B);
@@ -1282,6 +1287,7 @@ class AppIntegrationTest {
         .idCliente(cliente.getId_Cliente())
         .build();
     facturaVentaA.setIdSucursal(1L);
+    facturaVentaA.setIdCliente(1L);
     facturaVentaA.setIdTransportista(transportista.getId_Transportista());
     facturaVentaA.setObservaciones("Factura Venta A test");
     facturaVentaA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
@@ -1417,6 +1423,7 @@ class AppIntegrationTest {
         .idCliente(cliente.getId_Cliente())
         .build();
     facturaVentaB.setIdSucursal(sucursal.getIdSucursal());
+    facturaVentaB.setIdCliente(cliente.getId_Cliente());
     facturaVentaB.setIdTransportista(transportista.getId_Transportista());
     facturaVentaB.setObservaciones("Factura Venta B test");
     facturaVentaB.setTipoComprobante(TipoDeComprobante.FACTURA_B);
@@ -1446,6 +1453,129 @@ class AppIntegrationTest {
         + ")",
       facturas[0].getNombreUsuario());
     assertEquals(transportista.getNombre(), facturas[0].getNombreTransportista());
+  }
+
+  @Test
+  void shouldNotModificarFacturaSiElClienteSeModifica() {
+    this.crearProductos();
+    ProductoDTO productoUno =
+      restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    ProductoDTO productoDos =
+      restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
+    RenglonFactura renglonUno =
+      restTemplate.getForObject(
+        apiPrefix
+          + "/facturas/renglon?"
+          + "idProducto="
+          + productoUno.getIdProducto()
+          + "&tipoDeComprobante="
+          + TipoDeComprobante.FACTURA_A
+          + "&movimiento="
+          + Movimiento.VENTA
+          + "&cantidad=6"
+          + "&descuentoPorcentaje=10",
+        RenglonFactura.class);
+    RenglonFactura renglonDos =
+      restTemplate.getForObject(
+        apiPrefix
+          + "/facturas/renglon?"
+          + "idProducto="
+          + productoDos.getIdProducto()
+          + "&tipoDeComprobante="
+          + TipoDeComprobante.FACTURA_A
+          + "&movimiento="
+          + Movimiento.VENTA
+          + "&cantidad=3"
+          + "&descuentoPorcentaje=5",
+        RenglonFactura.class);
+    List<RenglonFactura> renglones = new ArrayList<>();
+    renglones.add(renglonUno);
+    renglones.add(renglonDos);
+    int size = renglones.size();
+    BigDecimal[] cantidades = new BigDecimal[size];
+    BigDecimal[] ivaPorcentajeRenglones = new BigDecimal[size];
+    BigDecimal[] ivaNetoRenglones = new BigDecimal[size];
+    int indice = 0;
+    BigDecimal subTotal = BigDecimal.ZERO;
+    for (RenglonFactura renglon : renglones) {
+      subTotal = subTotal.add(renglon.getImporte());
+      cantidades[indice] = renglon.getCantidad();
+      ivaPorcentajeRenglones[indice] = renglon.getIvaPorcentaje();
+      ivaNetoRenglones[indice] = renglon.getIvaNeto();
+      indice++;
+    }
+    BigDecimal descuentoPorcentaje = new BigDecimal("25");
+    BigDecimal recargoPorcentaje = new BigDecimal("10");
+    BigDecimal descuento_neto =
+      subTotal.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+    BigDecimal recargo_neto =
+      subTotal.multiply(recargoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+    indice = cantidades.length;
+    BigDecimal iva_105_netoFactura = BigDecimal.ZERO;
+    BigDecimal iva_21_netoFactura = BigDecimal.ZERO;
+    for (int i = 0; i < indice; i++) {
+      if (ivaPorcentajeRenglones[i].compareTo(IVA_105) == 0) {
+        iva_105_netoFactura =
+          iva_105_netoFactura.add(
+            cantidades[i].multiply(
+              ivaNetoRenglones[i]
+                .subtract(
+                  ivaNetoRenglones[i].multiply(
+                    descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
+                .add(
+                  ivaNetoRenglones[i].multiply(
+                    recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
+      } else if (ivaPorcentajeRenglones[i].compareTo(IVA_21) == 0) {
+        iva_21_netoFactura =
+          iva_21_netoFactura.add(
+            cantidades[i].multiply(
+              ivaNetoRenglones[i]
+                .subtract(
+                  ivaNetoRenglones[i].multiply(
+                    descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
+                .add(
+                  ivaNetoRenglones[i].multiply(
+                    recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
+      }
+    }
+    BigDecimal subTotalBruto = subTotal.add(recargo_neto).subtract(descuento_neto);
+    BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
+    ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", ClienteDTO.class);
+    FacturaVentaDTO facturaVentaA =
+      FacturaVentaDTO.builder().nombreFiscalCliente(cliente.getNombreFiscal()).build();
+    facturaVentaA.setObservaciones("Factura Venta A test");
+    facturaVentaA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
+    facturaVentaA.setRenglones(renglones);
+    facturaVentaA.setSubTotal(subTotal);
+    facturaVentaA.setRecargoPorcentaje(recargoPorcentaje);
+    facturaVentaA.setRecargoNeto(recargo_neto);
+    facturaVentaA.setDescuentoPorcentaje(descuentoPorcentaje);
+    facturaVentaA.setDescuentoNeto(descuento_neto);
+    facturaVentaA.setSubTotalBruto(subTotalBruto);
+    facturaVentaA.setIva105Neto(iva_105_netoFactura);
+    facturaVentaA.setIva21Neto(iva_21_netoFactura);
+    facturaVentaA.setTotal(total);
+    Transportista transportista =
+      restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
+    facturaVentaA.setIdCliente(cliente.getId_Cliente());
+    facturaVentaA.setIdSucursal(sucursal.getIdSucursal());
+    facturaVentaA.setIdTransportista(transportista.getId_Transportista());
+    FacturaVentaDTO facturaVenta =
+        restTemplate
+            .postForObject(apiPrefix + "/facturas/venta", facturaVentaA, FacturaVentaDTO[].class)[
+            0];
+    String ubicacionSinModificacion = facturaVenta.getUbicacionCliente();
+    cliente.setNombreFiscal("Superior Spider Man");
+    cliente.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
+    cliente.getUbicacionFacturacion().setCalle("Rio Torcuato");
+    restTemplate.put(apiPrefix + "/clientes", cliente);
+    facturaVenta = restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaVentaDTO.class);
+    assertEquals(cliente.getNroCliente(), facturaVenta.getNroDeCliente());
+    assertEquals("Peter Parker", facturaVenta.getNombreFiscalCliente());
+    assertEquals(CategoriaIVA.RESPONSABLE_INSCRIPTO, facturaVenta.getCategoriaIVACliente());
+    assertEquals("Sucursal Test test (test)", facturaVenta.getNombreUsuario());
+    assertEquals(ubicacionSinModificacion, facturaVenta.getUbicacionCliente());
   }
 
   @Test
@@ -1545,6 +1675,8 @@ class AppIntegrationTest {
         FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
     facturaVentaC.setIdTransportista(transportista.getId_Transportista());
     facturaVentaC.setIdSucursal(sucursal.getIdSucursal());
+    facturaVentaC.setIdCliente(cliente.getId_Cliente());
+    facturaVentaC.setIdTransportista(transportista.getId_Transportista());
     facturaVentaC.setObservaciones("Factura Venta C test");
     facturaVentaC.setTipoComprobante(TipoDeComprobante.FACTURA_C);
     facturaVentaC.setRenglones(renglones);
@@ -1629,6 +1761,7 @@ class AppIntegrationTest {
     FacturaVentaDTO facturaVentaX =
       FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
     facturaVentaX.setIdSucursal(sucursal.getIdSucursal());
+    facturaVentaX.setIdCliente(cliente.getId_Cliente());
     facturaVentaX.setIdTransportista(transportista.getId_Transportista());
     facturaVentaX.setObservaciones("Factura Venta X test");
     facturaVentaX.setTipoComprobante(TipoDeComprobante.FACTURA_X);
@@ -1756,6 +1889,7 @@ class AppIntegrationTest {
     FacturaVentaDTO facturaVentaY =
       FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
     facturaVentaY.setIdSucursal(sucursal.getIdSucursal());
+    facturaVentaY.setIdCliente(cliente.getId_Cliente());
     facturaVentaY.setIdTransportista(transportista.getId_Transportista());
     facturaVentaY.setObservaciones("Factura Venta Y test");
     facturaVentaY.setTipoComprobante(TipoDeComprobante.FACTURA_Y);
@@ -1883,6 +2017,7 @@ class AppIntegrationTest {
     FacturaVentaDTO facturaVentaPresupuesto =
       FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
     facturaVentaPresupuesto.setIdSucursal(sucursal.getIdSucursal());
+    facturaVentaPresupuesto.setIdCliente(cliente.getId_Cliente());
     facturaVentaPresupuesto.setIdTransportista(transportista.getId_Transportista());
     facturaVentaPresupuesto.setObservaciones("Factura Venta Presupuesto test");
     facturaVentaPresupuesto.setTipoComprobante(TipoDeComprobante.PRESUPUESTO);
@@ -1985,6 +2120,7 @@ class AppIntegrationTest {
     FacturaVentaDTO facturaVentaX =
       FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
     facturaVentaX.setIdSucursal(sucursal.getIdSucursal());
+    facturaVentaX.setIdCliente(cliente.getId_Cliente());
     facturaVentaX.setIdTransportista(transportista.getId_Transportista());
     facturaVentaX.setObservaciones("Factura Venta X test");
     facturaVentaX.setTipoComprobante(TipoDeComprobante.FACTURA_X);
@@ -2109,6 +2245,7 @@ class AppIntegrationTest {
     FacturaVentaDTO facturaVentaA =
         FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
     facturaVentaA.setIdSucursal(sucursal.getIdSucursal());
+    facturaVentaA.setIdCliente(cliente.getId_Cliente());
     facturaVentaA.setIdTransportista(transportista.getId_Transportista());
     facturaVentaA.setObservaciones("Factura Venta A test");
     facturaVentaA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
@@ -2244,6 +2381,8 @@ class AppIntegrationTest {
     facturaCompraA.setIva105Neto(iva_105_netoFactura);
     facturaCompraA.setIva21Neto(iva_21_netoFactura);
     facturaCompraA.setTotal(total);
+    facturaCompraA.setIdProveedor(1L);
+    facturaCompraA.setIdTransportista(1L);
     FacturaCompraDTO[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/compra", facturaCompraA, FacturaCompraDTO[].class);
@@ -2357,6 +2496,8 @@ class AppIntegrationTest {
     facturaCompraB.setIva105Neto(iva_105_netoFactura);
     facturaCompraB.setIva21Neto(iva_21_netoFactura);
     facturaCompraB.setTotal(total);
+    facturaCompraB.setIdProveedor(1L);
+    facturaCompraB.setIdTransportista(1L);
     FacturaCompraDTO[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/compra", facturaCompraB, FacturaCompraDTO[].class);
@@ -2473,6 +2614,8 @@ class AppIntegrationTest {
     facturaCompraC.setIva105Neto(iva_105_netoFactura);
     facturaCompraC.setIva21Neto(iva_21_netoFactura);
     facturaCompraC.setTotal(total);
+    facturaCompraC.setIdProveedor(1L);
+    facturaCompraC.setIdTransportista(1L);
     FacturaCompraDTO[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/compra", facturaCompraC, FacturaCompraDTO[].class);
@@ -2589,6 +2732,8 @@ class AppIntegrationTest {
     facturaCompraX.setIva105Neto(BigDecimal.ZERO);
     facturaCompraX.setIva21Neto(BigDecimal.ZERO);
     facturaCompraX.setTotal(total);
+    facturaCompraX.setIdProveedor(1L);
+    facturaCompraX.setIdTransportista(1L);
     FacturaCompraDTO[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/compra", facturaCompraX, FacturaCompraDTO[].class);
@@ -2705,6 +2850,8 @@ class AppIntegrationTest {
     facturaCompraPresupuesto.setIva105Neto(iva_105_netoFactura);
     facturaCompraPresupuesto.setIva21Neto(iva_21_netoFactura);
     facturaCompraPresupuesto.setTotal(total);
+    facturaCompraPresupuesto.setIdProveedor(1L);
+    facturaCompraPresupuesto.setIdTransportista(1L);
     FacturaCompraDTO[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/compra", facturaCompraPresupuesto, FacturaCompraDTO[].class);
@@ -4402,6 +4549,13 @@ class AppIntegrationTest {
     assertEquals(new Double(0), renglonesCuentaCorriente.get(3).getSaldo());
     assertEquals(new Double(-5992.5), renglonesCuentaCorriente.get(4).getSaldo());
   }
+  
+  @Test
+  void shouldCrearReporteCuentaCorrienteCliente() {
+    this.shouldComprobarSaldoParcialCuentaCorrienteCliente();
+    restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1/reporte?pagina=0&formato=xlsx", byte[].class);
+    restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1/reporte?pagina=0&formato=pdf", byte[].class);
+  }
 
   @Test
   void shouldCrearPedido() {
@@ -4690,6 +4844,7 @@ class AppIntegrationTest {
         nuevoPedidoDTO,
         PedidoDTO.class);
     assertEquals("Rio Chico 6211 Corrientes Corrientes", pedidoRecuperado.getDetalleEnvio());
+   // assertEquals("Rio Piacentin 345 Corrientes Corrientes", pedidoRecuperado.getDetalleEnvio());
   }
 
   @Test

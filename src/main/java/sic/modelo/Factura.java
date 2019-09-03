@@ -31,12 +31,12 @@ import javax.validation.constraints.NotEmpty;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"fecha", "tipoComprobante", "numSerie", "numFactura", "sucursal"})
 @ToString(exclude = {"renglones"})
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Factura", scope = Factura.class)
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.PropertyGenerator.class,
+    property = "id_Factura",
+    scope = Factura.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-@JsonSubTypes({
-  @Type(value = FacturaCompra.class), 
-  @Type(value = FacturaVenta.class) 
-})
+@JsonSubTypes({@Type(value = FacturaCompra.class), @Type(value = FacturaVenta.class)})
 public abstract class Factura implements Serializable {
 
     // bug: https://jira.spring.io/browse/DATAREST-304
@@ -141,10 +141,10 @@ public abstract class Factura implements Serializable {
 
     private boolean eliminada;
     
-    private long CAE;
+    private long cae;
     
     @Temporal(TemporalType.TIMESTAMP)
-    private Date vencimientoCAE;
+    private Date vencimientoCae;
     
     private long numSerieAfip;
 
@@ -179,5 +179,4 @@ public abstract class Factura implements Serializable {
     public String getNombreUsuario() {
         return usuario.getNombre() + " " + usuario.getApellido() + " (" + usuario.getUsername() + ")";
     }
-    
 }

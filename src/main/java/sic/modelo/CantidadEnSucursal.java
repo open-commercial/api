@@ -16,14 +16,14 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"idCantidadSucursal", "sucursal"})
+@EqualsAndHashCode(of = {"idCantidadEnSucursal", "sucursal"})
 @ToString
 @JsonView(Views.Vendedor.class)
 public class CantidadEnSucursal implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long idCantidadSucursal;
+  private Long idCantidadEnSucursal;
 
   @ManyToOne
   @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
