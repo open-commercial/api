@@ -5,7 +5,7 @@ CREATE TABLE cantidadensucursal (
   estanteria varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   id_Empresa bigint(20) NOT NULL,
   idProducto bigint(20) DEFAULT NULL,
-  PRIMARY KEY (idCantidadSucursal),
+  PRIMARY KEY (idCantidadEnSucursal),
   KEY FKah2gat74y707din7l3k4lqd0d (id_Empresa),
   KEY FKlbd386vgya8ugkt0ynp67k8wl (idProducto),
   CONSTRAINT FKah2gat74y707din7l3k4lqd0d FOREIGN KEY (id_Empresa) REFERENCES empresa (id_Empresa),
