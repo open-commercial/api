@@ -56,6 +56,8 @@ public class ConfiguracionDelSistema implements Serializable {
 
     private boolean emailSenderHabilitado;
 
+    private boolean puntoDeRetiro;
+
     @Email(message = "{mensaje_cds_email_invalido}")
     private String emailUsername;
 

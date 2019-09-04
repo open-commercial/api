@@ -5484,4 +5484,14 @@ class AppIntegrationTest {
     assertEquals(14, pedido.getCantidadArticulos().doubleValue());
     assertEquals(new BigDecimal("14395.500000000000000000000000000000000000000000000"), pedido.getTotalActual());
   }
+
+  @Test
+  void shouldActualizarConfiguracionDelSistema() {
+    ConfiguracionDelSistemaDTO cds =
+      restTemplate.getForObject(apiPrefix + "/configuraciones-del-sistema/sucursales/1", ConfiguracionDelSistemaDTO.class);
+    cds.setPuntoDeRetiro(true);
+    restTemplate.put(apiPrefix + "/configuraciones-del-sistema", cds);
+    cds = restTemplate.getForObject(apiPrefix + "/configuraciones-del-sistema/sucursales/1", ConfiguracionDelSistemaDTO.class);
+    assertTrue(cds.isPuntoDeRetiro());
+  }
 }

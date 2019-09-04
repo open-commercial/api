@@ -31,6 +31,8 @@ public class ConfiguracionDelSistemaDTO {
 
   private boolean emailSenderHabilitado;
 
+  private boolean puntoDeRetiro;
+
   private String emailUsername;
 
   private String emailPassword;

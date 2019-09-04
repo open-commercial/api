@@ -18,6 +18,7 @@ public class ConfiguracionDelSistemaBuilder {
   private String tokenWSAA = null;
   private String signTokenWSAA = null;
   private boolean emailSenderHabilitado = true;
+  private boolean puntoDeRetiro = true;
   private String emailUserName = "test@mail.com";
   private String emailPassword = "password";
   private Date fechaGeneracionTokenWSAA = null;
@@ -37,6 +38,7 @@ public class ConfiguracionDelSistemaBuilder {
         tokenWSAA,
         signTokenWSAA,
         emailSenderHabilitado,
+        puntoDeRetiro,
         emailUserName,
         emailPassword,
         fechaGeneracionTokenWSAA,
@@ -101,6 +103,11 @@ public class ConfiguracionDelSistemaBuilder {
 
   public ConfiguracionDelSistemaBuilder withEmailSenderHabilitado(boolean emailSenderHabilitado) {
     this.emailSenderHabilitado = emailSenderHabilitado;
+    return this;
+  }
+
+  public ConfiguracionDelSistemaBuilder withPuntoDeRetiro(boolean puntoDeRetiro) {
+    this.puntoDeRetiro = puntoDeRetiro;
     return this;
   }
 

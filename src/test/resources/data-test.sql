@@ -51,10 +51,10 @@ INSERT INTO rubro(eliminado, nombre)
 VALUES (false,'Ferreteria');
 
 INSERT INTO configuraciondelsistema(cantidad_maxima_de_renglones_en_factura, certificado_afip, email_password,
-    email_sender_habilitado, email_username,factura_electronica_habilitada, fecha_generacion_tokenWsaa,
+    email_sender_habilitado, punto_de_retiro, email_username,factura_electronica_habilitada, fecha_generacion_tokenWsaa,
     fecha_vencimiento_tokenWsaa, firmante_certificado_afip,
     nro_punto_de_venta_afip, password_certificado_afip, sign_tokenWsaa, tokenWsaa, usar_factura_venta_pre_impresa, id_sucursal)
-VALUES (3000,NULL,NULL,false,NULL,false,NULL,NULL,NULL,1,NULL,NULL,NULL,false,1);
+VALUES (3000,NULL,NULL,false,false,NULL,false,NULL,NULL,NULL,1,NULL,NULL,NULL,false,1);
 
 INSERT INTO cuentacorriente(eliminada,fecha_apertura, saldo, fecha_ultimo_movimiento)
 VALUES (false,'2019-07-18 02:43:38',0.000000000000000,'2019-07-18 02:43:38'),

@@ -75,4 +75,6 @@ ALTER TABLE pedido CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
 ALTER TABLE recibo CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
 ALTER TABLE usuario CHANGE idEmpresaPredeterminada idSucursalPredeterminada bigint(20) NOT NULL;
 
+alter TABLE configuraciondelsistema add column puntoDeRetiro bit(1) default false after emailSenderHabilitado;
+
  

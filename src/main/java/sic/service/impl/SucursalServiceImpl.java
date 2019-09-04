@@ -2,6 +2,7 @@ package sic.service.impl;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 
@@ -53,8 +54,18 @@ public class SucursalServiceImpl implements ISucursalService {
   }
 
   @Override
-  public List<Sucursal> getSucusales() {
-    return sucursalRepository.findAllByAndEliminadaOrderByNombreAsc(false);
+  public List<Sucursal> getSucusales(boolean puntoDeRetiro) {
+    if (puntoDeRetiro) {
+      return sucursalRepository.findAllByAndEliminadaOrderByNombreAsc(false).stream()
+          .filter(
+              sucursal ->
+                  configuracionDelSistemaService
+                      .getConfiguracionDelSistemaPorSucursal(sucursal)
+                      .isPuntoDeRetiro())
+          .collect(Collectors.toList());
+    } else {
+      return sucursalRepository.findAllByAndEliminadaOrderByNombreAsc(false);
+    }
   }
 
   @Override

@@ -17,7 +17,7 @@ public interface ISucursalService {
 
   Sucursal getSucursalPorNombre(String nombre);
 
-  List<Sucursal> getSucusales();
+  List<Sucursal> getSucusales(boolean puntoDeRetiro);
 
   Sucursal guardar(@Valid Sucursal sucursal);
 
