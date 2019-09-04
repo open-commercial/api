@@ -3,11 +3,13 @@ package sic.controller;
 import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
+import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.dto.NuevoPedidoDTO;
@@ -33,20 +36,25 @@ public class PedidoController {
     private final ISucursalService sucursalService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
+    private final IConfiguracionDelSistemaService configuracionDelSistemaService;
     private final IAuthService authService;
     private final ModelMapper modelMapper;
+    private final MessageSource messageSource;
     private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
     @Autowired
     public PedidoController(IPedidoService pedidoService, ISucursalService sucursalService,
                             IUsuarioService usuarioService, IClienteService clienteService,
-                            IAuthService authService, ModelMapper modelMapper) {
+                            IConfiguracionDelSistemaService configuracionDelSistemaService,
+                            IAuthService authService, ModelMapper modelMapper, MessageSource messageSource) {
         this.pedidoService = pedidoService;
         this.sucursalService = sucursalService;
         this.usuarioService = usuarioService;
         this.clienteService = clienteService;
+        this.configuracionDelSistemaService = configuracionDelSistemaService;
         this.authService = authService;
         this.modelMapper = modelMapper;
+        this.messageSource = messageSource;
     }
     
     @GetMapping("/pedidos/{idPedido}")
@@ -112,7 +120,15 @@ public class PedidoController {
     pedido.setTotalEstimado(nuevoPedidoDTO.getTotal());
     pedido.setTotalActual(nuevoPedidoDTO.getTotal());
     if (nuevoPedidoDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
-      pedido.setSucursal(sucursalService.getSucursalPorId(nuevoPedidoDTO.getIdSucursalEnvio()));
+      Sucursal sucursal = sucursalService.getSucursalPorId(nuevoPedidoDTO.getIdSucursalEnvio());
+      if (!configuracionDelSistemaService
+          .getConfiguracionDelSistemaPorSucursal(sucursal)
+          .isPuntoDeRetiro()) {
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_pedido_sucursal_entrega_no_valida", null, Locale.getDefault()));
+      }
+      pedido.setSucursal(sucursal);
     } else {
       pedido.setSucursal(sucursalService.getSucursalPorId(nuevoPedidoDTO.getIdSucursal()));
     }

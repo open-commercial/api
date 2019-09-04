@@ -3,14 +3,19 @@ package sic.controller;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
+import sic.exception.BusinessServiceException;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
+import sic.modelo.Sucursal;
 import sic.modelo.dto.CarritoCompraDTO;
 import sic.modelo.dto.NuevaOrdenDeCompraDTO;
 import sic.service.*;
@@ -24,6 +29,8 @@ public class CarritoCompraController {
   private final ISucursalService sucursalService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
+  private final IConfiguracionDelSistemaService configuracionDelSistemaService;
+  private final MessageSource messageSource;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
@@ -32,12 +39,16 @@ public class CarritoCompraController {
       IPedidoService pedidoService,
       ISucursalService sucursalService,
       IUsuarioService usuarioService,
-      IClienteService clienteService) {
+      IClienteService clienteService,
+      IConfiguracionDelSistemaService configuracionDelSistemaService,
+      MessageSource messageSource) {
     this.carritoCompraService = carritoCompraService;
     this.pedidoService = pedidoService;
     this.sucursalService = sucursalService;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
+    this.configuracionDelSistemaService = configuracionDelSistemaService;
+    this.messageSource = messageSource;
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/clientes/{idCliente}")
@@ -100,7 +111,15 @@ public class CarritoCompraController {
     pedido.setTotalActual(carritoCompraDTO.getTotal());
     pedido.setTotalEstimado(pedido.getTotalActual());
     if (nuevaOrdenDeCompraDTO.getIdSucursal() != null) {
-      pedido.setSucursal(sucursalService.getSucursalPorId(nuevaOrdenDeCompraDTO.getIdSucursal()));
+      Sucursal sucursal = sucursalService.getSucursalPorId(nuevaOrdenDeCompraDTO.getIdSucursal());
+      if (!configuracionDelSistemaService
+          .getConfiguracionDelSistemaPorSucursal(sucursal)
+          .isPuntoDeRetiro()) {
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_pedido_sucursal_entrega_no_valida", null, Locale.getDefault()));
+      }
+      pedido.setSucursal(sucursal);
     } else {
       pedido.setSucursal(sucursalService.getSucursalPorId(1L));
     }

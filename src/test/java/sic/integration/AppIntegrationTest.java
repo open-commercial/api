@@ -4795,6 +4795,10 @@ class AppIntegrationTest {
   void shouldCrearPedidoConUbicacionSucursal() {
     this.crearProductos();
     this.shouldCrearSucursalResponsableInscripto();
+    ConfiguracionDelSistemaDTO cds =
+      restTemplate.getForObject(apiPrefix + "/configuraciones-del-sistema/sucursales/2", ConfiguracionDelSistemaDTO.class);
+    cds.setPuntoDeRetiro(true);
+    restTemplate.put(apiPrefix + "/configuraciones-del-sistema", cds);
     List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
@@ -4844,7 +4848,6 @@ class AppIntegrationTest {
         nuevoPedidoDTO,
         PedidoDTO.class);
     assertEquals("Rio Chico 6211 Corrientes Corrientes", pedidoRecuperado.getDetalleEnvio());
-   // assertEquals("Rio Piacentin 345 Corrientes Corrientes", pedidoRecuperado.getDetalleEnvio());
   }
 
   @Test
@@ -5471,6 +5474,10 @@ class AppIntegrationTest {
   @Test
   void shouldGenerarPedidoConItemsDelCarrito() {
     this.shouldAgregarItemsAlCarritoCompra();
+    ConfiguracionDelSistemaDTO cds =
+      restTemplate.getForObject(apiPrefix + "/configuraciones-del-sistema/sucursales/1", ConfiguracionDelSistemaDTO.class);
+    cds.setPuntoDeRetiro(true);
+    restTemplate.put(apiPrefix + "/configuraciones-del-sistema", cds);
     NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO = NuevaOrdenDeCompraDTO.builder()
       .idSucursal(1L)
       .idCliente(1L)
