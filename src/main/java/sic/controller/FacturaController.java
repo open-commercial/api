@@ -171,7 +171,7 @@ public class FacturaController {
   public Page<FacturaCompra> buscarFacturaCompra(
       @RequestBody BusquedaFacturaCompraCriteria criteria) {
     criteria.setBuscaPorFecha(
-        (criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null));
+        (criteria.getFechaDesde() != null) || (criteria.getFechaHasta() != null));
     criteria.setBuscaPorProveedor(criteria.getIdProveedor() != null);
     criteria.setBuscaPorNumeroFactura(
         (criteria.getNumSerie() != 0L) && (criteria.getNumFactura() != 0L));
@@ -192,7 +192,7 @@ public class FacturaController {
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
     criteria.setBuscaPorFecha(
-      (criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null));
+      (criteria.getFechaDesde() != null) || (criteria.getFechaHasta() != null));
     criteria.setBuscaCliente(criteria.getIdCliente() != null);
     criteria.setBuscaPorNumeroFactura(
       (criteria.getNumSerie() != 0L) && (criteria.getNumFactura() != 0L));
