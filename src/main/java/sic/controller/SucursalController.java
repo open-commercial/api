@@ -36,8 +36,8 @@ public class SucursalController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public List<Sucursal> getSucursales(@RequestParam(required = false) boolean puntoDeEntrega) {
-    return sucursalService.getSucusales(puntoDeEntrega);
+  public List<Sucursal> getSucursales(@RequestParam(required = false) boolean puntoDeRetiro) {
+    return sucursalService.getSucusales(puntoDeRetiro);
   }
 
   @GetMapping("/sucursales/{idSucursal}")
