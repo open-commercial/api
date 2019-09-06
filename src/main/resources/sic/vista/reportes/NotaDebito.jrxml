@@ -558,7 +558,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{notaDebito}.getCae() == 0l)? "":"cae:"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaDebito}.getCae() == 0l)? "":"CAE:"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="100" y="36" width="80" height="15" uuid="2c838051-1ca0-4a7f-836c-c29ecd4a55ca">
