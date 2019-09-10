@@ -32,7 +32,6 @@ public class ProductoController {
   private final IClienteService clienteService;
   private final IAuthService authService;
   private final ModelMapper modelMapper;
-  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
   @Autowired
@@ -58,7 +57,7 @@ public class ProductoController {
   }
 
   @GetMapping("/productos/{idProducto}")
-  public Producto getProductoPorIdPublic(
+  public Producto getProductoPorId(
     @PathVariable long idProducto,
     @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
@@ -80,40 +79,17 @@ public class ProductoController {
     }
   }
 
-  @GetMapping("/productos/busqueda/criteria")
-  public Page<Producto> buscarProductosPublic(
-      @RequestParam long idEmpresa,
-      @RequestParam(required = false) Long idRubro,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) String codigo,
-      @RequestParam(required = false) String descripcion,
-      @RequestParam(required = false) boolean soloFaltantes,
-      @RequestParam(required = false) boolean soloEnStock,
-      @RequestParam(required = false) Boolean destacados,
-      @RequestParam(required = false) Boolean publicos,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido,
+  @PostMapping("/productos/busqueda/criteria")
+  public Page<Producto> buscarProductos(
+      @RequestBody BusquedaProductoCriteria criteria,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
-    Page<Producto> productos =
-      this.buscar(
-        idEmpresa,
-        codigo,
-        descripcion,
-        idRubro,
-        idProveedor,
-        soloFaltantes,
-        soloEnStock,
-        publicos,
-        destacados,
-        pagina,
-        TAMANIO_PAGINA_DEFAULT,
-        ordenarPor,
-        sentido);
-    if (authorizationHeader != null && authService.esAuthorizationHeaderValido(authorizationHeader)) {
+    Page<Producto> productos = productoService.buscarProductos(criteria);
+    if (authorizationHeader != null
+        && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente =
-        clienteService.getClientePorIdUsuarioYidEmpresa((int) claims.get("idUsuario"), idEmpresa);
+          clienteService.getClientePorIdUsuarioYidEmpresa(
+              (int) claims.get("idUsuario"), criteria.getIdEmpresa());
       if (cliente != null) {
         return productoService.getProductosConPrecioBonificado(productos, cliente);
       } else {
@@ -134,61 +110,6 @@ public class ProductoController {
   })
   public Producto getProductoPorCodigo(@RequestParam long idEmpresa, @RequestParam String codigo) {
     return productoService.getProductoPorCodigo(codigo, idEmpresa);
-  }
-
-  private Page<Producto> buscar(
-      long idEmpresa,
-      String codigo,
-      String descripcion,
-      Long idRubro,
-      Long idProveedor,
-      boolean soloFantantes,
-      boolean soloEnStock,
-      Boolean publicos,
-      Boolean destacados,
-      Integer pagina,
-      Integer tamanio,
-      String ordenarPor,
-      String sentido) {
-    if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
-    if (pagina == null || pagina < 0) pagina = 0;
-    String ordenDefault = "descripcion";
-    Pageable pageable;
-    if (ordenarPor == null || sentido == null) {
-      pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenDefault));
-    } else {
-      switch (sentido) {
-        case "ASC":
-          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenarPor));
-          break;
-        case "DESC":
-          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenarPor));
-          break;
-        default:
-          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenDefault));
-          break;
-      }
-    }
-    BusquedaProductoCriteria criteria =
-        BusquedaProductoCriteria.builder()
-            .buscarPorCodigo((codigo != null && !codigo.isEmpty()))
-            .codigo(codigo)
-            .buscarPorDescripcion(descripcion != null && !descripcion.isEmpty())
-            .descripcion(descripcion)
-            .buscarPorRubro(idRubro != null)
-            .idRubro(idRubro)
-            .buscarPorProveedor(idProveedor != null)
-            .idProveedor(idProveedor)
-            .idEmpresa(idEmpresa)
-            .listarSoloFaltantes(soloFantantes)
-            .listarSoloEnStock(soloEnStock)
-            .buscaPorVisibilidad(publicos != null)
-            .publico(publicos)
-            .buscaPorDestacado(destacados != null)
-            .destacado(destacados)
-            .pageable(pageable)
-            .build();
-    return productoService.buscarProductos(criteria);
   }
 
   @DeleteMapping("/productos")
@@ -271,36 +192,9 @@ public class ProductoController {
     productoService.actualizarMultiples(productosParaActualizarDTO);
   }
 
-  @GetMapping("/productos/valor-stock/criteria")
+  @PostMapping("/productos/valor-stock/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public BigDecimal calcularValorStock(
-      @RequestParam long idEmpresa,
-      @RequestParam(required = false) String codigo,
-      @RequestParam(required = false) String descripcion,
-      @RequestParam(required = false) Long idRubro,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) boolean soloFantantes,
-      @RequestParam(required = false) boolean soloEnStock,
-      @RequestParam(required = false) Boolean publicos,
-      @RequestParam(required = false) Boolean destacados) {
-    BusquedaProductoCriteria criteria =
-        BusquedaProductoCriteria.builder()
-            .buscarPorCodigo((codigo != null))
-            .codigo(codigo)
-            .buscarPorDescripcion(descripcion != null)
-            .descripcion(descripcion)
-            .buscarPorRubro(idRubro != null)
-            .idRubro(idRubro)
-            .buscarPorProveedor(idProveedor != null)
-            .idProveedor(idProveedor)
-            .idEmpresa(idEmpresa)
-            .listarSoloFaltantes(soloFantantes)
-            .listarSoloEnStock(soloEnStock)
-            .buscaPorVisibilidad(publicos != null)
-            .publico(publicos)
-            .buscaPorDestacado(destacados != null)
-            .destacado(destacados)
-            .build();
+  public BigDecimal calcularValorStock(@RequestBody BusquedaProductoCriteria criteria) {
     return productoService.calcularValorStock(criteria);
   }
 
@@ -317,7 +211,7 @@ public class ProductoController {
     return productoService.getProductosSinStockDisponible(idProducto, cantidad);
   }
 
-  @GetMapping("/productos/reporte/criteria")
+  @PostMapping("/productos/reporte/criteria")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -326,17 +220,7 @@ public class ProductoController {
     Rol.COMPRADOR
   })
   public ResponseEntity<byte[]> getListaDePrecios(
-      @RequestParam long idEmpresa,
-      @RequestParam(required = false) String codigo,
-      @RequestParam(required = false) String descripcion,
-      @RequestParam(required = false) Long idRubro,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) boolean soloFantantes,
-      @RequestParam(required = false) boolean soloEnStock,
-      @RequestParam(required = false) Boolean publicos,
-      @RequestParam(required = false) Boolean destacados,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido,
+      @RequestBody BusquedaProductoCriteria criteria,
       @RequestParam(required = false) String formato) {
     HttpHeaders headers = new HttpHeaders();
     List<Producto> productos;
@@ -345,48 +229,18 @@ public class ProductoController {
         headers.setContentType(new MediaType("application", "vnd.ms-excel"));
         headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        productos =
-            this.buscar(
-                    idEmpresa,
-                    codigo,
-                    descripcion,
-                    idRubro,
-                    idProveedor,
-                    soloFantantes,
-                    soloEnStock,
-                    publicos,
-                    destacados,
-                    0,
-                    Integer.MAX_VALUE,
-                    ordenarPor,
-                    sentido)
-                .getContent();
+        productos = productoService.buscarProductos(criteria).getContent();
         byte[] reporteXls =
-            productoService.getListaDePreciosPorEmpresa(productos, idEmpresa, formato);
+            productoService.getListaDePreciosPorEmpresa(productos, criteria.getIdEmpresa(), formato);
         headers.setContentLength(reporteXls.length);
         return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
       case "pdf":
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        productos =
-            this.buscar(
-                    idEmpresa,
-                    codigo,
-                    descripcion,
-                    idRubro,
-                    idProveedor,
-                    soloFantantes,
-                    soloEnStock,
-                    publicos,
-                    destacados,
-                    0,
-                    Integer.MAX_VALUE,
-                    ordenarPor,
-                    sentido)
-                .getContent();
+        productos = productoService.buscarProductos(criteria).getContent();
         byte[] reportePDF =
-            productoService.getListaDePreciosPorEmpresa(productos, idEmpresa, formato);
+            productoService.getListaDePreciosPorEmpresa(productos, criteria.getIdEmpresa(), formato);
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
       default:
         throw new BusinessServiceException(messageSource.getMessage(

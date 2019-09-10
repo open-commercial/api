@@ -22,5 +22,7 @@ public class BusquedaCuentaCorrienteProveedorCriteria {
   private boolean buscaPorLocalidad;
   private Long idLocalidad;
   private Long idEmpresa;
-  private Pageable pageable;
+  private Integer pagina;
+  private String ordenarPor;
+  private String sentido;
 }

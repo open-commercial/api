@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -49,6 +50,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
   @Autowired
@@ -113,6 +115,13 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   @Override
   public Page<CuentaCorrienteCliente> buscarCuentaCorrienteCliente(
       BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn) {
+    criteria.setBuscaPorNombreFiscal(criteria.getNombreFiscal() != null);
+    criteria.setBuscaPorNombreFantasia(criteria.getNombreFantasia() != null);
+    criteria.setBuscaPorIdFiscal(criteria.getIdFiscal() != null);
+    criteria.setBuscaPorViajante(criteria.getIdViajante() != null);
+    criteria.setBuscaPorProvincia(criteria.getIdProvincia() != null);
+    criteria.setBuscaPorLocalidad(criteria.getIdLocalidad() != null);
+    criteria.setBuscarPorNroDeCliente(criteria.getNroDeCliente() != null);
     QCuentaCorrienteCliente qCuentaCorrienteCliente =
         QCuentaCorrienteCliente.cuentaCorrienteCliente;
     BooleanBuilder builder = new BooleanBuilder();
@@ -179,12 +188,38 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             .id_Empresa
             .eq(criteria.getIdEmpresa())
             .and(qCuentaCorrienteCliente.eliminada.eq(false)));
-    return cuentaCorrienteClienteRepository.findAll(builder, criteria.getPageable());
+    return cuentaCorrienteClienteRepository.findAll(
+        builder,
+        this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido(), "cliente.nombreFiscal"));
+  }
+
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido, String ordenDefault) {
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
+    }
   }
 
   @Override
   public Page<CuentaCorrienteProveedor> buscarCuentaCorrienteProveedor(
       BusquedaCuentaCorrienteProveedorCriteria criteria) {
+    criteria.setBuscaPorNroProveedor(criteria.getNroProveedor() != null);
+    criteria.setBuscaPorRazonSocial(criteria.getRazonSocial() != null);
+    criteria.setBuscaPorIdFiscal(criteria.getIdFiscal() != null);
+    criteria.setBuscaPorProvincia(criteria.getIdProvincia() != null);
+    criteria.setBuscaPorLocalidad(criteria.getIdLocalidad() != null);
     QCuentaCorrienteProveedor qCuentaCorrienteProveedor =
         QCuentaCorrienteProveedor.cuentaCorrienteProveedor;
     BooleanBuilder builder = new BooleanBuilder();
@@ -205,7 +240,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       builder.or(qCuentaCorrienteProveedor.proveedor.idFiscal.eq(criteria.getIdFiscal()));
     if (criteria.isBuscaPorLocalidad())
       builder.and(
-          qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
+          qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.idLocalidad.eq(
+              criteria.getIdLocalidad()));
     if (criteria.isBuscaPorProvincia())
       builder.and(
           qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.provincia.idProvincia.eq(
@@ -216,7 +252,13 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             .id_Empresa
             .eq(criteria.getIdEmpresa())
             .and(qCuentaCorrienteProveedor.eliminada.eq(false)));
-    return cuentaCorrienteProveedorRepository.findAll(builder, criteria.getPageable());
+    return cuentaCorrienteProveedorRepository.findAll(
+        builder,
+        this.getPageable(
+            criteria.getPagina(),
+            criteria.getOrdenarPor(),
+            criteria.getSentido(),
+            "proveedor.razonSocial"));
   }
 
   @Override

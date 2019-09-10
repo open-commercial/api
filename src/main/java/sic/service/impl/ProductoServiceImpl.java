@@ -9,6 +9,9 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.export.*;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
@@ -52,6 +55,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final IMedidaService medidaService;
   private final ICarritoCompraService carritoCompraService;
   private final IPhotoVideoUploader photoVideoUploader;
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
   @Autowired
@@ -180,7 +184,40 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public Page<Producto> buscarProductos(BusquedaProductoCriteria criteria) {
-    return productoRepository.findAll(this.getBuilder(criteria), criteria.getPageable());
+    this.setCriteriosBusquedaDeCriteria(criteria);
+    return productoRepository.findAll(
+        this.getBuilder(criteria),
+        this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
+  }
+
+  private void setCriteriosBusquedaDeCriteria(BusquedaProductoCriteria criteria) {
+    criteria.setBuscarPorCodigo(criteria.getCodigo() != null && !criteria.getCodigo().isEmpty());
+    criteria.setBuscarPorDescripcion(
+        criteria.getDescripcion() != null && !criteria.getDescripcion().isEmpty());
+    criteria.setBuscarPorRubro(criteria.getIdRubro() != null);
+    criteria.setBuscarPorProveedor(criteria.getIdProveedor() != null);
+    criteria.setBuscaPorVisibilidad(criteria.getPublico() != null);
+    criteria.setBuscaPorDestacado(criteria.getDestacado() != null);
+  }
+
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+    String ordenDefault = "nombreFiscal";
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
+    }
   }
 
   private BooleanBuilder getBuilder(BusquedaProductoCriteria criteria) {
@@ -513,6 +550,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public BigDecimal calcularValorStock(BusquedaProductoCriteria criteria) {
+    this.setCriteriosBusquedaDeCriteria(criteria);
     return productoRepository.calcularValorStock(this.getBuilder(criteria));
   }
 

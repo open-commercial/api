@@ -45,132 +45,22 @@ public class CuentaCorrienteController {
     this.messageSource = messageSource;
   }
 
-  @GetMapping("/cuentas-corriente/clientes/busqueda/criteria")
+  @PostMapping("/cuentas-corriente/clientes/busqueda/criteria")
   public Page<CuentaCorrienteCliente> buscarConCriteria(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) String nroCliente,
-      @RequestParam(required = false) String nombreFiscal,
-      @RequestParam(required = false) String nombreFantasia,
-      @RequestParam(required = false) Long idFiscal,
-      @RequestParam(required = false) Long idViajante,
-      @RequestParam(required = false) Long idProvincia,
-      @RequestParam(required = false) Long idLocalidad,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido,
+      @RequestBody BusquedaCuentaCorrienteClienteCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable;
-    if (ordenarPor == null || sentido == null) {
-      pageable =
-          PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "cliente.nombreFiscal"));
-    } else {
-      switch (sentido) {
-        case "ASC":
-          pageable =
-              PageRequest.of(
-                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
-          break;
-        case "DESC":
-          pageable =
-              PageRequest.of(
-                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
-          break;
-        default:
-          pageable =
-              PageRequest.of(
-                  pagina,
-                  TAMANIO_PAGINA_DEFAULT,
-                  new Sort(Sort.Direction.ASC, "cliente.nombreFiscal"));
-          break;
-      }
-    }
-    BusquedaCuentaCorrienteClienteCriteria criteria =
-        BusquedaCuentaCorrienteClienteCriteria.builder()
-            .buscaPorNombreFiscal(nombreFiscal != null)
-            .nombreFiscal(nombreFiscal)
-            .buscaPorNombreFantasia(nombreFantasia != null)
-            .nombreFantasia(nombreFantasia)
-            .buscaPorIdFiscal(idFiscal != null)
-            .idFiscal(idFiscal)
-            .buscaPorViajante(idViajante != null)
-            .idViajante(idViajante)
-            .buscaPorProvincia(idProvincia != null)
-            .idProvincia(idProvincia)
-            .buscaPorLocalidad(idLocalidad != null)
-            .idLocalidad(idLocalidad)
-            .buscarPorNroDeCliente(nroCliente != null)
-            .nroDeCliente(nroCliente)
-            .idEmpresa(idEmpresa)
-            .pageable(pageable)
-            .build();
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return cuentaCorrienteService.buscarCuentaCorrienteCliente(
         criteria, (int) claims.get("idUsuario"));
   }
 
-  @GetMapping("/cuentas-corriente/proveedores/busqueda/criteria")
+  @PostMapping("/cuentas-corriente/proveedores/busqueda/criteria")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
   })
   public Page<CuentaCorrienteProveedor> buscarConCriteria(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) String nroProveedor,
-      @RequestParam(required = false) String razonSocial,
-      @RequestParam(required = false) Long idFiscal,
-      @RequestParam(required = false) Long idProvincia,
-      @RequestParam(required = false) Long idLocalidad,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido) {
-    if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable;
-    if (ordenarPor == null || sentido == null) {
-      pageable =
-          PageRequest.of(
-              pagina,
-              TAMANIO_PAGINA_DEFAULT,
-              new Sort(Sort.Direction.ASC, "proveedor.razonSocial"));
-    } else {
-      switch (sentido) {
-        case "ASC":
-          pageable =
-              PageRequest.of(
-                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
-          break;
-        case "DESC":
-          pageable =
-              PageRequest.of(
-                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
-          break;
-        default:
-          pageable =
-              PageRequest.of(
-                  pagina,
-                  TAMANIO_PAGINA_DEFAULT,
-                  new Sort(Sort.Direction.ASC, "proveedor.razonSocial"));
-          break;
-      }
-    }
-    BusquedaCuentaCorrienteProveedorCriteria criteria =
-        BusquedaCuentaCorrienteProveedorCriteria.builder()
-            .buscaPorNroProveedor(nroProveedor != null)
-            .nroProveedor(nroProveedor)
-            .buscaPorRazonSocial(razonSocial != null)
-            .razonSocial(razonSocial)
-            .buscaPorIdFiscal(idFiscal != null)
-            .idFiscal(idFiscal)
-            .buscaPorIdFiscal(idFiscal != null)
-            .idFiscal(idFiscal)
-            .buscaPorProvincia(idProvincia != null)
-            .idProvincia(idProvincia)
-            .buscaPorLocalidad(idLocalidad != null)
-            .idLocalidad(idLocalidad)
-            .idEmpresa(idEmpresa)
-            .pageable(pageable)
-            .build();
+      @RequestBody BusquedaCuentaCorrienteProveedorCriteria criteria) {
     return cuentaCorrienteService.buscarCuentaCorrienteProveedor(criteria);
   }
 

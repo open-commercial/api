@@ -25,6 +25,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -54,6 +57,7 @@ public class PedidoServiceImpl implements IPedidoService {
   private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
   @Autowired
@@ -259,17 +263,26 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   public Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
+    criteria.setBuscaPorFecha(
+        (criteria.getFechaDesde() != null) || (criteria.getFechaHasta() != null));
+    criteria.setBuscaCliente(criteria.getIdCliente() != null);
+    criteria.setBuscaUsuario(criteria.getIdUsuario() != null);
+    criteria.setBuscaPorViajante(criteria.getIdViajante() != null);
+    criteria.setBuscaPorNroPedido(criteria.getNroPedido() != 0L);
+    criteria.setBuscaPorEstadoPedido(criteria.getEstadoPedido() != null);
+    criteria.setBuscaPorEnvio(criteria.getTipoDeEnvio() != null);
+    criteria.setBuscaPorProducto(criteria.getIdProducto() != null);
     // Fecha
     if (criteria.isBuscaPorFecha()) {
       Calendar cal = new GregorianCalendar();
-      if(criteria.getFechaDesde() != null){
+      if (criteria.getFechaDesde() != null) {
         cal.setTime(criteria.getFechaDesde());
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         criteria.setFechaDesde(cal.getTime());
       }
-      if(criteria.getFechaHasta() != null) {
+      if (criteria.getFechaHasta() != null) {
         cal.setTime(criteria.getFechaHasta());
         cal.set(Calendar.HOUR_OF_DAY, 23);
         cal.set(Calendar.MINUTE, 59);
@@ -277,6 +290,20 @@ public class PedidoServiceImpl implements IPedidoService {
         criteria.setFechaHasta(cal.getTime());
       }
     }
+    Page<Pedido> pedidos =
+        pedidoRepository.findAll(
+            this.getBuilderPedido(criteria, idUsuarioLoggedIn),
+            this.getPageable(
+                (criteria.getPagina() == null || criteria.getPagina() < 0)
+                    ? 0
+                    : criteria.getPagina(),
+                criteria.getOrdenarPor(),
+                criteria.getSentido()));
+    pedidos.getContent().forEach(this::calcularTotalActualDePedido);
+    return pedidos;
+  }
+
+  private BooleanBuilder getBuilderPedido(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
     QPedido qPedido = QPedido.pedido;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
@@ -346,9 +373,27 @@ public class PedidoServiceImpl implements IPedidoService {
       }
       builder.and(rsPredicate);
     }
-    Page<Pedido> pedidos = pedidoRepository.findAll(builder, criteria.getPageable());
-    pedidos.getContent().forEach(this::calcularTotalActualDePedido);
-    return pedidos;
+    return builder;
+  }
+
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+    String ordenDefault = "fecha";
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
+    }
   }
 
   @Override

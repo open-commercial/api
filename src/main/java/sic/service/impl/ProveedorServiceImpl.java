@@ -4,6 +4,9 @@ import com.querydsl.core.BooleanBuilder;
 
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
@@ -34,6 +37,7 @@ public class ProveedorServiceImpl implements IProveedorService {
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IUbicacionService ubicacionService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
   @Autowired
@@ -67,6 +71,11 @@ public class ProveedorServiceImpl implements IProveedorService {
 
   @Override
   public Page<Proveedor> buscarProveedores(BusquedaProveedorCriteria criteria) {
+    criteria.setBuscaPorNroProveedor(criteria.getNroProveedor() != null);
+    criteria.setBuscaPorRazonSocial(criteria.getRazonSocial() != null);
+    criteria.setBuscaPorIdFiscal(criteria.getIdFiscal() != null);
+    criteria.setBuscaPorProvincia(criteria.getIdProvincia() != null);
+    criteria.setBuscaPorLocalidad(criteria.getIdLocalidad() != null);
     QProveedor qProveedor = QProveedor.proveedor;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.isBuscaPorRazonSocial()) {
@@ -90,7 +99,27 @@ public class ProveedorServiceImpl implements IProveedorService {
             .id_Empresa
             .eq(criteria.getIdEmpresa())
             .and(qProveedor.eliminado.eq(false)));
-    return proveedorRepository.findAll(builder, criteria.getPageable());
+    return proveedorRepository.findAll(builder, this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
+  }
+
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+    String ordenDefault = "razonSocial";
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
+    }
   }
 
   @Override
