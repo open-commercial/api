@@ -1,6 +1,7 @@
 package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
 import sic.controller.Views;
@@ -19,6 +20,7 @@ import java.math.BigDecimal;
 @EqualsAndHashCode(of = {"idCantidadEnSucursal", "sucursal"})
 @ToString
 @JsonView(Views.Vendedor.class)
+@JsonIgnoreProperties("sucursal")
 public class CantidadEnSucursal implements Serializable {
 
   @Id
