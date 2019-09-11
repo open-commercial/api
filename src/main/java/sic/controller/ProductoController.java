@@ -20,6 +20,8 @@ import sic.modelo.dto.ProductoDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 
+import javax.persistence.EntityNotFoundException;
+
 @RestController
 @RequestMapping("/api/v1")
 public class ProductoController {
@@ -58,10 +60,15 @@ public class ProductoController {
   }
 
   @GetMapping("/productos/{idProducto}")
-  public Producto getProductoPorIdPublic(
+  public Producto getProductoPorId(
     @PathVariable long idProducto,
+    @RequestParam(required = false) Boolean publicos,
     @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
+    if (publicos != null && publicos && !producto.isPublico()) {
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_producto_no_existente", null, Locale.getDefault()));
+    }
     if (authorizationHeader != null && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente =
@@ -81,7 +88,7 @@ public class ProductoController {
   }
 
   @GetMapping("/productos/busqueda/criteria")
-  public Page<Producto> buscarProductosPublic(
+  public Page<Producto> buscarProductos(
       @RequestParam long idEmpresa,
       @RequestParam(required = false) Long idRubro,
       @RequestParam(required = false) Long idProveedor,
