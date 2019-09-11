@@ -62,23 +62,26 @@ public class ProductoController {
 
   @GetMapping("/productos/{idProducto}")
   public Producto getProductoPorId(
-    @PathVariable long idProducto,
-    @RequestParam(required = false) Boolean publicos,
-    @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
+      @PathVariable long idProducto,
+      @RequestParam(required = false) Boolean publicos,
+      @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     if (publicos != null && publicos && !producto.isPublico()) {
-      throw new EntityNotFoundException(messageSource.getMessage(
-        "mensaje_producto_no_existente", null, Locale.getDefault()));
+      throw new EntityNotFoundException(
+          messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
     }
-    if (authorizationHeader != null && authService.esAuthorizationHeaderValido(authorizationHeader)) {
+    if (authorizationHeader != null
+        && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
-      Cliente cliente =
-        clienteService.getClientePorIdUsuario((int) claims.get("idUsuario"));
+      Cliente cliente = clienteService.getClientePorIdUsuario((int) claims.get("idUsuario"));
       if (cliente != null) {
         Page<Producto> productos =
-          productoService.getProductosConPrecioBonificado(
-              new PageImpl<>(Collections.singletonList(producto)), cliente);
-      return productos.getContent().get(0);
+            productoService.getProductosConPrecioBonificado(
+                new PageImpl<>(Collections.singletonList(producto)), cliente);
+        return productos.getContent().get(0);
+      } else {
+        return producto;
+      }
     } else {
       return producto;
     }
