@@ -227,11 +227,10 @@ public class ProductoController {
   @PostMapping("/productos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Producto guardar(
-    @RequestBody NuevoProductoDTO nuevoProductoDTO,
-    @RequestParam Long idMedida,
-    @RequestParam Long idRubro,
-    @RequestParam Long idProveedor,
-    @RequestParam Long idSucursal) {
+      @RequestBody NuevoProductoDTO nuevoProductoDTO,
+      @RequestParam Long idMedida,
+      @RequestParam Long idRubro,
+      @RequestParam Long idProveedor) {
     Producto producto = new Producto();
     producto.setMedida(medidaService.getMedidaNoEliminadaPorId(idMedida));
     producto.setRubro(rubroService.getRubroNoEliminadoPorId(idRubro));
@@ -239,14 +238,23 @@ public class ProductoController {
     producto.setCodigo(nuevoProductoDTO.getCodigo());
     producto.setDescripcion(nuevoProductoDTO.getDescripcion());
     List<CantidadEnSucursal> cantidadEnSucursal = new ArrayList<>();
-    CantidadEnSucursal cantidad = new CantidadEnSucursal();
-    cantidad.setCantidad(nuevoProductoDTO.getCantidad());
-    cantidad.setSucursal(sucursalService.getSucursalPorId(idSucursal));
-    cantidad.setEstante(nuevoProductoDTO.getEstante());
-    cantidad.setEstanteria(nuevoProductoDTO.getEstanteria());
-    cantidadEnSucursal.add(cantidad);
+    nuevoProductoDTO
+        .getCantidadEnSucursal()
+        .keySet()
+        .forEach(
+            idSucursal -> {
+              CantidadEnSucursal cantidad = new CantidadEnSucursal();
+              cantidad.setCantidad(nuevoProductoDTO.getCantidadEnSucursal().get(idSucursal));
+              cantidad.setSucursal(sucursalService.getSucursalPorId(idSucursal));
+              cantidad.setEstante(nuevoProductoDTO.getEstante());
+              cantidad.setEstanteria(nuevoProductoDTO.getEstanteria());
+              cantidadEnSucursal.add(cantidad);
+            });
     producto.setCantidadEnSucursales(cantidadEnSucursal);
-    producto.setCantidad(nuevoProductoDTO.getCantidad());
+    producto.setCantidad(
+        producto.getCantidadEnSucursales().stream()
+            .map(CantidadEnSucursal::getCantidad)
+            .reduce(BigDecimal.ZERO, BigDecimal::add));
     producto.setHayStock(producto.getCantidad().compareTo(BigDecimal.ZERO) > 0);
     producto.setPrecioBonificado(nuevoProductoDTO.getPrecioBonificado());
     producto.setCantMinima(nuevoProductoDTO.getCantMinima());

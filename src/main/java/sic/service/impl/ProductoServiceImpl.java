@@ -83,6 +83,19 @@ public class ProductoServiceImpl implements IProductoService {
               "mensaje_producto_destacado_privado_o_sin_imagen", null, Locale.getDefault()));
     }
     // Duplicados
+    //Cantidades
+    for (int i = 0; i < producto.getCantidadEnSucursales().size(); i++) {
+      for (int j = i + 1; j < producto.getCantidadEnSucursales().size(); j++) {
+        if (producto
+            .getCantidadEnSucursales()
+            .get(i)
+            .equals(producto.getCantidadEnSucursales().get(j))) {
+          throw new BusinessServiceException(
+              messageSource.getMessage(
+                  "mensaje_producto_cantidades_en_sucursal_repetidas", null, Locale.getDefault()));
+        }
+      }
+    }
     // Codigo
     if (!producto.getCodigo().equals("")) {
       Producto productoDuplicado = this.getProductoPorCodigo(producto.getCodigo());

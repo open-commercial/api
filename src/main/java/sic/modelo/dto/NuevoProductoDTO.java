@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -16,7 +17,7 @@ public class NuevoProductoDTO {
 
   private String codigo;
   private String descripcion;
-  private BigDecimal cantidad;
+  private Map<Long,BigDecimal> cantidadEnSucursal;
   private boolean hayStock;
   private BigDecimal precioBonificado;
   private BigDecimal cantMinima;

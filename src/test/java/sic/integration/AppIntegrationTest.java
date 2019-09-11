@@ -69,7 +69,7 @@ class AppIntegrationTest {
       NuevoProductoDTO.builder()
         .codigo(RandomStringUtils.random(10, false, true))
         .descripcion(RandomStringUtils.random(10, true, false))
-        .cantidad(BigDecimal.TEN)
+        .cantidadEnSucursal(new HashMap<Long, BigDecimal>() {{put(1L, BigDecimal.TEN);}})
         .bulto(BigDecimal.ONE)
         .precioCosto(CIEN)
         .gananciaPorcentaje(new BigDecimal("900"))
@@ -86,7 +86,7 @@ class AppIntegrationTest {
       NuevoProductoDTO.builder()
         .codigo(RandomStringUtils.random(10, false, true))
         .descripcion(RandomStringUtils.random(10, true, false))
-        .cantidad(new BigDecimal("6"))
+        .cantidadEnSucursal(new HashMap<Long, BigDecimal>() {{put(1L, new BigDecimal("6"));}})
         .bulto(BigDecimal.ONE)
         .precioCosto(CIEN)
         .gananciaPorcentaje(new BigDecimal("900"))
@@ -2873,7 +2873,7 @@ class AppIntegrationTest {
       NuevoProductoDTO.builder()
         .codigo("1")
         .descripcion("uno")
-        .cantidad(BigDecimal.TEN)
+        .cantidadEnSucursal(new HashMap<Long, BigDecimal>() {{put(1L, BigDecimal.TEN);}})
         .bulto(BigDecimal.ONE)
         .precioCosto(CIEN)
         .gananciaPorcentaje(new BigDecimal("900"))
@@ -2890,7 +2890,7 @@ class AppIntegrationTest {
       NuevoProductoDTO.builder()
         .codigo("2")
         .descripcion("dos")
-        .cantidad(new BigDecimal("6"))
+        .cantidadEnSucursal(new HashMap<Long, BigDecimal>() {{put(1L, new BigDecimal("6"));}})
         .bulto(BigDecimal.ONE)
         .precioCosto(CIEN)
         .gananciaPorcentaje(new BigDecimal("900"))
@@ -3060,7 +3060,7 @@ class AppIntegrationTest {
       NuevoProductoDTO.builder()
         .codigo("123test")
         .descripcion(RandomStringUtils.random(10, true, false))
-        .cantidad(BigDecimal.TEN)
+        .cantidadEnSucursal(new HashMap<Long, BigDecimal>() {{put(1L, BigDecimal.TEN);}})
         .bulto(BigDecimal.ONE)
         .precioCosto(CIEN)
         .gananciaPorcentaje(new BigDecimal("900"))
@@ -3084,8 +3084,8 @@ class AppIntegrationTest {
           + sucursal.getIdSucursal(),
         productoUno,
         ProductoDTO.class);
-    assertEquals(productoUno.getCantidad(), productoRecuperado.getCantidadEnSucursales().get(0).getCantidad());
-    assertEquals(productoUno.getCantidad(), productoRecuperado.getCantidad());
+    assertEquals(productoUno.getCantidadEnSucursal().get(1L), productoRecuperado.getCantidadEnSucursales().get(0).getCantidad());
+    assertEquals(productoUno.getCantidadEnSucursal().get(1L), productoRecuperado.getCantidad());
     assertEquals(productoUno.getIvaPorcentaje(), productoRecuperado.getIvaPorcentaje());
     assertEquals(productoUno.getIvaNeto(), productoRecuperado.getIvaNeto());
     assertEquals(productoUno.getCantMinima(), productoRecuperado.getCantMinima());
@@ -3112,7 +3112,7 @@ class AppIntegrationTest {
       NuevoProductoDTO.builder()
         .codigo("123test")
         .descripcion(RandomStringUtils.random(10, true, false))
-        .cantidad(BigDecimal.TEN)
+        .cantidadEnSucursal(new HashMap<Long, BigDecimal>() {{put(1L, BigDecimal.TEN);}})
         .bulto(BigDecimal.ONE)
         .precioCosto(CIEN)
         .gananciaPorcentaje(new BigDecimal("900"))
@@ -3151,7 +3151,7 @@ class AppIntegrationTest {
         NuevoProductoDTO.builder()
             .codigo(RandomStringUtils.random(10, false, true))
             .descripcion(RandomStringUtils.random(10, true, false))
-            .cantidad(BigDecimal.TEN)
+            .cantidadEnSucursal(new HashMap<Long, BigDecimal>() {{put(1L, BigDecimal.TEN);}})
             .bulto(BigDecimal.ONE)
             .precioCosto(CIEN)
             .gananciaPorcentaje(new BigDecimal("900"))
@@ -3267,7 +3267,7 @@ class AppIntegrationTest {
         NuevoProductoDTO.builder()
             .codigo(RandomStringUtils.random(10, false, true))
             .descripcion(RandomStringUtils.random(10, true, false))
-            .cantidad(BigDecimal.ZERO)
+            .cantidadEnSucursal(new HashMap<Long, BigDecimal>() {{put(1L, BigDecimal.ZERO);}})
             .bulto(BigDecimal.ONE)
             .precioCosto(CIEN)
             .gananciaPorcentaje(new BigDecimal("900"))
