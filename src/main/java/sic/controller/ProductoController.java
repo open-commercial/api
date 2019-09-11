@@ -21,6 +21,8 @@ import sic.modelo.dto.ProductoDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 
+import javax.persistence.EntityNotFoundException;
+
 @RestController
 @RequestMapping("/api/v1")
 public class ProductoController {
@@ -60,14 +62,20 @@ public class ProductoController {
 
   @GetMapping("/productos/{idProducto}")
   public Producto getProductoPorId(
-      @PathVariable long idProducto,
-      @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    @PathVariable long idProducto,
+    @RequestParam(required = false) Boolean publicos,
+    @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
-    Cliente cliente =
+    if (publicos != null && publicos && !producto.isPublico()) {
+      throw new EntityNotFoundException(messageSource.getMessage(
+        "mensaje_producto_no_existente", null, Locale.getDefault()));
+    }
+    if (authorizationHeader != null && authService.esAuthorizationHeaderValido(authorizationHeader)) {
+      Claims claims = authService.getClaimsDelToken(authorizationHeader);
+      Cliente cliente =
         clienteService.getClientePorIdUsuario((int) claims.get("idUsuario"));
-    if (cliente != null) {
-      Page<Producto> productos =
+      if (cliente != null) {
+        Page<Producto> productos =
           productoService.getProductosConPrecioBonificado(
               new PageImpl<>(Collections.singletonList(producto)), cliente);
       return productos.getContent().get(0);
