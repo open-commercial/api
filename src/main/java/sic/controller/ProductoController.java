@@ -101,9 +101,6 @@ public class ProductoController {
       @RequestParam(required = false) String ordenarPor,
       @RequestParam(required = false) String sentido,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    Cliente cliente =
-        clienteService.getClientePorIdUsuario((int) claims.get("idUsuario"));
     Page<Producto> productos =
         this.buscar(
             codigo,
@@ -118,10 +115,17 @@ public class ProductoController {
             null,
             ordenarPor,
             sentido);
-    if (cliente != null) {
-      return productoService.getProductosConPrecioBonificado(productos, cliente);
+    if (authorizationHeader != null && authService.esAuthorizationHeaderValido(authorizationHeader)) {
+      Claims claims = authService.getClaimsDelToken(authorizationHeader);
+      Cliente cliente =
+        clienteService.getClientePorIdUsuario((int) claims.get("idUsuario"));
+      if (cliente != null) {
+        return productoService.getProductosConPrecioBonificado(productos, cliente);
+      } else {
+        return productos;
+      }
     } else {
-     return productos;
+      return productos;
     }
   }
 
