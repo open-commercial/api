@@ -155,8 +155,8 @@ public class NotaController {
     Rol.COMPRADOR
   })
   public List<TipoDeComprobante> getTipoNotaCreditoCliente(
-      @RequestParam long idCliente, @RequestParam long idSursal) {
-    return notaService.getTipoNotaCreditoCliente(idCliente, idSursal);
+      @RequestParam long idCliente, @RequestParam long idSucursal) {
+    return notaService.getTipoNotaCreditoCliente(idCliente, idSucursal);
   }
 
   @GetMapping("/notas/clientes/tipos/debito")

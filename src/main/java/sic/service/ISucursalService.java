@@ -11,7 +11,7 @@ public interface ISucursalService {
 
   void actualizar(@Valid Sucursal sucursalParaActualizar, Sucursal sucursalPersistida);
 
-  void eliminar(Long idSursal);
+  void eliminar(Long idSucursal);
 
   Sucursal getSucursalPorIdFiscal(Long idFiscal);
 
