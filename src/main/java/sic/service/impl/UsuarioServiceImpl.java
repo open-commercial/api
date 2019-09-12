@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -40,6 +41,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   private final IClienteService clienteService;
   private final ICorreoElectronicoService correoElectronicoService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
   @Autowired
@@ -117,6 +119,11 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria) {
+    criteria.setBuscarPorNombreDeUsuario(criteria.getUsername() != null);
+    criteria.setBuscaPorNombre(criteria.getNombre() != null);
+    criteria.setBuscaPorApellido(criteria.getApellido() != null);
+    criteria.setBuscaPorEmail(criteria.getEmail() != null);
+    criteria.setBuscarPorRol(criteria.getRoles() != null );
     QUsuario qUsuario = QUsuario.usuario;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.isBuscaPorApellido()) {
@@ -175,7 +182,27 @@ public class UsuarioServiceImpl implements IUsuarioService {
       builder.and(rsPredicate);
     }
     builder.and(qUsuario.eliminado.eq(false));
-    return usuarioRepository.findAll(builder, criteria.getPageable());
+    return usuarioRepository.findAll(builder, this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
+  }
+
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+    String ordenDefault = "nombre";
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
+    }
   }
 
   @Override

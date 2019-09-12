@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -24,6 +23,7 @@ public class BusquedaUsuarioCriteria {
     private String email;
     private boolean buscarPorRol;
     private List<Rol> roles;
-    private Pageable pageable;
-
+    private Integer pagina;
+    private String ordenarPor;
+    private String sentido;
 }
