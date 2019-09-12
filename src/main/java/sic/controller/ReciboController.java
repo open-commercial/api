@@ -35,7 +35,6 @@ public class ReciboController {
   private final IFormaDePagoService formaDePagoService;
   private final IAuthService authService;
   private final ModelMapper modelMapper;
-  private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
   public ReciboController(
@@ -69,211 +68,15 @@ public class ReciboController {
     return reciboService.getReciboNoEliminadoPorId(idRecibo);
   }
 
-  @GetMapping("/recibos/venta/busqueda/criteria")
+  @PostMapping("/recibos/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Page<Recibo> buscarConCriteriaVenta(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) String concepto,
-      @RequestParam(required = false) Integer nroSerie,
-      @RequestParam(required = false) Integer nroRecibo,
-      @RequestParam(required = false) Long idCliente,
-      @RequestParam(required = false) Long idUsuario,
-      @RequestParam(required = false) Long idViajante,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if ((desde != null) && (hasta != null)) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable;
-    if (ordenarPor == null || sentido == null) {
-      pageable =
-          PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "fecha"));
-    } else {
-      switch (sentido) {
-        case "ASC":
-          pageable =
-              PageRequest.of(
-                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
-          break;
-        case "DESC":
-          pageable =
-              PageRequest.of(
-                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
-          break;
-        default:
-          pageable =
-              PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "fecha"));
-          break;
-      }
-    }
-    BusquedaReciboCriteria criteria =
-        BusquedaReciboCriteria.builder()
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .buscaPorConcepto(concepto != null)
-            .concepto(concepto)
-            .buscaPorNumeroRecibo((nroSerie != null) && (nroRecibo != null))
-            .numSerie((nroSerie != null) ? nroSerie : 0)
-            .numRecibo((nroRecibo != null) ? nroRecibo : 0)
-            .buscaPorCliente(idCliente != null)
-            .idCliente(idCliente)
-            .buscaPorUsuario(idUsuario != null)
-            .idUsuario(idUsuario)
-            .buscaPorViajante(idViajante != null)
-            .idViajante(idViajante)
-            .idEmpresa(idEmpresa)
-            .pageable(pageable)
-            .movimiento(Movimiento.VENTA)
-            .build();
+  public Page<Recibo> buscarConCriteriaVenta(@RequestBody BusquedaReciboCriteria criteria) {
     return reciboService.buscarRecibos(criteria);
   }
 
-  @GetMapping("/recibos/compra/busqueda/criteria")
+  @PostMapping("/recibos/total/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Page<Recibo> buscarConCriteriaCompra(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) String concepto,
-      @RequestParam(required = false) Integer nroSerie,
-      @RequestParam(required = false) Integer nroRecibo,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) Long idUsuario,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if ((desde != null) && (hasta != null)) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable;
-    if (ordenarPor == null || sentido == null) {
-      pageable =
-          PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "fecha"));
-    } else {
-      switch (sentido) {
-        case "ASC":
-          pageable =
-              PageRequest.of(
-                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
-          break;
-        case "DESC":
-          pageable =
-              PageRequest.of(
-                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
-          break;
-        default:
-          pageable =
-              PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "fecha"));
-          break;
-      }
-    }
-    BusquedaReciboCriteria criteria =
-        BusquedaReciboCriteria.builder()
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .buscaPorConcepto(concepto != null)
-            .buscaPorNumeroRecibo((nroSerie != null) && (nroRecibo != null))
-            .numSerie((nroSerie != null) ? nroSerie : 0)
-            .numRecibo((nroRecibo != null) ? nroRecibo : 0)
-            .buscaPorConcepto(concepto != null)
-            .concepto(concepto)
-            .buscaPorProveedor(idProveedor != null)
-            .idProveedor(idProveedor)
-            .buscaPorUsuario(idUsuario != null)
-            .idUsuario(idUsuario)
-            .idEmpresa(idEmpresa)
-            .pageable(pageable)
-            .movimiento(Movimiento.COMPRA)
-            .build();
-    return reciboService.buscarRecibos(criteria);
-  }
-
-  @GetMapping("/recibos/compra/total/criteria")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal getTotalRecibosCompra(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) String concepto,
-      @RequestParam(required = false) Integer nroSerie,
-      @RequestParam(required = false) Integer nroRecibo,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) Long idUsuario) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if ((desde != null) && (hasta != null)) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    BusquedaReciboCriteria criteria =
-        BusquedaReciboCriteria.builder()
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .buscaPorConcepto(concepto != null)
-            .buscaPorNumeroRecibo((nroSerie != null) && (nroRecibo != null))
-            .numSerie((nroSerie != null) ? nroSerie : 0)
-            .numRecibo((nroRecibo != null) ? nroRecibo : 0)
-            .buscaPorConcepto(concepto != null)
-            .concepto(concepto)
-            .buscaPorProveedor(idProveedor != null)
-            .idProveedor(idProveedor)
-            .buscaPorUsuario(idUsuario != null)
-            .idUsuario(idUsuario)
-            .idEmpresa(idEmpresa)
-            .movimiento(Movimiento.COMPRA)
-            .build();
-    return reciboService.getTotalRecibos(criteria);
-  }
-
-  @GetMapping("/recibos/venta/total/criteria")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal getTotalRecibosVenta(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) String concepto,
-      @RequestParam(required = false) Integer nroSerie,
-      @RequestParam(required = false) Integer nroRecibo,
-      @RequestParam(required = false) Long idCliente,
-      @RequestParam(required = false) Long idUsuario) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if ((desde != null) && (hasta != null)) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    BusquedaReciboCriteria criteria =
-        BusquedaReciboCriteria.builder()
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .buscaPorConcepto(concepto != null)
-            .buscaPorNumeroRecibo((nroSerie != null) && (nroRecibo != null))
-            .numSerie((nroSerie != null) ? nroSerie : 0)
-            .numRecibo((nroRecibo != null) ? nroRecibo : 0)
-            .buscaPorConcepto(concepto != null)
-            .concepto(concepto)
-            .buscaPorCliente(idCliente != null)
-            .idCliente(idCliente)
-            .buscaPorUsuario(idUsuario != null)
-            .idUsuario(idUsuario)
-            .idEmpresa(idEmpresa)
-            .movimiento(Movimiento.VENTA)
-            .build();
+  public BigDecimal getTotalRecibosCompra(@RequestBody BusquedaReciboCriteria criteria) {
     return reciboService.getTotalRecibos(criteria);
   }
 

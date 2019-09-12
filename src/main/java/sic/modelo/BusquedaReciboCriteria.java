@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.domain.Pageable;
 
 import java.util.Date;
 
@@ -19,8 +18,8 @@ public class BusquedaReciboCriteria {
   private Date fechaHasta;
   private Long idEmpresa;
   private boolean buscaPorNumeroRecibo;
-  private long numSerie;
-  private long numRecibo;
+  private Long numSerie;
+  private Long numRecibo;
   private boolean buscaPorConcepto;
   private String concepto;
   private boolean buscaPorCliente;
@@ -31,6 +30,8 @@ public class BusquedaReciboCriteria {
   private Long idUsuario;
   private boolean buscaPorViajante;
   private Long idViajante;
-  private Pageable pageable;
   private Movimiento movimiento;
+  private Integer pagina;
+  private String ordenarPor;
+  private String sentido;
 }

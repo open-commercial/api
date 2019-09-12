@@ -25,6 +25,7 @@ public class UsuarioController {
   private final IAuthService authService;
   private final ModelMapper modelMapper;
   private final MessageSource messageSource;
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
   public UsuarioController(
@@ -43,7 +44,7 @@ public class UsuarioController {
     return usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
   }
 
-  @GetMapping("/usuarios/busqueda/criteria")
+  @PostMapping("/usuarios/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Page<Usuario> buscarUsuarios(
       @RequestBody BusquedaUsuarioCriteria criteria) {
