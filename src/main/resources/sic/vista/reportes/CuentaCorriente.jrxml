@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="CuentaCorriente" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e47a212f-3954-4de9-aca2-5bd71a6098c5">
 	<property name="ireport.zoom" value="3.0"/>
 	<property name="ireport.x" value="0"/>
@@ -110,7 +110,7 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getCliente().getIdFiscal() == null ? "" : $P{cuentaCorrienteCliente}.getCliente().getIdFiscal()]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="302" y="0" width="230" height="25" uuid="fcdd23d2-56f9-4d85-ac55-bb24a80541be"/>
+				<reportElement x="302" y="78" width="230" height="25" uuid="fcdd23d2-56f9-4d85-ac55-bb24a80541be"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="16" isBold="true" isUnderline="false"/>
 				</textElement>
@@ -214,6 +214,27 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				</textElement>
 				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("CONSUMIDOR_FINAL") ? "DNI:" : "CUIT:"]]></textFieldExpression>
 			</textField>
+			<staticText>
+				<reportElement x="226" y="-1" width="385" height="21" uuid="81dc89ff-067b-44d5-bfba-ee0e983918cc"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Web: www.globodeoro.com]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="226" y="20" width="385" height="21" uuid="1d3a80a7-67d6-409f-82e6-3a93da4fd8cd"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Teléfono/WhatsApp: 379 4834638]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="226" y="41" width="385" height="19" uuid="5fc9e09b-2b5b-4934-bbcc-6313c3221b71"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Email: ventas@globodistribuciones.com]]></text>
+			</staticText>
 		</band>
 	</title>
 	<detail>
