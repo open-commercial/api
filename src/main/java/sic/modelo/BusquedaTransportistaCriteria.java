@@ -8,12 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BusquedaTransportistaCriteria {
-
-    private boolean buscarPorNombre;
-    private String nombre;
-    private boolean buscarPorProvincia;
-    private Long idProvincia;
-    private boolean buscarPorLocalidad;
-    private Long idLocalidad;
-    private Long idEmpresa;
+  private String nombre;
+  private Long idProvincia;
+  private Long idLocalidad;
+  private Long idEmpresa;
 }

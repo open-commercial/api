@@ -75,11 +75,11 @@ public class TransportistaServiceImpl implements ITransportistaService {
             .id_Empresa
             .eq(criteria.getIdEmpresa())
             .and(qTransportista.eliminado.eq(false)));
-    if (criteria.isBuscarPorNombre())
+    if (criteria.getNombre() != null)
       builder.and(this.buildPredicadoNombre(criteria.getNombre(), qTransportista));
-    if (criteria.isBuscarPorLocalidad())
+    if (criteria.getIdLocalidad() != null)
       builder.and(qTransportista.ubicacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
-    if (criteria.isBuscarPorProvincia())
+    if (criteria.getIdProvincia() != null)
       builder.and(qTransportista.ubicacion.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
     List<Transportista> list = new ArrayList<>();
     transportistaRepository

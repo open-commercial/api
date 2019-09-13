@@ -7,6 +7,9 @@ import com.querydsl.core.types.dsl.DateExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.service.IGastoService;
@@ -34,6 +37,7 @@ public class GastoServiceImpl implements IGastoService {
   private final GastoRepository gastoRepository;
   private final IEmpresaService empresaService;
   private final ICajaService cajaService;
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
 
@@ -73,7 +77,36 @@ public class GastoServiceImpl implements IGastoService {
 
   @Override
   public Page<Gasto> buscarGastos(BusquedaGastoCriteria criteria) {
-    return gastoRepository.findAll(this.getBuilder(criteria), criteria.getPageable());
+    criteria.setBuscaPorFecha(
+        (criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null));
+    criteria.setBuscaPorConcepto(criteria.getConcepto() != null);
+    criteria.setBuscaPorUsuario(criteria.getIdUsuario() != null);
+    criteria.setBuscarPorFormaDePago(criteria.getIdFormaDePago() != null);
+    criteria.setBuscaPorNro(criteria.getNroGasto() != null);
+    return gastoRepository.findAll(
+        this.getBuilder(criteria),
+        this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
+  }
+
+  private Pageable getPageable(Integer pagina, String ordenarPor, String sentido) {
+    String ordenDefault = "fecha";
+    if(pagina == null) pagina = 0;
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
+    }
   }
 
   private BooleanBuilder getBuilder(BusquedaGastoCriteria criteria) {

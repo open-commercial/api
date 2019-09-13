@@ -5398,12 +5398,16 @@ class AppIntegrationTest {
   @Test
   void shouldRecuperarGastoPorEmpresa() {
     this.shouldCrearGasto();
+    BusquedaGastoCriteria criteria =
+      BusquedaGastoCriteria.builder()
+      .idEmpresa(1L).build();
+    HttpEntity<BusquedaGastoCriteria> requestEntity = new HttpEntity<>(criteria);
     List<GastoDTO> gastos =
         restTemplate
             .exchange(
-                apiPrefix + "/gastos/busqueda/criteria?idEmpresa=1",
-                HttpMethod.GET,
-                null,
+                apiPrefix + "/gastos/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<GastoDTO>>() {})
             .getBody()
             .getContent();

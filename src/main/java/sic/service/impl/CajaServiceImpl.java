@@ -44,6 +44,7 @@ public class CajaServiceImpl implements ICajaService {
   private final IUsuarioService usuarioService;
   private final IReciboService reciboService;
   private final IClockService clockService;
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
 
@@ -157,17 +158,34 @@ public class CajaServiceImpl implements ICajaService {
   }
 
   @Override
-  public Page<Caja> getCajasCriteria(BusquedaCajaCriteria criteria) {
-    int pageNumber = 0;
-    int pageSize = Integer.MAX_VALUE;
-    Sort sorting = new Sort(Sort.Direction.DESC, "fechaApertura");
-    if (criteria.getPageable() != null) {
-      pageNumber = criteria.getPageable().getPageNumber();
-      pageSize = criteria.getPageable().getPageSize();
-      sorting = criteria.getPageable().getSort();
+  public Page<Caja> buscarCajas(BusquedaCajaCriteria criteria) {
+    criteria.setBuscaPorFecha(
+        (criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null));
+    criteria.setBuscaPorUsuarioApertura(criteria.getIdUsuarioApertura() != null);
+    criteria.setBuscaPorUsuarioCierre(criteria.getIdUsuarioCierre() != null);
+    return cajaRepository.findAll(
+        getBuilder(criteria),
+        this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
+  }
+
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+    String ordenDefault = "fechaApertura";
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
     }
-    Pageable pageable = PageRequest.of(pageNumber, pageSize, sorting);
-    return cajaRepository.findAll(getBuilder(criteria), pageable);
   }
 
   private BooleanBuilder getBuilder(BusquedaCajaCriteria criteria) {
@@ -190,25 +208,25 @@ public class CajaServiceImpl implements ICajaService {
       cal.set(Calendar.SECOND, 59);
       criteria.setFechaHasta(cal.getTime());
     }
-    QCaja qcaja = QCaja.caja;
+    QCaja qCaja = QCaja.caja;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
-        qcaja.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qcaja.eliminada.eq(false)));
+        qCaja.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qCaja.eliminada.eq(false)));
     if (criteria.isBuscaPorUsuarioApertura() && !criteria.isBuscaPorUsuarioCierre()) {
-      builder.and(qcaja.usuarioAbreCaja.id_Usuario.eq(criteria.getIdUsuarioApertura()));
+      builder.and(qCaja.usuarioAbreCaja.id_Usuario.eq(criteria.getIdUsuarioApertura()));
     }
     if (criteria.isBuscaPorUsuarioCierre() && !criteria.isBuscaPorUsuarioApertura()) {
-      builder.and(qcaja.usuarioCierraCaja.id_Usuario.eq(criteria.getIdUsuarioCierre()));
+      builder.and(qCaja.usuarioCierraCaja.id_Usuario.eq(criteria.getIdUsuarioCierre()));
     }
     if (criteria.isBuscaPorUsuarioCierre() && criteria.isBuscaPorUsuarioApertura()) {
       builder.and(
-          qcaja
+          qCaja
               .usuarioAbreCaja
               .id_Usuario
               .eq(criteria.getIdUsuarioApertura())
-              .and(qcaja.usuarioCierraCaja.id_Usuario.eq(criteria.getIdUsuarioCierre())));
+              .and(qCaja.usuarioCierraCaja.id_Usuario.eq(criteria.getIdUsuarioCierre())));
     }
-    if (criteria.isBuscaPorFecha()) {
+    if ((criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null)) {
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
       DateExpression<Date> fDesde =
@@ -221,7 +239,7 @@ public class CajaServiceImpl implements ICajaService {
               Date.class,
               "convert({0}, datetime)",
               formateadorFecha.format(criteria.getFechaHasta()));
-      builder.and(qcaja.fechaApertura.between(fDesde, fHasta));
+      builder.and(qCaja.fechaApertura.between(fDesde, fHasta));
     }
     return builder;
   }

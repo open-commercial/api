@@ -6,6 +6,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -31,6 +34,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
   private final ProvinciaRepository provinciaRepository;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
   public UbicacionServiceImpl(
@@ -104,27 +108,28 @@ public class UbicacionServiceImpl implements IUbicacionService {
   public void validarOperacion(TipoDeOperacion operacion, Localidad localidad) {
     // Requeridos
     if (Validator.esVacio(localidad.getNombre())) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_localidad_vacio_nombre", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_localidad_vacio_nombre", null, Locale.getDefault()));
     }
     if (localidad.getProvincia() == null) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_localidad_provincia_vacio", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_localidad_provincia_vacio", null, Locale.getDefault()));
     }
     // Duplicados
     // Nombre
     Localidad localidadDuplicada =
         this.getLocalidadPorNombre(localidad.getNombre(), localidad.getProvincia());
     if (operacion.equals(TipoDeOperacion.ALTA) && localidadDuplicada != null) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_localidad_duplicado_nombre", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_localidad_duplicado_nombre", null, Locale.getDefault()));
     }
-    if (operacion.equals(TipoDeOperacion.ACTUALIZACION)) {
-      if (localidadDuplicada != null
-          && localidadDuplicada.getIdLocalidad() != localidad.getIdLocalidad()) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_localidad_duplicado_nombre", null, Locale.getDefault()));
-      }
+    if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
+        && localidadDuplicada != null
+        && localidadDuplicada.getIdLocalidad() != localidad.getIdLocalidad()) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_localidad_duplicado_nombre", null, Locale.getDefault()));
     }
   }
 
@@ -132,7 +137,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
   public Page<Localidad> buscar(BusquedaLocalidadCriteria criteria) {
     QLocalidad qLocalidad = QLocalidad.localidad;
     BooleanBuilder builder = new BooleanBuilder();
-    if (criteria.isBuscaPorNombre()) {
+    if (criteria.getNombre() != null) {
       String[] terminos = criteria.getNombre().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -140,7 +145,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscaPorCodigoPostal()) {
+    if (criteria.getCodigoPostal() != null) {
       String[] terminos = criteria.getCodigoPostal().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -148,7 +153,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscaPorNombreProvincia()) {
+    if (criteria.getNombre() != null) {
       String[] terminos = criteria.getNombreProvincia().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -156,9 +161,31 @@ public class UbicacionServiceImpl implements IUbicacionService {
       }
       builder.and(rsPredicate);
     }
-    if (criteria.isBuscaPorEnvio()) {
+    if (criteria.getEnvioGratuito() != null) {
       builder.and(qLocalidad.envioGratuito.eq(criteria.getEnvioGratuito()));
     }
-    return localidadRepository.findAll(builder, criteria.getPageable());
+    return localidadRepository.findAll(
+        builder,
+        this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
+  }
+
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+    String ordenDefault = "nombre";
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
+    }
   }
 }

@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.domain.Pageable;
 
 @Data
 @AllArgsConstructor
@@ -22,6 +21,8 @@ public class BusquedaCajaCriteria {
     private Long idUsuarioApertura;
     private boolean buscaPorUsuarioCierre;
     private Long idUsuarioCierre;
-    private Pageable pageable;
+    private Integer pagina;
+    private String ordenarPor;
+    private String sentido;
     
 }
