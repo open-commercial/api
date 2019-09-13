@@ -60,6 +60,9 @@ alter TABLE cliente drop column id_Empresa;
 alter TABLE proveedor DROP FOREIGN KEY FK5s5a4d2763thtum39ht6r059q;
 alter TABLE proveedor drop column id_Empresa;
 
+alter TABLE cuentacorriente DROP FOREIGN KEY FKs7jnro4dgqdaexbg57371xkr2;
+alter TABLE cuentacorriente drop column id_Empresa;
+
 RENAME TABLE empresa TO sucursal;
 
 ALTER TABLE sucursal CHANGE id_Empresa idSucursal bigint(20) NOT NULL AUTO_INCREMENT;
@@ -67,7 +70,6 @@ ALTER TABLE sucursal CHANGE id_Empresa idSucursal bigint(20) NOT NULL AUTO_INCRE
 ALTER TABLE caja CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
 ALTER TABLE cantidadensucursal CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
 ALTER TABLE configuraciondelsistema CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
-ALTER TABLE cuentacorriente CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
 ALTER TABLE factura CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
 ALTER TABLE gasto CHANGE id_Empresa idSucursal bigint(20) NOT NULL;
 ALTER TABLE nota CHANGE id_Empresa idSucursal bigint(20) NOT NULL;

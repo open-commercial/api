@@ -47,7 +47,6 @@ public class Producto implements Serializable {
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "idProducto")
   @JsonProperty(access = JsonProperty.Access.READ_WRITE)
-  @NotEmpty
   @JsonView(Views.Comprador.class)
   private List<CantidadEnSucursal> cantidadEnSucursales;
 
