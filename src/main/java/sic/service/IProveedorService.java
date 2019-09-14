@@ -18,8 +18,6 @@ public interface IProveedorService {
 
   void eliminar(long idProveedor);
 
-  Proveedor getProveedorPorIdFiscal(Long idFiscal);
-
   Proveedor getProveedorPorRazonSocial(String razonSocial);
 
   List<Proveedor> getProveedores();

@@ -15,6 +15,9 @@ import sic.modelo.Cliente;
 import sic.exception.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
 import sic.repository.ClienteRepository;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 @ExtendWith(SpringExtension.class)
@@ -45,13 +48,15 @@ class ClienteServiceImplTest {
   @Test
   void shouldLanzarExceptionWhenIdFiscalDuplicadoEnAlta() {
     Cliente clienteNuevo = new ClienteBuilder().build();
+    List<Cliente> listaClienteNuevo = new ArrayList<>();
+    listaClienteNuevo.add(clienteNuevo);
     Cliente clienteDuplicado = new ClienteBuilder().build();
     BusinessServiceException thrown =
         assertThrows(
             BusinessServiceException.class,
             () -> {
               when(clienteRepository.findByIdFiscalAndEliminado(clienteNuevo.getIdFiscal(), false))
-                  .thenReturn(clienteNuevo);
+                  .thenReturn(listaClienteNuevo);
               clienteServiceImpl.validarOperacion(TipoDeOperacion.ALTA, clienteDuplicado);
             });
     assertTrue(thrown.getMessage().contains(mensaje_cliente_duplicado_idFiscal));
@@ -59,12 +64,14 @@ class ClienteServiceImplTest {
 
   @Test
   void shouldLanzarExceptionWhenIdFiscalDuplicadoEnActualizacion() {
+    List<Cliente> listaClienteNuevo = new ArrayList<>();
     Cliente clienteNuevo =
         new ClienteBuilder()
             .withId_Cliente(7L)
             .withNombreFiscal("Merceria los dos botones")
             .withIdFiscal(23111111119L)
             .build();
+    listaClienteNuevo.add(clienteNuevo);
     Cliente clienteDuplicado =
         new ClienteBuilder()
             .withId_Cliente(2L)
@@ -76,7 +83,7 @@ class ClienteServiceImplTest {
             BusinessServiceException.class,
             () -> {
               when(clienteRepository.findByIdFiscalAndEliminado(clienteNuevo.getIdFiscal(), false))
-                  .thenReturn(clienteNuevo);
+                  .thenReturn(listaClienteNuevo);
               clienteServiceImpl.validarOperacion(TipoDeOperacion.ACTUALIZACION, clienteDuplicado);
             });
     assertTrue(thrown.getMessage().contains(mensaje_cliente_duplicado_idFiscal));

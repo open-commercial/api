@@ -4,6 +4,7 @@ import com.querydsl.core.BooleanBuilder;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
@@ -57,11 +58,6 @@ public class ClienteServiceImpl implements IClienteService {
       throw new EntityNotFoundException(messageSource.getMessage(
         "mensaje_cliente_no_existente", null, Locale.getDefault()));
     }
-  }
-
-  @Override
-  public Cliente getClientePorIdFiscal(Long idFiscal) {
-    return clienteRepository.findByIdFiscalAndEliminado(idFiscal, false);
   }
 
   @Override
@@ -167,18 +163,22 @@ public class ClienteServiceImpl implements IClienteService {
     // Duplicados
     // ID Fiscal
     if (cliente.getIdFiscal() != null) {
-      Cliente clienteDuplicado = this.getClientePorIdFiscal(cliente.getIdFiscal());
-      if (operacion == TipoDeOperacion.ACTUALIZACION
-          && clienteDuplicado != null
-          && clienteDuplicado.getId_Cliente() != cliente.getId_Cliente()) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_cliente_duplicado_idFiscal", null, Locale.getDefault()));
+      List<Cliente> clientes =
+          clienteRepository.findByIdFiscalAndEliminado(cliente.getIdFiscal(), false);
+      if (clientes.size() > 1
+          || operacion == TipoDeOperacion.ACTUALIZACION
+              && !clientes.isEmpty()
+              && clientes.get(0).getId_Cliente() != cliente.getId_Cliente()) {
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_cliente_duplicado_idFiscal", null, Locale.getDefault()));
       }
       if (operacion == TipoDeOperacion.ALTA
-          && clienteDuplicado != null
+          && !clientes.isEmpty()
           && cliente.getIdFiscal() != null) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_cliente_duplicado_idFiscal", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_cliente_duplicado_idFiscal", null, Locale.getDefault()));
       }
     }
     // Ubicacion

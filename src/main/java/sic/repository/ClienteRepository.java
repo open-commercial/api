@@ -6,13 +6,14 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.Cliente;
-import sic.modelo.Sucursal;
 import sic.modelo.Usuario;
+
+import java.util.List;
 
 public interface ClienteRepository
     extends PagingAndSortingRepository<Cliente, Long>, QuerydslPredicateExecutor<Cliente> {
 
-  Cliente findByIdFiscalAndEliminado(Long idFiscal, boolean eliminado);
+  List<Cliente> findByIdFiscalAndEliminado(Long idFiscal, boolean eliminado);
 
   Cliente findByAndPredeterminadoAndEliminado(boolean predeterminado, boolean eliminado);
 

@@ -16,8 +16,6 @@ public interface IClienteService {
 
   Cliente getClienteNoEliminadoPorId(long idCliente);
 
-  Cliente getClientePorIdFiscal(Long idFiscal);
-
   Cliente getClientePredeterminado();
 
   boolean existeClientePredeterminado();

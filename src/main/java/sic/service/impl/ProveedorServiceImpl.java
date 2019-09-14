@@ -90,11 +90,6 @@ public class ProveedorServiceImpl implements IProveedorService {
   }
 
   @Override
-  public Proveedor getProveedorPorIdFiscal(Long idFiscal) {
-    return proveedorRepository.findByIdFiscalAndEliminado(idFiscal, false);
-  }
-
-  @Override
   public Proveedor getProveedorPorRazonSocial(String razonSocial) {
     return proveedorRepository.findByRazonSocialAndEliminado(razonSocial, false);
   }
@@ -103,18 +98,22 @@ public class ProveedorServiceImpl implements IProveedorService {
     // Duplicados
     // ID Fiscal
     if (proveedor.getIdFiscal() != null) {
-      Proveedor proveedorDuplicado = this.getProveedorPorIdFiscal(proveedor.getIdFiscal());
-      if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
-          && proveedorDuplicado != null
-          && proveedorDuplicado.getId_Proveedor() != proveedor.getId_Proveedor()) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_proveedor_duplicado_idFiscal", null, Locale.getDefault()));
+      List<Proveedor> proveedores =
+          proveedorRepository.findByIdFiscalAndEliminado(proveedor.getIdFiscal(), false);
+      if (proveedores.size() > 1
+          || operacion.equals(TipoDeOperacion.ACTUALIZACION)
+              && !proveedores.isEmpty()
+              && proveedores.get(0).getId_Proveedor() != proveedor.getId_Proveedor()) {
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_proveedor_duplicado_idFiscal", null, Locale.getDefault()));
       }
       if (operacion.equals(TipoDeOperacion.ALTA)
-          && proveedorDuplicado != null
+          && !proveedores.isEmpty()
           && proveedor.getIdFiscal() != null) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_proveedor_duplicado_idFiscal", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_proveedor_duplicado_idFiscal", null, Locale.getDefault()));
       }
     }
     // Razon social

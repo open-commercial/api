@@ -3,7 +3,6 @@ package sic.repository;
 import java.util.List;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import sic.modelo.Sucursal;
 import sic.modelo.Proveedor;
 
 public interface ProveedorRepository
@@ -11,7 +10,7 @@ public interface ProveedorRepository
 
   Proveedor findByNroProveedorAndEliminado(String nroProveedor, boolean eliminado);
 
-  Proveedor findByIdFiscalAndEliminado(Long idFiscal, boolean eliminado);
+  List<Proveedor> findByIdFiscalAndEliminado(Long idFiscal, boolean eliminado);
 
   Proveedor findByRazonSocialAndEliminado(String razonSocial, boolean eliminado);
 
