@@ -36,7 +36,7 @@ public class PedidoController {
     private final ISucursalService sucursalService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
-    private final IConfiguracionDelSistemaService configuracionDelSistemaService;
+    private final IConfiguracionSucursalService configuracionSucursal;
     private final IAuthService authService;
     private final ModelMapper modelMapper;
     private final MessageSource messageSource;
@@ -45,13 +45,13 @@ public class PedidoController {
     @Autowired
     public PedidoController(IPedidoService pedidoService, ISucursalService sucursalService,
                             IUsuarioService usuarioService, IClienteService clienteService,
-                            IConfiguracionDelSistemaService configuracionDelSistemaService,
+                            IConfiguracionSucursalService configuracionSucursal,
                             IAuthService authService, ModelMapper modelMapper, MessageSource messageSource) {
         this.pedidoService = pedidoService;
         this.sucursalService = sucursalService;
         this.usuarioService = usuarioService;
         this.clienteService = clienteService;
-        this.configuracionDelSistemaService = configuracionDelSistemaService;
+        this.configuracionSucursal = configuracionSucursal;
         this.authService = authService;
         this.modelMapper = modelMapper;
         this.messageSource = messageSource;
@@ -121,8 +121,8 @@ public class PedidoController {
     pedido.setTotalActual(nuevoPedidoDTO.getTotal());
     if (nuevoPedidoDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
       Sucursal sucursal = sucursalService.getSucursalPorId(nuevoPedidoDTO.getIdSucursalEnvio());
-      if (!configuracionDelSistemaService
-          .getConfiguracionDelSistemaPorSucursal(sucursal)
+      if (!configuracionSucursal
+          .getConfiguracionDelSucursal(sucursal)
           .isPuntoDeRetiro()) {
         throw new BusinessServiceException(
             messageSource.getMessage(

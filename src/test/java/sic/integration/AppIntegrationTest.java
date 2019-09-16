@@ -4795,10 +4795,10 @@ class AppIntegrationTest {
   void shouldCrearPedidoConUbicacionSucursal() {
     this.crearProductos();
     this.shouldCrearSucursalResponsableInscripto();
-    ConfiguracionDelSistemaDTO cds =
-      restTemplate.getForObject(apiPrefix + "/configuraciones-del-sistema/sucursales/2", ConfiguracionDelSistemaDTO.class);
-    cds.setPuntoDeRetiro(true);
-    restTemplate.put(apiPrefix + "/configuraciones-del-sistema", cds);
+    ConfiguracionSucursalDTO configuracionSucursalDTO =
+      restTemplate.getForObject(apiPrefix + "/configuracion-sucursales/2", ConfiguracionSucursalDTO.class);
+    configuracionSucursalDTO.setPuntoDeRetiro(true);
+    restTemplate.put(apiPrefix + "/configuracion-sucursales", configuracionSucursalDTO);
     List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
@@ -5474,10 +5474,10 @@ class AppIntegrationTest {
   @Test
   void shouldGenerarPedidoConItemsDelCarrito() {
     this.shouldAgregarItemsAlCarritoCompra();
-    ConfiguracionDelSistemaDTO cds =
-      restTemplate.getForObject(apiPrefix + "/configuraciones-del-sistema/sucursales/1", ConfiguracionDelSistemaDTO.class);
-    cds.setPuntoDeRetiro(true);
-    restTemplate.put(apiPrefix + "/configuraciones-del-sistema", cds);
+    ConfiguracionSucursalDTO configuracionSucursalDTO =
+      restTemplate.getForObject(apiPrefix + "/configuracion-sucursales/1", ConfiguracionSucursalDTO.class);
+    configuracionSucursalDTO.setPuntoDeRetiro(true);
+    restTemplate.put(apiPrefix + "/configuracion-sucursales", configuracionSucursalDTO);
     NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO = NuevaOrdenDeCompraDTO.builder()
       .idSucursal(1L)
       .idCliente(1L)
@@ -5493,12 +5493,12 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldActualizarConfiguracionDelSistema() {
-    ConfiguracionDelSistemaDTO cds =
-      restTemplate.getForObject(apiPrefix + "/configuraciones-del-sistema/sucursales/1", ConfiguracionDelSistemaDTO.class);
-    cds.setPuntoDeRetiro(true);
-    restTemplate.put(apiPrefix + "/configuraciones-del-sistema", cds);
-    cds = restTemplate.getForObject(apiPrefix + "/configuraciones-del-sistema/sucursales/1", ConfiguracionDelSistemaDTO.class);
-    assertTrue(cds.isPuntoDeRetiro());
+  void shouldActualizarConfiguracionSucursal() {
+    ConfiguracionSucursalDTO configuracionSucursalDTO =
+      restTemplate.getForObject(apiPrefix + "/configuracion-sucursales/1", ConfiguracionSucursalDTO.class);
+    configuracionSucursalDTO.setPuntoDeRetiro(true);
+    restTemplate.put(apiPrefix + "/configuracion-sucursales", configuracionSucursalDTO);
+    configuracionSucursalDTO = restTemplate.getForObject(apiPrefix + "/configuracion-sucursales/1", ConfiguracionSucursalDTO.class);
+    assertTrue(configuracionSucursalDTO.isPuntoDeRetiro());
   }
 }

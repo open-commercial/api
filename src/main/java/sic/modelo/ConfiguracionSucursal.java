@@ -18,19 +18,19 @@ import sic.controller.Views;
 import javax.validation.constraints.Email;
 
 @Entity
-@Table(name = "configuraciondelsistema")
+@Table(name = "configuracionsucursal")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = "id_ConfiguracionDelSistema")
+@EqualsAndHashCode(of = "idConfiguracionSucursal")
 @ToString(exclude = "certificadoAfip")
-@JsonIgnoreProperties({"tokenWSAA", "signTokenWSAA", "fechaGeneracionTokenWSAA", "fechaVencimientoTokenWSAA"})
+@JsonIgnoreProperties({"tokenWSAA", "signTokenWSAA", "fechaGeneracionTokenWSAA", "fechaVencimientoTokenWSAA", "sucursal"})
 @JsonView(Views.Comprador.class)
-public class ConfiguracionDelSistema implements Serializable {
+public class ConfiguracionSucursal implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id_ConfiguracionDelSistema;
+    private long idConfiguracionSucursal;
 
     private boolean usarFacturaVentaPreImpresa;
 
@@ -54,15 +54,7 @@ public class ConfiguracionDelSistema implements Serializable {
 
     private String signTokenWSAA;
 
-    private boolean emailSenderHabilitado;
-
     private boolean puntoDeRetiro;
-
-    @Email(message = "{mensaje_cds_email_invalido}")
-    private String emailUsername;
-
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private String emailPassword;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaGeneracionTokenWSAA;

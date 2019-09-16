@@ -79,4 +79,8 @@ ALTER TABLE usuario CHANGE idEmpresaPredeterminada idSucursalPredeterminada bigi
 
 alter TABLE configuraciondelsistema add column puntoDeRetiro bit(1) default false after emailSenderHabilitado;
 
+RENAME TABLE configuraciondelsistema TO configuracionsucursal;
+
+ALTER TABLE configuracionsucursal CHANGE id_ConfiguracionDelSistema idConfiguracionSucursal bigint(20) NOT NULL AUTO_INCREMENT;
+
  

@@ -1,13 +1,13 @@
 package sic.builder;
 
-import sic.modelo.ConfiguracionDelSistema;
+import sic.modelo.ConfiguracionSucursal;
 import sic.modelo.Sucursal;
 
 import java.util.Date;
 
-public class ConfiguracionDelSistemaBuilder {
+public class ConfiguracionSucursalBuilder {
 
-  private long id_ConfiguracionDelSistema = 0L;
+  private long idConfiguracionSucursal = 0L;
   private boolean usarFacturaVentaPreImpresa = true;
   private int cantidadMaximaDeRenglonesEnFactura = 28;
   private boolean facturaElectronicaHabilitada = false;
@@ -17,17 +17,14 @@ public class ConfiguracionDelSistemaBuilder {
   private int nroPuntoDeVentaAfip = 1;
   private String tokenWSAA = null;
   private String signTokenWSAA = null;
-  private boolean emailSenderHabilitado = true;
   private boolean puntoDeRetiro = true;
-  private String emailUserName = "test@mail.com";
-  private String emailPassword = "password";
   private Date fechaGeneracionTokenWSAA = null;
   private Date fechaVencimientoTokenWSAA = null;
   private Sucursal sucursal = new SucursalBuilder().build();
 
-  public ConfiguracionDelSistema build() {
-    return new ConfiguracionDelSistema(
-        id_ConfiguracionDelSistema,
+  public ConfiguracionSucursal build() {
+    return new ConfiguracionSucursal(
+        idConfiguracionSucursal,
         usarFacturaVentaPreImpresa,
         cantidadMaximaDeRenglonesEnFactura,
         facturaElectronicaHabilitada,
@@ -37,103 +34,85 @@ public class ConfiguracionDelSistemaBuilder {
         nroPuntoDeVentaAfip,
         tokenWSAA,
         signTokenWSAA,
-        emailSenderHabilitado,
         puntoDeRetiro,
-        emailUserName,
-        emailPassword,
         fechaGeneracionTokenWSAA,
         fechaVencimientoTokenWSAA,
-      sucursal);
+        sucursal);
   }
 
-  public ConfiguracionDelSistemaBuilder withIdConfiguracionDelSistema(long idCds) {
-    this.id_ConfiguracionDelSistema = idCds;
+  public ConfiguracionSucursalBuilder withIdConfiguracionSucursal(long idConfiguracionSucursal) {
+    this.idConfiguracionSucursal = idConfiguracionSucursal;
     return this;
   }
 
-  public ConfiguracionDelSistemaBuilder withUsarFacturaVentaPreImpresa(
+  public ConfiguracionSucursalBuilder withUsarFacturaVentaPreImpresa(
       boolean usarFacturaPreImpresa) {
     this.usarFacturaVentaPreImpresa = usarFacturaPreImpresa;
     return this;
   }
 
-  public ConfiguracionDelSistemaBuilder withCantidadMaximaDeRenglonesEnFactura(
+  public ConfiguracionSucursalBuilder withCantidadMaximaDeRenglonesEnFactura(
       int cantidadMaximaDeRenglonesEnFactura) {
     this.cantidadMaximaDeRenglonesEnFactura = cantidadMaximaDeRenglonesEnFactura;
     return this;
   }
 
-  public ConfiguracionDelSistemaBuilder withFacturaElectronicaHabilitada(
+  public ConfiguracionSucursalBuilder withFacturaElectronicaHabilitada(
       boolean facturaElectronicaHabilitada) {
     this.facturaElectronicaHabilitada = facturaElectronicaHabilitada;
     return this;
   }
 
-  public ConfiguracionDelSistemaBuilder withCertificadoAfip(byte[] certificadoAfip) {
+  public ConfiguracionSucursalBuilder withCertificadoAfip(byte[] certificadoAfip) {
     this.certificadoAfip = certificadoAfip;
     return this;
   }
 
-  public ConfiguracionDelSistemaBuilder withFirmanteCertificadoAfip(
+  public ConfiguracionSucursalBuilder withFirmanteCertificadoAfip(
       String firmanteCertificadoAfip) {
     this.firmanteCertificadoAfip = firmanteCertificadoAfip;
     return this;
   }
 
-  public ConfiguracionDelSistemaBuilder withPasswordCertificadoAfip(
+  public ConfiguracionSucursalBuilder withPasswordCertificadoAfip(
       String passwordCertificadoAfip) {
     this.passwordCertificadoAfip = passwordCertificadoAfip;
     return this;
   }
 
-  public ConfiguracionDelSistemaBuilder withNroPuntoDeVentaAfip(int nroPuntoDeVentaAfip) {
+  public ConfiguracionSucursalBuilder withNroPuntoDeVentaAfip(int nroPuntoDeVentaAfip) {
     this.nroPuntoDeVentaAfip = nroPuntoDeVentaAfip;
     return this;
   }
 
-  public ConfiguracionDelSistemaBuilder withTokenWSAA(String tokenWSAA) {
+  public ConfiguracionSucursalBuilder withTokenWSAA(String tokenWSAA) {
     this.tokenWSAA = tokenWSAA;
     return this;
   }
 
-  public ConfiguracionDelSistemaBuilder withSignTokenWSAA(String signTokenWSAA) {
+  public ConfiguracionSucursalBuilder withSignTokenWSAA(String signTokenWSAA) {
     this.signTokenWSAA = signTokenWSAA;
     return this;
   }
 
-  public ConfiguracionDelSistemaBuilder withEmailSenderHabilitado(boolean emailSenderHabilitado) {
-    this.emailSenderHabilitado = emailSenderHabilitado;
-    return this;
-  }
-
-  public ConfiguracionDelSistemaBuilder withPuntoDeRetiro(boolean puntoDeRetiro) {
+  public ConfiguracionSucursalBuilder withPuntoDeRetiro(boolean puntoDeRetiro) {
     this.puntoDeRetiro = puntoDeRetiro;
     return this;
   }
 
-  public ConfiguracionDelSistemaBuilder withEmailUserName(String emailUserName) {
-    this.emailUserName = emailUserName;
-    return this;
-  }
-
-  public ConfiguracionDelSistemaBuilder withEmailPassword(String emailPassword) {
-    this.emailPassword = emailPassword;
-    return this;
-  }
-
-  public ConfiguracionDelSistemaBuilder withFechaGeneracionTokenWSAA(
+  public ConfiguracionSucursalBuilder withFechaGeneracionTokenWSAA(
       Date fechaGeneracionTokenWSAA) {
     this.fechaGeneracionTokenWSAA = fechaGeneracionTokenWSAA;
     return this;
   }
 
-  public ConfiguracionDelSistemaBuilder withFechaVencimientoTokenWSAA(
+  public ConfiguracionSucursalBuilder withFechaVencimientoTokenWSAA(
       Date fechaVencimientoTokenWSAA) {
     this.fechaVencimientoTokenWSAA = fechaVencimientoTokenWSAA;
     return this;
   }
 
-  public ConfiguracionDelSistemaBuilder withSucursal(Sucursal sucursal) {
+  public ConfiguracionSucursalBuilder withSucursal(Sucursal sucursal) {
     this.sucursal = sucursal;
     return this;
   }

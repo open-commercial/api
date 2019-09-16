@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.ConfiguracionDelSistema;
+import sic.modelo.ConfiguracionSucursal;
 import sic.modelo.Sucursal;
 import sic.service.*;
 import sic.modelo.TipoDeOperacion;
@@ -23,7 +23,7 @@ import sic.exception.BusinessServiceException;
 public class SucursalServiceImpl implements ISucursalService {
 
   private final SucursalRepository sucursalRepository;
-  private final IConfiguracionDelSistemaService configuracionDelSistemaService;
+  private final IConfiguracionSucursalService configuracionSucursal;
   private final IPhotoVideoUploader photoVideoUploader;
   private final IUbicacionService ubicacionService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -32,12 +32,12 @@ public class SucursalServiceImpl implements ISucursalService {
   @Autowired
   public SucursalServiceImpl(
       SucursalRepository sucursalRepository,
-      IConfiguracionDelSistemaService configuracionDelSistemaService,
+      IConfiguracionSucursalService configuracionSucursal,
       IUbicacionService ubicacionService,
       IPhotoVideoUploader photoVideoUploader,
       MessageSource messageSource) {
     this.sucursalRepository = sucursalRepository;
-    this.configuracionDelSistemaService = configuracionDelSistemaService;
+    this.configuracionSucursal = configuracionSucursal;
     this.ubicacionService = ubicacionService;
     this.photoVideoUploader = photoVideoUploader;
     this.messageSource = messageSource;
@@ -59,8 +59,8 @@ public class SucursalServiceImpl implements ISucursalService {
       return sucursalRepository.findAllByAndEliminadaOrderByNombreAsc(false).stream()
           .filter(
               sucursal ->
-                  configuracionDelSistemaService
-                      .getConfiguracionDelSistemaPorSucursal(sucursal)
+                  configuracionSucursal
+                      .getConfiguracionDelSucursal(sucursal)
                       .isPuntoDeRetiro())
           .collect(Collectors.toList());
     } else {
@@ -114,13 +114,13 @@ public class SucursalServiceImpl implements ISucursalService {
     }
   }
 
-  private void crearConfiguracionDelSistema(Sucursal sucursal) {
-    ConfiguracionDelSistema cds = new ConfiguracionDelSistema();
-    cds.setUsarFacturaVentaPreImpresa(false);
-    cds.setCantidadMaximaDeRenglonesEnFactura(28);
-    cds.setFacturaElectronicaHabilitada(false);
-    cds.setSucursal(sucursal);
-    configuracionDelSistemaService.guardar(cds);
+  private void crearConfiguracionSucursal(Sucursal sucursal) {
+    ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
+    configuracionSucursal.setUsarFacturaVentaPreImpresa(false);
+    configuracionSucursal.setCantidadMaximaDeRenglonesEnFactura(28);
+    configuracionSucursal.setFacturaElectronicaHabilitada(false);
+    configuracionSucursal.setSucursal(sucursal);
+    this.configuracionSucursal.guardar(configuracionSucursal);
   }
 
   @Override
@@ -134,7 +134,7 @@ public class SucursalServiceImpl implements ISucursalService {
     }
     validarOperacion(TipoDeOperacion.ALTA, sucursal);
     sucursal = sucursalRepository.save(sucursal);
-    crearConfiguracionDelSistema(sucursal);
+    crearConfiguracionSucursal(sucursal);
     logger.warn("La Sucursal {} se guardó correctamente.", sucursal);
     return sucursal;
   }
@@ -161,8 +161,8 @@ public class SucursalServiceImpl implements ISucursalService {
     if (sucursal.getLogo() != null && !sucursal.getLogo().isEmpty()) {
       photoVideoUploader.borrarImagen(Sucursal.class.getSimpleName() + sucursal.getIdSucursal());
     }
-    configuracionDelSistemaService.eliminar(
-        configuracionDelSistemaService.getConfiguracionDelSistemaPorSucursal(sucursal));
+    configuracionSucursal.eliminar(
+        configuracionSucursal.getConfiguracionDelSucursal(sucursal));
     sucursalRepository.save(sucursal);
   }
 

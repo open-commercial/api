@@ -29,7 +29,7 @@ public class CarritoCompraController {
   private final ISucursalService sucursalService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
-  private final IConfiguracionDelSistemaService configuracionDelSistemaService;
+  private final IConfiguracionSucursalService configuracionSucursal;
   private final MessageSource messageSource;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
@@ -40,14 +40,14 @@ public class CarritoCompraController {
       ISucursalService sucursalService,
       IUsuarioService usuarioService,
       IClienteService clienteService,
-      IConfiguracionDelSistemaService configuracionDelSistemaService,
+      IConfiguracionSucursalService configuracionSucursal,
       MessageSource messageSource) {
     this.carritoCompraService = carritoCompraService;
     this.pedidoService = pedidoService;
     this.sucursalService = sucursalService;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
-    this.configuracionDelSistemaService = configuracionDelSistemaService;
+    this.configuracionSucursal = configuracionSucursal;
     this.messageSource = messageSource;
   }
 
@@ -112,8 +112,8 @@ public class CarritoCompraController {
     pedido.setTotalEstimado(pedido.getTotalActual());
     if (nuevaOrdenDeCompraDTO.getIdSucursal() != null) {
       Sucursal sucursal = sucursalService.getSucursalPorId(nuevaOrdenDeCompraDTO.getIdSucursal());
-      if (!configuracionDelSistemaService
-          .getConfiguracionDelSistemaPorSucursal(sucursal)
+      if (!configuracionSucursal
+          .getConfiguracionDelSucursal(sucursal)
           .isPuntoDeRetiro()) {
         throw new BusinessServiceException(
             messageSource.getMessage(

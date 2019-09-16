@@ -61,7 +61,7 @@ public class NotaServiceImpl implements INotaService {
   private final IProductoService productoService;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IMercadoPagoService mercadoPagoService;
-  private final IConfiguracionDelSistemaService configuracionDelSistemaService;
+  private final IConfiguracionSucursalService configuracionSucursal;
   private final IAfipService afipService;
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
@@ -86,7 +86,7 @@ public class NotaServiceImpl implements INotaService {
       ISucursalService sucursalService,
       ICuentaCorrienteService cuentaCorrienteService,
       IMercadoPagoService mercadoPagoService,
-      IConfiguracionDelSistemaService cds,
+      IConfiguracionSucursalService configuracionSucursalService,
       IAfipService afipService,
       MessageSource messageSource) {
     this.notaRepository = notaRepository;
@@ -102,7 +102,7 @@ public class NotaServiceImpl implements INotaService {
     this.productoService = productoService;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.mercadoPagoService = mercadoPagoService;
-    this.configuracionDelSistemaService = cds;
+    this.configuracionSucursal = configuracionSucursalService;
     this.afipService = afipService;
     this.messageSource = messageSource;
   }
@@ -519,8 +519,8 @@ public class NotaServiceImpl implements INotaService {
     Long numeroNota =
         notaDebitoRepository.buscarMayorNumNotaDebitoClienteSegunTipo(
             tipoDeComprobante,
-            configuracionDelSistemaService
-                .getConfiguracionDelSistemaPorSucursal(sucursal)
+            configuracionSucursal
+                .getConfiguracionDelSucursal(sucursal)
                 .getNroPuntoDeVentaAfip(),
             idSucursal);
     return (numeroNota == null) ? 1 : numeroNota + 1;
@@ -533,8 +533,8 @@ public class NotaServiceImpl implements INotaService {
     Long numeroNota =
         notaCreditoRepository.buscarMayorNumNotaCreditoClienteSegunTipo(
             tipoDeComprobante,
-            configuracionDelSistemaService
-                .getConfiguracionDelSistemaPorSucursal(sucursal)
+            configuracionSucursal
+                .getConfiguracionDelSucursal(sucursal)
                 .getNroPuntoDeVentaAfip(),
             idSucursal);
     return (numeroNota == null) ? 1 : numeroNota + 1;
@@ -829,8 +829,8 @@ public class NotaServiceImpl implements INotaService {
         }
       }
       notaCredito.setSerie(
-          configuracionDelSistemaService
-              .getConfiguracionDelSistemaPorSucursal(notaCredito.getSucursal())
+          configuracionSucursal
+              .getConfiguracionDelSucursal(notaCredito.getSucursal())
               .getNroPuntoDeVentaAfip());
       notaCredito.setNroNota(
           this.getSiguienteNumeroNotaCreditoCliente(
@@ -1171,8 +1171,8 @@ public class NotaServiceImpl implements INotaService {
             messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
       }
       notaDebito.setSerie(
-          configuracionDelSistemaService
-              .getConfiguracionDelSistemaPorSucursal(notaDebito.getSucursal())
+          configuracionSucursal
+              .getConfiguracionDelSucursal(notaDebito.getSucursal())
               .getNroPuntoDeVentaAfip());
       notaDebito.setNroNota(
           this.getSiguienteNumeroNotaDebitoCliente(
@@ -1294,9 +1294,9 @@ public class NotaServiceImpl implements INotaService {
       ds = new JRBeanCollectionDataSource(renglones);
       params.put("notaDebito", nota);
     }
-    ConfiguracionDelSistema cds =
-        configuracionDelSistemaService.getConfiguracionDelSistemaPorSucursal(nota.getSucursal());
-    params.put("preImpresa", cds.isUsarFacturaVentaPreImpresa());
+    ConfiguracionSucursal configuracionSucursal =
+        this.configuracionSucursal.getConfiguracionDelSucursal(nota.getSucursal());
+    params.put("preImpresa", configuracionSucursal.isUsarFacturaVentaPreImpresa());
     if (nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_B)
         || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_C)
         || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_X)
