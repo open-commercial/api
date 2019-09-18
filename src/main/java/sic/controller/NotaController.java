@@ -87,7 +87,6 @@ public class NotaController {
   public Page<NotaCredito> buscarNotasCredito(
       @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    this.procesarCriteriaDeBusqueda(busquedaNotaCriteria);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.buscarNotasCredito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
@@ -103,7 +102,6 @@ public class NotaController {
   public Page<NotaDebito> buscarNotasDebito(
     @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
     @RequestHeader("Authorization") String authorizationHeader) {
-    this.procesarCriteriaDeBusqueda(busquedaNotaCriteria);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.buscarNotasDebito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
@@ -362,7 +360,6 @@ public class NotaController {
   public BigDecimal getTotalNotasCredito(
       @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    this.procesarCriteriaDeBusqueda(busquedaNotaCriteria);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalCredito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
@@ -372,7 +369,6 @@ public class NotaController {
   public BigDecimal getTotalNotasDebito(
       @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    this.procesarCriteriaDeBusqueda(busquedaNotaCriteria);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalDebito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
@@ -382,7 +378,6 @@ public class NotaController {
   public BigDecimal getTotalIvaCredito(
       @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    this.procesarCriteriaDeBusqueda(busquedaNotaCriteria);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalIVACredito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
@@ -392,27 +387,7 @@ public class NotaController {
   public BigDecimal getTotalIvaDebito(
       @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    this.procesarCriteriaDeBusqueda(busquedaNotaCriteria);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalIVADebito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
-  }
-
-  private void procesarCriteriaDeBusqueda(BusquedaNotaCriteria busquedaNotaCriteria) {
-    busquedaNotaCriteria.setBuscaPorFecha(
-        (busquedaNotaCriteria.getFechaDesde() != null)
-            && (busquedaNotaCriteria.getFechaHasta() != null));
-    if (busquedaNotaCriteria.getMovimiento() != null) {
-      busquedaNotaCriteria.setBuscaCliente(
-          busquedaNotaCriteria.getMovimiento().equals(Movimiento.VENTA)
-              && busquedaNotaCriteria.getIdCliente() != null);
-      busquedaNotaCriteria.setBuscaViajante(
-          busquedaNotaCriteria.getMovimiento().equals(Movimiento.VENTA)
-              && busquedaNotaCriteria.getIdViajante() != null);
-    }
-    busquedaNotaCriteria.setBuscaUsuario(busquedaNotaCriteria.getIdUsuario() != null);
-    busquedaNotaCriteria.setBuscaPorTipoComprobante(
-        (busquedaNotaCriteria.getNumSerie() != 0L) && (busquedaNotaCriteria.getNumNota() != 0L));
-    busquedaNotaCriteria.setBuscaPorTipoComprobante(
-        busquedaNotaCriteria.getTipoComprobante() != null);
   }
 }

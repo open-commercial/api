@@ -90,7 +90,7 @@ public class ReciboServiceImpl implements IReciboService {
   private BooleanBuilder getBuilder(BusquedaReciboCriteria criteria) {
     QRecibo qRecibo = QRecibo.recibo;
     BooleanBuilder builder = new BooleanBuilder();
-    if (criteria.isBuscaPorFecha()) {
+    if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
       Calendar cal = new GregorianCalendar();
       cal.setTime(criteria.getFechaDesde());
       cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -116,11 +116,11 @@ public class ReciboServiceImpl implements IReciboService {
           formateadorFecha.format(criteria.getFechaHasta()));
       builder.and(qRecibo.fecha.between(fDesde, fHasta));
     }
-    if (criteria.isBuscaPorNumeroRecibo())
+    if (criteria.getNumSerie() != null && criteria.getNumRecibo() != null)
       builder
         .and(qRecibo.numSerie.eq(criteria.getNumSerie()))
         .and(qRecibo.numRecibo.eq(criteria.getNumRecibo()));
-    if (criteria.isBuscaPorConcepto()) {
+    if (criteria.getConcepto() != null) {
       String[] terminos = criteria.getConcepto().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -128,13 +128,13 @@ public class ReciboServiceImpl implements IReciboService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscaPorCliente())
+    if (criteria.getIdCliente() != null)
       builder.and(qRecibo.cliente.id_Cliente.eq(criteria.getIdCliente()));
-    if (criteria.isBuscaPorProveedor())
+    if (criteria.getIdProveedor() != null)
       builder.and(qRecibo.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
-    if (criteria.isBuscaPorUsuario())
+    if (criteria.getIdUsuario() != null)
       builder.and(qRecibo.usuario.id_Usuario.eq(criteria.getIdUsuario()));
-    if (criteria.isBuscaPorViajante())
+    if (criteria.getIdViajante() != null)
       builder.and(qRecibo.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.getMovimiento() == Movimiento.VENTA) builder.and(qRecibo.proveedor.isNull());
     else if (criteria.getMovimiento() == Movimiento.COMPRA) builder.and(qRecibo.cliente.isNull());
@@ -145,13 +145,6 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public Page<Recibo> buscarRecibos(BusquedaReciboCriteria criteria) {
-    criteria.setBuscaPorFecha(criteria.getFechaDesde() != null && criteria.getFechaHasta() != null);
-    criteria.setBuscaPorConcepto(criteria.getConcepto() != null);
-    criteria.setBuscaPorNumeroRecibo(
-        criteria.getNumSerie() != null && criteria.getNumRecibo() != null);
-    criteria.setBuscaPorCliente(criteria.getIdCliente() != null);
-    criteria.setBuscaPorUsuario(criteria.getIdUsuario() != null);
-    criteria.setBuscaPorViajante(criteria.getIdViajante() != null);
     return reciboRepository.findAll(
         this.getBuilder(criteria),
         this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));

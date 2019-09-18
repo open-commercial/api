@@ -159,10 +159,6 @@ public class CajaServiceImpl implements ICajaService {
 
   @Override
   public Page<Caja> buscarCajas(BusquedaCajaCriteria criteria) {
-    criteria.setBuscaPorFecha(
-        (criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null));
-    criteria.setBuscaPorUsuarioApertura(criteria.getIdUsuarioApertura() != null);
-    criteria.setBuscaPorUsuarioCierre(criteria.getIdUsuarioCierre() != null);
     return cajaRepository.findAll(
         getBuilder(criteria),
         this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
@@ -189,36 +185,17 @@ public class CajaServiceImpl implements ICajaService {
   }
 
   private BooleanBuilder getBuilder(BusquedaCajaCriteria criteria) {
-    // Fecha
-    if (criteria.isBuscaPorFecha()
-        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_caja_fechas_invalidas", null, Locale.getDefault()));
-    }
-    if (criteria.isBuscaPorFecha()) {
-      Calendar cal = new GregorianCalendar();
-      cal.setTime(criteria.getFechaDesde());
-      cal.set(Calendar.HOUR_OF_DAY, 0);
-      cal.set(Calendar.MINUTE, 0);
-      cal.set(Calendar.SECOND, 0);
-      criteria.setFechaDesde(cal.getTime());
-      cal.setTime(criteria.getFechaHasta());
-      cal.set(Calendar.HOUR_OF_DAY, 23);
-      cal.set(Calendar.MINUTE, 59);
-      cal.set(Calendar.SECOND, 59);
-      criteria.setFechaHasta(cal.getTime());
-    }
     QCaja qCaja = QCaja.caja;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
         qCaja.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qCaja.eliminada.eq(false)));
-    if (criteria.isBuscaPorUsuarioApertura() && !criteria.isBuscaPorUsuarioCierre()) {
+    if (criteria.getIdUsuarioApertura() != null && criteria.getIdUsuarioCierre() == null) {
       builder.and(qCaja.usuarioAbreCaja.id_Usuario.eq(criteria.getIdUsuarioApertura()));
     }
-    if (criteria.isBuscaPorUsuarioCierre() && !criteria.isBuscaPorUsuarioApertura()) {
+    if (criteria.getIdUsuarioApertura() == null && criteria.getIdUsuarioCierre() != null) {
       builder.and(qCaja.usuarioCierraCaja.id_Usuario.eq(criteria.getIdUsuarioCierre()));
     }
-    if (criteria.isBuscaPorUsuarioCierre() && criteria.isBuscaPorUsuarioApertura()) {
+    if (criteria.getIdUsuarioApertura() != null && criteria.getIdUsuarioCierre() != null) {
       builder.and(
           qCaja
               .usuarioAbreCaja
@@ -226,20 +203,51 @@ public class CajaServiceImpl implements ICajaService {
               .eq(criteria.getIdUsuarioApertura())
               .and(qCaja.usuarioCierraCaja.id_Usuario.eq(criteria.getIdUsuarioCierre())));
     }
-    if ((criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null)) {
+    if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
+      Calendar cal = new GregorianCalendar();
+      if (criteria.getFechaDesde() != null) {
+        cal.setTime(criteria.getFechaDesde());
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        criteria.setFechaDesde(cal.getTime());
+      }
+      if (criteria.getFechaHasta() != null) {
+        cal.setTime(criteria.getFechaHasta());
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        criteria.setFechaHasta(cal.getTime());
+      }
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
-      DateExpression<Date> fDesde =
-          Expressions.dateTemplate(
-              Date.class,
-              "convert({0}, datetime)",
-              formateadorFecha.format(criteria.getFechaDesde()));
-      DateExpression<Date> fHasta =
-          Expressions.dateTemplate(
-              Date.class,
-              "convert({0}, datetime)",
-              formateadorFecha.format(criteria.getFechaHasta()));
-      builder.and(qCaja.fechaApertura.between(fDesde, fHasta));
+      if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
+        DateExpression<Date> fDesde =
+            Expressions.dateTemplate(
+                Date.class,
+                "convert({0}, datetime)",
+                formateadorFecha.format(criteria.getFechaDesde()));
+        DateExpression<Date> fHasta =
+            Expressions.dateTemplate(
+                Date.class,
+                "convert({0}, datetime)",
+                formateadorFecha.format(criteria.getFechaHasta()));
+        builder.and(qCaja.fechaApertura.between(fDesde, fHasta));
+      } else if (criteria.getFechaDesde() != null) {
+        DateExpression<Date> fDesde =
+            Expressions.dateTemplate(
+                Date.class,
+                "convert({0}, datetime)",
+                formateadorFecha.format(criteria.getFechaDesde()));
+        builder.and(qCaja.fechaApertura.after(fDesde));
+      } else if (criteria.getFechaHasta() != null) {
+        DateExpression<Date> fHasta =
+            Expressions.dateTemplate(
+                Date.class,
+                "convert({0}, datetime)",
+                formateadorFecha.format(criteria.getFechaHasta()));
+        builder.and(qCaja.fechaApertura.before(fHasta));
+      }
     }
     return builder;
   }

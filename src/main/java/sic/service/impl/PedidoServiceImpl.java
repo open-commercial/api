@@ -263,33 +263,6 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   public Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
-    criteria.setBuscaPorFecha(
-        (criteria.getFechaDesde() != null) || (criteria.getFechaHasta() != null));
-    criteria.setBuscaCliente(criteria.getIdCliente() != null);
-    criteria.setBuscaUsuario(criteria.getIdUsuario() != null);
-    criteria.setBuscaPorViajante(criteria.getIdViajante() != null);
-    criteria.setBuscaPorNroPedido(criteria.getNroPedido() != 0L);
-    criteria.setBuscaPorEstadoPedido(criteria.getEstadoPedido() != null);
-    criteria.setBuscaPorEnvio(criteria.getTipoDeEnvio() != null);
-    criteria.setBuscaPorProducto(criteria.getIdProducto() != null);
-    // Fecha
-    if (criteria.isBuscaPorFecha()) {
-      Calendar cal = new GregorianCalendar();
-      if (criteria.getFechaDesde() != null) {
-        cal.setTime(criteria.getFechaDesde());
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        criteria.setFechaDesde(cal.getTime());
-      }
-      if (criteria.getFechaHasta() != null) {
-        cal.setTime(criteria.getFechaHasta());
-        cal.set(Calendar.HOUR_OF_DAY, 23);
-        cal.set(Calendar.MINUTE, 59);
-        cal.set(Calendar.SECOND, 59);
-        criteria.setFechaHasta(cal.getTime());
-      }
-    }
     Page<Pedido> pedidos =
         pedidoRepository.findAll(
             this.getBuilderPedido(criteria, idUsuarioLoggedIn),
@@ -308,7 +281,22 @@ public class PedidoServiceImpl implements IPedidoService {
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
         qPedido.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qPedido.eliminado.eq(false)));
-    if (criteria.isBuscaPorFecha()) {
+    if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
+      Calendar cal = new GregorianCalendar();
+      if (criteria.getFechaDesde() != null) {
+        cal.setTime(criteria.getFechaDesde());
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        criteria.setFechaDesde(cal.getTime());
+      }
+      if (criteria.getFechaHasta() != null) {
+        cal.setTime(criteria.getFechaHasta());
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        criteria.setFechaHasta(cal.getTime());
+      }
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
@@ -339,17 +327,17 @@ public class PedidoServiceImpl implements IPedidoService {
         builder.and(qPedido.fecha.before(fHasta));
       }
     }
-    if (criteria.isBuscaCliente())
+    if (criteria.getIdCliente() != null)
       builder.and(qPedido.cliente.id_Cliente.eq(criteria.getIdCliente()));
-    if (criteria.isBuscaUsuario())
+    if (criteria.getIdUsuario() != null)
       builder.and(qPedido.usuario.id_Usuario.eq(criteria.getIdUsuario()));
-    if (criteria.isBuscaPorViajante())
+    if (criteria.getIdViajante() != null)
       builder.and(qPedido.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
-    if (criteria.isBuscaPorNroPedido()) builder.and(qPedido.nroPedido.eq(criteria.getNroPedido()));
-    if (criteria.isBuscaPorEstadoPedido())
+    if (criteria.getNroPedido() != null) builder.and(qPedido.nroPedido.eq(criteria.getNroPedido()));
+    if (criteria.getEstadoPedido() != null)
       builder.and(qPedido.estado.eq(criteria.getEstadoPedido()));
-    if (criteria.isBuscaPorEnvio()) builder.and(qPedido.tipoDeEnvio.eq(criteria.getTipoDeEnvio()));
-    if (criteria.isBuscaPorProducto())
+    if (criteria.getTipoDeEnvio() != null) builder.and(qPedido.tipoDeEnvio.eq(criteria.getTipoDeEnvio()));
+    if (criteria.getIdProducto() != null)
       builder.and(qPedido.renglones.any().idProductoItem.eq(criteria.getIdProducto()));
     Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     BooleanBuilder rsPredicate = new BooleanBuilder();

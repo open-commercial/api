@@ -11,15 +11,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class BusquedaCajaCriteria {
-    
-    private boolean buscaPorFecha;
+
     private Date fechaDesde;
     private Date fechaHasta;
     private Long idEmpresa;
     private int cantidadDeRegistros;
-    private boolean buscaPorUsuarioApertura;
     private Long idUsuarioApertura;
-    private boolean buscaPorUsuarioCierre;
     private Long idUsuarioCierre;
     private Integer pagina;
     private String ordenarPor;

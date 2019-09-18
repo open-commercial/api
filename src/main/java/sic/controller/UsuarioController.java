@@ -25,7 +25,6 @@ public class UsuarioController {
   private final IAuthService authService;
   private final ModelMapper modelMapper;
   private final MessageSource messageSource;
-  private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
   public UsuarioController(

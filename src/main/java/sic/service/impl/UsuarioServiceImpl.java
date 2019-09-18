@@ -119,14 +119,9 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria) {
-    criteria.setBuscarPorNombreDeUsuario(criteria.getUsername() != null);
-    criteria.setBuscaPorNombre(criteria.getNombre() != null);
-    criteria.setBuscaPorApellido(criteria.getApellido() != null);
-    criteria.setBuscaPorEmail(criteria.getEmail() != null);
-    criteria.setBuscarPorRol(criteria.getRoles() != null );
     QUsuario qUsuario = QUsuario.usuario;
     BooleanBuilder builder = new BooleanBuilder();
-    if (criteria.isBuscaPorApellido()) {
+    if (criteria.getApellido() != null) {
       String[] terminos = criteria.getApellido().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -134,7 +129,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscaPorNombre()) {
+    if (criteria.getNombre() != null) {
       String[] terminos = criteria.getNombre().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -142,7 +137,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscarPorNombreDeUsuario()) {
+    if (criteria.getUsername() != null) {
       String[] terminos = criteria.getUsername().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -150,7 +145,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscaPorEmail()) {
+    if (criteria.getEmail() != null) {
       String[] terminos = criteria.getEmail().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -158,7 +153,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscarPorRol() && !criteria.getRoles().isEmpty()) {
+    if (!criteria.getRoles().isEmpty()) {
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (Rol rol : criteria.getRoles()) {
         switch (rol) {

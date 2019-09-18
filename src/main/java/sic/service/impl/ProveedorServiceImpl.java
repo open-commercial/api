@@ -71,14 +71,9 @@ public class ProveedorServiceImpl implements IProveedorService {
 
   @Override
   public Page<Proveedor> buscarProveedores(BusquedaProveedorCriteria criteria) {
-    criteria.setBuscaPorNroProveedor(criteria.getNroProveedor() != null);
-    criteria.setBuscaPorRazonSocial(criteria.getRazonSocial() != null);
-    criteria.setBuscaPorIdFiscal(criteria.getIdFiscal() != null);
-    criteria.setBuscaPorProvincia(criteria.getIdProvincia() != null);
-    criteria.setBuscaPorLocalidad(criteria.getIdLocalidad() != null);
     QProveedor qProveedor = QProveedor.proveedor;
     BooleanBuilder builder = new BooleanBuilder();
-    if (criteria.isBuscaPorRazonSocial()) {
+    if (criteria.getNroProveedor() != null) {
       String[] terminos = criteria.getRazonSocial().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -86,12 +81,12 @@ public class ProveedorServiceImpl implements IProveedorService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscaPorIdFiscal()) builder.or(qProveedor.idFiscal.eq(criteria.getIdFiscal()));
-    if (criteria.isBuscaPorNroProveedor())
+    if (criteria.getIdFiscal() != null) builder.or(qProveedor.idFiscal.eq(criteria.getIdFiscal()));
+    if (criteria.getNroProveedor() != null)
       builder.or(qProveedor.nroProveedor.containsIgnoreCase(criteria.getNroProveedor()));
-    if (criteria.isBuscaPorLocalidad())
+    if (criteria.getIdLocalidad() != null)
       builder.and(qProveedor.ubicacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
-    if (criteria.isBuscaPorProvincia())
+    if (criteria.getIdProvincia() != null)
       builder.and(qProveedor.ubicacion.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
     builder.and(
         qProveedor

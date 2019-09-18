@@ -77,12 +77,6 @@ public class GastoServiceImpl implements IGastoService {
 
   @Override
   public Page<Gasto> buscarGastos(BusquedaGastoCriteria criteria) {
-    criteria.setBuscaPorFecha(
-        (criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null));
-    criteria.setBuscaPorConcepto(criteria.getConcepto() != null);
-    criteria.setBuscaPorUsuario(criteria.getIdUsuario() != null);
-    criteria.setBuscarPorFormaDePago(criteria.getIdFormaDePago() != null);
-    criteria.setBuscaPorNro(criteria.getNroGasto() != null);
     return gastoRepository.findAll(
         this.getBuilder(criteria),
         this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
@@ -110,27 +104,9 @@ public class GastoServiceImpl implements IGastoService {
   }
 
   private BooleanBuilder getBuilder(BusquedaGastoCriteria criteria) {
-    if (criteria.isBuscaPorFecha()
-        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_gasto_fechas_busqueda_invalidas", null, Locale.getDefault()));
-    }
-    if (criteria.isBuscaPorFecha()) {
-      Calendar cal = new GregorianCalendar();
-      cal.setTime(criteria.getFechaDesde());
-      cal.set(Calendar.HOUR_OF_DAY, 0);
-      cal.set(Calendar.MINUTE, 0);
-      cal.set(Calendar.SECOND, 0);
-      criteria.setFechaDesde(cal.getTime());
-      cal.setTime(criteria.getFechaHasta());
-      cal.set(Calendar.HOUR_OF_DAY, 23);
-      cal.set(Calendar.MINUTE, 59);
-      cal.set(Calendar.SECOND, 59);
-      criteria.setFechaHasta(cal.getTime());
-    }
     QGasto qGasto = QGasto.gasto;
     BooleanBuilder builder = new BooleanBuilder();
-    if (criteria.isBuscaPorConcepto()) {
+    if (criteria.getConcepto() != null) {
       String[] terminos = criteria.getConcepto().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -138,25 +114,56 @@ public class GastoServiceImpl implements IGastoService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscaPorFecha()) {
+    if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
+      Calendar cal = new GregorianCalendar();
+      if (criteria.getFechaDesde() != null) {
+        cal.setTime(criteria.getFechaDesde());
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        criteria.setFechaDesde(cal.getTime());
+      }
+      if (criteria.getFechaHasta() != null) {
+        cal.setTime(criteria.getFechaHasta());
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        criteria.setFechaHasta(cal.getTime());
+      }
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
-      DateExpression<Date> fDesde =
-          Expressions.dateTemplate(
-              Date.class,
-              "convert({0}, datetime)",
-              formateadorFecha.format(criteria.getFechaDesde()));
-      DateExpression<Date> fHasta =
-          Expressions.dateTemplate(
-              Date.class,
-              "convert({0}, datetime)",
-              formateadorFecha.format(criteria.getFechaHasta()));
-      builder.and(qGasto.fecha.between(fDesde, fHasta));
+      if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
+        DateExpression<Date> fDesde =
+            Expressions.dateTemplate(
+                Date.class,
+                "convert({0}, datetime)",
+                formateadorFecha.format(criteria.getFechaDesde()));
+        DateExpression<Date> fHasta =
+            Expressions.dateTemplate(
+                Date.class,
+                "convert({0}, datetime)",
+                formateadorFecha.format(criteria.getFechaHasta()));
+        builder.and(qGasto.fecha.between(fDesde, fHasta));
+      } else if (criteria.getFechaDesde() != null) {
+        DateExpression<Date> fDesde =
+            Expressions.dateTemplate(
+                Date.class,
+                "convert({0}, datetime)",
+                formateadorFecha.format(criteria.getFechaDesde()));
+        builder.and(qGasto.fecha.after(fDesde));
+      } else if (criteria.getFechaHasta() != null) {
+        DateExpression<Date> fHasta =
+            Expressions.dateTemplate(
+                Date.class,
+                "convert({0}, datetime)",
+                formateadorFecha.format(criteria.getFechaHasta()));
+        builder.and(qGasto.fecha.before(fHasta));
+      }
     }
-    if (criteria.isBuscarPorFormaDePago())
+    if (criteria.getIdFormaDePago() != null)
       builder.or(qGasto.formaDePago.id_FormaDePago.eq(criteria.getIdFormaDePago()));
-    if (criteria.isBuscaPorNro()) builder.or(qGasto.nroGasto.eq(criteria.getNroGasto()));
-    if (criteria.isBuscaPorUsuario())
+    if (criteria.getNroGasto() != null) builder.or(qGasto.nroGasto.eq(criteria.getNroGasto()));
+    if (criteria.getIdUsuario() != null)
       builder.and(qGasto.usuario.id_Usuario.eq(criteria.getIdUsuario()));
     builder.and(
         qGasto.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qGasto.eliminado.eq(false)));

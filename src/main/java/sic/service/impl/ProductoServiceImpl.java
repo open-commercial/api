@@ -184,20 +184,9 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public Page<Producto> buscarProductos(BusquedaProductoCriteria criteria) {
-    this.setCriteriosBusquedaDeCriteria(criteria);
     return productoRepository.findAll(
         this.getBuilder(criteria),
         this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
-  }
-
-  private void setCriteriosBusquedaDeCriteria(BusquedaProductoCriteria criteria) {
-    criteria.setBuscarPorCodigo(criteria.getCodigo() != null && !criteria.getCodigo().isEmpty());
-    criteria.setBuscarPorDescripcion(
-        criteria.getDescripcion() != null && !criteria.getDescripcion().isEmpty());
-    criteria.setBuscarPorRubro(criteria.getIdRubro() != null);
-    criteria.setBuscarPorProveedor(criteria.getIdProveedor() != null);
-    criteria.setBuscaPorVisibilidad(criteria.getPublico() != null);
-    criteria.setBuscaPorDestacado(criteria.getDestacado() != null);
   }
 
   private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
@@ -229,30 +218,30 @@ public class ProductoServiceImpl implements IProductoService {
             .id_Empresa
             .eq(criteria.getIdEmpresa())
             .and(qProducto.eliminado.eq(false)));
-    if (criteria.isBuscarPorCodigo() && criteria.isBuscarPorDescripcion())
+    if (criteria.getCodigo() != null && criteria.getDescripcion() != null)
       builder.and(
           qProducto
               .codigo
               .containsIgnoreCase(criteria.getCodigo())
               .or(this.buildPredicadoDescripcion(criteria.getDescripcion(), qProducto)));
     else {
-      if (criteria.isBuscarPorCodigo())
+      if (criteria.getCodigo() != null)
         builder.and(qProducto.codigo.containsIgnoreCase(criteria.getCodigo()));
-      if (criteria.isBuscarPorDescripcion())
+      if (criteria.getDescripcion() != null)
         builder.and(this.buildPredicadoDescripcion(criteria.getDescripcion(), qProducto));
     }
-    if (criteria.isBuscarPorRubro())
+    if (criteria.getIdRubro() != null)
       builder.and(qProducto.rubro.id_Rubro.eq(criteria.getIdRubro()));
-    if (criteria.isBuscarPorProveedor())
+    if (criteria.getIdProveedor() != null)
       builder.and(qProducto.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
     if (criteria.isListarSoloFaltantes())
       builder.and(qProducto.cantidad.loe(qProducto.cantMinima)).and(qProducto.ilimitado.eq(false));
     if (criteria.isListarSoloEnStock())
       builder.and(qProducto.cantidad.gt(BigDecimal.ZERO)).and(qProducto.ilimitado.eq(false));
-    if (criteria.isBuscaPorVisibilidad())
+    if (criteria.getPublico() != null)
       if (criteria.getPublico()) builder.and(qProducto.publico.isTrue());
       else builder.and(qProducto.publico.isFalse());
-    if (criteria.isBuscaPorDestacado())
+    if (criteria.getDestacado() != null)
       if (criteria.getDestacado()) builder.and(qProducto.destacado.isTrue());
       else builder.and(qProducto.destacado.isFalse());
     return builder;
@@ -550,7 +539,6 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public BigDecimal calcularValorStock(BusquedaProductoCriteria criteria) {
-    this.setCriteriosBusquedaDeCriteria(criteria);
     return productoRepository.calcularValorStock(this.getBuilder(criteria));
   }
 
