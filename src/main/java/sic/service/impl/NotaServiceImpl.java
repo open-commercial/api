@@ -329,7 +329,7 @@ public class NotaServiceImpl implements INotaService {
     if (criteria.isBuscaViajante())
       builder.and(qNotaDebito.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.isBuscaProveedor())
-      builder.and(qNotaDebito.proveedor.id_Proveedor.eq(criteria.getIdCliente()));
+      builder.and(qNotaDebito.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
     if (criteria.isBuscaPorTipoComprobante())
       builder.and(qNotaDebito.tipoComprobante.eq(criteria.getTipoComprobante()));
     if (criteria.isBuscaPorNumeroNota())
