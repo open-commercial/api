@@ -115,17 +115,10 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   @Override
   public Page<CuentaCorrienteCliente> buscarCuentaCorrienteCliente(
       BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn) {
-    criteria.setBuscaPorNombreFiscal(criteria.getNombreFiscal() != null);
-    criteria.setBuscaPorNombreFantasia(criteria.getNombreFantasia() != null);
-    criteria.setBuscaPorIdFiscal(criteria.getIdFiscal() != null);
-    criteria.setBuscaPorViajante(criteria.getIdViajante() != null);
-    criteria.setBuscaPorProvincia(criteria.getIdProvincia() != null);
-    criteria.setBuscaPorLocalidad(criteria.getIdLocalidad() != null);
-    criteria.setBuscarPorNroDeCliente(criteria.getNroDeCliente() != null);
     QCuentaCorrienteCliente qCuentaCorrienteCliente =
         QCuentaCorrienteCliente.cuentaCorrienteCliente;
     BooleanBuilder builder = new BooleanBuilder();
-    if (criteria.isBuscaPorNombreFiscal()) {
+    if (criteria.getNombreFiscal() != null) {
       String[] terminos = criteria.getNombreFiscal().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -133,7 +126,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscaPorNombreFantasia()) {
+    if (criteria.getNombreFantasia() != null) {
       String[] terminos = criteria.getNombreFantasia().split(" ");
       BooleanBuilder nfPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -141,19 +134,19 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       }
       builder.or(nfPredicate);
     }
-    if (criteria.isBuscaPorIdFiscal())
+    if (criteria.getIdFiscal() != null)
       builder.or(qCuentaCorrienteCliente.cliente.idFiscal.eq(criteria.getIdFiscal()));
-    if (criteria.isBuscarPorNroDeCliente())
+    if (criteria.getNroDeCliente() != null)
       builder.or(
           qCuentaCorrienteCliente.cliente.nroCliente.containsIgnoreCase(
               criteria.getNroDeCliente()));
-    if (criteria.isBuscaPorViajante())
+    if (criteria.getIdViajante() != null)
       builder.and(qCuentaCorrienteCliente.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
-    if (criteria.isBuscaPorLocalidad())
+    if (criteria.getIdLocalidad() != null)
       builder.and(
           qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.idLocalidad.eq(
               criteria.getIdLocalidad()));
-    if (criteria.isBuscaPorProvincia())
+    if (criteria.getIdProvincia() != null)
       builder.and(
           qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.provincia.idProvincia.eq(
               criteria.getIdProvincia()));
@@ -215,19 +208,14 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   @Override
   public Page<CuentaCorrienteProveedor> buscarCuentaCorrienteProveedor(
       BusquedaCuentaCorrienteProveedorCriteria criteria) {
-    criteria.setBuscaPorNroProveedor(criteria.getNroProveedor() != null);
-    criteria.setBuscaPorRazonSocial(criteria.getRazonSocial() != null);
-    criteria.setBuscaPorIdFiscal(criteria.getIdFiscal() != null);
-    criteria.setBuscaPorProvincia(criteria.getIdProvincia() != null);
-    criteria.setBuscaPorLocalidad(criteria.getIdLocalidad() != null);
     QCuentaCorrienteProveedor qCuentaCorrienteProveedor =
         QCuentaCorrienteProveedor.cuentaCorrienteProveedor;
     BooleanBuilder builder = new BooleanBuilder();
-    if (criteria.isBuscaPorNroProveedor())
+    if (criteria.getNroProveedor() != null)
       builder.or(
           qCuentaCorrienteProveedor.proveedor.nroProveedor.containsIgnoreCase(
               criteria.getNroProveedor()));
-    if (criteria.isBuscaPorRazonSocial()) {
+    if (criteria.getRazonSocial() != null) {
       String[] terminos = criteria.getRazonSocial().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -236,13 +224,13 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscaPorIdFiscal())
+    if (criteria.getIdFiscal() != null)
       builder.or(qCuentaCorrienteProveedor.proveedor.idFiscal.eq(criteria.getIdFiscal()));
-    if (criteria.isBuscaPorLocalidad())
+    if (criteria.getIdLocalidad() != null)
       builder.and(
           qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.idLocalidad.eq(
               criteria.getIdLocalidad()));
-    if (criteria.isBuscaPorProvincia())
+    if (criteria.getIdProvincia() != null)
       builder.and(
           qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.provincia.idProvincia.eq(
               criteria.getIdProvincia()));
@@ -255,10 +243,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     return cuentaCorrienteProveedorRepository.findAll(
         builder,
         this.getPageable(
-            criteria.getPagina(),
-            criteria.getOrdenarPor(),
-            criteria.getSentido(),
-            "proveedor.razonSocial"));
+            criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido(), "proveedor.razonSocial"));
   }
 
   @Override

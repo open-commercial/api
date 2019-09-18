@@ -190,7 +190,7 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
-    String ordenDefault = "nombreFiscal";
+    String ordenDefault = "descripcion";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(
           pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));

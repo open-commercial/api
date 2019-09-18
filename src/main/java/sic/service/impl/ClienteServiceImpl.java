@@ -99,16 +99,9 @@ public class ClienteServiceImpl implements IClienteService {
 
   @Override
   public Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long idUsuarioLoggedIn) {
-    criteria.setBuscaPorNombreFiscal(criteria.getNombreFiscal() != null);
-    criteria.setBuscaPorNombreFantasia(criteria.getNombreFantasia() != null);
-    criteria.setBuscaPorIdFiscal(criteria.getIdFiscal() != null);
-    criteria.setBuscaPorViajante(criteria.getIdViajante() != null);
-    criteria.setBuscaPorProvincia(criteria.getIdProvincia() != null);
-    criteria.setBuscaPorLocalidad(criteria.getIdLocalidad() != null);
-    criteria.setBuscarPorNroDeCliente(criteria.getNroDeCliente() != null);
     QCliente qCliente = QCliente.cliente;
     BooleanBuilder builder = new BooleanBuilder();
-    if (criteria.isBuscaPorNombreFiscal()) {
+    if (criteria.getNombreFiscal() != null) {
       String[] terminos = criteria.getNombreFiscal().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -116,7 +109,7 @@ public class ClienteServiceImpl implements IClienteService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscaPorNombreFantasia()) {
+    if (criteria.getNombreFantasia() != null) {
       String[] terminos = criteria.getNombreFantasia().split(" ");
       BooleanBuilder nfPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -124,21 +117,21 @@ public class ClienteServiceImpl implements IClienteService {
       }
       builder.or(nfPredicate);
     }
-    if (criteria.isBuscaPorIdFiscal()) builder.or(qCliente.idFiscal.eq(criteria.getIdFiscal()));
-    if (criteria.isBuscarPorNroDeCliente())
+    if (criteria.getIdFiscal() != null) builder.or(qCliente.idFiscal.eq(criteria.getIdFiscal()));
+    if (criteria.getNroDeCliente() != null)
       builder.or(qCliente.nroCliente.containsIgnoreCase(criteria.getNroDeCliente()));
-    if (criteria.isBuscaPorViajante())
+    if (criteria.getIdViajante() != null)
       builder.and(qCliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
-    if (criteria.isBuscaPorLocalidad())
+    if (criteria.getIdLocalidad() != null)
       builder.and(
           qCliente.ubicacionFacturacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
-    if (criteria.isBuscaPorProvincia())
+    if (criteria.getIdProvincia() != null)
       builder.and(
           qCliente.ubicacionFacturacion.localidad.provincia.idProvincia.eq(
               criteria.getIdProvincia()));
-    if (criteria.isBuscaPorLocalidad())
+    if (criteria.getIdLocalidad() != null)
       builder.and(qCliente.ubicacionEnvio.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
-    if (criteria.isBuscaPorProvincia())
+    if (criteria.getIdProvincia() != null)
       builder.and(
           qCliente.ubicacionEnvio.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
     Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);

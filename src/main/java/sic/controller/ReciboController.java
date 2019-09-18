@@ -70,13 +70,13 @@ public class ReciboController {
 
   @PostMapping("/recibos/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Page<Recibo> buscarConCriteriaVenta(@RequestBody BusquedaReciboCriteria criteria) {
+  public Page<Recibo> buscarConCriteria(@RequestBody BusquedaReciboCriteria criteria) {
     return reciboService.buscarRecibos(criteria);
   }
 
   @PostMapping("/recibos/total/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal getTotalRecibosCompra(@RequestBody BusquedaReciboCriteria criteria) {
+  public BigDecimal getTotalRecibos(@RequestBody BusquedaReciboCriteria criteria) {
     return reciboService.getTotalRecibos(criteria);
   }
 

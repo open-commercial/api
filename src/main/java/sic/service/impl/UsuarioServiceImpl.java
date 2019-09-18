@@ -41,7 +41,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   private final IClienteService clienteService;
   private final ICorreoElectronicoService correoElectronicoService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
-  private static final int TAMANIO_PAGINA_DEFAULT = 25;
+  private static final int TAMANIO_PAGINA_DEFAULT = 50;
   private final MessageSource messageSource;
 
   @Autowired
@@ -153,7 +153,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
       }
       builder.or(rsPredicate);
     }
-    if (!criteria.getRoles().isEmpty()) {
+    if (criteria.getRoles() != null && !criteria.getRoles().isEmpty()) {
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (Rol rol : criteria.getRoles()) {
         switch (rol) {

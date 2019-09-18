@@ -261,7 +261,7 @@ public class NotaServiceImpl implements INotaService {
       builder.and(qNotaCredito.cliente.id_Cliente.eq(criteria.getIdCliente()));
     if (criteria.getIdViajante() != null)
       builder.and(qNotaCredito.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
-    if (criteria.getIdCliente() != null)
+    if (criteria.getIdProveedor() != null)
       builder.and(qNotaCredito.proveedor.id_Proveedor.eq(criteria.getIdCliente()));
     if (criteria.getTipoComprobante() != null)
       builder.and(qNotaCredito.tipoComprobante.eq(criteria.getTipoComprobante()));
@@ -1651,11 +1651,6 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public BigDecimal calcularTotalCredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
-    if (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_nota_fechas_busqueda_invalidas", null, Locale.getDefault()));
-    }
     if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
       Calendar cal = new GregorianCalendar();
       cal.setTime(criteria.getFechaDesde());
@@ -1703,11 +1698,6 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public BigDecimal calcularTotalIVACredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
-    if (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_nota_fechas_busqueda_invalidas", null, Locale.getDefault()));
-    }
     if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
       Calendar cal = new GregorianCalendar();
       cal.setTime(criteria.getFechaDesde());

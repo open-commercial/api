@@ -153,7 +153,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.getNombre() != null) {
+    if (criteria.getNombreProvincia() != null) {
       String[] terminos = criteria.getNombreProvincia().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
