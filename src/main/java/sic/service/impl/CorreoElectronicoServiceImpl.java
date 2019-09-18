@@ -71,7 +71,6 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
         helper.setFrom(emailUsername);
         helper.setTo(toEmail);
         if (bcc != null && !bcc.isEmpty()) helper.setBcc(bcc);
-        helper.setBcc(emailUsername);
         helper.setSubject(subject);
         helper.setText(mensaje);
         if (byteArray != null) {

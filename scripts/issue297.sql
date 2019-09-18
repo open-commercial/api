@@ -83,4 +83,6 @@ RENAME TABLE configuraciondelsistema TO configuracionsucursal;
 
 ALTER TABLE configuracionsucursal CHANGE id_ConfiguracionDelSistema idConfiguracionSucursal bigint(20) NOT NULL AUTO_INCREMENT;
 
- 
+alter TABLE configuracionsucursal drop column emailPassword;
+alter TABLE configuracionsucursal drop column emailSenderHabilitado;
+alter TABLE configuracionsucursal drop column emailUsername;
