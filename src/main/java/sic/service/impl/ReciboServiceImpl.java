@@ -40,7 +40,7 @@ public class ReciboServiceImpl implements IReciboService {
   private final ReciboRepository reciboRepository;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final ISucursalService sucursalService;
-  private final IConfiguracionSucursalService configuracionSucursal;
+  private final IConfiguracionSucursalService configuracionSucursalService;
   private final INotaService notaService;
   private final IFormaDePagoService formaDePagoService;
   private final ICajaService cajaService;
@@ -61,7 +61,7 @@ public class ReciboServiceImpl implements IReciboService {
     this.reciboRepository = reciboRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.sucursalService = sucursalService;
-    this.configuracionSucursal = configuracionSucursalService;
+    this.configuracionSucursalService = configuracionSucursalService;
     this.notaService = notaService;
     this.formaDePagoService = formaDePagoService;
     this.cajaService = cajaService;
@@ -154,14 +154,14 @@ public class ReciboServiceImpl implements IReciboService {
   @Transactional
   public Recibo guardar(@Valid Recibo recibo) {
     recibo.setNumSerie(
-        configuracionSucursal
-            .getConfiguracionDelSucursal(recibo.getSucursal())
+        configuracionSucursalService
+            .getConfiguracionSucursal(recibo.getSucursal())
             .getNroPuntoDeVentaAfip());
     recibo.setNumRecibo(
         this.getSiguienteNumeroRecibo(
             recibo.getSucursal().getIdSucursal(),
-            configuracionSucursal
-                .getConfiguracionDelSucursal(recibo.getSucursal())
+            configuracionSucursalService
+                .getConfiguracionSucursal(recibo.getSucursal())
                 .getNroPuntoDeVentaAfip()));
     recibo.setFecha(new Date());
     this.validarOperacion(recibo);
@@ -227,8 +227,8 @@ public class ReciboServiceImpl implements IReciboService {
         recibo.setFormaDePago(fdp);
         recibo.setMonto(montos[i]);
         recibo.setNumSerie(
-            configuracionSucursal
-                .getConfiguracionDelSucursal(recibo.getSucursal())
+            configuracionSucursalService
+                .getConfiguracionSucursal(recibo.getSucursal())
                 .getNroPuntoDeVentaAfip());
         recibo.setNumRecibo(
             this.getSiguienteNumeroRecibo(sucursal.getIdSucursal(), recibo.getNumSerie()));

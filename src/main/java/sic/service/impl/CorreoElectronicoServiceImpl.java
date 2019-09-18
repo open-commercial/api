@@ -16,13 +16,8 @@ import javax.mail.util.ByteArrayDataSource;
 import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Transport;
-import sic.modelo.ConfiguracionSucursal;
-import sic.modelo.Sucursal;
 import sic.exception.BusinessServiceException;
-import sic.service.IConfiguracionSucursalService;
 import sic.service.ICorreoElectronicoService;
-import sic.service.ISucursalService;
-
 import java.util.Locale;
 import java.util.Properties;
 
@@ -33,10 +28,10 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
   private String mailEnv;
 
   @Value("${SIC_MAIL_USERNAME}")
-  private String emailUserNameEnv;
+  private String emailUsername;
 
   @Value("${SIC_MAIL_PASSWORD}")
-  private String emailPasswordEnv;
+  private String emailPassword;
 
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
@@ -50,13 +45,14 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
   @Async
   public void enviarEmail(
       String toEmail,
+      String bcc,
       String subject,
       String mensaje,
       byte[] byteArray,
       String attachmentDescription) {
     if (mailEnv.equals("production")
-        && !emailUserNameEnv.isEmpty()
-        && !emailPasswordEnv.isEmpty()) {
+        && !emailUsername.isEmpty()
+        && !emailPassword.isEmpty()) {
       Properties props = new Properties();
       props.put("mail.smtp.host", "smtp.gmail.com");
       props.put("mail.smtp.port", "587");
@@ -67,15 +63,15 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
             new Authenticator() {
               @Override
               protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(emailUserNameEnv, emailPasswordEnv);
+                return new PasswordAuthentication(emailUsername, emailPassword);
               }
             };
-        Session session = Session.getInstance(props, auth);
-        MimeMessage message = new MimeMessage(session);
+        MimeMessage message = new MimeMessage(Session.getInstance(props, auth));
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        helper.setFrom(emailUserNameEnv);
+        helper.setFrom(emailUsername);
         helper.setTo(toEmail);
-        helper.setBcc(emailUserNameEnv);
+        if (bcc != null && !bcc.isEmpty()) helper.setBcc(bcc);
+        helper.setBcc(emailUsername);
         helper.setSubject(subject);
         helper.setText(mensaje);
         if (byteArray != null) {

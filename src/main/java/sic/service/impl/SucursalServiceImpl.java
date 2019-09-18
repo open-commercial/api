@@ -23,7 +23,7 @@ import sic.exception.BusinessServiceException;
 public class SucursalServiceImpl implements ISucursalService {
 
   private final SucursalRepository sucursalRepository;
-  private final IConfiguracionSucursalService configuracionSucursal;
+  private final IConfiguracionSucursalService configuracionSucursalService;
   private final IPhotoVideoUploader photoVideoUploader;
   private final IUbicacionService ubicacionService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -32,12 +32,12 @@ public class SucursalServiceImpl implements ISucursalService {
   @Autowired
   public SucursalServiceImpl(
       SucursalRepository sucursalRepository,
-      IConfiguracionSucursalService configuracionSucursal,
+      IConfiguracionSucursalService configuracionSucursalService,
       IUbicacionService ubicacionService,
       IPhotoVideoUploader photoVideoUploader,
       MessageSource messageSource) {
     this.sucursalRepository = sucursalRepository;
-    this.configuracionSucursal = configuracionSucursal;
+    this.configuracionSucursalService = configuracionSucursalService;
     this.ubicacionService = ubicacionService;
     this.photoVideoUploader = photoVideoUploader;
     this.messageSource = messageSource;
@@ -59,8 +59,8 @@ public class SucursalServiceImpl implements ISucursalService {
       return sucursalRepository.findAllByAndEliminadaOrderByNombreAsc(false).stream()
           .filter(
               sucursal ->
-                  configuracionSucursal
-                      .getConfiguracionDelSucursal(sucursal)
+                  configuracionSucursalService
+                      .getConfiguracionSucursal(sucursal)
                       .isPuntoDeRetiro())
           .collect(Collectors.toList());
     } else {
@@ -120,7 +120,7 @@ public class SucursalServiceImpl implements ISucursalService {
     configuracionSucursal.setCantidadMaximaDeRenglonesEnFactura(28);
     configuracionSucursal.setFacturaElectronicaHabilitada(false);
     configuracionSucursal.setSucursal(sucursal);
-    this.configuracionSucursal.guardar(configuracionSucursal);
+    this.configuracionSucursalService.guardar(configuracionSucursal);
   }
 
   @Override
@@ -161,8 +161,8 @@ public class SucursalServiceImpl implements ISucursalService {
     if (sucursal.getLogo() != null && !sucursal.getLogo().isEmpty()) {
       photoVideoUploader.borrarImagen(Sucursal.class.getSimpleName() + sucursal.getIdSucursal());
     }
-    configuracionSucursal.eliminar(
-        configuracionSucursal.getConfiguracionDelSucursal(sucursal));
+    configuracionSucursalService.eliminar(
+        configuracionSucursalService.getConfiguracionSucursal(sucursal));
     sucursalRepository.save(sucursal);
   }
 

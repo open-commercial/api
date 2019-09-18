@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Cliente;
 import sic.modelo.Usuario;
 import sic.service.*;
-
 import java.math.BigDecimal;
 import java.util.Locale;
 
@@ -19,9 +18,7 @@ public class RegistracionServiceImpl implements IRegistracionService {
 
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
-  private final ISucursalService sucursalService;
   private final ICorreoElectronicoService correoElectronicoService;
-  private final IConfiguracionSucursalService configuracionSucursal;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
 
@@ -29,15 +26,11 @@ public class RegistracionServiceImpl implements IRegistracionService {
   public RegistracionServiceImpl(
       IUsuarioService usuarioService,
       IClienteService clienteService,
-      ISucursalService sucursalService,
       ICorreoElectronicoService correoElectronicoService,
-      IConfiguracionSucursalService configuracionSucursalService,
       MessageSource messageSource) {
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
-    this.sucursalService = sucursalService;
     this.correoElectronicoService = correoElectronicoService;
-    this.configuracionSucursal = configuracionSucursalService;
     this.messageSource = messageSource;
   }
 
@@ -50,6 +43,7 @@ public class RegistracionServiceImpl implements IRegistracionService {
     clienteService.guardar(cliente);
     correoElectronicoService.enviarEmail(
         usuario.getEmail(),
+        "",
         "Registración de cuenta nueva",
         messageSource.getMessage(
             "mensaje_correo_registracion",

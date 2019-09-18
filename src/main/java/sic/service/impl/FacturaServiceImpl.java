@@ -55,7 +55,7 @@ public class FacturaServiceImpl implements IFacturaService {
   private final FacturaCompraRepository facturaCompraRepository;
   private final RenglonFacturaRepository renglonFacturaRepository;
   private final IProductoService productoService;
-  private final IConfiguracionSucursalService configuracionSucursal;
+  private final IConfiguracionSucursalService configuracionSucursalService;
   private final IPedidoService pedidoService;
   private final INotaService notaService;
   private final ICuentaCorrienteService cuentaCorrienteService;
@@ -78,7 +78,7 @@ public class FacturaServiceImpl implements IFacturaService {
       FacturaCompraRepository facturaCompraRepository,
       RenglonFacturaRepository renglonFacturaRepository,
       IProductoService productoService,
-      IConfiguracionSucursalService configuracionSucursal,
+      IConfiguracionSucursalService configuracionSucursalService,
       IPedidoService pedidoService,
       INotaService notaService,
       ICuentaCorrienteService cuentaCorrienteService,
@@ -92,7 +92,7 @@ public class FacturaServiceImpl implements IFacturaService {
     this.facturaCompraRepository = facturaCompraRepository;
     this.renglonFacturaRepository = renglonFacturaRepository;
     this.productoService = productoService;
-    this.configuracionSucursal = configuracionSucursal;
+    this.configuracionSucursalService = configuracionSucursalService;
     this.pedidoService = pedidoService;
     this.notaService = notaService;
     this.cuentaCorrienteService = cuentaCorrienteService;
@@ -473,8 +473,8 @@ public class FacturaServiceImpl implements IFacturaService {
     if (factura instanceof FacturaVenta) {
       factura.setFecha(new Date());
       factura.setNumSerie(
-          configuracionSucursal
-              .getConfiguracionDelSucursal(factura.getSucursal())
+          configuracionSucursalService
+              .getConfiguracionSucursal(factura.getSucursal())
               .getNroPuntoDeVentaAfip());
       factura.setNumFactura(
           this.calcularNumeroFacturaVenta(
@@ -1003,7 +1003,7 @@ public class FacturaServiceImpl implements IFacturaService {
         classLoader.getResourceAsStream("sic/vista/reportes/FacturaVenta.jasper");
     Map<String, Object> params = new HashMap<>();
     ConfiguracionSucursal configuracionSucursal =
-        this.configuracionSucursal.getConfiguracionDelSucursal(factura.getSucursal());
+        this.configuracionSucursalService.getConfiguracionSucursal(factura.getSucursal());
     params.put("preImpresa", configuracionSucursal.isUsarFacturaVentaPreImpresa());
     if (factura.getTipoComprobante().equals(TipoDeComprobante.FACTURA_B)
         || factura.getTipoComprobante().equals(TipoDeComprobante.PRESUPUESTO)) {

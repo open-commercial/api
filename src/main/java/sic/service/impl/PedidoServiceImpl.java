@@ -203,6 +203,7 @@ public class PedidoServiceImpl implements IPedidoService {
     if (emailCliente != null && !emailCliente.isEmpty()) {
       correoElectronicoService.enviarEmail(
           emailCliente,
+          "",
           "Nuevo Pedido Ingresado",
           messageSource.getMessage(
               "mensaje_correo_pedido_recibido",

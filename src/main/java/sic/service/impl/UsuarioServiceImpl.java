@@ -283,6 +283,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
     this.actualizarPasswordRecoveryKey(passwordRecoveryKey, usuario.getId_Usuario());
     correoElectronicoService.enviarEmail(
         usuario.getEmail(),
+        "",
         "Recuperación de contraseña",
         messageSource.getMessage(
             "mensaje_correo_recuperacion",

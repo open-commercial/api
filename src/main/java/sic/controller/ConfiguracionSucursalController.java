@@ -34,7 +34,7 @@ public class ConfiguracionSucursalController {
     this.modelMapper = modelMapper;
   }
 
-  @PutMapping("/configuracion-sucursales")
+  @PutMapping("/configuraciones-sucursal")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void actualizar(@RequestBody ConfiguracionSucursalDTO configuracionSucursalDTO) {
     ConfiguracionSucursal configuracionDeSucursal =
@@ -61,7 +61,7 @@ public class ConfiguracionSucursalController {
     this.configuracionSucursal.actualizar(configuracionDeSucursal);
   }
 
-  @PostMapping("/configuracion-sucursales")
+  @PostMapping("/configuraciones-sucursal")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public ConfiguracionSucursal guardar(
       @RequestBody ConfiguracionSucursalDTO configuracionSucursalDTO) {
@@ -70,21 +70,21 @@ public class ConfiguracionSucursalController {
     return this.configuracionSucursal.guardar(configuracionDeSucursal);
   }
 
-  @GetMapping("/configuracion-sucursales/{idSucursal}")
+  @GetMapping("/configuraciones-sucursal/{idSucursal}")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public ConfiguracionSucursal getConfiguracionSucursal(
       @PathVariable long idSucursal) {
-    return configuracionSucursal.getConfiguracionDelSucursal(
+    return configuracionSucursal.getConfiguracionSucursal(
         sucursalService.getSucursalPorId(idSucursal));
   }
 
-  @GetMapping("/configuracion-sucursales/{idSucursal}/cantidad-renglones")
+  @GetMapping("/configuraciones-sucursal/{idSucursal}/cantidad-renglones")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public int getCantidadMaximaDeRenglonesPorIdSucursal(@PathVariable long idSucursal) {
     return configuracionSucursal.getCantidadMaximaDeRenglonesPorIdSucursal(idSucursal);
   }
 
-  @GetMapping("/configuracion-sucursales/{idSucursal}/factura-electronica-habilitada")
+  @GetMapping("/configuraciones-sucursal/{idSucursal}/factura-electronica-habilitada")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public boolean isFacturaElectronicaHabilitada(@PathVariable long idSucursal) {
     return configuracionSucursal.isFacturaElectronicaHabilitada(idSucursal);

@@ -9,7 +9,7 @@ public interface IConfiguracionSucursalService {
 
   void actualizar(@Valid ConfiguracionSucursal configuracionSucursal);
 
-  ConfiguracionSucursal getConfiguracionDelSucursal(Sucursal sucursal);
+  ConfiguracionSucursal getConfiguracionSucursal(Sucursal sucursal);
 
   ConfiguracionSucursal getConfiguracionSucursalPorId(long idConfiguracionSucursal);
 

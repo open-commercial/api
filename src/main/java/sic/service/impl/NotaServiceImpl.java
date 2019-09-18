@@ -61,7 +61,7 @@ public class NotaServiceImpl implements INotaService {
   private final IProductoService productoService;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IMercadoPagoService mercadoPagoService;
-  private final IConfiguracionSucursalService configuracionSucursal;
+  private final IConfiguracionSucursalService configuracionSucursalService;
   private final IAfipService afipService;
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
@@ -102,7 +102,7 @@ public class NotaServiceImpl implements INotaService {
     this.productoService = productoService;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.mercadoPagoService = mercadoPagoService;
-    this.configuracionSucursal = configuracionSucursalService;
+    this.configuracionSucursalService = configuracionSucursalService;
     this.afipService = afipService;
     this.messageSource = messageSource;
   }
@@ -519,8 +519,8 @@ public class NotaServiceImpl implements INotaService {
     Long numeroNota =
         notaDebitoRepository.buscarMayorNumNotaDebitoClienteSegunTipo(
             tipoDeComprobante,
-            configuracionSucursal
-                .getConfiguracionDelSucursal(sucursal)
+            configuracionSucursalService
+                .getConfiguracionSucursal(sucursal)
                 .getNroPuntoDeVentaAfip(),
             idSucursal);
     return (numeroNota == null) ? 1 : numeroNota + 1;
@@ -533,8 +533,8 @@ public class NotaServiceImpl implements INotaService {
     Long numeroNota =
         notaCreditoRepository.buscarMayorNumNotaCreditoClienteSegunTipo(
             tipoDeComprobante,
-            configuracionSucursal
-                .getConfiguracionDelSucursal(sucursal)
+            configuracionSucursalService
+                .getConfiguracionSucursal(sucursal)
                 .getNroPuntoDeVentaAfip(),
             idSucursal);
     return (numeroNota == null) ? 1 : numeroNota + 1;
@@ -829,8 +829,8 @@ public class NotaServiceImpl implements INotaService {
         }
       }
       notaCredito.setSerie(
-          configuracionSucursal
-              .getConfiguracionDelSucursal(notaCredito.getSucursal())
+          configuracionSucursalService
+              .getConfiguracionSucursal(notaCredito.getSucursal())
               .getNroPuntoDeVentaAfip());
       notaCredito.setNroNota(
           this.getSiguienteNumeroNotaCreditoCliente(
@@ -1171,8 +1171,8 @@ public class NotaServiceImpl implements INotaService {
             messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
       }
       notaDebito.setSerie(
-          configuracionSucursal
-              .getConfiguracionDelSucursal(notaDebito.getSucursal())
+          configuracionSucursalService
+              .getConfiguracionSucursal(notaDebito.getSucursal())
               .getNroPuntoDeVentaAfip());
       notaDebito.setNroNota(
           this.getSiguienteNumeroNotaDebitoCliente(
@@ -1295,7 +1295,7 @@ public class NotaServiceImpl implements INotaService {
       params.put("notaDebito", nota);
     }
     ConfiguracionSucursal configuracionSucursal =
-        this.configuracionSucursal.getConfiguracionDelSucursal(nota.getSucursal());
+        this.configuracionSucursalService.getConfiguracionSucursal(nota.getSucursal());
     params.put("preImpresa", configuracionSucursal.isUsarFacturaVentaPreImpresa());
     if (nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_B)
         || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_C)

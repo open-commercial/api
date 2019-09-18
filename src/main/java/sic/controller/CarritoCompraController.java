@@ -113,7 +113,7 @@ public class CarritoCompraController {
     if (nuevaOrdenDeCompraDTO.getIdSucursal() != null) {
       Sucursal sucursal = sucursalService.getSucursalPorId(nuevaOrdenDeCompraDTO.getIdSucursal());
       if (!configuracionSucursal
-          .getConfiguracionDelSucursal(sucursal)
+          .getConfiguracionSucursal(sucursal)
           .isPuntoDeRetiro()) {
         throw new BusinessServiceException(
             messageSource.getMessage(

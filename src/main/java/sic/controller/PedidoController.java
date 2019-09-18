@@ -122,7 +122,7 @@ public class PedidoController {
     if (nuevoPedidoDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
       Sucursal sucursal = sucursalService.getSucursalPorId(nuevoPedidoDTO.getIdSucursalEnvio());
       if (!configuracionSucursal
-          .getConfiguracionDelSucursal(sucursal)
+          .getConfiguracionSucursal(sucursal)
           .isPuntoDeRetiro()) {
         throw new BusinessServiceException(
             messageSource.getMessage(

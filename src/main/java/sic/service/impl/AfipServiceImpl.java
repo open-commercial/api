@@ -41,7 +41,7 @@ import sic.util.FormatterFechaHora;
 public class AfipServiceImpl implements IAfipService {
 
   private final AfipWebServiceSOAPClient afipWebServiceSOAPClient;
-  private final IConfiguracionSucursalService configuracionSucursal;
+  private final IConfiguracionSucursalService configuracionSucursalService;
   private final IFacturaService facturaService;
   private final INotaService notaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -57,7 +57,7 @@ public class AfipServiceImpl implements IAfipService {
       INotaService notaService,
       MessageSource messageSource) {
     this.afipWebServiceSOAPClient = afipWebServiceSOAPClient;
-    this.configuracionSucursal = configuracionSucursalService;
+    this.configuracionSucursalService = configuracionSucursalService;
     this.facturaService = facturaService;
     this.notaService = notaService;
     this.messageSource = messageSource;
@@ -67,7 +67,7 @@ public class AfipServiceImpl implements IAfipService {
   public FEAuthRequest getFEAuth(String afipNombreServicio, Sucursal sucursal) {
     FEAuthRequest feAuthRequest = new FEAuthRequest();
     ConfiguracionSucursal configuracionSucursal =
-        this.configuracionSucursal.getConfiguracionDelSucursal(sucursal);
+        this.configuracionSucursalService.getConfiguracionSucursal(sucursal);
     Date fechaVencimientoToken = configuracionSucursal.getFechaVencimientoTokenWSAA();
     if (fechaVencimientoToken != null && fechaVencimientoToken.after(new Date())) {
       feAuthRequest.setToken(configuracionSucursal.getTokenWSAA());
@@ -105,7 +105,7 @@ public class AfipServiceImpl implements IAfipService {
             new SimpleDateFormat(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL_MILISEGUNDO);
         configuracionSucursal.setFechaGeneracionTokenWSAA(sdf.parse(generationTime));
         configuracionSucursal.setFechaVencimientoTokenWSAA(sdf.parse(expirationTime));
-        this.configuracionSucursal.actualizar(configuracionSucursal);
+        this.configuracionSucursalService.actualizar(configuracionSucursal);
         return feAuthRequest;
       } catch (DocumentException | IOException ex) {
         logger.error(ex.getMessage());
@@ -125,8 +125,8 @@ public class AfipServiceImpl implements IAfipService {
 
   @Override
   public void autorizar(ComprobanteAFIP comprobante) {
-    if (!configuracionSucursal
-        .getConfiguracionDelSucursal(comprobante.getSucursal())
+    if (!configuracionSucursalService
+        .getConfiguracionSucursal(comprobante.getSucursal())
         .isFacturaElectronicaHabilitada()) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_sucursal_fe_habilitada", null, Locale.getDefault()));
@@ -174,8 +174,8 @@ public class AfipServiceImpl implements IAfipService {
         this.getFEAuth(WEBSERVICE_FACTURA_ELECTRONICA, comprobante.getSucursal());
     fecaeSolicitud.setAuth(feAuthRequest);
     int nroPuntoDeVentaAfip =
-        configuracionSucursal
-            .getConfiguracionDelSucursal(comprobante.getSucursal())
+        configuracionSucursalService
+            .getConfiguracionSucursal(comprobante.getSucursal())
             .getNroPuntoDeVentaAfip();
     int siguienteNroComprobante =
         this.getSiguienteNroComprobante(

@@ -15,8 +15,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import sic.controller.Views;
 
-import javax.validation.constraints.Email;
-
 @Entity
 @Table(name = "configuracionsucursal")
 @Data

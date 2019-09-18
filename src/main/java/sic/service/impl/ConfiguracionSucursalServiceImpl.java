@@ -43,7 +43,7 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
   }
 
   @Override
-  public ConfiguracionSucursal getConfiguracionDelSucursal(Sucursal sucursal) {
+  public ConfiguracionSucursal getConfiguracionSucursal(Sucursal sucursal) {
     return configuracionRepository.findBySucursal(sucursal);
   }
 
@@ -52,7 +52,7 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
   public ConfiguracionSucursal guardar(@Valid ConfiguracionSucursal configuracionSucursal) {
     this.validarOperacion(configuracionSucursal);
     configuracionSucursal = configuracionRepository.save(configuracionSucursal);
-    logger.warn("La Configuracion del Sistema {} se guardó correctamente.", configuracionSucursal);
+    logger.warn("La configuracion de sucursal {} se guardó correctamente.", configuracionSucursal);
     return configuracionSucursal;
   }
 

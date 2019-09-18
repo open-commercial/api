@@ -4796,9 +4796,9 @@ class AppIntegrationTest {
     this.crearProductos();
     this.shouldCrearSucursalResponsableInscripto();
     ConfiguracionSucursalDTO configuracionSucursalDTO =
-      restTemplate.getForObject(apiPrefix + "/configuracion-sucursales/2", ConfiguracionSucursalDTO.class);
+      restTemplate.getForObject(apiPrefix + "/configuraciones-sucursal/2", ConfiguracionSucursalDTO.class);
     configuracionSucursalDTO.setPuntoDeRetiro(true);
-    restTemplate.put(apiPrefix + "/configuracion-sucursales", configuracionSucursalDTO);
+    restTemplate.put(apiPrefix + "/configuraciones-sucursal", configuracionSucursalDTO);
     List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
@@ -5475,9 +5475,9 @@ class AppIntegrationTest {
   void shouldGenerarPedidoConItemsDelCarrito() {
     this.shouldAgregarItemsAlCarritoCompra();
     ConfiguracionSucursalDTO configuracionSucursalDTO =
-      restTemplate.getForObject(apiPrefix + "/configuracion-sucursales/1", ConfiguracionSucursalDTO.class);
+      restTemplate.getForObject(apiPrefix + "/configuraciones-sucursal/1", ConfiguracionSucursalDTO.class);
     configuracionSucursalDTO.setPuntoDeRetiro(true);
-    restTemplate.put(apiPrefix + "/configuracion-sucursales", configuracionSucursalDTO);
+    restTemplate.put(apiPrefix + "/configuraciones-sucursal", configuracionSucursalDTO);
     NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO = NuevaOrdenDeCompraDTO.builder()
       .idSucursal(1L)
       .idCliente(1L)
@@ -5495,10 +5495,10 @@ class AppIntegrationTest {
   @Test
   void shouldActualizarConfiguracionSucursal() {
     ConfiguracionSucursalDTO configuracionSucursalDTO =
-      restTemplate.getForObject(apiPrefix + "/configuracion-sucursales/1", ConfiguracionSucursalDTO.class);
+      restTemplate.getForObject(apiPrefix + "/configuraciones-sucursal/1", ConfiguracionSucursalDTO.class);
     configuracionSucursalDTO.setPuntoDeRetiro(true);
-    restTemplate.put(apiPrefix + "/configuracion-sucursales", configuracionSucursalDTO);
-    configuracionSucursalDTO = restTemplate.getForObject(apiPrefix + "/configuracion-sucursales/1", ConfiguracionSucursalDTO.class);
+    restTemplate.put(apiPrefix + "/configuraciones-sucursal", configuracionSucursalDTO);
+    configuracionSucursalDTO = restTemplate.getForObject(apiPrefix + "/configuraciones-sucursal/1", ConfiguracionSucursalDTO.class);
     assertTrue(configuracionSucursalDTO.isPuntoDeRetiro());
   }
 }
