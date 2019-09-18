@@ -124,7 +124,7 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Saldo:]]></text>
+				<text><![CDATA[Saldo]]></text>
 			</staticText>
 			<textField pattern="¤ #,##0.00">
 				<reportElement x="730" y="166" width="71" height="16" uuid="d79999bb-94af-4ac3-895a-7c3ff70d751c">
@@ -235,6 +235,9 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				</textElement>
 				<text><![CDATA[Email: ventas@globodistribuciones.com]]></text>
 			</staticText>
+			<line>
+				<reportElement x="0" y="166" width="800" height="1" uuid="a6117af8-aad7-4b6e-a15e-251efed99a1d"/>
+			</line>
 		</band>
 	</title>
 	<detail>
