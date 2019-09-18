@@ -410,6 +410,9 @@ public class NotaController {
       busquedaNotaCriteria.setBuscaViajante(
           busquedaNotaCriteria.getMovimiento().equals(Movimiento.VENTA)
               && busquedaNotaCriteria.getIdViajante() != null);
+      busquedaNotaCriteria.setBuscaProveedor(
+          busquedaNotaCriteria.getMovimiento().equals(Movimiento.COMPRA)
+              && busquedaNotaCriteria.getIdProveedor() != null);
     }
     busquedaNotaCriteria.setBuscaUsuario(busquedaNotaCriteria.getIdUsuario() != null);
     busquedaNotaCriteria.setBuscaPorNumeroNota(
