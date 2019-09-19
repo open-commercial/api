@@ -567,17 +567,21 @@ public class ProductoServiceImpl implements IProductoService {
     int longitudCantidades = cantidad.length;
     if (longitudIds == longitudCantidades) {
       for (int i = 0; i < longitudIds; i++) {
-        Producto p = this.getProductoNoEliminadoPorId(idProducto[i]);
+        Producto producto = this.getProductoNoEliminadoPorId(idProducto[i]);
         BigDecimal cantidadLambda = cantidad[i];
-        p.getCantidadEnSucursales()
-            .forEach(
-                cantidadEnSucursal -> {
-                  if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal
-                      && !p.isIlimitado()
-                      && cantidadEnSucursal.getCantidad().compareTo(cantidadLambda) < 0) {
-                    productos.put(p.getIdProducto(), cantidadLambda);
-                  }
-                });
+        if (!producto.getCantidadEnSucursales().isEmpty()) {
+          boolean noExisteEnSucursales = true;
+          for (CantidadEnSucursal cantidadEnSucursal : producto.getCantidadEnSucursales()) {
+            if (cantidadEnSucursal.getIdSucursal().equals(idSucursal)) {
+              noExisteEnSucursales = false;
+              if (!producto.isIlimitado()
+                  && cantidadEnSucursal.getCantidad().compareTo(cantidadLambda) < 0) {
+                productos.put(producto.getIdProducto(), cantidadLambda);
+              }
+            }
+          }
+          if (noExisteEnSucursales) productos.put(producto.getIdProducto(), cantidadLambda);
+        } else productos.put(producto.getIdProducto(), cantidadLambda);
       }
     } else {
       throw new BusinessServiceException(
