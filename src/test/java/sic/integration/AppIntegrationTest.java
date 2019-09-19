@@ -3262,12 +3262,12 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldVerificarProductoSinStockDisponible() {
+  void shouldVerificarProductoConStockDisponibleSucursal1() {
     NuevoProductoDTO productoTestSinStock =
         NuevoProductoDTO.builder()
             .codigo(RandomStringUtils.random(10, false, true))
             .descripcion(RandomStringUtils.random(10, true, false))
-            .cantidadEnSucursal(new HashMap<Long, BigDecimal>() {{put(1L, BigDecimal.ZERO);}})
+            .cantidadEnSucursal(new HashMap<Long, BigDecimal>() {{put(1L, BigDecimal.ONE);}})
             .bulto(BigDecimal.ONE)
             .precioCosto(CIEN)
             .gananciaPorcentaje(new BigDecimal("900"))
@@ -3282,7 +3282,7 @@ class AppIntegrationTest {
             .build();
     ProductoDTO productoSinStock =
         restTemplate.postForObject(
-            apiPrefix + "/productos?idMedida=1&idRubro=1&idProveedor=1&idSucursal=1",
+            apiPrefix + "/productos?idMedida=1&idRubro=1&idProveedor=1",
             productoTestSinStock,
             ProductoDTO.class);
     Map faltante =
@@ -3292,7 +3292,111 @@ class AppIntegrationTest {
                 + productoSinStock.getIdProducto()
                 + "&cantidad=1",
             Map.class);
-    assertFalse(faltante.isEmpty(), "Debería no devolver faltantes");
+    assertTrue(faltante.isEmpty(), "Debería no devolver faltantes");
+  }
+
+  @Test
+  void shouldVerificarProductoSinStockDisponibleSucursal1() {
+    NuevoProductoDTO productoTestSinStock =
+      NuevoProductoDTO.builder()
+        .codigo(RandomStringUtils.random(10, false, true))
+        .descripcion(RandomStringUtils.random(10, true, false))
+        .cantidadEnSucursal(new HashMap<Long, BigDecimal>() {{put(1L, BigDecimal.ZERO);}})
+        .bulto(BigDecimal.ONE)
+        .precioCosto(CIEN)
+        .gananciaPorcentaje(new BigDecimal("900"))
+        .gananciaNeto(new BigDecimal("900"))
+        .precioVentaPublico(new BigDecimal("1000"))
+        .ivaPorcentaje(new BigDecimal("21.0"))
+        .ivaNeto(new BigDecimal("210"))
+        .precioLista(new BigDecimal("1210"))
+        .nota("ProductoTestSinStock")
+        .publico(true)
+        .destacado(true)
+        .build();
+    ProductoDTO productoSinStock =
+      restTemplate.postForObject(
+        apiPrefix + "/productos?idMedida=1&idRubro=1&idProveedor=1",
+        productoTestSinStock,
+        ProductoDTO.class);
+    Map faltante =
+      restTemplate.getForObject(
+        apiPrefix
+          + "/productos/disponibilidad-stock/sucursales/1?idProducto="
+          + productoSinStock.getIdProducto()
+          + "&cantidad=1",
+        Map.class);
+    assertFalse(faltante.isEmpty(), "Debería devolver faltantes");
+  }
+
+  @Test
+  void shouldVerificarProductoConStockDisponibleSucursal2() {
+    this.shouldCrearSucursalResponsableInscripto();
+    NuevoProductoDTO productoTestSinStock =
+      NuevoProductoDTO.builder()
+        .codigo(RandomStringUtils.random(10, false, true))
+        .descripcion(RandomStringUtils.random(10, true, false))
+        .cantidadEnSucursal(new HashMap<Long, BigDecimal>() {{put(2L, BigDecimal.ONE);}})
+        .bulto(BigDecimal.ONE)
+        .precioCosto(CIEN)
+        .gananciaPorcentaje(new BigDecimal("900"))
+        .gananciaNeto(new BigDecimal("900"))
+        .precioVentaPublico(new BigDecimal("1000"))
+        .ivaPorcentaje(new BigDecimal("21.0"))
+        .ivaNeto(new BigDecimal("210"))
+        .precioLista(new BigDecimal("1210"))
+        .nota("ProductoTestSinStock")
+        .publico(true)
+        .destacado(true)
+        .build();
+    ProductoDTO productoSinStock =
+      restTemplate.postForObject(
+        apiPrefix + "/productos?idMedida=1&idRubro=1&idProveedor=1",
+        productoTestSinStock,
+        ProductoDTO.class);
+    Map faltante =
+      restTemplate.getForObject(
+        apiPrefix
+          + "/productos/disponibilidad-stock/sucursales/2?idProducto="
+          + productoSinStock.getIdProducto()
+          + "&cantidad=1",
+        Map.class);
+    assertTrue(faltante.isEmpty(), "Debería no devolver faltantes");
+  }
+
+  @Test
+  void shouldVerificarProductoSinStockDisponibleSucursal2() {
+    this.shouldCrearSucursalResponsableInscripto();
+    NuevoProductoDTO productoTestSinStock =
+      NuevoProductoDTO.builder()
+        .codigo(RandomStringUtils.random(10, false, true))
+        .descripcion(RandomStringUtils.random(10, true, false))
+        .cantidadEnSucursal(new HashMap<Long, BigDecimal>() {{put(1L, BigDecimal.ONE);}})
+        .bulto(BigDecimal.ONE)
+        .precioCosto(CIEN)
+        .gananciaPorcentaje(new BigDecimal("900"))
+        .gananciaNeto(new BigDecimal("900"))
+        .precioVentaPublico(new BigDecimal("1000"))
+        .ivaPorcentaje(new BigDecimal("21.0"))
+        .ivaNeto(new BigDecimal("210"))
+        .precioLista(new BigDecimal("1210"))
+        .nota("ProductoTestSinStock")
+        .publico(true)
+        .destacado(true)
+        .build();
+    ProductoDTO productoSinStock =
+      restTemplate.postForObject(
+        apiPrefix + "/productos?idMedida=1&idRubro=1&idProveedor=1",
+        productoTestSinStock,
+        ProductoDTO.class);
+    Map faltante =
+      restTemplate.getForObject( 
+        apiPrefix
+          + "/productos/disponibilidad-stock/sucursales/2?idProducto="
+          + productoSinStock.getIdProducto()
+          + "&cantidad=1",
+        Map.class);
+    assertFalse(faltante.isEmpty(), "Debería devolver faltantes");
   }
 
   @Test
