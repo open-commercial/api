@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaLocalidadCriteria;
 import sic.modelo.dto.LocalidadDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;

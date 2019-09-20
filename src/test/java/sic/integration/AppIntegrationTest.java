@@ -26,6 +26,9 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
 import sic.builder.*;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
+import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
+import sic.modelo.criteria.BusquedaGastoCriteria;
 import sic.modelo.dto.*;
 import sic.service.ICajaService;
 import sic.service.IClockService;
@@ -5396,7 +5399,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldRecuperarGastoPorEmpresa() {
+  void shouldBuscarGastoPorEmpresa() {
     this.shouldCrearGasto();
     BusquedaGastoCriteria criteria =
       BusquedaGastoCriteria.builder()

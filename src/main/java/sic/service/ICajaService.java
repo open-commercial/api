@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaCajaCriteria;
 
 import javax.validation.Valid;
 

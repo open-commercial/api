@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.modelo.dto.UbicacionDTO;
 import sic.repository.RenglonPedidoRepository;

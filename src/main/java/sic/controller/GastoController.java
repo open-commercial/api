@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.BusquedaGastoCriteria;
+import sic.modelo.criteria.BusquedaGastoCriteria;
 import sic.modelo.Gasto;
 import sic.modelo.Rol;
 import sic.modelo.dto.GastoDTO;
@@ -49,6 +49,12 @@ public class GastoController {
     return gastoService.buscarGastos(criteria);
   }
 
+  @PostMapping("/gastos/total/criteria")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public BigDecimal getTotalGastos(@RequestBody BusquedaGastoCriteria criteria) {
+    return gastoService.getTotalGastos(criteria);
+  }
+
     @DeleteMapping("/gastos/{idGasto}")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void eliminar(@PathVariable long idGasto) {
@@ -69,10 +75,4 @@ public class GastoController {
         gasto.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn));
         return gastoService.guardar(gasto);
     }
-
-  @PostMapping("/gastos/total/criteria")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public BigDecimal getTotalGastos(@RequestBody BusquedaGastoCriteria criteria) {
-    return gastoService.getTotalGastos(criteria);
-  }
 }

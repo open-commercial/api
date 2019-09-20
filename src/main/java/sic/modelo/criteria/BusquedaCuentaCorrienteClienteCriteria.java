@@ -1,4 +1,4 @@
-package sic.modelo;
+package sic.modelo.criteria;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,13 +9,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BusquedaCuentaCorrienteProveedorCriteria {
+public class BusquedaCuentaCorrienteClienteCriteria {
 
-  private String nroProveedor;
-  private String razonSocial;
+  private String nombreFiscal;
+  private String nombreFantasia;
   private Long idFiscal;
+  private Long idViajante;
   private Long idProvincia;
   private Long idLocalidad;
+  private String nroDeCliente;
   private Long idEmpresa;
   private Integer pagina;
   private String ordenarPor;

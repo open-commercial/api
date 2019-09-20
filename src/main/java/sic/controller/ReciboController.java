@@ -4,24 +4,18 @@ import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.BusquedaReciboCriteria;
-import sic.modelo.Movimiento;
+import sic.modelo.criteria.BusquedaReciboCriteria;
 import sic.modelo.Recibo;
 import sic.modelo.Rol;
 import sic.modelo.dto.ReciboDTO;
 import sic.service.*;
-
 import java.math.BigDecimal;
-import java.util.Calendar;
 
 @RestController
 @RequestMapping("/api/v1")

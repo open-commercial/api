@@ -3,7 +3,7 @@ package sic.service;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import sic.modelo.BusquedaProveedorCriteria;
+import sic.modelo.criteria.BusquedaProveedorCriteria;
 import sic.modelo.Empresa;
 import sic.modelo.Proveedor;
 

@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaNotaCriteria;
 import sic.modelo.dto.*;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
@@ -74,36 +75,6 @@ public class NotaController {
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void eliminarNota(@PathVariable long idNota) {
     notaService.eliminarNota(idNota);
-  }
-
-  @PostMapping("/notas/credito/busqueda/criteria")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
-  public Page<NotaCredito> buscarNotasCredito(
-      @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
-      @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return notaService.buscarNotasCredito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
-  }
-
-  @PostMapping("/notas/debito/busqueda/criteria")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
-  public Page<NotaDebito> buscarNotasDebito(
-    @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
-    @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return notaService.buscarNotasDebito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
 
   @GetMapping("/notas/credito/tipos/empresas/{idEmpresa}")
@@ -353,6 +324,36 @@ public class NotaController {
   public BigDecimal calcularTotalDebito(
       BigDecimal subTotalBruto, BigDecimal iva21Neto, BigDecimal montoNoGravado) {
     return notaService.calcularTotalDebito(subTotalBruto, iva21Neto, montoNoGravado);
+  }
+
+  @PostMapping("/notas/credito/busqueda/criteria")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public Page<NotaCredito> buscarNotasCredito(
+    @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
+    @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    return notaService.buscarNotasCredito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
+  }
+
+  @PostMapping("/notas/debito/busqueda/criteria")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public Page<NotaDebito> buscarNotasDebito(
+    @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
+    @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    return notaService.buscarNotasDebito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
 
   @PostMapping("/notas/total-credito/criteria")

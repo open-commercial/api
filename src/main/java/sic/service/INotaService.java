@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaNotaCriteria;
 import sic.modelo.dto.NuevaNotaCreditoDeFacturaDTO;
 import sic.modelo.dto.NuevaNotaCreditoSinFacturaDTO;
 import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;

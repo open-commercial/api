@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaCajaCriteria;
 import sic.service.*;
 
 @RestController
@@ -78,6 +79,18 @@ public class CajaController {
     return cajaService.buscarCajas(criteria);
   }
 
+  @PostMapping("/cajas/saldo-sistema")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public BigDecimal getSaldoSistemaCajas(@RequestBody BusquedaCajaCriteria criteria) {
+    return cajaService.getSaldoSistemaCajas(criteria);
+  }
+
+  @PostMapping("/cajas/saldo-real")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public BigDecimal getSaldoRealCajas(@RequestBody BusquedaCajaCriteria criteria) {
+    return cajaService.getSaldoRealCajas(criteria);
+  }
+
   @GetMapping("/cajas/{idCaja}/movimientos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public List<MovimientoCaja> getMovimientosDeCaja(
@@ -108,18 +121,6 @@ public class CajaController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public boolean getEstadoUltimaCaja(@PathVariable long idEmpresa) {
     return cajaService.isUltimaCajaAbierta(idEmpresa);
-  }
-
-  @PostMapping("/cajas/saldo-sistema")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public BigDecimal getSaldoSistemaCajas(@RequestBody BusquedaCajaCriteria criteria) {
-    return cajaService.getSaldoSistemaCajas(criteria);
-  }
-
-  @PostMapping("/cajas/saldo-real")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public BigDecimal getSaldoRealCajas(@RequestBody BusquedaCajaCriteria criteria) {
-    return cajaService.getSaldoRealCajas(criteria);
   }
 
   @GetMapping("/cajas/{idCaja}/totales-formas-de-pago")

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaClienteCriteria;
 import sic.service.*;
 import sic.repository.ClienteRepository;
 import sic.exception.BusinessServiceException;

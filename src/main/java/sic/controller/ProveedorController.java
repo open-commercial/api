@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaProveedorCriteria;
 import sic.modelo.dto.ProveedorDTO;
 import sic.service.IEmpresaService;
 import sic.service.IProveedorService;
@@ -61,14 +62,13 @@ public class ProveedorController {
 
   @PutMapping("/proveedores")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public void actualizar(
-    @RequestBody ProveedorDTO proveedorDTO) {
+  public void actualizar(@RequestBody ProveedorDTO proveedorDTO) {
     Proveedor proveedorPersistido =
-      proveedorService.getProveedorNoEliminadoPorId(proveedorDTO.getId_Proveedor());
+        proveedorService.getProveedorNoEliminadoPorId(proveedorDTO.getId_Proveedor());
     Proveedor proveedorPorActualizar = modelMapper.map(proveedorDTO, Proveedor.class);
     proveedorPorActualizar.setNroProveedor(proveedorPersistido.getNroProveedor());
     if (proveedorPorActualizar.getRazonSocial() == null
-      || proveedorPorActualizar.getRazonSocial().isEmpty()) {
+        || proveedorPorActualizar.getRazonSocial().isEmpty()) {
       proveedorPorActualizar.setRazonSocial(proveedorPersistido.getRazonSocial());
     }
     if (proveedorPorActualizar.getCategoriaIVA() == null) {
@@ -85,15 +85,15 @@ public class ProveedorController {
     } else {
       proveedorPorActualizar.setEmpresa(proveedorPersistido.getEmpresa());
     }
-    Ubicacion ubicacion;
     if (proveedorDTO.getUbicacion() != null) {
-      ubicacion = modelMapper.map(proveedorDTO.getUbicacion(), Ubicacion.class);
+      Ubicacion ubicacion = modelMapper.map(proveedorDTO.getUbicacion(), Ubicacion.class);
       ubicacion.setLocalidad(ubicacionService.getLocalidadPorId(ubicacion.getIdLocalidad()));
       proveedorPorActualizar.setUbicacion(ubicacion);
     } else {
       proveedorPorActualizar.setUbicacion(proveedorPersistido.getUbicacion());
     }
-    if (proveedorService.getProveedorNoEliminadoPorId(proveedorPorActualizar.getId_Proveedor()) != null) {
+    if (proveedorService.getProveedorNoEliminadoPorId(proveedorPorActualizar.getId_Proveedor())
+        != null) {
       proveedorService.actualizar(proveedorPorActualizar);
     }
   }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.exception.ForbiddenException;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaClienteCriteria;
 import sic.modelo.dto.ClienteDTO;
 import sic.service.*;
 
@@ -24,7 +25,6 @@ public class ClienteController {
   private final IUbicacionService ubicacionService;
   private final IAuthService authService;
   private final ModelMapper modelMapper;
-  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
   @Autowired

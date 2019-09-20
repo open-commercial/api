@@ -13,6 +13,7 @@ import java.util.*;
 import org.springframework.context.MessageSource;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaCajaCriteria;
 import sic.service.*;
 
 import javax.persistence.EntityNotFoundException;

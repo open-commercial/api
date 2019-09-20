@@ -1,4 +1,4 @@
-package sic.modelo;
+package sic.modelo.criteria;
 
 import java.util.Date;
 
@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import sic.modelo.Movimiento;
+import sic.modelo.TipoDeComprobante;
 
 @Data
 @AllArgsConstructor

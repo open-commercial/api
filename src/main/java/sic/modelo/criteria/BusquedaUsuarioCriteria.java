@@ -1,9 +1,10 @@
-package sic.modelo;
+package sic.modelo.criteria;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import sic.modelo.Rol;
 
 import java.util.List;
 

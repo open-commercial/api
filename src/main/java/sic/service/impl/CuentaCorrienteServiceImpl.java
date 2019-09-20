@@ -31,6 +31,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaCuentaCorrienteClienteCriteria;
+import sic.modelo.criteria.BusquedaCuentaCorrienteProveedorCriteria;
 import sic.repository.CuentaCorrienteClienteRepository;
 import sic.repository.CuentaCorrienteProveedorRepository;
 import sic.repository.CuentaCorrienteRepository;
@@ -114,7 +116,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   public Page<CuentaCorrienteCliente> buscarCuentaCorrienteCliente(
-      BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn) {
+    BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn) {
     QCuentaCorrienteCliente qCuentaCorrienteCliente =
         QCuentaCorrienteCliente.cuentaCorrienteCliente;
     BooleanBuilder builder = new BooleanBuilder();

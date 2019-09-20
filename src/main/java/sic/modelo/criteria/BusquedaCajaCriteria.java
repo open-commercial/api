@@ -1,4 +1,4 @@
-package sic.modelo;
+package sic.modelo.criteria;
 
 import java.util.Date;
 import lombok.AllArgsConstructor;
@@ -10,19 +10,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BusquedaPedidoCriteria {
+public class BusquedaCajaCriteria {
 
     private Date fechaDesde;
     private Date fechaHasta;
-    private Long idCliente;
-    private Long idUsuario;
-    private Long idViajante;
-    private Long nroPedido;
-    private EstadoPedido estadoPedido;
-    private TipoDeEnvio tipoDeEnvio;
-    private Long idProducto;
     private Long idEmpresa;
+    private int cantidadDeRegistros;
+    private Long idUsuarioApertura;
+    private Long idUsuarioCierre;
     private Integer pagina;
     private String ordenarPor;
     private String sentido;
+    
 }

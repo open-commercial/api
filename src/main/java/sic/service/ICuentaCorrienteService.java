@@ -3,6 +3,8 @@ package sic.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaCuentaCorrienteClienteCriteria;
+import sic.modelo.criteria.BusquedaCuentaCorrienteProveedorCriteria;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -26,7 +28,7 @@ public interface ICuentaCorrienteService {
   void eliminarCuentaCorrienteProveedor(long idProveedor);
 
   Page<CuentaCorrienteCliente> buscarCuentaCorrienteCliente(
-      BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn);
+    BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn);
 
   Page<CuentaCorrienteProveedor> buscarCuentaCorrienteProveedor(BusquedaCuentaCorrienteProveedorCriteria criteria);
 
