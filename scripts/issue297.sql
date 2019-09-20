@@ -12,9 +12,15 @@ CREATE TABLE cantidadensucursal (
   CONSTRAINT FKlbd386vgya8ugkt0ynp67k8wl FOREIGN KEY (idProducto) REFERENCES producto (idProducto)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+UPDATE producto SET eliminado = true where id_Empresa = 5;
+
 insert into cantidadensucursal(cantidad, estante, estanteria, id_Empresa, idProducto)
-select producto.cantidad, producto.estante, producto.estanteria, producto.id_Empresa, producto.idProducto
-from producto; -- where producto.id_Empresa = 5;
+select producto.cantidad, producto.estante, producto.estanteria, 1, producto.idProducto
+from producto where producto.eliminado = false;
+
+insert into cantidadensucursal(cantidad, estante, estanteria, id_Empresa, idProducto)
+select 0, "", "", 5, producto.idProducto
+from producto where producto.eliminado = false;
  
 ALTER TABLE producto DROP estante;
 ALTER TABLE producto DROP estanteria;

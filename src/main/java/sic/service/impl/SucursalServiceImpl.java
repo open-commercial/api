@@ -26,6 +26,7 @@ public class SucursalServiceImpl implements ISucursalService {
   private final IConfiguracionSucursalService configuracionSucursalService;
   private final IPhotoVideoUploader photoVideoUploader;
   private final IUbicacionService ubicacionService;
+  private final IProductoService productoService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
 
@@ -35,11 +36,13 @@ public class SucursalServiceImpl implements ISucursalService {
       IConfiguracionSucursalService configuracionSucursalService,
       IUbicacionService ubicacionService,
       IPhotoVideoUploader photoVideoUploader,
+      IProductoService productoService,
       MessageSource messageSource) {
     this.sucursalRepository = sucursalRepository;
     this.configuracionSucursalService = configuracionSucursalService;
     this.ubicacionService = ubicacionService;
     this.photoVideoUploader = photoVideoUploader;
+    this.productoService = productoService;
     this.messageSource = messageSource;
   }
 
@@ -86,11 +89,11 @@ public class SucursalServiceImpl implements ISucursalService {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_sucursal_duplicado_nombre", null, Locale.getDefault()));
     }
-    if (operacion == TipoDeOperacion.ACTUALIZACION) {
-      if (sucursalDuplicada != null && sucursalDuplicada.getIdSucursal() != sucursal.getIdSucursal()) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_sucursal_duplicado_nombre", null, Locale.getDefault()));
-      }
+    if (operacion == TipoDeOperacion.ACTUALIZACION
+        && sucursalDuplicada != null
+        && sucursalDuplicada.getIdSucursal() != sucursal.getIdSucursal()) {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_sucursal_duplicado_nombre", null, Locale.getDefault()));
     }
     // ID Fiscal
     sucursalDuplicada = this.getSucursalPorIdFiscal(sucursal.getIdFiscal());
@@ -134,6 +137,7 @@ public class SucursalServiceImpl implements ISucursalService {
     }
     validarOperacion(TipoDeOperacion.ALTA, sucursal);
     sucursal = sucursalRepository.save(sucursal);
+    this.productoService.guardarCantidadesDeSucursalNueva(sucursal);
     crearConfiguracionSucursal(sucursal);
     logger.warn("La Sucursal {} se guardó correctamente.", sucursal);
     return sucursal;

@@ -59,6 +59,8 @@ public interface IProductoService {
 
   List<Producto> actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO);
 
+  void guardarCantidadesDeSucursalNueva(Sucursal sucursal);
+
   String subirImagenProducto(long idProducto, byte[] imagen);
 
   List<Producto> getMultiplesProductosPorId(List<Long> idsProductos);

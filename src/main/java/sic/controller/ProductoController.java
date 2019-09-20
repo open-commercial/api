@@ -252,20 +252,27 @@ public class ProductoController {
     producto.setProveedor(proveedorService.getProveedorNoEliminadoPorId(idProveedor));
     producto.setCodigo(nuevoProductoDTO.getCodigo());
     producto.setDescripcion(nuevoProductoDTO.getDescripcion());
-    List<CantidadEnSucursal> cantidadEnSucursal = new ArrayList<>();
-    nuevoProductoDTO
-        .getCantidadEnSucursal()
-        .keySet()
+    List<CantidadEnSucursal> altaCantidadesEnSucursales = new ArrayList<>();
+    this.sucursalService.getSucusales(false).forEach(sucursal -> {
+      CantidadEnSucursal cantidad = new CantidadEnSucursal();
+      cantidad.setCantidad(BigDecimal.ZERO);
+      cantidad.setSucursal(sucursal);
+      altaCantidadesEnSucursales.add(cantidad);
+    });
+    producto.setCantidadEnSucursales(altaCantidadesEnSucursales);
+    producto
+        .getCantidadEnSucursales()
         .forEach(
-            idSucursal -> {
-              CantidadEnSucursal cantidad = new CantidadEnSucursal();
-              cantidad.setCantidad(nuevoProductoDTO.getCantidadEnSucursal().get(idSucursal));
-              cantidad.setSucursal(sucursalService.getSucursalPorId(idSucursal));
-              cantidad.setEstante(nuevoProductoDTO.getEstante());
-              cantidad.setEstanteria(nuevoProductoDTO.getEstanteria());
-              cantidadEnSucursal.add(cantidad);
-            });
-    producto.setCantidadEnSucursales(cantidadEnSucursal);
+            cantidadEnSucursal ->
+                nuevoProductoDTO.getCantidadEnSucursal().keySet().stream()
+                    .filter(idSucursal -> idSucursal.equals(cantidadEnSucursal.getIdSucursal()))
+                    .forEach(
+                        idSucursal -> {
+                          cantidadEnSucursal.setCantidad(
+                              nuevoProductoDTO.getCantidadEnSucursal().get(idSucursal));
+                          cantidadEnSucursal.setEstante(nuevoProductoDTO.getEstante());
+                          cantidadEnSucursal.setEstanteria(nuevoProductoDTO.getEstanteria());
+                        }));
     producto.setCantidad(
         producto.getCantidadEnSucursales().stream()
             .map(CantidadEnSucursal::getCantidad)

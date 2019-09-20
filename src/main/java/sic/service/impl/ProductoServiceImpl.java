@@ -9,6 +9,7 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.export.*;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
@@ -508,6 +509,19 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
+  public void guardarCantidadesDeSucursalNueva(Sucursal sucursal) {
+    BusquedaProductoCriteria criteriaProductos =
+        BusquedaProductoCriteria.builder().pageable(PageRequest.of(0, Integer.MAX_VALUE)).build();
+    CantidadEnSucursal cantidadNueva = new CantidadEnSucursal();
+    cantidadNueva.setSucursal(sucursal);
+    cantidadNueva.setCantidad(BigDecimal.ZERO);
+    List<Producto> productos = this.buscarProductos(criteriaProductos).getContent();
+    productos.forEach(producto -> producto.getCantidadEnSucursales().add(cantidadNueva));
+    this.productoRepository.saveAll(productos);
+  }
+
+  @Override
+  @Transactional
   public String subirImagenProducto(long idProducto, byte[] imagen) {
     if (imagen.length > TAMANIO_MAXIMO_IMAGEN)
       throw new BusinessServiceException(messageSource.getMessage(
@@ -567,22 +581,35 @@ public class ProductoServiceImpl implements IProductoService {
     int longitudCantidades = cantidad.length;
     if (longitudIds == longitudCantidades) {
       for (int i = 0; i < longitudIds; i++) {
-        Producto producto = this.getProductoNoEliminadoPorId(idProducto[i]);
         BigDecimal cantidadLambda = cantidad[i];
-        if (!producto.getCantidadEnSucursales().isEmpty()) {
-          boolean noExisteEnSucursales = true;
-          for (CantidadEnSucursal cantidadEnSucursal : producto.getCantidadEnSucursales()) {
-            if (cantidadEnSucursal.getIdSucursal().equals(idSucursal)) {
-              noExisteEnSucursales = false;
-              if (!producto.isIlimitado()
-                  && cantidadEnSucursal.getCantidad().compareTo(cantidadLambda) < 0) {
-                productos.put(producto.getIdProducto(), cantidadLambda);
-              }
-            }
-          }
-          if (noExisteEnSucursales) productos.put(producto.getIdProducto(), cantidadLambda);
-        } else productos.put(producto.getIdProducto(), cantidadLambda);
+        Producto producto = this.getProductoNoEliminadoPorId(idProducto[i]);
+        producto.getCantidadEnSucursales().stream()
+            .filter(cantidadEnSucursal -> cantidadEnSucursal.getIdSucursal().equals(idSucursal))
+            .forEach(
+                cantidadEnSucursal -> {
+                  if (!producto.isIlimitado()
+                      && cantidadEnSucursal.getCantidad().compareTo(cantidadLambda) < 0) {
+                    productos.put(producto.getIdProducto(), cantidadLambda);
+                  }
+                });
       }
+//      for (int i = 0; i < longitudIds; i++) {
+//        Producto producto = this.getProductoNoEliminadoPorId(idProducto[i]);
+//        BigDecimal cantidadLambda = cantidad[i];
+//        if (!producto.getCantidadEnSucursales().isEmpty()) {
+//          boolean noExisteEnSucursales = true;
+//          for (CantidadEnSucursal cantidadEnSucursal : producto.getCantidadEnSucursales()) {
+//            if (cantidadEnSucursal.getIdSucursal().equals(idSucursal)) {
+//              noExisteEnSucursales = false;
+//              if (!producto.isIlimitado()
+//                  && cantidadEnSucursal.getCantidad().compareTo(cantidadLambda) < 0) {
+//                productos.put(producto.getIdProducto(), cantidadLambda);
+//              }
+//            }
+//          }
+//          if (noExisteEnSucursales) productos.put(producto.getIdProducto(), cantidadLambda);
+//        } else productos.put(producto.getIdProducto(), cantidadLambda);
+//      }
     } else {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_error_logitudes_arrays", null, Locale.getDefault()));
