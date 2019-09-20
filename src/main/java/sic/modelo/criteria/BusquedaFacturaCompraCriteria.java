@@ -13,17 +13,12 @@ import sic.modelo.TipoDeComprobante;
 @Builder
 public class BusquedaFacturaCompraCriteria {
 
-  private boolean buscaPorFecha;
   private Date fechaDesde;
   private Date fechaHasta;
-  private boolean buscaPorProveedor;
   private Long idProveedor;
-  private boolean buscaPorNumeroFactura;
-  private long numSerie;
-  private long numFactura;
-  private boolean buscaPorTipoComprobante;
+  private Long numSerie;
+  private Long numFactura;
   private TipoDeComprobante tipoComprobante;
-  private boolean buscaPorProducto;
   private Long idProducto;
   private Long idEmpresa;
   private Integer pagina;

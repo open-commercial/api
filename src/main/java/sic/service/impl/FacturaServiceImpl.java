@@ -269,25 +269,6 @@ public class FacturaServiceImpl implements IFacturaService {
 
   @Override
   public Page<FacturaCompra> buscarFacturaCompra(BusquedaFacturaCompraCriteria criteria) {
-    // Fecha de Factura
-    if (criteria.isBuscaPorFecha()) {
-      Calendar cal = new GregorianCalendar();
-      if (criteria.getFechaDesde() != null) {
-        cal.setTime(criteria.getFechaDesde());
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        criteria.setFechaDesde(cal.getTime());
-      }
-      if (criteria.getFechaHasta() != null) {
-        cal.setTime(criteria.getFechaHasta());
-        cal.set(Calendar.HOUR_OF_DAY, 23);
-        cal.set(Calendar.MINUTE, 59);
-        cal.set(Calendar.SECOND, 59);
-        criteria.setFechaHasta(cal.getTime());
-      }
-    }
-    // orden, numero de pagina y sentido
     return facturaCompraRepository.findAll(
         this.getBuilderCompra(criteria),
         this.getPageable(
@@ -298,25 +279,7 @@ public class FacturaServiceImpl implements IFacturaService {
 
   @Override
   public Page<FacturaVenta> buscarFacturaVenta(
-    BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
-    // Fecha de Factura
-    if (criteria.isBuscaPorFecha()) {
-      Calendar cal = new GregorianCalendar();
-      if (criteria.getFechaDesde() != null) {
-        cal.setTime(criteria.getFechaDesde());
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        criteria.setFechaDesde(cal.getTime());
-      }
-      if (criteria.getFechaHasta() != null) {
-        cal.setTime(criteria.getFechaHasta());
-        cal.set(Calendar.HOUR_OF_DAY, 23);
-        cal.set(Calendar.MINUTE, 59);
-        cal.set(Calendar.SECOND, 59);
-        criteria.setFechaHasta(cal.getTime());
-      }
-    }
+      BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
     return facturaVentaRepository.findAll(
         this.getBuilderVenta(criteria, idUsuarioLoggedIn),
         this.getPageable(
@@ -335,7 +298,22 @@ public class FacturaServiceImpl implements IFacturaService {
             .eq(criteria.getIdEmpresa())
             .and(qFacturaCompra.eliminada.eq(false)));
     // Fecha
-    if (criteria.isBuscaPorFecha()) {
+    if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
+      Calendar cal = new GregorianCalendar();
+      if (criteria.getFechaDesde() != null) {
+        cal.setTime(criteria.getFechaDesde());
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        criteria.setFechaDesde(cal.getTime());
+      }
+      if (criteria.getFechaHasta() != null) {
+        cal.setTime(criteria.getFechaHasta());
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        criteria.setFechaHasta(cal.getTime());
+      }
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
@@ -366,13 +344,13 @@ public class FacturaServiceImpl implements IFacturaService {
         builder.and(qFacturaCompra.fecha.before(fHasta));
       }
     }
-    if (criteria.isBuscaPorProveedor())
+    if (criteria.getIdProveedor() != null)
       builder.and(qFacturaCompra.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
-    if (criteria.isBuscaPorTipoComprobante())
+    if (criteria.getTipoComprobante() != null)
       builder.and(qFacturaCompra.tipoComprobante.eq(criteria.getTipoComprobante()));
-    if (criteria.isBuscaPorProducto())
+    if (criteria.getIdProducto() != null)
       builder.and(qFacturaCompra.renglones.any().idProductoItem.eq(criteria.getIdProducto()));
-    if (criteria.isBuscaPorNumeroFactura())
+    if (criteria.getNumSerie() != null && criteria.getNumFactura() != null)
       builder
           .and(qFacturaCompra.numSerie.eq(criteria.getNumSerie()))
           .and(qFacturaCompra.numFactura.eq(criteria.getNumFactura()));
@@ -390,7 +368,22 @@ public class FacturaServiceImpl implements IFacturaService {
             .eq(criteria.getIdEmpresa())
             .and(qFacturaVenta.eliminada.eq(false)));
     // Fecha
-    if (criteria.isBuscaPorFecha()) {
+    if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
+      Calendar cal = new GregorianCalendar();
+      if (criteria.getFechaDesde() != null) {
+        cal.setTime(criteria.getFechaDesde());
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        criteria.setFechaDesde(cal.getTime());
+      }
+      if (criteria.getFechaHasta() != null) {
+        cal.setTime(criteria.getFechaHasta());
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        criteria.setFechaHasta(cal.getTime());
+      }
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
@@ -421,21 +414,21 @@ public class FacturaServiceImpl implements IFacturaService {
         builder.and(qFacturaVenta.fecha.before(fHasta));
       }
     }
-    if (criteria.isBuscaCliente())
+    if (criteria.getIdCliente() != null)
       builder.and(qFacturaVenta.cliente.id_Cliente.eq(criteria.getIdCliente()));
-    if (criteria.isBuscaPorTipoComprobante())
+    if (criteria.getTipoComprobante() != null)
       builder.and(qFacturaVenta.tipoComprobante.eq(criteria.getTipoComprobante()));
-    if (criteria.isBuscaUsuario())
+    if (criteria.getIdUsuario() != null)
       builder.and(qFacturaVenta.usuario.id_Usuario.eq(criteria.getIdUsuario()));
-    if (criteria.isBuscaViajante())
+    if (criteria.getIdViajante() != null)
       builder.and(qFacturaVenta.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
-    if (criteria.isBuscaPorNumeroFactura())
+    if (criteria.getNumSerie() != null && criteria.getNumFactura() != null)
       builder
           .and(qFacturaVenta.numSerie.eq(criteria.getNumSerie()))
           .and(qFacturaVenta.numFactura.eq(criteria.getNumFactura()));
-    if (criteria.isBuscarPorPedido())
+    if (criteria.getNroPedido() != null)
       builder.and(qFacturaVenta.pedido.nroPedido.eq(criteria.getNroPedido()));
-    if (criteria.isBuscaPorProducto())
+    if (criteria.getIdProducto() != null)
       builder.and(qFacturaVenta.renglones.any().idProductoItem.eq(criteria.getIdProducto()));
     Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     BooleanBuilder rsPredicate = new BooleanBuilder();
@@ -728,26 +721,6 @@ public class FacturaServiceImpl implements IFacturaService {
   @Override
   public BigDecimal calcularTotalFacturadoVenta(
       BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
-    // Fecha de Factura
-    if (criteria.isBuscaPorFecha()
-        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_factura_fechas_busqueda_invalidas", null, Locale.getDefault()));
-    }
-    if (criteria.isBuscaPorFecha()) {
-      Calendar cal = new GregorianCalendar();
-      cal.setTime(criteria.getFechaDesde());
-      cal.set(Calendar.HOUR_OF_DAY, 0);
-      cal.set(Calendar.MINUTE, 0);
-      cal.set(Calendar.SECOND, 0);
-      criteria.setFechaDesde(cal.getTime());
-      cal.setTime(criteria.getFechaHasta());
-      cal.set(Calendar.HOUR_OF_DAY, 23);
-      cal.set(Calendar.MINUTE, 59);
-      cal.set(Calendar.SECOND, 59);
-      criteria.setFechaHasta(cal.getTime());
-    }
     BigDecimal totalFacturado =
         facturaVentaRepository.calcularTotalFacturadoVenta(
             this.getBuilderVenta(criteria, idUsuarioLoggedIn));
@@ -756,26 +729,6 @@ public class FacturaServiceImpl implements IFacturaService {
 
   @Override
   public BigDecimal calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria) {
-    // Fecha de Factura
-    if (criteria.isBuscaPorFecha()
-        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_factura_fechas_busqueda_invalidas", null, Locale.getDefault()));
-    }
-    if (criteria.isBuscaPorFecha()) {
-      Calendar cal = new GregorianCalendar();
-      cal.setTime(criteria.getFechaDesde());
-      cal.set(Calendar.HOUR_OF_DAY, 0);
-      cal.set(Calendar.MINUTE, 0);
-      cal.set(Calendar.SECOND, 0);
-      criteria.setFechaDesde(cal.getTime());
-      cal.setTime(criteria.getFechaHasta());
-      cal.set(Calendar.HOUR_OF_DAY, 23);
-      cal.set(Calendar.MINUTE, 59);
-      cal.set(Calendar.SECOND, 59);
-      criteria.setFechaHasta(cal.getTime());
-    }
     BigDecimal totalFacturado =
         facturaCompraRepository.calcularTotalFacturadoCompra(this.getBuilderCompra(criteria));
     return (totalFacturado != null ? totalFacturado : BigDecimal.ZERO);
@@ -784,26 +737,6 @@ public class FacturaServiceImpl implements IFacturaService {
   @Override
   public BigDecimal calcularIvaVenta(
       BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
-    // Fecha de Factura
-    if (criteria.isBuscaPorFecha()
-        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_factura_fechas_busqueda_invalidas", null, Locale.getDefault()));
-    }
-    if (criteria.isBuscaPorFecha()) {
-      Calendar cal = new GregorianCalendar();
-      cal.setTime(criteria.getFechaDesde());
-      cal.set(Calendar.HOUR_OF_DAY, 0);
-      cal.set(Calendar.MINUTE, 0);
-      cal.set(Calendar.SECOND, 0);
-      criteria.setFechaDesde(cal.getTime());
-      cal.setTime(criteria.getFechaHasta());
-      cal.set(Calendar.HOUR_OF_DAY, 23);
-      cal.set(Calendar.MINUTE, 59);
-      cal.set(Calendar.SECOND, 59);
-      criteria.setFechaHasta(cal.getTime());
-    }
     TipoDeComprobante[] tipoFactura = {TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B};
     BigDecimal ivaVenta =
         facturaVentaRepository.calcularIVAVenta(
@@ -813,26 +746,6 @@ public class FacturaServiceImpl implements IFacturaService {
 
   @Override
   public BigDecimal calcularIvaCompra(BusquedaFacturaCompraCriteria criteria) {
-    // Fecha de Factura
-    if (criteria.isBuscaPorFecha()
-        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_factura_fechas_busqueda_invalidas", null, Locale.getDefault()));
-    }
-    if (criteria.isBuscaPorFecha()) {
-      Calendar cal = new GregorianCalendar();
-      cal.setTime(criteria.getFechaDesde());
-      cal.set(Calendar.HOUR_OF_DAY, 0);
-      cal.set(Calendar.MINUTE, 0);
-      cal.set(Calendar.SECOND, 0);
-      criteria.setFechaDesde(cal.getTime());
-      cal.setTime(criteria.getFechaHasta());
-      cal.set(Calendar.HOUR_OF_DAY, 23);
-      cal.set(Calendar.MINUTE, 59);
-      cal.set(Calendar.SECOND, 59);
-      criteria.setFechaHasta(cal.getTime());
-    }
     TipoDeComprobante[] tipoFactura = {TipoDeComprobante.FACTURA_A};
     BigDecimal ivaCompra =
         facturaCompraRepository.calcularIVACompra(this.getBuilderCompra(criteria), tipoFactura);
@@ -842,26 +755,6 @@ public class FacturaServiceImpl implements IFacturaService {
   @Override
   public BigDecimal calcularGananciaTotal(
       BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
-    // Fecha de Factura
-    if (criteria.isBuscaPorFecha()
-        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_factura_fechas_busqueda_invalidas", null, Locale.getDefault()));
-    }
-    if (criteria.isBuscaPorFecha()) {
-      Calendar cal = new GregorianCalendar();
-      cal.setTime(criteria.getFechaDesde());
-      cal.set(Calendar.HOUR_OF_DAY, 0);
-      cal.set(Calendar.MINUTE, 0);
-      cal.set(Calendar.SECOND, 0);
-      criteria.setFechaDesde(cal.getTime());
-      cal.setTime(criteria.getFechaHasta());
-      cal.set(Calendar.HOUR_OF_DAY, 23);
-      cal.set(Calendar.MINUTE, 59);
-      cal.set(Calendar.SECOND, 59);
-      criteria.setFechaHasta(cal.getTime());
-    }
     BigDecimal gananciaTotal =
         facturaVentaRepository.calcularGananciaTotal(
             this.getBuilderVenta(criteria, idUsuarioLoggedIn));

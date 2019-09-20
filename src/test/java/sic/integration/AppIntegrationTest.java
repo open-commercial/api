@@ -272,8 +272,6 @@ class AppIntegrationTest {
     BusquedaFacturaVentaCriteria criteria =
       BusquedaFacturaVentaCriteria.builder()
         .tipoComprobante(TipoDeComprobante.FACTURA_B)
-        .numSerie(0L)
-        .numFactura(1L)
         .idEmpresa(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
@@ -3490,7 +3488,7 @@ class AppIntegrationTest {
       BusquedaFacturaVentaCriteria.builder()
         .idEmpresa(1L)
         .tipoComprobante(TipoDeComprobante.FACTURA_A)
-        .numSerie(0L)
+        .numSerie(1L)
         .numFactura(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
@@ -3544,7 +3542,7 @@ class AppIntegrationTest {
     BusquedaFacturaVentaCriteria criteria =
       BusquedaFacturaVentaCriteria.builder()
         .tipoComprobante(TipoDeComprobante.FACTURA_B)
-        .numSerie(0L)
+        .numSerie(1L)
         .numFactura(1L)
         .idEmpresa(1L)
         .build();
@@ -3601,7 +3599,7 @@ class AppIntegrationTest {
     BusquedaFacturaVentaCriteria criteria =
         BusquedaFacturaVentaCriteria.builder()
             .tipoComprobante(TipoDeComprobante.FACTURA_X)
-            .numSerie(0L)
+            .numSerie(1L)
             .numFactura(1L)
             .idEmpresa(1L)
             .build();
@@ -3655,7 +3653,7 @@ class AppIntegrationTest {
     BusquedaFacturaVentaCriteria criteria =
       BusquedaFacturaVentaCriteria.builder()
         .tipoComprobante(TipoDeComprobante.FACTURA_C)
-        .numSerie(0L)
+        .numSerie(1L)
         .numFactura(1L)
         .idEmpresa(1L)
         .build();
@@ -3850,7 +3848,7 @@ class AppIntegrationTest {
     BusquedaFacturaVentaCriteria criteria =
       BusquedaFacturaVentaCriteria.builder()
         .tipoComprobante(TipoDeComprobante.FACTURA_A)
-        .numSerie(0L)
+        .numSerie(1L)
         .numFactura(1L)
         .idEmpresa(1L)
         .build();
@@ -3902,7 +3900,7 @@ class AppIntegrationTest {
     BusquedaFacturaVentaCriteria criteria =
         BusquedaFacturaVentaCriteria.builder()
             .tipoComprobante(TipoDeComprobante.FACTURA_A)
-            .numSerie(0L)
+            .numSerie(1L)
             .numFactura(1L)
             .idEmpresa(1L)
             .build();
