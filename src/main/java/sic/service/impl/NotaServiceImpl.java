@@ -209,7 +209,6 @@ public class NotaServiceImpl implements INotaService {
       builder.and(qNotaCredito.movimiento.eq(Movimiento.VENTA));
     if (criteria.getMovimiento() == Movimiento.COMPRA)
       builder.and(qNotaCredito.movimiento.eq(Movimiento.COMPRA));
-    // Fecha
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       Calendar cal = new GregorianCalendar();
       if (criteria.getFechaDesde() != null) {
@@ -228,30 +227,31 @@ public class NotaServiceImpl implements INotaService {
       }
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
         DateExpression<Date> fDesde =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaDesde()));
         DateExpression<Date> fHasta =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaHasta()));
         builder.and(qNotaCredito.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
         DateExpression<Date> fDesde =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaDesde()));
         builder.and(qNotaCredito.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
         DateExpression<Date> fHasta =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaHasta()));
         builder.and(qNotaCredito.fecha.before(fHasta));
       }
@@ -311,19 +311,19 @@ public class NotaServiceImpl implements INotaService {
       builder.and(qNotaDebito.movimiento.eq(Movimiento.VENTA));
     if (criteria.getMovimiento() == Movimiento.COMPRA)
       builder.and(qNotaDebito.movimiento.eq(Movimiento.COMPRA));
-    // Fecha
     if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      String dateTemplate = "convert({0}, datetime)";
       DateExpression<Date> fDesde =
           Expressions.dateTemplate(
               Date.class,
-              "convert({0}, datetime)",
+              dateTemplate,
               formateadorFecha.format(criteria.getFechaDesde()));
       DateExpression<Date> fHasta =
           Expressions.dateTemplate(
               Date.class,
-              "convert({0}, datetime)",
+              dateTemplate,
               formateadorFecha.format(criteria.getFechaHasta()));
       builder.and(qNotaDebito.fecha.between(fDesde, fHasta));
     }
@@ -371,13 +371,9 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public Factura getFacturaDeLaNotaCredito(Long idNota) {
     Optional<NotaCredito> nc = this.notaCreditoRepository.findById(idNota);
-    if (nc.isPresent()) {
-      return (nc.get().getFacturaVenta() != null
-          ? nc.get().getFacturaVenta()
-          : nc.get().getFacturaCompra());
-    } else {
-      return null;
-    }
+    return nc.map(notaCredito -> (notaCredito.getFacturaVenta() != null
+      ? notaCredito.getFacturaVenta()
+      : notaCredito.getFacturaCompra())).orElse(null);
   }
 
   @Override

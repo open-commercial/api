@@ -26,7 +26,7 @@ public interface IGastoService {
 
     Page<Gasto> buscarGastos(BusquedaGastoCriteria criteria);
 
-    long getUltimoNumeroDeGasto(long id_empresa);
+    long getUltimoNumeroDeGasto(long idEmpresa);
 
     BigDecimal getTotalGastosEntreFechasYFormaDePago(long idEmpresa, long idFormaDePago, Date desde, Date hasta);
 

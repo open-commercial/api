@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.domain.Pageable;
 
 @Data
 @AllArgsConstructor
@@ -16,5 +15,7 @@ public class BusquedaUbicacionCriteria {
   private Long idProvincia;
   private String descripcion;
   private String codigoPostal;
-  private Pageable pageable;
+  private Integer pagina;
+  private String ordenarPor;
+  private String sentido;
 }

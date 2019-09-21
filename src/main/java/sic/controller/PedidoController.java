@@ -125,7 +125,7 @@ public class PedidoController {
       @RequestBody BusquedaPedidoCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return pedidoService.buscarConCriteria(criteria, (int) claims.get("idUsuario"));
+    return pedidoService.buscarPedidos(criteria, (int) claims.get("idUsuario"));
   }
 
     @DeleteMapping("/pedidos/{idPedido}")

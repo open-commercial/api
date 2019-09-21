@@ -11,10 +11,9 @@ public interface IUbicacionService {
 
   Ubicacion getUbicacionPorId(long idUbicacion);
 
-  Page<Localidad> buscar(BusquedaLocalidadCriteria criteria);
+  Page<Localidad> buscarLocalidades(BusquedaLocalidadCriteria criteria);
 
-  Ubicacion guardar(
-    @Valid Ubicacion ubicacion);
+  Ubicacion guardar(@Valid Ubicacion ubicacion);
 
   Localidad getLocalidadPorId(Long idLocalidad);
 

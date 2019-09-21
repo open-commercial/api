@@ -13,13 +13,13 @@ import javax.validation.Valid;
 
 public interface IPedidoService {
 
-  Pedido getPedidoNoEliminadoPorId(long id);
+  Pedido getPedidoNoEliminadoPorId(long idPedido);
 
   void actualizar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal);
 
   void actualizarFacturasDelPedido(@Valid Pedido pedido, List<Factura> facturas);
 
-  Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn);
+  Page<Pedido> buscarPedidos(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn);
 
   long generarNumeroPedido(Empresa empresa);
 

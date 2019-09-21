@@ -263,7 +263,7 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
+  public Page<Pedido> buscarPedidos(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
     Page<Pedido> pedidos =
         pedidoRepository.findAll(
             this.getBuilderPedido(criteria, idUsuarioLoggedIn),
@@ -300,30 +300,31 @@ public class PedidoServiceImpl implements IPedidoService {
       }
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
         DateExpression<Date> fDesde =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaDesde()));
         DateExpression<Date> fHasta =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaHasta()));
         builder.and(qPedido.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
         DateExpression<Date> fDesde =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaDesde()));
         builder.and(qPedido.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
         DateExpression<Date> fHasta =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaHasta()));
         builder.and(qPedido.fecha.before(fHasta));
       }

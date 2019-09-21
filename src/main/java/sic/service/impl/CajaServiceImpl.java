@@ -161,7 +161,7 @@ public class CajaServiceImpl implements ICajaService {
   @Override
   public Page<Caja> buscarCajas(BusquedaCajaCriteria criteria) {
     return cajaRepository.findAll(
-        getBuilder(criteria),
+        this.getBuilder(criteria),
         this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
   }
 
@@ -222,30 +222,31 @@ public class CajaServiceImpl implements ICajaService {
       }
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
         DateExpression<Date> fDesde =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaDesde()));
         DateExpression<Date> fHasta =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaHasta()));
         builder.and(qCaja.fechaApertura.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
         DateExpression<Date> fDesde =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaDesde()));
         builder.and(qCaja.fechaApertura.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
         DateExpression<Date> fHasta =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaHasta()));
         builder.and(qCaja.fechaApertura.before(fHasta));
       }

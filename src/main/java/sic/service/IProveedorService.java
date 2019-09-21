@@ -11,7 +11,7 @@ import javax.validation.Valid;
 
 public interface IProveedorService {
 
-  Proveedor getProveedorNoEliminadoPorId(long id_Proveedor);
+  Proveedor getProveedorNoEliminadoPorId(long idProveedor);
 
   void actualizar(@Valid Proveedor proveedor);
 

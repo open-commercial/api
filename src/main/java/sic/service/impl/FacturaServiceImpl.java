@@ -297,7 +297,6 @@ public class FacturaServiceImpl implements IFacturaService {
             .id_Empresa
             .eq(criteria.getIdEmpresa())
             .and(qFacturaCompra.eliminada.eq(false)));
-    // Fecha
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       Calendar cal = new GregorianCalendar();
       if (criteria.getFechaDesde() != null) {
@@ -316,30 +315,31 @@ public class FacturaServiceImpl implements IFacturaService {
       }
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
         DateExpression<Date> fDesde =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaDesde()));
         DateExpression<Date> fHasta =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaHasta()));
         builder.and(qFacturaCompra.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
         DateExpression<Date> fDesde =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaDesde()));
         builder.and(qFacturaCompra.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
         DateExpression<Date> fHasta =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaHasta()));
         builder.and(qFacturaCompra.fecha.before(fHasta));
       }
@@ -367,7 +367,6 @@ public class FacturaServiceImpl implements IFacturaService {
             .id_Empresa
             .eq(criteria.getIdEmpresa())
             .and(qFacturaVenta.eliminada.eq(false)));
-    // Fecha
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       Calendar cal = new GregorianCalendar();
       if (criteria.getFechaDesde() != null) {
@@ -386,30 +385,31 @@ public class FacturaServiceImpl implements IFacturaService {
       }
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
         DateExpression<Date> fDesde =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaDesde()));
         DateExpression<Date> fHasta =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaHasta()));
         builder.and(qFacturaVenta.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
         DateExpression<Date> fDesde =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaDesde()));
         builder.and(qFacturaVenta.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
         DateExpression<Date> fHasta =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaHasta()));
         builder.and(qFacturaVenta.fecha.before(fHasta));
       }

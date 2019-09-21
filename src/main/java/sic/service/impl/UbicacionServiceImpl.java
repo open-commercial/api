@@ -135,7 +135,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
   }
 
   @Override
-  public Page<Localidad> buscar(BusquedaLocalidadCriteria criteria) {
+  public Page<Localidad> buscarLocalidades(BusquedaLocalidadCriteria criteria) {
     QLocalidad qLocalidad = QLocalidad.localidad;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.getNombre() != null) {

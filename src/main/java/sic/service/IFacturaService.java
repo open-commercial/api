@@ -42,8 +42,14 @@ public interface IFacturaService {
 
   FacturaVenta autorizarFacturaVenta(FacturaVenta fv);
 
-  BigDecimal calcularIvaNetoFactura(TipoDeComprobante tipo, BigDecimal[] cantidades,
-                                    BigDecimal[] ivaPorcentajeRenglones, BigDecimal[] ivaNetoRenglones, BigDecimal ivaPorcentaje, BigDecimal porcentajeDescuento, BigDecimal porcentajeRecargo);
+  BigDecimal calcularIvaNetoFactura(
+      TipoDeComprobante tipo,
+      BigDecimal[] cantidades,
+      BigDecimal[] ivaPorcentajeRenglones,
+      BigDecimal[] ivaNetoRenglones,
+      BigDecimal ivaPorcentaje,
+      BigDecimal porcentajeDescuento,
+      BigDecimal porcentajeRecargo);
 
   BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
 

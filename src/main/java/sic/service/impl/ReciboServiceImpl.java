@@ -105,15 +105,16 @@ public class ReciboServiceImpl implements IReciboService {
       criteria.setFechaHasta(cal.getTime());
       FormatterFechaHora formateadorFecha =
         new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      String dateTemplate = "convert({0}, datetime)";
       DateExpression<Date> fDesde =
         Expressions.dateTemplate(
           Date.class,
-          "convert({0}, datetime)",
+          dateTemplate,
           formateadorFecha.format(criteria.getFechaDesde()));
       DateExpression<Date> fHasta =
         Expressions.dateTemplate(
           Date.class,
-          "convert({0}, datetime)",
+          dateTemplate,
           formateadorFecha.format(criteria.getFechaHasta()));
       builder.and(qRecibo.fecha.between(fDesde, fHasta));
     }

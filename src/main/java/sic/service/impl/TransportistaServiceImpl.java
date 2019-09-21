@@ -90,11 +90,11 @@ public class TransportistaServiceImpl implements ITransportistaService {
     return list;
   }
 
-  private BooleanBuilder buildPredicadoNombre(String nombre, QTransportista qtransportista) {
+  private BooleanBuilder buildPredicadoNombre(String nombre, QTransportista qTransportista) {
     String[] terminos = nombre.split(" ");
     BooleanBuilder descripcionProducto = new BooleanBuilder();
     for (String termino : terminos) {
-      descripcionProducto.and(qtransportista.nombre.containsIgnoreCase(termino));
+      descripcionProducto.and(qTransportista.nombre.containsIgnoreCase(termino));
     }
     return descripcionProducto;
   }

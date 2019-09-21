@@ -133,30 +133,31 @@ public class GastoServiceImpl implements IGastoService {
       }
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
         DateExpression<Date> fDesde =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaDesde()));
         DateExpression<Date> fHasta =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaHasta()));
         builder.and(qGasto.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
         DateExpression<Date> fDesde =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaDesde()));
         builder.and(qGasto.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
         DateExpression<Date> fHasta =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaHasta()));
         builder.and(qGasto.fecha.before(fHasta));
       }

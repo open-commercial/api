@@ -105,7 +105,7 @@ public class UbicacionController {
 
   @PostMapping("/ubicaciones/localidades/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Page<Localidad> buscarConCriteria(@RequestBody BusquedaLocalidadCriteria criteria) {
-    return ubicacionService.buscar(criteria);
+  public Page<Localidad> buscarLocalidades(@RequestBody BusquedaLocalidadCriteria criteria) {
+    return ubicacionService.buscarLocalidades(criteria);
   }
 }
