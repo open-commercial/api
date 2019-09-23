@@ -7,8 +7,6 @@ import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,7 +27,6 @@ public class CuentaCorrienteController {
   private final IProveedorService proveedorService;
   private final IClienteService clienteService;
   private final IAuthService authService;
-  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
   @Autowired
@@ -47,6 +44,12 @@ public class CuentaCorrienteController {
   }
 
   @PostMapping("/cuentas-corriente/clientes/busqueda/criteria")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE
+  })
   public Page<CuentaCorrienteCliente> buscarConCriteria(
       @RequestBody BusquedaCuentaCorrienteClienteCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -131,8 +134,7 @@ public class CuentaCorrienteController {
       @PathVariable long idCuentaCorriente,
       @RequestParam(required = false) Integer pagina) {
     if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable = PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT);
-    return cuentaCorrienteService.getRenglonesCuentaCorriente(idCuentaCorriente, pageable);
+    return cuentaCorrienteService.getRenglonesCuentaCorriente(idCuentaCorriente, pagina, false);
   }
 
   @GetMapping("/cuentas-corriente/clientes/{idCliente}/reporte")
@@ -148,7 +150,6 @@ public class CuentaCorrienteController {
       @RequestParam(required = false) Integer pagina,
       @RequestParam(required = false) String formato) {
     if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable = PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT);
     HttpHeaders headers = new HttpHeaders();
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
     switch (formato) {
@@ -159,7 +160,7 @@ public class CuentaCorrienteController {
             cuentaCorrienteService.getReporteCuentaCorrienteCliente(
                 cuentaCorrienteService.getCuentaCorrientePorCliente(
                     clienteService.getClienteNoEliminadoPorId(idCliente)),
-                pageable,
+                pagina,
                 formato);
         headers.setContentLength(reporteXls.length);
         return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
@@ -170,7 +171,7 @@ public class CuentaCorrienteController {
             cuentaCorrienteService.getReporteCuentaCorrienteCliente(
                 cuentaCorrienteService.getCuentaCorrientePorCliente(
                     clienteService.getClienteNoEliminadoPorId(idCliente)),
-                pageable,
+                pagina,
                 formato);
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
       default:

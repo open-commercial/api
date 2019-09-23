@@ -1,6 +1,8 @@
 package sic.service;
 
 import java.util.List;
+
+import org.springframework.data.domain.Page;
 import sic.modelo.criteria.BusquedaTransportistaCriteria;
 import sic.modelo.Empresa;
 import sic.modelo.Transportista;
@@ -13,7 +15,7 @@ public interface ITransportistaService {
             
     void actualizar(@Valid Transportista transportista);
 
-    List<Transportista> buscarTransportistas(BusquedaTransportistaCriteria criteria);
+    Page<Transportista> buscarTransportistas(BusquedaTransportistaCriteria criteria);
 
     void eliminar(long idTransportista);
 

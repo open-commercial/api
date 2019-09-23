@@ -1,7 +1,6 @@
 package sic.service;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaCuentaCorrienteClienteCriteria;
 import sic.modelo.criteria.BusquedaCuentaCorrienteProveedorCriteria;
@@ -32,8 +31,7 @@ public interface ICuentaCorrienteService {
 
   Page<CuentaCorrienteProveedor> buscarCuentaCorrienteProveedor(BusquedaCuentaCorrienteProveedorCriteria criteria);
 
-  Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(
-      long idCuentaCorriente, Pageable pageable);
+  Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Integer pagina, boolean reporte);
 
   void asentarEnCuentaCorriente(FacturaVenta facturaVenta, TipoDeOperacion tipo);
 
@@ -44,7 +42,7 @@ public interface ICuentaCorrienteService {
   void asentarEnCuentaCorriente(Recibo recibo, TipoDeOperacion tipo);
 
   byte[] getReporteCuentaCorrienteCliente(
-      CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page, String formato);
+      CuentaCorrienteCliente cuentaCorrienteCliente, Integer pagina, String formato);
 
   List<RenglonCuentaCorriente> getUltimosDosMovimientos(CuentaCorriente cuentaCorriente);
 

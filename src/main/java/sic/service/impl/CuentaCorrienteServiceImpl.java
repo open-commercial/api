@@ -425,14 +425,13 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   public byte[] getReporteCuentaCorrienteCliente(
-      CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page, String formato) {
+      CuentaCorrienteCliente cuentaCorrienteCliente, Integer pagina, String formato) {
     ClassLoader classLoader = CuentaCorrienteServiceImpl.class.getClassLoader();
     InputStream isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/CuentaCorriente.jasper");
-    page = PageRequest.of(0, (page.getPageNumber() + 1) * page.getPageSize());
     JRBeanCollectionDataSource ds =
         new JRBeanCollectionDataSource(
-            this.getRenglonesCuentaCorriente(cuentaCorrienteCliente.getIdCuentaCorriente(), page)
+            this.getRenglonesCuentaCorriente(cuentaCorrienteCliente.getIdCuentaCorriente(), pagina, true)
                 .getContent());
     Map<String, Object> params = new HashMap<>();
     params.put("cuentaCorrienteCliente", cuentaCorrienteCliente);
@@ -518,9 +517,15 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(
-      long idCuentaCorriente, Pageable page) {
+      long idCuentaCorriente, Integer pagina, boolean reporte) {
+    Pageable pageable;
+    if (reporte) {
+      pageable = PageRequest.of(0, (pagina + 1) * TAMANIO_PAGINA_DEFAULT);
+    } else {
+      pageable = PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT);
+    }
     return renglonCuentaCorrienteRepository.findAllByCuentaCorrienteAndEliminado(
-        idCuentaCorriente, page);
+        idCuentaCorriente, pageable);
   }
 
   @Override
