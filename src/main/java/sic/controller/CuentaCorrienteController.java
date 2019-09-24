@@ -50,7 +50,7 @@ public class CuentaCorrienteController {
     Rol.VENDEDOR,
     Rol.VIAJANTE
   })
-  public Page<CuentaCorrienteCliente> buscarConCriteria(
+  public Page<CuentaCorrienteCliente> buscarCuentasCorrienteCliente(
       @RequestBody BusquedaCuentaCorrienteClienteCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
@@ -63,7 +63,7 @@ public class CuentaCorrienteController {
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
   })
-  public Page<CuentaCorrienteProveedor> buscarConCriteria(
+  public Page<CuentaCorrienteProveedor> buscarCuentasCorrienteProveedor(
       @RequestBody BusquedaCuentaCorrienteProveedorCriteria criteria) {
     return cuentaCorrienteService.buscarCuentaCorrienteProveedor(criteria);
   }

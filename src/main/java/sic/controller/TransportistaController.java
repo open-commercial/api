@@ -91,7 +91,7 @@ public class TransportistaController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public Page<Transportista> buscarTransportista(
+  public Page<Transportista> buscarTransportistas(
       @RequestBody BusquedaTransportistaCriteria criteria) {
     return transportistaService.buscarTransportistas(criteria);
   }
