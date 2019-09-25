@@ -28,7 +28,8 @@ public class ProductoBuilder {
     private String nombreRubro = "Ferreteria";
     private boolean ilimitado = false;
     private boolean publico = true;
-    private boolean destacado = false;
+    private boolean oferta = false;
+    private BigDecimal bonificacionOferta = BigDecimal.TEN;
     private Date fechaUltimaModificacion = new Date(1463540400000L); // 18-05-2016
     private String estanteria = "A";
     private String estante = "1";
@@ -60,7 +61,8 @@ public class ProductoBuilder {
         nombreRubro,
         ilimitado,
         publico,
-        destacado,
+        oferta,
+        bonificacionOferta,
         fechaUltimaModificacion,
         estanteria,
         estante,
@@ -168,16 +170,21 @@ public class ProductoBuilder {
     }
 
 
-    public ProductoBuilder withDestacado(boolean destacado) {
-        this.destacado = destacado;
+    public ProductoBuilder withOferta(boolean oferta) {
+        this.oferta = oferta;
         return this;
     }
-    
+
+  public ProductoBuilder withBonificacionOferta(BigDecimal bonificacionOferta) {
+    this.bonificacionOferta = bonificacionOferta;
+    return this;
+  }
+
     public ProductoBuilder withFechaUltimaModificacion(Date fechaUltimaModificacion) {
         this.fechaUltimaModificacion = fechaUltimaModificacion;
         return this;
     }
-    
+
     public ProductoBuilder withEstanteria(String estanteria) {
         this.estanteria = estanteria;
         return this;

@@ -71,12 +71,12 @@ public interface IFacturaService {
   boolean pedidoTotalmenteFacturado(Pedido pedido);
 
   RenglonFactura calcularRenglon(
-    TipoDeComprobante tipoDeComprobante,
-    Movimiento movimiento,
-    BigDecimal cantidad,
-    long idProducto,
-    BigDecimal descuentoPorcentaje,
-    boolean dividiendoRenglonFactura);
+      TipoDeComprobante tipoDeComprobante,
+      Movimiento movimiento,
+      BigDecimal cantidad,
+      long idProducto,
+      boolean dividiendoRenglonFactura,
+      Cliente cliente);
 
   boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAFIP comprobante);
 

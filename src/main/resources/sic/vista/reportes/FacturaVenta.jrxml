@@ -16,7 +16,7 @@
 	<field name="medidaItem" class="java.lang.String"/>
 	<field name="cantidad" class="java.math.BigDecimal"/>
 	<field name="precioUnitario" class="java.math.BigDecimal"/>
-	<field name="descuentoPorcentaje" class="java.math.BigDecimal"/>
+	<field name="bonificacionPorcentaje" class="java.math.BigDecimal"/>
 	<field name="importe" class="java.math.BigDecimal"/>
 	<background>
 		<band splitType="Stretch"/>
@@ -264,8 +264,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{facturaVenta}.getUbicacionFacturacion()
-]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getUbicacionFacturacion()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="50" y="191" width="505" height="15" uuid="cb8691ce-a678-4cf1-a2c7-4938068372c4">
@@ -350,7 +349,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 			<property name="local_mesure_unitheight" value="pixel"/>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<staticText>
-				<reportElement x="0" y="1" width="75" height="16" uuid="0ba8e29c-2f1e-4b9f-b40c-cdd66d250bea">
+				<reportElement x="0" y="1" width="80" height="16" uuid="0ba8e29c-2f1e-4b9f-b40c-cdd66d250bea">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -360,7 +359,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<text><![CDATA[Código]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="75" y="1" width="255" height="16" uuid="01f242fd-85d5-4c4e-9b09-f1c09d95b55a">
+				<reportElement x="80" y="1" width="210" height="16" uuid="01f242fd-85d5-4c4e-9b09-f1c09d95b55a">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="local_mesure_unitwidth" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -371,7 +370,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<text><![CDATA[Descripción]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="330" y="1" width="40" height="16" uuid="e2f0a5f2-9774-4ad4-962c-8b064818b692">
+				<reportElement x="290" y="1" width="40" height="16" uuid="e2f0a5f2-9774-4ad4-962c-8b064818b692">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -380,7 +379,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<text><![CDATA[Cant.]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="415" y="1" width="52" height="16" uuid="93deb364-0ad0-4437-92b8-20064ed82690">
+				<reportElement x="375" y="1" width="52" height="16" uuid="93deb364-0ad0-4437-92b8-20064ed82690">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -389,13 +388,13 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<text><![CDATA[P.Unit.]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="467" y="1" width="31" height="16" uuid="5bd3b2cd-ad86-4699-8f14-8c6d3126b493">
+				<reportElement x="427" y="1" width="71" height="16" uuid="5bd3b2cd-ad86-4699-8f14-8c6d3126b493">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Desc.]]></text>
+				<text><![CDATA[Bonificación]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="498" y="1" width="57" height="16" uuid="b048b3d8-b91d-4375-88a9-cd62bd6ad32b">
@@ -410,7 +409,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<reportElement x="0" y="0" width="555" height="1" uuid="9554feb6-2d03-455d-a9bb-071b6982915e"/>
 			</line>
 			<staticText>
-				<reportElement x="370" y="1" width="45" height="16" uuid="92d2b330-c0cf-4e16-8082-bc3659e31754">
+				<reportElement x="330" y="1" width="45" height="16" uuid="92d2b330-c0cf-4e16-8082-bc3659e31754">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -436,7 +435,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textFieldExpression><![CDATA[$F{codigoItem}]]></textFieldExpression>
 			</textField>
 			<textField pattern="">
-				<reportElement x="80" y="0" width="250" height="15" uuid="f2bfc27d-700e-40b7-a73b-6303c546d09a">
+				<reportElement x="80" y="0" width="210" height="15" uuid="f2bfc27d-700e-40b7-a73b-6303c546d09a">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="local_mesure_unitwidth" value="pixel"/>
@@ -448,7 +447,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textFieldExpression><![CDATA[$F{descripcionItem}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="330" y="0" width="40" height="15" uuid="5dc407ad-61c0-4c06-bc77-1ab3136f8e40">
+				<reportElement x="290" y="0" width="40" height="15" uuid="5dc407ad-61c0-4c06-bc77-1ab3136f8e40">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -457,7 +456,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textFieldExpression><![CDATA[$F{cantidad}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00">
-				<reportElement x="415" y="0" width="52" height="15" uuid="ef48b8f6-ecc3-42f2-b6f9-269aae20c81e">
+				<reportElement x="375" y="0" width="52" height="15" uuid="ef48b8f6-ecc3-42f2-b6f9-269aae20c81e">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -466,13 +465,13 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textFieldExpression><![CDATA[$F{precioUnitario}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="">
-				<reportElement x="467" y="0" width="31" height="15" uuid="f3e07bc2-0b6a-4759-80ae-837e9ad074b8">
+				<reportElement x="427" y="0" width="71" height="15" uuid="f3e07bc2-0b6a-4759-80ae-837e9ad074b8">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{descuentoPorcentaje}.doubleValue()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{bonificacionPorcentaje}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.00">
 				<reportElement x="498" y="0" width="57" height="15" uuid="e044f181-0b15-492c-bf20-af4d406e94db">
@@ -484,7 +483,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textFieldExpression><![CDATA[$F{importe}.doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern="">
-				<reportElement x="370" y="0" width="45" height="15" uuid="7a5d637a-a063-4bbe-a486-b313a3f62c77">
+				<reportElement x="330" y="0" width="45" height="15" uuid="7a5d637a-a063-4bbe-a486-b313a3f62c77">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center">

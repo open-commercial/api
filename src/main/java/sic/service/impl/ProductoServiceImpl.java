@@ -76,7 +76,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
     if (operacion == TipoDeOperacion.ACTUALIZACION
-        && (producto.isDestacado()
+        && (producto.isOferta()
             && (!producto.isPublico()
                 || (producto.getUrlImagen() == null || producto.getUrlImagen().isEmpty())))) {
       throw new BusinessServiceException(
@@ -222,9 +222,9 @@ public class ProductoServiceImpl implements IProductoService {
     if (criteria.isBuscaPorVisibilidad())
       if (criteria.getPublico()) builder.and(qProducto.publico.isTrue());
       else builder.and(qProducto.publico.isFalse());
-    if (criteria.isBuscaPorDestacado())
-      if (criteria.getDestacado()) builder.and(qProducto.destacado.isTrue());
-      else builder.and(qProducto.destacado.isFalse());
+    if (criteria.isBuscaPorOferta())
+      if (criteria.getOferta()) builder.and(qProducto.oferta.isTrue());
+      else builder.and(qProducto.oferta.isFalse());
     return builder;
   }
 
@@ -244,7 +244,7 @@ public class ProductoServiceImpl implements IProductoService {
     producto.setFechaAlta(new Date());
     producto.setFechaUltimaModificacion(new Date());
     producto.setEliminado(false);
-    producto.setDestacado(false);
+    producto.setOferta(false);
     this.validarOperacion(TipoDeOperacion.ALTA, producto);
     producto = productoRepository.save(producto);
     logger.warn("El Producto {} se guardó correctamente.", producto);

@@ -259,15 +259,22 @@ public class FacturaController {
         return facturaService.getRenglonesPedidoParaFacturar(idPedido, tipoDeComprobante);
     }
 
-    @GetMapping("/facturas/renglon")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
-    public RenglonFactura calcularRenglonVenta(@RequestParam long idProducto,
-                                          @RequestParam TipoDeComprobante tipoDeComprobante,
-                                          @RequestParam Movimiento movimiento,
-                                          @RequestParam BigDecimal cantidad, 
-                                          @RequestParam BigDecimal descuentoPorcentaje) {
-        return facturaService.calcularRenglon(tipoDeComprobante, movimiento, cantidad, idProducto, descuentoPorcentaje, false);
-    }
+  @GetMapping("/facturas/renglon")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
+  public RenglonFactura calcularRenglon(
+      @RequestParam long idProducto,
+      @RequestParam TipoDeComprobante tipoDeComprobante,
+      @RequestParam Movimiento movimiento,
+      @RequestParam BigDecimal cantidad,
+      @RequestParam long idCliente) {
+    return facturaService.calcularRenglon(
+        tipoDeComprobante,
+        movimiento,
+        cantidad,
+        idProducto,
+        false,
+        clienteService.getClienteNoEliminadoPorId(idCliente));
+  }
 
   @PostMapping("/facturas/total-facturado-venta/criteria")
   @AccesoRolesPermitidos({

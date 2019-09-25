@@ -1378,10 +1378,10 @@ public class NotaServiceImpl implements INotaService {
         renglonNota.setMedidaItem(renglonFactura.getMedidaItem());
         renglonNota.setCantidad(cantidad[i]);
         renglonNota.setPrecioUnitario(renglonFactura.getPrecioUnitario());
-        renglonNota.setDescuentoPorcentaje(renglonFactura.getDescuentoPorcentaje());
+        renglonNota.setDescuentoPorcentaje(renglonFactura.getBonificacionPorcentaje());
         renglonNota.setDescuentoNeto(
             renglonFactura
-                .getDescuentoPorcentaje()
+                .getBonificacionPorcentaje()
                 .divide(CIEN, 15, RoundingMode.HALF_UP)
                 .multiply(renglonNota.getPrecioUnitario()));
         renglonNota.setGananciaPorcentaje(renglonFactura.getGananciaPorcentaje());

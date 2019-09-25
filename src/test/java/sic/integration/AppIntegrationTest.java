@@ -139,12 +139,12 @@ class AppIntegrationTest {
         RenglonFactura[].class);
     BigDecimal subTotal = renglonesParaFacturar[0].getImporte();
     assertEquals(
-      new BigDecimal("4250.000000000000000000000000000000"),
+      new BigDecimal("4000.000000000000000000000000000000"),
       renglonesParaFacturar[0].getImporte());
     BigDecimal recargoPorcentaje = BigDecimal.TEN;
     BigDecimal recargo_neto =
       subTotal.multiply(recargoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
-    assertEquals(new BigDecimal("425.000000000000000"), recargo_neto);
+    assertEquals(new BigDecimal("400.000000000000000"), recargo_neto);
     BigDecimal iva_105_netoFactura = BigDecimal.ZERO;
     BigDecimal iva_21_netoFactura = BigDecimal.ZERO;
     if (renglonesParaFacturar[0].getIvaPorcentaje().compareTo(IVA_105) == 0) {
@@ -160,19 +160,15 @@ class AppIntegrationTest {
             .getCantidad()
             .multiply(renglonesParaFacturar[0].getIvaNeto()));
     }
+    iva_21_netoFactura = iva_21_netoFactura.add(recargo_neto.multiply(IVA_21.divide(new BigDecimal("100"))));
     assertEquals(BigDecimal.ZERO, iva_105_netoFactura);
     assertEquals(
-      new BigDecimal("892.500000000000000"),
+      new BigDecimal("924.000000000000000"),
       iva_21_netoFactura.setScale(15, RoundingMode.HALF_UP));
     BigDecimal subTotalBruto = subTotal.add(recargo_neto);
-    assertEquals(new BigDecimal("4675.000000000000000000000000000000"), subTotalBruto);
-    BigDecimal total =
-      subTotalBruto
-        .add(iva_105_netoFactura)
-        .add(
-          iva_21_netoFactura.multiply(
-            BigDecimal.ONE.add(recargoPorcentaje.divide(new BigDecimal("100")))));
-    assertEquals(new BigDecimal("5656.750000000000000"), total.setScale(15, RoundingMode.HALF_UP));
+    assertEquals(new BigDecimal("4400.000000000000000000000000000000"), subTotalBruto);
+    BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
+    assertEquals(new BigDecimal("5324.000000000000000"), total.setScale(15, RoundingMode.HALF_UP));
     FacturaVentaDTO facturaVentaA = FacturaVentaDTO.builder()
       .idCliente(1L)
       .build();
@@ -191,9 +187,7 @@ class AppIntegrationTest {
     facturaVentaA.setDescuentoNeto(BigDecimal.ZERO);
     facturaVentaA.setSubTotalBruto(subTotalBruto);
     facturaVentaA.setIva105Neto(iva_105_netoFactura);
-    facturaVentaA.setIva21Neto(
-      iva_21_netoFactura.multiply(
-        BigDecimal.ONE.add(recargoPorcentaje.divide(new BigDecimal("100")))));
+    facturaVentaA.setIva21Neto(iva_21_netoFactura);
     facturaVentaA.setTotal(total);
     facturaVentaA.setFecha(new Date());
     this.abrirCaja();
@@ -222,15 +216,15 @@ class AppIntegrationTest {
     List<RenglonFactura> renglonesDeFactura = new ArrayList<>();
     renglonesDeFactura.add(renglonesParaFacturar[0]);
     facturaVentaB.setRenglones(renglonesDeFactura);
-    facturaVentaB.setSubTotal(new BigDecimal("2210"));
+    facturaVentaB.setSubTotal(new BigDecimal("1768"));
     facturaVentaB.setRecargoPorcentaje(BigDecimal.TEN);
-    facturaVentaB.setRecargoNeto(new BigDecimal("221"));
+    facturaVentaB.setRecargoNeto(new BigDecimal("176.800000000000000"));
     facturaVentaB.setDescuentoPorcentaje(BigDecimal.ZERO);
     facturaVentaB.setDescuentoNeto(BigDecimal.ZERO);
-    facturaVentaB.setSubTotalBruto(new BigDecimal("2200"));
-    facturaVentaB.setIva105Neto(new BigDecimal("231"));
+    facturaVentaB.setSubTotalBruto(new BigDecimal("1760.00000000000000"));
+    facturaVentaB.setIva105Neto(new BigDecimal("184.800000000000000"));
     facturaVentaB.setIva21Neto(BigDecimal.ZERO);
-    facturaVentaB.setTotal(new BigDecimal("2431"));
+    facturaVentaB.setTotal(new BigDecimal("1944.800000000000000"));
     facturaVentaB.setFecha(new Date());
     restTemplate.postForObject(
         apiPrefix + "/facturas/venta?idPedido=1", facturaVentaB, FacturaVenta[].class);
@@ -1211,7 +1205,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.VENTA
           + "&cantidad=6"
-          + "&descuentoPorcentaje=10",
+          + "&idCliente=1",
         RenglonFactura.class);
     RenglonFactura renglonDos =
       restTemplate.getForObject(
@@ -1224,7 +1218,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.VENTA
           + "&cantidad=3"
-          + "&descuentoPorcentaje=5",
+          + "&idCliente=1",
         RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
@@ -1343,7 +1337,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.VENTA
           + "&cantidad=5"
-          + "&descuentoPorcentaje=20",
+          + "&idCliente=1",
         RenglonFactura.class);
     RenglonFactura renglonDos =
       restTemplate.getForObject(
@@ -1356,7 +1350,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.VENTA
           + "&cantidad=2"
-          + "&descuentoPorcentaje=0",
+          + "&idCliente=1",
         RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
@@ -1473,7 +1467,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.VENTA
           + "&cantidad=6"
-          + "&descuentoPorcentaje=10",
+          + "&idCliente=1",
         RenglonFactura.class);
     RenglonFactura renglonDos =
       restTemplate.getForObject(
@@ -1486,7 +1480,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.VENTA
           + "&cantidad=3"
-          + "&descuentoPorcentaje=5",
+          + "&idCliente=1",
         RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
@@ -1596,7 +1590,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.VENTA
           + "&cantidad=5"
-          + "&descuentoPorcentaje=20",
+          + "&idCliente=1",
         RenglonFactura.class);
     RenglonFactura renglonDos =
       restTemplate.getForObject(
@@ -1609,7 +1603,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.VENTA
           + "&cantidad=2"
-          + "&descuentoPorcentaje=0",
+          + "&idCliente=1",
         RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
@@ -1725,7 +1719,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.VENTA
           + "&cantidad=6"
-          + "&descuentoPorcentaje=10",
+          + "&idCliente=1",
         RenglonFactura.class);
     RenglonFactura renglonDos =
       restTemplate.getForObject(
@@ -1738,7 +1732,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.VENTA
           + "&cantidad=3"
-          + "&descuentoPorcentaje=5",
+          + "&idCliente=1",
         RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
@@ -1811,7 +1805,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.VENTA
           + "&cantidad=6"
-          + "&descuentoPorcentaje=10",
+          + "&idCliente=1",
         RenglonFactura.class);
     RenglonFactura renglonDos =
       restTemplate.getForObject(
@@ -1824,7 +1818,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.VENTA
           + "&cantidad=3"
-          + "&descuentoPorcentaje=5",
+          + "&idCliente=1",
         RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
@@ -1939,7 +1933,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.VENTA
           + "&cantidad=5"
-          + "&descuentoPorcentaje=20",
+          + "&idCliente=1",
         RenglonFactura.class);
     RenglonFactura renglonDos =
       restTemplate.getForObject(
@@ -1952,7 +1946,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.VENTA
           + "&cantidad=2"
-          + "&descuentoPorcentaje=0",
+          + "&idCliente=1",
         RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
@@ -2084,7 +2078,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.VENTA
           + "&cantidad=6"
-          + "&descuentoPorcentaje=10",
+          + "&idCliente=1",
         RenglonFactura.class);
     RenglonFactura renglonDos =
       restTemplate.getForObject(
@@ -2097,7 +2091,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.VENTA
           + "&cantidad=3"
-          + "&descuentoPorcentaje=5",
+          + "&idCliente=1",
         RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
@@ -2171,7 +2165,7 @@ class AppIntegrationTest {
                 + "&movimiento="
                 + Movimiento.VENTA
                 + "&cantidad=6"
-                + "&descuentoPorcentaje=10",
+                + "&idCliente=1",
             RenglonFactura.class);
     RenglonFactura renglonDos =
         restTemplate.getForObject(
@@ -2184,7 +2178,7 @@ class AppIntegrationTest {
                 + "&movimiento="
                 + Movimiento.VENTA
                 + "&cantidad=3"
-                + "&descuentoPorcentaje=5",
+                + "&idCliente=1",
             RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
@@ -2294,7 +2288,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=4"
-          + "&descuentoPorcentaje=20",
+          + "&idCliente=1",
         RenglonFactura.class);
     RenglonFactura renglonDos =
       restTemplate.getForObject(
@@ -2306,7 +2300,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=3"
-          + "&descuentoPorcentaje=0",
+          + "&idCliente=1",
         RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
@@ -2408,7 +2402,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=5"
-          + "&descuentoPorcentaje=20",
+          + "&idCliente=1",
         RenglonFactura.class);
     RenglonFactura renglonDos =
       restTemplate.getForObject(
@@ -2420,7 +2414,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=2"
-          + "&descuentoPorcentaje=0",
+          + "&idCliente=1",
         RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
@@ -2526,7 +2520,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=3"
-          + "&descuentoPorcentaje=20",
+          + "&idCliente=1",
         RenglonFactura.class);
     RenglonFactura renglonDos =
       restTemplate.getForObject(
@@ -2538,7 +2532,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=1"
-          + "&descuentoPorcentaje=0",
+          + "&idCliente=1",
         RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
@@ -2644,7 +2638,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=5"
-          + "&descuentoPorcentaje=20",
+          + "&idCliente=1",
         RenglonFactura.class);
     RenglonFactura renglonDos =
       restTemplate.getForObject(
@@ -2656,7 +2650,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=2"
-          + "&descuentoPorcentaje=0",
+          + "&idCliente=1",
         RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
@@ -2762,7 +2756,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=5"
-          + "&descuentoPorcentaje=20",
+          + "&idCliente=1",
         RenglonFactura.class);
     RenglonFactura renglonDos =
       restTemplate.getForObject(
@@ -2774,7 +2768,7 @@ class AppIntegrationTest {
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=2"
-          + "&descuentoPorcentaje=0",
+          + "&idCliente=1",
         RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
@@ -3176,7 +3170,7 @@ class AppIntegrationTest {
                 + sucursal.getIdSucursal(),
             productoUno,
             ProductoDTO.class);
-    assertFalse(productoRecuperado.isDestacado());
+    assertFalse(productoRecuperado.isOferta());
   }
 
   @Test
@@ -3199,7 +3193,8 @@ class AppIntegrationTest {
     ProductoDTO productoAModificar =
         restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     productoAModificar.setDescripcion("PRODUCTO MODIFICADO.");
-    productoAModificar.setDestacado(true);
+    productoAModificar.setOferta(true);
+    productoAModificar.setBonificacionOferta(BigDecimal.TEN);
     productoAModificar.setUrlImagen(null);
     productoAModificar.setCodigo("666");
     RestClientResponseException thrown =
@@ -3223,7 +3218,7 @@ class AppIntegrationTest {
     productoAModificar.setDescripcion("PRODUCTO MODIFICADO.");
     productoAModificar.getCantidadEnSucursales().get(0).setCantidad(new BigDecimal("52"));
     productoAModificar.setPublico(false);
-    productoAModificar.setDestacado(true);
+    productoAModificar.setOferta(true);
     productoAModificar.setCodigo("666");
     RestClientResponseException thrown =
         assertThrows(
@@ -3602,13 +3597,13 @@ class AppIntegrationTest {
         NotaCreditoDTO.class);
     notaCreditoParaPersistir.setNroNota(notaGuardada.getNroNota());
     assertEquals(notaCreditoParaPersistir, notaGuardada);
-    assertEquals(new BigDecimal("4500.000000000000000000000000000000"), notaGuardada.getSubTotal());
-    assertEquals(new BigDecimal("450.000000000000000"), notaGuardada.getRecargoNeto());
-    assertEquals(new BigDecimal("1125.000000000000000"), notaGuardada.getDescuentoNeto());
-    assertEquals(new BigDecimal("3825.000000000000000000000000000000"), notaGuardada.getSubTotalBruto());
-    assertEquals(new BigDecimal("803.250000000000000000000000000000"), notaGuardada.getIva21Neto());
+    assertEquals(new BigDecimal("4000.000000000000000000000000000000"), notaGuardada.getSubTotal());
+    assertEquals(new BigDecimal("400.000000000000000"), notaGuardada.getRecargoNeto());
+    assertEquals(new BigDecimal("1000.000000000000000"), notaGuardada.getDescuentoNeto());
+    assertEquals(new BigDecimal("3400.000000000000000000000000000000"), notaGuardada.getSubTotalBruto());
+    assertEquals(new BigDecimal("714.000000000000000000000000000000"), notaGuardada.getIva21Neto());
     assertEquals(BigDecimal.ZERO, notaGuardada.getIva105Neto());
-    assertEquals(new BigDecimal("4628.250000000000000000000000000000"), notaGuardada.getTotal());
+    assertEquals(new BigDecimal("4114.000000000000000000000000000000"), notaGuardada.getTotal());
     assertEquals(TipoDeComprobante.NOTA_CREDITO_A, notaGuardada.getTipoComprobante());
     restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
   }
@@ -3713,13 +3708,13 @@ class AppIntegrationTest {
         NotaCreditoDTO.class);
     notaCreditoParaPersistir.setNroNota(notaGuardada.getNroNota());
     assertEquals(notaCreditoParaPersistir, notaGuardada);
-    assertEquals(new BigDecimal("4500.000000000000000000000000000000"), notaGuardada.getSubTotal());
-    assertEquals(new BigDecimal("450.000000000000000"), notaGuardada.getRecargoNeto());
-    assertEquals(new BigDecimal("1125.000000000000000"), notaGuardada.getDescuentoNeto());
-    assertEquals(new BigDecimal("3825.000000000000000000000000000000"), notaGuardada.getSubTotalBruto());
+    assertEquals(new BigDecimal("4000.000000000000000000000000000000"), notaGuardada.getSubTotal());
+    assertEquals(new BigDecimal("400.000000000000000"), notaGuardada.getRecargoNeto());
+    assertEquals(new BigDecimal("1000.000000000000000"), notaGuardada.getDescuentoNeto());
+    assertEquals(new BigDecimal("3400.000000000000000000000000000000"), notaGuardada.getSubTotalBruto());
     assertEquals(BigDecimal.ZERO, notaGuardada.getIva21Neto());
     assertEquals(BigDecimal.ZERO, notaGuardada.getIva105Neto());
-    assertEquals(new BigDecimal("3825.000000000000000000000000000000"), notaGuardada.getTotal());
+    assertEquals(new BigDecimal("3400.000000000000000000000000000000"), notaGuardada.getTotal());
     assertEquals(TipoDeComprobante.NOTA_CREDITO_X, notaGuardada.getTipoComprobante());
     restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
   }
@@ -4593,12 +4588,12 @@ class AppIntegrationTest {
     this.abrirCaja();
     this.shouldCrearFacturaVentaB();
     assertEquals(
-        new BigDecimal("-5992.500000000000000"),
+        new BigDecimal("-5616.800000000000000"),
         restTemplate.getForObject(
             apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
     this.crearReciboParaCliente(5992.5, 1L, 1L);
     assertEquals(
-        new BigDecimal("0E-15"),
+        new BigDecimal("375.700000000000000"),
         restTemplate.getForObject(
             apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
     restTemplate.delete(apiPrefix + "/facturas/1");
@@ -4619,12 +4614,12 @@ class AppIntegrationTest {
     this.shouldCrearFacturaVentaB();
     this.crearNotaCreditoParaCliente();
     assertEquals(
-        new BigDecimal("4114.000000000000000"),
+        new BigDecimal("4489.700000000000000"),
         restTemplate.getForObject(
             apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
     this.shouldCrearFacturaVentaA();
     assertEquals(
-        new BigDecimal("-4116.762500000000000"),
+        new BigDecimal("-2701.300000000000000"),
         restTemplate.getForObject(
             apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class));
   }
@@ -4647,11 +4642,11 @@ class AppIntegrationTest {
           })
         .getBody()
         .getContent();
-    assertEquals(new Double(4114), renglonesCuentaCorriente.get(0).getSaldo());
-    assertEquals(new Double(0), renglonesCuentaCorriente.get(1).getSaldo());
-    assertEquals(new Double(-6113.5), renglonesCuentaCorriente.get(2).getSaldo());
-    assertEquals(new Double(0), renglonesCuentaCorriente.get(3).getSaldo());
-    assertEquals(new Double(-5992.5), renglonesCuentaCorriente.get(4).getSaldo());
+    assertEquals(new Double(4489.7), renglonesCuentaCorriente.get(0).getSaldo());
+    assertEquals(new Double(375.7), renglonesCuentaCorriente.get(1).getSaldo());
+    assertEquals(new Double(-5737.8), renglonesCuentaCorriente.get(2).getSaldo());
+    assertEquals(new Double(375.7), renglonesCuentaCorriente.get(3).getSaldo());
+    assertEquals(new Double(-5616.8), renglonesCuentaCorriente.get(4).getSaldo());
   }
   
   @Test
@@ -5115,28 +5110,28 @@ class AppIntegrationTest {
     this.abrirCaja();
     this.shouldCrearFacturaCompraB();
     assertEquals(
-      new BigDecimal("-599.250000000000000"),
+      new BigDecimal("-561.680000000000000"),
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/proveedores/1/saldo", BigDecimal.class));
     this.crearReciboParaProveedor(599.25, 1L, 1L);
     assertEquals(
-      0,
+      37.57,
       restTemplate
         .getForObject(apiPrefix + "/cuentas-corriente/proveedores/1/saldo", BigDecimal.class)
         .doubleValue());
     restTemplate.delete(apiPrefix + "/recibos/1");
     assertEquals(
-      new BigDecimal("-599.250000000000000"),
+      new BigDecimal("-561.680000000000000"),
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/proveedores/1/saldo", BigDecimal.class));
     this.crearReciboParaProveedor(499.25, 1L, 1L);
     assertEquals(
-      new BigDecimal("-100.000000000000000"),
+      new BigDecimal("-62.430000000000000"),
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/proveedores/1/saldo", BigDecimal.class));
     this.crearReciboParaProveedor(200, 1L, 1L);
     assertEquals(
-      new BigDecimal("100.000000000000000"),
+      new BigDecimal("137.570000000000000"),
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/proveedores/1/saldo", BigDecimal.class));
   }
@@ -5163,11 +5158,11 @@ class AppIntegrationTest {
                 new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {})
             .getBody()
             .getContent();
-    assertEquals(-87.85, renglonesCuentaCorriente.get(0).getSaldo().doubleValue());
-    assertEquals(-499.25, renglonesCuentaCorriente.get(1).getSaldo().doubleValue());
-    assertEquals(100, renglonesCuentaCorriente.get(2).getSaldo().doubleValue());
-    assertEquals(-100, renglonesCuentaCorriente.get(3).getSaldo().doubleValue());
-    assertEquals(-599.25, renglonesCuentaCorriente.get(4).getSaldo().doubleValue());
+    assertEquals(-12.71, renglonesCuentaCorriente.get(0).getSaldo().doubleValue());
+    assertEquals(-424.11, renglonesCuentaCorriente.get(1).getSaldo().doubleValue());
+    assertEquals(137.57, renglonesCuentaCorriente.get(2).getSaldo().doubleValue());
+    assertEquals(-62.43, renglonesCuentaCorriente.get(3).getSaldo().doubleValue());
+    assertEquals(-561.68, renglonesCuentaCorriente.get(4).getSaldo().doubleValue());
     this.crearNotaDebitoParaProveedor();
     renglonesCuentaCorriente =
         restTemplate
@@ -5178,12 +5173,12 @@ class AppIntegrationTest {
                 new ParameterizedTypeReference<PaginaRespuestaRest<RenglonCuentaCorriente>>() {})
             .getBody()
             .getContent();
-    assertEquals(-408.85, renglonesCuentaCorriente.get(0).getSaldo().doubleValue());
-    assertEquals(-87.85, renglonesCuentaCorriente.get(1).getSaldo().doubleValue());
-    assertEquals(-499.25, renglonesCuentaCorriente.get(2).getSaldo().doubleValue());
-    assertEquals(100, renglonesCuentaCorriente.get(3).getSaldo().doubleValue());
-    assertEquals(-100, renglonesCuentaCorriente.get(4).getSaldo().doubleValue());
-    assertEquals(-599.25, renglonesCuentaCorriente.get(5).getSaldo().doubleValue());
+    assertEquals(-333.71, renglonesCuentaCorriente.get(0).getSaldo().doubleValue());
+    assertEquals(-12.71, renglonesCuentaCorriente.get(1).getSaldo().doubleValue());
+    assertEquals(-424.11, renglonesCuentaCorriente.get(2).getSaldo().doubleValue());
+    assertEquals(137.57, renglonesCuentaCorriente.get(3).getSaldo().doubleValue());
+    assertEquals(-62.43, renglonesCuentaCorriente.get(4).getSaldo().doubleValue());
+    assertEquals(-561.68, renglonesCuentaCorriente.get(5).getSaldo().doubleValue());
   }
 
   @Test
@@ -5358,11 +5353,11 @@ class AppIntegrationTest {
     totalFacturadoVenta =
       restTemplate.postForObject(
         apiPrefix + "/facturas/total-facturado-venta/criteria", criteria, BigDecimal.class);
-    assertEquals(new BigDecimal("8230.762500000000000"), totalFacturadoVenta);
+    assertEquals(new BigDecimal("7191.000000000000000"), totalFacturadoVenta);
     totalIvaVenta =
       restTemplate.postForObject(
         apiPrefix + "/facturas/total-iva-venta/criteria", criteria, BigDecimal.class);
-    assertEquals(new BigDecimal("1218.262500000000000"), totalIvaVenta);
+    assertEquals(new BigDecimal("1071.000000000000000"), totalIvaVenta);
     gananciaTotal =
       restTemplate.postForObject(
         apiPrefix + "/facturas/ganancia-total/criteria", criteria, BigDecimal.class);
@@ -5379,11 +5374,11 @@ class AppIntegrationTest {
     totalFacturadoVenta =
       restTemplate.postForObject(
         apiPrefix + "/facturas/total-facturado-venta/criteria", criteria, BigDecimal.class);
-    assertEquals(new BigDecimal("14223.262500000000000"), totalFacturadoVenta);
+    assertEquals(new BigDecimal("12807.800000000000000"), totalFacturadoVenta);
     totalIvaVenta =
       restTemplate.postForObject(
         apiPrefix + "/facturas/total-iva-venta/criteria", criteria, BigDecimal.class);
-    assertEquals(new BigDecimal("1218.262500000000000"), totalIvaVenta);
+    assertEquals(new BigDecimal("1071.000000000000000"), totalIvaVenta);
     gananciaTotal =
       restTemplate.postForObject(
         apiPrefix + "/facturas/ganancia-total/criteria", criteria, BigDecimal.class);
@@ -5406,20 +5401,20 @@ class AppIntegrationTest {
     totalFacturadoCompra =
         restTemplate.postForObject(
             apiPrefix + "/facturas/total-facturado-compra/criteria", criteria, BigDecimal.class);
-    assertEquals(new BigDecimal("610.895000000000000"), totalFacturadoCompra);
+    assertEquals(new BigDecimal("554.540000000000000"), totalFacturadoCompra);
     totalIvaCompra =
         restTemplate.postForObject(
             apiPrefix + "/facturas/total-iva-compra/criteria", criteria, BigDecimal.class);
-    assertEquals(new BigDecimal("83.895000000000000"), totalIvaCompra);
+    assertEquals(new BigDecimal("78.540000000000000"), totalIvaCompra);
     this.shouldCrearFacturaCompraPresupuesto();
     totalFacturadoCompra =
         restTemplate.postForObject(
             apiPrefix + "/facturas/total-facturado-compra/criteria", criteria, BigDecimal.class);
-    assertEquals(new BigDecimal("1210.145000000000000"), totalFacturadoCompra);
+    assertEquals(new BigDecimal("1116.220000000000000"), totalFacturadoCompra);
     totalIvaCompra =
         restTemplate.postForObject(
             apiPrefix + "/facturas/total-iva-compra/criteria", criteria, BigDecimal.class);
-    assertEquals(new BigDecimal("83.895000000000000"), totalIvaCompra);
+    assertEquals(new BigDecimal("78.540000000000000"), totalIvaCompra);
   }
 
   @Test
@@ -5593,7 +5588,7 @@ class AppIntegrationTest {
         restTemplate.postForObject(
             apiPrefix + "/carrito-compra", nuevaOrdenDeCompraDTO, PedidoDTO.class);
     assertEquals(14, pedido.getCantidadArticulos().doubleValue());
-    assertEquals(new BigDecimal("14395.500000000000000000000000000000000000000000000"), pedido.getTotalActual());
+    assertEquals(new BigDecimal("12796.000000000000000000000000000000000000000000000"), pedido.getTotalActual());
   }
 
   @Test

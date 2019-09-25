@@ -187,8 +187,8 @@ public class ProductoController {
             .listarSoloEnStock(soloEnStock)
             .buscaPorVisibilidad(publicos != null)
             .publico(publicos)
-            .buscaPorDestacado(destacados != null)
-            .destacado(destacados)
+            .buscaPorOferta(destacados != null)
+            .oferta(destacados)
             .pageable(pageable)
             .build();
     return productoService.buscarProductos(criteria);
@@ -333,8 +333,8 @@ public class ProductoController {
             .listarSoloEnStock(soloEnStock)
             .buscaPorVisibilidad(publicos != null)
             .publico(publicos)
-            .buscaPorDestacado(destacados != null)
-            .destacado(destacados)
+            .buscaPorOferta(destacados != null)
+            .oferta(destacados)
             .build();
     return productoService.calcularValorStock(criteria);
   }

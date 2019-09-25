@@ -24,7 +24,7 @@ public class BusquedaProductoCriteria {
   private boolean listarSoloEnStock;
   private boolean buscaPorVisibilidad;
   private Boolean publico;
-  private boolean buscaPorDestacado;
-  private Boolean destacado;
+  private boolean buscaPorOferta;
+  private Boolean oferta;
   private Pageable pageable;
 }

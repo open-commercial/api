@@ -384,9 +384,9 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public Map<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido) {
+  public Map<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long idPedido) {
     List<RenglonFactura> renglonesDeFacturas = new ArrayList<>();
-    this.getFacturasDelPedido(nroPedido)
+    this.getFacturasDelPedido(idPedido)
         .forEach(
             f ->
                 f.getRenglones()
@@ -398,8 +398,8 @@ public class PedidoServiceImpl implements IPedidoService {
                                     Movimiento.VENTA,
                                     r.getCantidad(),
                                     r.getIdProductoItem(),
-                                    r.getDescuentoPorcentaje(),
-                                    false))));
+                                    false,
+                                    this.getPedidoNoEliminadoPorId(idPedido).getCliente()))));
     HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
     if (!renglonesDeFacturas.isEmpty()) {
       renglonesDeFacturas.forEach(

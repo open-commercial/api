@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
+import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 
@@ -117,7 +118,12 @@ public class Producto implements Serializable {
 
   private boolean publico;
 
-  private boolean destacado;
+  private boolean oferta;
+
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_oferta_inferior_0}")
+  @DecimalMax(value = "100", inclusive = false, message = "{mensaje_producto_oferta_superior_100}")
+  private BigDecimal bonificacionOferta;
 
   @Temporal(TemporalType.TIMESTAMP)
   private Date fechaUltimaModificacion;
