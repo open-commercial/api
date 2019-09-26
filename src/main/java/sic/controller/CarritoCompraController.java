@@ -1,8 +1,6 @@
 package sic.controller;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -17,23 +15,10 @@ import sic.service.*;
 public class CarritoCompraController {
 
   private final ICarritoCompraService carritoCompraService;
-  private final IPedidoService pedidoService;
-  private final IEmpresaService empresaService;
-  private final IUsuarioService usuarioService;
-  private final IClienteService clienteService;
 
   @Autowired
-  public CarritoCompraController(
-      ICarritoCompraService carritoCompraService,
-      IPedidoService pedidoService,
-      IEmpresaService empresaService,
-      IUsuarioService usuarioService,
-      IClienteService clienteService) {
+  public CarritoCompraController(ICarritoCompraService carritoCompraService) {
     this.carritoCompraService = carritoCompraService;
-    this.pedidoService = pedidoService;
-    this.empresaService = empresaService;
-    this.usuarioService = usuarioService;
-    this.clienteService = clienteService;
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/clientes/{idCliente}")
@@ -77,44 +62,6 @@ public class CarritoCompraController {
   @PostMapping("/carrito-compra")
   public Pedido generarPedidoConItemsDelCarrito(
       @RequestBody NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO) {
-    CarritoCompraDTO carritoCompraDTO =
-        carritoCompraService.getCarritoCompra(
-            nuevaOrdenDeCompraDTO.getIdUsuario(),
-            nuevaOrdenDeCompraDTO.getIdCliente());
-    Pedido pedido = new Pedido();
-    pedido.setCliente(
-        clienteService.getClienteNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdCliente()));
-    pedido.setObservaciones(nuevaOrdenDeCompraDTO.getObservaciones());
-    pedido.setSubTotal(carritoCompraDTO.getSubtotal());
-    pedido.setRecargoPorcentaje(BigDecimal.ZERO);
-    pedido.setRecargoNeto(BigDecimal.ZERO);
-    pedido.setDescuentoPorcentaje(carritoCompraDTO.getBonificacionPorcentaje());
-    pedido.setDescuentoNeto(carritoCompraDTO.getBonificacionNeto());
-    pedido.setTotalActual(carritoCompraDTO.getTotal());
-    pedido.setTotalEstimado(pedido.getTotalActual());
-    pedido.setEmpresa(empresaService.getEmpresaPorId(nuevaOrdenDeCompraDTO.getIdEmpresa()));
-    pedido.setUsuario(
-        usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario()));
-    List<ItemCarritoCompra> items =
-        carritoCompraService
-            .getItemsDelCaritoCompra(
-                nuevaOrdenDeCompraDTO.getIdUsuario(), nuevaOrdenDeCompraDTO.getIdCliente(), 0)
-            .getContent();
-    pedido.setRenglones(new ArrayList<>());
-    items.forEach(
-        i ->
-            pedido
-                .getRenglones()
-                .add(
-                    pedidoService.calcularRenglonPedido(
-                        i.getProducto().getIdProducto(), i.getCantidad(), BigDecimal.ZERO)));
-    Pedido p =
-        pedidoService.guardar(
-            pedido,
-            nuevaOrdenDeCompraDTO.getTipoDeEnvio(),
-            nuevaOrdenDeCompraDTO.getIdSucursal());
-    carritoCompraService.eliminarTodosLosItemsDelUsuario(
-        nuevaOrdenDeCompraDTO.getIdUsuario());
-    return p;
+    return carritoCompraService.crearPedido(nuevaOrdenDeCompraDTO);
   }
 }

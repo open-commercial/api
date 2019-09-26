@@ -4,13 +4,17 @@ import java.math.BigDecimal;
 
 import org.springframework.data.domain.Page;
 import sic.modelo.ItemCarritoCompra;
+import sic.modelo.Pedido;
 import sic.modelo.dto.CarritoCompraDTO;
+import sic.modelo.dto.NuevaOrdenDeCompraDTO;
 
 public interface ICarritoCompraService {
 
   CarritoCompraDTO getCarritoCompra(long idUsuario, long idCliente);
 
   Page<ItemCarritoCompra> getItemsDelCaritoCompra(long idUsuario, long idCliente, int pagina);
+
+  Pedido crearPedido(NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO);
 
   ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(long idUsuario, long idProducto);
 
