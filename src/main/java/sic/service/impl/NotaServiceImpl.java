@@ -1669,11 +1669,6 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public BigDecimal calcularTotalDebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
-    if (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_nota_fechas_busqueda_invalidas", null, Locale.getDefault()));
-    }
     if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
       Calendar cal = new GregorianCalendar();
       cal.setTime(criteria.getFechaDesde());
@@ -1719,11 +1714,6 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public BigDecimal calcularTotalIVADebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
-    if (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_nota_fechas_busqueda_invalidas", null, Locale.getDefault()));
-    }
     if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
       Calendar cal = new GregorianCalendar();
       cal.setTime(criteria.getFechaDesde());
