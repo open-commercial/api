@@ -154,7 +154,7 @@ public class PedidoServiceImpl implements IPedidoService {
               .multiply(
                   BigDecimal.ONE.subtract(
                       renglonPedido
-                          .getDescuentoPorcentaje()
+                          .getBonificacionPorcentaje()
                           .divide(CIEN, 15, RoundingMode.HALF_UP))));
       totalActual = totalActual.add(renglonPedido.getImporte());
       i++;
@@ -456,19 +456,7 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public BigDecimal calcularDescuentoNeto(
-      BigDecimal precioUnitario, BigDecimal descuentoPorcentaje) {
-    BigDecimal resultado = BigDecimal.ZERO;
-    if (descuentoPorcentaje.compareTo(BigDecimal.ZERO) != 0) {
-      resultado =
-          precioUnitario.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
-    }
-    return resultado;
-  }
-
-  @Override
-  public RenglonPedido calcularRenglonPedido(
-      long idProducto, BigDecimal cantidad, BigDecimal descuentoPorcentaje) {
+  public RenglonPedido calcularRenglonPedido(long idProducto, BigDecimal cantidad, Cliente cliente) {
     RenglonPedido nuevoRenglon = new RenglonPedido();
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     nuevoRenglon.setIdProductoItem(producto.getIdProducto());
@@ -477,14 +465,25 @@ public class PedidoServiceImpl implements IPedidoService {
     nuevoRenglon.setDescripcionItem(producto.getDescripcion());
     nuevoRenglon.setMedidaItem(producto.getMedida().getNombre());
     nuevoRenglon.setPrecioUnitario(producto.getPrecioLista());
-    nuevoRenglon.setDescuentoPorcentaje(descuentoPorcentaje);
-    nuevoRenglon.setDescuentoNeto(
-        this.calcularDescuentoNeto(producto.getPrecioLista(), descuentoPorcentaje));
+    if (producto.isOferta()) {
+      nuevoRenglon.setBonificacionPorcentaje(producto.getBonificacionOferta());
+      nuevoRenglon.setBonificacionNeta(
+        CalculosComprobante.calcularProporcion(
+          nuevoRenglon.getPrecioUnitario(), producto.getBonificacionOferta()));
+    } else if (nuevoRenglon.getCantidad().compareTo(producto.getBulto()) > 0) {
+      nuevoRenglon.setBonificacionPorcentaje(cliente.getBonificacion());
+      nuevoRenglon.setBonificacionNeta(
+        CalculosComprobante.calcularProporcion(
+          nuevoRenglon.getPrecioUnitario(), cliente.getBonificacion()));
+    } else {
+      nuevoRenglon.setBonificacionPorcentaje(BigDecimal.ZERO);
+      nuevoRenglon.setBonificacionNeta(BigDecimal.ZERO);
+    }
     nuevoRenglon.setImporte(
         CalculosComprobante.calcularImporte(
             nuevoRenglon.getCantidad(),
             producto.getPrecioLista(),
-            nuevoRenglon.getDescuentoNeto()));
+            nuevoRenglon.getBonificacionNeta()));
     return nuevoRenglon;
   }
 
@@ -498,7 +497,8 @@ public class PedidoServiceImpl implements IPedidoService {
                 this.calcularRenglonPedido(
                     nuevoRenglonesPedidoDTO.getIdProductoItem(),
                     nuevoRenglonesPedidoDTO.getCantidad(),
-                    nuevoRenglonesPedidoDTO.getDescuentoPorcentaje())));
+                    this.clienteService.getClienteNoEliminadoPorId(
+                        nuevoRenglonesPedidoDTO.getIdCliente()))));
     return renglonesPedido;
   }
 }

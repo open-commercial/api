@@ -39,13 +39,8 @@ public interface IPedidoService {
 
   Pedido guardar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal);
 
-  RenglonPedido calcularRenglonPedido(
-    long idProducto,
-    BigDecimal cantidad,
-    BigDecimal descuentoPorcentaje);
+  RenglonPedido calcularRenglonPedido(long idProducto, BigDecimal cantidad, Cliente cliente);
 
   List<RenglonPedido> calcularRenglonesPedido(List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO);
-
-  BigDecimal calcularDescuentoNeto(BigDecimal precioUnitario, BigDecimal descuentoPorcentaje);
 
 }

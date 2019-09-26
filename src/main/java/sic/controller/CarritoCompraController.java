@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import sic.exception.BusinessServiceException;
+import sic.modelo.Cliente;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
 import sic.modelo.Sucursal;
@@ -100,8 +101,8 @@ public class CarritoCompraController {
             nuevaOrdenDeCompraDTO.getIdUsuario(),
             nuevaOrdenDeCompraDTO.getIdCliente());
     Pedido pedido = new Pedido();
-    pedido.setCliente(
-        clienteService.getClienteNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdCliente()));
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdCliente());
+    pedido.setCliente(cliente);
     pedido.setObservaciones(nuevaOrdenDeCompraDTO.getObservaciones());
     pedido.setSubTotal(carritoCompraDTO.getSubtotal());
     pedido.setRecargoPorcentaje(BigDecimal.ZERO);
@@ -141,7 +142,7 @@ public class CarritoCompraController {
                 .getRenglones()
                 .add(
                     pedidoService.calcularRenglonPedido(
-                        i.getProducto().getIdProducto(), i.getCantidad(), BigDecimal.ZERO)));
+                        i.getProducto().getIdProducto(), i.getCantidad(), cliente)));
     Pedido p =
         pedidoService.guardar(
             pedido,
