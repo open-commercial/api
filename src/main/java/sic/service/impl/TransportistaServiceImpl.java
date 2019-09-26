@@ -96,7 +96,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
     String ordenDefault = "nombre";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(
-        pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+        pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenDefault));
     } else {
       switch (sentido) {
         case "ASC":
