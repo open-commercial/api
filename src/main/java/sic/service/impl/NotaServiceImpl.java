@@ -311,21 +311,44 @@ public class NotaServiceImpl implements INotaService {
       builder.and(qNotaDebito.movimiento.eq(Movimiento.VENTA));
     if (criteria.getMovimiento() == Movimiento.COMPRA)
       builder.and(qNotaDebito.movimiento.eq(Movimiento.COMPRA));
-    if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
+    if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
+      Calendar cal = new GregorianCalendar();
+      if (criteria.getFechaDesde() != null) {
+        cal.setTime(criteria.getFechaDesde());
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        criteria.setFechaDesde(cal.getTime());
+      }
+      if (criteria.getFechaHasta() != null) {
+        cal.setTime(criteria.getFechaHasta());
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        criteria.setFechaHasta(cal.getTime());
+      }
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
       String dateTemplate = "convert({0}, datetime)";
-      DateExpression<Date> fDesde =
-          Expressions.dateTemplate(
-              Date.class,
-              dateTemplate,
-              formateadorFecha.format(criteria.getFechaDesde()));
-      DateExpression<Date> fHasta =
-          Expressions.dateTemplate(
-              Date.class,
-              dateTemplate,
-              formateadorFecha.format(criteria.getFechaHasta()));
-      builder.and(qNotaDebito.fecha.between(fDesde, fHasta));
+      if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
+        DateExpression<Date> fDesde =
+            Expressions.dateTemplate(
+                Date.class, dateTemplate, formateadorFecha.format(criteria.getFechaDesde()));
+        DateExpression<Date> fHasta =
+            Expressions.dateTemplate(
+                Date.class, dateTemplate, formateadorFecha.format(criteria.getFechaHasta()));
+        builder.and(qNotaDebito.fecha.between(fDesde, fHasta));
+      } else if (criteria.getFechaDesde() != null) {
+        DateExpression<Date> fDesde =
+            Expressions.dateTemplate(
+                Date.class, dateTemplate, formateadorFecha.format(criteria.getFechaDesde()));
+        builder.and(qNotaDebito.fecha.after(fDesde));
+      } else if (criteria.getFechaHasta() != null) {
+        DateExpression<Date> fHasta =
+            Expressions.dateTemplate(
+                Date.class, dateTemplate, formateadorFecha.format(criteria.getFechaHasta()));
+        builder.and(qNotaDebito.fecha.before(fHasta));
+      }
     }
     if (criteria.getIdUsuario() != null)
       builder.and(qNotaDebito.usuario.id_Usuario.eq(criteria.getIdUsuario()));
