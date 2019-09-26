@@ -6,7 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Cliente;
@@ -29,6 +31,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   private final IClienteService clienteService;
   private final IProductoService productoService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private static final BigDecimal CIEN = new BigDecimal("100");
 
   @Autowired
@@ -63,7 +66,10 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   @Override
   public Page<ItemCarritoCompra> getItemsDelCaritoCompra(
-    long idUsuario, long idCliente, Pageable pageable) {
+    long idUsuario, long idCliente, int pagina) {
+    Pageable pageable =
+      PageRequest.of(
+        pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
     Page<ItemCarritoCompra> items =
         carritoCompraRepository.findAllByUsuario(
             usuarioService.getUsuarioNoEliminadoPorId(idUsuario), pageable);

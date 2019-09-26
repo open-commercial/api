@@ -3,7 +3,6 @@ package sic.service;
 import java.math.BigDecimal;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.dto.CarritoCompraDTO;
 
@@ -11,8 +10,7 @@ public interface ICarritoCompraService {
 
   CarritoCompraDTO getCarritoCompra(long idUsuario, long idCliente);
 
-  Page<ItemCarritoCompra> getItemsDelCaritoCompra(
-      long idUsuario, long idCliente, Pageable pageable);
+  Page<ItemCarritoCompra> getItemsDelCaritoCompra(long idUsuario, long idCliente, int pagina);
 
   ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(long idUsuario, long idProducto);
 

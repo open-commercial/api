@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
@@ -24,7 +21,6 @@ public class CarritoCompraController {
   private final IEmpresaService empresaService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
-  private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
   public CarritoCompraController(
@@ -52,10 +48,7 @@ public class CarritoCompraController {
       @PathVariable long idCliente,
       @RequestParam(required = false) Integer pagina) {
     if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable =
-        PageRequest.of(
-            pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
-    return carritoCompraService.getItemsDelCaritoCompra(idUsuario, idCliente, pageable);
+    return carritoCompraService.getItemsDelCaritoCompra(idUsuario, idCliente, pagina);
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
@@ -99,18 +92,13 @@ public class CarritoCompraController {
     pedido.setDescuentoNeto(carritoCompraDTO.getBonificacionNeto());
     pedido.setTotalActual(carritoCompraDTO.getTotal());
     pedido.setTotalEstimado(pedido.getTotalActual());
-    pedido.setEmpresa(
-        empresaService.getEmpresaPorId(nuevaOrdenDeCompraDTO.getIdEmpresa()));
+    pedido.setEmpresa(empresaService.getEmpresaPorId(nuevaOrdenDeCompraDTO.getIdEmpresa()));
     pedido.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario()));
-    Pageable pageable =
-        PageRequest.of(0, Integer.MAX_VALUE, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
     List<ItemCarritoCompra> items =
         carritoCompraService
             .getItemsDelCaritoCompra(
-                nuevaOrdenDeCompraDTO.getIdUsuario(),
-                nuevaOrdenDeCompraDTO.getIdCliente(),
-                pageable)
+                nuevaOrdenDeCompraDTO.getIdUsuario(), nuevaOrdenDeCompraDTO.getIdCliente(), 0)
             .getContent();
     pedido.setRenglones(new ArrayList<>());
     items.forEach(
