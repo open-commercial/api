@@ -4664,13 +4664,13 @@ class AppIntegrationTest {
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(1L)
         .cantidad(new BigDecimal("5.000000000000000"))
-        .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
+        .idCliente(1L)
         .build());
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
-        .descuentoPorcentaje(BigDecimal.ZERO)
+        .idCliente(1L)
         .build());
     List<RenglonPedidoDTO> renglonesPedido =
       Arrays.asList(
@@ -4719,13 +4719,13 @@ class AppIntegrationTest {
         NuevoRenglonPedidoDTO.builder()
             .idProductoItem(1L)
             .cantidad(new BigDecimal("5.000000000000000"))
-            .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
+            .idCliente(1L)
             .build());
     renglonesPedidoDTO.add(
         NuevoRenglonPedidoDTO.builder()
             .idProductoItem(2L)
             .cantidad(new BigDecimal("2.000000000000000"))
-            .descuentoPorcentaje(BigDecimal.ZERO)
+            .idCliente(1L)
             .build());
     List<RenglonPedidoDTO> renglonesPedido =
         Arrays.asList(
@@ -4792,13 +4792,13 @@ class AppIntegrationTest {
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(1L)
         .cantidad(new BigDecimal("5.000000000000000"))
-        .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
+        .idCliente(1L)
         .build());
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
-        .descuentoPorcentaje(BigDecimal.ZERO)
+        .idCliente(1L)
         .build());
     List<RenglonPedidoDTO> renglonesPedido =
       Arrays.asList(
@@ -4845,13 +4845,13 @@ class AppIntegrationTest {
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(1L)
         .cantidad(new BigDecimal("5.000000000000000"))
-        .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
+        .idCliente(1L)
         .build());
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
-        .descuentoPorcentaje(BigDecimal.ZERO)
+        .idCliente(1L)
         .build());
     List<RenglonPedidoDTO> renglonesPedido =
       Arrays.asList(
@@ -4903,13 +4903,13 @@ class AppIntegrationTest {
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(1L)
         .cantidad(new BigDecimal("5.000000000000000"))
-        .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
+        .idCliente(1L)
         .build());
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
-        .descuentoPorcentaje(BigDecimal.ZERO)
+        .idCliente(1L)
         .build());
     List<RenglonPedidoDTO> renglonesPedido =
       Arrays.asList(
@@ -4974,13 +4974,13 @@ class AppIntegrationTest {
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(1L)
         .cantidad(new BigDecimal("5"))
-        .descuentoPorcentaje(new BigDecimal("15"))
+        .idCliente(1L)
         .build());
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2"))
-        .descuentoPorcentaje(BigDecimal.ZERO)
+        .idCliente(1L)
         .build());
     List<RenglonPedidoDTO> renglonesPedido =
       Arrays.asList(
@@ -5025,7 +5025,7 @@ class AppIntegrationTest {
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(3)
         .cantidad(new BigDecimal("7"))
-        .descuentoPorcentaje(new BigDecimal("18"))
+        .idCliente(1L)
         .build());
     renglonesPedido =
       Arrays.asList(
