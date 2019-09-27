@@ -33,6 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
+import sic.modelo.calculos.NuevoCalculoPedido;
+import sic.modelo.calculos.Resultados;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.modelo.dto.UbicacionDTO;
 import sic.repository.RenglonPedidoRepository;
@@ -536,5 +538,35 @@ public class PedidoServiceImpl implements IPedidoService {
                     nuevoRenglonesPedidoDTO.getCantidad(),
                     nuevoRenglonesPedidoDTO.getDescuentoPorcentaje())));
     return renglonesPedido;
+  }
+
+  @Override
+  public Resultados calcularResultadosPedido(NuevoCalculoPedido calculoPedido) {
+    Resultados resultados = Resultados.builder().build();
+    calculoPedido
+        .getRenglones()
+        .forEach(
+            renglonPedidoDTO ->
+                resultados.setSubTotal(
+                    renglonPedidoDTO
+                        .getCantidad()
+                        .multiply(
+                            renglonPedidoDTO
+                                .getPrecioUnitario()
+                                .subtract(
+                                    renglonPedidoDTO
+                                        .getDescuentoPorcentaje()
+                                        .divide(new BigDecimal("100"), 2, RoundingMode.FLOOR)
+                                        .multiply(renglonPedidoDTO.getPrecioUnitario())))));
+    resultados.setSubTotalBruto(
+        resultados
+            .getSubTotal()
+            .subtract(
+                calculoPedido
+                    .getDescuentoPorcentaje()
+                    .divide(new BigDecimal("100"), 2, RoundingMode.FLOOR))
+            .multiply(resultados.getSubTotal()));
+    resultados.setTotal(resultados.getSubTotalBruto());
+    return resultados;
   }
 }

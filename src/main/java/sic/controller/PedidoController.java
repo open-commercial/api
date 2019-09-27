@@ -1,8 +1,8 @@
 package sic.controller;
 
 import java.lang.reflect.Type;
+import java.util.Calendar;
 import java.util.List;
-
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
+import sic.modelo.calculos.NuevoCalculoPedido;
+import sic.modelo.calculos.Resultados;
 import sic.modelo.dto.NuevoPedidoDTO;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.modelo.dto.PedidoDTO;
@@ -144,5 +146,16 @@ public class PedidoController {
         byte[] reportePDF = pedidoService.getReportePedido(pedidoService.getPedidoNoEliminadoPorId(idPedido));
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
     }
-    
+
+  @PostMapping("/pedidos/calculo-pedido")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public Resultados calcularResultadosPedido(@RequestBody NuevoCalculoPedido nuevoCalculoPedido) {
+    return pedidoService.calcularResultadosPedido(nuevoCalculoPedido);
+  }
 }
