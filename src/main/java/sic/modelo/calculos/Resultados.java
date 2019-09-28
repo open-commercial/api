@@ -22,7 +22,7 @@ public class Resultados {
   private BigDecimal recargoPorcentaje;
   private BigDecimal recargoNeto;
   private BigDecimal subTotalBruto;
-  private BigDecimal iva105;
-  private BigDecimal iva21;
+  private BigDecimal iva105Neto;
+  private BigDecimal iva21Neto;
   private BigDecimal total;
 }
