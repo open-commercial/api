@@ -157,9 +157,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     pedido.setEmpresa(empresaService.getEmpresaPorId(nuevaOrdenDeCompraDTO.getIdEmpresa()));
     pedido.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario()));
-    List<ItemCarritoCompra> items =
-        carritoCompraRepository.findAllByUsuario(
-            usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario()));
+    List<ItemCarritoCompra> items = carritoCompraRepository.findAllByUsuarioOrderByIdItemCarritoCompraDesc(pedido.getUsuario());
     pedido.setRenglones(new ArrayList<>());
     items.forEach(
         i ->

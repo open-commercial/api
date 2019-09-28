@@ -17,7 +17,7 @@ public interface CarritoCompraRepository
 
   Page<ItemCarritoCompra> findAllByUsuario(Usuario usuario, Pageable pageable);
 
-  List<ItemCarritoCompra> findAllByUsuario(Usuario usuario);
+  List<ItemCarritoCompra> findAllByUsuarioOrderByIdItemCarritoCompraDesc(Usuario usuario);
 
   @Query(
       "SELECT SUM(icc.cantidad * p.precioLista) "
