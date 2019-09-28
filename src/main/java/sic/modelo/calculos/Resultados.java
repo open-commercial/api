@@ -18,7 +18,7 @@ public class Resultados {
 
   private BigDecimal subTotal;
   private BigDecimal descuento;
-  private BigDecimal regargo;
+  private BigDecimal recargo;
   private BigDecimal subTotalBruto;
   private BigDecimal iva105;
   private BigDecimal iva21;
