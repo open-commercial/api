@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class NuevoCalculoPedido {
+public class NuevosResultadosPedido {
 
   private List<RenglonPedidoDTO> renglones;
   private BigDecimal descuentoPorcentaje;
