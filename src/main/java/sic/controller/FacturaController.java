@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
+import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 import sic.modelo.dto.FacturaCompraDTO;
 import sic.modelo.dto.FacturaVentaDTO;
 import sic.service.*;
@@ -170,13 +172,6 @@ public class FacturaController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Page<FacturaCompra> buscarFacturaCompra(
       @RequestBody BusquedaFacturaCompraCriteria criteria) {
-    criteria.setBuscaPorFecha(
-        (criteria.getFechaDesde() != null) || (criteria.getFechaHasta() != null));
-    criteria.setBuscaPorProveedor(criteria.getIdProveedor() != null);
-    criteria.setBuscaPorNumeroFactura(
-        (criteria.getNumSerie() != 0L) && (criteria.getNumFactura() != 0L));
-    criteria.setBuscaPorProducto(criteria.getIdProducto() != null);
-    criteria.setBuscaPorTipoComprobante(criteria.getTipoComprobante() != null);
     return facturaService.buscarFacturaCompra(criteria);
   }
 
@@ -191,16 +186,6 @@ public class FacturaController {
   public Page<FacturaVenta> buscarFacturaVenta(
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    criteria.setBuscaPorFecha(
-      (criteria.getFechaDesde() != null) || (criteria.getFechaHasta() != null));
-    criteria.setBuscaCliente(criteria.getIdCliente() != null);
-    criteria.setBuscaPorNumeroFactura(
-      (criteria.getNumSerie() != 0L) && (criteria.getNumFactura() != 0L));
-    criteria.setBuscaPorProducto(criteria.getIdProducto() != null);
-    criteria.setBuscaPorTipoComprobante(criteria.getTipoComprobante() != null);
-    criteria.setBuscaUsuario(criteria.getIdUsuario() != null);
-    criteria.setBuscaViajante(criteria.getIdViajante() != null);
-    criteria.setBuscarPorPedido(criteria.getNroPedido() != 0L);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return facturaService.buscarFacturaVenta(criteria, (int) claims.get("idUsuario"));
   }
@@ -278,16 +263,6 @@ public class FacturaController {
   public BigDecimal calcularTotalFacturadoVenta(
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    criteria.setBuscaPorFecha(
-      (criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null));
-    criteria.setBuscaCliente(criteria.getIdCliente() != null);
-    criteria.setBuscaPorNumeroFactura(
-      (criteria.getNumSerie() != 0L) && (criteria.getNumFactura() != 0L));
-    criteria.setBuscaPorProducto(criteria.getIdProducto() != null);
-    criteria.setBuscaPorTipoComprobante(criteria.getTipoComprobante() != null);
-    criteria.setBuscaUsuario(criteria.getIdUsuario() != null);
-    criteria.setBuscaViajante(criteria.getIdViajante() != null);
-    criteria.setBuscarPorPedido(criteria.getNroPedido() != 0L);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return facturaService.calcularTotalFacturadoVenta(criteria, (int) claims.get("idUsuario"));
   }
@@ -296,13 +271,6 @@ public class FacturaController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public BigDecimal calcularTotalFacturadoCompra(
       @RequestBody BusquedaFacturaCompraCriteria criteria) {
-    criteria.setBuscaPorFecha(
-        (criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null));
-    criteria.setBuscaPorProveedor(criteria.getIdProveedor() != null);
-    criteria.setBuscaPorNumeroFactura(
-        (criteria.getNumSerie() != 0L) && (criteria.getNumFactura() != 0L));
-    criteria.setBuscaPorProducto(criteria.getIdProducto() != null);
-    criteria.setBuscaPorTipoComprobante(criteria.getTipoComprobante() != null);
     return facturaService.calcularTotalFacturadoCompra(criteria);
   }
 
@@ -311,16 +279,6 @@ public class FacturaController {
   public BigDecimal calcularIvaVenta(
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    criteria.setBuscaPorFecha(
-      (criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null));
-    criteria.setBuscaCliente(criteria.getIdCliente() != null);
-    criteria.setBuscaPorNumeroFactura(
-      (criteria.getNumSerie() != 0L) && (criteria.getNumFactura() != 0L));
-    criteria.setBuscaPorProducto(criteria.getIdProducto() != null);
-    criteria.setBuscaPorTipoComprobante(criteria.getTipoComprobante() != null);
-    criteria.setBuscaUsuario(criteria.getIdUsuario() != null);
-    criteria.setBuscaViajante(criteria.getIdViajante() != null);
-    criteria.setBuscarPorPedido(criteria.getNroPedido() != 0L);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return facturaService.calcularIvaVenta(criteria, (int) claims.get("idUsuario"));
   }
@@ -328,13 +286,6 @@ public class FacturaController {
   @PostMapping("/facturas/total-iva-compra/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public BigDecimal calcularTotalIvaCompra(@RequestBody BusquedaFacturaCompraCriteria criteria) {
-    criteria.setBuscaPorFecha(
-        (criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null));
-    criteria.setBuscaPorProveedor(criteria.getIdProveedor() != null);
-    criteria.setBuscaPorNumeroFactura(
-        (criteria.getNumSerie() != 0L) && (criteria.getNumFactura() != 0L));
-    criteria.setBuscaPorProducto(criteria.getIdProducto() != null);
-    criteria.setBuscaPorTipoComprobante(criteria.getTipoComprobante() != null);
     return facturaService.calcularIvaCompra(criteria);
   }
 
@@ -343,16 +294,6 @@ public class FacturaController {
   public BigDecimal calcularGananciaTotal(
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    criteria.setBuscaPorFecha(
-        (criteria.getFechaDesde() != null) && (criteria.getFechaHasta() != null));
-    criteria.setBuscaCliente(criteria.getIdCliente() != null);
-    criteria.setBuscaPorNumeroFactura(
-        (criteria.getNumSerie() != 0L) && (criteria.getNumFactura() != 0L));
-    criteria.setBuscaPorProducto(criteria.getIdProducto() != null);
-    criteria.setBuscaPorTipoComprobante(criteria.getTipoComprobante() != null);
-    criteria.setBuscaUsuario(criteria.getIdUsuario() != null);
-    criteria.setBuscaViajante(criteria.getIdViajante() != null);
-    criteria.setBuscarPorPedido(criteria.getNroPedido() != 0L);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return facturaService.calcularGananciaTotal(criteria, (int) claims.get("idUsuario"));
   }

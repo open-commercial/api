@@ -21,10 +21,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaUsuarioCriteria;
 import sic.service.*;
 import sic.repository.UsuarioRepository;
 import sic.exception.BusinessServiceException;
@@ -40,6 +42,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   private final IClienteService clienteService;
   private final ICorreoElectronicoService correoElectronicoService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final int TAMANIO_PAGINA_DEFAULT = 50;
   private final MessageSource messageSource;
 
   @Autowired
@@ -119,7 +122,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   public Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria) {
     QUsuario qUsuario = QUsuario.usuario;
     BooleanBuilder builder = new BooleanBuilder();
-    if (criteria.isBuscaPorApellido()) {
+    if (criteria.getApellido() != null) {
       String[] terminos = criteria.getApellido().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -127,7 +130,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscaPorNombre()) {
+    if (criteria.getNombre() != null) {
       String[] terminos = criteria.getNombre().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -135,7 +138,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscarPorNombreDeUsuario()) {
+    if (criteria.getUsername() != null) {
       String[] terminos = criteria.getUsername().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -143,7 +146,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscaPorEmail()) {
+    if (criteria.getEmail() != null) {
       String[] terminos = criteria.getEmail().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -151,7 +154,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscarPorRol() && !criteria.getRoles().isEmpty()) {
+    if (criteria.getRoles() != null && !criteria.getRoles().isEmpty()) {
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (Rol rol : criteria.getRoles()) {
         switch (rol) {
@@ -175,7 +178,27 @@ public class UsuarioServiceImpl implements IUsuarioService {
       builder.and(rsPredicate);
     }
     builder.and(qUsuario.eliminado.eq(false));
-    return usuarioRepository.findAll(builder, criteria.getPageable());
+    return usuarioRepository.findAll(builder, this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
+  }
+
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+    String ordenDefault = "nombre";
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
+    }
   }
 
   @Override

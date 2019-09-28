@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,10 +12,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaTransportistaCriteria;
 import sic.modelo.dto.TransportistaDTO;
 import sic.service.IEmpresaService;
 import sic.service.ITransportistaService;
@@ -82,7 +83,7 @@ public class TransportistaController {
     }
   }
 
-  @GetMapping("/transportistas/busqueda/criteria")
+  @PostMapping("/transportistas/busqueda/criteria")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -90,20 +91,8 @@ public class TransportistaController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public List<Transportista> buscarTransportista(
-    @RequestParam long idEmpresa,
-    @RequestParam(required = false) String nombre,
-    @RequestParam(required = false) Long idProvincia,
-    @RequestParam(required = false) Long idLocalidad) {
-    BusquedaTransportistaCriteria criteria =
-      new BusquedaTransportistaCriteria(
-        (nombre != null),
-        nombre,
-        (idProvincia != null),
-        idProvincia,
-        (idLocalidad != null),
-        idLocalidad,
-        idEmpresa);
+  public Page<Transportista> buscarTransportistas(
+      @RequestBody BusquedaTransportistaCriteria criteria) {
     return transportistaService.buscarTransportistas(criteria);
   }
 

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaCajaCriteria;
 
 import javax.validation.Valid;
 
@@ -20,7 +21,7 @@ public interface ICajaService {
     
     Caja getCajaPorId(Long id);
 
-    Page<Caja> getCajasCriteria(BusquedaCajaCriteria criteria);
+    Page<Caja> buscarCajas(BusquedaCajaCriteria criteria);
 
     Map<Long, BigDecimal> getTotalesDeFormaDePago(long idCaja);
 

@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaReciboCriteria;
 
 import javax.validation.Valid;
 

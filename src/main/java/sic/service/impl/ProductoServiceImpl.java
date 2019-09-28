@@ -9,6 +9,9 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.export.*;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
@@ -31,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.modelo.criteria.BusquedaProductoCriteria;
 import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
@@ -52,6 +56,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final IMedidaService medidaService;
   private final ICarritoCompraService carritoCompraService;
   private final IPhotoVideoUploader photoVideoUploader;
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
   @Autowired
@@ -180,7 +185,29 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public Page<Producto> buscarProductos(BusquedaProductoCriteria criteria) {
-    return productoRepository.findAll(this.getBuilder(criteria), criteria.getPageable());
+    return productoRepository.findAll(
+        this.getBuilder(criteria),
+        this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
+  }
+
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+    String ordenDefault = "descripcion";
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
+    }
   }
 
   private BooleanBuilder getBuilder(BusquedaProductoCriteria criteria) {
@@ -192,30 +219,30 @@ public class ProductoServiceImpl implements IProductoService {
             .id_Empresa
             .eq(criteria.getIdEmpresa())
             .and(qProducto.eliminado.eq(false)));
-    if (criteria.isBuscarPorCodigo() && criteria.isBuscarPorDescripcion())
+    if (criteria.getCodigo() != null && criteria.getDescripcion() != null)
       builder.and(
           qProducto
               .codigo
               .containsIgnoreCase(criteria.getCodigo())
               .or(this.buildPredicadoDescripcion(criteria.getDescripcion(), qProducto)));
     else {
-      if (criteria.isBuscarPorCodigo())
+      if (criteria.getCodigo() != null)
         builder.and(qProducto.codigo.containsIgnoreCase(criteria.getCodigo()));
-      if (criteria.isBuscarPorDescripcion())
+      if (criteria.getDescripcion() != null)
         builder.and(this.buildPredicadoDescripcion(criteria.getDescripcion(), qProducto));
     }
-    if (criteria.isBuscarPorRubro())
+    if (criteria.getIdRubro() != null)
       builder.and(qProducto.rubro.id_Rubro.eq(criteria.getIdRubro()));
-    if (criteria.isBuscarPorProveedor())
+    if (criteria.getIdProveedor() != null)
       builder.and(qProducto.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
     if (criteria.isListarSoloFaltantes())
       builder.and(qProducto.cantidad.loe(qProducto.cantMinima)).and(qProducto.ilimitado.eq(false));
     if (criteria.isListarSoloEnStock())
       builder.and(qProducto.cantidad.gt(BigDecimal.ZERO)).and(qProducto.ilimitado.eq(false));
-    if (criteria.isBuscaPorVisibilidad())
+    if (criteria.getPublico() != null)
       if (criteria.getPublico()) builder.and(qProducto.publico.isTrue());
       else builder.and(qProducto.publico.isFalse());
-    if (criteria.isBuscaPorDestacado())
+    if (criteria.getDestacado() != null)
       if (criteria.getDestacado()) builder.and(qProducto.destacado.isTrue());
       else builder.and(qProducto.destacado.isFalse());
     return builder;

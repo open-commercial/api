@@ -4,6 +4,9 @@ import com.querydsl.core.BooleanBuilder;
 import java.util.ArrayList;
 
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
@@ -19,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.modelo.criteria.BusquedaTransportistaCriteria;
 import sic.service.ITransportistaService;
 import sic.exception.BusinessServiceException;
 import sic.repository.TransportistaRepository;
@@ -31,6 +35,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
   private final TransportistaRepository transportistaRepository;
   private final IUbicacionService ubicacionService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
   @Autowired
@@ -66,7 +71,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
   }
 
   @Override
-  public List<Transportista> buscarTransportistas(BusquedaTransportistaCriteria criteria) {
+  public Page<Transportista> buscarTransportistas(BusquedaTransportistaCriteria criteria) {
     QTransportista qTransportista = QTransportista.transportista;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
@@ -75,25 +80,43 @@ public class TransportistaServiceImpl implements ITransportistaService {
             .id_Empresa
             .eq(criteria.getIdEmpresa())
             .and(qTransportista.eliminado.eq(false)));
-    if (criteria.isBuscarPorNombre())
+    if (criteria.getNombre() != null)
       builder.and(this.buildPredicadoNombre(criteria.getNombre(), qTransportista));
-    if (criteria.isBuscarPorLocalidad())
+    if (criteria.getIdLocalidad() != null)
       builder.and(qTransportista.ubicacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
-    if (criteria.isBuscarPorProvincia())
-      builder.and(qTransportista.ubicacion.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
-    List<Transportista> list = new ArrayList<>();
-    transportistaRepository
-        .findAll(builder, new Sort(Sort.Direction.ASC, "nombre"))
-        .iterator()
-        .forEachRemaining(list::add);
-    return list;
+    if (criteria.getIdProvincia() != null)
+      builder.and(
+          qTransportista.ubicacion.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
+    return transportistaRepository.findAll(
+        builder,
+        this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
   }
 
-  private BooleanBuilder buildPredicadoNombre(String nombre, QTransportista qtransportista) {
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+    String ordenDefault = "nombre";
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(
+        pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(
+            pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(
+            pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(
+            pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
+    }
+  }
+
+  private BooleanBuilder buildPredicadoNombre(String nombre, QTransportista qTransportista) {
     String[] terminos = nombre.split(" ");
     BooleanBuilder descripcionProducto = new BooleanBuilder();
     for (String termino : terminos) {
-      descripcionProducto.and(qtransportista.nombre.containsIgnoreCase(termino));
+      descripcionProducto.and(qTransportista.nombre.containsIgnoreCase(termino));
     }
     return descripcionProducto;
   }

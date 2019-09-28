@@ -13,6 +13,7 @@ import java.util.*;
 import org.springframework.context.MessageSource;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaCajaCriteria;
 import sic.service.*;
 
 import javax.persistence.EntityNotFoundException;
@@ -44,6 +45,7 @@ public class CajaServiceImpl implements ICajaService {
   private final IUsuarioService usuarioService;
   private final IReciboService reciboService;
   private final IClockService clockService;
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
 
@@ -157,71 +159,97 @@ public class CajaServiceImpl implements ICajaService {
   }
 
   @Override
-  public Page<Caja> getCajasCriteria(BusquedaCajaCriteria criteria) {
-    int pageNumber = 0;
-    int pageSize = Integer.MAX_VALUE;
-    Sort sorting = new Sort(Sort.Direction.DESC, "fechaApertura");
-    if (criteria.getPageable() != null) {
-      pageNumber = criteria.getPageable().getPageNumber();
-      pageSize = criteria.getPageable().getPageSize();
-      sorting = criteria.getPageable().getSort();
+  public Page<Caja> buscarCajas(BusquedaCajaCriteria criteria) {
+    return cajaRepository.findAll(
+        this.getBuilder(criteria),
+        this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
+  }
+
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+    String ordenDefault = "fechaApertura";
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
     }
-    Pageable pageable = PageRequest.of(pageNumber, pageSize, sorting);
-    return cajaRepository.findAll(getBuilder(criteria), pageable);
   }
 
   private BooleanBuilder getBuilder(BusquedaCajaCriteria criteria) {
-    // Fecha
-    if (criteria.isBuscaPorFecha()
-        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_caja_fechas_invalidas", null, Locale.getDefault()));
-    }
-    if (criteria.isBuscaPorFecha()) {
-      Calendar cal = new GregorianCalendar();
-      cal.setTime(criteria.getFechaDesde());
-      cal.set(Calendar.HOUR_OF_DAY, 0);
-      cal.set(Calendar.MINUTE, 0);
-      cal.set(Calendar.SECOND, 0);
-      criteria.setFechaDesde(cal.getTime());
-      cal.setTime(criteria.getFechaHasta());
-      cal.set(Calendar.HOUR_OF_DAY, 23);
-      cal.set(Calendar.MINUTE, 59);
-      cal.set(Calendar.SECOND, 59);
-      criteria.setFechaHasta(cal.getTime());
-    }
-    QCaja qcaja = QCaja.caja;
+    QCaja qCaja = QCaja.caja;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
-        qcaja.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qcaja.eliminada.eq(false)));
-    if (criteria.isBuscaPorUsuarioApertura() && !criteria.isBuscaPorUsuarioCierre()) {
-      builder.and(qcaja.usuarioAbreCaja.id_Usuario.eq(criteria.getIdUsuarioApertura()));
+        qCaja.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qCaja.eliminada.eq(false)));
+    if (criteria.getIdUsuarioApertura() != null && criteria.getIdUsuarioCierre() == null) {
+      builder.and(qCaja.usuarioAbreCaja.id_Usuario.eq(criteria.getIdUsuarioApertura()));
     }
-    if (criteria.isBuscaPorUsuarioCierre() && !criteria.isBuscaPorUsuarioApertura()) {
-      builder.and(qcaja.usuarioCierraCaja.id_Usuario.eq(criteria.getIdUsuarioCierre()));
+    if (criteria.getIdUsuarioApertura() == null && criteria.getIdUsuarioCierre() != null) {
+      builder.and(qCaja.usuarioCierraCaja.id_Usuario.eq(criteria.getIdUsuarioCierre()));
     }
-    if (criteria.isBuscaPorUsuarioCierre() && criteria.isBuscaPorUsuarioApertura()) {
+    if (criteria.getIdUsuarioApertura() != null && criteria.getIdUsuarioCierre() != null) {
       builder.and(
-          qcaja
+          qCaja
               .usuarioAbreCaja
               .id_Usuario
               .eq(criteria.getIdUsuarioApertura())
-              .and(qcaja.usuarioCierraCaja.id_Usuario.eq(criteria.getIdUsuarioCierre())));
+              .and(qCaja.usuarioCierraCaja.id_Usuario.eq(criteria.getIdUsuarioCierre())));
     }
-    if (criteria.isBuscaPorFecha()) {
+    if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
+      Calendar cal = new GregorianCalendar();
+      if (criteria.getFechaDesde() != null) {
+        cal.setTime(criteria.getFechaDesde());
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        criteria.setFechaDesde(cal.getTime());
+      }
+      if (criteria.getFechaHasta() != null) {
+        cal.setTime(criteria.getFechaHasta());
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        criteria.setFechaHasta(cal.getTime());
+      }
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
-      DateExpression<Date> fDesde =
-          Expressions.dateTemplate(
-              Date.class,
-              "convert({0}, datetime)",
-              formateadorFecha.format(criteria.getFechaDesde()));
-      DateExpression<Date> fHasta =
-          Expressions.dateTemplate(
-              Date.class,
-              "convert({0}, datetime)",
-              formateadorFecha.format(criteria.getFechaHasta()));
-      builder.and(qcaja.fechaApertura.between(fDesde, fHasta));
+      String dateTemplate = "convert({0}, datetime)";
+      if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
+        DateExpression<Date> fDesde =
+            Expressions.dateTemplate(
+                Date.class,
+                dateTemplate,
+                formateadorFecha.format(criteria.getFechaDesde()));
+        DateExpression<Date> fHasta =
+            Expressions.dateTemplate(
+                Date.class,
+                dateTemplate,
+                formateadorFecha.format(criteria.getFechaHasta()));
+        builder.and(qCaja.fechaApertura.between(fDesde, fHasta));
+      } else if (criteria.getFechaDesde() != null) {
+        DateExpression<Date> fDesde =
+            Expressions.dateTemplate(
+                Date.class,
+                dateTemplate,
+                formateadorFecha.format(criteria.getFechaDesde()));
+        builder.and(qCaja.fechaApertura.after(fDesde));
+      } else if (criteria.getFechaHasta() != null) {
+        DateExpression<Date> fHasta =
+            Expressions.dateTemplate(
+                Date.class,
+                dateTemplate,
+                formateadorFecha.format(criteria.getFechaHasta()));
+        builder.and(qCaja.fechaApertura.before(fHasta));
+      }
     }
     return builder;
   }

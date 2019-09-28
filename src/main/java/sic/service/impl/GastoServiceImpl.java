@@ -7,8 +7,12 @@ import com.querydsl.core.types.dsl.DateExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaGastoCriteria;
 import sic.service.IGastoService;
 
 import java.util.*;
@@ -34,6 +38,7 @@ public class GastoServiceImpl implements IGastoService {
   private final GastoRepository gastoRepository;
   private final IEmpresaService empresaService;
   private final ICajaService cajaService;
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
 
@@ -73,31 +78,36 @@ public class GastoServiceImpl implements IGastoService {
 
   @Override
   public Page<Gasto> buscarGastos(BusquedaGastoCriteria criteria) {
-    return gastoRepository.findAll(this.getBuilder(criteria), criteria.getPageable());
+    return gastoRepository.findAll(
+        this.getBuilder(criteria),
+        this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
+  }
+
+  private Pageable getPageable(Integer pagina, String ordenarPor, String sentido) {
+    String ordenDefault = "fecha";
+    if(pagina == null) pagina = 0;
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
+    }
   }
 
   private BooleanBuilder getBuilder(BusquedaGastoCriteria criteria) {
-    if (criteria.isBuscaPorFecha()
-        && (criteria.getFechaDesde() == null || criteria.getFechaHasta() == null)) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_gasto_fechas_busqueda_invalidas", null, Locale.getDefault()));
-    }
-    if (criteria.isBuscaPorFecha()) {
-      Calendar cal = new GregorianCalendar();
-      cal.setTime(criteria.getFechaDesde());
-      cal.set(Calendar.HOUR_OF_DAY, 0);
-      cal.set(Calendar.MINUTE, 0);
-      cal.set(Calendar.SECOND, 0);
-      criteria.setFechaDesde(cal.getTime());
-      cal.setTime(criteria.getFechaHasta());
-      cal.set(Calendar.HOUR_OF_DAY, 23);
-      cal.set(Calendar.MINUTE, 59);
-      cal.set(Calendar.SECOND, 59);
-      criteria.setFechaHasta(cal.getTime());
-    }
     QGasto qGasto = QGasto.gasto;
     BooleanBuilder builder = new BooleanBuilder();
-    if (criteria.isBuscaPorConcepto()) {
+    if (criteria.getConcepto() != null) {
       String[] terminos = criteria.getConcepto().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -105,25 +115,57 @@ public class GastoServiceImpl implements IGastoService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscaPorFecha()) {
+    if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
+      Calendar cal = new GregorianCalendar();
+      if (criteria.getFechaDesde() != null) {
+        cal.setTime(criteria.getFechaDesde());
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        criteria.setFechaDesde(cal.getTime());
+      }
+      if (criteria.getFechaHasta() != null) {
+        cal.setTime(criteria.getFechaHasta());
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        criteria.setFechaHasta(cal.getTime());
+      }
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
-      DateExpression<Date> fDesde =
-          Expressions.dateTemplate(
-              Date.class,
-              "convert({0}, datetime)",
-              formateadorFecha.format(criteria.getFechaDesde()));
-      DateExpression<Date> fHasta =
-          Expressions.dateTemplate(
-              Date.class,
-              "convert({0}, datetime)",
-              formateadorFecha.format(criteria.getFechaHasta()));
-      builder.and(qGasto.fecha.between(fDesde, fHasta));
+      String dateTemplate = "convert({0}, datetime)";
+      if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
+        DateExpression<Date> fDesde =
+            Expressions.dateTemplate(
+                Date.class,
+                dateTemplate,
+                formateadorFecha.format(criteria.getFechaDesde()));
+        DateExpression<Date> fHasta =
+            Expressions.dateTemplate(
+                Date.class,
+                dateTemplate,
+                formateadorFecha.format(criteria.getFechaHasta()));
+        builder.and(qGasto.fecha.between(fDesde, fHasta));
+      } else if (criteria.getFechaDesde() != null) {
+        DateExpression<Date> fDesde =
+            Expressions.dateTemplate(
+                Date.class,
+                dateTemplate,
+                formateadorFecha.format(criteria.getFechaDesde()));
+        builder.and(qGasto.fecha.after(fDesde));
+      } else if (criteria.getFechaHasta() != null) {
+        DateExpression<Date> fHasta =
+            Expressions.dateTemplate(
+                Date.class,
+                dateTemplate,
+                formateadorFecha.format(criteria.getFechaHasta()));
+        builder.and(qGasto.fecha.before(fHasta));
+      }
     }
-    if (criteria.isBuscarPorFormaDePago())
+    if (criteria.getIdFormaDePago() != null)
       builder.or(qGasto.formaDePago.id_FormaDePago.eq(criteria.getIdFormaDePago()));
-    if (criteria.isBuscaPorNro()) builder.or(qGasto.nroGasto.eq(criteria.getNroGasto()));
-    if (criteria.isBuscaPorUsuario())
+    if (criteria.getNroGasto() != null) builder.or(qGasto.nroGasto.eq(criteria.getNroGasto()));
+    if (criteria.getIdUsuario() != null)
       builder.and(qGasto.usuario.id_Usuario.eq(criteria.getIdUsuario()));
     builder.and(
         qGasto.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qGasto.eliminado.eq(false)));

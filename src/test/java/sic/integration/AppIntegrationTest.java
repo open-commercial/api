@@ -26,6 +26,9 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
 import sic.builder.*;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
+import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
+import sic.modelo.criteria.BusquedaGastoCriteria;
 import sic.modelo.dto.*;
 import sic.service.ICajaService;
 import sic.service.IClockService;
@@ -269,8 +272,6 @@ class AppIntegrationTest {
     BusquedaFacturaVentaCriteria criteria =
       BusquedaFacturaVentaCriteria.builder()
         .tipoComprobante(TipoDeComprobante.FACTURA_B)
-        .numSerie(0L)
-        .numFactura(1L)
         .idEmpresa(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
@@ -3487,7 +3488,7 @@ class AppIntegrationTest {
       BusquedaFacturaVentaCriteria.builder()
         .idEmpresa(1L)
         .tipoComprobante(TipoDeComprobante.FACTURA_A)
-        .numSerie(0L)
+        .numSerie(1L)
         .numFactura(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
@@ -3541,7 +3542,7 @@ class AppIntegrationTest {
     BusquedaFacturaVentaCriteria criteria =
       BusquedaFacturaVentaCriteria.builder()
         .tipoComprobante(TipoDeComprobante.FACTURA_B)
-        .numSerie(0L)
+        .numSerie(1L)
         .numFactura(1L)
         .idEmpresa(1L)
         .build();
@@ -3598,7 +3599,7 @@ class AppIntegrationTest {
     BusquedaFacturaVentaCriteria criteria =
         BusquedaFacturaVentaCriteria.builder()
             .tipoComprobante(TipoDeComprobante.FACTURA_X)
-            .numSerie(0L)
+            .numSerie(1L)
             .numFactura(1L)
             .idEmpresa(1L)
             .build();
@@ -3652,7 +3653,7 @@ class AppIntegrationTest {
     BusquedaFacturaVentaCriteria criteria =
       BusquedaFacturaVentaCriteria.builder()
         .tipoComprobante(TipoDeComprobante.FACTURA_C)
-        .numSerie(0L)
+        .numSerie(1L)
         .numFactura(1L)
         .idEmpresa(1L)
         .build();
@@ -3847,7 +3848,7 @@ class AppIntegrationTest {
     BusquedaFacturaVentaCriteria criteria =
       BusquedaFacturaVentaCriteria.builder()
         .tipoComprobante(TipoDeComprobante.FACTURA_A)
-        .numSerie(0L)
+        .numSerie(1L)
         .numFactura(1L)
         .idEmpresa(1L)
         .build();
@@ -3899,7 +3900,7 @@ class AppIntegrationTest {
     BusquedaFacturaVentaCriteria criteria =
         BusquedaFacturaVentaCriteria.builder()
             .tipoComprobante(TipoDeComprobante.FACTURA_A)
-            .numSerie(0L)
+            .numSerie(1L)
             .numFactura(1L)
             .idEmpresa(1L)
             .build();
@@ -5396,14 +5397,18 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldRecuperarGastoPorEmpresa() {
+  void shouldBuscarGastoPorEmpresa() {
     this.shouldCrearGasto();
+    BusquedaGastoCriteria criteria =
+      BusquedaGastoCriteria.builder()
+      .idEmpresa(1L).build();
+    HttpEntity<BusquedaGastoCriteria> requestEntity = new HttpEntity<>(criteria);
     List<GastoDTO> gastos =
         restTemplate
             .exchange(
-                apiPrefix + "/gastos/busqueda/criteria?idEmpresa=1",
-                HttpMethod.GET,
-                null,
+                apiPrefix + "/gastos/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<GastoDTO>>() {})
             .getBody()
             .getContent();

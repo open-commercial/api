@@ -1,17 +1,12 @@
 package sic.controller;
 
 import java.lang.reflect.Type;
-import java.util.Calendar;
 import java.util.List;
-
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.calculos.NuevosResultadosPedido;
 import sic.modelo.calculos.Resultados;
 import sic.modelo.dto.NuevoPedidoDTO;
@@ -36,7 +32,6 @@ public class PedidoController {
     private final IClienteService clienteService;
     private final IAuthService authService;
     private final ModelMapper modelMapper;
-    private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
     @Autowired
     public PedidoController(IPedidoService pedidoService, IEmpresaService empresaService,
@@ -61,7 +56,6 @@ public class PedidoController {
     public List<RenglonPedido> getRenglonesDelPedido(@PathVariable long idPedido) {
         return pedidoService.getRenglonesDelPedido(idPedido);
     }
-
 
     @PostMapping("/pedidos/renglones")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
@@ -120,7 +114,7 @@ public class PedidoController {
     return pedidoService.guardar(pedido, nuevoPedidoDTO.getTipoDeEnvio(), nuevoPedidoDTO.getIdSucursal());
   }
 
-  @GetMapping("/pedidos/busqueda/criteria")
+  @PostMapping("/pedidos/busqueda/criteria")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -129,54 +123,10 @@ public class PedidoController {
     Rol.COMPRADOR
   })
   public Page<Pedido> buscarConCriteria(
-      @RequestParam Long idEmpresa,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) Long idCliente,
-      @RequestParam(required = false) Long idUsuario,
-      @RequestParam(required = false) Long idViajante,
-      @RequestParam(required = false) Long nroPedido,
-      @RequestParam(required = false) EstadoPedido estadoPedido,
-      @RequestParam(required = false) TipoDeEnvio tipoDeEnvio,
-      @RequestParam(required = false) Long idProducto,
-      @RequestParam(required = false) Integer pagina,
+      @RequestBody BusquedaPedidoCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if (desde != null) {
-      fechaDesde.setTimeInMillis(desde);
-    }
-    if (hasta != null) {
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    Cliente cliente = null;
-    if (idCliente != null) cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
-    if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable = PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "fecha"));
-    BusquedaPedidoCriteria criteria =
-        BusquedaPedidoCriteria.builder()
-            .buscaPorFecha((desde != null) || (hasta != null))
-            .fechaDesde((desde != null) ? fechaDesde.getTime() : null)
-            .fechaHasta((hasta != null) ? fechaHasta.getTime() : null)
-            .buscaCliente(cliente != null)
-            .idCliente(idCliente)
-            .buscaUsuario(idUsuario != null)
-            .idUsuario(idUsuario)
-            .buscaPorViajante(idViajante != null)
-            .idViajante(idViajante)
-            .buscaPorNroPedido(nroPedido != null)
-            .nroPedido((nroPedido != null) ? nroPedido : 0)
-            .buscaPorEstadoPedido(estadoPedido != null)
-            .estadoPedido(estadoPedido)
-            .buscaPorEnvio(tipoDeEnvio != null)
-            .tipoDeEnvio(tipoDeEnvio)
-            .buscaPorProducto(idProducto != null)
-            .idProducto(idProducto)
-            .idEmpresa(idEmpresa)
-            .pageable(pageable)
-            .build();
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return pedidoService.buscarConCriteria(criteria, (int) claims.get("idUsuario"));
+    return pedidoService.buscarPedidos(criteria, (int) claims.get("idUsuario"));
   }
 
     @DeleteMapping("/pedidos/{idPedido}")

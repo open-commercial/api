@@ -7,6 +7,8 @@ import sic.modelo.*;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
+import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 
 import javax.validation.Valid;
 
@@ -40,8 +42,14 @@ public interface IFacturaService {
 
   FacturaVenta autorizarFacturaVenta(FacturaVenta fv);
 
-  BigDecimal calcularIvaNetoFactura(TipoDeComprobante tipo, BigDecimal[] cantidades,
-                                    BigDecimal[] ivaPorcentajeRenglones, BigDecimal[] ivaNetoRenglones, BigDecimal ivaPorcentaje, BigDecimal porcentajeDescuento, BigDecimal porcentajeRecargo);
+  BigDecimal calcularIvaNetoFactura(
+      TipoDeComprobante tipo,
+      BigDecimal[] cantidades,
+      BigDecimal[] ivaPorcentajeRenglones,
+      BigDecimal[] ivaNetoRenglones,
+      BigDecimal ivaPorcentaje,
+      BigDecimal porcentajeDescuento,
+      BigDecimal porcentajeRecargo);
 
   BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
 
