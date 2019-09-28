@@ -52,6 +52,9 @@ public class RenglonPedido implements Serializable {
   @DecimalMin(value = "0", message = "{mensaje_renglon_bonificacion_neta_negativa}")
   private BigDecimal bonificacionNeta;
 
+  @Transient
+  private BigDecimal importeAnterior;
+
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_renglon_importe_negativo}")
   private BigDecimal importe;

@@ -98,6 +98,7 @@ alter TABLE renglonfactura CHANGE descuentoNeto bonificacionNeta decimal(25,15);
 
 alter TABLE renglonpedido CHANGE descuentoPorcentaje bonificacionPorcentaje decimal(25,15);
 alter TABLE renglonpedido CHANGE descuentoNeto bonificacionNeta decimal(25,15);
+alter TABLE renglonpedido add importeAnterior decimal(25,15) after descuentoNeto;
 
 alter TABLE producto CHANGE destacado oferta bit(1);
 alter TABLE producto ADD COLUMN bonificacionoferta decimal(25,15) after oferta;

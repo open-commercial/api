@@ -13,13 +13,15 @@ public class RenglonPedidoBuilder {
     private String medidaItem = "Metro";
     private BigDecimal precioUnitario = new BigDecimal("181.5");
     private BigDecimal cantidad = new BigDecimal("2");
-    private BigDecimal descuentoPorcentaje = BigDecimal.ZERO;
-    private BigDecimal descuentoNeto = BigDecimal.ZERO;
+    private BigDecimal bonificacionPorcentaje = BigDecimal.ZERO;
+    private BigDecimal bonificacionNeta = BigDecimal.ZERO;
     private BigDecimal subTotal = new BigDecimal("363");
+    private BigDecimal importeAnterior = new BigDecimal("363");
+    private BigDecimal importe = new BigDecimal("363");
 
     public RenglonPedidoDTO build() {
         return new RenglonPedidoDTO(id_RenglonPedido, idProductoItem, codigoItem, descripcionItem, medidaItem,
-                precioUnitario, cantidad, descuentoPorcentaje, descuentoNeto, subTotal);
+                precioUnitario, cantidad, bonificacionPorcentaje, bonificacionNeta, subTotal, importeAnterior, importe);
     }
     
     public RenglonPedidoBuilder withIdRenglonPedido(long idRenglonPedido) {
@@ -52,18 +54,29 @@ public class RenglonPedidoBuilder {
         return this;
     }
 
-    public RenglonPedidoBuilder withDescuentoPorcentaje(BigDecimal descuento_porcentaje) {
-        this.descuentoPorcentaje = descuento_porcentaje;
-        return this;
-    }
-
-    public RenglonPedidoBuilder withDescuentoNeto(BigDecimal descuentoNeto) {
-        this.descuentoNeto = descuentoNeto;
-        return this;
-    }
-
     public RenglonPedidoBuilder withSubTotal(BigDecimal subTotal) {
         this.subTotal = subTotal;
         return this;
     }
+
+    public RenglonPedidoBuilder withBonificacionPorcentaje(BigDecimal bonificacionPorcentaje) {
+        this.bonificacionPorcentaje = bonificacionPorcentaje;
+        return this;
+    }
+
+    public RenglonPedidoBuilder withBonificacionNeta(BigDecimal bonificacionNeta) {
+        this.bonificacionNeta = bonificacionNeta;
+        return this;
+    }
+
+    public RenglonPedidoBuilder withImporteAnterior(BigDecimal importeAnterior) {
+        this.importeAnterior = importeAnterior;
+        return this;
+    }
+
+    public RenglonPedidoBuilder withImporte(BigDecimal importe) {
+        this.importe = importe;
+        return this;
+    }
+
 }

@@ -484,6 +484,7 @@ public class PedidoServiceImpl implements IPedidoService {
             nuevoRenglon.getCantidad(),
             producto.getPrecioLista(),
             nuevoRenglon.getBonificacionNeta()));
+    nuevoRenglon.setImporteAnterior(nuevoRenglon.getImporte().add(nuevoRenglon.getBonificacionNeta()));
     return nuevoRenglon;
   }
 
