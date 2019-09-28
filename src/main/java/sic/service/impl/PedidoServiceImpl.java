@@ -543,6 +543,8 @@ public class PedidoServiceImpl implements IPedidoService {
   @Override
   public Resultados calcularResultadosPedido(NuevosResultadosPedido calculoPedido) {
     Resultados resultados = Resultados.builder().build();
+    resultados.setDescuentoPorcentaje(calculoPedido.getDescuentoPorcentaje());
+    resultados.setRecargoPorcentaje(calculoPedido.getRecargoPorcentaje());
     calculoPedido
         .getRenglones()
         .forEach(

@@ -17,7 +17,9 @@ import java.math.BigDecimal;
 public class Resultados {
 
   private BigDecimal subTotal;
+  private BigDecimal descuentoPorcentaje;
   private BigDecimal descuento;
+  private BigDecimal recargoPorcentaje;
   private BigDecimal recargo;
   private BigDecimal subTotalBruto;
   private BigDecimal iva105;
