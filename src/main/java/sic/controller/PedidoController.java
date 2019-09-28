@@ -17,6 +17,7 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.calculos.NuevoCalculoPedido;
+import sic.modelo.calculos.NuevosResultadosPedido;
 import sic.modelo.calculos.Resultados;
 import sic.modelo.dto.NuevoPedidoDTO;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
@@ -155,7 +156,7 @@ public class PedidoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public Resultados calcularResultadosPedido(@RequestBody NuevoCalculoPedido nuevoCalculoPedido) {
-    return pedidoService.calcularResultadosPedido(nuevoCalculoPedido);
+  public Resultados calcularResultadosPedido(@RequestBody NuevosResultadosPedido nuevosResultadosPedido) {
+    return pedidoService.calcularResultadosPedido(nuevosResultadosPedido);
   }
 }

@@ -34,6 +34,7 @@ import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.calculos.NuevoCalculoPedido;
+import sic.modelo.calculos.NuevosResultadosPedido;
 import sic.modelo.calculos.Resultados;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.modelo.dto.UbicacionDTO;
@@ -541,7 +542,7 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public Resultados calcularResultadosPedido(NuevoCalculoPedido calculoPedido) {
+  public Resultados calcularResultadosPedido(NuevosResultadosPedido calculoPedido) {
     Resultados resultados = Resultados.builder().build();
     calculoPedido
         .getRenglones()
