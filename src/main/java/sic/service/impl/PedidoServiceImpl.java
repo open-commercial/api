@@ -25,11 +25,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
+import sic.modelo.calculos.NuevosResultadosPedido;
+import sic.modelo.calculos.Resultados;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.modelo.dto.UbicacionDTO;
 import sic.repository.RenglonPedidoRepository;
@@ -55,6 +60,7 @@ public class PedidoServiceImpl implements IPedidoService {
   private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
   @Autowired
@@ -258,71 +264,68 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public Page<Pedido> buscarConCriteria(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
-    // Fecha
-    if (criteria.isBuscaPorFecha()) {
-      Calendar cal = new GregorianCalendar();
-      if(criteria.getFechaDesde() != null){
-        cal.setTime(criteria.getFechaDesde());
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        criteria.setFechaDesde(cal.getTime());
-      }
-      if(criteria.getFechaHasta() != null) {
-        cal.setTime(criteria.getFechaHasta());
-        cal.set(Calendar.HOUR_OF_DAY, 23);
-        cal.set(Calendar.MINUTE, 59);
-        cal.set(Calendar.SECOND, 59);
-        criteria.setFechaHasta(cal.getTime());
-      }
-    }
+  public Page<Pedido> buscarPedidos(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
+    Page<Pedido> pedidos =
+        pedidoRepository.findAll(
+            this.getBuilderPedido(criteria, idUsuarioLoggedIn),
+            this.getPageable(
+                (criteria.getPagina() == null || criteria.getPagina() < 0)
+                    ? 0
+                    : criteria.getPagina(),
+                criteria.getOrdenarPor(),
+                criteria.getSentido()));
+    pedidos.getContent().forEach(this::calcularTotalActualDePedido);
+    return pedidos;
+  }
+
+  private BooleanBuilder getBuilderPedido(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
     QPedido qPedido = QPedido.pedido;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
         qPedido.sucursal.idSucursal.eq(criteria.getIdSucursal()).and(qPedido.eliminado.eq(false)));
-    if (criteria.isBuscaPorFecha()) {
+    if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
         DateExpression<Date> fDesde =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaDesde()));
         DateExpression<Date> fHasta =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaHasta()));
         builder.and(qPedido.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
         DateExpression<Date> fDesde =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaDesde()));
         builder.and(qPedido.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
         DateExpression<Date> fHasta =
             Expressions.dateTemplate(
                 Date.class,
-                "convert({0}, datetime)",
+                dateTemplate,
                 formateadorFecha.format(criteria.getFechaHasta()));
         builder.and(qPedido.fecha.before(fHasta));
       }
     }
-    if (criteria.isBuscaCliente())
+    if (criteria.getIdCliente() != null)
       builder.and(qPedido.cliente.id_Cliente.eq(criteria.getIdCliente()));
-    if (criteria.isBuscaUsuario())
+    if (criteria.getIdUsuario() != null)
       builder.and(qPedido.usuario.id_Usuario.eq(criteria.getIdUsuario()));
-    if (criteria.isBuscaPorViajante())
+    if (criteria.getIdViajante() != null)
       builder.and(qPedido.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
-    if (criteria.isBuscaPorNroPedido()) builder.and(qPedido.nroPedido.eq(criteria.getNroPedido()));
-    if (criteria.isBuscaPorEstadoPedido())
+    if (criteria.getNroPedido() != null) builder.and(qPedido.nroPedido.eq(criteria.getNroPedido()));
+    if (criteria.getEstadoPedido() != null)
       builder.and(qPedido.estado.eq(criteria.getEstadoPedido()));
-    if (criteria.isBuscaPorEnvio()) builder.and(qPedido.tipoDeEnvio.eq(criteria.getTipoDeEnvio()));
-    if (criteria.isBuscaPorProducto())
+    if (criteria.getTipoDeEnvio() != null) builder.and(qPedido.tipoDeEnvio.eq(criteria.getTipoDeEnvio()));
+    if (criteria.getIdProducto() != null)
       builder.and(qPedido.renglones.any().idProductoItem.eq(criteria.getIdProducto()));
     Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     BooleanBuilder rsPredicate = new BooleanBuilder();
@@ -345,9 +348,27 @@ public class PedidoServiceImpl implements IPedidoService {
       }
       builder.and(rsPredicate);
     }
-    Page<Pedido> pedidos = pedidoRepository.findAll(builder, criteria.getPageable());
-    pedidos.getContent().forEach(this::calcularTotalActualDePedido);
-    return pedidos;
+    return builder;
+  }
+
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+    String ordenDefault = "fecha";
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
+    }
   }
 
   @Override
@@ -501,5 +522,37 @@ public class PedidoServiceImpl implements IPedidoService {
                     this.clienteService.getClienteNoEliminadoPorId(
                         nuevoRenglonesPedidoDTO.getIdCliente()))));
     return renglonesPedido;
+  }
+
+  @Override
+  public Resultados calcularResultadosPedido(NuevosResultadosPedido calculoPedido) {
+    Resultados resultados = Resultados.builder().build();
+    resultados.setDescuentoPorcentaje(calculoPedido.getDescuentoPorcentaje());
+    resultados.setRecargoPorcentaje(calculoPedido.getRecargoPorcentaje());
+    calculoPedido
+        .getRenglones()
+        .forEach(
+            renglonPedidoDTO ->
+                resultados.setSubTotal(
+                    renglonPedidoDTO
+                        .getCantidad()
+                        .multiply(
+                            renglonPedidoDTO
+                                .getPrecioUnitario()
+                                .subtract(
+                                    renglonPedidoDTO
+                                        .getBonificacionPorcentaje()
+                                        .divide(new BigDecimal("100"), 2, RoundingMode.FLOOR)
+                                        .multiply(renglonPedidoDTO.getPrecioUnitario())))));
+    resultados.setSubTotalBruto(
+        resultados
+            .getSubTotal()
+            .subtract(
+                calculoPedido
+                    .getDescuentoPorcentaje()
+                    .divide(new BigDecimal("100"), 2, RoundingMode.FLOOR))
+            .multiply(resultados.getSubTotal()));
+    resultados.setTotal(resultados.getSubTotalBruto());
+    return resultados;
   }
 }

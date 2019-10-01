@@ -15,6 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -33,6 +36,7 @@ public class ClienteServiceImpl implements IClienteService {
   private final IUsuarioService usuarioService;
   private final IUbicacionService ubicacionService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
   @Autowired
@@ -93,7 +97,7 @@ public class ClienteServiceImpl implements IClienteService {
   public Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long idUsuarioLoggedIn) {
     QCliente qCliente = QCliente.cliente;
     BooleanBuilder builder = new BooleanBuilder();
-    if (criteria.isBuscaPorNombreFiscal()) {
+    if (criteria.getNombreFiscal() != null) {
       String[] terminos = criteria.getNombreFiscal().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -101,7 +105,7 @@ public class ClienteServiceImpl implements IClienteService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscaPorNombreFantasia()) {
+    if (criteria.getNombreFantasia() != null) {
       String[] terminos = criteria.getNombreFantasia().split(" ");
       BooleanBuilder nfPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -109,21 +113,21 @@ public class ClienteServiceImpl implements IClienteService {
       }
       builder.or(nfPredicate);
     }
-    if (criteria.isBuscaPorIdFiscal()) builder.or(qCliente.idFiscal.eq(criteria.getIdFiscal()));
-    if (criteria.isBuscarPorNroDeCliente())
+    if (criteria.getIdFiscal() != null) builder.or(qCliente.idFiscal.eq(criteria.getIdFiscal()));
+    if (criteria.getNroDeCliente() != null)
       builder.or(qCliente.nroCliente.containsIgnoreCase(criteria.getNroDeCliente()));
-    if (criteria.isBuscaPorViajante())
+    if (criteria.getIdViajante() != null)
       builder.and(qCliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
-    if (criteria.isBuscaPorLocalidad())
+    if (criteria.getIdLocalidad() != null)
       builder.and(
           qCliente.ubicacionFacturacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
-    if (criteria.isBuscaPorProvincia())
+    if (criteria.getIdProvincia() != null)
       builder.and(
           qCliente.ubicacionFacturacion.localidad.provincia.idProvincia.eq(
               criteria.getIdProvincia()));
-    if (criteria.isBuscaPorLocalidad())
+    if (criteria.getIdLocalidad() != null)
       builder.and(qCliente.ubicacionEnvio.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
-    if (criteria.isBuscaPorProvincia())
+    if (criteria.getIdProvincia() != null)
       builder.and(
           qCliente.ubicacionEnvio.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
     Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
@@ -150,7 +154,29 @@ public class ClienteServiceImpl implements IClienteService {
       builder.and(rsPredicate);
     }
     builder.and(qCliente.eliminado.eq(false));
-    return clienteRepository.findAll(builder, criteria.getPageable());
+    return clienteRepository.findAll(
+        builder,
+        this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
+  }
+
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+    String ordenDefault = "nombreFiscal";
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
+    }
   }
 
   @Override

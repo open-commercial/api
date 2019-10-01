@@ -5,9 +5,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.exception.ForbiddenException;
@@ -27,7 +24,6 @@ public class ClienteController {
   private final IUbicacionService ubicacionService;
   private final IAuthService authService;
   private final ModelMapper modelMapper;
-  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
   @Autowired
@@ -58,62 +54,17 @@ public class ClienteController {
     return clienteService.getClienteNoEliminadoPorId(idCliente);
   }
 
-  @GetMapping("/clientes/busqueda/criteria")
+  @PostMapping("/clientes/busqueda/criteria")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
   public Page<Cliente> buscarConCriteria(
-      @RequestParam(required = false) String nroCliente,
-      @RequestParam(required = false) String nombreFiscal,
-      @RequestParam(required = false) String nombreFantasia,
-      @RequestParam(required = false) Long idFiscal,
-      @RequestParam(required = false) Long idViajante,
-      @RequestParam(required = false) Long idProvincia,
-      @RequestParam(required = false) Long idLocalidad,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido,
+      @RequestBody BusquedaClienteCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable;
-    if (ordenarPor == null || sentido == null) {
-      pageable =
-          PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombreFiscal"));
-    } else {
-      switch (sentido) {
-        case "ASC":
-          pageable =
-              PageRequest.of(
-                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
-          break;
-        case "DESC":
-          pageable =
-              PageRequest.of(
-                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
-          break;
-        default:
-          pageable =
-              PageRequest.of(
-                  pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, "nombreFiscal"));
-          break;
-      }
-    }
-    BusquedaClienteCriteria criteria =
-        BusquedaClienteCriteria.builder()
-            .buscaPorNombreFiscal(nombreFiscal != null)
-            .nombreFiscal(nombreFiscal)
-            .buscaPorNombreFantasia(nombreFantasia != null)
-            .nombreFantasia(nombreFantasia)
-            .buscaPorIdFiscal(idFiscal != null)
-            .idFiscal(idFiscal)
-            .buscaPorViajante(idViajante != null)
-            .idViajante(idViajante)
-            .buscaPorProvincia(idProvincia != null)
-            .idProvincia(idProvincia)
-            .buscaPorLocalidad(idLocalidad != null)
-            .idLocalidad(idLocalidad)
-            .buscarPorNroDeCliente(nroCliente != null)
-            .nroDeCliente(nroCliente)
-            .pageable(pageable)
-            .build();
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return clienteService.buscarClientes(criteria, (int) claims.get("idUsuario"));
   }

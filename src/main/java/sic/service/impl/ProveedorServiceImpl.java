@@ -4,6 +4,9 @@ import com.querydsl.core.BooleanBuilder;
 
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
@@ -35,6 +38,7 @@ public class ProveedorServiceImpl implements IProveedorService {
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IUbicacionService ubicacionService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
   @Autowired
@@ -70,7 +74,7 @@ public class ProveedorServiceImpl implements IProveedorService {
   public Page<Proveedor> buscarProveedores(BusquedaProveedorCriteria criteria) {
     QProveedor qProveedor = QProveedor.proveedor;
     BooleanBuilder builder = new BooleanBuilder();
-    if (criteria.isBuscaPorRazonSocial()) {
+    if (criteria.getNroProveedor() != null) {
       String[] terminos = criteria.getRazonSocial().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -78,15 +82,34 @@ public class ProveedorServiceImpl implements IProveedorService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscaPorIdFiscal()) builder.or(qProveedor.idFiscal.eq(criteria.getIdFiscal()));
-    if (criteria.isBuscaPorNroProveedor())
+    if (criteria.getIdFiscal() != null) builder.or(qProveedor.idFiscal.eq(criteria.getIdFiscal()));
+    if (criteria.getNroProveedor() != null)
       builder.or(qProveedor.nroProveedor.containsIgnoreCase(criteria.getNroProveedor()));
-    if (criteria.isBuscaPorLocalidad())
+    if (criteria.getIdLocalidad() != null)
       builder.and(qProveedor.ubicacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
-    if (criteria.isBuscaPorProvincia())
+    if (criteria.getIdProvincia() != null)
       builder.and(qProveedor.ubicacion.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
-    builder.and(qProveedor.eliminado.eq(false));
-    return proveedorRepository.findAll(builder, criteria.getPageable());
+    return proveedorRepository.findAll(builder, this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
+  }
+
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+    String ordenDefault = "razonSocial";
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
+    }
   }
 
   @Override

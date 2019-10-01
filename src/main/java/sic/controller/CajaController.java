@@ -6,9 +6,6 @@ import java.util.*;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
@@ -24,7 +21,6 @@ public class CajaController {
   private final IUsuarioService usuarioService;
   private final IFormaDePagoService formaDePagoService;
   private final IAuthService authService;
-  private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
   public CajaController(
@@ -77,39 +73,22 @@ public class CajaController {
     return cajaService.cerrarCaja(idCaja, monto, idUsuarioLoggedIn, false);
   }
 
-  @GetMapping("/cajas/busqueda/criteria")
+  @PostMapping("/cajas/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public Page<Caja> getCajasCriteria(
-      @RequestParam long idSucursal,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) Long idUsuarioApertura,
-      @RequestParam(required = false) Long idUsuarioCierre,
-      @RequestParam(required = false) Integer pagina) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if (desde != null && hasta != null) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable =
-        PageRequest.of(
-            pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "fechaApertura"));
-    BusquedaCajaCriteria criteria =
-        BusquedaCajaCriteria.builder()
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .idSucursal(idSucursal)
-            .cantidadDeRegistros(0)
-            .buscaPorUsuarioApertura(idUsuarioApertura != null)
-            .idUsuarioApertura(idUsuarioApertura)
-            .buscaPorUsuarioCierre(idUsuarioCierre != null)
-            .idUsuarioCierre(idUsuarioCierre)
-            .pageable(pageable)
-            .build();
-    return cajaService.getCajasCriteria(criteria);
+  public Page<Caja> getCajasCriteria(@RequestBody BusquedaCajaCriteria criteria) {
+    return cajaService.buscarCajas(criteria);
+  }
+
+  @PostMapping("/cajas/saldo-sistema")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public BigDecimal getSaldoSistemaCajas(@RequestBody BusquedaCajaCriteria criteria) {
+    return cajaService.getSaldoSistemaCajas(criteria);
+  }
+
+  @PostMapping("/cajas/saldo-real")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public BigDecimal getSaldoRealCajas(@RequestBody BusquedaCajaCriteria criteria) {
+    return cajaService.getSaldoRealCajas(criteria);
   }
 
   @GetMapping("/cajas/{idCaja}/movimientos")
@@ -142,64 +121,6 @@ public class CajaController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public boolean getEstadoUltimaCaja(@PathVariable long idSucursal) {
     return cajaService.isUltimaCajaAbierta(idSucursal);
-  }
-
-  @GetMapping("/cajas/saldo-sistema")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public BigDecimal getSaldoSistemaCajas(
-      @RequestParam long idSucursal,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) Long idUsuarioApertura,
-      @RequestParam(required = false) Long idUsuarioCierre) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if (desde != null && hasta != null) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    BusquedaCajaCriteria criteria =
-        BusquedaCajaCriteria.builder()
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .idSucursal(idSucursal)
-            .cantidadDeRegistros(0)
-            .buscaPorUsuarioApertura(idUsuarioApertura != null)
-            .idUsuarioApertura(idUsuarioApertura)
-            .buscaPorUsuarioCierre(idUsuarioCierre != null)
-            .idUsuarioCierre(idUsuarioCierre)
-            .build();
-    return cajaService.getSaldoSistemaCajas(criteria);
-  }
-
-  @GetMapping("/cajas/saldo-real")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public BigDecimal getSaldoRealCajas(
-      @RequestParam long idSucursal,
-      @RequestParam(required = false) Long desde,
-      @RequestParam(required = false) Long hasta,
-      @RequestParam(required = false) Long idUsuarioApertura,
-      @RequestParam(required = false) Long idUsuarioCierre) {
-    Calendar fechaDesde = Calendar.getInstance();
-    Calendar fechaHasta = Calendar.getInstance();
-    if (desde != null && hasta != null) {
-      fechaDesde.setTimeInMillis(desde);
-      fechaHasta.setTimeInMillis(hasta);
-    }
-    BusquedaCajaCriteria criteria =
-        BusquedaCajaCriteria.builder()
-            .buscaPorFecha((desde != null) && (hasta != null))
-            .fechaDesde(fechaDesde.getTime())
-            .fechaHasta(fechaHasta.getTime())
-            .idSucursal(idSucursal)
-            .cantidadDeRegistros(0)
-            .buscaPorUsuarioApertura(idUsuarioApertura != null)
-            .idUsuarioApertura(idUsuarioApertura)
-            .buscaPorUsuarioCierre(idUsuarioCierre != null)
-            .idUsuarioCierre(idUsuarioCierre)
-            .build();
-    return cajaService.getSaldoRealCajas(criteria);
   }
 
   @GetMapping("/cajas/{idCaja}/totales-formas-de-pago")

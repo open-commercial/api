@@ -5,9 +5,6 @@ import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
@@ -61,14 +57,13 @@ public class ProveedorController {
 
   @PutMapping("/proveedores")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public void actualizar(
-    @RequestBody ProveedorDTO proveedorDTO) {
+  public void actualizar(@RequestBody ProveedorDTO proveedorDTO) {
     Proveedor proveedorPersistido =
-      proveedorService.getProveedorNoEliminadoPorId(proveedorDTO.getId_Proveedor());
+        proveedorService.getProveedorNoEliminadoPorId(proveedorDTO.getId_Proveedor());
     Proveedor proveedorPorActualizar = modelMapper.map(proveedorDTO, Proveedor.class);
     proveedorPorActualizar.setNroProveedor(proveedorPersistido.getNroProveedor());
     if (proveedorPorActualizar.getRazonSocial() == null
-      || proveedorPorActualizar.getRazonSocial().isEmpty()) {
+        || proveedorPorActualizar.getRazonSocial().isEmpty()) {
       proveedorPorActualizar.setRazonSocial(proveedorPersistido.getRazonSocial());
     }
     if (proveedorPorActualizar.getCategoriaIVA() == null) {
@@ -79,64 +74,23 @@ public class ProveedorController {
     } else {
       proveedorPorActualizar.setUbicacion(null);
     }
-    Ubicacion ubicacion;
     if (proveedorDTO.getUbicacion() != null) {
-      ubicacion = modelMapper.map(proveedorDTO.getUbicacion(), Ubicacion.class);
+      Ubicacion ubicacion = modelMapper.map(proveedorDTO.getUbicacion(), Ubicacion.class);
       ubicacion.setLocalidad(ubicacionService.getLocalidadPorId(ubicacion.getIdLocalidad()));
       proveedorPorActualizar.setUbicacion(ubicacion);
     } else {
       proveedorPorActualizar.setUbicacion(proveedorPersistido.getUbicacion());
     }
-    if (proveedorService.getProveedorNoEliminadoPorId(proveedorPorActualizar.getId_Proveedor()) != null) {
+    if (proveedorService.getProveedorNoEliminadoPorId(proveedorPorActualizar.getId_Proveedor())
+        != null) {
       proveedorService.actualizar(proveedorPorActualizar);
     }
   }
 
-  @GetMapping("/proveedores/busqueda/criteria")
+  @PostMapping("/proveedores/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Page<Proveedor> buscarProveedores(
-    @RequestParam(required = false) String nroProveedor,
-    @RequestParam(required = false) String razonSocial,
-    @RequestParam(required = false) Long idFiscal,
-    @RequestParam(required = false) Long idProvincia,
-    @RequestParam(required = false) Long idLocalidad,
-    @RequestParam(required = false) Integer pagina,
-    @RequestParam(required = false) Integer tamanio,
-    @RequestParam(required = false) String ordenarPor,
-    @RequestParam(required = false) String sentido) {
-    final int TAMANIO_PAGINA_DEFAULT = 50;
-    if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
-    if (pagina == null || pagina < 0) pagina = 0;
-    Pageable pageable;
-    if (ordenarPor == null || sentido == null) {
-      pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.ASC, "razonSocial"));
-    } else {
-      switch (sentido) {
-        case "ASC":
-          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenarPor));
-          break;
-        case "DESC":
-          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenarPor));
-          break;
-        default:
-          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.ASC, "razonSocial"));
-          break;
-      }
-    }
-    BusquedaProveedorCriteria criteria =
-      BusquedaProveedorCriteria.builder()
-        .buscaPorNroProveedor(nroProveedor != null)
-        .nroProveedor(nroProveedor)
-        .buscaPorRazonSocial(razonSocial != null)
-        .razonSocial(razonSocial)
-        .buscaPorIdFiscal(idFiscal != null)
-        .idFiscal(idFiscal)
-        .buscaPorProvincia(idProvincia != null)
-        .idProvincia(idProvincia)
-        .buscaPorLocalidad(idLocalidad != null)
-        .idLocalidad(idLocalidad)
-        .pageable(pageable)
-        .build();
+    @RequestBody BusquedaProveedorCriteria criteria) {
     return proveedorService.buscarProveedores(criteria);
   }
 

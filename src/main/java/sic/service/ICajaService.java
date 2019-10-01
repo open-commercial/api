@@ -21,7 +21,7 @@ public interface ICajaService {
     
     Caja getCajaPorId(Long id);
 
-    Page<Caja> getCajasCriteria(BusquedaCajaCriteria criteria);
+    Page<Caja> buscarCajas(BusquedaCajaCriteria criteria);
 
     Map<Long, BigDecimal> getTotalesDeFormaDePago(long idCaja);
 

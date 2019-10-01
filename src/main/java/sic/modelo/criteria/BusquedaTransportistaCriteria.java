@@ -15,4 +15,7 @@ public class BusquedaTransportistaCriteria {
     private Long idProvincia;
     private boolean buscarPorLocalidad;
     private Long idLocalidad;
+    private Integer pagina;
+    private String ordenarPor;
+    private String sentido;
 }

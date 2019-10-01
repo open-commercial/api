@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaProductoCriteria;
-import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductoDTO;
+import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 
@@ -35,7 +35,6 @@ public class ProductoController {
   private final IClienteService clienteService;
   private final IAuthService authService;
   private final ModelMapper modelMapper;
-  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
   @Autowired
@@ -87,38 +86,28 @@ public class ProductoController {
     }
   }
 
-  @GetMapping("/productos/busqueda/criteria")
+  @GetMapping("/productos/busqueda")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+    public Producto getProductoPorCodigo(@RequestParam String codigo) {
+      return productoService.getProductoPorCodigo(codigo);
+    }
+
+  @PostMapping("/productos/busqueda/criteria")
   public Page<Producto> buscarProductos(
-      @RequestParam(required = false) String codigo,
-      @RequestParam(required = false) String descripcion,
-      @RequestParam(required = false) Long idRubro,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) boolean soloFantantes,
-      @RequestParam(required = false) boolean soloEnStock,
-      @RequestParam(required = false) Boolean publicos,
-      @RequestParam(required = false) Boolean destacados,
-      @RequestParam(required = false) Integer pagina,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido,
+      @RequestBody BusquedaProductoCriteria criteria,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
-    Page<Producto> productos =
-        this.buscar(
-            codigo,
-            descripcion,
-            idRubro,
-            idProveedor,
-            soloFantantes,
-            soloEnStock,
-            publicos,
-            destacados,
-            pagina,
-            null,
-            ordenarPor,
-            sentido);
-    if (authorizationHeader != null && authService.esAuthorizationHeaderValido(authorizationHeader)) {
+    Page<Producto> productos = productoService.buscarProductos(criteria);
+    if (authorizationHeader != null
+        && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente =
-        clienteService.getClientePorIdUsuario((int) claims.get("idUsuario"));
+          clienteService.getClientePorIdUsuario((int) claims.get("idUsuario"));
       if (cliente != null) {
         return productoService.getProductosConPrecioBonificado(productos, cliente);
       } else {
@@ -129,7 +118,13 @@ public class ProductoController {
     }
   }
 
-  @GetMapping("/productos/busqueda")
+  @PostMapping("/productos/valor-stock/criteria")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public BigDecimal calcularValorStock(@RequestBody BusquedaProductoCriteria criteria) {
+    return productoService.calcularValorStock(criteria);
+  }
+
+  @PostMapping("/productos/reporte/criteria")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -137,61 +132,33 @@ public class ProductoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public Producto getProductoPorCodigo(@RequestParam String codigo) {
-    return productoService.getProductoPorCodigo(codigo);
-  }
-
-  private Page<Producto> buscar(
-      String codigo,
-      String descripcion,
-      Long idRubro,
-      Long idProveedor,
-      boolean soloFantantes,
-      boolean soloEnStock,
-      Boolean publicos,
-      Boolean destacados,
-      Integer pagina,
-      Integer tamanio,
-      String ordenarPor,
-      String sentido) {
-    if (tamanio == null || tamanio <= 0) tamanio = TAMANIO_PAGINA_DEFAULT;
-    if (pagina == null || pagina < 0) pagina = 0;
-    String ordenDefault = "descripcion";
-    Pageable pageable;
-    if (ordenarPor == null || sentido == null) {
-      pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenDefault));
-    } else {
-      switch (sentido) {
-        case "ASC":
-          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.ASC, ordenarPor));
-          break;
-        case "DESC":
-          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenarPor));
-          break;
-        default:
-          pageable = PageRequest.of(pagina, tamanio, new Sort(Sort.Direction.DESC, ordenDefault));
-          break;
-      }
+  public ResponseEntity<byte[]> getListaDePrecios(
+    @RequestBody BusquedaProductoCriteria criteria,
+    @RequestParam(required = false) String formato) {
+    HttpHeaders headers = new HttpHeaders();
+    List<Producto> productos;
+    switch (formato) {
+      case "xlsx":
+        headers.setContentType(new MediaType("application", "vnd.ms-excel"));
+        headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+        productos = productoService.buscarProductos(criteria).getContent();
+        byte[] reporteXls =
+          productoService.getListaDePrecios(productos, formato);
+        headers.setContentLength(reporteXls.length);
+        return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
+      case "pdf":
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+        productos = productoService.buscarProductos(criteria).getContent();
+        byte[] reportePDF =
+          productoService.getListaDePrecios(productos, formato);
+        return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+      default:
+        throw new BusinessServiceException(messageSource.getMessage(
+          "mensaje_formato_no_valido", null, Locale.getDefault()));
     }
-    BusquedaProductoCriteria criteria =
-        BusquedaProductoCriteria.builder()
-            .buscarPorCodigo((codigo != null && !codigo.isEmpty()))
-            .codigo(codigo)
-            .buscarPorDescripcion(descripcion != null && !descripcion.isEmpty())
-            .descripcion(descripcion)
-            .buscarPorRubro(idRubro != null)
-            .idRubro(idRubro)
-            .buscarPorProveedor(idProveedor != null)
-            .idProveedor(idProveedor)
-            .listarSoloFaltantes(soloFantantes)
-            .listarSoloEnStock(soloEnStock)
-            .buscaPorVisibilidad(publicos != null)
-            .publico(publicos)
-            .buscaPorOferta(destacados != null)
-            .oferta(destacados)
-            .pageable(pageable)
-            .build();
-    return productoService.buscarProductos(criteria);
   }
 
   @DeleteMapping("/productos")
@@ -308,37 +275,6 @@ public class ProductoController {
     productoService.actualizarMultiples(productosParaActualizarDTO);
   }
 
-  @GetMapping("/productos/valor-stock/criteria")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public BigDecimal calcularValorStock(
-      @RequestParam(required = false) String codigo,
-      @RequestParam(required = false) String descripcion,
-      @RequestParam(required = false) Long idRubro,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) boolean soloFantantes,
-      @RequestParam(required = false) boolean soloEnStock,
-      @RequestParam(required = false) Boolean publicos,
-      @RequestParam(required = false) Boolean destacados) {
-    BusquedaProductoCriteria criteria =
-        BusquedaProductoCriteria.builder()
-            .buscarPorCodigo((codigo != null))
-            .codigo(codigo)
-            .buscarPorDescripcion(descripcion != null)
-            .descripcion(descripcion)
-            .buscarPorRubro(idRubro != null)
-            .idRubro(idRubro)
-            .buscarPorProveedor(idProveedor != null)
-            .idProveedor(idProveedor)
-            .listarSoloFaltantes(soloFantantes)
-            .listarSoloEnStock(soloEnStock)
-            .buscaPorVisibilidad(publicos != null)
-            .publico(publicos)
-            .buscaPorOferta(destacados != null)
-            .oferta(destacados)
-            .build();
-    return productoService.calcularValorStock(criteria);
-  }
-
   @GetMapping("/productos/disponibilidad-stock/sucursales/{idSucursal}")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
@@ -350,79 +286,5 @@ public class ProductoController {
   public Map<Long, BigDecimal> verificarDisponibilidadStock(
       long[] idProducto, BigDecimal[] cantidad, @PathVariable Long idSucursal) {
     return productoService.getProductosSinStockDisponible(idSucursal, idProducto, cantidad);
-  }
-
-  @GetMapping("/productos/reporte/criteria")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
-  public ResponseEntity<byte[]> getListaDePrecios(
-      @RequestParam(required = false) String codigo,
-      @RequestParam(required = false) String descripcion,
-      @RequestParam(required = false) Long idRubro,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) boolean soloFantantes,
-      @RequestParam(required = false) boolean soloEnStock,
-      @RequestParam(required = false) Boolean publicos,
-      @RequestParam(required = false) Boolean destacados,
-      @RequestParam(required = false) String ordenarPor,
-      @RequestParam(required = false) String sentido,
-      @RequestParam(required = false) String formato) {
-    HttpHeaders headers = new HttpHeaders();
-    List<Producto> productos;
-    switch (formato) {
-      case "xlsx":
-        headers.setContentType(new MediaType("application", "vnd.ms-excel"));
-        headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
-        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        productos =
-            this.buscar(
-                    codigo,
-                    descripcion,
-                    idRubro,
-                    idProveedor,
-                    soloFantantes,
-                    soloEnStock,
-                    publicos,
-                    destacados,
-                    0,
-                    Integer.MAX_VALUE,
-                    ordenarPor,
-                    sentido)
-                .getContent();
-        byte[] reporteXls =
-            productoService.getListaDePreciosPorSucursal(productos, formato);
-        headers.setContentLength(reporteXls.length);
-        return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
-      case "pdf":
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
-        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        productos =
-            this.buscar(
-                    codigo,
-                    descripcion,
-                    idRubro,
-                    idProveedor,
-                    soloFantantes,
-                    soloEnStock,
-                    publicos,
-                    destacados,
-                    0,
-                    Integer.MAX_VALUE,
-                    ordenarPor,
-                    sentido)
-                .getContent();
-        byte[] reportePDF =
-            productoService.getListaDePreciosPorSucursal(productos, formato);
-        return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
-      default:
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_formato_no_valido", null, Locale.getDefault()));
-    }
   }
 }

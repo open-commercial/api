@@ -17,11 +17,15 @@ public interface IProductoService {
   void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido);
 
   void actualizarStock(
-      Map<Long, BigDecimal> idsYCantidades, Long idSucursal, TipoDeOperacion operacion, Movimiento movimiento, TipoDeComprobante tipoDeComprobante);
+      Map<Long, BigDecimal> idsYCantidades,
+      Long idSucursal,
+      TipoDeOperacion operacion,
+      Movimiento movimiento,
+      TipoDeComprobante tipoDeComprobante);
 
   Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
 
-  BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal ganancia_porcentaje);
+  BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal gananciaPorcentaje);
 
   Map<Long, BigDecimal> getProductosSinStockDisponible(Long idSucursal, long[] idProducto, BigDecimal[] cantidad);
 
@@ -34,12 +38,12 @@ public interface IProductoService {
       BigDecimal precioCosto,
       boolean descendente);
 
-  BigDecimal calcularIVANeto(BigDecimal precioCosto, BigDecimal iva_porcentaje);
+  BigDecimal calcularIVANeto(BigDecimal precioCosto, BigDecimal ivaPorcentaje);
 
-  BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal ganancia_porcentaje);
+  BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal gananciaPorcentaje);
 
   BigDecimal calcularPrecioLista(
-      BigDecimal PVP, BigDecimal iva_porcentaje);
+      BigDecimal pvp, BigDecimal ivaPorcentaje);
 
   void eliminarMultiplesProductos(long[] idProducto);
 
@@ -53,7 +57,7 @@ public interface IProductoService {
 
   BigDecimal calcularValorStock(BusquedaProductoCriteria criteria);
 
-  byte[] getListaDePreciosPorSucursal(List<Producto> productos, String formato);
+  byte[] getListaDePrecios(List<Producto> productos, String formato);
 
   Producto guardar(@Valid Producto producto);
 

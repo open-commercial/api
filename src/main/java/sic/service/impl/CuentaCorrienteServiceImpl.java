@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -48,6 +49,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
   @Autowired
@@ -115,7 +117,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     QCuentaCorrienteCliente qCuentaCorrienteCliente =
         QCuentaCorrienteCliente.cuentaCorrienteCliente;
     BooleanBuilder builder = new BooleanBuilder();
-    if (criteria.isBuscaPorNombreFiscal()) {
+    if (criteria.getNombreFiscal() != null) {
       String[] terminos = criteria.getNombreFiscal().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -123,7 +125,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscaPorNombreFantasia()) {
+    if (criteria.getNombreFantasia() != null) {
       String[] terminos = criteria.getNombreFantasia().split(" ");
       BooleanBuilder nfPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -131,19 +133,19 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       }
       builder.or(nfPredicate);
     }
-    if (criteria.isBuscaPorIdFiscal())
+    if (criteria.getIdFiscal() != null)
       builder.or(qCuentaCorrienteCliente.cliente.idFiscal.eq(criteria.getIdFiscal()));
-    if (criteria.isBuscarPorNroDeCliente())
+    if (criteria.getNroDeCliente() != null)
       builder.or(
           qCuentaCorrienteCliente.cliente.nroCliente.containsIgnoreCase(
               criteria.getNroDeCliente()));
-    if (criteria.isBuscaPorViajante())
+    if (criteria.getIdViajante() != null)
       builder.and(qCuentaCorrienteCliente.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
-    if (criteria.isBuscaPorLocalidad())
+    if (criteria.getIdLocalidad() != null)
       builder.and(
           qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.idLocalidad.eq(
               criteria.getIdLocalidad()));
-    if (criteria.isBuscaPorProvincia())
+    if (criteria.getIdProvincia() != null)
       builder.and(
           qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.provincia.idProvincia.eq(
               criteria.getIdProvincia()));
@@ -172,7 +174,28 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       builder.and(rsPredicate);
     }
     builder.and(qCuentaCorrienteCliente.eliminada.eq(false));
-    return cuentaCorrienteClienteRepository.findAll(builder, criteria.getPageable());
+    return cuentaCorrienteClienteRepository.findAll(
+        builder,
+        this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido(), "cliente.nombreFiscal"));
+  }
+
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido, String ordenDefault) {
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
+    }
   }
 
   @Override
@@ -181,11 +204,11 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     QCuentaCorrienteProveedor qCuentaCorrienteProveedor =
         QCuentaCorrienteProveedor.cuentaCorrienteProveedor;
     BooleanBuilder builder = new BooleanBuilder();
-    if (criteria.isBuscaPorNroProveedor())
+    if (criteria.getNroProveedor() != null)
       builder.or(
           qCuentaCorrienteProveedor.proveedor.nroProveedor.containsIgnoreCase(
               criteria.getNroProveedor()));
-    if (criteria.isBuscaPorRazonSocial()) {
+    if (criteria.getRazonSocial() != null) {
       String[] terminos = criteria.getRazonSocial().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
@@ -194,17 +217,21 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.isBuscaPorIdFiscal())
+    if (criteria.getIdFiscal() != null)
       builder.or(qCuentaCorrienteProveedor.proveedor.idFiscal.eq(criteria.getIdFiscal()));
-    if (criteria.isBuscaPorLocalidad())
+    if (criteria.getIdLocalidad() != null)
       builder.and(
-          qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
-    if (criteria.isBuscaPorProvincia())
+          qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.idLocalidad.eq(
+              criteria.getIdLocalidad()));
+    if (criteria.getIdProvincia() != null)
       builder.and(
           qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.provincia.idProvincia.eq(
               criteria.getIdProvincia()));
     builder.and(qCuentaCorrienteProveedor.eliminada.eq(false));
-    return cuentaCorrienteProveedorRepository.findAll(builder, criteria.getPageable());
+    return cuentaCorrienteProveedorRepository.findAll(
+        builder,
+        this.getPageable(
+            criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido(), "proveedor.razonSocial"));
   }
 
   @Override
@@ -382,14 +409,13 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   public byte[] getReporteCuentaCorrienteCliente(
-      CuentaCorrienteCliente cuentaCorrienteCliente, Pageable page, String formato) {
+      CuentaCorrienteCliente cuentaCorrienteCliente, Integer pagina, String formato) {
     ClassLoader classLoader = CuentaCorrienteServiceImpl.class.getClassLoader();
     InputStream isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/CuentaCorriente.jasper");
-    page = PageRequest.of(0, (page.getPageNumber() + 1) * page.getPageSize());
     JRBeanCollectionDataSource ds =
         new JRBeanCollectionDataSource(
-            this.getRenglonesCuentaCorriente(cuentaCorrienteCliente.getIdCuentaCorriente(), page)
+            this.getRenglonesCuentaCorriente(cuentaCorrienteCliente.getIdCuentaCorriente(), pagina, true)
                 .getContent());
     Map<String, Object> params = new HashMap<>();
     params.put("cuentaCorrienteCliente", cuentaCorrienteCliente);
@@ -463,9 +489,15 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(
-      long idCuentaCorriente, Pageable page) {
+      long idCuentaCorriente, Integer pagina, boolean reporte) {
+    Pageable pageable;
+    if (reporte) {
+      pageable = PageRequest.of(0, (pagina + 1) * TAMANIO_PAGINA_DEFAULT);
+    } else {
+      pageable = PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT);
+    }
     return renglonCuentaCorrienteRepository.findAllByCuentaCorrienteAndEliminado(
-        idCuentaCorriente, page);
+        idCuentaCorriente, pageable);
   }
 
   @Override

@@ -10,6 +10,8 @@ import net.sf.jasperreports.export.*;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
@@ -51,6 +53,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final IMedidaService medidaService;
   private final ICarritoCompraService carritoCompraService;
   private final IPhotoVideoUploader photoVideoUploader;
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
   @Autowired
@@ -192,39 +195,68 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public Page<Producto> buscarProductos(BusquedaProductoCriteria criteria) {
-    return productoRepository.findAll(this.getBuilder(criteria), criteria.getPageable());
+    return productoRepository.findAll(
+        this.getBuilder(criteria),
+        this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
+  }
+
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+    String ordenDefault = "descripcion";
+    if (ordenarPor == null || sentido == null) {
+      return PageRequest.of(
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenDefault));
+    } else {
+      switch (sentido) {
+        case "ASC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+        case "DESC":
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+        default:
+          return PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+      }
+    }
   }
 
   private BooleanBuilder getBuilder(BusquedaProductoCriteria criteria) {
     QProducto qProducto = QProducto.producto;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(qProducto.eliminado.eq(false));
-    if (criteria.isBuscarPorCodigo() && criteria.isBuscarPorDescripcion())
+    if (criteria.getCodigo() != null && criteria.getDescripcion() != null)
       builder.and(
           qProducto
               .codigo
               .containsIgnoreCase(criteria.getCodigo())
               .or(this.buildPredicadoDescripcion(criteria.getDescripcion(), qProducto)));
     else {
-      if (criteria.isBuscarPorCodigo())
+      if (criteria.getCodigo() != null)
         builder.and(qProducto.codigo.containsIgnoreCase(criteria.getCodigo()));
-      if (criteria.isBuscarPorDescripcion())
+      if (criteria.getDescripcion() != null)
         builder.and(this.buildPredicadoDescripcion(criteria.getDescripcion(), qProducto));
     }
-    if (criteria.isBuscarPorRubro())
+    if (criteria.getIdRubro() != null)
       builder.and(qProducto.rubro.id_Rubro.eq(criteria.getIdRubro()));
-    if (criteria.isBuscarPorProveedor())
+    if (criteria.getIdProveedor() != null)
       builder.and(qProducto.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
     if (criteria.isListarSoloFaltantes())
-      builder.and(qProducto.cantidadEnSucursales.any().cantidad.loe(qProducto.cantMinima)).and(qProducto.ilimitado.eq(false));
+      builder
+          .and(qProducto.cantidadEnSucursales.any().cantidad.loe(qProducto.cantMinima))
+          .and(qProducto.ilimitado.eq(false));
     if (criteria.isListarSoloEnStock())
-      builder.and(qProducto.cantidadEnSucursales.any().cantidad.gt(BigDecimal.ZERO)).and(qProducto.ilimitado.eq(false));
+      builder
+          .and(qProducto.cantidadEnSucursales.any().cantidad.gt(BigDecimal.ZERO))
+          .and(qProducto.ilimitado.eq(false));
     if (criteria.isBuscaPorVisibilidad())
       if (criteria.getPublico()) builder.and(qProducto.publico.isTrue());
       else builder.and(qProducto.publico.isFalse());
-    if (criteria.isBuscaPorOferta())
-      if (criteria.getOferta()) builder.and(qProducto.oferta.isTrue());
-      else builder.and(qProducto.oferta.isFalse());
+    if (criteria.getOferta()) builder.and(qProducto.oferta.isTrue());
+    else builder.and(qProducto.oferta.isFalse());
+    builder.and(qProducto.cantidad.gt(BigDecimal.ZERO)).and(qProducto.ilimitado.eq(false));
+    if (criteria.getPublico() != null)
+      if (criteria.getPublico()) builder.and(qProducto.publico.isTrue());
+      else builder.and(qProducto.publico.isFalse());
     return builder;
   }
 
@@ -510,12 +542,11 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   @Transactional
   public void guardarCantidadesDeSucursalNueva(Sucursal sucursal) {
-    BusquedaProductoCriteria criteriaProductos =
-        BusquedaProductoCriteria.builder().pageable(PageRequest.of(0, Integer.MAX_VALUE)).build();
     CantidadEnSucursal cantidadNueva = new CantidadEnSucursal();
     cantidadNueva.setSucursal(sucursal);
     cantidadNueva.setCantidad(BigDecimal.ZERO);
-    List<Producto> productos = this.buscarProductos(criteriaProductos).getContent();
+    List<Producto> productos =
+      productoRepository.findAllByEliminado(false);
     productos.forEach(producto -> producto.getCantidadEnSucursales().add(cantidadNueva));
     this.productoRepository.saveAll(productos);
   }
@@ -593,23 +624,6 @@ public class ProductoServiceImpl implements IProductoService {
                   }
                 });
       }
-//      for (int i = 0; i < longitudIds; i++) {
-//        Producto producto = this.getProductoNoEliminadoPorId(idProducto[i]);
-//        BigDecimal cantidadLambda = cantidad[i];
-//        if (!producto.getCantidadEnSucursales().isEmpty()) {
-//          boolean noExisteEnSucursales = true;
-//          for (CantidadEnSucursal cantidadEnSucursal : producto.getCantidadEnSucursales()) {
-//            if (cantidadEnSucursal.getIdSucursal().equals(idSucursal)) {
-//              noExisteEnSucursales = false;
-//              if (!producto.isIlimitado()
-//                  && cantidadEnSucursal.getCantidad().compareTo(cantidadLambda) < 0) {
-//                productos.put(producto.getIdProducto(), cantidadLambda);
-//              }
-//            }
-//          }
-//          if (noExisteEnSucursales) productos.put(producto.getIdProducto(), cantidadLambda);
-//        } else productos.put(producto.getIdProducto(), cantidadLambda);
-//      }
     } else {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_error_logitudes_arrays", null, Locale.getDefault()));
@@ -679,7 +693,7 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public byte[] getListaDePreciosPorSucursal(List<Producto> productos, String formato) {
+  public byte[] getListaDePrecios(List<Producto> productos, String formato) {
     ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
     InputStream isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");

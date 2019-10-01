@@ -18,6 +18,8 @@ public interface ProductoRepository extends PagingAndSortingRepository<Producto,
 
   List<Producto> findByIdProductoInOrderByIdProductoAsc(List<Long> idsProductos);
 
+  List<Producto> findAllByEliminado(boolean eliminado);
+
   @Modifying
   @Query("UPDATE Producto p SET p.urlImagen = :urlImagen WHERE p.idProducto = :idProducto")
   int actualizarUrlImagen(@Param("idProducto") long idProducto, @Param("urlImagen") String urlImagen);
