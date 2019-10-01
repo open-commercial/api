@@ -142,7 +142,7 @@ public class PedidoController {
         headers.setContentType(MediaType.APPLICATION_PDF);        
         headers.add("content-disposition", "inline; filename=Pedido.pdf");
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        byte[] reportePDF = pedidoService.getReportePedido(pedidoService.getPedidoNoEliminadoPorId(idPedido));
+        byte[] reportePDF = pedidoService.getReportePedido(idPedido);
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
     }
 

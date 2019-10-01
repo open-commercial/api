@@ -218,7 +218,7 @@ public class PedidoServiceImpl implements IPedidoService {
                 pedido.getCliente().getNombreFiscal(), "Pedido Nº " + pedido.getNroPedido()
               },
               Locale.getDefault()),
-          this.getReportePedido(pedido),
+          this.getReportePedido(pedido.getId_Pedido()),
           "Reporte");
       logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
@@ -459,17 +459,17 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public byte[] getReportePedido(Pedido pedido) {
+  public byte[] getReportePedido(long idPedido) {
     ClassLoader classLoader = PedidoServiceImpl.class.getClassLoader();
     InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Pedido.jasper");
     Map<String, Object> params = new HashMap<>();
+    Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
     params.put("pedido", pedido);
     if (pedido.getEmpresa().getLogo() != null && !pedido.getEmpresa().getLogo().isEmpty()) {
       try {
         params.put(
             "logo", new ImageIcon(ImageIO.read(new URL(pedido.getEmpresa().getLogo()))).getImage());
       } catch (IOException ex) {
-        logger.error(ex.getMessage());
         throw new ServiceException(messageSource.getMessage(
           "mensaje_empresa_404_logo", null, Locale.getDefault()), ex);
       }
@@ -487,7 +487,6 @@ public class PedidoServiceImpl implements IPedidoService {
       return JasperExportManager.exportReportToPdf(
           JasperFillManager.fillReport(isFileReport, params, ds));
     } catch (JRException ex) {
-      logger.error(ex.getMessage());
       throw new ServiceException(messageSource.getMessage(
         "mensaje_error_reporte", null, Locale.getDefault()), ex);
     }
