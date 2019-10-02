@@ -24,7 +24,10 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
+import org.springframework.web.client.RestTemplate;
 import sic.modelo.*;
+import sic.modelo.calculos.NuevosResultadosPedido;
+import sic.modelo.calculos.Resultados;
 import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 import sic.modelo.criteria.BusquedaGastoCriteria;
@@ -4708,6 +4711,42 @@ class AppIntegrationTest {
     assertEquals(nuevoPedidoDTO.getTotal(), pedidoRecuperado.getTotalEstimado());
     assertEquals(pedidoRecuperado.getObservaciones(), nuevoPedidoDTO.getObservaciones());
     assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
+  }
+
+  @Test
+  void shouldCalcularPiePedido() {
+    this.crearProductos();
+    List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
+    renglonesPedidoDTO.add(
+      NuevoRenglonPedidoDTO.builder()
+        .idProductoItem(1L)
+        .cantidad(new BigDecimal("5.000000000000000"))
+        .idCliente(1L)
+        .build());
+    renglonesPedidoDTO.add(
+      NuevoRenglonPedidoDTO.builder()
+        .idProductoItem(2L)
+        .cantidad(new BigDecimal("2.000000000000000"))
+        .idCliente(1L)
+        .build());
+    List<RenglonPedidoDTO> renglonesPedido =
+      Arrays.asList(
+        restTemplate.postForObject(
+          apiPrefix + "/pedidos/renglones", renglonesPedidoDTO, RenglonPedidoDTO[].class));
+    BigDecimal descuentoPorcentaje = new BigDecimal("20");
+    BigDecimal recargoPorcentaje = BigDecimal.ZERO;
+    NuevosResultadosPedido nuevosResultadosPedido = new NuevosResultadosPedido();
+    nuevosResultadosPedido.setRenglones(renglonesPedido);
+    nuevosResultadosPedido.setDescuentoPorcentaje(descuentoPorcentaje);
+    nuevosResultadosPedido.setRecargoPorcentaje(recargoPorcentaje);
+    Resultados resultados = restTemplate.postForObject(apiPrefix + "/pedidos/calculo-pedido", nuevosResultadosPedido, Resultados.class);
+    assertEquals(new BigDecimal("6608.000000000000000000000000000000"), resultados.getSubTotal());
+    assertEquals(new BigDecimal("1321.60000000000000000000000000000000"), resultados.getDescuentoNeto());
+    assertEquals(new BigDecimal("0E-32"), resultados.getRecargoNeto());
+    assertEquals(new BigDecimal("5286.40000000000000000000000000000000"), resultados.getSubTotalBruto());
+    assertEquals(null, resultados.getIva105Neto());
+    assertEquals(null, resultados.getIva21Neto());
+    assertEquals(new BigDecimal("5286.40000000000000000000000000000000"), resultados.getTotal());
   }
 
   @Test

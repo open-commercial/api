@@ -540,28 +540,12 @@ public class PedidoServiceImpl implements IPedidoService {
             : BigDecimal.ZERO);
     BigDecimal subTotal = BigDecimal.ZERO;
     for (RenglonPedidoDTO renglonPedidoDTO : calculoPedido.getRenglones()) {
-      subTotal =
-          subTotal.add(
-              renglonPedidoDTO
-                  .getCantidad()
-                  .multiply(
-                      renglonPedidoDTO
-                          .getPrecioUnitario()
-                          .subtract(
-                              renglonPedidoDTO
-                                  .getBonificacionPorcentaje()
-                                  .divide(new BigDecimal("100"), 2, RoundingMode.FLOOR)
-                                  .multiply(renglonPedidoDTO.getPrecioUnitario()))));
+      subTotal = subTotal.add(renglonPedidoDTO.getImporte());
     }
     resultados.setSubTotal(subTotal);
-    resultados.setSubTotalBruto(
-        resultados
-            .getSubTotal()
-            .subtract(
-                calculoPedido
-                    .getDescuentoPorcentaje()
-                    .divide(new BigDecimal("100"), 2, RoundingMode.FLOOR))
-            .multiply(resultados.getSubTotal()));
+    resultados.setDescuentoNeto(resultados.getSubTotal().multiply(resultados.getDescuentoPorcentaje().divide(new BigDecimal("100"), 2, RoundingMode.FLOOR)));
+    resultados.setRecargoNeto(resultados.getSubTotal().multiply(resultados.getRecargoPorcentaje().divide(new BigDecimal("100"), 2, RoundingMode.FLOOR)));
+    resultados.setSubTotalBruto(resultados.getSubTotal().subtract(resultados.getDescuentoNeto()).add(resultados.getRecargoNeto()));
     resultados.setTotal(resultados.getSubTotalBruto());
     return resultados;
   }
