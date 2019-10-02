@@ -251,7 +251,7 @@ public class ProductoServiceImpl implements IProductoService {
     if (criteria.isBuscaPorVisibilidad())
       if (criteria.getPublico()) builder.and(qProducto.publico.isTrue());
       else builder.and(qProducto.publico.isFalse());
-    if (criteria.getOferta()) builder.and(qProducto.oferta.isTrue());
+    if (criteria.getOferta() != null && criteria.getOferta()) builder.and(qProducto.oferta.isTrue());
     else builder.and(qProducto.oferta.isFalse());
     builder.and(qProducto.cantidad.gt(BigDecimal.ZERO)).and(qProducto.ilimitado.eq(false));
     if (criteria.getPublico() != null)
