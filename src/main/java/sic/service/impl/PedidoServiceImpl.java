@@ -530,20 +530,28 @@ public class PedidoServiceImpl implements IPedidoService {
   @Override
   public Resultados calcularResultadosPedido(NuevosResultadosPedido calculoPedido) {
     Resultados resultados = Resultados.builder().build();
-    resultados.setDescuentoPorcentaje(calculoPedido.getDescuentoPorcentaje());
-    resultados.setRecargoPorcentaje(calculoPedido.getRecargoPorcentaje());
+    resultados.setDescuentoPorcentaje(
+        calculoPedido.getDescuentoPorcentaje() != null
+            ? calculoPedido.getDescuentoPorcentaje()
+            : BigDecimal.ZERO);
+    resultados.setRecargoPorcentaje(
+        calculoPedido.getDescuentoPorcentaje() != null
+            ? calculoPedido.getRecargoPorcentaje()
+            : BigDecimal.ZERO);
     BigDecimal subTotal = BigDecimal.ZERO;
     for (RenglonPedidoDTO renglonPedidoDTO : calculoPedido.getRenglones()) {
-        subTotal = subTotal.add(renglonPedidoDTO
-          .getCantidad()
-          .multiply(
-            renglonPedidoDTO
-              .getPrecioUnitario()
-              .subtract(
-                renglonPedidoDTO
-                  .getBonificacionPorcentaje()
-                  .divide(new BigDecimal("100"), 2, RoundingMode.FLOOR)
-                  .multiply(renglonPedidoDTO.getPrecioUnitario()))));
+      subTotal =
+          subTotal.add(
+              renglonPedidoDTO
+                  .getCantidad()
+                  .multiply(
+                      renglonPedidoDTO
+                          .getPrecioUnitario()
+                          .subtract(
+                              renglonPedidoDTO
+                                  .getBonificacionPorcentaje()
+                                  .divide(new BigDecimal("100"), 2, RoundingMode.FLOOR)
+                                  .multiply(renglonPedidoDTO.getPrecioUnitario()))));
     }
     resultados.setSubTotal(subTotal);
     resultados.setSubTotalBruto(
