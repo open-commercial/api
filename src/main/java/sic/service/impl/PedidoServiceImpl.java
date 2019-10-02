@@ -532,9 +532,29 @@ public class PedidoServiceImpl implements IPedidoService {
     Resultados resultados = Resultados.builder().build();
     resultados.setDescuentoPorcentaje(calculoPedido.getDescuentoPorcentaje());
     resultados.setRecargoPorcentaje(calculoPedido.getRecargoPorcentaje());
-    resultados.setSubTotal(BigDecimal.TEN);
-    resultados.setSubTotalBruto(BigDecimal.TEN);
-    resultados.setTotal(BigDecimal.TEN);
+    BigDecimal subTotal = BigDecimal.ZERO;
+    for (RenglonPedidoDTO renglonPedidoDTO : calculoPedido.getRenglones()) {
+        subTotal = subTotal.add(renglonPedidoDTO
+          .getCantidad()
+          .multiply(
+            renglonPedidoDTO
+              .getPrecioUnitario()
+              .subtract(
+                renglonPedidoDTO
+                  .getBonificacionPorcentaje()
+                  .divide(new BigDecimal("100"), 2, RoundingMode.FLOOR)
+                  .multiply(renglonPedidoDTO.getPrecioUnitario()))));
+    }
+    resultados.setSubTotal(subTotal);
+    resultados.setSubTotalBruto(
+        resultados
+            .getSubTotal()
+            .subtract(
+                calculoPedido
+                    .getDescuentoPorcentaje()
+                    .divide(new BigDecimal("100"), 2, RoundingMode.FLOOR))
+            .multiply(resultados.getSubTotal()));
+    resultados.setTotal(resultados.getSubTotalBruto());
     return resultados;
   }
 }
