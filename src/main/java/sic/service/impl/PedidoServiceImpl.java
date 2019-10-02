@@ -36,6 +36,7 @@ import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.calculos.NuevosResultadosPedido;
 import sic.modelo.calculos.Resultados;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
+import sic.modelo.dto.RenglonPedidoDTO;
 import sic.modelo.dto.UbicacionDTO;
 import sic.repository.RenglonPedidoRepository;
 import sic.service.*;
@@ -531,30 +532,9 @@ public class PedidoServiceImpl implements IPedidoService {
     Resultados resultados = Resultados.builder().build();
     resultados.setDescuentoPorcentaje(calculoPedido.getDescuentoPorcentaje());
     resultados.setRecargoPorcentaje(calculoPedido.getRecargoPorcentaje());
-    calculoPedido
-        .getRenglones()
-        .forEach(
-            renglonPedidoDTO ->
-                resultados.setSubTotal(
-                    renglonPedidoDTO
-                        .getCantidad()
-                        .multiply(
-                            renglonPedidoDTO
-                                .getPrecioUnitario()
-                                .subtract(
-                                    renglonPedidoDTO
-                                        .getBonificacionPorcentaje()
-                                        .divide(new BigDecimal("100"), 2, RoundingMode.FLOOR)
-                                        .multiply(renglonPedidoDTO.getPrecioUnitario())))));
-    resultados.setSubTotalBruto(
-        resultados
-            .getSubTotal()
-            .subtract(
-                calculoPedido
-                    .getDescuentoPorcentaje()
-                    .divide(new BigDecimal("100"), 2, RoundingMode.FLOOR))
-            .multiply(resultados.getSubTotal()));
-    resultados.setTotal(resultados.getSubTotalBruto());
+    resultados.setSubTotal(BigDecimal.TEN);
+    resultados.setSubTotalBruto(BigDecimal.TEN);
+    resultados.setTotal(BigDecimal.TEN);
     return resultados;
   }
 }
