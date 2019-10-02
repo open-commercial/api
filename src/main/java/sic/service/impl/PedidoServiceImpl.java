@@ -500,12 +500,14 @@ public class PedidoServiceImpl implements IPedidoService {
       nuevoRenglon.setBonificacionPorcentaje(BigDecimal.ZERO);
       nuevoRenglon.setBonificacionNeta(BigDecimal.ZERO);
     }
+    nuevoRenglon.setImporteAnterior(
+        CalculosComprobante.calcularImporte(
+            nuevoRenglon.getCantidad(), producto.getPrecioLista(), BigDecimal.ZERO));
     nuevoRenglon.setImporte(
         CalculosComprobante.calcularImporte(
             nuevoRenglon.getCantidad(),
             producto.getPrecioLista(),
             nuevoRenglon.getBonificacionNeta()));
-    nuevoRenglon.setImporteAnterior(nuevoRenglon.getImporte().add(nuevoRenglon.getBonificacionNeta()));
     return nuevoRenglon;
   }
 
