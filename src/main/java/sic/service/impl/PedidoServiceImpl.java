@@ -421,7 +421,8 @@ public class PedidoServiceImpl implements IPedidoService {
                                     r.getCantidad(),
                                     r.getIdProductoItem(),
                                     false,
-                                    this.getPedidoNoEliminadoPorId(idPedido).getCliente()))));
+                                    this.getPedidoNoEliminadoPorId(idPedido).getCliente(),
+                                    null))));
     HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
     if (!renglonesDeFacturas.isEmpty()) {
       renglonesDeFacturas.forEach(

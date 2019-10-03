@@ -82,7 +82,8 @@ public interface IFacturaService {
       BigDecimal cantidad,
       long idProducto,
       boolean dividiendoRenglonFactura,
-      Cliente cliente);
+      Cliente cliente,
+      BigDecimal bonificacion);
 
   boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAFIP comprobante);
 

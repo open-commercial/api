@@ -1199,7 +1199,7 @@ class AppIntegrationTest {
     RenglonFactura renglonUno =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-venta?"
           + "idProducto="
           + productoUno.getIdProducto()
           + "&tipoDeComprobante="
@@ -1212,7 +1212,7 @@ class AppIntegrationTest {
     RenglonFactura renglonDos =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-venta?"
           + "idProducto="
           + productoDos.getIdProducto()
           + "&tipoDeComprobante="
@@ -1331,7 +1331,7 @@ class AppIntegrationTest {
     RenglonFactura renglonUno =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-venta?"
           + "idProducto="
           + productoUno.getIdProducto()
           + "&tipoDeComprobante="
@@ -1344,7 +1344,7 @@ class AppIntegrationTest {
     RenglonFactura renglonDos =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-venta?"
           + "idProducto="
           + productoDos.getIdProducto()
           + "&tipoDeComprobante="
@@ -1461,7 +1461,7 @@ class AppIntegrationTest {
     RenglonFactura renglonUno =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-venta?"
           + "idProducto="
           + productoUno.getIdProducto()
           + "&tipoDeComprobante="
@@ -1474,7 +1474,7 @@ class AppIntegrationTest {
     RenglonFactura renglonDos =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-venta?"
           + "idProducto="
           + productoDos.getIdProducto()
           + "&tipoDeComprobante="
@@ -1584,7 +1584,7 @@ class AppIntegrationTest {
     RenglonFactura renglonUno =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-venta?"
           + "idProducto="
           + productoUno.getIdProducto()
           + "&tipoDeComprobante="
@@ -1597,7 +1597,7 @@ class AppIntegrationTest {
     RenglonFactura renglonDos =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-venta?"
           + "idProducto="
           + productoDos.getIdProducto()
           + "&tipoDeComprobante="
@@ -1713,7 +1713,7 @@ class AppIntegrationTest {
     RenglonFactura renglonUno =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-venta?"
           + "idProducto="
           + productoUno.getIdProducto()
           + "&tipoDeComprobante="
@@ -1726,7 +1726,7 @@ class AppIntegrationTest {
     RenglonFactura renglonDos =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-venta?"
           + "idProducto="
           + productoDos.getIdProducto()
           + "&tipoDeComprobante="
@@ -1799,7 +1799,7 @@ class AppIntegrationTest {
     RenglonFactura renglonUno =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-venta?"
           + "idProducto="
           + productoUno.getIdProducto()
           + "&tipoDeComprobante="
@@ -1812,7 +1812,7 @@ class AppIntegrationTest {
     RenglonFactura renglonDos =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-venta?"
           + "idProducto="
           + productoDos.getIdProducto()
           + "&tipoDeComprobante="
@@ -1927,7 +1927,7 @@ class AppIntegrationTest {
     RenglonFactura renglonUno =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-venta?"
           + "idProducto="
           + productoUno.getIdProducto()
           + "&tipoDeComprobante="
@@ -1940,7 +1940,7 @@ class AppIntegrationTest {
     RenglonFactura renglonDos =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-venta?"
           + "idProducto="
           + productoDos.getIdProducto()
           + "&tipoDeComprobante="
@@ -2072,7 +2072,7 @@ class AppIntegrationTest {
     RenglonFactura renglonUno =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-venta?"
           + "idProducto="
           + productoUno.getIdProducto()
           + "&tipoDeComprobante="
@@ -2085,7 +2085,7 @@ class AppIntegrationTest {
     RenglonFactura renglonDos =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-venta?"
           + "idProducto="
           + productoDos.getIdProducto()
           + "&tipoDeComprobante="
@@ -2159,7 +2159,7 @@ class AppIntegrationTest {
     RenglonFactura renglonUno =
         restTemplate.getForObject(
             apiPrefix
-                + "/facturas/renglon?"
+                + "/facturas/renglon-venta?"
                 + "idProducto="
                 + productoUno.getIdProducto()
                 + "&tipoDeComprobante="
@@ -2172,7 +2172,7 @@ class AppIntegrationTest {
     RenglonFactura renglonDos =
         restTemplate.getForObject(
             apiPrefix
-                + "/facturas/renglon?"
+                + "/facturas/renglon-venta?"
                 + "idProducto="
                 + productoDos.getIdProducto()
                 + "&tipoDeComprobante="
@@ -2283,26 +2283,26 @@ class AppIntegrationTest {
     RenglonFactura renglonUno =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-compra?"
           + "idProducto=1"
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_A
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=4"
-          + "&idCliente=1",
+          + "&bonificacion=20",
         RenglonFactura.class);
     RenglonFactura renglonDos =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-compra?"
           + "idProducto=2"
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_A
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=3"
-          + "&idCliente=1",
+          + "&bonificacion=20",
         RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
@@ -2397,26 +2397,26 @@ class AppIntegrationTest {
     RenglonFactura renglonUno =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-compra?"
           + "idProducto=1"
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_B
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=5"
-          + "&idCliente=1",
+          + "&bonificacion=20",
         RenglonFactura.class);
     RenglonFactura renglonDos =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-compra?"
           + "idProducto=2"
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_B
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=2"
-          + "&idCliente=1",
+          + "&bonificacion=20",
         RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
@@ -2515,26 +2515,26 @@ class AppIntegrationTest {
     RenglonFactura renglonUno =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-compra?"
           + "idProducto=1"
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_C
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=3"
-          + "&idCliente=1",
+          + "&bonificacion=0",
         RenglonFactura.class);
     RenglonFactura renglonDos =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-compra?"
           + "idProducto=2"
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_C
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=1"
-          + "&idCliente=1",
+          + "&bonificacion=0",
         RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
@@ -2633,26 +2633,26 @@ class AppIntegrationTest {
     RenglonFactura renglonUno =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-compra?"
           + "idProducto=1"
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_X
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=5"
-          + "&idCliente=1",
+          + "&bonificacion=20",
         RenglonFactura.class);
     RenglonFactura renglonDos =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-compra?"
           + "idProducto=2"
           + "&tipoDeComprobante="
           + TipoDeComprobante.FACTURA_X
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=2"
-          + "&idCliente=1",
+          + "&bonificacion=20",
         RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
@@ -2751,26 +2751,26 @@ class AppIntegrationTest {
     RenglonFactura renglonUno =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-compra?"
           + "idProducto=1"
           + "&tipoDeComprobante="
           + TipoDeComprobante.PRESUPUESTO
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=5"
-          + "&idCliente=1",
+          + "&bonificacion=20",
         RenglonFactura.class);
     RenglonFactura renglonDos =
       restTemplate.getForObject(
         apiPrefix
-          + "/facturas/renglon?"
+          + "/facturas/renglon-compra?"
           + "idProducto=2"
           + "&tipoDeComprobante="
           + TipoDeComprobante.PRESUPUESTO
           + "&movimiento="
           + Movimiento.COMPRA
           + "&cantidad=2"
-          + "&idCliente=1",
+          + "&bonificacion=20",
         RenglonFactura.class);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
