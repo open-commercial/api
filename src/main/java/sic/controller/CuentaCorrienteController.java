@@ -81,6 +81,19 @@ public class CuentaCorrienteController {
         clienteService.getClienteNoEliminadoPorId(idCliente));
   }
 
+  @GetMapping("/cuentas-corriente/clientes/predeterminado")
+  @AccesoRolesPermitidos({
+    Rol.ADMINISTRADOR,
+    Rol.ENCARGADO,
+    Rol.VENDEDOR,
+    Rol.VIAJANTE,
+    Rol.COMPRADOR
+  })
+  public CuentaCorrienteCliente getCuentaCorrienteClientePredeterminado() {
+    return cuentaCorrienteService.getCuentaCorrientePorCliente(
+        clienteService.getClientePredeterminado());
+  }
+
   @GetMapping("/cuentas-corriente/proveedores/{idProveedor}")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,

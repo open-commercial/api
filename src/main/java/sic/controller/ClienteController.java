@@ -69,12 +69,6 @@ public class ClienteController {
     return clienteService.buscarClientes(criteria, (int) claims.get("idUsuario"));
   }
 
-  @GetMapping("/clientes/predeterminado")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Cliente getClientePredeterminado() {
-    return clienteService.getClientePredeterminado();
-  }
-
   @GetMapping("/clientes/existe-predeterminado")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public boolean existeClientePredeterminado() {
