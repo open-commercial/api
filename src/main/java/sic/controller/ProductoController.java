@@ -144,7 +144,7 @@ public class ProductoController {
         headers.setContentType(new MediaType("application", "vnd.ms-excel"));
         headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        productos = productoService.buscarProductos(criteria).getContent();
+        productos = productoService.buscarProductosParaReporte(criteria);
         byte[] reporteXls =
           productoService.getListaDePreciosPorEmpresa(productos, criteria.getIdEmpresa(), formato);
         headers.setContentLength(reporteXls.length);
@@ -153,7 +153,7 @@ public class ProductoController {
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        productos = productoService.buscarProductos(criteria).getContent();
+        productos = productoService.buscarProductosParaReporte(criteria);
         byte[] reportePDF =
           productoService.getListaDePreciosPorEmpresa(productos, criteria.getIdEmpresa(), formato);
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);

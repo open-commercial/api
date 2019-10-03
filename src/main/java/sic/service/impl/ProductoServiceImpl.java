@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import com.google.common.collect.Lists;
 import com.querydsl.core.BooleanBuilder;
 
 import java.io.*;
@@ -187,25 +188,35 @@ public class ProductoServiceImpl implements IProductoService {
   public Page<Producto> buscarProductos(BusquedaProductoCriteria criteria) {
     return productoRepository.findAll(
         this.getBuilder(criteria),
-        this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
+        this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido(), TAMANIO_PAGINA_DEFAULT));
   }
 
-  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+  @Override
+  public List<Producto> buscarProductosParaReporte(BusquedaProductoCriteria criteria) {
+    criteria.setPagina(0);
+    return productoRepository
+        .findAll(
+            this.getBuilder(criteria),
+            this.getPageable(
+                criteria.getPagina(),
+                criteria.getOrdenarPor(),
+                criteria.getSentido(),
+                Integer.MAX_VALUE))
+        .getContent();
+  }
+
+  private Pageable getPageable(int pagina, String ordenarPor, String sentido, int tamanioPagina) {
     String ordenDefault = "descripcion";
     if (ordenarPor == null || sentido == null) {
-      return PageRequest.of(
-          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenDefault));
+      return PageRequest.of(pagina, tamanioPagina, new Sort(Sort.Direction.ASC, ordenDefault));
     } else {
       switch (sentido) {
         case "ASC":
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+          return PageRequest.of(pagina, tamanioPagina, new Sort(Sort.Direction.ASC, ordenarPor));
         case "DESC":
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+          return PageRequest.of(pagina, tamanioPagina, new Sort(Sort.Direction.DESC, ordenarPor));
         default:
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+          return PageRequest.of(pagina, tamanioPagina, new Sort(Sort.Direction.DESC, ordenDefault));
       }
     }
   }

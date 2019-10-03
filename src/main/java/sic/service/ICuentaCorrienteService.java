@@ -31,7 +31,9 @@ public interface ICuentaCorrienteService {
 
   Page<CuentaCorrienteProveedor> buscarCuentaCorrienteProveedor(BusquedaCuentaCorrienteProveedorCriteria criteria);
 
-  Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Integer pagina, boolean reporte);
+  Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Integer pagina);
+
+  List<RenglonCuentaCorriente> getRenglonesCuentaCorrienteParaReporte(long idCuentaCorriente);
 
   void asentarEnCuentaCorriente(FacturaVenta facturaVenta, TipoDeOperacion tipo);
 
@@ -42,7 +44,7 @@ public interface ICuentaCorrienteService {
   void asentarEnCuentaCorriente(Recibo recibo, TipoDeOperacion tipo);
 
   byte[] getReporteCuentaCorrienteCliente(
-      CuentaCorrienteCliente cuentaCorrienteCliente, Integer pagina, String formato);
+      CuentaCorrienteCliente cuentaCorrienteCliente, String formato);
 
   List<RenglonCuentaCorriente> getUltimosDosMovimientos(CuentaCorriente cuentaCorriente);
 

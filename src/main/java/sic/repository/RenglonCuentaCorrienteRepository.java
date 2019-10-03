@@ -23,6 +23,11 @@ public interface RenglonCuentaCorrienteRepository extends PagingAndSortingReposi
             + " ORDER BY r.idRenglonCuentaCorriente DESC")
     Page<RenglonCuentaCorriente> findAllByCuentaCorrienteAndEliminado(@Param("idCuentaCorriente") long idCuentaCorriente, Pageable page);
 
+    @Query("SELECT r FROM CuentaCorriente cc INNER JOIN cc.renglones r"
+      + " WHERE cc.idCuentaCorriente = :idCuentaCorriente AND cc.eliminada = false AND r.eliminado = false"
+      + " ORDER BY r.idRenglonCuentaCorriente DESC")
+    List<RenglonCuentaCorriente> findAllByCuentaCorrienteAndEliminado(@Param("idCuentaCorriente") long idCuentaCorriente);
+
     List<RenglonCuentaCorriente> findTop2ByAndCuentaCorrienteAndEliminadoOrderByIdRenglonCuentaCorrienteDesc(CuentaCorriente cuentaCorriente, boolean eliminado);
 
     @Modifying

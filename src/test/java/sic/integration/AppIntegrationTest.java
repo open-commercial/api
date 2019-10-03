@@ -26,6 +26,7 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
 import sic.builder.*;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaCuentaCorrienteClienteCriteria;
 import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 import sic.modelo.criteria.BusquedaGastoCriteria;
@@ -4572,8 +4573,11 @@ class AppIntegrationTest {
   @Test
   void shouldCrearReporteCuentaCorrienteCliente() {
     this.shouldComprobarSaldoParcialCuentaCorrienteCliente();
-    restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1/reporte?pagina=0&formato=xlsx", byte[].class);
-    restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1/reporte?pagina=0&formato=pdf", byte[].class);
+    BusquedaCuentaCorrienteClienteCriteria criteria = BusquedaCuentaCorrienteClienteCriteria.builder()
+      .idCliente(1L)
+      .build();
+    restTemplate.postForObject(apiPrefix + "/cuentas-corriente/clientes/reporte/criteria?formato=xlsx", criteria, byte[].class);
+    restTemplate.postForObject(apiPrefix + "/cuentas-corriente/clientes/reporte/criteria?formato=pdf", criteria, byte[].class);
   }
 
   @Test

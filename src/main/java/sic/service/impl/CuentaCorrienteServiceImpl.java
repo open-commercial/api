@@ -425,26 +425,26 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   public byte[] getReporteCuentaCorrienteCliente(
-      CuentaCorrienteCliente cuentaCorrienteCliente, Integer pagina, String formato) {
+      CuentaCorrienteCliente cuentaCorrienteCliente, String formato) {
     ClassLoader classLoader = CuentaCorrienteServiceImpl.class.getClassLoader();
     InputStream isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/CuentaCorriente.jasper");
     JRBeanCollectionDataSource ds =
         new JRBeanCollectionDataSource(
-            this.getRenglonesCuentaCorriente(cuentaCorrienteCliente.getIdCuentaCorriente(), pagina, true)
-                .getContent());
+            this.getRenglonesCuentaCorrienteParaReporte(
+                cuentaCorrienteCliente.getIdCuentaCorriente()));
     Map<String, Object> params = new HashMap<>();
     params.put("cuentaCorrienteCliente", cuentaCorrienteCliente);
-    if (cuentaCorrienteCliente.getEmpresa().getLogo() != null && !cuentaCorrienteCliente.getEmpresa().getLogo().isEmpty()) {
+    if (cuentaCorrienteCliente.getEmpresa().getLogo() != null
+        && !cuentaCorrienteCliente.getEmpresa().getLogo().isEmpty()) {
       try {
         params.put(
             "logo",
             new ImageIcon(ImageIO.read(new URL(cuentaCorrienteCliente.getEmpresa().getLogo())))
                 .getImage());
       } catch (IOException ex) {
-        logger.error(ex.getMessage());
-        throw new ServiceException(messageSource.getMessage(
-          "mensaje_empresa_404_logo", null, Locale.getDefault()), ex);
+        throw new ServiceException(
+            messageSource.getMessage("mensaje_empresa_404_logo", null, Locale.getDefault()), ex);
       }
     }
     switch (formato) {
@@ -452,22 +452,20 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         try {
           return xlsReportToArray(JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
-          logger.error(ex.getMessage());
-          throw new ServiceException(messageSource.getMessage(
-            "mensaje_error_reporte", null, Locale.getDefault()), ex);
+          throw new ServiceException(
+              messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
       case "pdf":
         try {
           return JasperExportManager.exportReportToPdf(
-                  JasperFillManager.fillReport(isFileReport, params, ds));
+              JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
-          logger.error(ex.getMessage());
-          throw new ServiceException(messageSource.getMessage(
-            "mensaje_error_reporte", null, Locale.getDefault()), ex);
+          throw new ServiceException(
+              messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
       default:
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_formato_no_valido", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_formato_no_valido", null, Locale.getDefault()));
     }
   }
 
@@ -517,15 +515,16 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(
-      long idCuentaCorriente, Integer pagina, boolean reporte) {
-    Pageable pageable;
-    if (reporte) {
-      pageable = PageRequest.of(0, (pagina + 1) * TAMANIO_PAGINA_DEFAULT);
-    } else {
-      pageable = PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT);
-    }
+      long idCuentaCorriente, Integer pagina) {
+    Pageable pageable = PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT);
     return renglonCuentaCorrienteRepository.findAllByCuentaCorrienteAndEliminado(
         idCuentaCorriente, pageable);
+  }
+
+  @Override
+  public List<RenglonCuentaCorriente> getRenglonesCuentaCorrienteParaReporte(
+      long idCuentaCorriente) {
+    return renglonCuentaCorrienteRepository.findAllByCuentaCorrienteAndEliminado(idCuentaCorriente);
   }
 
   @Override

@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class BusquedaCuentaCorrienteClienteCriteria {
 
+  private Long idCliente;
   private String nombreFiscal;
   private String nombreFantasia;
   private Long idFiscal;
