@@ -37,7 +37,7 @@ public interface IPedidoService {
 
   List<RenglonPedido> getRenglonesDelPedido(Long idPedido);
 
-  byte[] getReportePedido(Pedido pedido);
+  byte[] getReportePedido(long idPedido);
 
   Pedido guardar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal);
 

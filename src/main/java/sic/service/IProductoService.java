@@ -25,6 +25,8 @@ public interface IProductoService {
 
   Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
 
+  List<Producto> buscarProductosParaReporte(BusquedaProductoCriteria criteria);
+
   BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal gananciaPorcentaje);
 
   Map<Long, BigDecimal> getProductosSinStockDisponible(Long idSucursal, long[] idProducto, BigDecimal[] cantidad);

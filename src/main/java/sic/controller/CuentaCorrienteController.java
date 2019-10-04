@@ -147,10 +147,10 @@ public class CuentaCorrienteController {
       @PathVariable long idCuentaCorriente,
       @RequestParam(required = false) Integer pagina) {
     if (pagina == null || pagina < 0) pagina = 0;
-    return cuentaCorrienteService.getRenglonesCuentaCorriente(idCuentaCorriente, pagina, false);
+    return cuentaCorrienteService.getRenglonesCuentaCorriente(idCuentaCorriente, pagina);
   }
 
-  @GetMapping("/cuentas-corriente/clientes/{idCliente}/reporte")
+  @PostMapping("/cuentas-corriente/clientes/reporte/criteria")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -158,11 +158,9 @@ public class CuentaCorrienteController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public ResponseEntity<byte[]> getReporteCuentaCorrienteXls(
-      @PathVariable long idCliente,
-      @RequestParam(required = false) Integer pagina,
+  public ResponseEntity<byte[]> getReporteCuentaCorriente(
+    @RequestBody BusquedaCuentaCorrienteClienteCriteria criteria,
       @RequestParam(required = false) String formato) {
-    if (pagina == null || pagina < 0) pagina = 0;
     HttpHeaders headers = new HttpHeaders();
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
     switch (formato) {
@@ -172,8 +170,7 @@ public class CuentaCorrienteController {
         byte[] reporteXls =
             cuentaCorrienteService.getReporteCuentaCorrienteCliente(
                 cuentaCorrienteService.getCuentaCorrientePorCliente(
-                    clienteService.getClienteNoEliminadoPorId(idCliente)),
-                pagina,
+                    clienteService.getClienteNoEliminadoPorId(criteria.getIdCliente())),
                 formato);
         headers.setContentLength(reporteXls.length);
         return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
@@ -183,8 +180,7 @@ public class CuentaCorrienteController {
         byte[] reportePDF =
             cuentaCorrienteService.getReporteCuentaCorrienteCliente(
                 cuentaCorrienteService.getCuentaCorrientePorCliente(
-                    clienteService.getClienteNoEliminadoPorId(idCliente)),
-                pagina,
+                    clienteService.getClienteNoEliminadoPorId(criteria.getIdCliente())),
                 formato);
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
       default:
