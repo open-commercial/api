@@ -282,8 +282,10 @@ public class PedidoServiceImpl implements IPedidoService {
   private BooleanBuilder getBuilderPedido(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
     QPedido qPedido = QPedido.pedido;
     BooleanBuilder builder = new BooleanBuilder();
-    builder.and(
-        qPedido.sucursal.idSucursal.eq(criteria.getIdSucursal()).and(qPedido.eliminado.eq(false)));
+    if (criteria.getIdSucursal() != null) {
+      builder.and(
+        qPedido.sucursal.idSucursal.eq(criteria.getIdSucursal()));
+    }
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       FormatterFechaHora formateadorFecha =
           new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
@@ -349,6 +351,7 @@ public class PedidoServiceImpl implements IPedidoService {
       }
       builder.and(rsPredicate);
     }
+    builder.and(qPedido.eliminado.eq(false));
     return builder;
   }
 

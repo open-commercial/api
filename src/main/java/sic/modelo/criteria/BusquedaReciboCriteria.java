@@ -17,10 +17,8 @@ public class BusquedaReciboCriteria {
   private Date fechaDesde;
   private Date fechaHasta;
   private Long idSucursal;
-  private boolean buscaPorNumeroRecibo;
   private Long numSerie;
   private Long numRecibo;
-  private boolean buscaPorConcepto;
   private String concepto;
   private Long idCliente;
   private Long idProveedor;
