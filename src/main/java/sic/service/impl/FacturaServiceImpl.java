@@ -768,7 +768,7 @@ public class FacturaServiceImpl implements IFacturaService {
       Movimiento movimiento,
       TipoDeComprobante tipo,
       Producto producto,
-      BigDecimal descuentoPorcentaje) {
+      BigDecimal bonificacionPorcentaje) {
     BigDecimal resultado = BigDecimal.ZERO;
     if (movimiento == Movimiento.COMPRA) {
       if (tipo == TipoDeComprobante.FACTURA_A || tipo == TipoDeComprobante.FACTURA_B) {
@@ -777,7 +777,7 @@ public class FacturaServiceImpl implements IFacturaService {
                 .getPrecioCosto()
                 .multiply(
                     BigDecimal.ONE
-                        .subtract(descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))
+                        .subtract(bonificacionPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))
                         .multiply(
                             producto.getIvaPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP)));
       }
@@ -790,7 +790,7 @@ public class FacturaServiceImpl implements IFacturaService {
                 .getPrecioVentaPublico()
                 .multiply(
                     BigDecimal.ONE
-                        .subtract(descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))
+                        .subtract(bonificacionPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))
                         .multiply(
                             producto.getIvaPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP)));
       }
@@ -1065,10 +1065,10 @@ public class FacturaServiceImpl implements IFacturaService {
   private void asignarBonificacion(
       RenglonFactura nuevoRenglon, Cliente cliente, Producto producto) {
     if (producto.isOferta()) {
-      nuevoRenglon.setBonificacionPorcentaje(producto.getBonificacionOferta());
+      nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajeBonificacionOferta());
       nuevoRenglon.setBonificacionNeta(
           CalculosComprobante.calcularProporcion(
-              nuevoRenglon.getPrecioUnitario(), producto.getBonificacionOferta()));
+              nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionOferta()));
     } else if (nuevoRenglon.getCantidad().compareTo(producto.getBulto()) >= 0) {
       nuevoRenglon.setBonificacionPorcentaje(cliente.getBonificacion());
       nuevoRenglon.setBonificacionNeta(

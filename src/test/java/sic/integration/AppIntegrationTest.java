@@ -24,7 +24,6 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
-import org.springframework.web.client.RestTemplate;
 import sic.modelo.*;
 import sic.modelo.calculos.NuevosResultadosPedido;
 import sic.modelo.calculos.Resultados;
@@ -3196,7 +3195,7 @@ class AppIntegrationTest {
         restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     productoAModificar.setDescripcion("PRODUCTO MODIFICADO.");
     productoAModificar.setOferta(true);
-    productoAModificar.setBonificacionOferta(BigDecimal.TEN);
+    productoAModificar.setPorcentajeBonificacionOferta(BigDecimal.TEN);
     productoAModificar.setUrlImagen(null);
     productoAModificar.setCodigo("666");
     RestClientResponseException thrown =
@@ -3209,7 +3208,7 @@ class AppIntegrationTest {
             .getMessage()
             .contains(
                 messageSource.getMessage(
-                    "mensaje_producto_destacado_privado_o_sin_imagen", null, Locale.getDefault())));
+                    "mensaje_producto_oferta_privado_o_sin_imagen", null, Locale.getDefault())));
   }
 
   @Test
@@ -3232,7 +3231,7 @@ class AppIntegrationTest {
             .getMessage()
             .contains(
                 messageSource.getMessage(
-                    "mensaje_producto_destacado_privado_o_sin_imagen", null, Locale.getDefault())));
+                    "mensaje_producto_oferta_privado_o_sin_imagen", null, Locale.getDefault())));
   }
 
   @Test

@@ -509,10 +509,10 @@ public class PedidoServiceImpl implements IPedidoService {
     nuevoRenglon.setMedidaItem(producto.getMedida().getNombre());
     nuevoRenglon.setPrecioUnitario(producto.getPrecioLista());
     if (producto.isOferta()) {
-      nuevoRenglon.setBonificacionPorcentaje(producto.getBonificacionOferta());
+      nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajeBonificacionOferta());
       nuevoRenglon.setBonificacionNeta(
         CalculosComprobante.calcularProporcion(
-          nuevoRenglon.getPrecioUnitario(), producto.getBonificacionOferta()));
+          nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionOferta()));
     } else if (nuevoRenglon.getCantidad().compareTo(producto.getBulto()) > 0) {
       nuevoRenglon.setBonificacionPorcentaje(cliente.getBonificacion());
       nuevoRenglon.setBonificacionNeta(

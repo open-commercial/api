@@ -29,7 +29,8 @@ public class ProductoBuilder {
     private boolean ilimitado = false;
     private boolean publico = true;
     private boolean oferta = false;
-    private BigDecimal bonificacionOferta = BigDecimal.TEN;
+    private BigDecimal porcentajeBonificacionOferta = BigDecimal.TEN;
+    private BigDecimal precioListaBonificado = new BigDecimal("18.15");
     private Date fechaUltimaModificacion = new Date(1463540400000L); // 18-05-2016
     private String estanteria = "A";
     private String estante = "1";
@@ -62,7 +63,8 @@ public class ProductoBuilder {
         ilimitado,
         publico,
         oferta,
-        bonificacionOferta,
+      porcentajeBonificacionOferta,
+      precioListaBonificado,
         fechaUltimaModificacion,
         estanteria,
         estante,
@@ -175,11 +177,15 @@ public class ProductoBuilder {
         return this;
     }
 
-  public ProductoBuilder withBonificacionOferta(BigDecimal bonificacionOferta) {
-    this.bonificacionOferta = bonificacionOferta;
+  public ProductoBuilder withBonificacionOferta(BigDecimal porcentajeBonificacionOferta) {
+    this.porcentajeBonificacionOferta = porcentajeBonificacionOferta;
     return this;
   }
 
+  public ProductoBuilder withPrecioListaBonificado(BigDecimal precioListaBonificado) {
+    this.precioListaBonificado = precioListaBonificado;
+    return this;
+  }
     public ProductoBuilder withFechaUltimaModificacion(Date fechaUltimaModificacion) {
         this.fechaUltimaModificacion = fechaUltimaModificacion;
         return this;

@@ -84,7 +84,7 @@ public class ProductoServiceImpl implements IProductoService {
                 || (producto.getUrlImagen() == null || producto.getUrlImagen().isEmpty())))) {
       throw new BusinessServiceException(
           messageSource.getMessage(
-              "mensaje_producto_destacado_privado_o_sin_imagen", null, Locale.getDefault()));
+              "mensaje_producto_oferta_privado_o_sin_imagen", null, Locale.getDefault()));
     }
     // Duplicados
     //Cantidades
@@ -285,11 +285,23 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   @Transactional
   public void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido) {
+    if (productoPorActualizar.isOferta()
+        && productoPorActualizar.getPorcentajeBonificacionOferta() != null) {
+      productoPorActualizar.setPrecioBonificado(
+          productoPorActualizar
+              .getPrecioLista()
+              .multiply(
+                  (new BigDecimal("100"))
+                      .subtract(productoPorActualizar.getPorcentajeBonificacionOferta())
+                      .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP)));
+    }
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
     productoPorActualizar.setFechaUltimaModificacion(new Date());
-    if (productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty()
-      && (productoPorActualizar.getUrlImagen() == null || productoPorActualizar.getUrlImagen().isEmpty())) {
+    if (productoPersistido.getUrlImagen() != null
+        && !productoPersistido.getUrlImagen().isEmpty()
+        && (productoPorActualizar.getUrlImagen() == null
+            || productoPorActualizar.getUrlImagen().isEmpty())) {
       photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + productoPersistido.getIdProducto());
     }
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
