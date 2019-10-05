@@ -292,6 +292,11 @@ public class FacturaServiceImpl implements IFacturaService {
   private BooleanBuilder getBuilderCompra(BusquedaFacturaCompraCriteria criteria) {
     QFacturaCompra qFacturaCompra = QFacturaCompra.facturaCompra;
     BooleanBuilder builder = new BooleanBuilder();
+    if (criteria.getIdSucursal() == null) {
+      throw new BusinessServiceException(
+        messageSource.getMessage(
+          "mensaje_busqueda_sin_sucursal", null, Locale.getDefault()));
+    }
     builder.and(
         qFacturaCompra
             .sucursal
@@ -362,6 +367,11 @@ public class FacturaServiceImpl implements IFacturaService {
       BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
     QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
     BooleanBuilder builder = new BooleanBuilder();
+    if (criteria.getIdSucursal() == null) {
+      throw new BusinessServiceException(
+        messageSource.getMessage(
+          "mensaje_busqueda_sin_sucursal", null, Locale.getDefault()));
+    }
     builder.and(
         qFacturaVenta
             .sucursal

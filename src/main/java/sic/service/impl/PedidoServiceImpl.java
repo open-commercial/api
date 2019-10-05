@@ -285,7 +285,7 @@ public class PedidoServiceImpl implements IPedidoService {
     if (criteria.getIdSucursal() == null) {
       throw new BusinessServiceException(
           messageSource.getMessage(
-              "mensaje_pedido_busqueda_sin_sucursal", null, Locale.getDefault()));
+              "mensaje_busqueda_sin_sucursal", null, Locale.getDefault()));
     }
     builder.and(qPedido.sucursal.idSucursal.eq(criteria.getIdSucursal()));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
