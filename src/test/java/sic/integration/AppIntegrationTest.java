@@ -5536,6 +5536,6 @@ class AppIntegrationTest {
         restTemplate.postForObject(
             apiPrefix + "/carrito-compra", nuevaOrdenDeCompraDTO, PedidoDTO.class);
     assertEquals(14, pedido.getCantidadArticulos().doubleValue());
-    assertEquals(new BigDecimal("14395.500000000000000000000000000000000000000000000"), pedido.getTotalActual());
+    assertEquals(new BigDecimal("14395.500000000000000000000000000000000000000000000"), pedido.getTotalEstimado());
   }
 }

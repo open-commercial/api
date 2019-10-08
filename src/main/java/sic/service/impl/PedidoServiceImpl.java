@@ -148,7 +148,7 @@ public class PedidoServiceImpl implements IPedidoService {
     BigDecimal porcentajeDescuento;
     BigDecimal totalActual = BigDecimal.ZERO;
     List<Long> idsProductos = new ArrayList<>();
-    List<RenglonPedido> renglonesDelPedido = this.getRenglonesDelPedidoOrdenadorPorIdProducto(pedido.getId_Pedido());
+    List<RenglonPedido> renglonesDelPedido = this.getRenglonesDelPedidoOrdenadoPorIdProducto(pedido.getId_Pedido());
     renglonesDelPedido.forEach(r -> idsProductos.add(r.getIdProductoItem()));
     List<Producto> productos = productoService.getMultiplesProductosPorId(idsProductos);
     int i = 0;
@@ -422,7 +422,7 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdProducto(Long idPedido) {
+  public List<RenglonPedido> getRenglonesDelPedidoOrdenadoPorIdProducto(Long idPedido) {
     return renglonPedidoRepository.findByIdPedidoOrderByIdProductoItem(idPedido);
   }
 
