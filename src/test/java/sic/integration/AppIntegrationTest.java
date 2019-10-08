@@ -5028,7 +5028,6 @@ class AppIntegrationTest {
     PedidoDTO pedidoDTO = restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoDTO.class);
     assertEquals(new BigDecimal("7.000000000000000"), pedidoDTO.getCantidadArticulos());
     assertEquals(new BigDecimal("6617.250000000000000"), pedidoDTO.getTotalEstimado());
-    assertEquals(new BigDecimal("6617.250000000000000"), pedidoDTO.getTotalActual());
     ProductoDTO productoRecuperado = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     productoRecuperado.setPrecioCosto(new BigDecimal("110"));
     productoRecuperado.setGananciaPorcentaje(new BigDecimal("900"));

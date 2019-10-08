@@ -105,7 +105,6 @@ public class PedidoController {
     pedido.setDescuentoPorcentaje(nuevoPedidoDTO.getDescuentoPorcentaje());
     pedido.setDescuentoNeto(nuevoPedidoDTO.getDescuentoNeto());
     pedido.setTotalEstimado(nuevoPedidoDTO.getTotal());
-    pedido.setTotalActual(nuevoPedidoDTO.getTotal());
     Empresa empresaParaPedido = empresaService.getEmpresaPorId(nuevoPedidoDTO.getIdEmpresa());
     pedido.setEmpresa(empresaParaPedido);
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(nuevoPedidoDTO.getIdUsuario()));
