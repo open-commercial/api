@@ -148,7 +148,7 @@ public class PedidoServiceImpl implements IPedidoService {
     BigDecimal porcentajeDescuento;
     BigDecimal totalActual = BigDecimal.ZERO;
     List<Long> idsProductos = new ArrayList<>();
-    List<RenglonPedido> renglonesDelPedido = this.getRenglonesDelPedido(pedido.getId_Pedido());
+    List<RenglonPedido> renglonesDelPedido = this.getRenglonesDelPedidoOrdenadorPorIdProducto(pedido.getId_Pedido());
     renglonesDelPedido.forEach(r -> idsProductos.add(r.getIdProductoItem()));
     List<Producto> productos = productoService.getMultiplesProductosPorId(idsProductos);
     int i = 0;
@@ -417,8 +417,13 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public List<RenglonPedido> getRenglonesDelPedido(Long idPedido) {
-    return renglonPedidoRepository.findByIdPedido(idPedido);
+  public List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglon(Long idPedido) {
+    return renglonPedidoRepository.findByIdPedidoOrderByIdRenglonPedido(idPedido);
+  }
+
+  @Override
+  public List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdProducto(Long idPedido) {
+    return renglonPedidoRepository.findByIdPedidoOrderByIdProductoItem(idPedido);
   }
 
   @Override
@@ -481,7 +486,7 @@ public class PedidoServiceImpl implements IPedidoService {
       detalleEnvio = pedido.getEnvio();
     }
     params.put("detalleEnvio", detalleEnvio);
-    List<RenglonPedido> renglones = this.getRenglonesDelPedido(pedido.getId_Pedido());
+    List<RenglonPedido> renglones = this.getRenglonesDelPedidoOrdenadorPorIdRenglon(pedido.getId_Pedido());
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
     try {
       return JasperExportManager.exportReportToPdf(

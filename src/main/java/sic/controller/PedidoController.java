@@ -54,7 +54,7 @@ public class PedidoController {
     @GetMapping("/pedidos/{idPedido}/renglones")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public List<RenglonPedido> getRenglonesDelPedido(@PathVariable long idPedido) {
-        return pedidoService.getRenglonesDelPedido(idPedido);
+        return pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido);
     }
 
     @PostMapping("/pedidos/renglones")
