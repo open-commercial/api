@@ -53,7 +53,7 @@ public class Producto implements Serializable {
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_producto_cantidad_negativa}")
-  private BigDecimal cantidad;
+  private BigDecimal cantidadTotalEnSucursales;
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_producto_cantidadMinima_negativa}")

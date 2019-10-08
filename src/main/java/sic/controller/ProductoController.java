@@ -198,7 +198,7 @@ public class ProductoController {
                       sucursalService.getSucursalPorId(cantidadEnSucursalDTO.getIdSucursal()));
             });
     productoPorActualizar.setCantidadEnSucursales(cantidadEnSucursales);
-    productoPorActualizar.setCantidad(
+    productoPorActualizar.setCantidadTotalEnSucursales(
         cantidadEnSucursales
             .stream()
             .map(CantidadEnSucursal::getCantidad)
@@ -240,11 +240,11 @@ public class ProductoController {
                           cantidadEnSucursal.setEstante(nuevoProductoDTO.getEstante());
                           cantidadEnSucursal.setEstanteria(nuevoProductoDTO.getEstanteria());
                         }));
-    producto.setCantidad(
+    producto.setCantidadTotalEnSucursales(
         producto.getCantidadEnSucursales().stream()
             .map(CantidadEnSucursal::getCantidad)
             .reduce(BigDecimal.ZERO, BigDecimal::add));
-    producto.setHayStock(producto.getCantidad().compareTo(BigDecimal.ZERO) > 0);
+    producto.setHayStock(producto.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
     producto.setPrecioBonificado(nuevoProductoDTO.getPrecioBonificado());
     producto.setCantMinima(nuevoProductoDTO.getCantMinima());
     producto.setBulto(nuevoProductoDTO.getBulto());

@@ -1,6 +1,5 @@
 package sic.service.impl;
 
-import com.google.common.collect.Lists;
 import com.querydsl.core.BooleanBuilder;
 
 import java.io.*;
@@ -407,7 +406,7 @@ public class ProductoServiceImpl implements IProductoService {
                 }
               });
     }
-    producto.setCantidad(
+    producto.setCantidadTotalEnSucursales(
         producto
             .getCantidadEnSucursales()
             .stream()
@@ -438,7 +437,7 @@ public class ProductoServiceImpl implements IProductoService {
                 }
               });
     }
-    producto.setCantidad(
+    producto.setCantidadTotalEnSucursales(
         producto
             .getCantidadEnSucursales()
             .stream()
@@ -588,7 +587,7 @@ public class ProductoServiceImpl implements IProductoService {
   public Producto getProductoNoEliminadoPorId(long idProducto) {
     Optional<Producto> producto = productoRepository.findById(idProducto);
     if (producto.isPresent() && !producto.get().isEliminado()) {
-      producto.get().setHayStock(producto.get().getCantidad().compareTo(BigDecimal.ZERO) > 0);
+      producto.get().setHayStock(producto.get().getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
       return producto.get();
     } else {
       throw new EntityNotFoundException(

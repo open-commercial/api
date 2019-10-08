@@ -3081,7 +3081,7 @@ class AppIntegrationTest {
         productoUno,
         ProductoDTO.class);
     assertEquals(productoUno.getCantidadEnSucursal().get(1L), productoRecuperado.getCantidadEnSucursales().get(0).getCantidad());
-    assertEquals(productoUno.getCantidadEnSucursal().get(1L), productoRecuperado.getCantidad());
+    assertEquals(productoUno.getCantidadEnSucursal().get(1L), productoRecuperado.getCantidadTotalEnSucursales());
     assertEquals(productoUno.getIvaPorcentaje(), productoRecuperado.getIvaPorcentaje());
     assertEquals(productoUno.getIvaNeto(), productoRecuperado.getIvaNeto());
     assertEquals(productoUno.getCantMinima(), productoRecuperado.getCantMinima());
@@ -3403,15 +3403,15 @@ class AppIntegrationTest {
         restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO producto2 =
         restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
-    assertEquals(new BigDecimal("4.000000000000000"), producto1.getCantidad());
-    assertEquals(new BigDecimal("3.000000000000000"), producto2.getCantidad());
+    assertEquals(new BigDecimal("4.000000000000000"), producto1.getCantidadTotalEnSucursales());
+    assertEquals(new BigDecimal("3.000000000000000"), producto2.getCantidadTotalEnSucursales());
     restTemplate.delete(apiPrefix + "/facturas/1");
     producto1 =
         restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     producto2 =
         restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
-    assertEquals(new BigDecimal("10.000000000000000"), producto1.getCantidad());
-    assertEquals(new BigDecimal("6.000000000000000"), producto2.getCantidad());
+    assertEquals(new BigDecimal("10.000000000000000"), producto1.getCantidadTotalEnSucursales());
+    assertEquals(new BigDecimal("6.000000000000000"), producto2.getCantidadTotalEnSucursales());
   }
 
   @Test
@@ -3421,8 +3421,8 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO producto2 =
       restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
-    assertEquals(new BigDecimal("14.000000000000000"), producto1.getCantidad());
-    assertEquals(new BigDecimal("9.000000000000000"), producto2.getCantidad());
+    assertEquals(new BigDecimal("14.000000000000000"), producto1.getCantidadTotalEnSucursales());
+    assertEquals(new BigDecimal("9.000000000000000"), producto2.getCantidadTotalEnSucursales());
   }
 
   @Disabled
@@ -3433,8 +3433,8 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO producto2 =
       restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
-    assertEquals(new BigDecimal("14.000000000000000"), producto1.getCantidad());
-    assertEquals(new BigDecimal("9.000000000000000"), producto2.getCantidad());
+    assertEquals(new BigDecimal("14.000000000000000"), producto1.getCantidadTotalEnSucursales());
+    assertEquals(new BigDecimal("9.000000000000000"), producto2.getCantidadTotalEnSucursales());
     ProductoDTO productoUno =
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO productoDos =
@@ -3551,8 +3551,8 @@ class AppIntegrationTest {
     restTemplate.delete(apiPrefix + "/facturas/1");
     producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     producto2 = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
-    assertEquals(BigDecimal.TEN, producto1.getCantidad());
-    assertEquals(new BigDecimal("6.000000000000000"), producto2.getCantidad());
+    assertEquals(BigDecimal.TEN, producto1.getCantidadTotalEnSucursales());
+    assertEquals(new BigDecimal("6.000000000000000"), producto2.getCantidadTotalEnSucursales());
   }
 
   @Test
@@ -4022,13 +4022,13 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO producto2 =
       restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
-    assertEquals(new BigDecimal("10.000000000000000"), producto1.getCantidad());
-    assertEquals(new BigDecimal("4.000000000000000"), producto2.getCantidad());
+    assertEquals(new BigDecimal("10.000000000000000"), producto1.getCantidadTotalEnSucursales());
+    assertEquals(new BigDecimal("4.000000000000000"), producto2.getCantidadTotalEnSucursales());
     restTemplate.delete(apiPrefix + "/notas/1");
     producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     producto2 = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
-    assertEquals(new BigDecimal("5.000000000000000"), producto1.getCantidad());
-    assertEquals(new BigDecimal("4.000000000000000"), producto2.getCantidad());
+    assertEquals(new BigDecimal("5.000000000000000"), producto1.getCantidadTotalEnSucursales());
+    assertEquals(new BigDecimal("4.000000000000000"), producto2.getCantidadTotalEnSucursales());
   }
 
   @Test
@@ -4581,8 +4581,8 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO producto2 =
       restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
-    assertEquals(new BigDecimal("12.000000000000000"), producto1.getCantidad());
-    assertEquals(new BigDecimal("8.000000000000000"), producto2.getCantidad());
+    assertEquals(new BigDecimal("12.000000000000000"), producto1.getCantidadTotalEnSucursales());
+    assertEquals(new BigDecimal("8.000000000000000"), producto2.getCantidadTotalEnSucursales());
   }
 
   @Test

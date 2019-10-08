@@ -18,7 +18,7 @@ public class ProductoDTO implements Serializable {
   private String codigo;
   private String descripcion;
   private List<CantidadEnSucursalDTO> cantidadEnSucursales;
-  private BigDecimal cantidad;
+  private BigDecimal cantidadTotalEnSucursales;
   private boolean hayStock;
   private BigDecimal cantMinima;
   private BigDecimal bulto;
