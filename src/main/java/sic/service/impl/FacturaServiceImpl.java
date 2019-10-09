@@ -1034,6 +1034,11 @@ public class FacturaServiceImpl implements IFacturaService {
       boolean dividiendoRenglonFactura,
       Cliente cliente,
       BigDecimal bonificacion) {
+    if (cantidad.compareTo(BigDecimal.ZERO) < 0) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_producto_cantidad_negativa", null, Locale.getDefault()));
+    }
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     /*if (dividiendoRenglonFactura == false && cantidad < producto.getBulto()
             && (movimiento == Movimiento.VENTA || movimiento == Movimiento.PEDIDO)) {

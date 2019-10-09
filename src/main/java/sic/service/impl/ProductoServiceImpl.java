@@ -258,14 +258,12 @@ public class ProductoServiceImpl implements IProductoService {
       builder
           .and(qProducto.cantidadEnSucursales.any().cantidad.gt(BigDecimal.ZERO))
           .and(qProducto.ilimitado.eq(false));
-    if (criteria.isBuscaPorVisibilidad())
+    if (criteria.getPublico() != null) {
       if (criteria.getPublico()) builder.and(qProducto.publico.isTrue());
       else builder.and(qProducto.publico.isFalse());
+    }
     if (criteria.getOferta() != null && criteria.getOferta())
       builder.and(qProducto.oferta.isTrue());
-    if (criteria.getPublico() != null)
-      if (criteria.getPublico()) builder.and(qProducto.publico.isTrue());
-      else builder.and(qProducto.publico.isFalse());
     return builder;
   }
 
