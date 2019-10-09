@@ -295,16 +295,7 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   @Transactional
   public void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido) {
-    if (productoPorActualizar.isOferta()
-        && productoPorActualizar.getPorcentajeBonificacionOferta() != null) {
-      productoPorActualizar.setPrecioBonificado(
-          productoPorActualizar
-              .getPrecioLista()
-              .multiply(
-                  (new BigDecimal("100"))
-                      .subtract(productoPorActualizar.getPorcentajeBonificacionOferta())
-                      .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP)));
-    }
+    this.calcularPrecioBonificado(productoPorActualizar);
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
     productoPorActualizar.setFechaUltimaModificacion(new Date());
@@ -532,6 +523,8 @@ public class ProductoServiceImpl implements IProductoService {
         p.setIvaPorcentaje(productosParaActualizarDTO.getIvaPorcentaje());
         p.setIvaNeto(productosParaActualizarDTO.getIvaNeto());
         p.setPrecioLista(productosParaActualizarDTO.getPrecioLista());
+        p.setFechaUltimaModificacion(new Date());
+        this.calcularPrecioBonificado(p);
       }
       if (aplicaDescuentoRecargoPorcentaje) {
         p.setPrecioCosto(p.getPrecioCosto().multiply(multiplicador));
@@ -540,6 +533,7 @@ public class ProductoServiceImpl implements IProductoService {
         p.setIvaNeto(p.getIvaNeto().multiply(multiplicador));
         p.setPrecioLista(p.getPrecioLista().multiply(multiplicador));
         p.setFechaUltimaModificacion(new Date());
+        this.calcularPrecioBonificado(p);
       }
       if (productosParaActualizarDTO.getIdMedida() != null
           || productosParaActualizarDTO.getIdRubro() != null
@@ -558,6 +552,18 @@ public class ProductoServiceImpl implements IProductoService {
     productoRepository.saveAll(productos);
     logger.warn("Los Productos {} se modificaron correctamente.", productos);
     return productos;
+  }
+
+  private void calcularPrecioBonificado(Producto producto) {
+    if (producto.isOferta() && producto.getPorcentajeBonificacionOferta() != null) {
+      producto.setPrecioBonificado(
+          producto
+              .getPrecioLista()
+              .multiply(
+                  (new BigDecimal("100"))
+                      .subtract(producto.getPorcentajeBonificacionOferta())
+                      .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP)));
+    }
   }
 
   @Override
