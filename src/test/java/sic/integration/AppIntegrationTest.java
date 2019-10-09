@@ -5023,7 +5023,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shloudVerificarTotalActualPedido() {
+  void shouldVerificarTotalActualPedido() {
     this.shouldCrearPedido();
     PedidoDTO pedidoDTO = restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoDTO.class);
     assertEquals(new BigDecimal("7.000000000000000"), pedidoDTO.getCantidadArticulos());
@@ -5049,7 +5049,7 @@ class AppIntegrationTest {
         .getBody()
         .getContent();
     assertTrue(!pedidos.isEmpty());
-    assertEquals(new BigDecimal("6686.737500000000000000000000000000000000000000000000000000000000"), pedidos.get(0).getTotalActual());
+    assertEquals(new BigDecimal("6686.7375000000000000000000000000000000"), pedidos.get(0).getTotalActual());
   }
 
   @Test
@@ -5537,5 +5537,6 @@ class AppIntegrationTest {
             apiPrefix + "/carrito-compra", nuevaOrdenDeCompraDTO, PedidoDTO.class);
     assertEquals(14, pedido.getCantidadArticulos().doubleValue());
     assertEquals(new BigDecimal("14395.500000000000000000000000000000000000000000000"), pedido.getTotalEstimado());
+    assertEquals(new BigDecimal("14395.5000000000000000000000000000000000"), pedido.getTotalActual());
   }
 }

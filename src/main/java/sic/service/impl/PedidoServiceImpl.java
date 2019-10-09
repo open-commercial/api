@@ -161,13 +161,13 @@ public class PedidoServiceImpl implements IPedidoService {
                   BigDecimal.ONE.subtract(
                       renglonPedido
                           .getDescuentoPorcentaje()
-                          .divide(CIEN, 15, RoundingMode.HALF_UP))));
+                          .divide(CIEN, 2, RoundingMode.HALF_UP))));
       totalActual = totalActual.add(renglonPedido.getImporte());
       i++;
     }
     porcentajeDescuento =
         BigDecimal.ONE.subtract(
-            pedido.getDescuentoPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP));
+            pedido.getDescuentoPorcentaje().divide(CIEN, 2, RoundingMode.HALF_UP));
     pedido.setTotalActual(totalActual.multiply(porcentajeDescuento));
     return pedido;
   }
@@ -222,6 +222,7 @@ public class PedidoServiceImpl implements IPedidoService {
           "Reporte");
       logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
+    this.calcularTotalActualDePedido(pedido);
     return pedido;
   }
 
