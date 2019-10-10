@@ -152,8 +152,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     pedido.setRecargoNeto(BigDecimal.ZERO);
     pedido.setDescuentoPorcentaje(carritoCompraDTO.getBonificacionPorcentaje());
     pedido.setDescuentoNeto(carritoCompraDTO.getBonificacionNeto());
-    pedido.setTotalActual(carritoCompraDTO.getTotal());
-    pedido.setTotalEstimado(pedido.getTotalActual());
+    pedido.setTotalEstimado(carritoCompraDTO.getTotal());
     pedido.setEmpresa(empresaService.getEmpresaPorId(nuevaOrdenDeCompraDTO.getIdEmpresa()));
     pedido.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario()));

@@ -148,7 +148,7 @@ public class PedidoServiceImpl implements IPedidoService {
     BigDecimal porcentajeDescuento;
     BigDecimal totalActual = BigDecimal.ZERO;
     List<Long> idsProductos = new ArrayList<>();
-    List<RenglonPedido> renglonesDelPedido = this.getRenglonesDelPedido(pedido.getId_Pedido());
+    List<RenglonPedido> renglonesDelPedido = this.getRenglonesDelPedidoOrdenadoPorIdProducto(pedido.getId_Pedido());
     renglonesDelPedido.forEach(r -> idsProductos.add(r.getIdProductoItem()));
     List<Producto> productos = productoService.getMultiplesProductosPorId(idsProductos);
     int i = 0;
@@ -161,13 +161,13 @@ public class PedidoServiceImpl implements IPedidoService {
                   BigDecimal.ONE.subtract(
                       renglonPedido
                           .getDescuentoPorcentaje()
-                          .divide(CIEN, 15, RoundingMode.HALF_UP))));
+                          .divide(CIEN, 2, RoundingMode.HALF_UP))));
       totalActual = totalActual.add(renglonPedido.getImporte());
       i++;
     }
     porcentajeDescuento =
         BigDecimal.ONE.subtract(
-            pedido.getDescuentoPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP));
+            pedido.getDescuentoPorcentaje().divide(CIEN, 2, RoundingMode.HALF_UP));
     pedido.setTotalActual(totalActual.multiply(porcentajeDescuento));
     return pedido;
   }
@@ -222,6 +222,7 @@ public class PedidoServiceImpl implements IPedidoService {
           "Reporte");
       logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
+    this.calcularTotalActualDePedido(pedido);
     return pedido;
   }
 
@@ -417,8 +418,13 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public List<RenglonPedido> getRenglonesDelPedido(Long idPedido) {
-    return renglonPedidoRepository.findByIdPedido(idPedido);
+  public List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglon(Long idPedido) {
+    return renglonPedidoRepository.findByIdPedidoOrderByIdRenglonPedido(idPedido);
+  }
+
+  @Override
+  public List<RenglonPedido> getRenglonesDelPedidoOrdenadoPorIdProducto(Long idPedido) {
+    return renglonPedidoRepository.findByIdPedidoOrderByIdProductoItem(idPedido);
   }
 
   @Override
@@ -481,7 +487,7 @@ public class PedidoServiceImpl implements IPedidoService {
       detalleEnvio = pedido.getEnvio();
     }
     params.put("detalleEnvio", detalleEnvio);
-    List<RenglonPedido> renglones = this.getRenglonesDelPedido(pedido.getId_Pedido());
+    List<RenglonPedido> renglones = this.getRenglonesDelPedidoOrdenadorPorIdRenglon(pedido.getId_Pedido());
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
     try {
       return JasperExportManager.exportReportToPdf(

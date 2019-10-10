@@ -944,7 +944,7 @@ public class FacturaServiceImpl implements IFacturaService {
   public List<RenglonFactura> getRenglonesPedidoParaFacturar(
       long idPedido, TipoDeComprobante tipoDeComprobante) {
     List<RenglonFactura> renglonesRestantes = new ArrayList<>();
-    List<RenglonPedido> renglonesPedido = pedidoService.getRenglonesDelPedido(idPedido);
+    List<RenglonPedido> renglonesPedido = pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido);
     Map<Long, RenglonFactura> renglonesDeFacturas =
         pedidoService.getRenglonesFacturadosDelPedido(idPedido);
     if (renglonesDeFacturas != null) {
