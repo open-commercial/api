@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 
 @Data
@@ -14,6 +15,8 @@ import java.math.BigDecimal;
 public class NuevoRenglonPedidoDTO {
 
   private long idProductoItem;
+  
+  @Positive(message = "{mensaje_producto_cantidad_negativa}")
   private BigDecimal cantidad;
   private Long idCliente;
 }

@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import javax.persistence.*;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
@@ -39,7 +41,8 @@ public class RenglonFactura implements Serializable {
     private String medidaItem;
 
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_renglon_cantidad_mayor_uno}", inclusive = false)
+    @NotNull
+    @Positive(message = "{mensaje_renglon_cantidad_mayor_uno}")
     private BigDecimal cantidad;
     
     @Column(precision = 25, scale = 15)

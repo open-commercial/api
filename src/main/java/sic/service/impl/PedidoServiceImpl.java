@@ -499,11 +499,6 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   public RenglonPedido calcularRenglonPedido(long idProducto, BigDecimal cantidad, Cliente cliente) {
-    if (cantidad.compareTo(BigDecimal.ZERO) < 0) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_producto_cantidad_negativa", null, Locale.getDefault()));
-    }
     RenglonPedido nuevoRenglon = new RenglonPedido();
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     nuevoRenglon.setIdProductoItem(producto.getIdProducto());
@@ -539,7 +534,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   public List<RenglonPedido> calcularRenglonesPedido(
-      List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO) {
+      @Valid List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO) {
     List<RenglonPedido> renglonesPedido = new ArrayList<>();
     nuevosRenglonesPedidoDTO.forEach(
         nuevoRenglonesPedidoDTO ->
