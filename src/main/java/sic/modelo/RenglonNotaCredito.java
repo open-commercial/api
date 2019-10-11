@@ -15,6 +15,7 @@ import lombok.ToString;
 import sic.controller.Views;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Positive;
 
 @Entity
 @Table(name = "renglonnotacredito")
@@ -42,7 +43,8 @@ public class RenglonNotaCredito implements Serializable {
     private String medidaItem;
         
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_renglon_credito_cantidad_negativa}")
+    @NotNull
+    @Positive(message = "{mensaje_renglon_credito_cantidad_negativa}")
     private BigDecimal cantidad;
     
     @Column(precision = 25, scale = 15)
