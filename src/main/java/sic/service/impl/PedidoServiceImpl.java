@@ -203,6 +203,14 @@ public class PedidoServiceImpl implements IPedidoService {
     if (pedido.getObservaciones() == null || pedido.getObservaciones().equals("")) {
       pedido.setObservaciones("Los precios se encuentran sujetos a modificaciones.");
     }
+    pedido
+        .getRenglones()
+        .forEach(
+            renglonPedido ->
+                renglonPedido.setUrlImagenItem(
+                    productoService
+                        .getProductoNoEliminadoPorId(renglonPedido.getIdProductoItem())
+                        .getUrlImagen()));
     this.validarOperacion(TipoDeOperacion.ALTA, pedido);
     pedido = pedidoRepository.save(pedido);
     logger.warn("El Pedido {} se guardó correctamente.", pedido);
@@ -529,6 +537,8 @@ public class PedidoServiceImpl implements IPedidoService {
             nuevoRenglon.getCantidad(),
             producto.getPrecioLista(),
             nuevoRenglon.getBonificacionNeta()));
+    nuevoRenglon.setUrlImagenItem(producto.getUrlImagen());
+    nuevoRenglon.setOferta(producto.isOferta());
     return nuevoRenglon;
   }
 

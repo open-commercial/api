@@ -11,6 +11,8 @@ public class RenglonPedidoBuilder {
     private String codigoItem = "ABC123";
     private String descripcionItem = "Cinta adhesiva doble faz 3M";
     private String medidaItem = "Metro";
+    private String urlImagenItem = "https://www.imagen.com";
+    private boolean oferta = false;
     private BigDecimal precioUnitario = new BigDecimal("181.5");
     private BigDecimal cantidad = new BigDecimal("2");
     private BigDecimal bonificacionPorcentaje = BigDecimal.ZERO;
@@ -19,11 +21,24 @@ public class RenglonPedidoBuilder {
     private BigDecimal importeAnterior = new BigDecimal("363");
     private BigDecimal importe = new BigDecimal("363");
 
-    public RenglonPedidoDTO build() {
-        return new RenglonPedidoDTO(id_RenglonPedido, idProductoItem, codigoItem, descripcionItem, medidaItem,
-                precioUnitario, cantidad, bonificacionPorcentaje, bonificacionNeta, subTotal, importeAnterior, importe);
-    }
-    
+  public RenglonPedidoDTO build() {
+    return new RenglonPedidoDTO(
+        id_RenglonPedido,
+        idProductoItem,
+        codigoItem,
+        descripcionItem,
+        medidaItem,
+        urlImagenItem,
+        oferta,
+        precioUnitario,
+        cantidad,
+        bonificacionPorcentaje,
+        bonificacionNeta,
+        subTotal,
+        importeAnterior,
+        importe);
+  }
+
     public RenglonPedidoBuilder withIdRenglonPedido(long idRenglonPedido) {
         this.id_RenglonPedido = idRenglonPedido;
         return this;
@@ -41,6 +56,21 @@ public class RenglonPedidoBuilder {
 
     public RenglonPedidoBuilder withDescripcion(String descripcion) {
         this.descripcionItem = descripcion;
+        return this;
+    }
+
+    public RenglonPedidoBuilder withMedidaItem(String medidaItem) {
+        this.medidaItem = medidaItem;
+        return this;
+    }
+
+    public RenglonPedidoBuilder withUrlImagenItem(String urlImagenItem) {
+        this.urlImagenItem = urlImagenItem;
+        return this;
+    }
+
+    public RenglonPedidoBuilder withOferta(boolean oferta) {
+        this.oferta = oferta;
         return this;
     }
 

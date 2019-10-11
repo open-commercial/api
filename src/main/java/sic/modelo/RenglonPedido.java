@@ -38,6 +38,12 @@ public class RenglonPedido implements Serializable {
   @Column(nullable = false)
   private String medidaItem;
 
+  @Column
+  private String urlImagenItem;
+
+  @Transient
+  private boolean oferta;
+
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_renglon_precio_unitario_negativo}")
   private BigDecimal precioUnitario;
