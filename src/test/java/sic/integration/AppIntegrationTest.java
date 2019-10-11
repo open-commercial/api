@@ -27,10 +27,7 @@ import org.springframework.web.client.RestClientResponseException;
 import sic.modelo.*;
 import sic.modelo.calculos.NuevosResultadosPedido;
 import sic.modelo.calculos.Resultados;
-import sic.modelo.criteria.BusquedaCuentaCorrienteClienteCriteria;
-import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
-import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
-import sic.modelo.criteria.BusquedaGastoCriteria;
+import sic.modelo.criteria.*;
 import sic.modelo.dto.*;
 import sic.service.ICajaService;
 import sic.service.IClockService;
@@ -5132,6 +5129,36 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldVerificarTotalActualPedido() {
+    this.shouldCrearPedido();
+    PedidoDTO pedidoDTO = restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoDTO.class);
+    assertEquals(new BigDecimal("7.000000000000000"), pedidoDTO.getCantidadArticulos());
+    assertEquals(new BigDecimal("5947.200000000000000"), pedidoDTO.getTotalEstimado());
+    ProductoDTO productoRecuperado = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    productoRecuperado.setPrecioCosto(new BigDecimal("110"));
+    productoRecuperado.setGananciaPorcentaje(new BigDecimal("900"));
+    productoRecuperado.setGananciaNeto(new BigDecimal("990"));
+    productoRecuperado.setPrecioVentaPublico(new BigDecimal("1100"));
+    productoRecuperado.setIvaNeto(new BigDecimal("231"));
+    productoRecuperado.setPrecioLista(new BigDecimal("1331"));
+    restTemplate.put(apiPrefix + "/productos", productoRecuperado);
+    BusquedaPedidoCriteria criteriaPedido = new BusquedaPedidoCriteria();
+    criteriaPedido.setIdSucursal(1L);
+    HttpEntity<BusquedaPedidoCriteria> requestEntity = new HttpEntity<>(criteriaPedido);
+    List<PedidoDTO> pedidos =
+      restTemplate
+        .exchange(
+          apiPrefix + "/pedidos/busqueda/criteria",
+          HttpMethod.POST,
+          requestEntity,
+          new ParameterizedTypeReference<PaginaRespuestaRest<PedidoDTO>>() {})
+        .getBody()
+        .getContent();
+    assertTrue(!pedidos.isEmpty());
+    assertEquals(new BigDecimal("6028.20000000000000000000000000000000000000000000000"), pedidos.get(0).getTotalActual());
+  }
+
+  @Test
   void shouldComprobarSaldoCuentaCorrienteProveedor() {
     this.abrirCaja();
     this.shouldCrearFacturaCompraB();
@@ -5354,7 +5381,7 @@ class AppIntegrationTest {
     idsProductos.add(1L);
     idsProductos.add(2L);
     List<Producto> productos = productoService.getMultiplesProductosPorId(idsProductos);
-    List<RenglonPedido> renglones = pedidoService.getRenglonesDelPedido(1L);
+    List<RenglonPedido> renglones = pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(1L);
     assertEquals(productos.get(0).getIdProducto().longValue(), renglones.get(0).getIdProductoItem());
     assertEquals(productos.get(1).getIdProducto().longValue(), renglones.get(1).getIdProductoItem());
   }
@@ -5616,7 +5643,7 @@ class AppIntegrationTest {
         restTemplate.postForObject(
             apiPrefix + "/carrito-compra", nuevaOrdenDeCompraDTO, PedidoDTO.class);
     assertEquals(14, pedido.getCantidadArticulos().doubleValue());
-    assertEquals(new BigDecimal("12796.000000000000000000000000000000000000000000000"), pedido.getTotalActual());
+    assertEquals(new BigDecimal("10236.80000000000000000000000000000000000000000000000"), pedido.getTotalActual());
   }
 
   @Test

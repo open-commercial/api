@@ -35,7 +35,9 @@ public interface IPedidoService {
 
   Map<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido);
 
-  List<RenglonPedido> getRenglonesDelPedido(Long idPedido);
+  List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglon(Long idPedido);
+
+  List<RenglonPedido> getRenglonesDelPedidoOrdenadoPorIdProducto(Long idPedido);
 
   byte[] getReportePedido(long idPedido);
 
