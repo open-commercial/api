@@ -38,7 +38,6 @@ public class RenglonPedido implements Serializable {
   @Column(nullable = false)
   private String medidaItem;
 
-  @Column
   private String urlImagenItem;
 
   @Transient

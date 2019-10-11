@@ -43,7 +43,7 @@ public interface IPedidoService {
 
   RenglonPedido calcularRenglonPedido(long idProducto, BigDecimal cantidad, Cliente cliente);
 
-  List<RenglonPedido> calcularRenglonesPedido(@Valid List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO);
+  List<RenglonPedido> calcularRenglonesPedido(@Valid List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO, Long idCliente);
 
   Resultados calcularResultadosPedido(NuevosResultadosPedido calculoPedido);
 }

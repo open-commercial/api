@@ -18,5 +18,4 @@ public class NuevoRenglonPedidoDTO {
   
   @Positive(message = "{mensaje_producto_cantidad_negativa}")
   private BigDecimal cantidad;
-  private Long idCliente;
 }

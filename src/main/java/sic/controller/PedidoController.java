@@ -66,11 +66,13 @@ public class PedidoController {
         return pedidoService.getRenglonesDelPedido(idPedido);
     }
 
-    @PostMapping("/pedidos/renglones")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
-    public List<RenglonPedido> calcularRenglonesPedido(@RequestBody List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO) {
-        return pedidoService.calcularRenglonesPedido(nuevosRenglonesPedidoDTO);
-    }
+  @PostMapping("/pedidos/renglones/clientes/{idCliente}")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
+  public List<RenglonPedido> calcularRenglonesPedido(
+      @RequestBody List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO,
+      @PathVariable Long idCliente) {
+    return pedidoService.calcularRenglonesPedido(nuevosRenglonesPedidoDTO, idCliente);
+  }
 
   @PutMapping("/pedidos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})

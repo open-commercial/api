@@ -544,7 +544,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   public List<RenglonPedido> calcularRenglonesPedido(
-      @Valid List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO) {
+      @Valid List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO, Long idCliente) {
     List<RenglonPedido> renglonesPedido = new ArrayList<>();
     nuevosRenglonesPedidoDTO.forEach(
         nuevoRenglonesPedidoDTO ->
@@ -552,8 +552,7 @@ public class PedidoServiceImpl implements IPedidoService {
                 this.calcularRenglonPedido(
                     nuevoRenglonesPedidoDTO.getIdProductoItem(),
                     nuevoRenglonesPedidoDTO.getCantidad(),
-                    this.clienteService.getClienteNoEliminadoPorId(
-                        nuevoRenglonesPedidoDTO.getIdCliente()))));
+                    this.clienteService.getClienteNoEliminadoPorId(idCliente))));
     return renglonesPedido;
   }
 

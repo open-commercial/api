@@ -4669,18 +4669,16 @@ class AppIntegrationTest {
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(1L)
         .cantidad(new BigDecimal("5.000000000000000"))
-        .idCliente(1L)
         .build());
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
-        .idCliente(1L)
         .build());
     List<RenglonPedidoDTO> renglonesPedido =
       Arrays.asList(
         restTemplate.postForObject(
-          apiPrefix + "/pedidos/renglones", renglonesPedidoDTO, RenglonPedidoDTO[].class));
+          apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedidoDTO[].class));
     BigDecimal importe = BigDecimal.ZERO;
     for (RenglonPedidoDTO renglon : renglonesPedido) {
       importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
@@ -4724,18 +4722,16 @@ class AppIntegrationTest {
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(1L)
         .cantidad(new BigDecimal("5.000000000000000"))
-        .idCliente(1L)
         .build());
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
-        .idCliente(1L)
         .build());
     List<RenglonPedidoDTO> renglonesPedido =
       Arrays.asList(
         restTemplate.postForObject(
-          apiPrefix + "/pedidos/renglones", renglonesPedidoDTO, RenglonPedidoDTO[].class));
+          apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedidoDTO[].class));
     BigDecimal descuentoPorcentaje = new BigDecimal("20");
     BigDecimal recargoPorcentaje = BigDecimal.ZERO;
     NuevosResultadosPedido nuevosResultadosPedido = new NuevosResultadosPedido();
@@ -4760,18 +4756,16 @@ class AppIntegrationTest {
         NuevoRenglonPedidoDTO.builder()
             .idProductoItem(1L)
             .cantidad(new BigDecimal("5.000000000000000"))
-            .idCliente(1L)
             .build());
     renglonesPedidoDTO.add(
         NuevoRenglonPedidoDTO.builder()
             .idProductoItem(2L)
             .cantidad(new BigDecimal("2.000000000000000"))
-            .idCliente(1L)
             .build());
     List<RenglonPedidoDTO> renglonesPedido =
         Arrays.asList(
             restTemplate.postForObject(
-                apiPrefix + "/pedidos/renglones", renglonesPedidoDTO, RenglonPedidoDTO[].class));
+                apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedidoDTO[].class));
     BigDecimal importe = BigDecimal.ZERO;
     for (RenglonPedidoDTO renglon : renglonesPedido) {
       importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
@@ -4833,18 +4827,16 @@ class AppIntegrationTest {
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(1L)
         .cantidad(new BigDecimal("5.000000000000000"))
-        .idCliente(1L)
         .build());
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
-        .idCliente(1L)
         .build());
     List<RenglonPedidoDTO> renglonesPedido =
       Arrays.asList(
         restTemplate.postForObject(
-          apiPrefix + "/pedidos/renglones", renglonesPedidoDTO, RenglonPedidoDTO[].class));
+          apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedidoDTO[].class));
     BigDecimal importe = BigDecimal.ZERO;
     for (RenglonPedidoDTO renglon : renglonesPedido) {
       importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
@@ -4886,18 +4878,16 @@ class AppIntegrationTest {
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(1L)
         .cantidad(new BigDecimal("5.000000000000000"))
-        .idCliente(1L)
         .build());
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
-        .idCliente(1L)
         .build());
     List<RenglonPedidoDTO> renglonesPedido =
       Arrays.asList(
         restTemplate.postForObject(
-          apiPrefix + "/pedidos/renglones", renglonesPedidoDTO, RenglonPedidoDTO[].class));
+          apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedidoDTO[].class));
     BigDecimal importe = BigDecimal.ZERO;
     for (RenglonPedidoDTO renglon : renglonesPedido) {
       importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
@@ -4944,18 +4934,16 @@ class AppIntegrationTest {
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(1L)
         .cantidad(new BigDecimal("5.000000000000000"))
-        .idCliente(1L)
         .build());
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
-        .idCliente(1L)
         .build());
     List<RenglonPedidoDTO> renglonesPedido =
       Arrays.asList(
         restTemplate.postForObject(
-          apiPrefix + "/pedidos/renglones", renglonesPedidoDTO, RenglonPedidoDTO[].class));
+          apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedidoDTO[].class));
     BigDecimal importe = BigDecimal.ZERO;
     for (RenglonPedidoDTO renglon : renglonesPedido) {
       importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
@@ -5015,18 +5003,16 @@ class AppIntegrationTest {
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(1L)
         .cantidad(new BigDecimal("5"))
-        .idCliente(1L)
         .build());
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2"))
-        .idCliente(1L)
         .build());
     List<RenglonPedidoDTO> renglonesPedido =
       Arrays.asList(
         restTemplate.postForObject(
-          apiPrefix + "/pedidos/renglones", renglonesPedidoDTO, RenglonPedidoDTO[].class));
+          apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedidoDTO[].class));
     BigDecimal importe = BigDecimal.ZERO;
     for (RenglonPedidoDTO renglon : renglonesPedido) {
       importe = importe.add(renglon.getImporte());
@@ -5066,12 +5052,11 @@ class AppIntegrationTest {
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(3)
         .cantidad(new BigDecimal("7"))
-        .idCliente(1L)
         .build());
     renglonesPedido =
       Arrays.asList(
         restTemplate.postForObject(
-          apiPrefix + "/pedidos/renglones", renglonesPedidoDTO, RenglonPedidoDTO[].class));
+          apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedidoDTO[].class));
     importe = BigDecimal.ZERO;
     for (RenglonPedidoDTO renglon : renglonesPedido) {
       importe = importe.add(renglon.getImporte());
