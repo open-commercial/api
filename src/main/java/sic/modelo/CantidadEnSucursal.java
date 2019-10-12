@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"idCantidadEnSucursal", "sucursal"})
+@EqualsAndHashCode(of = "sucursal")
 @ToString
 @JsonView(Views.Vendedor.class)
 @JsonIgnoreProperties("sucursal")

@@ -92,8 +92,8 @@ public class ProductoServiceImpl implements IProductoService {
       for (int j = i + 1; j < producto.getCantidadEnSucursales().size(); j++) {
         if (producto
             .getCantidadEnSucursales()
-            .get(i)
-            .equals(producto.getCantidadEnSucursales().get(j))) {
+            .get(i).getIdSucursal()
+            .equals(producto.getCantidadEnSucursales().get(j).getIdSucursal())) {
           throw new BusinessServiceException(
               messageSource.getMessage(
                   "mensaje_producto_cantidades_en_sucursal_repetidas", null, Locale.getDefault()));

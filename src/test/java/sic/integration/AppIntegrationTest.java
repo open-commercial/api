@@ -3415,6 +3415,33 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldNotActualizarStockConCantidadEnSucursalRepetida() {
+    this.shouldCrearFacturaVentaA();
+    this.shouldCrearSucursalResponsableInscripto();
+    ProductoDTO producto1 =
+      restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    List<CantidadEnSucursalDTO> cantidadEnSucursal = producto1.getCantidadEnSucursales();
+    CantidadEnSucursalDTO cantidadNuevaRepetida = CantidadEnSucursalDTO.builder()
+      .idSucursal(2L)
+      .cantidad(new BigDecimal("10"))
+      .build();
+    cantidadEnSucursal.add(cantidadNuevaRepetida);
+    producto1.setCantidadEnSucursales(cantidadEnSucursal);
+    RestClientResponseException thrown =
+      assertThrows(
+        RestClientResponseException.class,
+        () ->
+          restTemplate.put(apiPrefix + "/productos", producto1));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+      thrown
+        .getMessage()
+        .contains(
+          messageSource.getMessage(
+            "mensaje_producto_cantidades_en_sucursal_repetidas", null, Locale.getDefault())));
+  }
+
+  @Test
   void shouldVerificarStockCompra() {
     this.shouldCrearFacturaCompraA();
     ProductoDTO producto1 =
