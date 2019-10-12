@@ -57,13 +57,13 @@ public class PedidoController {
     @GetMapping("/pedidos/{idPedido}")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Pedido getPedidoPorId(@PathVariable long idPedido) {
-        return pedidoService.getPedidoNoEliminadoPorId(idPedido);
+        return pedidoService.calcularTotalActualDePedido(pedidoService.getPedidoNoEliminadoPorId(idPedido));
     }
     
     @GetMapping("/pedidos/{idPedido}/renglones")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public List<RenglonPedido> getRenglonesDelPedido(@PathVariable long idPedido) {
-        return pedidoService.getRenglonesDelPedido(idPedido);
+        return pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido);
     }
 
   @PostMapping("/pedidos/renglones/clientes/{idCliente}")
