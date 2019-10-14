@@ -47,7 +47,6 @@ public class ProductoServiceImpl implements IProductoService {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final BigDecimal CIEN = new BigDecimal("100");
   private static final long TAMANIO_MAXIMO_IMAGEN = 1024000L;
-  private final ISucursalService sucursalService;
   private final IRubroService rubroService;
   private final IProveedorService proveedorService;
   private final IMedidaService medidaService;
@@ -60,7 +59,6 @@ public class ProductoServiceImpl implements IProductoService {
   @Lazy
   public ProductoServiceImpl(
     ProductoRepository productoRepository,
-    ISucursalService sucursalService,
     IRubroService rubroService,
     IProveedorService proveedorService,
     IMedidaService medidaService,
@@ -68,7 +66,6 @@ public class ProductoServiceImpl implements IProductoService {
     IPhotoVideoUploader photoVideoUploader,
     MessageSource messageSource) {
     this.productoRepository = productoRepository;
-    this.sucursalService = sucursalService;
     this.rubroService = rubroService;
     this.proveedorService = proveedorService;
     this.medidaService = medidaService;
@@ -85,20 +82,6 @@ public class ProductoServiceImpl implements IProductoService {
       throw new BusinessServiceException(
           messageSource.getMessage(
               "mensaje_producto_oferta_privado_o_sin_imagen", null, Locale.getDefault()));
-    }
-    // Duplicados
-    //Cantidades
-    for (int i = 0; i < producto.getCantidadEnSucursales().size(); i++) {
-      for (int j = i + 1; j < producto.getCantidadEnSucursales().size(); j++) {
-        if (producto
-            .getCantidadEnSucursales()
-            .get(i).getIdSucursal()
-            .equals(producto.getCantidadEnSucursales().get(j).getIdSucursal())) {
-          throw new BusinessServiceException(
-              messageSource.getMessage(
-                  "mensaje_producto_cantidades_en_sucursal_repetidas", null, Locale.getDefault()));
-        }
-      }
     }
     // Codigo
     if (!producto.getCodigo().equals("")) {

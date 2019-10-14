@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 import javax.persistence.*;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
@@ -49,7 +49,7 @@ public class Producto implements Serializable {
   @JoinColumn(name = "idProducto")
   @JsonProperty(access = JsonProperty.Access.READ_WRITE)
   @JsonView(Views.Comprador.class)
-  private List<CantidadEnSucursal> cantidadEnSucursales;
+  private Set<CantidadEnSucursal> cantidadEnSucursales;
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_producto_cantidad_negativa}")

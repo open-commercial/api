@@ -185,17 +185,16 @@ public class ProductoController {
       productoPorActualizar.setProveedor(
           proveedorService.getProveedorNoEliminadoPorId(idProveedor));
     else productoPorActualizar.setProveedor(productoPersistido.getProveedor());
-    List<CantidadEnSucursal> cantidadEnSucursales = new ArrayList<>();
+    Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet();
     productoDTO
         .getCantidadEnSucursales()
         .forEach(
             cantidadEnSucursalDTO -> {
-              cantidadEnSucursales.add(
-                  modelMapper.map(cantidadEnSucursalDTO, CantidadEnSucursal.class));
-              cantidadEnSucursales
-                  .get(cantidadEnSucursales.size() - 1)
-                  .setSucursal(
-                      sucursalService.getSucursalPorId(cantidadEnSucursalDTO.getIdSucursal()));
+              CantidadEnSucursal cantidadEnSucursal =
+                  modelMapper.map(cantidadEnSucursalDTO, CantidadEnSucursal.class);
+              cantidadEnSucursal.setSucursal(
+                  sucursalService.getSucursalPorId(cantidadEnSucursalDTO.getIdSucursal()));
+              cantidadEnSucursales.add(cantidadEnSucursal);
             });
     productoPorActualizar.setCantidadEnSucursales(cantidadEnSucursales);
     productoPorActualizar.setCantidadTotalEnSucursales(
@@ -219,7 +218,7 @@ public class ProductoController {
     producto.setProveedor(proveedorService.getProveedorNoEliminadoPorId(idProveedor));
     producto.setCodigo(nuevoProductoDTO.getCodigo());
     producto.setDescripcion(nuevoProductoDTO.getDescripcion());
-    List<CantidadEnSucursal> altaCantidadesEnSucursales = new ArrayList<>();
+    Set<CantidadEnSucursal> altaCantidadesEnSucursales = new HashSet<>();
     this.sucursalService.getSucusales(false).forEach(sucursal -> {
       CantidadEnSucursal cantidad = new CantidadEnSucursal();
       cantidad.setCantidad(BigDecimal.ZERO);

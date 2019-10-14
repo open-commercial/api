@@ -2,7 +2,7 @@ package sic.builder;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 import sic.modelo.dto.CantidadEnSucursalDTO;
 import sic.modelo.dto.ProductoDTO;
@@ -12,7 +12,7 @@ public class ProductoBuilder {
     private Long idProducto = 0L;
     private String codigo = "ABC123";
     private String descripcion = "Cinta adhesiva doble faz 3M";
-    private List<CantidadEnSucursalDTO> cantidadEnSucursales;
+    private Set<CantidadEnSucursalDTO> cantidadEnSucursales;
     private BigDecimal cantidadTotalEnSucursales;
     private boolean hayStock = true;
     private BigDecimal cantMinima = new BigDecimal("2");    
@@ -91,7 +91,7 @@ public class ProductoBuilder {
         return this;
     }
     
-    public ProductoBuilder withCantidadSucursales(List<CantidadEnSucursalDTO> cantidadEnSucursales) {
+    public ProductoBuilder withCantidadSucursales(Set<CantidadEnSucursalDTO> cantidadEnSucursales) {
         this.cantidadEnSucursales = cantidadEnSucursales;
         return this;
     }

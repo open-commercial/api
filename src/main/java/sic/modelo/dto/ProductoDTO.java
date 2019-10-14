@@ -3,7 +3,7 @@ package sic.modelo.dto;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 import lombok.*;
 
@@ -17,7 +17,7 @@ public class ProductoDTO implements Serializable {
   private Long idProducto;
   private String codigo;
   private String descripcion;
-  private List<CantidadEnSucursalDTO> cantidadEnSucursales;
+  private Set<CantidadEnSucursalDTO> cantidadEnSucursales;
   private BigDecimal cantidadTotalEnSucursales;
   private boolean hayStock;
   private BigDecimal cantMinima;
