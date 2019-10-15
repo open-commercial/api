@@ -19,13 +19,25 @@ public class RenglonFacturaBuilder {
     private BigDecimal gananciaPorcentaje = new BigDecimal("30");
     private BigDecimal gananciaNeto = new BigDecimal("300");
     private BigDecimal importe = new BigDecimal("1573");
-    
-    public RenglonFactura build() {
-        return new RenglonFactura(id_RenglonFactura, id_ProductoItem, codigoItem, 
-                descripcionItem, medidaItem, cantidad, precioUnitario, descuentoPorcentaje,
-                descuentoNeto, ivaPorcentaje, ivaNeto,gananciaPorcentaje, gananciaNeto, importe);
-    }
-    
+
+  public RenglonFactura build() {
+    return new RenglonFactura(
+        id_RenglonFactura,
+        id_ProductoItem,
+        codigoItem,
+        descripcionItem,
+        medidaItem,
+        cantidad,
+        precioUnitario,
+        descuentoPorcentaje,
+        descuentoNeto,
+        ivaPorcentaje,
+        ivaNeto,
+        gananciaPorcentaje,
+        gananciaNeto,
+        importe);
+  }
+
     public RenglonFacturaBuilder withId_Transportista(long idRenglonFactura) {
         this.id_RenglonFactura = idRenglonFactura;
         return this;

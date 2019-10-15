@@ -83,6 +83,11 @@ public class ProductoServiceImpl implements IProductoService {
           messageSource.getMessage(
               "mensaje_producto_oferta_privado_o_sin_imagen", null, Locale.getDefault()));
     }
+    if (producto.isOferta()
+        && (producto.getPorcentajeBonificacionOferta() == null
+            || producto.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO) == 0)) {
+      producto.setOferta(false);
+    }
     // Codigo
     if (!producto.getCodigo().equals("")) {
       Producto productoDuplicado = this.getProductoPorCodigo(producto.getCodigo());

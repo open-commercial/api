@@ -521,7 +521,7 @@ public class PedidoServiceImpl implements IPedidoService {
     nuevoRenglon.setDescripcionItem(producto.getDescripcion());
     nuevoRenglon.setMedidaItem(producto.getMedida().getNombre());
     nuevoRenglon.setPrecioUnitario(producto.getPrecioLista());
-    if (producto.isOferta()) {
+    if (producto.isOferta() && producto.getPorcentajeBonificacionOferta() != null) {
       nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajeBonificacionOferta());
       nuevoRenglon.setBonificacionNeta(
         CalculosComprobante.calcularProporcion(
