@@ -547,7 +547,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   private void calcularPrecioBonificado(Producto producto) {
     if (producto.isOferta() && producto.getPorcentajeBonificacionOferta() != null) {
-      producto.setPrecioBonificado(
+      producto.setPrecioListaBonificado(
           producto
               .getPrecioLista()
               .multiply(
