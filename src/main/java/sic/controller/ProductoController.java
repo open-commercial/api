@@ -185,7 +185,7 @@ public class ProductoController {
       productoPorActualizar.setProveedor(
           proveedorService.getProveedorNoEliminadoPorId(idProveedor));
     else productoPorActualizar.setProveedor(productoPersistido.getProveedor());
-    Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet();
+    Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
     productoDTO
         .getCantidadEnSucursales()
         .forEach(

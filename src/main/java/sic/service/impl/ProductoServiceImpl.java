@@ -83,11 +83,6 @@ public class ProductoServiceImpl implements IProductoService {
           messageSource.getMessage(
               "mensaje_producto_oferta_privado_o_sin_imagen", null, Locale.getDefault()));
     }
-    if (producto.isOferta()
-        && (producto.getPorcentajeBonificacionOferta() == null
-            || producto.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO) == 0)) {
-      producto.setOferta(false);
-    }
     // Codigo
     if (!producto.getCodigo().equals("")) {
       Producto productoDuplicado = this.getProductoPorCodigo(producto.getCodigo());
@@ -273,6 +268,7 @@ public class ProductoServiceImpl implements IProductoService {
     producto.setEliminado(false);
     producto.setOferta(false);
     this.validarOperacion(TipoDeOperacion.ALTA, producto);
+    this.validarBonificacionOferta(producto);
     producto = productoRepository.save(producto);
     logger.warn("El Producto {} se guardó correctamente.", producto);
     return producto;
@@ -292,11 +288,20 @@ public class ProductoServiceImpl implements IProductoService {
       photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + productoPersistido.getIdProducto());
     }
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
+    this.validarBonificacionOferta(productoPorActualizar);
     if (productoPersistido.isPublico() && !productoPorActualizar.isPublico()) {
       carritoCompraService.eliminarItem(productoPersistido.getIdProducto());
     }
     productoRepository.save(productoPorActualizar);
     logger.warn("El Producto {} se modificó correctamente.", productoPorActualizar);
+  }
+
+  private void validarBonificacionOferta(Producto producto) {
+    if (producto.isOferta()
+        && (producto.getPorcentajeBonificacionOferta() == null
+            || producto.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO) == 0)) {
+      producto.setOferta(false);
+    }
   }
 
   @Override
