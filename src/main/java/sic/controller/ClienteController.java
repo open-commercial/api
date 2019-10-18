@@ -131,7 +131,7 @@ public class ClienteController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public void actualizar(
+  public Cliente actualizar(
       @RequestBody ClienteDTO clienteDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     Cliente clientePorActualizar = modelMapper.map(clienteDTO, Cliente.class);
@@ -189,7 +189,7 @@ public class ClienteController {
     } else {
       clientePorActualizar.setViajante(null);
     }
-    clienteService.actualizar(clientePorActualizar, clientePersistido);
+    return clienteService.actualizar(clientePorActualizar, clientePersistido);
   }
 
   @PutMapping("/clientes/{idCliente}/predeterminado")

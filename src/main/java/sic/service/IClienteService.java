@@ -8,7 +8,7 @@ import javax.validation.Valid;
 
 public interface IClienteService {
 
-  void actualizar(@Valid Cliente clientePorActualizar, Cliente clientePersistido);
+  Cliente actualizar(@Valid Cliente clientePorActualizar, Cliente clientePersistido);
 
   Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long idUsuario);
 

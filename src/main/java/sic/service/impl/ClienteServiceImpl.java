@@ -277,7 +277,7 @@ public class ClienteServiceImpl implements IClienteService {
 
   @Override
   @Transactional
-  public void actualizar(@Valid Cliente clientePorActualizar, Cliente clientePersistido) {
+  public Cliente actualizar(@Valid Cliente clientePorActualizar, Cliente clientePersistido) {
     clientePorActualizar.setNroCliente(clientePersistido.getNroCliente());
     clientePorActualizar.setFechaAlta(clientePersistido.getFechaAlta());
     clientePorActualizar.setPredeterminado(clientePersistido.isPredeterminado());
@@ -298,8 +298,9 @@ public class ClienteServiceImpl implements IClienteService {
         }
       }
     }
-    clienteRepository.save(clientePorActualizar);
-    logger.warn("El Cliente {} se actualizó correctamente.", clientePorActualizar);
+    Cliente clienteGuardado = clienteRepository.save(clientePorActualizar);
+    logger.warn("El Cliente {} se actualizó correctamente.", clienteGuardado);
+    return clienteGuardado;
   }
 
   @Override
