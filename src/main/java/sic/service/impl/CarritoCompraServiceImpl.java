@@ -70,34 +70,40 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   @Override
   public Page<ItemCarritoCompra> getItemsDelCaritoCompra(
-    long idUsuario, long idCliente, int pagina) {
+      long idUsuario, long idCliente, int pagina) {
     Pageable pageable =
-      PageRequest.of(
-        pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
+        PageRequest.of(
+            pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
     Page<ItemCarritoCompra> items =
         carritoCompraRepository.findAllByUsuario(
             usuarioService.getUsuarioNoEliminadoPorId(idUsuario), pageable);
     Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     BigDecimal bonificacion = cliente.getBonificacion();
     items.forEach(
-      i -> {
-        i.getProducto()
-          .setPrecioBonificado(
-            i.getProducto()
-              .getPrecioLista()
-              .multiply(
-                BigDecimal.ONE.subtract(
-                  bonificacion.divide(CIEN, RoundingMode.HALF_UP))));
-        i.setImporte(i.getProducto().getPrecioLista().multiply(i.getCantidad()));
-        i.setImporteBonificado(i.getProducto().getPrecioBonificado().multiply(i.getCantidad()));
-      });
+        i -> {
+          i.getProducto()
+              .setPrecioBonificado(
+                  i.getProducto()
+                      .getPrecioLista()
+                      .multiply(
+                          BigDecimal.ONE.subtract(
+                              bonificacion.divide(CIEN, RoundingMode.HALF_UP))));
+          i.setImporte(i.getProducto().getPrecioLista().multiply(i.getCantidad()));
+          i.setImporteBonificado(i.getProducto().getPrecioBonificado().multiply(i.getCantidad()));
+          i.getProducto().setHayStock(i.getProducto().getCantidad().compareTo(BigDecimal.ZERO) > 0);
+        });
     return items;
   }
 
   @Override
   public ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(
-    long idUsuario, long idProducto) {
-    return this.carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
+      long idUsuario, long idProducto) {
+    ItemCarritoCompra itemCarritoCompra =
+        this.carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
+    itemCarritoCompra
+        .getProducto()
+        .setHayStock(itemCarritoCompra.getProducto().getCantidad().compareTo(BigDecimal.ZERO) > 0);
+    return itemCarritoCompra;
   }
 
   @Override

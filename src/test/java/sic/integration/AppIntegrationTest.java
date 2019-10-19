@@ -5494,9 +5494,11 @@ class AppIntegrationTest {
     ItemCarritoCompra item1 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
     assertEquals(1L, item1.getProducto().getIdProducto());
     assertEquals(5, item1.getCantidad().doubleValue());
+    assertTrue(item1.getProducto().isHayStock());
     ItemCarritoCompra item2 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/2", ItemCarritoCompra.class);
     assertEquals(2L, item2.getProducto().getIdProducto());
     assertEquals(9, item2.getCantidad().doubleValue());
+    assertTrue(item2.getProducto().isHayStock());
   }
 
   @Test
