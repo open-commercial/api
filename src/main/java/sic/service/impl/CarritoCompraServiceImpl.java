@@ -100,9 +100,12 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
       long idUsuario, long idProducto) {
     ItemCarritoCompra itemCarritoCompra =
         this.carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
-    itemCarritoCompra
-        .getProducto()
-        .setHayStock(itemCarritoCompra.getProducto().getCantidad().compareTo(BigDecimal.ZERO) > 0);
+    if (itemCarritoCompra != null) {
+      itemCarritoCompra
+          .getProducto()
+          .setHayStock(
+              itemCarritoCompra.getProducto().getCantidad().compareTo(BigDecimal.ZERO) > 0);
+    }
     return itemCarritoCompra;
   }
 

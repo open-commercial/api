@@ -5502,6 +5502,13 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldDevolverNullCuandoElItemNoExisteEnElCarrito() {
+    this.crearProductos();
+    ItemCarritoCompra item1 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
+    assertNull(item1);
+  }
+
+  @Test
   void shouldModificarCantidadesDeUnItemDelCarrito() {
     this.crearProductos();
     this.shouldAgregarItemsAlCarritoCompra();
