@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
@@ -54,10 +54,8 @@ public abstract class Factura implements Serializable {
   @NotNull(message = "{mensaje_factura_usuario_vacio}")
   private Usuario usuario;
 
-  @Column(nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
   @NotNull(message = "{mensaje_factura_fecha_vacia}")
-  private Date fecha;
+  private LocalDateTime fecha;
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
@@ -68,8 +66,7 @@ public abstract class Factura implements Serializable {
 
   private long numFactura;
 
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date fechaVencimiento;
+  private LocalDateTime fechaVencimiento;
 
   @ManyToOne
   @JoinColumn(name = "id_Pedido", referencedColumnName = "id_Pedido")
@@ -143,8 +140,7 @@ public abstract class Factura implements Serializable {
 
   private long cae;
 
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date vencimientoCae;
+  private LocalDateTime vencimientoCae;
 
   private long numSerieAfip;
 

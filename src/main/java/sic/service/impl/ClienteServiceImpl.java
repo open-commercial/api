@@ -3,7 +3,7 @@ package sic.service.impl;
 import com.querydsl.core.BooleanBuilder;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
@@ -235,7 +235,7 @@ public class ClienteServiceImpl implements IClienteService {
   @Override
   @Transactional
   public Cliente guardar(@Valid Cliente cliente) {
-    cliente.setFechaAlta(new Date());
+    cliente.setFechaAlta(LocalDateTime.now());
     cliente.setEliminado(false);
     cliente.setNroCliente(this.generarNroDeCliente(cliente.getEmpresa()));
     if (cliente.getBonificacion() == null) cliente.setBonificacion(BigDecimal.ZERO);

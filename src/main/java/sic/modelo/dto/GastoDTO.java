@@ -3,7 +3,7 @@ package sic.modelo.dto;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @EqualsAndHashCode(exclude = {"id_Gasto", "nroGasto", "idEmpresa", "nombreEmpresa", "fecha", "idUsuario", "nombreUsuario", "idFormaDePago", "nombreFormaDePago"})
@@ -14,7 +14,7 @@ public class GastoDTO {
 
   private long id_Gasto;
   private long nroGasto;
-  private Date fecha;
+  private LocalDateTime fecha;
   private String concepto;
   private Long idEmpresa;
   private String nombreEmpresa;

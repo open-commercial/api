@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import sic.modelo.Caja;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public interface CajaRepository
     extends PagingAndSortingRepository<Caja, Long>,
@@ -36,7 +36,7 @@ public interface CajaRepository
           + "WHERE c.empresa.id_Empresa = :idEmpresa AND c.eliminada = false AND c.estado = sic.modelo.EstadoCaja.CERRADA "
           + "AND :fecha BETWEEN c.fechaApertura AND c.fechaCierre")
   Caja encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(
-      @Param("idEmpresa") long idEmpresa, @Param("fecha") Date fecha);
+      @Param("idEmpresa") long idEmpresa, @Param("fecha") LocalDateTime fecha);
 
   @Modifying
   @Query(

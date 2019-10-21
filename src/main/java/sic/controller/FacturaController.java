@@ -1,6 +1,7 @@
 package sic.controller;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import io.jsonwebtoken.Claims;
@@ -96,7 +97,7 @@ public class FacturaController {
     fv.setCliente(cliente);
     facturaService.asignarClienteEmbeddable(fv, cliente);
     fv.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(facturaVentaDTO.getIdTransportista()));
-    fv.setFecha(new Date());
+    fv.setFecha(LocalDateTime.now());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     fv.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     List<FacturaVenta> facturasGuardadas;

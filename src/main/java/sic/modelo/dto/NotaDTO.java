@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,7 +32,7 @@ public abstract class NotaDTO implements Serializable {
   private long nroNota;
   private boolean eliminada;
   private TipoDeComprobante tipoComprobante;
-  private Date fecha;
+  private LocalDateTime fecha;
   private long idEmpresa;
   private String nombreEmpresa;
   private Long idCliente;
@@ -51,7 +51,7 @@ public abstract class NotaDTO implements Serializable {
   private BigDecimal iva105Neto;
   private BigDecimal total;
   private long cae;
-  private Date vencimientoCae;
+  private LocalDateTime vencimientoCae;
   private long numSerieAfip;
   private long numNotaAfip;
 

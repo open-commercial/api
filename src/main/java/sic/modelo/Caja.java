@@ -2,7 +2,7 @@ package sic.modelo;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
@@ -31,13 +31,9 @@ public class Caja implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long id_Caja;
 
-  @Column(nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
-  @NotNull(message = "{mensaje_caja_fecha_apertura_vacia}")
-  private Date fechaApertura;
+  private LocalDateTime fechaApertura;
 
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date fechaCierre;
+  private LocalDateTime fechaCierre;
 
   @ManyToOne
   @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")

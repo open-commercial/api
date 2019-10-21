@@ -4,7 +4,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -279,9 +278,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   @Override
   public void actualizarPasswordRecoveryKey(String passwordRecoveryKey, long idUsuario) {
     usuarioRepository.updatePasswordRecoveryKey(
-        passwordRecoveryKey,
-        Date.from(LocalDateTime.now().plusHours(3L).atZone(ZoneId.systemDefault()).toInstant()),
-        idUsuario);
+        passwordRecoveryKey, LocalDateTime.now().plusHours(3L), idUsuario);
   }
 
   @Override

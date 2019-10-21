@@ -1,8 +1,8 @@
 package sic.builder;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import sic.modelo.Cliente;
 import sic.modelo.Empresa;
@@ -17,11 +17,11 @@ import sic.modelo.embeddable.ClienteEmbeddable;
 public class FacturaVentaBuilder {
     
     private long id_Factura = 0L;
-    private Date fecha = new Date();
+    private LocalDateTime fecha = LocalDateTime.now();
     private TipoDeComprobante tipoFactura = TipoDeComprobante.FACTURA_A;
     private long numSerie = 0;
     private long numFactura = 1;
-    private Date fechaVencimiento = new Date();    
+    private LocalDateTime fechaVencimiento = LocalDateTime.now();
     private Pedido pedido =  null;
     private Transportista transportista = new TransportistaBuilder().build();
     private List<RenglonFactura> renglones;
@@ -43,7 +43,7 @@ public class FacturaVentaBuilder {
     private Empresa empresa = new EmpresaBuilder().build();
     private boolean eliminada = false;
     private long CAE = 21064126523746l;
-    private Date vencimientoCAE = null;
+    private LocalDateTime vencimientoCAE = null;
     private long numSerieAfip = 0;
     private long numFacturaAfip = 0;
 
@@ -100,7 +100,7 @@ public class FacturaVentaBuilder {
         return this;
     }
     
-    public FacturaVentaBuilder withFecha(Date fecha) {
+    public FacturaVentaBuilder withFecha(LocalDateTime fecha) {
         this.fecha = fecha;
         return this;
     }
@@ -135,7 +135,7 @@ public class FacturaVentaBuilder {
         return this;
     }
     
-    public FacturaVentaBuilder withFechaVencimiento(Date fechaDeVencimiento) {
+    public FacturaVentaBuilder withFechaVencimiento(LocalDateTime fechaDeVencimiento) {
         this.fechaVencimiento = fechaDeVencimiento;
         return this;
     }  
@@ -230,7 +230,7 @@ public class FacturaVentaBuilder {
         return this;
     }
     
-    public FacturaVentaBuilder withVencimientoCAE(Date vencimientoCAE) {
+    public FacturaVentaBuilder withVencimientoCAE(LocalDateTime vencimientoCAE) {
         this.vencimientoCAE = vencimientoCAE;
         return this;
     }

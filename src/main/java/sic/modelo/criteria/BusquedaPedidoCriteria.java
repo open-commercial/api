@@ -1,6 +1,5 @@
 package sic.modelo.criteria;
 
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,14 +7,16 @@ import lombok.NoArgsConstructor;
 import sic.modelo.EstadoPedido;
 import sic.modelo.TipoDeEnvio;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class BusquedaPedidoCriteria {
 
-    private Date fechaDesde;
-    private Date fechaHasta;
+    private LocalDateTime fechaDesde;
+    private LocalDateTime fechaHasta;
     private Long idCliente;
     private Long idUsuario;
     private Long idViajante;

@@ -1,8 +1,6 @@
 package sic.util;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,10 +19,8 @@ public class Validator {
      * @return -1 si la fechaAnterior esta antes de la fechaSiguiente, 0 si son iguales,
      * o 1 si la fechaAnterior esta despues de la fechaSiguiente
      */
-    public static int compararDias(Date fechaAnterior, Date fechaSiguiente) {
-        LocalDate diaAnterior = fechaAnterior.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate diaSiguiente = fechaSiguiente.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        return diaAnterior.compareTo(diaSiguiente);
+    public static int compararDias(LocalDateTime fechaAnterior, LocalDateTime fechaSiguiente) {
+        return fechaAnterior.compareTo(fechaSiguiente);
     }
     
     public static boolean tieneDuplicados(long[] array) {

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -29,11 +29,11 @@ import sic.modelo.TipoDeComprobante;
 public abstract class FacturaDTO implements Serializable {
 
     private long id_Factura;
-    private Date fecha;
+    private LocalDateTime fecha;
     private TipoDeComprobante tipoComprobante;
     private long numSerie;
     private long numFactura;
-    private Date fechaVencimiento;
+    private LocalDateTime fechaVencimiento;
     private Long nroPedido;
     private long idTransportista;
     private String nombreTransportista;
@@ -56,5 +56,5 @@ public abstract class FacturaDTO implements Serializable {
     private String nombreUsuario;
     private boolean eliminada;
     private long cae;
-    private Date vencimientoCae;
+    private LocalDateTime vencimientoCae;
 }

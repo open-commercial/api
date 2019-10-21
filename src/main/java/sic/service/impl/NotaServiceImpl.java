@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -210,49 +212,28 @@ public class NotaServiceImpl implements INotaService {
     if (criteria.getMovimiento() == Movimiento.COMPRA)
       builder.and(qNotaCredito.movimiento.eq(Movimiento.COMPRA));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
-      Calendar cal = new GregorianCalendar();
-      if (criteria.getFechaDesde() != null) {
-        cal.setTime(criteria.getFechaDesde());
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        criteria.setFechaDesde(cal.getTime());
-      }
-      if (criteria.getFechaHasta() != null) {
-        cal.setTime(criteria.getFechaHasta());
-        cal.set(Calendar.HOUR_OF_DAY, 23);
-        cal.set(Calendar.MINUTE, 59);
-        cal.set(Calendar.SECOND, 59);
-        criteria.setFechaHasta(cal.getTime());
-      }
-      FormatterFechaHora formateadorFecha =
-          new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
+      criteria.setFechaHasta(criteria.getFechaHasta().withHour(0).withMinute(0).withSecond(0));
+      DateTimeFormatter formato =
+          DateTimeFormatter.ofPattern(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
       String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-        DateExpression<Date> fDesde =
+        DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                Date.class,
-                dateTemplate,
-                formateadorFecha.format(criteria.getFechaDesde()));
-        DateExpression<Date> fHasta =
+                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(formato));
+        DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                Date.class,
-                dateTemplate,
-                formateadorFecha.format(criteria.getFechaHasta()));
+                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(formato));
         builder.and(qNotaCredito.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
-        DateExpression<Date> fDesde =
+        DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                Date.class,
-                dateTemplate,
-                formateadorFecha.format(criteria.getFechaDesde()));
+                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(formato));
         builder.and(qNotaCredito.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
-        DateExpression<Date> fHasta =
+        DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                Date.class,
-                dateTemplate,
-                formateadorFecha.format(criteria.getFechaHasta()));
+                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(formato));
         builder.and(qNotaCredito.fecha.before(fHasta));
       }
     }
@@ -312,41 +293,32 @@ public class NotaServiceImpl implements INotaService {
     if (criteria.getMovimiento() == Movimiento.COMPRA)
       builder.and(qNotaDebito.movimiento.eq(Movimiento.COMPRA));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
-      Calendar cal = new GregorianCalendar();
-      if (criteria.getFechaDesde() != null) {
-        cal.setTime(criteria.getFechaDesde());
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        criteria.setFechaDesde(cal.getTime());
-      }
-      if (criteria.getFechaHasta() != null) {
-        cal.setTime(criteria.getFechaHasta());
-        cal.set(Calendar.HOUR_OF_DAY, 23);
-        cal.set(Calendar.MINUTE, 59);
-        cal.set(Calendar.SECOND, 59);
-        criteria.setFechaHasta(cal.getTime());
-      }
-      FormatterFechaHora formateadorFecha =
-          new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
+      criteria.setFechaHasta(criteria.getFechaHasta().withHour(0).withMinute(0).withSecond(0));
+      DateTimeFormatter formato =
+        DateTimeFormatter.ofPattern(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
       String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-        DateExpression<Date> fDesde =
+        DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                Date.class, dateTemplate, formateadorFecha.format(criteria.getFechaDesde()));
-        DateExpression<Date> fHasta =
+                LocalDateTime.class,
+                dateTemplate,
+                criteria.getFechaDesde().format(formato));
+        DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                Date.class, dateTemplate, formateadorFecha.format(criteria.getFechaHasta()));
+                LocalDateTime.class,
+                dateTemplate,
+                criteria.getFechaHasta().format(formato));
         builder.and(qNotaDebito.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
-        DateExpression<Date> fDesde =
+        DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                Date.class, dateTemplate, formateadorFecha.format(criteria.getFechaDesde()));
+                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(formato));
         builder.and(qNotaDebito.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
-        DateExpression<Date> fHasta =
+        DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                Date.class, dateTemplate, formateadorFecha.format(criteria.getFechaHasta()));
+                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(formato));
         builder.and(qNotaDebito.fecha.before(fHasta));
       }
     }
@@ -632,7 +604,7 @@ public class NotaServiceImpl implements INotaService {
   private void validarOperacion(Nota nota) {
     if (nota instanceof NotaCredito && nota.getMovimiento().equals(Movimiento.VENTA)) {
       if (nota.getFacturaVenta() != null
-          && nota.getFecha().compareTo(nota.getFacturaVenta().getFecha()) <= 0) {
+          && nota.getFecha().isBefore(nota.getFacturaVenta().getFecha())) {
         throw new BusinessServiceException(
             messageSource.getMessage("mensaje_nota_fecha_incorrecta", null, Locale.getDefault()));
       }
@@ -642,11 +614,11 @@ public class NotaServiceImpl implements INotaService {
       }
     } else if (nota instanceof NotaCredito && nota.getMovimiento().equals(Movimiento.COMPRA)) {
       if (nota.getFacturaCompra() != null
-          && nota.getFecha().compareTo(nota.getFacturaCompra().getFecha()) < 0) {
+          && nota.getFecha().isBefore(nota.getFacturaCompra().getFecha())) {
         throw new BusinessServiceException(
             messageSource.getMessage("mensaje_nota_fecha_incorrecta", null, Locale.getDefault()));
       }
-      if (nota.getFecha().compareTo(new Date()) > 0) {
+      if (nota.getFecha().isAfter(LocalDateTime.now())) {
         throw new BusinessServiceException(
             messageSource.getMessage("mensaje_nota_fecha_incorrecta", null, Locale.getDefault()));
       }
@@ -837,7 +809,7 @@ public class NotaServiceImpl implements INotaService {
   @Transactional
   public NotaCredito guardarNotaCredito(@Valid NotaCredito notaCredito) {
     if (notaCredito.getFecha() == null) {
-      notaCredito.setFecha(new Date());
+      notaCredito.setFecha(LocalDateTime.now());
     }
     this.validarOperacion(notaCredito);
     if (notaCredito.getMovimiento().equals(Movimiento.VENTA)) {
@@ -962,7 +934,7 @@ public class NotaServiceImpl implements INotaService {
             notaCreditoNueva.getSubTotalBruto(),
             notaCreditoNueva.getIva105Neto(),
             notaCreditoNueva.getIva21Neto()));
-    notaCreditoNueva.setFecha(new Date());
+    notaCreditoNueva.setFecha(LocalDateTime.now());
     if (factura instanceof FacturaVenta) {
       notaCreditoNueva.setCliente(
           clienteService.getClienteNoEliminadoPorId(((FacturaVenta) factura).getIdCliente()));
@@ -1024,7 +996,7 @@ public class NotaServiceImpl implements INotaService {
     notaCreditoNueva.setSubTotalBruto(subTotalBruto);
     notaCreditoNueva.setTotal(
         notaService.calcularTotalNota(notaCreditoNueva.getRenglonesNotaCredito()));
-    notaCreditoNueva.setFecha(new Date());
+    notaCreditoNueva.setFecha(LocalDateTime.now());
     if ((nuevaNotaCreditoSinFacturaDTO.getIdCliente() != null
             && nuevaNotaCreditoSinFacturaDTO.getIdProveedor() != null)
         || (nuevaNotaCreditoSinFacturaDTO.getIdCliente() == null
@@ -1054,7 +1026,7 @@ public class NotaServiceImpl implements INotaService {
   public NotaDebito calcularNotaDebitoConRecibo(
       NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO, Usuario usuario) {
     NotaDebito notaDebitoCalculada = new NotaDebito();
-    notaDebitoCalculada.setFecha(new Date());
+    notaDebitoCalculada.setFecha(LocalDateTime.now());
     Recibo reciboRelacionado =
         reciboService.getReciboNoEliminadoPorId(nuevaNotaDebitoDeReciboDTO.getIdRecibo());
     if (reciboRelacionado.getCliente() != null) {
@@ -1126,7 +1098,7 @@ public class NotaServiceImpl implements INotaService {
   public NotaDebito calcularNotaDebitoSinRecibo(
       NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDTO, Usuario usuario) {
     NotaDebito notaDebitoCalculada = new NotaDebito();
-    notaDebitoCalculada.setFecha(new Date());
+    notaDebitoCalculada.setFecha(LocalDateTime.now());
     if (nuevaNotaDebitoSinReciboDTO.getTipoDeComprobante() != null) {
       if (nuevaNotaDebitoSinReciboDTO.getIdCliente() != null) {
         Cliente cliente =
@@ -1185,7 +1157,7 @@ public class NotaServiceImpl implements INotaService {
   @Transactional
   public NotaDebito guardarNotaDebito(@Valid NotaDebito notaDebito) {
     if (notaDebito.getFecha() == null) {
-      notaDebito.setFecha(new Date());
+      notaDebito.setFecha(LocalDateTime.now());
     }
     this.validarOperacion(notaDebito);
     if (notaDebito.getMovimiento().equals(Movimiento.VENTA)) {
@@ -1524,12 +1496,9 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public RenglonNotaDebito calcularRenglonDebitoConRecibo(Recibo recibo) {
     RenglonNotaDebito renglonNota = new RenglonNotaDebito();
+    DateTimeFormatter formato = DateTimeFormatter.ofPattern(FormatterFechaHora.FORMATO_FECHA_HISPANO);
     String descripcion =
-        "Recibo Nº "
-            + recibo.getNumRecibo()
-            + " "
-            + (new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHA_HISPANO))
-                .format(recibo.getFecha());
+        "Recibo Nº " + recibo.getNumRecibo() + " " + recibo.getFecha().format(formato);
     renglonNota.setDescripcion(descripcion);
     renglonNota.setMonto(recibo.getMonto());
     renglonNota.setImporteBruto(renglonNota.getMonto());
@@ -1671,19 +1640,7 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public BigDecimal calcularTotalCredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
-    if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-      Calendar cal = new GregorianCalendar();
-      cal.setTime(criteria.getFechaDesde());
-      cal.set(Calendar.HOUR_OF_DAY, 0);
-      cal.set(Calendar.MINUTE, 0);
-      cal.set(Calendar.SECOND, 0);
-      criteria.setFechaDesde(cal.getTime());
-      cal.setTime(criteria.getFechaHasta());
-      cal.set(Calendar.HOUR_OF_DAY, 23);
-      cal.set(Calendar.MINUTE, 59);
-      cal.set(Calendar.SECOND, 59);
-      criteria.setFechaHasta(cal.getTime());
-    }
+    this.cortarHoraMinutoSegundoDeCriteria(criteria);
     BigDecimal totalNotaCredito =
         notaCreditoRepository.calcularTotalCredito(
             this.getBuilderNotaCredito(criteria, idUsuarioLoggedIn));
@@ -1692,19 +1649,7 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public BigDecimal calcularTotalDebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
-    if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-      Calendar cal = new GregorianCalendar();
-      cal.setTime(criteria.getFechaDesde());
-      cal.set(Calendar.HOUR_OF_DAY, 0);
-      cal.set(Calendar.MINUTE, 0);
-      cal.set(Calendar.SECOND, 0);
-      criteria.setFechaDesde(cal.getTime());
-      cal.setTime(criteria.getFechaHasta());
-      cal.set(Calendar.HOUR_OF_DAY, 23);
-      cal.set(Calendar.MINUTE, 59);
-      cal.set(Calendar.SECOND, 59);
-      criteria.setFechaHasta(cal.getTime());
-    }
+    this.cortarHoraMinutoSegundoDeCriteria(criteria);
     BigDecimal totalNotaDebito =
         notaDebitoRepository.calcularTotalDebito(
             this.getBuilderNotaDebito(criteria, idUsuarioLoggedIn));
@@ -1713,19 +1658,7 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public BigDecimal calcularTotalIVACredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
-    if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-      Calendar cal = new GregorianCalendar();
-      cal.setTime(criteria.getFechaDesde());
-      cal.set(Calendar.HOUR_OF_DAY, 0);
-      cal.set(Calendar.MINUTE, 0);
-      cal.set(Calendar.SECOND, 0);
-      criteria.setFechaDesde(cal.getTime());
-      cal.setTime(criteria.getFechaHasta());
-      cal.set(Calendar.HOUR_OF_DAY, 23);
-      cal.set(Calendar.MINUTE, 59);
-      cal.set(Calendar.SECOND, 59);
-      criteria.setFechaHasta(cal.getTime());
-    }
+    this.cortarHoraMinutoSegundoDeCriteria(criteria);
     BigDecimal ivaNotaCredito =
         notaCreditoRepository.calcularIVACredito(
             this.getBuilderNotaCredito(criteria, idUsuarioLoggedIn),
@@ -1737,19 +1670,7 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public BigDecimal calcularTotalIVADebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
-    if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-      Calendar cal = new GregorianCalendar();
-      cal.setTime(criteria.getFechaDesde());
-      cal.set(Calendar.HOUR_OF_DAY, 0);
-      cal.set(Calendar.MINUTE, 0);
-      cal.set(Calendar.SECOND, 0);
-      criteria.setFechaDesde(cal.getTime());
-      cal.setTime(criteria.getFechaHasta());
-      cal.set(Calendar.HOUR_OF_DAY, 23);
-      cal.set(Calendar.MINUTE, 59);
-      cal.set(Calendar.SECOND, 59);
-      criteria.setFechaHasta(cal.getTime());
-    }
+    this.cortarHoraMinutoSegundoDeCriteria(criteria);
     BigDecimal ivaNotaDebito =
         notaDebitoRepository.calcularIVADebito(
             this.getBuilderNotaDebito(criteria, idUsuarioLoggedIn),
@@ -1793,5 +1714,12 @@ public class NotaServiceImpl implements INotaService {
         notaDebitoRepository.findAll(
             builder, PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "fecha")));
     return notaAnterior.getContent().get(0).getCae() == 0L;
+  }
+
+  private void cortarHoraMinutoSegundoDeCriteria(BusquedaNotaCriteria criteria) {
+    if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
+      criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
+      criteria.setFechaHasta(criteria.getFechaHasta().withHour(0).withMinute(0).withSecond(0));
+    }
   }
 }

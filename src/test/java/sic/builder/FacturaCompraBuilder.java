@@ -1,21 +1,22 @@
 package sic.builder;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
+import org.apache.tomcat.jni.Local;
 import sic.modelo.*;
 
 public class FacturaCompraBuilder {
     
     private long id_Factura = 0L;
     private Usuario usuario = new UsuarioBuilder().build();
-    private Date fecha = new Date();
+    private LocalDateTime fecha = LocalDateTime.now();
     private TipoDeComprobante tipoFactura = TipoDeComprobante.FACTURA_A;
     private long numSerie = 0;
     private long numFactura = 1;
-    private Date fechaVencimiento = new Date();
+    private LocalDateTime fechaVencimiento = LocalDateTime.now();
     private Pedido pedido = null;
     private Transportista transportista = new TransportistaBuilder().build();
     private List<RenglonFactura> renglones;
@@ -35,7 +36,7 @@ public class FacturaCompraBuilder {
     private Empresa empresa = new EmpresaBuilder().build();
     private boolean eliminada = false;
     private long CAE = 21064126523746l;
-    private Date vencimientoCAE = null;
+    private LocalDateTime vencimientoCAE = null;
     private long numSerieAfip = 0;
     private long numFacturaAfip = 0;
     
@@ -72,7 +73,7 @@ public class FacturaCompraBuilder {
         return this;
     }
     
-    public FacturaCompraBuilder withFecha(Date fecha) {
+    public FacturaCompraBuilder withFecha(LocalDateTime fecha) {
         this.fecha = fecha;
         return this;
     }
@@ -107,7 +108,7 @@ public class FacturaCompraBuilder {
         return this;
     }
     
-    public FacturaCompraBuilder withFechaVencimiento(Date fechaDeVencimiento) {
+    public FacturaCompraBuilder withFechaVencimiento(LocalDateTime fechaDeVencimiento) {
         this.fechaVencimiento = fechaDeVencimiento;
         return this;
     }  
@@ -192,7 +193,7 @@ public class FacturaCompraBuilder {
         return this;
     }
     
-    public FacturaCompraBuilder withVencimientoCAE(Date vencimientoCAE) {
+    public FacturaCompraBuilder withVencimientoCAE(LocalDateTime vencimientoCAE) {
         this.vencimientoCAE = vencimientoCAE;
         return this;
     }

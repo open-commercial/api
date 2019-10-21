@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.persistence.*;
@@ -41,9 +41,7 @@ public class Recibo implements Serializable {
 
   private String idPagoMercadoPago;
 
-  @Column(nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date fecha;
+  private LocalDateTime fecha;
 
   private boolean eliminado;
 
@@ -75,7 +73,7 @@ public class Recibo implements Serializable {
   private Usuario usuario;
 
   @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_monto_negativo}")
+  @DecimalMin(value = "0", message = "{mensaje_recibo_monto_negativo}")
   private BigDecimal monto;
 
   @JsonGetter("idFormaDePago")

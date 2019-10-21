@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
@@ -42,12 +42,9 @@ public class Pedido implements Serializable {
 
   private long nroPedido;
 
-  @Column(nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date fecha;
+  private LocalDateTime fecha;
 
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date fechaVencimiento;
+  private LocalDateTime fechaVencimiento;
 
   @Column(nullable = false)
   private String observaciones;

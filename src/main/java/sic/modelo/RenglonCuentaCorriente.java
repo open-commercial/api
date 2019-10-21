@@ -3,7 +3,7 @@ package sic.modelo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -45,12 +45,9 @@ public class RenglonCuentaCorriente implements Serializable {
     
     private boolean eliminado;
 
-    @Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fecha;
+    private LocalDateTime fecha;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fechaVencimiento;
+    private LocalDateTime fechaVencimiento;
 
     @Column(precision = 25, scale = 15)
     private BigDecimal monto;

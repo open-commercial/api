@@ -1,7 +1,7 @@
 package sic.service;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +15,7 @@ public interface ICajaService {
 
     void actualizar(@Valid Caja caja);
 
-    void validarMovimiento(Date fechaMovimiento, long idEmpresa);
+    void validarMovimiento(LocalDateTime fechaMovimiento, long idEmpresa);
     
     void eliminar(Long idCaja);
     
@@ -43,11 +43,11 @@ public interface ICajaService {
     
     BigDecimal getSaldoRealCajas(BusquedaCajaCriteria criteria);
     
-    List<MovimientoCaja> getMovimientosPorFormaDePagoEntreFechas(Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta);
+    List<MovimientoCaja> getMovimientosPorFormaDePagoEntreFechas(Empresa empresa, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta);
 
     void reabrirCaja(long idCaja, BigDecimal saldoInicial);
 
-    Caja encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(long idEmpresa, Date fecha);
+    Caja encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(long idEmpresa, LocalDateTime fecha);
 
     int actualizarSaldoSistema(Caja caja, BigDecimal monto);
 

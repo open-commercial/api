@@ -1,7 +1,8 @@
 package sic.builder;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
+
 import sic.modelo.*;
 
 public class ClienteBuilder {
@@ -18,7 +19,7 @@ public class ClienteBuilder {
   private Ubicacion ubicacionFacturacion = new UbicacionBuilder().build();
   private Ubicacion ubicacionEnvio = new UbicacionBuilder().build();
   private String contacto = "Facundo Pastore";
-  private Date fechaAlta = new Date(1458010800000L);
+  private LocalDateTime fechaAlta = LocalDateTime.now();
   private Empresa empresa = new EmpresaBuilder().build();
   private Usuario viajante = new UsuarioBuilder().build();
   private Usuario credencial = new UsuarioBuilder().build();
@@ -107,7 +108,7 @@ public class ClienteBuilder {
     return this;
   }
 
-  public ClienteBuilder withFechaAlta(Date fechaAlta) {
+  public ClienteBuilder withFechaAlta(LocalDateTime fechaAlta) {
     this.fechaAlta = fechaAlta;
     return this;
   }

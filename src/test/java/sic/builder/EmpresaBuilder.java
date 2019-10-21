@@ -1,11 +1,12 @@
 package sic.builder;
 
-import java.util.Date;
 
 import sic.modelo.CategoriaIVA;
 import sic.modelo.Empresa;
-import sic.modelo.Localidad;
 import sic.modelo.Ubicacion;
+
+import java.time.LocalDateTime;
+import java.time.Month;
 
 public class EmpresaBuilder {
 
@@ -15,7 +16,7 @@ public class EmpresaBuilder {
   private CategoriaIVA categoriaIVA = CategoriaIVA.RESPONSABLE_INSCRIPTO;
   private Long idFiscal = 23154587589L;
   private Long ingresosBrutos = 123456789L;
-  private Date fechaInicioActividad = new Date(539924400000L); // 10-02-1987
+  private LocalDateTime fechaInicioActividad = LocalDateTime.of(1987, Month.FEBRUARY, 10, 00, 00);
   private String email = "support@globocorporation.com";
   private String telefono = "379 4895549";
   private Ubicacion ubicacion = new UbicacionBuilder().build();
@@ -68,7 +69,7 @@ public class EmpresaBuilder {
     return this;
   }
 
-  public EmpresaBuilder withFechaInicioActividad(Date fechaInicioActividad) {
+  public EmpresaBuilder withFechaInicioActividad(LocalDateTime fechaInicioActividad) {
     this.fechaInicioActividad = fechaInicioActividad;
     return this;
   }

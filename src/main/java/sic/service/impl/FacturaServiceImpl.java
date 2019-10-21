@@ -16,6 +16,8 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -298,49 +300,28 @@ public class FacturaServiceImpl implements IFacturaService {
             .eq(criteria.getIdEmpresa())
             .and(qFacturaCompra.eliminada.eq(false)));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
-      Calendar cal = new GregorianCalendar();
-      if (criteria.getFechaDesde() != null) {
-        cal.setTime(criteria.getFechaDesde());
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        criteria.setFechaDesde(cal.getTime());
-      }
-      if (criteria.getFechaHasta() != null) {
-        cal.setTime(criteria.getFechaHasta());
-        cal.set(Calendar.HOUR_OF_DAY, 23);
-        cal.set(Calendar.MINUTE, 59);
-        cal.set(Calendar.SECOND, 59);
-        criteria.setFechaHasta(cal.getTime());
-      }
-      FormatterFechaHora formateadorFecha =
-          new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
+      criteria.setFechaHasta(criteria.getFechaHasta().withHour(0).withMinute(0).withSecond(0));
+      DateTimeFormatter formato =
+          DateTimeFormatter.ofPattern(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
       String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-        DateExpression<Date> fDesde =
+        DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                Date.class,
-                dateTemplate,
-                formateadorFecha.format(criteria.getFechaDesde()));
-        DateExpression<Date> fHasta =
+                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(formato));
+        DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                Date.class,
-                dateTemplate,
-                formateadorFecha.format(criteria.getFechaHasta()));
+                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(formato));
         builder.and(qFacturaCompra.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
-        DateExpression<Date> fDesde =
+        DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                Date.class,
-                dateTemplate,
-                formateadorFecha.format(criteria.getFechaDesde()));
+                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(formato));
         builder.and(qFacturaCompra.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
-        DateExpression<Date> fHasta =
+        DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                Date.class,
-                dateTemplate,
-                formateadorFecha.format(criteria.getFechaHasta()));
+                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(formato));
         builder.and(qFacturaCompra.fecha.before(fHasta));
       }
     }
@@ -368,49 +349,28 @@ public class FacturaServiceImpl implements IFacturaService {
             .eq(criteria.getIdEmpresa())
             .and(qFacturaVenta.eliminada.eq(false)));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
-      Calendar cal = new GregorianCalendar();
-      if (criteria.getFechaDesde() != null) {
-        cal.setTime(criteria.getFechaDesde());
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        criteria.setFechaDesde(cal.getTime());
-      }
-      if (criteria.getFechaHasta() != null) {
-        cal.setTime(criteria.getFechaHasta());
-        cal.set(Calendar.HOUR_OF_DAY, 23);
-        cal.set(Calendar.MINUTE, 59);
-        cal.set(Calendar.SECOND, 59);
-        criteria.setFechaHasta(cal.getTime());
-      }
-      FormatterFechaHora formateadorFecha =
-          new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
+      criteria.setFechaHasta(criteria.getFechaHasta().withHour(0).withMinute(0).withSecond(0));
+      DateTimeFormatter formato =
+          DateTimeFormatter.ofPattern(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
       String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-        DateExpression<Date> fDesde =
+        DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                Date.class,
-                dateTemplate,
-                formateadorFecha.format(criteria.getFechaDesde()));
-        DateExpression<Date> fHasta =
+                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(formato));
+        DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                Date.class,
-                dateTemplate,
-                formateadorFecha.format(criteria.getFechaHasta()));
+                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(formato));
         builder.and(qFacturaVenta.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
-        DateExpression<Date> fDesde =
+        DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                Date.class,
-                dateTemplate,
-                formateadorFecha.format(criteria.getFechaDesde()));
+                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(formato));
         builder.and(qFacturaVenta.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
-        DateExpression<Date> fHasta =
+        DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                Date.class,
-                dateTemplate,
-                formateadorFecha.format(criteria.getFechaHasta()));
+                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(formato));
         builder.and(qFacturaVenta.fecha.before(fHasta));
       }
     }
@@ -464,7 +424,7 @@ public class FacturaServiceImpl implements IFacturaService {
   private Factura procesarFactura(Factura factura) {
     factura.setEliminada(false);
     if (factura instanceof FacturaVenta) {
-      factura.setFecha(new Date());
+      factura.setFecha(LocalDateTime.now());
       factura.setNumSerie(
           configuracionDelSistemaService
               .getConfiguracionDelSistemaPorEmpresa(factura.getEmpresa())
@@ -562,31 +522,21 @@ public class FacturaServiceImpl implements IFacturaService {
 
   private void validarOperacion(Factura factura) {
     // Entrada de Datos
-    if (factura.getFechaVencimiento() != null) {
-      Calendar calFechaVencimiento = new GregorianCalendar();
-      calFechaVencimiento.setTime(factura.getFechaVencimiento());
-      calFechaVencimiento.set(Calendar.HOUR, 0);
-      calFechaVencimiento.set(Calendar.MINUTE, 0);
-      calFechaVencimiento.set(Calendar.SECOND, 0);
-      calFechaVencimiento.set(Calendar.MILLISECOND, 0);
-      Calendar calFechaFactura = new GregorianCalendar();
-      calFechaFactura.setTime(factura.getFecha());
-      calFechaFactura.set(Calendar.HOUR, 0);
-      calFechaFactura.set(Calendar.MINUTE, 0);
-      calFechaFactura.set(Calendar.SECOND, 0);
-      calFechaFactura.set(Calendar.MILLISECOND, 0);
-      if (calFechaFactura.getTime().compareTo(calFechaVencimiento.getTime()) > 0) {
-        throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_factura_fecha_invalida", null, Locale.getDefault()));
-      }
+    if (factura.getFechaVencimiento() != null
+        && factura
+            .getFecha()
+            .withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .isBefore(factura.getFechaVencimiento().withHour(0).withMinute(0).withSecond(0))) {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_factura_fecha_invalida", null, Locale.getDefault()));
     }
     // Requeridos
-    if (factura instanceof FacturaCompra) {
-      if (factura.getFecha().compareTo(new Date()) > 0) {
-        throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_factura_compra_fecha_incorrecta", null, Locale.getDefault()));
-      }
+    if (factura instanceof FacturaCompra && factura.getFecha().isAfter(LocalDateTime.now())) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_factura_compra_fecha_incorrecta", null, Locale.getDefault()));
     }
     if (factura instanceof FacturaVenta) {
       FacturaVenta facturaVenta = (FacturaVenta) factura;

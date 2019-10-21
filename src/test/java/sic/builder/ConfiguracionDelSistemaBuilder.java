@@ -2,7 +2,8 @@ package sic.builder;
 
 import sic.modelo.ConfiguracionDelSistema;
 import sic.modelo.Empresa;
-import java.util.Date;
+
+import java.time.LocalDateTime;
 
 public class ConfiguracionDelSistemaBuilder {
 
@@ -19,8 +20,8 @@ public class ConfiguracionDelSistemaBuilder {
   private boolean emailSenderHabilitado = true;
   private String emailUserName = "test@mail.com";
   private String emailPassword = "password";
-  private Date fechaGeneracionTokenWSAA = null;
-  private Date fechaVencimientoTokenWSAA = null;
+  private LocalDateTime fechaGeneracionTokenWSAA = null;
+  private LocalDateTime fechaVencimientoTokenWSAA = null;
   private Empresa empresa = new EmpresaBuilder().build();
 
   public ConfiguracionDelSistema build() {
@@ -114,13 +115,13 @@ public class ConfiguracionDelSistemaBuilder {
   }
 
   public ConfiguracionDelSistemaBuilder withFechaGeneracionTokenWSAA(
-      Date fechaGeneracionTokenWSAA) {
+      LocalDateTime fechaGeneracionTokenWSAA) {
     this.fechaGeneracionTokenWSAA = fechaGeneracionTokenWSAA;
     return this;
   }
 
   public ConfiguracionDelSistemaBuilder withFechaVencimientoTokenWSAA(
-      Date fechaVencimientoTokenWSAA) {
+      LocalDateTime fechaVencimientoTokenWSAA) {
     this.fechaVencimientoTokenWSAA = fechaVencimientoTokenWSAA;
     return this;
   }

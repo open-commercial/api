@@ -3,7 +3,7 @@ package sic.modelo.dto;
 import lombok.*;
 import sic.modelo.CategoriaIVA;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @EqualsAndHashCode(exclude = {"id_Empresa" , "ubicacion"})
@@ -18,7 +18,7 @@ public class EmpresaDTO {
   private CategoriaIVA categoriaIVA;
   private Long idFiscal;
   private long ingresosBrutos;
-  private Date fechaInicioActividad;
+  private LocalDateTime fechaInicioActividad;
   private String email;
   private String telefono;
   private UbicacionDTO ubicacion;

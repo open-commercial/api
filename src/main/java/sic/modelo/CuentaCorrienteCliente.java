@@ -3,7 +3,7 @@ package sic.modelo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -35,11 +35,24 @@ public class CuentaCorrienteCliente extends CuentaCorriente implements Serializa
 
     public CuentaCorrienteCliente() {}
 
-    public CuentaCorrienteCliente(long idCuentaCorriente, boolean eliminada, Date fechaApertura, Empresa empresa,
-            BigDecimal saldo, Date fechaUltimoMovimiento, List<RenglonCuentaCorriente> renglones, Cliente cliente) {
+  public CuentaCorrienteCliente(
+      long idCuentaCorriente,
+      boolean eliminada,
+      LocalDateTime fechaApertura,
+      Empresa empresa,
+      BigDecimal saldo,
+      LocalDateTime fechaUltimoMovimiento,
+      List<RenglonCuentaCorriente> renglones,
+      Cliente cliente) {
 
-        super(idCuentaCorriente, eliminada, fechaApertura, empresa, saldo, fechaUltimoMovimiento, renglones);
-        this.cliente = cliente;
-    }
-
+    super(
+        idCuentaCorriente,
+        eliminada,
+        fechaApertura,
+        empresa,
+        saldo,
+        fechaUltimoMovimiento,
+        renglones);
+    this.cliente = cliente;
+  }
 }

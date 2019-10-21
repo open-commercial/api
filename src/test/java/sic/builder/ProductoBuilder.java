@@ -1,7 +1,9 @@
 package sic.builder;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.Month;
+
 import sic.modelo.dto.ProductoDTO;
 
 public class ProductoBuilder {
@@ -25,13 +27,13 @@ public class ProductoBuilder {
     private boolean ilimitado = false;
     private boolean publico = true;
     private boolean destacado = false;
-    private Date fechaUltimaModificacion = new Date(1463540400000L); // 18-05-2016
+    private LocalDateTime fechaUltimaModificacion = LocalDateTime.of(2016, Month.MAY, 18, 00, 00); // 18-05-2016
     private String estanteria = "A";
     private String estante = "1";
     private String razonSocialProveedor = "Abrasol";
     private String nota = "Cumple con las normas ISO";
-    private Date fechaAlta = new Date(1458010800000L); // 15-03-2016;
-    private Date fechaVencimiento = new Date(1597892400000L); // 20-08-2020
+    private LocalDateTime fechaAlta = LocalDateTime.of(2016, Month.MARCH, 15, 00, 00);; // 15-03-2016;
+    private LocalDateTime fechaVencimiento = LocalDateTime.of(2020, Month.OCTOBER, 20, 00, 00);; // 20-08-2020
     private boolean eliminado = false;
     private String urlImagen;
     
@@ -138,7 +140,7 @@ public class ProductoBuilder {
         return this;
     }
     
-    public ProductoBuilder withFechaUltimaModificacion(Date fechaUltimaModificacion) {
+    public ProductoBuilder withFechaUltimaModificacion(LocalDateTime fechaUltimaModificacion) {
         this.fechaUltimaModificacion = fechaUltimaModificacion;
         return this;
     }
@@ -163,12 +165,12 @@ public class ProductoBuilder {
         return this;
     }
     
-    public ProductoBuilder withFechaAlta(Date fechaAlta) {
+    public ProductoBuilder withFechaAlta(LocalDateTime fechaAlta) {
         this.fechaAlta = fechaAlta;
         return this;
     }
     
-    public ProductoBuilder withFechaVencimiento(Date fechaVencimiento) {
+    public ProductoBuilder withFechaVencimiento(LocalDateTime fechaVencimiento) {
         this.fechaVencimiento = fechaVencimiento;
         return this;
     }

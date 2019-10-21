@@ -1,10 +1,10 @@
 package sic.service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public interface IClockService {
 
-  Date getFechaActual();
+  LocalDateTime getFechaActual();
 
   void cambiarFechaHora(int anio, int mes, int dia, int hora, int minuto, int segundo);
 }

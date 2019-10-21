@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.*;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.persistence.*;
 import javax.validation.constraints.DecimalMin;
 
@@ -54,9 +54,7 @@ public abstract class Nota implements Serializable {
   @Enumerated(EnumType.STRING)
   private TipoDeComprobante tipoComprobante;
 
-  @Column(nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date fecha;
+  private LocalDateTime fecha;
 
   @ManyToOne
   @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
@@ -110,8 +108,7 @@ public abstract class Nota implements Serializable {
 
   private long cae;
 
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date vencimientoCae;
+  private LocalDateTime vencimientoCae;
 
   private long numSerieAfip;
 

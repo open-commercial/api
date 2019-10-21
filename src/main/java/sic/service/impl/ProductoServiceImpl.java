@@ -19,6 +19,7 @@ import sic.modelo.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -272,8 +273,8 @@ public class ProductoServiceImpl implements IProductoService {
   @Transactional
   public Producto guardar(@Valid Producto producto) {
     if (producto.getCodigo() == null) producto.setCodigo("");
-    producto.setFechaAlta(new Date());
-    producto.setFechaUltimaModificacion(new Date());
+    producto.setFechaAlta(LocalDateTime.now());
+    producto.setFechaUltimaModificacion(LocalDateTime.now());
     producto.setEliminado(false);
     producto.setDestacado(false);
     this.validarOperacion(TipoDeOperacion.ALTA, producto);
@@ -287,7 +288,7 @@ public class ProductoServiceImpl implements IProductoService {
   public void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido) {
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
-    productoPorActualizar.setFechaUltimaModificacion(new Date());
+    productoPorActualizar.setFechaUltimaModificacion(LocalDateTime.now());
     if (productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty()
       && (productoPorActualizar.getUrlImagen() == null || productoPorActualizar.getUrlImagen().isEmpty())) {
       photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + productoPersistido.getIdProducto());
@@ -467,14 +468,14 @@ public class ProductoServiceImpl implements IProductoService {
         p.setPrecioVentaPublico(p.getPrecioVentaPublico().multiply(multiplicador));
         p.setIvaNeto(p.getIvaNeto().multiply(multiplicador));
         p.setPrecioLista(p.getPrecioLista().multiply(multiplicador));
-        p.setFechaUltimaModificacion(new Date());
+        p.setFechaUltimaModificacion(LocalDateTime.now());
       }
       if (productosParaActualizarDTO.getIdMedida() != null
           || productosParaActualizarDTO.getIdRubro() != null
           || productosParaActualizarDTO.getIdProveedor() != null
           || actualizaPrecios
           || aplicaDescuentoRecargoPorcentaje) {
-        p.setFechaUltimaModificacion(new Date());
+        p.setFechaUltimaModificacion(LocalDateTime.now());
       }
       if (productosParaActualizarDTO.getPublico() != null) {
         p.setPublico(productosParaActualizarDTO.getPublico());

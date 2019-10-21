@@ -30,8 +30,11 @@ import java.security.cert.CertStoreException;
 import java.security.cert.CertificateException;
 import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -134,13 +137,15 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
         return asn1Cms;
     }
 
-    public String crearTicketRequerimientoAcceso(String service, long ticketTime) {
-        Date now = new Date();
-        GregorianCalendar genenerationTime = new GregorianCalendar();
-        GregorianCalendar expirationTime = new GregorianCalendar();
+    public String crearTicketRequerimientoAcceso(String service, long ticketTime) {//REVISAR
+        LocalDateTime now = LocalDateTime.now();
+        ZonedDateTime zdt = now.atZone(ZoneId.systemDefault());
+        LocalDateTime genenerationTime = LocalDateTime.now();
+        // LocalDateTime.now();
         DatatypeFactory datatypeFactory = null;
-        String uniqueId = Long.toString(now.getTime() / 1000);
-        expirationTime.setTime(new Date(now.getTime() + ticketTime));
+        String uniqueId = Long.toString(zdt.toInstant().toEpochMilli() / 1000);
+        LocalDateTime expirationTime = now.plusHours(12L); // 3600000L
+       //.setTime(new Date(now.getTime() + ticketTime));
         try {
             datatypeFactory = DatatypeFactory.newInstance();
         } catch (DatatypeConfigurationException ex) {
@@ -148,8 +153,11 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
             throw new BusinessServiceException(messageSource.getMessage(
               "mensaje_error_xml_factory", null, Locale.getDefault()));
         }
-        XMLGregorianCalendar xmlgentime = datatypeFactory.newXMLGregorianCalendar(genenerationTime);
-        XMLGregorianCalendar xmlexptime = datatypeFactory.newXMLGregorianCalendar(expirationTime);
+        GregorianCalendar calendar = new GregorianCalendar();
+        calendar.set(genenerationTime.getYear(), genenerationTime.getMonthValue() - 1, genenerationTime.getDayOfMonth());
+        XMLGregorianCalendar xmlgentime = datatypeFactory.newXMLGregorianCalendar(calendar);
+        calendar.set(expirationTime.getYear(), expirationTime.getMonthValue() - 1, expirationTime.getDayOfMonth());
+        XMLGregorianCalendar xmlexptime = datatypeFactory.newXMLGregorianCalendar(calendar);
         return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
                 + "<loginTicketRequest version=\"1.0\">"
                 + "<header>"

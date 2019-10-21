@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import org.springframework.context.MessageSource;
@@ -75,35 +76,37 @@ public class CajaServiceImpl implements ICajaService {
     Caja ultimaCaja = this.getUltimaCaja(caja.getEmpresa().getId_Empresa());
     if (ultimaCaja != null) {
       if (ultimaCaja.getEstado() == EstadoCaja.ABIERTA) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_caja_anterior_abierta", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_caja_anterior_abierta", null, Locale.getDefault()));
       }
-      if (Validator.compararDias(ultimaCaja.getFechaApertura(), caja.getFechaApertura()) >= 0) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_fecha_apertura_no_valida", null, Locale.getDefault()));
+      if (ultimaCaja.getFechaApertura().isBefore(caja.getFechaApertura())) {
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_fecha_apertura_no_valida", null, Locale.getDefault()));
       }
     }
     // Duplicados
     if (cajaRepository.findById(caja.getId_Caja()) != null) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_caja_duplicada", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_caja_duplicada", null, Locale.getDefault()));
     }
   }
 
   @Override
-  public void validarMovimiento(Date fechaMovimiento, long idEmpresa) {
+  public void validarMovimiento(LocalDateTime fechaMovimiento, long idEmpresa) {
     Caja caja = this.getUltimaCaja(idEmpresa);
     if (caja == null) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_caja_no_existente", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_caja_no_existente", null, Locale.getDefault()));
     }
     if (caja.getEstado().equals(EstadoCaja.CERRADA)) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_caja_cerrada", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_caja_cerrada", null, Locale.getDefault()));
     }
-    if (fechaMovimiento.before(caja.getFechaApertura())) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_caja_movimiento_fecha_no_valida", null, Locale.getDefault()));
+    if (fechaMovimiento.isBefore(caja.getFechaApertura())) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_caja_movimiento_fecha_no_valida", null, Locale.getDefault()));
     }
   }
 
@@ -205,49 +208,28 @@ public class CajaServiceImpl implements ICajaService {
               .and(qCaja.usuarioCierraCaja.id_Usuario.eq(criteria.getIdUsuarioCierre())));
     }
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
-      Calendar cal = new GregorianCalendar();
-      if (criteria.getFechaDesde() != null) {
-        cal.setTime(criteria.getFechaDesde());
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        criteria.setFechaDesde(cal.getTime());
-      }
-      if (criteria.getFechaHasta() != null) {
-        cal.setTime(criteria.getFechaHasta());
-        cal.set(Calendar.HOUR_OF_DAY, 23);
-        cal.set(Calendar.MINUTE, 59);
-        cal.set(Calendar.SECOND, 59);
-        criteria.setFechaHasta(cal.getTime());
-      }
-      FormatterFechaHora formateadorFecha =
-          new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
+      criteria.setFechaHasta(criteria.getFechaHasta().withHour(0).withMinute(0).withSecond(0));
+      DateTimeFormatter formato =
+          DateTimeFormatter.ofPattern(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
       String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-        DateExpression<Date> fDesde =
+        DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                Date.class,
-                dateTemplate,
-                formateadorFecha.format(criteria.getFechaDesde()));
-        DateExpression<Date> fHasta =
+                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(formato));
+        DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                Date.class,
-                dateTemplate,
-                formateadorFecha.format(criteria.getFechaHasta()));
+                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(formato));
         builder.and(qCaja.fechaApertura.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
-        DateExpression<Date> fDesde =
+        DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                Date.class,
-                dateTemplate,
-                formateadorFecha.format(criteria.getFechaDesde()));
+                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(formato));
         builder.and(qCaja.fechaApertura.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
-        DateExpression<Date> fHasta =
+        DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                Date.class,
-                dateTemplate,
-                formateadorFecha.format(criteria.getFechaHasta()));
+                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(formato));
         builder.and(qCaja.fechaApertura.before(fHasta));
       }
     }
@@ -259,12 +241,8 @@ public class CajaServiceImpl implements ICajaService {
     Caja cajaACerrar = this.getCajaPorId(idCaja);
     cajaACerrar.setSaldoReal(monto);
     if (scheduling) {
-      LocalDateTime fechaCierre =
-        LocalDateTime.ofInstant(cajaACerrar.getFechaApertura().toInstant(), ZoneId.systemDefault());
-      fechaCierre = fechaCierre.withHour(23);
-      fechaCierre = fechaCierre.withMinute(59);
-      fechaCierre = fechaCierre.withSecond(59);
-      cajaACerrar.setFechaCierre(Date.from(fechaCierre.atZone(ZoneId.systemDefault()).toInstant()));
+      cajaACerrar.setFechaCierre(
+          cajaACerrar.getFechaApertura().withHour(23).withMinute(59).withSecond(59));
     } else {
       cajaACerrar.setFechaCierre(this.clockService.getFechaActual());
     }
@@ -291,18 +269,11 @@ public class CajaServiceImpl implements ICajaService {
                     && (ultimaCajaDeEmpresa.getEstado() == EstadoCaja.ABIERTA)))
         .forEachOrdered(
             ultimaCajaDeEmpresa -> {
-              LocalDate fechaActual =
-                  LocalDate.of(
-                      LocalDate.now().getYear(),
-                      LocalDate.now().getMonth(),
-                      LocalDate.now().getDayOfMonth());
-              Calendar fechaHoraCaja = new GregorianCalendar();
-              fechaHoraCaja.setTime(ultimaCajaDeEmpresa.getFechaApertura());
-              LocalDate fechaCaja =
-                  LocalDate.of(
-                      fechaHoraCaja.get(Calendar.YEAR),
-                      fechaHoraCaja.get(Calendar.MONTH) + 1,
-                      fechaHoraCaja.get(Calendar.DAY_OF_MONTH));
+              LocalDateTime fechaActual = LocalDateTime.now();
+              LocalDateTime fechaHoraCaja = ultimaCajaDeEmpresa.getFechaApertura();//REVISAR
+              LocalDateTime fechaCaja =
+                LocalDateTime.of(fechaHoraCaja.getYear(), fechaHoraCaja.getMonth(), fechaHoraCaja.getDayOfMonth(),
+                  fechaHoraCaja.getHour(), fechaHoraCaja.getMinute());
               if (fechaCaja.compareTo(fechaActual) < 0) {
                 this.cerrarCaja(
                     ultimaCajaDeEmpresa.getId_Caja(),
@@ -315,7 +286,7 @@ public class CajaServiceImpl implements ICajaService {
 
   @Override
   public BigDecimal getSaldoQueAfectaCaja(Caja caja) {
-    Date fechaHasta = new Date();
+    LocalDateTime fechaHasta = LocalDateTime.now();
     if (caja.getFechaCierre() != null) {
       fechaHasta = caja.getFechaCierre();
     }
@@ -337,7 +308,7 @@ public class CajaServiceImpl implements ICajaService {
   @Override
   public BigDecimal getSaldoSistema(Caja caja) {
     if (caja.getEstado().equals(EstadoCaja.ABIERTA)) {
-      Date fechaHasta = new Date();
+      LocalDateTime fechaHasta = LocalDateTime.now();
       if (caja.getFechaCierre() != null) {
         fechaHasta = caja.getFechaCierre();
       }
@@ -367,7 +338,7 @@ public class CajaServiceImpl implements ICajaService {
   }
 
   private BigDecimal getTotalMovimientosPorFormaDePago(Caja caja, FormaDePago fdp) {
-    Date fechaHasta = new Date();
+    LocalDateTime fechaHasta = LocalDateTime.now();
     if (caja.getFechaCierre() != null) {
       fechaHasta = caja.getFechaCierre();
     }
@@ -421,7 +392,7 @@ public class CajaServiceImpl implements ICajaService {
 
   @Override
   public List<MovimientoCaja> getMovimientosPorFormaDePagoEntreFechas(
-      Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta) {
+      Empresa empresa, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta) {
     List<MovimientoCaja> movimientos = new ArrayList<>();
     gastoService
         .getGastosEntreFechasYFormaDePago(empresa, formaDePago, desde, hasta)
@@ -458,7 +429,7 @@ public class CajaServiceImpl implements ICajaService {
 
   @Override
   public Caja encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(
-      long idEmpresa, Date fecha) {
+      long idEmpresa, LocalDateTime fecha) {
     return cajaRepository.encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(
         idEmpresa, fecha);
   }
