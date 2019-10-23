@@ -554,6 +554,8 @@ public class ProductoServiceImpl implements IProductoService {
                   (new BigDecimal("100"))
                       .subtract(producto.getPorcentajeBonificacionOferta())
                       .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP)));
+    } else {
+      producto.setPrecioListaBonificado(null);
     }
   }
 
