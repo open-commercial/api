@@ -90,6 +90,9 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
                               bonificacion.divide(CIEN, RoundingMode.HALF_UP))));
           i.setImporte(i.getProducto().getPrecioLista().multiply(i.getCantidad()));
           i.setImporteBonificado(i.getProducto().getPrecioBonificado().multiply(i.getCantidad()));
+          i.getProducto()
+              .setHayStock(
+                  i.getProducto().getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
         });
     return items;
   }
@@ -97,7 +100,15 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   @Override
   public ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(
       long idUsuario, long idProducto) {
-    return this.carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
+    ItemCarritoCompra itemCarritoCompra =
+        this.carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
+    if (itemCarritoCompra != null) {
+      itemCarritoCompra
+          .getProducto()
+          .setHayStock(
+              itemCarritoCompra.getProducto().getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
+    }
+    return itemCarritoCompra;
   }
 
   @Override
