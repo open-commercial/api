@@ -5,6 +5,7 @@ import java.util.Date;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.QueryInit;
@@ -68,4 +69,14 @@ public class Sucursal implements Serializable {
   private String logo;
 
   private boolean eliminada;
+
+  @JsonGetter("detalleUbicacion")
+  public String getDetalleUbicacion() {
+    return (ubicacion.getCalle() != null ? ubicacion.getCalle() + " " : "")
+        + (ubicacion.getNumero() != null ? ubicacion.getNumero() + " " : "")
+        + (ubicacion.getPiso() != null ? ubicacion.getPiso() + " " : "")
+        + (ubicacion.getDepartamento() != null ? ubicacion.getDepartamento() + " " : "")
+        + (ubicacion.getNombreLocalidad() != null ? ubicacion.getNombreLocalidad() + " " : "")
+        + (ubicacion.getNombreProvincia() != null ? ubicacion.getNombreProvincia() : "");
+  }
 }

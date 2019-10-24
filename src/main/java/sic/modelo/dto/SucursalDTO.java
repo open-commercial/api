@@ -6,7 +6,7 @@ import sic.modelo.CategoriaIVA;
 import java.util.Date;
 
 @Data
-@EqualsAndHashCode(exclude = {"idSucursal" , "ubicacion"})
+@EqualsAndHashCode(exclude = {"idSucursal" , "ubicacion", "detalleUbicacion"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -22,6 +22,7 @@ public class SucursalDTO {
   private String email;
   private String telefono;
   private UbicacionDTO ubicacion;
+  private String detalleUbicacion;
   private String logo;
   private boolean eliminada;
 
