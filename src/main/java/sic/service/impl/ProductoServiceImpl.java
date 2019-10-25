@@ -273,8 +273,6 @@ public class ProductoServiceImpl implements IProductoService {
   @Transactional
   public Producto guardar(@Valid Producto producto) {
     if (producto.getCodigo() == null) producto.setCodigo("");
-    producto.setFechaAlta(LocalDateTime.now());
-    producto.setFechaUltimaModificacion(LocalDateTime.now());
     producto.setEliminado(false);
     producto.setDestacado(false);
     this.validarOperacion(TipoDeOperacion.ALTA, producto);

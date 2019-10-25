@@ -13,6 +13,7 @@ import sic.modelo.criteria.BusquedaClienteCriteria;
 import sic.modelo.dto.ClienteDTO;
 import sic.service.*;
 
+import java.time.LocalDateTime;
 import java.util.Locale;
 
 @RestController
@@ -130,6 +131,7 @@ public class ClienteController {
     if (nuevoCliente.getIdViajante() != null) {
       cliente.setViajante(usuarioService.getUsuarioNoEliminadoPorId(nuevoCliente.getIdViajante()));
     }
+    cliente.setFechaAlta(LocalDateTime.now());
     return clienteService.guardar(cliente);
   }
 

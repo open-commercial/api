@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
@@ -45,6 +46,7 @@ public class RenglonCuentaCorriente implements Serializable {
     
     private boolean eliminado;
 
+    @NotNull(message = "{mensaje_renglon_cuenta_corriente_fecha_vacia}")
     private LocalDateTime fecha;
 
     private LocalDateTime fechaVencimiento;

@@ -111,6 +111,7 @@ public class Producto implements Serializable {
 
   private boolean destacado;
 
+  @NotNull(message = "{mensaje_producto_fecha_ultima_modificacion_vacia}")
   private LocalDateTime fechaUltimaModificacion;
 
   private String estanteria;
@@ -125,6 +126,7 @@ public class Producto implements Serializable {
   @NotNull(message = "{mensaje_producto_vacio_nota}")
   private String nota;
 
+  @NotNull(message = "{mensaje_producto_fecha_alta_vacia}")
   private LocalDateTime fechaAlta;
 
   private LocalDateTime fechaVencimiento;

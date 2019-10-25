@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "nota")
@@ -54,6 +55,7 @@ public abstract class Nota implements Serializable {
   @Enumerated(EnumType.STRING)
   private TipoDeComprobante tipoComprobante;
 
+  @NotNull(message = "{mensaje_nota_fecha_vacia}")
   private LocalDateTime fecha;
 
   @ManyToOne

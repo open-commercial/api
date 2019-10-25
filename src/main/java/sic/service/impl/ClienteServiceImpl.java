@@ -235,7 +235,6 @@ public class ClienteServiceImpl implements IClienteService {
   @Override
   @Transactional
   public Cliente guardar(@Valid Cliente cliente) {
-    cliente.setFechaAlta(LocalDateTime.now());
     cliente.setEliminado(false);
     cliente.setNroCliente(this.generarNroDeCliente(cliente.getEmpresa()));
     if (cliente.getBonificacion() == null) cliente.setBonificacion(BigDecimal.ZERO);
@@ -259,6 +258,7 @@ public class ClienteServiceImpl implements IClienteService {
     cuentaCorrienteCliente.setCliente(cliente);
     cuentaCorrienteCliente.setEmpresa(cliente.getEmpresa());
     cuentaCorrienteCliente.setFechaApertura(cliente.getFechaAlta());
+    cuentaCorrienteCliente.setFechaUltimoMovimiento(cliente.getFechaAlta());
     cuentaCorrienteCliente.setSaldo(BigDecimal.ZERO);
     if (cliente.getCredencial() != null) {
       Cliente clienteYaAsignado =
