@@ -5642,7 +5642,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldNotCrearPedidoConUbicacionSucursal() {
+  void shouldNotCrearPedidoSinUbicacionSucursal() {
     this.crearProductos();
     this.shouldCrearSucursalResponsableInscripto();
     ConfiguracionSucursalDTO configuracionSucursalDTO =

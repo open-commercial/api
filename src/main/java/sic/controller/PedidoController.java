@@ -37,7 +37,6 @@ public class PedidoController {
     private final IAuthService authService;
     private final ModelMapper modelMapper;
     private final MessageSource messageSource;
-    private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
     @Autowired
     public PedidoController(IPedidoService pedidoService, ISucursalService sucursalService,
@@ -115,22 +114,7 @@ public class PedidoController {
     pedido.setDescuentoNeto(nuevoPedidoDTO.getDescuentoNeto());
     pedido.setTotalEstimado(nuevoPedidoDTO.getTotal());
     pedido.setTotalActual(nuevoPedidoDTO.getTotal());
-    if (nuevoPedidoDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
-      if (nuevoPedidoDTO.getIdSucursalEnvio() == null) {
-        throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_pedido_retiro_sucursal_no_seleccionada", null, Locale.getDefault()));
-      }
-      Sucursal sucursal = sucursalService.getSucursalPorId(nuevoPedidoDTO.getIdSucursalEnvio());
-      if (!configuracionSucursal.getConfiguracionSucursal(sucursal).isPuntoDeRetiro()) {
-        throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_pedido_sucursal_entrega_no_valida", null, Locale.getDefault()));
-      }
-      pedido.setSucursal(sucursal);
-    } else {
-      pedido.setSucursal(sucursalService.getSucursalPorId(nuevoPedidoDTO.getIdSucursal()));
-    }
+    pedido.setSucursal(sucursalService.getSucursalPorId(nuevoPedidoDTO.getIdSucursal()));
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(nuevoPedidoDTO.getIdUsuario()));
     Cliente cliente = clienteService.getClienteNoEliminadoPorId(nuevoPedidoDTO.getIdCliente());
     pedido.setCliente(cliente);

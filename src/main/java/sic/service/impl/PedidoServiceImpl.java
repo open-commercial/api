@@ -58,6 +58,7 @@ public class PedidoServiceImpl implements IPedidoService {
   private final IProductoService productoService;
   private final ICorreoElectronicoService correoElectronicoService;
   private final ISucursalService sucursalService;
+  private final IConfiguracionSucursalService configuracionSucursal;
   private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -74,6 +75,7 @@ public class PedidoServiceImpl implements IPedidoService {
       IProductoService productoService,
       ICorreoElectronicoService correoElectronicoService,
       ISucursalService sucursalService,
+      IConfiguracionSucursalService configuracionSucursal,
       ModelMapper modelMapper,
       MessageSource messageSource) {
     this.facturaService = facturaService;
@@ -84,6 +86,7 @@ public class PedidoServiceImpl implements IPedidoService {
     this.productoService = productoService;
     this.correoElectronicoService = correoElectronicoService;
     this.sucursalService = sucursalService;
+    this.configuracionSucursal = configuracionSucursal;
     this.modelMapper = modelMapper;
     this.messageSource = messageSource;
   }
@@ -255,7 +258,15 @@ public class PedidoServiceImpl implements IPedidoService {
     }
     if (tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL && idSucursalEnvio == null) {
       throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_ubicacion_sucursal_vacia", null, Locale.getDefault()));
+        "mensaje_pedido_retiro_sucursal_no_seleccionada", null, Locale.getDefault()));
+    }
+    if (tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL
+        && !configuracionSucursal
+            .getConfiguracionSucursal(sucursalService.getSucursalPorId(idSucursalEnvio))
+            .isPuntoDeRetiro()) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_pedido_sucursal_entrega_no_valida", null, Locale.getDefault()));
     }
     if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_FACTURACION) {
       pedido.setDetalleEnvio(
