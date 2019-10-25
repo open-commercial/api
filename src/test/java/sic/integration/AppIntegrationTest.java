@@ -5642,6 +5642,69 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldNotCrearPedidoConUbicacionSucursal() {
+    this.crearProductos();
+    this.shouldCrearSucursalResponsableInscripto();
+    ConfiguracionSucursalDTO configuracionSucursalDTO =
+      restTemplate.getForObject(apiPrefix + "/configuraciones-sucursal/2", ConfiguracionSucursalDTO.class);
+    configuracionSucursalDTO.setPuntoDeRetiro(true);
+    restTemplate.put(apiPrefix + "/configuraciones-sucursal", configuracionSucursalDTO);
+    List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
+    renglonesPedidoDTO.add(
+      NuevoRenglonPedidoDTO.builder()
+        .idProductoItem(1L)
+        .cantidad(new BigDecimal("5.000000000000000"))
+        .build());
+    renglonesPedidoDTO.add(
+      NuevoRenglonPedidoDTO.builder()
+        .idProductoItem(2L)
+        .cantidad(new BigDecimal("2.000000000000000"))
+        .build());
+    List<RenglonPedidoDTO> renglonesPedido =
+      Arrays.asList(
+        restTemplate.postForObject(
+          apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedidoDTO[].class));
+    BigDecimal importe = BigDecimal.ZERO;
+    for (RenglonPedidoDTO renglon : renglonesPedido) {
+      importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
+    }
+    BigDecimal recargoNeto =
+      importe.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
+    BigDecimal descuentoNeto =
+      importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
+    BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
+    NuevoPedidoDTO nuevoPedidoDTO =
+      NuevoPedidoDTO.builder()
+        .descuentoNeto(descuentoNeto)
+        .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
+        .recargoNeto(recargoNeto)
+        .recargoPorcentaje(new BigDecimal("5"))
+        .fechaVencimiento(new Date())
+        .observaciones("Nuevo Pedido Test")
+        .renglones(renglonesPedido)
+        .subTotal(importe)
+        .total(total)
+        .idUsuario(2L)
+        .idCliente(1L)
+        .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
+        .idSucursal(1L)
+        .build();
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class,
+            () ->
+                restTemplate.postForObject(
+                    apiPrefix + "/pedidos", nuevoPedidoDTO, PedidoDTO.class));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_pedido_retiro_sucursal_no_seleccionada", null, Locale.getDefault())));
+  }
+
+  @Test
   void shouldFacturarPedido() {
     this.shouldCrearPedido();
     this.crearFacturaTipoADePedido();

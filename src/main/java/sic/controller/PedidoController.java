@@ -102,13 +102,11 @@ public class PedidoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public Pedido guardar(
-    @RequestBody NuevoPedidoDTO nuevoPedidoDTO) {
+  public Pedido guardar(@RequestBody NuevoPedidoDTO nuevoPedidoDTO) {
     Pedido pedido = new Pedido();
     pedido.setFechaVencimiento(nuevoPedidoDTO.getFechaVencimiento());
     pedido.setObservaciones(nuevoPedidoDTO.getObservaciones());
-    Type listType = new TypeToken<List<RenglonPedido>>() {
-    }.getType();
+    Type listType = new TypeToken<List<RenglonPedido>>() {}.getType();
     pedido.setRenglones(modelMapper.map(nuevoPedidoDTO.getRenglones(), listType));
     pedido.setSubTotal(nuevoPedidoDTO.getSubTotal());
     pedido.setRecargoPorcentaje(nuevoPedidoDTO.getRecargoPorcentaje());
@@ -118,10 +116,13 @@ public class PedidoController {
     pedido.setTotalEstimado(nuevoPedidoDTO.getTotal());
     pedido.setTotalActual(nuevoPedidoDTO.getTotal());
     if (nuevoPedidoDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
+      if (nuevoPedidoDTO.getIdSucursalEnvio() == null) {
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_pedido_retiro_sucursal_no_seleccionada", null, Locale.getDefault()));
+      }
       Sucursal sucursal = sucursalService.getSucursalPorId(nuevoPedidoDTO.getIdSucursalEnvio());
-      if (!configuracionSucursal
-          .getConfiguracionSucursal(sucursal)
-          .isPuntoDeRetiro()) {
+      if (!configuracionSucursal.getConfiguracionSucursal(sucursal).isPuntoDeRetiro()) {
         throw new BusinessServiceException(
             messageSource.getMessage(
                 "mensaje_pedido_sucursal_entrega_no_valida", null, Locale.getDefault()));
@@ -133,7 +134,8 @@ public class PedidoController {
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(nuevoPedidoDTO.getIdUsuario()));
     Cliente cliente = clienteService.getClienteNoEliminadoPorId(nuevoPedidoDTO.getIdCliente());
     pedido.setCliente(cliente);
-    return pedidoService.guardar(pedido, nuevoPedidoDTO.getTipoDeEnvio(), nuevoPedidoDTO.getIdSucursalEnvio());
+    return pedidoService.guardar(
+        pedido, nuevoPedidoDTO.getTipoDeEnvio(), nuevoPedidoDTO.getIdSucursalEnvio());
   }
 
   @PostMapping("/pedidos/busqueda/criteria")
