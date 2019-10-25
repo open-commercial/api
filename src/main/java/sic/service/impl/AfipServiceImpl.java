@@ -102,13 +102,12 @@ public class AfipServiceImpl implements IAfipService {
         cds.setSignTokenWSAA(signTokenWSAA);
         String generationTime = tokenDoc.valueOf("/loginTicketResponse/header/generationTime");
         String expirationTime = tokenDoc.valueOf("/loginTicketResponse/header/expirationTime");
-        DateTimeFormatter formato = DateTimeFormatter.ofPattern(FormatterFechaHora.FORMATO_FECHA_HISPANO);
+        DateTimeFormatter dateTimeFormatter =
+            DateTimeFormatter.ofPattern(FormatterFechaHora.FORMATO_FECHA_HISPANO);
         // REVISAR
-        //        SimpleDateFormat sdf =
-        //            new
-        // SimpleDateFormat(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL_MILISEGUNDO);
-        cds.setFechaGeneracionTokenWSAA(LocalDateTime.parse(generationTime, formato));
-        cds.setFechaVencimientoTokenWSAA(LocalDateTime.parse(expirationTime, formato));
+        // SimpleDateFormat sdf = new SimpleDateFormat(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL_MILISEGUNDO);
+        cds.setFechaGeneracionTokenWSAA(LocalDateTime.parse(generationTime, dateTimeFormatter));
+        cds.setFechaVencimientoTokenWSAA(LocalDateTime.parse(expirationTime, dateTimeFormatter));
         configuracionDelSistemaService.actualizar(cds);
         return feAuthRequest;
       } catch (DocumentException | IOException ex) {
@@ -218,16 +217,13 @@ public class AfipServiceImpl implements IAfipService {
         throw new BusinessServiceException(msjError);
       }
       long cae = Long.parseLong(response.getFeDetResp().getFECAEDetResponse().get(0).getCAE());
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+      DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
       //SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
       comprobante.setCAE(cae);
       // REVISAR
-      //        SimpleDateFormat sdf =
-      //            new
-      // SimpleDateFormat(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL_MILISEGUNDO);
-      comprobante.setVencimientoCAE(LocalDateTime.parse(response.getFeDetResp().getFECAEDetResponse().get(0).getCAEFchVto(), formatter));
-//      comprobante.setVencimientoCAE(
-//          formatter.parse(response.getFeDetResp().getFECAEDetResponse().get(0).getCAEFchVto()));
+      // SimpleDateFormat sdf = new SimpleDateFormat(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL_MILISEGUNDO);
+      comprobante.setVencimientoCAE(LocalDateTime.parse(response.getFeDetResp().getFECAEDetResponse().get(0).getCAEFchVto(), dateTimeFormatter));
+//      comprobante.setVencimientoCAE(formatter.parse(response.getFeDetResp().getFECAEDetResponse().get(0).getCAEFchVto()));
       comprobante.setNumSerieAfip(nroPuntoDeVentaAfip);
       comprobante.setNumFacturaAfip(siguienteNroComprobante);
     } catch (WebServiceClientException ex) {
@@ -363,17 +359,17 @@ public class AfipServiceImpl implements IAfipService {
     // Si se informa más de un comprobante, todos deben corresponder al mismo punto de venta
     cabecera.setPtoVta(nroPuntoDeVentaAfip);
     fecaeRequest.setFeCabReq(cabecera);
-    //SimpleDateFormat sdf = new SimpleDateFormat(FormatterFechaHora.FORMATO_FECHA_INTERNACIONAL); REVISAR
-    DateTimeFormatter formato = DateTimeFormatter.ofPattern(FormatterFechaHora.FORMATO_FECHA_INTERNACIONAL);
+    // REVISAR
+    //SimpleDateFormat sdf = new SimpleDateFormat(FormatterFechaHora.FORMATO_FECHA_INTERNACIONAL);
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(FormatterFechaHora.FORMATO_FECHA_INTERNACIONAL);
     ArrayOfFECAEDetRequest arrayDetalle = new ArrayOfFECAEDetRequest();
     detalle.setCbteDesde(siguienteNroComprobante);
     detalle.setCbteHasta(siguienteNroComprobante);
     // Concepto del Comprobante. Valores permitidos: 1 Productos, 2 Servicios, 3 Productos y Servicios
     detalle.setConcepto(1);
     // Fecha del comprobante (yyyymmdd)
-//    detalle.setCbteFch(
-//        sdf.format(comprobante.getFecha()).replace("/", ""));
-    detalle.setCbteFch(comprobante.getFecha().format(formato).replace("/", ""));
+    // detalle.setCbteFch(sdf.format(comprobante.getFecha()).replace("/", ""));
+    detalle.setCbteFch(comprobante.getFecha().format(dateTimeFormatter).replace("/", ""));
     ArrayOfAlicIva arrayIVA = new ArrayOfAlicIva();
     if (comprobante.getIva21neto().compareTo(BigDecimal.ZERO) != 0
         && (comprobante.getTipoComprobante() != TipoDeComprobante.FACTURA_C

@@ -289,27 +289,27 @@ public class PedidoServiceImpl implements IPedidoService {
         qPedido.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qPedido.eliminado.eq(false)));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
-      criteria.setFechaHasta(criteria.getFechaHasta().withHour(0).withMinute(0).withSecond(0));
-      DateTimeFormatter formato =
+      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59));
+      DateTimeFormatter dateTimeFormatter =
           DateTimeFormatter.ofPattern(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
       String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
         DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(formato));
+                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(dateTimeFormatter));
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(formato));
+                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(dateTimeFormatter));
         builder.and(qPedido.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
         DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(formato));
+                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(dateTimeFormatter));
         builder.and(qPedido.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(formato));
+                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(dateTimeFormatter));
         builder.and(qPedido.fecha.before(fHasta));
       }
     }

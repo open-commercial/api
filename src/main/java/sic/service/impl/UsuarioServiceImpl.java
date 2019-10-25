@@ -3,7 +3,6 @@ package sic.service.impl;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;

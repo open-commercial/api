@@ -1,6 +1,5 @@
 package sic.service.impl;
 
-import com.google.common.collect.Lists;
 import com.querydsl.core.BooleanBuilder;
 
 import java.io.*;
@@ -41,7 +40,6 @@ import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
-import sic.util.Validator;
 import sic.repository.ProductoRepository;
 
 @Service
@@ -377,7 +375,7 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   @Transactional
   public void eliminarMultiplesProductos(long[] idProducto) {
-    if (Validator.tieneDuplicados(idProducto)) {
+    if (this.contieneDuplicados(idProducto)) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_error_ids_duplicados", null, Locale.getDefault()));
     }
@@ -414,7 +412,7 @@ public class ProductoServiceImpl implements IProductoService {
         "mensaje_modificar_producto_no_permitido", null, Locale.getDefault()));
     }
     // Requeridos
-    if (Validator.tieneDuplicados(productosParaActualizarDTO.getIdProducto())) {
+    if (this.contieneDuplicados(productosParaActualizarDTO.getIdProducto())) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_error_ids_duplicados", null, Locale.getDefault()));
     }
@@ -705,4 +703,14 @@ public class ProductoServiceImpl implements IProductoService {
   public List<Producto> getMultiplesProductosPorId(List<Long> idsProductos) {
     return productoRepository.findByIdProductoInOrderByIdProductoAsc(idsProductos);
   }
+
+  private boolean contieneDuplicados(long[] array) {
+      Set<Long> set = new HashSet<>();
+      for (long i : array) {
+        if (set.contains(i)) return true;
+        set.add(i);
+      }
+      return false;
+    }
+
 }

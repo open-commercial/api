@@ -30,7 +30,11 @@ public class ExceptionControllerAdvice {
   }
 
   private String log(Exception ex) {
-    String mensaje = ex.getMessage() + "\n(Transaction ID: " + LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() + ")";
+    String mensaje =
+        ex.getMessage()
+            + "\n(Transaction ID: "
+            + LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            + ")";
     logger.error(mensaje, ex);
     return mensaje;
   }
@@ -42,7 +46,11 @@ public class ExceptionControllerAdvice {
     for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
       mensaje = mensaje.concat(violation.getMessage() + "\n");
     }
-    mensaje = mensaje.concat("(Transaction ID: " + LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() + ")");
+    mensaje =
+        mensaje.concat(
+            "(Transaction ID: "
+                + LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                + ")");
     logger.error(mensaje, ex);
     return mensaje;
   }
@@ -74,7 +82,8 @@ public class ExceptionControllerAdvice {
   @ExceptionHandler(Exception.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public String handleException(Exception ex) {
-    return log(new Exception(messageSource.getMessage(
-      "mensaje_error_request", null, Locale.getDefault()), ex));
+    return log(
+        new Exception(
+            messageSource.getMessage("mensaje_error_request", null, Locale.getDefault()), ex));
   }
 }

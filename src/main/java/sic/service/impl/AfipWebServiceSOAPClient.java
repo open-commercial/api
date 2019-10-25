@@ -34,7 +34,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -137,11 +136,11 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
         return asn1Cms;
     }
 
-    public String crearTicketRequerimientoAcceso(String service, long ticketTime) {//REVISAR
+    //REVISAR
+    public String crearTicketRequerimientoAcceso(String service, long ticketTime) {
         LocalDateTime now = LocalDateTime.now();
         ZonedDateTime zdt = now.atZone(ZoneId.systemDefault());
         LocalDateTime genenerationTime = LocalDateTime.now();
-        // LocalDateTime.now();
         DatatypeFactory datatypeFactory = null;
         String uniqueId = Long.toString(zdt.toInstant().toEpochMilli() / 1000);
         LocalDateTime expirationTime = now.plusHours(12L); // 3600000L

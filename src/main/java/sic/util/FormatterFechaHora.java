@@ -2,6 +2,8 @@ package sic.util;
 
 public class FormatterFechaHora {
 
+  private FormatterFechaHora() {}
+
   public static final String FORMATO_FECHAHORA_INTERNACIONAL_MILISEGUNDO =
       "yyyy-MM-dd'T'HH:mm:ss.SSS";
   public static final String FORMATO_FECHAHORA_INTERNACIONAL = "yyyy/MM/dd HH:mm:ss";

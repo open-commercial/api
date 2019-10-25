@@ -5,9 +5,7 @@ import com.querydsl.core.types.dsl.DateExpression;
 import com.querydsl.core.types.dsl.Expressions;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -32,7 +30,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.exception.BusinessServiceException;
 import sic.util.FormatterFechaHora;
-import sic.util.Validator;
 import sic.repository.CajaRepository;
 
 @Service
@@ -209,27 +206,27 @@ public class CajaServiceImpl implements ICajaService {
     }
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
-      criteria.setFechaHasta(criteria.getFechaHasta().withHour(0).withMinute(0).withSecond(0));
-      DateTimeFormatter formato =
+      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59));
+      DateTimeFormatter dateTimeFormatter =
           DateTimeFormatter.ofPattern(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
       String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
         DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(formato));
+                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(dateTimeFormatter));
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(formato));
+                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(dateTimeFormatter));
         builder.and(qCaja.fechaApertura.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
         DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(formato));
+                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(dateTimeFormatter));
         builder.and(qCaja.fechaApertura.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(formato));
+                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(dateTimeFormatter));
         builder.and(qCaja.fechaApertura.before(fHasta));
       }
     }
