@@ -198,7 +198,6 @@ public class PedidoServiceImpl implements IPedidoService {
   public Pedido guardar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal) {
     this.asignarDetalleEnvio(pedido, tipoDeEnvio, idSucursal);
     this.calcularCantidadDeArticulos(pedido);
-    pedido.setFecha(LocalDateTime.now());
     pedido.setNroPedido(this.generarNumeroPedido(pedido.getEmpresa()));
     pedido.setEstado(EstadoPedido.ABIERTO);
     if (pedido.getObservaciones() == null || pedido.getObservaciones().equals("")) {

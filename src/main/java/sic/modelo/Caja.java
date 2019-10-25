@@ -31,6 +31,7 @@ public class Caja implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long id_Caja;
 
+  @NotNull(message = "{mensaje_caja_fecha_apertura_vacia}")
   private LocalDateTime fechaApertura;
 
   private LocalDateTime fechaCierre;

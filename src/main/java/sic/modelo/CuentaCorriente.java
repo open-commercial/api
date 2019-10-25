@@ -54,7 +54,7 @@ public abstract class CuentaCorriente implements Serializable {
 
     @Column(precision = 25, scale = 15)
     private BigDecimal saldo;
-
+    
     private LocalDateTime fechaUltimoMovimiento;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "cuentaCorriente")

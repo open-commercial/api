@@ -41,6 +41,7 @@ public class Recibo implements Serializable {
 
   private String idPagoMercadoPago;
 
+  @NotNull(message = "{mensaje_recibo_fecha_vacia}")
   private LocalDateTime fecha;
 
   private boolean eliminado;

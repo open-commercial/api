@@ -1,6 +1,7 @@
 package sic.controller;
 
 import java.lang.reflect.Type;
+import java.time.LocalDateTime;
 import java.util.List;
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
@@ -110,6 +111,7 @@ public class PedidoController {
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(nuevoPedidoDTO.getIdUsuario()));
     Cliente cliente = clienteService.getClienteNoEliminadoPorId(nuevoPedidoDTO.getIdCliente());
     pedido.setCliente(cliente);
+    pedido.setFecha(LocalDateTime.now());
     return pedidoService.guardar(pedido, nuevoPedidoDTO.getTipoDeEnvio(), nuevoPedidoDTO.getIdSucursal());
   }
 

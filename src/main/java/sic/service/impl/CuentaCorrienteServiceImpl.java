@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -264,6 +265,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   @Transactional
   public void asentarEnCuentaCorriente(FacturaVenta facturaVenta, TipoDeOperacion tipo) {
     CuentaCorriente cc = this.getCuentaCorrientePorCliente(clienteService.getClienteNoEliminadoPorId(facturaVenta.getIdCliente()));
+    cc.setFechaUltimoMovimiento(LocalDateTime.now());
     if (null == cc) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_cuenta_corriente_no_existente", null, Locale.getDefault()));
@@ -285,6 +287,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   @Transactional
   public void asentarEnCuentaCorriente(FacturaCompra facturaCompra) {
     CuentaCorriente cc = this.getCuentaCorrientePorProveedor(facturaCompra.getProveedor());
+    cc.setFechaUltimoMovimiento(LocalDateTime.now());
     if (null == cc) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_cuenta_corriente_no_existente", null, Locale.getDefault()));
@@ -315,6 +318,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   @Transactional
   public void asentarEnCuentaCorriente(Nota nota, TipoDeOperacion tipo) {
     CuentaCorriente cc = this.getCuentaCorrientePorNota(nota);
+    cc.setFechaUltimoMovimiento(LocalDateTime.now());
     if (tipo == TipoDeOperacion.ALTA) {
       RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
       rcc.setTipoComprobante(nota.getTipoComprobante());

@@ -76,6 +76,7 @@ public class Cliente implements Serializable {
 
   private String contacto;
 
+  @NotNull(message = "{mensaje_cliente_fecha_vacia}")
   private LocalDateTime fechaAlta;
 
   @ManyToOne

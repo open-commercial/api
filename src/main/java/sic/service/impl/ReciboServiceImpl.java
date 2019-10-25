@@ -179,7 +179,6 @@ public class ReciboServiceImpl implements IReciboService {
             configuracionDelSistemaService
                 .getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa())
                 .getNroPuntoDeVentaAfip()));
-    recibo.setFecha(LocalDateTime.now());
     this.validarOperacion(recibo);
     recibo = reciboRepository.save(recibo);
     this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
