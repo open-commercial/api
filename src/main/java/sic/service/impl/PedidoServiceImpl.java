@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -289,26 +288,36 @@ public class PedidoServiceImpl implements IPedidoService {
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
       criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59));
-      DateTimeFormatter dateTimeFormatter =
-          DateTimeFormatter.ofPattern(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
       String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
         DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(dateTimeFormatter));
+                LocalDateTime.class,
+                dateTemplate,
+                FormatterFechaHora.formatoFecha(
+                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(dateTimeFormatter));
+                LocalDateTime.class,
+                dateTemplate,
+                FormatterFechaHora.formatoFecha(
+                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
         builder.and(qPedido.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
         DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(dateTimeFormatter));
+                LocalDateTime.class,
+                dateTemplate,
+                FormatterFechaHora.formatoFecha(
+                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
         builder.and(qPedido.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(dateTimeFormatter));
+                LocalDateTime.class,
+                dateTemplate,
+                FormatterFechaHora.formatoFecha(
+                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
         builder.and(qPedido.fecha.before(fHasta));
       }
     }

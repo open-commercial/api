@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -212,28 +211,37 @@ public class NotaServiceImpl implements INotaService {
     if (criteria.getMovimiento() == Movimiento.COMPRA)
       builder.and(qNotaCredito.movimiento.eq(Movimiento.COMPRA));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
-      criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
-      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59));
-      DateTimeFormatter dateTimeFormatter =
-          DateTimeFormatter.ofPattern(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      this.establecerLimitesDeFechasDeCriteria(criteria);
       String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
         DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(dateTimeFormatter));
+                LocalDateTime.class,
+                dateTemplate,
+                FormatterFechaHora.formatoFecha(
+                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(dateTimeFormatter));
+                LocalDateTime.class,
+                dateTemplate,
+                FormatterFechaHora.formatoFecha(
+                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
         builder.and(qNotaCredito.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
         DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(dateTimeFormatter));
+                LocalDateTime.class,
+                dateTemplate,
+                FormatterFechaHora.formatoFecha(
+                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
         builder.and(qNotaCredito.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(dateTimeFormatter));
+                LocalDateTime.class,
+                dateTemplate,
+                FormatterFechaHora.formatoFecha(
+                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
         builder.and(qNotaCredito.fecha.before(fHasta));
       }
     }
@@ -293,32 +301,37 @@ public class NotaServiceImpl implements INotaService {
     if (criteria.getMovimiento() == Movimiento.COMPRA)
       builder.and(qNotaDebito.movimiento.eq(Movimiento.COMPRA));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
-      criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
-      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59));
-      DateTimeFormatter dateTimeFormatter =
-        DateTimeFormatter.ofPattern(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      this.establecerLimitesDeFechasDeCriteria(criteria);
       String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
         DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                criteria.getFechaDesde().format(dateTimeFormatter));
+                FormatterFechaHora.formatoFecha(
+                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                criteria.getFechaHasta().format(dateTimeFormatter));
+                FormatterFechaHora.formatoFecha(
+                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
         builder.and(qNotaDebito.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
         DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(dateTimeFormatter));
+                LocalDateTime.class,
+                dateTemplate,
+                FormatterFechaHora.formatoFecha(
+                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
         builder.and(qNotaDebito.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(dateTimeFormatter));
+                LocalDateTime.class,
+                dateTemplate,
+                FormatterFechaHora.formatoFecha(
+                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
         builder.and(qNotaDebito.fecha.before(fHasta));
       }
     }
@@ -1496,9 +1509,12 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public RenglonNotaDebito calcularRenglonDebitoConRecibo(Recibo recibo) {
     RenglonNotaDebito renglonNota = new RenglonNotaDebito();
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(FormatterFechaHora.FORMATO_FECHA_HISPANO);
     String descripcion =
-        "Recibo Nº " + recibo.getNumRecibo() + " " + recibo.getFecha().format(dateTimeFormatter);
+        "Recibo Nº "
+            + recibo.getNumRecibo()
+            + " "
+            + FormatterFechaHora.formatoFecha(
+                recibo.getFecha(), FormatterFechaHora.FORMATO_FECHA_HISPANO);
     renglonNota.setDescripcion(descripcion);
     renglonNota.setMonto(recibo.getMonto());
     renglonNota.setImporteBruto(renglonNota.getMonto());
@@ -1640,7 +1656,7 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public BigDecimal calcularTotalCredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
-    this.cortarHoraMinutoSegundoDeCriteria(criteria);
+    this.establecerLimitesDeFechasDeCriteria(criteria);
     BigDecimal totalNotaCredito =
         notaCreditoRepository.calcularTotalCredito(
             this.getBuilderNotaCredito(criteria, idUsuarioLoggedIn));
@@ -1649,7 +1665,7 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public BigDecimal calcularTotalDebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
-    this.cortarHoraMinutoSegundoDeCriteria(criteria);
+    this.establecerLimitesDeFechasDeCriteria(criteria);
     BigDecimal totalNotaDebito =
         notaDebitoRepository.calcularTotalDebito(
             this.getBuilderNotaDebito(criteria, idUsuarioLoggedIn));
@@ -1658,7 +1674,7 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public BigDecimal calcularTotalIVACredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
-    this.cortarHoraMinutoSegundoDeCriteria(criteria);
+    this.establecerLimitesDeFechasDeCriteria(criteria);
     BigDecimal ivaNotaCredito =
         notaCreditoRepository.calcularIVACredito(
             this.getBuilderNotaCredito(criteria, idUsuarioLoggedIn),
@@ -1670,7 +1686,7 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public BigDecimal calcularTotalIVADebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
-    this.cortarHoraMinutoSegundoDeCriteria(criteria);
+    this.establecerLimitesDeFechasDeCriteria(criteria);
     BigDecimal ivaNotaDebito =
         notaDebitoRepository.calcularIVADebito(
             this.getBuilderNotaDebito(criteria, idUsuarioLoggedIn),
@@ -1716,7 +1732,7 @@ public class NotaServiceImpl implements INotaService {
     return notaAnterior.getContent().get(0).getCae() == 0L;
   }
 
-  private void cortarHoraMinutoSegundoDeCriteria(BusquedaNotaCriteria criteria) {
+  private void establecerLimitesDeFechasDeCriteria(BusquedaNotaCriteria criteria) {
     if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
       criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
       criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59));

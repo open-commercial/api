@@ -6,7 +6,6 @@ import com.querydsl.core.types.dsl.Expressions;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import org.springframework.context.MessageSource;
@@ -207,26 +206,36 @@ public class CajaServiceImpl implements ICajaService {
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
       criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59));
-      DateTimeFormatter dateTimeFormatter =
-          DateTimeFormatter.ofPattern(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
       String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
         DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(dateTimeFormatter));
+                LocalDateTime.class,
+                dateTemplate,
+                FormatterFechaHora.formatoFecha(
+                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(dateTimeFormatter));
+                LocalDateTime.class,
+                dateTemplate,
+                FormatterFechaHora.formatoFecha(
+                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
         builder.and(qCaja.fechaApertura.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
         DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaDesde().format(dateTimeFormatter));
+                LocalDateTime.class,
+                dateTemplate,
+                FormatterFechaHora.formatoFecha(
+                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
         builder.and(qCaja.fechaApertura.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                LocalDateTime.class, dateTemplate, criteria.getFechaHasta().format(dateTimeFormatter));
+                LocalDateTime.class,
+                dateTemplate,
+                FormatterFechaHora.formatoFecha(
+                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
         builder.and(qCaja.fechaApertura.before(fHasta));
       }
     }
@@ -257,8 +266,7 @@ public class CajaServiceImpl implements ICajaService {
   public void cerrarCajas() {
     logger.warn("Cierre automático de Cajas a las {}", LocalDateTime.now());
     List<Empresa> empresas = this.empresaService.getEmpresas();
-    empresas
-        .stream()
+    empresas.stream()
         .map(empresa -> this.getUltimaCaja(empresa.getId_Empresa()))
         .filter(
             ultimaCajaDeEmpresa ->
@@ -266,12 +274,8 @@ public class CajaServiceImpl implements ICajaService {
                     && (ultimaCajaDeEmpresa.getEstado() == EstadoCaja.ABIERTA)))
         .forEachOrdered(
             ultimaCajaDeEmpresa -> {
-              LocalDateTime fechaActual = LocalDateTime.now();
-              LocalDateTime fechaHoraCaja = ultimaCajaDeEmpresa.getFechaApertura();//REVISAR
-              LocalDateTime fechaCaja =
-                LocalDateTime.of(fechaHoraCaja.getYear(), fechaHoraCaja.getMonth(), fechaHoraCaja.getDayOfMonth(),
-                  fechaHoraCaja.getHour(), fechaHoraCaja.getMinute());
-              if (fechaCaja.compareTo(fechaActual) < 0) {
+              LocalDateTime fechaApertura = ultimaCajaDeEmpresa.getFechaApertura();
+              if (fechaApertura.isBefore(LocalDateTime.now())) {
                 this.cerrarCaja(
                     ultimaCajaDeEmpresa.getId_Caja(),
                     this.getSaldoQueAfectaCaja(ultimaCajaDeEmpresa),

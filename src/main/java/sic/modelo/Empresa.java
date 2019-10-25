@@ -49,8 +49,7 @@ public class Empresa implements Serializable {
   private Long idFiscal;
 
   private Long ingresosBrutos;
-
-  @NotNull(message = "{mensaje_empresa_fecha_inicio_actividad_vacia}")
+  
   private LocalDateTime fechaInicioActividad;
 
   @Column(nullable = false)
