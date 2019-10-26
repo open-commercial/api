@@ -101,6 +101,11 @@ alter TABLE renglonpedido CHANGE descuentoNeto bonificacionNeta decimal(25,15);
 alter TABLE renglonpedido add importeAnterior decimal(25,15) after bonificacionNeta;
 
 alter TABLE producto CHANGE destacado oferta bit(1);
+SET SQL_SAFE_UPDATES = 0;
+update producto
+set producto.oferta = false
+where producto.oferta = true;
+SET SQL_SAFE_UPDATES = 1;
 alter TABLE producto ADD COLUMN porcentajeBonificacionOferta decimal(25,15);
 alter TABLE producto ADD COLUMN precioListaBonificado decimal(25,15) after porcentajebonificacionoferta;
 alter TABLE producto CHANGE cantidad cantidadTotalEnSucursales decimal(25,15);

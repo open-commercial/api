@@ -123,8 +123,10 @@ public class Producto implements Serializable {
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_bonificacion_oferta_inferior_0}")
   @DecimalMax(value = "100", inclusive = false, message = "{mensaje_producto_bonificacion_oferta_superior_100}")
+  @JsonView(Views.Comprador.class)
   private BigDecimal porcentajeBonificacionOferta;
 
+  @JsonView(Views.Comprador.class)
   private BigDecimal precioListaBonificado;
 
   @Temporal(TemporalType.TIMESTAMP)

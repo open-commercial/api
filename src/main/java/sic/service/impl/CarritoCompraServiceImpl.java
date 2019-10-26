@@ -19,6 +19,7 @@ import sic.modelo.dto.CarritoCompraDTO;
 import sic.modelo.dto.NuevaOrdenDeCompraDTO;
 import sic.repository.CarritoCompraRepository;
 import sic.service.*;
+import sic.util.CalculosComprobante;
 
 @Service
 @Transactional
@@ -81,15 +82,33 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     BigDecimal bonificacion = cliente.getBonificacion();
     items.forEach(
         i -> {
-          i.getProducto()
-              .setPrecioBonificado(
-                  i.getProducto()
-                      .getPrecioLista()
-                      .multiply(
-                          BigDecimal.ONE.subtract(
-                              bonificacion.divide(CIEN, RoundingMode.HALF_UP))));
           i.setImporte(i.getProducto().getPrecioLista().multiply(i.getCantidad()));
-          i.setImporteBonificado(i.getProducto().getPrecioBonificado().multiply(i.getCantidad()));
+          if (i.getProducto().isOferta()
+              && i.getCantidad().compareTo(i.getProducto().getBulto()) >= 0
+              && i.getProducto().getPorcentajeBonificacionOferta() != null) {
+            i.getProducto()
+                .setPrecioBonificado(
+                    i.getProducto()
+                        .getPrecioLista()
+                        .multiply(
+                            BigDecimal.ONE.subtract(
+                                i.getProducto()
+                                    .getPorcentajeBonificacionOferta()
+                                    .divide(CIEN, RoundingMode.HALF_UP))));
+
+            i.setImporteBonificado(i.getProducto().getPrecioBonificado().multiply(i.getCantidad()));
+          } else if (i.getCantidad().compareTo(i.getProducto().getBulto()) >= 0) {
+            i.getProducto()
+                .setPrecioBonificado(
+                    i.getProducto()
+                        .getPrecioLista()
+                        .multiply(
+                            BigDecimal.ONE.subtract(
+                                bonificacion.divide(CIEN, RoundingMode.HALF_UP))));
+            i.setImporteBonificado(i.getProducto().getPrecioBonificado().multiply(i.getCantidad()));
+          } else {
+            i.setImporteBonificado(BigDecimal.ZERO);
+          }
           i.getProducto()
               .setHayStock(
                   i.getProducto().getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);

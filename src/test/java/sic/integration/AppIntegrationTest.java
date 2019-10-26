@@ -81,7 +81,6 @@ class AppIntegrationTest {
         .precioLista(new BigDecimal("1210"))
         .nota("ProductoTest1")
         .publico(true)
-        .destacado(true)
         .build();
     NuevoProductoDTO productoDos =
       NuevoProductoDTO.builder()
@@ -97,7 +96,6 @@ class AppIntegrationTest {
         .ivaNeto(new BigDecimal("105"))
         .precioLista(new BigDecimal("1105"))
         .nota("ProductoTest2")
-        .destacado(false)
         .build();
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     RubroDTO rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", RubroDTO.class);
@@ -3249,7 +3247,6 @@ class AppIntegrationTest {
         .precioLista(new BigDecimal("1210"))
         .nota("ProductoTest1")
         .publico(true)
-        .destacado(true)
         .build();
     NuevoProductoDTO productoDos =
       NuevoProductoDTO.builder()
@@ -3265,7 +3262,6 @@ class AppIntegrationTest {
         .ivaNeto(new BigDecimal("105"))
         .precioLista(new BigDecimal("1105"))
         .nota("ProductoTest2")
-        .destacado(false)
         .build();
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     RubroDTO rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", RubroDTO.class);
@@ -3526,7 +3522,7 @@ class AppIntegrationTest {
             .ivaNeto(new BigDecimal("210"))
             .precioLista(new BigDecimal("1210"))
             .nota("Producto Test")
-            .destacado(true)
+            .oferta(true)
             .build();
     ProductoDTO productoRecuperado =
         restTemplate.postForObject(
@@ -3648,7 +3644,6 @@ class AppIntegrationTest {
             .precioLista(new BigDecimal("1210"))
             .nota("ProductoTestSinStock")
             .publico(true)
-            .destacado(true)
             .build();
     ProductoDTO productoSinStock =
         restTemplate.postForObject(
@@ -3682,7 +3677,6 @@ class AppIntegrationTest {
         .precioLista(new BigDecimal("1210"))
         .nota("ProductoTestSinStock")
         .publico(true)
-        .destacado(true)
         .build();
     ProductoDTO productoSinStock =
       restTemplate.postForObject(
@@ -3717,7 +3711,6 @@ class AppIntegrationTest {
         .precioLista(new BigDecimal("1210"))
         .nota("ProductoTestSinStock")
         .publico(true)
-        .destacado(true)
         .build();
     ProductoDTO productoSinStock =
       restTemplate.postForObject(
@@ -3752,7 +3745,6 @@ class AppIntegrationTest {
         .precioLista(new BigDecimal("1210"))
         .nota("ProductoTestSinStock")
         .publico(true)
-        .destacado(true)
         .build();
     ProductoDTO productoSinStock =
       restTemplate.postForObject(
