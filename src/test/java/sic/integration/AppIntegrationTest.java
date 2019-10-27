@@ -1,5 +1,6 @@
 package sic.integration;
 
+import io.jsonwebtoken.lang.Assert;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +42,7 @@ import java.nio.charset.Charset;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -6392,5 +6394,56 @@ class AppIntegrationTest {
     restTemplate.put(apiPrefix + "/configuraciones-sucursal", configuracionSucursalDTO);
     configuracionSucursalDTO = restTemplate.getForObject(apiPrefix + "/configuraciones-sucursal/1", ConfiguracionSucursalDTO.class);
     assertTrue(configuracionSucursalDTO.isPuntoDeRetiro());
+  }
+  
+  @Test
+  void crearProductoEnOfertaAndAgregarloAlCarrito() {
+    NuevoProductoDTO productoUno =
+      NuevoProductoDTO.builder()
+        .codigo(RandomStringUtils.random(10, false, true))
+        .descripcion(RandomStringUtils.random(10, true, false))
+        .cantidadEnSucursal(new HashMap<Long, BigDecimal>() {{put(1L, BigDecimal.TEN);}})
+        .bulto(BigDecimal.ONE)
+        .precioCosto(CIEN)
+        .gananciaPorcentaje(new BigDecimal("900"))
+        .gananciaNeto(new BigDecimal("900"))
+        .precioVentaPublico(new BigDecimal("1000"))
+        .ivaPorcentaje(new BigDecimal("21.0"))
+        .ivaNeto(new BigDecimal("210"))
+        .precioLista(new BigDecimal("1210"))
+        .nota("ProductoTest1")
+        .publico(true)
+        .build();
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
+    RubroDTO rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", RubroDTO.class);
+    ProveedorDTO proveedor =
+      restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
+    Medida medida = restTemplate.getForObject(apiPrefix + "/medidas/1", Medida.class);
+    restTemplate.postForObject(
+      apiPrefix
+        + "/productos?idMedida="
+        + medida.getId_Medida()
+        + "&idRubro="
+        + rubro.getId_Rubro()
+        + "&idProveedor="
+        + proveedor.getId_Proveedor()
+        + "&idSucursal="
+        + sucursal.getIdSucursal(),
+      productoUno,
+      ProductoDTO.class);
+    ProductoDTO productoRecuperado = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    productoRecuperado.setPublico(true);
+    productoRecuperado.setOferta(true);
+    productoRecuperado.setUrlImagen("imagen.com");
+    productoRecuperado.setPorcentajeBonificacionOferta(BigDecimal.TEN);
+    restTemplate.put(apiPrefix + "/productos", productoRecuperado);
+    productoRecuperado = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    assertTrue(productoRecuperado.isOferta());
+    assertEquals(new BigDecimal("10.000000000000000"), productoRecuperado.getPorcentajeBonificacionOferta());
+    assertEquals(new BigDecimal("1089.00"), productoRecuperado.getPrecioListaBonificado());
+    restTemplate.postForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=5", null, ItemCarritoCompra.class);
+    ItemCarritoCompra item1 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
+    assertEquals(new BigDecimal("6050.00"), item1.getImporte());
+    assertEquals(new BigDecimal("5445.00"), item1.getImporteBonificado());
   }
 }

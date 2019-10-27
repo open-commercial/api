@@ -82,7 +82,11 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     BigDecimal bonificacion = cliente.getBonificacion();
     items.forEach(
         i -> {
-          i.setImporte(i.getProducto().getPrecioLista().multiply(i.getCantidad()));
+          i.setImporte(
+              i.getProducto()
+                  .getPrecioLista()
+                  .multiply(i.getCantidad())
+                  .setScale(2, RoundingMode.HALF_UP));
           if (i.getProducto().isOferta()
               && i.getCantidad().compareTo(i.getProducto().getBulto()) >= 0
               && i.getProducto().getPorcentajeBonificacionOferta() != null) {
@@ -94,9 +98,13 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
                             BigDecimal.ONE.subtract(
                                 i.getProducto()
                                     .getPorcentajeBonificacionOferta()
-                                    .divide(CIEN, RoundingMode.HALF_UP))));
-
-            i.setImporteBonificado(i.getProducto().getPrecioBonificado().multiply(i.getCantidad()));
+                                    .divide(CIEN, RoundingMode.HALF_UP)))
+                        .setScale(2, RoundingMode.HALF_UP));
+            i.setImporteBonificado(
+                i.getProducto()
+                    .getPrecioBonificado()
+                    .multiply(i.getCantidad())
+                    .setScale(2, RoundingMode.HALF_UP));
           } else if (i.getCantidad().compareTo(i.getProducto().getBulto()) >= 0) {
             i.getProducto()
                 .setPrecioBonificado(
@@ -104,8 +112,13 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
                         .getPrecioLista()
                         .multiply(
                             BigDecimal.ONE.subtract(
-                                bonificacion.divide(CIEN, RoundingMode.HALF_UP))));
-            i.setImporteBonificado(i.getProducto().getPrecioBonificado().multiply(i.getCantidad()));
+                                bonificacion.divide(CIEN, RoundingMode.HALF_UP)))
+                        .setScale(2, RoundingMode.HALF_UP));
+            i.setImporteBonificado(
+                i.getProducto()
+                    .getPrecioBonificado()
+                    .multiply(i.getCantidad())
+                    .setScale(2, RoundingMode.HALF_UP));
           } else {
             i.setImporteBonificado(BigDecimal.ZERO);
           }
@@ -121,11 +134,75 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
       long idUsuario, long idProducto) {
     ItemCarritoCompra itemCarritoCompra =
         this.carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
+    BigDecimal bonificacion = clienteService.getClientePorIdUsuario(idUsuario).getBonificacion();
     if (itemCarritoCompra != null) {
       itemCarritoCompra
           .getProducto()
           .setHayStock(
-              itemCarritoCompra.getProducto().getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
+              itemCarritoCompra
+                      .getProducto()
+                      .getCantidadTotalEnSucursales()
+                      .compareTo(BigDecimal.ZERO)
+                  > 0);
+      itemCarritoCompra.setImporte(
+          itemCarritoCompra
+              .getProducto()
+              .getPrecioLista()
+              .multiply(itemCarritoCompra.getCantidad())
+              .setScale(2, RoundingMode.HALF_UP));
+      if (itemCarritoCompra.getProducto().isOferta()
+          && itemCarritoCompra.getCantidad().compareTo(itemCarritoCompra.getProducto().getBulto())
+              >= 0
+          && itemCarritoCompra.getProducto().getPorcentajeBonificacionOferta() != null) {
+        itemCarritoCompra
+            .getProducto()
+            .setPrecioBonificado(
+                itemCarritoCompra
+                    .getProducto()
+                    .getPrecioLista()
+                    .multiply(
+                        BigDecimal.ONE.subtract(
+                            itemCarritoCompra
+                                .getProducto()
+                                .getPorcentajeBonificacionOferta()
+                                .divide(CIEN, RoundingMode.HALF_UP)))
+                    .setScale(2, RoundingMode.HALF_UP));
+        itemCarritoCompra.setImporteBonificado(
+            itemCarritoCompra
+                .getProducto()
+                .getPrecioBonificado()
+                .multiply(itemCarritoCompra.getCantidad())
+                .setScale(2, RoundingMode.HALF_UP));
+      } else if (itemCarritoCompra
+              .getCantidad()
+              .compareTo(itemCarritoCompra.getProducto().getBulto())
+          >= 0) {
+        itemCarritoCompra
+            .getProducto()
+            .setPrecioBonificado(
+                itemCarritoCompra
+                    .getProducto()
+                    .getPrecioLista()
+                    .multiply(
+                        BigDecimal.ONE.subtract(bonificacion.divide(CIEN, RoundingMode.HALF_UP)))
+                    .setScale(2, RoundingMode.HALF_UP));
+        itemCarritoCompra.setImporteBonificado(
+            itemCarritoCompra
+                .getProducto()
+                .getPrecioBonificado()
+                .multiply(itemCarritoCompra.getCantidad())
+                .setScale(2, RoundingMode.HALF_UP));
+      } else {
+        itemCarritoCompra.setImporteBonificado(BigDecimal.ZERO);
+      }
+      itemCarritoCompra
+          .getProducto()
+          .setHayStock(
+              itemCarritoCompra
+                      .getProducto()
+                      .getCantidadTotalEnSucursales()
+                      .compareTo(BigDecimal.ZERO)
+                  > 0);
     }
     return itemCarritoCompra;
   }
