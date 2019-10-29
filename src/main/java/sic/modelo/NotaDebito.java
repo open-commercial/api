@@ -3,6 +3,7 @@ package sic.modelo;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -60,8 +61,8 @@ public class NotaDebito extends Nota implements Serializable {
       BigDecimal iva105Neto,
       BigDecimal total,
       BigDecimal montoNoGravado,
-      long CAE,
-      LocalDateTime vencimientoCAE,
+      long cae,
+      LocalDate vencimientoCAE,
       long numSerieAfip,
       long numNotaAfip,
       Recibo recibo) {
@@ -85,7 +86,7 @@ public class NotaDebito extends Nota implements Serializable {
         iva21Neto,
         iva105Neto,
         total,
-        CAE,
+        cae,
         vencimientoCAE,
         numSerieAfip,
         numNotaAfip);
@@ -112,8 +113,8 @@ public class NotaDebito extends Nota implements Serializable {
       BigDecimal iva105Neto,
       BigDecimal total,
       BigDecimal montoNoGravado,
-      long CAE,
-      LocalDateTime vencimientoCAE,
+      long cae,
+      LocalDate vencimientoCAE,
       long numSerieAfip,
       long numNotaAfip,
       Recibo recibo) {
@@ -137,7 +138,7 @@ public class NotaDebito extends Nota implements Serializable {
         iva21Neto,
         iva105Neto,
         total,
-        CAE,
+        cae,
         vencimientoCAE,
         numSerieAfip,
         numNotaAfip);

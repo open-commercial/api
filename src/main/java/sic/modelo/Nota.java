@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.*;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javax.persistence.*;
 import javax.validation.constraints.DecimalMin;
@@ -110,7 +111,7 @@ public abstract class Nota implements Serializable {
 
   private long cae;
 
-  private LocalDateTime vencimientoCae;
+  private LocalDate vencimientoCae;
 
   private long numSerieAfip;
 

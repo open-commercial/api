@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -43,7 +44,6 @@ import sic.service.*;
 import sic.repository.NotaRepository;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
-import sic.util.FormatterFechaHora;
 
 @Service
 @Validated
@@ -218,30 +218,26 @@ public class NotaServiceImpl implements INotaService {
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qNotaCredito.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
         DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qNotaCredito.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qNotaCredito.fecha.before(fHasta));
       }
     }
@@ -308,30 +304,26 @@ public class NotaServiceImpl implements INotaService {
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qNotaDebito.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
         DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qNotaDebito.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qNotaDebito.fecha.before(fHasta));
       }
     }
@@ -1229,7 +1221,7 @@ public class NotaServiceImpl implements INotaService {
               .idComprobante(nota.getIdNota())
               .fecha(nota.getFecha())
               .tipoComprobante(nota.getTipoComprobante())
-              .CAE(nota.getCae())
+              .cae(nota.getCae())
               .vencimientoCAE(nota.getVencimientoCae())
               .numSerieAfip(nota.getNumSerieAfip())
               .numFacturaAfip(nota.getNumNotaAfip())
@@ -1242,11 +1234,11 @@ public class NotaServiceImpl implements INotaService {
               .total(nota.getTotal())
               .build();
       afipService.autorizar(comprobante);
-      nota.setCae(comprobante.getCAE());
+      nota.setCae(comprobante.getCae());
       nota.setVencimientoCae(comprobante.getVencimientoCAE());
       nota.setNumSerieAfip(comprobante.getNumSerieAfip());
       nota.setNumNotaAfip(comprobante.getNumFacturaAfip());
-      cuentaCorrienteService.updateCAENota(nota.getIdNota(), comprobante.getCAE());
+      cuentaCorrienteService.updateCAENota(nota.getIdNota(), comprobante.getCae());
     } else {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_comprobanteAFIP_invalido", null, Locale.getDefault()));
@@ -1513,8 +1505,7 @@ public class NotaServiceImpl implements INotaService {
         "Recibo Nº "
             + recibo.getNumRecibo()
             + " "
-            + FormatterFechaHora.formatoFecha(
-                recibo.getFecha(), FormatterFechaHora.FORMATO_FECHA_HISPANO);
+            +  DateTimeFormatter.ofPattern("dd/MM/yyyy");
     renglonNota.setDescripcion(descripcion);
     renglonNota.setMonto(recibo.getMonto());
     renglonNota.setImporteBruto(renglonNota.getMonto());

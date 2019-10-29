@@ -6,6 +6,7 @@ import com.querydsl.core.types.dsl.Expressions;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import org.springframework.context.MessageSource;
@@ -28,7 +29,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.exception.BusinessServiceException;
-import sic.util.FormatterFechaHora;
 import sic.repository.CajaRepository;
 
 @Service
@@ -212,30 +212,26 @@ public class CajaServiceImpl implements ICajaService {
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qCaja.fechaApertura.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
         DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qCaja.fechaApertura.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qCaja.fechaApertura.before(fHasta));
       }
     }
@@ -274,8 +270,7 @@ public class CajaServiceImpl implements ICajaService {
                     && (ultimaCajaDeEmpresa.getEstado() == EstadoCaja.ABIERTA)))
         .forEachOrdered(
             ultimaCajaDeEmpresa -> {
-              LocalDateTime fechaApertura = ultimaCajaDeEmpresa.getFechaApertura();
-              if (fechaApertura.isBefore(LocalDateTime.now())) {
+              if (ultimaCajaDeEmpresa.getFechaApertura().isBefore(LocalDateTime.now())) {
                 this.cerrarCaja(
                     ultimaCajaDeEmpresa.getId_Caja(),
                     this.getSaldoQueAfectaCaja(ultimaCajaDeEmpresa),

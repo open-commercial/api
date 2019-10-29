@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -35,7 +36,6 @@ import sic.repository.ReciboRepository;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
-import sic.util.FormatterFechaHora;
 
 @Service
 @Validated
@@ -100,20 +100,18 @@ public class ReciboServiceImpl implements IReciboService {
           Expressions.dateTemplate(
               LocalDateTime.class,
               dateTemplate,
-              FormatterFechaHora.formatoFecha(
-                  criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+              criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
       DateExpression<LocalDateTime> fHasta =
           Expressions.dateTemplate(
               LocalDateTime.class,
               dateTemplate,
-              FormatterFechaHora.formatoFecha(
-                  criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+              criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
       builder.and(qRecibo.fecha.between(fDesde, fHasta));
     }
     if (criteria.getNumSerie() != null && criteria.getNumRecibo() != null)
       builder
-        .and(qRecibo.numSerie.eq(criteria.getNumSerie()))
-        .and(qRecibo.numRecibo.eq(criteria.getNumRecibo()));
+          .and(qRecibo.numSerie.eq(criteria.getNumSerie()))
+          .and(qRecibo.numRecibo.eq(criteria.getNumRecibo()));
     if (criteria.getConcepto() != null) {
       String[] terminos = criteria.getConcepto().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();

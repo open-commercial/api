@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.persistence.Entity;
@@ -59,8 +60,8 @@ public class FacturaCompra extends Factura implements Serializable {
       BigDecimal cantidadArticulos,
       Empresa empresa,
       boolean eliminada,
-      long CAE,
-      LocalDateTime vencimientoCAE,
+      long cae,
+      LocalDate vencimientoCAE,
       Proveedor proveedor,
       long numSerieAfip,
       long numFacturaAfip) {
@@ -90,7 +91,7 @@ public class FacturaCompra extends Factura implements Serializable {
         cantidadArticulos,
         empresa,
         eliminada,
-        CAE,
+        cae,
         vencimientoCAE,
         numSerieAfip,
         numFacturaAfip);

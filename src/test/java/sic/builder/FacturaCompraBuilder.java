@@ -1,6 +1,7 @@
 package sic.builder;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class FacturaCompraBuilder {
     private Empresa empresa = new EmpresaBuilder().build();
     private boolean eliminada = false;
     private long CAE = 21064126523746l;
-    private LocalDateTime vencimientoCAE = null;
+    private LocalDate vencimientoCAE = null;
     private long numSerieAfip = 0;
     private long numFacturaAfip = 0;
     
@@ -193,7 +194,7 @@ public class FacturaCompraBuilder {
         return this;
     }
     
-    public FacturaCompraBuilder withVencimientoCAE(LocalDateTime vencimientoCAE) {
+    public FacturaCompraBuilder withVencimientoCAE(LocalDate vencimientoCAE) {
         this.vencimientoCAE = vencimientoCAE;
         return this;
     }

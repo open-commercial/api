@@ -16,6 +16,7 @@ import sic.modelo.criteria.BusquedaGastoCriteria;
 import sic.service.IGastoService;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
@@ -30,7 +31,6 @@ import sic.exception.BusinessServiceException;
 import sic.repository.GastoRepository;
 import sic.service.ICajaService;
 import sic.service.IEmpresaService;
-import sic.util.FormatterFechaHora;
 
 @Service
 @Validated
@@ -125,30 +125,26 @@ public class GastoServiceImpl implements IGastoService {
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qGasto.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
         DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qGasto.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qGasto.fecha.before(fHasta));
       }
     }

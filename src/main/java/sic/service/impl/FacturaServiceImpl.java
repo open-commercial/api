@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -41,7 +42,6 @@ import sic.service.*;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 import sic.util.CalculosComprobante;
-import sic.util.FormatterFechaHora;
 import sic.repository.FacturaVentaRepository;
 import sic.repository.FacturaCompraRepository;
 import sic.repository.FacturaRepository;
@@ -307,30 +307,26 @@ public class FacturaServiceImpl implements IFacturaService {
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qFacturaCompra.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
         DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qFacturaCompra.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qFacturaCompra.fecha.before(fHasta));
       }
     }
@@ -366,30 +362,26 @@ public class FacturaServiceImpl implements IFacturaService {
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qFacturaVenta.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
         DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaDesde(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qFacturaVenta.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
         DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
                 LocalDateTime.class,
                 dateTemplate,
-                FormatterFechaHora.formatoFecha(
-                    criteria.getFechaHasta(), FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL));
+                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qFacturaVenta.fecha.before(fHasta));
       }
     }
@@ -542,12 +534,18 @@ public class FacturaServiceImpl implements IFacturaService {
   private void validarOperacion(Factura factura) {
     // Entrada de Datos
     if (factura.getFechaVencimiento() != null
-        && factura
-            .getFecha()
-            .withHour(0)
-            .withMinute(0)
-            .withSecond(0)
-            .isBefore(factura.getFechaVencimiento().withHour(0).withMinute(0).withSecond(0))) {
+        && (factura
+                .getFecha()
+                .withHour(0)
+                .withMinute(0)
+                .withSecond(0)
+                .isEqual(factura.getFechaVencimiento().withHour(0).withMinute(0).withSecond(0))
+            || factura
+                .getFecha()
+                .withHour(0)
+                .withMinute(0)
+                .withSecond(0)
+                .isBefore(factura.getFechaVencimiento().withHour(0).withMinute(0).withSecond(0)))) {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_factura_fecha_invalida", null, Locale.getDefault()));
     }
@@ -666,7 +664,7 @@ public class FacturaServiceImpl implements IFacturaService {
             .idComprobante(fv.getId_Factura())
             .fecha(fv.getFecha())
             .tipoComprobante(fv.getTipoComprobante())
-            .CAE(fv.getCae())
+            .cae(fv.getCae())
             .vencimientoCAE(fv.getVencimientoCae())
             .numSerieAfip(fv.getNumSerieAfip())
             .numFacturaAfip(fv.getNumFacturaAfip())
@@ -679,11 +677,11 @@ public class FacturaServiceImpl implements IFacturaService {
             .total(fv.getTotal())
             .build();
     afipService.autorizar(comprobante);
-    fv.setCae(comprobante.getCAE());
+    fv.setCae(comprobante.getCae());
     fv.setVencimientoCae(comprobante.getVencimientoCAE());
     fv.setNumSerieAfip(comprobante.getNumSerieAfip());
     fv.setNumFacturaAfip(comprobante.getNumFacturaAfip());
-    cuentaCorrienteService.updateCAEFactura(fv.getId_Factura(), comprobante.getCAE());
+    cuentaCorrienteService.updateCAEFactura(fv.getId_Factura(), comprobante.getCae());
     return fv;
   }
 

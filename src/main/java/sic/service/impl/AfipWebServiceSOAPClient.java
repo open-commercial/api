@@ -33,12 +33,9 @@ import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.Locale;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.transform.Result;
 
 import org.bouncycastle.cms.CMSException;
@@ -96,7 +93,7 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
         return response.getLoginCmsReturn();
     }
 
-    public byte[] crearCMS(byte[] p12file, String p12pass, String signer, String service, long ticketTime) {
+    public byte[] crearCMS(byte[] p12file, String p12pass, String signer, String service, long ticketTimeInHours) {
         PrivateKey pKey;
         X509Certificate pCertificate;
         byte[] asn1Cms;
@@ -120,7 +117,7 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
             throw new BusinessServiceException(messageSource.getMessage(
               "mensaje_certificado_error", null, Locale.getDefault()));
         }
-        String loginTicketRequestXml = this.crearTicketRequerimientoAcceso(service, ticketTime);
+        String loginTicketRequestXml = this.crearTicketRequerimientoAcceso(service, ticketTimeInHours);
         try {
             CMSSignedDataGenerator generator = new CMSSignedDataGenerator();
             generator.addSigner(pKey, pCertificate, CMSSignedDataGenerator.DIGEST_SHA1);
@@ -136,27 +133,14 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
         return asn1Cms;
     }
 
-    //REVISAR
-    public String crearTicketRequerimientoAcceso(String service, long ticketTime) {
+    public String crearTicketRequerimientoAcceso(String service, long ticketTimeInHours) {
+        //long uniqueId = 1L + (long) (Math.random() * (9999999999L - 1L));
         LocalDateTime now = LocalDateTime.now();
         ZonedDateTime zdt = now.atZone(ZoneId.systemDefault());
-        LocalDateTime genenerationTime = LocalDateTime.now();
-        DatatypeFactory datatypeFactory = null;
         String uniqueId = Long.toString(zdt.toInstant().toEpochMilli() / 1000);
-        LocalDateTime expirationTime = now.plusHours(12L); // 3600000L
-       //.setTime(new Date(now.getTime() + ticketTime));
-        try {
-            datatypeFactory = DatatypeFactory.newInstance();
-        } catch (DatatypeConfigurationException ex) {
-            loggerSoapClient.error(ex.getMessage());
-            throw new BusinessServiceException(messageSource.getMessage(
-              "mensaje_error_xml_factory", null, Locale.getDefault()));
-        }
-        GregorianCalendar calendar = new GregorianCalendar();
-        calendar.set(genenerationTime.getYear(), genenerationTime.getMonthValue() - 1, genenerationTime.getDayOfMonth());
-        XMLGregorianCalendar xmlgentime = datatypeFactory.newXMLGregorianCalendar(calendar);
-        calendar.set(expirationTime.getYear(), expirationTime.getMonthValue() - 1, expirationTime.getDayOfMonth());
-        XMLGregorianCalendar xmlexptime = datatypeFactory.newXMLGregorianCalendar(calendar);
+
+        String xmlgentime = LocalDateTime.now().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        String xmlexptime = LocalDateTime.now().plusHours(ticketTimeInHours).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
                 + "<loginTicketRequest version=\"1.0\">"
                 + "<header>"
