@@ -86,6 +86,7 @@ public class UsuarioController {
       Usuario usuarioPersistido = usuarioService.getUsuarioNoEliminadoPorId(usuarioDTO.getId_Usuario());
       if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
         usuarioPorActualizar.setRoles(usuarioPersistido.getRoles());
+        usuarioPorActualizar.setHabilitado(usuarioPersistido.isHabilitado());
       }
       if (usuarioLoggedIn.getId_Usuario() == usuarioPersistido.getId_Usuario()) {
         usuarioPorActualizar.setToken(usuarioLoggedIn.getToken());
@@ -97,6 +98,7 @@ public class UsuarioController {
       } else {
         usuarioPorActualizar.setPassword(usuarioPersistido.getPassword());
       }
+
       usuarioService.actualizar(usuarioPorActualizar, usuarioPersistido);
       if (!usuarioSeModificaASiMismo)
         usuarioService.actualizarToken("", usuarioPorActualizar.getId_Usuario());
