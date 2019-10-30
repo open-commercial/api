@@ -614,7 +614,7 @@ public class ProductoServiceImpl implements IProductoService {
     BigDecimal bonificacion =
         cliente.getBonificacion().divide(new BigDecimal("100"), RoundingMode.HALF_UP);
     productos.stream()
-        .filter(producto -> !producto.isOferta())
+        .filter(producto -> !producto.isOferta() && bonificacion.compareTo(BigDecimal.ZERO) > 0)
         .forEach(
             p ->
                 p.setPrecioListaBonificado(

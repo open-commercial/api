@@ -6447,22 +6447,64 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("5445.00"), item1.getImporteBonificado());
   }
 
-//  @Test
-//  void buscarProductosAndVerificarPrecios() {
-//    BusquedaFacturaVentaCriteria criteria =
-//        BusquedaFacturaVentaCriteria.builder()
-//            .tipoComprobante(TipoDeComprobante.FACTURA_B)
-//            .idSucursal(1L)
-//            .build();
-//    HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-//    List<FacturaVenta> facturasRecuperadas =
-//        restTemplate
-//            .exchange(
-//                apiPrefix + "/facturas/venta/busqueda/criteria",
-//                HttpMethod.POST,
-//                requestEntity,
-//                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
-//            .getBody()
-//            .getContent();
-//  }
+  @Test
+  void buscarProductosAndVerificarPrecios() {
+    this.crearProductos();
+    BusquedaProductoCriteria criteria =
+        BusquedaProductoCriteria.builder()
+          .pagina(0).build();
+    HttpEntity<BusquedaProductoCriteria> requestEntity = new HttpEntity(criteria);
+    // sin bonificacion
+
+    List<ProductoDTO> productosRecuperados =
+        restTemplate
+            .exchange(
+                apiPrefix + "/productos/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
+                new ParameterizedTypeReference<PaginaRespuestaRest<ProductoDTO>>() {})
+            .getBody()
+            .getContent();
+    assertNull(productosRecuperados.get(0).getPrecioListaBonificado());
+    assertNull(productosRecuperados.get(1).getPrecioListaBonificado());
+    ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/2", ClienteDTO.class);
+    cliente.setBonificacion(BigDecimal.TEN);
+    restTemplate.put(apiPrefix + "/clientes", cliente);
+    cliente = restTemplate.getForObject(apiPrefix + "/clientes/2", ClienteDTO.class);
+    assertEquals(new BigDecimal("10.000000000000000"), cliente.getBonificacion());
+    productosRecuperados =
+      restTemplate
+        .exchange(
+          apiPrefix + "/productos/busqueda/criteria",
+          HttpMethod.POST,
+          requestEntity,
+          new ParameterizedTypeReference<PaginaRespuestaRest<ProductoDTO>>() {})
+        .getBody()
+        .getContent();
+    assertEquals(new BigDecimal("994.500000000000000000000000000000"), productosRecuperados.get(0).getPrecioListaBonificado());
+    assertEquals(new BigDecimal("1089.000000000000000000000000000000"), productosRecuperados.get(1).getPrecioListaBonificado());
+    ProductoDTO productoUno = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    productoUno.setPublico(true);
+    productoUno.setOferta(true);
+    productoUno.setUrlImagen("imagen.com");
+    productoUno.setPorcentajeBonificacionOferta(BigDecimal.TEN);
+    restTemplate.put(apiPrefix + "/productos", productoUno);
+    ProductoDTO productoDos = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
+    productoDos.setPublico(true);
+    productoDos.setOferta(true);
+    productoDos.setUrlImagen("imagen2.com");
+    productoDos.setPorcentajeBonificacionOferta(new BigDecimal("50"));
+    restTemplate.put(apiPrefix + "/productos", productoDos);
+    productosRecuperados =
+      restTemplate
+        .exchange(
+          apiPrefix + "/productos/busqueda/criteria",
+          HttpMethod.POST,
+          requestEntity,
+          new ParameterizedTypeReference<PaginaRespuestaRest<ProductoDTO>>() {})
+        .getBody()
+        .getContent();
+    assertEquals(new BigDecimal("552.50000000000000000"), productosRecuperados.get(0).getPrecioListaBonificado());
+    assertEquals(new BigDecimal("1089.00000000000000000"), productosRecuperados.get(1).getPrecioListaBonificado());
+  }
 }
