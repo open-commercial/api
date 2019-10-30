@@ -6454,8 +6454,6 @@ class AppIntegrationTest {
         BusquedaProductoCriteria.builder()
           .pagina(0).build();
     HttpEntity<BusquedaProductoCriteria> requestEntity = new HttpEntity(criteria);
-    // sin bonificacion
-
     List<ProductoDTO> productosRecuperados =
         restTemplate
             .exchange(
@@ -6481,8 +6479,8 @@ class AppIntegrationTest {
           new ParameterizedTypeReference<PaginaRespuestaRest<ProductoDTO>>() {})
         .getBody()
         .getContent();
-    assertEquals(new BigDecimal("994.500000000000000000000000000000"), productosRecuperados.get(0).getPrecioListaBonificado());
-    assertEquals(new BigDecimal("1089.000000000000000000000000000000"), productosRecuperados.get(1).getPrecioListaBonificado());
+    assertEquals(new BigDecimal("1089.000000000000000000000000000000"), productosRecuperados.get(0).getPrecioListaBonificado());
+    assertEquals(new BigDecimal("994.500000000000000000000000000000"), productosRecuperados.get(1).getPrecioListaBonificado());
     ProductoDTO productoUno = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     productoUno.setPublico(true);
     productoUno.setOferta(true);
@@ -6504,7 +6502,7 @@ class AppIntegrationTest {
           new ParameterizedTypeReference<PaginaRespuestaRest<ProductoDTO>>() {})
         .getBody()
         .getContent();
-    assertEquals(new BigDecimal("552.50000000000000000"), productosRecuperados.get(0).getPrecioListaBonificado());
-    assertEquals(new BigDecimal("1089.00000000000000000"), productosRecuperados.get(1).getPrecioListaBonificado());
+    assertEquals(new BigDecimal("1089.00000000000000000"), productosRecuperados.get(0).getPrecioListaBonificado());
+    assertEquals(new BigDecimal("552.50000000000000000"), productosRecuperados.get(1).getPrecioListaBonificado());
   }
 }
