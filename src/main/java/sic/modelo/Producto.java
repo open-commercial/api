@@ -118,6 +118,7 @@ public class Producto implements Serializable {
 
   private boolean publico;
 
+  @JsonView(Views.Comprador.class)
   private boolean oferta;
 
   @Column(precision = 25, scale = 15)
