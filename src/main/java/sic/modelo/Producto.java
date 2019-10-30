@@ -63,10 +63,6 @@ public class Producto implements Serializable {
   @JsonView(Views.Comprador.class)
   private boolean hayStock;
 
-  @Transient
-  @JsonView(Views.Comprador.class)
-  private BigDecimal precioBonificado;
-
   @Column(precision = 25, scale = 15)
   @DecimalMin(
       value = "0",
@@ -109,15 +105,6 @@ public class Producto implements Serializable {
   @JsonView(Views.Comprador.class)
   private BigDecimal precioLista;
 
-  @ManyToOne
-  @JoinColumn(name = "id_Rubro", referencedColumnName = "id_Rubro")
-  @NotNull(message = "{mensaje_producto_vacio_rubro}")
-  private Rubro rubro;
-
-  private boolean ilimitado;
-
-  private boolean publico;
-
   @JsonView(Views.Comprador.class)
   private boolean oferta;
 
@@ -127,8 +114,18 @@ public class Producto implements Serializable {
   @JsonView(Views.Comprador.class)
   private BigDecimal porcentajeBonificacionOferta;
 
+  @Transient
   @JsonView(Views.Comprador.class)
   private BigDecimal precioListaBonificado;
+
+  @ManyToOne
+  @JoinColumn(name = "id_Rubro", referencedColumnName = "id_Rubro")
+  @NotNull(message = "{mensaje_producto_vacio_rubro}")
+  private Rubro rubro;
+
+  private boolean ilimitado;
+
+  private boolean publico;
 
   @Temporal(TemporalType.TIMESTAMP)
   private Date fechaUltimaModificacion;

@@ -178,9 +178,26 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public Page<Producto> buscarProductos(BusquedaProductoCriteria criteria) {
-    return productoRepository.findAll(
-        this.getBuilder(criteria),
-        this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido(), TAMANIO_PAGINA_DEFAULT));
+    Page<Producto> productos =
+        productoRepository.findAll(
+            this.getBuilder(criteria),
+            this.getPageable(
+                criteria.getPagina(),
+                criteria.getOrdenarPor(),
+                criteria.getSentido(),
+                TAMANIO_PAGINA_DEFAULT));
+    productos.stream()
+        .filter(Producto::isOferta)
+        .forEach(
+            producto ->
+                producto.setPrecioListaBonificado(
+                    producto
+                        .getPrecioLista()
+                        .multiply(
+                            (new BigDecimal("100"))
+                                .subtract(producto.getPorcentajeBonificacionOferta())
+                                .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP))));
+    return productos;
   }
 
   @Override
@@ -277,7 +294,6 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   @Transactional
   public void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido) {
-    this.calcularPrecioBonificado(productoPorActualizar);
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
     productoPorActualizar.setFechaUltimaModificacion(new Date());
@@ -515,7 +531,6 @@ public class ProductoServiceImpl implements IProductoService {
         p.setIvaNeto(productosParaActualizarDTO.getIvaNeto());
         p.setPrecioLista(productosParaActualizarDTO.getPrecioLista());
         p.setFechaUltimaModificacion(new Date());
-        this.calcularPrecioBonificado(p);
       }
       if (aplicaDescuentoRecargoPorcentaje) {
         p.setPrecioCosto(p.getPrecioCosto().multiply(multiplicador));
@@ -524,7 +539,6 @@ public class ProductoServiceImpl implements IProductoService {
         p.setIvaNeto(p.getIvaNeto().multiply(multiplicador));
         p.setPrecioLista(p.getPrecioLista().multiply(multiplicador));
         p.setFechaUltimaModificacion(new Date());
-        this.calcularPrecioBonificado(p);
       }
       if (productosParaActualizarDTO.getIdMedida() != null
           || productosParaActualizarDTO.getIdRubro() != null
@@ -543,20 +557,6 @@ public class ProductoServiceImpl implements IProductoService {
     productoRepository.saveAll(productos);
     logger.warn("Los Productos {} se modificaron correctamente.", productos);
     return productos;
-  }
-
-  private void calcularPrecioBonificado(Producto producto) {
-    if (producto.isOferta() && producto.getPorcentajeBonificacionOferta() != null) {
-      producto.setPrecioListaBonificado(
-          producto
-              .getPrecioLista()
-              .multiply(
-                  (new BigDecimal("100"))
-                      .subtract(producto.getPorcentajeBonificacionOferta())
-                      .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP)));
-    } else {
-      producto.setPrecioListaBonificado(null);
-    }
   }
 
   @Override
@@ -586,7 +586,22 @@ public class ProductoServiceImpl implements IProductoService {
   public Producto getProductoNoEliminadoPorId(long idProducto) {
     Optional<Producto> producto = productoRepository.findById(idProducto);
     if (producto.isPresent() && !producto.get().isEliminado()) {
-      producto.get().setHayStock(producto.get().getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
+      producto
+          .get()
+          .setHayStock(
+              producto.get().getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
+      if (producto.get().isOferta()) {
+        producto
+            .get()
+            .setPrecioListaBonificado(
+                producto
+                    .get()
+                    .getPrecioLista()
+                    .multiply(
+                        (new BigDecimal("100"))
+                            .subtract(producto.get().getPorcentajeBonificacionOferta())
+                            .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP)));
+      }
       return producto.get();
     } else {
       throw new EntityNotFoundException(
@@ -598,10 +613,12 @@ public class ProductoServiceImpl implements IProductoService {
   public Page<Producto> getProductosConPrecioBonificado(Page<Producto> productos, Cliente cliente) {
     BigDecimal bonificacion =
         cliente.getBonificacion().divide(new BigDecimal("100"), RoundingMode.HALF_UP);
-    productos.forEach(
-        p ->
-            p.setPrecioBonificado(
-                p.getPrecioLista().subtract(p.getPrecioLista().multiply(bonificacion))));
+    productos.stream()
+        .filter(producto -> !producto.isOferta())
+        .forEach(
+            p ->
+                p.setPrecioListaBonificado(
+                    p.getPrecioLista().subtract(p.getPrecioLista().multiply(bonificacion))));
     return productos;
   }
 

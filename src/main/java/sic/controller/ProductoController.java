@@ -1,6 +1,7 @@
 package sic.controller;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
@@ -69,7 +70,8 @@ public class ProductoController {
       throw new EntityNotFoundException(
           messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
     }
-    if (authorizationHeader != null
+    if (!producto.isOferta()
+        && authorizationHeader != null
         && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente = clienteService.getClientePorIdUsuario((int) claims.get("idUsuario"));
@@ -77,13 +79,10 @@ public class ProductoController {
         Page<Producto> productos =
             productoService.getProductosConPrecioBonificado(
                 new PageImpl<>(Collections.singletonList(producto)), cliente);
-        return productos.getContent().get(0);
-      } else {
-        return producto;
+        producto = productos.getContent().get(0);
       }
-    } else {
-      return producto;
     }
+    return producto;
   }
 
   @GetMapping("/productos/busqueda")
@@ -244,7 +243,6 @@ public class ProductoController {
             .map(CantidadEnSucursal::getCantidad)
             .reduce(BigDecimal.ZERO, BigDecimal::add));
     producto.setHayStock(producto.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
-    producto.setPrecioBonificado(nuevoProductoDTO.getPrecioBonificado());
     producto.setCantMinima(nuevoProductoDTO.getCantMinima());
     producto.setBulto(nuevoProductoDTO.getBulto());
     producto.setPrecioCosto(nuevoProductoDTO.getPrecioCosto());

@@ -6440,10 +6440,29 @@ class AppIntegrationTest {
     productoRecuperado = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     assertTrue(productoRecuperado.isOferta());
     assertEquals(new BigDecimal("10.000000000000000"), productoRecuperado.getPorcentajeBonificacionOferta());
-    assertEquals(new BigDecimal("1089.00"), productoRecuperado.getPrecioListaBonificado());
+    assertEquals(new BigDecimal("1089.00000000000000000"), productoRecuperado.getPrecioListaBonificado());
     restTemplate.postForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=5", null, ItemCarritoCompra.class);
     ItemCarritoCompra item1 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
     assertEquals(new BigDecimal("6050.00"), item1.getImporte());
     assertEquals(new BigDecimal("5445.00"), item1.getImporteBonificado());
   }
+
+//  @Test
+//  void buscarProductosAndVerificarPrecios() {
+//    BusquedaFacturaVentaCriteria criteria =
+//        BusquedaFacturaVentaCriteria.builder()
+//            .tipoComprobante(TipoDeComprobante.FACTURA_B)
+//            .idSucursal(1L)
+//            .build();
+//    HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
+//    List<FacturaVenta> facturasRecuperadas =
+//        restTemplate
+//            .exchange(
+//                apiPrefix + "/facturas/venta/busqueda/criteria",
+//                HttpMethod.POST,
+//                requestEntity,
+//                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+//            .getBody()
+//            .getContent();
+//  }
 }

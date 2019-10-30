@@ -107,8 +107,6 @@ set producto.oferta = false
 where producto.oferta = true;
 SET SQL_SAFE_UPDATES = 1;
 alter TABLE producto ADD COLUMN porcentajeBonificacionOferta decimal(25,15);
-alter TABLE producto ADD COLUMN precioListaBonificado decimal(25,15) after porcentajebonificacionoferta;
 alter TABLE producto CHANGE cantidad cantidadTotalEnSucursales decimal(25,15);
-
 alter TABLE renglonpedido ADD COLUMN urlImagenItem varchar(255) after medidaItem;
 alter TABLE renglonpedido ADD COLUMN oferta bit(1) after urlImagenItem;
