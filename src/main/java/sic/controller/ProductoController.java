@@ -74,7 +74,7 @@ public class ProductoController {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente =
         clienteService.getClientePorIdUsuarioYidEmpresa(
-          (int) claims.get("idUsuario"), producto.getEmpresa().getId_Empresa());
+          (int) claims.get("idUsuario"), producto.getEmpresa().getIdEmpresa());
       if (cliente != null) {
         Page<Producto> productos =
           productoService.getProductosConPrecioBonificado(

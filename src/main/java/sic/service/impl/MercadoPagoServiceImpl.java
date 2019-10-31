@@ -132,7 +132,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                           notaService
                               .getTipoNotaDebitoCliente(
                                   reciboMP.get().getIdCliente(),
-                                  reciboMP.get().getEmpresa().getId_Empresa())
+                                  reciboMP.get().getEmpresa().getIdEmpresa())
                               .get(0))
                       .build();
               NotaDebito notaGuardada =

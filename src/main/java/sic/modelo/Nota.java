@@ -119,7 +119,7 @@ public abstract class Nota implements Serializable {
 
   @JsonGetter("idEmpresa")
   public Long getIdEmpresa() {
-    return empresa.getId_Empresa();
+    return empresa.getIdEmpresa();
   }
 
   @JsonGetter("nombreEmpresa")
@@ -185,7 +185,7 @@ public abstract class Nota implements Serializable {
   @JsonGetter("idFacturaVenta")
   public Long getIdFacturaVenta() {
     if (facturaVenta != null) {
-      return facturaVenta.getId_Factura();
+      return facturaVenta.getIdFactura();
     } else {
       return null;
     }
@@ -194,7 +194,7 @@ public abstract class Nota implements Serializable {
   @JsonGetter("idFacturaCompra")
   public Long getIdFacturaCompra() {
     if (facturaCompra != null) {
-      return facturaCompra.getId_Factura();
+      return facturaCompra.getIdFactura();
     } else {
       return null;
     }

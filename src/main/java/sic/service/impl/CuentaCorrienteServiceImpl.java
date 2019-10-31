@@ -181,7 +181,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     builder.and(
         qCuentaCorrienteCliente
             .empresa
-            .id_Empresa
+            .idEmpresa
             .eq(criteria.getIdEmpresa())
             .and(qCuentaCorrienteCliente.eliminada.eq(false)));
     return cuentaCorrienteClienteRepository.findAll(
@@ -240,7 +240,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     builder.and(
         qCuentaCorrienteProveedor
             .empresa
-            .id_Empresa
+            .idEmpresa
             .eq(criteria.getIdEmpresa())
             .and(qCuentaCorrienteProveedor.eliminada.eq(false)));
     return cuentaCorrienteProveedorRepository.findAll(
@@ -303,7 +303,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     rcc.setFactura(factura);
     rcc.setFecha(factura.getFecha());
     rcc.setFechaVencimiento(factura.getFechaVencimiento());
-    rcc.setIdMovimiento(factura.getId_Factura());
+    rcc.setIdMovimiento(factura.getIdFactura());
     rcc.setMonto(factura.getTotal().negate());
     cc.getRenglones().add(rcc);
     cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));

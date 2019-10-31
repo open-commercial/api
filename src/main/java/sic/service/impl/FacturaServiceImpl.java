@@ -295,7 +295,7 @@ public class FacturaServiceImpl implements IFacturaService {
     builder.and(
         qFacturaCompra
             .empresa
-            .id_Empresa
+            .idEmpresa
             .eq(criteria.getIdEmpresa())
             .and(qFacturaCompra.eliminada.eq(false)));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
@@ -350,7 +350,7 @@ public class FacturaServiceImpl implements IFacturaService {
     builder.and(
         qFacturaVenta
             .empresa
-            .id_Empresa
+            .idEmpresa
             .eq(criteria.getIdEmpresa())
             .and(qFacturaVenta.eliminada.eq(false)));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
@@ -444,7 +444,7 @@ public class FacturaServiceImpl implements IFacturaService {
           this.calcularNumeroFacturaVenta(
               factura.getTipoComprobante(),
               factura.getNumSerie(),
-              factura.getEmpresa().getId_Empresa()));
+              factura.getEmpresa().getIdEmpresa()));
     }
     this.calcularCantidadDeArticulos(factura);
     this.validarOperacion(factura);
@@ -644,7 +644,7 @@ public class FacturaServiceImpl implements IFacturaService {
     Cliente cliente = clienteService.getClienteNoEliminadoPorId(fv.getIdCliente());
     ComprobanteAFIP comprobante =
         ComprobanteAFIP.builder()
-            .idComprobante(fv.getId_Factura())
+            .idComprobante(fv.getIdFactura())
             .fecha(fv.getFecha())
             .tipoComprobante(fv.getTipoComprobante())
             .cae(fv.getCae())
@@ -664,7 +664,7 @@ public class FacturaServiceImpl implements IFacturaService {
     fv.setVencimientoCae(comprobante.getVencimientoCAE());
     fv.setNumSerieAfip(comprobante.getNumSerieAfip());
     fv.setNumFacturaAfip(comprobante.getNumFacturaAfip());
-    cuentaCorrienteService.updateCAEFactura(fv.getId_Factura(), comprobante.getCae());
+    cuentaCorrienteService.updateCAEFactura(fv.getIdFactura(), comprobante.getCae());
     return fv;
   }
 
@@ -878,7 +878,7 @@ public class FacturaServiceImpl implements IFacturaService {
             messageSource.getMessage("mensaje_empresa_404_logo", null, Locale.getDefault()), ex);
       }
     }
-    List<RenglonFactura> renglones = this.getRenglonesDeLaFactura(factura.getId_Factura());
+    List<RenglonFactura> renglones = this.getRenglonesDeLaFactura(factura.getIdFactura());
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
     try {
       return JasperExportManager.exportReportToPdf(
@@ -1295,10 +1295,10 @@ public class FacturaServiceImpl implements IFacturaService {
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
         qFacturaVenta
-            .id_Factura
+            .idFactura
             .lt(comprobante.getIdComprobante())
             .and(qFacturaVenta.eliminada.eq(false))
-            .and(qFacturaVenta.empresa.id_Empresa.eq(comprobante.getEmpresa().getId_Empresa()))
+            .and(qFacturaVenta.empresa.idEmpresa.eq(comprobante.getEmpresa().getIdEmpresa()))
             .and(qFacturaVenta.tipoComprobante.eq(comprobante.getTipoComprobante())));
     Page<FacturaVenta> facturaAnterior =
         facturaVentaRepository.findAll(

@@ -23,7 +23,7 @@ public interface ReciboRepository
 
   @Query(
       "SELECT r FROM Recibo r "
-          + "WHERE r.empresa.id_Empresa = :idEmpresa "
+          + "WHERE r.empresa.idEmpresa = :idEmpresa "
           + "AND r.formaDePago.id_FormaDePago = :idFormaDePago "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
   List<Recibo> getRecibosEntreFechasPorFormaDePago(
@@ -34,7 +34,7 @@ public interface ReciboRepository
 
   @Query(
       "SELECT SUM(r.monto) FROM Recibo r "
-          + "WHERE r.empresa.id_Empresa = :idEmpresa "
+          + "WHERE r.empresa.idEmpresa = :idEmpresa "
           + "AND (r.proveedor is null) "
           + "AND r.formaDePago.id_FormaDePago = :idFormaDePago "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
@@ -46,7 +46,7 @@ public interface ReciboRepository
 
   @Query(
       "SELECT SUM(r.monto) FROM Recibo r "
-          + "WHERE r.empresa.id_Empresa = :idEmpresa "
+          + "WHERE r.empresa.idEmpresa = :idEmpresa "
           + "AND (r.cliente is null) "
           + "AND r.formaDePago.id_FormaDePago = :idFormaDePago "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
@@ -58,7 +58,7 @@ public interface ReciboRepository
 
   @Query(
       "SELECT SUM(r.monto) FROM Recibo r "
-          + "WHERE r.empresa.id_Empresa = :idEmpresa "
+          + "WHERE r.empresa.idEmpresa = :idEmpresa "
           + "AND (r.proveedor is null) "
           + "AND r.formaDePago.afectaCaja = true "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
@@ -67,7 +67,7 @@ public interface ReciboRepository
 
   @Query(
       "SELECT SUM(r.monto) FROM Recibo r "
-          + "WHERE r.empresa.id_Empresa = :idEmpresa "
+          + "WHERE r.empresa.idEmpresa = :idEmpresa "
           + "AND (r.cliente is null) "
           + "AND r.formaDePago.afectaCaja = true "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
@@ -76,7 +76,7 @@ public interface ReciboRepository
 
   @Query(
       "SELECT SUM(r.monto) FROM Recibo r "
-          + "WHERE r.empresa.id_Empresa = :idEmpresa "
+          + "WHERE r.empresa.idEmpresa = :idEmpresa "
           + "AND (r.proveedor is null) "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
   BigDecimal getTotalRecibosClientesEntreFechas(
@@ -84,7 +84,7 @@ public interface ReciboRepository
 
   @Query(
       "SELECT SUM(r.monto) FROM Recibo r "
-          + "WHERE r.empresa.id_Empresa = :idEmpresa "
+          + "WHERE r.empresa.idEmpresa = :idEmpresa "
           + "AND (r.cliente is null) "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
   BigDecimal getTotalRecibosProveedoresEntreFechas(

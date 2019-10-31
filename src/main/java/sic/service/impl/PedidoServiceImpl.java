@@ -208,7 +208,7 @@ public class PedidoServiceImpl implements IPedidoService {
     String emailCliente = pedido.getCliente().getEmail();
     if (emailCliente != null && !emailCliente.isEmpty()) {
       correoElectronicoService.enviarMailPorEmpresa(
-          pedido.getEmpresa().getId_Empresa(),
+          pedido.getEmpresa().getIdEmpresa(),
           emailCliente,
           "",
           "Nuevo Pedido Ingresado",
@@ -284,7 +284,7 @@ public class PedidoServiceImpl implements IPedidoService {
     QPedido qPedido = QPedido.pedido;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
-        qPedido.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qPedido.eliminado.eq(false)));
+        qPedido.empresa.idEmpresa.eq(criteria.getIdEmpresa()).and(qPedido.eliminado.eq(false)));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
       criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59));

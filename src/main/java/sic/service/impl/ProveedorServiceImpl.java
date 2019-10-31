@@ -92,7 +92,7 @@ public class ProveedorServiceImpl implements IProveedorService {
     builder.and(
         qProveedor
             .empresa
-            .id_Empresa
+            .idEmpresa
             .eq(criteria.getIdEmpresa())
             .and(qProveedor.eliminado.eq(false)));
     return proveedorRepository.findAll(builder, this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));

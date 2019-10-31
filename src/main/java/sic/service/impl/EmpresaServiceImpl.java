@@ -76,7 +76,7 @@ public class EmpresaServiceImpl implements IEmpresaService {
         "mensaje_empresa_duplicado_nombre", null, Locale.getDefault()));
     }
     if (operacion == TipoDeOperacion.ACTUALIZACION) {
-      if (empresaDuplicada != null && empresaDuplicada.getId_Empresa() != empresa.getId_Empresa()) {
+      if (empresaDuplicada != null && empresaDuplicada.getIdEmpresa() != empresa.getIdEmpresa()) {
         throw new BusinessServiceException(messageSource.getMessage(
           "mensaje_empresa_duplicado_nombre", null, Locale.getDefault()));
       }
@@ -91,7 +91,7 @@ public class EmpresaServiceImpl implements IEmpresaService {
     }
     if (operacion == TipoDeOperacion.ACTUALIZACION
         && empresaDuplicada != null
-        && empresaDuplicada.getId_Empresa() != empresa.getId_Empresa()
+        && empresaDuplicada.getIdEmpresa() != empresa.getIdEmpresa()
         && empresa.getIdFiscal() != null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_empresa_duplicado_cuip", null, Locale.getDefault()));
@@ -135,7 +135,7 @@ public class EmpresaServiceImpl implements IEmpresaService {
         && !empresaPersistida.getLogo().isEmpty()
         && (empresaParaActualizar.getLogo() == null || empresaParaActualizar.getLogo().isEmpty())) {
       photoVideoUploader.borrarImagen(
-          Empresa.class.getSimpleName() + empresaPersistida.getId_Empresa());
+          Empresa.class.getSimpleName() + empresaPersistida.getIdEmpresa());
     }
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, empresaParaActualizar);
     empresaRepository.save(empresaParaActualizar);
@@ -148,7 +148,7 @@ public class EmpresaServiceImpl implements IEmpresaService {
     empresa.setEliminada(true);
     empresa.setUbicacion(null);
     if (empresa.getLogo() != null && !empresa.getLogo().isEmpty()) {
-      photoVideoUploader.borrarImagen(Empresa.class.getSimpleName() + empresa.getId_Empresa());
+      photoVideoUploader.borrarImagen(Empresa.class.getSimpleName() + empresa.getIdEmpresa());
     }
     configuracionDelSistemaService.eliminar(
         configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa));

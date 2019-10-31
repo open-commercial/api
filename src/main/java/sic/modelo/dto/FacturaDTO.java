@@ -20,8 +20,8 @@ import sic.modelo.TipoDeComprobante;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"id_Factura", "fecha", "numSerie", "numFactura", "nombreTransportista", "renglones", "nombreEmpresa", "idUsuario", "nombreUsuario", "cantidadArticulos"})
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Factura", scope = FacturaDTO.class)
+@EqualsAndHashCode(exclude = {"idFactura", "fecha", "numSerie", "numFactura", "nombreTransportista", "renglones", "nombreEmpresa", "idUsuario", "nombreUsuario", "cantidadArticulos"})
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idFactura", scope = FacturaDTO.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
    @JsonSubTypes.Type(value = FacturaCompraDTO.class, name = "FacturaCompra"),
@@ -29,7 +29,7 @@ import sic.modelo.TipoDeComprobante;
 })
 public abstract class FacturaDTO implements Serializable {
 
-    private long id_Factura;
+    private long idFactura;
     private LocalDateTime fecha;
     private TipoDeComprobante tipoComprobante;
     private long numSerie;

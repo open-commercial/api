@@ -131,7 +131,7 @@ public class ReciboServiceImpl implements IReciboService {
     if (criteria.getMovimiento() == Movimiento.VENTA) builder.and(qRecibo.proveedor.isNull());
     else if (criteria.getMovimiento() == Movimiento.COMPRA) builder.and(qRecibo.cliente.isNull());
     builder.and(
-      qRecibo.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qRecibo.eliminado.eq(false)));
+      qRecibo.empresa.idEmpresa.eq(criteria.getIdEmpresa()).and(qRecibo.eliminado.eq(false)));
     return builder;
   }
 
@@ -176,7 +176,7 @@ public class ReciboServiceImpl implements IReciboService {
             .getNroPuntoDeVentaAfip());
     recibo.setNumRecibo(
         this.getSiguienteNumeroRecibo(
-            recibo.getEmpresa().getId_Empresa(),
+            recibo.getEmpresa().getIdEmpresa(),
             configuracionDelSistemaService
                 .getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa())
                 .getNroPuntoDeVentaAfip()));
@@ -247,7 +247,7 @@ public class ReciboServiceImpl implements IReciboService {
                 .getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa())
                 .getNroPuntoDeVentaAfip());
         recibo.setNumRecibo(
-            this.getSiguienteNumeroRecibo(empresa.getId_Empresa(), recibo.getNumSerie()));
+            this.getSiguienteNumeroRecibo(empresa.getIdEmpresa(), recibo.getNumSerie()));
         recibo.setConcepto("SALDO.");
         recibos.add(recibo);
         i++;
@@ -275,7 +275,7 @@ public class ReciboServiceImpl implements IReciboService {
   private void actualizarCajaPorEliminacionDeRecibo(Recibo recibo) {
     Caja caja =
         this.cajaService.encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(
-            recibo.getEmpresa().getId_Empresa(), recibo.getFecha());
+            recibo.getEmpresa().getIdEmpresa(), recibo.getFecha());
     BigDecimal monto = BigDecimal.ZERO;
     if (caja != null && caja.getEstado().equals(EstadoCaja.CERRADA)) {
       if (recibo.getCliente() != null) {
@@ -292,7 +292,7 @@ public class ReciboServiceImpl implements IReciboService {
   public List<Recibo> getRecibosEntreFechasPorFormaDePago(
     LocalDateTime desde, LocalDateTime hasta, FormaDePago formaDePago, Empresa empresa) {
     return reciboRepository.getRecibosEntreFechasPorFormaDePago(
-        empresa.getId_Empresa(), formaDePago.getId_FormaDePago(), desde, hasta);
+        empresa.getIdEmpresa(), formaDePago.getId_FormaDePago(), desde, hasta);
   }
 
   @Override

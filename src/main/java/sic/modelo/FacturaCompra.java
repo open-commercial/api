@@ -36,7 +36,7 @@ public class FacturaCompra extends Factura implements Serializable {
   public FacturaCompra() {}
 
   public FacturaCompra(
-      long id_Factura,
+      long idFactura,
       Usuario usuario,
       LocalDateTime fecha,
       TipoDeComprobante tipoComprobante,
@@ -67,7 +67,7 @@ public class FacturaCompra extends Factura implements Serializable {
       long numFacturaAfip) {
 
     super(
-        id_Factura,
+        idFactura,
         usuario,
         fecha,
         tipoComprobante,

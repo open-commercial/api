@@ -69,7 +69,7 @@ public class CajaServiceImpl implements ICajaService {
   @Override
   public void validarOperacion(@Valid Caja caja) {
     // Una Caja por dia
-    Caja ultimaCaja = this.getUltimaCaja(caja.getEmpresa().getId_Empresa());
+    Caja ultimaCaja = this.getUltimaCaja(caja.getEmpresa().getIdEmpresa());
     if (ultimaCaja != null) {
       if (ultimaCaja.getEstado() == EstadoCaja.ABIERTA) {
         throw new BusinessServiceException(
@@ -188,7 +188,7 @@ public class CajaServiceImpl implements ICajaService {
     QCaja qCaja = QCaja.caja;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
-        qCaja.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qCaja.eliminada.eq(false)));
+        qCaja.empresa.idEmpresa.eq(criteria.getIdEmpresa()).and(qCaja.eliminada.eq(false)));
     if (criteria.getIdUsuarioApertura() != null && criteria.getIdUsuarioCierre() == null) {
       builder.and(qCaja.usuarioAbreCaja.id_Usuario.eq(criteria.getIdUsuarioApertura()));
     }
@@ -263,7 +263,7 @@ public class CajaServiceImpl implements ICajaService {
     logger.warn("Cierre automático de Cajas a las {}", LocalDateTime.now());
     List<Empresa> empresas = this.empresaService.getEmpresas();
     empresas.stream()
-        .map(empresa -> this.getUltimaCaja(empresa.getId_Empresa()))
+        .map(empresa -> this.getUltimaCaja(empresa.getIdEmpresa()))
         .filter(
             ultimaCajaDeEmpresa ->
                 ((ultimaCajaDeEmpresa != null)
@@ -288,13 +288,13 @@ public class CajaServiceImpl implements ICajaService {
     }
     BigDecimal totalRecibosCliente =
         reciboService.getTotalRecibosClientesQueAfectanCajaEntreFechas(
-            caja.getEmpresa().getId_Empresa(), caja.getFechaApertura(), fechaHasta);
+            caja.getEmpresa().getIdEmpresa(), caja.getFechaApertura(), fechaHasta);
     BigDecimal totalRecibosProveedor =
         reciboService.getTotalRecibosProveedoresQueAfectanCajaEntreFechas(
-            caja.getEmpresa().getId_Empresa(), caja.getFechaApertura(), fechaHasta);
+            caja.getEmpresa().getIdEmpresa(), caja.getFechaApertura(), fechaHasta);
     BigDecimal totalGastos =
         gastoService.getTotalGastosQueAfectanCajaEntreFechas(
-            caja.getEmpresa().getId_Empresa(), caja.getFechaApertura(), fechaHasta);
+            caja.getEmpresa().getIdEmpresa(), caja.getFechaApertura(), fechaHasta);
     return caja.getSaldoApertura()
         .add(totalRecibosCliente)
         .subtract(totalRecibosProveedor)
@@ -310,13 +310,13 @@ public class CajaServiceImpl implements ICajaService {
       }
       BigDecimal totalRecibosCliente =
           reciboService.getTotalRecibosClientesEntreFechas(
-              caja.getEmpresa().getId_Empresa(), caja.getFechaApertura(), fechaHasta);
+              caja.getEmpresa().getIdEmpresa(), caja.getFechaApertura(), fechaHasta);
       BigDecimal totalRecibosProveedor =
           reciboService.getTotalRecibosProveedoresEntreFechas(
-              caja.getEmpresa().getId_Empresa(), caja.getFechaApertura(), fechaHasta);
+              caja.getEmpresa().getIdEmpresa(), caja.getFechaApertura(), fechaHasta);
       BigDecimal totalGastos =
           gastoService.getTotalGastosEntreFechas(
-              caja.getEmpresa().getId_Empresa(), caja.getFechaApertura(), fechaHasta);
+              caja.getEmpresa().getIdEmpresa(), caja.getFechaApertura(), fechaHasta);
       return caja.getSaldoApertura()
           .add(totalRecibosCliente)
           .subtract(totalRecibosProveedor)
@@ -341,19 +341,19 @@ public class CajaServiceImpl implements ICajaService {
     BigDecimal recibosTotal =
         reciboService
             .getTotalRecibosClientesEntreFechasPorFormaDePago(
-                caja.getEmpresa().getId_Empresa(),
+                caja.getEmpresa().getIdEmpresa(),
                 fdp.getId_FormaDePago(),
                 caja.getFechaApertura(),
                 fechaHasta)
             .subtract(
                 reciboService.getTotalRecibosProveedoresEntreFechasPorFormaDePago(
-                    caja.getEmpresa().getId_Empresa(),
+                    caja.getEmpresa().getIdEmpresa(),
                     fdp.getId_FormaDePago(),
                     caja.getFechaApertura(),
                     fechaHasta));
     BigDecimal gastosTotal =
         gastoService.getTotalGastosEntreFechasYFormaDePago(
-            caja.getEmpresa().getId_Empresa(),
+            caja.getEmpresa().getIdEmpresa(),
             fdp.getId_FormaDePago(),
             caja.getFechaApertura(),
             fechaHasta);
@@ -404,7 +404,7 @@ public class CajaServiceImpl implements ICajaService {
   @Transactional
   public void reabrirCaja(long idCaja, BigDecimal saldoAperturaNuevo) {
     Caja caja = getCajaPorId(idCaja);
-    Caja ultimaCaja = this.getUltimaCaja(caja.getEmpresa().getId_Empresa());
+    Caja ultimaCaja = this.getUltimaCaja(caja.getEmpresa().getIdEmpresa());
     if (ultimaCaja == null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_caja_no_existente", null, Locale.getDefault()));

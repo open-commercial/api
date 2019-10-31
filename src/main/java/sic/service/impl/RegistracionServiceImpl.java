@@ -48,7 +48,7 @@ public class RegistracionServiceImpl implements IRegistracionService {
     cliente.setFechaAlta(LocalDateTime.now());
     clienteService.guardar(cliente);
     correoElectronicoService.enviarMailPorEmpresa(
-        cliente.getEmpresa().getId_Empresa(),
+        cliente.getEmpresa().getIdEmpresa(),
         usuario.getEmail(),
         configuracionDelSistemaService
             .getConfiguracionDelSistemaPorEmpresa(cliente.getEmpresa())

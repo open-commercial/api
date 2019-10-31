@@ -21,19 +21,19 @@ public interface CajaRepository
   Caja findById(@Param("idCaja") long idCaja);
 
   @Query(
-      "SELECT c FROM Caja c WHERE c.empresa.id_Empresa = :idEmpresa AND c.eliminada = false ORDER BY c.id_Caja DESC")
+      "SELECT c FROM Caja c WHERE c.empresa.idEmpresa = :idEmpresa AND c.eliminada = false ORDER BY c.id_Caja DESC")
   Page<Caja> findTopByEmpresaAndEliminadaOrderByIdCajaDesc(
       @Param("idEmpresa") long idEmpresa, Pageable page);
 
   @Query(
       "SELECT c FROM Caja c "
-          + "WHERE c.empresa.id_Empresa = :idEmpresa AND c.eliminada = false AND c.estado = sic.modelo.EstadoCaja.ABIERTA "
+          + "WHERE c.empresa.idEmpresa = :idEmpresa AND c.eliminada = false AND c.estado = sic.modelo.EstadoCaja.ABIERTA "
           + "ORDER BY c.id_Caja DESC")
   Caja isUltimaCajaAbierta(@Param("idEmpresa") long idEmpresa);
 
   @Query(
       "SELECT c FROM Caja c "
-          + "WHERE c.empresa.id_Empresa = :idEmpresa AND c.eliminada = false AND c.estado = sic.modelo.EstadoCaja.CERRADA "
+          + "WHERE c.empresa.idEmpresa = :idEmpresa AND c.eliminada = false AND c.estado = sic.modelo.EstadoCaja.CERRADA "
           + "AND :fecha BETWEEN c.fechaApertura AND c.fechaCierre")
   Caja encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(
       @Param("idEmpresa") long idEmpresa, @Param("fecha") LocalDateTime fecha);

@@ -43,7 +43,7 @@ public class FacturaVenta extends Factura implements Serializable {
   public FacturaVenta() {}
 
   public FacturaVenta(
-      long id_Factura,
+      long idFactura,
       ClienteEmbeddable clienteEmbedded,
       Cliente cliente,
       Usuario usuario,
@@ -75,7 +75,7 @@ public class FacturaVenta extends Factura implements Serializable {
       long numFacturaAfip) {
 
     super(
-        id_Factura,
+        idFactura,
         usuario,
         fecha,
         tipoComprobante,

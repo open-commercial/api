@@ -12,10 +12,10 @@ public interface ConfiguracionDelSistemaRepository
   ConfiguracionDelSistema findByEmpresa(Empresa empresa);
 
   @Query(
-      "SELECT cds.cantidadMaximaDeRenglonesEnFactura FROM ConfiguracionDelSistema cds WHERE cds.empresa.id_Empresa = :idEmpresa")
+      "SELECT cds.cantidadMaximaDeRenglonesEnFactura FROM ConfiguracionDelSistema cds WHERE cds.empresa.idEmpresa = :idEmpresa")
   int getCantidadMaximaDeRenglones(@Param("idEmpresa") long idEmpresa);
 
   @Query(
-      "SELECT cds.facturaElectronicaHabilitada FROM ConfiguracionDelSistema cds WHERE cds.empresa.id_Empresa = :idEmpresa")
+      "SELECT cds.facturaElectronicaHabilitada FROM ConfiguracionDelSistema cds WHERE cds.empresa.idEmpresa = :idEmpresa")
   boolean isFacturaElectronicaHabilitada(@Param("idEmpresa") long idEmpresa);
 }

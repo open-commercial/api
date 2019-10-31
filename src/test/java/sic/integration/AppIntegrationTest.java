@@ -114,7 +114,7 @@ class AppIntegrationTest {
         + "&idProveedor="
         + proveedor.getId_Proveedor()
         + "&idEmpresa="
-        + empresa.getId_Empresa(),
+        + empresa.getIdEmpresa(),
       productoUno,
       ProductoDTO.class);
     restTemplate.postForObject(
@@ -126,7 +126,7 @@ class AppIntegrationTest {
         + "&idProveedor="
         + proveedor.getId_Proveedor()
         + "&idEmpresa="
-        + empresa.getId_Empresa(),
+        + empresa.getIdEmpresa(),
       productoDos,
       ProductoDTO.class);
   }
@@ -286,13 +286,13 @@ class AppIntegrationTest {
             .getContent();
     Long[] idsFactura = new Long[1];
     RenglonFactura[] renglones =
-      restTemplate.getForObject(apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getId_Factura() + "/renglones", RenglonFactura[].class);
+      restTemplate.getForObject(apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getIdFactura() + "/renglones", RenglonFactura[].class);
     idsFactura[0] = renglones[0].getId_RenglonFactura();
     BigDecimal[] cantidades = new BigDecimal[1];
     cantidades[0] = new BigDecimal("5");
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
       NuevaNotaCreditoDeFacturaDTO.builder()
-        .idFactura(facturasRecuperadas.get(0).getId_Factura())
+        .idFactura(facturasRecuperadas.get(0).getIdFactura())
         .idsRenglonesFactura(idsFactura)
         .cantidades(cantidades)
         .modificaStock(true)
@@ -517,7 +517,7 @@ class AppIntegrationTest {
     restTemplate.put(apiPrefix + "/empresas", empresaGuardada);
     empresaGuardada =
         restTemplate.getForObject(
-            apiPrefix + "/empresas/" + empresaGuardada.getId_Empresa(), EmpresaDTO.class);
+            apiPrefix + "/empresas/" + empresaGuardada.getIdEmpresa(), EmpresaDTO.class);
     assertEquals(ubicacion, empresaGuardada.getUbicacion());
   }
 
@@ -1449,7 +1449,7 @@ class AppIntegrationTest {
         .idCliente(cliente.getId_Cliente())
         .build();
     facturaVentaB.setIdCliente(cliente.getId_Cliente());
-    facturaVentaB.setIdEmpresa(empresa.getId_Empresa());
+    facturaVentaB.setIdEmpresa(empresa.getIdEmpresa());
     facturaVentaB.setIdUsuario(1L);
     facturaVentaB.setIdTransportista(transportista.getId_Transportista());
     facturaVentaB.setObservaciones("Factura Venta B test");
@@ -1588,7 +1588,7 @@ class AppIntegrationTest {
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     facturaVentaA.setIdCliente(cliente.getId_Cliente());
     facturaVentaA.setIdUsuario(credencial.getId_Usuario());
-    facturaVentaA.setIdEmpresa(empresa.getId_Empresa());
+    facturaVentaA.setIdEmpresa(empresa.getIdEmpresa());
     facturaVentaA.setIdTransportista(transportista.getId_Transportista());
     FacturaVentaDTO facturaVenta =
         restTemplate
@@ -1703,7 +1703,7 @@ class AppIntegrationTest {
     FacturaVentaDTO facturaVentaC =
         FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
     facturaVentaC.setIdCliente(cliente.getId_Cliente());
-    facturaVentaC.setIdEmpresa(empresa.getId_Empresa());
+    facturaVentaC.setIdEmpresa(empresa.getIdEmpresa());
     facturaVentaC.setIdUsuario(1L);
     facturaVentaC.setIdTransportista(transportista.getId_Transportista());
     facturaVentaC.setObservaciones("Factura Venta C test");
@@ -1791,7 +1791,7 @@ class AppIntegrationTest {
       FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
     facturaVentaX.setIdCliente(cliente.getId_Cliente());
     facturaVentaX.setIdTransportista(transportista.getId_Transportista());
-    facturaVentaX.setIdEmpresa(empresa.getId_Empresa());
+    facturaVentaX.setIdEmpresa(empresa.getIdEmpresa());
     facturaVentaX.setIdUsuario(1L);
     facturaVentaX.setObservaciones("Factura Venta X test");
     facturaVentaX.setTipoComprobante(TipoDeComprobante.FACTURA_X);
@@ -1919,7 +1919,7 @@ class AppIntegrationTest {
     FacturaVentaDTO facturaVentaY =
       FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
     facturaVentaY.setIdCliente(cliente.getId_Cliente());
-    facturaVentaY.setIdEmpresa(empresa.getId_Empresa());
+    facturaVentaY.setIdEmpresa(empresa.getIdEmpresa());
     facturaVentaY.setIdUsuario(1L);
     facturaVentaY.setIdTransportista(transportista.getId_Transportista());
     facturaVentaY.setObservaciones("Factura Venta Y test");
@@ -2049,7 +2049,7 @@ class AppIntegrationTest {
       FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
     facturaVentaPresupuesto.setIdCliente(cliente.getId_Cliente());
     facturaVentaPresupuesto.setIdTransportista(transportista.getId_Transportista());
-    facturaVentaPresupuesto.setIdEmpresa(empresa.getId_Empresa());
+    facturaVentaPresupuesto.setIdEmpresa(empresa.getIdEmpresa());
     facturaVentaPresupuesto.setIdUsuario(1L);
     facturaVentaPresupuesto.setObservaciones("Factura Venta Presupuesto test");
     facturaVentaPresupuesto.setTipoComprobante(TipoDeComprobante.PRESUPUESTO);
@@ -2152,7 +2152,7 @@ class AppIntegrationTest {
     FacturaVentaDTO facturaVentaX =
       FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
     facturaVentaX.setIdUsuario(1L);
-    facturaVentaX.setIdEmpresa(empresa.getId_Empresa());
+    facturaVentaX.setIdEmpresa(empresa.getIdEmpresa());
     facturaVentaX.setIdCliente(cliente.getId_Cliente());
     facturaVentaX.setIdTransportista(transportista.getId_Transportista());
     facturaVentaX.setObservaciones("Factura Venta X test");
@@ -2277,7 +2277,7 @@ class AppIntegrationTest {
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     FacturaVentaDTO facturaVentaA =
         FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
-    facturaVentaA.setIdEmpresa(empresa.getId_Empresa());
+    facturaVentaA.setIdEmpresa(empresa.getIdEmpresa());
     facturaVentaA.setIdUsuario(1L);
     facturaVentaA.setIdCliente(cliente.getId_Cliente());
     facturaVentaA.setIdTransportista(transportista.getId_Transportista());
@@ -3105,7 +3105,7 @@ class AppIntegrationTest {
           + "&idProveedor="
           + proveedor.getId_Proveedor()
           + "&idEmpresa="
-          + empresa.getId_Empresa(),
+          + empresa.getIdEmpresa(),
         productoUno,
         ProductoDTO.class);
     assertEquals(productoUno.getCantidad(), productoRecuperado.getCantidad());
@@ -3157,7 +3157,7 @@ class AppIntegrationTest {
           + "&idProveedor="
           + proveedor.getId_Proveedor()
           + "&idEmpresa="
-          + empresa.getId_Empresa(),
+          + empresa.getIdEmpresa(),
         productoUno,
         ProductoDTO.class);
     productoUno.setFechaAlta(productoRecuperado.getFechaAlta());
@@ -3201,7 +3201,7 @@ class AppIntegrationTest {
                 + "&idProveedor="
                 + proveedor.getId_Proveedor()
                 + "&idEmpresa="
-                + empresa.getId_Empresa(),
+                + empresa.getIdEmpresa(),
             productoUno,
             ProductoDTO.class);
     assertFalse(productoRecuperado.isDestacado());
@@ -3467,7 +3467,7 @@ class AppIntegrationTest {
         + "idCliente="
         + cliente.getId_Cliente()
         + "&idEmpresa="
-        + empresa.getId_Empresa()
+        + empresa.getIdEmpresa()
         + "&idUsuario="
         + credencial.getId_Usuario()
         + "&idTransportista="
@@ -3508,7 +3508,7 @@ class AppIntegrationTest {
     cantidades[0] = new BigDecimal("5");
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
       NuevaNotaCreditoDeFacturaDTO.builder()
-        .idFactura(facturasRecuperadas.get(0).getId_Factura())
+        .idFactura(facturasRecuperadas.get(0).getIdFactura())
         .idsRenglonesFactura(idsRenglonesFacutura)
         .cantidades(cantidades)
         .modificaStock(true)
@@ -3565,7 +3565,7 @@ class AppIntegrationTest {
     restTemplate.put(apiPrefix + "/clientes", cliente);
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
         NuevaNotaCreditoDeFacturaDTO.builder()
-            .idFactura(facturasRecuperadas.get(0).getId_Factura())
+            .idFactura(facturasRecuperadas.get(0).getIdFactura())
             .idsRenglonesFactura(idsRenglonesFacutura)
             .cantidades(cantidades)
             .modificaStock(true)
@@ -3619,7 +3619,7 @@ class AppIntegrationTest {
     cantidades[0] = new BigDecimal("5");
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
       NuevaNotaCreditoDeFacturaDTO.builder()
-        .idFactura(facturasRecuperadas.get(0).getId_Factura())
+        .idFactura(facturasRecuperadas.get(0).getIdFactura())
         .idsRenglonesFactura(idsRenglonesFacutura)
         .cantidades(cantidades)
         .modificaStock(true)
@@ -3673,7 +3673,7 @@ class AppIntegrationTest {
     cantidades[0] = new BigDecimal("5");
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
       NuevaNotaCreditoDeFacturaDTO.builder()
-        .idFactura(facturasRecuperadas.get(0).getId_Factura())
+        .idFactura(facturasRecuperadas.get(0).getIdFactura())
         .idsRenglonesFactura(idsRenglonesFacutura)
         .cantidades(cantidades)
         .modificaStock(true)
@@ -3713,7 +3713,7 @@ class AppIntegrationTest {
             .monto(new BigDecimal("1000"))
             .tipo(TipoDeComprobante.NOTA_CREDITO_A)
             .idCliente(1L)
-            .idEmpresa(empresa.getId_Empresa())
+            .idEmpresa(empresa.getIdEmpresa())
             .motivo("Descuento mal aplicado")
             .build();
     NotaCreditoDTO notaPorGuardar =
@@ -3749,7 +3749,7 @@ class AppIntegrationTest {
         .monto(new BigDecimal("1000"))
         .tipo(TipoDeComprobante.NOTA_CREDITO_B)
         .idCliente(1L)
-        .idEmpresa(empresa.getId_Empresa())
+        .idEmpresa(empresa.getIdEmpresa())
         .motivo("Descuento mal aplicado")
         .build();
     NotaCreditoDTO notaPorGuardar =
@@ -3784,7 +3784,7 @@ class AppIntegrationTest {
         .monto(new BigDecimal("1000"))
         .tipo(TipoDeComprobante.NOTA_CREDITO_C)
         .idCliente(1L)
-        .idEmpresa(empresa.getId_Empresa())
+        .idEmpresa(empresa.getIdEmpresa())
         .motivo("Descuento mal aplicado")
         .build();
     NotaCreditoDTO notaPorGuardar =
@@ -3818,7 +3818,7 @@ class AppIntegrationTest {
         .monto(new BigDecimal("1000"))
         .tipo(TipoDeComprobante.NOTA_CREDITO_X)
         .idCliente(1L)
-        .idEmpresa(empresa.getId_Empresa())
+        .idEmpresa(empresa.getIdEmpresa())
         .motivo("Descuento mal aplicado")
         .build();
     NotaCreditoDTO notaPorGuardar =
@@ -3869,7 +3869,7 @@ class AppIntegrationTest {
     cantidades[0] = new BigDecimal("5");
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
         NuevaNotaCreditoDeFacturaDTO.builder()
-            .idFactura(facturasRecuperadas.get(0).getId_Factura())
+            .idFactura(facturasRecuperadas.get(0).getIdFactura())
             .idsRenglonesFactura(idsRenglonesFacutura)
             .cantidades(cantidades)
             .modificaStock(true)
@@ -3918,7 +3918,7 @@ class AppIntegrationTest {
     BigDecimal[] cantidades = new BigDecimal[1];
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
         NuevaNotaCreditoDeFacturaDTO.builder()
-            .idFactura(facturasRecuperadas.get(0).getId_Factura())
+            .idFactura(facturasRecuperadas.get(0).getIdFactura())
             .idsRenglonesFactura(idsRenglonesFacutura)
             .cantidades(cantidades)
             .modificaStock(true)
@@ -5004,13 +5004,13 @@ class AppIntegrationTest {
             .getBody()
             .getContent();
     restTemplate.delete(
-      apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getId_Factura());
+      apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getIdFactura());
     pedidoRecuperado =
       restTemplate.getForObject(
         apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
     assertEquals(EstadoPedido.ACTIVO, pedidoRecuperado.getEstado());
     restTemplate.delete(
-      apiPrefix + "/facturas/" + facturasRecuperadas.get(1).getId_Factura());
+      apiPrefix + "/facturas/" + facturasRecuperadas.get(1).getIdFactura());
     pedidoRecuperado =
       restTemplate.getForObject(
         apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);

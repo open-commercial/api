@@ -98,7 +98,7 @@ public class Cliente implements Serializable {
 
   @JsonGetter("idEmpresa")
   public Long getIdEmpresa() {
-    return empresa.getId_Empresa();
+    return empresa.getIdEmpresa();
   }
 
   @JsonGetter("nombreEmpresa")

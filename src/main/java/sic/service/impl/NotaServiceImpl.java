@@ -203,7 +203,7 @@ public class NotaServiceImpl implements INotaService {
     builder.and(
         qNotaCredito
             .empresa
-            .id_Empresa
+            .idEmpresa
             .eq(criteria.getIdEmpresa())
             .and(qNotaCredito.eliminada.eq(false)));
     if (criteria.getMovimiento() == Movimiento.VENTA)
@@ -289,7 +289,7 @@ public class NotaServiceImpl implements INotaService {
     builder.and(
         qNotaDebito
             .empresa
-            .id_Empresa
+            .idEmpresa
             .eq(criteria.getIdEmpresa())
             .and(qNotaDebito.eliminada.eq(false)));
     if (criteria.getMovimiento() == Movimiento.VENTA)
@@ -824,7 +824,7 @@ public class NotaServiceImpl implements INotaService {
                 notaCredito.getFacturaVenta().getTipoComprobante()));
       } else {
         if (!this.getTipoNotaCreditoCliente(
-                notaCredito.getCliente().getId_Cliente(), notaCredito.getEmpresa().getId_Empresa())
+                notaCredito.getCliente().getId_Cliente(), notaCredito.getEmpresa().getIdEmpresa())
             .contains(notaCredito.getTipoComprobante())) {
           throw new BusinessServiceException(
               messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
@@ -845,7 +845,7 @@ public class NotaServiceImpl implements INotaService {
     } else {
       if (!this.getTipoNotaCreditoProveedor(
               notaCredito.getProveedor().getId_Proveedor(),
-              notaCredito.getEmpresa().getId_Empresa())
+              notaCredito.getEmpresa().getIdEmpresa())
           .contains(notaCredito.getTipoComprobante())) {
         throw new BusinessServiceException(
             messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
@@ -1167,7 +1167,7 @@ public class NotaServiceImpl implements INotaService {
     this.validarOperacion(notaDebito);
     if (notaDebito.getMovimiento().equals(Movimiento.VENTA)) {
       if (!this.getTipoNotaDebitoCliente(
-              notaDebito.getCliente().getId_Cliente(), notaDebito.getEmpresa().getId_Empresa())
+              notaDebito.getCliente().getId_Cliente(), notaDebito.getEmpresa().getIdEmpresa())
           .contains(notaDebito.getTipoComprobante())) {
         throw new BusinessServiceException(
             messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
@@ -1182,7 +1182,7 @@ public class NotaServiceImpl implements INotaService {
     } else if (notaDebito.getMovimiento().equals(Movimiento.COMPRA)
         && !this.getTipoNotaDebitoProveedor(
                 notaDebito.getProveedor().getId_Proveedor(),
-                notaDebito.getEmpresa().getId_Empresa())
+                notaDebito.getEmpresa().getIdEmpresa())
             .contains(notaDebito.getTipoComprobante())) {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
@@ -1696,7 +1696,7 @@ public class NotaServiceImpl implements INotaService {
             .idNota
             .lt(comprobante.getIdComprobante())
             .and(qNotaCredito.eliminada.eq(false))
-            .and(qNotaCredito.empresa.id_Empresa.eq(comprobante.getEmpresa().getId_Empresa()))
+            .and(qNotaCredito.empresa.idEmpresa.eq(comprobante.getEmpresa().getIdEmpresa()))
             .and(qNotaCredito.tipoComprobante.eq(comprobante.getTipoComprobante()))
             .and(qNotaCredito.cliente.isNotNull()));
     Page<NotaCredito> notaAnterior =
@@ -1714,7 +1714,7 @@ public class NotaServiceImpl implements INotaService {
             .idNota
             .lt(comprobante.getIdComprobante())
             .and(qNotaDebito.eliminada.eq(false))
-            .and(qNotaDebito.empresa.id_Empresa.eq(comprobante.getEmpresa().getId_Empresa()))
+            .and(qNotaDebito.empresa.idEmpresa.eq(comprobante.getEmpresa().getIdEmpresa()))
             .and(qNotaDebito.tipoComprobante.eq(comprobante.getTipoComprobante()))
             .and(qNotaDebito.cliente.isNotNull()));
     Page<NotaDebito> notaAnterior =

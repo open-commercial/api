@@ -31,7 +31,8 @@ public class Empresa implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id_Empresa;
+  @Column(name = "id_Empresa")
+  private long idEmpresa;
 
   @NotNull(message = "{mensaje_empresa_nombre_vacio}")
   @NotEmpty(message = "{mensaje_empresa_nombre_vacio}")

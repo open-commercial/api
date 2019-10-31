@@ -93,7 +93,7 @@ public class ProductoServiceImpl implements IProductoService {
     // Codigo
     if (!producto.getCodigo().equals("")) {
       Producto productoDuplicado =
-          this.getProductoPorCodigo(producto.getCodigo(), producto.getEmpresa().getId_Empresa());
+          this.getProductoPorCodigo(producto.getCodigo(), producto.getEmpresa().getIdEmpresa());
       if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
           && productoDuplicado != null
           && productoDuplicado.getIdProducto() != producto.getIdProducto()) {
@@ -226,7 +226,7 @@ public class ProductoServiceImpl implements IProductoService {
     builder.and(
         qProducto
             .empresa
-            .id_Empresa
+            .idEmpresa
             .eq(criteria.getIdEmpresa())
             .and(qProducto.eliminado.eq(false)));
     if (criteria.getCodigo() != null && criteria.getDescripcion() != null)

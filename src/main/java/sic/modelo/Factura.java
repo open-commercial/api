@@ -31,7 +31,7 @@ import lombok.ToString;
 @ToString(exclude = {"renglones"})
 @JsonIdentityInfo(
     generator = ObjectIdGenerators.PropertyGenerator.class,
-    property = "id_Factura",
+    property = "idFactura",
     scope = Factura.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({@Type(value = FacturaCompra.class), @Type(value = FacturaVenta.class)})
@@ -45,7 +45,8 @@ public abstract class Factura implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id_Factura;
+  @Column(name = "id_Factura")
+  private long idFactura;
 
   @ManyToOne
   @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
@@ -162,7 +163,7 @@ public abstract class Factura implements Serializable {
 
   @JsonGetter("idEmpresa")
   public long getIdEmpresa() {
-    return empresa.getId_Empresa();
+    return empresa.getIdEmpresa();
   }
 
   @JsonGetter("nombreEmpresa")

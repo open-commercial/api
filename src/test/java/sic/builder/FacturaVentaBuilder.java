@@ -17,7 +17,7 @@ import sic.modelo.embeddable.ClienteEmbeddable;
 
 public class FacturaVentaBuilder {
     
-    private long id_Factura = 0L;
+    private long idFactura = 0L;
     private LocalDateTime fecha = LocalDateTime.now();
     private TipoDeComprobante tipoFactura = TipoDeComprobante.FACTURA_A;
     private long numSerie = 0;
@@ -65,7 +65,7 @@ public class FacturaVentaBuilder {
       this.renglones = renglonesFactura;
     }
     return new FacturaVenta(
-        id_Factura,
+      idFactura,
         clienteEmbeddable,
         cliente,
         usuario,
@@ -97,8 +97,8 @@ public class FacturaVentaBuilder {
         numFacturaAfip);
   }
 
-    public FacturaVentaBuilder withId_Factura(long idFactura) {
-        this.id_Factura = idFactura;
+    public FacturaVentaBuilder withIdFactura(long idFactura) {
+        this.idFactura = idFactura;
         return this;
     }
     

@@ -15,7 +15,7 @@ public interface NotaCreditoRepository
       "SELECT max(nc.nroNota) FROM NotaCredito nc "
           + "WHERE nc.tipoComprobante = :tipoComprobante "
           + "AND nc.serie = :serie "
-          + "AND nc.empresa.id_Empresa = :idEmpresa "
+          + "AND nc.empresa.idEmpresa = :idEmpresa "
           + "AND nc.cliente IS NOT null")
   Long buscarMayorNumNotaCreditoClienteSegunTipo(
       @Param("tipoComprobante") TipoDeComprobante tipoComprobante,

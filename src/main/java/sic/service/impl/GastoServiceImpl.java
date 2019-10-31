@@ -70,7 +70,7 @@ public class GastoServiceImpl implements IGastoService {
 
   @Override
   public void validarOperacion(Gasto gasto) {
-    this.cajaService.validarMovimiento(gasto.getFecha(), gasto.getEmpresa().getId_Empresa());
+    this.cajaService.validarMovimiento(gasto.getFecha(), gasto.getEmpresa().getIdEmpresa());
     if (gastoRepository.findById(gasto.getId_Gasto()).isPresent()) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_gasto_duplicada", null, Locale.getDefault()));
@@ -154,14 +154,14 @@ public class GastoServiceImpl implements IGastoService {
     if (criteria.getIdUsuario() != null)
       builder.and(qGasto.usuario.id_Usuario.eq(criteria.getIdUsuario()));
     builder.and(
-        qGasto.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qGasto.eliminado.eq(false)));
+        qGasto.empresa.idEmpresa.eq(criteria.getIdEmpresa()).and(qGasto.eliminado.eq(false)));
     return builder;
   }
 
   @Override
   @Transactional
   public Gasto guardar(@Valid Gasto gasto) {
-    gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getEmpresa().getId_Empresa()) + 1);
+    gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getEmpresa().getIdEmpresa()) + 1);
     gasto.setFecha(LocalDateTime.now());
     this.validarOperacion(gasto);
     gasto = gastoRepository.save(gasto);
@@ -173,7 +173,7 @@ public class GastoServiceImpl implements IGastoService {
   public List<Gasto> getGastosEntreFechasYFormaDePago(
       Empresa empresa, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta) {
     return gastoRepository.getGastosEntreFechasPorFormaDePago(
-        empresa.getId_Empresa(), formaDePago.getId_FormaDePago(), desde, hasta);
+        empresa.getIdEmpresa(), formaDePago.getId_FormaDePago(), desde, hasta);
   }
 
   @Override
@@ -181,7 +181,7 @@ public class GastoServiceImpl implements IGastoService {
   public void eliminar(long idGasto) {
     Gasto gastoParaEliminar = this.getGastoNoEliminadoPorId(idGasto);
     if (this.cajaService
-        .getUltimaCaja(gastoParaEliminar.getEmpresa().getId_Empresa())
+        .getUltimaCaja(gastoParaEliminar.getEmpresa().getIdEmpresa())
         .getEstado()
         .equals(EstadoCaja.CERRADA)) {
       throw new BusinessServiceException(messageSource.getMessage(

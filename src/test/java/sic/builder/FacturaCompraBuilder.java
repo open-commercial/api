@@ -6,12 +6,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.tomcat.jni.Local;
 import sic.modelo.*;
 
 public class FacturaCompraBuilder {
     
-    private long id_Factura = 0L;
+    private long idFactura = 0L;
     private Usuario usuario = new UsuarioBuilder().build();
     private LocalDateTime fecha = LocalDateTime.now();
     private TipoDeComprobante tipoFactura = TipoDeComprobante.FACTURA_A;
@@ -56,7 +55,7 @@ public class FacturaCompraBuilder {
             renglonesFactura.add(renglon2);
             this.renglones = renglonesFactura;
         }
-        FacturaCompra factura = new FacturaCompra(id_Factura, usuario, fecha, tipoFactura,
+        FacturaCompra factura = new FacturaCompra(idFactura, usuario, fecha, tipoFactura,
                 numSerie, numFactura, fechaVencimiento, pedido, transportista, renglones,
                 subTotal, recargo_porcentaje, recargo_neto, descuento_porcentaje, descuento_neto,
                 subTotal_neto, iva_105_neto, iva_21_neto, impuestoInterno_neto, total, observaciones,
@@ -65,7 +64,7 @@ public class FacturaCompraBuilder {
     }
     
     public FacturaCompraBuilder withId_Factura(long idFactura) {
-        this.id_Factura = idFactura;
+        this.idFactura = idFactura;
         return this;
     }
 
