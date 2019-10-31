@@ -51,7 +51,7 @@ public class FacturaVenta extends Factura implements Serializable {
       TipoDeComprobante tipoComprobante,
       long numSerie,
       long numFactura,
-      LocalDateTime fechaVencimiento,
+      LocalDate fechaVencimiento,
       Pedido pedido,
       Transportista transportista,
       List<RenglonFactura> renglones,

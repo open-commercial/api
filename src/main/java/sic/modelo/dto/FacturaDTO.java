@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public abstract class FacturaDTO implements Serializable {
     private TipoDeComprobante tipoComprobante;
     private long numSerie;
     private long numFactura;
-    private LocalDateTime fechaVencimiento;
+    private LocalDate fechaVencimiento;
     private Long nroPedido;
     private long idTransportista;
     private String nombreTransportista;
@@ -56,5 +57,5 @@ public abstract class FacturaDTO implements Serializable {
     private String nombreUsuario;
     private boolean eliminada;
     private long cae;
-    private LocalDateTime vencimientoCae;
+    private LocalDate vencimientoCae;
 }

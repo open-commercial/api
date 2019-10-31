@@ -22,7 +22,7 @@ public class FacturaVentaBuilder {
     private TipoDeComprobante tipoFactura = TipoDeComprobante.FACTURA_A;
     private long numSerie = 0;
     private long numFactura = 1;
-    private LocalDateTime fechaVencimiento = LocalDateTime.now();
+    private LocalDate fechaVencimiento = LocalDate.now();
     private Pedido pedido =  null;
     private Transportista transportista = new TransportistaBuilder().build();
     private List<RenglonFactura> renglones;
@@ -51,49 +51,50 @@ public class FacturaVentaBuilder {
   public FacturaVenta build() {
     if (renglones == null) {
       RenglonFactura renglon1 = new RenglonFacturaBuilder().build();
-      RenglonFactura renglon2 = new RenglonFacturaBuilder()
-        .withCantidad(new BigDecimal("2"))
-        .withId_ProductoItem(890L)
-        .withCodigoItem("mate.0923")
-        .withIVAneto(new BigDecimal("1092"))
-        .withPrecioUnitario(new BigDecimal("5200"))
-        .build();
+      RenglonFactura renglon2 =
+          new RenglonFacturaBuilder()
+              .withCantidad(new BigDecimal("2"))
+              .withId_ProductoItem(890L)
+              .withCodigoItem("mate.0923")
+              .withIVAneto(new BigDecimal("1092"))
+              .withPrecioUnitario(new BigDecimal("5200"))
+              .build();
       List<RenglonFactura> renglonesFactura = new ArrayList<>();
       renglonesFactura.add(renglon1);
       renglonesFactura.add(renglon2);
       this.renglones = renglonesFactura;
     }
     return new FacturaVenta(
-      id_Factura,
-      clienteEmbeddable,
-      cliente,
-      usuario,
-      fecha,
-      tipoFactura,
-      numSerie,
-      numFactura,
-      fechaVencimiento,
-      pedido,
-      transportista,
-      renglones,
-      subTotal,
-      recargo_porcentaje,
-      recargo_neto,
-      descuento_porcentaje,
-      descuento_neto,
-      subTotal_neto,
-      iva_105_neto,
-      iva_21_neto,
-      impuestoInterno_neto,
-      total,
-      observaciones,
-      cantidadArticulos,
-      empresa,
-      eliminada,
-      CAE,
-      vencimientoCAE,
-      numSerieAfip,
-      numFacturaAfip);
+        id_Factura,
+        clienteEmbeddable,
+        cliente,
+        usuario,
+        fecha,
+        tipoFactura,
+        numSerie,
+        numFactura,
+        fechaVencimiento,
+        pedido,
+        transportista,
+        renglones,
+        subTotal,
+        recargo_porcentaje,
+        recargo_neto,
+        descuento_porcentaje,
+        descuento_neto,
+        subTotal_neto,
+        iva_105_neto,
+        iva_21_neto,
+        impuestoInterno_neto,
+        total,
+        observaciones,
+        cantidadArticulos,
+        empresa,
+        eliminada,
+        CAE,
+        vencimientoCAE,
+        numSerieAfip,
+        numFacturaAfip);
   }
 
     public FacturaVentaBuilder withId_Factura(long idFactura) {
@@ -136,7 +137,7 @@ public class FacturaVentaBuilder {
         return this;
     }
     
-    public FacturaVentaBuilder withFechaVencimiento(LocalDateTime fechaDeVencimiento) {
+    public FacturaVentaBuilder withFechaVencimiento(LocalDate fechaDeVencimiento) {
         this.fechaVencimiento = fechaDeVencimiento;
         return this;
     }  

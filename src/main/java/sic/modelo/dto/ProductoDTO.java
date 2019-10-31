@@ -2,6 +2,7 @@ package sic.modelo.dto;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import lombok.*;
@@ -38,7 +39,7 @@ public class ProductoDTO implements Serializable {
   private String razonSocialProveedor;
   private String nota;
   private LocalDateTime fechaAlta;
-  private LocalDateTime fechaVencimiento;
+  private LocalDate fechaVencimiento;
   private boolean eliminado;
   private String urlImagen;
 }

@@ -1,6 +1,7 @@
 package sic.builder;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 
@@ -33,17 +34,42 @@ public class ProductoBuilder {
     private String razonSocialProveedor = "Abrasol";
     private String nota = "Cumple con las normas ISO";
     private LocalDateTime fechaAlta = LocalDateTime.of(2016, Month.MARCH, 15, 00, 00);; // 15-03-2016;
-    private LocalDateTime fechaVencimiento = LocalDateTime.of(2020, Month.OCTOBER, 20, 00, 00);; // 20-08-2020
+    private LocalDate fechaVencimiento = LocalDate.of(2020, Month.OCTOBER, 20);; // 20-08-2020
     private boolean eliminado = false;
     private String urlImagen;
-    
-    public ProductoDTO build() {
-        return new ProductoDTO(idProducto, codigo, descripcion, cantidad, hayStock, cantMinima, bulto, nombreMedida,
-                precioCosto, ganancia_porcentaje, ganancia_neto, precioVentaPublico, iva_porcentaje, iva_neto,
-                precioLista, nombreRubro, ilimitado, publico, destacado, fechaUltimaModificacion, estanteria, estante, razonSocialProveedor,
-                nota, fechaAlta, fechaVencimiento, eliminado, urlImagen);
-    }
-    
+
+  public ProductoDTO build() {
+    return new ProductoDTO(
+        idProducto,
+        codigo,
+        descripcion,
+        cantidad,
+        hayStock,
+        cantMinima,
+        bulto,
+        nombreMedida,
+        precioCosto,
+        ganancia_porcentaje,
+        ganancia_neto,
+        precioVentaPublico,
+        iva_porcentaje,
+        iva_neto,
+        precioLista,
+        nombreRubro,
+        ilimitado,
+        publico,
+        destacado,
+        fechaUltimaModificacion,
+        estanteria,
+        estante,
+        razonSocialProveedor,
+        nota,
+        fechaAlta,
+        fechaVencimiento,
+        eliminado,
+        urlImagen);
+  }
+
     public ProductoBuilder withId_Producto(Long idProducto) {
         this.idProducto = idProducto;
         return this;
@@ -170,7 +196,7 @@ public class ProductoBuilder {
         return this;
     }
     
-    public ProductoBuilder withFechaVencimiento(LocalDateTime fechaVencimiento) {
+    public ProductoBuilder withFechaVencimiento(LocalDate fechaVencimiento) {
         this.fechaVencimiento = fechaVencimiento;
         return this;
     }

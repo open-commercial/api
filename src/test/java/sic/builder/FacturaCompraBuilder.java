@@ -17,7 +17,7 @@ public class FacturaCompraBuilder {
     private TipoDeComprobante tipoFactura = TipoDeComprobante.FACTURA_A;
     private long numSerie = 0;
     private long numFactura = 1;
-    private LocalDateTime fechaVencimiento = LocalDateTime.now();
+    private LocalDate fechaVencimiento = LocalDate.now();
     private Pedido pedido = null;
     private Transportista transportista = new TransportistaBuilder().build();
     private List<RenglonFactura> renglones;
@@ -109,7 +109,7 @@ public class FacturaCompraBuilder {
         return this;
     }
     
-    public FacturaCompraBuilder withFechaVencimiento(LocalDateTime fechaDeVencimiento) {
+    public FacturaCompraBuilder withFechaVencimiento(LocalDate fechaDeVencimiento) {
         this.fechaVencimiento = fechaDeVencimiento;
         return this;
     }  

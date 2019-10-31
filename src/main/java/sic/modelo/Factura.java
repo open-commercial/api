@@ -13,16 +13,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import javax.validation.constraints.DecimalMax;
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import javax.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "factura")
@@ -67,7 +64,8 @@ public abstract class Factura implements Serializable {
 
   private long numFactura;
 
-  private LocalDateTime fechaVencimiento;
+  @FutureOrPresent(message = "{mensaje_fecha_vencimiento_invalida}")
+  private LocalDate fechaVencimiento;
 
   @ManyToOne
   @JoinColumn(name = "id_Pedido", referencedColumnName = "id_Pedido")

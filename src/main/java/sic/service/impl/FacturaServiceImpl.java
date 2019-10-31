@@ -532,23 +532,6 @@ public class FacturaServiceImpl implements IFacturaService {
   }
 
   private void validarOperacion(Factura factura) {
-    // Entrada de Datos
-    if (factura.getFechaVencimiento() != null
-        && (factura
-                .getFecha()
-                .withHour(0)
-                .withMinute(0)
-                .withSecond(0)
-                .isEqual(factura.getFechaVencimiento().withHour(0).withMinute(0).withSecond(0))
-            || factura
-                .getFecha()
-                .withHour(0)
-                .withMinute(0)
-                .withSecond(0)
-                .isBefore(factura.getFechaVencimiento().withHour(0).withMinute(0).withSecond(0)))) {
-      throw new BusinessServiceException(
-          messageSource.getMessage("mensaje_factura_fecha_invalida", null, Locale.getDefault()));
-    }
     // Requeridos
     if (factura instanceof FacturaCompra && factura.getFecha().isAfter(LocalDateTime.now())) {
       throw new BusinessServiceException(

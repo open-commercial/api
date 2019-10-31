@@ -5,18 +5,17 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import javax.validation.constraints.DecimalMax;
-import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.*;
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import javax.validation.constraints.NotEmpty;
 
 import sic.controller.Views;
 import sic.modelo.dto.UbicacionDTO;
@@ -45,7 +44,8 @@ public class Pedido implements Serializable {
   @NotNull(message = "{mensaje_pedido_fecha_vacia}")
   private LocalDateTime fecha;
 
-  private LocalDateTime fechaVencimiento;
+  @FutureOrPresent(message = "{mensaje_fecha_vencimiento_invalida}")
+  private LocalDate fechaVencimiento;
 
   @Column(nullable = false)
   private String observaciones;

@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.Charset;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -4613,7 +4614,7 @@ class AppIntegrationTest {
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
         .recargoNeto(recargoNeto)
         .recargoPorcentaje(new BigDecimal("5"))
-        .fechaVencimiento(LocalDateTime.now())
+        .fechaVencimiento(LocalDate.now())
         .observaciones("Nuevo Pedido Test")
         .renglones(renglonesPedido)
         .subTotal(importe)
@@ -4668,7 +4669,7 @@ class AppIntegrationTest {
             .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
             .recargoNeto(recargoNeto)
             .recargoPorcentaje(new BigDecimal("5"))
-            .fechaVencimiento(LocalDateTime.now())
+            .fechaVencimiento(LocalDate.now())
             .observaciones("Nuevo Pedido Test")
             .renglones(renglonesPedido)
             .subTotal(importe)
@@ -4741,7 +4742,7 @@ class AppIntegrationTest {
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
         .recargoNeto(recargoNeto)
         .recargoPorcentaje(new BigDecimal("5"))
-        .fechaVencimiento(LocalDateTime.now())
+        .fechaVencimiento(LocalDate.now())
         .observaciones("Nuevo Pedido Test")
         .renglones(renglonesPedido)
         .subTotal(importe)
@@ -4794,7 +4795,7 @@ class AppIntegrationTest {
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
         .recargoNeto(recargoNeto)
         .recargoPorcentaje(new BigDecimal("5"))
-        .fechaVencimiento(LocalDateTime.now())
+        .fechaVencimiento(LocalDate.now())
         .observaciones("Nuevo Pedido Test")
         .renglones(renglonesPedido)
         .subTotal(importe)
@@ -4848,7 +4849,7 @@ class AppIntegrationTest {
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
         .recargoNeto(recargoNeto)
         .recargoPorcentaje(new BigDecimal("5"))
-        .fechaVencimiento(LocalDateTime.now())
+        .fechaVencimiento(LocalDate.now())
         .observaciones("Nuevo Pedido Test")
         .renglones(renglonesPedido)
         .subTotal(importe)
@@ -4919,7 +4920,7 @@ class AppIntegrationTest {
         .descuentoPorcentaje(new BigDecimal("15"))
         .recargoNeto(recargoNeto)
         .recargoPorcentaje(new BigDecimal("5"))
-        .fechaVencimiento(LocalDateTime.now())
+        .fechaVencimiento(LocalDate.now())
         .observaciones("Nuevo Pedido Test")
         .renglones(renglonesPedido)
         .subTotal(importe)
