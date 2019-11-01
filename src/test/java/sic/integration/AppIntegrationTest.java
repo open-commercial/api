@@ -6403,7 +6403,7 @@ class AppIntegrationTest {
         .codigo(RandomStringUtils.random(10, false, true))
         .descripcion(RandomStringUtils.random(10, true, false))
         .cantidadEnSucursal(new HashMap<Long, BigDecimal>() {{put(1L, BigDecimal.TEN);}})
-        .bulto(BigDecimal.ONE)
+        .bulto(BigDecimal.TEN)
         .precioCosto(CIEN)
         .gananciaPorcentaje(new BigDecimal("900"))
         .gananciaNeto(new BigDecimal("900"))
@@ -6444,7 +6444,15 @@ class AppIntegrationTest {
     restTemplate.postForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=5", null, ItemCarritoCompra.class);
     ItemCarritoCompra item1 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
     assertEquals(new BigDecimal("6050.00"), item1.getImporte());
-    assertEquals(new BigDecimal("5445.00"), item1.getImporteBonificado());
+    assertNull(item1.getImporteBonificado());
+    assertEquals(new BigDecimal("10.000000000000000"), item1.getProducto().getPorcentajeBonificacionOferta());
+    assertNull(item1.getProducto().getPrecioListaBonificado());
+    restTemplate.postForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=10", null, ItemCarritoCompra.class);
+    item1 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
+    assertEquals(new BigDecimal("12100.00"), item1.getImporte());
+    assertEquals(new BigDecimal("10890.00"), item1.getImporteBonificado());
+    assertEquals(new BigDecimal("10.000000000000000"), item1.getProducto().getPorcentajeBonificacionOferta());
+    assertEquals(new BigDecimal("1089.00"), item1.getProducto().getPrecioListaBonificado());
   }
 
   @Test
@@ -6453,16 +6461,16 @@ class AppIntegrationTest {
     BusquedaProductoCriteria criteria =
         BusquedaProductoCriteria.builder()
           .pagina(0).build();
-    HttpEntity<BusquedaProductoCriteria> requestEntity = new HttpEntity(criteria);
-    List<ProductoDTO> productosRecuperados =
-        restTemplate
-            .exchange(
-                apiPrefix + "/productos/busqueda/criteria",
-                HttpMethod.POST,
-                requestEntity,
-                new ParameterizedTypeReference<PaginaRespuestaRest<ProductoDTO>>() {})
-            .getBody()
-            .getContent();
+    HttpEntity<BusquedaProductoCriteria> requestEntity = new HttpEntity<>(criteria);
+    PaginaRespuestaRest<ProductoDTO>  paginaRespuestaRest = restTemplate
+      .exchange(
+        apiPrefix + "/productos/busqueda/criteria",
+        HttpMethod.POST,
+        requestEntity,
+        new ParameterizedTypeReference<PaginaRespuestaRest<ProductoDTO>>() {})
+      .getBody();
+    assertNotNull(paginaRespuestaRest);
+    List<ProductoDTO> productosRecuperados = paginaRespuestaRest.getContent();
     assertNull(productosRecuperados.get(0).getPrecioListaBonificado());
     assertNull(productosRecuperados.get(1).getPrecioListaBonificado());
     ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/2", ClienteDTO.class);
