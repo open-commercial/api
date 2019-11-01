@@ -19,6 +19,7 @@ import lombok.ToString;
 import sic.controller.Views;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.PastOrPresent;
 
 @Entity
 @Table(name = "recibo")
@@ -42,6 +43,7 @@ public class Recibo implements Serializable {
   private String idPagoMercadoPago;
 
   @NotNull(message = "{mensaje_recibo_fecha_vacia}")
+  @PastOrPresent(message = "{mensaje_recibo_fecha_futura_no_permitida}")
   private LocalDateTime fecha;
 
   private boolean eliminado;

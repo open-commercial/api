@@ -75,7 +75,7 @@ public class CajaServiceImpl implements ICajaService {
         throw new BusinessServiceException(
             messageSource.getMessage("mensaje_caja_anterior_abierta", null, Locale.getDefault()));
       }
-      if (ultimaCaja.getFechaApertura().isBefore(caja.getFechaApertura())) {
+      if (caja.getFechaApertura().isBefore(ultimaCaja.getFechaCierre())) {
         throw new BusinessServiceException(
             messageSource.getMessage(
                 "mensaje_fecha_apertura_no_valida", null, Locale.getDefault()));
