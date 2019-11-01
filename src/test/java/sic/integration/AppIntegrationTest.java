@@ -317,6 +317,7 @@ class AppIntegrationTest {
             .idEmpresa(idEmpresa)
             .idProveedor(idProveedor)
             .idFormaDePago(1L)
+            .fecha(LocalDateTime.now())
             .build();
     restTemplate.postForObject(apiPrefix + "/recibos/proveedores", recibo, Recibo.class);
   }
