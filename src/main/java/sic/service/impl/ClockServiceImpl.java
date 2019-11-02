@@ -7,7 +7,6 @@ import sic.service.IClockService;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
 
 import static java.time.Instant.ofEpochMilli;
 
@@ -22,8 +21,8 @@ public class ClockServiceImpl implements IClockService {
   }
 
   @Override
-  public Date getFechaActual() {
-    return Date.from(this.clock.instant());
+  public LocalDateTime getFechaActual() {
+    return LocalDateTime.ofInstant(this.clock.instant(), ZoneId.systemDefault());
   }
 
   @Override

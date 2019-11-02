@@ -1,6 +1,7 @@
 package sic.controller;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
@@ -73,7 +74,7 @@ public class ProductoController {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente =
         clienteService.getClientePorIdUsuarioYidEmpresa(
-          (int) claims.get("idUsuario"), producto.getEmpresa().getId_Empresa());
+          (int) claims.get("idUsuario"), producto.getEmpresa().getIdEmpresa());
       if (cliente != null) {
         Page<Producto> productos =
           productoService.getProductosConPrecioBonificado(
@@ -227,6 +228,8 @@ public class ProductoController {
     producto.setEstanteria(nuevoProductoDTO.getEstanteria());
     producto.setNota(nuevoProductoDTO.getNota());
     producto.setFechaVencimiento(nuevoProductoDTO.getFechaVencimiento());
+    producto.setFechaAlta(LocalDateTime.now());
+    producto.setFechaUltimaModificacion(LocalDateTime.now());
     return productoService.guardar(producto);
   }
 

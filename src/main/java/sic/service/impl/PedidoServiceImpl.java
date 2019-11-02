@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -43,7 +45,6 @@ import sic.repository.PedidoRepository;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 import sic.util.CalculosComprobante;
-import sic.util.FormatterFechaHora;
 
 @Service
 @Validated
@@ -196,7 +197,6 @@ public class PedidoServiceImpl implements IPedidoService {
   public Pedido guardar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal) {
     this.asignarDetalleEnvio(pedido, tipoDeEnvio, idSucursal);
     this.calcularCantidadDeArticulos(pedido);
-    pedido.setFecha(new Date());
     pedido.setNroPedido(this.generarNumeroPedido(pedido.getEmpresa()));
     pedido.setEstado(EstadoPedido.ABIERTO);
     if (pedido.getObservaciones() == null || pedido.getObservaciones().equals("")) {
@@ -208,7 +208,7 @@ public class PedidoServiceImpl implements IPedidoService {
     String emailCliente = pedido.getCliente().getEmail();
     if (emailCliente != null && !emailCliente.isEmpty()) {
       correoElectronicoService.enviarMailPorEmpresa(
-          pedido.getEmpresa().getId_Empresa(),
+          pedido.getEmpresa().getIdEmpresa(),
           emailCliente,
           "",
           "Nuevo Pedido Ingresado",
@@ -284,51 +284,36 @@ public class PedidoServiceImpl implements IPedidoService {
     QPedido qPedido = QPedido.pedido;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
-        qPedido.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qPedido.eliminado.eq(false)));
+        qPedido.empresa.idEmpresa.eq(criteria.getIdEmpresa()).and(qPedido.eliminado.eq(false)));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
-      Calendar cal = new GregorianCalendar();
-      if (criteria.getFechaDesde() != null) {
-        cal.setTime(criteria.getFechaDesde());
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        criteria.setFechaDesde(cal.getTime());
-      }
-      if (criteria.getFechaHasta() != null) {
-        cal.setTime(criteria.getFechaHasta());
-        cal.set(Calendar.HOUR_OF_DAY, 23);
-        cal.set(Calendar.MINUTE, 59);
-        cal.set(Calendar.SECOND, 59);
-        criteria.setFechaHasta(cal.getTime());
-      }
-      FormatterFechaHora formateadorFecha =
-          new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
+      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59));
       String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-        DateExpression<Date> fDesde =
+        DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                Date.class,
+                LocalDateTime.class,
                 dateTemplate,
-                formateadorFecha.format(criteria.getFechaDesde()));
-        DateExpression<Date> fHasta =
+                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                Date.class,
+                LocalDateTime.class,
                 dateTemplate,
-                formateadorFecha.format(criteria.getFechaHasta()));
+                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qPedido.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
-        DateExpression<Date> fDesde =
+        DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                Date.class,
+                LocalDateTime.class,
                 dateTemplate,
-                formateadorFecha.format(criteria.getFechaDesde()));
+                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qPedido.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
-        DateExpression<Date> fHasta =
+        DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                Date.class,
+                LocalDateTime.class,
                 dateTemplate,
-                formateadorFecha.format(criteria.getFechaHasta()));
+                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qPedido.fecha.before(fHasta));
       }
     }

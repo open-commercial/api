@@ -10,18 +10,16 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import javax.validation.constraints.DecimalMax;
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import javax.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "factura")
@@ -33,7 +31,7 @@ import javax.validation.constraints.NotEmpty;
 @ToString(exclude = {"renglones"})
 @JsonIdentityInfo(
     generator = ObjectIdGenerators.PropertyGenerator.class,
-    property = "id_Factura",
+    property = "idFactura",
     scope = Factura.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({@Type(value = FacturaCompra.class), @Type(value = FacturaVenta.class)})
@@ -47,17 +45,16 @@ public abstract class Factura implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id_Factura;
+  @Column(name = "id_Factura")
+  private long idFactura;
 
   @ManyToOne
   @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
   @NotNull(message = "{mensaje_factura_usuario_vacio}")
   private Usuario usuario;
 
-  @Column(nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
   @NotNull(message = "{mensaje_factura_fecha_vacia}")
-  private Date fecha;
+  private LocalDateTime fecha;
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
@@ -68,8 +65,8 @@ public abstract class Factura implements Serializable {
 
   private long numFactura;
 
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date fechaVencimiento;
+  @FutureOrPresent(message = "{mensaje_fecha_vencimiento_invalida}")
+  private LocalDate fechaVencimiento;
 
   @ManyToOne
   @JoinColumn(name = "id_Pedido", referencedColumnName = "id_Pedido")
@@ -143,8 +140,7 @@ public abstract class Factura implements Serializable {
 
   private long cae;
 
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date vencimientoCae;
+  private LocalDate vencimientoCae;
 
   private long numSerieAfip;
 
@@ -167,7 +163,7 @@ public abstract class Factura implements Serializable {
 
   @JsonGetter("idEmpresa")
   public long getIdEmpresa() {
-    return empresa.getId_Empresa();
+    return empresa.getIdEmpresa();
   }
 
   @JsonGetter("nombreEmpresa")

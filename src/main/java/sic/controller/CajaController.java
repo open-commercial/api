@@ -1,6 +1,7 @@
 package sic.controller;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import io.jsonwebtoken.Claims;
@@ -96,7 +97,7 @@ public class CajaController {
   public List<MovimientoCaja> getMovimientosDeCaja(
       @PathVariable long idCaja, @RequestParam long idFormaDePago) {
     Caja caja = cajaService.getCajaPorId(idCaja);
-    Date fechaHasta = new Date();
+    LocalDateTime fechaHasta = LocalDateTime.now();
     if (caja.getFechaCierre() != null) fechaHasta = caja.getFechaCierre();
     return cajaService.getMovimientosPorFormaDePagoEntreFechas(
         caja.getEmpresa(),

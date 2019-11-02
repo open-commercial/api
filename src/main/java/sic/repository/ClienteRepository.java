@@ -26,7 +26,7 @@ public interface ClienteRepository
 
   @Query(
       "SELECT c FROM Cliente c WHERE c.credencial.id_Usuario = :idUsuario "
-          + "AND c.empresa.id_Empresa = :idEmpresa AND c.eliminado = false")
+          + "AND c.empresa.idEmpresa = :idEmpresa AND c.eliminado = false")
   Cliente findClienteByIdUsuarioYidEmpresa(
       @Param("idUsuario") long idUsuario, @Param("idEmpresa") long idEmpresa);
 

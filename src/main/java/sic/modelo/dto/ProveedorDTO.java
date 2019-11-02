@@ -5,7 +5,7 @@ import sic.modelo.CategoriaIVA;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @EqualsAndHashCode(exclude = {"id_Proveedor", "idEmpresa", "nombreEmpresa", "nroProveedor"})
@@ -29,5 +29,5 @@ public class ProveedorDTO implements Serializable {
   private String nombreEmpresa;
   private boolean eliminado;
   private BigDecimal saldoCuentaCorriente;
-  private Date fechaUltimoMovimiento;
+  private LocalDateTime fechaUltimoMovimiento;
 }

@@ -1,7 +1,10 @@
 package sic.builder;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Month;
+
 import sic.modelo.dto.ProductoDTO;
 
 public class ProductoBuilder {
@@ -25,23 +28,48 @@ public class ProductoBuilder {
     private boolean ilimitado = false;
     private boolean publico = true;
     private boolean destacado = false;
-    private Date fechaUltimaModificacion = new Date(1463540400000L); // 18-05-2016
+    private LocalDateTime fechaUltimaModificacion = LocalDateTime.of(2016, Month.MAY, 18, 00, 00); // 18-05-2016
     private String estanteria = "A";
     private String estante = "1";
     private String razonSocialProveedor = "Abrasol";
     private String nota = "Cumple con las normas ISO";
-    private Date fechaAlta = new Date(1458010800000L); // 15-03-2016;
-    private Date fechaVencimiento = new Date(1597892400000L); // 20-08-2020
+    private LocalDateTime fechaAlta = LocalDateTime.of(2016, Month.MARCH, 15, 00, 00);; // 15-03-2016;
+    private LocalDate fechaVencimiento = LocalDate.of(2020, Month.OCTOBER, 20);; // 20-08-2020
     private boolean eliminado = false;
     private String urlImagen;
-    
-    public ProductoDTO build() {
-        return new ProductoDTO(idProducto, codigo, descripcion, cantidad, hayStock, cantMinima, bulto, nombreMedida,
-                precioCosto, ganancia_porcentaje, ganancia_neto, precioVentaPublico, iva_porcentaje, iva_neto,
-                precioLista, nombreRubro, ilimitado, publico, destacado, fechaUltimaModificacion, estanteria, estante, razonSocialProveedor,
-                nota, fechaAlta, fechaVencimiento, eliminado, urlImagen);
-    }
-    
+
+  public ProductoDTO build() {
+    return new ProductoDTO(
+        idProducto,
+        codigo,
+        descripcion,
+        cantidad,
+        hayStock,
+        cantMinima,
+        bulto,
+        nombreMedida,
+        precioCosto,
+        ganancia_porcentaje,
+        ganancia_neto,
+        precioVentaPublico,
+        iva_porcentaje,
+        iva_neto,
+        precioLista,
+        nombreRubro,
+        ilimitado,
+        publico,
+        destacado,
+        fechaUltimaModificacion,
+        estanteria,
+        estante,
+        razonSocialProveedor,
+        nota,
+        fechaAlta,
+        fechaVencimiento,
+        eliminado,
+        urlImagen);
+  }
+
     public ProductoBuilder withId_Producto(Long idProducto) {
         this.idProducto = idProducto;
         return this;
@@ -138,7 +166,7 @@ public class ProductoBuilder {
         return this;
     }
     
-    public ProductoBuilder withFechaUltimaModificacion(Date fechaUltimaModificacion) {
+    public ProductoBuilder withFechaUltimaModificacion(LocalDateTime fechaUltimaModificacion) {
         this.fechaUltimaModificacion = fechaUltimaModificacion;
         return this;
     }
@@ -163,12 +191,12 @@ public class ProductoBuilder {
         return this;
     }
     
-    public ProductoBuilder withFechaAlta(Date fechaAlta) {
+    public ProductoBuilder withFechaAlta(LocalDateTime fechaAlta) {
         this.fechaAlta = fechaAlta;
         return this;
     }
     
-    public ProductoBuilder withFechaVencimiento(Date fechaVencimiento) {
+    public ProductoBuilder withFechaVencimiento(LocalDate fechaVencimiento) {
         this.fechaVencimiento = fechaVencimiento;
         return this;
     }

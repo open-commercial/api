@@ -2,6 +2,7 @@ package sic.service.impl;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -174,6 +175,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
                 .add(
                     pedidoService.calcularRenglonPedido(
                         i.getProducto().getIdProducto(), i.getCantidad(), BigDecimal.ZERO)));
+    pedido.setFecha(LocalDateTime.now());
     Pedido p =
         pedidoService.guardar(
             pedido, nuevaOrdenDeCompraDTO.getTipoDeEnvio(), nuevaOrdenDeCompraDTO.getIdSucursal());

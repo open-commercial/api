@@ -2,7 +2,7 @@ package sic.modelo;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.persistence.*;
@@ -37,10 +37,8 @@ public class Gasto implements Serializable {
 
   private long nroGasto;
 
-  @Column(nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
   @NotNull(message = "{mensaje_gasto_fecha_vacia}")
-  private Date fecha;
+  private LocalDateTime fecha;
 
   @Column(nullable = false)
   @NotNull
@@ -71,7 +69,7 @@ public class Gasto implements Serializable {
 
   @JsonGetter("idEmpresa")
   public Long getIdEmpresa() {
-    return empresa.getId_Empresa();
+    return empresa.getIdEmpresa();
   }
 
   @JsonGetter("nombreEmpresa")

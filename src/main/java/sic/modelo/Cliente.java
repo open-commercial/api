@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.QueryInit;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.persistence.*;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
@@ -76,9 +76,8 @@ public class Cliente implements Serializable {
 
   private String contacto;
 
-  @Column(nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date fechaAlta;
+  @NotNull(message = "{mensaje_cliente_fecha_vacia}")
+  private LocalDateTime fechaAlta;
 
   @ManyToOne
   @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
@@ -99,7 +98,7 @@ public class Cliente implements Serializable {
 
   @JsonGetter("idEmpresa")
   public Long getIdEmpresa() {
-    return empresa.getId_Empresa();
+    return empresa.getIdEmpresa();
   }
 
   @JsonGetter("nombreEmpresa")

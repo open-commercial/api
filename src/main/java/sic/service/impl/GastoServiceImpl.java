@@ -15,6 +15,8 @@ import sic.modelo.*;
 import sic.modelo.criteria.BusquedaGastoCriteria;
 import sic.service.IGastoService;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
@@ -29,7 +31,6 @@ import sic.exception.BusinessServiceException;
 import sic.repository.GastoRepository;
 import sic.service.ICajaService;
 import sic.service.IEmpresaService;
-import sic.util.FormatterFechaHora;
 
 @Service
 @Validated
@@ -69,7 +70,7 @@ public class GastoServiceImpl implements IGastoService {
 
   @Override
   public void validarOperacion(Gasto gasto) {
-    this.cajaService.validarMovimiento(gasto.getFecha(), gasto.getEmpresa().getId_Empresa());
+    this.cajaService.validarMovimiento(gasto.getFecha(), gasto.getEmpresa().getIdEmpresa());
     if (gastoRepository.findById(gasto.getId_Gasto()).isPresent()) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_gasto_duplicada", null, Locale.getDefault()));
@@ -116,49 +117,34 @@ public class GastoServiceImpl implements IGastoService {
       builder.or(rsPredicate);
     }
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
-      Calendar cal = new GregorianCalendar();
-      if (criteria.getFechaDesde() != null) {
-        cal.setTime(criteria.getFechaDesde());
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        criteria.setFechaDesde(cal.getTime());
-      }
-      if (criteria.getFechaHasta() != null) {
-        cal.setTime(criteria.getFechaHasta());
-        cal.set(Calendar.HOUR_OF_DAY, 23);
-        cal.set(Calendar.MINUTE, 59);
-        cal.set(Calendar.SECOND, 59);
-        criteria.setFechaHasta(cal.getTime());
-      }
-      FormatterFechaHora formateadorFecha =
-          new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
+      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59));
       String dateTemplate = "convert({0}, datetime)";
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-        DateExpression<Date> fDesde =
+        DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                Date.class,
+                LocalDateTime.class,
                 dateTemplate,
-                formateadorFecha.format(criteria.getFechaDesde()));
-        DateExpression<Date> fHasta =
+                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                Date.class,
+                LocalDateTime.class,
                 dateTemplate,
-                formateadorFecha.format(criteria.getFechaHasta()));
+                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qGasto.fecha.between(fDesde, fHasta));
       } else if (criteria.getFechaDesde() != null) {
-        DateExpression<Date> fDesde =
+        DateExpression<LocalDateTime> fDesde =
             Expressions.dateTemplate(
-                Date.class,
+                LocalDateTime.class,
                 dateTemplate,
-                formateadorFecha.format(criteria.getFechaDesde()));
+                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qGasto.fecha.after(fDesde));
       } else if (criteria.getFechaHasta() != null) {
-        DateExpression<Date> fHasta =
+        DateExpression<LocalDateTime> fHasta =
             Expressions.dateTemplate(
-                Date.class,
+                LocalDateTime.class,
                 dateTemplate,
-                formateadorFecha.format(criteria.getFechaHasta()));
+                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         builder.and(qGasto.fecha.before(fHasta));
       }
     }
@@ -168,15 +154,15 @@ public class GastoServiceImpl implements IGastoService {
     if (criteria.getIdUsuario() != null)
       builder.and(qGasto.usuario.id_Usuario.eq(criteria.getIdUsuario()));
     builder.and(
-        qGasto.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qGasto.eliminado.eq(false)));
+        qGasto.empresa.idEmpresa.eq(criteria.getIdEmpresa()).and(qGasto.eliminado.eq(false)));
     return builder;
   }
 
   @Override
   @Transactional
   public Gasto guardar(@Valid Gasto gasto) {
-    gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getEmpresa().getId_Empresa()) + 1);
-    gasto.setFecha(new Date());
+    gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getEmpresa().getIdEmpresa()) + 1);
+    gasto.setFecha(LocalDateTime.now());
     this.validarOperacion(gasto);
     gasto = gastoRepository.save(gasto);
     logger.warn("El Gasto {} se guardó correctamente.", gasto);
@@ -185,9 +171,9 @@ public class GastoServiceImpl implements IGastoService {
 
   @Override
   public List<Gasto> getGastosEntreFechasYFormaDePago(
-      Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta) {
+      Empresa empresa, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta) {
     return gastoRepository.getGastosEntreFechasPorFormaDePago(
-        empresa.getId_Empresa(), formaDePago.getId_FormaDePago(), desde, hasta);
+        empresa.getIdEmpresa(), formaDePago.getId_FormaDePago(), desde, hasta);
   }
 
   @Override
@@ -195,7 +181,7 @@ public class GastoServiceImpl implements IGastoService {
   public void eliminar(long idGasto) {
     Gasto gastoParaEliminar = this.getGastoNoEliminadoPorId(idGasto);
     if (this.cajaService
-        .getUltimaCaja(gastoParaEliminar.getEmpresa().getId_Empresa())
+        .getUltimaCaja(gastoParaEliminar.getEmpresa().getIdEmpresa())
         .getEstado()
         .equals(EstadoCaja.CERRADA)) {
       throw new BusinessServiceException(messageSource.getMessage(
@@ -219,7 +205,7 @@ public class GastoServiceImpl implements IGastoService {
 
   @Override
   public BigDecimal getTotalGastosEntreFechasYFormaDePago(
-      long idEmpresa, long idFormaDePago, Date desde, Date hasta) {
+      long idEmpresa, long idFormaDePago, LocalDateTime desde, LocalDateTime hasta) {
     BigDecimal total =
         gastoRepository.getTotalGastosEntreFechasPorFormaDePago(
             idEmpresa, idFormaDePago, desde, hasta);
@@ -228,14 +214,14 @@ public class GastoServiceImpl implements IGastoService {
 
   @Override
   public BigDecimal getTotalGastosQueAfectanCajaEntreFechas(
-      long idEmpresa, Date desde, Date hasta) {
+      long idEmpresa, LocalDateTime desde, LocalDateTime hasta) {
     BigDecimal total =
         gastoRepository.getTotalGastosQueAfectanCajaEntreFechas(idEmpresa, desde, hasta);
     return (total == null) ? BigDecimal.ZERO : total;
   }
 
   @Override
-  public BigDecimal getTotalGastosEntreFechas(long idEmpresa, Date desde, Date hasta) {
+  public BigDecimal getTotalGastosEntreFechas(long idEmpresa, LocalDateTime desde, LocalDateTime hasta) {
     BigDecimal total = gastoRepository.getTotalGastosEntreFechas(idEmpresa, desde, hasta);
     return (total == null) ? BigDecimal.ZERO : total;
   }

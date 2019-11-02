@@ -6,7 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -31,10 +32,10 @@ public class NuevoProductoDTO {
   private boolean ilimitado;
   private boolean publico;
   private boolean destacado;
-  private Date fechaUltimaModificacion;
+  private LocalDateTime fechaUltimaModificacion;
   private String estanteria;
   private String estante;
   private String nota;
-  private Date fechaVencimiento;
+  private LocalDate fechaVencimiento;
   private boolean eliminado;
 }

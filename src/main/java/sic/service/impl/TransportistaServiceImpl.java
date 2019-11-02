@@ -77,7 +77,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
     builder.and(
         qTransportista
             .empresa
-            .id_Empresa
+            .idEmpresa
             .eq(criteria.getIdEmpresa())
             .and(qTransportista.eliminado.eq(false)));
     if (criteria.getNombre() != null)

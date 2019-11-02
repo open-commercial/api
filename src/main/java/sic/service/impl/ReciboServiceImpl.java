@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -34,7 +36,6 @@ import sic.repository.ReciboRepository;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
-import sic.util.FormatterFechaHora;
 
 @Service
 @Validated
@@ -92,36 +93,25 @@ public class ReciboServiceImpl implements IReciboService {
     QRecibo qRecibo = QRecibo.recibo;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-      Calendar cal = new GregorianCalendar();
-      cal.setTime(criteria.getFechaDesde());
-      cal.set(Calendar.HOUR_OF_DAY, 0);
-      cal.set(Calendar.MINUTE, 0);
-      cal.set(Calendar.SECOND, 0);
-      criteria.setFechaDesde(cal.getTime());
-      cal.setTime(criteria.getFechaHasta());
-      cal.set(Calendar.HOUR_OF_DAY, 23);
-      cal.set(Calendar.MINUTE, 59);
-      cal.set(Calendar.SECOND, 59);
-      criteria.setFechaHasta(cal.getTime());
-      FormatterFechaHora formateadorFecha =
-        new FormatterFechaHora(FormatterFechaHora.FORMATO_FECHAHORA_INTERNACIONAL);
+      criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
+      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59));
       String dateTemplate = "convert({0}, datetime)";
-      DateExpression<Date> fDesde =
-        Expressions.dateTemplate(
-          Date.class,
-          dateTemplate,
-          formateadorFecha.format(criteria.getFechaDesde()));
-      DateExpression<Date> fHasta =
-        Expressions.dateTemplate(
-          Date.class,
-          dateTemplate,
-          formateadorFecha.format(criteria.getFechaHasta()));
+      DateExpression<LocalDateTime> fDesde =
+          Expressions.dateTemplate(
+              LocalDateTime.class,
+              dateTemplate,
+              criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+      DateExpression<LocalDateTime> fHasta =
+          Expressions.dateTemplate(
+              LocalDateTime.class,
+              dateTemplate,
+              criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
       builder.and(qRecibo.fecha.between(fDesde, fHasta));
     }
     if (criteria.getNumSerie() != null && criteria.getNumRecibo() != null)
       builder
-        .and(qRecibo.numSerie.eq(criteria.getNumSerie()))
-        .and(qRecibo.numRecibo.eq(criteria.getNumRecibo()));
+          .and(qRecibo.numSerie.eq(criteria.getNumSerie()))
+          .and(qRecibo.numRecibo.eq(criteria.getNumRecibo()));
     if (criteria.getConcepto() != null) {
       String[] terminos = criteria.getConcepto().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
@@ -141,7 +131,7 @@ public class ReciboServiceImpl implements IReciboService {
     if (criteria.getMovimiento() == Movimiento.VENTA) builder.and(qRecibo.proveedor.isNull());
     else if (criteria.getMovimiento() == Movimiento.COMPRA) builder.and(qRecibo.cliente.isNull());
     builder.and(
-      qRecibo.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qRecibo.eliminado.eq(false)));
+      qRecibo.empresa.idEmpresa.eq(criteria.getIdEmpresa()).and(qRecibo.eliminado.eq(false)));
     return builder;
   }
 
@@ -186,11 +176,10 @@ public class ReciboServiceImpl implements IReciboService {
             .getNroPuntoDeVentaAfip());
     recibo.setNumRecibo(
         this.getSiguienteNumeroRecibo(
-            recibo.getEmpresa().getId_Empresa(),
+            recibo.getEmpresa().getIdEmpresa(),
             configuracionDelSistemaService
                 .getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa())
                 .getNroPuntoDeVentaAfip()));
-    recibo.setFecha(new Date());
     this.validarOperacion(recibo);
     recibo = reciboRepository.save(recibo);
     this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
@@ -232,7 +221,7 @@ public class ReciboServiceImpl implements IReciboService {
       Usuario usuario,
       BigDecimal[] montos,
       BigDecimal totalFactura,
-      Date fecha) {
+      LocalDateTime fecha) {
     List<Recibo> recibos = new ArrayList<>();
     if (idsFormaDePago != null && montos != null && idsFormaDePago.length == montos.length) {
       BigDecimal totalMontos = BigDecimal.ZERO;
@@ -258,7 +247,7 @@ public class ReciboServiceImpl implements IReciboService {
                 .getConfiguracionDelSistemaPorEmpresa(recibo.getEmpresa())
                 .getNroPuntoDeVentaAfip());
         recibo.setNumRecibo(
-            this.getSiguienteNumeroRecibo(empresa.getId_Empresa(), recibo.getNumSerie()));
+            this.getSiguienteNumeroRecibo(empresa.getIdEmpresa(), recibo.getNumSerie()));
         recibo.setConcepto("SALDO.");
         recibos.add(recibo);
         i++;
@@ -286,7 +275,7 @@ public class ReciboServiceImpl implements IReciboService {
   private void actualizarCajaPorEliminacionDeRecibo(Recibo recibo) {
     Caja caja =
         this.cajaService.encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(
-            recibo.getEmpresa().getId_Empresa(), recibo.getFecha());
+            recibo.getEmpresa().getIdEmpresa(), recibo.getFecha());
     BigDecimal monto = BigDecimal.ZERO;
     if (caja != null && caja.getEstado().equals(EstadoCaja.CERRADA)) {
       if (recibo.getCliente() != null) {
@@ -301,9 +290,9 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public List<Recibo> getRecibosEntreFechasPorFormaDePago(
-      Date desde, Date hasta, FormaDePago formaDePago, Empresa empresa) {
+    LocalDateTime desde, LocalDateTime hasta, FormaDePago formaDePago, Empresa empresa) {
     return reciboRepository.getRecibosEntreFechasPorFormaDePago(
-        empresa.getId_Empresa(), formaDePago.getId_FormaDePago(), desde, hasta);
+        empresa.getIdEmpresa(), formaDePago.getId_FormaDePago(), desde, hasta);
   }
 
   @Override
@@ -338,7 +327,7 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public BigDecimal getTotalRecibosClientesEntreFechasPorFormaDePago(
-      long idEmpresa, long idFormaDePago, Date desde, Date hasta) {
+      long idEmpresa, long idFormaDePago, LocalDateTime desde, LocalDateTime hasta) {
     BigDecimal total =
         reciboRepository.getTotalRecibosClientesEntreFechasPorFormaDePago(
             idEmpresa, idFormaDePago, desde, hasta);
@@ -347,7 +336,7 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public BigDecimal getTotalRecibosProveedoresEntreFechasPorFormaDePago(
-      long idEmpresa, long idFormaDePago, Date desde, Date hasta) {
+      long idEmpresa, long idFormaDePago, LocalDateTime desde, LocalDateTime hasta) {
     BigDecimal total =
         reciboRepository.getTotalRecibosProveedoresEntreFechasPorFormaDePago(
             idEmpresa, idFormaDePago, desde, hasta);
@@ -356,7 +345,7 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public BigDecimal getTotalRecibosClientesQueAfectanCajaEntreFechas(
-      long idEmpresa, Date desde, Date hasta) {
+      long idEmpresa, LocalDateTime desde, LocalDateTime hasta) {
     BigDecimal total =
         reciboRepository.getTotalRecibosClientesQueAfectanCajaEntreFechas(idEmpresa, desde, hasta);
     return (total == null) ? BigDecimal.ZERO : total;
@@ -364,7 +353,7 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public BigDecimal getTotalRecibosProveedoresQueAfectanCajaEntreFechas(
-      long idEmpresa, Date desde, Date hasta) {
+      long idEmpresa, LocalDateTime desde, LocalDateTime hasta) {
     BigDecimal total =
         reciboRepository.getTotalRecibosProveedoresQueAfectanCajaEntreFechas(
             idEmpresa, desde, hasta);
@@ -372,13 +361,13 @@ public class ReciboServiceImpl implements IReciboService {
   }
 
   @Override
-  public BigDecimal getTotalRecibosClientesEntreFechas(long idEmpresa, Date desde, Date hasta) {
+  public BigDecimal getTotalRecibosClientesEntreFechas(long idEmpresa, LocalDateTime desde, LocalDateTime hasta) {
     BigDecimal total = reciboRepository.getTotalRecibosClientesEntreFechas(idEmpresa, desde, hasta);
     return (total == null) ? BigDecimal.ZERO : total;
   }
 
   @Override
-  public BigDecimal getTotalRecibosProveedoresEntreFechas(long idEmpresa, Date desde, Date hasta) {
+  public BigDecimal getTotalRecibosProveedoresEntreFechas(long idEmpresa, LocalDateTime desde, LocalDateTime hasta) {
     BigDecimal total =
         reciboRepository.getTotalRecibosProveedoresEntreFechas(idEmpresa, desde, hasta);
     return (total == null) ? BigDecimal.ZERO : total;

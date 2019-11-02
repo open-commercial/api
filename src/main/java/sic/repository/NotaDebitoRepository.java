@@ -10,7 +10,7 @@ public interface NotaDebitoRepository
 
   @Query(
       "SELECT max(nd.nroNota) FROM NotaDebito nd "
-          + "WHERE nd.tipoComprobante = :tipoComprobante AND nd.serie = :serie AND nd.empresa.id_Empresa = :idEmpresa "
+          + "WHERE nd.tipoComprobante = :tipoComprobante AND nd.serie = :serie AND nd.empresa.idEmpresa = :idEmpresa "
           + "AND nd.cliente IS NOT null")
   Long buscarMayorNumNotaDebitoClienteSegunTipo(
       @Param("tipoComprobante") TipoDeComprobante tipoComprobante,

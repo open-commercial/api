@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.persistence.*;
@@ -19,6 +19,7 @@ import lombok.ToString;
 import sic.controller.Views;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.PastOrPresent;
 
 @Entity
 @Table(name = "recibo")
@@ -41,9 +42,9 @@ public class Recibo implements Serializable {
 
   private String idPagoMercadoPago;
 
-  @Column(nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date fecha;
+  @NotNull(message = "{mensaje_recibo_fecha_vacia}")
+  @PastOrPresent(message = "{mensaje_recibo_fecha_futura_no_permitida}")
+  private LocalDateTime fecha;
 
   private boolean eliminado;
 
@@ -75,7 +76,7 @@ public class Recibo implements Serializable {
   private Usuario usuario;
 
   @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_monto_negativo}")
+  @DecimalMin(value = "0", message = "{mensaje_recibo_monto_negativo}")
   private BigDecimal monto;
 
   @JsonGetter("idFormaDePago")
@@ -90,7 +91,7 @@ public class Recibo implements Serializable {
 
   @JsonGetter("idEmpresa")
   public long getIdEmpresa() {
-    return empresa.getId_Empresa();
+    return empresa.getIdEmpresa();
   }
 
   @JsonGetter("nombreEmpresa")

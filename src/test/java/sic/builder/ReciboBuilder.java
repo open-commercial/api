@@ -1,7 +1,8 @@
 package sic.builder;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
+
 import sic.modelo.Cliente;
 import sic.modelo.Empresa;
 import sic.modelo.FormaDePago;
@@ -22,7 +23,7 @@ public class ReciboBuilder {
   private Cliente cliente = new ClienteBuilder().build();
   private Usuario usuario = new UsuarioBuilder().build();
   private Proveedor proveedor = null;
-  private Date fecha = new Date();
+  private LocalDateTime fecha = LocalDateTime.now();
   private BigDecimal monto = new BigDecimal("1000");
 
   public Recibo build() {
@@ -97,7 +98,7 @@ public class ReciboBuilder {
     return this;
   }
 
-  public ReciboBuilder withFecha(Date fecha) {
+  public ReciboBuilder withFecha(LocalDateTime fecha) {
     this.fecha = fecha;
     return this;
   }

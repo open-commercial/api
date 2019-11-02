@@ -11,7 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -92,7 +92,7 @@ public class ProveedorServiceImpl implements IProveedorService {
     builder.and(
         qProveedor
             .empresa
-            .id_Empresa
+            .idEmpresa
             .eq(criteria.getIdEmpresa())
             .and(qProveedor.eliminado.eq(false)));
     return proveedorRepository.findAll(builder, this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
@@ -102,7 +102,7 @@ public class ProveedorServiceImpl implements IProveedorService {
     String ordenDefault = "razonSocial";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(
-          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenDefault));
     } else {
       switch (sentido) {
         case "ASC":
@@ -183,7 +183,8 @@ public class ProveedorServiceImpl implements IProveedorService {
     cuentaCorrienteProveedor.setProveedor(proveedor);
     cuentaCorrienteProveedor.setEmpresa(proveedor.getEmpresa());
     cuentaCorrienteProveedor.setSaldo(BigDecimal.ZERO);
-    cuentaCorrienteProveedor.setFechaApertura(new Date());
+    cuentaCorrienteProveedor.setFechaApertura(LocalDateTime.now());
+    cuentaCorrienteProveedor.setFechaUltimoMovimiento(LocalDateTime.now());
     cuentaCorrienteService.guardarCuentaCorrienteProveedor(cuentaCorrienteProveedor);
     logger.warn("El Proveedor {} se guardó correctamente.", proveedor);
     return proveedor;

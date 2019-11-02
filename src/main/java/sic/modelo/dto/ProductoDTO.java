@@ -2,7 +2,8 @@ package sic.modelo.dto;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import lombok.*;
 
@@ -32,13 +33,13 @@ public class ProductoDTO implements Serializable {
   private boolean ilimitado;
   private boolean publico;
   private boolean destacado;
-  private Date fechaUltimaModificacion;
+  private LocalDateTime fechaUltimaModificacion;
   private String estanteria;
   private String estante;
   private String razonSocialProveedor;
   private String nota;
-  private Date fechaAlta;
-  private Date fechaVencimiento;
+  private LocalDateTime fechaAlta;
+  private LocalDate fechaVencimiento;
   private boolean eliminado;
   private String urlImagen;
 }

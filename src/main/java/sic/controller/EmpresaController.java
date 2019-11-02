@@ -68,7 +68,7 @@ public class EmpresaController {
   public void actualizar(@RequestBody EmpresaDTO empresaDTO) {
     Empresa empresaParaActualizar = modelMapper.map(empresaDTO, Empresa.class);
     Empresa empresaPersistida =
-        empresaService.getEmpresaPorId(empresaParaActualizar.getId_Empresa());
+        empresaService.getEmpresaPorId(empresaParaActualizar.getIdEmpresa());
     if (empresaParaActualizar.getNombre() == null || empresaParaActualizar.getNombre().isEmpty()) {
       empresaParaActualizar.setNombre(empresaPersistida.getNombre());
     }

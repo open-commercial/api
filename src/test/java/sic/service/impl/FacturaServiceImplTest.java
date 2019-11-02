@@ -1,8 +1,8 @@
 package sic.service.impl;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -169,10 +169,10 @@ class FacturaServiceImplTest {
   @Test
   void shouldDividirFactura() {
     when(facturaVentaRepository.buscarMayorNumFacturaSegunTipo(
-            TipoDeComprobante.FACTURA_X, 1L, new EmpresaBuilder().build().getId_Empresa()))
+            TipoDeComprobante.FACTURA_X, 1L, new EmpresaBuilder().build().getIdEmpresa()))
         .thenReturn(1L);
     when(facturaVentaRepository.buscarMayorNumFacturaSegunTipo(
-            TipoDeComprobante.FACTURA_A, 1L, new EmpresaBuilder().build().getId_Empresa()))
+            TipoDeComprobante.FACTURA_A, 1L, new EmpresaBuilder().build().getIdEmpresa()))
         .thenReturn(1L);
     RenglonFactura renglon1 = Mockito.mock(RenglonFactura.class);
     RenglonFactura renglon2 = Mockito.mock(RenglonFactura.class);
@@ -225,7 +225,7 @@ class FacturaServiceImplTest {
     factura.setDescuentoPorcentaje(BigDecimal.ZERO);
     factura.setRecargoPorcentaje(BigDecimal.ZERO);
     factura.setRenglones(renglones);
-    factura.setFecha(new Date());
+    factura.setFecha(LocalDateTime.now());
     factura.setTransportista(new TransportistaBuilder().build());
     factura.setEmpresa(new EmpresaBuilder().build());
     // factura.setCliente(new ClienteBuilder().withId_Cliente(1L).build());

@@ -3,7 +3,6 @@ package sic.service.impl;
 import com.querydsl.core.BooleanBuilder;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.Locale;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
@@ -160,7 +159,7 @@ public class ClienteServiceImpl implements IClienteService {
       builder.and(rsPredicate);
     }
     builder.and(
-        qCliente.empresa.id_Empresa.eq(criteria.getIdEmpresa()).and(qCliente.eliminado.eq(false)));
+        qCliente.empresa.idEmpresa.eq(criteria.getIdEmpresa()).and(qCliente.eliminado.eq(false)));
     return clienteRepository.findAll(builder, this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
   }
 
@@ -235,7 +234,6 @@ public class ClienteServiceImpl implements IClienteService {
   @Override
   @Transactional
   public Cliente guardar(@Valid Cliente cliente) {
-    cliente.setFechaAlta(new Date());
     cliente.setEliminado(false);
     cliente.setNroCliente(this.generarNroDeCliente(cliente.getEmpresa()));
     if (cliente.getBonificacion() == null) cliente.setBonificacion(BigDecimal.ZERO);
@@ -259,11 +257,12 @@ public class ClienteServiceImpl implements IClienteService {
     cuentaCorrienteCliente.setCliente(cliente);
     cuentaCorrienteCliente.setEmpresa(cliente.getEmpresa());
     cuentaCorrienteCliente.setFechaApertura(cliente.getFechaAlta());
+    cuentaCorrienteCliente.setFechaUltimoMovimiento(cliente.getFechaAlta());
     cuentaCorrienteCliente.setSaldo(BigDecimal.ZERO);
     if (cliente.getCredencial() != null) {
       Cliente clienteYaAsignado =
           this.getClientePorIdUsuarioYidEmpresa(
-              cliente.getCredencial().getId_Usuario(), cliente.getEmpresa().getId_Empresa());
+              cliente.getCredencial().getId_Usuario(), cliente.getEmpresa().getIdEmpresa());
       if (clienteYaAsignado != null) {
         throw new BusinessServiceException(messageSource.getMessage(
           "mensaje_cliente_credencial_no_valida", new Object[] {clienteYaAsignado.getNombreFiscal()}, Locale.getDefault()));
@@ -294,7 +293,7 @@ public class ClienteServiceImpl implements IClienteService {
       Cliente clienteYaAsignado =
           this.getClientePorIdUsuarioYidEmpresa(
               clientePorActualizar.getCredencial().getId_Usuario(),
-              clientePorActualizar.getEmpresa().getId_Empresa());
+              clientePorActualizar.getEmpresa().getIdEmpresa());
       if (clienteYaAsignado != null
           && clienteYaAsignado.getId_Cliente() != clientePorActualizar.getId_Cliente()) {
         throw new BusinessServiceException(messageSource.getMessage(

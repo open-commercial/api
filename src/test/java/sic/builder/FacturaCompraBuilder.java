@@ -1,21 +1,22 @@
 package sic.builder;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import sic.modelo.*;
 
 public class FacturaCompraBuilder {
     
-    private long id_Factura = 0L;
+    private long idFactura = 0L;
     private Usuario usuario = new UsuarioBuilder().build();
-    private Date fecha = new Date();
+    private LocalDateTime fecha = LocalDateTime.now();
     private TipoDeComprobante tipoFactura = TipoDeComprobante.FACTURA_A;
     private long numSerie = 0;
     private long numFactura = 1;
-    private Date fechaVencimiento = new Date();
+    private LocalDate fechaVencimiento = LocalDate.now();
     private Pedido pedido = null;
     private Transportista transportista = new TransportistaBuilder().build();
     private List<RenglonFactura> renglones;
@@ -35,7 +36,7 @@ public class FacturaCompraBuilder {
     private Empresa empresa = new EmpresaBuilder().build();
     private boolean eliminada = false;
     private long CAE = 21064126523746l;
-    private Date vencimientoCAE = null;
+    private LocalDate vencimientoCAE = null;
     private long numSerieAfip = 0;
     private long numFacturaAfip = 0;
     
@@ -54,7 +55,7 @@ public class FacturaCompraBuilder {
             renglonesFactura.add(renglon2);
             this.renglones = renglonesFactura;
         }
-        FacturaCompra factura = new FacturaCompra(id_Factura, usuario, fecha, tipoFactura,
+        FacturaCompra factura = new FacturaCompra(idFactura, usuario, fecha, tipoFactura,
                 numSerie, numFactura, fechaVencimiento, pedido, transportista, renglones,
                 subTotal, recargo_porcentaje, recargo_neto, descuento_porcentaje, descuento_neto,
                 subTotal_neto, iva_105_neto, iva_21_neto, impuestoInterno_neto, total, observaciones,
@@ -63,7 +64,7 @@ public class FacturaCompraBuilder {
     }
     
     public FacturaCompraBuilder withId_Factura(long idFactura) {
-        this.id_Factura = idFactura;
+        this.idFactura = idFactura;
         return this;
     }
 
@@ -72,7 +73,7 @@ public class FacturaCompraBuilder {
         return this;
     }
     
-    public FacturaCompraBuilder withFecha(Date fecha) {
+    public FacturaCompraBuilder withFecha(LocalDateTime fecha) {
         this.fecha = fecha;
         return this;
     }
@@ -107,7 +108,7 @@ public class FacturaCompraBuilder {
         return this;
     }
     
-    public FacturaCompraBuilder withFechaVencimiento(Date fechaDeVencimiento) {
+    public FacturaCompraBuilder withFechaVencimiento(LocalDate fechaDeVencimiento) {
         this.fechaVencimiento = fechaDeVencimiento;
         return this;
     }  
@@ -192,7 +193,7 @@ public class FacturaCompraBuilder {
         return this;
     }
     
-    public FacturaCompraBuilder withVencimientoCAE(Date vencimientoCAE) {
+    public FacturaCompraBuilder withVencimientoCAE(LocalDate vencimientoCAE) {
         this.vencimientoCAE = vencimientoCAE;
         return this;
     }

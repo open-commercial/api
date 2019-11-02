@@ -1,7 +1,7 @@
 package sic.modelo;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
@@ -16,7 +16,7 @@ public class MovimientoCaja implements Comparable<MovimientoCaja> {
     private long idMovimiento;
     private TipoDeComprobante tipoComprobante;
     private String concepto;
-    private Date fecha;
+    private LocalDateTime fecha;
     private BigDecimal monto;
 
     public MovimientoCaja(Recibo recibo) {

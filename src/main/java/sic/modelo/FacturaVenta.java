@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -42,15 +43,15 @@ public class FacturaVenta extends Factura implements Serializable {
   public FacturaVenta() {}
 
   public FacturaVenta(
-      long id_Factura,
+      long idFactura,
       ClienteEmbeddable clienteEmbedded,
       Cliente cliente,
       Usuario usuario,
-      Date fecha,
+      LocalDateTime fecha,
       TipoDeComprobante tipoComprobante,
       long numSerie,
       long numFactura,
-      Date fechaVencimiento,
+      LocalDate fechaVencimiento,
       Pedido pedido,
       Transportista transportista,
       List<RenglonFactura> renglones,
@@ -68,13 +69,13 @@ public class FacturaVenta extends Factura implements Serializable {
       BigDecimal cantidadDeArticulos,
       Empresa empresa,
       boolean eliminada,
-      long CAE,
-      Date vencimientoCAE,
+      long cae,
+      LocalDate vencimientoCAE,
       long numSerieAfip,
       long numFacturaAfip) {
 
     super(
-        id_Factura,
+        idFactura,
         usuario,
         fecha,
         tipoComprobante,
@@ -98,7 +99,7 @@ public class FacturaVenta extends Factura implements Serializable {
         cantidadDeArticulos,
         empresa,
         eliminada,
-        CAE,
+        cae,
         vencimientoCAE,
         numSerieAfip,
         numFacturaAfip);

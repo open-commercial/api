@@ -1,7 +1,7 @@
 package sic.service;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -18,7 +18,7 @@ public interface IGastoService {
     
     void eliminar(long idGasto);
 
-    List<Gasto> getGastosEntreFechasYFormaDePago(Empresa empresa, FormaDePago formaDePago, Date desde, Date hasta);
+    List<Gasto> getGastosEntreFechasYFormaDePago(Empresa empresa, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta);
 
     Gasto guardar(@Valid Gasto gasto);
 
@@ -28,11 +28,11 @@ public interface IGastoService {
 
     long getUltimoNumeroDeGasto(long idEmpresa);
 
-    BigDecimal getTotalGastosEntreFechasYFormaDePago(long idEmpresa, long idFormaDePago, Date desde, Date hasta);
+    BigDecimal getTotalGastosEntreFechasYFormaDePago(long idEmpresa, long idFormaDePago, LocalDateTime desde, LocalDateTime hasta);
 
-    BigDecimal getTotalGastosQueAfectanCajaEntreFechas(long idEmpresa, Date desde, Date hasta);
+    BigDecimal getTotalGastosQueAfectanCajaEntreFechas(long idEmpresa, LocalDateTime desde, LocalDateTime hasta);
 
-    BigDecimal getTotalGastosEntreFechas(long idEmpresa, Date desde, Date hasta);
+    BigDecimal getTotalGastosEntreFechas(long idEmpresa, LocalDateTime desde, LocalDateTime hasta);
 
     BigDecimal getTotalGastos(BusquedaGastoCriteria criteria);
 

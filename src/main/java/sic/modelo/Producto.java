@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import javax.persistence.*;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -112,8 +114,8 @@ public class Producto implements Serializable {
 
   private boolean destacado;
 
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date fechaUltimaModificacion;
+  @NotNull(message = "{mensaje_producto_fecha_ultima_modificacion_vacia}")
+  private LocalDateTime fechaUltimaModificacion;
 
   private String estanteria;
 
@@ -127,12 +129,11 @@ public class Producto implements Serializable {
   @NotNull(message = "{mensaje_producto_vacio_nota}")
   private String nota;
 
-  @Column(nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date fechaAlta;
+  @NotNull(message = "{mensaje_producto_fecha_alta_vacia}")
+  private LocalDateTime fechaAlta;
 
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date fechaVencimiento;
+  @FutureOrPresent(message = "{mensaje_fecha_vencimiento_invalida}")
+  private LocalDate fechaVencimiento;
 
   @ManyToOne
   @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")

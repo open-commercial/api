@@ -50,6 +50,6 @@ public class Medida implements Serializable {
 
   @JsonGetter("idEmpresa")
   public long getIdEmpresa() {
-    return empresa.getId_Empresa();
+    return empresa.getIdEmpresa();
   }
 }

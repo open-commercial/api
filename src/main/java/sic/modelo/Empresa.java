@@ -1,7 +1,7 @@
 package sic.modelo;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
@@ -31,7 +31,8 @@ public class Empresa implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id_Empresa;
+  @Column(name = "id_Empresa")
+  private long idEmpresa;
 
   @NotNull(message = "{mensaje_empresa_nombre_vacio}")
   @NotEmpty(message = "{mensaje_empresa_nombre_vacio}")
@@ -49,9 +50,8 @@ public class Empresa implements Serializable {
   private Long idFiscal;
 
   private Long ingresosBrutos;
-
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date fechaInicioActividad;
+  
+  private LocalDateTime fechaInicioActividad;
 
   @Column(nullable = false)
   @Email(message = "{mensaje_correo_formato_incorrecto}")

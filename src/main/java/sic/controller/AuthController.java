@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +77,7 @@ public class AuthController {
     Usuario usuario =
         usuarioService.getUsuarioPorPasswordRecoveryKeyAndIdUsuario(
             recoveryPasswordDTO.getKey(), recoveryPasswordDTO.getId());
-    if (usuario != null && (new Date()).before(usuario.getPasswordRecoveryKeyExpirationDate())) {
+    if (usuario != null && LocalDateTime.now().isBefore(usuario.getPasswordRecoveryKeyExpirationDate())) {
       token = authService.generarToken(usuario.getId_Usuario(), usuario.getRoles());
       usuarioService.actualizarToken(token, usuario.getId_Usuario());
       usuarioService.actualizarPasswordRecoveryKey(null, recoveryPasswordDTO.getId());
