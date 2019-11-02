@@ -65,7 +65,7 @@ public abstract class Factura implements Serializable {
 
   private long numFactura;
 
-  @FutureOrPresent(message = "{mensaje_fecha_vencimiento_invalida}")
+  // @FutureOrPresent(message = "{mensaje_fecha_vencimiento_invalida}")
   private LocalDate fechaVencimiento;
 
   @ManyToOne
