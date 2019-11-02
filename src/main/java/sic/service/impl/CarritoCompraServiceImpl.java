@@ -210,10 +210,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
                   .multiply(itemCarritoCompra.getCantidad())
                   .setScale(2, RoundingMode.HALF_UP));
         }
-      } else if (itemCarritoCompra
-              .getCantidad()
-              .compareTo(itemCarritoCompra.getProducto().getBulto())
-          >= 0) {
+      } else if (bonificacion != null && bonificacion.compareTo(BigDecimal.ZERO) > 0) {
         itemCarritoCompra
             .getProducto()
             .setPrecioListaBonificado(
@@ -223,12 +220,15 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
                     .multiply(
                         BigDecimal.ONE.subtract(bonificacion.divide(CIEN, RoundingMode.HALF_UP)))
                     .setScale(2, RoundingMode.HALF_UP));
-        itemCarritoCompra.setImporteBonificado(
-            itemCarritoCompra
-                .getProducto()
-                .getPrecioListaBonificado()
-                .multiply(itemCarritoCompra.getCantidad())
-                .setScale(2, RoundingMode.HALF_UP));
+        if (itemCarritoCompra.getCantidad().compareTo(itemCarritoCompra.getProducto().getBulto())
+            >= 0) {
+          itemCarritoCompra.setImporteBonificado(
+              itemCarritoCompra
+                  .getProducto()
+                  .getPrecioListaBonificado()
+                  .multiply(itemCarritoCompra.getCantidad())
+                  .setScale(2, RoundingMode.HALF_UP));
+        }
       }
       itemCarritoCompra
           .getProducto()
