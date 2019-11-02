@@ -265,11 +265,11 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   @Transactional
   public void asentarEnCuentaCorriente(FacturaVenta facturaVenta, TipoDeOperacion tipo) {
     CuentaCorriente cc = this.getCuentaCorrientePorCliente(clienteService.getClienteNoEliminadoPorId(facturaVenta.getIdCliente()));
-    cc.setFechaUltimoMovimiento(LocalDateTime.now());
     if (null == cc) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_cuenta_corriente_no_existente", null, Locale.getDefault()));
     }
+    cc.setFechaUltimoMovimiento(LocalDateTime.now());
     if (tipo == TipoDeOperacion.ALTA) {
       this.guardarRenglonCuentaCorrienteDeFactura(facturaVenta, cc);
     }
@@ -287,12 +287,12 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   @Transactional
   public void asentarEnCuentaCorriente(FacturaCompra facturaCompra) {
     CuentaCorriente cc = this.getCuentaCorrientePorProveedor(facturaCompra.getProveedor());
-    cc.setFechaUltimoMovimiento(LocalDateTime.now());
     if (null == cc) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_cuenta_corriente_no_existente", null, Locale.getDefault()));
     }
-      this.guardarRenglonCuentaCorrienteDeFactura(facturaCompra, cc);
+    cc.setFechaUltimoMovimiento(LocalDateTime.now());
+    this.guardarRenglonCuentaCorrienteDeFactura(facturaCompra, cc);
   }
 
   private void guardarRenglonCuentaCorrienteDeFactura(Factura factura, CuentaCorriente cc) {
