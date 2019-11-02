@@ -44,7 +44,7 @@ public class Pedido implements Serializable {
   @NotNull(message = "{mensaje_pedido_fecha_vacia}")
   private LocalDateTime fecha;
 
-  @FutureOrPresent(message = "{mensaje_fecha_vencimiento_invalida}")
+  // @FutureOrPresent(message = "{mensaje_fecha_vencimiento_invalida}")
   private LocalDate fechaVencimiento;
 
   @Column(nullable = false)
