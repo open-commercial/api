@@ -6446,7 +6446,7 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("6050.00"), item1.getImporte());
     assertNull(item1.getImporteBonificado());
     assertEquals(new BigDecimal("10.000000000000000"), item1.getProducto().getPorcentajeBonificacionOferta());
-    assertNull(item1.getProducto().getPrecioListaBonificado());
+    assertEquals(new BigDecimal("1089.00"), item1.getProducto().getPrecioListaBonificado());
     restTemplate.postForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=10", null, ItemCarritoCompra.class);
     item1 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
     assertEquals(new BigDecimal("12100.00"), item1.getImporte());
