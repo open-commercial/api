@@ -60,12 +60,12 @@ class MedidaServiceImplTest {
               when(medidaRepository.findByNombreAndEmpresaAndEliminada(
                       "Metro", medidaNueva.getEmpresa(), false))
                   .thenReturn(medidaMock);
-              medidaNueva.setId_Medida(1L);
+              medidaNueva.setIdMedida(1L);
               medidaNueva.setNombre("Metro");
               when(medidaService.getMedidaPorNombre("Metro", medidaNueva.getEmpresa()))
                   .thenReturn(medidaNueva);
               Medida medidaDuplicada = new Medida();
-              medidaDuplicada.setId_Medida(2L);
+              medidaDuplicada.setIdMedida(2L);
               medidaDuplicada.setNombre("Metro");
               medidaDuplicada.setEmpresa(medidaNueva.getEmpresa());
               medidaService.validarOperacion(TipoDeOperacion.ACTUALIZACION, medidaDuplicada);

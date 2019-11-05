@@ -244,7 +244,7 @@ public class NotaServiceImpl implements INotaService {
     if (criteria.getIdUsuario() != null)
       builder.and(qNotaCredito.usuario.id_Usuario.eq(criteria.getIdUsuario()));
     if (criteria.getIdCliente() != null)
-      builder.and(qNotaCredito.cliente.id_Cliente.eq(criteria.getIdCliente()));
+      builder.and(qNotaCredito.cliente.idCliente.eq(criteria.getIdCliente()));
     if (criteria.getIdViajante() != null)
       builder.and(qNotaCredito.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.getIdProveedor() != null)
@@ -330,7 +330,7 @@ public class NotaServiceImpl implements INotaService {
     if (criteria.getIdUsuario() != null)
       builder.and(qNotaDebito.usuario.id_Usuario.eq(criteria.getIdUsuario()));
     if (criteria.getIdCliente() != null)
-      builder.and(qNotaDebito.cliente.id_Cliente.eq(criteria.getIdCliente()));
+      builder.and(qNotaDebito.cliente.idCliente.eq(criteria.getIdCliente()));
     if (criteria.getIdViajante() != null)
       builder.and(qNotaDebito.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.getIdProveedor() != null)
@@ -824,7 +824,7 @@ public class NotaServiceImpl implements INotaService {
                 notaCredito.getFacturaVenta().getTipoComprobante()));
       } else {
         if (!this.getTipoNotaCreditoCliente(
-                notaCredito.getCliente().getId_Cliente(), notaCredito.getEmpresa().getIdEmpresa())
+                notaCredito.getCliente().getIdCliente(), notaCredito.getEmpresa().getIdEmpresa())
             .contains(notaCredito.getTipoComprobante())) {
           throw new BusinessServiceException(
               messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
@@ -1167,7 +1167,7 @@ public class NotaServiceImpl implements INotaService {
     this.validarOperacion(notaDebito);
     if (notaDebito.getMovimiento().equals(Movimiento.VENTA)) {
       if (!this.getTipoNotaDebitoCliente(
-              notaDebito.getCliente().getId_Cliente(), notaDebito.getEmpresa().getIdEmpresa())
+              notaDebito.getCliente().getIdCliente(), notaDebito.getEmpresa().getIdEmpresa())
           .contains(notaDebito.getTipoComprobante())) {
         throw new BusinessServiceException(
             messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));

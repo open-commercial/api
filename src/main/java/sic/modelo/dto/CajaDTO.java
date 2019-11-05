@@ -7,14 +7,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@EqualsAndHashCode(exclude = {"id_Caja", "idEmpresa", "nombreEmpresa", "idUsuarioAbreCaja", "nombreUsuarioAbreCaja",
+@EqualsAndHashCode(exclude = {"idCaja", "idEmpresa", "nombreEmpresa", "idUsuarioAbreCaja", "nombreUsuarioAbreCaja",
   "idUsuarioCierraCaja", "nombreUsuarioCierraCaja", "fechaApertura", "saldoApertura", "saldoSistema", "saldoReal"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class CajaDTO {
 
-  private long id_Caja;
+  private long idCaja;
   private LocalDateTime fechaApertura;
   private LocalDateTime fechaCierre;
   private Long idEmpresa;

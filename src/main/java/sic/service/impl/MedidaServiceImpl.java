@@ -68,7 +68,7 @@ public class MedidaServiceImpl implements IMedidaService {
     }
     if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
         && medidaDuplicada != null
-        && medidaDuplicada.getId_Medida() != medida.getId_Medida()) {
+        && medidaDuplicada.getIdMedida() != medida.getIdMedida()) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_medida_duplicada_nombre", null, Locale.getDefault()));
     }

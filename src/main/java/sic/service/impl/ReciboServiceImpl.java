@@ -121,7 +121,7 @@ public class ReciboServiceImpl implements IReciboService {
       builder.or(rsPredicate);
     }
     if (criteria.getIdCliente() != null)
-      builder.and(qRecibo.cliente.id_Cliente.eq(criteria.getIdCliente()));
+      builder.and(qRecibo.cliente.idCliente.eq(criteria.getIdCliente()));
     if (criteria.getIdProveedor() != null)
       builder.and(qRecibo.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
     if (criteria.getIdUsuario() != null)
@@ -292,7 +292,7 @@ public class ReciboServiceImpl implements IReciboService {
   public List<Recibo> getRecibosEntreFechasPorFormaDePago(
     LocalDateTime desde, LocalDateTime hasta, FormaDePago formaDePago, Empresa empresa) {
     return reciboRepository.getRecibosEntreFechasPorFormaDePago(
-        empresa.getIdEmpresa(), formaDePago.getId_FormaDePago(), desde, hasta);
+        empresa.getIdEmpresa(), formaDePago.getIdFormaDePago(), desde, hasta);
   }
 
   @Override

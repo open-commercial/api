@@ -21,7 +21,7 @@ import sic.controller.Views;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"id_Caja", "empresa"})
+@EqualsAndHashCode(of = {"idCaja", "empresa"})
 @ToString
 @JsonView(Views.Comprador.class)
 @JsonIgnoreProperties({"empresa", "usuarioAbreCaja", "usuarioCierraCaja", "eliminada"})
@@ -29,7 +29,8 @@ public class Caja implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id_Caja;
+  @Column(name = "id_Caja")
+  private long idCaja;
 
   @NotNull(message = "{mensaje_caja_fecha_apertura_vacia}")
   private LocalDateTime fechaApertura;

@@ -197,7 +197,7 @@ public class ClienteServiceImpl implements IClienteService {
           this.getClientePorIdFiscal(cliente.getIdFiscal(), cliente.getEmpresa());
       if (operacion == TipoDeOperacion.ACTUALIZACION
           && clienteDuplicado != null
-          && clienteDuplicado.getId_Cliente() != cliente.getId_Cliente()) {
+          && clienteDuplicado.getIdCliente() != cliente.getIdCliente()) {
         throw new BusinessServiceException(messageSource.getMessage(
           "mensaje_cliente_duplicado_idFiscal", null, Locale.getDefault()));
       }
@@ -295,7 +295,7 @@ public class ClienteServiceImpl implements IClienteService {
               clientePorActualizar.getCredencial().getId_Usuario(),
               clientePorActualizar.getEmpresa().getIdEmpresa());
       if (clienteYaAsignado != null
-          && clienteYaAsignado.getId_Cliente() != clientePorActualizar.getId_Cliente()) {
+          && clienteYaAsignado.getIdCliente() != clientePorActualizar.getIdCliente()) {
         throw new BusinessServiceException(messageSource.getMessage(
           "mensaje_cliente_credencial_no_valida", new Object[] {clienteYaAsignado.getNombreFiscal()}, Locale.getDefault()));
       } else {

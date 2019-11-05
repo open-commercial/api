@@ -17,18 +17,18 @@ public interface CajaRepository
         QuerydslPredicateExecutor<Caja>,
         CajaRepositoryCustom {
 
-  @Query("SELECT c FROM Caja c WHERE c.id_Caja = :idCaja AND c.eliminada = false")
+  @Query("SELECT c FROM Caja c WHERE c.idCaja = :idCaja AND c.eliminada = false")
   Caja findById(@Param("idCaja") long idCaja);
 
   @Query(
-      "SELECT c FROM Caja c WHERE c.empresa.idEmpresa = :idEmpresa AND c.eliminada = false ORDER BY c.id_Caja DESC")
+      "SELECT c FROM Caja c WHERE c.empresa.idEmpresa = :idEmpresa AND c.eliminada = false ORDER BY c.idCaja DESC")
   Page<Caja> findTopByEmpresaAndEliminadaOrderByIdCajaDesc(
       @Param("idEmpresa") long idEmpresa, Pageable page);
 
   @Query(
       "SELECT c FROM Caja c "
           + "WHERE c.empresa.idEmpresa = :idEmpresa AND c.eliminada = false AND c.estado = sic.modelo.EstadoCaja.ABIERTA "
-          + "ORDER BY c.id_Caja DESC")
+          + "ORDER BY c.idCaja DESC")
   Caja isUltimaCajaAbierta(@Param("idEmpresa") long idEmpresa);
 
   @Query(
@@ -40,6 +40,6 @@ public interface CajaRepository
 
   @Modifying
   @Query(
-      "UPDATE Caja c SET c.saldoSistema = c.saldoSistema + :monto WHERE c.id_Caja = :idCaja AND c.estado = sic.modelo.EstadoCaja.CERRADA")
+      "UPDATE Caja c SET c.saldoSistema = c.saldoSistema + :monto WHERE c.idCaja = :idCaja AND c.estado = sic.modelo.EstadoCaja.CERRADA")
   int actualizarSaldoSistema(@Param("idCaja") long idCaja, @Param("monto") BigDecimal monto);
 }

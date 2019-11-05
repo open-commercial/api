@@ -67,7 +67,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
             + " "
             + cliente.getNombreFiscal()
             + (cliente.getNombreFantasia() != null ? cliente.getNombreFantasia() : ""));
-    payment.setExternalReference(String.valueOf(cliente.getId_Cliente()));
+    payment.setExternalReference(String.valueOf(cliente.getIdCliente()));
     Payer payer = new Payer();
     payer.setEmail(cliente.getEmail());
     payment.setPayer(payer);

@@ -109,7 +109,7 @@ public class FacturaVenta extends Factura implements Serializable {
 
   @JsonGetter("idCliente")
   public Long getIdCliente() {
-    return cliente.getId_Cliente();
+    return cliente.getIdCliente();
   }
 
   @JsonGetter("nombreFiscalCliente")

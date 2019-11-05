@@ -71,7 +71,7 @@ public class GastoServiceImpl implements IGastoService {
   @Override
   public void validarOperacion(Gasto gasto) {
     this.cajaService.validarMovimiento(gasto.getFecha(), gasto.getEmpresa().getIdEmpresa());
-    if (gastoRepository.findById(gasto.getId_Gasto()).isPresent()) {
+    if (gastoRepository.findById(gasto.getIdGasto()).isPresent()) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_gasto_duplicada", null, Locale.getDefault()));
     }
@@ -173,7 +173,7 @@ public class GastoServiceImpl implements IGastoService {
   public List<Gasto> getGastosEntreFechasYFormaDePago(
       Empresa empresa, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta) {
     return gastoRepository.getGastosEntreFechasPorFormaDePago(
-        empresa.getIdEmpresa(), formaDePago.getId_FormaDePago(), desde, hasta);
+        empresa.getIdEmpresa(), formaDePago.getIdFormaDePago(), desde, hasta);
   }
 
   @Override

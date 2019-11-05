@@ -10,7 +10,7 @@ import sic.modelo.Usuario;
 
 public class CajaBuilder {
 
-    private long id_Caja = 0L;
+    private long idCaja = 0L;
     private LocalDateTime fechaApertura = LocalDateTime.now();
     private LocalDateTime fechaCierre;
     private Usuario usuarioAbreCaja = new UsuarioBuilder().build();
@@ -23,13 +23,13 @@ public class CajaBuilder {
     private Empresa empresa = new EmpresaBuilder().build();
 
     public Caja build() {
-        return new Caja(id_Caja, fechaApertura, fechaCierre, empresa,
+        return new Caja(idCaja, fechaApertura, fechaCierre, empresa,
                 usuarioAbreCaja, usuarioCierraCaja, estado,
                 saldoInicial, saldoSistema, saldoReal, eliminada);
     }
 
     public CajaBuilder withIdCaja(long idCaja) {
-        this.id_Caja = idCaja;
+        this.idCaja = idCaja;
         return this;
     }
 

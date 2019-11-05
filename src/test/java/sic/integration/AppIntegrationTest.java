@@ -108,7 +108,7 @@ class AppIntegrationTest {
     restTemplate.postForObject(
       apiPrefix
         + "/productos?idMedida="
-        + medida.getId_Medida()
+        + medida.getIdMedida()
         + "&idRubro="
         + rubro.getId_Rubro()
         + "&idProveedor="
@@ -120,7 +120,7 @@ class AppIntegrationTest {
     restTemplate.postForObject(
       apiPrefix
         + "/productos?idMedida="
-        + medida.getId_Medida()
+        + medida.getIdMedida()
         + "&idRubro="
         + rubro.getId_Rubro()
         + "&idProveedor="
@@ -287,7 +287,7 @@ class AppIntegrationTest {
     Long[] idsFactura = new Long[1];
     RenglonFactura[] renglones =
       restTemplate.getForObject(apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getIdFactura() + "/renglones", RenglonFactura[].class);
-    idsFactura[0] = renglones[0].getId_RenglonFactura();
+    idsFactura[0] = renglones[0].getIdRenglonFactura();
     BigDecimal[] cantidades = new BigDecimal[1];
     cantidades[0] = new BigDecimal("5");
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
@@ -1310,7 +1310,7 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
     FacturaVentaDTO facturaVentaA =
       FacturaVentaDTO.builder().nombreFiscalCliente(cliente.getNombreFiscal())
-        .idCliente(cliente.getId_Cliente())
+        .idCliente(cliente.getIdCliente())
         .build();
     facturaVentaA.setIdEmpresa(1L);
     facturaVentaA.setIdUsuario(2L);
@@ -1447,9 +1447,9 @@ class AppIntegrationTest {
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     FacturaVentaDTO facturaVentaB =
       FacturaVentaDTO.builder()
-        .idCliente(cliente.getId_Cliente())
+        .idCliente(cliente.getIdCliente())
         .build();
-    facturaVentaB.setIdCliente(cliente.getId_Cliente());
+    facturaVentaB.setIdCliente(cliente.getIdCliente());
     facturaVentaB.setIdEmpresa(empresa.getIdEmpresa());
     facturaVentaB.setIdUsuario(1L);
     facturaVentaB.setIdTransportista(transportista.getId_Transportista());
@@ -1587,7 +1587,7 @@ class AppIntegrationTest {
     Transportista transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
-    facturaVentaA.setIdCliente(cliente.getId_Cliente());
+    facturaVentaA.setIdCliente(cliente.getIdCliente());
     facturaVentaA.setIdUsuario(credencial.getId_Usuario());
     facturaVentaA.setIdEmpresa(empresa.getIdEmpresa());
     facturaVentaA.setIdTransportista(transportista.getId_Transportista());
@@ -1702,8 +1702,8 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     FacturaVentaDTO facturaVentaC =
-        FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
-    facturaVentaC.setIdCliente(cliente.getId_Cliente());
+        FacturaVentaDTO.builder().idCliente(cliente.getIdCliente()).build();
+    facturaVentaC.setIdCliente(cliente.getIdCliente());
     facturaVentaC.setIdEmpresa(empresa.getIdEmpresa());
     facturaVentaC.setIdUsuario(1L);
     facturaVentaC.setIdTransportista(transportista.getId_Transportista());
@@ -1789,8 +1789,8 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     FacturaVentaDTO facturaVentaX =
-      FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
-    facturaVentaX.setIdCliente(cliente.getId_Cliente());
+      FacturaVentaDTO.builder().idCliente(cliente.getIdCliente()).build();
+    facturaVentaX.setIdCliente(cliente.getIdCliente());
     facturaVentaX.setIdTransportista(transportista.getId_Transportista());
     facturaVentaX.setIdEmpresa(empresa.getIdEmpresa());
     facturaVentaX.setIdUsuario(1L);
@@ -1918,8 +1918,8 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     FacturaVentaDTO facturaVentaY =
-      FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
-    facturaVentaY.setIdCliente(cliente.getId_Cliente());
+      FacturaVentaDTO.builder().idCliente(cliente.getIdCliente()).build();
+    facturaVentaY.setIdCliente(cliente.getIdCliente());
     facturaVentaY.setIdEmpresa(empresa.getIdEmpresa());
     facturaVentaY.setIdUsuario(1L);
     facturaVentaY.setIdTransportista(transportista.getId_Transportista());
@@ -2047,8 +2047,8 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     FacturaVentaDTO facturaVentaPresupuesto =
-      FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
-    facturaVentaPresupuesto.setIdCliente(cliente.getId_Cliente());
+      FacturaVentaDTO.builder().idCliente(cliente.getIdCliente()).build();
+    facturaVentaPresupuesto.setIdCliente(cliente.getIdCliente());
     facturaVentaPresupuesto.setIdTransportista(transportista.getId_Transportista());
     facturaVentaPresupuesto.setIdEmpresa(empresa.getIdEmpresa());
     facturaVentaPresupuesto.setIdUsuario(1L);
@@ -2151,10 +2151,10 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     FacturaVentaDTO facturaVentaX =
-      FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
+      FacturaVentaDTO.builder().idCliente(cliente.getIdCliente()).build();
     facturaVentaX.setIdUsuario(1L);
     facturaVentaX.setIdEmpresa(empresa.getIdEmpresa());
-    facturaVentaX.setIdCliente(cliente.getId_Cliente());
+    facturaVentaX.setIdCliente(cliente.getIdCliente());
     facturaVentaX.setIdTransportista(transportista.getId_Transportista());
     facturaVentaX.setObservaciones("Factura Venta X test");
     facturaVentaX.setTipoComprobante(TipoDeComprobante.FACTURA_X);
@@ -2277,10 +2277,10 @@ class AppIntegrationTest {
         restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     FacturaVentaDTO facturaVentaA =
-        FacturaVentaDTO.builder().idCliente(cliente.getId_Cliente()).build();
+        FacturaVentaDTO.builder().idCliente(cliente.getIdCliente()).build();
     facturaVentaA.setIdEmpresa(empresa.getIdEmpresa());
     facturaVentaA.setIdUsuario(1L);
-    facturaVentaA.setIdCliente(cliente.getId_Cliente());
+    facturaVentaA.setIdCliente(cliente.getIdCliente());
     facturaVentaA.setIdTransportista(transportista.getId_Transportista());
     facturaVentaA.setObservaciones("Factura Venta A test");
     facturaVentaA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
@@ -3019,7 +3019,7 @@ class AppIntegrationTest {
     medida = restTemplate.postForObject(apiPrefix + "/medidas?idEmpresa=1", medida, MedidaDTO.class);
     ProductosParaActualizarDTO productosParaActualizarDTO = ProductosParaActualizarDTO.builder()
       .idProducto(idsProductos)
-      .idMedida(medida.getId_Medida()).build();
+      .idMedida(medida.getIdMedida()).build();
     restTemplate.put(apiPrefix + "/productos/multiples", productosParaActualizarDTO);
     ProductoDTO productoUno = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO productoDos = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
@@ -3100,7 +3100,7 @@ class AppIntegrationTest {
       restTemplate.postForObject(
         apiPrefix
           + "/productos?idMedida="
-          + medida.getId_Medida()
+          + medida.getIdMedida()
           + "&idRubro="
           + rubro.getId_Rubro()
           + "&idProveedor="
@@ -3152,7 +3152,7 @@ class AppIntegrationTest {
       restTemplate.postForObject(
         apiPrefix
           + "/productos?idMedida="
-          + medida.getId_Medida()
+          + medida.getIdMedida()
           + "&idRubro="
           + rubro.getId_Rubro()
           + "&idProveedor="
@@ -3196,7 +3196,7 @@ class AppIntegrationTest {
         restTemplate.postForObject(
             apiPrefix
                 + "/productos?idMedida="
-                + medida.getId_Medida()
+                + medida.getIdMedida()
                 + "&idRubro="
                 + rubro.getId_Rubro()
                 + "&idProveedor="
@@ -3466,7 +3466,7 @@ class AppIntegrationTest {
       apiPrefix
         + "/facturas/venta?"
         + "idCliente="
-        + cliente.getId_Cliente()
+        + cliente.getIdCliente()
         + "&idEmpresa="
         + empresa.getIdEmpresa()
         + "&idUsuario="

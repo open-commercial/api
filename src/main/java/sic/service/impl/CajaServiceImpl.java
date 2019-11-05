@@ -82,7 +82,7 @@ public class CajaServiceImpl implements ICajaService {
       }
     }
     // Duplicados
-    if (cajaRepository.findById(caja.getId_Caja()) != null) {
+    if (cajaRepository.findById(caja.getIdCaja()) != null) {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_caja_duplicada", null, Locale.getDefault()));
     }
@@ -272,7 +272,7 @@ public class CajaServiceImpl implements ICajaService {
             ultimaCajaDeEmpresa -> {
               if (ultimaCajaDeEmpresa.getFechaApertura().isBefore(LocalDateTime.now())) {
                 this.cerrarCaja(
-                    ultimaCajaDeEmpresa.getId_Caja(),
+                    ultimaCajaDeEmpresa.getIdCaja(),
                     this.getSaldoQueAfectaCaja(ultimaCajaDeEmpresa),
                     ultimaCajaDeEmpresa.getUsuarioAbreCaja().getId_Usuario(),
                     true);
@@ -342,19 +342,19 @@ public class CajaServiceImpl implements ICajaService {
         reciboService
             .getTotalRecibosClientesEntreFechasPorFormaDePago(
                 caja.getEmpresa().getIdEmpresa(),
-                fdp.getId_FormaDePago(),
+                fdp.getIdFormaDePago(),
                 caja.getFechaApertura(),
                 fechaHasta)
             .subtract(
                 reciboService.getTotalRecibosProveedoresEntreFechasPorFormaDePago(
                     caja.getEmpresa().getIdEmpresa(),
-                    fdp.getId_FormaDePago(),
+                    fdp.getIdFormaDePago(),
                     caja.getFechaApertura(),
                     fechaHasta));
     BigDecimal gastosTotal =
         gastoService.getTotalGastosEntreFechasYFormaDePago(
             caja.getEmpresa().getIdEmpresa(),
-            fdp.getId_FormaDePago(),
+            fdp.getIdFormaDePago(),
             caja.getFechaApertura(),
             fechaHasta);
     return recibosTotal.subtract(gastosTotal);
@@ -370,7 +370,7 @@ public class CajaServiceImpl implements ICajaService {
             fdp -> {
               BigDecimal total = this.getTotalMovimientosPorFormaDePago(caja, fdp);
               if (total.compareTo(BigDecimal.ZERO) != 0) {
-                totalesPorFomaDePago.put(fdp.getId_FormaDePago(), total);
+                totalesPorFomaDePago.put(fdp.getIdFormaDePago(), total);
               }
             });
     return totalesPorFomaDePago;
@@ -409,7 +409,7 @@ public class CajaServiceImpl implements ICajaService {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_caja_no_existente", null, Locale.getDefault()));
     }
-    if (caja.getId_Caja() == ultimaCaja.getId_Caja()) {
+    if (caja.getIdCaja() == ultimaCaja.getIdCaja()) {
       caja.setSaldoSistema(null);
       caja.setSaldoApertura(saldoAperturaNuevo);
       caja.setSaldoReal(null);
@@ -433,6 +433,6 @@ public class CajaServiceImpl implements ICajaService {
   @Override
   @Transactional
   public int actualizarSaldoSistema(Caja caja, BigDecimal monto) {
-    return cajaRepository.actualizarSaldoSistema(caja.getId_Caja(), monto);
+    return cajaRepository.actualizarSaldoSistema(caja.getIdCaja(), monto);
   }
 }

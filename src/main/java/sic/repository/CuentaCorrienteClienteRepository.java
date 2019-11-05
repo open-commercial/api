@@ -17,6 +17,6 @@ public interface CuentaCorrienteClienteRepository
 
   @Modifying
   @Query(
-      "UPDATE CuentaCorrienteCliente ccc SET ccc.eliminada = true WHERE ccc.cliente.id_Cliente = :idCliente")
+      "UPDATE CuentaCorrienteCliente ccc SET ccc.eliminada = true WHERE ccc.cliente.idCliente = :idCliente")
   int eliminarCuentaCorrienteCliente(@Param("idCliente") long idCliente);
 }

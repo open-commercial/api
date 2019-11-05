@@ -35,7 +35,8 @@ public class Cliente implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id_Cliente;
+  @Column(name = "id_Cliente")
+  private long idCliente;
 
   @Column(precision = 25, scale = 15)
   @NotNull(message = "{mensaje_cliente_vacio_bonificacion}")

@@ -130,7 +130,7 @@ public abstract class Nota implements Serializable {
   @JsonGetter("idCliente")
   public Long getIdCliente() {
     if (cliente != null) {
-      return cliente.getId_Cliente();
+      return cliente.getIdCliente();
     } else {
       return null;
     }

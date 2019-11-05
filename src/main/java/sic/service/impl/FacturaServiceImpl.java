@@ -386,7 +386,7 @@ public class FacturaServiceImpl implements IFacturaService {
       }
     }
     if (criteria.getIdCliente() != null)
-      builder.and(qFacturaVenta.cliente.id_Cliente.eq(criteria.getIdCliente()));
+      builder.and(qFacturaVenta.cliente.idCliente.eq(criteria.getIdCliente()));
     if (criteria.getTipoComprobante() != null)
       builder.and(qFacturaVenta.tipoComprobante.eq(criteria.getTipoComprobante()));
     if (criteria.getIdUsuario() != null)
@@ -421,7 +421,7 @@ public class FacturaServiceImpl implements IFacturaService {
                           idUsuarioLoggedIn, criteria.getIdEmpresa());
                   if (clienteRelacionado != null) {
                     rsPredicate.or(
-                        qFacturaVenta.cliente.id_Cliente.eq(clienteRelacionado.getId_Cliente()));
+                        qFacturaVenta.cliente.idCliente.eq(clienteRelacionado.getIdCliente()));
                   } else {
                     rsPredicate.or(qFacturaVenta.cliente.isNull());
                   }
