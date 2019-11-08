@@ -219,7 +219,7 @@ public class CajaServiceImpl implements ICajaService {
     cajaACerrar.setSaldoReal(monto);
     if (scheduling) {
       cajaACerrar.setFechaCierre(
-          cajaACerrar.getFechaApertura().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
+          cajaACerrar.getFechaApertura().withHour(23).withMinute(59).withSecond(59));
     } else {
       cajaACerrar.setFechaCierre(this.clockService.getFechaActual());
     }
