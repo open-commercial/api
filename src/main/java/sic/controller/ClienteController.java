@@ -191,6 +191,7 @@ public class ClienteController {
     } else {
       clientePorActualizar.setViajante(null);
     }
+    clientePorActualizar.setFechaAlta(clientePersistido.getFechaAlta());
     return clienteService.actualizar(clientePorActualizar, clientePersistido);
   }
 
