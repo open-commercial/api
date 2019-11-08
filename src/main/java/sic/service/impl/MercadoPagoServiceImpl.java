@@ -22,8 +22,8 @@ import sic.service.*;
 
 import javax.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -195,7 +195,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
         nuevoRecibo.setFormaDePago(formaDePagoService.getFormaDePagoPorNombre(FormaDePagoEnum.MERCADO_PAGO));
         nuevoRecibo.setUsuario(usuario);
         nuevoRecibo.setCliente(cliente);
-        nuevoRecibo.setFecha(new Date());
+        nuevoRecibo.setFecha(LocalDateTime.now());
         nuevoRecibo.setConcepto("Pago en MercadoPago (" + payment.getPaymentMethodId() + ")");
         nuevoRecibo.setMonto(new BigDecimal(Float.toString(payment.getTransactionAmount())));
         nuevoRecibo.setIdPagoMercadoPago(payment.getId());

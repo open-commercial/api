@@ -1,6 +1,7 @@
 package sic.controller;
 
 import java.lang.reflect.Type;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import io.jsonwebtoken.Claims;
@@ -118,8 +119,8 @@ public class PedidoController {
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(nuevoPedidoDTO.getIdUsuario()));
     Cliente cliente = clienteService.getClienteNoEliminadoPorId(nuevoPedidoDTO.getIdCliente());
     pedido.setCliente(cliente);
-    return pedidoService.guardar(
-        pedido, nuevoPedidoDTO.getTipoDeEnvio(), nuevoPedidoDTO.getIdSucursalEnvio());
+    pedido.setFecha(LocalDateTime.now());
+    return pedidoService.guardar(pedido, nuevoPedidoDTO.getTipoDeEnvio(), nuevoPedidoDTO.getIdSucursalEnvio());
   }
 
   @PostMapping("/pedidos/busqueda/criteria")

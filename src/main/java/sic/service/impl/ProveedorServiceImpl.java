@@ -11,7 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -173,7 +173,8 @@ public class ProveedorServiceImpl implements IProveedorService {
     CuentaCorrienteProveedor cuentaCorrienteProveedor = new CuentaCorrienteProveedor();
     cuentaCorrienteProveedor.setProveedor(proveedor);
     cuentaCorrienteProveedor.setSaldo(BigDecimal.ZERO);
-    cuentaCorrienteProveedor.setFechaApertura(new Date());
+    cuentaCorrienteProveedor.setFechaApertura(LocalDateTime.now());
+    cuentaCorrienteProveedor.setFechaUltimoMovimiento(LocalDateTime.now());
     cuentaCorrienteService.guardarCuentaCorrienteProveedor(cuentaCorrienteProveedor);
     logger.warn("El Proveedor {} se guardó correctamente.", proveedor);
     return proveedor;

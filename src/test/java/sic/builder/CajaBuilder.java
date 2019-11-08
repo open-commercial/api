@@ -1,7 +1,8 @@
 package sic.builder;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
+
 import sic.modelo.Caja;
 import sic.modelo.Sucursal;
 import sic.modelo.EstadoCaja;
@@ -10,8 +11,8 @@ import sic.modelo.Usuario;
 public class CajaBuilder {
 
     private long id_Caja = 0L;
-    private Date fechaApertura = new Date();
-    private Date fechaCierre;
+    private LocalDateTime fechaApertura = LocalDateTime.now();
+    private LocalDateTime fechaCierre;
     private Usuario usuarioAbreCaja = new UsuarioBuilder().build();
     private Usuario usuarioCierraCaja = new UsuarioBuilder().build();
     private EstadoCaja estado = EstadoCaja.ABIERTA;
@@ -32,12 +33,12 @@ public class CajaBuilder {
         return this;
     }
 
-    public CajaBuilder withFechaApertura(Date fechaApertura) {
+    public CajaBuilder withFechaApertura(LocalDateTime fechaApertura) {
         this.fechaApertura = fechaApertura;
         return this;
     }
 
-    public CajaBuilder withFechaCierre(Date fechaCierre) {
+    public CajaBuilder withFechaCierre(LocalDateTime fechaCierre) {
         this.fechaCierre = fechaCierre;
         return this;
     }

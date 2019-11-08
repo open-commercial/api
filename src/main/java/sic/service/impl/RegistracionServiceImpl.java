@@ -10,6 +10,7 @@ import sic.modelo.Cliente;
 import sic.modelo.Usuario;
 import sic.service.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Locale;
 
 @Service
@@ -40,6 +41,7 @@ public class RegistracionServiceImpl implements IRegistracionService {
     Usuario credencial = usuarioService.guardar(usuario);
     cliente.setCredencial(credencial);
     cliente.setBonificacion(BigDecimal.ZERO);
+    cliente.setFechaAlta(LocalDateTime.now());
     clienteService.guardar(cliente);
     correoElectronicoService.enviarEmail(
         usuario.getEmail(),

@@ -53,7 +53,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getFecha()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[java.util.Date.from($P{notaCredito}.getFecha().atZone(java.time.ZoneId.systemDefault()).toInstant())]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="100" width="555" height="15" uuid="48165e8f-802d-48ab-b527-f040ad65579a">

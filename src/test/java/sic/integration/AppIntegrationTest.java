@@ -38,6 +38,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.Charset;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -189,7 +191,7 @@ class AppIntegrationTest {
     facturaVentaA.setIva105Neto(iva_105_netoFactura);
     facturaVentaA.setIva21Neto(iva_21_netoFactura);
     facturaVentaA.setTotal(total);
-    facturaVentaA.setFecha(new Date());
+    facturaVentaA.setFecha(LocalDateTime.now());
     this.abrirCaja();
     restTemplate.postForObject(
         apiPrefix + "/facturas/venta?idPedido=1" + "&idsFormaDePago=1" + "&montos=" + total,
@@ -225,7 +227,7 @@ class AppIntegrationTest {
     facturaVentaB.setIva105Neto(new BigDecimal("184.800000000000000"));
     facturaVentaB.setIva21Neto(BigDecimal.ZERO);
     facturaVentaB.setTotal(new BigDecimal("1944.800000000000000"));
-    facturaVentaB.setFecha(new Date());
+    facturaVentaB.setFecha(LocalDateTime.now());
     restTemplate.postForObject(
         apiPrefix + "/facturas/venta?idPedido=1", facturaVentaB, FacturaVenta[].class);
   }
@@ -276,13 +278,13 @@ class AppIntegrationTest {
             .getContent();
     Long[] idsFactura = new Long[1];
     RenglonFactura[] renglones =
-      restTemplate.getForObject(apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getId_Factura() + "/renglones", RenglonFactura[].class);
+      restTemplate.getForObject(apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getIdFactura() + "/renglones", RenglonFactura[].class);
     idsFactura[0] = renglones[0].getId_RenglonFactura();
     BigDecimal[] cantidades = new BigDecimal[1];
     cantidades[0] = new BigDecimal("5");
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
       NuevaNotaCreditoDeFacturaDTO.builder()
-        .idFactura(facturasRecuperadas.get(0).getId_Factura())
+        .idFactura(facturasRecuperadas.get(0).getIdFactura())
         .idsRenglonesFactura(idsFactura)
         .cantidades(cantidades)
         .modificaStock(true)
@@ -307,6 +309,7 @@ class AppIntegrationTest {
             .idSucursal(idSucursal)
             .idProveedor(idProveedor)
             .idFormaDePago(1L)
+            .fecha(LocalDateTime.now())
             .build();
     restTemplate.postForObject(apiPrefix + "/recibos/proveedores", recibo, Recibo.class);
   }
@@ -420,7 +423,7 @@ class AppIntegrationTest {
         SucursalDTO.builder()
             .telefono("3795221144")
             .email("sucursal@nueva.com")
-            .fechaInicioActividad(new Date())
+            .fechaInicioActividad(LocalDateTime.now())
             .ingresosBrutos(21112244L)
             .idFiscal(7488521665766L)
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -440,7 +443,7 @@ class AppIntegrationTest {
       SucursalDTO.builder()
         .telefono("3795221144")
         .email("sucursal@nuevaMonotribustista.com")
-        .fechaInicioActividad(new Date())
+        .fechaInicioActividad(LocalDateTime.now())
         .ingresosBrutos(23335577L)
         .idFiscal(7599541775766L)
         .categoriaIVA(CategoriaIVA.MONOTRIBUTO)
@@ -460,7 +463,7 @@ class AppIntegrationTest {
         SucursalDTO.builder()
             .telefono("3795221144")
             .email("sucursal@nueva.com")
-            .fechaInicioActividad(new Date())
+            .fechaInicioActividad(LocalDateTime.now())
             .ingresosBrutos(21112244L)
             .idFiscal(7488521665766L)
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -484,7 +487,7 @@ class AppIntegrationTest {
         SucursalDTO.builder()
             .telefono("3795221144")
             .email("sucursal@nueva.com")
-            .fechaInicioActividad(new Date())
+            .fechaInicioActividad(LocalDateTime.now())
             .ingresosBrutos(21112244L)
             .idFiscal(7488521665766L)
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -2499,7 +2502,7 @@ class AppIntegrationTest {
     facturaCompraA.setIdTransportista(1L);
     facturaCompraA.setObservaciones("Factura Compra A test");
     facturaCompraA.setRazonSocialProveedor(proveedor.getRazonSocial());
-    facturaCompraA.setFecha(new Date());
+    facturaCompraA.setFecha(LocalDateTime.now());
     facturaCompraA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
     facturaCompraA.setRenglones(renglones);
     facturaCompraA.setSubTotal(subTotal);
@@ -2614,7 +2617,7 @@ class AppIntegrationTest {
     facturaCompraA.setIdTransportista(1L);
     facturaCompraA.setObservaciones("Factura Compra A test");
     facturaCompraA.setRazonSocialProveedor(proveedor.getRazonSocial());
-    facturaCompraA.setFecha(new Date());
+    facturaCompraA.setFecha(LocalDateTime.now());
     facturaCompraA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
     facturaCompraA.setRenglones(renglones);
     facturaCompraA.setSubTotal(subTotal);
@@ -2729,7 +2732,7 @@ class AppIntegrationTest {
     facturaCompraB.setIdSucursal(1L);
     facturaCompraB.setIdTransportista(1L);
     facturaCompraB.setObservaciones("Factura Compra B test");
-    facturaCompraB.setFecha(new Date());
+    facturaCompraB.setFecha(LocalDateTime.now());
     facturaCompraB.setTipoComprobante(TipoDeComprobante.FACTURA_B);
     facturaCompraB.setRenglones(renglones);
     facturaCompraB.setSubTotal(subTotal);
@@ -2848,7 +2851,7 @@ class AppIntegrationTest {
     facturaCompraB.setIdSucursal(2L);
     facturaCompraB.setIdTransportista(1L);
     facturaCompraB.setObservaciones("Factura Compra B test");
-    facturaCompraB.setFecha(new Date());
+    facturaCompraB.setFecha(LocalDateTime.now());
     facturaCompraB.setTipoComprobante(TipoDeComprobante.FACTURA_B);
     facturaCompraB.setRenglones(renglones);
     facturaCompraB.setSubTotal(subTotal);
@@ -2966,7 +2969,7 @@ class AppIntegrationTest {
     facturaCompraC.setIdTransportista(1L);
     facturaCompraC.setIdSucursal(1L);
     facturaCompraC.setObservaciones("Factura Compra C test");
-    facturaCompraC.setFecha(new Date());
+    facturaCompraC.setFecha(LocalDateTime.now());
     facturaCompraC.setTipoComprobante(TipoDeComprobante.FACTURA_C);
     facturaCompraC.setRenglones(renglones);
     facturaCompraC.setSubTotal(subTotal);
@@ -3084,7 +3087,7 @@ class AppIntegrationTest {
     facturaCompraX.setIdSucursal(1L);
     facturaCompraX.setIdTransportista(1L);
     facturaCompraX.setObservaciones("Factura Compra X test");
-    facturaCompraX.setFecha(new Date());
+    facturaCompraX.setFecha(LocalDateTime.now());
     facturaCompraX.setTipoComprobante(TipoDeComprobante.FACTURA_X);
     facturaCompraX.setRenglones(renglones);
     facturaCompraX.setSubTotal(subTotal);
@@ -3202,7 +3205,7 @@ class AppIntegrationTest {
     facturaCompraPresupuesto.setIdSucursal(1L);
     facturaCompraPresupuesto.setIdTransportista(1L);
     facturaCompraPresupuesto.setObservaciones("Factura Compra Presupuesto test");
-    facturaCompraPresupuesto.setFecha(new Date());
+    facturaCompraPresupuesto.setFecha(LocalDateTime.now());
     facturaCompraPresupuesto.setTipoComprobante(TipoDeComprobante.PRESUPUESTO);
     facturaCompraPresupuesto.setRenglones(renglones);
     facturaCompraPresupuesto.setSubTotal(subTotal);
@@ -3446,7 +3449,6 @@ class AppIntegrationTest {
           + sucursal.getIdSucursal(),
         productoUno,
         ProductoDTO.class);
-    //assertEquals(productoUno.getCantidadEnSucursal().get(1L), productoRecuperado.getCantidadEnSucursales()); test
     assertEquals(productoUno.getCantidadEnSucursal().get(1L), productoRecuperado.getCantidadTotalEnSucursales());
     assertEquals(productoUno.getIvaPorcentaje(), productoRecuperado.getIvaPorcentaje());
     assertEquals(productoUno.getIvaNeto(), productoRecuperado.getIvaNeto());
@@ -4070,7 +4072,7 @@ class AppIntegrationTest {
     cantidades[0] = new BigDecimal("5");
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
       NuevaNotaCreditoDeFacturaDTO.builder()
-        .idFactura(facturasRecuperadas.get(0).getId_Factura())
+        .idFactura(facturasRecuperadas.get(0).getIdFactura())
         .idsRenglonesFactura(idsRenglonesFacutura)
         .cantidades(cantidades)
         .modificaStock(true)
@@ -4125,7 +4127,7 @@ class AppIntegrationTest {
     cantidades[0] = new BigDecimal("5");
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
       NuevaNotaCreditoDeFacturaDTO.builder()
-        .idFactura(facturasRecuperadas.get(0).getId_Factura())
+        .idFactura(facturasRecuperadas.get(0).getIdFactura())
         .idsRenglonesFactura(idsRenglonesFacutura)
         .cantidades(cantidades)
         .modificaStock(true)
@@ -4182,7 +4184,7 @@ class AppIntegrationTest {
     restTemplate.put(apiPrefix + "/clientes", cliente);
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
         NuevaNotaCreditoDeFacturaDTO.builder()
-            .idFactura(facturasRecuperadas.get(0).getId_Factura())
+            .idFactura(facturasRecuperadas.get(0).getIdFactura())
             .idsRenglonesFactura(idsRenglonesFacutura)
             .cantidades(cantidades)
             .modificaStock(true)
@@ -4236,7 +4238,7 @@ class AppIntegrationTest {
     cantidades[0] = new BigDecimal("5");
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
       NuevaNotaCreditoDeFacturaDTO.builder()
-        .idFactura(facturasRecuperadas.get(0).getId_Factura())
+        .idFactura(facturasRecuperadas.get(0).getIdFactura())
         .idsRenglonesFactura(idsRenglonesFacutura)
         .cantidades(cantidades)
         .modificaStock(true)
@@ -4290,7 +4292,7 @@ class AppIntegrationTest {
     cantidades[0] = new BigDecimal("5");
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
       NuevaNotaCreditoDeFacturaDTO.builder()
-        .idFactura(facturasRecuperadas.get(0).getId_Factura())
+        .idFactura(facturasRecuperadas.get(0).getIdFactura())
         .idsRenglonesFactura(idsRenglonesFacutura)
         .cantidades(cantidades)
         .modificaStock(true)
@@ -4486,7 +4488,7 @@ class AppIntegrationTest {
     cantidades[0] = new BigDecimal("5");
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
         NuevaNotaCreditoDeFacturaDTO.builder()
-            .idFactura(facturasRecuperadas.get(0).getId_Factura())
+            .idFactura(facturasRecuperadas.get(0).getIdFactura())
             .idsRenglonesFactura(idsRenglonesFacutura)
             .cantidades(cantidades)
             .modificaStock(true)
@@ -4535,7 +4537,7 @@ class AppIntegrationTest {
     BigDecimal[] cantidades = new BigDecimal[1];
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
         NuevaNotaCreditoDeFacturaDTO.builder()
-            .idFactura(facturasRecuperadas.get(0).getId_Factura())
+            .idFactura(facturasRecuperadas.get(0).getIdFactura())
             .idsRenglonesFactura(idsRenglonesFacutura)
             .cantidades(cantidades)
             .modificaStock(true)
@@ -5350,7 +5352,7 @@ class AppIntegrationTest {
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
         .recargoNeto(recargoNeto)
         .recargoPorcentaje(new BigDecimal("5"))
-        .fechaVencimiento(new Date())
+        .fechaVencimiento(LocalDate.now())
         .observaciones("Nuevo Pedido Test")
         .renglones(renglonesPedido)
         .subTotal(importe)
@@ -5437,7 +5439,7 @@ class AppIntegrationTest {
             .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
             .recargoNeto(recargoNeto)
             .recargoPorcentaje(new BigDecimal("5"))
-            .fechaVencimiento(new Date())
+            .fechaVencimiento(LocalDate.now())
             .observaciones("Nuevo Pedido Test")
             .renglones(renglonesPedido)
             .subTotal(importe)
@@ -5508,7 +5510,7 @@ class AppIntegrationTest {
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
         .recargoNeto(recargoNeto)
         .recargoPorcentaje(new BigDecimal("5"))
-        .fechaVencimiento(new Date())
+        .fechaVencimiento(LocalDate.now())
         .observaciones("Nuevo Pedido Test")
         .renglones(renglonesPedido)
         .subTotal(importe)
@@ -5559,7 +5561,7 @@ class AppIntegrationTest {
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
         .recargoNeto(recargoNeto)
         .recargoPorcentaje(new BigDecimal("5"))
-        .fechaVencimiento(new Date())
+        .fechaVencimiento(LocalDate.now())
         .observaciones("Nuevo Pedido Test")
         .renglones(renglonesPedido)
         .subTotal(importe)
@@ -5615,7 +5617,7 @@ class AppIntegrationTest {
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
         .recargoNeto(recargoNeto)
         .recargoPorcentaje(new BigDecimal("5"))
-        .fechaVencimiento(new Date())
+        .fechaVencimiento(LocalDate.now())
         .observaciones("Nuevo Pedido Test")
         .renglones(renglonesPedido)
         .subTotal(importe)
@@ -5624,14 +5626,14 @@ class AppIntegrationTest {
         .idCliente(1L)
         .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
         .idSucursal(1L)
-        .idSucursalEnvio(2L)
+        .idSucursalEnvio(1L)
         .build();
     PedidoDTO pedidoRecuperado =
       restTemplate.postForObject(
         apiPrefix + "/pedidos",
         nuevoPedidoDTO,
         PedidoDTO.class);
-    assertEquals("Rio Chico 6211 Corrientes Corrientes", pedidoRecuperado.getDetalleEnvio());
+    assertEquals("Rio Piacentin 345 Corrientes Corrientes", pedidoRecuperado.getDetalleEnvio());
   }
 
   @Test
@@ -5672,7 +5674,7 @@ class AppIntegrationTest {
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
         .recargoNeto(recargoNeto)
         .recargoPorcentaje(new BigDecimal("5"))
-        .fechaVencimiento(new Date())
+        .fechaVencimiento(LocalDate.now())
         .observaciones("Nuevo Pedido Test")
         .renglones(renglonesPedido)
         .subTotal(importe)
@@ -5747,7 +5749,7 @@ class AppIntegrationTest {
         .descuentoPorcentaje(new BigDecimal("15"))
         .recargoNeto(recargoNeto)
         .recargoPorcentaje(new BigDecimal("5"))
-        .fechaVencimiento(new Date())
+        .fechaVencimiento(LocalDate.now())
         .observaciones("Nuevo Pedido Test")
         .renglones(renglonesPedido)
         .subTotal(importe)
@@ -5830,13 +5832,13 @@ class AppIntegrationTest {
             .getBody()
             .getContent();
     restTemplate.delete(
-      apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getId_Factura());
+      apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getIdFactura());
     pedidoRecuperado =
       restTemplate.getForObject(
         apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
     assertEquals(EstadoPedido.ACTIVO, pedidoRecuperado.getEstado());
     restTemplate.delete(
-      apiPrefix + "/facturas/" + facturasRecuperadas.get(1).getId_Factura());
+      apiPrefix + "/facturas/" + facturasRecuperadas.get(1).getIdFactura());
     pedidoRecuperado =
       restTemplate.getForObject(
         apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
@@ -6219,7 +6221,7 @@ class AppIntegrationTest {
     GastoDTO gasto =
       GastoDTO.builder()
         .concepto("Gasto test")
-        .fecha(new Date())
+        .fecha(LocalDateTime.now())
         .monto(new BigDecimal("200"))
         .build();
     restTemplate.postForObject(
@@ -6235,7 +6237,7 @@ class AppIntegrationTest {
     GastoDTO gasto =
       GastoDTO.builder()
         .concepto("Gasto test")
-        .fecha(new Date())
+        .fecha(LocalDateTime.now())
         .monto(new BigDecimal("200.000000000000000"))
         .build();
     restTemplate.postForObject(
@@ -6297,11 +6299,10 @@ class AppIntegrationTest {
     clockService.cambiarFechaHora(2030, 9, 24, 23, 59, 59);
     restTemplate.put(apiPrefix + "/cajas/1/cierre?monto=300", CajaDTO.class);
     CajaDTO cajaRecuperada = restTemplate.getForObject(apiPrefix + "/cajas/1", CajaDTO.class);
-    Calendar fechaCierre = Calendar.getInstance();
-    fechaCierre.setTime(cajaRecuperada.getFechaCierre());
-    assertEquals(2030, fechaCierre.get(Calendar.YEAR));
-    assertEquals(8, fechaCierre.get(Calendar.MONTH));
-    assertEquals(24, fechaCierre.get(Calendar.DATE));
+    LocalDateTime fechaCierre = cajaRecuperada.getFechaCierre();
+    assertEquals(2030, fechaCierre.getYear());
+    assertEquals(9, fechaCierre.getMonthValue());
+    assertEquals(24, fechaCierre.getDayOfMonth());
   }
 
   @Test
@@ -6310,14 +6311,13 @@ class AppIntegrationTest {
     restTemplate.postForObject(apiPrefix + "/cajas/apertura/sucursales/1?saldoApertura=200", null, CajaDTO.class);
     cajaService.cerrarCaja(1L, new BigDecimal("300"), 1L, true);
     CajaDTO cajaRecuperada = restTemplate.getForObject(apiPrefix + "/cajas/1", CajaDTO.class);
-    Calendar fechaCierre = Calendar.getInstance();
-    fechaCierre.setTime(cajaRecuperada.getFechaCierre());
-    assertEquals(2019, fechaCierre.get(Calendar.YEAR));
-    assertEquals(11, fechaCierre.get(Calendar.MONTH));
-    assertEquals(31, fechaCierre.get(Calendar.DATE));
-    assertEquals(23, fechaCierre.get(Calendar.HOUR_OF_DAY));
-    assertEquals(59, fechaCierre.get(Calendar.MINUTE));
-    assertEquals(59, fechaCierre.get(Calendar.SECOND));
+    LocalDateTime fechaCierre = cajaRecuperada.getFechaCierre();
+    assertEquals(2019, fechaCierre.getYear());
+    assertEquals(12, fechaCierre.getMonthValue());
+    assertEquals(31, fechaCierre.getDayOfMonth());
+    assertEquals(23, fechaCierre.getHour());
+    assertEquals(59, fechaCierre.getMinute());
+    assertEquals(59, fechaCierre.getSecond());
   }
 
   @Test

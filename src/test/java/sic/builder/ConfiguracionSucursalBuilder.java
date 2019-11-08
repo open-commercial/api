@@ -2,8 +2,7 @@ package sic.builder;
 
 import sic.modelo.ConfiguracionSucursal;
 import sic.modelo.Sucursal;
-
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class ConfiguracionSucursalBuilder {
 
@@ -18,8 +17,8 @@ public class ConfiguracionSucursalBuilder {
   private String tokenWSAA = null;
   private String signTokenWSAA = null;
   private boolean puntoDeRetiro = true;
-  private Date fechaGeneracionTokenWSAA = null;
-  private Date fechaVencimientoTokenWSAA = null;
+  private LocalDateTime fechaGeneracionTokenWSAA = null;
+  private LocalDateTime fechaVencimientoTokenWSAA = null;
   private Sucursal sucursal = new SucursalBuilder().build();
 
   public ConfiguracionSucursal build() {
@@ -101,13 +100,13 @@ public class ConfiguracionSucursalBuilder {
   }
 
   public ConfiguracionSucursalBuilder withFechaGeneracionTokenWSAA(
-      Date fechaGeneracionTokenWSAA) {
+    LocalDateTime fechaGeneracionTokenWSAA) {
     this.fechaGeneracionTokenWSAA = fechaGeneracionTokenWSAA;
     return this;
   }
 
   public ConfiguracionSucursalBuilder withFechaVencimientoTokenWSAA(
-      Date fechaVencimientoTokenWSAA) {
+    LocalDateTime fechaVencimientoTokenWSAA) {
     this.fechaVencimientoTokenWSAA = fechaVencimientoTokenWSAA;
     return this;
   }

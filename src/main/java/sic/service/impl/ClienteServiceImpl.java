@@ -3,7 +3,6 @@ package sic.service.impl;
 import com.querydsl.core.BooleanBuilder;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -233,7 +232,6 @@ public class ClienteServiceImpl implements IClienteService {
   @Override
   @Transactional
   public Cliente guardar(@Valid Cliente cliente) {
-    cliente.setFechaAlta(new Date());
     cliente.setEliminado(false);
     cliente.setNroCliente(this.generarNroDeCliente());
     if (cliente.getBonificacion() == null) cliente.setBonificacion(BigDecimal.ZERO);
@@ -256,6 +254,7 @@ public class ClienteServiceImpl implements IClienteService {
     CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
     cuentaCorrienteCliente.setCliente(cliente);
     cuentaCorrienteCliente.setFechaApertura(cliente.getFechaAlta());
+    cuentaCorrienteCliente.setFechaUltimoMovimiento(cliente.getFechaAlta());
     cuentaCorrienteCliente.setSaldo(BigDecimal.ZERO);
     if (cliente.getCredencial() != null) {
       Cliente clienteYaAsignado = this.getClientePorIdUsuario(cliente.getCredencial().getId_Usuario());

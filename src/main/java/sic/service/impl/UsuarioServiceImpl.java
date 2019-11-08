@@ -3,8 +3,6 @@ package sic.service.impl;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -182,10 +180,10 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
-    String ordenDefault = "nombre";
+    String ordenDefault = "username";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(
-          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenDefault));
     } else {
       switch (sentido) {
         case "ASC":
@@ -279,9 +277,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   @Override
   public void actualizarPasswordRecoveryKey(String passwordRecoveryKey, long idUsuario) {
     usuarioRepository.updatePasswordRecoveryKey(
-        passwordRecoveryKey,
-        Date.from(LocalDateTime.now().plusHours(3L).atZone(ZoneId.systemDefault()).toInstant()),
-        idUsuario);
+        passwordRecoveryKey, LocalDateTime.now().plusHours(3L), idUsuario);
   }
 
   @Override

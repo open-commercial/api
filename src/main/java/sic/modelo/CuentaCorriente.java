@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.*;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -43,17 +43,14 @@ public abstract class CuentaCorriente implements Serializable {
     private Long idCuentaCorriente;
     
     private boolean eliminada;
-    
-    @Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
+
     @NotNull(message = "{mensaje_cuenta_corriente_fecha_vacia}")
-    private Date fechaApertura;
+    private LocalDateTime fechaApertura;
 
     @Column(precision = 25, scale = 15)
     private BigDecimal saldo;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fechaUltimoMovimiento;
+    
+    private LocalDateTime fechaUltimoMovimiento;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "cuentaCorriente")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

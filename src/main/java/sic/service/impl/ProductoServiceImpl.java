@@ -17,6 +17,7 @@ import sic.modelo.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.*;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
@@ -36,7 +37,6 @@ import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
-import sic.util.Validator;
 import sic.repository.ProductoRepository;
 
 @Service
@@ -280,8 +280,6 @@ public class ProductoServiceImpl implements IProductoService {
   @Transactional
   public Producto guardar(@Valid Producto producto) {
     if (producto.getCodigo() == null) producto.setCodigo("");
-    producto.setFechaAlta(new Date());
-    producto.setFechaUltimaModificacion(new Date());
     producto.setEliminado(false);
     producto.setOferta(false);
     this.validarOperacion(TipoDeOperacion.ALTA, producto);
@@ -296,11 +294,9 @@ public class ProductoServiceImpl implements IProductoService {
   public void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido) {
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
-    productoPorActualizar.setFechaUltimaModificacion(new Date());
-    if (productoPersistido.getUrlImagen() != null
-        && !productoPersistido.getUrlImagen().isEmpty()
-        && (productoPorActualizar.getUrlImagen() == null
-            || productoPorActualizar.getUrlImagen().isEmpty())) {
+    productoPorActualizar.setFechaUltimaModificacion(LocalDateTime.now());
+    if (productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty()
+      && (productoPorActualizar.getUrlImagen() == null || productoPorActualizar.getUrlImagen().isEmpty())) {
       photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + productoPersistido.getIdProducto());
     }
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
@@ -446,7 +442,7 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   @Transactional
   public void eliminarMultiplesProductos(long[] idProducto) {
-    if (Validator.tieneDuplicados(idProducto)) {
+    if (this.contieneDuplicados(idProducto)) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_error_ids_duplicados", null, Locale.getDefault()));
     }
@@ -483,7 +479,7 @@ public class ProductoServiceImpl implements IProductoService {
         "mensaje_modificar_producto_no_permitido", null, Locale.getDefault()));
     }
     // Requeridos
-    if (Validator.tieneDuplicados(productosParaActualizarDTO.getIdProducto())) {
+    if (this.contieneDuplicados(productosParaActualizarDTO.getIdProducto())) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_error_ids_duplicados", null, Locale.getDefault()));
     }
@@ -530,7 +526,7 @@ public class ProductoServiceImpl implements IProductoService {
         p.setIvaPorcentaje(productosParaActualizarDTO.getIvaPorcentaje());
         p.setIvaNeto(productosParaActualizarDTO.getIvaNeto());
         p.setPrecioLista(productosParaActualizarDTO.getPrecioLista());
-        p.setFechaUltimaModificacion(new Date());
+        p.setFechaUltimaModificacion(LocalDateTime.now());
       }
       if (aplicaDescuentoRecargoPorcentaje) {
         p.setPrecioCosto(p.getPrecioCosto().multiply(multiplicador));
@@ -538,14 +534,14 @@ public class ProductoServiceImpl implements IProductoService {
         p.setPrecioVentaPublico(p.getPrecioVentaPublico().multiply(multiplicador));
         p.setIvaNeto(p.getIvaNeto().multiply(multiplicador));
         p.setPrecioLista(p.getPrecioLista().multiply(multiplicador));
-        p.setFechaUltimaModificacion(new Date());
+        p.setFechaUltimaModificacion(LocalDateTime.now());
       }
       if (productosParaActualizarDTO.getIdMedida() != null
           || productosParaActualizarDTO.getIdRubro() != null
           || productosParaActualizarDTO.getIdProveedor() != null
           || actualizaPrecios
           || aplicaDescuentoRecargoPorcentaje) {
-        p.setFechaUltimaModificacion(new Date());
+        p.setFechaUltimaModificacion(LocalDateTime.now());
       }
       if (productosParaActualizarDTO.getPublico() != null) {
         p.setPublico(productosParaActualizarDTO.getPublico());
@@ -786,4 +782,14 @@ public class ProductoServiceImpl implements IProductoService {
   public List<Producto> getMultiplesProductosPorId(List<Long> idsProductos) {
     return productoRepository.findByIdProductoInOrderByIdProductoAsc(idsProductos);
   }
+
+  private boolean contieneDuplicados(long[] array) {
+      Set<Long> set = new HashSet<>();
+      for (long i : array) {
+        if (set.contains(i)) return true;
+        set.add(i);
+      }
+      return false;
+    }
+
 }

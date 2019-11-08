@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import sic.modelo.Movimiento;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -14,8 +14,8 @@ import java.util.Date;
 @Builder
 public class BusquedaReciboCriteria {
 
-  private Date fechaDesde;
-  private Date fechaHasta;
+  private LocalDateTime fechaDesde;
+  private LocalDateTime fechaHasta;
   private Long idSucursal;
   private Long numSerie;
   private Long numRecibo;

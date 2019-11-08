@@ -6,7 +6,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -19,21 +20,21 @@ import sic.modelo.TipoDeComprobante;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"id_Factura", "fecha", "numSerie", "numFactura", "nombreTransportista", "renglones", "nombreSucursal", "nombreUsuario", "cantidadArticulos"})
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id_Factura", scope = FacturaDTO.class)
+@EqualsAndHashCode(exclude = {"idFactura", "fecha", "numSerie", "numFactura", "nombreTransportista", "renglones", "nombreSucursal", "nombreUsuario", "cantidadArticulos"})
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idFactura", scope = FacturaDTO.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
-   @JsonSubTypes.Type(value = FacturaCompraDTO.class, name = "FacturaCompra"),
-   @JsonSubTypes.Type(value = FacturaVentaDTO.class, name = "FacturaVenta"),    
+  @JsonSubTypes.Type(value = FacturaCompraDTO.class, name = "FacturaCompra"),
+  @JsonSubTypes.Type(value = FacturaVentaDTO.class, name = "FacturaVenta"),
 })
 public abstract class FacturaDTO implements Serializable {
 
-    private long id_Factura;
-    private Date fecha;
+    private long idFactura;
+    private LocalDateTime fecha;
     private TipoDeComprobante tipoComprobante;
     private long numSerie;
     private long numFactura;
-    private Date fechaVencimiento;
+    private LocalDate fechaVencimiento;
     private Long nroPedido;
     private long idTransportista;
     private String nombreTransportista;
@@ -56,5 +57,5 @@ public abstract class FacturaDTO implements Serializable {
     private String nombreUsuario;
     private boolean eliminada;
     private long cae;
-    private Date vencimientoCae;
+    private LocalDate vencimientoCae;
 }

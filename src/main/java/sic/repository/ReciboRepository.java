@@ -1,7 +1,7 @@
 package sic.repository;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +17,8 @@ public interface ReciboRepository
         QuerydslPredicateExecutor<Recibo>,
         ReciboRepositoryCustom {
 
-  Optional<Recibo> findReciboByIdPagoMercadoPagoAndEliminado(String idPagoMercadoPago, boolean eliminado);
+  Optional<Recibo> findReciboByIdPagoMercadoPagoAndEliminado(
+      String idPagoMercadoPago, boolean eliminado);
 
   Recibo findTopBySucursalAndNumSerieOrderByNumReciboDesc(Sucursal sucursal, long serie);
 
@@ -29,8 +30,8 @@ public interface ReciboRepository
   List<Recibo> getRecibosEntreFechasPorFormaDePago(
       @Param("idSucursal") long idSucursal,
       @Param("idFormaDePago") long idFormaDePago,
-      @Param("desde") Date desde,
-      @Param("hasta") Date hasta);
+      @Param("desde") LocalDateTime desde,
+      @Param("hasta") LocalDateTime hasta);
 
   @Query(
       "SELECT SUM(r.monto) FROM Recibo r "
@@ -41,8 +42,8 @@ public interface ReciboRepository
   BigDecimal getTotalRecibosClientesEntreFechasPorFormaDePago(
       @Param("idSucursal") long idSucursal,
       @Param("idFormaDePago") long idFormaDePago,
-      @Param("desde") Date desde,
-      @Param("hasta") Date hasta);
+      @Param("desde") LocalDateTime desde,
+      @Param("hasta") LocalDateTime hasta);
 
   @Query(
       "SELECT SUM(r.monto) FROM Recibo r "
@@ -53,8 +54,8 @@ public interface ReciboRepository
   BigDecimal getTotalRecibosProveedoresEntreFechasPorFormaDePago(
       @Param("idSucursal") long idSucursal,
       @Param("idFormaDePago") long idFormaDePago,
-      @Param("desde") Date desde,
-      @Param("hasta") Date hasta);
+      @Param("desde") LocalDateTime desde,
+      @Param("hasta") LocalDateTime hasta);
 
   @Query(
       "SELECT SUM(r.monto) FROM Recibo r "
@@ -63,7 +64,9 @@ public interface ReciboRepository
           + "AND r.formaDePago.afectaCaja = true "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
   BigDecimal getTotalRecibosClientesQueAfectanCajaEntreFechas(
-      @Param("idSucursal") long idSucursal, @Param("desde") Date desde, @Param("hasta") Date hasta);
+      @Param("idSucursal") long idSucursal,
+      @Param("desde") LocalDateTime desde,
+      @Param("hasta") LocalDateTime hasta);
 
   @Query(
       "SELECT SUM(r.monto) FROM Recibo r "
@@ -72,7 +75,9 @@ public interface ReciboRepository
           + "AND r.formaDePago.afectaCaja = true "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
   BigDecimal getTotalRecibosProveedoresQueAfectanCajaEntreFechas(
-      @Param("idSucursal") long idSucursal, @Param("desde") Date desde, @Param("hasta") Date hasta);
+      @Param("idSucursal") long idSucursal,
+      @Param("desde") LocalDateTime desde,
+      @Param("hasta") LocalDateTime hasta);
 
   @Query(
       "SELECT SUM(r.monto) FROM Recibo r "
@@ -80,7 +85,9 @@ public interface ReciboRepository
           + "AND (r.proveedor is null) "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
   BigDecimal getTotalRecibosClientesEntreFechas(
-      @Param("idSucursal") long idSucursal, @Param("desde") Date desde, @Param("hasta") Date hasta);
+      @Param("idSucursal") long idSucursal,
+      @Param("desde") LocalDateTime desde,
+      @Param("hasta") LocalDateTime hasta);
 
   @Query(
       "SELECT SUM(r.monto) FROM Recibo r "
@@ -88,5 +95,7 @@ public interface ReciboRepository
           + "AND (r.cliente is null) "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
   BigDecimal getTotalRecibosProveedoresEntreFechas(
-      @Param("idSucursal") long idSucursal, @Param("desde") Date desde, @Param("hasta") Date hasta);
+      @Param("idSucursal") long idSucursal,
+      @Param("desde") LocalDateTime desde,
+      @Param("hasta") LocalDateTime hasta);
 }

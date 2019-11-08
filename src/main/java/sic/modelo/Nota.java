@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.*;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import javax.persistence.*;
 import javax.validation.constraints.DecimalMin;
 
@@ -13,6 +14,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "nota")
@@ -54,9 +56,8 @@ public abstract class Nota implements Serializable {
   @Enumerated(EnumType.STRING)
   private TipoDeComprobante tipoComprobante;
 
-  @Column(nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date fecha;
+  @NotNull(message = "{mensaje_nota_fecha_vacia}")
+  private LocalDateTime fecha;
 
   @ManyToOne
   @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
@@ -110,8 +111,7 @@ public abstract class Nota implements Serializable {
 
   private long cae;
 
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date vencimientoCae;
+  private LocalDate vencimientoCae;
 
   private long numSerieAfip;
 
@@ -185,7 +185,7 @@ public abstract class Nota implements Serializable {
   @JsonGetter("idFacturaVenta")
   public Long getIdFacturaVenta() {
     if (facturaVenta != null) {
-      return facturaVenta.getId_Factura();
+      return facturaVenta.getIdFactura();
     } else {
       return null;
     }
@@ -194,7 +194,7 @@ public abstract class Nota implements Serializable {
   @JsonGetter("idFacturaCompra")
   public Long getIdFacturaCompra() {
     if (facturaCompra != null) {
-      return facturaCompra.getId_Factura();
+      return facturaCompra.getIdFactura();
     } else {
       return null;
     }

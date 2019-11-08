@@ -1,8 +1,8 @@
 package sic.service.impl;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -227,7 +227,7 @@ class FacturaServiceImplTest {
     factura.setDescuentoPorcentaje(BigDecimal.ZERO);
     factura.setRecargoPorcentaje(BigDecimal.ZERO);
     factura.setRenglones(renglones);
-    factura.setFecha(new Date());
+    factura.setFecha(LocalDateTime.now());
     factura.setTransportista(new TransportistaBuilder().build());
     factura.setSucursal(new SucursalBuilder().build());
     factura.setCliente(new ClienteBuilder().withId_Cliente(1L).build());

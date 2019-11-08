@@ -13,6 +13,7 @@ import sic.modelo.dto.GastoDTO;
 import sic.service.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -74,6 +75,7 @@ public class GastoController {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
     gasto.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn));
+    gasto.setFecha(LocalDateTime.now());
     return gastoService.guardar(gasto);
   }
 }

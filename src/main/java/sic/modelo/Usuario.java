@@ -3,7 +3,7 @@ package sic.modelo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.persistence.*;
 
@@ -61,8 +61,7 @@ public class Usuario implements Serializable {
 
     private String passwordRecoveryKey;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date passwordRecoveryKeyExpirationDate;
+    private LocalDateTime passwordRecoveryKeyExpirationDate;
     
     @ElementCollection(targetClass = Rol.class)
     @CollectionTable(name="rol", joinColumns = @JoinColumn(name = "id_Usuario"))

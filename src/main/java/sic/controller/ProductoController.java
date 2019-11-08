@@ -1,7 +1,7 @@
 package sic.controller;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.*;
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
@@ -256,6 +256,8 @@ public class ProductoController {
     producto.setPublico(nuevoProductoDTO.isPublico());
     producto.setNota(nuevoProductoDTO.getNota());
     producto.setFechaVencimiento(nuevoProductoDTO.getFechaVencimiento());
+    producto.setFechaAlta(LocalDateTime.now());
+    producto.setFechaUltimaModificacion(LocalDateTime.now());
     return productoService.guardar(producto);
   }
 

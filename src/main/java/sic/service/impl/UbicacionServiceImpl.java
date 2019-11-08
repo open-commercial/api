@@ -19,7 +19,6 @@ import sic.repository.ProvinciaRepository;
 import sic.repository.UbicacionRepository;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
-import sic.util.Validator;
 
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
@@ -108,7 +107,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
   @Override
   public void validarOperacion(TipoDeOperacion operacion, Localidad localidad) {
     // Requeridos
-    if (Validator.esVacio(localidad.getNombre())) {
+    if (localidad.getNombre() == null || localidad.getNombre().equals("")) {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_localidad_vacio_nombre", null, Locale.getDefault()));
     }

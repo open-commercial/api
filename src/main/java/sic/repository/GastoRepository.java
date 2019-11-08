@@ -1,7 +1,7 @@
 package sic.repository;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -18,7 +18,7 @@ public interface GastoRepository extends PagingAndSortingRepository<Gasto, Long>
             "AND g.fecha BETWEEN :desde AND :hasta AND g.eliminado = false")
     List<Gasto> getGastosEntreFechasPorFormaDePago(@Param("idSucursal") long idSucursal,
                                                    @Param("idFormaDePago") long idFormaDePago,
-                                                   @Param("desde") Date desde, @Param("hasta") Date hasta);
+                                                   @Param("desde") LocalDateTime desde, @Param("hasta") LocalDateTime hasta);
 
     Gasto findTopBySucursalAndEliminadoOrderByNroGastoDesc(Sucursal sucursal, boolean eliminado);
 
@@ -27,19 +27,19 @@ public interface GastoRepository extends PagingAndSortingRepository<Gasto, Long>
             "AND g.formaDePago.id_FormaDePago = :idFormaDePago " +
             "AND g.fecha BETWEEN :desde AND :hasta AND g.eliminado = false")
     BigDecimal getTotalGastosEntreFechasPorFormaDePago(@Param("idSucursal") long idSucursal, @Param("idFormaDePago") long idFormaDePago,
-                                                       @Param("desde") Date desde, @Param("hasta") Date hasta);
+                                                       @Param("desde") LocalDateTime desde, @Param("hasta") LocalDateTime hasta);
 
     @Query("SELECT SUM(g.monto) FROM Gasto g " +
             "WHERE g.sucursal.idSucursal = :idSucursal " +
             "AND g.formaDePago.afectaCaja = true " +
             "AND g.fecha BETWEEN :desde AND :hasta AND g.eliminado = false")
     BigDecimal getTotalGastosQueAfectanCajaEntreFechas(@Param("idSucursal") long idSucursal,
-                                                       @Param("desde") Date desde, @Param("hasta") Date hasta);
+                                                       @Param("desde") LocalDateTime desde, @Param("hasta") LocalDateTime hasta);
 
     @Query("SELECT SUM(g.monto) FROM Gasto g " +
             "WHERE g.sucursal.idSucursal = :idSucursal " +
             "AND g.fecha BETWEEN :desde AND :hasta AND g.eliminado = false")
     BigDecimal getTotalGastosEntreFechas(@Param("idSucursal") long idSucursal,
-                                         @Param("desde") Date desde, @Param("hasta") Date hasta);
+                                         @Param("desde") LocalDateTime desde, @Param("hasta") LocalDateTime hasta);
 
 }

@@ -1,6 +1,6 @@
 package sic.modelo.criteria;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class BusquedaCajaCriteria {
 
-    private Date fechaDesde;
-    private Date fechaHasta;
     private Long idSucursal;
+    private LocalDateTime fechaDesde;
+    private LocalDateTime fechaHasta;
     private int cantidadDeRegistros;
     private Long idUsuarioApertura;
     private Long idUsuarioCierre;

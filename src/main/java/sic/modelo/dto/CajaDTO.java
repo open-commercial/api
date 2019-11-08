@@ -4,7 +4,7 @@ import lombok.*;
 import sic.modelo.EstadoCaja;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @EqualsAndHashCode(exclude = {"id_Caja", "idSucursal", "nombreSucursal", "idUsuarioAbreCaja", "nombreUsuarioAbreCaja",
@@ -15,8 +15,8 @@ import java.util.Date;
 public class CajaDTO {
 
   private long id_Caja;
-  private Date fechaApertura;
-  private Date fechaCierre;
+  private LocalDateTime fechaApertura;
+  private LocalDateTime fechaCierre;
   private Long idSucursal;
   private String nombreSucursal;
   private Long idUsuarioAbreCaja;

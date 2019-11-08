@@ -1,7 +1,7 @@
 package sic.modelo;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
@@ -50,9 +50,8 @@ public class Sucursal implements Serializable {
   private Long idFiscal;
 
   private Long ingresosBrutos;
-
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date fechaInicioActividad;
+  
+  private LocalDateTime fechaInicioActividad;
 
   @Column(nullable = false)
   @Email(message = "{mensaje_correo_formato_incorrecto}")

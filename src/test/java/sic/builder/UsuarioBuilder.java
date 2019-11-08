@@ -1,5 +1,6 @@
 package sic.builder;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import sic.modelo.Rol;
@@ -15,7 +16,7 @@ public class UsuarioBuilder {
   private String email = "daenerys@gmail.com";
   private String token = null;
   private String passwordRecoveryKey = "";
-  private Date passwordRecoveryKeyExpirationDate = new Date();
+  private LocalDateTime passwordRecoveryKeyExpirationDate = LocalDateTime.now();
   private List<Rol> roles = Collections.singletonList(Rol.ADMINISTRADOR);
   private boolean habilitado = true;
   private boolean eliminado = false;
@@ -84,7 +85,7 @@ public class UsuarioBuilder {
   }
 
   public UsuarioBuilder withPasswordRecoveryKeyExpirationDate(
-      Date passwordRecoveryKeyExpirationDate) {
+      LocalDateTime passwordRecoveryKeyExpirationDate) {
     this.passwordRecoveryKeyExpirationDate = passwordRecoveryKeyExpirationDate;
     return this;
   }

@@ -1,8 +1,9 @@
 package sic.builder;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import sic.modelo.EstadoPedido;
@@ -13,8 +14,8 @@ public class PedidoBuilder {
 
   private long id_Pedido = 0L;
   private long nroPedido = 46L;
-  private Date fecha = new Date();
-  private Date fechaVencimiento;
+  private LocalDateTime fecha = LocalDateTime.now();
+  private LocalDate fechaVencimiento;
   private String observaciones = "Los precios se encuentran sujetos a modificaciones.";
   private String nombreSucursal = "Globo Corporation";
   private String detalleEnvio;
@@ -79,12 +80,12 @@ public class PedidoBuilder {
     return this;
   }
 
-  public PedidoBuilder withFecha(Date fecha) {
+  public PedidoBuilder withFecha(LocalDateTime fecha) {
     this.fecha = fecha;
     return this;
   }
 
-  public PedidoBuilder withFechaVencimiento(Date fechaVencimiento) {
+  public PedidoBuilder withFechaVencimiento(LocalDate fechaVencimiento) {
     this.fechaVencimiento = fechaVencimiento;
     return this;
   }

@@ -1,8 +1,9 @@
 package sic.builder;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import sic.modelo.Sucursal;
@@ -17,12 +18,12 @@ import sic.modelo.embeddable.ClienteEmbeddable;
 
 public class FacturaVentaBuilder {
 
-  private long id_Factura = 0L;
-  private Date fecha = new Date();
+  private long idFactura = 0L;
+  private LocalDateTime fecha = LocalDateTime.now();
   private TipoDeComprobante tipoFactura = TipoDeComprobante.FACTURA_A;
   private long numSerie = 0;
   private long numFactura = 1;
-  private Date fechaVencimiento = new Date();
+  private LocalDate fechaVencimiento = LocalDate.now();
   private Pedido pedido = null;
   private Transportista transportista = new TransportistaBuilder().build();
   private List<RenglonFactura> renglones;
@@ -44,7 +45,7 @@ public class FacturaVentaBuilder {
   private Sucursal sucursal = new SucursalBuilder().build();
   private boolean eliminada = false;
   private long CAE = 21064126523746l;
-  private Date vencimientoCAE = null;
+  private LocalDate vencimientoCAE = null;
   private long numSerieAfip = 0;
   private long numFacturaAfip = 0;
 
@@ -65,7 +66,7 @@ public class FacturaVentaBuilder {
       this.renglones = renglonesFactura;
     }
     return new FacturaVenta(
-        id_Factura,
+        idFactura,
         clienteEmbeddable,
         cliente,
         usuario,
@@ -97,12 +98,12 @@ public class FacturaVentaBuilder {
         numFacturaAfip);
   }
 
-    public FacturaVentaBuilder withId_Factura(long idFactura) {
-        this.id_Factura = idFactura;
+    public FacturaVentaBuilder withIdFactura(long idFactura) {
+        this.idFactura = idFactura;
         return this;
     }
     
-    public FacturaVentaBuilder withFecha(Date fecha) {
+    public FacturaVentaBuilder withFecha(LocalDateTime fecha) {
         this.fecha = fecha;
         return this;
     }
@@ -137,7 +138,7 @@ public class FacturaVentaBuilder {
         return this;
     }
     
-    public FacturaVentaBuilder withFechaVencimiento(Date fechaDeVencimiento) {
+    public FacturaVentaBuilder withFechaVencimiento(LocalDate fechaDeVencimiento) {
         this.fechaVencimiento = fechaDeVencimiento;
         return this;
     }  
@@ -232,7 +233,7 @@ public class FacturaVentaBuilder {
         return this;
     }
     
-    public FacturaVentaBuilder withVencimientoCAE(Date vencimientoCAE) {
+    public FacturaVentaBuilder withVencimientoCAE(LocalDate vencimientoCAE) {
         this.vencimientoCAE = vencimientoCAE;
         return this;
     }

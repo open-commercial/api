@@ -1,7 +1,8 @@
 package sic.modelo;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,10 +11,10 @@ import lombok.Data;
 public class ComprobanteAFIP {
 
     private long idComprobante;
-    private Date fecha;
+    private LocalDateTime fecha;
     private TipoDeComprobante tipoComprobante;
-    private long CAE;
-    private Date vencimientoCAE;
+    private long cae;
+    private LocalDate vencimientoCAE;
     private long numSerieAfip;
     private long numFacturaAfip;
     private Sucursal sucursal;

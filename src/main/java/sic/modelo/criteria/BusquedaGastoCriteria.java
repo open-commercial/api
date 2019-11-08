@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -13,10 +13,10 @@ import java.util.Date;
 @Builder
 public class BusquedaGastoCriteria {
 
-  private Date fechaDesde;
-  private Date fechaHasta;
   private Long idSucursal;
   private boolean buscaPorUsuario;
+  private LocalDateTime fechaDesde;
+  private LocalDateTime fechaHasta;
   private Long idUsuario;
   private Long idFormaDePago;
   private Long nroGasto;

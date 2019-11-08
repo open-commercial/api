@@ -21,7 +21,9 @@ import sic.exception.BusinessServiceException;
 import sic.service.IAuthService;
 import sic.service.IUsuarioService;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -54,14 +56,12 @@ public class AuthServiceImpl implements IAuthService {
 
   @Override
   public String generarToken(long idUsuario, List<Rol> rolesDeUsuario) {
-    Date today = new Date();
-    Calendar c = Calendar.getInstance();
-    c.setTime(today);
-    c.add(Calendar.YEAR, 1);
-    Date yearLater = c.getTime();
+    LocalDateTime today = LocalDateTime.now();
+    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
+    ZonedDateTime zdtInOneYear = today.plusYears(1L).atZone(ZoneId.systemDefault());
     return Jwts.builder()
-        .setIssuedAt(today)
-        .setExpiration(yearLater)
+        .setIssuedAt(Date.from(zdtNow.toInstant()))
+        .setExpiration(Date.from(zdtInOneYear.toInstant()))
         .signWith(SignatureAlgorithm.HS512, secretkey)
         .claim("idUsuario", idUsuario)
         .claim("roles", rolesDeUsuario)

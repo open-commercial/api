@@ -17,6 +17,7 @@ import sic.modelo.Rol;
 import sic.modelo.dto.ReciboDTO;
 import sic.service.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -87,6 +88,7 @@ public class ReciboController {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     recibo.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+    recibo.setFecha(LocalDateTime.now());
     return reciboService.guardar(recibo);
   }
 

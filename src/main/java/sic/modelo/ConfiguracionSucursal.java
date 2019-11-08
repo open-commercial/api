@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -22,61 +22,64 @@ import sic.controller.Views;
 @NoArgsConstructor
 @EqualsAndHashCode(of = "idConfiguracionSucursal")
 @ToString(exclude = "certificadoAfip")
-@JsonIgnoreProperties({"tokenWSAA", "signTokenWSAA", "fechaGeneracionTokenWSAA", "fechaVencimientoTokenWSAA", "sucursal"})
+@JsonIgnoreProperties({
+  "tokenWSAA",
+  "signTokenWSAA",
+  "fechaGeneracionTokenWSAA",
+  "fechaVencimientoTokenWSAA",
+  "sucursal"
+})
 @JsonView(Views.Comprador.class)
 public class ConfiguracionSucursal implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long idConfiguracionSucursal;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private long idConfiguracionSucursal;
 
-    private boolean usarFacturaVentaPreImpresa;
+  private boolean usarFacturaVentaPreImpresa;
 
-    private int cantidadMaximaDeRenglonesEnFactura;
+  private int cantidadMaximaDeRenglonesEnFactura;
 
-    private boolean facturaElectronicaHabilitada;
+  private boolean facturaElectronicaHabilitada;
 
-    @Lob
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private byte[] certificadoAfip;
+  @Lob
+  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+  private byte[] certificadoAfip;
 
-    private String firmanteCertificadoAfip;
+  private String firmanteCertificadoAfip;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private String passwordCertificadoAfip;
+  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+  private String passwordCertificadoAfip;
 
-    private int nroPuntoDeVentaAfip;
+  private int nroPuntoDeVentaAfip;
 
-    @Column(length = 1000)
-    private String tokenWSAA;
+  @Column(length = 1000)
+  private String tokenWSAA;
 
-    private String signTokenWSAA;
+  private String signTokenWSAA;
 
-    private boolean puntoDeRetiro;
+  private boolean puntoDeRetiro;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fechaGeneracionTokenWSAA;
+  private LocalDateTime fechaGeneracionTokenWSAA;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fechaVencimientoTokenWSAA;
+  private LocalDateTime fechaVencimientoTokenWSAA;
 
-    @ManyToOne
-    @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
-    private Sucursal sucursal;
+  @ManyToOne
+  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
+  private Sucursal sucursal;
 
-    @JsonGetter("idSucursal")
-    public Long getIdSucursal() {
-        return sucursal.getIdSucursal();
-    }
+  @JsonGetter("idSucursal")
+  public Long getIdSucursal() {
+    return sucursal.getIdSucursal();
+  }
 
-    @JsonGetter("nombreSucursal")
-    public String getNombreSucursal() {
-        return sucursal.getNombre();
-    }
+  @JsonGetter("nombreSucursal")
+  public String getNombreSucursal() {
+    return sucursal.getNombre();
+  }
 
-    @JsonGetter("existeCertificado")
-    public boolean isExisteCertificado() {
-        return (certificadoAfip != null);
-    }
-
+  @JsonGetter("existeCertificado")
+  public boolean isExisteCertificado() {
+    return (certificadoAfip != null);
+  }
 }

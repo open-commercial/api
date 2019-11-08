@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import sic.modelo.Caja;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public interface CajaRepository
     extends PagingAndSortingRepository<Caja, Long>,
@@ -20,8 +20,7 @@ public interface CajaRepository
   @Query("SELECT c FROM Caja c WHERE c.id_Caja = :idCaja AND c.eliminada = false")
   Caja findById(@Param("idCaja") long idCaja);
 
-  @Query(
-      "SELECT c FROM Caja c WHERE c.sucursal.idSucursal = :idSucursal AND c.eliminada = false ORDER BY c.id_Caja DESC")
+  @Query("SELECT c FROM Caja c WHERE c.sucursal.idSucursal = :idSucursal AND c.eliminada = false ORDER BY c.id_Caja DESC")
   Page<Caja> findTopBySucursalAndEliminadaOrderByIdCajaDesc(
       @Param("idSucursal") long idSucursal, Pageable page);
 
@@ -36,7 +35,7 @@ public interface CajaRepository
           + "WHERE c.sucursal.idSucursal = :idSucursal AND c.eliminada = false AND c.estado = sic.modelo.EstadoCaja.CERRADA "
           + "AND :fecha BETWEEN c.fechaApertura AND c.fechaCierre")
   Caja encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(
-      @Param("idSucursal") long idSucursal, @Param("fecha") Date fecha);
+      @Param("idSucursal") long idSucursal, @Param("fecha") LocalDateTime fecha);
 
   @Modifying
   @Query(

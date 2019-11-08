@@ -69,5 +69,4 @@ public class Proveedor implements Serializable {
   private Ubicacion ubicacion;
 
   private boolean eliminado;
-
 }

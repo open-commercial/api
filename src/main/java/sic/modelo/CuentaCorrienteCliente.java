@@ -2,7 +2,7 @@ package sic.modelo;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -25,18 +25,28 @@ import sic.controller.Views;
 @JsonView(Views.Comprador.class)
 public class CuentaCorrienteCliente extends CuentaCorriente implements Serializable {
 
-    @OneToOne
-    @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
-    @QueryInit({"viajante", "ubicacionFacturacion.localidad.provincia", "ubicacionEnvio.localidad.provincia"})
-    @NotNull(message = "{mensaje_cuenta_corriente_cliente_vacio}")
-    private Cliente cliente;
+  @OneToOne
+  @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
+  @QueryInit({
+    "viajante",
+    "ubicacionFacturacion.localidad.provincia",
+    "ubicacionEnvio.localidad.provincia"
+  })
+  @NotNull(message = "{mensaje_cuenta_corriente_cliente_vacio}")
+  private Cliente cliente;
 
-    public CuentaCorrienteCliente() {}
+  public CuentaCorrienteCliente() {}
 
-    public CuentaCorrienteCliente(long idCuentaCorriente, boolean eliminada, Date fechaApertura,
-            BigDecimal saldo, Date fechaUltimoMovimiento, List<RenglonCuentaCorriente> renglones, Cliente cliente) {
-        super(idCuentaCorriente, eliminada, fechaApertura, saldo, fechaUltimoMovimiento, renglones);
-        this.cliente = cliente;
-    }
+  public CuentaCorrienteCliente(
+      long idCuentaCorriente,
+      boolean eliminada,
+      LocalDateTime fechaApertura,
+      BigDecimal saldo,
+      LocalDateTime fechaUltimoMovimiento,
+      List<RenglonCuentaCorriente> renglones,
+      Cliente cliente) {
 
+    super(idCuentaCorriente, eliminada, fechaApertura, saldo, fechaUltimoMovimiento, renglones);
+    this.cliente = cliente;
+  }
 }

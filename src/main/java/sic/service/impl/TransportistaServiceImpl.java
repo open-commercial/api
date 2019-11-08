@@ -76,7 +76,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
     QTransportista qTransportista = QTransportista.transportista;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(qTransportista.eliminado.eq(false));
-    if (criteria.isBuscarPorNombre())
+    if (criteria.getNombre() != null)
       builder.and(this.buildPredicadoNombre(criteria.getNombre(), qTransportista));
     if (criteria.getIdLocalidad() != null)
       builder.and(qTransportista.ubicacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));

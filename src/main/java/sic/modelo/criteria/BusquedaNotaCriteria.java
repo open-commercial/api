@@ -1,6 +1,6 @@
 package sic.modelo.criteria;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,11 +15,11 @@ import sic.modelo.TipoDeComprobante;
 @Builder
 public class BusquedaNotaCriteria {
 
-  private Date fechaDesde;
-  private Date fechaHasta;
   private Long idSucursal;
   private int cantidadDeRegistros;
   private boolean buscaPorNumeroNota;
+  private LocalDateTime fechaDesde;
+  private LocalDateTime fechaHasta;
   private Long numSerie;
   private Long numNota;
   private boolean buscaPorTipoComprobante;

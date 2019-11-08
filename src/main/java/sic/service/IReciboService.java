@@ -1,7 +1,7 @@
 package sic.service;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,7 +32,7 @@ public interface IReciboService {
       Usuario usuario,
       BigDecimal[] monto,
       BigDecimal totalFactura,
-      Date fecha);
+      LocalDateTime fecha);
 
   long getSiguienteNumeroRecibo(long idSucursal, long serie);
 
@@ -41,21 +41,21 @@ public interface IReciboService {
   byte[] getReporteRecibo(Recibo recibo);
 
   BigDecimal getTotalRecibosClientesEntreFechasPorFormaDePago(
-      long idSucursal, long idFormaDePago, Date desde, Date hasta);
+      long idSucursal, long idFormaDePago, LocalDateTime desde, LocalDateTime hasta);
 
   BigDecimal getTotalRecibosProveedoresEntreFechasPorFormaDePago(
-      long idSucursal, long idFormaDePago, Date desde, Date hasta);
+      long idSucursal, long idFormaDePago, LocalDateTime desde, LocalDateTime hasta);
 
   List<Recibo> getRecibosEntreFechasPorFormaDePago(
-      Date desde, Date hasta, FormaDePago formaDePago, Sucursal sucursal);
+    LocalDateTime desde, LocalDateTime hasta, FormaDePago formaDePago, Sucursal sucursal);
 
   BigDecimal getTotalRecibosClientesQueAfectanCajaEntreFechas(
-      long idSucursal, Date desde, Date hasta);
+      long idSucursal, LocalDateTime desde, LocalDateTime hasta);
 
   BigDecimal getTotalRecibosProveedoresQueAfectanCajaEntreFechas(
-      long idSucursal, Date desde, Date hasta);
+      long idSucursal, LocalDateTime desde, LocalDateTime hasta);
 
-  BigDecimal getTotalRecibosClientesEntreFechas(long idSucursal, Date desde, Date hasta);
+  BigDecimal getTotalRecibosClientesEntreFechas(long idSucursal, LocalDateTime desde, LocalDateTime hasta);
 
-  BigDecimal getTotalRecibosProveedoresEntreFechas(long idSucursal, Date desde, Date hasta);
+  BigDecimal getTotalRecibosProveedoresEntreFechas(long idSucursal, LocalDateTime desde, LocalDateTime hasta);
 }

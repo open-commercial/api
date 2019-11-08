@@ -3,8 +3,11 @@ package sic.modelo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import javax.persistence.*;
+import javax.validation.constraints.FutureOrPresent;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
@@ -45,12 +48,10 @@ public class RenglonCuentaCorriente implements Serializable {
     
     private boolean eliminado;
 
-    @Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fecha;
+    @NotNull(message = "{mensaje_renglon_cuenta_corriente_fecha_vacia}")
+    private LocalDateTime fecha;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fechaVencimiento;
+    private LocalDate fechaVencimiento;
 
     @Column(precision = 25, scale = 15)
     private BigDecimal monto;
