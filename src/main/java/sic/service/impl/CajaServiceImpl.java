@@ -1,12 +1,8 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.dsl.DateExpression;
-import com.querydsl.core.types.dsl.Expressions;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import org.springframework.context.MessageSource;
@@ -187,8 +183,7 @@ public class CajaServiceImpl implements ICajaService {
   private BooleanBuilder getBuilder(BusquedaCajaCriteria criteria) {
     QCaja qCaja = QCaja.caja;
     BooleanBuilder builder = new BooleanBuilder();
-    builder.and(
-        qCaja.empresa.idEmpresa.eq(criteria.getIdEmpresa()).and(qCaja.eliminada.eq(false)));
+    builder.and(qCaja.empresa.idEmpresa.eq(criteria.getIdEmpresa()).and(qCaja.eliminada.eq(false)));
     if (criteria.getIdUsuarioApertura() != null && criteria.getIdUsuarioCierre() == null) {
       builder.and(qCaja.usuarioAbreCaja.id_Usuario.eq(criteria.getIdUsuarioApertura()));
     }
@@ -205,34 +200,14 @@ public class CajaServiceImpl implements ICajaService {
     }
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
-      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59));
-      String dateTemplate = "convert({0}, datetime)";
+      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-        DateExpression<LocalDateTime> fDesde =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        DateExpression<LocalDateTime> fHasta =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        builder.and(qCaja.fechaApertura.between(fDesde, fHasta));
+        builder.and(
+            qCaja.fechaApertura.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
       } else if (criteria.getFechaDesde() != null) {
-        DateExpression<LocalDateTime> fDesde =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        builder.and(qCaja.fechaApertura.after(fDesde));
+        builder.and(qCaja.fechaApertura.after(criteria.getFechaDesde()));
       } else if (criteria.getFechaHasta() != null) {
-        DateExpression<LocalDateTime> fHasta =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        builder.and(qCaja.fechaApertura.before(fHasta));
+        builder.and(qCaja.fechaApertura.before(criteria.getFechaHasta()));
       }
     }
     return builder;
@@ -244,7 +219,7 @@ public class CajaServiceImpl implements ICajaService {
     cajaACerrar.setSaldoReal(monto);
     if (scheduling) {
       cajaACerrar.setFechaCierre(
-          cajaACerrar.getFechaApertura().withHour(23).withMinute(59).withSecond(59));
+          cajaACerrar.getFechaApertura().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
     } else {
       cajaACerrar.setFechaCierre(this.clockService.getFechaActual());
     }

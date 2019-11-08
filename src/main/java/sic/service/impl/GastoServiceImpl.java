@@ -3,8 +3,6 @@ package sic.service.impl;
 import java.math.BigDecimal;
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.dsl.DateExpression;
-import com.querydsl.core.types.dsl.Expressions;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,13 +12,10 @@ import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaGastoCriteria;
 import sic.service.IGastoService;
-
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,35 +112,14 @@ public class GastoServiceImpl implements IGastoService {
       builder.or(rsPredicate);
     }
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
-      criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
-      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59));
-      String dateTemplate = "convert({0}, datetime)";
+      criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0).withNano(0));
+      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-        DateExpression<LocalDateTime> fDesde =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        DateExpression<LocalDateTime> fHasta =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        builder.and(qGasto.fecha.between(fDesde, fHasta));
+        builder.and(qGasto.fecha.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
       } else if (criteria.getFechaDesde() != null) {
-        DateExpression<LocalDateTime> fDesde =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        builder.and(qGasto.fecha.after(fDesde));
+        builder.and(qGasto.fecha.after(criteria.getFechaDesde()));
       } else if (criteria.getFechaHasta() != null) {
-        DateExpression<LocalDateTime> fHasta =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        builder.and(qGasto.fecha.before(fHasta));
+        builder.and(qGasto.fecha.before(criteria.getFechaHasta()));
       }
     }
     if (criteria.getIdFormaDePago() != null)
