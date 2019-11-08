@@ -104,6 +104,7 @@ public class ReciboController {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     recibo.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+    recibo.setFecha(LocalDateTime.now());
     return reciboService.guardar(recibo);
   }
 

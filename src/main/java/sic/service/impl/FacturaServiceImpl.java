@@ -3,8 +3,6 @@ package sic.service.impl;
 import java.io.IOException;
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.dsl.DateExpression;
-import com.querydsl.core.types.dsl.Expressions;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +15,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -306,34 +303,14 @@ public class FacturaServiceImpl implements IFacturaService {
             .and(qFacturaCompra.eliminada.eq(false)));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
-      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59));
-      String dateTemplate = "convert({0}, datetime)";
+      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-        DateExpression<LocalDateTime> fDesde =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        DateExpression<LocalDateTime> fHasta =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        builder.and(qFacturaCompra.fecha.between(fDesde, fHasta));
+        builder.and(
+            qFacturaCompra.fecha.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
       } else if (criteria.getFechaDesde() != null) {
-        DateExpression<LocalDateTime> fDesde =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        builder.and(qFacturaCompra.fecha.after(fDesde));
+        builder.and(qFacturaCompra.fecha.after(criteria.getFechaDesde()));
       } else if (criteria.getFechaHasta() != null) {
-        DateExpression<LocalDateTime> fHasta =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        builder.and(qFacturaCompra.fecha.before(fHasta));
+        builder.and(qFacturaCompra.fecha.before(criteria.getFechaHasta()));
       }
     }
     if (criteria.getIdProveedor() != null)
@@ -366,34 +343,14 @@ public class FacturaServiceImpl implements IFacturaService {
             .and(qFacturaVenta.eliminada.eq(false)));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
-      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59));
-      String dateTemplate = "convert({0}, datetime)";
+      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-        DateExpression<LocalDateTime> fDesde =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        DateExpression<LocalDateTime> fHasta =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        builder.and(qFacturaVenta.fecha.between(fDesde, fHasta));
+        builder.and(
+            qFacturaVenta.fecha.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
       } else if (criteria.getFechaDesde() != null) {
-        DateExpression<LocalDateTime> fDesde =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        builder.and(qFacturaVenta.fecha.after(fDesde));
+        builder.and(qFacturaVenta.fecha.after(criteria.getFechaDesde()));
       } else if (criteria.getFechaHasta() != null) {
-        DateExpression<LocalDateTime> fHasta =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        builder.and(qFacturaVenta.fecha.before(fHasta));
+        builder.and(qFacturaVenta.fecha.before(criteria.getFechaHasta()));
       }
     }
     if (criteria.getIdCliente() != null)
