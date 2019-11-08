@@ -5,7 +5,7 @@
     
     <modelVersion>4.0.0</modelVersion>
     <groupId>sic-api</groupId>
-    <artifactId>SIC-API</artifactId>
+    <artifactId>sic-api</artifactId>
     <version>Athena</version>
     <packaging>jar</packaging>
     
