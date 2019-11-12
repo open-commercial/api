@@ -135,7 +135,7 @@ public class PedidoServiceImpl implements IPedidoService {
   @Override
   public Pedido actualizarEstadoPedido(Pedido pedido) {
     pedido.setEstado(EstadoPedido.ACTIVO);
-    if (this.getFacturasDelPedido(pedido.getId_Pedido()).isEmpty()) {
+    if (this.getFacturasDelPedido(pedido.getIdPedido()).isEmpty()) {
       pedido.setEstado(EstadoPedido.ABIERTO);
     }
     if (facturaService.pedidoTotalmenteFacturado(pedido)) {
@@ -149,7 +149,7 @@ public class PedidoServiceImpl implements IPedidoService {
     BigDecimal porcentajeDescuento;
     BigDecimal totalActual = BigDecimal.ZERO;
     List<Long> idsProductos = new ArrayList<>();
-    List<RenglonPedido> renglonesDelPedido = this.getRenglonesDelPedidoOrdenadoPorIdProducto(pedido.getId_Pedido());
+    List<RenglonPedido> renglonesDelPedido = this.getRenglonesDelPedidoOrdenadoPorIdProducto(pedido.getIdPedido());
     renglonesDelPedido.forEach(r -> idsProductos.add(r.getIdProductoItem()));
     List<Producto> productos = productoService.getMultiplesProductosPorId(idsProductos);
     int i = 0;
@@ -218,7 +218,7 @@ public class PedidoServiceImpl implements IPedidoService {
                 pedido.getCliente().getNombreFiscal(), "Pedido Nº " + pedido.getNroPedido()
               },
               Locale.getDefault()),
-          this.getReportePedido(pedido.getId_Pedido()),
+          this.getReportePedido(pedido.getIdPedido()),
           "Reporte");
       logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
@@ -472,7 +472,7 @@ public class PedidoServiceImpl implements IPedidoService {
       detalleEnvio = pedido.getEnvio();
     }
     params.put("detalleEnvio", detalleEnvio);
-    List<RenglonPedido> renglones = this.getRenglonesDelPedidoOrdenadorPorIdRenglon(pedido.getId_Pedido());
+    List<RenglonPedido> renglones = this.getRenglonesDelPedidoOrdenadorPorIdRenglon(pedido.getIdPedido());
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
     try {
       return JasperExportManager.exportReportToPdf(

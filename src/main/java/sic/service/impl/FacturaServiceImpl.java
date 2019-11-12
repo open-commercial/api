@@ -331,7 +331,7 @@ public class FacturaServiceImpl implements IFacturaService {
       }
     }
     if (criteria.getIdProveedor() != null)
-      builder.and(qFacturaCompra.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
+      builder.and(qFacturaCompra.proveedor.idProveedor.eq(criteria.getIdProveedor()));
     if (criteria.getTipoComprobante() != null)
       builder.and(qFacturaCompra.tipoComprobante.eq(criteria.getTipoComprobante()));
     if (criteria.getIdProducto() != null)
@@ -944,7 +944,7 @@ public class FacturaServiceImpl implements IFacturaService {
   public boolean pedidoTotalmenteFacturado(Pedido pedido) {
     boolean facturado = false;
     Map<Long, RenglonFactura> renglonesDeFacturas =
-        pedidoService.getRenglonesFacturadosDelPedido(pedido.getId_Pedido());
+        pedidoService.getRenglonesFacturadosDelPedido(pedido.getIdPedido());
     if (!renglonesDeFacturas.isEmpty()) {
       for (RenglonPedido r : pedido.getRenglones()) {
         if (renglonesDeFacturas.containsKey(r.getIdProductoItem())) {

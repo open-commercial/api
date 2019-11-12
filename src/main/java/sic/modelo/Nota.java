@@ -167,7 +167,7 @@ public abstract class Nota implements Serializable {
   @JsonGetter("idProveedor")
   public Long getIdProveedor() {
     if (proveedor != null) {
-      return proveedor.getId_Proveedor();
+      return proveedor.getIdProveedor();
     } else {
       return null;
     }

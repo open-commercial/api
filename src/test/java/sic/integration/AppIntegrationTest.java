@@ -110,9 +110,9 @@ class AppIntegrationTest {
         + "/productos?idMedida="
         + medida.getIdMedida()
         + "&idRubro="
-        + rubro.getId_Rubro()
+        + rubro.getIdRubro()
         + "&idProveedor="
-        + proveedor.getId_Proveedor()
+        + proveedor.getIdProveedor()
         + "&idEmpresa="
         + empresa.getIdEmpresa(),
       productoUno,
@@ -122,9 +122,9 @@ class AppIntegrationTest {
         + "/productos?idMedida="
         + medida.getIdMedida()
         + "&idRubro="
-        + rubro.getId_Rubro()
+        + rubro.getIdRubro()
         + "&idProveedor="
-        + proveedor.getId_Proveedor()
+        + proveedor.getIdProveedor()
         + "&idEmpresa="
         + empresa.getIdEmpresa(),
       productoDos,
@@ -1033,7 +1033,7 @@ class AppIntegrationTest {
     ubicacion.setNumero(9666);
     proveedorRecuperado.setUbicacion(ubicacion);
     restTemplate.put(apiPrefix + "/proveedores", proveedorRecuperado);
-    proveedorRecuperado = restTemplate.getForObject(apiPrefix+ "/proveedores/" + proveedorRecuperado.getId_Proveedor(), ProveedorDTO.class);
+    proveedorRecuperado = restTemplate.getForObject(apiPrefix+ "/proveedores/" + proveedorRecuperado.getIdProveedor(), ProveedorDTO.class);
     assertEquals(ubicacion, proveedorRecuperado.getUbicacion());
   }
 
@@ -3037,7 +3037,7 @@ class AppIntegrationTest {
     rubro = restTemplate.postForObject(apiPrefix + "/rubros?idEmpresa=1", rubro, RubroDTO.class);
     ProductosParaActualizarDTO productosParaActualizarDTO = ProductosParaActualizarDTO.builder()
       .idProducto(idsProductos)
-      .idRubro(rubro.getId_Rubro()).build();
+      .idRubro(rubro.getIdRubro()).build();
     restTemplate.put(apiPrefix + "/productos/multiples", productosParaActualizarDTO);
     ProductoDTO productoUno = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO productoDos = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
@@ -3066,7 +3066,7 @@ class AppIntegrationTest {
     proveedor = restTemplate.postForObject(apiPrefix + "/proveedores", proveedor, ProveedorDTO.class);
     ProductosParaActualizarDTO productosParaActualizarDTO = ProductosParaActualizarDTO.builder()
       .idProducto(idsProductos)
-      .idProveedor(proveedor.getId_Proveedor()).build();
+      .idProveedor(proveedor.getIdProveedor()).build();
     restTemplate.put(apiPrefix + "/productos/multiples", productosParaActualizarDTO);
     ProductoDTO productoUno = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO productoDos = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
@@ -3102,9 +3102,9 @@ class AppIntegrationTest {
           + "/productos?idMedida="
           + medida.getIdMedida()
           + "&idRubro="
-          + rubro.getId_Rubro()
+          + rubro.getIdRubro()
           + "&idProveedor="
-          + proveedor.getId_Proveedor()
+          + proveedor.getIdProveedor()
           + "&idEmpresa="
           + empresa.getIdEmpresa(),
         productoUno,
@@ -3154,9 +3154,9 @@ class AppIntegrationTest {
           + "/productos?idMedida="
           + medida.getIdMedida()
           + "&idRubro="
-          + rubro.getId_Rubro()
+          + rubro.getIdRubro()
           + "&idProveedor="
-          + proveedor.getId_Proveedor()
+          + proveedor.getIdProveedor()
           + "&idEmpresa="
           + empresa.getIdEmpresa(),
         productoUno,
@@ -3198,9 +3198,9 @@ class AppIntegrationTest {
                 + "/productos?idMedida="
                 + medida.getIdMedida()
                 + "&idRubro="
-                + rubro.getId_Rubro()
+                + rubro.getIdRubro()
                 + "&idProveedor="
-                + proveedor.getId_Proveedor()
+                + proveedor.getIdProveedor()
                 + "&idEmpresa="
                 + empresa.getIdEmpresa(),
             productoUno,
@@ -4686,7 +4686,7 @@ class AppIntegrationTest {
     pedidoRecuperado.setRenglones(
         restTemplate
             .exchange(
-                apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido() + "/renglones",
+                apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido() + "/renglones",
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<List<RenglonPedidoDTO>>() {})
@@ -4877,12 +4877,12 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoDTO.class);
     pedidoRecuperado =
       restTemplate.getForObject(
-        apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
+        apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido(), PedidoDTO.class);
     assertEquals(EstadoPedido.ACTIVO, pedidoRecuperado.getEstado());
     this.crearFacturaTipoBDePedido();
     pedidoRecuperado =
       restTemplate.getForObject(
-        apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
+        apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido(), PedidoDTO.class);
     assertEquals(EstadoPedido.CERRADO, pedidoRecuperado.getEstado());
   }
 
@@ -4982,12 +4982,12 @@ class AppIntegrationTest {
         restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoDTO.class);
     pedidoRecuperado =
         restTemplate.getForObject(
-            apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
+            apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido(), PedidoDTO.class);
     assertEquals(EstadoPedido.ACTIVO, pedidoRecuperado.getEstado());
     this.crearFacturaTipoBDePedido();
     pedidoRecuperado =
         restTemplate.getForObject(
-            apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
+            apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido(), PedidoDTO.class);
     assertEquals(EstadoPedido.CERRADO, pedidoRecuperado.getEstado());
     BusquedaFacturaVentaCriteria criteria =
       BusquedaFacturaVentaCriteria.builder()
@@ -5008,13 +5008,13 @@ class AppIntegrationTest {
       apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getIdFactura());
     pedidoRecuperado =
       restTemplate.getForObject(
-        apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
+        apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido(), PedidoDTO.class);
     assertEquals(EstadoPedido.ACTIVO, pedidoRecuperado.getEstado());
     restTemplate.delete(
       apiPrefix + "/facturas/" + facturasRecuperadas.get(1).getIdFactura());
     pedidoRecuperado =
       restTemplate.getForObject(
-        apiPrefix + "/pedidos/" + pedidoRecuperado.getId_Pedido(), PedidoDTO.class);
+        apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido(), PedidoDTO.class);
     assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
   }
 

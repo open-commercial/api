@@ -248,7 +248,7 @@ public class NotaServiceImpl implements INotaService {
     if (criteria.getIdViajante() != null)
       builder.and(qNotaCredito.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.getIdProveedor() != null)
-      builder.and(qNotaCredito.proveedor.id_Proveedor.eq(criteria.getIdCliente()));
+      builder.and(qNotaCredito.proveedor.idProveedor.eq(criteria.getIdCliente()));
     if (criteria.getTipoComprobante() != null)
       builder.and(qNotaCredito.tipoComprobante.eq(criteria.getTipoComprobante()));
     if (criteria.getNumSerie() != null && criteria.getNumNota() != null)
@@ -334,7 +334,7 @@ public class NotaServiceImpl implements INotaService {
     if (criteria.getIdViajante() != null)
       builder.and(qNotaDebito.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
     if (criteria.getIdProveedor() != null)
-      builder.and(qNotaDebito.proveedor.id_Proveedor.eq(criteria.getIdCliente()));
+      builder.and(qNotaDebito.proveedor.idProveedor.eq(criteria.getIdCliente()));
     if (criteria.getTipoComprobante() != null)
       builder.and(qNotaDebito.tipoComprobante.eq(criteria.getTipoComprobante()));
     if (criteria.getNumNota() != null && criteria.getNumSerie() != null)
@@ -844,7 +844,7 @@ public class NotaServiceImpl implements INotaService {
               notaCredito.getFacturaCompra().getTipoComprobante()));
     } else {
       if (!this.getTipoNotaCreditoProveedor(
-              notaCredito.getProveedor().getId_Proveedor(),
+              notaCredito.getProveedor().getIdProveedor(),
               notaCredito.getEmpresa().getIdEmpresa())
           .contains(notaCredito.getTipoComprobante())) {
         throw new BusinessServiceException(
@@ -1181,7 +1181,7 @@ public class NotaServiceImpl implements INotaService {
               notaDebito.getIdEmpresa(), notaDebito.getTipoComprobante()));
     } else if (notaDebito.getMovimiento().equals(Movimiento.COMPRA)
         && !this.getTipoNotaDebitoProveedor(
-                notaDebito.getProveedor().getId_Proveedor(),
+                notaDebito.getProveedor().getIdProveedor(),
                 notaDebito.getEmpresa().getIdEmpresa())
             .contains(notaDebito.getTipoComprobante())) {
       throw new BusinessServiceException(

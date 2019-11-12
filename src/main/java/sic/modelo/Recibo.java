@@ -111,7 +111,7 @@ public class Recibo implements Serializable {
 
   @JsonGetter("idProveedor")
   public Long getIdProveedor() {
-    return (proveedor != null) ? proveedor.getId_Proveedor() : null;
+    return (proveedor != null) ? proveedor.getIdProveedor() : null;
   }
 
   @JsonGetter("razonSocialProveedor")

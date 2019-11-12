@@ -21,7 +21,7 @@ public interface ClienteRepository
       Empresa empresa, boolean predeterminado, boolean eliminado);
 
   @Query(
-      "SELECT c FROM Pedido p INNER JOIN p.cliente c WHERE p.id_Pedido = :idPedido AND c.eliminado = false")
+      "SELECT c FROM Pedido p INNER JOIN p.cliente c WHERE p.idPedido = :idPedido AND c.eliminado = false")
   Cliente findClienteByIdPedido(@Param("idPedido") long idPedido);
 
   @Query(

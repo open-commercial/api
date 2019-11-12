@@ -4,7 +4,7 @@ import sic.modelo.*;
 
 public class ProveedorBuilder {
 
-  private long id_Proveedor = 0L;
+  private long idProveedor = 0L;
   private String codigo = "ABC123";
   private String razonSocial = "Chamaco S.R.L.";
   private CategoriaIVA categoriaIVA = CategoriaIVA.RESPONSABLE_INSCRIPTO;
@@ -20,7 +20,7 @@ public class ProveedorBuilder {
 
   public Proveedor build() {
     return new Proveedor(
-        id_Proveedor,
+        idProveedor,
         codigo,
         razonSocial,
         categoriaIVA,
@@ -36,7 +36,7 @@ public class ProveedorBuilder {
   }
 
   public ProveedorBuilder withId_Proveedor(long id_Proveedor) {
-    this.id_Proveedor = id_Proveedor;
+    this.idProveedor = id_Proveedor;
     return this;
   }
 

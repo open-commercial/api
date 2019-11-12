@@ -30,14 +30,15 @@ import sic.modelo.dto.UbicacionDTO;
 @JsonView(Views.Comprador.class)
 @JsonIdentityInfo(
     generator = ObjectIdGenerators.PropertyGenerator.class,
-    property = "id_Pedido",
+    property = "idPedido",
     scope = Pedido.class)
 @JsonIgnoreProperties({"cliente", "usuario", "empresa", "tipoDeEnvio"})
 public class Pedido implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id_Pedido;
+  @Column(name = "id_Pedido")
+  private long idPedido;
 
   private long nroPedido;
 

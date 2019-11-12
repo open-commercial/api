@@ -123,7 +123,7 @@ public class ReciboServiceImpl implements IReciboService {
     if (criteria.getIdCliente() != null)
       builder.and(qRecibo.cliente.idCliente.eq(criteria.getIdCliente()));
     if (criteria.getIdProveedor() != null)
-      builder.and(qRecibo.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
+      builder.and(qRecibo.proveedor.idProveedor.eq(criteria.getIdProveedor()));
     if (criteria.getIdUsuario() != null)
       builder.and(qRecibo.usuario.id_Usuario.eq(criteria.getIdUsuario()));
     if (criteria.getIdViajante() != null)
