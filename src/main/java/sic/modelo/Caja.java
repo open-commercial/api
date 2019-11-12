@@ -78,7 +78,7 @@ public class Caja implements Serializable {
 
   @JsonGetter("idUsuarioAbreCaja")
   public Long getIdUsuarioAbreCaja() {
-    return usuarioAbreCaja.getId_Usuario();
+    return usuarioAbreCaja.getIdUsuario();
   }
 
   @JsonGetter("nombreUsuarioAbreCaja")
@@ -97,7 +97,7 @@ public class Caja implements Serializable {
 
   @JsonGetter("idUsuarioCierraCaja")
   public Long getIdUsuarioCierraCaja() {
-    return (usuarioCierraCaja != null) ? usuarioCierraCaja.getId_Usuario() : null;
+    return (usuarioCierraCaja != null) ? usuarioCierraCaja.getIdUsuario() : null;
   }
 
   @JsonGetter("nombreUsuarioCierraCaja")

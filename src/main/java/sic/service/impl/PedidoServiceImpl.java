@@ -320,9 +320,9 @@ public class PedidoServiceImpl implements IPedidoService {
     if (criteria.getIdCliente() != null)
       builder.and(qPedido.cliente.idCliente.eq(criteria.getIdCliente()));
     if (criteria.getIdUsuario() != null)
-      builder.and(qPedido.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+      builder.and(qPedido.usuario.idUsuario.eq(criteria.getIdUsuario()));
     if (criteria.getIdViajante() != null)
-      builder.and(qPedido.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
+      builder.and(qPedido.cliente.viajante.idUsuario.eq(criteria.getIdViajante()));
     if (criteria.getNroPedido() != null) builder.and(qPedido.nroPedido.eq(criteria.getNroPedido()));
     if (criteria.getEstadoPedido() != null)
       builder.and(qPedido.estado.eq(criteria.getEstadoPedido()));

@@ -390,9 +390,9 @@ public class FacturaServiceImpl implements IFacturaService {
     if (criteria.getTipoComprobante() != null)
       builder.and(qFacturaVenta.tipoComprobante.eq(criteria.getTipoComprobante()));
     if (criteria.getIdUsuario() != null)
-      builder.and(qFacturaVenta.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+      builder.and(qFacturaVenta.usuario.idUsuario.eq(criteria.getIdUsuario()));
     if (criteria.getIdViajante() != null)
-      builder.and(qFacturaVenta.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
+      builder.and(qFacturaVenta.cliente.viajante.idUsuario.eq(criteria.getIdViajante()));
     if (criteria.getNumSerie() != null && criteria.getNumFactura() != null)
       builder
           .and(qFacturaVenta.numSerie.eq(criteria.getNumSerie()))
@@ -412,8 +412,8 @@ public class FacturaServiceImpl implements IFacturaService {
               rol -> {
                 if (rol == Rol.VIAJANTE) {
                   rsPredicate.or(
-                      qFacturaVenta.cliente.viajante.id_Usuario.eq(
-                          usuarioLogueado.getId_Usuario()));
+                      qFacturaVenta.cliente.viajante.idUsuario.eq(
+                          usuarioLogueado.getIdUsuario()));
                 }
                 if (rol == Rol.COMPRADOR) {
                   Cliente clienteRelacionado =

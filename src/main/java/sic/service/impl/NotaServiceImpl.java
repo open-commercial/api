@@ -242,11 +242,11 @@ public class NotaServiceImpl implements INotaService {
       }
     }
     if (criteria.getIdUsuario() != null)
-      builder.and(qNotaCredito.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+      builder.and(qNotaCredito.usuario.idUsuario.eq(criteria.getIdUsuario()));
     if (criteria.getIdCliente() != null)
       builder.and(qNotaCredito.cliente.idCliente.eq(criteria.getIdCliente()));
     if (criteria.getIdViajante() != null)
-      builder.and(qNotaCredito.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
+      builder.and(qNotaCredito.cliente.viajante.idUsuario.eq(criteria.getIdViajante()));
     if (criteria.getIdProveedor() != null)
       builder.and(qNotaCredito.proveedor.idProveedor.eq(criteria.getIdCliente()));
     if (criteria.getTipoComprobante() != null)
@@ -328,11 +328,11 @@ public class NotaServiceImpl implements INotaService {
       }
     }
     if (criteria.getIdUsuario() != null)
-      builder.and(qNotaDebito.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+      builder.and(qNotaDebito.usuario.idUsuario.eq(criteria.getIdUsuario()));
     if (criteria.getIdCliente() != null)
       builder.and(qNotaDebito.cliente.idCliente.eq(criteria.getIdCliente()));
     if (criteria.getIdViajante() != null)
-      builder.and(qNotaDebito.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
+      builder.and(qNotaDebito.cliente.viajante.idUsuario.eq(criteria.getIdViajante()));
     if (criteria.getIdProveedor() != null)
       builder.and(qNotaDebito.proveedor.idProveedor.eq(criteria.getIdCliente()));
     if (criteria.getTipoComprobante() != null)

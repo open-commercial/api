@@ -25,7 +25,7 @@ public interface ClienteRepository
   Cliente findClienteByIdPedido(@Param("idPedido") long idPedido);
 
   @Query(
-      "SELECT c FROM Cliente c WHERE c.credencial.id_Usuario = :idUsuario "
+      "SELECT c FROM Cliente c WHERE c.credencial.idUsuario = :idUsuario "
           + "AND c.empresa.idEmpresa = :idEmpresa AND c.eliminado = false")
   Cliente findClienteByIdUsuarioYidEmpresa(
       @Param("idUsuario") long idUsuario, @Param("idEmpresa") long idEmpresa);
@@ -33,12 +33,12 @@ public interface ClienteRepository
   Cliente findByCredencialAndEliminado(Usuario UsuarioCredencial, boolean eliminado);
 
   @Modifying
-  @Query("UPDATE Cliente c SET c.viajante = null WHERE c.viajante.id_Usuario = :idUsuarioViajante")
+  @Query("UPDATE Cliente c SET c.viajante = null WHERE c.viajante.idUsuario = :idUsuarioViajante")
   int desvincularClienteDeViajante(@Param("idUsuarioViajante") long idUsuarioViajante);
 
   @Modifying
   @Query(
-      "UPDATE Cliente c SET c.credencial = null WHERE c.credencial.id_Usuario = :idUsuarioCredencial")
+      "UPDATE Cliente c SET c.credencial = null WHERE c.credencial.idUsuario = :idUsuarioCredencial")
   int desvincularClienteDeCredencial(@Param("idUsuarioCredencial") long idUsuarioCredencial);
 
   Cliente findByNroClienteAndEmpresaAndEliminado(

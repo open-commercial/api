@@ -152,7 +152,7 @@ public class GastoServiceImpl implements IGastoService {
       builder.or(qGasto.formaDePago.idFormaDePago.eq(criteria.getIdFormaDePago()));
     if (criteria.getNroGasto() != null) builder.or(qGasto.nroGasto.eq(criteria.getNroGasto()));
     if (criteria.getIdUsuario() != null)
-      builder.and(qGasto.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+      builder.and(qGasto.usuario.idUsuario.eq(criteria.getIdUsuario()));
     builder.and(
         qGasto.empresa.idEmpresa.eq(criteria.getIdEmpresa()).and(qGasto.eliminado.eq(false)));
     return builder;

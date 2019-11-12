@@ -137,7 +137,7 @@ public class Pedido implements Serializable {
 
   @JsonGetter("idViajante")
   public Long getIdViajante() {
-    return (cliente.getViajante() != null) ? cliente.getViajante().getId_Usuario() : null;
+    return (cliente.getViajante() != null) ? cliente.getViajante().getIdUsuario() : null;
   }
 
   @JsonGetter("nombreViajante")

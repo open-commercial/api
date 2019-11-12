@@ -22,14 +22,14 @@ public interface CarritoCompraRepository
   @Query(
       "SELECT SUM(icc.cantidad * p.precioLista) "
           + "FROM ItemCarritoCompra icc INNER JOIN icc.producto p "
-          + "WHERE icc.usuario.id_Usuario = :idUsuario")
+          + "WHERE icc.usuario.idUsuario = :idUsuario")
   BigDecimal calcularSubtotal(@Param("idUsuario") long idUsuario);
 
   @Query(
-      "SELECT SUM(icc.cantidad) FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario")
+      "SELECT SUM(icc.cantidad) FROM ItemCarritoCompra icc WHERE icc.usuario.idUsuario = :idUsuario")
   BigDecimal getCantArticulos(@Param("idUsuario") long idUsuario);
 
-  @Query("SELECT COUNT(icc) FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario")
+  @Query("SELECT COUNT(icc) FROM ItemCarritoCompra icc WHERE icc.usuario.idUsuario = :idUsuario")
   Long getCantRenglones(@Param("idUsuario") long idUsuario);
 
   @Modifying
@@ -39,13 +39,13 @@ public interface CarritoCompraRepository
 
   @Modifying
   @Query(
-      "DELETE FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario AND icc.producto.idProducto = :idProducto")
+      "DELETE FROM ItemCarritoCompra icc WHERE icc.usuario.idUsuario = :idUsuario AND icc.producto.idProducto = :idProducto")
   void eliminarItemDelUsuario(@Param("idUsuario") long idUsuario, @Param("idProducto") long idProducto);
 
   @Modifying
-  @Query("DELETE FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario")
+  @Query("DELETE FROM ItemCarritoCompra icc WHERE icc.usuario.idUsuario = :idUsuario")
   void eliminarTodosLosItemsDelUsuario(@Param("idUsuario") long idUsuario);
 
-  @Query("SELECT icc FROM ItemCarritoCompra icc WHERE icc.usuario.id_Usuario = :idUsuario AND icc.producto.idProducto = :idProducto")
+  @Query("SELECT icc FROM ItemCarritoCompra icc WHERE icc.usuario.idUsuario = :idUsuario AND icc.producto.idProducto = :idProducto")
   ItemCarritoCompra findByUsuarioAndProducto(@Param("idUsuario") long idUsuario, @Param("idProducto") long idProducto);
 }

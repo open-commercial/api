@@ -545,7 +545,7 @@ class AppIntegrationTest {
             .telefono("3785663322")
             .contacto("Ramon el hermano de Juan")
             .idEmpresa(1L)
-            .idCredencial(credencial.getId_Usuario())
+            .idCredencial(credencial.getIdUsuario())
             .build();
     ClienteDTO clienteRecuperado =
         restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class);
@@ -577,7 +577,7 @@ class AppIntegrationTest {
         .telefono("3745112324")
         .contacto("Ricardo, trabaja por encargo.")
         .idEmpresa(1L)
-        .idCredencial(credencial.getId_Usuario())
+        .idCredencial(credencial.getIdUsuario())
         .build();
     ClienteDTO clienteRecuperado =
       restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class);
@@ -619,7 +619,7 @@ class AppIntegrationTest {
             .telefono("3785663322")
             .contacto("Ramon el hermano de Juan")
             .idEmpresa(1L)
-            .idCredencial(credencial.getId_Usuario())
+            .idCredencial(credencial.getIdUsuario())
             .ubicacionFacturacion(ubicacionDeFacturacion)
             .ubicacionEnvio(ubicacionDeEnvio)
             .build();
@@ -657,7 +657,7 @@ class AppIntegrationTest {
             .telefono("3785663322")
             .contacto("Ramon el hermano de Juan")
             .idEmpresa(1L)
-            .idCredencial(credencial.getId_Usuario())
+            .idCredencial(credencial.getIdUsuario())
             .ubicacionFacturacion(ubicacionDeFacturacion)
             .build();
     ClienteDTO clienteRecuperado =
@@ -695,7 +695,7 @@ class AppIntegrationTest {
             .telefono("3785663322")
             .contacto("Ramon el hermano de Juan")
             .idEmpresa(1L)
-            .idCredencial(credencial.getId_Usuario())
+            .idCredencial(credencial.getIdUsuario())
             .ubicacionEnvio(ubicacionDeEnvio)
             .build();
     ClienteDTO clienteRecuperado =
@@ -730,7 +730,7 @@ class AppIntegrationTest {
             .telefono("3785663322")
             .contacto("Ramon el hermano de Juan")
             .idEmpresa(1L)
-            .idCredencial(credencial.getId_Usuario())
+            .idCredencial(credencial.getIdUsuario())
             .ubicacionFacturacion(ubicacionDeFacturacion)
             .build();
     RestClientResponseException thrown =
@@ -770,7 +770,7 @@ class AppIntegrationTest {
         .telefono("3785663322")
         .contacto("Ramon el hermano de Juan")
         .idEmpresa(1L)
-        .idCredencial(credencial.getId_Usuario())
+        .idCredencial(credencial.getIdUsuario())
         .ubicacionEnvio(ubicacionDeEnvio)
         .build();
     RestClientResponseException thrown =
@@ -809,7 +809,7 @@ class AppIntegrationTest {
             .telefono("3785663322")
             .contacto("Ramon el hermano de Juan")
             .idEmpresa(1L)
-            .idCredencial(credencial.getId_Usuario())
+            .idCredencial(credencial.getIdUsuario())
             .build();
     ClienteDTO clienteRecuperado =
         restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class);
@@ -844,7 +844,7 @@ class AppIntegrationTest {
             .telefono("3785663322")
             .contacto("Ramon el hermano de Juan")
             .idEmpresa(1L)
-            .idCredencial(credencial.getId_Usuario())
+            .idCredencial(credencial.getIdUsuario())
             .build();
     ClienteDTO clienteRecuperado =
         restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class);
@@ -879,7 +879,7 @@ class AppIntegrationTest {
         .telefono("3785663322")
         .contacto("Ramon el hermano de Juan")
         .idEmpresa(1L)
-        .idCredencial(credencial.getId_Usuario())
+        .idCredencial(credencial.getIdUsuario())
         .build();
     ClienteDTO clienteRecuperado =
         restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class);
@@ -922,7 +922,7 @@ class AppIntegrationTest {
             .ubicacionEnvio(
                 UbicacionDTO.builder().calle("Belgrano").numero(456).idLocalidad(1L).build())
             .idEmpresa(1L)
-            .idCredencial(credencial.getId_Usuario())
+            .idCredencial(credencial.getIdUsuario())
             .build();
     ClienteDTO clienteRecuperado =
         restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class);
@@ -967,7 +967,7 @@ class AppIntegrationTest {
             .ubicacionEnvio(
                 UbicacionDTO.builder().calle("Belgrano").numero(456).idLocalidad(1L).build())
             .idEmpresa(1L)
-            .idCredencial(credencial.getId_Usuario())
+            .idCredencial(credencial.getIdUsuario())
             .build();
     ClienteDTO clienteRecuperado =
         restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class);
@@ -1588,7 +1588,7 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     facturaVentaA.setIdCliente(cliente.getIdCliente());
-    facturaVentaA.setIdUsuario(credencial.getId_Usuario());
+    facturaVentaA.setIdUsuario(credencial.getIdUsuario());
     facturaVentaA.setIdEmpresa(empresa.getIdEmpresa());
     facturaVentaA.setIdTransportista(transportista.getId_Transportista());
     FacturaVentaDTO facturaVenta =
@@ -3470,7 +3470,7 @@ class AppIntegrationTest {
         + "&idEmpresa="
         + empresa.getIdEmpresa()
         + "&idUsuario="
-        + credencial.getId_Usuario()
+        + credencial.getIdUsuario()
         + "&idTransportista="
         + transportista.getId_Transportista(),
       facturaVentaA,

@@ -154,7 +154,7 @@ public class ClienteController {
       Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
       if (clienteDTO.getIdCredencial() != idUsuarioLoggedIn
           && clientePersistido.getCredencial() != null
-          && clientePersistido.getCredencial().getId_Usuario() != clienteDTO.getIdCredencial()
+          && clientePersistido.getCredencial().getIdUsuario() != clienteDTO.getIdCredencial()
           && !(usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
               || usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)
               || usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR))) {

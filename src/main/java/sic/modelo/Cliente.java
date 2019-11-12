@@ -110,7 +110,7 @@ public class Cliente implements Serializable {
   @JsonGetter("idViajante")
   public Long getIdViajante() {
     if (viajante != null) {
-      return viajante.getId_Usuario();
+      return viajante.getIdUsuario();
     } else {
       return null;
     }
@@ -133,7 +133,7 @@ public class Cliente implements Serializable {
   @JsonGetter("idCredencial")
   public Long getIdCredencial() {
     if (credencial != null) {
-      return credencial.getId_Usuario();
+      return credencial.getIdUsuario();
     } else {
       return null;
     }

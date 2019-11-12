@@ -126,7 +126,7 @@ public class Recibo implements Serializable {
 
   @JsonGetter("idViajante")
   public Long getIdViajante() {
-    return (cliente != null && cliente.getViajante() != null) ? cliente.getViajante().getId_Usuario() : null;
+    return (cliente != null && cliente.getViajante() != null) ? cliente.getViajante().getIdUsuario() : null;
   }
 
   @JsonGetter("nombreViajante")

@@ -90,7 +90,7 @@ public class Gasto implements Serializable {
 
   @JsonGetter("idUsuario")
   public Long getIdCredencial() {
-    return usuario.getId_Usuario();
+    return usuario.getIdUsuario();
   }
 
   @JsonGetter("nombreUsuario")

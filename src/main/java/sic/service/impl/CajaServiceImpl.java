@@ -190,18 +190,18 @@ public class CajaServiceImpl implements ICajaService {
     builder.and(
         qCaja.empresa.idEmpresa.eq(criteria.getIdEmpresa()).and(qCaja.eliminada.eq(false)));
     if (criteria.getIdUsuarioApertura() != null && criteria.getIdUsuarioCierre() == null) {
-      builder.and(qCaja.usuarioAbreCaja.id_Usuario.eq(criteria.getIdUsuarioApertura()));
+      builder.and(qCaja.usuarioAbreCaja.idUsuario.eq(criteria.getIdUsuarioApertura()));
     }
     if (criteria.getIdUsuarioApertura() == null && criteria.getIdUsuarioCierre() != null) {
-      builder.and(qCaja.usuarioCierraCaja.id_Usuario.eq(criteria.getIdUsuarioCierre()));
+      builder.and(qCaja.usuarioCierraCaja.idUsuario.eq(criteria.getIdUsuarioCierre()));
     }
     if (criteria.getIdUsuarioApertura() != null && criteria.getIdUsuarioCierre() != null) {
       builder.and(
           qCaja
               .usuarioAbreCaja
-              .id_Usuario
+              .idUsuario
               .eq(criteria.getIdUsuarioApertura())
-              .and(qCaja.usuarioCierraCaja.id_Usuario.eq(criteria.getIdUsuarioCierre())));
+              .and(qCaja.usuarioCierraCaja.idUsuario.eq(criteria.getIdUsuarioCierre())));
     }
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
@@ -274,7 +274,7 @@ public class CajaServiceImpl implements ICajaService {
                 this.cerrarCaja(
                     ultimaCajaDeEmpresa.getIdCaja(),
                     this.getSaldoQueAfectaCaja(ultimaCajaDeEmpresa),
-                    ultimaCajaDeEmpresa.getUsuarioAbreCaja().getId_Usuario(),
+                    ultimaCajaDeEmpresa.getUsuarioAbreCaja().getIdUsuario(),
                     true);
               }
             });
