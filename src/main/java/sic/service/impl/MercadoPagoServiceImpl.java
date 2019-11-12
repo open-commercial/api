@@ -74,9 +74,9 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
             + cliente.getNombreFiscal()
             + (cliente.getNombreFantasia() != null ? cliente.getNombreFantasia() : ""));
     String json = "{ \"idCliente\": "+ nuevoPagoMercadoPagoDTO.getIdCliente()
-      +" , \"idSucursal\": " +nuevoPagoMercadoPagoDTO.getIdSucursal() +"}";
+      +" , \"idSucursal\": " + nuevoPagoMercadoPagoDTO.getIdSucursal() +"}";
     JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
-    payment.setExternalReference(jsonObject.getAsString());
+    payment.setExternalReference(jsonObject.toString());
     Payer payer = new Payer();
     payer.setEmail(cliente.getEmail());
     payment.setPayer(payer);
