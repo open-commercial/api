@@ -5,7 +5,7 @@ import lombok.*;
 @Data
 @EqualsAndHashCode(
     exclude = {
-      "id_Transportista",
+      "idTransportista",
       "idEmpresa",
       "nombreEmpresa"
     })
@@ -14,7 +14,7 @@ import lombok.*;
 @Builder
 public class TransportistaDTO {
 
-  private long id_Transportista;
+  private long idTransportista;
   private String nombre;
   private UbicacionDTO ubicacion;
   private String web;

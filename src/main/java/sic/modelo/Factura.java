@@ -153,7 +153,7 @@ public abstract class Factura implements Serializable {
 
   @JsonGetter("idTransportista")
   public long getIdTransportista() {
-    return transportista.getId_Transportista();
+    return transportista.getIdTransportista();
   }
 
   @JsonGetter("nombreTransportista")

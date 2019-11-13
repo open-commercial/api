@@ -26,7 +26,7 @@ public class RenglonFacturaBuilder {
                 descuentoNeto, ivaPorcentaje, ivaNeto,gananciaPorcentaje, gananciaNeto, importe);
     }
     
-    public RenglonFacturaBuilder withId_Transportista(long idRenglonFactura) {
+    public RenglonFacturaBuilder withIdTransportista(long idRenglonFactura) {
         this.idRenglonFactura = idRenglonFactura;
         return this;
     }
