@@ -139,10 +139,10 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   @Override
   public Pedido crearPedido(NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO) {
-    if (nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPagoDTO() != null) {
+    if (nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago() != null) {
       try {
         mercadoPagoService.crearNuevoPago(
-            nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPagoDTO(),
+            nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago(),
             usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario()));
       } catch (MPException ex) {
         mercadoPagoService.logExceptionMercadoPago(ex);

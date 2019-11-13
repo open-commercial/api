@@ -17,5 +17,5 @@ public class NuevaOrdenDeCompraDTO {
   private Long idCliente;
   private TipoDeEnvio tipoDeEnvio;
   private String observaciones;
-  private NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO;
+  private NuevoPagoMercadoPagoDTO nuevoPagoMercadoPago;
 }
