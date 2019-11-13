@@ -20,7 +20,7 @@ public class NuevoPagoMercadoPagoDTO {
   private String issuerId;
   private Integer installments;
   private long idCliente;
-  @NotBlank(message = "{mensaje_pago_sin_sucursal}")
+  //@NotBlank(message = "{mensaje_pago_sin_sucursal}")
   private Long idSucursal;
   private Float monto;
 }
