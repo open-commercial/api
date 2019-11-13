@@ -143,11 +143,9 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     Pedido p = null;
     if (nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPagoDTO() != null) {
       try {
-        if (mercadoPagoService
-            .crearNuevoPago(
-                nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPagoDTO(),
-                usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario()))
-            .equals(Payment.Status.approved)) {
+        if (mercadoPagoService.crearNuevoPago(
+            nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPagoDTO(),
+            usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario()))) {
           p = crearPedidoDeCarrito(nuevaOrdenDeCompraDTO);
         }
       } catch (MPException ex) {

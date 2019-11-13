@@ -63,7 +63,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   }
 
   @Override
-  public Payment.Status crearNuevoPago(@Valid NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Usuario usuario) throws MPException {
+  public boolean crearNuevoPago(@Valid NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Usuario usuario) throws MPException {
     Cliente cliente =
         clienteService.getClienteNoEliminadoPorId(nuevoPagoMercadoPagoDTO.getIdCliente());
     this.validarOperacion(nuevoPagoMercadoPagoDTO, cliente);
@@ -104,8 +104,9 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     Payment pago = payment.save();
     if (pago.getStatus() == Payment.Status.rejected) {
       this.procesarMensajeNoAprobado(payment);
+      return false;
     }
-    return pago.getStatus();
+    return true;
   }
 
   @Override
