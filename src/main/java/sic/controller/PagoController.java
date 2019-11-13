@@ -1,5 +1,6 @@
 package sic.controller;
 
+import com.mercadopago.exceptions.MPException;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -39,9 +40,14 @@ public class PagoController {
       @RequestBody NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    pagoMercadoPagoService.crearNuevoPago(
-        nuevoPagoMercadoPagoDTO,
-        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+    try {
+      pagoMercadoPagoService.crearNuevoPago(
+          nuevoPagoMercadoPagoDTO,
+          usuarioService.getUsuarioNoEliminadoPorId(
+              ((Integer) claims.get("idUsuario")).longValue()));
+    } catch (MPException ex) {
+      pagoMercadoPagoService.logExceptionMercadoPago(ex);
+    }
   }
 
   @PostMapping("/pagos/notificacion")

@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.mercadopago.exceptions.MPException;
+import com.mercadopago.resources.Payment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   private final IProductoService productoService;
   private final ISucursalService sucursalService;
   private final IPedidoService pedidoService;
+  private final IMercadoPagoService mercadoPagoService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private static final BigDecimal CIEN = new BigDecimal("100");
@@ -42,13 +45,15 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
       IClienteService clienteService,
       IProductoService productoService,
       ISucursalService sucursalService,
-      IPedidoService pedidoService) {
+      IPedidoService pedidoService,
+      IMercadoPagoService mercadoPagoService) {
     this.carritoCompraRepository = carritoCompraRepository;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
     this.productoService = productoService;
     this.sucursalService = sucursalService;
     this.pedidoService = pedidoService;
+    this.mercadoPagoService = mercadoPagoService;
   }
 
   @Override
@@ -135,39 +140,22 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   @Override
   public Pedido crearPedido(NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO) {
-    CarritoCompraDTO carritoCompraDTO =
-        this.getCarritoCompra(
-            nuevaOrdenDeCompraDTO.getIdUsuario(), nuevaOrdenDeCompraDTO.getIdCliente());
-    Pedido pedido = new Pedido();
-    Cliente clienteParaPedido =
-        clienteService.getClienteNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdCliente());
-    pedido.setCliente(clienteParaPedido);
-    pedido.setObservaciones(nuevaOrdenDeCompraDTO.getObservaciones());
-    pedido.setSubTotal(carritoCompraDTO.getSubtotal());
-    pedido.setRecargoPorcentaje(BigDecimal.ZERO);
-    pedido.setRecargoNeto(BigDecimal.ZERO);
-    pedido.setDescuentoPorcentaje(carritoCompraDTO.getBonificacionPorcentaje());
-    pedido.setDescuentoNeto(carritoCompraDTO.getBonificacionNeto());
-    pedido.setTotalActual(carritoCompraDTO.getTotal());
-    pedido.setTotalEstimado(pedido.getTotalActual());
-    pedido.setSucursal(sucursalService.getSucursalPorId(nuevaOrdenDeCompraDTO.getIdSucursal()));
-    pedido.setUsuario(
-        usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario()));
-    List<ItemCarritoCompra> items =
-        carritoCompraRepository.findAllByUsuarioOrderByIdItemCarritoCompraDesc(pedido.getUsuario());
-    pedido.setRenglones(new ArrayList<>());
-    items.forEach(
-        i ->
-            pedido
-                .getRenglones()
-                .add(
-                    pedidoService.calcularRenglonPedido(
-                        i.getProducto().getIdProducto(), i.getCantidad(), clienteParaPedido)));
-    pedido.setFecha(LocalDateTime.now());
-    Pedido p =
-        pedidoService.guardar(
-            pedido, nuevaOrdenDeCompraDTO.getTipoDeEnvio(), nuevaOrdenDeCompraDTO.getIdSucursal());
-    this.eliminarTodosLosItemsDelUsuario(nuevaOrdenDeCompraDTO.getIdUsuario());
+    Pedido p = null;
+    if (nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPagoDTO() != null) {
+      try {
+        if (mercadoPagoService
+            .crearNuevoPago(
+                nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPagoDTO(),
+                usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario()))
+            .equals(Payment.Status.approved)) {
+          p = crearPedidoDeCarrito(nuevaOrdenDeCompraDTO);
+        }
+      } catch (MPException ex) {
+        mercadoPagoService.logExceptionMercadoPago(ex);
+      }
+    } else {
+      p = crearPedidoDeCarrito(nuevaOrdenDeCompraDTO);
+    }
     return p;
   }
 
@@ -241,5 +229,45 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
                       .compareTo(BigDecimal.ZERO)
                   > 0);
     }
+  }
+
+  private Pedido crearPedidoDeCarrito(NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO) {
+    CarritoCompraDTO carritoCompraDTO =
+      this.getCarritoCompra(
+        nuevaOrdenDeCompraDTO.getIdUsuario(), nuevaOrdenDeCompraDTO.getIdCliente());
+    Pedido pedido = new Pedido();
+    Cliente clienteParaPedido =
+      clienteService.getClienteNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdCliente());
+    pedido.setCliente(clienteParaPedido);
+    pedido.setObservaciones(nuevaOrdenDeCompraDTO.getObservaciones() + " Pago pendiente por MP");
+    pedido.setSubTotal(carritoCompraDTO.getSubtotal());
+    pedido.setRecargoPorcentaje(BigDecimal.ZERO);
+    pedido.setRecargoNeto(BigDecimal.ZERO);
+    pedido.setDescuentoPorcentaje(carritoCompraDTO.getBonificacionPorcentaje());
+    pedido.setDescuentoNeto(carritoCompraDTO.getBonificacionNeto());
+    pedido.setTotalActual(carritoCompraDTO.getTotal());
+    pedido.setTotalEstimado(pedido.getTotalActual());
+    pedido.setSucursal(sucursalService.getSucursalPorId(nuevaOrdenDeCompraDTO.getIdSucursal()));
+    pedido.setUsuario(
+      usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario()));
+    List<ItemCarritoCompra> items =
+      carritoCompraRepository.findAllByUsuarioOrderByIdItemCarritoCompraDesc(
+        pedido.getUsuario());
+    pedido.setRenglones(new ArrayList<>());
+    items.forEach(
+      i ->
+        pedido
+          .getRenglones()
+          .add(
+            pedidoService.calcularRenglonPedido(
+              i.getProducto().getIdProducto(), i.getCantidad(), clienteParaPedido)));
+    pedido.setFecha(LocalDateTime.now());
+    Pedido p =
+      pedidoService.guardar(
+        pedido,
+        nuevaOrdenDeCompraDTO.getTipoDeEnvio(),
+        nuevaOrdenDeCompraDTO.getIdSucursal());
+    this.eliminarTodosLosItemsDelUsuario(nuevaOrdenDeCompraDTO.getIdUsuario());
+    return  p;
   }
 }

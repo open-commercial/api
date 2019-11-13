@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
@@ -21,6 +22,7 @@ import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
 import sic.service.*;
 
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -28,6 +30,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 @Service
+@Validated
 public class MercadoPagoServiceImpl implements IMercadoPagoService {
 
   @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
@@ -60,7 +63,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   }
 
   @Override
-  public void crearNuevoPago(NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Usuario usuario) {
+  public Payment.Status crearNuevoPago(@Valid NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Usuario usuario) throws MPException {
     Cliente cliente =
         clienteService.getClienteNoEliminadoPorId(nuevoPagoMercadoPagoDTO.getIdCliente());
     this.validarOperacion(nuevoPagoMercadoPagoDTO, cliente);
@@ -98,14 +101,11 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_pago_no_soportado", null, Locale.getDefault()));
     }
-    try {
-      Payment p = payment.save();
-      if (p.getStatus() == Payment.Status.rejected) {
-        this.procesarMensajeNoAprobado(payment);
-      }
-    } catch (MPException ex) {
-      this.logExceptionMercadoPago(ex);
+    Payment pago = payment.save();
+    if (pago.getStatus() == Payment.Status.rejected) {
+      this.procesarMensajeNoAprobado(payment);
     }
+    return pago.getStatus();
   }
 
   @Override
@@ -215,7 +215,8 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     }
   }
 
-  private void logExceptionMercadoPago(MPException ex) {
+  @Override
+  public void logExceptionMercadoPago(MPException ex) {
     logger.warn("Ocurrió un error con MercadoPago: {}", ex.getMessage());
     throw new BusinessServiceException(
       messageSource.getMessage("mensaje_pago_error", null, Locale.getDefault()));
@@ -260,12 +261,6 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     }
     if (nuevoPagoMercadoPagoDTO.getInstallments() == null) {
       nuevoPagoMercadoPagoDTO.setInstallments(1);
-    }
-    if (nuevoPagoMercadoPagoDTO.getPaymentMethodId() != null
-        && nuevoPagoMercadoPagoDTO.getPaymentMethodId().isEmpty()) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_pago_sin_payment_method_id", null, Locale.getDefault()));
     }
     if (nuevoPagoMercadoPagoDTO.getToken() != null
         && !nuevoPagoMercadoPagoDTO.getToken().isEmpty()
