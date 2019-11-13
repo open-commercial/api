@@ -132,7 +132,7 @@ public class Producto implements Serializable {
   @NotNull(message = "{mensaje_producto_fecha_alta_vacia}")
   private LocalDateTime fechaAlta;
 
-  @FutureOrPresent(message = "{mensaje_fecha_vencimiento_invalida}")
+  //@FutureOrPresent(message = "{mensaje_fecha_vencimiento_invalida}")
   private LocalDate fechaVencimiento;
 
   @ManyToOne

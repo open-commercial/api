@@ -1,16 +1,11 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.dsl.DateExpression;
-import com.querydsl.core.types.dsl.Expressions;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -287,34 +282,13 @@ public class PedidoServiceImpl implements IPedidoService {
         qPedido.empresa.idEmpresa.eq(criteria.getIdEmpresa()).and(qPedido.eliminado.eq(false)));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
-      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59));
-      String dateTemplate = "convert({0}, datetime)";
+      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-        DateExpression<LocalDateTime> fDesde =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        DateExpression<LocalDateTime> fHasta =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        builder.and(qPedido.fecha.between(fDesde, fHasta));
+        builder.and(qPedido.fecha.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
       } else if (criteria.getFechaDesde() != null) {
-        DateExpression<LocalDateTime> fDesde =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        builder.and(qPedido.fecha.after(fDesde));
+        builder.and(qPedido.fecha.after(criteria.getFechaDesde()));
       } else if (criteria.getFechaHasta() != null) {
-        DateExpression<LocalDateTime> fHasta =
-            Expressions.dateTemplate(
-                LocalDateTime.class,
-                dateTemplate,
-                criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        builder.and(qPedido.fecha.before(fHasta));
+        builder.and(qPedido.fecha.before(criteria.getFechaHasta()));
       }
     }
     if (criteria.getIdCliente() != null)
@@ -326,7 +300,8 @@ public class PedidoServiceImpl implements IPedidoService {
     if (criteria.getNroPedido() != null) builder.and(qPedido.nroPedido.eq(criteria.getNroPedido()));
     if (criteria.getEstadoPedido() != null)
       builder.and(qPedido.estado.eq(criteria.getEstadoPedido()));
-    if (criteria.getTipoDeEnvio() != null) builder.and(qPedido.tipoDeEnvio.eq(criteria.getTipoDeEnvio()));
+    if (criteria.getTipoDeEnvio() != null)
+      builder.and(qPedido.tipoDeEnvio.eq(criteria.getTipoDeEnvio()));
     if (criteria.getIdProducto() != null)
       builder.and(qPedido.renglones.any().idProductoItem.eq(criteria.getIdProducto()));
     Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);

@@ -1447,7 +1447,6 @@ class AppIntegrationTest {
     EmpresaDTO empresa = restTemplate.getForObject(apiPrefix + "/empresas/1", EmpresaDTO.class);
     FacturaVentaDTO facturaVentaB =
       FacturaVentaDTO.builder()
-        .idCliente(cliente.getIdCliente())
         .build();
     facturaVentaB.setIdCliente(cliente.getIdCliente());
     facturaVentaB.setIdEmpresa(empresa.getIdEmpresa());
@@ -1465,6 +1464,7 @@ class AppIntegrationTest {
     facturaVentaB.setIva105Neto(iva_105_netoFactura);
     facturaVentaB.setIva21Neto(iva_21_netoFactura);
     facturaVentaB.setTotal(total);
+    facturaVentaB.setFechaVencimiento(LocalDate.now().plusYears(1l));
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
     FacturaVentaDTO[] facturas =
         restTemplate.postForObject(

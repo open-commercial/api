@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -13,8 +12,6 @@ import javax.swing.ImageIcon;
 import javax.validation.Valid;
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.dsl.DateExpression;
-import com.querydsl.core.types.dsl.Expressions;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -94,19 +91,8 @@ public class ReciboServiceImpl implements IReciboService {
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
       criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
-      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59));
-      String dateTemplate = "convert({0}, datetime)";
-      DateExpression<LocalDateTime> fDesde =
-          Expressions.dateTemplate(
-              LocalDateTime.class,
-              dateTemplate,
-              criteria.getFechaDesde().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-      DateExpression<LocalDateTime> fHasta =
-          Expressions.dateTemplate(
-              LocalDateTime.class,
-              dateTemplate,
-              criteria.getFechaHasta().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-      builder.and(qRecibo.fecha.between(fDesde, fHasta));
+      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
+      builder.and(qRecibo.fecha.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
     }
     if (criteria.getNumSerie() != null && criteria.getNumRecibo() != null)
       builder
