@@ -1462,7 +1462,7 @@ public class NotaServiceImpl implements INotaService {
         "Recibo Nº "
             + recibo.getNumRecibo()
             + " "
-            +  DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            +  DateTimeFormatter.ofPattern("dd/MM/yyyy").format(recibo.getFecha());
     renglonNota.setDescripcion(descripcion);
     renglonNota.setMonto(recibo.getMonto());
     renglonNota.setImporteBruto(renglonNota.getMonto());
@@ -1677,7 +1677,7 @@ public class NotaServiceImpl implements INotaService {
     Page<NotaDebito> notaAnterior =
         notaDebitoRepository.findAll(
             builder, PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "fecha")));
-    return notaAnterior.getContent().get(0).getCae() == 0L;
+    return (!notaAnterior.getContent().isEmpty() && notaAnterior.getContent().get(0).getCae() == 0L);
   }
 
   private void establecerLimitesDeFechasDeCriteria(BusquedaNotaCriteria criteria) {

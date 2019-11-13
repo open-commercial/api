@@ -141,7 +141,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getSucursal().getFechaInicioActividad()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[java.util.Date.from($P{notaCredito}.getSucursal().getFechaInicioActividad().atZone(java.time.ZoneId.systemDefault()).toInstant())]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="145" width="279" height="15" uuid="0ac9e3dd-2252-49da-8d4a-ae5da578c748">
@@ -648,7 +648,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				<textFieldExpression><![CDATA[($P{notaCredito}.getCae() == 0l)? "":$P{notaCredito}.getCae()]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy">
-				<reportElement x="180" y="80" width="70" height="15" uuid="c76bf386-4a1c-4295-9d8e-bbf0dcf2b951">
+				<reportElement x="190" y="80" width="70" height="15" uuid="c76bf386-4a1c-4295-9d8e-bbf0dcf2b951">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
@@ -656,7 +656,10 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{notaCredito}.getVencimientoCae() == null)?"":$P{notaCredito}.getVencimientoCae()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaCredito}.getVencimientoCae() == null)?"": 
+java.util.Date.from($P{notaCredito}.getVencimientoCae().atStartOfDay()
+      .atZone(java.time.ZoneId.systemDefault())
+      .toInstant());]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="80" width="20" height="15" uuid="d5f954da-00dd-4d74-b2d1-436a48c8b1ec">
@@ -675,7 +678,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{notaCredito}.getCae() == 0l)? "":"Vencimiento cae:"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaCredito}.getCae() == 0l)? "":"Vencimiento CAE:"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="360" y="1" width="70" height="15" uuid="ef436b89-cce3-4a3e-be8d-19d9f11fc3f4">
@@ -776,7 +779,9 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				<textElement verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{notaCredito}.getFacturaVenta() != null) ? $P{notaCredito}.getFacturaVenta().getFecha() : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaCredito}.getFacturaVenta() != null) ? java.util.Date
+      .from( $P{notaCredito}.getFacturaVenta().getFecha().atZone(java.time.ZoneId.systemDefault())
+      .toInstant()) : ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="95" width="40" height="12" uuid="e06933f8-0985-4dac-bbb6-4e273d26e38a">
