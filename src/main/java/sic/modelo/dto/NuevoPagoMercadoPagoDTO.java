@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Data
 @Builder
@@ -20,7 +21,7 @@ public class NuevoPagoMercadoPagoDTO {
   private String issuerId;
   private Integer installments;
   private long idCliente;
-  //@NotBlank(message = "{mensaje_pago_sin_sucursal}")
+  @NotNull(message = "{mensaje_pago_sin_sucursal}")
   private Long idSucursal;
   private Float monto;
 }

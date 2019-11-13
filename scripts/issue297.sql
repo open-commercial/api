@@ -45,12 +45,27 @@ UPDATE producto SET id_Rubro = 12 where id_Rubro = 71;
 UPDATE producto SET id_Rubro = 6 where id_Rubro = 72;
 UPDATE producto SET id_Rubro = 9 where id_Rubro = 74;
 
+UPDATE rubro set rubro.eliminado = false where
+rubro.id_Rubro = 32 or
+rubro.id_Rubro = 34 or
+rubro.id_Rubro = 37 or
+rubro.id_Rubro = 39 or
+rubro.id_Rubro = 41 or
+rubro.id_Rubro = 53 or
+rubro.id_Rubro = 68 or
+rubro.id_Rubro = 69 or
+rubro.id_Rubro = 70 or
+rubro.id_Rubro = 71 or
+rubro.id_Rubro = 72 or
+rubro.id_Rubro = 74;
+
 alter TABLE medida DROP FOREIGN KEY FK5jsf5bmdsydn5wfvlgsofl4vf;
 alter TABLE medida drop column id_Empresa;
 UPDATE producto SET id_Medida = 1 where id_Medida = 18;
+UPDATE producto SET id_Medida = 1 where id_Medida = 7;
 UPDATE producto SET id_Medida = 6 where id_Medida = 19;
 
-
+DELETE FROM medida WHERE id_Medida = 7; 
 DELETE FROM medida WHERE id_Medida = 18; 
 DELETE FROM medida WHERE id_Medida = 19;
 
