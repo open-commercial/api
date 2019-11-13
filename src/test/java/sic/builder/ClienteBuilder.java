@@ -7,7 +7,7 @@ import sic.modelo.*;
 
 public class ClienteBuilder {
 
-  private long id_Cliente = 0L;
+  private long idCliente = 0L;
   private BigDecimal bonificacion = BigDecimal.TEN;
   private String nroCliente = "00001";
   private String nombreFiscal = "Construcciones S.A.";
@@ -28,7 +28,7 @@ public class ClienteBuilder {
 
   public Cliente build() {
     return new Cliente(
-        id_Cliente,
+      idCliente,
         bonificacion,
         nroCliente,
         nombreFiscal,
@@ -48,8 +48,8 @@ public class ClienteBuilder {
         predeterminado);
   }
 
-  public ClienteBuilder withId_Cliente(long id_Cliente) {
-    this.id_Cliente = id_Cliente;
+  public ClienteBuilder withIdCliente(long idCliente) {
+    this.idCliente = idCliente;
     return this;
   }
 

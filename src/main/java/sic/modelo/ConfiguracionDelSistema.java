@@ -22,7 +22,7 @@ import javax.validation.constraints.Email;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"id_ConfiguracionDelSistema", "empresa"})
+@EqualsAndHashCode(of = {"idConfiguracionDelSistema", "empresa"})
 @ToString(exclude = "certificadoAfip")
 @JsonView(Views.Comprador.class)
 @JsonIgnoreProperties({
@@ -36,7 +36,8 @@ public class ConfiguracionDelSistema implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id_ConfiguracionDelSistema;
+  @Column(name = "id_ConfiguracionDelSistema")
+  private long idConfiguracionDelSistema;
 
   private boolean usarFacturaVentaPreImpresa;
 

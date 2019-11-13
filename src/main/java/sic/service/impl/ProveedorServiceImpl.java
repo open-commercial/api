@@ -136,7 +136,7 @@ public class ProveedorServiceImpl implements IProveedorService {
           this.getProveedorPorIdFiscal(proveedor.getIdFiscal(), proveedor.getEmpresa());
       if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
           && proveedorDuplicado != null
-          && proveedorDuplicado.getId_Proveedor() != proveedor.getId_Proveedor()) {
+          && proveedorDuplicado.getIdProveedor() != proveedor.getIdProveedor()) {
         throw new BusinessServiceException(messageSource.getMessage(
           "mensaje_proveedor_duplicado_idFiscal", null, Locale.getDefault()));
       }
@@ -156,7 +156,7 @@ public class ProveedorServiceImpl implements IProveedorService {
     }
     if (operacion == TipoDeOperacion.ACTUALIZACION
         && proveedorDuplicado != null
-        && proveedorDuplicado.getId_Proveedor() != proveedor.getId_Proveedor()) {
+        && proveedorDuplicado.getIdProveedor() != proveedor.getIdProveedor()) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_proveedor_duplicado_razonSocial", null, Locale.getDefault()));
     }

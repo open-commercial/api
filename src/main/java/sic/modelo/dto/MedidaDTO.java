@@ -5,11 +5,11 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"id_Medida", "idEmpresa", "nombreEmpresa"})
+@EqualsAndHashCode(exclude = {"idMedida", "idEmpresa", "nombreEmpresa"})
 @Builder
 public class MedidaDTO {
 
-  private long id_Medida;
+  private long idMedida;
   private String nombre;
   private Long idEmpresa;
   private String nombreEmpresa;

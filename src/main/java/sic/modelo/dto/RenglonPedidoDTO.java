@@ -11,7 +11,7 @@ import lombok.*;
 @Builder
 public class RenglonPedidoDTO implements Serializable {
 
-    private long id_RenglonPedido;
+    private long idRenglonPedido;
     private long idProductoItem;
     private String codigoItem;
     private String descripcionItem;

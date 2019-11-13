@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ConfiguracionDelSistemaDTO {
 
-  private long id_ConfiguracionDelSistema;
+  private long idConfiguracionDelSistema;
 
   private boolean usarFacturaVentaPreImpresa;
 

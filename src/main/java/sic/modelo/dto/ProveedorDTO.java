@@ -8,13 +8,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@EqualsAndHashCode(exclude = {"id_Proveedor", "idEmpresa", "nombreEmpresa", "nroProveedor"})
+@EqualsAndHashCode(exclude = {"idProveedor", "idEmpresa", "nombreEmpresa", "nroProveedor"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class ProveedorDTO implements Serializable {
 
-  private long id_Proveedor;
+  private long idProveedor;
   private String nroProveedor;
   private String razonSocial;
   private CategoriaIVA categoriaIVA;

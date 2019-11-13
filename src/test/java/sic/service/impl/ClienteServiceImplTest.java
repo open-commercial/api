@@ -64,13 +64,13 @@ class ClienteServiceImplTest {
   void shouldLanzarExceptionWhenIdFiscalDuplicadoEnActualizacion() {
     Cliente clienteNuevo =
         new ClienteBuilder()
-            .withId_Cliente(7L)
+            .withIdCliente(7L)
             .withNombreFiscal("Merceria los dos botones")
             .withIdFiscal(23111111119L)
             .build();
     Cliente clienteDuplicado =
         new ClienteBuilder()
-            .withId_Cliente(2L)
+            .withIdCliente(2L)
             .withNombreFiscal("Merceria los dos botones")
             .withIdFiscal(23111111119L)
             .build();

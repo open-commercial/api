@@ -30,26 +30,26 @@ public interface UsuarioRepository
 
   @Query(
       "SELECT u FROM Usuario u "
-          + "WHERE u.passwordRecoveryKey = ?1 AND u.id_Usuario = ?2 "
+          + "WHERE u.passwordRecoveryKey = ?1 AND u.idUsuario = ?2 "
           + "AND u.eliminado = false AND u.habilitado = true")
   Usuario findByPasswordRecoveryKeyAndIdUsuarioAndEliminadoAndHabilitado(
       String passwordRecoveryKey, long idUsuario);
 
   @Modifying
-  @Query("UPDATE Usuario u SET u.token = ?1 WHERE u.id_Usuario = ?2")
+  @Query("UPDATE Usuario u SET u.token = ?1 WHERE u.idUsuario = ?2")
   int updateToken(String token, long idUsuario);
 
   @Modifying
   @Query(
       "UPDATE Usuario u SET u.passwordRecoveryKey = ?1, u.passwordRecoveryKeyExpirationDate = ?2 "
-          + "WHERE u.id_Usuario = ?3")
+          + "WHERE u.idUsuario = ?3")
   int updatePasswordRecoveryKey(
       String passwordRecoveryKey, LocalDateTime passwordRecoveryKeyExpirationDate, long idUsuario);
 
   @Modifying
   @Query(
       "UPDATE Usuario u SET u.idEmpresaPredeterminada = :idEmpresaPredeterminada "
-          + "WHERE u.id_Usuario = :idUsuario")
+          + "WHERE u.idUsuario = :idUsuario")
   int updateIdEmpresa(
       @Param("idUsuario") long idUsuario,
       @Param("idEmpresaPredeterminada") long idEmpresaPredeterminada);

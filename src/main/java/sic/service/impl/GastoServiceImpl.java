@@ -66,7 +66,7 @@ public class GastoServiceImpl implements IGastoService {
   @Override
   public void validarOperacion(Gasto gasto) {
     this.cajaService.validarMovimiento(gasto.getFecha(), gasto.getEmpresa().getIdEmpresa());
-    if (gastoRepository.findById(gasto.getId_Gasto()).isPresent()) {
+    if (gastoRepository.findById(gasto.getIdGasto()).isPresent()) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_gasto_duplicada", null, Locale.getDefault()));
     }
@@ -123,10 +123,10 @@ public class GastoServiceImpl implements IGastoService {
       }
     }
     if (criteria.getIdFormaDePago() != null)
-      builder.or(qGasto.formaDePago.id_FormaDePago.eq(criteria.getIdFormaDePago()));
+      builder.or(qGasto.formaDePago.idFormaDePago.eq(criteria.getIdFormaDePago()));
     if (criteria.getNroGasto() != null) builder.or(qGasto.nroGasto.eq(criteria.getNroGasto()));
     if (criteria.getIdUsuario() != null)
-      builder.and(qGasto.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+      builder.and(qGasto.usuario.idUsuario.eq(criteria.getIdUsuario()));
     builder.and(
         qGasto.empresa.idEmpresa.eq(criteria.getIdEmpresa()).and(qGasto.eliminado.eq(false)));
     return builder;
@@ -147,7 +147,7 @@ public class GastoServiceImpl implements IGastoService {
   public List<Gasto> getGastosEntreFechasYFormaDePago(
       Empresa empresa, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta) {
     return gastoRepository.getGastosEntreFechasPorFormaDePago(
-        empresa.getIdEmpresa(), formaDePago.getId_FormaDePago(), desde, hasta);
+        empresa.getIdEmpresa(), formaDePago.getIdFormaDePago(), desde, hasta);
   }
 
   @Override

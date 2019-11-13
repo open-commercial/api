@@ -121,7 +121,7 @@ public class ClienteServiceImpl implements IClienteService {
     if (criteria.getNroDeCliente() != null)
       builder.or(qCliente.nroCliente.containsIgnoreCase(criteria.getNroDeCliente()));
     if (criteria.getIdViajante() != null)
-      builder.and(qCliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
+      builder.and(qCliente.viajante.idUsuario.eq(criteria.getIdViajante()));
     if (criteria.getIdLocalidad() != null)
       builder.and(
           qCliente.ubicacionFacturacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
@@ -197,7 +197,7 @@ public class ClienteServiceImpl implements IClienteService {
           this.getClientePorIdFiscal(cliente.getIdFiscal(), cliente.getEmpresa());
       if (operacion == TipoDeOperacion.ACTUALIZACION
           && clienteDuplicado != null
-          && clienteDuplicado.getId_Cliente() != cliente.getId_Cliente()) {
+          && clienteDuplicado.getIdCliente() != cliente.getIdCliente()) {
         throw new BusinessServiceException(messageSource.getMessage(
           "mensaje_cliente_duplicado_idFiscal", null, Locale.getDefault()));
       }
@@ -262,7 +262,7 @@ public class ClienteServiceImpl implements IClienteService {
     if (cliente.getCredencial() != null) {
       Cliente clienteYaAsignado =
           this.getClientePorIdUsuarioYidEmpresa(
-              cliente.getCredencial().getId_Usuario(), cliente.getEmpresa().getIdEmpresa());
+              cliente.getCredencial().getIdUsuario(), cliente.getEmpresa().getIdEmpresa());
       if (clienteYaAsignado != null) {
         throw new BusinessServiceException(messageSource.getMessage(
           "mensaje_cliente_credencial_no_valida", new Object[] {clienteYaAsignado.getNombreFiscal()}, Locale.getDefault()));
@@ -292,10 +292,10 @@ public class ClienteServiceImpl implements IClienteService {
     if (clientePorActualizar.getCredencial() != null) {
       Cliente clienteYaAsignado =
           this.getClientePorIdUsuarioYidEmpresa(
-              clientePorActualizar.getCredencial().getId_Usuario(),
+              clientePorActualizar.getCredencial().getIdUsuario(),
               clientePorActualizar.getEmpresa().getIdEmpresa());
       if (clienteYaAsignado != null
-          && clienteYaAsignado.getId_Cliente() != clientePorActualizar.getId_Cliente()) {
+          && clienteYaAsignado.getIdCliente() != clientePorActualizar.getIdCliente()) {
         throw new BusinessServiceException(messageSource.getMessage(
           "mensaje_cliente_credencial_no_valida", new Object[] {clienteYaAsignado.getNombreFiscal()}, Locale.getDefault()));
       } else {

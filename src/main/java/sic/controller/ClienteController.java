@@ -147,14 +147,14 @@ public class ClienteController {
       @RequestBody ClienteDTO clienteDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     Cliente clientePorActualizar = modelMapper.map(clienteDTO, Cliente.class);
-    Cliente clientePersistido = clienteService.getClienteNoEliminadoPorId(clientePorActualizar.getId_Cliente());
+    Cliente clientePersistido = clienteService.getClienteNoEliminadoPorId(clientePorActualizar.getIdCliente());
     if (clienteDTO.getIdCredencial() != null) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get("idUsuario");
       Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
       if (clienteDTO.getIdCredencial() != idUsuarioLoggedIn
           && clientePersistido.getCredencial() != null
-          && clientePersistido.getCredencial().getId_Usuario() != clienteDTO.getIdCredencial()
+          && clientePersistido.getCredencial().getIdUsuario() != clienteDTO.getIdCredencial()
           && !(usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
               || usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)
               || usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR))) {

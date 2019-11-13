@@ -81,7 +81,7 @@ public class Recibo implements Serializable {
 
   @JsonGetter("idFormaDePago")
   public long getIdFormaDePago() {
-    return formaDePago.getId_FormaDePago();
+    return formaDePago.getIdFormaDePago();
   }
 
   @JsonGetter("nombreFormaDePago")
@@ -101,7 +101,7 @@ public class Recibo implements Serializable {
 
   @JsonGetter("idCliente")
   public Long getIdCliente() {
-    return (cliente != null) ? cliente.getId_Cliente() : null;
+    return (cliente != null) ? cliente.getIdCliente() : null;
   }
 
   @JsonGetter("nombreFiscalCliente")
@@ -111,7 +111,7 @@ public class Recibo implements Serializable {
 
   @JsonGetter("idProveedor")
   public Long getIdProveedor() {
-    return (proveedor != null) ? proveedor.getId_Proveedor() : null;
+    return (proveedor != null) ? proveedor.getIdProveedor() : null;
   }
 
   @JsonGetter("razonSocialProveedor")
@@ -126,7 +126,7 @@ public class Recibo implements Serializable {
 
   @JsonGetter("idViajante")
   public Long getIdViajante() {
-    return (cliente != null && cliente.getViajante() != null) ? cliente.getViajante().getId_Usuario() : null;
+    return (cliente != null && cliente.getViajante() != null) ? cliente.getViajante().getIdUsuario() : null;
   }
 
   @JsonGetter("nombreViajante")

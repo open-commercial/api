@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 public class ConfiguracionDelSistemaBuilder {
 
-  private long id_ConfiguracionDelSistema = 0L;
+  private long idConfiguracionDelSistema = 0L;
   private boolean usarFacturaVentaPreImpresa = true;
   private int cantidadMaximaDeRenglonesEnFactura = 28;
   private boolean facturaElectronicaHabilitada = false;
@@ -26,7 +26,7 @@ public class ConfiguracionDelSistemaBuilder {
 
   public ConfiguracionDelSistema build() {
     return new ConfiguracionDelSistema(
-        id_ConfiguracionDelSistema,
+      idConfiguracionDelSistema,
         usarFacturaVentaPreImpresa,
         cantidadMaximaDeRenglonesEnFactura,
         facturaElectronicaHabilitada,
@@ -45,7 +45,7 @@ public class ConfiguracionDelSistemaBuilder {
   }
 
   public ConfiguracionDelSistemaBuilder withIdConfiguracionDelSistema(long idCds) {
-    this.id_ConfiguracionDelSistema = idCds;
+    this.idConfiguracionDelSistema = idCds;
     return this;
   }
 

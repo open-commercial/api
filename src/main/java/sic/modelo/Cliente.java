@@ -35,7 +35,8 @@ public class Cliente implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id_Cliente;
+  @Column(name = "id_Cliente")
+  private long idCliente;
 
   @Column(precision = 25, scale = 15)
   @NotNull(message = "{mensaje_cliente_vacio_bonificacion}")
@@ -109,7 +110,7 @@ public class Cliente implements Serializable {
   @JsonGetter("idViajante")
   public Long getIdViajante() {
     if (viajante != null) {
-      return viajante.getId_Usuario();
+      return viajante.getIdUsuario();
     } else {
       return null;
     }
@@ -132,7 +133,7 @@ public class Cliente implements Serializable {
   @JsonGetter("idCredencial")
   public Long getIdCredencial() {
     if (credencial != null) {
-      return credencial.getId_Usuario();
+      return credencial.getIdUsuario();
     } else {
       return null;
     }

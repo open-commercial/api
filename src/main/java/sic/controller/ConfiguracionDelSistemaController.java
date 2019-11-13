@@ -41,7 +41,7 @@ public class ConfiguracionDelSistemaController {
         modelMapper.map(configuracionDelSistemaDTO, ConfiguracionDelSistema.class);
     ConfiguracionDelSistema cdsRecuperado =
         configuracionDelSistemaService.getConfiguracionDelSistemaPorId(
-            configuracionDelSistemaDTO.getId_ConfiguracionDelSistema());
+            configuracionDelSistemaDTO.getIdConfiguracionDelSistema());
     configuracionDelSistema.setEmpresa(cdsRecuperado.getEmpresa());
     if (configuracionDelSistema.isFacturaElectronicaHabilitada()) {
       if (configuracionDelSistema.getPasswordCertificadoAfip().equals("")) {

@@ -31,7 +31,7 @@ public class MovimientoCaja implements Comparable<MovimientoCaja> {
     }
 
     public MovimientoCaja(Gasto gasto) {
-        this.idMovimiento = gasto.getId_Gasto();
+        this.idMovimiento = gasto.getIdGasto();
         this.tipoComprobante = TipoDeComprobante.GASTO;
         this.concepto = "Gasto por: " + gasto.getConcepto();
         this.fecha = gasto.getFecha();

@@ -5,7 +5,7 @@ import sic.modelo.RenglonFactura;
 
 public class RenglonFacturaBuilder {
     
-    private long id_RenglonFactura = 0L;
+    private long idRenglonFactura = 0L;
     private long id_ProductoItem = 1L;
     private String codigoItem = "mdk.03617";
     private String descripcionItem = "Ventiladores de pie";
@@ -21,13 +21,13 @@ public class RenglonFacturaBuilder {
     private BigDecimal importe = new BigDecimal("1573");
     
     public RenglonFactura build() {
-        return new RenglonFactura(id_RenglonFactura, id_ProductoItem, codigoItem, 
+        return new RenglonFactura(idRenglonFactura, id_ProductoItem, codigoItem,
                 descripcionItem, medidaItem, cantidad, precioUnitario, descuentoPorcentaje,
                 descuentoNeto, ivaPorcentaje, ivaNeto,gananciaPorcentaje, gananciaNeto, importe);
     }
     
     public RenglonFacturaBuilder withId_Transportista(long idRenglonFactura) {
-        this.id_RenglonFactura = idRenglonFactura;
+        this.idRenglonFactura = idRenglonFactura;
         return this;
     }
     

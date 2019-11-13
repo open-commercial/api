@@ -80,15 +80,15 @@ public class UsuarioController {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Usuario usuarioLoggedIn = this.getUsuarioPorId((int) claims.get("idUsuario"));
     boolean usuarioSeModificaASiMismo =
-        usuarioLoggedIn.getId_Usuario() == usuarioDTO.getId_Usuario();
+        usuarioLoggedIn.getIdUsuario() == usuarioDTO.getIdUsuario();
     if (usuarioSeModificaASiMismo || usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
       Usuario usuarioPorActualizar = modelMapper.map(usuarioDTO, Usuario.class);
-      Usuario usuarioPersistido = usuarioService.getUsuarioNoEliminadoPorId(usuarioDTO.getId_Usuario());
+      Usuario usuarioPersistido = usuarioService.getUsuarioNoEliminadoPorId(usuarioDTO.getIdUsuario());
       if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
         usuarioPorActualizar.setRoles(usuarioPersistido.getRoles());
         usuarioPorActualizar.setHabilitado(usuarioPersistido.isHabilitado());
       }
-      if (usuarioLoggedIn.getId_Usuario() == usuarioPersistido.getId_Usuario()) {
+      if (usuarioLoggedIn.getIdUsuario() == usuarioPersistido.getIdUsuario()) {
         usuarioPorActualizar.setToken(usuarioLoggedIn.getToken());
       }
       if (usuarioPorActualizar.getPassword() != null
@@ -101,7 +101,7 @@ public class UsuarioController {
 
       usuarioService.actualizar(usuarioPorActualizar, usuarioPersistido);
       if (!usuarioSeModificaASiMismo)
-        usuarioService.actualizarToken("", usuarioPorActualizar.getId_Usuario());
+        usuarioService.actualizarToken("", usuarioPorActualizar.getIdUsuario());
     } else {
       throw new ForbiddenException(messageSource.getMessage(
         "mensaje_usuario_rol_no_valido", null, Locale.getDefault()));

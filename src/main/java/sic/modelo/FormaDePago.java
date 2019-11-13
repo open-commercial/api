@@ -28,7 +28,8 @@ public class FormaDePago implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id_FormaDePago;
+  @Column(name = "id_FormaDePago")
+  private long idFormaDePago;
 
   @NotNull(message = "{mensaje_forma_de_pago_nombre_vacio}")
   @NotEmpty(message = "{mensaje_forma_de_pago_nombre_vacio}")

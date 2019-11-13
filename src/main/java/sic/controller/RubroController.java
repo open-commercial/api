@@ -38,7 +38,7 @@ public class RubroController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(
       @RequestBody RubroDTO rubroDTO, @RequestParam(required = false) Long idEmpresa) {
-    Rubro rubroPersistido = rubroService.getRubroNoEliminadoPorId(rubroDTO.getId_Rubro());
+    Rubro rubroPersistido = rubroService.getRubroNoEliminadoPorId(rubroDTO.getIdRubro());
     Rubro rubroPorActualizar = modelMapper.map(rubroDTO, Rubro.class);
     if (rubroPorActualizar.getNombre() == null || rubroPorActualizar.getNombre().isEmpty()) {
       rubroPorActualizar.setNombre(rubroPersistido.getNombre());
