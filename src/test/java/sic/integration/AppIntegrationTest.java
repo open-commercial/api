@@ -6365,7 +6365,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldGenerarPedidoConItemsDelCarrito() {
+  void shouldGenerarPedidoRetiroEnSucursalConItemsDelCarrito() {
     this.shouldAgregarItemsAlCarritoCompra();
     ConfiguracionSucursalDTO configuracionSucursalDTO =
       restTemplate.getForObject(apiPrefix + "/configuraciones-sucursal/1", ConfiguracionSucursalDTO.class);
@@ -6381,6 +6381,26 @@ class AppIntegrationTest {
     PedidoDTO pedido =
         restTemplate.postForObject(
             apiPrefix + "/carrito-compra", nuevaOrdenDeCompraDTO, PedidoDTO.class);
+    assertEquals(14, pedido.getCantidadArticulos().doubleValue());
+    assertEquals(new BigDecimal("10236.80000000000000000000000000000000000000000000000"), pedido.getTotalActual());
+  }
+
+  @Test
+  void shouldGenerarPedidoEnvioDomicilioConItemsDelCarrito() {
+    this.shouldAgregarItemsAlCarritoCompra();
+    ConfiguracionSucursalDTO configuracionSucursalDTO =
+      restTemplate.getForObject(apiPrefix + "/configuraciones-sucursal/1", ConfiguracionSucursalDTO.class);
+    configuracionSucursalDTO.setPuntoDeRetiro(true);
+    restTemplate.put(apiPrefix + "/configuraciones-sucursal", configuracionSucursalDTO);
+    NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO = NuevaOrdenDeCompraDTO.builder()
+      .idCliente(1L)
+      .idUsuario(1L)
+      .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_ENVIO)
+      .observaciones("probando pedido desde carrito, sin pago")
+      .build();
+    PedidoDTO pedido =
+      restTemplate.postForObject(
+        apiPrefix + "/carrito-compra", nuevaOrdenDeCompraDTO, PedidoDTO.class);
     assertEquals(14, pedido.getCantidadArticulos().doubleValue());
     assertEquals(new BigDecimal("10236.80000000000000000000000000000000000000000000000"), pedido.getTotalActual());
   }

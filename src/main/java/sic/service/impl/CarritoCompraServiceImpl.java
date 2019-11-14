@@ -5,22 +5,26 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import com.mercadopago.exceptions.MPException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.dto.CarritoCompraDTO;
 import sic.modelo.dto.NuevaOrdenDeCompraDTO;
 import sic.repository.CarritoCompraRepository;
 import sic.service.*;
+
 
 @Service
 @Transactional
@@ -33,8 +37,10 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   private final ISucursalService sucursalService;
   private final IPedidoService pedidoService;
   private final IMercadoPagoService mercadoPagoService;
+  private final MessageSource messageSource;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
+  private static final Long ID_SUCURSAL_DEFAULT = 1L;
   private static final BigDecimal CIEN = new BigDecimal("100");
 
   @Autowired
@@ -45,7 +51,8 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
       IProductoService productoService,
       ISucursalService sucursalService,
       IPedidoService pedidoService,
-      IMercadoPagoService mercadoPagoService) {
+      IMercadoPagoService mercadoPagoService,
+      MessageSource messageSource) {
     this.carritoCompraRepository = carritoCompraRepository;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
@@ -53,6 +60,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     this.sucursalService = sucursalService;
     this.pedidoService = pedidoService;
     this.mercadoPagoService = mercadoPagoService;
+    this.messageSource = messageSource;
   }
 
   @Override
@@ -140,6 +148,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   @Override
   public Pedido crearPedido(NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO) {
     if (nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago() != null) {
+      nuevaOrdenDeCompraDTO.setIdSucursal(ID_SUCURSAL_DEFAULT);
       try {
         mercadoPagoService.crearNuevoPago(
             nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago(),
@@ -163,7 +172,17 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     pedido.setDescuentoNeto(carritoCompraDTO.getBonificacionNeto());
     pedido.setTotalActual(carritoCompraDTO.getTotal());
     pedido.setTotalEstimado(pedido.getTotalActual());
-    pedido.setSucursal(sucursalService.getSucursalPorId(nuevaOrdenDeCompraDTO.getIdSucursal()));
+    if (nuevaOrdenDeCompraDTO.getIdSucursal() == null) {
+      if (!nuevaOrdenDeCompraDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
+        pedido.setSucursal(sucursalService.getSucursalPorId(ID_SUCURSAL_DEFAULT));
+      } else {
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_pedido_retiro_sucursal_no_seleccionada", null, Locale.getDefault()));
+      }
+    } else {
+      pedido.setSucursal(sucursalService.getSucursalPorId(nuevaOrdenDeCompraDTO.getIdSucursal()));
+    }
     pedido.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario()));
     List<ItemCarritoCompra> items =
