@@ -379,7 +379,7 @@ class AppIntegrationTest {
 
           @Override
           public void handleError(ClientHttpResponse response) throws IOException {
-            String mensaje = IOUtils.toString(response.getBody());
+            String mensaje = IOUtils.toString(response.getBody(), Charset.defaultCharset());
             throw new RestClientResponseException(
               mensaje,
               response.getRawStatusCode(),
