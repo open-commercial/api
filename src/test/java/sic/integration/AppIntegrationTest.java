@@ -6544,4 +6544,46 @@ class AppIntegrationTest {
         new BigDecimal("552.50000000000000000"),
         productosRecuperados.get(1).getPrecioListaBonificado());
   }
+
+  @Test
+  void shouldCrearReporteListaPrecios() {
+    this.crearDosProductos("1er Producto", "2do Producto");
+    BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder().pagina(0).build();
+    HttpEntity<BusquedaProductoCriteria> requestEntity = new HttpEntity<>(criteria);
+    restTemplate
+        .exchange(
+            apiPrefix + "/productos/reporte/criteria", HttpMethod.POST, requestEntity, byte[].class)
+        .getBody();
+    restTemplate
+        .exchange(
+            apiPrefix + "/productos/reporte/criteria?formato=xlsx",
+            HttpMethod.POST,
+            requestEntity,
+            byte[].class)
+        .getBody();
+    restTemplate
+        .exchange(
+            apiPrefix + "/productos/reporte/criteria?formato=pdf",
+            HttpMethod.POST,
+            requestEntity,
+            byte[].class)
+        .getBody();
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class,
+            () ->
+                restTemplate
+                    .exchange(
+                        apiPrefix + "/productos/reporte/criteria?formato=formatoNoValido",
+                        HttpMethod.POST,
+                        requestEntity,
+                        byte[].class)
+                    .getBody());
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage("mensaje_formato_no_valido", null, Locale.getDefault())));
+  }
 }

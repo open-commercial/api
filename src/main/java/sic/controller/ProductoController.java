@@ -136,6 +136,9 @@ public class ProductoController {
     @RequestParam(required = false) String formato) {
     HttpHeaders headers = new HttpHeaders();
     List<Producto> productos;
+    if (formato == null || formato.isEmpty()) {
+      formato = "xlsx";
+    }
     switch (formato) {
       case "xlsx":
         headers.setContentType(new MediaType("application", "vnd.ms-excel"));
