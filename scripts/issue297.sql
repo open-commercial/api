@@ -44,14 +44,16 @@ UPDATE producto SET id_Rubro = 8 where id_Rubro = 70;
 UPDATE producto SET id_Rubro = 12 where id_Rubro = 71;
 UPDATE producto SET id_Rubro = 6 where id_Rubro = 72;
 UPDATE producto SET id_Rubro = 9 where id_Rubro = 74;
+UPDATE producto SET id_Rubro = 75 where id_Rubro = 61;
 
-UPDATE rubro set rubro.eliminado = false where
+UPDATE rubro set rubro.eliminado = true where
 rubro.id_Rubro = 32 or
 rubro.id_Rubro = 34 or
 rubro.id_Rubro = 37 or
 rubro.id_Rubro = 39 or
 rubro.id_Rubro = 41 or
 rubro.id_Rubro = 53 or
+rubro.id_Rubro = 61 or
 rubro.id_Rubro = 68 or
 rubro.id_Rubro = 69 or
 rubro.id_Rubro = 70 or
