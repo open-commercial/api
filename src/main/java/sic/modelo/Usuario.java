@@ -31,7 +31,8 @@ public class Usuario implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id_Usuario;
+    @Column(name = "id_Usuario")
+    private long idUsuario;
     
     @Column(nullable = false)
     @NotEmpty(message = "{mensaje_usuario_vacio_username}")

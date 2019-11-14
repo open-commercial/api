@@ -46,8 +46,8 @@ public class AuthController {
     if (authService.esTokenValido(usuario.getToken())) {
       return usuario.getToken();
     } else {
-      String token = authService.generarToken(usuario.getId_Usuario(), usuario.getRoles());
-      usuarioService.actualizarToken(token, usuario.getId_Usuario());
+      String token = authService.generarToken(usuario.getIdUsuario(), usuario.getRoles());
+      usuarioService.actualizarToken(token, usuario.getIdUsuario());
       return token;
     }
   }
@@ -75,8 +75,8 @@ public class AuthController {
         usuarioService.getUsuarioPorPasswordRecoveryKeyAndIdUsuario(
             recoveryPasswordDTO.getKey(), recoveryPasswordDTO.getId());
     if (usuario != null && LocalDateTime.now().isBefore(usuario.getPasswordRecoveryKeyExpirationDate())) {
-      token = authService.generarToken(usuario.getId_Usuario(), usuario.getRoles());
-      usuarioService.actualizarToken(token, usuario.getId_Usuario());
+      token = authService.generarToken(usuario.getIdUsuario(), usuario.getRoles());
+      usuarioService.actualizarToken(token, usuario.getIdUsuario());
       usuarioService.actualizarPasswordRecoveryKey(null, recoveryPasswordDTO.getId());
     } else {
       throw new UnauthorizedException(messageSource.getMessage(

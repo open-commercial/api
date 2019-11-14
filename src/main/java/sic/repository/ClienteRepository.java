@@ -20,22 +20,22 @@ public interface ClienteRepository
   boolean existsByAndPredeterminadoAndEliminado(boolean predeterminado, boolean eliminado);
 
   @Query(
-      "SELECT c FROM Pedido p INNER JOIN p.cliente c WHERE p.id_Pedido = :idPedido AND c.eliminado = false")
+      "SELECT c FROM Pedido p INNER JOIN p.cliente c WHERE p.idPedido = :idPedido AND c.eliminado = false")
   Cliente findClienteByIdPedido(@Param("idPedido") long idPedido);
 
   @Query(
-      "SELECT c FROM Cliente c WHERE c.credencial.id_Usuario = :idUsuario AND c.eliminado = false")
+      "SELECT c FROM Cliente c WHERE c.credencial.idUsuario = :idUsuario AND c.eliminado = false")
   Cliente findClienteByIdUsuario(@Param("idUsuario") long idUsuario);
 
   Cliente findByCredencialAndEliminado(Usuario usuarioCredencial, boolean eliminado);
 
   @Modifying
-  @Query("UPDATE Cliente c SET c.viajante = null WHERE c.viajante.id_Usuario = :idUsuarioViajante")
+  @Query("UPDATE Cliente c SET c.viajante = null WHERE c.viajante.idUsuario = :idUsuarioViajante")
   int desvincularClienteDeViajante(@Param("idUsuarioViajante") long idUsuarioViajante);
 
   @Modifying
   @Query(
-      "UPDATE Cliente c SET c.credencial = null WHERE c.credencial.id_Usuario = :idUsuarioCredencial")
+      "UPDATE Cliente c SET c.credencial = null WHERE c.credencial.idUsuario = :idUsuarioCredencial")
   int desvincularClienteDeCredencial(@Param("idUsuarioCredencial") long idUsuarioCredencial);
 
   Cliente findByNroClienteAndEliminado(String nroCliente, boolean eliminado);

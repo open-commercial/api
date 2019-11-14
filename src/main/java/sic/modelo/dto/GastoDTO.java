@@ -6,13 +6,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@EqualsAndHashCode(exclude = {"id_Gasto", "nroGasto", "idSucursal", "nombreSucursal", "fecha", "idUsuario", "nombreUsuario", "idFormaDePago", "nombreFormaDePago"})
+@EqualsAndHashCode(exclude = {"idGasto", "nroGasto", "idSucursal", "nombreSucursal", "fecha", "idUsuario", "nombreUsuario", "idFormaDePago", "nombreFormaDePago"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class GastoDTO {
 
-  private long id_Gasto;
+  private long idGasto;
   private long nroGasto;
   private LocalDateTime fecha;
   private String concepto;

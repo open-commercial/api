@@ -86,9 +86,9 @@ public class PedidoController {
     pedido.setSucursal(sucursalService.getSucursalPorId(idSucursal));
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     pedido.setCliente(clienteService.getClienteNoEliminadoPorId(idCliente));
-    pedido.setDetalleEnvio(pedidoService.getPedidoNoEliminadoPorId(pedidoDTO.getId_Pedido()).getDetalleEnvio());
+    pedido.setDetalleEnvio(pedidoService.getPedidoNoEliminadoPorId(pedidoDTO.getIdPedido()).getDetalleEnvio());
     //Las facturas se recuperan para evitar cambios no deseados.
-    pedido.setFacturas(pedidoService.getFacturasDelPedido(pedido.getId_Pedido()));
+    pedido.setFacturas(pedidoService.getFacturasDelPedido(pedido.getIdPedido()));
     //Si los renglones vienen null, recupera los renglones del pedido para actualizarLocalidad
     //caso contrario, ultiliza los renglones del pedido.
     pedidoService.actualizar(pedido, tipoDeEnvio, idSucursalEnvio);

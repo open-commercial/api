@@ -134,7 +134,7 @@ public class PedidoServiceImpl implements IPedidoService {
   @Override
   public Pedido actualizarEstadoPedido(Pedido pedido) {
     pedido.setEstado(EstadoPedido.ACTIVO);
-    if (this.getFacturasDelPedido(pedido.getId_Pedido()).isEmpty()) {
+    if (this.getFacturasDelPedido(pedido.getIdPedido()).isEmpty()) {
       pedido.setEstado(EstadoPedido.ABIERTO);
     }
     if (facturaService.pedidoTotalmenteFacturado(pedido)) {
@@ -148,7 +148,7 @@ public class PedidoServiceImpl implements IPedidoService {
     BigDecimal porcentajeDescuento;
     BigDecimal totalActual = BigDecimal.ZERO;
     List<Long> idsProductos = new ArrayList<>();
-    List<RenglonPedido> renglonesDelPedido = this.getRenglonesDelPedidoOrdenadoPorIdProducto(pedido.getId_Pedido());
+    List<RenglonPedido> renglonesDelPedido = this.getRenglonesDelPedidoOrdenadoPorIdProducto(pedido.getIdPedido());
     renglonesDelPedido.forEach(r -> idsProductos.add(r.getIdProductoItem()));
     List<Producto> productos = productoService.getMultiplesProductosPorId(idsProductos);
     int i = 0;
@@ -224,7 +224,7 @@ public class PedidoServiceImpl implements IPedidoService {
                 pedido.getCliente().getNombreFiscal(), "Pedido Nº " + pedido.getNroPedido()
               },
               Locale.getDefault()),
-          this.getReportePedido(pedido.getId_Pedido()),
+          this.getReportePedido(pedido.getIdPedido()),
           "Reporte");
       logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
@@ -317,11 +317,11 @@ public class PedidoServiceImpl implements IPedidoService {
       }
     }
     if (criteria.getIdCliente() != null)
-      builder.and(qPedido.cliente.id_Cliente.eq(criteria.getIdCliente()));
+      builder.and(qPedido.cliente.idCliente.eq(criteria.getIdCliente()));
     if (criteria.getIdUsuario() != null)
-      builder.and(qPedido.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+      builder.and(qPedido.usuario.idUsuario.eq(criteria.getIdUsuario()));
     if (criteria.getIdViajante() != null)
-      builder.and(qPedido.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
+      builder.and(qPedido.cliente.viajante.idUsuario.eq(criteria.getIdViajante()));
     if (criteria.getNroPedido() != null) builder.and(qPedido.nroPedido.eq(criteria.getNroPedido()));
     if (criteria.getEstadoPedido() != null)
       builder.and(qPedido.estado.eq(criteria.getEstadoPedido()));
@@ -473,7 +473,7 @@ public class PedidoServiceImpl implements IPedidoService {
       detalleEnvio = pedido.getEnvio();
     }
     params.put("detalleEnvio", detalleEnvio);
-    List<RenglonPedido> renglones = this.getRenglonesDelPedidoOrdenadorPorIdRenglon(pedido.getId_Pedido());
+    List<RenglonPedido> renglones = this.getRenglonesDelPedidoOrdenadorPorIdRenglon(pedido.getIdPedido());
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
     try {
       return JasperExportManager.exportReportToPdf(

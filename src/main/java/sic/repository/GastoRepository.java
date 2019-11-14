@@ -14,7 +14,7 @@ public interface GastoRepository extends PagingAndSortingRepository<Gasto, Long>
 
     @Query("SELECT g FROM Gasto g " +
             "WHERE g.sucursal.idSucursal = :idSucursal " +
-            "AND g.formaDePago.id_FormaDePago = :idFormaDePago " +
+            "AND g.formaDePago.idFormaDePago = :idFormaDePago " +
             "AND g.fecha BETWEEN :desde AND :hasta AND g.eliminado = false")
     List<Gasto> getGastosEntreFechasPorFormaDePago(@Param("idSucursal") long idSucursal,
                                                    @Param("idFormaDePago") long idFormaDePago,
@@ -24,7 +24,7 @@ public interface GastoRepository extends PagingAndSortingRepository<Gasto, Long>
 
     @Query("SELECT SUM(g.monto) FROM Gasto g " +
             "WHERE g.sucursal.idSucursal = :idSucursal " +
-            "AND g.formaDePago.id_FormaDePago = :idFormaDePago " +
+            "AND g.formaDePago.idFormaDePago = :idFormaDePago " +
             "AND g.fecha BETWEEN :desde AND :hasta AND g.eliminado = false")
     BigDecimal getTotalGastosEntreFechasPorFormaDePago(@Param("idSucursal") long idSucursal, @Param("idFormaDePago") long idFormaDePago,
                                                        @Param("desde") LocalDateTime desde, @Param("hasta") LocalDateTime hasta);

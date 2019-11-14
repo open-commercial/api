@@ -4,16 +4,16 @@ import sic.modelo.Rubro;
 
 public class RubroBuilder {
     
-    private long id_Rubro = 0L;
+    private long idRubro = 0L;
     private String nombre = "Ferreteria";
     private boolean eliminado = false;
     
     public Rubro build() {
-        return new Rubro(id_Rubro, nombre, eliminado);
+        return new Rubro(idRubro, nombre, eliminado);
     }
     
-    public RubroBuilder withId_Rubro(long id_Rubro) {
-        this.id_Rubro = id_Rubro;
+    public RubroBuilder withIdRubro(long idRubro) {
+        this.idRubro = idRubro;
         return this;
     }
     

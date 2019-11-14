@@ -12,7 +12,7 @@ import sic.modelo.dto.RenglonPedidoDTO;
 
 public class PedidoBuilder {
 
-  private long id_Pedido = 0L;
+  private long idPedido = 0L;
   private long nroPedido = 46L;
   private LocalDateTime fecha = LocalDateTime.now();
   private LocalDate fechaVencimiento;
@@ -48,7 +48,7 @@ public class PedidoBuilder {
       this.renglones = renglonesPedido;
     }
     return new PedidoDTO(
-      id_Pedido,
+      idPedido,
       nroPedido,
       fecha,
       fechaVencimiento,
@@ -71,7 +71,7 @@ public class PedidoBuilder {
   }
 
   public PedidoBuilder withIdPedido(long idPedido) {
-    this.id_Pedido = idPedido;
+    this.idPedido = idPedido;
     return this;
   }
 

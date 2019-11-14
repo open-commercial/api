@@ -1,7 +1,6 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import java.util.ArrayList;
 
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
@@ -132,8 +131,8 @@ public class TransportistaServiceImpl implements ITransportistaService {
     }
     if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
         && (transportistaDuplicado != null
-            && transportistaDuplicado.getId_Transportista()
-                != transportista.getId_Transportista())) {
+            && transportistaDuplicado.getIdTransportista()
+                != transportista.getIdTransportista())) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_transportista_duplicado_nombre", null, Locale.getDefault()));
     }

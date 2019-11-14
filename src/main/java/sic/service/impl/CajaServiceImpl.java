@@ -79,7 +79,7 @@ public class CajaServiceImpl implements ICajaService {
       }
     }
     // Duplicados
-    if (cajaRepository.findById(caja.getId_Caja()) != null) {
+    if (cajaRepository.findById(caja.getIdCaja()) != null) {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_caja_duplicada", null, Locale.getDefault()));
     }
@@ -187,18 +187,18 @@ public class CajaServiceImpl implements ICajaService {
     builder.and(
         qCaja.sucursal.idSucursal.eq(criteria.getIdSucursal()).and(qCaja.eliminada.eq(false)));
     if (criteria.getIdUsuarioApertura() != null && criteria.getIdUsuarioCierre() == null) {
-      builder.and(qCaja.usuarioAbreCaja.id_Usuario.eq(criteria.getIdUsuarioApertura()));
+      builder.and(qCaja.usuarioAbreCaja.idUsuario.eq(criteria.getIdUsuarioApertura()));
     }
     if (criteria.getIdUsuarioApertura() == null && criteria.getIdUsuarioCierre() != null) {
-      builder.and(qCaja.usuarioCierraCaja.id_Usuario.eq(criteria.getIdUsuarioCierre()));
+      builder.and(qCaja.usuarioCierraCaja.idUsuario.eq(criteria.getIdUsuarioCierre()));
     }
     if (criteria.getIdUsuarioApertura() != null && criteria.getIdUsuarioCierre() != null) {
       builder.and(
           qCaja
               .usuarioAbreCaja
-              .id_Usuario
+              .idUsuario
               .eq(criteria.getIdUsuarioApertura())
-              .and(qCaja.usuarioCierraCaja.id_Usuario.eq(criteria.getIdUsuarioCierre())));
+              .and(qCaja.usuarioCierraCaja.idUsuario.eq(criteria.getIdUsuarioCierre())));
     }
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
@@ -249,9 +249,9 @@ public class CajaServiceImpl implements ICajaService {
             ultimaCajadeSucursal -> {
               if (ultimaCajadeSucursal.getFechaApertura().isBefore(LocalDateTime.now())) {
                 this.cerrarCaja(
-                    ultimaCajadeSucursal.getId_Caja(),
+                    ultimaCajadeSucursal.getIdCaja(),
                     this.getSaldoQueAfectaCaja(ultimaCajadeSucursal),
-                    ultimaCajadeSucursal.getUsuarioAbreCaja().getId_Usuario(),
+                    ultimaCajadeSucursal.getUsuarioAbreCaja().getIdUsuario(),
                     true);
               }
             });
@@ -319,19 +319,19 @@ public class CajaServiceImpl implements ICajaService {
         reciboService
             .getTotalRecibosClientesEntreFechasPorFormaDePago(
                 caja.getSucursal().getIdSucursal(),
-                fdp.getId_FormaDePago(),
+                fdp.getIdFormaDePago(),
                 caja.getFechaApertura(),
                 fechaHasta)
             .subtract(
                 reciboService.getTotalRecibosProveedoresEntreFechasPorFormaDePago(
                     caja.getSucursal().getIdSucursal(),
-                    fdp.getId_FormaDePago(),
+                    fdp.getIdFormaDePago(),
                     caja.getFechaApertura(),
                     fechaHasta));
     BigDecimal gastosTotal =
         gastoService.getTotalGastosEntreFechasYFormaDePago(
             caja.getSucursal().getIdSucursal(),
-            fdp.getId_FormaDePago(),
+            fdp.getIdFormaDePago(),
             caja.getFechaApertura(),
             fechaHasta);
     return recibosTotal.subtract(gastosTotal);
@@ -347,7 +347,7 @@ public class CajaServiceImpl implements ICajaService {
             fdp -> {
               BigDecimal total = this.getTotalMovimientosPorFormaDePago(caja, fdp);
               if (total.compareTo(BigDecimal.ZERO) != 0) {
-                totalesPorFomaDePago.put(fdp.getId_FormaDePago(), total);
+                totalesPorFomaDePago.put(fdp.getIdFormaDePago(), total);
               }
             });
     return totalesPorFomaDePago;
@@ -386,7 +386,7 @@ public class CajaServiceImpl implements ICajaService {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_caja_no_existente", null, Locale.getDefault()));
     }
-    if (caja.getId_Caja() == ultimaCaja.getId_Caja()) {
+    if (caja.getIdCaja() == ultimaCaja.getIdCaja()) {
       caja.setSaldoSistema(null);
       caja.setSaldoApertura(saldoAperturaNuevo);
       caja.setSaldoReal(null);
@@ -410,6 +410,6 @@ public class CajaServiceImpl implements ICajaService {
   @Override
   @Transactional
   public int actualizarSaldoSistema(Caja caja, BigDecimal monto) {
-    return cajaRepository.actualizarSaldoSistema(caja.getId_Caja(), monto);
+    return cajaRepository.actualizarSaldoSistema(caja.getIdCaja(), monto);
   }
 }

@@ -33,7 +33,8 @@ public class Gasto implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id_Gasto;
+  @Column(name = "id_Gasto")
+  private long idGasto;
 
   private long nroGasto;
 
@@ -79,7 +80,7 @@ public class Gasto implements Serializable {
 
   @JsonGetter("idFormaDePago")
   public Long getIdFormaDePago() {
-    return formaDePago.getId_FormaDePago();
+    return formaDePago.getIdFormaDePago();
   }
 
   @JsonGetter("nombreFormaDePago")
@@ -89,7 +90,7 @@ public class Gasto implements Serializable {
 
   @JsonGetter("idUsuario")
   public Long getIdCredencial() {
-    return usuario.getId_Usuario();
+    return usuario.getIdUsuario();
   }
 
   @JsonGetter("nombreUsuario")

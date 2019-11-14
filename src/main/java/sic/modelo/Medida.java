@@ -29,7 +29,8 @@ public class Medida implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id_Medida;
+  @Column(name = "id_Medida")
+  private long idMedida;
 
   @Column(nullable = false)
   @NotNull(message = "{mensaje_medida_vacio_nombre}")

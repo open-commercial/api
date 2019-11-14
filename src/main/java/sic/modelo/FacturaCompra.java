@@ -100,7 +100,7 @@ public class FacturaCompra extends Factura implements Serializable {
 
   @JsonGetter("idProveedor")
   public Long getIdProveedor() {
-    return proveedor.getId_Proveedor();
+    return proveedor.getIdProveedor();
   }
 
   @JsonGetter("razonSocialProveedor")

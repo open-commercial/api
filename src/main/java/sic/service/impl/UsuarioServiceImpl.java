@@ -223,13 +223,13 @@ public class UsuarioServiceImpl implements IUsuarioService {
       // username
       Usuario usuarioGuardado =
           usuarioRepository.findByUsernameAndEliminado(usuario.getUsername(), false);
-      if (usuarioGuardado != null && usuarioGuardado.getId_Usuario() != usuario.getId_Usuario()) {
+      if (usuarioGuardado != null && usuarioGuardado.getIdUsuario() != usuario.getIdUsuario()) {
         throw new BusinessServiceException(messageSource.getMessage(
           "mensaje_usuario_duplicado_username", null, Locale.getDefault()));
       }
       // email
       usuarioGuardado = usuarioRepository.findByEmailAndEliminado(usuario.getEmail(), false);
-      if (usuarioGuardado != null && usuarioGuardado.getId_Usuario() != usuario.getId_Usuario()) {
+      if (usuarioGuardado != null && usuarioGuardado.getIdUsuario() != usuario.getIdUsuario()) {
         throw new BusinessServiceException(messageSource.getMessage(
           "mensaje_usuario_duplicado_email", null, Locale.getDefault()));
       }
@@ -241,7 +241,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
             && usuario.getRoles().contains(Rol.ADMINISTRADOR)) {
       List<Usuario> administradores = this.getUsuariosPorRol(Rol.ADMINISTRADOR).getContent();
       if (administradores.size() == 1
-          && administradores.get(0).getId_Usuario() == usuario.getId_Usuario()) {
+          && administradores.get(0).getIdUsuario() == usuario.getIdUsuario()) {
         throw new BusinessServiceException(messageSource.getMessage(
           "mensaje_usuario_ultimoAdmin", null, Locale.getDefault()));
       }
@@ -259,10 +259,10 @@ public class UsuarioServiceImpl implements IUsuarioService {
   public void actualizar(@Valid Usuario usuarioPorActualizar, Usuario usuarioPersistido) {
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuarioPorActualizar);
     if (!usuarioPorActualizar.getRoles().contains(Rol.VIAJANTE)) {
-      this.clienteService.desvincularClienteDeViajante(usuarioPorActualizar.getId_Usuario());
+      this.clienteService.desvincularClienteDeViajante(usuarioPorActualizar.getIdUsuario());
     }
     if (!usuarioPorActualizar.getRoles().contains(Rol.COMPRADOR)) {
-      this.clienteService.desvincularClienteDeCredencial(usuarioPorActualizar.getId_Usuario());
+      this.clienteService.desvincularClienteDeCredencial(usuarioPorActualizar.getIdUsuario());
     }
     usuarioPorActualizar.setUsername(usuarioPorActualizar.getUsername().toLowerCase());
     usuarioRepository.save(usuarioPorActualizar);
@@ -298,14 +298,14 @@ public class UsuarioServiceImpl implements IUsuarioService {
               "mensaje_correo_no_existente_or_deshabilitado", null, Locale.getDefault()));
     }
     String passwordRecoveryKey = RandomStringUtils.random(250, true, true);
-    this.actualizarPasswordRecoveryKey(passwordRecoveryKey, usuario.getId_Usuario());
+    this.actualizarPasswordRecoveryKey(passwordRecoveryKey, usuario.getIdUsuario());
     correoElectronicoService.enviarEmail(
         usuario.getEmail(),
         "",
         "Recuperación de contraseña",
         messageSource.getMessage(
             "mensaje_correo_recuperacion",
-            new Object[] {host, passwordRecoveryKey, usuario.getId_Usuario()},
+            new Object[] {host, passwordRecoveryKey, usuario.getIdUsuario()},
             Locale.getDefault()),
         null,
         null);

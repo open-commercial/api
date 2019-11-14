@@ -130,7 +130,7 @@ public abstract class Nota implements Serializable {
   @JsonGetter("idCliente")
   public Long getIdCliente() {
     if (cliente != null) {
-      return cliente.getId_Cliente();
+      return cliente.getIdCliente();
     } else {
       return null;
     }
@@ -148,7 +148,7 @@ public abstract class Nota implements Serializable {
   @JsonGetter("idViajante")
   public Long getIdViajante() {
     if (cliente != null && cliente.getViajante() != null) {
-      return cliente.getViajante().getId_Usuario();
+      return cliente.getViajante().getIdUsuario();
     } else {
       return null;
     }
@@ -167,7 +167,7 @@ public abstract class Nota implements Serializable {
   @JsonGetter("idProveedor")
   public Long getIdProveedor() {
     if (proveedor != null) {
-      return proveedor.getId_Proveedor();
+      return proveedor.getIdProveedor();
     } else {
       return null;
     }
@@ -202,7 +202,7 @@ public abstract class Nota implements Serializable {
 
   @JsonGetter("idUsuario")
   public Long getIdUsuario() {
-    return usuario.getId_Usuario();
+    return usuario.getIdUsuario();
   }
 
   @JsonGetter("nombreUsuario")

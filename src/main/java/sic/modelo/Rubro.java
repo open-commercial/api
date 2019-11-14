@@ -26,7 +26,8 @@ public class Rubro implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id_Rubro;
+  @Column(name = "id_Rubro")
+  private long idRubro;
 
   @Column(nullable = false)
   @NotNull(message = "{mensaje_rubro_nombre_vacio}")

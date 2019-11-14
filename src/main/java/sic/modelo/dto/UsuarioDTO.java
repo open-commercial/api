@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 public class UsuarioDTO implements Serializable {
 
-  private long id_Usuario;
+  private long idUsuario;
   private String username;
   private String password;
   private String nombre;

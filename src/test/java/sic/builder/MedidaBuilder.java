@@ -4,16 +4,16 @@ import sic.modelo.Medida;
 
 public class MedidaBuilder {
 
-    private long id_Medida = 0L;
+    private long idMedida = 0L;
     private String nombre = "Metro";
     private boolean eliminada = false;
     
     public Medida build() {
-        return new Medida(id_Medida, nombre, eliminada);
+        return new Medida(idMedida, nombre, eliminada);
     }
     
-    public MedidaBuilder withId_Medida(long id_Medida) {
-        this.id_Medida = id_Medida;
+    public MedidaBuilder withIdMedida(long idMedida) {
+        this.idMedida = idMedida;
         return this;
     }
     

@@ -25,7 +25,7 @@ public interface ReciboRepository
   @Query(
       "SELECT r FROM Recibo r "
           + "WHERE r.sucursal.idSucursal = :idSucursal "
-          + "AND r.formaDePago.id_FormaDePago = :idFormaDePago "
+          + "AND r.formaDePago.idFormaDePago = :idFormaDePago "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
   List<Recibo> getRecibosEntreFechasPorFormaDePago(
       @Param("idSucursal") long idSucursal,
@@ -37,7 +37,7 @@ public interface ReciboRepository
       "SELECT SUM(r.monto) FROM Recibo r "
           + "WHERE r.sucursal.idSucursal = :idSucursal "
           + "AND (r.proveedor is null) "
-          + "AND r.formaDePago.id_FormaDePago = :idFormaDePago "
+          + "AND r.formaDePago.idFormaDePago = :idFormaDePago "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
   BigDecimal getTotalRecibosClientesEntreFechasPorFormaDePago(
       @Param("idSucursal") long idSucursal,
@@ -49,7 +49,7 @@ public interface ReciboRepository
       "SELECT SUM(r.monto) FROM Recibo r "
           + "WHERE r.sucursal.idSucursal = :idSucursal "
           + "AND (r.cliente is null) "
-          + "AND r.formaDePago.id_FormaDePago = :idFormaDePago "
+          + "AND r.formaDePago.idFormaDePago = :idFormaDePago "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
   BigDecimal getTotalRecibosProveedoresEntreFechasPorFormaDePago(
       @Param("idSucursal") long idSucursal,

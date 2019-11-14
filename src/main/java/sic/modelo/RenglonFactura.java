@@ -27,7 +27,8 @@ public class RenglonFactura implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id_RenglonFactura;
+    @Column(name = "id_RenglonFactura")
+    private long idRenglonFactura;
 
     private long idProductoItem;
 

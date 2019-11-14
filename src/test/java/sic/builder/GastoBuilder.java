@@ -9,7 +9,7 @@ import sic.modelo.Usuario;
 
 public class GastoBuilder {
 
-    private long id_Gasto = 0L;
+    private long idGasto = 0L;
     private long nroGasto = 34;
     private LocalDateTime fecha = LocalDateTime.now();
     private String concepto = "Gasto Factura de Luz - Builder";
@@ -20,11 +20,11 @@ public class GastoBuilder {
     private boolean eliminado = false;
 
     public Gasto build() {
-        return new Gasto(id_Gasto, nroGasto, fecha, concepto, sucursal, usuario, formaDePago, monto, eliminado);
+        return new Gasto(idGasto, nroGasto, fecha, concepto, sucursal, usuario, formaDePago, monto, eliminado);
     }
 
     public GastoBuilder withIdGasto(long idGasto) {
-        this.id_Gasto = idGasto;
+        this.idGasto = idGasto;
         return this;
     }
 

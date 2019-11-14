@@ -247,9 +247,9 @@ public class ProductoServiceImpl implements IProductoService {
         builder.and(this.buildPredicadoDescripcion(criteria.getDescripcion(), qProducto));
     }
     if (criteria.getIdRubro() != null)
-      builder.and(qProducto.rubro.id_Rubro.eq(criteria.getIdRubro()));
+      builder.and(qProducto.rubro.idRubro.eq(criteria.getIdRubro()));
     if (criteria.getIdProveedor() != null)
-      builder.and(qProducto.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
+      builder.and(qProducto.proveedor.idProveedor.eq(criteria.getIdProveedor()));
     if (criteria.isListarSoloFaltantes())
       builder
           .and(qProducto.cantidadEnSucursales.any().cantidad.loe(qProducto.cantMinima))

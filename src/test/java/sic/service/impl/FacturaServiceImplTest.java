@@ -230,7 +230,7 @@ class FacturaServiceImplTest {
     factura.setFecha(LocalDateTime.now());
     factura.setTransportista(new TransportistaBuilder().build());
     factura.setSucursal(new SucursalBuilder().build());
-    factura.setCliente(new ClienteBuilder().withId_Cliente(1L).build());
+    factura.setCliente(new ClienteBuilder().withIdCliente(1L).build());
     Usuario usuario = new Usuario();
     usuario.setNombre("Marian Jhons  help");
     factura.setUsuario(usuario);

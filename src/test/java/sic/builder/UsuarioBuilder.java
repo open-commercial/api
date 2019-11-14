@@ -8,7 +8,7 @@ import sic.modelo.Usuario;
 
 public class UsuarioBuilder {
 
-  private long id_Usuario = 0L;
+  private long idUsuario = 0L;
   private String username = "daenta";
   private String password = "LaQueNoArde";
   private String nombre = "Daenerys";
@@ -24,7 +24,7 @@ public class UsuarioBuilder {
 
   public Usuario build() {
     return new Usuario(
-        id_Usuario,
+      idUsuario,
         username,
         password,
         nombre,
@@ -39,8 +39,8 @@ public class UsuarioBuilder {
         eliminado);
   }
 
-  public UsuarioBuilder withId_Usuario(long idUsuario) {
-    this.id_Usuario = idUsuario;
+  public UsuarioBuilder withIdUsuario(long idUsuario) {
+    this.idUsuario = idUsuario;
     return this;
   }
 

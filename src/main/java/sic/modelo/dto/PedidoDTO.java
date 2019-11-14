@@ -19,12 +19,12 @@ import sic.modelo.EstadoPedido;
 @EqualsAndHashCode(of = {"nroPedido", "nombreSucursal"})
 @JsonIdentityInfo(
     generator = ObjectIdGenerators.PropertyGenerator.class,
-    property = "id_Pedido",
+    property = "idPedido",
     scope = PedidoDTO.class)
 @Builder
 public class PedidoDTO implements Serializable {
 
-  private long id_Pedido;
+  private long idPedido;
   private long nroPedido;
   private LocalDateTime fecha;
   private LocalDate fechaVencimiento;

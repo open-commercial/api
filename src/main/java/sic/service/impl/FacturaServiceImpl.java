@@ -314,7 +314,7 @@ public class FacturaServiceImpl implements IFacturaService {
       }
     }
     if (criteria.getIdProveedor() != null)
-      builder.and(qFacturaCompra.proveedor.id_Proveedor.eq(criteria.getIdProveedor()));
+      builder.and(qFacturaCompra.proveedor.idProveedor.eq(criteria.getIdProveedor()));
     if (criteria.getTipoComprobante() != null)
       builder.and(qFacturaCompra.tipoComprobante.eq(criteria.getTipoComprobante()));
     if (criteria.getIdProducto() != null)
@@ -354,13 +354,13 @@ public class FacturaServiceImpl implements IFacturaService {
       }
     }
     if (criteria.getIdCliente() != null)
-      builder.and(qFacturaVenta.cliente.id_Cliente.eq(criteria.getIdCliente()));
+      builder.and(qFacturaVenta.cliente.idCliente.eq(criteria.getIdCliente()));
     if (criteria.getTipoComprobante() != null)
       builder.and(qFacturaVenta.tipoComprobante.eq(criteria.getTipoComprobante()));
     if (criteria.getIdUsuario() != null)
-      builder.and(qFacturaVenta.usuario.id_Usuario.eq(criteria.getIdUsuario()));
+      builder.and(qFacturaVenta.usuario.idUsuario.eq(criteria.getIdUsuario()));
     if (criteria.getIdViajante() != null)
-      builder.and(qFacturaVenta.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
+      builder.and(qFacturaVenta.cliente.viajante.idUsuario.eq(criteria.getIdViajante()));
     if (criteria.getNumSerie() != null && criteria.getNumFactura() != null)
       builder
           .and(qFacturaVenta.numSerie.eq(criteria.getNumSerie()))
@@ -380,15 +380,15 @@ public class FacturaServiceImpl implements IFacturaService {
               rol -> {
                 if (rol == Rol.VIAJANTE) {
                   rsPredicate.or(
-                      qFacturaVenta.cliente.viajante.id_Usuario.eq(
-                          usuarioLogueado.getId_Usuario()));
+                      qFacturaVenta.cliente.viajante.idUsuario.eq(
+                          usuarioLogueado.getIdUsuario()));
                 }
                 if (rol == Rol.COMPRADOR) {
                   Cliente clienteRelacionado =
                       clienteService.getClientePorIdUsuario(idUsuarioLoggedIn);
                   if (clienteRelacionado != null) {
                     rsPredicate.or(
-                        qFacturaVenta.cliente.id_Cliente.eq(clienteRelacionado.getId_Cliente()));
+                        qFacturaVenta.cliente.idCliente.eq(clienteRelacionado.getIdCliente()));
                   } else {
                     rsPredicate.or(qFacturaVenta.cliente.isNull());
                   }
@@ -916,7 +916,7 @@ public class FacturaServiceImpl implements IFacturaService {
   public boolean pedidoTotalmenteFacturado(Pedido pedido) {
     boolean facturado = false;
     Map<Long, RenglonFactura> renglonesDeFacturas =
-        pedidoService.getRenglonesFacturadosDelPedido(pedido.getId_Pedido());
+        pedidoService.getRenglonesFacturadosDelPedido(pedido.getIdPedido());
     if (!renglonesDeFacturas.isEmpty()) {
       for (RenglonPedido r : pedido.getRenglones()) {
         if (renglonesDeFacturas.containsKey(r.getIdProductoItem())) {

@@ -141,7 +141,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
           qCuentaCorrienteCliente.cliente.nroCliente.containsIgnoreCase(
               criteria.getNroDeCliente()));
     if (criteria.getIdViajante() != null)
-      builder.and(qCuentaCorrienteCliente.cliente.viajante.id_Usuario.eq(criteria.getIdViajante()));
+      builder.and(qCuentaCorrienteCliente.cliente.viajante.idUsuario.eq(criteria.getIdViajante()));
     if (criteria.getIdLocalidad() != null)
       builder.and(
           qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.idLocalidad.eq(

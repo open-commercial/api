@@ -65,7 +65,7 @@ public class RubroServiceImpl implements IRubroService {
         "mensaje_rubro_nombre_duplicado", null, Locale.getDefault()));
     }
     if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
-        && (rubroDuplicado != null && rubroDuplicado.getId_Rubro() != rubro.getId_Rubro())) {
+        && (rubroDuplicado != null && rubroDuplicado.getIdRubro() != rubro.getIdRubro())) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_rubro_nombre_duplicado", null, Locale.getDefault()));
     }

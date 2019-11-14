@@ -33,7 +33,7 @@ public class MedidaController {
     @PutMapping("/medidas")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
     public void actualizar(@RequestBody MedidaDTO medidaDTO) {
-        Medida medidaPersistida = medidaService.getMedidaNoEliminadaPorId(medidaDTO.getId_Medida());
+        Medida medidaPersistida = medidaService.getMedidaNoEliminadaPorId(medidaDTO.getIdMedida());
         Medida medidaPorActualizar = modelMapper.map(medidaDTO, Medida.class);
         if (medidaPorActualizar.getNombre() == null || medidaPorActualizar.getNombre().isEmpty()) {
             medidaPorActualizar.setNombre(medidaPersistida.getNombre());

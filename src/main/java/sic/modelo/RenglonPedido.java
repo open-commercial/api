@@ -25,7 +25,8 @@ public class RenglonPedido implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id_RenglonPedido;
+  @Column(name = "id_RenglonPedido")
+  private long idRenglonPedido;
 
   private long idProductoItem;
 

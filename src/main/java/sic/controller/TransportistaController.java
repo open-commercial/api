@@ -50,7 +50,7 @@ public class TransportistaController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(@RequestBody TransportistaDTO transportistaDTO) {
     Transportista transportistaPersistido =
-        transportistaService.getTransportistaNoEliminadoPorId(transportistaDTO.getId_Transportista());
+        transportistaService.getTransportistaNoEliminadoPorId(transportistaDTO.getIdTransportista());
     Transportista transportistaPorActualizar =
         modelMapper.map(transportistaDTO, Transportista.class);
     if (transportistaPorActualizar.getNombre() == null
@@ -71,7 +71,7 @@ public class TransportistaController {
     if (transportistaPorActualizar.getTelefono() == null) {
       transportistaPorActualizar.setTelefono(transportistaPersistido.getTelefono());
     }
-    if (transportistaService.getTransportistaNoEliminadoPorId(transportistaPorActualizar.getId_Transportista())
+    if (transportistaService.getTransportistaNoEliminadoPorId(transportistaPorActualizar.getIdTransportista())
         != null) {
       transportistaService.actualizar(transportistaPorActualizar);
     }
