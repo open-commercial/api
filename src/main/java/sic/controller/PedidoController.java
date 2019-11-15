@@ -2,8 +2,10 @@ package sic.controller;
 
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -34,7 +36,6 @@ public class PedidoController {
     private final ISucursalService sucursalService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
-    private final IConfiguracionSucursalService configuracionSucursal;
     private final IAuthService authService;
     private final ModelMapper modelMapper;
     private final MessageSource messageSource;
@@ -42,13 +43,11 @@ public class PedidoController {
     @Autowired
     public PedidoController(IPedidoService pedidoService, ISucursalService sucursalService,
                             IUsuarioService usuarioService, IClienteService clienteService,
-                            IConfiguracionSucursalService configuracionSucursal,
                             IAuthService authService, ModelMapper modelMapper, MessageSource messageSource) {
         this.pedidoService = pedidoService;
         this.sucursalService = sucursalService;
         this.usuarioService = usuarioService;
         this.clienteService = clienteService;
-        this.configuracionSucursal = configuracionSucursal;
         this.authService = authService;
         this.modelMapper = modelMapper;
         this.messageSource = messageSource;
@@ -80,19 +79,35 @@ public class PedidoController {
                          @RequestParam Long idUsuario,
                          @RequestParam Long idCliente,
                          @RequestParam TipoDeEnvio tipoDeEnvio,
-                         @RequestParam(required = false) Long idSucursalEnvio,
                          @RequestBody PedidoDTO pedidoDTO) {
     Pedido pedido = modelMapper.map(pedidoDTO, Pedido.class);
     pedido.setSucursal(sucursalService.getSucursalPorId(idSucursal));
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     pedido.setCliente(clienteService.getClienteNoEliminadoPorId(idCliente));
-    pedido.setDetalleEnvio(pedidoService.getPedidoNoEliminadoPorId(pedidoDTO.getIdPedido()).getDetalleEnvio());
-    //Las facturas se recuperan para evitar cambios no deseados.
+    pedido.setDetalleEnvio(
+        pedidoService.getPedidoNoEliminadoPorId(pedidoDTO.getIdPedido()).getDetalleEnvio());
+    // Las facturas se recuperan para evitar cambios no deseados.
     pedido.setFacturas(pedidoService.getFacturasDelPedido(pedido.getIdPedido()));
-    //Si los renglones vienen null, recupera los renglones del pedido para actualizarLocalidad
-    //caso contrario, ultiliza los renglones del pedido.
-    pedidoService.actualizar(pedido, tipoDeEnvio, idSucursalEnvio);
+    // Si los renglones vienen null, recupera los renglones del pedido para actualizar
+    // caso contrario, ultiliza los renglones del pedido.
+    if (pedido.getRenglones() == null) {
+      pedido.setRenglones(
+          pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(pedido.getIdPedido()));
+    } else {
+      List<RenglonPedido> renglonesActualizados = new ArrayList<>();
+      pedido
+          .getRenglones()
+          .forEach(
+              renglonPedido ->
+                  renglonesActualizados.add(
+                      pedidoService.calcularRenglonPedido(
+                          renglonPedido.getIdProductoItem(),
+                          renglonPedido.getCantidad(),
+                          pedido.getCliente())));
+      pedido.setRenglones(renglonesActualizados);
     }
+    pedidoService.actualizar(pedido, tipoDeEnvio);
+  }
 
   @PostMapping("/pedidos")
   @AccesoRolesPermitidos({
@@ -103,24 +118,7 @@ public class PedidoController {
     Rol.COMPRADOR
   })
   public Pedido guardar(@RequestBody NuevoPedidoDTO nuevoPedidoDTO) {
-    Pedido pedido = new Pedido();
-    pedido.setFechaVencimiento(nuevoPedidoDTO.getFechaVencimiento());
-    pedido.setObservaciones(nuevoPedidoDTO.getObservaciones());
-    Type listType = new TypeToken<List<RenglonPedido>>() {}.getType();
-    pedido.setRenglones(modelMapper.map(nuevoPedidoDTO.getRenglones(), listType));
-    pedido.setSubTotal(nuevoPedidoDTO.getSubTotal());
-    pedido.setRecargoPorcentaje(nuevoPedidoDTO.getRecargoPorcentaje());
-    pedido.setRecargoNeto(nuevoPedidoDTO.getRecargoNeto());
-    pedido.setDescuentoPorcentaje(nuevoPedidoDTO.getDescuentoPorcentaje());
-    pedido.setDescuentoNeto(nuevoPedidoDTO.getDescuentoNeto());
-    pedido.setTotalEstimado(nuevoPedidoDTO.getTotal());
-    pedido.setTotalActual(nuevoPedidoDTO.getTotal());
-    pedido.setSucursal(sucursalService.getSucursalPorId(nuevoPedidoDTO.getIdSucursal()));
-    pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(nuevoPedidoDTO.getIdUsuario()));
-    Cliente cliente = clienteService.getClienteNoEliminadoPorId(nuevoPedidoDTO.getIdCliente());
-    pedido.setCliente(cliente);
-    pedido.setFecha(LocalDateTime.now());
-    return pedidoService.guardar(pedido, nuevoPedidoDTO.getTipoDeEnvio(), nuevoPedidoDTO.getIdSucursalEnvio());
+    return pedidoService.guardar(nuevoPedidoDTO);
   }
 
   @PostMapping("/pedidos/busqueda/criteria")

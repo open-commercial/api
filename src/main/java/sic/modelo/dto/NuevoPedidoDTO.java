@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import sic.modelo.TipoDeEnvio;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -16,19 +15,12 @@ import java.util.List;
 @Builder
 public class NuevoPedidoDTO {
 
-  private LocalDate fechaVencimiento;
   private String observaciones;
   private Long idSucursal;
   private TipoDeEnvio tipoDeEnvio;
-  private Long idSucursalEnvio;
   private Long idUsuario;
   private Long idCliente;
-  private List<RenglonPedidoDTO> renglones;
-  private BigDecimal subTotal;
+  private List<NuevoRenglonPedidoDTO> renglones;
   private BigDecimal recargoPorcentaje;
-  private BigDecimal recargoNeto;
   private BigDecimal descuentoPorcentaje;
-  private BigDecimal descuentoNeto;
-  private BigDecimal total;
-
 }

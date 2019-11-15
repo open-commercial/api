@@ -9,6 +9,7 @@ import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.calculos.NuevosResultadosPedido;
 import sic.modelo.calculos.Resultados;
+import sic.modelo.dto.NuevoPedidoDTO;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 
 import javax.validation.Valid;
@@ -17,7 +18,7 @@ public interface IPedidoService {
 
   Pedido getPedidoNoEliminadoPorId(long idPedido);
 
-  void actualizar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal);
+  void actualizar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio);
 
   void actualizarFacturasDelPedido(@Valid Pedido pedido, List<Factura> facturas);
 
@@ -41,7 +42,7 @@ public interface IPedidoService {
 
   byte[] getReportePedido(long idPedido);
 
-  Pedido guardar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal);
+  Pedido guardar(NuevoPedidoDTO nuevoPedidoDTO);
 
   RenglonPedido calcularRenglonPedido(long idProducto, BigDecimal cantidad, Cliente cliente);
 

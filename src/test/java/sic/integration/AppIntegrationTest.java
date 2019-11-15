@@ -5333,30 +5333,12 @@ class AppIntegrationTest {
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
         .build());
-    List<RenglonPedidoDTO> renglonesPedido =
-      Arrays.asList(
-        restTemplate.postForObject(
-          apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedidoDTO[].class));
-    BigDecimal importe = BigDecimal.ZERO;
-    for (RenglonPedidoDTO renglon : renglonesPedido) {
-      importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
-    }
-    BigDecimal recargoNeto =
-      importe.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal descuentoNeto =
-      importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
     NuevoPedidoDTO nuevoPedidoDTO =
       NuevoPedidoDTO.builder()
-        .descuentoNeto(descuentoNeto)
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
-        .recargoNeto(recargoNeto)
         .recargoPorcentaje(new BigDecimal("5"))
-        .fechaVencimiento(LocalDate.now())
         .observaciones("Nuevo Pedido Test")
-        .renglones(renglonesPedido)
-        .subTotal(importe)
-        .total(total)
+        .renglones(renglonesPedidoDTO)
         .idSucursal(1L)
         .idUsuario(2L)
         .idCliente(1L)
@@ -5367,7 +5349,7 @@ class AppIntegrationTest {
         apiPrefix + "/pedidos",
         nuevoPedidoDTO,
         PedidoDTO.class);
-    assertEquals(nuevoPedidoDTO.getTotal(), pedidoRecuperado.getTotalEstimado());
+    assertEquals(new BigDecimal("5947.200000000000000"), pedidoRecuperado.getTotalEstimado());
     assertEquals(pedidoRecuperado.getObservaciones(), nuevoPedidoDTO.getObservaciones());
     assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
   }
@@ -5420,30 +5402,12 @@ class AppIntegrationTest {
             .idProductoItem(2L)
             .cantidad(new BigDecimal("2.000000000000000"))
             .build());
-    List<RenglonPedidoDTO> renglonesPedido =
-        Arrays.asList(
-            restTemplate.postForObject(
-                apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedidoDTO[].class));
-    BigDecimal importe = BigDecimal.ZERO;
-    for (RenglonPedidoDTO renglon : renglonesPedido) {
-      importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
-    }
-    BigDecimal recargoNeto =
-        importe.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal descuentoNeto =
-        importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
     NuevoPedidoDTO nuevoPedidoDTO =
         NuevoPedidoDTO.builder()
-            .descuentoNeto(descuentoNeto)
             .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
-            .recargoNeto(recargoNeto)
             .recargoPorcentaje(new BigDecimal("5"))
-            .fechaVencimiento(LocalDate.now())
             .observaciones("Nuevo Pedido Test")
-            .renglones(renglonesPedido)
-            .subTotal(importe)
-            .total(total)
+            .renglones(renglonesPedidoDTO)
             .idSucursal(1L)
             .idUsuario(2L)
             .idCliente(1L)
@@ -5491,30 +5455,12 @@ class AppIntegrationTest {
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
         .build());
-    List<RenglonPedidoDTO> renglonesPedido =
-      Arrays.asList(
-        restTemplate.postForObject(
-          apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedidoDTO[].class));
-    BigDecimal importe = BigDecimal.ZERO;
-    for (RenglonPedidoDTO renglon : renglonesPedido) {
-      importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
-    }
-    BigDecimal recargoNeto =
-      importe.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal descuentoNeto =
-      importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
     NuevoPedidoDTO nuevoPedidoDTO =
       NuevoPedidoDTO.builder()
-        .descuentoNeto(descuentoNeto)
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
-        .recargoNeto(recargoNeto)
         .recargoPorcentaje(new BigDecimal("5"))
-        .fechaVencimiento(LocalDate.now())
         .observaciones("Nuevo Pedido Test")
-        .renglones(renglonesPedido)
-        .subTotal(importe)
-        .total(total)
+        .renglones(renglonesPedidoDTO)
         .idSucursal(1L)
         .idUsuario(2L)
         .idCliente(1L)
@@ -5542,30 +5488,12 @@ class AppIntegrationTest {
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
         .build());
-    List<RenglonPedidoDTO> renglonesPedido =
-      Arrays.asList(
-        restTemplate.postForObject(
-          apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedidoDTO[].class));
-    BigDecimal importe = BigDecimal.ZERO;
-    for (RenglonPedidoDTO renglon : renglonesPedido) {
-      importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
-    }
-    BigDecimal recargoNeto =
-      importe.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal descuentoNeto =
-      importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
     NuevoPedidoDTO nuevoPedidoDTO =
       NuevoPedidoDTO.builder()
-        .descuentoNeto(descuentoNeto)
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
-        .recargoNeto(recargoNeto)
         .recargoPorcentaje(new BigDecimal("5"))
-        .fechaVencimiento(LocalDate.now())
         .observaciones("Nuevo Pedido Test")
-        .renglones(renglonesPedido)
-        .subTotal(importe)
-        .total(total)
+        .renglones(renglonesPedidoDTO)
         .idSucursal(1L)
         .idUsuario(2L)
         .idCliente(1L)
@@ -5587,46 +5515,27 @@ class AppIntegrationTest {
       restTemplate.getForObject(apiPrefix + "/configuraciones-sucursal/2", ConfiguracionSucursalDTO.class);
     configuracionSucursalDTO.setPuntoDeRetiro(true);
     restTemplate.put(apiPrefix + "/configuraciones-sucursal", configuracionSucursalDTO);
-    List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
-    renglonesPedidoDTO.add(
+    List<NuevoRenglonPedidoDTO> nuevosRenglonesPedido = new ArrayList<>();
+    nuevosRenglonesPedido.add(
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(1L)
         .cantidad(new BigDecimal("5.000000000000000"))
         .build());
-    renglonesPedidoDTO.add(
+    nuevosRenglonesPedido.add(
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
         .build());
-    List<RenglonPedidoDTO> renglonesPedido =
-      Arrays.asList(
-        restTemplate.postForObject(
-          apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedidoDTO[].class));
-    BigDecimal importe = BigDecimal.ZERO;
-    for (RenglonPedidoDTO renglon : renglonesPedido) {
-      importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
-    }
-    BigDecimal recargoNeto =
-      importe.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal descuentoNeto =
-      importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
     NuevoPedidoDTO nuevoPedidoDTO =
       NuevoPedidoDTO.builder()
-        .descuentoNeto(descuentoNeto)
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
-        .recargoNeto(recargoNeto)
         .recargoPorcentaje(new BigDecimal("5"))
-        .fechaVencimiento(LocalDate.now())
         .observaciones("Nuevo Pedido Test")
-        .renglones(renglonesPedido)
-        .subTotal(importe)
-        .total(total)
+        .renglones(nuevosRenglonesPedido)
         .idUsuario(2L)
         .idCliente(1L)
         .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
         .idSucursal(1L)
-        .idSucursalEnvio(1L)
         .build();
     PedidoDTO pedidoRecuperado =
       restTemplate.postForObject(
@@ -5655,34 +5564,15 @@ class AppIntegrationTest {
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
         .build());
-    List<RenglonPedidoDTO> renglonesPedido =
-      Arrays.asList(
-        restTemplate.postForObject(
-          apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedidoDTO[].class));
-    BigDecimal importe = BigDecimal.ZERO;
-    for (RenglonPedidoDTO renglon : renglonesPedido) {
-      importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
-    }
-    BigDecimal recargoNeto =
-      importe.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal descuentoNeto =
-      importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
     NuevoPedidoDTO nuevoPedidoDTO =
       NuevoPedidoDTO.builder()
-        .descuentoNeto(descuentoNeto)
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
-        .recargoNeto(recargoNeto)
         .recargoPorcentaje(new BigDecimal("5"))
-        .fechaVencimiento(LocalDate.now())
         .observaciones("Nuevo Pedido Test")
-        .renglones(renglonesPedido)
-        .subTotal(importe)
-        .total(total)
+        .renglones(renglonesPedidoDTO)
         .idUsuario(2L)
         .idCliente(1L)
         .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
-        .idSucursal(1L)
         .build();
     RestClientResponseException thrown =
         assertThrows(
@@ -5719,41 +5609,23 @@ class AppIntegrationTest {
   @Test
   void shouldModificarPedido() {
     this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
-    List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
-    renglonesPedidoDTO.add(
+    List<NuevoRenglonPedidoDTO> nuevosRenglonesDePedido = new ArrayList<>();
+    nuevosRenglonesDePedido.add(
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(1L)
         .cantidad(new BigDecimal("5"))
         .build());
-    renglonesPedidoDTO.add(
+    nuevosRenglonesDePedido.add(
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2"))
         .build());
-    List<RenglonPedidoDTO> renglonesPedido =
-      Arrays.asList(
-        restTemplate.postForObject(
-          apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedidoDTO[].class));
-    BigDecimal importe = BigDecimal.ZERO;
-    for (RenglonPedidoDTO renglon : renglonesPedido) {
-      importe = importe.add(renglon.getImporte());
-    }
-    BigDecimal recargoNeto =
-      importe.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal descuentoNeto =
-      importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
     NuevoPedidoDTO nuevoPedidoDTO =
       NuevoPedidoDTO.builder()
-        .descuentoNeto(descuentoNeto)
         .descuentoPorcentaje(new BigDecimal("15"))
-        .recargoNeto(recargoNeto)
         .recargoPorcentaje(new BigDecimal("5"))
-        .fechaVencimiento(LocalDate.now())
         .observaciones("Nuevo Pedido Test")
-        .renglones(renglonesPedido)
-        .subTotal(importe)
-        .total(total)
+        .renglones(nuevosRenglonesDePedido)
         .idSucursal(1L)
         .idUsuario(1L)
         .idCliente(1L)
@@ -5764,39 +5636,27 @@ class AppIntegrationTest {
         apiPrefix + "/pedidos",
         nuevoPedidoDTO,
         PedidoDTO.class);
-    assertEquals(nuevoPedidoDTO.getTotal(), pedidoRecuperado.getTotalEstimado());
+    assertEquals(new BigDecimal("5947.200000000000000"), pedidoRecuperado.getTotalEstimado());
     assertEquals(nuevoPedidoDTO.getObservaciones(), pedidoRecuperado.getObservaciones());
     assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
     this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
-    renglonesPedidoDTO = new ArrayList<>();
-    renglonesPedidoDTO.add(
+    nuevosRenglonesDePedido = new ArrayList<>();
+    nuevosRenglonesDePedido.add(
       NuevoRenglonPedidoDTO.builder()
         .idProductoItem(3)
         .cantidad(new BigDecimal("7"))
         .build());
-    renglonesPedido =
+    List<RenglonPedidoDTO> renglonesPedido =
       Arrays.asList(
         restTemplate.postForObject(
-          apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedidoDTO[].class));
-    importe = BigDecimal.ZERO;
-    for (RenglonPedidoDTO renglon : renglonesPedido) {
-      importe = importe.add(renglon.getImporte());
-    }
-    recargoNeto = importe.multiply(new BigDecimal("5")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    descuentoNeto = importe.multiply(new BigDecimal("15")).divide(CIEN, 15, RoundingMode.HALF_UP);
-    total = importe.add(recargoNeto).subtract(descuentoNeto);
-    pedidoRecuperado.setSubTotal(importe);
-    pedidoRecuperado.setRecargoNeto(recargoNeto);
-    pedidoRecuperado.setDescuentoNeto(descuentoNeto);
-    pedidoRecuperado.setTotalActual(total);
-    pedidoRecuperado.setTotalEstimado(total);
+          apiPrefix + "/pedidos/renglones/clientes/1", nuevosRenglonesDePedido, RenglonPedidoDTO[].class));
     pedidoRecuperado.setRenglones(renglonesPedido);
     pedidoRecuperado.setObservaciones("Cambiando las observaciones del pedido");
     restTemplate.put(apiPrefix + "/pedidos?idSucursal=1&idCliente=1&idUsuario=1&tipoDeEnvio=USAR_UBICACION_FACTURACION", pedidoRecuperado);
     PedidoDTO pedidoModificado =
       restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoDTO.class);
     assertEquals(pedidoRecuperado, pedidoModificado);
-    assertEquals(total, pedidoModificado.getTotalEstimado());
+    assertEquals(new BigDecimal("6098.400000000000000"), pedidoModificado.getTotalEstimado());
     assertEquals("Cambiando las observaciones del pedido", pedidoModificado.getObservaciones());
     assertEquals(EstadoPedido.ABIERTO, pedidoModificado.getEstado());
   }
@@ -5879,7 +5739,7 @@ class AppIntegrationTest {
         .getBody()
         .getContent();
     assertTrue(!pedidos.isEmpty());
-    assertEquals(new BigDecimal("6028.20000000000000000000000000000000000000000000000"), pedidos.get(0).getTotalActual());
+    assertEquals(new BigDecimal("6382.80000000000000000000000000000000000000000000000"), pedidos.get(0).getTotalActual());
   }
 
   @Test

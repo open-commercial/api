@@ -1,7 +1,6 @@
 package sic.builder;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +14,6 @@ public class PedidoBuilder {
   private long idPedido = 0L;
   private long nroPedido = 46L;
   private LocalDateTime fecha = LocalDateTime.now();
-  private LocalDate fechaVencimiento;
   private String observaciones = "Los precios se encuentran sujetos a modificaciones.";
   private String nombreSucursal = "Globo Corporation";
   private String detalleEnvio;
@@ -47,27 +45,8 @@ public class PedidoBuilder {
       renglonesPedido.add(renglon2);
       this.renglones = renglonesPedido;
     }
-    return new PedidoDTO(
-      idPedido,
-      nroPedido,
-      fecha,
-      fechaVencimiento,
-      observaciones,
-      nombreSucursal,
-      detalleEnvio,
-      eliminado,
-      nombreFiscalCliente,
-      nombreUsuario,
-      renglones,
-      subTotal,
-      recargoPorcentaje,
-      recargoNeto,
-      descuentoPorcentaje,
-      descuentoNeto,
-      totalEstimado,
-      totalActual,
-      estado,
-      cantidadArticulos);
+    return new PedidoDTO(idPedido, nroPedido, fecha, observaciones, nombreSucursal, detalleEnvio, eliminado, nombreFiscalCliente, nombreUsuario, renglones,
+      subTotal, recargoPorcentaje, recargoNeto, descuentoPorcentaje, descuentoNeto, totalEstimado, totalActual, estado, cantidadArticulos);
   }
 
   public PedidoBuilder withIdPedido(long idPedido) {
@@ -82,11 +61,6 @@ public class PedidoBuilder {
 
   public PedidoBuilder withFecha(LocalDateTime fecha) {
     this.fecha = fecha;
-    return this;
-  }
-
-  public PedidoBuilder withFechaVencimiento(LocalDate fechaVencimiento) {
-    this.fechaVencimiento = fechaVencimiento;
     return this;
   }
 
