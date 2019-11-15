@@ -74,7 +74,6 @@ public abstract class Factura implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "id_Transportista", referencedColumnName = "id_Transportista")
-  @NotNull(message = "{mensaje_factura_transportista_vacio}")
   private Transportista transportista;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

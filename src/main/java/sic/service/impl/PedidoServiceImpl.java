@@ -156,15 +156,7 @@ public class PedidoServiceImpl implements IPedidoService {
     renglonesDelPedido.forEach(r -> idsProductos.add(r.getIdProductoItem()));
     List<Producto> productos = productoService.getMultiplesProductosPorId(idsProductos);
     int i = 0;
-
     for (RenglonPedido renglonPedido : renglonesDelPedido) {
-      //      totalActual =
-      //          totalActual.add(
-      //              this.calcularRenglonPedido(
-      //                      renglonPedido.getIdProductoItem(),
-      //                      renglonPedido.getCantidad(),
-      //                      pedido.getCliente())
-      //                  .getImporte());
       BigDecimal precioUnitario = productos.get(i).getPrecioLista();
       renglonPedido.setImporte(
           precioUnitario
