@@ -96,7 +96,11 @@ public class FacturaController {
     }
     fv.setCliente(cliente);
     facturaService.asignarClienteEmbeddable(fv, cliente);
-    fv.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(facturaVentaDTO.getIdTransportista()));
+    if (facturaVentaDTO.getIdTransportista() != null) {
+      fv.setTransportista(
+          transportistaService.getTransportistaNoEliminadoPorId(
+              facturaVentaDTO.getIdTransportista()));
+    }
     fv.setFecha(LocalDateTime.now());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     fv.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
@@ -141,8 +145,11 @@ public class FacturaController {
     FacturaCompra fc = modelMapper.map(facturaCompraDTO, FacturaCompra.class);
     fc.setSucursal(sucursalService.getSucursalPorId(facturaCompraDTO.getIdSucursal()));
     fc.setProveedor(proveedorService.getProveedorNoEliminadoPorId(facturaCompraDTO.getIdProveedor()));
-    fc.setTransportista(
-        transportistaService.getTransportistaNoEliminadoPorId(facturaCompraDTO.getIdTransportista()));
+    if (facturaCompraDTO.getIdTransportista() != null) {
+      fc.setTransportista(
+          transportistaService.getTransportistaNoEliminadoPorId(
+              facturaCompraDTO.getIdTransportista()));
+    }
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     fc.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     List<FacturaCompra> facturas = new ArrayList<>();

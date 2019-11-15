@@ -666,7 +666,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<textFieldExpression><![CDATA[$P{facturaVenta}.getTotal().doubleValue()]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="32" width="104" height="15" uuid="43f39702-e0af-456b-bea4-3952f75b1aa5">
+				<reportElement x="0" y="47" width="104" height="15" uuid="43f39702-e0af-456b-bea4-3952f75b1aa5">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
@@ -675,7 +675,7 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				<text><![CDATA[Observaciones:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="104" y="32" width="240" height="39" uuid="7d4cd7c6-3ef8-449b-b63b-9d16f6eb9934"/>
+				<reportElement x="104" y="47" width="240" height="39" uuid="7d4cd7c6-3ef8-449b-b63b-9d16f6eb9934"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
@@ -798,6 +798,22 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 			<line>
 				<reportElement x="0" y="15" width="555" height="1" uuid="2c7c571e-b7b8-4767-aed6-23a052dca578"/>
 			</line>
+			<staticText>
+				<reportElement x="0" y="32" width="104" height="15" uuid="8c498fca-025c-46e4-b87c-d643c30be200">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Transportista:]]></text>
+			</staticText>
+			<textField evaluationTime="Report" pattern=" #,##0.#">
+				<reportElement positionType="FixRelativeToBottom" x="104" y="32" width="240" height="15" uuid="41928c8a-4d73-482e-b4e0-a7985b3bb604"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{facturaVenta}.getNombreTransportista()]]></textFieldExpression>
+			</textField>
 		</band>
 	</lastPageFooter>
 </jasperReport>

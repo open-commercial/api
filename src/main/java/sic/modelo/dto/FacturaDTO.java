@@ -36,7 +36,7 @@ public abstract class FacturaDTO implements Serializable {
     private long numFactura;
     private LocalDate fechaVencimiento;
     private Long nroPedido;
-    private long idTransportista;
+    private Long idTransportista;
     private String nombreTransportista;
     private List<RenglonFactura> renglones;
     private BigDecimal subTotal;
