@@ -110,7 +110,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Cant. x Bulto]]></text>
+				<text><![CDATA[Venta x Cant.]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="170" y="80" width="385" height="30" uuid="d32784cb-2840-4275-a461-edaf16ddc32c"/>

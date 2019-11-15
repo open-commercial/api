@@ -114,7 +114,7 @@ $P{pedido}.getSucursal().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "M
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{pedido}.getSucursal().getFechaInicioActividad()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[java.util.Date.from($P{pedido}.getSucursal().getFechaInicioActividad().atZone(java.time.ZoneId.systemDefault()).toInstant())]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="145" width="279" height="15" uuid="0ac9e3dd-2252-49da-8d4a-ae5da578c748">
