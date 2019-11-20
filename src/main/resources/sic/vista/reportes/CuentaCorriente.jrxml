@@ -126,7 +126,7 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				</textElement>
 				<text><![CDATA[Saldo]]></text>
 			</staticText>
-			<textField pattern="¤ #,##0.00">
+			<textField pattern="¤ #,##0.##">
 				<reportElement x="730" y="166" width="71" height="16" uuid="d79999bb-94af-4ac3-895a-7c3ff70d751c">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
