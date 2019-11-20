@@ -120,8 +120,11 @@ public class ProductoServiceImpl implements IProductoService {
   private void validarCalculos(Producto producto) {
     Double[] iva = {10.5, 21.0, 0.0};
     if (!Arrays.asList(iva).contains(producto.getIvaPorcentaje().doubleValue())) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_error_iva_no_valido", new Object[] {producto.getDescripcion()}, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_error_iva_no_valido",
+              new Object[] {producto.getDescripcion()},
+              Locale.getDefault()));
     }
     if (producto
             .getGananciaNeto()
@@ -131,8 +134,11 @@ public class ProductoServiceImpl implements IProductoService {
                         producto.getPrecioCosto(), producto.getGananciaPorcentaje())
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_producto_ganancia_neta_incorrecta", new Object[] {producto.getDescripcion()}, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_producto_ganancia_neta_incorrecta",
+              new Object[] {producto.getDescripcion()},
+              Locale.getDefault()));
     }
     if (producto
             .getPrecioVentaPublico()
@@ -155,10 +161,10 @@ public class ProductoServiceImpl implements IProductoService {
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-        messageSource.getMessage(
-          "mensaje_producto_iva_neto_incorrecto",
-          new Object[] {producto.getDescripcion()},
-          Locale.getDefault()));
+          messageSource.getMessage(
+              "mensaje_producto_iva_neto_incorrecto",
+              new Object[] {producto.getDescripcion()},
+              Locale.getDefault()));
     }
     if (producto
             .getPrecioLista()
@@ -169,10 +175,10 @@ public class ProductoServiceImpl implements IProductoService {
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-        messageSource.getMessage(
-          "mensaje_producto_precio_lista_incorrecto",
-          new Object[] {producto.getDescripcion()},
-          Locale.getDefault()));
+          messageSource.getMessage(
+              "mensaje_producto_precio_lista_incorrecto",
+              new Object[] {producto.getDescripcion()},
+              Locale.getDefault()));
     }
   }
 
@@ -530,10 +536,11 @@ public class ProductoServiceImpl implements IProductoService {
       }
       if (aplicaDescuentoRecargoPorcentaje) {
         p.setPrecioCosto(p.getPrecioCosto().multiply(multiplicador));
-        p.setGananciaNeto(p.getGananciaNeto().multiply(multiplicador));
-        p.setPrecioVentaPublico(p.getPrecioVentaPublico().multiply(multiplicador));
-        p.setIvaNeto(p.getIvaNeto().multiply(multiplicador));
-        p.setPrecioLista(p.getPrecioLista().multiply(multiplicador));
+        p.setGananciaNeto(this.calcularGananciaNeto(p.getPrecioCosto(), p.getGananciaPorcentaje()));
+        p.setPrecioVentaPublico(this.calcularPVP(p.getPrecioCosto(), p.getGananciaPorcentaje()));
+        p.setIvaNeto(this.calcularIVANeto(p.getPrecioVentaPublico(), p.getIvaPorcentaje()));
+        p.setPrecioLista(
+            this.calcularPrecioLista(p.getPrecioVentaPublico(), p.getIvaPorcentaje()));
         p.setFechaUltimaModificacion(LocalDateTime.now());
       }
       if (productosParaActualizarDTO.getIdMedida() != null
