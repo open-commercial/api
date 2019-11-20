@@ -147,7 +147,7 @@
 				<textElement verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤ #,##0.00">
+			<textField pattern="¤ #,##0.##">
 				<reportElement x="480" y="0" width="75" height="20" uuid="87b3f1e2-6d18-4fe6-b5e8-90706d7bd888"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{precioLista}.doubleValue()]]></textFieldExpression>

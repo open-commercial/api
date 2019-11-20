@@ -396,7 +396,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				</textElement>
 				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤ #,##0.00">
+			<textField pattern="¤ #,##0.##">
 				<reportElement x="490" y="0" width="65" height="15" uuid="e044f181-0b15-492c-bf20-af4d406e94db">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -414,7 +414,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ivaPorcentaje}.doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤ #,##0.00">
+			<textField pattern="¤ #,##0.##">
 				<reportElement x="360" y="0" width="80" height="15" uuid="c7b87790-d932-4831-a827-5a9da47c5d43"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8"/>
@@ -484,7 +484,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				</textElement>
 				<text><![CDATA[21]]></text>
 			</staticText>
-			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
+			<textField pattern="¤ #,##0.##" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="2" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="c6a75d5b-c210-44c6-8e4a-c725bf20381e">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -494,7 +494,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				</textElement>
 				<textFieldExpression><![CDATA[$P{notaDebito}.getSubTotalBruto().doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
+			<textField pattern="¤ #,##0.##" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="17" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="e063a476-1e47-4947-9f7f-04ad07139b9e">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -504,7 +504,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				</textElement>
 				<textFieldExpression><![CDATA[$P{notaDebito}.getIva21Neto().doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
+			<textField pattern="¤ #,##0.##" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="47" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="0287f0d5-94e6-4d59-ac75-cfff995614c1">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -581,7 +581,7 @@ java.util.Date.from($P{notaDebito}.getVencimientoCae().atStartOfDay()
 				</textElement>
 				<text><![CDATA[No Gravado]]></text>
 			</staticText>
-			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
+			<textField pattern="¤ #,##0.##" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="32" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="8453496a-c290-4eda-ad95-4b56351d4595">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>

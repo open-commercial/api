@@ -368,7 +368,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				</textElement>
 				<textFieldExpression><![CDATA[$F{cantidad}.doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤ #,##0.00">
+			<textField pattern="¤ #,##0.##">
 				<reportElement x="401" y="0" width="60" height="15" uuid="ef48b8f6-ecc3-42f2-b6f9-269aae20c81e">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -386,7 +386,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				</textElement>
 				<textFieldExpression><![CDATA[$F{bonificacionPorcentaje}.doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤ #,##0.00">
+			<textField pattern="¤ #,##0.##">
 				<reportElement x="500" y="0" width="55" height="15" uuid="e044f181-0b15-492c-bf20-af4d406e94db">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -473,7 +473,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				</textElement>
 				<text><![CDATA[Total Estimado:]]></text>
 			</staticText>
-			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
+			<textField pattern="¤ #,##0.##" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="427" y="89" width="128" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="0287f0d5-94e6-4d59-ac75-cfff995614c1">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -510,7 +510,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				</textElement>
 				<text><![CDATA[SubTotal]]></text>
 			</staticText>
-			<textField pattern="¤ #,##0.00">
+			<textField pattern="¤ #,##0.##">
 				<reportElement x="464" y="44" width="91" height="15" uuid="c3606c7c-3c8c-4621-9cf5-571e24f2e387">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -541,7 +541,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				</textElement>
 				<textFieldExpression><![CDATA[$P{pedido}.getDescuentoPorcentaje().doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
+			<textField pattern="¤ #,##0.##" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="464" y="59" width="91" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="ddb2901e-8adc-402d-87b4-8b67755aaed3">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -572,7 +572,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				</textElement>
 				<textFieldExpression><![CDATA[$P{pedido}.getRecargoPorcentaje().doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
+			<textField pattern="¤ #,##0.##" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="464" y="74" width="91" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="3b341a20-85f0-4618-9829-a87f5777670d">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
