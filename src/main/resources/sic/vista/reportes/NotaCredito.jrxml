@@ -454,7 +454,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				</textElement>
 				<textFieldExpression><![CDATA[$F{descripcionItem}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField pattern="###0.##">
 				<reportElement x="330" y="0" width="40" height="15" uuid="5dc407ad-61c0-4c06-bc77-1ab3136f8e40">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -472,7 +472,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				</textElement>
 				<textFieldExpression><![CDATA[$F{precioUnitario}.doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="">
+			<textField pattern="##0.##">
 				<reportElement x="467" y="0" width="31" height="15" uuid="f3e07bc2-0b6a-4759-80ae-837e9ad074b8">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -710,7 +710,7 @@ java.util.Date.from($P{notaCredito}.getVencimientoCae().atStartOfDay()
 				</textElement>
 				<text><![CDATA[Descuento (%)]]></text>
 			</staticText>
-			<textField pattern="" isBlankWhenNull="false">
+			<textField pattern="##0.##" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="430" y="16" width="37" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="fe2b88e3-6297-4879-b69d-a1ca31c13341">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -741,7 +741,7 @@ java.util.Date.from($P{notaCredito}.getVencimientoCae().atStartOfDay()
 				</textElement>
 				<text><![CDATA[Recargo (%)]]></text>
 			</staticText>
-			<textField pattern="" isBlankWhenNull="false">
+			<textField pattern="##0.##" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="430" y="31" width="37" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="305cf5fe-6303-4042-aebc-68105eeafa97">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>

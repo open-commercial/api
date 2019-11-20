@@ -359,7 +359,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				</textElement>
 				<textFieldExpression><![CDATA[$F{descripcionItem}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField pattern="###0.##">
 				<reportElement x="310" y="0" width="41" height="15" uuid="5dc407ad-61c0-4c06-bc77-1ab3136f8e40">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -377,7 +377,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				</textElement>
 				<textFieldExpression><![CDATA[$F{precioUnitario}.doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField pattern="##0.##">
 				<reportElement x="461" y="0" width="39" height="15" uuid="f3e07bc2-0b6a-4759-80ae-837e9ad074b8">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -530,7 +530,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				</textElement>
 				<text><![CDATA[Descuento (%)]]></text>
 			</staticText>
-			<textField pattern="" isBlankWhenNull="false">
+			<textField pattern="##0.##" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="427" y="59" width="37" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="62f817d1-c558-4127-8459-f05e8d79f9fd">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -561,7 +561,7 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				</textElement>
 				<text><![CDATA[Recargo (%)]]></text>
 			</staticText>
-			<textField pattern="" isBlankWhenNull="false">
+			<textField pattern="##0.##" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="427" y="74" width="37" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="d8a64d5f-d5b4-4806-b271-08da0c991e99">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>

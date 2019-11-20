@@ -405,7 +405,7 @@ $P{notaDebito}.getTipoComprobante().toString().equals("NOTA_DEBITO_B"))]]></prin
 				</textElement>
 				<textFieldExpression><![CDATA[$F{importeNeto}.doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="">
+			<textField pattern="##0.##">
 				<reportElement x="440" y="0" width="50" height="15" uuid="7a5d637a-a063-4bbe-a486-b313a3f62c77">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
