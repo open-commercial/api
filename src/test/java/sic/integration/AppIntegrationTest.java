@@ -6446,4 +6446,43 @@ class AppIntegrationTest {
             .contains(
                 messageSource.getMessage("mensaje_formato_no_valido", null, Locale.getDefault())));
   }
+
+  @Test
+  void shouldThrowsUsuarioLoginInvalido() {
+    Credencial credencial = new Credencial();
+    credencial.setUsername("falsoLogin");
+    credencial.setPassword("passFalso");
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class,
+            () -> restTemplate.postForObject(apiPrefix + "/login", credencial, String.class));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_usuario_logInInvalido", null, Locale.getDefault())));
+  }
+
+  @Test
+  void shouldThrowsUsuarioNoHabilitado() {
+    UsuarioDTO usuario = restTemplate.getForObject(apiPrefix + "/usuarios/2", UsuarioDTO.class);
+    usuario.setPassword("passwordTest");
+    restTemplate.put(apiPrefix + "/usuarios", usuario);
+    Credencial credencial = new Credencial();
+    credencial.setUsername("marce");
+    credencial.setPassword("passwordTest");
+    RestClientResponseException thrown =
+      assertThrows(
+        RestClientResponseException.class,
+        () -> restTemplate.postForObject(apiPrefix + "/login", credencial, String.class));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+      thrown
+        .getMessage()
+        .contains(
+          messageSource.getMessage(
+            "mensaje_usuario_no_habilitado", null, Locale.getDefault())));
+  }
 }
