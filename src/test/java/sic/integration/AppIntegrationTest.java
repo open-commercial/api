@@ -267,13 +267,13 @@ class AppIntegrationTest {
         .idSucursal(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-    List<FacturaVenta> facturasRecuperadas =
+    List<FacturaVentaDTO> facturasRecuperadas =
         restTemplate
             .exchange(
                 apiPrefix + "/facturas/venta/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
-                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
             .getBody()
             .getContent();
     Long[] idsFactura = new Long[1];
@@ -4056,14 +4056,14 @@ class AppIntegrationTest {
         .numFactura(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-    List<FacturaVenta> facturasRecuperadas =
+    List<FacturaVentaDTO> facturasRecuperadas =
         restTemplate
             .exchange(
                 apiPrefix
                     + "/facturas/venta/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
-                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
             .getBody()
             .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -4111,14 +4111,14 @@ class AppIntegrationTest {
         .numFactura(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-    List<FacturaVenta> facturasRecuperadas =
+    List<FacturaVentaDTO> facturasRecuperadas =
       restTemplate
         .exchange(
           apiPrefix
             + "/facturas/venta/busqueda/criteria",
           HttpMethod.POST,
           requestEntity,
-          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
         .getBody()
         .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -4166,13 +4166,13 @@ class AppIntegrationTest {
         .idSucursal(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-    List<FacturaVenta> facturasRecuperadas =
+    List<FacturaVentaDTO> facturasRecuperadas =
         restTemplate
             .exchange(
                 apiPrefix + "/facturas/venta/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
-                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
             .getBody()
             .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -4223,13 +4223,13 @@ class AppIntegrationTest {
             .idSucursal(1L)
             .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-    List<FacturaVenta> facturasRecuperadas =
+    List<FacturaVentaDTO> facturasRecuperadas =
         restTemplate
             .exchange(
                 apiPrefix + "/facturas/venta/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
-                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
             .getBody()
             .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -4277,13 +4277,13 @@ class AppIntegrationTest {
         .idSucursal(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-    List<FacturaVenta> facturasRecuperadas =
+    List<FacturaVentaDTO> facturasRecuperadas =
         restTemplate
             .exchange(
                 apiPrefix + "/facturas/venta/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
-                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
             .getBody()
             .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -4472,14 +4472,14 @@ class AppIntegrationTest {
         .idSucursal(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-    List<FacturaVenta> facturasRecuperadas =
+    List<FacturaVentaDTO> facturasRecuperadas =
       restTemplate
         .exchange(
           apiPrefix
             + "/facturas/venta/busqueda/criteria",
           HttpMethod.POST,
           requestEntity,
-          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
         .getBody()
         .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -4524,13 +4524,13 @@ class AppIntegrationTest {
             .idSucursal(1L)
             .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-    List<FacturaVenta> facturasRecuperadas =
+    List<FacturaVentaDTO> facturasRecuperadas =
         restTemplate
             .exchange(
                 apiPrefix + "/facturas/venta/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
-                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
             .getBody()
             .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -5682,13 +5682,13 @@ class AppIntegrationTest {
         .idSucursal(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-    List<FacturaVenta> facturasRecuperadas =
+    List<FacturaVentaDTO> facturasRecuperadas =
         restTemplate
             .exchange(
                 apiPrefix + "/facturas/venta/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
-                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
             .getBody()
             .getContent();
     restTemplate.delete(
