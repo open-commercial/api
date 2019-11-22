@@ -2,6 +2,7 @@ package sic.service.impl;
 
 import org.springframework.context.MessageSource;
 import sic.modelo.*;
+import sic.modelo.embeddable.ClienteEmbeddable;
 import sic.service.*;
 import afip.wsaa.wsdl.LoginCms;
 import afip.wsfe.wsdl.AlicIva;
@@ -286,25 +287,25 @@ public class AfipServiceImpl implements IAfipService {
     // CbteTipo = 1: Factura A, 2: Nota de Débito A, 3: Nota de Crédito A, 6: Factura B,
     //    7: Nota de Débito B 8: Nota de Crédito B. 11: Factura C. 12: Nota Debito C. 13: Nota Credito C.
     // DocTipo = 80: CUIT, 86: CUIL, 96: DNI, 99: Doc.(Otro)
-    int docTipo = (comprobante.getCliente().getCategoriaIVA() == CategoriaIVA.CONSUMIDOR_FINAL) ? 96 : 80;
+    int docTipo = (comprobante.getCliente().getCategoriaIVACliente() == CategoriaIVA.CONSUMIDOR_FINAL) ? 96 : 80;
     switch (comprobante.getTipoComprobante()) {
       case FACTURA_A:
         this.validarCliente(comprobante.getCliente());
         cabecera.setCbteTipo(1);
         detalle.setDocTipo(docTipo);
-        detalle.setDocNro(comprobante.getCliente().getIdFiscal());
+        detalle.setDocNro(comprobante.getCliente().getIdFiscalCliente());
         break;
       case NOTA_DEBITO_A:
         this.validarCliente(comprobante.getCliente());
         cabecera.setCbteTipo(2);
         detalle.setDocTipo(docTipo);
-        detalle.setDocNro(comprobante.getCliente().getIdFiscal());
+        detalle.setDocNro(comprobante.getCliente().getIdFiscalCliente());
         break;
       case NOTA_CREDITO_A:
         this.validarCliente(comprobante.getCliente());
         cabecera.setCbteTipo(3);
         detalle.setDocTipo(docTipo);
-        detalle.setDocNro(comprobante.getCliente().getIdFiscal());
+        detalle.setDocNro(comprobante.getCliente().getIdFiscalCliente());
         break;
       case FACTURA_B:
         cabecera.setCbteTipo(6);
@@ -448,13 +449,13 @@ public class AfipServiceImpl implements IAfipService {
     } else {
       this.validarCliente(comprobante.getCliente());
       detalle.setDocTipo(
-          (comprobante.getCliente().getCategoriaIVA() == CategoriaIVA.CONSUMIDOR_FINAL) ? 96 : 80);
-      detalle.setDocNro(comprobante.getCliente().getIdFiscal());
+          (comprobante.getCliente().getCategoriaIVACliente() == CategoriaIVA.CONSUMIDOR_FINAL) ? 96 : 80);
+      detalle.setDocNro(comprobante.getCliente().getIdFiscalCliente());
     }
   }
 
-  private void validarCliente(Cliente cliente) {
-    if (cliente.getIdFiscal() == null) {
+  private void validarCliente(ClienteEmbeddable cliente) {
+    if (cliente.getIdFiscalCliente() == null) {
       throw new BusinessServiceException(
           messageSource.getMessage(
               "mensaje_cliente_sin_idFiscal_error", null, Locale.getDefault()));
