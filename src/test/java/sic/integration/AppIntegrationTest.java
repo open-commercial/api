@@ -6448,7 +6448,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldThrowsUsuarioLoginInvalido() {
+  void shouldThrowsExceptionWhenUsuarioLoginInvalido() {
     Credencial credencial = new Credencial();
     credencial.setUsername("falsoLogin");
     credencial.setPassword("passFalso");
@@ -6466,7 +6466,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldThrowsUsuarioNoHabilitado() {
+  void shouldThrowsExceptionWhenUsuarioNoHabilitado() {
     UsuarioDTO usuario = restTemplate.getForObject(apiPrefix + "/usuarios/2", UsuarioDTO.class);
     usuario.setPassword("passwordTest");
     restTemplate.put(apiPrefix + "/usuarios", usuario);
