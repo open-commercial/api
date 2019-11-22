@@ -3315,12 +3315,19 @@ class AppIntegrationTest {
             apiPrefix + "/productos?idMedida=1&idRubro=1&idProveedor=1&idEmpresa=1",
             productoTestSinStock,
             ProductoDTO.class);
+    BigDecimal[] cantidades = {BigDecimal.ONE};
+    long[] idsProductos = {1L};
+    ProductosParaVerificarStock productosParaVerificarStock = ProductosParaVerificarStock.builder()
+      .cantidad(cantidades)
+      .idProducto(idsProductos)
+      .build();
     Map faltante =
-        restTemplate.getForObject(
+        restTemplate.postForObject(
             apiPrefix
                 + "/productos/disponibilidad-stock?idProducto="
                 + productoSinStock.getIdProducto()
                 + "&cantidad=1",
+            productosParaVerificarStock,
             Map.class);
     assertFalse(faltante.isEmpty(), "Debería no devolver faltantes");
   }
