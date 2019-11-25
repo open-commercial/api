@@ -3,6 +3,7 @@ package sic.service;
 import sic.modelo.*;
 import org.springframework.data.domain.Page;
 import sic.modelo.criteria.BusquedaClienteCriteria;
+import sic.modelo.embeddable.ClienteEmbeddable;
 
 import javax.validation.Valid;
 
@@ -39,4 +40,6 @@ public interface IClienteService {
   int desvincularClienteDeCredencial(long idUsuarioCliente);
 
   String generarNroDeCliente(Empresa empresa);
+
+  ClienteEmbeddable crearClienteEmbedded(Cliente cliente);
 }

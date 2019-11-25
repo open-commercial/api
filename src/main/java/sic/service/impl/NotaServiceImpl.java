@@ -1182,7 +1182,7 @@ public class NotaServiceImpl implements INotaService {
               .numSerieAfip(nota.getNumSerieAfip())
               .numFacturaAfip(nota.getNumNotaAfip())
               .empresa(nota.getEmpresa())
-              .cliente(cliente)
+              .cliente(clienteService.crearClienteEmbedded(cliente))
               .subtotalBruto(nota.getSubTotalBruto())
               .iva105neto(nota.getIva105Neto())
               .iva21neto(nota.getIva21Neto())
