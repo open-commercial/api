@@ -128,4 +128,4 @@ alter TABLE producto CHANGE cantidad cantidadTotalEnSucursales decimal(25,15);
 alter TABLE renglonpedido ADD COLUMN urlImagenItem varchar(255) after medidaItem;
 alter TABLE renglonpedido ADD COLUMN oferta bit(1) after urlImagenItem;
 
-alter TABLE pedido drop column pedido.fechaVencimiento;
+alter TABLE pedido drop column fechaVencimiento;

@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javax.persistence.*;
-import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -58,6 +57,7 @@ public class RenglonCuentaCorriente implements Serializable {
     
     @ManyToOne
     @JoinColumn(name = "id_cuenta_corriente", referencedColumnName = "id_cuenta_corriente")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private CuentaCorriente cuentaCorriente;
     
     @OneToOne
