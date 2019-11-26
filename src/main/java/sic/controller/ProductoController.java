@@ -246,7 +246,7 @@ public class ProductoController {
     productoService.actualizarMultiples(productosParaActualizarDTO);
   }
 
-  @GetMapping("/productos/disponibilidad-stock")
+  @PostMapping("/productos/disponibilidad-stock")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -255,7 +255,7 @@ public class ProductoController {
     Rol.COMPRADOR
   })
   public Map<Long, BigDecimal> verificarDisponibilidadStock(
-      long[] idProducto, BigDecimal[] cantidad) {
-    return productoService.getProductosSinStockDisponible(idProducto, cantidad);
+      @RequestBody ProductosParaVerificarStockDTO productosParaVerificarStockDTO) {
+    return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
   }
 }
