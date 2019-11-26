@@ -255,7 +255,7 @@ public class ProductoController {
     Rol.COMPRADOR
   })
   public Map<Long, BigDecimal> verificarDisponibilidadStock(
-      @RequestBody ProductosParaVerificarStock productosParaVerificarStock) {
-    return productoService.getProductosSinStockDisponible(productosParaVerificarStock);
+      @RequestBody ProductosParaVerificarStockDTO productosParaVerificarStockDTO) {
+    return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
   }
 }

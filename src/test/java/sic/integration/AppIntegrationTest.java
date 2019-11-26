@@ -3345,7 +3345,7 @@ class AppIntegrationTest {
             ProductoDTO.class);
     BigDecimal[] cantidades = {BigDecimal.ONE};
     long[] idsProductos = {1L};
-    ProductosParaVerificarStock productosParaVerificarStock = ProductosParaVerificarStock.builder()
+    ProductosParaVerificarStockDTO productosParaVerificarStockDTO = ProductosParaVerificarStockDTO.builder()
       .cantidad(cantidades)
       .idProducto(idsProductos)
       .build();
@@ -3355,7 +3355,7 @@ class AppIntegrationTest {
                 + "/productos/disponibilidad-stock?idProducto="
                 + productoSinStock.getIdProducto()
                 + "&cantidad=1",
-            productosParaVerificarStock,
+          productosParaVerificarStockDTO,
             Map.class);
     assertFalse(faltante.isEmpty(), "Debería no devolver faltantes");
   }

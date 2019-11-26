@@ -11,8 +11,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProductosParaVerificarStock {
+public class ProductosParaVerificarStockDTO {
 
-  long[] idProducto;
-  BigDecimal[] cantidad;
+  private long[] idProducto;
+  private BigDecimal[] cantidad;
 }

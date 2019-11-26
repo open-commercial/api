@@ -552,15 +552,15 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Map<Long, BigDecimal> getProductosSinStockDisponible(ProductosParaVerificarStock productosParaVerificarStock) {
+  public Map<Long, BigDecimal> getProductosSinStockDisponible(ProductosParaVerificarStockDTO productosParaVerificarStockDTO) {
     Map<Long, BigDecimal> productos = new HashMap<>();
-    int longitudIds = productosParaVerificarStock.getIdProducto().length;
-    int longitudCantidades = productosParaVerificarStock.getCantidad().length;
+    int longitudIds = productosParaVerificarStockDTO.getIdProducto().length;
+    int longitudCantidades = productosParaVerificarStockDTO.getCantidad().length;
     if (longitudIds == longitudCantidades) {
       for (int i = 0; i < longitudIds; i++) {
-        Producto p = this.getProductoNoEliminadoPorId(productosParaVerificarStock.getIdProducto()[i]);
-        if (!p.isIlimitado() && p.getCantidad().compareTo(productosParaVerificarStock.getCantidad()[i]) < 0) {
-          productos.put(p.getIdProducto(), productosParaVerificarStock.getCantidad()[i]);
+        Producto p = this.getProductoNoEliminadoPorId(productosParaVerificarStockDTO.getIdProducto()[i]);
+        if (!p.isIlimitado() && p.getCantidad().compareTo(productosParaVerificarStockDTO.getCantidad()[i]) < 0) {
+          productos.put(p.getIdProducto(), productosParaVerificarStockDTO.getCantidad()[i]);
         }
       }
     } else {
