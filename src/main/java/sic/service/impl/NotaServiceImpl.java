@@ -1458,10 +1458,7 @@ public class NotaServiceImpl implements INotaService {
   public RenglonNotaDebito calcularRenglonDebitoConRecibo(Recibo recibo) {
     RenglonNotaDebito renglonNota = new RenglonNotaDebito();
     String descripcion =
-        "Recibo Nº "
-            + recibo.getNumRecibo()
-            + " "
-            +  DateTimeFormatter.ofPattern("dd/MM/yyyy").format(recibo.getFecha());
+        "Nº Recibo " + recibo.getNumSerie() + "-" + recibo.getNumRecibo() + ": " + recibo.getConcepto();
     renglonNota.setDescripcion(descripcion);
     renglonNota.setMonto(recibo.getMonto());
     renglonNota.setImporteBruto(renglonNota.getMonto());
