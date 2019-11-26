@@ -76,16 +76,16 @@ public class FacturaController {
   @PostMapping("/facturas/venta")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public List<FacturaVenta> guardarFacturaVenta(
-      @RequestBody NuevaFacturaVentaDTO nuevaFacturaVenta,
+      @RequestBody NuevaFacturaVentaDTO nuevaFacturaVentaDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     FacturaVenta fv =
-        modelMapper.map(nuevaFacturaVenta.getFacturaVenta(), FacturaVenta.class);
+        modelMapper.map(nuevaFacturaVentaDTO.getFacturaVenta(), FacturaVenta.class);
     Empresa empresa =
-        empresaService.getEmpresaPorId(nuevaFacturaVenta.getFacturaVenta().getIdEmpresa());
+        empresaService.getEmpresaPorId(nuevaFacturaVentaDTO.getFacturaVenta().getIdEmpresa());
     fv.setEmpresa(empresa);
     Cliente cliente =
         clienteService.getClienteNoEliminadoPorId(
-            nuevaFacturaVenta.getFacturaVenta().getIdCliente());
+            nuevaFacturaVentaDTO.getFacturaVenta().getIdCliente());
     if (cliente.getUbicacionFacturacion() == null
         && (fv.getTipoComprobante() == TipoDeComprobante.FACTURA_A
             || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_B
@@ -96,23 +96,23 @@ public class FacturaController {
     }
     fv.setCliente(cliente);
     fv.setClienteEmbedded(clienteService.crearClienteEmbedded(cliente));
-    fv.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(nuevaFacturaVenta.getFacturaVenta().getIdTransportista()));
+    fv.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(nuevaFacturaVentaDTO.getFacturaVenta().getIdTransportista()));
     fv.setFecha(LocalDateTime.now());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     fv.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     List<FacturaVenta> facturasGuardadas;
-    if (nuevaFacturaVenta.getIndices() != null) {
+    if (nuevaFacturaVentaDTO.getIndices() != null) {
       facturasGuardadas =
           facturaService.guardar(
-              facturaService.dividirFactura(fv, nuevaFacturaVenta.getIndices()),
-              nuevaFacturaVenta.getIdPedido(),
+              facturaService.dividirFactura(fv, nuevaFacturaVentaDTO.getIndices()),
+              nuevaFacturaVentaDTO.getIdPedido(),
               reciboService.construirRecibos(
-                  nuevaFacturaVenta.getIdsFormaDePago(),
+                  nuevaFacturaVentaDTO.getIdsFormaDePago(),
                   empresa,
                   cliente,
                   fv.getUsuario(),
-                  nuevaFacturaVenta.getMontos(),
+                  nuevaFacturaVentaDTO.getMontos(),
                   fv.getTotal(),
                   fv.getFecha()));
     } else {
@@ -121,13 +121,13 @@ public class FacturaController {
       facturasGuardadas =
           facturaService.guardar(
               facturas,
-              nuevaFacturaVenta.getIdPedido(),
+              nuevaFacturaVentaDTO.getIdPedido(),
               reciboService.construirRecibos(
-                  nuevaFacturaVenta.getIdsFormaDePago(),
+                  nuevaFacturaVentaDTO.getIdsFormaDePago(),
                   empresa,
                   cliente,
                   fv.getUsuario(),
-                  nuevaFacturaVenta.getMontos(),
+                  nuevaFacturaVentaDTO.getMontos(),
                   fv.getTotal(),
                   fv.getFecha()));
     }
