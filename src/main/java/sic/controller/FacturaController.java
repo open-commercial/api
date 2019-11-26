@@ -95,10 +95,8 @@ public class FacturaController {
               "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault()));
     }
     fv.setCliente(cliente);
-    facturaService.asignarClienteEmbeddable(fv, cliente);
-    fv.setTransportista(
-        transportistaService.getTransportistaNoEliminadoPorId(
-            nuevaFacturaVenta.getFacturaVenta().getIdTransportista()));
+    fv.setClienteEmbedded(clienteService.crearClienteEmbedded(cliente));
+    fv.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(nuevaFacturaVenta.getFacturaVenta().getIdTransportista()));
     fv.setFecha(LocalDateTime.now());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     fv.setUsuario(

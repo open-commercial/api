@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
+import sic.modelo.embeddable.ClienteEmbeddable;
 
 @Data
 @Builder
@@ -18,7 +19,7 @@ public class ComprobanteAFIP {
     private long numSerieAfip;
     private long numFacturaAfip;
     private Empresa empresa;    
-    private Cliente cliente;    
+    private ClienteEmbeddable cliente;
     private BigDecimal subtotalBruto;    
     private BigDecimal iva105neto;    
     private BigDecimal iva21neto;    
