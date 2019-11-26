@@ -201,7 +201,7 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public List<Recibo> construirRecibos(
-      long[] idsFormaDePago,
+      Long[] idsFormaDePago,
       Empresa empresa,
       Cliente cliente,
       Usuario usuario,

@@ -19,7 +19,6 @@ import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 import sic.modelo.dto.FacturaCompraDTO;
-import sic.modelo.dto.FacturaVentaDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 
@@ -77,41 +76,45 @@ public class FacturaController {
   @PostMapping("/facturas/venta")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public List<FacturaVenta> guardarFacturaVenta(
-      @RequestBody FacturaVentaDTO facturaVentaDTO,
-      @RequestParam(required = false) long[] idsFormaDePago,
-      @RequestParam(required = false) BigDecimal[] montos,
-      @RequestParam(required = false) int[] indices,
-      @RequestParam(required = false) Long idPedido,
+      @RequestBody NuevaFacturaVentaDTO nuevaFacturaVenta,
       @RequestHeader("Authorization") String authorizationHeader) {
-    FacturaVenta fv = modelMapper.map(facturaVentaDTO, FacturaVenta.class);
-    Empresa empresa = empresaService.getEmpresaPorId(facturaVentaDTO.getIdEmpresa());
+    FacturaVenta fv =
+        modelMapper.map(nuevaFacturaVenta.getFacturaVenta(), FacturaVenta.class);
+    Empresa empresa =
+        empresaService.getEmpresaPorId(nuevaFacturaVenta.getFacturaVenta().getIdEmpresa());
     fv.setEmpresa(empresa);
-    Cliente cliente = clienteService.getClienteNoEliminadoPorId(facturaVentaDTO.getIdCliente());
+    Cliente cliente =
+        clienteService.getClienteNoEliminadoPorId(
+            nuevaFacturaVenta.getFacturaVenta().getIdCliente());
     if (cliente.getUbicacionFacturacion() == null
         && (fv.getTipoComprobante() == TipoDeComprobante.FACTURA_A
             || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_B
             || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_C)) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault()));
     }
     fv.setCliente(cliente);
     facturaService.asignarClienteEmbeddable(fv, cliente);
-    fv.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(facturaVentaDTO.getIdTransportista()));
+    fv.setTransportista(
+        transportistaService.getTransportistaNoEliminadoPorId(
+            nuevaFacturaVenta.getFacturaVenta().getIdTransportista()));
     fv.setFecha(LocalDateTime.now());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    fv.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+    fv.setUsuario(
+        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     List<FacturaVenta> facturasGuardadas;
-    if (indices != null) {
+    if (nuevaFacturaVenta.getIndices() != null) {
       facturasGuardadas =
           facturaService.guardar(
-              facturaService.dividirFactura(fv, indices),
-              idPedido,
+              facturaService.dividirFactura(fv, nuevaFacturaVenta.getIndices()),
+              nuevaFacturaVenta.getIdPedido(),
               reciboService.construirRecibos(
-                  idsFormaDePago,
+                  nuevaFacturaVenta.getIdsFormaDePago(),
                   empresa,
                   cliente,
                   fv.getUsuario(),
-                  montos,
+                  nuevaFacturaVenta.getMontos(),
                   fv.getTotal(),
                   fv.getFecha()));
     } else {
@@ -120,13 +123,13 @@ public class FacturaController {
       facturasGuardadas =
           facturaService.guardar(
               facturas,
-              idPedido,
+              nuevaFacturaVenta.getIdPedido(),
               reciboService.construirRecibos(
-                  idsFormaDePago,
+                  nuevaFacturaVenta.getIdsFormaDePago(),
                   empresa,
                   cliente,
                   fv.getUsuario(),
-                  montos,
+                  nuevaFacturaVenta.getMontos(),
                   fv.getTotal(),
                   fv.getFecha()));
     }

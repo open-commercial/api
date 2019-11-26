@@ -26,7 +26,7 @@ public interface IReciboService {
   void validarOperacion(Recibo recibo);
 
   List<Recibo> construirRecibos(
-      long[] formaDePago,
+      Long[] formaDePago,
       Empresa empresa,
       Cliente cliente,
       Usuario usuario,
