@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
+import sic.modelo.embeddable.ClienteEmbeddable;
 
 import javax.validation.Valid;
 
@@ -86,7 +87,4 @@ public interface IFacturaService {
       BigDecimal bonificacion);
 
   boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAFIP comprobante);
-
-  void asignarClienteEmbeddable(FacturaVenta fv, Cliente cliente);
-
 }

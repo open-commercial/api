@@ -610,7 +610,6 @@ public class FacturaServiceImpl implements IFacturaService {
   @Override
   @Transactional
   public FacturaVenta autorizarFacturaVenta(FacturaVenta fv) {
-    Cliente cliente = clienteService.getClienteNoEliminadoPorId(fv.getIdCliente());
     ComprobanteAFIP comprobante =
         ComprobanteAFIP.builder()
             .idComprobante(fv.getIdFactura())
@@ -621,7 +620,7 @@ public class FacturaServiceImpl implements IFacturaService {
             .numSerieAfip(fv.getNumSerieAfip())
             .numFacturaAfip(fv.getNumFacturaAfip())
             .sucursal(fv.getSucursal())
-            .cliente(cliente)
+            .cliente(fv.getClienteEmbedded())
             .subtotalBruto(fv.getSubTotalBruto())
             .iva105neto(fv.getIva105Neto())
             .iva21neto(fv.getIva21Neto())
@@ -1296,45 +1295,5 @@ public class FacturaServiceImpl implements IFacturaService {
         facturaVentaRepository.findAll(
             builder, PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "fecha")));
     return facturaAnterior.getContent().get(0).getCae() == 0L;
-  }
-
-  @Override
-  public void asignarClienteEmbeddable(FacturaVenta fv, Cliente cliente) {
-    fv.setClienteEmbedded(
-        ClienteEmbeddable.builder()
-            .nroCliente(cliente.getNroCliente())
-            .nombreFiscalCliente(cliente.getNombreFiscal())
-            .nombreFantasiaCliente(cliente.getNombreFantasia())
-            .categoriaIVACliente(cliente.getCategoriaIVA())
-            .idFiscalCliente(cliente.getIdFiscal())
-            .emailCliente(cliente.getEmail())
-            .telefonoCliente(cliente.getTelefono())
-            .build());
-    if (cliente.getUbicacionFacturacion() != null) {
-      fv.getClienteEmbedded()
-          .setDescripcionUbicacionCliente(cliente.getUbicacionFacturacion().getDescripcion());
-      fv.getClienteEmbedded()
-          .setLatitudUbicacionCliente(cliente.getUbicacionFacturacion().getLatitud());
-      fv.getClienteEmbedded()
-          .setLongitudUbicacionCliente(cliente.getUbicacionFacturacion().getLongitud());
-      fv.getClienteEmbedded()
-          .setCalleUbicacionCliente(cliente.getUbicacionFacturacion().getCalle());
-      fv.getClienteEmbedded()
-          .setNumeroUbicacionCliente(cliente.getUbicacionFacturacion().getNumero());
-      fv.getClienteEmbedded().setPisoUbicacionCliente(cliente.getUbicacionFacturacion().getPiso());
-      fv.getClienteEmbedded()
-          .setDepartamentoUbicacionCliente(cliente.getUbicacionFacturacion().getDepartamento());
-      fv.getClienteEmbedded()
-          .setNombreLocalidadCliente(cliente.getUbicacionFacturacion().getLocalidad().getNombre());
-      fv.getClienteEmbedded()
-          .setCodigoPostalLocalidadCliente(
-              cliente.getUbicacionFacturacion().getLocalidad().getCodigoPostal());
-      fv.getClienteEmbedded()
-          .setCostoEnvioLocalidadCliente(
-              cliente.getUbicacionFacturacion().getLocalidad().getCostoEnvio());
-      fv.getClienteEmbedded()
-          .setNombreProvinciaCliente(
-              cliente.getUbicacionFacturacion().getLocalidad().getProvincia().getNombre());
-    }
   }
 }

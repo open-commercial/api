@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaClienteCriteria;
+import sic.modelo.embeddable.ClienteEmbeddable;
 import sic.service.*;
 import sic.repository.ClienteRepository;
 import sic.exception.BusinessServiceException;
@@ -357,5 +358,40 @@ public class ClienteServiceImpl implements IClienteService {
       if (c == null) esRepetido = false;
     }
     return Long.toString(randomLong);
+  }
+
+  @Override
+  public ClienteEmbeddable crearClienteEmbedded(Cliente cliente) {
+    ClienteEmbeddable clienteEmbeddable =
+        ClienteEmbeddable.builder()
+            .nroCliente(cliente.getNroCliente())
+            .nombreFiscalCliente(cliente.getNombreFiscal())
+            .nombreFantasiaCliente(cliente.getNombreFantasia())
+            .categoriaIVACliente(cliente.getCategoriaIVA())
+            .idFiscalCliente(cliente.getIdFiscal())
+            .emailCliente(cliente.getEmail())
+            .telefonoCliente(cliente.getTelefono())
+            .build();
+    if (cliente.getUbicacionFacturacion() != null) {
+      clienteEmbeddable.setDescripcionUbicacionCliente(
+          cliente.getUbicacionFacturacion().getDescripcion());
+      clienteEmbeddable.setLatitudUbicacionCliente(cliente.getUbicacionFacturacion().getLatitud());
+      clienteEmbeddable.setLongitudUbicacionCliente(
+          cliente.getUbicacionFacturacion().getLongitud());
+      clienteEmbeddable.setCalleUbicacionCliente(cliente.getUbicacionFacturacion().getCalle());
+      clienteEmbeddable.setNumeroUbicacionCliente(cliente.getUbicacionFacturacion().getNumero());
+      clienteEmbeddable.setPisoUbicacionCliente(cliente.getUbicacionFacturacion().getPiso());
+      clienteEmbeddable.setDepartamentoUbicacionCliente(
+          cliente.getUbicacionFacturacion().getDepartamento());
+      clienteEmbeddable.setNombreLocalidadCliente(
+          cliente.getUbicacionFacturacion().getLocalidad().getNombre());
+      clienteEmbeddable.setCodigoPostalLocalidadCliente(
+          cliente.getUbicacionFacturacion().getLocalidad().getCodigoPostal());
+      clienteEmbeddable.setCostoEnvioLocalidadCliente(
+          cliente.getUbicacionFacturacion().getLocalidad().getCostoEnvio());
+      clienteEmbeddable.setNombreProvinciaCliente(
+          cliente.getUbicacionFacturacion().getLocalidad().getProvincia().getNombre());
+    }
+    return clienteEmbeddable;
   }
 }

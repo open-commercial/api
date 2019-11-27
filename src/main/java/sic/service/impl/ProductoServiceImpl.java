@@ -646,16 +646,21 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public Map<Long, BigDecimal> getProductosSinStockDisponible(
-      Long idSucursal, long[] idProducto, BigDecimal[] cantidad) {
+      ProductosParaVerificarStockDTO productosParaVerificarStockDTO) {
     Map<Long, BigDecimal> productos = new HashMap<>();
-    int longitudIds = idProducto.length;
-    int longitudCantidades = cantidad.length;
+    int longitudIds = productosParaVerificarStockDTO.getIdProducto().length;
+    int longitudCantidades = productosParaVerificarStockDTO.getCantidad().length;
     if (longitudIds == longitudCantidades) {
       for (int i = 0; i < longitudIds; i++) {
-        BigDecimal cantidadLambda = cantidad[i];
-        Producto producto = this.getProductoNoEliminadoPorId(idProducto[i]);
+        BigDecimal cantidadLambda = productosParaVerificarStockDTO.getCantidad()[i];
+        Producto producto =
+            this.getProductoNoEliminadoPorId(productosParaVerificarStockDTO.getIdProducto()[i]);
         producto.getCantidadEnSucursales().stream()
-            .filter(cantidadEnSucursal -> cantidadEnSucursal.getIdSucursal().equals(idSucursal))
+            .filter(
+                cantidadEnSucursal ->
+                    cantidadEnSucursal
+                        .getIdSucursal()
+                        .equals(productosParaVerificarStockDTO.getIdSucursal()))
             .forEach(
                 cantidadEnSucursal -> {
                   if (!producto.isIlimitado()

@@ -29,7 +29,7 @@ public interface IProductoService {
 
   BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal gananciaPorcentaje);
 
-  Map<Long, BigDecimal> getProductosSinStockDisponible(Long idSucursal, long[] idProducto, BigDecimal[] cantidad);
+  Map<Long, BigDecimal> getProductosSinStockDisponible(ProductosParaVerificarStockDTO productosParaVerificarStockDTO);
 
   BigDecimal calcularGananciaPorcentaje(
       BigDecimal precioDeListaNuevo,

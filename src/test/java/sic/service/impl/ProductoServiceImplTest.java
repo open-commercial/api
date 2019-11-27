@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.modelo.Producto;
+import sic.modelo.ProductosParaVerificarStockDTO;
 import sic.repository.ProductoRepository;
 
 @ExtendWith(SpringExtension.class)
@@ -68,4 +69,21 @@ class ProductoServiceImplTest {
     BigDecimal resultadoObtenido = productoService.calcularPrecioLista(pvp, ivaPorcentaje);
     assertEquals(resultadoEsperado, resultadoObtenido);
   }
+
+//  @Test
+//  void shouldGetProductosSinStockDisponible() {
+//    Producto producto = new Producto();
+//    producto.setIdProducto(1L);
+//    producto.setCantidadTotalEnSucursales(BigDecimal.TEN);
+//    //producto.setCantidadEnSucursales();
+//    producto.setIlimitado(false);
+//    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+//    long[] idProducto = {1};
+//    BigDecimal[] cantidad = {BigDecimal.TEN.add(BigDecimal.ONE)};
+//    ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
+//        ProductosParaVerificarStockDTO.builder().cantidad(cantidad).idProducto(idProducto).build();
+//    Map<Long, BigDecimal> resultadoObtenido =
+//        productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
+//    Assertions.assertFalse(resultadoObtenido.isEmpty());
+//  }
 }
