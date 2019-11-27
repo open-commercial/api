@@ -157,7 +157,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{medida}.getNombre()]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField pattern=" #,##0.##">
 				<reportElement x="340" y="0" width="80" height="20" uuid="74b3a3f4-76bb-4f4d-96dd-b91848c76ba2"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{bulto}.doubleValue()]]></textFieldExpression>
@@ -171,7 +171,7 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[java.time.LocalDateTime.now()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[java.util.Date.from(java.time.LocalDateTime.now().atZone(java.time.ZoneId.systemDefault()).toInstant())]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="0" width="40" height="12" uuid="a57c4be2-9a1d-415e-8c3a-9d42931472de">
