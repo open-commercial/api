@@ -21,7 +21,6 @@
 	<field name="fecha" class="java.time.LocalDateTime"/>
 	<field name="serie" class="java.lang.Long"/>
 	<field name="numero" class="java.lang.Long"/>
-	<field name="fechaVencimiento" class="java.time.LocalDate"/>
 	<field name="nombreSucursal" class="java.lang.String"/>
 	<field name="descripcion" class="java.lang.String"/>
 	<field name="monto" class="java.math.BigDecimal"/>
@@ -279,7 +278,7 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				<textElement textAlignment="Center">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{nombreSucursal} ]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{nombreSucursal}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy HH:mm:ss">
 				<reportElement stretchType="ElementGroupHeight" x="1" y="0" width="87" height="15" uuid="40bb9abf-b844-4456-aeda-6e3608ffb5e0">

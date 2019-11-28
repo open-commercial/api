@@ -305,10 +305,16 @@ public class PedidoServiceImpl implements IPedidoService {
     if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_FACTURACION) {
       pedido.setDetalleEnvio(
           modelMapper.map(pedido.getCliente().getUbicacionFacturacion(), UbicacionDTO.class));
+      if (pedido.getCliente().getUbicacionEnvio() == null) {
+          pedido.getCliente().setUbicacionEnvio(pedido.getCliente().getUbicacionFacturacion());
+      }
     }
     if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_ENVIO) {
       pedido.setDetalleEnvio(
           modelMapper.map(pedido.getCliente().getUbicacionEnvio(), UbicacionDTO.class));
+      if (pedido.getCliente().getUbicacionFacturacion() == null) {
+        pedido.getCliente().setUbicacionFacturacion(pedido.getCliente().getUbicacionEnvio());
+      }
     }
     if (tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
       pedido.setDetalleEnvio(

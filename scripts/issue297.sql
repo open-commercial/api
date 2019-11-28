@@ -129,3 +129,7 @@ alter TABLE renglonpedido ADD COLUMN urlImagenItem varchar(255) after medidaItem
 alter TABLE renglonpedido ADD COLUMN oferta bit(1) after urlImagenItem;
 
 alter TABLE pedido drop column fechaVencimiento;
+
+alter TABLE rengloncuentacorriente drop column fechaVencimiento;
+alter TABLE rengloncuentacorriente drop column cae;
+

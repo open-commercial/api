@@ -51,9 +51,6 @@ public class RenglonCuentaCorriente implements Serializable {
     @NotNull(message = "{mensaje_renglon_cuenta_corriente_fecha_vacia}")
     private LocalDateTime fecha;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private LocalDate fechaVencimiento;
-
     @Column(precision = 25, scale = 15)
     private BigDecimal monto;
     
@@ -76,9 +73,6 @@ public class RenglonCuentaCorriente implements Serializable {
     @JoinColumn(name = "idRecibo", referencedColumnName = "idRecibo")  
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Recibo recibo;
-
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Long cae;
 
     @JsonGetter("idSucursal")
     public Long getIdSucursal() {

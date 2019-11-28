@@ -1193,7 +1193,6 @@ public class NotaServiceImpl implements INotaService {
       nota.setVencimientoCae(comprobante.getVencimientoCAE());
       nota.setNumSerieAfip(comprobante.getNumSerieAfip());
       nota.setNumNotaAfip(comprobante.getNumFacturaAfip());
-      cuentaCorrienteService.updateCAENota(nota.getIdNota(), comprobante.getCae());
     } else {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_comprobanteAFIP_invalido", null, Locale.getDefault()));

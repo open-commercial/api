@@ -632,7 +632,6 @@ public class FacturaServiceImpl implements IFacturaService {
     fv.setVencimientoCae(comprobante.getVencimientoCAE());
     fv.setNumSerieAfip(comprobante.getNumSerieAfip());
     fv.setNumFacturaAfip(comprobante.getNumFacturaAfip());
-    cuentaCorrienteService.updateCAEFactura(fv.getIdFactura(), comprobante.getCae());
     return fv;
   }
 

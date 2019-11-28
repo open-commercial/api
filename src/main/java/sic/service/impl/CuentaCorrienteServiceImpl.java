@@ -286,7 +286,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     rcc.setNumero(factura.getNumFactura());
     rcc.setFactura(factura);
     rcc.setFecha(factura.getFecha());
-    rcc.setFechaVencimiento(factura.getFechaVencimiento());
     rcc.setIdMovimiento(factura.getIdFactura());
     rcc.setMonto(factura.getTotal().negate());
     cc.getRenglones().add(rcc);
@@ -320,7 +319,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       rcc.setNota(nota);
       rcc.setFecha(nota.getFecha());
       rcc.setIdMovimiento(nota.getIdNota());
-      if (nota.getMovimiento() == Movimiento.COMPRA) rcc.setCae(nota.getCae());
       cc.getRenglones().add(rcc);
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
@@ -508,15 +506,5 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     return renglonCuentaCorrienteRepository
         .findTop2ByAndCuentaCorrienteAndEliminadoOrderByIdRenglonCuentaCorrienteDesc(
             cuentaCorriente, false);
-  }
-
-  @Override
-  public int updateCAEFactura(long idFactura, long cae) {
-    return renglonCuentaCorrienteRepository.updateCaeFactura(idFactura, cae);
-  }
-
-  @Override
-  public int updateCAENota(long idNota, long cae) {
-    return renglonCuentaCorrienteRepository.updateCaeNota(idNota, cae);
   }
 }
