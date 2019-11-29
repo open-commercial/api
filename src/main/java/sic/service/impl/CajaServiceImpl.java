@@ -2,7 +2,6 @@ package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 

@@ -1725,7 +1725,7 @@ class AppIntegrationTest {
     assertEquals(cliente.getNroCliente(), facturaVenta.getNroDeCliente());
     assertEquals("Peter Parker", facturaVenta.getNombreFiscalCliente());
     assertEquals(CategoriaIVA.RESPONSABLE_INSCRIPTO, facturaVenta.getCategoriaIVACliente());
-    assertEquals("Sucursal Test test (test)", facturaVenta.getNombreUsuario());
+    assertEquals("Usuario Test test (test)", facturaVenta.getNombreUsuario());
     assertEquals(ubicacionSinModificacion, facturaVenta.getUbicacionCliente());
   }
 
@@ -6669,17 +6669,144 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldBuscarUsuarios(){
-    BusquedaUsuarioCriteria criteria = BusquedaUsuarioCriteria.builder().pagina(0).build();
-    HttpEntity<BusquedaUsuarioCriteria> requestEntity = new HttpEntity<>(criteria);
+  void shouldCrearProductosEnTresSucursales(){
+    this.crearDosProductos("A", "B");
+    BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder().pagina(0).build();
+    HttpEntity<BusquedaProductoCriteria> requestEntity = new HttpEntity<>(criteria);
     PaginaRespuestaRest<ProductoDTO> paginaRespuestaRest =
       restTemplate
         .exchange(
-          apiPrefix + "/usuarios/busqueda/criteria",
+          apiPrefix + "/productos/busqueda/criteria",
           HttpMethod.POST,
           requestEntity,
           new ParameterizedTypeReference<PaginaRespuestaRest<ProductoDTO>>() {})
         .getBody();
     assertNotNull(paginaRespuestaRest);
+    List<ProductoDTO> productosRecuperados = paginaRespuestaRest.getContent();
+    assertEquals(new BigDecimal("10.000000000000000"), productosRecuperados.get(0).getCantidadTotalEnSucursales());
+    assertEquals(new BigDecimal("6.000000000000000"), productosRecuperados.get(1).getCantidadTotalEnSucursales());
+    assertEquals(1, productosRecuperados.get(0).getCantidadEnSucursales().size());
+    assertEquals(1, productosRecuperados.get(1).getCantidadEnSucursales().size());
+    CantidadEnSucursalDTO cantidadEnSucursalDTO = CantidadEnSucursalDTO.builder().idSucursal(1L).build();
+    assertTrue(productosRecuperados.get(0).getCantidadEnSucursales().contains(cantidadEnSucursalDTO));
+    assertTrue(productosRecuperados.get(1).getCantidadEnSucursales().contains(cantidadEnSucursalDTO));
+    this.shouldCrearSucursalResponsableInscripto();
+    paginaRespuestaRest =
+      restTemplate
+        .exchange(
+          apiPrefix + "/productos/busqueda/criteria",
+          HttpMethod.POST,
+          requestEntity,
+          new ParameterizedTypeReference<PaginaRespuestaRest<ProductoDTO>>() {})
+        .getBody();
+    assertNotNull(paginaRespuestaRest);
+    productosRecuperados = paginaRespuestaRest.getContent();
+    ProductoDTO productoParaModificar = productosRecuperados.get(0);
+    Set<CantidadEnSucursalDTO> cantidadEnSucursal = productoParaModificar.getCantidadEnSucursales();
+    cantidadEnSucursal.remove(CantidadEnSucursalDTO.builder().idSucursal(1L).build());
+    cantidadEnSucursal.stream().filter(cantidad -> cantidad.getIdSucursal() == 2L).forEach(cantidad -> cantidad.setCantidad(BigDecimal.TEN));
+    productoParaModificar.setCantidadEnSucursales(cantidadEnSucursal);
+    restTemplate.put(apiPrefix + "/productos", productoParaModificar);
+    paginaRespuestaRest =
+      restTemplate
+        .exchange(
+          apiPrefix + "/productos/busqueda/criteria",
+          HttpMethod.POST,
+          requestEntity,
+          new ParameterizedTypeReference<PaginaRespuestaRest<ProductoDTO>>() {})
+        .getBody();
+    assertNotNull(paginaRespuestaRest);
+    productosRecuperados = paginaRespuestaRest.getContent();
+    assertEquals(new BigDecimal("20.000000000000000"), productosRecuperados.get(0).getCantidadTotalEnSucursales());
+    assertEquals(new BigDecimal("6.000000000000000"), productosRecuperados.get(1).getCantidadTotalEnSucursales());
+    assertEquals(2, productosRecuperados.get(0).getCantidadEnSucursales().size());
+    assertEquals(2, productosRecuperados.get(1).getCantidadEnSucursales().size());
+    cantidadEnSucursalDTO = CantidadEnSucursalDTO.builder().idSucursal(2L).build();
+    assertTrue(productosRecuperados.get(0).getCantidadEnSucursales().contains(cantidadEnSucursalDTO));
+    assertTrue(productosRecuperados.get(1).getCantidadEnSucursales().contains(cantidadEnSucursalDTO));
+    this.shouldCrearSucursalMonotributista();
+    paginaRespuestaRest =
+      restTemplate
+        .exchange(
+          apiPrefix + "/productos/busqueda/criteria",
+          HttpMethod.POST,
+          requestEntity,
+          new ParameterizedTypeReference<PaginaRespuestaRest<ProductoDTO>>() {})
+        .getBody();
+    assertNotNull(paginaRespuestaRest);
+    productosRecuperados = paginaRespuestaRest.getContent();
+    productoParaModificar = productosRecuperados.get(0);
+    cantidadEnSucursal = productoParaModificar.getCantidadEnSucursales();
+    cantidadEnSucursal.remove(CantidadEnSucursalDTO.builder().idSucursal(1L).build());
+    cantidadEnSucursal.remove(CantidadEnSucursalDTO.builder().idSucursal(2L).build());
+    cantidadEnSucursal.stream().filter(cantidad -> cantidad.getIdSucursal() == 3L).forEach(cantidad -> cantidad.setCantidad(BigDecimal.ONE));
+    productoParaModificar.setCantidadEnSucursales(cantidadEnSucursal);
+    restTemplate.put(apiPrefix + "/productos", productoParaModificar);
+    paginaRespuestaRest =
+      restTemplate
+        .exchange(
+          apiPrefix + "/productos/busqueda/criteria",
+          HttpMethod.POST,
+          requestEntity,
+          new ParameterizedTypeReference<PaginaRespuestaRest<ProductoDTO>>() {})
+        .getBody();
+    assertNotNull(paginaRespuestaRest);
+    productosRecuperados = paginaRespuestaRest.getContent();
+    assertEquals(new BigDecimal("21.000000000000000"), productosRecuperados.get(0).getCantidadTotalEnSucursales());
+    assertEquals(new BigDecimal("6.000000000000000"), productosRecuperados.get(1).getCantidadTotalEnSucursales());
+    assertEquals(3, productosRecuperados.get(0).getCantidadEnSucursales().size());
+    assertEquals(3, productosRecuperados.get(1).getCantidadEnSucursales().size());
+    cantidadEnSucursalDTO = CantidadEnSucursalDTO.builder().idSucursal(3L).build();
+    assertTrue(productosRecuperados.get(0).getCantidadEnSucursales().contains(cantidadEnSucursalDTO));
+    assertTrue(productosRecuperados.get(1).getCantidadEnSucursales().contains(cantidadEnSucursalDTO));
+  }
+
+  @Test
+  void shouldBuscarUsuarios(){
+    BusquedaUsuarioCriteria criteria = BusquedaUsuarioCriteria.builder()
+      .apellido("test")
+      .email("test@test.com")
+      .nombre("Usuario Test")
+      .ordenarPor("nombre")
+      .roles(Collections.singletonList(Rol.ADMINISTRADOR))
+      .sentido("ASC")
+      .username("test")
+      .pagina(0).build();
+    HttpEntity<BusquedaUsuarioCriteria> requestEntity = new HttpEntity<>(criteria);
+    PaginaRespuestaRest<UsuarioDTO> paginaRespuestaRest =
+      restTemplate
+        .exchange(
+          apiPrefix + "/usuarios/busqueda/criteria",
+          HttpMethod.POST,
+          requestEntity,
+          new ParameterizedTypeReference<PaginaRespuestaRest<UsuarioDTO>>() {})
+        .getBody();
+    assertNotNull(paginaRespuestaRest);
+    assertEquals(1, paginaRespuestaRest.getContent().size());
+    assertEquals("Usuario Test", paginaRespuestaRest.getContent().get(0).getNombre());
+  }
+
+  @Test
+  void shouldBuscarCaja() {
+    BusquedaCajaCriteria criteria = BusquedaCajaCriteria.builder()
+      .fechaDesde(LocalDateTime.now())
+      .fechaHasta(LocalDateTime.now())
+      .idSucursal(1L)
+      .idUsuarioApertura(1L)
+      .ordenarPor("fechaApertura")
+      .sentido("ASC")
+      .pagina(0).build();
+    this.abrirCaja();
+    HttpEntity<BusquedaCajaCriteria> requestEntity = new HttpEntity<>(criteria);
+    PaginaRespuestaRest<CajaDTO> paginaRespuestaRest =
+      restTemplate
+        .exchange(
+          apiPrefix + "/cajas/busqueda/criteria",
+          HttpMethod.POST,
+          requestEntity,
+          new ParameterizedTypeReference<PaginaRespuestaRest<CajaDTO>>() {})
+        .getBody();
+    assertNotNull(paginaRespuestaRest);
+    assertEquals(1, paginaRespuestaRest.getContent().size());
   }
 }

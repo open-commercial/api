@@ -15,7 +15,6 @@ public class BusquedaCajaCriteria {
     private Long idSucursal;
     private LocalDateTime fechaDesde;
     private LocalDateTime fechaHasta;
-    private int cantidadDeRegistros;
     private Long idUsuarioApertura;
     private Long idUsuarioCierre;
     private Integer pagina;

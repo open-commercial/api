@@ -20,7 +20,7 @@ VALUES ('RESPONSABLE_INSCRIPTO',false,'support@globocorporation.com','2012-08-08
 
 INSERT INTO usuario (apellido, eliminado, email, habilitado, id_sucursal_predeterminada, nombre,
     password, password_recovery_key, password_recovery_key_expiration_date, token, username)
-VALUES ('test',false,'test@test.com',true,1,'Sucursal Test','098f6bcd4621d373cade4e832627b4f6','',NULL,'','test'),
+VALUES ('test',false,'test@test.com',true,1,'Usuario Test','098f6bcd4621d373cade4e832627b4f6','',NULL,'','test'),
     ('Rockefeller',false,'marce.r@gmail.com',false,1,'Marcelo','9cdcde4755ceeb6b5ad173c606e8997a',0,NULL,NULL,'marce');
 
 INSERT INTO rol (id_usuario, nombre)

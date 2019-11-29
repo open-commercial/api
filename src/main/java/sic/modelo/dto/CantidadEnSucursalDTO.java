@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"idCantidadEnSucursal", "idSucursal"})
+@EqualsAndHashCode(of = "idSucursal")
 @Builder
 public class CantidadEnSucursalDTO implements Serializable {
 

@@ -199,6 +199,7 @@ public class ProductoController {
               cantidadEnSucursales.add(cantidadEnSucursal);
             });
     productoPorActualizar.setCantidadEnSucursales(cantidadEnSucursales);
+    productoPorActualizar.getCantidadEnSucursales().addAll(productoPersistido.getCantidadEnSucursales());
     productoPorActualizar.setCantidadTotalEnSucursales(
         cantidadEnSucursales
             .stream()

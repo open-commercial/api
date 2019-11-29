@@ -71,11 +71,16 @@ public class Sucursal implements Serializable {
 
   @JsonGetter("detalleUbicacion")
   public String getDetalleUbicacion() {
-    return (ubicacion.getCalle() != null ? ubicacion.getCalle() + " " : "")
-        + (ubicacion.getNumero() != null ? ubicacion.getNumero() + " " : "")
-        + (ubicacion.getPiso() != null ? ubicacion.getPiso() + " " : "")
-        + (ubicacion.getDepartamento() != null ? ubicacion.getDepartamento() + " " : "")
-        + (ubicacion.getNombreLocalidad() != null ? ubicacion.getNombreLocalidad() + " " : "")
-        + (ubicacion.getNombreProvincia() != null ? ubicacion.getNombreProvincia() : "");
+    String detalleUbicacion = "";
+    if (ubicacion != null) {
+      detalleUbicacion =
+          (ubicacion.getCalle() != null ? ubicacion.getCalle() + " " : "")
+              + (ubicacion.getNumero() != null ? ubicacion.getNumero() + " " : "")
+              + (ubicacion.getPiso() != null ? ubicacion.getPiso() + " " : "")
+              + (ubicacion.getDepartamento() != null ? ubicacion.getDepartamento() + " " : "")
+              + (ubicacion.getNombreLocalidad() != null ? ubicacion.getNombreLocalidad() + " " : "")
+              + (ubicacion.getNombreProvincia() != null ? ubicacion.getNombreProvincia() : "");
+    }
+    return detalleUbicacion;
   }
 }
