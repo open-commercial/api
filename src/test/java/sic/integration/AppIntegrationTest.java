@@ -6809,4 +6809,52 @@ class AppIntegrationTest {
     assertNotNull(paginaRespuestaRest);
     assertEquals(1, paginaRespuestaRest.getContent().size());
   }
+
+  @Test
+  void shouldBuscarCuentasCorrientes() {
+    this.shouldCrearClienteResponsableInscripto();
+    this.shouldCrearFacturaVentaB();
+    this.crearReciboParaCliente(2800, 1L, 2L);
+    this.crearReciboParaCliente(500, 1L, 3L);
+    BusquedaCuentaCorrienteClienteCriteria criteria = BusquedaCuentaCorrienteClienteCriteria.builder()
+      .pagina(0)
+      .ordenarPor("cliente.nombreFiscal")
+      .sentido("DESC")
+      .build();
+    HttpEntity<BusquedaCuentaCorrienteClienteCriteria> requestEntity = new HttpEntity<>(criteria);
+    PaginaRespuestaRest<CuentaCorrienteCliente> paginaRespuestaRest =
+      restTemplate
+        .exchange(
+          apiPrefix + "/cuentas-corriente/clientes/busqueda/criteria",
+          HttpMethod.POST,
+          requestEntity,
+          new ParameterizedTypeReference<PaginaRespuestaRest<CuentaCorrienteCliente>>() {})
+        .getBody();
+    assertNotNull(paginaRespuestaRest);
+    assertEquals(3, paginaRespuestaRest.getContent().size());
+    ClienteDTO clienteParaBuscar = restTemplate.getForObject(apiPrefix + "/clientes/1", ClienteDTO.class);
+    criteria = BusquedaCuentaCorrienteClienteCriteria.builder()
+      .idCliente(clienteParaBuscar.getIdCliente())
+      .nombreFiscal(clienteParaBuscar.getNombreFiscal())
+      .nombreFantasia(clienteParaBuscar.getNombreFantasia())
+      .idFiscal(clienteParaBuscar.getIdFiscal())
+      .idViajante(clienteParaBuscar.getIdViajante())
+      .idProvincia(clienteParaBuscar.getUbicacionFacturacion().getIdProvincia())
+      .idLocalidad(clienteParaBuscar.getUbicacionFacturacion().getIdLocalidad())
+      .nroDeCliente(clienteParaBuscar.getNroCliente())
+    .build();
+    requestEntity = new HttpEntity<>(criteria);
+    paginaRespuestaRest =
+      restTemplate
+        .exchange(
+          apiPrefix + "/cuentas-corriente/clientes/busqueda/criteria",
+          HttpMethod.POST,
+          requestEntity,
+          new ParameterizedTypeReference<PaginaRespuestaRest<CuentaCorrienteCliente>>() {})
+        .getBody();
+    assertNotNull(paginaRespuestaRest);
+    assertEquals(1, paginaRespuestaRest.getContent().size());
+    assertEquals(new BigDecimal("-5616.8"), paginaRespuestaRest.getContent().get(0).getSaldo());
+    assertEquals(clienteParaBuscar.getIdCliente(), paginaRespuestaRest.getContent().get(0).getCliente().getIdCliente());
+  }
 }

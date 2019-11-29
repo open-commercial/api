@@ -159,7 +159,8 @@ public class ClienteServiceImpl implements IClienteService {
         this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
   }
 
-  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+  private Pageable getPageable(Integer pagina, String ordenarPor, String sentido) {
+    if (pagina == null) pagina = 0;
     String ordenDefault = "nombreFiscal";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(

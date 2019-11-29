@@ -377,14 +377,14 @@ $P{pedido}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Mo
 				</textElement>
 				<textFieldExpression><![CDATA[$F{precioUnitario}.doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="##0.##">
+			<textField pattern="##0.## %">
 				<reportElement x="461" y="0" width="39" height="15" uuid="f3e07bc2-0b6a-4759-80ae-837e9ad074b8">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{bonificacionPorcentaje}.doubleValue()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{bonificacionPorcentaje}.doubleValue() / 100]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.##">
 				<reportElement x="500" y="0" width="55" height="15" uuid="e044f181-0b15-492c-bf20-af4d406e94db">

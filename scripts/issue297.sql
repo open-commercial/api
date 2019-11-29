@@ -133,3 +133,7 @@ alter TABLE pedido drop column fechaVencimiento;
 alter TABLE rengloncuentacorriente drop column fechaVencimiento;
 alter TABLE rengloncuentacorriente drop column cae;
 
+update configuracionsucursal 
+set configuracionsucursal.puntoDeRetiro = true
+where configuracionsucursal.idSucursal = 5 or configuracionsucursal.idSucursal = 1;
+

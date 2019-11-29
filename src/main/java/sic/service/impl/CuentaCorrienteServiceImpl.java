@@ -180,7 +180,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido(), "cliente.nombreFiscal"));
   }
 
-  private Pageable getPageable(int pagina, String ordenarPor, String sentido, String ordenDefault) {
+  private Pageable getPageable(Integer pagina, String ordenarPor, String sentido, String ordenDefault) {
+    if (pagina == null) pagina = 0;
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(
           pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));

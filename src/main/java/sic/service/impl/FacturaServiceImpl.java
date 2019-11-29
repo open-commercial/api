@@ -246,7 +246,8 @@ public class FacturaServiceImpl implements IFacturaService {
     return renglonFacturaRepository.findById(idRenglonFactura).orElse(null); // orElseThrow
   }
 
-  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+  private Pageable getPageable(Integer pagina, String ordenarPor, String sentido) {
+    if (pagina == null) pagina = 0;
     String ordenDefault = "fecha";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(

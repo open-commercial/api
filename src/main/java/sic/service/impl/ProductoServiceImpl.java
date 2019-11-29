@@ -220,7 +220,8 @@ public class ProductoServiceImpl implements IProductoService {
         .getContent();
   }
 
-  private Pageable getPageable(int pagina, String ordenarPor, String sentido, int tamanioPagina) {
+  private Pageable getPageable(Integer pagina, String ordenarPor, String sentido, int tamanioPagina) {
+    if (pagina == null) pagina = 0;
     String ordenDefault = "descripcion";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(pagina, tamanioPagina, new Sort(Sort.Direction.ASC, ordenDefault));

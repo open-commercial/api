@@ -464,14 +464,14 @@ $P{facturaVenta}.getTipoComprobante().toString().equals("FACTURA_C"))]]></printW
 				</textElement>
 				<textFieldExpression><![CDATA[$F{precioUnitario}.doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="##0.##">
+			<textField pattern="##0.## %">
 				<reportElement x="459" y="0" width="39" height="15" uuid="f3e07bc2-0b6a-4759-80ae-837e9ad074b8">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{bonificacionPorcentaje}.doubleValue()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{bonificacionPorcentaje}.doubleValue()  / 100]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.##">
 				<reportElement x="498" y="0" width="57" height="15" uuid="e044f181-0b15-492c-bf20-af4d406e94db">
