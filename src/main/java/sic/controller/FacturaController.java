@@ -94,7 +94,11 @@ public class FacturaController {
               "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault()));
     }
     fv.setClienteEmbedded(clienteService.crearClienteEmbedded(cliente));
-    fv.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(nuevaFacturaVentaDTO.getFacturaVenta().getIdTransportista()));
+    if (nuevaFacturaVentaDTO.getFacturaVenta().getIdTransportista() != null) {
+      fv.setTransportista(
+          transportistaService.getTransportistaNoEliminadoPorId(
+              nuevaFacturaVentaDTO.getFacturaVenta().getIdTransportista()));
+    }
     fv.setFecha(LocalDateTime.now());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     fv.setUsuario(
