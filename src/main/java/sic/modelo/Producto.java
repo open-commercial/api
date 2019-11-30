@@ -28,7 +28,7 @@ import sic.controller.Views;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "descripcion")
+@EqualsAndHashCode(of = {"idProducto", "descripcion"})
 @ToString
 @JsonIgnoreProperties({"medida", "rubro", "proveedor"})
 @JsonView(Views.Vendedor.class)

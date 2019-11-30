@@ -12,21 +12,43 @@ CREATE TABLE cantidadensucursal (
   CONSTRAINT FKlbd386vgya8ugkt0ynp67k8wl FOREIGN KEY (idProducto) REFERENCES producto (idProducto)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-UPDATE producto SET eliminado = true where id_Empresa = 5;
+UPDATE producto set publico = false 
+where id_Empresa = 5;
+
+UPDATE producto set descripcion = concat(descripcion, "_")
+where id_Empresa = 5 and eliminado = 0;
+
+UPDATE producto set codigo = concat(codigo, "_")
+where id_Empresa = 5 and eliminado = 0 and codigo <> "";
+
+UPDATE producto set descripcion = concat(descripcion, "_")
+where id_Empresa = 2 and eliminado = 0;
+
+UPDATE producto set codigo = concat(codigo, "_")
+where id_Empresa = 2 and eliminado = 0 and codigo <> "";
 
 insert into cantidadensucursal(cantidad, estante, estanteria, id_Empresa, idProducto)
 select producto.cantidad, producto.estante, producto.estanteria, 1, producto.idProducto
-from producto where producto.eliminado = false;
+from producto where producto.id_Empresa = 1 and producto.eliminado = 0;
 
 insert into cantidadensucursal(cantidad, estante, estanteria, id_Empresa, idProducto)
 select 0, "", "", 5, producto.idProducto
-from producto where producto.eliminado = false;
+from producto where producto.id_Empresa = 1 and producto.eliminado = 0;
+
+insert into cantidadensucursal(cantidad, estante, estanteria, id_Empresa, idProducto)
+select producto.cantidad, producto.estante, producto.estanteria, 5, producto.idProducto
+from producto where producto.id_Empresa = 5 and producto.eliminado = 0;
+
+insert into cantidadensucursal(cantidad, estante, estanteria, id_Empresa, idProducto)
+select 0, "", "", 1, producto.idProducto
+from producto where producto.id_Empresa = 5 and producto.eliminado = 0;
+
+-- test
  
 ALTER TABLE producto DROP estante;
 ALTER TABLE producto DROP estanteria;
  
-ALTER TABLE producto
-	DROP FOREIGN KEY FKmicsquyd17liutvxtw6uao7fo;
+ALTER TABLE producto DROP FOREIGN KEY FKmicsquyd17liutvxtw6uao7fo;
     
 ALTER TABLE producto DROP id_Empresa;
 
