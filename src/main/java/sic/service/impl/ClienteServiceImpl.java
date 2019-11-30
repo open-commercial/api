@@ -209,16 +209,16 @@ public class ClienteServiceImpl implements IClienteService {
       }
     }
     // Ubicacion
-    if (cliente.getUbicacionFacturacion() != null
-        && cliente.getUbicacionEnvio() != null
-        && operacion == TipoDeOperacion.ACTUALIZACION
-        && (cliente.getUbicacionFacturacion().getIdUbicacion() != 0L)
-        && (cliente.getUbicacionEnvio().getIdUbicacion() != 0L)
-        && (cliente.getUbicacionFacturacion().getIdUbicacion()
-            == cliente.getUbicacionEnvio().getIdUbicacion())) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_ubicacion_facturacion_envio_iguales", null, Locale.getDefault()));
-    }
+//    if (cliente.getUbicacionFacturacion() != null
+//        && cliente.getUbicacionEnvio() != null
+//        && operacion == TipoDeOperacion.ACTUALIZACION
+//        && (cliente.getUbicacionFacturacion().getIdUbicacion() != 0L)
+//        && (cliente.getUbicacionEnvio().getIdUbicacion() != 0L)
+//        && (cliente.getUbicacionFacturacion().getIdUbicacion()
+//            == cliente.getUbicacionEnvio().getIdUbicacion())) {
+//      throw new BusinessServiceException(messageSource.getMessage(
+//        "mensaje_ubicacion_facturacion_envio_iguales", null, Locale.getDefault()));
+//    }
     if (cliente.getUbicacionFacturacion() != null
         && cliente.getUbicacionFacturacion().getLocalidad() == null) {
       throw new BusinessServiceException(messageSource.getMessage(
