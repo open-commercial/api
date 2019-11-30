@@ -108,10 +108,10 @@ public class UsuarioController {
     }
   }
 
-  @PutMapping("/usuarios/{idUsuario}/empresas/{idEmpresaPredeterminada}")
-  public void actualizarIdEmpresaDeUsuario(
-      @PathVariable long idUsuario, @PathVariable long idEmpresaPredeterminada) {
-    usuarioService.actualizarIdEmpresaDeUsuario(idUsuario, idEmpresaPredeterminada);
+  @PutMapping("/usuarios/{idUsuario}/sucursales/{idSucursalPredeterminada}")
+  public void actualizarIdSucursalDeUsuario(
+      @PathVariable long idUsuario, @PathVariable long idSucursalPredeterminada) {
+    usuarioService.actualizarIdSucursalDeUsuario(idUsuario, idSucursalPredeterminada);
   }
 
   @DeleteMapping("/usuarios/{idUsuario}")

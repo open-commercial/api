@@ -27,9 +27,9 @@ import javax.validation.constraints.PastOrPresent;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@EqualsAndHashCode(of = {"numSerie", "numRecibo", "empresa", "fecha"})
+@EqualsAndHashCode(of = {"numSerie", "numRecibo", "sucursal", "fecha"})
+@JsonIgnoreProperties({"formaDePago", "sucursal", "cliente", "usuario", "proveedor"})
 @JsonView(Views.Comprador.class)
-@JsonIgnoreProperties({"formaDePago", "empresa", "cliente", "usuario", "proveedor"})
 public class Recibo implements Serializable {
 
   @Id
@@ -58,9 +58,9 @@ public class Recibo implements Serializable {
   private FormaDePago formaDePago;
 
   @ManyToOne
-  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-  @NotNull(message = "{mensaje_recibo_empresa_vacia}")
-  private Empresa empresa;
+  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
+  @NotNull(message = "{mensaje_recibo_sucursal_vacia}")
+  private Sucursal sucursal;
 
   @ManyToOne
   @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
@@ -89,14 +89,14 @@ public class Recibo implements Serializable {
     return formaDePago.getNombre();
   }
 
-  @JsonGetter("idEmpresa")
-  public long getIdEmpresa() {
-    return empresa.getIdEmpresa();
+  @JsonGetter("idSucursal")
+  public long getIdSucursal() {
+    return sucursal.getIdSucursal();
   }
 
-  @JsonGetter("nombreEmpresa")
-  public String getNombreEmpresa() {
-    return empresa.getNombre();
+  @JsonGetter("nombreSucursal")
+  public String getNombreSucursal() {
+    return sucursal.getNombre();
   }
 
   @JsonGetter("idCliente")

@@ -9,7 +9,7 @@ import javax.validation.Valid;
 
 public interface IClienteService {
 
-  void actualizar(@Valid Cliente clientePorActualizar, Cliente clientePersistido);
+  Cliente actualizar(@Valid Cliente clientePorActualizar, Cliente clientePersistido);
 
   Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long idUsuario);
 
@@ -17,11 +17,9 @@ public interface IClienteService {
 
   Cliente getClienteNoEliminadoPorId(long idCliente);
 
-  Cliente getClientePorIdFiscal(Long idFiscal, Empresa empresa);
+  Cliente getClientePredeterminado();
 
-  Cliente getClientePredeterminado(Empresa empresa);
-
-  boolean existeClientePredeterminado(Empresa empresa);
+  boolean existeClientePredeterminado();
 
   void setClientePredeterminado(Cliente cliente);
 
@@ -31,7 +29,7 @@ public interface IClienteService {
 
   Cliente getClientePorIdPedido(long idPedido);
 
-  Cliente getClientePorIdUsuarioYidEmpresa(long idUsuario, long idEmpresa);
+  Cliente getClientePorIdUsuario(long idUsuario);
 
   Cliente getClientePorCredencial(Usuario usuarioCredencial);
 
@@ -39,7 +37,7 @@ public interface IClienteService {
 
   int desvincularClienteDeCredencial(long idUsuarioCliente);
 
-  String generarNroDeCliente(Empresa empresa);
+  String generarNroDeCliente();
 
   ClienteEmbeddable crearClienteEmbedded(Cliente cliente);
 }

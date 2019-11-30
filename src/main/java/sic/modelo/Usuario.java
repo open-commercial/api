@@ -58,7 +58,7 @@ public class Usuario implements Serializable {
     @Column(length = 300)
     private String token;
     
-    private long idEmpresaPredeterminada;
+    private long idSucursalPredeterminada;
 
     private String passwordRecoveryKey;
 

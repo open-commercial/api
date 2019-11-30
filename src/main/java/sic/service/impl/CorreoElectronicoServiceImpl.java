@@ -16,13 +16,8 @@ import javax.mail.util.ByteArrayDataSource;
 import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Transport;
-import sic.modelo.ConfiguracionDelSistema;
-import sic.modelo.Empresa;
 import sic.exception.BusinessServiceException;
-import sic.service.IConfiguracionDelSistemaService;
 import sic.service.ICorreoElectronicoService;
-import sic.service.IEmpresaService;
-
 import java.util.Locale;
 import java.util.Properties;
 
@@ -32,35 +27,32 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
   @Value("${SIC_MAIL_ENV}")
   private String mailEnv;
 
-  private final IConfiguracionDelSistemaService configuracionDelSistemaService;
-  private final IEmpresaService empresaService;
+  @Value("${SIC_MAIL_USERNAME}")
+  private String emailUsername;
+
+  @Value("${SIC_MAIL_PASSWORD}")
+  private String emailPassword;
+
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
 
   @Autowired
-  public CorreoElectronicoServiceImpl(
-      IConfiguracionDelSistemaService configuracionDelSistemaService,
-      IEmpresaService empresaService,
-      MessageSource messageSource) {
-    this.configuracionDelSistemaService = configuracionDelSistemaService;
-    this.empresaService = empresaService;
+  public CorreoElectronicoServiceImpl(MessageSource messageSource) {
     this.messageSource = messageSource;
   }
 
   @Override
   @Async
-  public void enviarMailPorEmpresa(
-      long idEmpresa,
+  public void enviarEmail(
       String toEmail,
-      String bbc,
+      String bcc,
       String subject,
       String mensaje,
       byte[] byteArray,
       String attachmentDescription) {
-    Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
-    ConfiguracionDelSistema cds =
-        configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa);
-    if (mailEnv.equals("production") && cds.isEmailSenderHabilitado()) {
+    if (mailEnv.equals("production")
+        && !emailUsername.isEmpty()
+        && !emailPassword.isEmpty()) {
       Properties props = new Properties();
       props.put("mail.smtp.host", "smtp.gmail.com");
       props.put("mail.smtp.port", "587");
@@ -71,18 +63,14 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
             new Authenticator() {
               @Override
               protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(cds.getEmailUsername(), cds.getEmailPassword());
+                return new PasswordAuthentication(emailUsername, emailPassword);
               }
             };
-        Session session = Session.getInstance(props, auth);
-        MimeMessage message = new MimeMessage(session);
+        MimeMessage message = new MimeMessage(Session.getInstance(props, auth));
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        helper.setFrom(
-            configuracionDelSistemaService
-                .getConfiguracionDelSistemaPorId(idEmpresa)
-                .getEmailUsername());
+        helper.setFrom(emailUsername);
         helper.setTo(toEmail);
-        if (bbc != null && !bbc.isEmpty()) helper.setBcc(bbc);
+        if (bcc != null && !bcc.isEmpty()) helper.setBcc(bcc);
         helper.setSubject(subject);
         helper.setText(mensaje);
         if (byteArray != null) {
@@ -91,8 +79,8 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
         }
         Transport.send(helper.getMimeMessage());
       } catch (MessagingException | MailException ex) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_correo_error", null, Locale.getDefault()), ex);
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_correo_error", null, Locale.getDefault()), ex);
       }
     } else {
       logger.error("Mail environment = {}, el mail NO se envió.", mailEnv);

@@ -3,6 +3,7 @@ package sic.service.impl;
 import com.querydsl.core.BooleanBuilder;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
@@ -64,14 +65,9 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public Cliente getClientePorIdFiscal(Long idFiscal, Empresa empresa) {
-    return clienteRepository.findByIdFiscalAndEmpresaAndEliminado(idFiscal, empresa, false);
-  }
-
-  @Override
-  public Cliente getClientePredeterminado(Empresa empresa) {
+  public Cliente getClientePredeterminado() {
     Cliente cliente =
-        clienteRepository.findByEmpresaAndPredeterminadoAndEliminado(empresa, true, false);
+        clienteRepository.findByAndPredeterminadoAndEliminado(true, false);
     if (cliente == null) {
       throw new EntityNotFoundException(messageSource.getMessage(
         "mensaje_cliente_sin_predeterminado", null, Locale.getDefault()));
@@ -80,16 +76,15 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public boolean existeClientePredeterminado(Empresa empresa) {
-    return clienteRepository.existsByEmpresaAndPredeterminadoAndEliminado(empresa, true, false);
+  public boolean existeClientePredeterminado() {
+    return clienteRepository.existsByAndPredeterminadoAndEliminado(true, false);
   }
 
   @Override
   @Transactional
   public void setClientePredeterminado(Cliente cliente) {
     Cliente clientePredeterminadoAnterior =
-        clienteRepository.findByEmpresaAndPredeterminadoAndEliminado(
-            cliente.getEmpresa(), true, false);
+        clienteRepository.findByAndPredeterminadoAndEliminado(true, false);
     if (clientePredeterminadoAnterior != null) {
       clientePredeterminadoAnterior.setPredeterminado(false);
       clienteRepository.save(clientePredeterminadoAnterior);
@@ -146,8 +141,7 @@ public class ClienteServiceImpl implements IClienteService {
             rsPredicate.or(qCliente.viajante.eq(usuarioLogueado));
             break;
           case COMPRADOR:
-            Cliente clienteRelacionado =
-                this.getClientePorIdUsuarioYidEmpresa(idUsuarioLoggedIn, criteria.getIdEmpresa());
+            Cliente clienteRelacionado = this.getClientePorIdUsuario(idUsuarioLoggedIn);
             if (clienteRelacionado != null) {
               rsPredicate.or(qCliente.eq(clienteRelacionado));
             }
@@ -159,12 +153,14 @@ public class ClienteServiceImpl implements IClienteService {
       }
       builder.and(rsPredicate);
     }
-    builder.and(
-        qCliente.empresa.idEmpresa.eq(criteria.getIdEmpresa()).and(qCliente.eliminado.eq(false)));
-    return clienteRepository.findAll(builder, this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
+    builder.and(qCliente.eliminado.eq(false));
+    return clienteRepository.findAll(
+        builder,
+        this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
   }
 
-  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+  private Pageable getPageable(Integer pagina, String ordenarPor, String sentido) {
+    if (pagina == null) pagina = 0;
     String ordenDefault = "nombreFiscal";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(
@@ -194,19 +190,22 @@ public class ClienteServiceImpl implements IClienteService {
     // Duplicados
     // ID Fiscal
     if (cliente.getIdFiscal() != null) {
-      Cliente clienteDuplicado =
-          this.getClientePorIdFiscal(cliente.getIdFiscal(), cliente.getEmpresa());
-      if (operacion == TipoDeOperacion.ACTUALIZACION
-          && clienteDuplicado != null
-          && clienteDuplicado.getIdCliente() != cliente.getIdCliente()) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_cliente_duplicado_idFiscal", null, Locale.getDefault()));
+      List<Cliente> clientes =
+          clienteRepository.findByIdFiscalAndEliminado(cliente.getIdFiscal(), false);
+      if (clientes.size() > 1
+          || operacion == TipoDeOperacion.ACTUALIZACION
+              && !clientes.isEmpty()
+              && clientes.get(0).getIdCliente() != cliente.getIdCliente()) {
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_cliente_duplicado_idFiscal", null, Locale.getDefault()));
       }
       if (operacion == TipoDeOperacion.ALTA
-          && clienteDuplicado != null
+          && !clientes.isEmpty()
           && cliente.getIdFiscal() != null) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_cliente_duplicado_idFiscal", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_cliente_duplicado_idFiscal", null, Locale.getDefault()));
       }
     }
     // Ubicacion
@@ -236,7 +235,7 @@ public class ClienteServiceImpl implements IClienteService {
   @Transactional
   public Cliente guardar(@Valid Cliente cliente) {
     cliente.setEliminado(false);
-    cliente.setNroCliente(this.generarNroDeCliente(cliente.getEmpresa()));
+    cliente.setNroCliente(this.generarNroDeCliente());
     if (cliente.getBonificacion() == null) cliente.setBonificacion(BigDecimal.ZERO);
     if (cliente.getUbicacionFacturacion() != null
         && cliente.getUbicacionFacturacion().getIdLocalidad() != null) {
@@ -256,14 +255,11 @@ public class ClienteServiceImpl implements IClienteService {
     this.validarOperacion(TipoDeOperacion.ALTA, cliente);
     CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
     cuentaCorrienteCliente.setCliente(cliente);
-    cuentaCorrienteCliente.setEmpresa(cliente.getEmpresa());
     cuentaCorrienteCliente.setFechaApertura(cliente.getFechaAlta());
     cuentaCorrienteCliente.setFechaUltimoMovimiento(cliente.getFechaAlta());
     cuentaCorrienteCliente.setSaldo(BigDecimal.ZERO);
     if (cliente.getCredencial() != null) {
-      Cliente clienteYaAsignado =
-          this.getClientePorIdUsuarioYidEmpresa(
-              cliente.getCredencial().getIdUsuario(), cliente.getEmpresa().getIdEmpresa());
+      Cliente clienteYaAsignado = this.getClientePorIdUsuario(cliente.getCredencial().getIdUsuario());
       if (clienteYaAsignado != null) {
         throw new BusinessServiceException(messageSource.getMessage(
           "mensaje_cliente_credencial_no_valida", new Object[] {clienteYaAsignado.getNombreFiscal()}, Locale.getDefault()));
@@ -282,7 +278,7 @@ public class ClienteServiceImpl implements IClienteService {
 
   @Override
   @Transactional
-  public void actualizar(@Valid Cliente clientePorActualizar, Cliente clientePersistido) {
+  public Cliente actualizar(@Valid Cliente clientePorActualizar, Cliente clientePersistido) {
     clientePorActualizar.setNroCliente(clientePersistido.getNroCliente());
     clientePorActualizar.setFechaAlta(clientePersistido.getFechaAlta());
     clientePorActualizar.setPredeterminado(clientePersistido.isPredeterminado());
@@ -292,9 +288,7 @@ public class ClienteServiceImpl implements IClienteService {
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, clientePorActualizar);
     if (clientePorActualizar.getCredencial() != null) {
       Cliente clienteYaAsignado =
-          this.getClientePorIdUsuarioYidEmpresa(
-              clientePorActualizar.getCredencial().getIdUsuario(),
-              clientePorActualizar.getEmpresa().getIdEmpresa());
+          this.getClientePorIdUsuario(clientePorActualizar.getCredencial().getIdUsuario());
       if (clienteYaAsignado != null
           && clienteYaAsignado.getIdCliente() != clientePorActualizar.getIdCliente()) {
         throw new BusinessServiceException(messageSource.getMessage(
@@ -305,8 +299,9 @@ public class ClienteServiceImpl implements IClienteService {
         }
       }
     }
-    clienteRepository.save(clientePorActualizar);
-    logger.warn("El Cliente {} se actualizó correctamente.", clientePorActualizar);
+    Cliente clienteGuardado = clienteRepository.save(clientePorActualizar);
+    logger.warn("El Cliente {} se actualizó correctamente.", clienteGuardado);
+    return clienteGuardado;
   }
 
   @Override
@@ -332,8 +327,8 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public Cliente getClientePorIdUsuarioYidEmpresa(long idUsuario, long idEmpresa) {
-    return clienteRepository.findClienteByIdUsuarioYidEmpresa(idUsuario, idEmpresa);
+  public Cliente getClientePorIdUsuario(long idUsuario) {
+    return clienteRepository.findClienteByIdUsuario(idUsuario);
   }
 
   @Override
@@ -352,7 +347,7 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public String generarNroDeCliente(Empresa empresa) {
+  public String generarNroDeCliente() {
     long min = 1L;
     long max = 99999L; // 5 digitos
     long randomLong = 0L;
@@ -360,8 +355,7 @@ public class ClienteServiceImpl implements IClienteService {
     while (esRepetido) {
       randomLong = min + (long) (Math.random() * (max - min));
       String nroCliente = Long.toString(randomLong);
-      Cliente c =
-          clienteRepository.findByNroClienteAndEmpresaAndEliminado(nroCliente, empresa, false);
+      Cliente c = clienteRepository.findByNroClienteAndEliminado(nroCliente, false);
       if (c == null) esRepetido = false;
     }
     return Long.toString(randomLong);

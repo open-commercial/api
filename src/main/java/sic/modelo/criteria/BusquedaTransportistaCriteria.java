@@ -9,11 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BusquedaTransportistaCriteria {
 
-  private String nombre;
-  private Long idProvincia;
-  private Long idLocalidad;
-  private Long idEmpresa;
-  private Integer pagina;
-  private String ordenarPor;
-  private String sentido;
+    private String nombre;
+    private Long idProvincia;
+    private Long idLocalidad;
+    private Integer pagina;
+    private String ordenarPor;
+    private String sentido;
 }

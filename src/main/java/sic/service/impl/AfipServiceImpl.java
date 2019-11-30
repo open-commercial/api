@@ -41,7 +41,7 @@ import sic.exception.ServiceException;
 public class AfipServiceImpl implements IAfipService {
 
   private final AfipWebServiceSOAPClient afipWebServiceSOAPClient;
-  private final IConfiguracionDelSistemaService configuracionDelSistemaService;
+  private final IConfiguracionSucursalService configuracionSucursalService;
   private final IFacturaService facturaService;
   private final INotaService notaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -52,36 +52,36 @@ public class AfipServiceImpl implements IAfipService {
   @Autowired
   public AfipServiceImpl(
       AfipWebServiceSOAPClient afipWebServiceSOAPClient,
-      IConfiguracionDelSistemaService cds,
+      IConfiguracionSucursalService configuracionSucursalService,
       IFacturaService facturaService,
       INotaService notaService,
       MessageSource messageSource) {
     this.afipWebServiceSOAPClient = afipWebServiceSOAPClient;
-    this.configuracionDelSistemaService = cds;
+    this.configuracionSucursalService = configuracionSucursalService;
     this.facturaService = facturaService;
     this.notaService = notaService;
     this.messageSource = messageSource;
   }
 
   @Override
-  public FEAuthRequest getFEAuth(String afipNombreServicio, Empresa empresa) {
+  public FEAuthRequest getFEAuth(String afipNombreServicio, Sucursal sucursal) {
     FEAuthRequest feAuthRequest = new FEAuthRequest();
-    ConfiguracionDelSistema cds =
-        configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(empresa);
-    LocalDateTime fechaVencimientoToken = cds.getFechaVencimientoTokenWSAA();
+    ConfiguracionSucursal configuracionSucursal =
+        this.configuracionSucursalService.getConfiguracionSucursal(sucursal);
+    LocalDateTime fechaVencimientoToken = configuracionSucursal.getFechaVencimientoTokenWSAA();
     if (fechaVencimientoToken != null && fechaVencimientoToken.isAfter(LocalDateTime.now())) {
-      feAuthRequest.setToken(cds.getTokenWSAA());
-      feAuthRequest.setSign(cds.getSignTokenWSAA());
-      feAuthRequest.setCuit(empresa.getIdFiscal());
+      feAuthRequest.setToken(configuracionSucursal.getTokenWSAA());
+      feAuthRequest.setSign(configuracionSucursal.getSignTokenWSAA());
+      feAuthRequest.setCuit(sucursal.getIdFiscal());
       return feAuthRequest;
     } else {
-      byte[] p12file = cds.getCertificadoAfip();
+      byte[] p12file = configuracionSucursal.getCertificadoAfip();
       if (p12file.length == 0) {
         throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_cds_certificado_vacio", null, Locale.getDefault()));
+          "mensaje_sucursal_certificado_vacio", null, Locale.getDefault()));
       }
-      String p12signer = cds.getFirmanteCertificadoAfip();
-      String p12pass = cds.getPasswordCertificadoAfip();
+      String p12signer = configuracionSucursal.getFirmanteCertificadoAfip();
+      String p12pass = configuracionSucursal.getPasswordCertificadoAfip();
       long ticketTimeInHours = 12L; // siempre devuelve por 12hs
       byte[] loginTicketRequestXmlCms =
           afipWebServiceSOAPClient.crearCMS(
@@ -96,14 +96,14 @@ public class AfipServiceImpl implements IAfipService {
         String signTokenWSAA = tokenDoc.valueOf("/loginTicketResponse/credentials/sign");
         feAuthRequest.setToken(tokenWSAA);
         feAuthRequest.setSign(signTokenWSAA);
-        feAuthRequest.setCuit(empresa.getIdFiscal());
-        cds.setTokenWSAA(tokenWSAA);
-        cds.setSignTokenWSAA(signTokenWSAA);
+        feAuthRequest.setCuit(sucursal.getIdFiscal());
+        configuracionSucursal.setTokenWSAA(tokenWSAA);
+        configuracionSucursal.setSignTokenWSAA(signTokenWSAA);
         String generationTime = tokenDoc.valueOf("/loginTicketResponse/header/generationTime");
         String expirationTime = tokenDoc.valueOf("/loginTicketResponse/header/expirationTime");
-        cds.setFechaGeneracionTokenWSAA(LocalDateTime.parse(generationTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-        cds.setFechaVencimientoTokenWSAA(LocalDateTime.parse(expirationTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-        configuracionDelSistemaService.actualizar(cds);
+        configuracionSucursal.setFechaGeneracionTokenWSAA(LocalDateTime.parse(generationTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+        configuracionSucursal.setFechaVencimientoTokenWSAA(LocalDateTime.parse(expirationTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+        configuracionSucursalService.actualizar(configuracionSucursal);
         return feAuthRequest;
       } catch (DocumentException | IOException ex) {
         logger.error(ex.getMessage());
@@ -120,11 +120,11 @@ public class AfipServiceImpl implements IAfipService {
 
   @Override
   public void autorizar(ComprobanteAFIP comprobante) {
-    if (!configuracionDelSistemaService
-        .getConfiguracionDelSistemaPorEmpresa(comprobante.getEmpresa())
+    if (!configuracionSucursalService
+        .getConfiguracionSucursal(comprobante.getSucursal())
         .isFacturaElectronicaHabilitada()) {
       throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_cds_fe_habilitada", null, Locale.getDefault()));
+        "mensaje_sucursal_fe_habilitada", null, Locale.getDefault()));
     }
     if (comprobante.getTipoComprobante() != TipoDeComprobante.FACTURA_A
         && comprobante.getTipoComprobante() != TipoDeComprobante.FACTURA_B
@@ -166,11 +166,11 @@ public class AfipServiceImpl implements IAfipService {
     }
     FECAESolicitar fecaeSolicitud = new FECAESolicitar();
     FEAuthRequest feAuthRequest =
-        this.getFEAuth(WEBSERVICE_FACTURA_ELECTRONICA, comprobante.getEmpresa());
+        this.getFEAuth(WEBSERVICE_FACTURA_ELECTRONICA, comprobante.getSucursal());
     fecaeSolicitud.setAuth(feAuthRequest);
     int nroPuntoDeVentaAfip =
-        configuracionDelSistemaService
-            .getConfiguracionDelSistemaPorEmpresa(comprobante.getEmpresa())
+        configuracionSucursalService
+            .getConfiguracionSucursal(comprobante.getSucursal())
             .getNroPuntoDeVentaAfip();
     int siguienteNroComprobante =
         this.getSiguienteNroComprobante(

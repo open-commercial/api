@@ -23,7 +23,7 @@ public class BusquedaFacturaVentaCriteria {
   private Long numFactura;
   private Long nroPedido;
   private Long idProducto;
-  private Long idEmpresa;
+  private Long idSucursal;
   private Integer pagina;
   private String ordenarPor;
   private String sentido;

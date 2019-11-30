@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.Cliente;
 import sic.modelo.Usuario;
 import sic.service.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Locale;
@@ -21,7 +20,6 @@ public class RegistracionServiceImpl implements IRegistracionService {
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
   private final ICorreoElectronicoService correoElectronicoService;
-  private final IConfiguracionDelSistemaService configuracionDelSistemaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
 
@@ -30,12 +28,10 @@ public class RegistracionServiceImpl implements IRegistracionService {
       IUsuarioService usuarioService,
       IClienteService clienteService,
       ICorreoElectronicoService correoElectronicoService,
-      IConfiguracionDelSistemaService cds,
       MessageSource messageSource) {
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
     this.correoElectronicoService = correoElectronicoService;
-    this.configuracionDelSistemaService = cds;
     this.messageSource = messageSource;
   }
 
@@ -47,12 +43,9 @@ public class RegistracionServiceImpl implements IRegistracionService {
     cliente.setBonificacion(BigDecimal.ZERO);
     cliente.setFechaAlta(LocalDateTime.now());
     clienteService.guardar(cliente);
-    correoElectronicoService.enviarMailPorEmpresa(
-        cliente.getEmpresa().getIdEmpresa(),
+    correoElectronicoService.enviarEmail(
         usuario.getEmail(),
-        configuracionDelSistemaService
-            .getConfiguracionDelSistemaPorEmpresa(cliente.getEmpresa())
-            .getEmailUsername(),
+        "",
         "Registración de cuenta nueva",
         messageSource.getMessage(
             "mensaje_correo_registracion",

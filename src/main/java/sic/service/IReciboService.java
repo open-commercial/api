@@ -27,35 +27,35 @@ public interface IReciboService {
 
   List<Recibo> construirRecibos(
       Long[] formaDePago,
-      Empresa empresa,
+      Sucursal sucursal,
       Cliente cliente,
       Usuario usuario,
       BigDecimal[] monto,
       BigDecimal totalFactura,
       LocalDateTime fecha);
 
-  long getSiguienteNumeroRecibo(long idEmpresa, long serie);
+  long getSiguienteNumeroRecibo(long idSucursal, long serie);
 
   void eliminar(long idRecibo);
 
   byte[] getReporteRecibo(Recibo recibo);
 
   BigDecimal getTotalRecibosClientesEntreFechasPorFormaDePago(
-      long idEmpresa, long idFormaDePago, LocalDateTime desde, LocalDateTime hasta);
+      long idSucursal, long idFormaDePago, LocalDateTime desde, LocalDateTime hasta);
 
   BigDecimal getTotalRecibosProveedoresEntreFechasPorFormaDePago(
-      long idEmpresa, long idFormaDePago, LocalDateTime desde, LocalDateTime hasta);
+      long idSucursal, long idFormaDePago, LocalDateTime desde, LocalDateTime hasta);
 
   List<Recibo> getRecibosEntreFechasPorFormaDePago(
-    LocalDateTime desde, LocalDateTime hasta, FormaDePago formaDePago, Empresa empresa);
+    LocalDateTime desde, LocalDateTime hasta, FormaDePago formaDePago, Sucursal sucursal);
 
   BigDecimal getTotalRecibosClientesQueAfectanCajaEntreFechas(
-      long idEmpresa, LocalDateTime desde, LocalDateTime hasta);
+      long idSucursal, LocalDateTime desde, LocalDateTime hasta);
 
   BigDecimal getTotalRecibosProveedoresQueAfectanCajaEntreFechas(
-      long idEmpresa, LocalDateTime desde, LocalDateTime hasta);
+      long idSucursal, LocalDateTime desde, LocalDateTime hasta);
 
-  BigDecimal getTotalRecibosClientesEntreFechas(long idEmpresa, LocalDateTime desde, LocalDateTime hasta);
+  BigDecimal getTotalRecibosClientesEntreFechas(long idSucursal, LocalDateTime desde, LocalDateTime hasta);
 
-  BigDecimal getTotalRecibosProveedoresEntreFechas(long idEmpresa, LocalDateTime desde, LocalDateTime hasta);
+  BigDecimal getTotalRecibosProveedoresEntreFechas(long idSucursal, LocalDateTime desde, LocalDateTime hasta);
 }

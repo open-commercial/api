@@ -15,29 +15,26 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import sic.controller.Views;
 
-import javax.validation.constraints.Email;
-
 @Entity
-@Table(name = "configuraciondelsistema")
+@Table(name = "configuracionsucursal")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"idConfiguracionDelSistema", "empresa"})
+@EqualsAndHashCode(of = "idConfiguracionSucursal")
 @ToString(exclude = "certificadoAfip")
-@JsonView(Views.Comprador.class)
 @JsonIgnoreProperties({
   "tokenWSAA",
   "signTokenWSAA",
   "fechaGeneracionTokenWSAA",
   "fechaVencimientoTokenWSAA",
-  "empresa"
+  "sucursal"
 })
-public class ConfiguracionDelSistema implements Serializable {
+@JsonView(Views.Comprador.class)
+public class ConfiguracionSucursal implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id_ConfiguracionDelSistema")
-  private long idConfiguracionDelSistema;
+  private long idConfiguracionSucursal;
 
   private boolean usarFacturaVentaPreImpresa;
 
@@ -61,30 +58,24 @@ public class ConfiguracionDelSistema implements Serializable {
 
   private String signTokenWSAA;
 
-  private boolean emailSenderHabilitado;
-
-  @Email(message = "{mensaje_cds_email_invalido}")
-  private String emailUsername;
-
-  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-  private String emailPassword;
+  private boolean puntoDeRetiro;
 
   private LocalDateTime fechaGeneracionTokenWSAA;
 
   private LocalDateTime fechaVencimientoTokenWSAA;
 
   @ManyToOne
-  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-  private Empresa empresa;
+  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
+  private Sucursal sucursal;
 
-  @JsonGetter("idEmpresa")
-  public Long getIdEmpresa() {
-    return empresa.getIdEmpresa();
+  @JsonGetter("idSucursal")
+  public Long getIdSucursal() {
+    return sucursal.getIdSucursal();
   }
 
-  @JsonGetter("nombreEmpresa")
-  public String getNombreEmpresa() {
-    return empresa.getNombre();
+  @JsonGetter("nombreSucursal")
+  public String getNombreSucursal() {
+    return sucursal.getNombre();
   }
 
   @JsonGetter("existeCertificado")

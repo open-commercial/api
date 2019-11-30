@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ConfiguracionDelSistemaDTO {
+public class ConfiguracionSucursalDTO {
 
-  private long idConfiguracionDelSistema;
+  private long idConfiguracionSucursal;
 
   private boolean usarFacturaVentaPreImpresa;
 
@@ -29,14 +29,10 @@ public class ConfiguracionDelSistemaDTO {
 
   private int nroPuntoDeVentaAfip;
 
-  private boolean emailSenderHabilitado;
+  private boolean puntoDeRetiro;
 
-  private String emailUsername;
+  private long idSucursal;
 
-  private String emailPassword;
-
-  private long idEmpresa;
-
-  private String nombreEmpresa;
+  private String nombreSucursal;
 
 }

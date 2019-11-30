@@ -18,7 +18,7 @@ public class ComprobanteAFIP {
     private LocalDate vencimientoCAE;
     private long numSerieAfip;
     private long numFacturaAfip;
-    private Empresa empresa;    
+    private Sucursal sucursal;
     private ClienteEmbeddable cliente;
     private BigDecimal subtotalBruto;    
     private BigDecimal iva105neto;    

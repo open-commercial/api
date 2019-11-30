@@ -25,10 +25,10 @@ import javax.validation.constraints.NotEmpty;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"nroGasto", "empresa"})
+@EqualsAndHashCode(of = {"nroGasto", "sucursal"})
 @ToString
+@JsonIgnoreProperties({"eliminado", "usuario"})
 @JsonView(Views.Comprador.class)
-@JsonIgnoreProperties({"empresa", "eliminado", "usuario"})
 public class Gasto implements Serializable {
 
   @Id
@@ -47,10 +47,10 @@ public class Gasto implements Serializable {
   private String concepto;
 
   @ManyToOne
-  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
+  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
   @QueryInit("ubicacion.localidad.provincia")
-  @NotNull(message = "{mensaje_gasto_empresa_vacia}")
-  private Empresa empresa;
+  @NotNull(message = "{mensaje_gasto_sucursal_vacia}")
+  private Sucursal sucursal;
 
   @OneToOne
   @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
@@ -68,14 +68,14 @@ public class Gasto implements Serializable {
 
   private boolean eliminado;
 
-  @JsonGetter("idEmpresa")
-  public Long getIdEmpresa() {
-    return empresa.getIdEmpresa();
+  @JsonGetter("idSucursal")
+  public Long getIdSucursal() {
+    return sucursal.getIdSucursal();
   }
 
-  @JsonGetter("nombreEmpresa")
-  public String getNombreEmpresa() {
-    return empresa.getNombre();
+  @JsonGetter("nombreSucursal")
+  public String getNombreSucursal() {
+    return sucursal.getNombre();
   }
 
   @JsonGetter("idFormaDePago")

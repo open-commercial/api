@@ -27,10 +27,10 @@ import javax.validation.constraints.NotBlank;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"nombreFiscal", "idFiscal", "empresa"})
+@EqualsAndHashCode(of = {"nombreFiscal", "idFiscal"})
 @ToString
+@JsonIgnoreProperties({"viajante", "credencial", "eliminado"})
 @JsonView(Views.Comprador.class)
-@JsonIgnoreProperties({"empresa", "viajante", "credencial", "eliminado"})
 public class Cliente implements Serializable {
 
   @Id
@@ -81,11 +81,6 @@ public class Cliente implements Serializable {
   private LocalDateTime fechaAlta;
 
   @ManyToOne
-  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-  @NotNull(message = "{mensaje_cliente_vacio_empresa}")
-  private Empresa empresa;
-
-  @ManyToOne
   @JoinColumn(name = "id_Usuario_Viajante", referencedColumnName = "id_Usuario")
   private Usuario viajante;
 
@@ -96,16 +91,6 @@ public class Cliente implements Serializable {
   private boolean eliminado;
 
   private boolean predeterminado;
-
-  @JsonGetter("idEmpresa")
-  public Long getIdEmpresa() {
-    return empresa.getIdEmpresa();
-  }
-
-  @JsonGetter("nombreEmpresa")
-  public String getNombreEmpresa() {
-    return empresa.getNombre();
-  }
 
   @JsonGetter("idViajante")
   public Long getIdViajante() {

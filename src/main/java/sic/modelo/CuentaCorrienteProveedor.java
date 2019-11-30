@@ -1,6 +1,5 @@
 package sic.modelo;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,7 +23,6 @@ import sic.controller.Views;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @JsonView(Views.Comprador.class)
-@JsonIgnoreProperties({"empresa"})
 public class CuentaCorrienteProveedor extends CuentaCorriente implements Serializable {
 
   @OneToOne
@@ -39,20 +37,12 @@ public class CuentaCorrienteProveedor extends CuentaCorriente implements Seriali
       long idCuentaCorriente,
       boolean eliminada,
       LocalDateTime fechaApertura,
-      Empresa empresa,
       BigDecimal saldo,
       LocalDateTime fechaUltimoMovimiento,
       List<RenglonCuentaCorriente> renglones,
       Proveedor proveedor) {
 
-    super(
-        idCuentaCorriente,
-        eliminada,
-        fechaApertura,
-        empresa,
-        saldo,
-        fechaUltimoMovimiento,
-        renglones);
+    super(idCuentaCorriente, eliminada, fechaApertura, saldo, fechaUltimoMovimiento, renglones);
     this.proveedor = proveedor;
   }
 }

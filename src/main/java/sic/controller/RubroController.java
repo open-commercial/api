@@ -9,7 +9,6 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Rol;
 import sic.modelo.Rubro;
 import sic.modelo.dto.RubroDTO;
-import sic.service.IEmpresaService;
 import sic.service.IRubroService;
 
 @RestController
@@ -17,14 +16,12 @@ import sic.service.IRubroService;
 public class RubroController {
 
   private final IRubroService rubroService;
-  private final IEmpresaService empresaService;
   private final ModelMapper modelMapper;
 
   @Autowired
   public RubroController(
-      IRubroService rubroService, IEmpresaService empresaService, ModelMapper modelMapper) {
+      IRubroService rubroService, ModelMapper modelMapper) {
     this.rubroService = rubroService;
-    this.empresaService = empresaService;
     this.modelMapper = modelMapper;
   }
 
@@ -36,17 +33,11 @@ public class RubroController {
 
   @PutMapping("/rubros")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public void actualizar(
-      @RequestBody RubroDTO rubroDTO, @RequestParam(required = false) Long idEmpresa) {
+  public void actualizar(@RequestBody RubroDTO rubroDTO) {
     Rubro rubroPersistido = rubroService.getRubroNoEliminadoPorId(rubroDTO.getIdRubro());
     Rubro rubroPorActualizar = modelMapper.map(rubroDTO, Rubro.class);
     if (rubroPorActualizar.getNombre() == null || rubroPorActualizar.getNombre().isEmpty()) {
       rubroPorActualizar.setNombre(rubroPersistido.getNombre());
-    }
-    if (idEmpresa != null) {
-      rubroPorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-    } else {
-      rubroPorActualizar.setEmpresa(rubroPersistido.getEmpresa());
     }
     rubroService.actualizar(rubroPorActualizar);
   }
@@ -59,13 +50,12 @@ public class RubroController {
 
   @PostMapping("/rubros")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public Rubro guardar(@RequestBody RubroDTO rubroDTO, @RequestParam Long idEmpresa) {
+  public Rubro guardar(@RequestBody RubroDTO rubroDTO) {
     Rubro rubro = modelMapper.map(rubroDTO, Rubro.class);
-    rubro.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     return rubroService.guardar(rubro);
   }
 
-  @GetMapping("/rubros/empresas/{idEmpresa}")
+  @GetMapping("/rubros")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -73,7 +63,7 @@ public class RubroController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public List<Rubro> getRubros(@PathVariable long idEmpresa) {
-    return rubroService.getRubros(empresaService.getEmpresaPorId(idEmpresa));
+  public List<Rubro> getRubros() {
+    return rubroService.getRubros();
   }
 }

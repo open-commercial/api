@@ -53,7 +53,7 @@ public class FacturaServiceImpl implements IFacturaService {
   private final FacturaCompraRepository facturaCompraRepository;
   private final RenglonFacturaRepository renglonFacturaRepository;
   private final IProductoService productoService;
-  private final IConfiguracionDelSistemaService configuracionDelSistemaService;
+  private final IConfiguracionSucursalService configuracionSucursalService;
   private final IPedidoService pedidoService;
   private final INotaService notaService;
   private final ICuentaCorrienteService cuentaCorrienteService;
@@ -76,7 +76,7 @@ public class FacturaServiceImpl implements IFacturaService {
       FacturaCompraRepository facturaCompraRepository,
       RenglonFacturaRepository renglonFacturaRepository,
       IProductoService productoService,
-      IConfiguracionDelSistemaService configuracionDelSistemaService,
+      IConfiguracionSucursalService configuracionSucursalService,
       IPedidoService pedidoService,
       INotaService notaService,
       ICuentaCorrienteService cuentaCorrienteService,
@@ -90,7 +90,7 @@ public class FacturaServiceImpl implements IFacturaService {
     this.facturaCompraRepository = facturaCompraRepository;
     this.renglonFacturaRepository = renglonFacturaRepository;
     this.productoService = productoService;
-    this.configuracionDelSistemaService = configuracionDelSistemaService;
+    this.configuracionSucursalService = configuracionSucursalService;
     this.pedidoService = pedidoService;
     this.notaService = notaService;
     this.cuentaCorrienteService = cuentaCorrienteService;
@@ -130,6 +130,7 @@ public class FacturaServiceImpl implements IFacturaService {
           (FacturaVenta) factura, TipoDeOperacion.ELIMINACION);
       productoService.actualizarStock(
           this.getIdsProductosYCantidades(factura),
+          factura.getIdSucursal(),
           TipoDeOperacion.ELIMINACION,
           Movimiento.VENTA,
           factura.getTipoComprobante());
@@ -152,8 +153,8 @@ public class FacturaServiceImpl implements IFacturaService {
   }
 
   @Override
-  public TipoDeComprobante[] getTipoFacturaCompra(Empresa empresa, Proveedor proveedor) {
-    if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())) {
+  public TipoDeComprobante[] getTipoFacturaCompra(Sucursal sucursal, Proveedor proveedor) {
+    if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())) {
       if (CategoriaIVA.discriminaIVA(proveedor.getCategoriaIVA())) {
         TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
         tiposPermitidos[0] = TipoDeComprobante.FACTURA_A;
@@ -186,8 +187,8 @@ public class FacturaServiceImpl implements IFacturaService {
   }
 
   @Override
-  public TipoDeComprobante[] getTipoFacturaVenta(Empresa empresa, Cliente cliente) {
-    if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())) {
+  public TipoDeComprobante[] getTipoFacturaVenta(Sucursal sucursal, Cliente cliente) {
+    if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())) {
       if (CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
         TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
         tiposPermitidos[0] = TipoDeComprobante.FACTURA_A;
@@ -211,8 +212,8 @@ public class FacturaServiceImpl implements IFacturaService {
   }
 
   @Override
-  public TipoDeComprobante[] getTiposFacturaSegunEmpresa(Empresa empresa) {
-    if (CategoriaIVA.discriminaIVA(empresa.getCategoriaIVA())) {
+  public TipoDeComprobante[] getTiposFacturaSegunSucursal(Sucursal sucursal) {
+    if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())) {
       TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[5];
       tiposPermitidos[0] = TipoDeComprobante.FACTURA_A;
       tiposPermitidos[1] = TipoDeComprobante.FACTURA_B;
@@ -245,7 +246,8 @@ public class FacturaServiceImpl implements IFacturaService {
     return renglonFacturaRepository.findById(idRenglonFactura).orElse(null); // orElseThrow
   }
 
-  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+  private Pageable getPageable(Integer pagina, String ordenarPor, String sentido) {
+    if (pagina == null) pagina = 0;
     String ordenDefault = "fecha";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(
@@ -289,11 +291,16 @@ public class FacturaServiceImpl implements IFacturaService {
   private BooleanBuilder getBuilderCompra(BusquedaFacturaCompraCriteria criteria) {
     QFacturaCompra qFacturaCompra = QFacturaCompra.facturaCompra;
     BooleanBuilder builder = new BooleanBuilder();
+    if (criteria.getIdSucursal() == null) {
+      throw new BusinessServiceException(
+        messageSource.getMessage(
+          "mensaje_busqueda_sin_sucursal", null, Locale.getDefault()));
+    }
     builder.and(
         qFacturaCompra
-            .empresa
-            .idEmpresa
-            .eq(criteria.getIdEmpresa())
+            .sucursal
+            .idSucursal
+            .eq(criteria.getIdSucursal())
             .and(qFacturaCompra.eliminada.eq(false)));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
@@ -324,11 +331,16 @@ public class FacturaServiceImpl implements IFacturaService {
       BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
     QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
     BooleanBuilder builder = new BooleanBuilder();
+    if (criteria.getIdSucursal() == null) {
+      throw new BusinessServiceException(
+        messageSource.getMessage(
+          "mensaje_busqueda_sin_sucursal", null, Locale.getDefault()));
+    }
     builder.and(
         qFacturaVenta
-            .empresa
-            .idEmpresa
-            .eq(criteria.getIdEmpresa())
+            .sucursal
+            .idSucursal
+            .eq(criteria.getIdSucursal())
             .and(qFacturaVenta.eliminada.eq(false)));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
@@ -374,8 +386,7 @@ public class FacturaServiceImpl implements IFacturaService {
                 }
                 if (rol == Rol.COMPRADOR) {
                   Cliente clienteRelacionado =
-                      clienteService.getClientePorIdUsuarioYidEmpresa(
-                          idUsuarioLoggedIn, criteria.getIdEmpresa());
+                      clienteService.getClientePorIdUsuario(idUsuarioLoggedIn);
                   if (clienteRelacionado != null) {
                     rsPredicate.or(
                         qFacturaVenta.cliente.idCliente.eq(clienteRelacionado.getIdCliente()));
@@ -394,14 +405,14 @@ public class FacturaServiceImpl implements IFacturaService {
     if (factura instanceof FacturaVenta) {
       factura.setFecha(LocalDateTime.now());
       factura.setNumSerie(
-          configuracionDelSistemaService
-              .getConfiguracionDelSistemaPorEmpresa(factura.getEmpresa())
+          configuracionSucursalService
+              .getConfiguracionSucursal(factura.getSucursal())
               .getNroPuntoDeVentaAfip());
       factura.setNumFactura(
           this.calcularNumeroFacturaVenta(
               factura.getTipoComprobante(),
               factura.getNumSerie(),
-              factura.getEmpresa().getIdEmpresa()));
+              factura.getSucursal().getIdSucursal()));
     }
     this.calcularCantidadDeArticulos(factura);
     this.validarOperacion(factura);
@@ -425,6 +436,7 @@ public class FacturaServiceImpl implements IFacturaService {
         f ->
             productoService.actualizarStock(
                 this.getIdsProductosYCantidades(f),
+                f.getIdSucursal(),
                 TipoDeOperacion.ALTA,
                 Movimiento.VENTA,
                 f.getTipoComprobante()));
@@ -468,6 +480,7 @@ public class FacturaServiceImpl implements IFacturaService {
         f ->
             productoService.actualizarStock(
                 this.getIdsProductosYCantidades(f),
+                f.getSucursal().getIdSucursal(),
                 TipoDeOperacion.ALTA,
                 Movimiento.COMPRA,
                 f.getTipoComprobante()));
@@ -607,7 +620,7 @@ public class FacturaServiceImpl implements IFacturaService {
             .vencimientoCAE(fv.getVencimientoCae())
             .numSerieAfip(fv.getNumSerieAfip())
             .numFacturaAfip(fv.getNumFacturaAfip())
-            .empresa(fv.getEmpresa())
+            .sucursal(fv.getSucursal())
             .cliente(fv.getClienteEmbedded())
             .subtotalBruto(fv.getSubTotalBruto())
             .iva105neto(fv.getIva105Neto())
@@ -620,7 +633,6 @@ public class FacturaServiceImpl implements IFacturaService {
     fv.setVencimientoCae(comprobante.getVencimientoCAE());
     fv.setNumSerieAfip(comprobante.getNumSerieAfip());
     fv.setNumFacturaAfip(comprobante.getNumFacturaAfip());
-    cuentaCorrienteService.updateCAEFactura(fv.getIdFactura(), comprobante.getCae());
     return fv;
   }
 
@@ -672,7 +684,7 @@ public class FacturaServiceImpl implements IFacturaService {
       Movimiento movimiento,
       TipoDeComprobante tipo,
       Producto producto,
-      BigDecimal descuentoPorcentaje) {
+      BigDecimal bonificacionPorcentaje) {
     BigDecimal resultado = BigDecimal.ZERO;
     if (movimiento == Movimiento.COMPRA) {
       if (tipo == TipoDeComprobante.FACTURA_A || tipo == TipoDeComprobante.FACTURA_B) {
@@ -681,7 +693,7 @@ public class FacturaServiceImpl implements IFacturaService {
                 .getPrecioCosto()
                 .multiply(
                     BigDecimal.ONE
-                        .subtract(descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))
+                        .subtract(bonificacionPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))
                         .multiply(
                             producto.getIvaPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP)));
       }
@@ -694,7 +706,7 @@ public class FacturaServiceImpl implements IFacturaService {
                 .getPrecioVentaPublico()
                 .multiply(
                     BigDecimal.ONE
-                        .subtract(descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))
+                        .subtract(bonificacionPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))
                         .multiply(
                             producto.getIvaPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP)));
       }
@@ -783,9 +795,9 @@ public class FacturaServiceImpl implements IFacturaService {
 
   @Override
   public long calcularNumeroFacturaVenta(
-      TipoDeComprobante tipoDeComprobante, long serie, long idEmpresa) {
+      TipoDeComprobante tipoDeComprobante, long serie, long idSucursal) {
     Long numeroFactura =
-        facturaVentaRepository.buscarMayorNumFacturaSegunTipo(tipoDeComprobante, serie, idEmpresa);
+        facturaVentaRepository.buscarMayorNumFacturaSegunTipo(tipoDeComprobante, serie, idSucursal);
     if (numeroFactura == null) {
       return 1; // No existe ninguna Factura anterior
     } else {
@@ -799,9 +811,9 @@ public class FacturaServiceImpl implements IFacturaService {
     InputStream isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/FacturaVenta.jasper");
     Map<String, Object> params = new HashMap<>();
-    ConfiguracionDelSistema cds =
-        configuracionDelSistemaService.getConfiguracionDelSistemaPorEmpresa(factura.getEmpresa());
-    params.put("preImpresa", cds.isUsarFacturaVentaPreImpresa());
+    ConfiguracionSucursal configuracionSucursal =
+        this.configuracionSucursalService.getConfiguracionSucursal(factura.getSucursal());
+    params.put("preImpresa", configuracionSucursal.isUsarFacturaVentaPreImpresa());
     if (factura.getTipoComprobante().equals(TipoDeComprobante.FACTURA_B)
         || factura.getTipoComprobante().equals(TipoDeComprobante.PRESUPUESTO)) {
       factura.setSubTotalBruto(factura.getTotal());
@@ -823,15 +835,15 @@ public class FacturaServiceImpl implements IFacturaService {
       params.put("nroSerie", factura.getNumSerie());
       params.put("nroFactura", factura.getNumFactura());
     }
-    if (factura.getEmpresa().getLogo() != null && !factura.getEmpresa().getLogo().isEmpty()) {
+    if (factura.getSucursal().getLogo() != null && !factura.getSucursal().getLogo().isEmpty()) {
       try {
         params.put(
             "logo",
-            new ImageIcon(ImageIO.read(new URL(factura.getEmpresa().getLogo()))).getImage());
+            new ImageIcon(ImageIO.read(new URL(factura.getSucursal().getLogo()))).getImage());
       } catch (IOException ex) {
         logger.error(ex.getMessage());
         throw new ServiceException(
-            messageSource.getMessage("mensaje_empresa_404_logo", null, Locale.getDefault()), ex);
+            messageSource.getMessage("mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
       }
     }
     List<RenglonFactura> renglones = this.getRenglonesDeLaFactura(factura.getIdFactura());
@@ -867,8 +879,9 @@ public class FacturaServiceImpl implements IFacturaService {
                         r.getCantidad()
                             .subtract(renglonesDeFacturas.get(r.getIdProductoItem()).getCantidad()),
                         r.getIdProductoItem(),
-                        r.getDescuentoPorcentaje(),
-                        false));
+                        false,
+                        pedidoService.getPedidoNoEliminadoPorId(idPedido).getCliente(),
+                        null));
               }
             } else {
               renglonesRestantes.add(
@@ -877,8 +890,9 @@ public class FacturaServiceImpl implements IFacturaService {
                       Movimiento.VENTA,
                       r.getCantidad(),
                       r.getIdProductoItem(),
-                      r.getDescuentoPorcentaje(),
-                      false));
+                      false,
+                      pedidoService.getPedidoNoEliminadoPorId(idPedido).getCliente(),
+                      null));
             }
           });
     } else {
@@ -890,8 +904,9 @@ public class FacturaServiceImpl implements IFacturaService {
                       Movimiento.VENTA,
                       r.getCantidad(),
                       r.getIdProductoItem(),
-                      r.getDescuentoPorcentaje(),
-                      false)));
+                      false,
+                      pedidoService.getPedidoNoEliminadoPorId(idPedido).getCliente(),
+                      null)));
     }
     return renglonesRestantes;
   }
@@ -922,8 +937,14 @@ public class FacturaServiceImpl implements IFacturaService {
       Movimiento movimiento,
       BigDecimal cantidad,
       long idProducto,
-      BigDecimal descuentoPorcentaje,
-      boolean dividiendoRenglonFactura) {
+      boolean dividiendoRenglonFactura,
+      Cliente cliente,
+      BigDecimal bonificacion) {
+    if (cantidad.compareTo(BigDecimal.ZERO) < 0) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_producto_cantidad_negativa", null, Locale.getDefault()));
+    }
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     /*if (dividiendoRenglonFactura == false && cantidad < producto.getBulto()
             && (movimiento == Movimiento.VENTA || movimiento == Movimiento.PEDIDO)) {
@@ -938,14 +959,14 @@ public class FacturaServiceImpl implements IFacturaService {
     nuevoRenglon.setCantidad(cantidad);
     nuevoRenglon.setPrecioUnitario(
         this.calcularPrecioUnitario(movimiento, tipoDeComprobante, producto));
-    if (descuentoPorcentaje.compareTo(CIEN) > 0) {
-      throw new BusinessServiceException(
-          messageSource.getMessage("mensaje_descuento_mayor_cien", null, Locale.getDefault()));
+    if ((movimiento.equals(Movimiento.VENTA) || movimiento.equals(Movimiento.PEDIDO))
+        && cliente != null) {
+      this.asignarBonificacion(nuevoRenglon, cliente, producto);
+    } else {
+      nuevoRenglon.setBonificacionPorcentaje(bonificacion);
+      nuevoRenglon.setBonificacionNeta(
+          CalculosComprobante.calcularProporcion(nuevoRenglon.getPrecioUnitario(), bonificacion));
     }
-    nuevoRenglon.setDescuentoPorcentaje(descuentoPorcentaje);
-    nuevoRenglon.setDescuentoNeto(
-        CalculosComprobante.calcularProporcion(
-            nuevoRenglon.getPrecioUnitario(), descuentoPorcentaje));
     nuevoRenglon.setIvaPorcentaje(producto.getIvaPorcentaje());
     if (tipoDeComprobante.equals(TipoDeComprobante.FACTURA_Y)) {
       nuevoRenglon.setIvaPorcentaje(
@@ -953,13 +974,31 @@ public class FacturaServiceImpl implements IFacturaService {
     }
     nuevoRenglon.setIvaNeto(
         this.calcularIVANetoRenglon(
-            movimiento, tipoDeComprobante, producto, nuevoRenglon.getDescuentoPorcentaje()));
+            movimiento, tipoDeComprobante, producto, nuevoRenglon.getBonificacionPorcentaje()));
     nuevoRenglon.setGananciaPorcentaje(producto.getGananciaPorcentaje());
     nuevoRenglon.setGananciaNeto(producto.getGananciaNeto());
     nuevoRenglon.setImporte(
         CalculosComprobante.calcularImporte(
-            cantidad, nuevoRenglon.getPrecioUnitario(), nuevoRenglon.getDescuentoNeto()));
+            cantidad, nuevoRenglon.getPrecioUnitario(), nuevoRenglon.getBonificacionNeta()));
     return nuevoRenglon;
+  }
+
+  private void asignarBonificacion(
+      RenglonFactura nuevoRenglon, Cliente cliente, Producto producto) {
+    if (producto.isOferta() && nuevoRenglon.getCantidad().compareTo(producto.getBulto()) >= 0) {
+      nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajeBonificacionOferta());
+      nuevoRenglon.setBonificacionNeta(
+          CalculosComprobante.calcularProporcion(
+              nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionOferta()));
+    } else if (nuevoRenglon.getCantidad().compareTo(producto.getBulto()) >= 0) {
+      nuevoRenglon.setBonificacionPorcentaje(cliente.getBonificacion());
+      nuevoRenglon.setBonificacionNeta(
+          CalculosComprobante.calcularProporcion(
+              nuevoRenglon.getPrecioUnitario(), cliente.getBonificacion()));
+    } else {
+      nuevoRenglon.setBonificacionPorcentaje(BigDecimal.ZERO);
+      nuevoRenglon.setBonificacionNeta(BigDecimal.ZERO);
+    }
   }
 
   @Override
@@ -1052,7 +1091,7 @@ public class FacturaServiceImpl implements IFacturaService {
             facturaSinIVA.getIva105Neto(),
             facturaSinIVA.getIva21Neto()));
     facturaSinIVA.setObservaciones(facturaADividir.getObservaciones());
-    facturaSinIVA.setEmpresa(facturaADividir.getEmpresa());
+    facturaSinIVA.setSucursal(facturaADividir.getSucursal());
     facturaSinIVA.setEliminada(facturaADividir.isEliminada());
     return facturaSinIVA;
   }
@@ -1118,7 +1157,7 @@ public class FacturaServiceImpl implements IFacturaService {
             facturaConIVA.getIva105Neto(),
             facturaConIVA.getIva21Neto()));
     facturaConIVA.setObservaciones(facturaADividir.getObservaciones());
-    facturaConIVA.setEmpresa(facturaADividir.getEmpresa());
+    facturaConIVA.setSucursal(facturaADividir.getSucursal());
     facturaConIVA.setEliminada(facturaADividir.isEliminada());
     return facturaConIVA;
   }
@@ -1153,8 +1192,9 @@ public class FacturaServiceImpl implements IFacturaService {
                 Movimiento.VENTA,
                 cantidadProductosRenglonFacturaSinIVA,
                 renglon.getIdProductoItem(),
-                renglon.getDescuentoPorcentaje(),
-                true);
+                true,
+                facturaSinIVA.getCliente(),
+                null);
         if (nuevoRenglonSinIVA.getCantidad().compareTo(BigDecimal.ZERO) != 0) {
           renglonesSinIVA.add(nuevoRenglonSinIVA);
         }
@@ -1201,8 +1241,8 @@ public class FacturaServiceImpl implements IFacturaService {
                   facturaConIVA.getTipoComprobante(),
                   cantidadProductosRenglonFacturaConIVA,
                   renglon.getIdProductoItem(),
-                  renglon.getDescuentoPorcentaje(),
-                  true));
+                  true,
+                  facturaConIVA.getCliente()));
           renglonMarcado++;
           numeroDeRenglon++;
         } else {
@@ -1212,8 +1252,8 @@ public class FacturaServiceImpl implements IFacturaService {
                   facturaConIVA.getTipoComprobante(),
                   renglon.getCantidad(),
                   renglon.getIdProductoItem(),
-                  renglon.getDescuentoPorcentaje(),
-                  false));
+                  false,
+                  facturaConIVA.getCliente()));
         }
       } else {
         numeroDeRenglon++;
@@ -1222,8 +1262,8 @@ public class FacturaServiceImpl implements IFacturaService {
                 facturaConIVA.getTipoComprobante(),
                 renglon.getCantidad(),
                 renglon.getIdProductoItem(),
-                renglon.getDescuentoPorcentaje(),
-                false));
+                false,
+                facturaConIVA.getCliente()));
       }
     }
     facturaConIVA.setRenglones(renglonesConIVA);
@@ -1234,15 +1274,10 @@ public class FacturaServiceImpl implements IFacturaService {
       TipoDeComprobante tipoDeComprobante,
       BigDecimal cantidad,
       long idProductoItem,
-      BigDecimal descuentoPorcentaje,
-      boolean dividir) {
+      boolean dividir,
+      Cliente cliente) {
     return this.calcularRenglon(
-        tipoDeComprobante,
-        Movimiento.VENTA,
-        cantidad,
-        idProductoItem,
-        descuentoPorcentaje,
-        dividir);
+        tipoDeComprobante, Movimiento.VENTA, cantidad, idProductoItem, dividir, cliente, null);
   }
 
   @Override
@@ -1254,7 +1289,7 @@ public class FacturaServiceImpl implements IFacturaService {
             .idFactura
             .lt(comprobante.getIdComprobante())
             .and(qFacturaVenta.eliminada.eq(false))
-            .and(qFacturaVenta.empresa.idEmpresa.eq(comprobante.getEmpresa().getIdEmpresa()))
+            .and(qFacturaVenta.sucursal.idSucursal.eq(comprobante.getSucursal().getIdSucursal()))
             .and(qFacturaVenta.tipoComprobante.eq(comprobante.getTipoComprobante())));
     Page<FacturaVenta> facturaAnterior =
         facturaVentaRepository.findAll(

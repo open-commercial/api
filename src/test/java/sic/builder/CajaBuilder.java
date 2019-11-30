@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import sic.modelo.Caja;
-import sic.modelo.Empresa;
+import sic.modelo.Sucursal;
 import sic.modelo.EstadoCaja;
 import sic.modelo.Usuario;
 
@@ -20,13 +20,22 @@ public class CajaBuilder {
     private BigDecimal saldoSistema;
     private BigDecimal saldoReal;
     private boolean eliminada = false;
-    private Empresa empresa = new EmpresaBuilder().build();
+    private Sucursal sucursal = new SucursalBuilder().build();
 
-    public Caja build() {
-        return new Caja(idCaja, fechaApertura, fechaCierre, empresa,
-                usuarioAbreCaja, usuarioCierraCaja, estado,
-                saldoInicial, saldoSistema, saldoReal, eliminada);
-    }
+  public Caja build() {
+    return new Caja(
+        idCaja,
+        fechaApertura,
+        fechaCierre,
+        sucursal,
+        usuarioAbreCaja,
+        usuarioCierraCaja,
+        estado,
+        saldoInicial,
+        saldoSistema,
+        saldoReal,
+        eliminada);
+  }
 
     public CajaBuilder withIdCaja(long idCaja) {
         this.idCaja = idCaja;
@@ -78,8 +87,8 @@ public class CajaBuilder {
         return this;
     }
 
-    public CajaBuilder withEmpresa(Empresa empresa) {
-        this.empresa = empresa;
+    public CajaBuilder withSucursal(Sucursal sucursal) {
+        this.sucursal = sucursal;
         return this;
     }
 }

@@ -13,9 +13,10 @@ import java.time.LocalDateTime;
 @Builder
 public class BusquedaGastoCriteria {
 
+  private Long idSucursal;
+  private boolean buscaPorUsuario;
   private LocalDateTime fechaDesde;
   private LocalDateTime fechaHasta;
-  private Long idEmpresa;
   private Long idUsuario;
   private Long idFormaDePago;
   private Long nroGasto;

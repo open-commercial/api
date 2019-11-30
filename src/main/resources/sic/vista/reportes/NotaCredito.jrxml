@@ -66,7 +66,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getEmpresa().getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getSucursal().getNombre()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="115" width="555" height="15" uuid="6fb6fe21-b26a-4f5f-8847-da585e165dae">
@@ -78,8 +78,8 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($P{notaCredito}.getEmpresa().getUbicacion() != null) ? 
-$P{notaCredito}.getEmpresa().getUbicacion()  : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($P{notaCredito}.getSucursal().getUbicacion() != null) ? 
+$P{notaCredito}.getSucursal().getUbicacion()  : ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="130" width="555" height="15" uuid="3c596225-a4e6-4283-92e6-74a5552f2211">
@@ -91,10 +91,10 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getEmpresa().getCategoriaIVA().toString().equals("RESPONSABLE_INSCRIPTO") ? "Responsable Inscripto" :
-$P{notaCredito}.getEmpresa().getCategoriaIVA().toString().equals("EXENTO") ? "Exento" :
-$P{notaCredito}.getEmpresa().getCategoriaIVA().toString().equals("CONSUMIDOR_FINAL") ? "Consumidor Final" :
-$P{notaCredito}.getEmpresa().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getSucursal().getCategoriaIVA().toString().equals("RESPONSABLE_INSCRIPTO") ? "Responsable Inscripto" :
+$P{notaCredito}.getSucursal().getCategoriaIVA().toString().equals("EXENTO") ? "Exento" :
+$P{notaCredito}.getSucursal().getCategoriaIVA().toString().equals("CONSUMIDOR_FINAL") ? "Consumidor Final" :
+$P{notaCredito}.getSucursal().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" : ""]]></textFieldExpression>
 			</textField>
 			<line>
 				<reportElement x="0" y="160" width="555" height="1" uuid="bbd9e748-9b14-42c1-b03e-08e8289d6627"/>
@@ -117,7 +117,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getEmpresa().getIdFiscal()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getSucursal().getIdFiscal()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="459" y="60" width="96" height="15" uuid="4630ada4-f911-45f3-bf8d-1026e289cc77">
@@ -129,7 +129,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getEmpresa().getIngresosBrutos()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getSucursal().getIngresosBrutos()]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
 				<reportElement x="459" y="75" width="96" height="15" uuid="71f82348-4ecf-4a46-9fcc-3681e588c04e">
@@ -141,7 +141,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[java.util.Date.from($P{notaCredito}.getEmpresa().getFechaInicioActividad().atZone(java.time.ZoneId.systemDefault()).toInstant())]]></textFieldExpression>
+				<textFieldExpression><![CDATA[java.util.Date.from($P{notaCredito}.getSucursal().getFechaInicioActividad().atZone(java.time.ZoneId.systemDefault()).toInstant())]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="145" width="279" height="15" uuid="0ac9e3dd-2252-49da-8d4a-ae5da578c748">
@@ -153,7 +153,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getEmpresa().getTelefono()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getSucursal().getTelefono()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="279" y="145" width="276" height="15" uuid="ecc2a8ba-e539-458c-93ed-17ae5e7a70df">
@@ -165,7 +165,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{notaCredito}.getEmpresa().getEmail()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{notaCredito}.getSucursal().getEmail()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement mode="Transparent" x="360" y="15" width="99" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="442e3a2d-471d-4b31-8fae-035b876966d7">
@@ -454,7 +454,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				</textElement>
 				<textFieldExpression><![CDATA[$F{descripcionItem}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField pattern="###0.##">
 				<reportElement x="330" y="0" width="40" height="15" uuid="5dc407ad-61c0-4c06-bc77-1ab3136f8e40">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -463,7 +463,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				</textElement>
 				<textFieldExpression><![CDATA[$F{cantidad}.doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤ #,##0.00">
+			<textField pattern="¤ #,##0.##">
 				<reportElement x="415" y="0" width="52" height="15" uuid="ef48b8f6-ecc3-42f2-b6f9-269aae20c81e">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -472,7 +472,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				</textElement>
 				<textFieldExpression><![CDATA[$F{precioUnitario}.doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="">
+			<textField pattern="##0.##">
 				<reportElement x="467" y="0" width="31" height="15" uuid="f3e07bc2-0b6a-4759-80ae-837e9ad074b8">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -481,7 +481,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				</textElement>
 				<textFieldExpression><![CDATA[$F{descuentoPorcentaje}.doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤ #,##0.00">
+			<textField pattern="¤ #,##0.##">
 				<reportElement x="498" y="0" width="57" height="15" uuid="e044f181-0b15-492c-bf20-af4d406e94db">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -582,7 +582,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				</textElement>
 				<text><![CDATA[21]]></text>
 			</staticText>
-			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
+			<textField pattern="¤ #,##0.##" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="46" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="c6a75d5b-c210-44c6-8e4a-c725bf20381e">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -592,7 +592,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				</textElement>
 				<textFieldExpression><![CDATA[$P{notaCredito}.getSubTotalBruto().doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
+			<textField pattern="¤ #,##0.##" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="61" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="18ea0bde-b849-4259-b982-1dde09844dba">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -602,7 +602,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				</textElement>
 				<textFieldExpression><![CDATA[$P{notaCredito}.getIva105Neto().doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
+			<textField pattern="¤ #,##0.##" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="76" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="e063a476-1e47-4947-9f7f-04ad07139b9e">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -612,7 +612,7 @@ $P{notaCredito}.getTipoComprobante().toString().equals("NOTA_CREDITO_B")
 				</textElement>
 				<textFieldExpression><![CDATA[$P{notaCredito}.getIva21Neto().doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
+			<textField pattern="¤ #,##0.##" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="91" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="0287f0d5-94e6-4d59-ac75-cfff995614c1">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -690,7 +690,7 @@ java.util.Date.from($P{notaCredito}.getVencimientoCae().atStartOfDay()
 				</textElement>
 				<text><![CDATA[SubTotal]]></text>
 			</staticText>
-			<textField pattern="¤ #,##0.00">
+			<textField pattern="¤ #,##0.##">
 				<reportElement x="467" y="1" width="88" height="15" uuid="3b85a686-6380-49b1-8d42-ec4959347e1a">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -710,7 +710,7 @@ java.util.Date.from($P{notaCredito}.getVencimientoCae().atStartOfDay()
 				</textElement>
 				<text><![CDATA[Descuento (%)]]></text>
 			</staticText>
-			<textField pattern="" isBlankWhenNull="false">
+			<textField pattern="##0.##" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="430" y="16" width="37" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="fe2b88e3-6297-4879-b69d-a1ca31c13341">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -721,7 +721,7 @@ java.util.Date.from($P{notaCredito}.getVencimientoCae().atStartOfDay()
 				</textElement>
 				<textFieldExpression><![CDATA[$P{notaCredito}.getDescuentoPorcentaje().doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
+			<textField pattern="¤ #,##0.##" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="16" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="dd0067fe-11c0-4807-a828-5c22be265349">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -741,7 +741,7 @@ java.util.Date.from($P{notaCredito}.getVencimientoCae().atStartOfDay()
 				</textElement>
 				<text><![CDATA[Recargo (%)]]></text>
 			</staticText>
-			<textField pattern="" isBlankWhenNull="false">
+			<textField pattern="##0.##" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="430" y="31" width="37" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="305cf5fe-6303-4042-aebc-68105eeafa97">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -752,7 +752,7 @@ java.util.Date.from($P{notaCredito}.getVencimientoCae().atStartOfDay()
 				</textElement>
 				<textFieldExpression><![CDATA[$P{notaCredito}.getRecargoPorcentaje().doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤ #,##0.00" isBlankWhenNull="false">
+			<textField pattern="¤ #,##0.##" isBlankWhenNull="false">
 				<reportElement mode="Transparent" x="467" y="31" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="5be699f5-8fd3-4f5a-b3f3-de1bffd69638">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -781,9 +781,7 @@ java.util.Date.from($P{notaCredito}.getVencimientoCae().atStartOfDay()
 				</textElement>
 				<textFieldExpression><![CDATA[($P{notaCredito}.getFacturaVenta() != null) ? java.util.Date
       .from( $P{notaCredito}.getFacturaVenta().getFecha().atZone(java.time.ZoneId.systemDefault())
-      .toInstant()) : ""
-
-]]></textFieldExpression>
+      .toInstant()) : ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="95" width="40" height="12" uuid="e06933f8-0985-4dac-bbb6-4e273d26e38a">

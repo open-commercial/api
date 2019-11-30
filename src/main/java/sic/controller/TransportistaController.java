@@ -17,7 +17,7 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaTransportistaCriteria;
 import sic.modelo.dto.TransportistaDTO;
-import sic.service.IEmpresaService;
+import sic.service.ISucursalService;
 import sic.service.ITransportistaService;
 import sic.service.IUbicacionService;
 
@@ -26,16 +26,16 @@ import sic.service.IUbicacionService;
 public class TransportistaController {
 
   private final ITransportistaService transportistaService;
-  private final IEmpresaService empresaService;
+  private final ISucursalService sucursalService;
   private final IUbicacionService ubicacionService;
   private final ModelMapper modelMapper;
 
   @Autowired
   public TransportistaController(
-    ITransportistaService transportistaService, IEmpresaService empresaService,
+    ITransportistaService transportistaService, ISucursalService sucursalService,
     IUbicacionService ubicacionService, ModelMapper modelMapper) {
     this.transportistaService = transportistaService;
-    this.empresaService = empresaService;
+    this.sucursalService = sucursalService;
     this.ubicacionService = ubicacionService;
     this.modelMapper = modelMapper;
   }
@@ -71,12 +71,6 @@ public class TransportistaController {
     if (transportistaPorActualizar.getTelefono() == null) {
       transportistaPorActualizar.setTelefono(transportistaPersistido.getTelefono());
     }
-    if (transportistaDTO.getIdEmpresa() == null) {
-      transportistaPorActualizar.setEmpresa(transportistaPersistido.getEmpresa());
-    } else {
-      transportistaPorActualizar.setEmpresa(
-          empresaService.getEmpresaPorId(transportistaDTO.getIdEmpresa()));
-    }
     if (transportistaService.getTransportistaNoEliminadoPorId(transportistaPorActualizar.getIdTransportista())
         != null) {
       transportistaService.actualizar(transportistaPorActualizar);
@@ -102,7 +96,7 @@ public class TransportistaController {
     transportistaService.eliminar(idTransportista);
   }
 
-  @GetMapping("/transportistas/empresas/{idEmpresa}")
+  @GetMapping("/transportistas/sucursales/{idSucursal}")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -110,15 +104,14 @@ public class TransportistaController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public List<Transportista> getTransportistas(@PathVariable long idEmpresa) {
-    return transportistaService.getTransportistas(empresaService.getEmpresaPorId(idEmpresa));
+  public List<Transportista> getTransportistas(@PathVariable long idSucursal) {
+    return transportistaService.getTransportistas(sucursalService.getSucursalPorId(idSucursal));
   }
 
   @PostMapping("/transportistas")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Transportista guardar(@RequestBody TransportistaDTO transportistaDTO) {
     Transportista transportista = modelMapper.map(transportistaDTO, Transportista.class);
-    transportista.setEmpresa(empresaService.getEmpresaPorId(transportistaDTO.getIdEmpresa()));
     transportista.setUbicacion(null);
     if (transportistaDTO.getUbicacion() != null) {
       transportista.setUbicacion(modelMapper.map(transportistaDTO.getUbicacion(), Ubicacion.class));

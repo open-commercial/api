@@ -1,6 +1,7 @@
 package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -50,7 +51,7 @@ public class NotaDebito extends Nota implements Serializable {
       boolean eliminada,
       TipoDeComprobante tipoDeComprobante,
       LocalDateTime fecha,
-      Empresa empresa,
+      Sucursal sucursal,
       Usuario usuario,
       Cliente cliente,
       Movimiento movimiento,
@@ -74,7 +75,7 @@ public class NotaDebito extends Nota implements Serializable {
         eliminada,
         tipoDeComprobante,
         fecha,
-        empresa,
+      sucursal,
         usuario,
         cliente,
         null,
@@ -102,7 +103,7 @@ public class NotaDebito extends Nota implements Serializable {
       boolean eliminada,
       TipoDeComprobante tipoDeComprobante,
       LocalDateTime fecha,
-      Empresa empresa,
+      Sucursal sucursal,
       Usuario usuario,
       Proveedor proveedor,
       Movimiento movimiento,
@@ -126,7 +127,7 @@ public class NotaDebito extends Nota implements Serializable {
         eliminada,
         tipoDeComprobante,
         fecha,
-        empresa,
+      sucursal,
         usuario,
         null,
         null,

@@ -22,8 +22,8 @@ public class ReciboDTO implements Serializable {
   private String concepto;
   private long idFormaDePago;
   private String nombreFormaDePago;
-  private long idEmpresa;
-  private String nombreEmpresa;
+  private long idSucursal;
+  private String nombreSucursal;
   private Long idCliente;
   private String nombreFiscalCliente;
   private Long idProveedor;

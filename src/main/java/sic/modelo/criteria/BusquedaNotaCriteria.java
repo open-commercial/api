@@ -15,11 +15,14 @@ import sic.modelo.TipoDeComprobante;
 @Builder
 public class BusquedaNotaCriteria {
 
+  private Long idSucursal;
+  private int cantidadDeRegistros;
+  private boolean buscaPorNumeroNota;
   private LocalDateTime fechaDesde;
   private LocalDateTime fechaHasta;
-  private Long idEmpresa;
   private Long numSerie;
   private Long numNota;
+  private boolean buscaPorTipoComprobante;
   private TipoDeComprobante tipoComprobante;
   private Movimiento movimiento;
   private Long idUsuario;

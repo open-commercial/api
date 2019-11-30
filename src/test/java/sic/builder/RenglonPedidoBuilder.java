@@ -11,17 +11,34 @@ public class RenglonPedidoBuilder {
     private String codigoItem = "ABC123";
     private String descripcionItem = "Cinta adhesiva doble faz 3M";
     private String medidaItem = "Metro";
+    private String urlImagenItem = "https://www.imagen.com";
+    private boolean oferta = false;
     private BigDecimal precioUnitario = new BigDecimal("181.5");
     private BigDecimal cantidad = new BigDecimal("2");
-    private BigDecimal descuentoPorcentaje = BigDecimal.ZERO;
-    private BigDecimal descuentoNeto = BigDecimal.ZERO;
+    private BigDecimal bonificacionPorcentaje = BigDecimal.ZERO;
+    private BigDecimal bonificacionNeta = BigDecimal.ZERO;
     private BigDecimal subTotal = new BigDecimal("363");
+    private BigDecimal importeAnterior = new BigDecimal("363");
+    private BigDecimal importe = new BigDecimal("363");
 
-    public RenglonPedidoDTO build() {
-        return new RenglonPedidoDTO(idRenglonPedido, idProductoItem, codigoItem, descripcionItem, medidaItem,
-                precioUnitario, cantidad, descuentoPorcentaje, descuentoNeto, subTotal);
-    }
-    
+  public RenglonPedidoDTO build() {
+    return new RenglonPedidoDTO(
+        idRenglonPedido,
+        idProductoItem,
+        codigoItem,
+        descripcionItem,
+        medidaItem,
+        urlImagenItem,
+        oferta,
+        precioUnitario,
+        cantidad,
+        bonificacionPorcentaje,
+        bonificacionNeta,
+        subTotal,
+        importeAnterior,
+        importe);
+  }
+
     public RenglonPedidoBuilder withIdRenglonPedido(long idRenglonPedido) {
         this.idRenglonPedido = idRenglonPedido;
         return this;
@@ -42,6 +59,21 @@ public class RenglonPedidoBuilder {
         return this;
     }
 
+    public RenglonPedidoBuilder withMedidaItem(String medidaItem) {
+        this.medidaItem = medidaItem;
+        return this;
+    }
+
+    public RenglonPedidoBuilder withUrlImagenItem(String urlImagenItem) {
+        this.urlImagenItem = urlImagenItem;
+        return this;
+    }
+
+    public RenglonPedidoBuilder withOferta(boolean oferta) {
+        this.oferta = oferta;
+        return this;
+    }
+
     public RenglonPedidoBuilder withPrecioDeLista(BigDecimal precioDeLista) {
         this.precioUnitario = precioDeLista;
         return this;
@@ -52,18 +84,29 @@ public class RenglonPedidoBuilder {
         return this;
     }
 
-    public RenglonPedidoBuilder withDescuentoPorcentaje(BigDecimal descuento_porcentaje) {
-        this.descuentoPorcentaje = descuento_porcentaje;
-        return this;
-    }
-
-    public RenglonPedidoBuilder withDescuentoNeto(BigDecimal descuentoNeto) {
-        this.descuentoNeto = descuentoNeto;
-        return this;
-    }
-
     public RenglonPedidoBuilder withSubTotal(BigDecimal subTotal) {
         this.subTotal = subTotal;
         return this;
     }
+
+    public RenglonPedidoBuilder withBonificacionPorcentaje(BigDecimal bonificacionPorcentaje) {
+        this.bonificacionPorcentaje = bonificacionPorcentaje;
+        return this;
+    }
+
+    public RenglonPedidoBuilder withBonificacionNeta(BigDecimal bonificacionNeta) {
+        this.bonificacionNeta = bonificacionNeta;
+        return this;
+    }
+
+    public RenglonPedidoBuilder withImporteAnterior(BigDecimal importeAnterior) {
+        this.importeAnterior = importeAnterior;
+        return this;
+    }
+
+    public RenglonPedidoBuilder withImporte(BigDecimal importe) {
+        this.importe = importe;
+        return this;
+    }
+
 }

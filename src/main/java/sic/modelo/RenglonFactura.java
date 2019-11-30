@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import javax.persistence.*;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
@@ -40,7 +42,8 @@ public class RenglonFactura implements Serializable {
     private String medidaItem;
 
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_renglon_cantidad_mayor_uno}", inclusive = false)
+    @NotNull
+    @Positive(message = "{mensaje_renglon_cantidad_mayor_uno}")
     private BigDecimal cantidad;
     
     @Column(precision = 25, scale = 15)
@@ -48,12 +51,12 @@ public class RenglonFactura implements Serializable {
     private BigDecimal precioUnitario;
     
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_renglon_descuento_porcentaje_negativo}")
-    private BigDecimal descuentoPorcentaje;
+    @DecimalMin(value = "0", message = "{mensaje_renglon_bonificacion_porcentaje_negativa}")
+    private BigDecimal bonificacionPorcentaje;
     
     @Column(precision = 25, scale = 15)
-    @DecimalMin(value = "0", message = "{mensaje_renglon_descuento_neto_negativo}")
-    private BigDecimal descuentoNeto;
+    @DecimalMin(value = "0", message = "{mensaje_renglon_bonificacion_neta_negativa}")
+    private BigDecimal bonificacionNeta;
     
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", message = "{mensaje_renglon_iva_porcentaje_negativo}")

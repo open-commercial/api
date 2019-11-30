@@ -16,10 +16,14 @@ public class RenglonPedidoDTO implements Serializable {
     private String codigoItem;
     private String descripcionItem;
     private String medidaItem;
+    private String urlImagenItem;
+    private boolean oferta;
     private BigDecimal precioUnitario;
     private BigDecimal cantidad;
-    private BigDecimal descuentoPorcentaje;
-    private BigDecimal descuentoNeto;
+    private BigDecimal bonificacionPorcentaje;
+    private BigDecimal bonificacionNeta;
+    private BigDecimal subTotal;
+    private BigDecimal importeAnterior;
     private BigDecimal importe;
 
 }

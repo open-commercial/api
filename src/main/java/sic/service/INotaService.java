@@ -46,21 +46,21 @@ public interface INotaService {
 
   List<NotaCredito> getNotasCreditoPorFactura(Long idFactura);
 
-  long getSiguienteNumeroNotaDebitoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
+  long getSiguienteNumeroNotaDebitoCliente(Long idSucursal, TipoDeComprobante tipoComprobante);
 
-  long getSiguienteNumeroNotaCreditoCliente(Long idEmpresa, TipoDeComprobante tipoComprobante);
+  long getSiguienteNumeroNotaCreditoCliente(Long idSucursal, TipoDeComprobante tipoComprobante);
 
-  List<TipoDeComprobante> getTipoNotaCreditoCliente(Long idCliente, Long idEmpresa);
+  List<TipoDeComprobante> getTipoNotaCreditoCliente(Long idCliente, Long idSucursal);
 
-  List<TipoDeComprobante> getTipoNotaDebitoCliente(Long idCliente, Long idEmpresa);
+  List<TipoDeComprobante> getTipoNotaDebitoCliente(Long idCliente, Long idSucursal);
 
-  List<TipoDeComprobante> getTipoNotaCreditoProveedor(Long idProveedor, Long idEmpresa);
+  List<TipoDeComprobante> getTipoNotaCreditoProveedor(Long idProveedor, Long idSucursal);
 
-  List<TipoDeComprobante> getTipoNotaDebitoProveedor(Long idProveedor, Long idEmpresa);
+  List<TipoDeComprobante> getTipoNotaDebitoProveedor(Long idProveedor, Long idSucursal);
 
-  TipoDeComprobante[] getTiposNotaCredito(Empresa empresa);
+  TipoDeComprobante[] getTiposNotaCredito(Sucursal sucursal);
 
-  TipoDeComprobante[] getTiposNotaDebito(Empresa empresa);
+  TipoDeComprobante[] getTiposNotaDebito(Sucursal sucursal);
 
   TipoDeComprobante getTipoDeNotaCreditoSegunFactura(TipoDeComprobante tipo);
 

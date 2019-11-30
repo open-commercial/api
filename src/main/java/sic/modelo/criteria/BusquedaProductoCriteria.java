@@ -15,11 +15,10 @@ public class BusquedaProductoCriteria {
   private String descripcion;
   private Long idRubro;
   private Long idProveedor;
-  private long idEmpresa;
   private boolean listarSoloFaltantes;
   private boolean listarSoloEnStock;
   private Boolean publico;
-  private Boolean destacado;
+  private Boolean oferta;
   private Integer pagina;
   private String ordenarPor;
   private String sentido;

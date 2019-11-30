@@ -21,8 +21,7 @@
 	<field name="fecha" class="java.time.LocalDateTime"/>
 	<field name="serie" class="java.lang.Long"/>
 	<field name="numero" class="java.lang.Long"/>
-	<field name="fechaVencimiento" class="java.time.LocalDate"/>
-	<field name="cae" class="java.lang.Long"/>
+	<field name="nombreSucursal" class="java.lang.String"/>
 	<field name="descripcion" class="java.lang.String"/>
 	<field name="monto" class="java.math.BigDecimal"/>
 	<field name="saldo" class="java.lang.Double"/>
@@ -30,93 +29,16 @@
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="257" splitType="Stretch">
-			<textField>
-				<reportElement x="0" y="100" width="800" height="15" uuid="48165e8f-802d-48ab-b527-f040ad65579a">
-					<property name="local_mesure_unitheight" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement>
-					<font size="8" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getEmpresa().getNombre()]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="0" y="115" width="800" height="15" uuid="6fb6fe21-b26a-4f5f-8847-da585e165dae">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement>
-					<font size="8" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA[($P{cuentaCorrienteCliente}.getEmpresa().getUbicacion() != null) ? 
-$P{cuentaCorrienteCliente}.getEmpresa().getUbicacion()  : ""]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="0" y="130" width="800" height="15" uuid="3c596225-a4e6-4283-92e6-74a5552f2211">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement>
-					<font size="8" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("RESPONSABLE_INSCRIPTO") ? "Responsable Inscripto" :
-$P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("EXENTO") ? "Exento" :
-$P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("CONSUMIDOR_FINAL") ? "Consumidor Final" :
-$P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" : ""]]></textFieldExpression>
-			</textField>
+		<band height="202" splitType="Stretch">
 			<line>
-				<reportElement x="0" y="160" width="799" height="1" uuid="bbd9e748-9b14-42c1-b03e-08e8289d6627"/>
+				<reportElement x="1" y="103" width="799" height="1" uuid="bbd9e748-9b14-42c1-b03e-08e8289d6627"/>
 			</line>
 			<image hAlign="Center" vAlign="Middle">
-				<reportElement x="40" y="0" width="140" height="100" uuid="a3439a7b-148b-4af2-8d4b-612d8d0beb47"/>
-				<imageExpression><![CDATA[$P{logo}]]></imageExpression>
+				<reportElement x="1" y="0" width="140" height="100" uuid="a3439a7b-148b-4af2-8d4b-612d8d0beb47"/>
+				<imageExpression><![CDATA["https://res.cloudinary.com/hf0vu1bg2/image/upload/v1557317348/assets/logo-globodeoro-500x500px.png"]]></imageExpression>
 			</image>
-			<textField>
-				<reportElement x="710" y="0" width="96" height="15" uuid="4d472ca2-fe0a-4f11-b2c2-eaff1fd6d51e">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Right">
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getEmpresa().getIdFiscal() == null ? "" : $P{cuentaCorrienteCliente}.getEmpresa().getIdFiscal()]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="710" y="15" width="96" height="15" uuid="4630ada4-f911-45f3-bf8d-1026e289cc77">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Right">
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getEmpresa().getIngresosBrutos()]]></textFieldExpression>
-			</textField>
-			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
-				<reportElement x="710" y="30" width="96" height="15" uuid="71f82348-4ecf-4a46-9fcc-3681e588c04e">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Right">
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[java.util.Date.from($P{cuentaCorrienteCliente}.getEmpresa().getFechaInicioActividad().atZone(java.time.ZoneId.systemDefault()).toInstant())]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="0" y="145" width="279" height="15" uuid="0ac9e3dd-2252-49da-8d4a-ae5da578c748">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement>
-					<font size="8" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getEmpresa().getTelefono()]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="279" y="145" width="276" height="15" uuid="ecc2a8ba-e539-458c-93ed-17ae5e7a70df">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement>
-					<font size="8" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getEmpresa().getEmail()]]></textFieldExpression>
-			</textField>
 			<staticText>
-				<reportElement positionType="FixRelativeToBottom" x="0" y="161" width="50" height="15" uuid="c23ab30f-f1da-44d0-b751-12dab0ff3001">
+				<reportElement positionType="FixRelativeToBottom" x="0" y="105" width="50" height="15" uuid="c23ab30f-f1da-44d0-b751-12dab0ff3001">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -126,7 +48,7 @@ $P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("MON
 				<text><![CDATA[Nombre:]]></text>
 			</staticText>
 			<textField>
-				<reportElement positionType="FixRelativeToBottom" x="50" y="161" width="505" height="15" uuid="a07a159d-b6fd-42bc-9024-8a31a442aa8a">
+				<reportElement positionType="FixRelativeToBottom" x="50" y="105" width="505" height="15" uuid="a07a159d-b6fd-42bc-9024-8a31a442aa8a">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -136,7 +58,7 @@ $P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("MON
 				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getCliente().getNombreFiscal() + "  (" + $P{cuentaCorrienteCliente}.getCliente().getNroCliente() + ")"]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement positionType="FixRelativeToBottom" x="0" y="176" width="50" height="15" uuid="07575dbb-0de5-4177-afb0-35b170670748">
+				<reportElement positionType="FixRelativeToBottom" x="0" y="120" width="50" height="15" uuid="07575dbb-0de5-4177-afb0-35b170670748">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="local_mesure_unitwidth" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -147,7 +69,7 @@ $P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("MON
 				<text><![CDATA[Ubicación:]]></text>
 			</staticText>
 			<textField>
-				<reportElement positionType="FixRelativeToBottom" x="50" y="176" width="505" height="15" uuid="9dc064b1-4bc1-4e5d-b6bb-ab49687c9e88">
+				<reportElement positionType="FixRelativeToBottom" x="50" y="120" width="505" height="15" uuid="9dc064b1-4bc1-4e5d-b6bb-ab49687c9e88">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement verticalAlignment="Middle">
@@ -157,7 +79,7 @@ $P{cuentaCorrienteCliente}.getEmpresa().getCategoriaIVA().toString().equals("MON
 $P{cuentaCorrienteCliente}.getCliente().getUbicacionFacturacion() : ""]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement positionType="FixRelativeToBottom" x="50" y="191" width="505" height="15" uuid="cb8691ce-a678-4cf1-a2c7-4938068372c4">
+				<reportElement positionType="FixRelativeToBottom" x="50" y="135" width="505" height="15" uuid="cb8691ce-a678-4cf1-a2c7-4938068372c4">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement verticalAlignment="Middle">
@@ -169,7 +91,7 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("CON
 $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "Monotributo" : ""]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement positionType="FixRelativeToBottom" x="0" y="191" width="50" height="15" uuid="f0b344fb-6370-43de-819b-3c1edd682fe1">
+				<reportElement positionType="FixRelativeToBottom" x="0" y="135" width="50" height="15" uuid="f0b344fb-6370-43de-819b-3c1edd682fe1">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -178,7 +100,7 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				<text><![CDATA[I.V.A.:]]></text>
 			</staticText>
 			<textField>
-				<reportElement positionType="FixRelativeToBottom" x="50" y="206" width="505" height="15" uuid="b25bf8b1-128a-4e0e-8b8b-3790a4aefb4a">
+				<reportElement positionType="FixRelativeToBottom" x="50" y="150" width="505" height="15" uuid="b25bf8b1-128a-4e0e-8b8b-3790a4aefb4a">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement verticalAlignment="Middle">
@@ -187,51 +109,24 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getCliente().getIdFiscal() == null ? "" : $P{cuentaCorrienteCliente}.getCliente().getIdFiscal()]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement mode="Transparent" x="611" y="0" width="99" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="9e7dfcda-5c8c-4987-88c2-2b820976c1bf"/>
-				<box padding="0" topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
-				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
-					<font size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single" lineSpacingSize="1.0" firstLineIndent="0" leftIndent="0" rightIndent="0" spacingBefore="0" spacingAfter="0" tabStopWidth="40"/>
-				</textElement>
-				<text><![CDATA[CUIT:]]></text>
-			</staticText>
-			<staticText>
-				<reportElement mode="Transparent" x="611" y="15" width="99" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="b14c524c-faa9-4313-afa5-6d41ff2095b7"/>
-				<box padding="0" topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
-				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
-					<font size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single" lineSpacingSize="1.0" firstLineIndent="0" leftIndent="0" rightIndent="0" spacingBefore="0" spacingAfter="0" tabStopWidth="40"/>
-				</textElement>
-				<text><![CDATA[Ingresos Brutos:]]></text>
-			</staticText>
-			<staticText>
-				<reportElement mode="Transparent" x="611" y="30" width="99" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="65b16deb-9ce0-4137-ad4c-53495b7cdeaa"/>
-				<box padding="0" topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
-				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
-					<font size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single" lineSpacingSize="1.0" firstLineIndent="0" leftIndent="0" rightIndent="0" spacingBefore="0" spacingAfter="0" tabStopWidth="40"/>
-				</textElement>
-				<text><![CDATA[Inicio Actividades:]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="302" y="0" width="230" height="25" uuid="fcdd23d2-56f9-4d85-ac55-bb24a80541be"/>
+				<reportElement x="302" y="78" width="230" height="25" uuid="fcdd23d2-56f9-4d85-ac55-bb24a80541be"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="16" isBold="true" isUnderline="false"/>
 				</textElement>
 				<text><![CDATA[CUENTA CORRIENTE]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="659" y="221" width="71" height="16" uuid="318cdd67-7e0d-4a5a-a524-e3a17e8a1e0d">
+				<reportElement x="659" y="166" width="71" height="16" uuid="318cdd67-7e0d-4a5a-a524-e3a17e8a1e0d">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Saldo:]]></text>
+				<text><![CDATA[Saldo]]></text>
 			</staticText>
-			<textField pattern="¤ #,##0.00">
-				<reportElement x="730" y="221" width="71" height="16" uuid="d79999bb-94af-4ac3-895a-7c3ff70d751c">
+			<textField pattern="¤ #,##0.##">
+				<reportElement x="730" y="166" width="71" height="16" uuid="d79999bb-94af-4ac3-895a-7c3ff70d751c">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -240,10 +135,10 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getSaldo().doubleValue()]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="0" y="236" width="800" height="1" uuid="9554feb6-2d03-455d-a9bb-071b6982915e"/>
+				<reportElement x="0" y="182" width="800" height="1" uuid="9554feb6-2d03-455d-a9bb-071b6982915e"/>
 			</line>
 			<staticText>
-				<reportElement x="1" y="237" width="87" height="15" uuid="0ba8e29c-2f1e-4b9f-b40c-cdd66d250bea">
+				<reportElement x="1" y="183" width="87" height="15" uuid="0ba8e29c-2f1e-4b9f-b40c-cdd66d250bea">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -253,7 +148,7 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				<text><![CDATA[Fecha]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="88" y="237" width="131" height="16" uuid="01f242fd-85d5-4c4e-9b09-f1c09d95b55a">
+				<reportElement x="88" y="183" width="131" height="16" uuid="01f242fd-85d5-4c4e-9b09-f1c09d95b55a">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="local_mesure_unitwidth" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -264,16 +159,7 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				<text><![CDATA[Comprobante]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="219" y="237" width="72" height="16" uuid="e2f0a5f2-9774-4ad4-962c-8b064818b692">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font isBold="true"/>
-				</textElement>
-				<text><![CDATA[Vencimiento]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="380" y="237" width="279" height="16" uuid="93deb364-0ad0-4437-92b8-20064ed82690">
+				<reportElement x="308" y="183" width="351" height="16" uuid="93deb364-0ad0-4437-92b8-20064ed82690">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -282,7 +168,7 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				<text><![CDATA[Detalle]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="659" y="237" width="71" height="16" uuid="5bd3b2cd-ad86-4699-8f14-8c6d3126b493">
+				<reportElement x="659" y="183" width="71" height="16" uuid="5bd3b2cd-ad86-4699-8f14-8c6d3126b493">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -291,7 +177,7 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				<text><![CDATA[Monto]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="730" y="237" width="71" height="16" uuid="b048b3d8-b91d-4375-88a9-cd62bd6ad32b">
+				<reportElement x="730" y="183" width="71" height="16" uuid="b048b3d8-b91d-4375-88a9-cd62bd6ad32b">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -300,24 +186,48 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				<text><![CDATA[Saldo]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="291" y="237" width="89" height="16" uuid="92d2b330-c0cf-4e16-8082-bc3659e31754">
+				<reportElement x="219" y="183" width="89" height="16" uuid="92d2b330-c0cf-4e16-8082-bc3659e31754">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[CAE]]></text>
+				<text><![CDATA[Sucursal]]></text>
 			</staticText>
 			<line>
-				<reportElement x="0" y="253" width="800" height="3" uuid="11ca4359-6606-44e0-bf65-0eb1f4a2a410"/>
+				<reportElement x="0" y="199" width="800" height="3" uuid="11ca4359-6606-44e0-bf65-0eb1f4a2a410"/>
 			</line>
 			<textField>
-				<reportElement positionType="FixRelativeToBottom" x="0" y="206" width="50" height="15" uuid="2dba9da8-60b6-4a02-b294-d545bfc4dabd"/>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="150" width="50" height="15" uuid="2dba9da8-60b6-4a02-b294-d545bfc4dabd"/>
 				<textElement verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("CONSUMIDOR_FINAL") ? "DNI:" : "CUIT:"]]></textFieldExpression>
 			</textField>
+			<staticText>
+				<reportElement x="226" y="-1" width="385" height="21" uuid="81dc89ff-067b-44d5-bfba-ee0e983918cc"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Web: www.globodeoro.com]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="226" y="20" width="385" height="21" uuid="1d3a80a7-67d6-409f-82e6-3a93da4fd8cd"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Teléfono/WhatsApp: 379 4834638]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="226" y="41" width="385" height="19" uuid="5fc9e09b-2b5b-4934-bbcc-6313c3221b71"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Email: ventas@globodistribuciones.com]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="166" width="800" height="1" uuid="a6117af8-aad7-4b6e-a15e-251efed99a1d"/>
+			</line>
 		</band>
 	</title>
 	<detail>
@@ -334,19 +244,8 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				</textElement>
 				<textFieldExpression><![CDATA[$F{tipoComprobante} + " Nº " + $F{serie} + " - " + $F{numero}]]></textFieldExpression>
 			</textField>
-			<textField pattern="dd/MM/yyyy">
-				<reportElement x="219" y="0" width="72" height="15" uuid="5dc407ad-61c0-4c06-bc77-1ab3136f8e40">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Center">
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{fechaVencimiento} == null ? "": java.util.Date.from($F{fechaVencimiento}.atStartOfDay()
-      .atZone(java.time.ZoneId.systemDefault())
-      .toInstant())]]></textFieldExpression>
-			</textField>
 			<textField pattern="¤ #,##0.00">
-				<reportElement x="380" y="0" width="279" height="15" uuid="ef48b8f6-ecc3-42f2-b6f9-269aae20c81e">
+				<reportElement x="308" y="0" width="351" height="15" uuid="ef48b8f6-ecc3-42f2-b6f9-269aae20c81e">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Left">
@@ -354,7 +253,7 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				</textElement>
 				<textFieldExpression><![CDATA[$F{descripcion}  == null ? "": $F{descripcion}]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤ #,##0.00">
+			<textField pattern="¤ #,##0.##">
 				<reportElement x="659" y="0" width="71" height="15" uuid="f3e07bc2-0b6a-4759-80ae-837e9ad074b8">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -363,7 +262,7 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				</textElement>
 				<textFieldExpression><![CDATA[$F{monto}]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤ #,##0.00">
+			<textField pattern="¤ #,##0.##">
 				<reportElement x="730" y="0" width="71" height="15" uuid="e044f181-0b15-492c-bf20-af4d406e94db">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -373,13 +272,13 @@ $P{cuentaCorrienteCliente}.getCliente().getCategoriaIVA().toString().equals("MON
 				<textFieldExpression><![CDATA[$F{saldo}]]></textFieldExpression>
 			</textField>
 			<textField pattern="">
-				<reportElement x="291" y="0" width="89" height="15" uuid="7a5d637a-a063-4bbe-a486-b313a3f62c77">
+				<reportElement x="219" y="0" width="89" height="15" uuid="7a5d637a-a063-4bbe-a486-b313a3f62c77">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{cae} == null ? "": $F{cae}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{nombreSucursal}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy HH:mm:ss">
 				<reportElement stretchType="ElementGroupHeight" x="1" y="0" width="87" height="15" uuid="40bb9abf-b844-4456-aeda-6e3608ffb5e0">

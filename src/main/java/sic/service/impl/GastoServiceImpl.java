@@ -25,14 +25,14 @@ import org.springframework.transaction.annotation.Transactional;
 import sic.exception.BusinessServiceException;
 import sic.repository.GastoRepository;
 import sic.service.ICajaService;
-import sic.service.IEmpresaService;
+import sic.service.ISucursalService;
 
 @Service
 @Validated
 public class GastoServiceImpl implements IGastoService {
 
   private final GastoRepository gastoRepository;
-  private final IEmpresaService empresaService;
+  private final ISucursalService sucursalService;
   private final ICajaService cajaService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -42,11 +42,11 @@ public class GastoServiceImpl implements IGastoService {
   @Lazy
   public GastoServiceImpl(
       GastoRepository gastoRepository,
-      IEmpresaService empresaService,
+      ISucursalService sucursalService,
       ICajaService cajaService,
       MessageSource messageSource) {
     this.gastoRepository = gastoRepository;
-    this.empresaService = empresaService;
+    this.sucursalService = sucursalService;
     this.cajaService = cajaService;
     this.messageSource = messageSource;
   }
@@ -65,7 +65,7 @@ public class GastoServiceImpl implements IGastoService {
 
   @Override
   public void validarOperacion(Gasto gasto) {
-    this.cajaService.validarMovimiento(gasto.getFecha(), gasto.getEmpresa().getIdEmpresa());
+    this.cajaService.validarMovimiento(gasto.getFecha(), gasto.getSucursal().getIdSucursal());
     if (gastoRepository.findById(gasto.getIdGasto()).isPresent()) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_gasto_duplicada", null, Locale.getDefault()));
@@ -128,15 +128,14 @@ public class GastoServiceImpl implements IGastoService {
     if (criteria.getIdUsuario() != null)
       builder.and(qGasto.usuario.idUsuario.eq(criteria.getIdUsuario()));
     builder.and(
-        qGasto.empresa.idEmpresa.eq(criteria.getIdEmpresa()).and(qGasto.eliminado.eq(false)));
+        qGasto.sucursal.idSucursal.eq(criteria.getIdSucursal()).and(qGasto.eliminado.eq(false)));
     return builder;
   }
 
   @Override
   @Transactional
   public Gasto guardar(@Valid Gasto gasto) {
-    gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getEmpresa().getIdEmpresa()) + 1);
-    gasto.setFecha(LocalDateTime.now());
+    gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getSucursal().getIdSucursal()) + 1);
     this.validarOperacion(gasto);
     gasto = gastoRepository.save(gasto);
     logger.warn("El Gasto {} se guardó correctamente.", gasto);
@@ -145,9 +144,9 @@ public class GastoServiceImpl implements IGastoService {
 
   @Override
   public List<Gasto> getGastosEntreFechasYFormaDePago(
-      Empresa empresa, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta) {
+    Sucursal sucursal, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta) {
     return gastoRepository.getGastosEntreFechasPorFormaDePago(
-        empresa.getIdEmpresa(), formaDePago.getIdFormaDePago(), desde, hasta);
+        sucursal.getIdSucursal(), formaDePago.getIdFormaDePago(), desde, hasta);
   }
 
   @Override
@@ -155,7 +154,7 @@ public class GastoServiceImpl implements IGastoService {
   public void eliminar(long idGasto) {
     Gasto gastoParaEliminar = this.getGastoNoEliminadoPorId(idGasto);
     if (this.cajaService
-        .getUltimaCaja(gastoParaEliminar.getEmpresa().getIdEmpresa())
+        .getUltimaCaja(gastoParaEliminar.getSucursal().getIdSucursal())
         .getEstado()
         .equals(EstadoCaja.CERRADA)) {
       throw new BusinessServiceException(messageSource.getMessage(
@@ -166,10 +165,10 @@ public class GastoServiceImpl implements IGastoService {
   }
 
   @Override
-  public long getUltimoNumeroDeGasto(long idEmpresa) {
+  public long getUltimoNumeroDeGasto(long idSucursal) {
     Gasto gasto =
-        gastoRepository.findTopByEmpresaAndEliminadoOrderByNroGastoDesc(
-            empresaService.getEmpresaPorId(idEmpresa), false);
+        gastoRepository.findTopBySucursalAndEliminadoOrderByNroGastoDesc(
+            sucursalService.getSucursalPorId(idSucursal), false);
     if (gasto == null) {
       return 1; // No existe ningun Gasto anterior
     } else {
@@ -179,24 +178,24 @@ public class GastoServiceImpl implements IGastoService {
 
   @Override
   public BigDecimal getTotalGastosEntreFechasYFormaDePago(
-      long idEmpresa, long idFormaDePago, LocalDateTime desde, LocalDateTime hasta) {
+    long idSucursal, long idFormaDePago, LocalDateTime desde, LocalDateTime hasta) {
     BigDecimal total =
         gastoRepository.getTotalGastosEntreFechasPorFormaDePago(
-            idEmpresa, idFormaDePago, desde, hasta);
+          idSucursal, idFormaDePago, desde, hasta);
     return (total == null) ? BigDecimal.ZERO : total;
   }
 
   @Override
   public BigDecimal getTotalGastosQueAfectanCajaEntreFechas(
-      long idEmpresa, LocalDateTime desde, LocalDateTime hasta) {
+    long idSucursal, LocalDateTime desde, LocalDateTime hasta) {
     BigDecimal total =
-        gastoRepository.getTotalGastosQueAfectanCajaEntreFechas(idEmpresa, desde, hasta);
+        gastoRepository.getTotalGastosQueAfectanCajaEntreFechas(idSucursal, desde, hasta);
     return (total == null) ? BigDecimal.ZERO : total;
   }
 
   @Override
-  public BigDecimal getTotalGastosEntreFechas(long idEmpresa, LocalDateTime desde, LocalDateTime hasta) {
-    BigDecimal total = gastoRepository.getTotalGastosEntreFechas(idEmpresa, desde, hasta);
+  public BigDecimal getTotalGastosEntreFechas(long idSucursal, LocalDateTime desde, LocalDateTime hasta) {
+    BigDecimal total = gastoRepository.getTotalGastosEntreFechas(idSucursal, desde, hasta);
     return (total == null) ? BigDecimal.ZERO : total;
   }
 

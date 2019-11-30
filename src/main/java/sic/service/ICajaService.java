@@ -15,7 +15,7 @@ public interface ICajaService {
 
     void actualizar(@Valid Caja caja);
 
-    void validarMovimiento(LocalDateTime fechaMovimiento, long idEmpresa);
+    void validarMovimiento(LocalDateTime fechaMovimiento, long idSucursal);
     
     void eliminar(Long idCaja);
     
@@ -25,9 +25,9 @@ public interface ICajaService {
 
     Map<Long, BigDecimal> getTotalesDeFormaDePago(long idCaja);
 
-    Caja getUltimaCaja(long idEmpresa);
+    Caja getUltimaCaja(long idSucursal);
 
-    Caja abrirCaja(Empresa empresa, Usuario usuarioApertura, BigDecimal saldoApertura);
+    Caja abrirCaja(Sucursal sucursal, Usuario usuarioApertura, BigDecimal saldoApertura);
 
     void validarOperacion(@Valid Caja caja);
     
@@ -37,17 +37,17 @@ public interface ICajaService {
 
     BigDecimal getSaldoSistema(Caja caja);
 
-    boolean isUltimaCajaAbierta(long idEmpresa);
+    boolean isUltimaCajaAbierta(long idSucursal);
     
     BigDecimal getSaldoSistemaCajas(BusquedaCajaCriteria criteria);
     
     BigDecimal getSaldoRealCajas(BusquedaCajaCriteria criteria);
-    
-    List<MovimientoCaja> getMovimientosPorFormaDePagoEntreFechas(Empresa empresa, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta);
+
+    List<MovimientoCaja> getMovimientosPorFormaDePagoEntreFechas(Sucursal sucursal, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta);
 
     void reabrirCaja(long idCaja, BigDecimal saldoInicial);
 
-    Caja encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(long idEmpresa, LocalDateTime fecha);
+    Caja encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(long idSucursal, LocalDateTime fecha);
 
     int actualizarSaldoSistema(Caja caja, BigDecimal monto);
 

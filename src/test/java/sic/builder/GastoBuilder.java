@@ -1,9 +1,8 @@
 package sic.builder;
 
 import java.math.BigDecimal;
+import sic.modelo.Sucursal;
 import java.time.LocalDateTime;
-
-import sic.modelo.Empresa;
 import sic.modelo.FormaDePago;
 import sic.modelo.Gasto;
 import sic.modelo.Usuario;
@@ -14,14 +13,14 @@ public class GastoBuilder {
     private long nroGasto = 34;
     private LocalDateTime fecha = LocalDateTime.now();
     private String concepto = "Gasto Factura de Luz - Builder";
-    private Empresa empresa = new EmpresaBuilder().build();
+    private Sucursal sucursal = new SucursalBuilder().build();
     private Usuario usuario = new UsuarioBuilder().build();
     private FormaDePago formaDePago = new FormaDePagoBuilder().build();
     private BigDecimal monto = new BigDecimal("245.33");
     private boolean eliminado = false;
 
     public Gasto build() {
-        return new Gasto(idGasto, nroGasto, fecha, concepto, empresa, usuario, formaDePago, monto, eliminado);
+        return new Gasto(idGasto, nroGasto, fecha, concepto, sucursal, usuario, formaDePago, monto, eliminado);
     }
 
     public GastoBuilder withIdGasto(long idGasto) {
@@ -44,8 +43,8 @@ public class GastoBuilder {
         return this;
     }
 
-    public GastoBuilder withEmpresa(Empresa empresa) {
-        this.empresa = empresa;
+    public GastoBuilder withEmpresa(Sucursal sucursal) {
+        this.sucursal = sucursal;
         return this;
     }
 

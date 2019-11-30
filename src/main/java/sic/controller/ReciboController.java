@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.criteria.BusquedaReciboCriteria;
+import sic.modelo.Movimiento;
 import sic.modelo.Recibo;
 import sic.modelo.Rol;
 import sic.modelo.dto.ReciboDTO;
@@ -23,7 +24,7 @@ import java.time.LocalDateTime;
 public class ReciboController {
 
   private final IReciboService reciboService;
-  private final IEmpresaService empresaService;
+  private final ISucursalService sucursalService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
   private final IProveedorService proveedorService;
@@ -34,7 +35,7 @@ public class ReciboController {
   @Autowired
   public ReciboController(
       IReciboService reciboService,
-      IEmpresaService empresaService,
+      ISucursalService sucursalService,
       IUsuarioService usuarioService,
       IClienteService clienteService,
       IProveedorService proveedorService,
@@ -42,7 +43,7 @@ public class ReciboController {
       IAuthService authService,
       ModelMapper modelMapper) {
     this.reciboService = reciboService;
-    this.empresaService = empresaService;
+    this.sucursalService = sucursalService;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
     this.formaDePagoService = formaDePagoService;
@@ -81,7 +82,7 @@ public class ReciboController {
       @RequestBody ReciboDTO reciboDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     Recibo recibo = modelMapper.map(reciboDTO, Recibo.class);
-    recibo.setEmpresa(empresaService.getEmpresaPorId(reciboDTO.getIdEmpresa()));
+    recibo.setSucursal(sucursalService.getSucursalPorId(reciboDTO.getIdSucursal()));
     recibo.setCliente(clienteService.getClienteNoEliminadoPorId(reciboDTO.getIdCliente()));
     recibo.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(reciboDTO.getIdFormaDePago()));
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
@@ -97,7 +98,7 @@ public class ReciboController {
       @RequestBody ReciboDTO reciboDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     Recibo recibo = modelMapper.map(reciboDTO, Recibo.class);
-    recibo.setEmpresa(empresaService.getEmpresaPorId(reciboDTO.getIdEmpresa()));
+    recibo.setSucursal(sucursalService.getSucursalPorId(reciboDTO.getIdSucursal()));
     recibo.setProveedor(proveedorService.getProveedorNoEliminadoPorId(reciboDTO.getIdProveedor()));
     recibo.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(reciboDTO.getIdFormaDePago()));
     Claims claims = authService.getClaimsDelToken(authorizationHeader);

@@ -16,7 +16,6 @@ public class BusquedaProveedorCriteria {
   private Long idFiscal;
   private Long idProvincia;
   private Long idLocalidad;
-  private Long idEmpresa;
   private Integer pagina;
   private String ordenarPor;
   private String sentido;

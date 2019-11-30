@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaProductoCriteria;
-import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductoDTO;
+import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 
@@ -32,7 +32,7 @@ public class ProductoController {
   private final IMedidaService medidaService;
   private final IRubroService rubroService;
   private final IProveedorService proveedorService;
-  private final IEmpresaService empresaService;
+  private final ISucursalService sucursalService;
   private final IClienteService clienteService;
   private final IAuthService authService;
   private final ModelMapper modelMapper;
@@ -44,7 +44,7 @@ public class ProductoController {
     IMedidaService medidaService,
     IRubroService rubroService,
     IProveedorService proveedorService,
-    IEmpresaService empresaService,
+    ISucursalService sucursalService,
     IClienteService clienteService,
     IAuthService authService,
     ModelMapper modelMapper,
@@ -53,7 +53,7 @@ public class ProductoController {
     this.medidaService = medidaService;
     this.rubroService = rubroService;
     this.proveedorService = proveedorService;
-    this.empresaService = empresaService;
+    this.sucursalService = sucursalService;
     this.clienteService = clienteService;
     this.authService = authService;
     this.modelMapper = modelMapper;
@@ -62,30 +62,27 @@ public class ProductoController {
 
   @GetMapping("/productos/{idProducto}")
   public Producto getProductoPorId(
-    @PathVariable long idProducto,
-    @RequestParam(required = false) Boolean publicos,
-    @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
+      @PathVariable long idProducto,
+      @RequestParam(required = false) Boolean publicos,
+      @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     if (publicos != null && publicos && !producto.isPublico()) {
-      throw new EntityNotFoundException(messageSource.getMessage(
-        "mensaje_producto_no_existente", null, Locale.getDefault()));
+      throw new EntityNotFoundException(
+          messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
     }
-    if (authorizationHeader != null && authService.esAuthorizationHeaderValido(authorizationHeader)) {
+    if (!producto.isOferta()
+        && authorizationHeader != null
+        && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
-      Cliente cliente =
-        clienteService.getClientePorIdUsuarioYidEmpresa(
-          (int) claims.get("idUsuario"), producto.getEmpresa().getIdEmpresa());
+      Cliente cliente = clienteService.getClientePorIdUsuario((int) claims.get("idUsuario"));
       if (cliente != null) {
         Page<Producto> productos =
-          productoService.getProductosConPrecioBonificado(
-            new PageImpl<>(Collections.singletonList(producto)), cliente);
-        return productos.getContent().get(0);
-      } else {
-        return producto;
+            productoService.getProductosConPrecioBonificado(
+                new PageImpl<>(Collections.singletonList(producto)), cliente);
+        producto = productos.getContent().get(0);
       }
-    } else {
-      return producto;
     }
+    return producto;
   }
 
   @GetMapping("/productos/busqueda")
@@ -96,9 +93,9 @@ public class ProductoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public Producto getProductoPorCodigo(@RequestParam long idEmpresa, @RequestParam String codigo) {
-    return productoService.getProductoPorCodigo(codigo, idEmpresa);
-  }
+    public Producto getProductoPorCodigo(@RequestParam String codigo) {
+      return productoService.getProductoPorCodigo(codigo);
+    }
 
   @PostMapping("/productos/busqueda/criteria")
   public Page<Producto> buscarProductos(
@@ -109,8 +106,7 @@ public class ProductoController {
         && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       Cliente cliente =
-          clienteService.getClientePorIdUsuarioYidEmpresa(
-              (int) claims.get("idUsuario"), criteria.getIdEmpresa());
+          clienteService.getClientePorIdUsuario((int) claims.get("idUsuario"));
       if (cliente != null) {
         return productoService.getProductosConPrecioBonificado(productos, cliente);
       } else {
@@ -140,6 +136,9 @@ public class ProductoController {
     @RequestParam(required = false) String formato) {
     HttpHeaders headers = new HttpHeaders();
     List<Producto> productos;
+    if (formato == null || formato.isEmpty()) {
+      formato = "xlsx";
+    }
     switch (formato) {
       case "xlsx":
         headers.setContentType(new MediaType("application", "vnd.ms-excel"));
@@ -147,7 +146,7 @@ public class ProductoController {
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
         productos = productoService.buscarProductosParaReporte(criteria);
         byte[] reporteXls =
-          productoService.getListaDePreciosPorEmpresa(productos, criteria.getIdEmpresa(), formato);
+          productoService.getListaDePrecios(productos, formato);
         headers.setContentLength(reporteXls.length);
         return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
       case "pdf":
@@ -156,7 +155,7 @@ public class ProductoController {
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
         productos = productoService.buscarProductosParaReporte(criteria);
         byte[] reportePDF =
-          productoService.getListaDePreciosPorEmpresa(productos, criteria.getIdEmpresa(), formato);
+          productoService.getListaDePrecios(productos, formato);
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
       default:
         throw new BusinessServiceException(messageSource.getMessage(
@@ -176,43 +175,78 @@ public class ProductoController {
       @RequestBody ProductoDTO productoDTO,
       @RequestParam(required = false) Long idMedida,
       @RequestParam(required = false) Long idRubro,
-      @RequestParam(required = false) Long idProveedor,
-      @RequestParam(required = false) Long idEmpresa) {
+      @RequestParam(required = false) Long idProveedor) {
     Producto productoPorActualizar = modelMapper.map(productoDTO, Producto.class);
     Producto productoPersistido =
         productoService.getProductoNoEliminadoPorId(productoPorActualizar.getIdProducto());
-    if (productoPersistido != null) {
       if (idMedida != null) productoPorActualizar.setMedida(medidaService.getMedidaNoEliminadaPorId(idMedida));
       else productoPorActualizar.setMedida(productoPersistido.getMedida());
       if (idRubro != null) productoPorActualizar.setRubro(rubroService.getRubroNoEliminadoPorId(idRubro));
       else productoPorActualizar.setRubro(productoPersistido.getRubro());
-      if (idProveedor != null) productoPorActualizar.setProveedor(proveedorService.getProveedorNoEliminadoPorId(idProveedor));
-      else productoPorActualizar.setProveedor(productoPersistido.getProveedor());
-      if (idEmpresa != null)
-        productoPorActualizar.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-      else productoPorActualizar.setEmpresa(productoPersistido.getEmpresa());
-      productoService.actualizar(productoPorActualizar, productoPersistido);
-    }
+    if (idProveedor != null)
+      productoPorActualizar.setProveedor(
+          proveedorService.getProveedorNoEliminadoPorId(idProveedor));
+    else productoPorActualizar.setProveedor(productoPersistido.getProveedor());
+    Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
+    productoDTO
+        .getCantidadEnSucursales()
+        .forEach(
+            cantidadEnSucursalDTO -> {
+              CantidadEnSucursal cantidadEnSucursal =
+                  modelMapper.map(cantidadEnSucursalDTO, CantidadEnSucursal.class);
+              cantidadEnSucursal.setSucursal(
+                  sucursalService.getSucursalPorId(cantidadEnSucursalDTO.getIdSucursal()));
+              cantidadEnSucursales.add(cantidadEnSucursal);
+            });
+    productoPorActualizar.setCantidadEnSucursales(cantidadEnSucursales);
+    productoPorActualizar.getCantidadEnSucursales().addAll(productoPersistido.getCantidadEnSucursales());
+    productoPorActualizar.setCantidadTotalEnSucursales(
+        cantidadEnSucursales
+            .stream()
+            .map(CantidadEnSucursal::getCantidad)
+            .reduce(BigDecimal.ZERO, BigDecimal::add));
+    productoService.actualizar(productoPorActualizar, productoPersistido);
   }
 
   @PostMapping("/productos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Producto guardar(
-    @RequestBody NuevoProductoDTO nuevoProductoDTO,
-    @RequestParam Long idMedida,
-    @RequestParam Long idRubro,
-    @RequestParam Long idProveedor,
-    @RequestParam Long idEmpresa) {
+      @RequestBody NuevoProductoDTO nuevoProductoDTO,
+      @RequestParam Long idMedida,
+      @RequestParam Long idRubro,
+      @RequestParam Long idProveedor) {
     Producto producto = new Producto();
     producto.setMedida(medidaService.getMedidaNoEliminadaPorId(idMedida));
     producto.setRubro(rubroService.getRubroNoEliminadoPorId(idRubro));
     producto.setProveedor(proveedorService.getProveedorNoEliminadoPorId(idProveedor));
-    producto.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
     producto.setCodigo(nuevoProductoDTO.getCodigo());
     producto.setDescripcion(nuevoProductoDTO.getDescripcion());
-    producto.setCantidad(nuevoProductoDTO.getCantidad());
-    producto.setHayStock(nuevoProductoDTO.isHayStock());
-    producto.setPrecioBonificado(nuevoProductoDTO.getPrecioBonificado());
+    Set<CantidadEnSucursal> altaCantidadesEnSucursales = new HashSet<>();
+    this.sucursalService.getSucusales(false).forEach(sucursal -> {
+      CantidadEnSucursal cantidad = new CantidadEnSucursal();
+      cantidad.setCantidad(BigDecimal.ZERO);
+      cantidad.setSucursal(sucursal);
+      altaCantidadesEnSucursales.add(cantidad);
+    });
+    producto.setCantidadEnSucursales(altaCantidadesEnSucursales);
+    producto
+        .getCantidadEnSucursales()
+        .forEach(
+            cantidadEnSucursal ->
+                nuevoProductoDTO.getCantidadEnSucursal().keySet().stream()
+                    .filter(idSucursal -> idSucursal.equals(cantidadEnSucursal.getIdSucursal()))
+                    .forEach(
+                        idSucursal -> {
+                          cantidadEnSucursal.setCantidad(
+                              nuevoProductoDTO.getCantidadEnSucursal().get(idSucursal));
+                          cantidadEnSucursal.setEstante(nuevoProductoDTO.getEstante());
+                          cantidadEnSucursal.setEstanteria(nuevoProductoDTO.getEstanteria());
+                        }));
+    producto.setCantidadTotalEnSucursales(
+        producto.getCantidadEnSucursales().stream()
+            .map(CantidadEnSucursal::getCantidad)
+            .reduce(BigDecimal.ZERO, BigDecimal::add));
+    producto.setHayStock(producto.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
     producto.setCantMinima(nuevoProductoDTO.getCantMinima());
     producto.setBulto(nuevoProductoDTO.getBulto());
     producto.setPrecioCosto(nuevoProductoDTO.getPrecioCosto());
@@ -224,8 +258,6 @@ public class ProductoController {
     producto.setPrecioLista(nuevoProductoDTO.getPrecioLista());
     producto.setIlimitado(nuevoProductoDTO.isIlimitado());
     producto.setPublico(nuevoProductoDTO.isPublico());
-    producto.setEstante(nuevoProductoDTO.getEstante());
-    producto.setEstanteria(nuevoProductoDTO.getEstanteria());
     producto.setNota(nuevoProductoDTO.getNota());
     producto.setFechaVencimiento(nuevoProductoDTO.getFechaVencimiento());
     producto.setFechaAlta(LocalDateTime.now());

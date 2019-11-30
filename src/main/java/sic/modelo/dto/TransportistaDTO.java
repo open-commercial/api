@@ -3,12 +3,7 @@ package sic.modelo.dto;
 import lombok.*;
 
 @Data
-@EqualsAndHashCode(
-    exclude = {
-      "idTransportista",
-      "idEmpresa",
-      "nombreEmpresa"
-    })
+@EqualsAndHashCode(exclude = "idTransportista")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -19,7 +14,5 @@ public class TransportistaDTO {
   private UbicacionDTO ubicacion;
   private String web;
   private String telefono;
-  private Long idEmpresa;
-  private String nombreEmpresa;
   private boolean eliminado;
 }

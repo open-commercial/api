@@ -55,8 +55,4 @@ public interface ICuentaCorrienteService {
   RenglonCuentaCorriente getRenglonCuentaCorrienteDeNota(Nota nota, boolean eliminado);
 
   RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(Recibo recibo, boolean eliminado);
-
-  int updateCAEFactura(long idFactura, long cae);
-
-  int updateCAENota(long idNota, long cae);
 }

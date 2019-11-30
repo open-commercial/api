@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -17,7 +18,7 @@ public class NuevoProductoDTO {
 
   private String codigo;
   private String descripcion;
-  private BigDecimal cantidad;
+  private Map<Long,BigDecimal> cantidadEnSucursal;
   private boolean hayStock;
   private BigDecimal precioBonificado;
   private BigDecimal cantMinima;
@@ -31,7 +32,7 @@ public class NuevoProductoDTO {
   private BigDecimal precioLista;
   private boolean ilimitado;
   private boolean publico;
-  private boolean destacado;
+  private boolean oferta;
   private LocalDateTime fechaUltimaModificacion;
   private String estanteria;
   private String estante;

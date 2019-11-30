@@ -3,19 +3,16 @@ package sic.repository;
 import java.util.List;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import sic.modelo.Empresa;
 import sic.modelo.Proveedor;
 
 public interface ProveedorRepository
     extends PagingAndSortingRepository<Proveedor, Long>, QuerydslPredicateExecutor<Proveedor> {
 
-  Proveedor findByNroProveedorAndEmpresaAndEliminado(String nroProveedor, Empresa empresa, boolean eliminado);
+  Proveedor findByNroProveedorAndEliminado(String nroProveedor, boolean eliminado);
 
-  Proveedor findByIdFiscalAndEmpresaAndEliminado(Long idFiscal, Empresa empresa, boolean eliminado);
+  List<Proveedor> findByIdFiscalAndEliminado(Long idFiscal, boolean eliminado);
 
-  Proveedor findByRazonSocialAndEmpresaAndEliminado(
-      String razonSocial, Empresa empresa, boolean eliminado);
+  Proveedor findByRazonSocialAndEliminado(String razonSocial, boolean eliminado);
 
-  List<Proveedor> findAllByAndEmpresaAndEliminadoOrderByRazonSocialAsc(
-      Empresa empresa, boolean eliminado);
+  List<Proveedor> findAllByAndEliminadoOrderByRazonSocialAsc(boolean eliminado);
 }

@@ -21,10 +21,10 @@ import sic.controller.Views;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"idCaja", "empresa"})
+@EqualsAndHashCode(of = {"idCaja", "sucursal"})
 @ToString
+@JsonIgnoreProperties({"sucursal", "usuarioAbreCaja", "usuarioCierraCaja", "eliminada"})
 @JsonView(Views.Comprador.class)
-@JsonIgnoreProperties({"empresa", "usuarioAbreCaja", "usuarioCierraCaja", "eliminada"})
 public class Caja implements Serializable {
 
   @Id
@@ -38,9 +38,9 @@ public class Caja implements Serializable {
   private LocalDateTime fechaCierre;
 
   @ManyToOne
-  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-  @NotNull(message = "{mensaje_caja_empresa_vacia}")
-  private Empresa empresa;
+  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
+  @NotNull(message = "{mensaje_caja_sucursal_vacia}")
+  private Sucursal sucursal;
 
   @OneToOne
   @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
@@ -66,14 +66,14 @@ public class Caja implements Serializable {
 
   private boolean eliminada;
 
-  @JsonGetter("idEmpresa")
-  public Long getIdEmpresa() {
-    return empresa.getIdEmpresa();
+  @JsonGetter("idSucursal")
+  public Long getIdSucursal() {
+    return sucursal.getIdSucursal();
   }
 
-  @JsonGetter("nombreEmpresa")
-  public String getNombreEmpresa() {
-    return empresa.getNombre();
+  @JsonGetter("nombreSucursal")
+  public String getNombreSucursal() {
+    return sucursal.getNombre();
   }
 
   @JsonGetter("idUsuarioAbreCaja")

@@ -1,7 +1,6 @@
 package sic.service;
 
 import java.util.List;
-import sic.modelo.Empresa;
 import sic.modelo.Rubro;
 
 import javax.validation.Valid;
@@ -14,9 +13,9 @@ public interface IRubroService {
 
     void eliminar(long idRubro);
 
-    Rubro getRubroPorNombre(String nombre, Empresa empresa);
+    Rubro getRubroPorNombre(String nombre);
 
-    List<Rubro> getRubros(Empresa empresa);
+    List<Rubro> getRubros();
 
     Rubro guardar(@Valid Rubro rubro);
     

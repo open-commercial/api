@@ -13,13 +13,14 @@ import sic.modelo.dto.GastoDTO;
 import sic.service.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/v1")
 public class GastoController {
     
     private final IGastoService gastoService;
-    private final IEmpresaService empresaService;
+    private final ISucursalService sucursalService;
     private final IFormaDePagoService formaDePagoService;
     private final IUsuarioService usuarioService;
     private final IAuthService authService;
@@ -27,10 +28,10 @@ public class GastoController {
     
     @Autowired
     public GastoController(IGastoService gastoService, ModelMapper modelMapper,
-                           IEmpresaService empresaService, IFormaDePagoService formaDePagoService,
+                           ISucursalService sucursalService, IFormaDePagoService formaDePagoService,
                            IUsuarioService usuarioService, IAuthService authService) {
         this.gastoService = gastoService;
-        this.empresaService = empresaService;
+        this.sucursalService = sucursalService;
         this.formaDePagoService = formaDePagoService;
         this.usuarioService = usuarioService;
         this.authService = authService;
@@ -55,24 +56,26 @@ public class GastoController {
     return gastoService.getTotalGastos(criteria);
   }
 
-    @DeleteMapping("/gastos/{idGasto}")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public void eliminar(@PathVariable long idGasto) {
-        gastoService.eliminar(idGasto);
-    }
+  @DeleteMapping("/gastos/{idGasto}")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public void eliminar(@PathVariable long idGasto) {
+    gastoService.eliminar(idGasto);
+  }
 
-    @PostMapping("/gastos")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-    public Gasto guardar(@RequestBody GastoDTO gastoDTO,
-                         @RequestParam Long idEmpresa,
-                         @RequestParam Long idFormaDePago,
-                         @RequestHeader(name = "Authorization") String authorizationHeader) {
-        Gasto gasto = modelMapper.map(gastoDTO, Gasto.class);
-        gasto.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
-        gasto.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(idFormaDePago));
-        Claims claims = authService.getClaimsDelToken(authorizationHeader);
-        long idUsuarioLoggedIn = (int) claims.get("idUsuario");
-        gasto.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn));
-        return gastoService.guardar(gasto);
-    }
+  @PostMapping("/gastos")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public Gasto guardar(
+      @RequestBody GastoDTO gastoDTO,
+      @RequestParam Long idSucursal,
+      @RequestParam Long idFormaDePago,
+      @RequestHeader(name = "Authorization") String authorizationHeader) {
+    Gasto gasto = modelMapper.map(gastoDTO, Gasto.class);
+    gasto.setSucursal(sucursalService.getSucursalPorId(idSucursal));
+    gasto.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(idFormaDePago));
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get("idUsuario");
+    gasto.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn));
+    gasto.setFecha(LocalDateTime.now());
+    return gastoService.guardar(gasto);
+  }
 }

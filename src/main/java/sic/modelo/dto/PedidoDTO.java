@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -16,7 +15,7 @@ import sic.modelo.EstadoPedido;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = {"renglones", "cantidadArticulos"})
-@EqualsAndHashCode(of = {"nroPedido", "nombreEmpresa"})
+@EqualsAndHashCode(of = {"nroPedido", "nombreSucursal"})
 @JsonIdentityInfo(
     generator = ObjectIdGenerators.PropertyGenerator.class,
     property = "idPedido",
@@ -27,9 +26,8 @@ public class PedidoDTO implements Serializable {
   private long idPedido;
   private long nroPedido;
   private LocalDateTime fecha;
-  private LocalDate fechaVencimiento;
   private String observaciones;
-  private String nombreEmpresa;
+  private String nombreSucursal;
   private String detalleEnvio;
   private boolean eliminado;
   private String nombreFiscalCliente;

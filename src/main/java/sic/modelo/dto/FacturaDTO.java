@@ -20,12 +20,12 @@ import sic.modelo.TipoDeComprobante;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"idFactura", "fecha", "numSerie", "numFactura", "nombreTransportista", "renglones", "nombreEmpresa", "idUsuario", "nombreUsuario", "cantidadArticulos"})
+@EqualsAndHashCode(exclude = {"idFactura", "fecha", "numSerie", "numFactura", "nombreTransportista", "renglones", "nombreSucursal", "nombreUsuario", "cantidadArticulos"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idFactura", scope = FacturaDTO.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
-   @JsonSubTypes.Type(value = FacturaCompraDTO.class, name = "FacturaCompra"),
-   @JsonSubTypes.Type(value = FacturaVentaDTO.class, name = "FacturaVenta"),    
+  @JsonSubTypes.Type(value = FacturaCompraDTO.class, name = "FacturaCompra"),
+  @JsonSubTypes.Type(value = FacturaVentaDTO.class, name = "FacturaVenta"),
 })
 public abstract class FacturaDTO implements Serializable {
 
@@ -36,7 +36,7 @@ public abstract class FacturaDTO implements Serializable {
     private long numFactura;
     private LocalDate fechaVencimiento;
     private Long nroPedido;
-    private long idTransportista;
+    private Long idTransportista;
     private String nombreTransportista;
     private List<RenglonFactura> renglones;
     private BigDecimal subTotal;
@@ -51,8 +51,8 @@ public abstract class FacturaDTO implements Serializable {
     private BigDecimal total;
     private String observaciones;
     private BigDecimal cantidadArticulos;
-    private long idEmpresa;
-    private String nombreEmpresa;
+    private long idSucursal;
+    private String nombreSucursal;
     private Long idUsuario;
     private String nombreUsuario;
     private boolean eliminada;

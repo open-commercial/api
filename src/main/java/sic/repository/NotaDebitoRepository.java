@@ -10,12 +10,12 @@ public interface NotaDebitoRepository
 
   @Query(
       "SELECT max(nd.nroNota) FROM NotaDebito nd "
-          + "WHERE nd.tipoComprobante = :tipoComprobante AND nd.serie = :serie AND nd.empresa.idEmpresa = :idEmpresa "
+          + "WHERE nd.tipoComprobante = :tipoComprobante AND nd.serie = :serie AND nd.sucursal.idSucursal = :idSucursal "
           + "AND nd.cliente IS NOT null")
   Long buscarMayorNumNotaDebitoClienteSegunTipo(
       @Param("tipoComprobante") TipoDeComprobante tipoComprobante,
       @Param("serie") long serie,
-      @Param("idEmpresa") long idEmpresa);
+      @Param("idSucursal") long idSucursal);
 
   boolean existsByReciboAndEliminada(Recibo recibo, boolean eliminada);
 }

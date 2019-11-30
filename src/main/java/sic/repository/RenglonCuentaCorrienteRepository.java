@@ -29,13 +29,4 @@ public interface RenglonCuentaCorrienteRepository extends PagingAndSortingReposi
     List<RenglonCuentaCorriente> findAllByCuentaCorrienteAndEliminado(@Param("idCuentaCorriente") long idCuentaCorriente);
 
     List<RenglonCuentaCorriente> findTop2ByAndCuentaCorrienteAndEliminadoOrderByIdRenglonCuentaCorrienteDesc(CuentaCorriente cuentaCorriente, boolean eliminado);
-
-    @Modifying
-    @Query("UPDATE RenglonCuentaCorriente rcc SET rcc.cae = :cae WHERE rcc.factura.idFactura = :idFactura")
-    int updateCaeFactura(@Param("idFactura") long idFactura, @Param("cae") long cae);
-    
-    @Modifying
-    @Query("UPDATE RenglonCuentaCorriente rcc SET rcc.cae = :cae WHERE rcc.nota.idNota = :idNota")
-    int updateCaeNota(@Param("idNota") long idNota, @Param("cae") long cae);
-
 }

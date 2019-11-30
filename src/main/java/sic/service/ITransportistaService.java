@@ -1,10 +1,9 @@
 package sic.service;
 
 import java.util.List;
-
-import org.springframework.data.domain.Page;
 import sic.modelo.criteria.BusquedaTransportistaCriteria;
-import sic.modelo.Empresa;
+import sic.modelo.Sucursal;
+import org.springframework.data.domain.Page;
 import sic.modelo.Transportista;
 
 import javax.validation.Valid;
@@ -19,9 +18,9 @@ public interface ITransportistaService {
 
     void eliminar(long idTransportista);
 
-    Transportista getTransportistaPorNombre(String nombre, Empresa empresa);
+    Transportista getTransportistaPorNombre(String nombre);
 
-    List<Transportista> getTransportistas(Empresa empresa);
+    List<Transportista> getTransportistas(Sucursal sucursal);
 
     Transportista guardar(@Valid Transportista transportista);
     

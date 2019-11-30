@@ -20,7 +20,6 @@ public class ClienteBuilder {
   private Ubicacion ubicacionEnvio = new UbicacionBuilder().build();
   private String contacto = "Facundo Pastore";
   private LocalDateTime fechaAlta = LocalDateTime.now();
-  private Empresa empresa = new EmpresaBuilder().build();
   private Usuario viajante = new UsuarioBuilder().build();
   private Usuario credencial = new UsuarioBuilder().build();
   private boolean eliminado = false;
@@ -41,7 +40,6 @@ public class ClienteBuilder {
         ubicacionEnvio,
         contacto,
         fechaAlta,
-        empresa,
         viajante,
         credencial,
         eliminado,
@@ -110,11 +108,6 @@ public class ClienteBuilder {
 
   public ClienteBuilder withFechaAlta(LocalDateTime fechaAlta) {
     this.fechaAlta = fechaAlta;
-    return this;
-  }
-
-  public ClienteBuilder withEmpresa(Empresa empresa) {
-    this.empresa = empresa;
     return this;
   }
 

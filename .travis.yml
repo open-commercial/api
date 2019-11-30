@@ -4,7 +4,7 @@ cache:
   directories:
   - $HOME/.m2
 env:  
-  - SIC_AFIP_ENV="testing" SIC_MAIL_ENV="testing" RECAPTCHA_SECRET_KEY="" RECAPTCHA_TEST_KEY="111111" CLOUDINARY_URL="cloudinary://*:*-*@*" SIC_MERCADOPAGO_ACCESS_TOKEN=""
+  - SIC_AFIP_ENV="testing" SIC_MAIL_ENV="testing" SIC_MAIL_USERNAME="" SIC_MAIL_PASSWORD="" RECAPTCHA_SECRET_KEY="" RECAPTCHA_TEST_KEY="111111" CLOUDINARY_URL="cloudinary://*:*-*@*" SIC_MERCADOPAGO_ACCESS_TOKEN=""
 
 addons:
   sonarcloud:

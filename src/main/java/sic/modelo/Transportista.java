@@ -1,6 +1,5 @@
 package sic.modelo;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.QueryInit;
@@ -22,10 +21,10 @@ import javax.validation.constraints.NotEmpty;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"nombre", "empresa"})
+@EqualsAndHashCode(of = "nombre")
 @ToString
+@JsonIgnoreProperties({"localidad", "eliminado"})
 @JsonView(Views.Comprador.class)
-@JsonIgnoreProperties({"localidad", "empresa", "eliminado"})
 public class Transportista implements Serializable {
 
   @Id
@@ -49,21 +48,5 @@ public class Transportista implements Serializable {
   @Column(nullable = false)
   private String telefono;
 
-  @ManyToOne
-  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-  @NotNull(message = "{mensaje_transportista_empresa_vacia}")
-  private Empresa empresa;
-
   private boolean eliminado;
-
-
-  @JsonGetter("idEmpresa")
-  public Long getIdEmpresa() {
-    return empresa.getIdEmpresa();
-  }
-
-  @JsonGetter("nombreEmpresa")
-  public String getNombreEmpresa() {
-    return empresa.getNombre();
-  }
 }

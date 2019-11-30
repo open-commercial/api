@@ -123,7 +123,6 @@ public class App implements WebMvcConfigurer {
     PropertyMap<Cliente, ClienteDTO> clienteMapping =
         new PropertyMap<Cliente, ClienteDTO>() {
           protected void configure() {
-            map(source.getEmpresa().getNombre(), destination.getNombreEmpresa());
             map(source.getViajante().getNombre(), destination.getNombreViajante());
             map(source.getCredencial().getNombre(), destination.getNombreCredencial());
           }

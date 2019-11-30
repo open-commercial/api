@@ -66,8 +66,8 @@ public class ProveedorServiceImpl implements IProveedorService {
   }
 
   @Override
-  public List<Proveedor> getProveedores(Empresa empresa) {
-    return proveedorRepository.findAllByAndEmpresaAndEliminadoOrderByRazonSocialAsc(empresa, false);
+  public List<Proveedor> getProveedores() {
+    return proveedorRepository.findAllByAndEliminadoOrderByRazonSocialAsc(false);
   }
 
   @Override
@@ -89,16 +89,11 @@ public class ProveedorServiceImpl implements IProveedorService {
       builder.and(qProveedor.ubicacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
     if (criteria.getIdProvincia() != null)
       builder.and(qProveedor.ubicacion.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
-    builder.and(
-        qProveedor
-            .empresa
-            .idEmpresa
-            .eq(criteria.getIdEmpresa())
-            .and(qProveedor.eliminado.eq(false)));
     return proveedorRepository.findAll(builder, this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
   }
 
-  private Pageable getPageable(int pagina, String ordenarPor, String sentido) {
+  private Pageable getPageable(Integer pagina, String ordenarPor, String sentido) {
+    if (pagina == null) pagina = 0;
     String ordenDefault = "razonSocial";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(
@@ -119,37 +114,34 @@ public class ProveedorServiceImpl implements IProveedorService {
   }
 
   @Override
-  public Proveedor getProveedorPorIdFiscal(Long idFiscal, Empresa empresa) {
-    return proveedorRepository.findByIdFiscalAndEmpresaAndEliminado(idFiscal, empresa, false);
-  }
-
-  @Override
-  public Proveedor getProveedorPorRazonSocial(String razonSocial, Empresa empresa) {
-    return proveedorRepository.findByRazonSocialAndEmpresaAndEliminado(razonSocial, empresa, false);
+  public Proveedor getProveedorPorRazonSocial(String razonSocial) {
+    return proveedorRepository.findByRazonSocialAndEliminado(razonSocial, false);
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Proveedor proveedor) {
     // Duplicados
     // ID Fiscal
     if (proveedor.getIdFiscal() != null) {
-      Proveedor proveedorDuplicado =
-          this.getProveedorPorIdFiscal(proveedor.getIdFiscal(), proveedor.getEmpresa());
-      if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
-          && proveedorDuplicado != null
-          && proveedorDuplicado.getIdProveedor() != proveedor.getIdProveedor()) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_proveedor_duplicado_idFiscal", null, Locale.getDefault()));
+      List<Proveedor> proveedores =
+          proveedorRepository.findByIdFiscalAndEliminado(proveedor.getIdFiscal(), false);
+      if (proveedores.size() > 1
+          || operacion.equals(TipoDeOperacion.ACTUALIZACION)
+              && !proveedores.isEmpty()
+              && proveedores.get(0).getIdProveedor() != proveedor.getIdProveedor()) {
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_proveedor_duplicado_idFiscal", null, Locale.getDefault()));
       }
       if (operacion.equals(TipoDeOperacion.ALTA)
-          && proveedorDuplicado != null
+          && !proveedores.isEmpty()
           && proveedor.getIdFiscal() != null) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_proveedor_duplicado_idFiscal", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_proveedor_duplicado_idFiscal", null, Locale.getDefault()));
       }
     }
     // Razon social
-    Proveedor proveedorDuplicado =
-        this.getProveedorPorRazonSocial(proveedor.getRazonSocial(), proveedor.getEmpresa());
+    Proveedor proveedorDuplicado = this.getProveedorPorRazonSocial(proveedor.getRazonSocial());
     if (operacion == TipoDeOperacion.ALTA && proveedorDuplicado != null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_proveedor_duplicado_razonSocial", null, Locale.getDefault()));
@@ -170,7 +162,7 @@ public class ProveedorServiceImpl implements IProveedorService {
   @Override
   @Transactional
   public Proveedor guardar(@Validated Proveedor proveedor) {
-    proveedor.setNroProveedor(this.generarNroDeProveedor(proveedor.getEmpresa()));
+    proveedor.setNroProveedor(this.generarNroDeProveedor());
     if (proveedor.getUbicacion() != null && proveedor.getUbicacion().getIdLocalidad() != null) {
       proveedor
           .getUbicacion()
@@ -181,7 +173,6 @@ public class ProveedorServiceImpl implements IProveedorService {
     proveedor = proveedorRepository.save(proveedor);
     CuentaCorrienteProveedor cuentaCorrienteProveedor = new CuentaCorrienteProveedor();
     cuentaCorrienteProveedor.setProveedor(proveedor);
-    cuentaCorrienteProveedor.setEmpresa(proveedor.getEmpresa());
     cuentaCorrienteProveedor.setSaldo(BigDecimal.ZERO);
     cuentaCorrienteProveedor.setFechaApertura(LocalDateTime.now());
     cuentaCorrienteProveedor.setFechaUltimoMovimiento(LocalDateTime.now());
@@ -212,7 +203,7 @@ public class ProveedorServiceImpl implements IProveedorService {
   }
 
   @Override
-  public String generarNroDeProveedor(Empresa empresa) {
+  public String generarNroDeProveedor() {
     long min = 1L;
     long max = 99999L; // 5 digitos
     long randomLong = 0L;
@@ -221,8 +212,7 @@ public class ProveedorServiceImpl implements IProveedorService {
       randomLong = min + (long) (Math.random() * (max - min));
       String nroProveedor = Long.toString(randomLong);
       Proveedor p =
-          proveedorRepository.findByNroProveedorAndEmpresaAndEliminado(
-              nroProveedor, empresa, false);
+          proveedorRepository.findByNroProveedorAndEliminado(nroProveedor, false);
       if (p == null) esRepetido = false;
     }
     return Long.toString(randomLong);

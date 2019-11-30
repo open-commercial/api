@@ -9,6 +9,7 @@ import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.calculos.NuevosResultadosPedido;
 import sic.modelo.calculos.Resultados;
+import sic.modelo.dto.NuevoPedidoDTO;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 
 import javax.validation.Valid;
@@ -17,13 +18,13 @@ public interface IPedidoService {
 
   Pedido getPedidoNoEliminadoPorId(long idPedido);
 
-  void actualizar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal);
+  void actualizar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio);
 
   void actualizarFacturasDelPedido(@Valid Pedido pedido, List<Factura> facturas);
 
   Page<Pedido> buscarPedidos(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn);
 
-  long generarNumeroPedido(Empresa empresa);
+  long generarNumeroPedido(Sucursal sucursal);
 
   Pedido actualizarEstadoPedido(Pedido pedido);
 
@@ -41,16 +42,11 @@ public interface IPedidoService {
 
   byte[] getReportePedido(long idPedido);
 
-  Pedido guardar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio, Long idSucursal);
+  Pedido guardar(NuevoPedidoDTO nuevoPedidoDTO);
 
-  RenglonPedido calcularRenglonPedido(
-    long idProducto,
-    BigDecimal cantidad,
-    BigDecimal descuentoPorcentaje);
+  RenglonPedido calcularRenglonPedido(long idProducto, BigDecimal cantidad, Cliente cliente);
 
-  List<RenglonPedido> calcularRenglonesPedido(List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO);
-
-  BigDecimal calcularDescuentoNeto(BigDecimal precioUnitario, BigDecimal descuentoPorcentaje);
+  List<RenglonPedido> calcularRenglonesPedido(@Valid List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO, Long idCliente);
 
   Resultados calcularResultadosPedido(NuevosResultadosPedido calculoPedido);
 }

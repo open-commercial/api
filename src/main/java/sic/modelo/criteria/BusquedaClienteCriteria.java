@@ -18,7 +18,6 @@ public class BusquedaClienteCriteria {
     private Long idProvincia;
     private Long idLocalidad;
     private String nroDeCliente;
-    private Long idEmpresa;
     private Integer pagina;
     private String ordenarPor;
     private String sentido;

@@ -2,15 +2,15 @@ package sic.builder;
 
 
 import sic.modelo.CategoriaIVA;
-import sic.modelo.Empresa;
+import sic.modelo.Sucursal;
 import sic.modelo.Ubicacion;
 
 import java.time.LocalDateTime;
 import java.time.Month;
 
-public class EmpresaBuilder {
+public class SucursalBuilder {
 
-  private long id_Empresa = 0L;
+  private long idSucursal = 0L;
   private String nombre = "Globo Corporation";
   private String lema = "Enjoy the life";
   private CategoriaIVA categoriaIVA = CategoriaIVA.RESPONSABLE_INSCRIPTO;
@@ -23,9 +23,9 @@ public class EmpresaBuilder {
   private String logo = "";
   private boolean eliminada = false;
 
-  public Empresa build() {
-    return new Empresa(
-        id_Empresa,
+  public Sucursal build() {
+    return new Sucursal(
+        idSucursal,
         nombre,
         lema,
         categoriaIVA,
@@ -39,62 +39,62 @@ public class EmpresaBuilder {
         eliminada);
   }
 
-  public EmpresaBuilder withId_Empresa(long id_Empresa) {
-    this.id_Empresa = id_Empresa;
+  public SucursalBuilder withIdSucursal(long idSucursal) {
+    this.idSucursal = idSucursal;
     return this;
   }
 
-  public EmpresaBuilder withNombre(String nombre) {
+  public SucursalBuilder withNombre(String nombre) {
     this.nombre = nombre;
     return this;
   }
 
-  public EmpresaBuilder withLema(String lema) {
+  public SucursalBuilder withLema(String lema) {
     this.lema = lema;
     return this;
   }
 
-  public EmpresaBuilder withCondicionIVA(CategoriaIVA categoriaIVA) {
+  public SucursalBuilder withCondicionIVA(CategoriaIVA categoriaIVA) {
     this.categoriaIVA = categoriaIVA;
     return this;
   }
 
-  public EmpresaBuilder withIdFiscal(Long idFiscal) {
+  public SucursalBuilder withIdFiscal(Long idFiscal) {
     this.idFiscal = idFiscal;
     return this;
   }
 
-  public EmpresaBuilder withIngresosBrutos(Long ingresosBrutos) {
+  public SucursalBuilder withIngresosBrutos(Long ingresosBrutos) {
     this.ingresosBrutos = ingresosBrutos;
     return this;
   }
 
-  public EmpresaBuilder withFechaInicioActividad(LocalDateTime fechaInicioActividad) {
+  public SucursalBuilder withFechaInicioActividad(LocalDateTime fechaInicioActividad) {
     this.fechaInicioActividad = fechaInicioActividad;
     return this;
   }
 
-  public EmpresaBuilder withEmail(String email) {
+  public SucursalBuilder withEmail(String email) {
     this.email = email;
     return this;
   }
 
-  public EmpresaBuilder withTelefono(String telefono) {
+  public SucursalBuilder withTelefono(String telefono) {
     this.telefono = telefono;
     return this;
   }
 
-  public EmpresaBuilder withUbicacion(Ubicacion ubicacion) {
+  public SucursalBuilder withUbicacion(Ubicacion ubicacion) {
     this.ubicacion = ubicacion;
     return this;
   }
 
-  public EmpresaBuilder withLogo(String logo) {
+  public SucursalBuilder withLogo(String logo) {
     this.logo = logo;
     return this;
   }
 
-  public EmpresaBuilder withEliminada(boolean eliminada) {
+  public SucursalBuilder withEliminada(boolean eliminada) {
     this.eliminada = eliminada;
     return this;
   }

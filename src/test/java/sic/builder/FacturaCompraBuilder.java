@@ -33,7 +33,7 @@ public class FacturaCompraBuilder {
     private BigDecimal total = new BigDecimal("7865");
     private String observaciones = "Factura por Default";
     private BigDecimal cantidadArticulos = new BigDecimal("5");
-    private Empresa empresa = new EmpresaBuilder().build();
+    private Sucursal sucursal = new SucursalBuilder().build();
     private boolean eliminada = false;
     private long CAE = 21064126523746l;
     private LocalDate vencimientoCAE = null;
@@ -59,7 +59,7 @@ public class FacturaCompraBuilder {
                 numSerie, numFactura, fechaVencimiento, pedido, transportista, renglones,
                 subTotal, recargo_porcentaje, recargo_neto, descuento_porcentaje, descuento_neto,
                 subTotal_neto, iva_105_neto, iva_21_neto, impuestoInterno_neto, total, observaciones,
-                cantidadArticulos,empresa, eliminada, CAE, vencimientoCAE, proveedor, numSerieAfip, numFacturaAfip);
+                cantidadArticulos, sucursal, eliminada, CAE, vencimientoCAE, proveedor, numSerieAfip, numFacturaAfip);
         return factura;
     }
     
@@ -178,8 +178,8 @@ public class FacturaCompraBuilder {
         return this;
     }
 
-    public FacturaCompraBuilder withEmpresa(Empresa empresa) {
-        this.empresa = empresa;
+    public FacturaCompraBuilder withSucursal(Sucursal sucursal) {
+        this.sucursal = sucursal;
         return this;
     }
 

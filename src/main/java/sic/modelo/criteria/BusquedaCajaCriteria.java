@@ -12,10 +12,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class BusquedaCajaCriteria {
 
+    private Long idSucursal;
     private LocalDateTime fechaDesde;
     private LocalDateTime fechaHasta;
-    private Long idEmpresa;
-    private int cantidadDeRegistros;
     private Long idUsuarioApertura;
     private Long idUsuarioCierre;
     private Integer pagina;

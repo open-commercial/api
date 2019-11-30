@@ -13,7 +13,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import sic.modelo.Empresa;
 import sic.modelo.Rubro;
 import sic.service.IRubroService;
 import sic.exception.BusinessServiceException;
@@ -48,19 +47,19 @@ public class RubroServiceImpl implements IRubroService {
   }
 
   @Override
-  public List<Rubro> getRubros(Empresa empresa) {
-    return rubroRepository.findAllByAndEmpresaAndEliminadoOrderByNombreAsc(empresa, false);
+  public List<Rubro> getRubros() {
+    return rubroRepository.findAllByAndEliminadoOrderByNombreAsc(false);
   }
 
   @Override
-  public Rubro getRubroPorNombre(String nombre, Empresa empresa) {
-    return rubroRepository.findByNombreAndEmpresaAndEliminado(nombre, empresa, false);
+  public Rubro getRubroPorNombre(String nombre) {
+    return rubroRepository.findByNombreAndEliminado(nombre, false);
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Rubro rubro) {
     // Duplicados
     // Nombre
-    Rubro rubroDuplicado = this.getRubroPorNombre(rubro.getNombre(), rubro.getEmpresa());
+    Rubro rubroDuplicado = this.getRubroPorNombre(rubro.getNombre());
     if (operacion.equals(TipoDeOperacion.ALTA) && rubroDuplicado != null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_rubro_nombre_duplicado", null, Locale.getDefault()));

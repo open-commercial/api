@@ -12,10 +12,10 @@ import sic.modelo.TipoDeEnvio;
 @NoArgsConstructor
 public class NuevaOrdenDeCompraDTO {
 
-  private Long idEmpresa;
+  private Long idSucursal;
   private Long idUsuario;
   private Long idCliente;
   private TipoDeEnvio tipoDeEnvio;
-  private Long idSucursal;
   private String observaciones;
+  private NuevoPagoMercadoPagoDTO nuevoPagoMercadoPago;
 }

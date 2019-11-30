@@ -18,6 +18,7 @@ public interface IProductoService {
 
   void actualizarStock(
       Map<Long, BigDecimal> idsYCantidades,
+      Long idSucursal,
       TipoDeOperacion operacion,
       Movimiento movimiento,
       TipoDeComprobante tipoDeComprobante);
@@ -48,9 +49,9 @@ public interface IProductoService {
 
   void eliminarMultiplesProductos(long[] idProducto);
 
-  Producto getProductoPorCodigo(String codigo, long idEmpresa);
+  Producto getProductoPorCodigo(String codigo);
 
-  Producto getProductoPorDescripcion(String descripcion, Empresa empresa);
+  Producto getProductoPorDescripcion(String descripciona);
 
   Producto getProductoNoEliminadoPorId(long idProducto);
 
@@ -58,15 +59,15 @@ public interface IProductoService {
 
   BigDecimal calcularValorStock(BusquedaProductoCriteria criteria);
 
-  byte[] getListaDePreciosPorEmpresa(List<Producto> productos, long idEmpresa, String formato);
+  byte[] getListaDePrecios(List<Producto> productos, String formato);
 
   Producto guardar(@Valid Producto producto);
 
   List<Producto> actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO);
 
-  String subirImagenProducto(long idProducto, byte[] imagen);
+  void guardarCantidadesDeSucursalNueva(Sucursal sucursal);
 
-  void eliminarImagenProducto(long idProducto);
+  String subirImagenProducto(long idProducto, byte[] imagen);
 
   List<Producto> getMultiplesProductosPorId(List<Long> idsProductos);
 

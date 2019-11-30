@@ -20,7 +20,7 @@ public class UsuarioBuilder {
   private List<Rol> roles = Collections.singletonList(Rol.ADMINISTRADOR);
   private boolean habilitado = true;
   private boolean eliminado = false;
-  private long idEmpresa = 0L;
+  private long idSucursal = 0L;
 
   public Usuario build() {
     return new Usuario(
@@ -31,7 +31,7 @@ public class UsuarioBuilder {
         apellido,
         email,
         token,
-        idEmpresa,
+      idSucursal,
         passwordRecoveryKey,
         passwordRecoveryKeyExpirationDate,
         roles,
@@ -74,8 +74,8 @@ public class UsuarioBuilder {
     return this;
   }
 
-  public UsuarioBuilder withidEmpresa(long idEmpresa) {
-    this.idEmpresa = idEmpresa;
+  public UsuarioBuilder withidSucursal(long idSucursal) {
+    this.idSucursal = idSucursal;
     return this;
   }
 

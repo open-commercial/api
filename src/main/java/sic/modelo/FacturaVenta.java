@@ -25,7 +25,7 @@ import sic.controller.Views;
 @JsonIgnoreProperties({
   "cliente",
   "usuario",
-  "empresa",
+  "sucursal",
   "pedido",
   "transportista",
   "clienteEmbedded"
@@ -67,7 +67,7 @@ public class FacturaVenta extends Factura implements Serializable {
       BigDecimal total,
       String observaciones,
       BigDecimal cantidadDeArticulos,
-      Empresa empresa,
+      Sucursal sucursal,
       boolean eliminada,
       long cae,
       LocalDate vencimientoCAE,
@@ -97,7 +97,7 @@ public class FacturaVenta extends Factura implements Serializable {
         total,
         observaciones,
         cantidadDeArticulos,
-        empresa,
+        sucursal,
         eliminada,
         cae,
         vencimientoCAE,

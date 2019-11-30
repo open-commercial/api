@@ -17,12 +17,9 @@ import sic.modelo.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.*;
-import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
-import javax.swing.ImageIcon;
 import javax.validation.Valid;
 
 import net.sf.jasperreports.engine.JRException;
@@ -50,7 +47,6 @@ public class ProductoServiceImpl implements IProductoService {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final BigDecimal CIEN = new BigDecimal("100");
   private static final long TAMANIO_MAXIMO_IMAGEN = 1024000L;
-  private final IEmpresaService empresaService;
   private final IRubroService rubroService;
   private final IProveedorService proveedorService;
   private final IMedidaService medidaService;
@@ -63,7 +59,6 @@ public class ProductoServiceImpl implements IProductoService {
   @Lazy
   public ProductoServiceImpl(
     ProductoRepository productoRepository,
-    IEmpresaService empresaService,
     IRubroService rubroService,
     IProveedorService proveedorService,
     IMedidaService medidaService,
@@ -71,7 +66,6 @@ public class ProductoServiceImpl implements IProductoService {
     IPhotoVideoUploader photoVideoUploader,
     MessageSource messageSource) {
     this.productoRepository = productoRepository;
-    this.empresaService = empresaService;
     this.rubroService = rubroService;
     this.proveedorService = proveedorService;
     this.medidaService = medidaService;
@@ -82,24 +76,22 @@ public class ProductoServiceImpl implements IProductoService {
 
   private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
     if (operacion == TipoDeOperacion.ACTUALIZACION
-        && (producto.isDestacado()
+        && (producto.isOferta()
             && (!producto.isPublico()
                 || (producto.getUrlImagen() == null || producto.getUrlImagen().isEmpty())))) {
       throw new BusinessServiceException(
           messageSource.getMessage(
-              "mensaje_producto_destacado_privado_o_sin_imagen", null, Locale.getDefault()));
+              "mensaje_producto_oferta_privado_o_sin_imagen", null, Locale.getDefault()));
     }
-    // Duplicados
     // Codigo
     if (!producto.getCodigo().equals("")) {
-      Producto productoDuplicado =
-          this.getProductoPorCodigo(producto.getCodigo(), producto.getEmpresa().getIdEmpresa());
+      Producto productoDuplicado = this.getProductoPorCodigo(producto.getCodigo());
       if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
           && productoDuplicado != null
-          && productoDuplicado.getIdProducto() != producto.getIdProducto()) {
+          && !producto.getIdProducto().equals(productoDuplicado.getIdProducto())) {
         throw new BusinessServiceException(
-        messageSource.getMessage(
-          "mensaje_producto_duplicado_codigo", null, Locale.getDefault()));
+            messageSource.getMessage(
+                "mensaje_producto_duplicado_codigo", null, Locale.getDefault()));
       }
       if (operacion.equals(TipoDeOperacion.ALTA)
           && productoDuplicado != null
@@ -110,25 +102,29 @@ public class ProductoServiceImpl implements IProductoService {
       }
     }
     // Descripcion
-    Producto productoDuplicado =
-        this.getProductoPorDescripcion(producto.getDescripcion(), producto.getEmpresa());
+    Producto productoDuplicado = this.getProductoPorDescripcion(producto.getDescripcion());
     if (operacion.equals(TipoDeOperacion.ALTA) && productoDuplicado != null) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()));
     }
     if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
         && productoDuplicado != null
-        && productoDuplicado.getIdProducto() != producto.getIdProducto())
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()));
+        && !producto.getIdProducto().equals(productoDuplicado.getIdProducto()))
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()));
     this.validarCalculos(producto);
   }
 
   private void validarCalculos(Producto producto) {
     Double[] iva = {10.5, 21.0, 0.0};
     if (!Arrays.asList(iva).contains(producto.getIvaPorcentaje().doubleValue())) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_error_iva_no_valido", new Object[] {producto.getDescripcion()}, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_error_iva_no_valido",
+              new Object[] {producto.getDescripcion()},
+              Locale.getDefault()));
     }
     if (producto
             .getGananciaNeto()
@@ -138,8 +134,11 @@ public class ProductoServiceImpl implements IProductoService {
                         producto.getPrecioCosto(), producto.getGananciaPorcentaje())
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_producto_ganancia_neta_incorrecta", new Object[] {producto.getDescripcion()}, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_producto_ganancia_neta_incorrecta",
+              new Object[] {producto.getDescripcion()},
+              Locale.getDefault()));
     }
     if (producto
             .getPrecioVentaPublico()
@@ -162,10 +161,10 @@ public class ProductoServiceImpl implements IProductoService {
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-        messageSource.getMessage(
-          "mensaje_producto_iva_neto_incorrecto",
-          new Object[] {producto.getDescripcion()},
-          Locale.getDefault()));
+          messageSource.getMessage(
+              "mensaje_producto_iva_neto_incorrecto",
+              new Object[] {producto.getDescripcion()},
+              Locale.getDefault()));
     }
     if (producto
             .getPrecioLista()
@@ -176,18 +175,35 @@ public class ProductoServiceImpl implements IProductoService {
                     .setScale(3, RoundingMode.HALF_UP))
         != 0) {
       throw new BusinessServiceException(
-        messageSource.getMessage(
-          "mensaje_producto_precio_lista_incorrecto",
-          new Object[] {producto.getDescripcion()},
-          Locale.getDefault()));
+          messageSource.getMessage(
+              "mensaje_producto_precio_lista_incorrecto",
+              new Object[] {producto.getDescripcion()},
+              Locale.getDefault()));
     }
   }
 
   @Override
   public Page<Producto> buscarProductos(BusquedaProductoCriteria criteria) {
-    return productoRepository.findAll(
-        this.getBuilder(criteria),
-        this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido(), TAMANIO_PAGINA_DEFAULT));
+    Page<Producto> productos =
+        productoRepository.findAll(
+            this.getBuilder(criteria),
+            this.getPageable(
+                criteria.getPagina(),
+                criteria.getOrdenarPor(),
+                criteria.getSentido(),
+                TAMANIO_PAGINA_DEFAULT));
+    productos.stream()
+        .filter(Producto::isOferta)
+        .forEach(
+            producto ->
+                producto.setPrecioListaBonificado(
+                    producto
+                        .getPrecioLista()
+                        .multiply(
+                            (new BigDecimal("100"))
+                                .subtract(producto.getPorcentajeBonificacionOferta())
+                                .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP))));
+    return productos;
   }
 
   @Override
@@ -204,7 +220,8 @@ public class ProductoServiceImpl implements IProductoService {
         .getContent();
   }
 
-  private Pageable getPageable(int pagina, String ordenarPor, String sentido, int tamanioPagina) {
+  private Pageable getPageable(Integer pagina, String ordenarPor, String sentido, int tamanioPagina) {
+    if (pagina == null) pagina = 0;
     String ordenDefault = "descripcion";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(pagina, tamanioPagina, new Sort(Sort.Direction.ASC, ordenDefault));
@@ -223,12 +240,7 @@ public class ProductoServiceImpl implements IProductoService {
   private BooleanBuilder getBuilder(BusquedaProductoCriteria criteria) {
     QProducto qProducto = QProducto.producto;
     BooleanBuilder builder = new BooleanBuilder();
-    builder.and(
-        qProducto
-            .empresa
-            .idEmpresa
-            .eq(criteria.getIdEmpresa())
-            .and(qProducto.eliminado.eq(false)));
+    builder.and(qProducto.eliminado.eq(false));
     if (criteria.getCodigo() != null && criteria.getDescripcion() != null)
       builder.and(
           qProducto
@@ -246,15 +258,19 @@ public class ProductoServiceImpl implements IProductoService {
     if (criteria.getIdProveedor() != null)
       builder.and(qProducto.proveedor.idProveedor.eq(criteria.getIdProveedor()));
     if (criteria.isListarSoloFaltantes())
-      builder.and(qProducto.cantidad.loe(qProducto.cantMinima)).and(qProducto.ilimitado.eq(false));
+      builder
+          .and(qProducto.cantidadEnSucursales.any().cantidad.loe(qProducto.cantMinima))
+          .and(qProducto.ilimitado.eq(false));
     if (criteria.isListarSoloEnStock())
-      builder.and(qProducto.cantidad.gt(BigDecimal.ZERO)).and(qProducto.ilimitado.eq(false));
-    if (criteria.getPublico() != null)
+      builder
+          .and(qProducto.cantidadEnSucursales.any().cantidad.gt(BigDecimal.ZERO))
+          .and(qProducto.ilimitado.eq(false));
+    if (criteria.getPublico() != null) {
       if (criteria.getPublico()) builder.and(qProducto.publico.isTrue());
       else builder.and(qProducto.publico.isFalse());
-    if (criteria.getDestacado() != null)
-      if (criteria.getDestacado()) builder.and(qProducto.destacado.isTrue());
-      else builder.and(qProducto.destacado.isFalse());
+    }
+    if (criteria.getOferta() != null && criteria.getOferta())
+      builder.and(qProducto.oferta.isTrue());
     return builder;
   }
 
@@ -272,8 +288,9 @@ public class ProductoServiceImpl implements IProductoService {
   public Producto guardar(@Valid Producto producto) {
     if (producto.getCodigo() == null) producto.setCodigo("");
     producto.setEliminado(false);
-    producto.setDestacado(false);
+    producto.setOferta(false);
     this.validarOperacion(TipoDeOperacion.ALTA, producto);
+    this.validarBonificacionOferta(producto);
     producto = productoRepository.save(producto);
     logger.warn("El Producto {} se guardó correctamente.", producto);
     return producto;
@@ -290,6 +307,7 @@ public class ProductoServiceImpl implements IProductoService {
       photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + productoPersistido.getIdProducto());
     }
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
+    this.validarBonificacionOferta(productoPorActualizar);
     if (productoPersistido.isPublico() && !productoPorActualizar.isPublico()) {
       carritoCompraService.eliminarItem(productoPersistido.getIdProducto());
     }
@@ -297,77 +315,135 @@ public class ProductoServiceImpl implements IProductoService {
     logger.warn("El Producto {} se modificó correctamente.", productoPorActualizar);
   }
 
+  private void validarBonificacionOferta(Producto producto) {
+    if (producto.isOferta()
+        && (producto.getPorcentajeBonificacionOferta() == null
+            || producto.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO) == 0)) {
+      producto.setOferta(false);
+    }
+  }
+
   @Override
   public void actualizarStock(
-    Map<Long, BigDecimal> idsYCantidades,
-    TipoDeOperacion operacion,
-    Movimiento movimiento,
-    TipoDeComprobante tipoDeComprobante) {
+      Map<Long, BigDecimal> idsYCantidades,
+      Long idSucursal,
+      TipoDeOperacion operacion,
+      Movimiento movimiento,
+      TipoDeComprobante tipoDeComprobante) {
     idsYCantidades.forEach(
-      (idProducto, cantidad) -> {
-        Optional<Producto> producto = productoRepository.findById(idProducto);
-        if (producto.isPresent() && !producto.get().isIlimitado()) {
-          List<TipoDeComprobante> tiposDeFactura =
-            Arrays.asList(
-              TipoDeComprobante.FACTURA_A,
-              TipoDeComprobante.FACTURA_B,
-              TipoDeComprobante.FACTURA_C,
-              TipoDeComprobante.FACTURA_X,
-              TipoDeComprobante.FACTURA_Y,
-              TipoDeComprobante.PRESUPUESTO);
-          List<TipoDeComprobante> tiposDeNotaCreditoQueAfectanStock =
-            Arrays.asList(
-              TipoDeComprobante.NOTA_CREDITO_A,
-              TipoDeComprobante.NOTA_CREDITO_B,
-              TipoDeComprobante.NOTA_CREDITO_C,
-              TipoDeComprobante.NOTA_CREDITO_X,
-              TipoDeComprobante.NOTA_CREDITO_X,
-              TipoDeComprobante.NOTA_CREDITO_Y,
-              TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO);
-          switch (movimiento) {
-            case VENTA:
-              if (tiposDeFactura.contains(tipoDeComprobante)) {
-                this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(operacion, producto.get(), cantidad);
-              }
-              if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
-                this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(operacion, producto.get(), cantidad);
-              }
-              break;
-            case COMPRA:
-              if (tiposDeFactura.contains(tipoDeComprobante)) {
-                this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(operacion, producto.get(), cantidad);
-              }
-              if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
-                this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(operacion, producto.get(), cantidad);
-              }
-              break;
-            default:
-              throw new BusinessServiceException(messageSource.getMessage(
-                "mensaje_movimiento_no_valido", null, Locale.getDefault()));
+        (idProducto, cantidad) -> {
+          Optional<Producto> producto = productoRepository.findById(idProducto);
+          if (producto.isPresent() && !producto.get().isIlimitado()) {
+            List<TipoDeComprobante> tiposDeFactura =
+                Arrays.asList(
+                    TipoDeComprobante.FACTURA_A,
+                    TipoDeComprobante.FACTURA_B,
+                    TipoDeComprobante.FACTURA_C,
+                    TipoDeComprobante.FACTURA_X,
+                    TipoDeComprobante.FACTURA_Y,
+                    TipoDeComprobante.PRESUPUESTO);
+            List<TipoDeComprobante> tiposDeNotaCreditoQueAfectanStock =
+                Arrays.asList(
+                    TipoDeComprobante.NOTA_CREDITO_A,
+                    TipoDeComprobante.NOTA_CREDITO_B,
+                    TipoDeComprobante.NOTA_CREDITO_C,
+                    TipoDeComprobante.NOTA_CREDITO_X,
+                    TipoDeComprobante.NOTA_CREDITO_X,
+                    TipoDeComprobante.NOTA_CREDITO_Y,
+                    TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO);
+            switch (movimiento) {
+              case VENTA:
+                if (tiposDeFactura.contains(tipoDeComprobante)) {
+                  this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(
+                      idSucursal, operacion, producto.get(), cantidad);
+                }
+                if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
+                  this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(
+                      idSucursal, operacion, producto.get(), cantidad);
+                }
+                break;
+              case COMPRA:
+                if (tiposDeFactura.contains(tipoDeComprobante)) {
+                  this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(
+                      idSucursal, operacion, producto.get(), cantidad);
+                }
+                if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
+                  this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(
+                      idSucursal, operacion, producto.get(), cantidad);
+                }
+                break;
+              default:
+                throw new BusinessServiceException(
+                    messageSource.getMessage(
+                        "mensaje_movimiento_no_valido", null, Locale.getDefault()));
+            }
+            productoRepository.save(producto.get());
+          } else {
+            logger.warn("Se intenta actualizar el stock de un producto eliminado.");
           }
-          productoRepository.save(producto.get());
-        } else {
-          logger.warn("Se intenta actualizar el stock de un producto eliminado.");
-        }
-      });
+        });
   }
 
-  private void cambiaStockPorFacturaVentaOrNotaCreditoCompra(TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
+  private void cambiaStockPorFacturaVentaOrNotaCreditoCompra(
+      Long idSucursal, TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
     if (operacion == TipoDeOperacion.ALTA) {
-      producto.setCantidad(producto.getCantidad().subtract(cantidad));
+      producto
+          .getCantidadEnSucursales()
+          .forEach(
+              cantidadEnSucursal -> {
+                if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
+                  cantidadEnSucursal.setCantidad(
+                      cantidadEnSucursal.getCantidad().subtract(cantidad));
+                }
+              });
     }
     if (operacion == TipoDeOperacion.ELIMINACION) {
-      producto.setCantidad(producto.getCantidad().add(cantidad));
+      producto
+          .getCantidadEnSucursales()
+          .forEach(
+              cantidadEnSucursal -> {
+                if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
+                  cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().add(cantidad));
+                }
+              });
     }
+    producto.setCantidadTotalEnSucursales(
+        producto
+            .getCantidadEnSucursales()
+            .stream()
+            .map(CantidadEnSucursal::getCantidad)
+            .reduce(BigDecimal.ZERO, BigDecimal::add));
   }
 
-  private void cambiaStockPorFacturaCompraOrNotaCreditoVenta(TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
+  private void cambiaStockPorFacturaCompraOrNotaCreditoVenta(
+      Long idSucursal, TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
     if (operacion == TipoDeOperacion.ALTA) {
-      producto.setCantidad(producto.getCantidad().add(cantidad));
+      producto
+          .getCantidadEnSucursales()
+          .forEach(
+              cantidadEnSucursal -> {
+                if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
+                  cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().add(cantidad));
+                }
+              });
     }
     if (operacion == TipoDeOperacion.ELIMINACION) {
-      producto.setCantidad(producto.getCantidad().subtract(cantidad));
+      producto
+          .getCantidadEnSucursales()
+          .forEach(
+              cantidadEnSucursal -> {
+                if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
+                  cantidadEnSucursal.setCantidad(
+                      cantidadEnSucursal.getCantidad().subtract(cantidad));
+                }
+              });
     }
+    producto.setCantidadTotalEnSucursales(
+        producto
+            .getCantidadEnSucursales()
+            .stream()
+            .map(CantidadEnSucursal::getCantidad)
+            .reduce(BigDecimal.ZERO, BigDecimal::add));
   }
 
   @Override
@@ -457,13 +533,15 @@ public class ProductoServiceImpl implements IProductoService {
         p.setIvaPorcentaje(productosParaActualizarDTO.getIvaPorcentaje());
         p.setIvaNeto(productosParaActualizarDTO.getIvaNeto());
         p.setPrecioLista(productosParaActualizarDTO.getPrecioLista());
+        p.setFechaUltimaModificacion(LocalDateTime.now());
       }
       if (aplicaDescuentoRecargoPorcentaje) {
         p.setPrecioCosto(p.getPrecioCosto().multiply(multiplicador));
-        p.setGananciaNeto(p.getGananciaNeto().multiply(multiplicador));
-        p.setPrecioVentaPublico(p.getPrecioVentaPublico().multiply(multiplicador));
-        p.setIvaNeto(p.getIvaNeto().multiply(multiplicador));
-        p.setPrecioLista(p.getPrecioLista().multiply(multiplicador));
+        p.setGananciaNeto(this.calcularGananciaNeto(p.getPrecioCosto(), p.getGananciaPorcentaje()));
+        p.setPrecioVentaPublico(this.calcularPVP(p.getPrecioCosto(), p.getGananciaPorcentaje()));
+        p.setIvaNeto(this.calcularIVANeto(p.getPrecioVentaPublico(), p.getIvaPorcentaje()));
+        p.setPrecioLista(
+            this.calcularPrecioLista(p.getPrecioVentaPublico(), p.getIvaPorcentaje()));
         p.setFechaUltimaModificacion(LocalDateTime.now());
       }
       if (productosParaActualizarDTO.getIdMedida() != null
@@ -487,6 +565,18 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
+  public void guardarCantidadesDeSucursalNueva(Sucursal sucursal) {
+    CantidadEnSucursal cantidadNueva = new CantidadEnSucursal();
+    cantidadNueva.setSucursal(sucursal);
+    cantidadNueva.setCantidad(BigDecimal.ZERO);
+    List<Producto> productos =
+      productoRepository.findAllByEliminado(false);
+    productos.forEach(producto -> producto.getCantidadEnSucursales().add(cantidadNueva));
+    this.productoRepository.saveAll(productos);
+  }
+
+  @Override
+  @Transactional
   public String subirImagenProducto(long idProducto, byte[] imagen) {
     if (imagen.length > TAMANIO_MAXIMO_IMAGEN)
       throw new BusinessServiceException(messageSource.getMessage(
@@ -497,26 +587,29 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  @Transactional
-  public void eliminarImagenProducto(long idProducto) {
-    photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + idProducto);
-    productoRepository.actualizarUrlImagen(idProducto, null);
-  }
-
-  @Override
   public Producto getProductoNoEliminadoPorId(long idProducto) {
     Optional<Producto> producto = productoRepository.findById(idProducto);
     if (producto.isPresent() && !producto.get().isEliminado()) {
-      if (producto.get().getCantidad().compareTo(BigDecimal.ZERO) > 0) {
-        producto.get().setHayStock(true);
-        return producto.get();
-      } else {
-        producto.get().setHayStock(false);
-        return producto.get();
+      producto
+          .get()
+          .setHayStock(
+              producto.get().getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
+      if (producto.get().isOferta()) {
+        producto
+            .get()
+            .setPrecioListaBonificado(
+                producto
+                    .get()
+                    .getPrecioLista()
+                    .multiply(
+                        (new BigDecimal("100"))
+                            .subtract(producto.get().getPorcentajeBonificacionOferta())
+                            .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP)));
       }
+      return producto.get();
     } else {
-      throw new EntityNotFoundException(messageSource.getMessage(
-        "mensaje_producto_no_existente", null, Locale.getDefault()));
+      throw new EntityNotFoundException(
+          messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
     }
   }
 
@@ -524,26 +617,27 @@ public class ProductoServiceImpl implements IProductoService {
   public Page<Producto> getProductosConPrecioBonificado(Page<Producto> productos, Cliente cliente) {
     BigDecimal bonificacion =
         cliente.getBonificacion().divide(new BigDecimal("100"), RoundingMode.HALF_UP);
-    productos.forEach(
-        p ->
-            p.setPrecioBonificado(
-                p.getPrecioLista().subtract(p.getPrecioLista().multiply(bonificacion))));
+    productos.stream()
+        .filter(producto -> !producto.isOferta() && bonificacion.compareTo(BigDecimal.ZERO) > 0)
+        .forEach(
+            p ->
+                p.setPrecioListaBonificado(
+                    p.getPrecioLista().subtract(p.getPrecioLista().multiply(bonificacion))));
     return productos;
   }
 
   @Override
-  public Producto getProductoPorCodigo(String codigo, long idEmpresa) {
+  public Producto getProductoPorCodigo(String codigo) {
     if (codigo.isEmpty()) {
       return null;
     } else {
-      Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
-      return productoRepository.findByCodigoAndEmpresaAndEliminado(codigo, empresa, false);
+      return productoRepository.findByCodigoAndEliminado(codigo, false);
     }
   }
 
   @Override
-  public Producto getProductoPorDescripcion(String descripcion, Empresa empresa) {
-    return productoRepository.findByDescripcionAndEmpresaAndEliminado(descripcion, empresa, false);
+  public Producto getProductoPorDescripcion(String descripcion) {
+    return productoRepository.findByDescripcionAndEliminado(descripcion, false);
   }
 
   @Override
@@ -552,20 +646,33 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Map<Long, BigDecimal> getProductosSinStockDisponible(ProductosParaVerificarStockDTO productosParaVerificarStockDTO) {
+  public Map<Long, BigDecimal> getProductosSinStockDisponible(
+      ProductosParaVerificarStockDTO productosParaVerificarStockDTO) {
     Map<Long, BigDecimal> productos = new HashMap<>();
     int longitudIds = productosParaVerificarStockDTO.getIdProducto().length;
     int longitudCantidades = productosParaVerificarStockDTO.getCantidad().length;
     if (longitudIds == longitudCantidades) {
       for (int i = 0; i < longitudIds; i++) {
-        Producto p = this.getProductoNoEliminadoPorId(productosParaVerificarStockDTO.getIdProducto()[i]);
-        if (!p.isIlimitado() && p.getCantidad().compareTo(productosParaVerificarStockDTO.getCantidad()[i]) < 0) {
-          productos.put(p.getIdProducto(), productosParaVerificarStockDTO.getCantidad()[i]);
-        }
+        BigDecimal cantidadLambda = productosParaVerificarStockDTO.getCantidad()[i];
+        Producto producto =
+            this.getProductoNoEliminadoPorId(productosParaVerificarStockDTO.getIdProducto()[i]);
+        producto.getCantidadEnSucursales().stream()
+            .filter(
+                cantidadEnSucursal ->
+                    cantidadEnSucursal
+                        .getIdSucursal()
+                        .equals(productosParaVerificarStockDTO.getIdSucursal()))
+            .forEach(
+                cantidadEnSucursal -> {
+                  if (!producto.isIlimitado()
+                      && cantidadEnSucursal.getCantidad().compareTo(cantidadLambda) < 0) {
+                    productos.put(producto.getIdProducto(), cantidadLambda);
+                  }
+                });
       }
     } else {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_error_logitudes_arrays", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_error_logitudes_arrays", null, Locale.getDefault()));
     }
     return productos;
   }
@@ -632,23 +739,11 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public byte[] getListaDePreciosPorEmpresa(
-      List<Producto> productos, long idEmpresa, String formato) {
-    Empresa empresa = empresaService.getEmpresaPorId(idEmpresa);
+  public byte[] getListaDePrecios(List<Producto> productos, String formato) {
     ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
     InputStream isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");
     Map<String, Object> params = new HashMap<>();
-    params.put("empresa", empresa);
-    if (empresa.getLogo() != null && !empresa.getLogo().isEmpty()) {
-      try {
-        params.put("logo", new ImageIcon(ImageIO.read(new URL(empresa.getLogo()))).getImage());
-      } catch (IOException ex) {
-        logger.error(ex.getMessage());
-        throw new ServiceException(messageSource.getMessage(
-          "mensaje_empresa_404_logo", null, Locale.getDefault()), ex);
-      }
-    }
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(productos);
     switch (formato) {
       case "xlsx":

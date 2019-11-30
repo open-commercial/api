@@ -1,12 +1,12 @@
 package sic.modelo;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javax.persistence.*;
-import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -51,13 +51,12 @@ public class RenglonCuentaCorriente implements Serializable {
     @NotNull(message = "{mensaje_renglon_cuenta_corriente_fecha_vacia}")
     private LocalDateTime fecha;
 
-    private LocalDate fechaVencimiento;
-
     @Column(precision = 25, scale = 15)
     private BigDecimal monto;
     
     @ManyToOne
     @JoinColumn(name = "id_cuenta_corriente", referencedColumnName = "id_cuenta_corriente")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private CuentaCorriente cuentaCorriente;
     
     @OneToOne
@@ -74,8 +73,24 @@ public class RenglonCuentaCorriente implements Serializable {
     @JoinColumn(name = "idRecibo", referencedColumnName = "idRecibo")  
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Recibo recibo;
-    
-    private Long cae;
+
+    @JsonGetter("idSucursal")
+    public Long getIdSucursal() {
+        Long idSucursal = null;
+        if (factura != null) idSucursal = factura.getIdSucursal();
+        if (nota != null) idSucursal = nota.getIdSucursal();
+        if (recibo != null) idSucursal = recibo.getIdSucursal();
+        return idSucursal;
+    }
+
+    @JsonGetter("nombreSucursal")
+    public String getNombreSucursal() {
+        String nombreSucursal = "";
+        if (factura != null) nombreSucursal = factura.getNombreSucursal();
+        if (nota != null) nombreSucursal = nota.getNombreSucursal();
+        if (recibo != null) nombreSucursal = recibo.getNombreSucursal();
+        return nombreSucursal;
+    }
 
     // Formula de Hibernate no coloca en la consulta el mismo alias para los campos que Spring Data.
     @Formula(value = "(SELECT SUM(r.monto) "

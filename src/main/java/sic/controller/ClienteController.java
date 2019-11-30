@@ -21,7 +21,6 @@ import java.util.Locale;
 public class ClienteController {
 
   private final IClienteService clienteService;
-  private final IEmpresaService empresaService;
   private final IUsuarioService usuarioService;
   private final IUbicacionService ubicacionService;
   private final IAuthService authService;
@@ -31,14 +30,12 @@ public class ClienteController {
   @Autowired
   public ClienteController(
       IClienteService clienteService,
-      IEmpresaService empresaService,
       IUsuarioService usuarioService,
       IUbicacionService ubicacionService,
       IAuthService authService,
       ModelMapper modelMapper,
       MessageSource messageSource) {
     this.clienteService = clienteService;
-    this.empresaService = empresaService;
     this.usuarioService = usuarioService;
     this.ubicacionService = ubicacionService;
     this.authService = authService;
@@ -73,16 +70,10 @@ public class ClienteController {
     return clienteService.buscarClientes(criteria, (int) claims.get("idUsuario"));
   }
 
-  @GetMapping("/clientes/predeterminado/empresas/{idEmpresa}")
+  @GetMapping("/clientes/existe-predeterminado")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Cliente getClientePredeterminado(@PathVariable long idEmpresa) {
-    return clienteService.getClientePredeterminado(empresaService.getEmpresaPorId(idEmpresa));
-  }
-
-  @GetMapping("/clientes/existe-predeterminado/empresas/{idEmpresa}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public boolean existeClientePredeterminado(@PathVariable long idEmpresa) {
-    return clienteService.existeClientePredeterminado(empresaService.getEmpresaPorId(idEmpresa));
+  public boolean existeClientePredeterminado() {
+    return clienteService.existeClientePredeterminado();
   }
 
   @DeleteMapping("/clientes/{idCliente}")
@@ -127,7 +118,6 @@ public class ClienteController {
     if (nuevoCliente.getUbicacionEnvio() != null) {
       cliente.setUbicacionEnvio(modelMapper.map(nuevoCliente.getUbicacionEnvio(), Ubicacion.class));
     }
-    cliente.setEmpresa(empresaService.getEmpresaPorId(nuevoCliente.getIdEmpresa()));
     if (nuevoCliente.getIdViajante() != null) {
       cliente.setViajante(usuarioService.getUsuarioNoEliminadoPorId(nuevoCliente.getIdViajante()));
     }
@@ -143,7 +133,7 @@ public class ClienteController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public void actualizar(
+  public Cliente actualizar(
       @RequestBody ClienteDTO clienteDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     Cliente clientePorActualizar = modelMapper.map(clienteDTO, Cliente.class);
@@ -196,18 +186,13 @@ public class ClienteController {
     } else {
       clientePorActualizar.setUbicacionEnvio(clientePersistido.getUbicacionEnvio());
     }
-    if (clienteDTO.getIdEmpresa() != null) {
-      clientePorActualizar.setEmpresa(empresaService.getEmpresaPorId(clienteDTO.getIdEmpresa()));
-    } else {
-      clientePorActualizar.setEmpresa(clientePersistido.getEmpresa());
-    }
     if (clienteDTO.getIdViajante() != null) {
       clientePorActualizar.setViajante(usuarioService.getUsuarioNoEliminadoPorId(clienteDTO.getIdViajante()));
     } else {
       clientePorActualizar.setViajante(null);
     }
     clientePorActualizar.setFechaAlta(clientePersistido.getFechaAlta());
-    clienteService.actualizar(clientePorActualizar, clientePersistido);
+    return clienteService.actualizar(clientePorActualizar, clientePersistido);
   }
 
   @PutMapping("/clientes/{idCliente}/predeterminado")
@@ -222,7 +207,7 @@ public class ClienteController {
     return clienteService.getClientePorIdPedido(idPedido);
   }
 
-  @GetMapping("/clientes/usuarios/{idUsuario}/empresas/{idEmpresa}")
+  @GetMapping("/clientes/usuarios/{idUsuario}")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -230,8 +215,7 @@ public class ClienteController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public Cliente getClientePorIdUsuario(
-      @PathVariable long idUsuario, @PathVariable long idEmpresa) {
-    return clienteService.getClientePorIdUsuarioYidEmpresa(idUsuario, idEmpresa);
+  public Cliente getClientePorIdUsuario(@PathVariable long idUsuario) {
+    return clienteService.getClientePorIdUsuario(idUsuario);
   }
 }

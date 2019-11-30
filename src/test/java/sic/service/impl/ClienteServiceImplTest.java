@@ -10,11 +10,14 @@ import org.mockito.Mock;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.builder.ClienteBuilder;
-import sic.builder.EmpresaBuilder;
+import sic.builder.SucursalBuilder;
 import sic.modelo.Cliente;
 import sic.exception.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
 import sic.repository.ClienteRepository;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 @ExtendWith(SpringExtension.class)
@@ -36,25 +39,24 @@ class ClienteServiceImplTest {
   void shouldSetClientePredeterminado() {
     Cliente resultadoEsperado = new ClienteBuilder().build();
     clienteServiceImpl.setClientePredeterminado(resultadoEsperado);
-    when(clienteRepository.findByEmpresaAndPredeterminadoAndEliminado(
-            (new EmpresaBuilder()).build(), true, false))
+    when(clienteRepository.findByAndPredeterminadoAndEliminado(true, false))
         .thenReturn((new ClienteBuilder()).build());
-    Cliente resultadoObtenido =
-        clienteServiceImpl.getClientePredeterminado((new EmpresaBuilder()).build());
+    Cliente resultadoObtenido = clienteServiceImpl.getClientePredeterminado();
     assertEquals(resultadoEsperado, resultadoObtenido);
   }
 
   @Test
   void shouldLanzarExceptionWhenIdFiscalDuplicadoEnAlta() {
     Cliente clienteNuevo = new ClienteBuilder().build();
+    List<Cliente> listaClienteNuevo = new ArrayList<>();
+    listaClienteNuevo.add(clienteNuevo);
     Cliente clienteDuplicado = new ClienteBuilder().build();
     BusinessServiceException thrown =
         assertThrows(
             BusinessServiceException.class,
             () -> {
-              when(clienteRepository.findByIdFiscalAndEmpresaAndEliminado(
-                      clienteNuevo.getIdFiscal(), clienteNuevo.getEmpresa(), false))
-                  .thenReturn(clienteNuevo);
+              when(clienteRepository.findByIdFiscalAndEliminado(clienteNuevo.getIdFiscal(), false))
+                  .thenReturn(listaClienteNuevo);
               clienteServiceImpl.validarOperacion(TipoDeOperacion.ALTA, clienteDuplicado);
             });
     assertTrue(thrown.getMessage().contains(mensaje_cliente_duplicado_idFiscal));
@@ -62,12 +64,14 @@ class ClienteServiceImplTest {
 
   @Test
   void shouldLanzarExceptionWhenIdFiscalDuplicadoEnActualizacion() {
+    List<Cliente> listaClienteNuevo = new ArrayList<>();
     Cliente clienteNuevo =
         new ClienteBuilder()
             .withIdCliente(7L)
             .withNombreFiscal("Merceria los dos botones")
             .withIdFiscal(23111111119L)
             .build();
+    listaClienteNuevo.add(clienteNuevo);
     Cliente clienteDuplicado =
         new ClienteBuilder()
             .withIdCliente(2L)
@@ -78,9 +82,8 @@ class ClienteServiceImplTest {
         assertThrows(
             BusinessServiceException.class,
             () -> {
-              when(clienteRepository.findByIdFiscalAndEmpresaAndEliminado(
-                      clienteNuevo.getIdFiscal(), clienteNuevo.getEmpresa(), false))
-                  .thenReturn(clienteNuevo);
+              when(clienteRepository.findByIdFiscalAndEliminado(clienteNuevo.getIdFiscal(), false))
+                  .thenReturn(listaClienteNuevo);
               clienteServiceImpl.validarOperacion(TipoDeOperacion.ACTUALIZACION, clienteDuplicado);
             });
     assertTrue(thrown.getMessage().contains(mensaje_cliente_duplicado_idFiscal));

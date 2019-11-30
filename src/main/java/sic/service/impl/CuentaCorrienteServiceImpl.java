@@ -3,11 +3,8 @@ package sic.service.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.*;
-import javax.imageio.ImageIO;
-import javax.swing.*;
 import javax.validation.Valid;
 
 import com.querydsl.core.BooleanBuilder;
@@ -165,8 +162,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             break;
           case COMPRADOR:
             Cliente clienteRelacionado =
-                clienteService.getClientePorIdUsuarioYidEmpresa(
-                    idUsuarioLoggedIn, criteria.getIdEmpresa());
+                clienteService.getClientePorIdUsuario(idUsuarioLoggedIn);
             if (clienteRelacionado != null) {
               rsPredicate.or(qCuentaCorrienteCliente.cliente.eq(clienteRelacionado));
             }
@@ -178,18 +174,14 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       }
       builder.and(rsPredicate);
     }
-    builder.and(
-        qCuentaCorrienteCliente
-            .empresa
-            .idEmpresa
-            .eq(criteria.getIdEmpresa())
-            .and(qCuentaCorrienteCliente.eliminada.eq(false)));
+    builder.and(qCuentaCorrienteCliente.eliminada.eq(false));
     return cuentaCorrienteClienteRepository.findAll(
         builder,
         this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido(), "cliente.nombreFiscal"));
   }
 
-  private Pageable getPageable(int pagina, String ordenarPor, String sentido, String ordenDefault) {
+  private Pageable getPageable(Integer pagina, String ordenarPor, String sentido, String ordenDefault) {
+    if (pagina == null) pagina = 0;
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(
           pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
@@ -237,12 +229,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       builder.and(
           qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.provincia.idProvincia.eq(
               criteria.getIdProvincia()));
-    builder.and(
-        qCuentaCorrienteProveedor
-            .empresa
-            .idEmpresa
-            .eq(criteria.getIdEmpresa())
-            .and(qCuentaCorrienteProveedor.eliminada.eq(false)));
+    builder.and(qCuentaCorrienteProveedor.eliminada.eq(false));
     return cuentaCorrienteProveedorRepository.findAll(
         builder,
         this.getPageable(
@@ -251,14 +238,12 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   public CuentaCorrienteCliente getCuentaCorrientePorCliente(Cliente cliente) {
-    return cuentaCorrienteClienteRepository.findByClienteAndEmpresaAndEliminada(
-            cliente, cliente.getEmpresa(), false);
+    return cuentaCorrienteClienteRepository.findByClienteAndEliminada(cliente, false);
   }
 
   @Override
   public CuentaCorrienteProveedor getCuentaCorrientePorProveedor(Proveedor proveedor) {
-    return cuentaCorrienteProveedorRepository.findByProveedorAndEmpresaAndEliminada(
-            proveedor, proveedor.getEmpresa(), false);
+    return cuentaCorrienteProveedorRepository.findByProveedorAndEliminada(proveedor, false);
   }
 
   @Override
@@ -302,7 +287,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     rcc.setNumero(factura.getNumFactura());
     rcc.setFactura(factura);
     rcc.setFecha(factura.getFecha());
-    rcc.setFechaVencimiento(factura.getFechaVencimiento());
     rcc.setIdMovimiento(factura.getIdFactura());
     rcc.setMonto(factura.getTotal().negate());
     cc.getRenglones().add(rcc);
@@ -336,7 +320,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       rcc.setNota(nota);
       rcc.setFecha(nota.getFecha());
       rcc.setIdMovimiento(nota.getIdNota());
-      if (nota.getMovimiento() == Movimiento.COMPRA) rcc.setCae(nota.getCae());
       cc.getRenglones().add(rcc);
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
@@ -439,18 +422,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                 cuentaCorrienteCliente.getIdCuentaCorriente()));
     Map<String, Object> params = new HashMap<>();
     params.put("cuentaCorrienteCliente", cuentaCorrienteCliente);
-    if (cuentaCorrienteCliente.getEmpresa().getLogo() != null
-        && !cuentaCorrienteCliente.getEmpresa().getLogo().isEmpty()) {
-      try {
-        params.put(
-            "logo",
-            new ImageIcon(ImageIO.read(new URL(cuentaCorrienteCliente.getEmpresa().getLogo())))
-                .getImage());
-      } catch (IOException ex) {
-        throw new ServiceException(
-            messageSource.getMessage("mensaje_empresa_404_logo", null, Locale.getDefault()), ex);
-      }
-    }
     switch (formato) {
       case "xlsx":
         try {
@@ -536,15 +507,5 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     return renglonCuentaCorrienteRepository
         .findTop2ByAndCuentaCorrienteAndEliminadoOrderByIdRenglonCuentaCorrienteDesc(
             cuentaCorriente, false);
-  }
-
-  @Override
-  public int updateCAEFactura(long idFactura, long cae) {
-    return renglonCuentaCorrienteRepository.updateCaeFactura(idFactura, cae);
-  }
-
-  @Override
-  public int updateCAENota(long idNota, long cae) {
-    return renglonCuentaCorrienteRepository.updateCaeNota(idNota, cae);
   }
 }

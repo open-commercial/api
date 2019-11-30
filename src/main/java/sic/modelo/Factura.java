@@ -27,7 +27,7 @@ import lombok.ToString;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"fecha", "tipoComprobante", "numSerie", "numFactura", "empresa"})
+@EqualsAndHashCode(of = {"fecha", "tipoComprobante", "numSerie", "numFactura", "sucursal"})
 @ToString(exclude = {"renglones"})
 @JsonIdentityInfo(
     generator = ObjectIdGenerators.PropertyGenerator.class,
@@ -74,7 +74,6 @@ public abstract class Factura implements Serializable {
 
   @ManyToOne
   @JoinColumn(name = "id_Transportista", referencedColumnName = "id_Transportista")
-  @NotNull(message = "{mensaje_factura_transportista_vacio}")
   private Transportista transportista;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -132,9 +131,9 @@ public abstract class Factura implements Serializable {
   private BigDecimal cantidadArticulos;
 
   @ManyToOne
-  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-  @NotNull(message = "{mensaje_factura_empresa_vacia}")
-  private Empresa empresa;
+  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
+  @NotNull(message = "{mensaje_factura_sucursal_vacia}")
+  private Sucursal sucursal;
 
   private boolean eliminada;
 
@@ -152,28 +151,23 @@ public abstract class Factura implements Serializable {
   }
 
   @JsonGetter("idTransportista")
-  public long getIdTransportista() {
-    return transportista.getIdTransportista();
+  public Long getIdTransportista() {
+    return transportista != null ? transportista.getIdTransportista() : null;
   }
 
   @JsonGetter("nombreTransportista")
   public String getNombreTransportista() {
-    return transportista.getNombre();
+    return transportista != null ? transportista.getNombre() : "";
   }
 
-  @JsonGetter("idEmpresa")
-  public long getIdEmpresa() {
-    return empresa.getIdEmpresa();
+  @JsonGetter("idSucursal")
+  public long getIdSucursal() {
+    return sucursal.getIdSucursal();
   }
 
-  @JsonGetter("nombreEmpresa")
-  public String getNombreEmpresa() {
-    return empresa.getNombre();
-  }
-
-  @JsonGetter("idUsuario")
-  public long getIdUsuario() {
-    return usuario.getIdUsuario();
+  @JsonGetter("nombreSucursal")
+  public String getNombreSucursal() {
+    return sucursal.getNombre();
   }
 
   @JsonGetter("nombreUsuario")

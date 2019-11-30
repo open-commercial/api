@@ -5,8 +5,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import sic.modelo.Sucursal;
 import sic.modelo.Cliente;
-import sic.modelo.Empresa;
 import sic.modelo.FacturaVenta;
 import sic.modelo.Pedido;
 import sic.modelo.RenglonFactura;
@@ -16,37 +17,37 @@ import sic.modelo.Usuario;
 import sic.modelo.embeddable.ClienteEmbeddable;
 
 public class FacturaVentaBuilder {
-    
-    private long idFactura = 0L;
-    private LocalDateTime fecha = LocalDateTime.now();
-    private TipoDeComprobante tipoFactura = TipoDeComprobante.FACTURA_A;
-    private long numSerie = 0;
-    private long numFactura = 1;
-    private LocalDate fechaVencimiento = LocalDate.now();
-    private Pedido pedido =  null;
-    private Transportista transportista = new TransportistaBuilder().build();
-    private List<RenglonFactura> renglones;
-    private Cliente cliente = new ClienteBuilder().build();
-    private ClienteEmbeddable clienteEmbeddable = ClienteEmbeddable.builder().build();
-    private Usuario usuario = new UsuarioBuilder().build();
-    private BigDecimal subTotal = new BigDecimal("6500");
-    private BigDecimal recargo_porcentaje = BigDecimal.ZERO;
-    private BigDecimal recargo_neto = BigDecimal.ZERO;
-    private BigDecimal descuento_porcentaje = BigDecimal.ZERO;
-    private BigDecimal descuento_neto = BigDecimal.ZERO;
-    private BigDecimal subTotal_neto = new BigDecimal("6500");
-    private BigDecimal iva_105_neto = BigDecimal.ZERO;
-    private BigDecimal iva_21_neto = new BigDecimal("1365");
-    private BigDecimal impuestoInterno_neto = BigDecimal.ZERO;
-    private BigDecimal total = new BigDecimal("7865");
-    private String observaciones = "Factura por Default";
-    private BigDecimal cantidadArticulos = new BigDecimal("3");
-    private Empresa empresa = new EmpresaBuilder().build();
-    private boolean eliminada = false;
-    private long CAE = 21064126523746l;
-    private LocalDate vencimientoCAE = null;
-    private long numSerieAfip = 0;
-    private long numFacturaAfip = 0;
+
+  private long idFactura = 0L;
+  private LocalDateTime fecha = LocalDateTime.now();
+  private TipoDeComprobante tipoFactura = TipoDeComprobante.FACTURA_A;
+  private long numSerie = 0;
+  private long numFactura = 1;
+  private LocalDate fechaVencimiento = LocalDate.now();
+  private Pedido pedido = null;
+  private Transportista transportista = new TransportistaBuilder().build();
+  private List<RenglonFactura> renglones;
+  private Cliente cliente = new ClienteBuilder().build();
+  private ClienteEmbeddable clienteEmbeddable = ClienteEmbeddable.builder().build();
+  private Usuario usuario = new UsuarioBuilder().build();
+  private BigDecimal subTotal = new BigDecimal("6500");
+  private BigDecimal recargo_porcentaje = BigDecimal.ZERO;
+  private BigDecimal recargo_neto = BigDecimal.ZERO;
+  private BigDecimal descuento_porcentaje = BigDecimal.ZERO;
+  private BigDecimal descuento_neto = BigDecimal.ZERO;
+  private BigDecimal subTotal_neto = new BigDecimal("6500");
+  private BigDecimal iva_105_neto = BigDecimal.ZERO;
+  private BigDecimal iva_21_neto = new BigDecimal("1365");
+  private BigDecimal impuestoInterno_neto = BigDecimal.ZERO;
+  private BigDecimal total = new BigDecimal("7865");
+  private String observaciones = "Factura por Default";
+  private BigDecimal cantidadArticulos = new BigDecimal("3");
+  private Sucursal sucursal = new SucursalBuilder().build();
+  private boolean eliminada = false;
+  private long CAE = 21064126523746l;
+  private LocalDate vencimientoCAE = null;
+  private long numSerieAfip = 0;
+  private long numFacturaAfip = 0;
 
   public FacturaVenta build() {
     if (renglones == null) {
@@ -65,7 +66,7 @@ public class FacturaVentaBuilder {
       this.renglones = renglonesFactura;
     }
     return new FacturaVenta(
-      idFactura,
+        idFactura,
         clienteEmbeddable,
         cliente,
         usuario,
@@ -89,7 +90,7 @@ public class FacturaVentaBuilder {
         total,
         observaciones,
         cantidadArticulos,
-        empresa,
+        sucursal,
         eliminada,
         CAE,
         vencimientoCAE,
@@ -217,8 +218,8 @@ public class FacturaVentaBuilder {
         return this;
     }
 
-    public FacturaVentaBuilder withEmpresa(Empresa empresa) {
-        this.empresa = empresa;
+    public FacturaVentaBuilder withEmpresa(Sucursal sucursal) {
+        this.sucursal = sucursal;
         return this;
     }
 

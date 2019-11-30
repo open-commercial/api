@@ -4,7 +4,6 @@ import java.io.Serializable;
 import javax.validation.constraints.NotNull;
 import javax.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,7 +22,6 @@ import javax.validation.constraints.NotEmpty;
 @EqualsAndHashCode(of = "nombre")
 @ToString
 @JsonView(Views.Comprador.class)
-@JsonIgnoreProperties("empresa")
 public class FormaDePago implements Serializable {
 
   @Id

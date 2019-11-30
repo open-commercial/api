@@ -24,8 +24,8 @@ import sic.controller.Views;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
+@JsonIgnoreProperties({"proveedor", "usuario", "transportista", "pedido"})
 @JsonView(Views.Comprador.class)
-@JsonIgnoreProperties({"proveedor", "usuario", "transportista", "empresa", "pedido"})
 public class FacturaCompra extends Factura implements Serializable {
 
   @ManyToOne
@@ -58,7 +58,7 @@ public class FacturaCompra extends Factura implements Serializable {
       BigDecimal total,
       String observaciones,
       BigDecimal cantidadArticulos,
-      Empresa empresa,
+      Sucursal sucursal,
       boolean eliminada,
       long cae,
       LocalDate vencimientoCAE,
@@ -89,7 +89,7 @@ public class FacturaCompra extends Factura implements Serializable {
         total,
         observaciones,
         cantidadArticulos,
-        empresa,
+      sucursal,
         eliminada,
         cae,
         vencimientoCAE,

@@ -33,8 +33,8 @@ public abstract class NotaDTO implements Serializable {
   private boolean eliminada;
   private TipoDeComprobante tipoComprobante;
   private LocalDateTime fecha;
-  private long idEmpresa;
-  private String nombreEmpresa;
+  private long idSucursal;
+  private String nombreSucursal;
   private Long idCliente;
   private String nombreFiscalCliente;
   private long idViajante;

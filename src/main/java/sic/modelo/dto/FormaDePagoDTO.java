@@ -5,7 +5,7 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"idFormaDePago", "idEmpresa", "nombreEmpresa"})
+@EqualsAndHashCode(exclude = {"idFormaDePago", "idSucursal", "nombreSucursal"})
 @Builder
 public class FormaDePagoDTO {
 
@@ -13,7 +13,7 @@ public class FormaDePagoDTO {
   private String nombre;
   private boolean afectaCaja;
   private boolean predeterminado;
-  private Long idEmpresa;
-  private String nombreEmpresa;
+  private Long idSucursal;
+  private String nombreSucursal;
   private boolean eliminada;
 }

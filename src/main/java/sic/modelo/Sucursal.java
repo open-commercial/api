@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.QueryInit;
@@ -19,7 +20,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
 @Entity
-@Table(name = "empresa")
+@Table(name = "sucursal")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,15 +28,14 @@ import javax.validation.constraints.NotEmpty;
 @ToString
 @JsonView(Views.Comprador.class)
 @JsonIgnoreProperties("eliminada")
-public class Empresa implements Serializable {
+public class Sucursal implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id_Empresa")
-  private long idEmpresa;
+  private long idSucursal;
 
-  @NotNull(message = "{mensaje_empresa_nombre_vacio}")
-  @NotEmpty(message = "{mensaje_empresa_nombre_vacio}")
+  @NotNull(message = "{mensaje_sucursal_nombre_vacio}")
+  @NotEmpty(message = "{mensaje_sucursal_nombre_vacio}")
   @Column(nullable = false)
   private String nombre;
 
@@ -44,7 +44,7 @@ public class Empresa implements Serializable {
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
-  @NotNull(message = "{mensaje_empresa_condicion_iva_vacia}")
+  @NotNull(message = "{mensaje_sucursal_condicion_iva_vacia}")
   private CategoriaIVA categoriaIVA;
 
   private Long idFiscal;
@@ -68,4 +68,19 @@ public class Empresa implements Serializable {
   private String logo;
 
   private boolean eliminada;
+
+  @JsonGetter("detalleUbicacion")
+  public String getDetalleUbicacion() {
+    String detalleUbicacion = "";
+    if (ubicacion != null) {
+      detalleUbicacion =
+          (ubicacion.getCalle() != null ? ubicacion.getCalle() + " " : "")
+              + (ubicacion.getNumero() != null ? ubicacion.getNumero() + " " : "")
+              + (ubicacion.getPiso() != null ? ubicacion.getPiso() + " " : "")
+              + (ubicacion.getDepartamento() != null ? ubicacion.getDepartamento() + " " : "")
+              + (ubicacion.getNombreLocalidad() != null ? ubicacion.getNombreLocalidad() + " " : "")
+              + (ubicacion.getNombreProvincia() != null ? ubicacion.getNombreProvincia() : "");
+    }
+    return detalleUbicacion;
+  }
 }

@@ -21,10 +21,10 @@ import javax.validation.constraints.NotEmpty;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"nombre", "empresa"})
+@EqualsAndHashCode(of = "nombre")
 @ToString
+@JsonIgnoreProperties("eliminada")
 @JsonView(Views.Comprador.class)
-@JsonIgnoreProperties({"empresa", "eliminada"})
 public class Medida implements Serializable {
 
   @Id
@@ -37,20 +37,5 @@ public class Medida implements Serializable {
   @NotEmpty(message = "{mensaje_medida_vacio_nombre}")
   private String nombre;
 
-  @ManyToOne
-  @JoinColumn(name = "id_Empresa", referencedColumnName = "id_Empresa")
-  @NotNull(message = "{mensaje_medida_empresa_vacia}")
-  private Empresa empresa;
-
   private boolean eliminada;
-
-  @JsonGetter("nombreEmpresa")
-  public String getNombreEmpresa() {
-    return empresa.getNombre();
-  }
-
-  @JsonGetter("idEmpresa")
-  public long getIdEmpresa() {
-    return empresa.getIdEmpresa();
-  }
 }

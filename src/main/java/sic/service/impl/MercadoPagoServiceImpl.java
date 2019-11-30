@@ -1,5 +1,8 @@
 package sic.service.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mercadopago.MercadoPago;
 import com.mercadopago.exceptions.MPException;
 import com.mercadopago.resources.Payment;
@@ -11,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
@@ -18,6 +22,7 @@ import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
 import sic.service.*;
 
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -25,6 +30,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 @Service
+@Validated
 public class MercadoPagoServiceImpl implements IMercadoPagoService {
 
   @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
@@ -36,6 +42,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   private final IFormaDePagoService formaDePagoService;
   private final IClienteService clienteService;
   private final INotaService notaService;
+  private final ISucursalService sucursalService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
 
@@ -45,16 +52,18 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       IFormaDePagoService formaDePagoService,
       IClienteService clienteService,
       INotaService notaService,
+      ISucursalService sucursalService,
       MessageSource messageSource) {
     this.reciboService = reciboService;
     this.formaDePagoService = formaDePagoService;
     this.clienteService = clienteService;
     this.notaService = notaService;
+    this.sucursalService = sucursalService;
     this.messageSource = messageSource;
   }
 
   @Override
-  public void crearNuevoPago(NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Usuario usuario) {
+  public void crearNuevoPago(@Valid NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Usuario usuario) throws MPException {
     Cliente cliente =
         clienteService.getClienteNoEliminadoPorId(nuevoPagoMercadoPagoDTO.getIdCliente());
     this.validarOperacion(nuevoPagoMercadoPagoDTO, cliente);
@@ -67,7 +76,10 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
             + " "
             + cliente.getNombreFiscal()
             + (cliente.getNombreFantasia() != null ? cliente.getNombreFantasia() : ""));
-    payment.setExternalReference(String.valueOf(cliente.getIdCliente()));
+    String json = "{ \"idCliente\": "+ nuevoPagoMercadoPagoDTO.getIdCliente()
+      +" , \"idSucursal\": " + nuevoPagoMercadoPagoDTO.getIdSucursal() +"}";
+    JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
+    payment.setExternalReference(jsonObject.toString());
     Payer payer = new Payer();
     payer.setEmail(cliente.getEmail());
     payment.setPayer(payer);
@@ -89,13 +101,9 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_pago_no_soportado", null, Locale.getDefault()));
     }
-    try {
-      Payment p = payment.save();
-      if (p.getStatus() == Payment.Status.rejected) {
-        this.procesarMensajeNoAprobado(payment);
-      }
-    } catch (MPException ex) {
-      this.logExceptionMercadoPago(ex);
+    Payment pago = payment.save();
+    if (pago.getStatus() == Payment.Status.rejected) {
+      this.procesarMensajeNoAprobado(payment);
     }
   }
 
@@ -107,14 +115,20 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       payment = Payment.findById(idPayment);
       if (payment.getId() != null && payment.getExternalReference() != null) {
         Optional<Recibo> reciboMP = reciboService.getReciboPorIdMercadoPago(idPayment);
+        JsonObject convertedObject =
+            new Gson().fromJson(payment.getExternalReference(), JsonObject.class);
         Cliente cliente =
-            clienteService.getClienteNoEliminadoPorId(Long.valueOf(payment.getExternalReference()));
+            clienteService.getClienteNoEliminadoPorId(
+                Long.parseLong(convertedObject.get("idCliente").getAsString()));
+        Sucursal sucursal =
+            sucursalService.getSucursalPorId(
+                Long.parseLong(convertedObject.get("idSucursal").getAsString()));
         switch (payment.getStatus()) {
           case approved:
             if (reciboMP.isPresent()) {
               logger.warn("El recibo del pago nro {} ya existe.", payment.getId());
             } else {
-              this.crearReciboDePago(payment, cliente.getCredencial(), cliente);
+              this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
             }
             break;
           case refunded:
@@ -132,7 +146,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                           notaService
                               .getTipoNotaDebitoCliente(
                                   reciboMP.get().getIdCliente(),
-                                  reciboMP.get().getEmpresa().getIdEmpresa())
+                                  reciboMP.get().getSucursal().getIdSucursal())
                               .get(0))
                       .build();
               NotaDebito notaGuardada =
@@ -171,12 +185,12 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     }
   }
 
-  private void crearReciboDePago(Payment payment, Usuario usuario, Cliente cliente) {
+  private void crearReciboDePago(Payment payment, Usuario usuario, Cliente cliente, Sucursal sucursal) {
     switch (payment.getStatus()) {
       case approved:
         logger.warn("El pago de mercadopago {} se aprobó correctamente.", payment);
         Recibo nuevoRecibo = new Recibo();
-        nuevoRecibo.setEmpresa(cliente.getEmpresa());
+        nuevoRecibo.setSucursal(sucursal);
         nuevoRecibo.setFormaDePago(formaDePagoService.getFormaDePagoPorNombre(FormaDePagoEnum.MERCADO_PAGO));
         nuevoRecibo.setUsuario(usuario);
         nuevoRecibo.setCliente(cliente);
@@ -200,7 +214,8 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     }
   }
 
-  private void logExceptionMercadoPago(MPException ex) {
+  @Override
+  public void logExceptionMercadoPago(MPException ex) {
     logger.warn("Ocurrió un error con MercadoPago: {}", ex.getMessage());
     throw new BusinessServiceException(
       messageSource.getMessage("mensaje_pago_error", null, Locale.getDefault()));
@@ -245,12 +260,6 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     }
     if (nuevoPagoMercadoPagoDTO.getInstallments() == null) {
       nuevoPagoMercadoPagoDTO.setInstallments(1);
-    }
-    if (nuevoPagoMercadoPagoDTO.getPaymentMethodId() != null
-        && nuevoPagoMercadoPagoDTO.getPaymentMethodId().isEmpty()) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_pago_sin_payment_method_id", null, Locale.getDefault()));
     }
     if (nuevoPagoMercadoPagoDTO.getToken() != null
         && !nuevoPagoMercadoPagoDTO.getToken().isEmpty()

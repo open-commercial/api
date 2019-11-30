@@ -2,11 +2,15 @@ package sic.controller;
 
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
+import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.calculos.NuevosResultadosPedido;
@@ -28,22 +33,24 @@ import sic.service.*;
 public class PedidoController {
     
     private final IPedidoService pedidoService;
-    private final IEmpresaService empresaService;
+    private final ISucursalService sucursalService;
     private final IUsuarioService usuarioService;
     private final IClienteService clienteService;
     private final IAuthService authService;
     private final ModelMapper modelMapper;
+    private final MessageSource messageSource;
 
     @Autowired
-    public PedidoController(IPedidoService pedidoService, IEmpresaService empresaService,
+    public PedidoController(IPedidoService pedidoService, ISucursalService sucursalService,
                             IUsuarioService usuarioService, IClienteService clienteService,
-                            IAuthService authService, ModelMapper modelMapper) {
+                            IAuthService authService, ModelMapper modelMapper, MessageSource messageSource) {
         this.pedidoService = pedidoService;
-        this.empresaService = empresaService;
+        this.sucursalService = sucursalService;
         this.usuarioService = usuarioService;
         this.clienteService = clienteService;
         this.authService = authService;
         this.modelMapper = modelMapper;
+        this.messageSource = messageSource;
     }
     
     @GetMapping("/pedidos/{idPedido}")
@@ -58,31 +65,49 @@ public class PedidoController {
         return pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido);
     }
 
-    @PostMapping("/pedidos/renglones")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
-    public List<RenglonPedido> calcularRenglonesPedido(@RequestBody List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO) {
-        return pedidoService.calcularRenglonesPedido(nuevosRenglonesPedidoDTO);
-    }
+  @PostMapping("/pedidos/renglones/clientes/{idCliente}")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
+  public List<RenglonPedido> calcularRenglonesPedido(
+      @RequestBody List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO,
+      @PathVariable Long idCliente) {
+    return pedidoService.calcularRenglonesPedido(nuevosRenglonesPedidoDTO, idCliente);
+  }
 
   @PutMapping("/pedidos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
-  public void actualizar(@RequestParam Long idEmpresa,
+  public void actualizar(@RequestParam Long idSucursal,
                          @RequestParam Long idUsuario,
                          @RequestParam Long idCliente,
                          @RequestParam TipoDeEnvio tipoDeEnvio,
-                         @RequestParam(required = false) Long idSucursal,
                          @RequestBody PedidoDTO pedidoDTO) {
     Pedido pedido = modelMapper.map(pedidoDTO, Pedido.class);
-    pedido.setEmpresa(empresaService.getEmpresaPorId(idEmpresa));
+    pedido.setSucursal(sucursalService.getSucursalPorId(idSucursal));
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     pedido.setCliente(clienteService.getClienteNoEliminadoPorId(idCliente));
-    pedido.setDetalleEnvio(pedidoService.getPedidoNoEliminadoPorId(pedidoDTO.getIdPedido()).getDetalleEnvio());
-    //Las facturas se recuperan para evitar cambios no deseados.
+    pedido.setDetalleEnvio(
+        pedidoService.getPedidoNoEliminadoPorId(pedidoDTO.getIdPedido()).getDetalleEnvio());
+    // Las facturas se recuperan para evitar cambios no deseados.
     pedido.setFacturas(pedidoService.getFacturasDelPedido(pedido.getIdPedido()));
-    //Si los renglones vienen null, recupera los renglones del pedido para actualizarLocalidad
-    //caso contrario, ultiliza los renglones del pedido.
-    pedidoService.actualizar(pedido, tipoDeEnvio, idSucursal);
+    // Si los renglones vienen null, recupera los renglones del pedido para actualizar
+    // caso contrario, ultiliza los renglones del pedido.
+    if (pedido.getRenglones() == null) {
+      pedido.setRenglones(
+          pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(pedido.getIdPedido()));
+    } else {
+      List<RenglonPedido> renglonesActualizados = new ArrayList<>();
+      pedido
+          .getRenglones()
+          .forEach(
+              renglonPedido ->
+                  renglonesActualizados.add(
+                      pedidoService.calcularRenglonPedido(
+                          renglonPedido.getIdProductoItem(),
+                          renglonPedido.getCantidad(),
+                          pedido.getCliente())));
+      pedido.setRenglones(renglonesActualizados);
     }
+    pedidoService.actualizar(pedido, tipoDeEnvio);
+  }
 
   @PostMapping("/pedidos")
   @AccesoRolesPermitidos({
@@ -92,27 +117,8 @@ public class PedidoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public Pedido guardar(
-    @RequestBody NuevoPedidoDTO nuevoPedidoDTO) {
-    Pedido pedido = new Pedido();
-    pedido.setFechaVencimiento(nuevoPedidoDTO.getFechaVencimiento());
-    pedido.setObservaciones(nuevoPedidoDTO.getObservaciones());
-    Type listType = new TypeToken<List<RenglonPedido>>() {
-    }.getType();
-    pedido.setRenglones(modelMapper.map(nuevoPedidoDTO.getRenglones(), listType));
-    pedido.setSubTotal(nuevoPedidoDTO.getSubTotal());
-    pedido.setRecargoPorcentaje(nuevoPedidoDTO.getRecargoPorcentaje());
-    pedido.setRecargoNeto(nuevoPedidoDTO.getRecargoNeto());
-    pedido.setDescuentoPorcentaje(nuevoPedidoDTO.getDescuentoPorcentaje());
-    pedido.setDescuentoNeto(nuevoPedidoDTO.getDescuentoNeto());
-    pedido.setTotalEstimado(nuevoPedidoDTO.getTotal());
-    Empresa empresaParaPedido = empresaService.getEmpresaPorId(nuevoPedidoDTO.getIdEmpresa());
-    pedido.setEmpresa(empresaParaPedido);
-    pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(nuevoPedidoDTO.getIdUsuario()));
-    Cliente cliente = clienteService.getClienteNoEliminadoPorId(nuevoPedidoDTO.getIdCliente());
-    pedido.setCliente(cliente);
-    pedido.setFecha(LocalDateTime.now());
-    return pedidoService.guardar(pedido, nuevoPedidoDTO.getTipoDeEnvio(), nuevoPedidoDTO.getIdSucursal());
+  public Pedido guardar(@RequestBody NuevoPedidoDTO nuevoPedidoDTO) {
+    return pedidoService.guardar(nuevoPedidoDTO);
   }
 
   @PostMapping("/pedidos/busqueda/criteria")

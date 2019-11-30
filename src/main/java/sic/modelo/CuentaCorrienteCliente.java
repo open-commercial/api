@@ -1,6 +1,5 @@
 package sic.modelo;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,35 +23,30 @@ import sic.controller.Views;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @JsonView(Views.Comprador.class)
-@JsonIgnoreProperties({"empresa"})
 public class CuentaCorrienteCliente extends CuentaCorriente implements Serializable {
 
-    @OneToOne
-    @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
-    @QueryInit({"viajante", "ubicacionFacturacion.localidad.provincia", "ubicacionEnvio.localidad.provincia"})
-    @NotNull(message = "{mensaje_cuenta_corriente_cliente_vacio}")
-    private Cliente cliente;
+  @OneToOne
+  @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
+  @QueryInit({
+    "viajante",
+    "ubicacionFacturacion.localidad.provincia",
+    "ubicacionEnvio.localidad.provincia"
+  })
+  @NotNull(message = "{mensaje_cuenta_corriente_cliente_vacio}")
+  private Cliente cliente;
 
-    public CuentaCorrienteCliente() {}
+  public CuentaCorrienteCliente() {}
 
   public CuentaCorrienteCliente(
       long idCuentaCorriente,
       boolean eliminada,
       LocalDateTime fechaApertura,
-      Empresa empresa,
       BigDecimal saldo,
       LocalDateTime fechaUltimoMovimiento,
       List<RenglonCuentaCorriente> renglones,
       Cliente cliente) {
 
-    super(
-        idCuentaCorriente,
-        eliminada,
-        fechaApertura,
-        empresa,
-        saldo,
-        fechaUltimoMovimiento,
-        renglones);
+    super(idCuentaCorriente, eliminada, fechaApertura, saldo, fechaUltimoMovimiento, renglones);
     this.cliente = cliente;
   }
 }

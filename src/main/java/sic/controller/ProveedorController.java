@@ -17,7 +17,6 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaProveedorCriteria;
 import sic.modelo.dto.ProveedorDTO;
-import sic.service.IEmpresaService;
 import sic.service.IProveedorService;
 import sic.service.IUbicacionService;
 
@@ -26,18 +25,15 @@ import sic.service.IUbicacionService;
 public class ProveedorController {
 
   private final IProveedorService proveedorService;
-  private final IEmpresaService empresaService;
   private final IUbicacionService ubicacionService;
   private final ModelMapper modelMapper;
 
   @Autowired
   public ProveedorController(
     IProveedorService proveedorService,
-    IEmpresaService empresaService,
     IUbicacionService ubicacionService,
     ModelMapper modelMapper) {
     this.proveedorService = proveedorService;
-    this.empresaService = empresaService;
     this.ubicacionService = ubicacionService;
     this.modelMapper = modelMapper;
   }
@@ -52,7 +48,6 @@ public class ProveedorController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Proveedor guardar(@RequestBody ProveedorDTO proveedorDTO) {
     Proveedor proveedor = modelMapper.map(proveedorDTO, Proveedor.class);
-    proveedor.setEmpresa(empresaService.getEmpresaPorId(proveedorDTO.getIdEmpresa()));
     proveedor.setUbicacion(null);
     if (proveedorDTO.getUbicacion() != null) {
       proveedor.setUbicacion(modelMapper.map(proveedorDTO.getUbicacion(), Ubicacion.class));
@@ -78,12 +73,6 @@ public class ProveedorController {
       proveedorPorActualizar.setUbicacion(proveedorPersistido.getUbicacion());
     } else {
       proveedorPorActualizar.setUbicacion(null);
-    }
-    if (proveedorDTO.getIdEmpresa() != null) {
-      proveedorPorActualizar.setEmpresa(
-          empresaService.getEmpresaPorId(proveedorDTO.getIdEmpresa()));
-    } else {
-      proveedorPorActualizar.setEmpresa(proveedorPersistido.getEmpresa());
     }
     if (proveedorDTO.getUbicacion() != null) {
       Ubicacion ubicacion = modelMapper.map(proveedorDTO.getUbicacion(), Ubicacion.class);
@@ -111,9 +100,9 @@ public class ProveedorController {
     proveedorService.eliminar(idProveedor);
   }
 
-  @GetMapping("/proveedores/empresas/{idEmpresa}")
+  @GetMapping("/proveedores")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public List<Proveedor> getProveedores(@PathVariable long idEmpresa) {
-    return proveedorService.getProveedores(empresaService.getEmpresaPorId(idEmpresa));
+  public List<Proveedor> getProveedores() {
+    return proveedorService.getProveedores();
   }
 }

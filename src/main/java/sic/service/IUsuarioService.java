@@ -20,7 +20,7 @@ public interface IUsuarioService {
 
   void actualizarPasswordRecoveryKey(String passwordRecoveryKey, long idUsuario);
 
-  void enviarEmailDeRecuperacion(long idEmpresa, String email, String host);
+  void enviarEmailDeRecuperacion(long idSucursal, String email, String host);
 
   void eliminar(long idUsuario);
 
@@ -32,7 +32,7 @@ public interface IUsuarioService {
 
   Usuario guardar(@Valid Usuario usuario);
 
-  int actualizarIdEmpresaDeUsuario(long idUsuario, long idEmpresaPredeterminada);
+  int actualizarIdSucursalDeUsuario(long idUsuario, long idSucursalPredeterminada);
 
   Page<Usuario> getUsuariosPorRol(Rol rol);
 
