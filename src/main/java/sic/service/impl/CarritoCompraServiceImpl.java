@@ -9,7 +9,6 @@ import com.mercadopago.exceptions.MPException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -43,10 +42,8 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
       IUsuarioService usuarioService,
       IClienteService clienteService,
       IProductoService productoService,
-      ISucursalService sucursalService,
       IPedidoService pedidoService,
-      IMercadoPagoService mercadoPagoService,
-      MessageSource messageSource) {
+      IMercadoPagoService mercadoPagoService) {
     this.carritoCompraRepository = carritoCompraRepository;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
@@ -62,23 +59,37 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     carritoCompraDTO.setCantRenglones(carritoCompraRepository.getCantRenglones(idUsuario));
     if (cantArticulos == null) cantArticulos = BigDecimal.ZERO;
     carritoCompraDTO.setCantArticulos(cantArticulos);
-    BigDecimal subtotal = carritoCompraRepository.calcularSubtotal(idUsuario);
-    if (subtotal == null) subtotal = BigDecimal.ZERO;
-    carritoCompraDTO.setSubtotal(subtotal);
-    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
-    carritoCompraDTO.setBonificacionPorcentaje(cliente.getBonificacion());
-    carritoCompraDTO.setBonificacionNeto(
-        subtotal.multiply(cliente.getBonificacion()).divide(CIEN, RoundingMode.HALF_UP));
-    carritoCompraDTO.setTotal(subtotal.subtract(carritoCompraDTO.getBonificacionNeto()));
+    carritoCompraDTO.setTotal(this.calcularTotal(idUsuario, idCliente));
     return carritoCompraDTO;
+  }
+
+  private BigDecimal calcularTotal(long idUsuario, long idCliente) {
+    BigDecimal total = BigDecimal.ZERO;
+    List<ItemCarritoCompra> itemCarritoCompra =
+        this.getItemsDelCaritoCompra(idUsuario, idCliente, 0, Integer.MAX_VALUE).getContent();
+    for (ItemCarritoCompra i : itemCarritoCompra) {
+      if (i.getImporteBonificado() != null && i.getImporteBonificado().compareTo(BigDecimal.ZERO) > 0) {
+        total = total.add(i.getImporteBonificado());
+      } else {
+        total = total.add(i.getImporte());
+      }
+    }
+    return total;
   }
 
   @Override
   public Page<ItemCarritoCompra> getItemsDelCaritoCompra(
-      long idUsuario, long idCliente, int pagina) {
-    Pageable pageable =
-        PageRequest.of(
-            pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
+      long idUsuario, long idCliente, int pagina, Integer tamanio) {
+    Pageable pageable = null;
+    if (tamanio != null) {
+      pageable =
+          PageRequest.of(
+              pagina, tamanio, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
+    } else {
+      pageable =
+          PageRequest.of(
+              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
+    }
     Page<ItemCarritoCompra> items =
         carritoCompraRepository.findAllByUsuario(
             usuarioService.getUsuarioNoEliminadoPorId(idUsuario), pageable);
@@ -149,9 +160,6 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
         mercadoPagoService.logExceptionMercadoPago(ex);
       }
     }
-    CarritoCompraDTO carritoCompraDTO =
-        this.getCarritoCompra(
-            nuevaOrdenDeCompraDTO.getIdUsuario(), nuevaOrdenDeCompraDTO.getIdCliente());
     List<ItemCarritoCompra> items =
         carritoCompraRepository.findAllByUsuarioOrderByIdItemCarritoCompraDesc(usuario);
     NuevoPedidoDTO nuevoPedido =
@@ -163,7 +171,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
             .tipoDeEnvio(nuevaOrdenDeCompraDTO.getTipoDeEnvio())
             .observaciones(nuevaOrdenDeCompraDTO.getObservaciones())
             .recargoPorcentaje(BigDecimal.ZERO)
-            .descuentoPorcentaje(carritoCompraDTO.getBonificacionPorcentaje())
+            .descuentoPorcentaje(BigDecimal.ZERO)
             .build();
     items.forEach(
         i ->

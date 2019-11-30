@@ -15,8 +15,5 @@ import java.math.BigDecimal;
 public class CarritoCompraDTO implements Serializable {
   private BigDecimal cantArticulos;
   private long cantRenglones;
-  private BigDecimal subtotal;
-  private BigDecimal bonificacionPorcentaje;
-  private BigDecimal bonificacionNeto;
   private BigDecimal total;
 }

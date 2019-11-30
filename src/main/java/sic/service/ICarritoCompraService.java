@@ -12,7 +12,7 @@ public interface ICarritoCompraService {
 
   CarritoCompraDTO getCarritoCompra(long idUsuario, long idCliente);
 
-  Page<ItemCarritoCompra> getItemsDelCaritoCompra(long idUsuario, long idCliente, int pagina);
+  Page<ItemCarritoCompra> getItemsDelCaritoCompra(long idUsuario, long idCliente, int pagina, Integer tamanio);
 
   Pedido crearPedido(NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO);
 

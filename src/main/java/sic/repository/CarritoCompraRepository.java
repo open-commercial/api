@@ -20,12 +20,6 @@ public interface CarritoCompraRepository
   List<ItemCarritoCompra> findAllByUsuarioOrderByIdItemCarritoCompraDesc(Usuario usuario);
 
   @Query(
-      "SELECT SUM(icc.cantidad * p.precioLista) "
-          + "FROM ItemCarritoCompra icc INNER JOIN icc.producto p "
-          + "WHERE icc.usuario.idUsuario = :idUsuario")
-  BigDecimal calcularSubtotal(@Param("idUsuario") long idUsuario);
-
-  @Query(
       "SELECT SUM(icc.cantidad) FROM ItemCarritoCompra icc WHERE icc.usuario.idUsuario = :idUsuario")
   BigDecimal getCantArticulos(@Param("idUsuario") long idUsuario);
 

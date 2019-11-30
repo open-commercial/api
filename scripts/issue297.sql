@@ -43,8 +43,6 @@ insert into cantidadensucursal(cantidad, estante, estanteria, id_Empresa, idProd
 select 0, "", "", 1, producto.idProducto
 from producto where producto.id_Empresa = 5 and producto.eliminado = 0;
 
--- test
- 
 ALTER TABLE producto DROP estante;
 ALTER TABLE producto DROP estanteria;
  
@@ -158,4 +156,6 @@ alter TABLE rengloncuentacorriente drop column cae;
 update configuracionsucursal 
 set configuracionsucursal.puntoDeRetiro = true
 where configuracionsucursal.idSucursal = 5 or configuracionsucursal.idSucursal = 1;
+
+ALTER TABLE itemcarritocompra DROP importe;
 

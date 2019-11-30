@@ -34,7 +34,7 @@ public class CarritoCompraController {
       @PathVariable long idCliente,
       @RequestParam(required = false) Integer pagina) {
     if (pagina == null || pagina < 0) pagina = 0;
-    return carritoCompraService.getItemsDelCaritoCompra(idUsuario, idCliente, pagina);
+    return carritoCompraService.getItemsDelCaritoCompra(idUsuario, idCliente, pagina, null);
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")

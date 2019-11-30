@@ -306,14 +306,21 @@ public class PedidoServiceImpl implements IPedidoService {
       pedido.setDetalleEnvio(
           modelMapper.map(pedido.getCliente().getUbicacionFacturacion(), UbicacionDTO.class));
       if (pedido.getCliente().getUbicacionEnvio() == null) {
-          pedido.getCliente().setUbicacionEnvio(pedido.getCliente().getUbicacionFacturacion());
+        pedido
+            .getCliente()
+            .setUbicacionEnvio(
+                this.crearUbicacionNuevaConDatosDeOtraUbicacion(
+                    pedido.getCliente().getUbicacionFacturacion()));
       }
     }
     if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_ENVIO) {
       pedido.setDetalleEnvio(
           modelMapper.map(pedido.getCliente().getUbicacionEnvio(), UbicacionDTO.class));
       if (pedido.getCliente().getUbicacionFacturacion() == null) {
-        pedido.getCliente().setUbicacionFacturacion(pedido.getCliente().getUbicacionEnvio());
+        pedido
+            .getCliente()
+            .setUbicacionFacturacion(
+                this.crearUbicacionNuevaConDatosDeOtraUbicacion(pedido.getCliente().getUbicacionEnvio()));
       }
     }
     if (tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
@@ -321,6 +328,19 @@ public class PedidoServiceImpl implements IPedidoService {
           modelMapper.map(pedido.getSucursal().getUbicacion(), UbicacionDTO.class));
     }
     pedido.setTipoDeEnvio(tipoDeEnvio);
+  }
+
+  private Ubicacion crearUbicacionNuevaConDatosDeOtraUbicacion(Ubicacion ubicacion) {
+    Ubicacion nuevaUbicacion = new Ubicacion();
+    nuevaUbicacion.setLocalidad(ubicacion.getLocalidad());
+    nuevaUbicacion.setCalle(ubicacion.getCalle());
+    nuevaUbicacion.setDepartamento(ubicacion.getDepartamento());
+    nuevaUbicacion.setDescripcion(ubicacion.getDescripcion());
+    nuevaUbicacion.setLatitud(ubicacion.getLatitud());
+    nuevaUbicacion.setLongitud(ubicacion.getLongitud());
+    nuevaUbicacion.setNumero(ubicacion.getNumero());
+    nuevaUbicacion.setPiso(ubicacion.getPiso());
+    return nuevaUbicacion;
   }
 
   @Override
