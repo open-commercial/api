@@ -93,6 +93,7 @@ public class FacturaController {
           messageSource.getMessage(
               "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault()));
     }
+    fv.setCliente(cliente);
     fv.setClienteEmbedded(clienteService.crearClienteEmbedded(cliente));
     if (nuevaFacturaVentaDTO.getFacturaVenta().getIdTransportista() != null) {
       fv.setTransportista(

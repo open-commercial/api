@@ -1465,7 +1465,6 @@ class AppIntegrationTest {
     assertEquals(transportista.getNombre(), facturas[0].getNombreTransportista());
   }
 
-
   @Test
   void shouldEmitirReporteFactura() {
     this.shouldCrearFacturaVentaASucursal1();
@@ -4608,7 +4607,6 @@ class AppIntegrationTest {
     assertEquals(TipoDeComprobante.NOTA_CREDITO_C, notaGuardada.getTipoComprobante());
     restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class);
   }
-
 
   @Test
   void shouldCrearNotaCreditoVentaXSinFactura() {
