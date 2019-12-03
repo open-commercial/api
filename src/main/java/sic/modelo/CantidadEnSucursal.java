@@ -19,7 +19,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @EqualsAndHashCode(of = "sucursal")
 @ToString
-@JsonView(Views.Vendedor.class)
+@JsonView(Views.Viajante.class)
 @JsonIgnoreProperties("sucursal")
 public class CantidadEnSucursal implements Serializable {
 
