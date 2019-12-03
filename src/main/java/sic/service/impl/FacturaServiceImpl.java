@@ -61,6 +61,7 @@ public class FacturaServiceImpl implements IFacturaService {
   private final IReciboService reciboService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
+  private final ICorreoElectronicoService correoElectronicoService;
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
   private static final BigDecimal CIEN = new BigDecimal("100");
@@ -84,6 +85,7 @@ public class FacturaServiceImpl implements IFacturaService {
       IReciboService reciboService,
       IUsuarioService usuarioService,
       IClienteService clienteService,
+      ICorreoElectronicoService correoElectronicoService,
       MessageSource messageSource) {
     this.facturaRepository = facturaRepository;
     this.facturaVentaRepository = facturaVentaRepository;
@@ -98,6 +100,7 @@ public class FacturaServiceImpl implements IFacturaService {
     this.reciboService = reciboService;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
+    this.correoElectronicoService = correoElectronicoService;
     this.messageSource = messageSource;
   }
 
@@ -1295,5 +1298,55 @@ public class FacturaServiceImpl implements IFacturaService {
         facturaVentaRepository.findAll(
             builder, PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "fecha")));
     return facturaAnterior.getContent().get(0).getCae() == 0L;
+  }
+
+  @Override
+  public void enviarFacturaVentaPorEmail(long idFactura) {
+    Factura factura = this.getFacturaNoEliminadaPorId(idFactura);
+    List<TipoDeComprobante> tiposPermitidosParaEnviar =
+        Arrays.asList(
+            TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
+    if (factura instanceof FacturaVenta
+        && tiposPermitidosParaEnviar.contains(factura.getTipoComprobante())
+        && factura.getCae() != 0L) {
+      FacturaVenta facturaVenta = (FacturaVenta) factura;
+      if (facturaVenta.getCliente().getEmail() != null
+          && !facturaVenta.getCliente().getEmail().isEmpty()) {
+        String bodyEmail = "";
+        if (facturaVenta.getPedido() != null) {
+          if (facturaVenta.getPedido().getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
+            bodyEmail =
+                messageSource.getMessage(
+                    "mensaje_correo_factura_retiro_sucursal",
+                    new Object[] {
+                      facturaVenta.getPedido().getSucursal().getNombre(),
+                      "(" + facturaVenta.getPedido().getDetalleEnvio().toString() + ")"
+                    },
+                    Locale.getDefault());
+          } else {
+            bodyEmail =
+                messageSource.getMessage(
+                    "mensaje_correo_factura_direccion_envio",
+                    new Object[] {facturaVenta.getPedido().getDetalleEnvio().toString()},
+                    Locale.getDefault());
+          }
+        } else {
+          bodyEmail =
+              messageSource.getMessage(
+                  "mensaje_correo_factura_sin_pedido", null, Locale.getDefault());
+        }
+        correoElectronicoService.enviarEmail(
+            facturaVenta.getCliente().getEmail(),
+            "",
+            "Su Factura de Compra",
+            bodyEmail,
+            this.getReporteFacturaVenta(factura),
+            "Reporte");
+        logger.warn(
+            "El mail de la factura serie {} nro {} se envió.",
+            factura.getNumSerie(),
+            factura.getNumFactura());
+      }
+    }
   }
 }
