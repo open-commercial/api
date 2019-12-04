@@ -61,7 +61,6 @@ public class Producto implements Serializable {
   @DecimalMin(value = "0", message = "{mensaje_producto_cantidadMinima_negativa}")
   private BigDecimal cantMinima;
 
-  @Transient
   @JsonView(Views.Comprador.class)
   private boolean hayStock;
 

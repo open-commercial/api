@@ -205,6 +205,7 @@ public class ProductoController {
             .stream()
             .map(CantidadEnSucursal::getCantidad)
             .reduce(BigDecimal.ZERO, BigDecimal::add));
+    productoPorActualizar.setHayStock(productoPorActualizar.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
     productoService.actualizar(productoPorActualizar, productoPersistido);
   }
 

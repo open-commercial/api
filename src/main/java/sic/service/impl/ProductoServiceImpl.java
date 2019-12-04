@@ -413,6 +413,7 @@ public class ProductoServiceImpl implements IProductoService {
             .stream()
             .map(CantidadEnSucursal::getCantidad)
             .reduce(BigDecimal.ZERO, BigDecimal::add));
+    producto.setHayStock(producto.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
   }
 
   private void cambiaStockPorFacturaCompraOrNotaCreditoVenta(
@@ -444,6 +445,7 @@ public class ProductoServiceImpl implements IProductoService {
             .stream()
             .map(CantidadEnSucursal::getCantidad)
             .reduce(BigDecimal.ZERO, BigDecimal::add));
+    producto.setHayStock(producto.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
   }
 
   @Override
@@ -590,10 +592,6 @@ public class ProductoServiceImpl implements IProductoService {
   public Producto getProductoNoEliminadoPorId(long idProducto) {
     Optional<Producto> producto = productoRepository.findById(idProducto);
     if (producto.isPresent() && !producto.get().isEliminado()) {
-      producto
-          .get()
-          .setHayStock(
-              producto.get().getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
       if (producto.get().isOferta()) {
         producto
             .get()

@@ -190,14 +190,6 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   private void calcularImporteBonificado(
       ItemCarritoCompra itemCarritoCompra, BigDecimal bonificacion) {
     if (itemCarritoCompra != null) {
-      itemCarritoCompra
-          .getProducto()
-          .setHayStock(
-              itemCarritoCompra
-                      .getProducto()
-                      .getCantidadTotalEnSucursales()
-                      .compareTo(BigDecimal.ZERO)
-                  > 0);
       itemCarritoCompra.setImporte(
           itemCarritoCompra
               .getProducto()
@@ -248,14 +240,6 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
                   .setScale(2, RoundingMode.HALF_UP));
         }
       }
-      itemCarritoCompra
-          .getProducto()
-          .setHayStock(
-              itemCarritoCompra
-                      .getProducto()
-                      .getCantidadTotalEnSucursales()
-                      .compareTo(BigDecimal.ZERO)
-                  > 0);
     }
   }
 }
