@@ -23,6 +23,7 @@ import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.calculos.NuevosResultadosPedido;
 import sic.modelo.calculos.Resultados;
+import sic.modelo.dto.ActualizarPedidoDTO;
 import sic.modelo.dto.NuevoPedidoDTO;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.modelo.dto.PedidoDTO;
@@ -75,38 +76,10 @@ public class PedidoController {
 
   @PutMapping("/pedidos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
-  public void actualizar(@RequestParam Long idSucursal,
-                         @RequestParam Long idUsuario,
-                         @RequestParam Long idCliente,
-                         @RequestParam TipoDeEnvio tipoDeEnvio,
-                         @RequestBody PedidoDTO pedidoDTO) {
-    Pedido pedido = modelMapper.map(pedidoDTO, Pedido.class);
-    pedido.setSucursal(sucursalService.getSucursalPorId(idSucursal));
-    pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
-    pedido.setCliente(clienteService.getClienteNoEliminadoPorId(idCliente));
-    pedido.setDetalleEnvio(
-        pedidoService.getPedidoNoEliminadoPorId(pedidoDTO.getIdPedido()).getDetalleEnvio());
-    // Las facturas se recuperan para evitar cambios no deseados.
-    pedido.setFacturas(pedidoService.getFacturasDelPedido(pedido.getIdPedido()));
-    // Si los renglones vienen null, recupera los renglones del pedido para actualizar
-    // caso contrario, ultiliza los renglones del pedido.
-    if (pedido.getRenglones() == null) {
-      pedido.setRenglones(
-          pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(pedido.getIdPedido()));
-    } else {
-      List<RenglonPedido> renglonesActualizados = new ArrayList<>();
-      pedido
-          .getRenglones()
-          .forEach(
-              renglonPedido ->
-                  renglonesActualizados.add(
-                      pedidoService.calcularRenglonPedido(
-                          renglonPedido.getIdProductoItem(),
-                          renglonPedido.getCantidad(),
-                          pedido.getCliente())));
-      pedido.setRenglones(renglonesActualizados);
-    }
-    pedidoService.actualizar(pedido, tipoDeEnvio);
+  public void actualizar(@RequestBody ActualizarPedidoDTO actualizarPedidoDTO,
+                         @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    pedidoService.actualizar(actualizarPedidoDTO, actualizarPedidoDTO.getTipoDeEnvio(), (long) claims.get("idUsuario"));
   }
 
   @PostMapping("/pedidos")

@@ -35,10 +35,7 @@ import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.calculos.NuevosResultadosPedido;
 import sic.modelo.calculos.Resultados;
-import sic.modelo.dto.NuevoPedidoDTO;
-import sic.modelo.dto.NuevoRenglonPedidoDTO;
-import sic.modelo.dto.RenglonPedidoDTO;
-import sic.modelo.dto.UbicacionDTO;
+import sic.modelo.dto.*;
 import sic.repository.RenglonPedidoRepository;
 import sic.service.*;
 import sic.repository.PedidoRepository;
@@ -441,14 +438,19 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public void actualizar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio) {
+  public void actualizar(ActualizarPedidoDTO actualizarPedidoDTO, TipoDeEnvio tipoDeEnvio, long idUsuario) {
+    Pedido pedido = this.getPedidoNoEliminadoPorId(actualizarPedidoDTO.getIdPedido());
+    pedido.setFacturas(this.getFacturasDelPedido(pedido.getIdPedido()));
+    pedido.setRenglones(this.calcularRenglonesPedido(actualizarPedidoDTO.getRenglones(), pedido.getCliente().getIdCliente()));
+    pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
+    pedido.setSucursal(sucursalService.getSucursalPorId(actualizarPedidoDTO.getIdSucursal()));
     Type listType = new TypeToken<List<RenglonPedidoDTO>>() {}.getType();
     Resultados resultados =
         this.calcularResultadosPedido(
             NuevosResultadosPedido.builder()
                 .renglones(modelMapper.map(pedido.getRenglones(), listType))
-                .descuentoPorcentaje(pedido.getDescuentoPorcentaje())
-                .recargoPorcentaje(pedido.getRecargoPorcentaje())
+                .descuentoPorcentaje(actualizarPedidoDTO.getDescuentoPorcentaje())
+                .recargoPorcentaje(actualizarPedidoDTO.getRecargoPorcentaje())
                 .build());
     pedido.setSubTotal(resultados.getSubTotal());
     pedido.setDescuentoPorcentaje(resultados.getDescuentoPorcentaje());

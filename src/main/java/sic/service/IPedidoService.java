@@ -9,6 +9,7 @@ import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.calculos.NuevosResultadosPedido;
 import sic.modelo.calculos.Resultados;
+import sic.modelo.dto.ActualizarPedidoDTO;
 import sic.modelo.dto.NuevoPedidoDTO;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 
@@ -18,7 +19,7 @@ public interface IPedidoService {
 
   Pedido getPedidoNoEliminadoPorId(long idPedido);
 
-  void actualizar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio);
+  void actualizar(ActualizarPedidoDTO actualizarPedidoDTO, TipoDeEnvio tipoDeEnvio, long idUsuario);
 
   void actualizarFacturasDelPedido(@Valid Pedido pedido, List<Factura> facturas);
 
