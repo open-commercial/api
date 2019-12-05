@@ -303,14 +303,16 @@ public class FacturaServiceImpl implements IFacturaService {
             .eq(criteria.getIdSucursal())
             .and(qFacturaCompra.eliminada.eq(false)));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
-      criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
-      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
+        criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
+        criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
         builder.and(
-            qFacturaCompra.fecha.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
+          qFacturaCompra.fecha.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
       } else if (criteria.getFechaDesde() != null) {
+        criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
         builder.and(qFacturaCompra.fecha.after(criteria.getFechaDesde()));
       } else if (criteria.getFechaHasta() != null) {
+        criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
         builder.and(qFacturaCompra.fecha.before(criteria.getFechaHasta()));
       }
     }
