@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.calculos.NuevosResultadosPedido;
+import sic.modelo.calculos.NuevosResultadosPedidoDTO;
 import sic.modelo.calculos.Resultados;
 import sic.modelo.dto.DetallePedidoDTO;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
@@ -114,7 +114,7 @@ public class PedidoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public Resultados calcularResultadosPedido(@RequestBody NuevosResultadosPedido nuevosResultadosPedido) {
-    return pedidoService.calcularResultadosPedido(nuevosResultadosPedido);
+  public Resultados calcularResultadosPedido(@RequestBody NuevosResultadosPedidoDTO nuevosResultadosPedidoDTO) {
+    return pedidoService.calcularResultadosPedido(nuevosResultadosPedidoDTO);
   }
 }

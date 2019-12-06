@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class NuevosResultadosPedido {
+public class NuevosResultadosPedidoDTO {
 
   private List<BigDecimal> importes;
   private BigDecimal descuentoPorcentaje;

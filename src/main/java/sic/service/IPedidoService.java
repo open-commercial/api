@@ -7,7 +7,7 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.calculos.NuevosResultadosPedido;
+import sic.modelo.calculos.NuevosResultadosPedidoDTO;
 import sic.modelo.calculos.Resultados;
 import sic.modelo.dto.DetallePedidoDTO;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
@@ -48,5 +48,5 @@ public interface IPedidoService {
 
   List<RenglonPedido> calcularRenglonesPedido(@Valid List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO, Long idCliente);
 
-  Resultados calcularResultadosPedido(NuevosResultadosPedido calculoPedido);
+  Resultados calcularResultadosPedido(NuevosResultadosPedidoDTO calculoPedido);
 }

@@ -3,7 +3,6 @@ package sic.service.impl;
 import com.querydsl.core.BooleanBuilder;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
@@ -19,7 +18,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.calculos.NuevosResultadosPedido;
+import sic.modelo.calculos.NuevosResultadosPedidoDTO;
 import sic.modelo.calculos.Resultados;
 import sic.modelo.dto.*;
 import sic.repository.RenglonPedidoRepository;
@@ -441,7 +439,7 @@ public class PedidoServiceImpl implements IPedidoService {
   public void actualizar(DetallePedidoDTO detallePedidoDTO, long idUsuario) {
     Pedido pedido = this.getPedidoNoEliminadoPorId(detallePedidoDTO.getIdPedido());
     pedido.getRenglones().clear();
-    pedido.setRenglones(this.calcularRenglonesPedido(detallePedidoDTO.getRenglones(), pedido.getCliente().getIdCliente()));
+    pedido.getRenglones().addAll(this.calcularRenglonesPedido(detallePedidoDTO.getRenglones(), pedido.getCliente().getIdCliente()));
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     if (detallePedidoDTO.getIdSucursal() != null)
       pedido.setSucursal(sucursalService.getSucursalPorId(detallePedidoDTO.getIdSucursal()));
@@ -450,7 +448,7 @@ public class PedidoServiceImpl implements IPedidoService {
     pedido.getRenglones().forEach(renglonPedido -> importesDeRenglones.add(renglonPedido.getImporte()));
     Resultados resultados =
         this.calcularResultadosPedido(
-            NuevosResultadosPedido.builder()
+            NuevosResultadosPedidoDTO.builder()
                 .importes(importesDeRenglones)
                 .descuentoPorcentaje(
                     detallePedidoDTO.getDescuentoPorcentaje() != null
@@ -631,7 +629,7 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public Resultados calcularResultadosPedido(NuevosResultadosPedido calculoPedido) {
+  public Resultados calcularResultadosPedido(NuevosResultadosPedidoDTO calculoPedido) {
     Resultados resultados = Resultados.builder().build();
     resultados.setDescuentoPorcentaje(
         calculoPedido.getDescuentoPorcentaje() != null
