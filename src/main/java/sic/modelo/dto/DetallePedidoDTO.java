@@ -13,13 +13,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class NuevoPedidoDTO {
+public class DetallePedidoDTO {
 
-  private String observaciones;
+  private Long idPedido;
   private Long idSucursal;
-  private TipoDeEnvio tipoDeEnvio;
-  private Long idUsuario;
+  private String observaciones;
   private Long idCliente;
+  private TipoDeEnvio tipoDeEnvio;
   private List<NuevoRenglonPedidoDTO> renglones;
   private BigDecimal recargoPorcentaje;
   private BigDecimal descuentoPorcentaje;

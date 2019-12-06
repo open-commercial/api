@@ -1,16 +1,9 @@
 package sic.controller;
 
-import java.lang.reflect.Type;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import io.jsonwebtoken.Claims;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -18,15 +11,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.calculos.NuevosResultadosPedido;
 import sic.modelo.calculos.Resultados;
-import sic.modelo.dto.ActualizarPedidoDTO;
-import sic.modelo.dto.NuevoPedidoDTO;
+import sic.modelo.dto.DetallePedidoDTO;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
-import sic.modelo.dto.PedidoDTO;
 import sic.service.*;
 
 @RestController
@@ -34,26 +24,14 @@ import sic.service.*;
 public class PedidoController {
     
     private final IPedidoService pedidoService;
-    private final ISucursalService sucursalService;
-    private final IUsuarioService usuarioService;
-    private final IClienteService clienteService;
     private final IAuthService authService;
-    private final ModelMapper modelMapper;
-    private final MessageSource messageSource;
 
-    @Autowired
-    public PedidoController(IPedidoService pedidoService, ISucursalService sucursalService,
-                            IUsuarioService usuarioService, IClienteService clienteService,
-                            IAuthService authService, ModelMapper modelMapper, MessageSource messageSource) {
-        this.pedidoService = pedidoService;
-        this.sucursalService = sucursalService;
-        this.usuarioService = usuarioService;
-        this.clienteService = clienteService;
-        this.authService = authService;
-        this.modelMapper = modelMapper;
-        this.messageSource = messageSource;
-    }
-    
+  @Autowired
+  public PedidoController(IPedidoService pedidoService, IAuthService authService) {
+    this.pedidoService = pedidoService;
+    this.authService = authService;
+  }
+
     @GetMapping("/pedidos/{idPedido}")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Pedido getPedidoPorId(@PathVariable long idPedido) {
@@ -76,10 +54,10 @@ public class PedidoController {
 
   @PutMapping("/pedidos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
-  public void actualizar(@RequestBody ActualizarPedidoDTO actualizarPedidoDTO,
+  public void actualizar(@RequestBody DetallePedidoDTO detallePedidoDTO,
                          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    pedidoService.actualizar(actualizarPedidoDTO, actualizarPedidoDTO.getTipoDeEnvio(), (long) claims.get("idUsuario"));
+    pedidoService.actualizar(detallePedidoDTO, (int) claims.get("idUsuario"));
   }
 
   @PostMapping("/pedidos")
@@ -90,8 +68,10 @@ public class PedidoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public Pedido guardar(@RequestBody NuevoPedidoDTO nuevoPedidoDTO) {
-    return pedidoService.guardar(nuevoPedidoDTO);
+  public Pedido guardar(@RequestBody DetallePedidoDTO detallePedidoDTO,
+                        @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    return pedidoService.guardar(detallePedidoDTO, (int) claims.get("idUsuario"));
   }
 
   @PostMapping("/pedidos/busqueda/criteria")

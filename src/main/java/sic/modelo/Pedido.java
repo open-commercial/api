@@ -76,7 +76,7 @@ public class Pedido implements Serializable {
   @JsonProperty(access = Access.WRITE_ONLY)
   private List<Factura> facturas;
 
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "id_Pedido")
   @JsonProperty(access = Access.WRITE_ONLY)
   @NotEmpty(message = "{mensaje_pedido_renglones_vacios}")

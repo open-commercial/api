@@ -198,29 +198,29 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public Pedido guardar(NuevoPedidoDTO nuevoPedidoDTO) {
+  public Pedido guardar(DetallePedidoDTO detallePedidoDTO, long idUsuario) {
     Pedido pedido = new Pedido();
-    pedido.setObservaciones(nuevoPedidoDTO.getObservaciones());
+    pedido.setObservaciones(detallePedidoDTO.getObservaciones());
     pedido.setRenglones(
-        this.calcularRenglonesPedido(nuevoPedidoDTO.getRenglones(), nuevoPedidoDTO.getIdCliente()));
+        this.calcularRenglonesPedido(detallePedidoDTO.getRenglones(), detallePedidoDTO.getIdCliente()));
     BigDecimal importe = BigDecimal.ZERO;
     for (RenglonPedido renglon : pedido.getRenglones()) {
       importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
     }
     BigDecimal recargoNeto =
-        importe.multiply(nuevoPedidoDTO.getRecargoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
+        importe.multiply(detallePedidoDTO.getRecargoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal descuentoNeto =
-        importe.multiply(nuevoPedidoDTO.getDescuentoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
+        importe.multiply(detallePedidoDTO.getDescuentoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
     pedido.setSubTotal(importe);
-    pedido.setRecargoPorcentaje(nuevoPedidoDTO.getRecargoPorcentaje());
+    pedido.setRecargoPorcentaje(detallePedidoDTO.getRecargoPorcentaje());
     pedido.setRecargoNeto(recargoNeto);
-    pedido.setDescuentoPorcentaje(nuevoPedidoDTO.getDescuentoPorcentaje());
+    pedido.setDescuentoPorcentaje(detallePedidoDTO.getDescuentoPorcentaje());
     pedido.setDescuentoNeto(descuentoNeto);
     pedido.setTotalEstimado(total);
     pedido.setTotalActual(total);
-    if (nuevoPedidoDTO.getIdSucursal() == null) {
-      if (!nuevoPedidoDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
+    if (detallePedidoDTO.getIdSucursal() == null) {
+      if (!detallePedidoDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
         pedido.setSucursal(sucursalService.getSucursalPorId(ID_SUCURSAL_DEFAULT));
       } else {
         throw new BusinessServiceException(
@@ -228,13 +228,13 @@ public class PedidoServiceImpl implements IPedidoService {
                 "mensaje_pedido_retiro_sucursal_no_seleccionada", null, Locale.getDefault()));
       }
     } else {
-      pedido.setSucursal(sucursalService.getSucursalPorId(nuevoPedidoDTO.getIdSucursal()));
+      pedido.setSucursal(sucursalService.getSucursalPorId(detallePedidoDTO.getIdSucursal()));
     }
-    pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(nuevoPedidoDTO.getIdUsuario()));
-    Cliente cliente = clienteService.getClienteNoEliminadoPorId(nuevoPedidoDTO.getIdCliente());
+    pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(detallePedidoDTO.getIdCliente());
     pedido.setCliente(cliente);
     pedido.setFecha(LocalDateTime.now());
-    this.asignarDetalleEnvio(pedido, nuevoPedidoDTO.getTipoDeEnvio());
+    this.asignarDetalleEnvio(pedido, detallePedidoDTO.getTipoDeEnvio());
     this.calcularCantidadDeArticulos(pedido);
     pedido.setNroPedido(this.generarNumeroPedido(pedido.getSucursal()));
     pedido.setEstado(EstadoPedido.ABIERTO);
@@ -438,19 +438,26 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public void actualizar(ActualizarPedidoDTO actualizarPedidoDTO, TipoDeEnvio tipoDeEnvio, long idUsuario) {
-    Pedido pedido = this.getPedidoNoEliminadoPorId(actualizarPedidoDTO.getIdPedido());
-    pedido.setFacturas(this.getFacturasDelPedido(pedido.getIdPedido()));
-    pedido.setRenglones(this.calcularRenglonesPedido(actualizarPedidoDTO.getRenglones(), pedido.getCliente().getIdCliente()));
+  public void actualizar(DetallePedidoDTO detallePedidoDTO, long idUsuario) {
+    Pedido pedido = this.getPedidoNoEliminadoPorId(detallePedidoDTO.getIdPedido());
+    pedido.getRenglones().clear();
+    pedido.setRenglones(this.calcularRenglonesPedido(detallePedidoDTO.getRenglones(), pedido.getCliente().getIdCliente()));
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
-    pedido.setSucursal(sucursalService.getSucursalPorId(actualizarPedidoDTO.getIdSucursal()));
+    if (detallePedidoDTO.getIdSucursal() != null)
+      pedido.setSucursal(sucursalService.getSucursalPorId(detallePedidoDTO.getIdSucursal()));
     Type listType = new TypeToken<List<RenglonPedidoDTO>>() {}.getType();
     Resultados resultados =
         this.calcularResultadosPedido(
             NuevosResultadosPedido.builder()
                 .renglones(modelMapper.map(pedido.getRenglones(), listType))
-                .descuentoPorcentaje(actualizarPedidoDTO.getDescuentoPorcentaje())
-                .recargoPorcentaje(actualizarPedidoDTO.getRecargoPorcentaje())
+                .descuentoPorcentaje(
+                    detallePedidoDTO.getDescuentoPorcentaje() != null
+                        ? detallePedidoDTO.getDescuentoPorcentaje()
+                        : pedido.getDescuentoPorcentaje())
+                .recargoPorcentaje(
+                    detallePedidoDTO.getRecargoPorcentaje() != null
+                        ? detallePedidoDTO.getRecargoPorcentaje()
+                        : pedido.getRecargoPorcentaje())
                 .build());
     pedido.setSubTotal(resultados.getSubTotal());
     pedido.setDescuentoPorcentaje(resultados.getDescuentoPorcentaje());
@@ -459,7 +466,9 @@ public class PedidoServiceImpl implements IPedidoService {
     pedido.setRecargoNeto(resultados.getRecargoNeto());
     pedido.setTotalEstimado(resultados.getTotal());
     pedido.setTotalActual(resultados.getTotal());
-    this.asignarDetalleEnvio(pedido, tipoDeEnvio);
+    if (detallePedidoDTO.getObservaciones() != null)
+      pedido.setObservaciones(detallePedidoDTO.getObservaciones());
+    this.asignarDetalleEnvio(pedido, detallePedidoDTO.getTipoDeEnvio());
     this.calcularCantidadDeArticulos(pedido);
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, pedido);
     pedidoRepository.save(pedido);

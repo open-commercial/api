@@ -162,10 +162,9 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     }
     List<ItemCarritoCompra> items =
         carritoCompraRepository.findAllByUsuarioOrderByIdItemCarritoCompraDesc(usuario);
-    NuevoPedidoDTO nuevoPedido =
-        NuevoPedidoDTO.builder()
+    DetallePedidoDTO nuevoPedido =
+        DetallePedidoDTO.builder()
             .idCliente(nuevaOrdenDeCompraDTO.getIdCliente())
-            .idUsuario(nuevaOrdenDeCompraDTO.getIdUsuario())
             .renglones(new ArrayList<>())
             .idSucursal(nuevaOrdenDeCompraDTO.getIdSucursal())
             .tipoDeEnvio(nuevaOrdenDeCompraDTO.getTipoDeEnvio())
@@ -182,7 +181,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
                         .idProductoItem(i.getProducto().getIdProducto())
                         .cantidad(i.getCantidad())
                         .build()));
-    Pedido p = pedidoService.guardar(nuevoPedido);
+    Pedido p = pedidoService.guardar(nuevoPedido, nuevaOrdenDeCompraDTO.getIdUsuario());
     this.eliminarTodosLosItemsDelUsuario(nuevaOrdenDeCompraDTO.getIdUsuario());
     return p;
   }
