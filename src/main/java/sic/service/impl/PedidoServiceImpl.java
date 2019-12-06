@@ -445,11 +445,13 @@ public class PedidoServiceImpl implements IPedidoService {
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     if (detallePedidoDTO.getIdSucursal() != null)
       pedido.setSucursal(sucursalService.getSucursalPorId(detallePedidoDTO.getIdSucursal()));
-    Type listType = new TypeToken<List<RenglonPedidoDTO>>() {}.getType();
+    //de los renglones, sacar ids y cantidades, array de nuevosResultadosPedido
+    List<BigDecimal> importesDeRenglones= new ArrayList<>();
+    pedido.getRenglones().forEach(renglonPedido -> importesDeRenglones.add(renglonPedido.getImporte()));
     Resultados resultados =
         this.calcularResultadosPedido(
             NuevosResultadosPedido.builder()
-                .renglones(modelMapper.map(pedido.getRenglones(), listType))
+                .importes(importesDeRenglones)
                 .descuentoPorcentaje(
                     detallePedidoDTO.getDescuentoPorcentaje() != null
                         ? detallePedidoDTO.getDescuentoPorcentaje()
@@ -640,8 +642,8 @@ public class PedidoServiceImpl implements IPedidoService {
             ? calculoPedido.getRecargoPorcentaje()
             : BigDecimal.ZERO);
     BigDecimal subTotal = BigDecimal.ZERO;
-    for (RenglonPedidoDTO renglonPedidoDTO : calculoPedido.getRenglones()) {
-      subTotal = subTotal.add(renglonPedidoDTO.getImporte());
+    for (BigDecimal importe: calculoPedido.getImportes()) {
+      subTotal = subTotal.add(importe);
     }
     resultados.setSubTotal(subTotal);
     resultados.setDescuentoNeto(resultados.getSubTotal().multiply(resultados.getDescuentoPorcentaje().divide(new BigDecimal("100"), 2, RoundingMode.FLOOR)));

@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import sic.modelo.dto.RenglonPedidoDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,7 +14,7 @@ import java.util.List;
 @Builder
 public class NuevosResultadosPedido {
 
-  private List<RenglonPedidoDTO> renglones;
+  private List<BigDecimal> importes;
   private BigDecimal descuentoPorcentaje;
   private BigDecimal recargoPorcentaje;
 }

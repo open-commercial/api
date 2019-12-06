@@ -1,27 +1,20 @@
-package sic.modelo.dto;
+package sic.modelostest;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import lombok.*;
+import sic.modelo.EstadoPedido;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import lombok.*;
-import sic.modelo.EstadoPedido;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = {"renglones", "cantidadArticulos"})
 @EqualsAndHashCode(of = {"nroPedido", "nombreSucursal"})
-@JsonIdentityInfo(
-    generator = ObjectIdGenerators.PropertyGenerator.class,
-    property = "idPedido",
-    scope = PedidoDTO.class)
 @Builder
-public class PedidoDTO implements Serializable {
+public class PedidoReadOnly implements Serializable {
 
   private long idPedido;
   private long nroPedido;
@@ -32,7 +25,7 @@ public class PedidoDTO implements Serializable {
   private boolean eliminado;
   private String nombreFiscalCliente;
   private String nombreUsuario;
-  private List<RenglonPedidoDTO> renglones;
+  private List<RenglonPedidoReadOnly> renglones;
   private BigDecimal subTotal;
   private BigDecimal recargoPorcentaje;
   private BigDecimal recargoNeto;

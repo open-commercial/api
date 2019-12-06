@@ -25,6 +25,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
 import sic.modelo.*;
+import sic.modelostest.*;
 import sic.modelo.calculos.NuevosResultadosPedido;
 import sic.modelo.calculos.Resultados;
 import sic.modelo.criteria.*;
@@ -177,7 +178,7 @@ class AppIntegrationTest {
     facturaVentaA.setIdSucursal(1L);
     facturaVentaA.setIdCliente(1L);
     facturaVentaA.setIdTransportista(1L);
-    facturaVentaA.setObservaciones("Factura A del Pedido");
+    facturaVentaA.setObservaciones("Factura A del PedidoReadOnly");
     facturaVentaA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonesParaFacturar[0]);
@@ -218,7 +219,7 @@ class AppIntegrationTest {
     facturaVentaB.setIdSucursal(1L);
     facturaVentaB.setIdUsuario(2L);
     facturaVentaB.setIdTransportista(1L);
-    facturaVentaB.setObservaciones("Factura B del Pedido");
+    facturaVentaB.setObservaciones("Factura B del PedidoReadOnly");
     facturaVentaB.setTipoComprobante(TipoDeComprobante.FACTURA_B);
     List<RenglonFactura> renglonesDeFactura = new ArrayList<>();
     renglonesDeFactura.add(renglonesParaFacturar[0]);
@@ -5671,17 +5672,17 @@ class AppIntegrationTest {
       DetallePedidoDTO.builder()
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
         .recargoPorcentaje(new BigDecimal("5"))
-        .observaciones("Nuevo Pedido Test")
+        .observaciones("Nuevo PedidoReadOnly Test")
         .renglones(renglonesPedidoDTO)
         .idSucursal(1L)
         .idCliente(1L)
         .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
         .build();
-    PedidoDTO pedidoRecuperado =
+    PedidoReadOnly pedidoRecuperado =
       restTemplate.postForObject(
         apiPrefix + "/pedidos",
         detallePedidoDTO,
-        PedidoDTO.class);
+        PedidoReadOnly.class);
     assertEquals(new BigDecimal("5947.200000000000000"), pedidoRecuperado.getTotalEstimado());
     assertEquals(pedidoRecuperado.getObservaciones(), detallePedidoDTO.getObservaciones());
     assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
@@ -5701,14 +5702,16 @@ class AppIntegrationTest {
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
         .build());
-    List<RenglonPedidoDTO> renglonesPedido =
+    List<RenglonPedidoReadOnly> renglonesPedido =
       Arrays.asList(
         restTemplate.postForObject(
-          apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedidoDTO[].class));
+          apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedidoReadOnly[].class));
     BigDecimal descuentoPorcentaje = new BigDecimal("20");
     BigDecimal recargoPorcentaje = BigDecimal.ZERO;
     NuevosResultadosPedido nuevosResultadosPedido = new NuevosResultadosPedido();
-    nuevosResultadosPedido.setRenglones(renglonesPedido);
+    List<BigDecimal> importes = new ArrayList<>();
+    renglonesPedido.forEach(renglonPedidoReadOnly -> importes.add(renglonPedidoReadOnly.getImporte()));
+    nuevosResultadosPedido.setImportes(importes);
     nuevosResultadosPedido.setDescuentoPorcentaje(descuentoPorcentaje);
     nuevosResultadosPedido.setRecargoPorcentaje(recargoPorcentaje);
     Resultados resultados = restTemplate.postForObject(apiPrefix + "/pedidos/calculo-pedido", nuevosResultadosPedido, Resultados.class);
@@ -5739,17 +5742,17 @@ class AppIntegrationTest {
       DetallePedidoDTO.builder()
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
         .recargoPorcentaje(new BigDecimal("5"))
-        .observaciones("Nuevo Pedido Test")
+        .observaciones("Nuevo PedidoReadOnly Test")
         .renglones(renglonesPedidoDTO)
         .idSucursal(1L)
         .idCliente(1L)
         .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
         .build();
-    PedidoDTO pedidoRecuperado =
+    PedidoReadOnly pedidoRecuperado =
       restTemplate.postForObject(
         apiPrefix + "/pedidos",
         detallePedidoDTO,
-        PedidoDTO.class);
+        PedidoReadOnly.class);
     assertEquals("Rio Parana 14500 Corrientes Corrientes", pedidoRecuperado.getDetalleEnvio());
   }
 
@@ -5771,17 +5774,17 @@ class AppIntegrationTest {
       DetallePedidoDTO.builder()
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
         .recargoPorcentaje(new BigDecimal("5"))
-        .observaciones("Nuevo Pedido Test")
+        .observaciones("Nuevo PedidoReadOnly Test")
         .renglones(renglonesPedidoDTO)
         .idSucursal(1L)
         .idCliente(1L)
         .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_ENVIO)
         .build();
-    PedidoDTO pedidoRecuperado =
+    PedidoReadOnly pedidoRecuperado =
       restTemplate.postForObject(
         apiPrefix + "/pedidos",
         detallePedidoDTO,
-        PedidoDTO.class);
+        PedidoReadOnly.class);
     assertEquals("Rio Uruguay 15000 Corrientes Corrientes", pedidoRecuperado.getDetalleEnvio());
   }
 
@@ -5808,17 +5811,17 @@ class AppIntegrationTest {
       DetallePedidoDTO.builder()
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
         .recargoPorcentaje(new BigDecimal("5"))
-        .observaciones("Nuevo Pedido Test")
+        .observaciones("Nuevo PedidoReadOnly Test")
         .renglones(nuevosRenglonesPedido)
         .idCliente(1L)
         .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
         .idSucursal(1L)
         .build();
-    PedidoDTO pedidoRecuperado =
+    PedidoReadOnly pedidoRecuperado =
       restTemplate.postForObject(
         apiPrefix + "/pedidos",
         detallePedidoDTO,
-        PedidoDTO.class);
+        PedidoReadOnly.class);
     assertEquals("Rio Piacentin 345 Corrientes Corrientes", pedidoRecuperado.getDetalleEnvio());
   }
 
@@ -5845,7 +5848,7 @@ class AppIntegrationTest {
       DetallePedidoDTO.builder()
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
         .recargoPorcentaje(new BigDecimal("5"))
-        .observaciones("Nuevo Pedido Test")
+        .observaciones("Nuevo PedidoReadOnly Test")
         .renglones(renglonesPedidoDTO)
         .idCliente(1L)
         .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
@@ -5855,7 +5858,7 @@ class AppIntegrationTest {
             RestClientResponseException.class,
             () ->
                 restTemplate.postForObject(
-                    apiPrefix + "/pedidos", detallePedidoDTO, PedidoDTO.class));
+                    apiPrefix + "/pedidos", detallePedidoDTO, PedidoReadOnly.class));
     assertNotNull(thrown.getMessage());
     assertTrue(
         thrown
@@ -5869,16 +5872,16 @@ class AppIntegrationTest {
   void shouldFacturarPedido() {
     this.shouldCrearPedido();
     this.crearFacturaTipoADePedido();
-    PedidoDTO pedidoRecuperado =
-      restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoDTO.class);
+    PedidoReadOnly pedidoRecuperado =
+      restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoReadOnly.class);
     pedidoRecuperado =
       restTemplate.getForObject(
-        apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido(), PedidoDTO.class);
+        apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido(), PedidoReadOnly.class);
     assertEquals(EstadoPedido.ACTIVO, pedidoRecuperado.getEstado());
     this.crearFacturaTipoBDePedido();
     pedidoRecuperado =
       restTemplate.getForObject(
-        apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido(), PedidoDTO.class);
+        apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido(), PedidoReadOnly.class);
     assertEquals(EstadoPedido.CERRADO, pedidoRecuperado.getEstado());
   }
 
@@ -5900,17 +5903,17 @@ class AppIntegrationTest {
       DetallePedidoDTO.builder()
         .descuentoPorcentaje(new BigDecimal("15"))
         .recargoPorcentaje(new BigDecimal("5"))
-        .observaciones("Nuevo Pedido Test")
+        .observaciones("Nuevo PedidoReadOnly Test")
         .renglones(nuevosRenglonesDePedido)
         .idSucursal(1L)
         .idCliente(1L)
         .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
         .build();
-    PedidoDTO pedidoRecuperado =
+    PedidoReadOnly pedidoRecuperado =
       restTemplate.postForObject(
         apiPrefix + "/pedidos",
         detallePedidoDTO,
-        PedidoDTO.class);
+        PedidoReadOnly.class);
     assertEquals(new BigDecimal("5947.200000000000000"), pedidoRecuperado.getTotalEstimado());
     assertEquals(detallePedidoDTO.getObservaciones(), pedidoRecuperado.getObservaciones());
     assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
@@ -5928,8 +5931,8 @@ class AppIntegrationTest {
       .observaciones("Cambiando las observaciones del pedido")
       .build();
     restTemplate.put(apiPrefix + "/pedidos", detallePedidoParaModificar);
-    PedidoDTO pedidoModificado =
-      restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoDTO.class);
+    PedidoReadOnly pedidoModificado =
+      restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoReadOnly.class);
     assertEquals(pedidoRecuperado, pedidoModificado);
     assertEquals(new BigDecimal("6098.400000000000000"), pedidoModificado.getTotalEstimado());
     assertEquals("Cambiando las observaciones del pedido", pedidoModificado.getObservaciones());
@@ -5940,16 +5943,16 @@ class AppIntegrationTest {
   void shouldVerificarTransicionDeEstadosDeUnPedido() {
     this.shouldCrearPedido();
     this.crearFacturaTipoADePedido();
-    PedidoDTO pedidoRecuperado =
-        restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoDTO.class);
+    PedidoReadOnly pedidoRecuperado =
+        restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoReadOnly.class);
     pedidoRecuperado =
         restTemplate.getForObject(
-            apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido(), PedidoDTO.class);
+            apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido(), PedidoReadOnly.class);
     assertEquals(EstadoPedido.ACTIVO, pedidoRecuperado.getEstado());
     this.crearFacturaTipoBDePedido();
     pedidoRecuperado =
         restTemplate.getForObject(
-            apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido(), PedidoDTO.class);
+            apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido(), PedidoReadOnly.class);
     assertEquals(EstadoPedido.CERRADO, pedidoRecuperado.getEstado());
     BusquedaFacturaVentaCriteria criteria =
       BusquedaFacturaVentaCriteria.builder()
@@ -5970,29 +5973,29 @@ class AppIntegrationTest {
       apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getIdFactura());
     pedidoRecuperado =
       restTemplate.getForObject(
-        apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido(), PedidoDTO.class);
+        apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido(), PedidoReadOnly.class);
     assertEquals(EstadoPedido.ACTIVO, pedidoRecuperado.getEstado());
     restTemplate.delete(
       apiPrefix + "/facturas/" + facturasRecuperadas.get(1).getIdFactura());
     pedidoRecuperado =
       restTemplate.getForObject(
-        apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido(), PedidoDTO.class);
+        apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido(), PedidoReadOnly.class);
     assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
   }
 
   @Test
   void shloudVerificarCantidadDeArticulosEnPedido() {
     this.shouldCrearPedido();
-    PedidoDTO pedidoDTO = restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoDTO.class);
-    assertEquals(new BigDecimal("7.000000000000000"), pedidoDTO.getCantidadArticulos());
+    PedidoReadOnly pedidoReadOnlyDTO = restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoReadOnly.class);
+    assertEquals(new BigDecimal("7.000000000000000"), pedidoReadOnlyDTO.getCantidadArticulos());
   }
 
   @Test
   void shouldVerificarTotalActualPedido() {
     this.shouldCrearPedido();
-    PedidoDTO pedidoDTO = restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoDTO.class);
-    assertEquals(new BigDecimal("7.000000000000000"), pedidoDTO.getCantidadArticulos());
-    assertEquals(new BigDecimal("5947.200000000000000"), pedidoDTO.getTotalEstimado());
+    PedidoReadOnly pedido = restTemplate.getForObject(apiPrefix + "/pedidos/1", PedidoReadOnly.class);
+    assertEquals(new BigDecimal("7.000000000000000"), pedido.getCantidadArticulos());
+    assertEquals(new BigDecimal("5947.200000000000000"), pedido.getTotalEstimado());
     ProductoDTO productoRecuperado = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     productoRecuperado.setPrecioCosto(new BigDecimal("110"));
     productoRecuperado.setGananciaPorcentaje(new BigDecimal("900"));
@@ -6004,13 +6007,13 @@ class AppIntegrationTest {
     BusquedaPedidoCriteria criteriaPedido = new BusquedaPedidoCriteria();
     criteriaPedido.setIdSucursal(1L);
     HttpEntity<BusquedaPedidoCriteria> requestEntity = new HttpEntity<>(criteriaPedido);
-    List<PedidoDTO> pedidos =
+    List<PedidoReadOnly> pedidos =
       restTemplate
         .exchange(
           apiPrefix + "/pedidos/busqueda/criteria",
           HttpMethod.POST,
           requestEntity,
-          new ParameterizedTypeReference<PaginaRespuestaRest<PedidoDTO>>() {})
+          new ParameterizedTypeReference<PaginaRespuestaRest<PedidoReadOnly>>() {})
         .getBody()
         .getContent();
     assertTrue(!pedidos.isEmpty());
@@ -6513,9 +6516,9 @@ class AppIntegrationTest {
       .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
       .observaciones("probando pedido desde carrito, sin pago")
       .build();
-    PedidoDTO pedido =
+    PedidoReadOnly pedido =
         restTemplate.postForObject(
-            apiPrefix + "/carrito-compra", nuevaOrdenDeCompraDTO, PedidoDTO.class);
+            apiPrefix + "/carrito-compra", nuevaOrdenDeCompraDTO, PedidoReadOnly.class);
     assertEquals(14, pedido.getCantidadArticulos().doubleValue());
     assertEquals(new BigDecimal("12796.00000000000000000000000000000000000000000000000"), pedido.getTotalActual());
   }
@@ -6533,9 +6536,9 @@ class AppIntegrationTest {
       .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_ENVIO)
       .observaciones("probando pedido desde carrito, sin pago")
       .build();
-    PedidoDTO pedido =
+    PedidoReadOnly pedido =
       restTemplate.postForObject(
-        apiPrefix + "/carrito-compra", nuevaOrdenDeCompraDTO, PedidoDTO.class);
+        apiPrefix + "/carrito-compra", nuevaOrdenDeCompraDTO, PedidoReadOnly.class);
     assertEquals(14, pedido.getCantidadArticulos().doubleValue());
     assertEquals(new BigDecimal("12796.00000000000000000000000000000000000000000000000"), pedido.getTotalActual());
   }
