@@ -50,7 +50,7 @@ public class Producto implements Serializable {
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "idProducto")
   @JsonProperty(access = JsonProperty.Access.READ_WRITE)
-  @JsonView(Views.Comprador.class)
+  @JsonView(Views.Viajante.class)
   private Set<CantidadEnSucursal> cantidadEnSucursales;
 
   @Column(precision = 25, scale = 15)
