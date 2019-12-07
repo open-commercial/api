@@ -7009,4 +7009,39 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("-5616.8"), paginaRespuestaRest.getContent().get(0).getSaldo());
     assertEquals(clienteParaBuscar.getIdCliente(), paginaRespuestaRest.getContent().get(0).getCliente().getIdCliente());
   }
+
+  @Test
+  void shouldNotEnviarEmailDeFacturaSiLaFacturaNoTieneCae() {
+    this.shouldCrearFacturaVentaB();
+    RestClientResponseException thrown =
+      assertThrows(
+        RestClientResponseException.class,
+        () ->  restTemplate.getForObject(apiPrefix + "/facturas/email/1", Object.class));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+      thrown
+        .getMessage()
+        .contains(
+          messageSource.getMessage(
+            "mensaje_correo_factura_sin_cae", null, Locale.getDefault())));
+  }
+
+  @Test
+  void shouldNotEnviarEmailDeFacturaSiElClienteNoPoseeEmail() {
+    this.shouldCrearFacturaVentaX();
+    ClienteDTO clienteRecuperado = restTemplate.getForObject(apiPrefix + "/clientes/1", ClienteDTO.class);
+    clienteRecuperado.setEmail(null);
+    restTemplate.put(apiPrefix + "/clientes", clienteRecuperado);
+    RestClientResponseException thrown =
+      assertThrows(
+        RestClientResponseException.class,
+        () ->     restTemplate.getForObject(apiPrefix + "/facturas/email/1", Object.class));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+      thrown
+        .getMessage()
+        .contains(
+          messageSource.getMessage(
+            "mensaje_correo_cliente_sin_email", null, Locale.getDefault())));
+  }
 }

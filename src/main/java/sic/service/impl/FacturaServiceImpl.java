@@ -1306,47 +1306,53 @@ public class FacturaServiceImpl implements IFacturaService {
     List<TipoDeComprobante> tiposPermitidosParaEnviar =
         Arrays.asList(
             TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
-    if (factura instanceof FacturaVenta
-        && tiposPermitidosParaEnviar.contains(factura.getTipoComprobante())
-        && factura.getCae() != 0L) {
+    if (factura instanceof FacturaVenta) {
+      if (tiposPermitidosParaEnviar.contains(factura.getTipoComprobante())
+          && factura.getCae() == 0L) {
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_correo_factura_sin_cae", null, Locale.getDefault()));
+      }
       FacturaVenta facturaVenta = (FacturaVenta) factura;
-      if (facturaVenta.getCliente().getEmail() != null
-          && !facturaVenta.getCliente().getEmail().isEmpty()) {
-        String bodyEmail = "";
-        if (facturaVenta.getPedido() != null) {
-          if (facturaVenta.getPedido().getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
-            bodyEmail =
-                messageSource.getMessage(
-                    "mensaje_correo_factura_retiro_sucursal",
-                    new Object[] {
-                      facturaVenta.getPedido().getSucursal().getNombre(),
-                      "(" + facturaVenta.getPedido().getDetalleEnvio().toString() + ")"
-                    },
-                    Locale.getDefault());
-          } else {
-            bodyEmail =
-                messageSource.getMessage(
-                    "mensaje_correo_factura_direccion_envio",
-                    new Object[] {facturaVenta.getPedido().getDetalleEnvio().toString()},
-                    Locale.getDefault());
-          }
+      if (facturaVenta.getCliente().getEmail() == null
+          || facturaVenta.getCliente().getEmail().isEmpty()) {
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_correo_cliente_sin_email", null, Locale.getDefault()));
+      }
+      String bodyEmail = "";
+      if (facturaVenta.getPedido() != null) {
+        if (facturaVenta.getPedido().getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
+          bodyEmail =
+              messageSource.getMessage(
+                  "mensaje_correo_factura_retiro_sucursal",
+                  new Object[] {
+                    facturaVenta.getPedido().getSucursal().getNombre(),
+                    "(" + facturaVenta.getPedido().getDetalleEnvio().toString() + ")"
+                  },
+                  Locale.getDefault());
         } else {
           bodyEmail =
               messageSource.getMessage(
-                  "mensaje_correo_factura_sin_pedido", null, Locale.getDefault());
+                  "mensaje_correo_factura_direccion_envio",
+                  new Object[] {facturaVenta.getPedido().getDetalleEnvio().toString()},
+                  Locale.getDefault());
         }
-        correoElectronicoService.enviarEmail(
-            facturaVenta.getCliente().getEmail(),
-            "",
-            "Su Factura de Compra",
-            bodyEmail,
-            this.getReporteFacturaVenta(factura),
-            "Reporte");
-        logger.warn(
-            "El mail de la factura serie {} nro {} se envió.",
-            factura.getNumSerie(),
-            factura.getNumFactura());
+      } else {
+        bodyEmail =
+            messageSource.getMessage(
+                "mensaje_correo_factura_sin_pedido", null, Locale.getDefault());
       }
+      correoElectronicoService.enviarEmail(
+          facturaVenta.getCliente().getEmail(),
+          "",
+          "Su Factura de Compra",
+          bodyEmail,
+          this.getReporteFacturaVenta(factura),
+          "Reporte");
+      logger.warn(
+          "El mail de la factura serie {} nro {} se envió.",
+          factura.getNumSerie(),
+          factura.getNumFactura());
     }
   }
 }
