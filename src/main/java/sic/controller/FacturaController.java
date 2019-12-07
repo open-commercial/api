@@ -328,7 +328,7 @@ public class FacturaController {
 
   @GetMapping("/facturas/email/{idFactura}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public void getTipoFacturaCompra(@PathVariable long idFactura) {
+  public void enviarFacturaVentaPorEmail(@PathVariable long idFactura) {
     facturaService.enviarFacturaVentaPorEmail(idFactura);
   }
 }
