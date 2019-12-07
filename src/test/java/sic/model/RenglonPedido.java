@@ -1,4 +1,4 @@
-package sic.modelostest;
+package sic.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RenglonPedidoReadOnly implements Serializable {
+public class RenglonPedido implements Serializable {
 
   private long idRenglonPedido;
   private long idProductoItem;

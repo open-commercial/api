@@ -1,4 +1,4 @@
-package sic.modelostest;
+package sic.model;
 
 import lombok.*;
 import sic.modelo.EstadoPedido;
@@ -14,7 +14,7 @@ import java.util.List;
 @ToString(exclude = {"renglones", "cantidadArticulos"})
 @EqualsAndHashCode(of = {"nroPedido", "nombreSucursal"})
 @Builder
-public class PedidoReadOnly implements Serializable {
+public class Pedido implements Serializable {
 
   private long idPedido;
   private long nroPedido;
@@ -25,7 +25,7 @@ public class PedidoReadOnly implements Serializable {
   private boolean eliminado;
   private String nombreFiscalCliente;
   private String nombreUsuario;
-  private List<RenglonPedidoReadOnly> renglones;
+  private List<RenglonPedido> renglones;
   private BigDecimal subTotal;
   private BigDecimal recargoPorcentaje;
   private BigDecimal recargoNeto;
