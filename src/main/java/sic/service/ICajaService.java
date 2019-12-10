@@ -23,7 +23,7 @@ public interface ICajaService {
 
     Page<Caja> buscarCajas(BusquedaCajaCriteria criteria);
 
-    Map<Long, BigDecimal> getTotalesDeFormaDePago(long idCaja);
+    Map<Long, BigDecimal> getIdsFormasDePagoAndMontos(long idCaja);
 
     Caja getUltimaCaja(long idSucursal);
 

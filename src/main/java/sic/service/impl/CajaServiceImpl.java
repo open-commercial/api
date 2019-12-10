@@ -310,45 +310,31 @@ public class CajaServiceImpl implements ICajaService {
         && cajaRepository.isUltimaCajaAbierta(idSucursal).getEstado().equals(EstadoCaja.ABIERTA);
   }
 
-  private BigDecimal getTotalMovimientosPorFormaDePago(Caja caja, FormaDePago fdp) {
-    LocalDateTime fechaHasta = LocalDateTime.now();
-    if (caja.getFechaCierre() != null) {
-      fechaHasta = caja.getFechaCierre();
-    }
-    BigDecimal recibosTotal =
-        reciboService
-            .getTotalRecibosClientesEntreFechasPorFormaDePago(
-                caja.getSucursal().getIdSucursal(),
-                fdp.getIdFormaDePago(),
-                caja.getFechaApertura(),
-                fechaHasta)
-            .subtract(
-                reciboService.getTotalRecibosProveedoresEntreFechasPorFormaDePago(
-                    caja.getSucursal().getIdSucursal(),
-                    fdp.getIdFormaDePago(),
-                    caja.getFechaApertura(),
-                    fechaHasta));
-    BigDecimal gastosTotal =
-        gastoService.getTotalGastosEntreFechasYFormaDePago(
-            caja.getSucursal().getIdSucursal(),
-            fdp.getIdFormaDePago(),
-            caja.getFechaApertura(),
-            fechaHasta);
-    return recibosTotal.subtract(gastosTotal);
-  }
-
   @Override
-  public Map<Long, BigDecimal> getTotalesDeFormaDePago(long idCaja) {
+  public Map<Long, BigDecimal> getIdsFormasDePagoAndMontos(long idCaja) {
     Caja caja = cajaRepository.findById(idCaja);
     Map<Long, BigDecimal> totalesPorFomaDePago = new HashMap<>();
+    List<MovimientoCaja> movimientos = new ArrayList<>();
     formaDePagoService
         .getFormasDePago()
         .forEach(
             fdp -> {
-              BigDecimal total = this.getTotalMovimientosPorFormaDePago(caja, fdp);
-              if (total.compareTo(BigDecimal.ZERO) != 0) {
+              movimientos.addAll(
+                  this.getMovimientosPorFormaDePagoEntreFechas(
+                      caja.getSucursal(),
+                      fdp,
+                      caja.getFechaApertura(),
+                      (caja.getFechaCierre() != null
+                          ? caja.getFechaCierre()
+                          : LocalDateTime.now())));
+              if (!movimientos.isEmpty()) {
+                BigDecimal total =
+                    movimientos.stream()
+                        .map(MovimientoCaja::getMonto)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
                 totalesPorFomaDePago.put(fdp.getIdFormaDePago(), total);
               }
+              movimientos.clear();
             });
     return totalesPorFomaDePago;
   }

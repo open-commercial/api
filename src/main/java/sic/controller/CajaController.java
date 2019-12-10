@@ -126,8 +126,8 @@ public class CajaController {
 
   @GetMapping("/cajas/{idCaja}/totales-formas-de-pago")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public Map<Long, BigDecimal> getTotalesPorFormaDePago(@PathVariable long idCaja) {
-    return cajaService.getTotalesDeFormaDePago(idCaja);
+  public Map<Long, BigDecimal> getIdsFormasDePagoAndMontos(@PathVariable long idCaja) {
+    return cajaService.getIdsFormasDePagoAndMontos(idCaja);
   }
 
   @PutMapping("/cajas/{idCaja}/reapertura")

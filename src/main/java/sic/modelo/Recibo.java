@@ -6,8 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -17,9 +16,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import sic.controller.Views;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.PastOrPresent;
 
 @Entity
 @Table(name = "recibo")
@@ -76,7 +72,7 @@ public class Recibo implements Serializable {
   private Usuario usuario;
 
   @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_recibo_monto_negativo}")
+  @Positive(message = "{mensaje_recibo_monto_igual_menor_cero}")
   private BigDecimal monto;
 
   @JsonGetter("idFormaDePago")
