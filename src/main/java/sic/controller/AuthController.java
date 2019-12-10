@@ -3,6 +3,7 @@ package sic.controller;
 import io.jsonwebtoken.Claims;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -87,7 +88,7 @@ public class AuthController {
 
   @PostMapping("/registracion")
   public void registrarse(
-      @RequestBody RegistracionClienteAndUsuarioDTO registracionClienteAndUsuarioDTO) {
+      @RequestBody @Valid RegistracionClienteAndUsuarioDTO registracionClienteAndUsuarioDTO) {
     authService.validarRecaptcha(registracionClienteAndUsuarioDTO.getRecaptcha());
     Usuario nuevoUsuario = new Usuario();
     nuevoUsuario.setHabilitado(true);
