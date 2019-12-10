@@ -413,7 +413,7 @@ class AppIntegrationTest {
         .nombre("Sansa")
         .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
         .email("sansa@got.com")
-        .telefono("415789966")
+        .telefono("4157899667")
         .password("caraDeMala")
         .recaptcha(recaptchaTestKey)
         .nombreFiscal("theRedWolf")

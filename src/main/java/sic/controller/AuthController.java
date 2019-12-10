@@ -3,8 +3,6 @@ package sic.controller;
 import io.jsonwebtoken.Claims;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -16,7 +14,6 @@ import sic.modelo.*;
 import sic.modelo.dto.RecoveryPasswordDTO;
 import sic.modelo.dto.RegistracionClienteAndUsuarioDTO;
 import sic.service.IAuthService;
-import sic.service.ISucursalService;
 import sic.service.IRegistracionService;
 import sic.service.IUsuarioService;
 
@@ -88,32 +85,8 @@ public class AuthController {
 
   @PostMapping("/registracion")
   public void registrarse(
-      @RequestBody @Valid RegistracionClienteAndUsuarioDTO registracionClienteAndUsuarioDTO) {
+      @RequestBody RegistracionClienteAndUsuarioDTO registracionClienteAndUsuarioDTO) {
     authService.validarRecaptcha(registracionClienteAndUsuarioDTO.getRecaptcha());
-    Usuario nuevoUsuario = new Usuario();
-    nuevoUsuario.setHabilitado(true);
-    nuevoUsuario.setNombre(registracionClienteAndUsuarioDTO.getNombre());
-    nuevoUsuario.setApellido(registracionClienteAndUsuarioDTO.getApellido());
-    nuevoUsuario.setEmail(registracionClienteAndUsuarioDTO.getEmail());
-    nuevoUsuario.setPassword(registracionClienteAndUsuarioDTO.getPassword());
-    nuevoUsuario.setRoles(Collections.singletonList(Rol.COMPRADOR));
-    Cliente nuevoCliente = new Cliente();
-    nuevoCliente.setTelefono(registracionClienteAndUsuarioDTO.getTelefono());
-    nuevoCliente.setEmail(registracionClienteAndUsuarioDTO.getEmail());
-    CategoriaIVA categoriaIVA = registracionClienteAndUsuarioDTO.getCategoriaIVA();
-    if (categoriaIVA == CategoriaIVA.CONSUMIDOR_FINAL) {
-      nuevoCliente.setNombreFiscal(
-          registracionClienteAndUsuarioDTO.getNombre()
-              + " "
-              + registracionClienteAndUsuarioDTO.getApellido());
-      nuevoCliente.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
-    } else if (categoriaIVA == CategoriaIVA.RESPONSABLE_INSCRIPTO
-        || categoriaIVA == CategoriaIVA.MONOTRIBUTO
-        || categoriaIVA == CategoriaIVA.EXENTO) {
-      nuevoCliente.setNombreFiscal(registracionClienteAndUsuarioDTO.getNombreFiscal());
-      nuevoCliente.setCategoriaIVA(categoriaIVA);
-      nuevoCliente.setBonificacion(BigDecimal.ZERO);
-    }
-    this.registracionService.crearCuentaConClienteAndUsuario(nuevoCliente, nuevoUsuario);
+    this.registracionService.crearCuenta(registracionClienteAndUsuarioDTO);
   }
 }
