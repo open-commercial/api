@@ -188,9 +188,7 @@ public class AfipServiceImpl implements IAfipService {
                 + "-"
                 + response.getErrors().getErr().get(0).getMsg();
         logger.error(msjError);
-        if (!msjError.isEmpty()) {
-          throw new BusinessServiceException(msjError);
-        }
+        throw new BusinessServiceException(msjError);
       }
       // errores particulares de cada comprobante
       if (response.getFeDetResp().getFECAEDetResponse().get(0).getResultado().equals("R")) {

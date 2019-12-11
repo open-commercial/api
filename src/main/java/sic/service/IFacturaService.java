@@ -87,4 +87,6 @@ public interface IFacturaService {
       BigDecimal bonificacion);
 
   boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAFIP comprobante);
+
+  void enviarFacturaVentaPorEmail(long idFactura);
 }

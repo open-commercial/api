@@ -325,4 +325,10 @@ public class FacturaController {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return facturaService.calcularGananciaTotal(criteria, (int) claims.get("idUsuario"));
   }
+
+  @GetMapping("/facturas/email/{idFactura}")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public void enviarFacturaVentaPorEmail(@PathVariable long idFactura) {
+    facturaService.enviarFacturaVentaPorEmail(idFactura);
+  }
 }
