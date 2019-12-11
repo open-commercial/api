@@ -9,9 +9,9 @@ FROM factura INNER JOIN facturaventa ON factura.id_Factura = facturaventa.id_Fac
 	INNER JOIN localidad ON ubicacion.idLocalidad = localidad.idLocalidad
 	INNER JOIN provincia ON localidad.idProvincia = provincia.idProvincia
 WHERE (factura.tipoComprobante = 'FACTURA_A' OR factura.tipoComprobante = 'FACTURA_B')
-	AND (factura.fecha >= CONVERT_TZ('2019-10-01 00:00:00','-03:00','+00:00')
-	    AND factura.fecha <= CONVERT_TZ('2019-10-31 23:59:59','-03:00','+00:00'))
-	AND factura.eliminada = 0 AND factura.id_Empresa = 5
+	AND (factura.fecha >= CONVERT_TZ('2019-11-01 00:00:00','-03:00','+00:00')
+	    AND factura.fecha <= CONVERT_TZ('2019-11-30 23:59:59','-03:00','+00:00'))
+	AND factura.eliminada = 0 AND factura.idSucursal = 1
 ORDER BY factura.tipoComprobante, factura.fecha ASC
 LIMIT 0,1000000;
 
@@ -26,9 +26,9 @@ FROM nota INNER JOIN notacredito on nota.idNota = notacredito.idNota
 	INNER JOIN localidad ON ubicacion.idLocalidad = localidad.idLocalidad
 	INNER JOIN provincia ON localidad.idProvincia = provincia.idProvincia
 WHERE (nota.tipoComprobante = 'NOTA_CREDITO_A' OR nota.tipoComprobante = 'NOTA_CREDITO_B')
-	AND (nota.fecha >= CONVERT_TZ('2019-10-01 00:00:00','-03:00','+00:00')
-	    AND nota.fecha <= CONVERT_TZ('2019-10-31 23:59:59','-03:00','+00:00'))
-	AND nota.eliminada = 0 AND nota.id_Empresa = 1
+	AND (nota.fecha >= CONVERT_TZ('2019-11-01 00:00:00','-03:00','+00:00')
+	    AND nota.fecha <= CONVERT_TZ('2019-11-30 23:59:59','-03:00','+00:00'))
+	AND nota.eliminada = 0 AND nota.idSucursal = 1
 ORDER BY nota.tipoComprobante, nota.fecha ASC
 LIMIT 0,1000000;
 
@@ -43,8 +43,8 @@ FROM nota INNER JOIN notadebito on nota.idNota = notadebito.idNota
 	INNER JOIN localidad ON ubicacion.idLocalidad = localidad.idLocalidad
 	INNER JOIN provincia ON localidad.idProvincia = provincia.idProvincia
 WHERE (nota.tipoComprobante = 'NOTA_DEBITO_A' OR nota.tipoComprobante = 'NOTA_DEBITO_B')
-	AND (nota.fecha >= CONVERT_TZ('2019-10-01 00:00:00','-03:00','+00:00')
-	    AND nota.fecha <= CONVERT_TZ('2019-10-31 23:59:59','-03:00','+00:00'))
-	AND nota.eliminada = 0 AND nota.id_Empresa = 1
+	AND (nota.fecha >= CONVERT_TZ('2019-11-01 00:00:00','-03:00','+00:00')
+	    AND nota.fecha <= CONVERT_TZ('2019-11-30 23:59:59','-03:00','+00:00'))
+	AND nota.eliminada = 0 AND nota.idSucursal = 1
 ORDER BY nota.tipoComprobante, nota.fecha ASC
 LIMIT 0,1000000;
