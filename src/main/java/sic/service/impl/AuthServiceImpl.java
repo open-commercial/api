@@ -65,6 +65,7 @@ public class AuthServiceImpl implements IAuthService {
         .signWith(SignatureAlgorithm.HS512, secretkey)
         .claim("idUsuario", idUsuario)
         .claim("roles", rolesDeUsuario)
+            //app
         .compact();
   }
 

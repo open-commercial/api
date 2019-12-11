@@ -71,6 +71,12 @@ public class Usuario implements Serializable {
     @NotEmpty(message = "{mensaje_usuario_no_selecciono_rol}")
     private List<Rol> roles;
 
+    @ElementCollection
+    @CollectionTable(name="token", joinColumns = @JoinColumn(name = "id_Usuario"))
+    @Column(name="tokenDeAplicacion")
+    @NotEmpty(message = "{mensaje_usuario_no_selecciono_rol}")
+    private List<TokenUsuario> tokens;
+
     @JsonView(Views.Administrador.class)
     private boolean habilitado;
     

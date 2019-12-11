@@ -15,7 +15,6 @@ import sic.modelo.*;
 import sic.modelo.dto.RecoveryPasswordDTO;
 import sic.modelo.dto.RegistracionClienteAndUsuarioDTO;
 import sic.service.IAuthService;
-import sic.service.ISucursalService;
 import sic.service.IRegistracionService;
 import sic.service.IUsuarioService;
 
