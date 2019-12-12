@@ -122,6 +122,11 @@ public class Pedido implements Serializable {
     return sucursal.getNombre();
   }
 
+  @JsonGetter("idCliente")
+  public long getIdCliente() {
+    return cliente.getIdCliente();
+  }
+
   @JsonGetter("nombreFiscalCliente")
   public String getNombreFiscalCliente() {
     return cliente.getNombreFiscal();
