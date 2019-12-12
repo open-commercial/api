@@ -2,10 +2,8 @@ package sic.modelo;
 
 import javax.persistence.*;
 
-//@Entity
-//@Table(name = "token")
 @Embeddable
-public class TokenUsuario {
+public class TokenAcceso {
 
     @Column(length = 300)
     private String token;

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -72,10 +73,8 @@ public class Usuario implements Serializable {
     private List<Rol> roles;
 
     @ElementCollection
-    @CollectionTable(name="token", joinColumns = @JoinColumn(name = "id_Usuario"))
-    @Column(name="tokenDeAplicacion")
-    @NotEmpty(message = "{mensaje_usuario_no_selecciono_rol}")
-    private List<TokenUsuario> tokens;
+    @CollectionTable(name="tokenAcceso", joinColumns = @JoinColumn(name = "idUsuario"))
+    private Set<TokenAcceso> tokens;
 
     @JsonView(Views.Administrador.class)
     private boolean habilitado;
