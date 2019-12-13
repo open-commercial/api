@@ -17,20 +17,23 @@ import java.io.Serializable;
 @Builder
 public class RegistracionClienteAndUsuarioDTO implements Serializable {
 
-  @Pattern(regexp = ".*[a-zA-Z]",  message = "mensaje_registracion_nombre")
+  @Pattern(regexp = "^[a-zA-Z]", message = "{mensaje_registracion_nombre}")
   private String nombre;
 
-  @Pattern(regexp = ".*[a-zA-Z]", message = "mensaje_registracion_apellido")
+  @Pattern(regexp = "^[a-zA-Z]", message = "{mensaje_registracion_apellido}")
   private String apellido;
 
-  @Pattern(regexp = "[0-9]{10}", message = "mensaje_registracion_telefono")
+  @Pattern(regexp = "[0-9]{10}", message = "{mensaje_registracion_telefono}")
   private String telefono;
 
-  @Email(message = "mensaje_registracion_email")
+  @Email(message = "{mensaje_registracion_email}")
   private String email;
+
   private CategoriaIVA categoriaIVA;
   private String nombreFiscal;
-  @Length(min=6, message = "mensaje_registracion_contraseña")
+
+  @Length(min = 6, message = "{mensaje_registracion_contraseña}")
   private String password;
+
   private String recaptcha;
 }
