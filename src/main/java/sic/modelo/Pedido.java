@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.validation.constraints.*;
@@ -32,7 +31,7 @@ import sic.modelo.dto.UbicacionDTO;
     generator = ObjectIdGenerators.PropertyGenerator.class,
     property = "idPedido",
     scope = Pedido.class)
-@JsonIgnoreProperties({"cliente", "usuario", "sucursal", "tipoDeEnvio"})
+@JsonIgnoreProperties({"cliente", "usuario", "sucursal"})
 public class Pedido implements Serializable {
 
   @Id

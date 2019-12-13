@@ -468,7 +468,8 @@ public class PedidoServiceImpl implements IPedidoService {
     pedido.setTotalActual(resultados.getTotal());
     if (detallePedidoDTO.getObservaciones() != null)
       pedido.setObservaciones(detallePedidoDTO.getObservaciones());
-    this.asignarDetalleEnvio(pedido, detallePedidoDTO.getTipoDeEnvio());
+    if (detallePedidoDTO.getTipoDeEnvio() != null)
+      this.asignarDetalleEnvio(pedido, detallePedidoDTO.getTipoDeEnvio());
     this.calcularCantidadDeArticulos(pedido);
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, pedido);
     pedidoRepository.save(pedido);
