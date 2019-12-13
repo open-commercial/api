@@ -54,6 +54,7 @@ public class PedidoServiceImpl implements IPedidoService {
   private final ICorreoElectronicoService correoElectronicoService;
   private final ISucursalService sucursalService;
   private final IConfiguracionSucursalService configuracionSucursal;
+  private final ICuentaCorrienteService cuentaCorrienteService;
   private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -72,6 +73,7 @@ public class PedidoServiceImpl implements IPedidoService {
       ICorreoElectronicoService correoElectronicoService,
       ISucursalService sucursalService,
       IConfiguracionSucursalService configuracionSucursal,
+      ICuentaCorrienteService cuentaCorrienteService,
       ModelMapper modelMapper,
       MessageSource messageSource) {
     this.facturaService = facturaService;
@@ -83,6 +85,7 @@ public class PedidoServiceImpl implements IPedidoService {
     this.correoElectronicoService = correoElectronicoService;
     this.sucursalService = sucursalService;
     this.configuracionSucursal = configuracionSucursal;
+    this.cuentaCorrienteService = cuentaCorrienteService;
     this.modelMapper = modelMapper;
     this.messageSource = messageSource;
   }
@@ -172,6 +175,9 @@ public class PedidoServiceImpl implements IPedidoService {
         totalActual
             .subtract(totalActual.multiply(porcentajeDescuento))
             .add(totalActual.multiply(porcentajeRecargo)));
+    pedido
+        .getCliente()
+        .setSaldo(cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente()));
     return pedido;
   }
 

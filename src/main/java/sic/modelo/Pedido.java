@@ -31,7 +31,7 @@ import sic.modelo.dto.UbicacionDTO;
     generator = ObjectIdGenerators.PropertyGenerator.class,
     property = "idPedido",
     scope = Pedido.class)
-@JsonIgnoreProperties({"cliente", "usuario", "sucursal"})
+@JsonIgnoreProperties({"usuario", "sucursal"})
 public class Pedido implements Serializable {
 
   @Id
@@ -116,19 +116,14 @@ public class Pedido implements Serializable {
   @DecimalMin(value = "0", message = "{mensaje_cantidad_de_productos_negativa}", inclusive = false)
   private BigDecimal cantidadArticulos;
 
+  @JsonGetter("idSucursal")
+  public Long getIdSucursal() {
+    return sucursal.getIdSucursal();
+  }
+
   @JsonGetter("nombreSucursal")
   public String getNombreSucursal() {
     return sucursal.getNombre();
-  }
-
-  @JsonGetter("idCliente")
-  public long getIdCliente() {
-    return cliente.getIdCliente();
-  }
-
-  @JsonGetter("nombreFiscalCliente")
-  public String getNombreFiscalCliente() {
-    return cliente.getNombreFiscal();
   }
 
   @JsonGetter("nombreUsuario")

@@ -6,6 +6,7 @@ import sic.modelo.criteria.BusquedaCuentaCorrienteClienteCriteria;
 import sic.modelo.criteria.BusquedaCuentaCorrienteProveedorCriteria;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface ICuentaCorrienteService {
@@ -13,6 +14,8 @@ public interface ICuentaCorrienteService {
   CuentaCorrienteCliente getCuentaCorrientePorCliente(Cliente cliente);
 
   CuentaCorrienteProveedor getCuentaCorrientePorProveedor(Proveedor proveedor);
+
+  BigDecimal getSaldoCuentaCorriente(long idCliente);
 
   CuentaCorrienteCliente guardarCuentaCorrienteCliente(
       @Valid CuentaCorrienteCliente cuentaCorrienteCliente);

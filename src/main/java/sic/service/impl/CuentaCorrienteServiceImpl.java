@@ -3,6 +3,7 @@ package sic.service.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import javax.validation.Valid;
@@ -90,6 +91,11 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     logger.warn(
         "La Cuenta Corriente Proveedor {} se guardó correctamente.", cuentaCorrienteProveedor);
     return cuentaCorrienteProveedor;
+  }
+
+  @Override
+  public BigDecimal getSaldoCuentaCorriente(long idCliente) {
+    return cuentaCorrienteRepository.getSaldoCuentaCorriente(idCliente);
   }
 
   @Override

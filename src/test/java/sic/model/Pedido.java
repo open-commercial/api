@@ -1,6 +1,7 @@
 package sic.model;
 
 import lombok.*;
+import sic.modelo.Cliente;
 import sic.modelo.EstadoPedido;
 
 import java.io.Serializable;
@@ -20,11 +21,11 @@ public class Pedido implements Serializable {
   private long nroPedido;
   private LocalDateTime fecha;
   private String observaciones;
+  private long idSucursal;
   private String nombreSucursal;
   private String detalleEnvio;
   private boolean eliminado;
-  private long idCliente;
-  private String nombreFiscalCliente;
+  private Cliente cliente;
   private String nombreUsuario;
   private List<RenglonPedido> renglones;
   private BigDecimal subTotal;
