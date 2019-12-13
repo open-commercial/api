@@ -8,7 +8,16 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@EqualsAndHashCode(exclude = {"idCliente", "nroCliente", "fechaAlta", "idCredencial", "nombreCredencial", "ubicacionFacturacion", "ubicacionEnvio"})
+@EqualsAndHashCode(
+    exclude = {
+      "idCliente",
+      "nroCliente",
+      "fechaAlta",
+      "idCredencial",
+      "nombreCredencial",
+      "ubicacionFacturacion",
+      "ubicacionEnvio"
+    })
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
