@@ -291,6 +291,8 @@ public class ProductoServiceImpl implements IProductoService {
     producto.setOferta(false);
     this.validarOperacion(TipoDeOperacion.ALTA, producto);
     this.validarBonificacionOferta(producto);
+    //se setea siempre en false momentaniamente
+    producto.setIlimitado(false);
     producto = productoRepository.save(producto);
     logger.warn("El Producto {} se guardó correctamente.", producto);
     return producto;
@@ -311,6 +313,8 @@ public class ProductoServiceImpl implements IProductoService {
     if (productoPersistido.isPublico() && !productoPorActualizar.isPublico()) {
       carritoCompraService.eliminarItem(productoPersistido.getIdProducto());
     }
+    //se setea siempre en false momentaniamente
+    productoPorActualizar.setIlimitado(false);
     productoRepository.save(productoPorActualizar);
     logger.warn("El Producto {} se modificó correctamente.", productoPorActualizar);
   }
