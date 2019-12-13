@@ -144,14 +144,4 @@ public class Cliente implements Serializable {
       return null;
     }
   }
-
-//  @JsonGetter("ubicacionDeFacturacion")
-//  public String getDetalleUbicacionFacturacion() {
-//    return (ubicacionFacturacion != null ? ubicacionFacturacion.toString() : null);
-//  }
-//
-//  @JsonGetter("ubicacionDeEnvio")
-//  public String getDetalleUbicacionEnvio() {
-//    return (ubicacionEnvio != null ? ubicacionEnvio.toString() : null);
-//  }
 }
