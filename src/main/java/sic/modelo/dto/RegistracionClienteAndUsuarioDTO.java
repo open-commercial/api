@@ -17,10 +17,10 @@ import java.io.Serializable;
 @Builder
 public class RegistracionClienteAndUsuarioDTO implements Serializable {
 
-  @Pattern(regexp = "^[a-zA-Z]", message = "{mensaje_registracion_nombre}")
+  @Pattern(regexp = "^[a-zA-Z]+$", message = "{mensaje_registracion_nombre}")
   private String nombre;
 
-  @Pattern(regexp = "^[a-zA-Z]", message = "{mensaje_registracion_apellido}")
+  @Pattern(regexp = "^[a-zA-Z]+$", message = "{mensaje_registracion_apellido}")
   private String apellido;
 
   @Pattern(regexp = "[0-9]{10}", message = "{mensaje_registracion_telefono}")
