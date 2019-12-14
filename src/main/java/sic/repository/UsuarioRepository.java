@@ -36,10 +36,6 @@ public interface UsuarioRepository
       String passwordRecoveryKey, long idUsuario);
 
   @Modifying
-  @Query("UPDATE Usuario u SET u.token = ?1 WHERE u.idUsuario = ?2")
-  int updateToken(String token, long idUsuario);
-
-  @Modifying
   @Query(
       "UPDATE Usuario u SET u.passwordRecoveryKey = ?1, u.passwordRecoveryKeyExpirationDate = ?2 "
           + "WHERE u.idUsuario = ?3")

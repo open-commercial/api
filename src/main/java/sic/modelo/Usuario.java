@@ -56,8 +56,8 @@ public class Usuario implements Serializable {
     @Email(message = "{mensaje_usuario_invalido_email}")
     private String email;
     
-    @Column(length = 300)
-    private String token;
+//    @Column(length = 300)
+//    private String token;
     
     private long idSucursalPredeterminada;
 

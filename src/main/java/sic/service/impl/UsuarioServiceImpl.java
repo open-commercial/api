@@ -271,8 +271,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public void actualizarToken(String token, long idUsuario) {
-    usuarioRepository.updateToken(token, idUsuario);
+  public void actualizarUsuario(Usuario usuario) {
+    usuarioRepository.save(usuario);
   }
 
   @Override

@@ -16,7 +16,7 @@ public interface IUsuarioService {
 
   void actualizar(@Valid Usuario usuarioPorActualizar, Usuario usuarioPersistido);
 
-  void actualizarToken(String token, long idUsuario);
+  void actualizarUsuario(Usuario usuario);
 
   void actualizarPasswordRecoveryKey(String passwordRecoveryKey, long idUsuario);
 
