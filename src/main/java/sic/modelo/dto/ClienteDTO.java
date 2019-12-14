@@ -16,7 +16,9 @@ import java.time.LocalDateTime;
       "idCredencial",
       "nombreCredencial",
       "ubicacionFacturacion",
-      "ubicacionEnvio"
+      "ubicacionEnvio",
+      "detalleUbicacionDeFacturacion",
+      "detalleUbicacionDeEnvio"
     })
 @AllArgsConstructor
 @NoArgsConstructor
@@ -43,5 +45,7 @@ public class ClienteDTO implements Serializable {
   private boolean predeterminado;
   private BigDecimal saldoCuentaCorriente;
   private LocalDateTime fechaUltimoMovimiento;
+  private String detalleUbicacionDeFacturacion;
+  private String detalleUbicacionDeEnvio;
 
 }
