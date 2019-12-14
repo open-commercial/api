@@ -49,7 +49,7 @@ public class Cliente implements Serializable {
   private BigDecimal bonificacion;
 
   @Transient
-  private BigDecimal saldo;
+  private BigDecimal saldoCuentaCorriente;
 
   private String nroCliente;
 

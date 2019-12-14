@@ -177,7 +177,7 @@ public class PedidoServiceImpl implements IPedidoService {
             .add(totalActual.multiply(porcentajeRecargo)));
     pedido
         .getCliente()
-        .setSaldo(cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente()));
+        .setSaldoCuentaCorriente(cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente()));
     return pedido;
   }
 

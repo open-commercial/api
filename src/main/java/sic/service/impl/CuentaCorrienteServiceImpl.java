@@ -95,7 +95,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   public BigDecimal getSaldoCuentaCorriente(long idCliente) {
-    return cuentaCorrienteRepository.getSaldoCuentaCorriente(idCliente);
+    return cuentaCorrienteClienteRepository.getSaldoCuentaCorrienteCliente(idCliente);
   }
 
   @Override
