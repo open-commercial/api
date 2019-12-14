@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class DetallePedidoDTO {
+public class PedidoDTO {
 
   private Long idPedido;
   private Long idSucursal;

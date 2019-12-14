@@ -15,7 +15,5 @@ import java.math.BigDecimal;
 public class NuevoRenglonPedidoDTO {
 
   private long idProductoItem;
-  
-  @Positive(message = "{mensaje_producto_cantidad_negativa}")
   private BigDecimal cantidad;
 }

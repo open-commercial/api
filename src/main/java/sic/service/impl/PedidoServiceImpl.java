@@ -52,14 +52,12 @@ public class PedidoServiceImpl implements IPedidoService {
   private final IClienteService clienteService;
   private final IProductoService productoService;
   private final ICorreoElectronicoService correoElectronicoService;
-  private final ISucursalService sucursalService;
   private final IConfiguracionSucursalService configuracionSucursal;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
-  private static final Long ID_SUCURSAL_DEFAULT = 1L;
   private final MessageSource messageSource;
 
   @Autowired
@@ -71,7 +69,6 @@ public class PedidoServiceImpl implements IPedidoService {
       IClienteService clienteService,
       IProductoService productoService,
       ICorreoElectronicoService correoElectronicoService,
-      ISucursalService sucursalService,
       IConfiguracionSucursalService configuracionSucursal,
       ICuentaCorrienteService cuentaCorrienteService,
       ModelMapper modelMapper,
@@ -83,7 +80,6 @@ public class PedidoServiceImpl implements IPedidoService {
     this.clienteService = clienteService;
     this.productoService = productoService;
     this.correoElectronicoService = correoElectronicoService;
-    this.sucursalService = sucursalService;
     this.configuracionSucursal = configuracionSucursal;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.modelMapper = modelMapper;
@@ -202,43 +198,23 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public Pedido guardar(DetallePedidoDTO detallePedidoDTO, long idUsuario) {
-    Pedido pedido = new Pedido();
-    pedido.setObservaciones(detallePedidoDTO.getObservaciones());
-    pedido.setRenglones(
-        this.calcularRenglonesPedido(detallePedidoDTO.getRenglones(), detallePedidoDTO.getIdCliente()));
+  public Pedido guardar(Pedido pedido) {
     BigDecimal importe = BigDecimal.ZERO;
     for (RenglonPedido renglon : pedido.getRenglones()) {
       importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
     }
     BigDecimal recargoNeto =
-        importe.multiply(detallePedidoDTO.getRecargoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
+        importe.multiply(pedido.getRecargoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal descuentoNeto =
-        importe.multiply(detallePedidoDTO.getDescuentoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
+        importe.multiply(pedido.getDescuentoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
     pedido.setSubTotal(importe);
-    pedido.setRecargoPorcentaje(detallePedidoDTO.getRecargoPorcentaje());
     pedido.setRecargoNeto(recargoNeto);
-    pedido.setDescuentoPorcentaje(detallePedidoDTO.getDescuentoPorcentaje());
     pedido.setDescuentoNeto(descuentoNeto);
     pedido.setTotalEstimado(total);
     pedido.setTotalActual(total);
-    if (detallePedidoDTO.getIdSucursal() == null) {
-      if (!detallePedidoDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
-        pedido.setSucursal(sucursalService.getSucursalPorId(ID_SUCURSAL_DEFAULT));
-      } else {
-        throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_pedido_retiro_sucursal_no_seleccionada", null, Locale.getDefault()));
-      }
-    } else {
-      pedido.setSucursal(sucursalService.getSucursalPorId(detallePedidoDTO.getIdSucursal()));
-    }
-    pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
-    Cliente cliente = clienteService.getClienteNoEliminadoPorId(detallePedidoDTO.getIdCliente());
-    pedido.setCliente(cliente);
     pedido.setFecha(LocalDateTime.now());
-    this.asignarDetalleEnvio(pedido, detallePedidoDTO.getTipoDeEnvio());
+    this.asignarDetalleEnvio(pedido);
     this.calcularCantidadDeArticulos(pedido);
     pedido.setNroPedido(this.generarNumeroPedido(pedido.getSucursal()));
     pedido.setEstado(EstadoPedido.ABIERTO);
@@ -284,18 +260,18 @@ public class PedidoServiceImpl implements IPedidoService {
             r -> pedido.setCantidadArticulos(pedido.getCantidadArticulos().add(r.getCantidad())));
   }
 
-  private void asignarDetalleEnvio(Pedido pedido, TipoDeEnvio tipoDeEnvio) {
-    if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_FACTURACION
+  private void asignarDetalleEnvio(Pedido pedido) {
+    if (pedido.getTipoDeEnvio() == TipoDeEnvio.USAR_UBICACION_FACTURACION
         && pedido.getCliente().getUbicacionFacturacion() == null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault()));
     }
-    if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_ENVIO
+    if (pedido.getTipoDeEnvio() == TipoDeEnvio.USAR_UBICACION_ENVIO
         && pedido.getCliente().getUbicacionEnvio() == null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_ubicacion_envio_vacia", null, Locale.getDefault()));
     }
-    if (tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL
+    if (pedido.getTipoDeEnvio() == TipoDeEnvio.RETIRO_EN_SUCURSAL
         && !configuracionSucursal
             .getConfiguracionSucursal(pedido.getSucursal())
             .isPuntoDeRetiro()) {
@@ -303,7 +279,7 @@ public class PedidoServiceImpl implements IPedidoService {
           messageSource.getMessage(
               "mensaje_pedido_sucursal_entrega_no_valida", null, Locale.getDefault()));
     }
-    if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_FACTURACION) {
+    if (pedido.getTipoDeEnvio() == TipoDeEnvio.USAR_UBICACION_FACTURACION) {
       pedido.setDetalleEnvio(
           modelMapper.map(pedido.getCliente().getUbicacionFacturacion(), UbicacionDTO.class));
       if (pedido.getCliente().getUbicacionEnvio() == null) {
@@ -314,7 +290,7 @@ public class PedidoServiceImpl implements IPedidoService {
                     pedido.getCliente().getUbicacionFacturacion()));
       }
     }
-    if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_ENVIO) {
+    if (pedido.getTipoDeEnvio() == TipoDeEnvio.USAR_UBICACION_ENVIO) {
       pedido.setDetalleEnvio(
           modelMapper.map(pedido.getCliente().getUbicacionEnvio(), UbicacionDTO.class));
       if (pedido.getCliente().getUbicacionFacturacion() == null) {
@@ -324,11 +300,10 @@ public class PedidoServiceImpl implements IPedidoService {
                 this.crearUbicacionNuevaConDatosDeOtraUbicacion(pedido.getCliente().getUbicacionEnvio()));
       }
     }
-    if (tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
+    if (pedido.getTipoDeEnvio() == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
       pedido.setDetalleEnvio(
           modelMapper.map(pedido.getSucursal().getUbicacion(), UbicacionDTO.class));
     }
-    pedido.setTipoDeEnvio(tipoDeEnvio);
   }
 
   private Ubicacion crearUbicacionNuevaConDatosDeOtraUbicacion(Ubicacion ubicacion) {
@@ -442,13 +417,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public void actualizar(DetallePedidoDTO detallePedidoDTO, long idUsuario) {
-    Pedido pedido = this.getPedidoNoEliminadoPorId(detallePedidoDTO.getIdPedido());
-    pedido.getRenglones().clear();
-    pedido.getRenglones().addAll(this.calcularRenglonesPedido(detallePedidoDTO.getRenglones(), pedido.getCliente().getIdCliente()));
-    pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
-    if (detallePedidoDTO.getIdSucursal() != null)
-      pedido.setSucursal(sucursalService.getSucursalPorId(detallePedidoDTO.getIdSucursal()));
+  public void actualizar(Pedido pedido) {
     //de los renglones, sacar ids y cantidades, array de nuevosResultadosPedido
     List<BigDecimal> importesDeRenglones= new ArrayList<>();
     pedido.getRenglones().forEach(renglonPedido -> importesDeRenglones.add(renglonPedido.getImporte()));
@@ -457,12 +426,12 @@ public class PedidoServiceImpl implements IPedidoService {
             NuevosResultadosPedidoDTO.builder()
                 .importes(importesDeRenglones)
                 .descuentoPorcentaje(
-                    detallePedidoDTO.getDescuentoPorcentaje() != null
-                        ? detallePedidoDTO.getDescuentoPorcentaje()
+                        pedido.getDescuentoPorcentaje() != null
+                        ? pedido.getDescuentoPorcentaje()
                         : pedido.getDescuentoPorcentaje())
                 .recargoPorcentaje(
-                    detallePedidoDTO.getRecargoPorcentaje() != null
-                        ? detallePedidoDTO.getRecargoPorcentaje()
+                        pedido.getRecargoPorcentaje() != null
+                        ? pedido.getRecargoPorcentaje()
                         : pedido.getRecargoPorcentaje())
                 .build());
     pedido.setSubTotal(resultados.getSubTotal());
@@ -472,10 +441,7 @@ public class PedidoServiceImpl implements IPedidoService {
     pedido.setRecargoNeto(resultados.getRecargoNeto());
     pedido.setTotalEstimado(resultados.getTotal());
     pedido.setTotalActual(resultados.getTotal());
-    if (detallePedidoDTO.getObservaciones() != null)
-      pedido.setObservaciones(detallePedidoDTO.getObservaciones());
-    if (detallePedidoDTO.getTipoDeEnvio() != null)
-      this.asignarDetalleEnvio(pedido, detallePedidoDTO.getTipoDeEnvio());
+    this.asignarDetalleEnvio(pedido);
     this.calcularCantidadDeArticulos(pedido);
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, pedido);
     pedidoRepository.save(pedido);
@@ -584,6 +550,11 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   public RenglonPedido calcularRenglonPedido(long idProducto, BigDecimal cantidad, Cliente cliente) {
+    if (cantidad.compareTo(BigDecimal.ZERO) <= 0) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_producto_cantidad_igual_menor_cero", null, Locale.getDefault()));
+    }
     RenglonPedido nuevoRenglon = new RenglonPedido();
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     nuevoRenglon.setIdProductoItem(producto.getIdProducto());
@@ -619,20 +590,6 @@ public class PedidoServiceImpl implements IPedidoService {
     nuevoRenglon.setUrlImagenItem(producto.getUrlImagen());
     nuevoRenglon.setOferta(producto.isOferta());
     return nuevoRenglon;
-  }
-
-  @Override
-  public List<RenglonPedido> calcularRenglonesPedido(
-      List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO, Long idCliente) {
-    List<RenglonPedido> renglonesPedido = new ArrayList<>();
-    nuevosRenglonesPedidoDTO.forEach(
-        nuevoRenglonesPedidoDTO ->
-            renglonesPedido.add(
-                this.calcularRenglonPedido(
-                    nuevoRenglonesPedidoDTO.getIdProductoItem(),
-                    nuevoRenglonesPedidoDTO.getCantidad(),
-                    clienteService.getClienteNoEliminadoPorId(idCliente))));
-    return renglonesPedido;
   }
 
   @Override

@@ -5669,8 +5669,8 @@ class AppIntegrationTest {
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
         .build());
-    DetallePedidoDTO detallePedidoDTO =
-      DetallePedidoDTO.builder()
+    PedidoDTO pedidoDTO =
+      PedidoDTO.builder()
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
         .recargoPorcentaje(new BigDecimal("5"))
         .observaciones("Nuevo Pedido Test")
@@ -5682,10 +5682,10 @@ class AppIntegrationTest {
     Pedido pedidoRecuperado =
       restTemplate.postForObject(
         apiPrefix + "/pedidos",
-        detallePedidoDTO,
+              pedidoDTO,
         Pedido.class);
     assertEquals(new BigDecimal("5947.200000000000000"), pedidoRecuperado.getTotalEstimado());
-    assertEquals(pedidoRecuperado.getObservaciones(), detallePedidoDTO.getObservaciones());
+    assertEquals(pedidoRecuperado.getObservaciones(), pedidoDTO.getObservaciones());
     assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
   }
 
@@ -5739,8 +5739,8 @@ class AppIntegrationTest {
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
         .build());
-    DetallePedidoDTO detallePedidoDTO =
-      DetallePedidoDTO.builder()
+    PedidoDTO pedidoDTO =
+      PedidoDTO.builder()
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
         .recargoPorcentaje(new BigDecimal("5"))
         .observaciones("Nuevo Pedido Test")
@@ -5752,7 +5752,7 @@ class AppIntegrationTest {
     Pedido pedidoRecuperado =
       restTemplate.postForObject(
         apiPrefix + "/pedidos",
-        detallePedidoDTO,
+              pedidoDTO,
         Pedido.class);
     assertEquals("Rio Parana 14500 Corrientes Corrientes", pedidoRecuperado.getDetalleEnvio());
   }
@@ -5771,8 +5771,8 @@ class AppIntegrationTest {
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
         .build());
-    DetallePedidoDTO detallePedidoDTO =
-      DetallePedidoDTO.builder()
+    PedidoDTO pedidoDTO =
+      PedidoDTO.builder()
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
         .recargoPorcentaje(new BigDecimal("5"))
         .observaciones("Nuevo Pedido Test")
@@ -5784,7 +5784,7 @@ class AppIntegrationTest {
     Pedido pedidoRecuperado =
       restTemplate.postForObject(
         apiPrefix + "/pedidos",
-        detallePedidoDTO,
+              pedidoDTO,
         Pedido.class);
     assertEquals("Rio Uruguay 15000 Corrientes Corrientes", pedidoRecuperado.getDetalleEnvio());
   }
@@ -5808,8 +5808,8 @@ class AppIntegrationTest {
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
         .build());
-    DetallePedidoDTO detallePedidoDTO =
-      DetallePedidoDTO.builder()
+    PedidoDTO pedidoDTO =
+      PedidoDTO.builder()
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
         .recargoPorcentaje(new BigDecimal("5"))
         .observaciones("Nuevo Pedido Test")
@@ -5821,7 +5821,7 @@ class AppIntegrationTest {
     Pedido pedidoRecuperado =
       restTemplate.postForObject(
         apiPrefix + "/pedidos",
-        detallePedidoDTO,
+              pedidoDTO,
         Pedido.class);
     assertEquals("Rio Piacentin 345 Corrientes Corrientes", pedidoRecuperado.getDetalleEnvio());
   }
@@ -5845,8 +5845,8 @@ class AppIntegrationTest {
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2.000000000000000"))
         .build());
-    DetallePedidoDTO detallePedidoDTO =
-      DetallePedidoDTO.builder()
+    PedidoDTO pedidoDTO =
+      PedidoDTO.builder()
         .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
         .recargoPorcentaje(new BigDecimal("5"))
         .observaciones("Nuevo Pedido Test")
@@ -5859,7 +5859,7 @@ class AppIntegrationTest {
             RestClientResponseException.class,
             () ->
                 restTemplate.postForObject(
-                    apiPrefix + "/pedidos", detallePedidoDTO, Pedido.class));
+                    apiPrefix + "/pedidos", pedidoDTO, Pedido.class));
     assertNotNull(thrown.getMessage());
     assertTrue(
         thrown
@@ -5900,8 +5900,8 @@ class AppIntegrationTest {
         .idProductoItem(2L)
         .cantidad(new BigDecimal("2"))
         .build());
-    DetallePedidoDTO detallePedidoDTO =
-      DetallePedidoDTO.builder()
+    PedidoDTO pedidoDTO =
+      PedidoDTO.builder()
         .descuentoPorcentaje(new BigDecimal("15"))
         .recargoPorcentaje(new BigDecimal("5"))
         .observaciones("Nuevo Pedido Test")
@@ -5913,10 +5913,10 @@ class AppIntegrationTest {
     Pedido pedidoRecuperado =
       restTemplate.postForObject(
         apiPrefix + "/pedidos",
-        detallePedidoDTO,
+              pedidoDTO,
         Pedido.class);
     assertEquals(new BigDecimal("5947.200000000000000"), pedidoRecuperado.getTotalEstimado());
-    assertEquals(detallePedidoDTO.getObservaciones(), pedidoRecuperado.getObservaciones());
+    assertEquals(pedidoDTO.getObservaciones(), pedidoRecuperado.getObservaciones());
     assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
     this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
     nuevosRenglonesDePedido = new ArrayList<>();
@@ -5925,7 +5925,7 @@ class AppIntegrationTest {
         .idProductoItem(3)
         .cantidad(new BigDecimal("7"))
         .build());
-    DetallePedidoDTO detallePedidoParaModificar = DetallePedidoDTO.builder()
+    PedidoDTO detallePedidoParaModificar = PedidoDTO.builder()
       .idPedido(pedidoRecuperado.getIdPedido())
       .renglones(nuevosRenglonesDePedido)
       .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
