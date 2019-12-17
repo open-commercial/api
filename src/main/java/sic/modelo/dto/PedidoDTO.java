@@ -1,45 +1,26 @@
 package sic.modelo.dto;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import sic.modelo.TipoDeEnvio;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
-
-import lombok.*;
-import sic.modelo.EstadoPedido;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = {"renglones", "cantidadArticulos"})
-@EqualsAndHashCode(of = {"nroPedido", "nombreSucursal"})
-@JsonIdentityInfo(
-    generator = ObjectIdGenerators.PropertyGenerator.class,
-    property = "idPedido",
-    scope = PedidoDTO.class)
 @Builder
-public class PedidoDTO implements Serializable {
+public class PedidoDTO {
 
-  private long idPedido;
-  private long nroPedido;
-  private LocalDateTime fecha;
+  private Long idPedido;
+  private Long idSucursal;
   private String observaciones;
-  private String nombreSucursal;
-  private String detalleEnvio;
-  private boolean eliminado;
-  private String nombreFiscalCliente;
-  private String nombreUsuario;
-  private List<RenglonPedidoDTO> renglones;
-  private BigDecimal subTotal;
+  private Long idCliente;
+  private TipoDeEnvio tipoDeEnvio;
+  private List<NuevoRenglonPedidoDTO> renglones;
   private BigDecimal recargoPorcentaje;
-  private BigDecimal recargoNeto;
   private BigDecimal descuentoPorcentaje;
-  private BigDecimal descuentoNeto;
-  private BigDecimal totalEstimado;
-  private BigDecimal totalActual;
-  private EstadoPedido estado;
-  private BigDecimal cantidadArticulos;
 }

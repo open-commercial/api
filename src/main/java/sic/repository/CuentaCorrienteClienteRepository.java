@@ -7,6 +7,8 @@ import org.springframework.data.repository.query.Param;
 import sic.modelo.Cliente;
 import sic.modelo.CuentaCorrienteCliente;
 
+import java.math.BigDecimal;
+
 public interface CuentaCorrienteClienteRepository
     extends CuentaCorrienteRepository<CuentaCorrienteCliente>,
         QuerydslPredicateExecutor<CuentaCorrienteCliente> {
@@ -17,4 +19,8 @@ public interface CuentaCorrienteClienteRepository
   @Query(
       "UPDATE CuentaCorrienteCliente ccc SET ccc.eliminada = true WHERE ccc.cliente.idCliente = :idCliente")
   int eliminarCuentaCorrienteCliente(@Param("idCliente") long idCliente);
+
+  @Query(
+      "SELECT ccc.saldo FROM CuentaCorrienteCliente ccc WHERE ccc.cliente.idCliente = :idCliente")
+  BigDecimal getSaldoCuentaCorrienteCliente(@Param("idCliente") long idCliente);
 }

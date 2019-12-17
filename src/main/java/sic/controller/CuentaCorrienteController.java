@@ -116,9 +116,7 @@ public class CuentaCorrienteController {
     Rol.COMPRADOR
   })
   public BigDecimal getSaldoCuentaCorrienteCliente(@PathVariable long idCliente) {
-    return cuentaCorrienteService
-        .getCuentaCorrientePorCliente(clienteService.getClienteNoEliminadoPorId(idCliente))
-        .getSaldo();
+    return cuentaCorrienteService.getSaldoCuentaCorriente(idCliente);
   }
 
   @GetMapping("/cuentas-corriente/proveedores/{idProveedor}/saldo")

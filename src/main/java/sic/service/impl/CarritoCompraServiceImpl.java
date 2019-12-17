@@ -4,17 +4,20 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import com.mercadopago.exceptions.MPException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.dto.*;
 import sic.repository.CarritoCompraRepository;
@@ -31,6 +34,8 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   private final IProductoService productoService;
   private final IPedidoService pedidoService;
   private final IMercadoPagoService mercadoPagoService;
+  private final ISucursalService sucursalService;
+  private final MessageSource messageSource;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private static final Long ID_SUCURSAL_DEFAULT = 1L;
@@ -43,12 +48,16 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
       IClienteService clienteService,
       IProductoService productoService,
       IPedidoService pedidoService,
+      ISucursalService sucursalService,
+      MessageSource messageSource,
       IMercadoPagoService mercadoPagoService) {
     this.carritoCompraRepository = carritoCompraRepository;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
     this.productoService = productoService;
     this.pedidoService = pedidoService;
+    this.sucursalService = sucursalService;
+    this.messageSource = messageSource;
     this.mercadoPagoService = mercadoPagoService;
   }
 
@@ -162,27 +171,38 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     }
     List<ItemCarritoCompra> items =
         carritoCompraRepository.findAllByUsuarioOrderByIdItemCarritoCompraDesc(usuario);
-    NuevoPedidoDTO nuevoPedido =
-        NuevoPedidoDTO.builder()
-            .idCliente(nuevaOrdenDeCompraDTO.getIdCliente())
-            .idUsuario(nuevaOrdenDeCompraDTO.getIdUsuario())
-            .renglones(new ArrayList<>())
-            .idSucursal(nuevaOrdenDeCompraDTO.getIdSucursal())
-            .tipoDeEnvio(nuevaOrdenDeCompraDTO.getTipoDeEnvio())
-            .observaciones(nuevaOrdenDeCompraDTO.getObservaciones())
-            .recargoPorcentaje(BigDecimal.ZERO)
-            .descuentoPorcentaje(BigDecimal.ZERO)
-            .build();
+    Pedido pedido = new Pedido();
+    pedido.setObservaciones(nuevaOrdenDeCompraDTO.getObservaciones());
+    pedido.setRecargoPorcentaje(BigDecimal.ZERO);
+    pedido.setDescuentoPorcentaje(BigDecimal.ZERO);
+    if (nuevaOrdenDeCompraDTO.getIdSucursal() == null) {
+      if (!nuevaOrdenDeCompraDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
+        pedido.setSucursal(sucursalService.getSucursalPorId(ID_SUCURSAL_DEFAULT));
+      } else {
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_pedido_retiro_sucursal_no_seleccionada", null, Locale.getDefault()));
+      }
+    } else {
+      pedido.setSucursal(sucursalService.getSucursalPorId(nuevaOrdenDeCompraDTO.getIdSucursal()));
+    }
+    pedido.setUsuario(
+        usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario()));
+    pedido.setCliente(
+        clienteService.getClienteNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdCliente()));
+    List<RenglonPedido> renglonesPedido = new ArrayList<>();
     items.forEach(
         i ->
-            nuevoPedido
-                .getRenglones()
-                .add(
-                    NuevoRenglonPedidoDTO.builder()
-                        .idProductoItem(i.getProducto().getIdProducto())
-                        .cantidad(i.getCantidad())
-                        .build()));
-    Pedido p = pedidoService.guardar(nuevoPedido);
+            renglonesPedido.add(
+                pedidoService.calcularRenglonPedido(
+                    i.getProducto().getIdProducto(),
+                    i.getCantidad(),
+                    clienteService.getClienteNoEliminadoPorId(
+                        nuevaOrdenDeCompraDTO.getIdCliente()))));
+    pedido.setRenglones(renglonesPedido);
+    pedido.setRenglones(renglonesPedido);
+    pedido.setTipoDeEnvio(nuevaOrdenDeCompraDTO.getTipoDeEnvio());
+    Pedido p = pedidoService.guardar(pedido);
     this.eliminarTodosLosItemsDelUsuario(nuevaOrdenDeCompraDTO.getIdUsuario());
     return p;
   }

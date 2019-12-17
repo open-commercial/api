@@ -29,7 +29,11 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombreFiscal", "idFiscal"})
 @ToString
-@JsonIgnoreProperties({"viajante", "credencial", "eliminado"})
+@JsonIgnoreProperties({
+  "viajante",
+  "credencial",
+  "eliminado",
+})
 @JsonView(Views.Comprador.class)
 public class Cliente implements Serializable {
 
@@ -43,6 +47,9 @@ public class Cliente implements Serializable {
   @DecimalMin(value = "0", message = "{mensaje_cliente_bonificacion_negativa}")
   @DecimalMax(value = "100", message = "{mensaje_cliente_bonificacion_superior_al_cien_porciento}")
   private BigDecimal bonificacion;
+
+  @Transient
+  private BigDecimal saldoCuentaCorriente;
 
   private String nroCliente;
 
@@ -136,5 +143,15 @@ public class Cliente implements Serializable {
     } else {
       return null;
     }
+  }
+
+  @JsonGetter("detalleUbicacionDeFacturacion")
+  public String getDetalleUbicacionDeFacturacion() {
+    return (ubicacionFacturacion != null ? ubicacionFacturacion.toString() : null);
+  }
+
+  @JsonGetter("detalleUbicacionDeEnvio")
+  public String getDetalleUbicacionDeEnvio() {
+    return (ubicacionEnvio != null ? ubicacionEnvio.toString() : null);
   }
 }

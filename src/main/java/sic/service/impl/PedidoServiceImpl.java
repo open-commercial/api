@@ -3,7 +3,6 @@ package sic.service.impl;
 import com.querydsl.core.BooleanBuilder;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
@@ -19,7 +18,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.calculos.NuevosResultadosPedido;
+import sic.modelo.calculos.NuevosResultadosPedidoDTO;
 import sic.modelo.calculos.Resultados;
-import sic.modelo.dto.NuevoPedidoDTO;
-import sic.modelo.dto.NuevoRenglonPedidoDTO;
-import sic.modelo.dto.RenglonPedidoDTO;
-import sic.modelo.dto.UbicacionDTO;
+import sic.modelo.dto.*;
 import sic.repository.RenglonPedidoRepository;
 import sic.service.*;
 import sic.repository.PedidoRepository;
@@ -57,13 +52,12 @@ public class PedidoServiceImpl implements IPedidoService {
   private final IClienteService clienteService;
   private final IProductoService productoService;
   private final ICorreoElectronicoService correoElectronicoService;
-  private final ISucursalService sucursalService;
   private final IConfiguracionSucursalService configuracionSucursal;
+  private final ICuentaCorrienteService cuentaCorrienteService;
   private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
-  private static final Long ID_SUCURSAL_DEFAULT = 1L;
   private final MessageSource messageSource;
 
   @Autowired
@@ -75,8 +69,8 @@ public class PedidoServiceImpl implements IPedidoService {
       IClienteService clienteService,
       IProductoService productoService,
       ICorreoElectronicoService correoElectronicoService,
-      ISucursalService sucursalService,
       IConfiguracionSucursalService configuracionSucursal,
+      ICuentaCorrienteService cuentaCorrienteService,
       ModelMapper modelMapper,
       MessageSource messageSource) {
     this.facturaService = facturaService;
@@ -86,8 +80,8 @@ public class PedidoServiceImpl implements IPedidoService {
     this.clienteService = clienteService;
     this.productoService = productoService;
     this.correoElectronicoService = correoElectronicoService;
-    this.sucursalService = sucursalService;
     this.configuracionSucursal = configuracionSucursal;
+    this.cuentaCorrienteService = cuentaCorrienteService;
     this.modelMapper = modelMapper;
     this.messageSource = messageSource;
   }
@@ -177,6 +171,9 @@ public class PedidoServiceImpl implements IPedidoService {
         totalActual
             .subtract(totalActual.multiply(porcentajeDescuento))
             .add(totalActual.multiply(porcentajeRecargo)));
+    pedido
+        .getCliente()
+        .setSaldoCuentaCorriente(cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente()));
     return pedido;
   }
 
@@ -201,43 +198,23 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public Pedido guardar(NuevoPedidoDTO nuevoPedidoDTO) {
-    Pedido pedido = new Pedido();
-    pedido.setObservaciones(nuevoPedidoDTO.getObservaciones());
-    pedido.setRenglones(
-        this.calcularRenglonesPedido(nuevoPedidoDTO.getRenglones(), nuevoPedidoDTO.getIdCliente()));
+  public Pedido guardar(Pedido pedido) {
     BigDecimal importe = BigDecimal.ZERO;
     for (RenglonPedido renglon : pedido.getRenglones()) {
       importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
     }
     BigDecimal recargoNeto =
-        importe.multiply(nuevoPedidoDTO.getRecargoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
+        importe.multiply(pedido.getRecargoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal descuentoNeto =
-        importe.multiply(nuevoPedidoDTO.getDescuentoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
+        importe.multiply(pedido.getDescuentoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
     pedido.setSubTotal(importe);
-    pedido.setRecargoPorcentaje(nuevoPedidoDTO.getRecargoPorcentaje());
     pedido.setRecargoNeto(recargoNeto);
-    pedido.setDescuentoPorcentaje(nuevoPedidoDTO.getDescuentoPorcentaje());
     pedido.setDescuentoNeto(descuentoNeto);
     pedido.setTotalEstimado(total);
     pedido.setTotalActual(total);
-    if (nuevoPedidoDTO.getIdSucursal() == null) {
-      if (!nuevoPedidoDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
-        pedido.setSucursal(sucursalService.getSucursalPorId(ID_SUCURSAL_DEFAULT));
-      } else {
-        throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_pedido_retiro_sucursal_no_seleccionada", null, Locale.getDefault()));
-      }
-    } else {
-      pedido.setSucursal(sucursalService.getSucursalPorId(nuevoPedidoDTO.getIdSucursal()));
-    }
-    pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(nuevoPedidoDTO.getIdUsuario()));
-    Cliente cliente = clienteService.getClienteNoEliminadoPorId(nuevoPedidoDTO.getIdCliente());
-    pedido.setCliente(cliente);
     pedido.setFecha(LocalDateTime.now());
-    this.asignarDetalleEnvio(pedido, nuevoPedidoDTO.getTipoDeEnvio());
+    this.asignarDetalleEnvio(pedido);
     this.calcularCantidadDeArticulos(pedido);
     pedido.setNroPedido(this.generarNumeroPedido(pedido.getSucursal()));
     pedido.setEstado(EstadoPedido.ABIERTO);
@@ -283,18 +260,18 @@ public class PedidoServiceImpl implements IPedidoService {
             r -> pedido.setCantidadArticulos(pedido.getCantidadArticulos().add(r.getCantidad())));
   }
 
-  private void asignarDetalleEnvio(Pedido pedido, TipoDeEnvio tipoDeEnvio) {
-    if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_FACTURACION
+  private void asignarDetalleEnvio(Pedido pedido) {
+    if (pedido.getTipoDeEnvio() == TipoDeEnvio.USAR_UBICACION_FACTURACION
         && pedido.getCliente().getUbicacionFacturacion() == null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault()));
     }
-    if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_ENVIO
+    if (pedido.getTipoDeEnvio() == TipoDeEnvio.USAR_UBICACION_ENVIO
         && pedido.getCliente().getUbicacionEnvio() == null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_ubicacion_envio_vacia", null, Locale.getDefault()));
     }
-    if (tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL
+    if (pedido.getTipoDeEnvio() == TipoDeEnvio.RETIRO_EN_SUCURSAL
         && !configuracionSucursal
             .getConfiguracionSucursal(pedido.getSucursal())
             .isPuntoDeRetiro()) {
@@ -302,7 +279,7 @@ public class PedidoServiceImpl implements IPedidoService {
           messageSource.getMessage(
               "mensaje_pedido_sucursal_entrega_no_valida", null, Locale.getDefault()));
     }
-    if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_FACTURACION) {
+    if (pedido.getTipoDeEnvio() == TipoDeEnvio.USAR_UBICACION_FACTURACION) {
       pedido.setDetalleEnvio(
           modelMapper.map(pedido.getCliente().getUbicacionFacturacion(), UbicacionDTO.class));
       if (pedido.getCliente().getUbicacionEnvio() == null) {
@@ -313,7 +290,7 @@ public class PedidoServiceImpl implements IPedidoService {
                     pedido.getCliente().getUbicacionFacturacion()));
       }
     }
-    if (tipoDeEnvio == TipoDeEnvio.USAR_UBICACION_ENVIO) {
+    if (pedido.getTipoDeEnvio() == TipoDeEnvio.USAR_UBICACION_ENVIO) {
       pedido.setDetalleEnvio(
           modelMapper.map(pedido.getCliente().getUbicacionEnvio(), UbicacionDTO.class));
       if (pedido.getCliente().getUbicacionFacturacion() == null) {
@@ -323,11 +300,10 @@ public class PedidoServiceImpl implements IPedidoService {
                 this.crearUbicacionNuevaConDatosDeOtraUbicacion(pedido.getCliente().getUbicacionEnvio()));
       }
     }
-    if (tipoDeEnvio == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
+    if (pedido.getTipoDeEnvio() == TipoDeEnvio.RETIRO_EN_SUCURSAL) {
       pedido.setDetalleEnvio(
           modelMapper.map(pedido.getSucursal().getUbicacion(), UbicacionDTO.class));
     }
-    pedido.setTipoDeEnvio(tipoDeEnvio);
   }
 
   private Ubicacion crearUbicacionNuevaConDatosDeOtraUbicacion(Ubicacion ubicacion) {
@@ -441,14 +417,22 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public void actualizar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio) {
-    Type listType = new TypeToken<List<RenglonPedidoDTO>>() {}.getType();
+  public void actualizar(Pedido pedido) {
+    //de los renglones, sacar ids y cantidades, array de nuevosResultadosPedido
+    List<BigDecimal> importesDeRenglones= new ArrayList<>();
+    pedido.getRenglones().forEach(renglonPedido -> importesDeRenglones.add(renglonPedido.getImporte()));
     Resultados resultados =
         this.calcularResultadosPedido(
-            NuevosResultadosPedido.builder()
-                .renglones(modelMapper.map(pedido.getRenglones(), listType))
-                .descuentoPorcentaje(pedido.getDescuentoPorcentaje())
-                .recargoPorcentaje(pedido.getRecargoPorcentaje())
+            NuevosResultadosPedidoDTO.builder()
+                .importes(importesDeRenglones)
+                .descuentoPorcentaje(
+                        pedido.getDescuentoPorcentaje() != null
+                        ? pedido.getDescuentoPorcentaje()
+                        : BigDecimal.ZERO)
+                .recargoPorcentaje(
+                        pedido.getRecargoPorcentaje() != null
+                        ? pedido.getRecargoPorcentaje()
+                        : BigDecimal.ZERO)
                 .build());
     pedido.setSubTotal(resultados.getSubTotal());
     pedido.setDescuentoPorcentaje(resultados.getDescuentoPorcentaje());
@@ -457,7 +441,7 @@ public class PedidoServiceImpl implements IPedidoService {
     pedido.setRecargoNeto(resultados.getRecargoNeto());
     pedido.setTotalEstimado(resultados.getTotal());
     pedido.setTotalActual(resultados.getTotal());
-    this.asignarDetalleEnvio(pedido, tipoDeEnvio);
+    this.asignarDetalleEnvio(pedido);
     this.calcularCantidadDeArticulos(pedido);
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, pedido);
     pedidoRepository.save(pedido);
@@ -566,6 +550,11 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   public RenglonPedido calcularRenglonPedido(long idProducto, BigDecimal cantidad, Cliente cliente) {
+    if (cantidad.compareTo(BigDecimal.ZERO) <= 0) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_producto_cantidad_igual_menor_cero", null, Locale.getDefault()));
+    }
     RenglonPedido nuevoRenglon = new RenglonPedido();
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     nuevoRenglon.setIdProductoItem(producto.getIdProducto());
@@ -604,21 +593,22 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public List<RenglonPedido> calcularRenglonesPedido(
-      List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO, Long idCliente) {
-    List<RenglonPedido> renglonesPedido = new ArrayList<>();
-    nuevosRenglonesPedidoDTO.forEach(
-        nuevoRenglonesPedidoDTO ->
-            renglonesPedido.add(
-                this.calcularRenglonPedido(
-                    nuevoRenglonesPedidoDTO.getIdProductoItem(),
-                    nuevoRenglonesPedidoDTO.getCantidad(),
-                    clienteService.getClienteNoEliminadoPorId(idCliente))));
-    return renglonesPedido;
+  public List<RenglonPedido> calcularRenglonesPedido(long[] idProductoItem, BigDecimal[] cantidad, long idCliente) {
+    if (idProductoItem.length != cantidad.length) {
+      throw new BusinessServiceException(
+              messageSource.getMessage(
+                      "mensaje_pedido_renglones_parametros_no_validos", null, Locale.getDefault()));
+    }
+    List<RenglonPedido> renglones = new ArrayList<>();
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
+    for (int i = 0; i < idProductoItem.length; ++i) {
+      renglones.add(this.calcularRenglonPedido(idProductoItem[i], cantidad[i], cliente));
+    }
+    return renglones;
   }
 
   @Override
-  public Resultados calcularResultadosPedido(NuevosResultadosPedido calculoPedido) {
+  public Resultados calcularResultadosPedido(NuevosResultadosPedidoDTO calculoPedido) {
     Resultados resultados = Resultados.builder().build();
     resultados.setDescuentoPorcentaje(
         calculoPedido.getDescuentoPorcentaje() != null
@@ -629,8 +619,8 @@ public class PedidoServiceImpl implements IPedidoService {
             ? calculoPedido.getRecargoPorcentaje()
             : BigDecimal.ZERO);
     BigDecimal subTotal = BigDecimal.ZERO;
-    for (RenglonPedidoDTO renglonPedidoDTO : calculoPedido.getRenglones()) {
-      subTotal = subTotal.add(renglonPedidoDTO.getImporte());
+    for (BigDecimal importe: calculoPedido.getImportes()) {
+      subTotal = subTotal.add(importe);
     }
     resultados.setSubTotal(subTotal);
     resultados.setDescuentoNeto(resultados.getSubTotal().multiply(resultados.getDescuentoPorcentaje().divide(new BigDecimal("100"), 2, RoundingMode.FLOOR)));

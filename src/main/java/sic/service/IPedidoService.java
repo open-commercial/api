@@ -7,10 +7,8 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.calculos.NuevosResultadosPedido;
+import sic.modelo.calculos.NuevosResultadosPedidoDTO;
 import sic.modelo.calculos.Resultados;
-import sic.modelo.dto.NuevoPedidoDTO;
-import sic.modelo.dto.NuevoRenglonPedidoDTO;
 
 import javax.validation.Valid;
 
@@ -18,7 +16,7 @@ public interface IPedidoService {
 
   Pedido getPedidoNoEliminadoPorId(long idPedido);
 
-  void actualizar(@Valid Pedido pedido, TipoDeEnvio tipoDeEnvio);
+  void actualizar(Pedido pedido);
 
   void actualizarFacturasDelPedido(@Valid Pedido pedido, List<Factura> facturas);
 
@@ -42,11 +40,11 @@ public interface IPedidoService {
 
   byte[] getReportePedido(long idPedido);
 
-  Pedido guardar(NuevoPedidoDTO nuevoPedidoDTO);
+  Pedido guardar(Pedido pedido);
 
   RenglonPedido calcularRenglonPedido(long idProducto, BigDecimal cantidad, Cliente cliente);
 
-  List<RenglonPedido> calcularRenglonesPedido(@Valid List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO, Long idCliente);
+  List<RenglonPedido> calcularRenglonesPedido(long[] idProductoItem, BigDecimal[] cantidad, long idCliente);
 
-  Resultados calcularResultadosPedido(NuevosResultadosPedido calculoPedido);
+  Resultados calcularResultadosPedido(NuevosResultadosPedidoDTO calculoPedido);
 }
