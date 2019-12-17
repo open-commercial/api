@@ -32,7 +32,6 @@ public class UsuarioBuilder {
         nombre,
         apellido,
         email,
-        token,
         idSucursal,
         passwordRecoveryKey,
         passwordRecoveryKeyExpirationDate,

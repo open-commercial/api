@@ -1,13 +1,15 @@
 package sic.modelo;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Embeddable
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(of = "aplicacion")
+@Builder
 public class TokenAcceso {
 
     @Column(length = 300)

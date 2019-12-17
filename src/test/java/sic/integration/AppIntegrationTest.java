@@ -401,7 +401,7 @@ class AppIntegrationTest {
     // set enviroment
     this.token =
       restTemplate
-        .postForEntity(apiPrefix + "/login", new Credencial("test", "test"), String.class)
+        .postForEntity(apiPrefix + "/login", new Credencial("test", "test", Aplicacion.SIC_OPS_WEB), String.class)
         .getBody();
   }
 
@@ -6199,7 +6199,7 @@ class AppIntegrationTest {
     restTemplate.postForObject(apiPrefix + "/usuarios", nuevoUsuario, UsuarioDTO.class);
     this.token =
         restTemplate
-            .postForEntity(apiPrefix + "/login", new Credencial("wicca", "Salem123"), String.class)
+            .postForEntity(apiPrefix + "/login", new Credencial("wicca", "Salem123", Aplicacion.SIC_OPS), String.class)
             .getBody();
     RestClientResponseException thrown =
         assertThrows(

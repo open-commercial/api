@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -44,7 +45,6 @@ public class AuthController {
     Usuario usuario = usuarioService.autenticarUsuario(credencial);
     TokenAcceso tokenAcceso = new TokenAcceso();
     tokenAcceso.setAplicacion(credencial.getAplicacion());
-    usuario.getTokens().contains(tokenAcceso);
     String token = "";
     if (!usuario.getTokens().isEmpty() && usuario.getTokens().contains(tokenAcceso)) {
       for (TokenAcceso f : usuario.getTokens()) {
@@ -58,7 +58,7 @@ public class AuthController {
       tokenAcceso.setAplicacion(credencial.getAplicacion());
       tokenAcceso.setToken(token);
       usuario.getTokens().add(tokenAcceso);
-      usuarioService.actualizarUsuario(usuario);
+      usuarioService.actualizar(usuario);
       return token;
     }
   }
@@ -68,12 +68,12 @@ public class AuthController {
       @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuario = (int) claims.get("idUsuario");
-    Aplicacion aplicacion = (Aplicacion) claims.get("app");
+    Aplicacion aplicacion = Aplicacion.valueOf(claims.get("app").toString());
     Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
     TokenAcceso tokenAcceso = new TokenAcceso();
     tokenAcceso.setAplicacion(aplicacion);
     usuario.getTokens().remove(tokenAcceso);
-    usuarioService.actualizarUsuario(usuario);
+    usuarioService.actualizar(usuario);
   }
 
   @GetMapping("/password-recovery")
@@ -86,21 +86,30 @@ public class AuthController {
 
   @PostMapping("/password-recovery")
   public String generarTokenTemporal(@RequestBody RecoveryPasswordDTO recoveryPasswordDTO) {
-    String token;
+    TokenAcceso tokenAcceso;
     Usuario usuario =
         usuarioService.getUsuarioPorPasswordRecoveryKeyAndIdUsuario(
             recoveryPasswordDTO.getKey(), recoveryPasswordDTO.getId());
     if (usuario != null && LocalDateTime.now().isBefore(usuario.getPasswordRecoveryKeyExpirationDate())) {
-      //dar un token temporal a todas las aplicaciones del usuario.
-      token = authService.generarToken(usuario.getIdUsuario(), usuario.getRoles());
-      usuarioService.actualizarToken(token, usuario.getIdUsuario());
-
+      tokenAcceso = TokenAcceso.builder().aplicacion(recoveryPasswordDTO.getAplicacion()).build();
+      usuario.getTokens().remove(tokenAcceso);
+      tokenAcceso =
+          TokenAcceso.builder()
+              .aplicacion(recoveryPasswordDTO.getAplicacion())
+              .token(
+                  authService.generarToken(
+                      usuario.getIdUsuario(),
+                      recoveryPasswordDTO.getAplicacion(),
+                      usuario.getRoles()))
+              .build();
+      usuario.getTokens().add(tokenAcceso);
+      usuarioService.actualizar(usuario);
       usuarioService.actualizarPasswordRecoveryKey(null, recoveryPasswordDTO.getId());
     } else {
       throw new UnauthorizedException(messageSource.getMessage(
         "mensaje_error_passwordRecoveryKey", null, Locale.getDefault()));
     }
-    return token;
+    return tokenAcceso.getToken();
   }
 
   @PostMapping("/registracion")

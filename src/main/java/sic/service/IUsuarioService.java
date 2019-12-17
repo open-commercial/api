@@ -14,9 +14,7 @@ public interface IUsuarioService {
 
   Usuario getUsuarioPorPasswordRecoveryKeyAndIdUsuario(String passwordRecoveryKey, long idUsuario);
 
-  void actualizar(@Valid Usuario usuarioPorActualizar, Usuario usuarioPersistido);
-
-  void actualizarUsuario(Usuario usuario);
+  void actualizar(@Valid Usuario usuarioPorActualizar);
 
   void actualizarPasswordRecoveryKey(String passwordRecoveryKey, long idUsuario);
 

@@ -257,7 +257,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   @Transactional
-  public void actualizar(@Valid Usuario usuarioPorActualizar, Usuario usuarioPersistido) {
+  public void actualizar(@Valid Usuario usuarioPorActualizar) {
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuarioPorActualizar);
     if (!usuarioPorActualizar.getRoles().contains(Rol.VIAJANTE)) {
       this.clienteService.desvincularClienteDeViajante(usuarioPorActualizar.getIdUsuario());
@@ -268,11 +268,6 @@ public class UsuarioServiceImpl implements IUsuarioService {
     usuarioPorActualizar.setUsername(usuarioPorActualizar.getUsername().toLowerCase());
     usuarioRepository.save(usuarioPorActualizar);
     logger.warn("El Usuario {} se actualizó correctamente.", usuarioPorActualizar);
-  }
-
-  @Override
-  public void actualizarUsuario(Usuario usuario) {
-    usuarioRepository.save(usuario);
   }
 
   @Override

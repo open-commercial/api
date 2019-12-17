@@ -56,9 +56,6 @@ public class Usuario implements Serializable {
     @Email(message = "{mensaje_usuario_invalido_email}")
     private String email;
     
-//    @Column(length = 300)
-//    private String token;
-    
     private long idSucursalPredeterminada;
 
     private String passwordRecoveryKey;
@@ -72,7 +69,7 @@ public class Usuario implements Serializable {
     @NotEmpty(message = "{mensaje_usuario_no_selecciono_rol}")
     private List<Rol> roles;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name="tokenAcceso", joinColumns = @JoinColumn(name = "idUsuario"))
     private Set<TokenAcceso> tokens;
 
