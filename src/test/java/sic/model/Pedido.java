@@ -3,6 +3,7 @@ package sic.model;
 import lombok.*;
 import sic.modelo.Cliente;
 import sic.modelo.EstadoPedido;
+import sic.modelo.TipoDeEnvio;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -24,6 +25,7 @@ public class Pedido implements Serializable {
   private long idSucursal;
   private String nombreSucursal;
   private String detalleEnvio;
+  private TipoDeEnvio tipoDeEnvio;
   private boolean eliminado;
   private Cliente cliente;
   private String nombreUsuario;

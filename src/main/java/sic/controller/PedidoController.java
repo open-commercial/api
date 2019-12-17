@@ -1,6 +1,6 @@
 package sic.controller;
 
-import java.util.ArrayList;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 
@@ -68,15 +68,10 @@ public class PedidoController {
   public List<RenglonPedido> calcularRenglonesPedido(
       @RequestBody List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO,
       @PathVariable Long idCliente) {
-    List<RenglonPedido> renglonesPedido = new ArrayList<>();
-    nuevosRenglonesPedidoDTO.forEach(
-        nuevoRenglonesPedidoDTO ->
-            renglonesPedido.add(
-                pedidoService.calcularRenglonPedido(
-                    nuevoRenglonesPedidoDTO.getIdProductoItem(),
-                    nuevoRenglonesPedidoDTO.getCantidad(),
-                    clienteService.getClienteNoEliminadoPorId(idCliente))));
-    return renglonesPedido;
+    return pedidoService.calcularRenglonesPedido(
+        this.getArrayDeIdProducto(nuevosRenglonesPedidoDTO),
+        this.getArrayDeCantidadesProducto(nuevosRenglonesPedidoDTO),
+        idCliente);
   }
 
   @PutMapping("/pedidos")
@@ -91,10 +86,15 @@ public class PedidoController {
       pedido.setSucursal(sucursalService.getSucursalPorId(pedidoDTO.getIdSucursal()));
     if (pedidoDTO.getObservaciones() != null)
       pedido.setObservaciones(pedidoDTO.getObservaciones());
-    if (pedidoDTO.getTipoDeEnvio() != null)
-      pedido.setTipoDeEnvio(pedidoDTO.getTipoDeEnvio());
+    if (pedidoDTO.getTipoDeEnvio() != null) pedido.setTipoDeEnvio(pedidoDTO.getTipoDeEnvio());
     pedido.getRenglones().clear();
-    pedido.getRenglones().addAll(this.calcularRenglonesPedido(pedidoDTO.getRenglones(), pedido.getCliente().getIdCliente()));
+    pedido
+        .getRenglones()
+        .addAll(
+            pedidoService.calcularRenglonesPedido(
+                this.getArrayDeIdProducto(pedidoDTO.getRenglones()),
+                this.getArrayDeCantidadesProducto(pedidoDTO.getRenglones()),
+                pedido.getCliente().getIdCliente()));
     pedidoService.actualizar(pedido);
   }
 
@@ -129,17 +129,11 @@ public class PedidoController {
     pedido.setCliente(clienteService.getClienteNoEliminadoPorId(pedidoDTO.getIdCliente()));
     if (pedidoDTO.getTipoDeEnvio() != null)
       pedido.setTipoDeEnvio(pedidoDTO.getTipoDeEnvio());
-    List<RenglonPedido> renglonesPedido = new ArrayList<>();
-    pedidoDTO
-        .getRenglones()
-        .forEach(
-            nuevoRenglonesPedidoDTO ->
-                renglonesPedido.add(
-                    pedidoService.calcularRenglonPedido(
-                        nuevoRenglonesPedidoDTO.getIdProductoItem(),
-                        nuevoRenglonesPedidoDTO.getCantidad(),
-                        clienteService.getClienteNoEliminadoPorId(pedidoDTO.getIdCliente()))));
-    pedido.setRenglones(renglonesPedido);
+    pedido.setRenglones(
+        pedidoService.calcularRenglonesPedido(
+            this.getArrayDeIdProducto(pedidoDTO.getRenglones()),
+            this.getArrayDeCantidadesProducto(pedidoDTO.getRenglones()),
+            pedidoDTO.getIdCliente()));
     return pedidoService.guardar(pedido);
   }
 
@@ -185,5 +179,21 @@ public class PedidoController {
   })
   public Resultados calcularResultadosPedido(@RequestBody NuevosResultadosPedidoDTO nuevosResultadosPedidoDTO) {
     return pedidoService.calcularResultadosPedido(nuevosResultadosPedidoDTO);
+  }
+
+  private long[] getArrayDeIdProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones) {
+    long[] idProductoItem = new long[nuevosRenglones.size()];
+    for (int i = 0; i < nuevosRenglones.size(); ++i) {
+      idProductoItem[i] = nuevosRenglones.get(i).getIdProductoItem();
+    }
+    return idProductoItem;
+  }
+
+  private BigDecimal[] getArrayDeCantidadesProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones) {
+    BigDecimal[] cantidades = new BigDecimal[nuevosRenglones.size()];
+    for (int i = 0; i < nuevosRenglones.size(); ++i) {
+      cantidades[i] = nuevosRenglones.get(i).getCantidad();
+    }
+    return cantidades;
   }
 }

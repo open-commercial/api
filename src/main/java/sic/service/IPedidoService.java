@@ -9,7 +9,6 @@ import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.calculos.NuevosResultadosPedidoDTO;
 import sic.modelo.calculos.Resultados;
-import sic.modelo.dto.NuevoRenglonPedidoDTO;
 
 import javax.validation.Valid;
 
@@ -44,6 +43,8 @@ public interface IPedidoService {
   Pedido guardar(Pedido pedido);
 
   RenglonPedido calcularRenglonPedido(long idProducto, BigDecimal cantidad, Cliente cliente);
+
+  List<RenglonPedido> calcularRenglonesPedido(long[] idProductoItem, BigDecimal[] cantidad, long idCliente);
 
   Resultados calcularResultadosPedido(NuevosResultadosPedidoDTO calculoPedido);
 }

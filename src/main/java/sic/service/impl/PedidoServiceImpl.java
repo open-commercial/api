@@ -593,6 +593,21 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
+  public List<RenglonPedido> calcularRenglonesPedido(long[] idProductoItem, BigDecimal[] cantidad, long idCliente) {
+    if (idProductoItem.length != cantidad.length) {
+      throw new BusinessServiceException(
+              messageSource.getMessage(
+                      "mensaje_pedido_renglones_parametros_no_validos", null, Locale.getDefault()));
+    }
+    List<RenglonPedido> renglones = new ArrayList<>();
+    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
+    for (int i = 0; i < idProductoItem.length; ++i) {
+      renglones.add(this.calcularRenglonPedido(idProductoItem[i], cantidad[i], cliente));
+    }
+    return renglones;
+  }
+
+  @Override
   public Resultados calcularResultadosPedido(NuevosResultadosPedidoDTO calculoPedido) {
     Resultados resultados = Resultados.builder().build();
     resultados.setDescuentoPorcentaje(
