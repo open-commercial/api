@@ -6807,6 +6807,7 @@ class AppIntegrationTest {
     Credencial credencial = new Credencial();
     credencial.setUsername("marce");
     credencial.setPassword("passwordTest");
+    credencial.setAplicacion(Aplicacion.SIC_OPS_WEB);
     RestClientResponseException thrown =
       assertThrows(
         RestClientResponseException.class,

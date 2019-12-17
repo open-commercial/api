@@ -11,9 +11,17 @@ import sic.modelo.Rol;
 import sic.modelo.Usuario;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public interface UsuarioRepository
     extends PagingAndSortingRepository<Usuario, Long>, QuerydslPredicateExecutor<Usuario> {
+
+  @Query(
+          "SELECT u FROM Usuario u left join fetch u.tokens "
+                  + "WHERE u.idUsuario = :idUsuario "
+                  + "AND u.eliminado = false")
+  Optional<Usuario> findByIdUsuario(
+          @Param("idUsuario") long idUsuario);
 
   @Query(
       "SELECT u FROM Usuario u "

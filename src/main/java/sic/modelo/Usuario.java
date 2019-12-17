@@ -69,7 +69,7 @@ public class Usuario implements Serializable {
     @NotEmpty(message = "{mensaje_usuario_no_selecciono_rol}")
     private List<Rol> roles;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection 
     @CollectionTable(name="tokenAcceso", joinColumns = @JoinColumn(name = "idUsuario"))
     private Set<TokenAcceso> tokens;
 

@@ -76,6 +76,16 @@ public class AuthController {
     usuarioService.actualizar(usuario);
   }
 
+  @PutMapping("/logout-all-sessions")
+  public void logoutAllSessions(
+          @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuario = (int) claims.get("idUsuario");
+    Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
+    usuario.setTokens(Collections.emptySet());
+    usuarioService.actualizar(usuario);
+  }
+
   @GetMapping("/password-recovery")
   public void recuperarPassword(
       @RequestParam String email, @RequestParam long idSucursal, HttpServletRequest request) {
