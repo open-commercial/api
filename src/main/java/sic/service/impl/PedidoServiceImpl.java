@@ -428,11 +428,11 @@ public class PedidoServiceImpl implements IPedidoService {
                 .descuentoPorcentaje(
                         pedido.getDescuentoPorcentaje() != null
                         ? pedido.getDescuentoPorcentaje()
-                        : pedido.getDescuentoPorcentaje())
+                        : BigDecimal.ZERO)
                 .recargoPorcentaje(
                         pedido.getRecargoPorcentaje() != null
                         ? pedido.getRecargoPorcentaje()
-                        : pedido.getRecargoPorcentaje())
+                        : BigDecimal.ZERO)
                 .build());
     pedido.setSubTotal(resultados.getSubTotal());
     pedido.setDescuentoPorcentaje(resultados.getDescuentoPorcentaje());
