@@ -26,7 +26,6 @@ import java.time.LocalDateTime;
 public class ClienteDTO implements Serializable {
 
   private long idCliente;
-  private BigDecimal bonificacion;
   private String nroCliente;
   private String nombreFiscal;
   private String nombreFantasia;

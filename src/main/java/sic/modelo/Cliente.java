@@ -41,13 +41,7 @@ public class Cliente implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id_Cliente")
   private long idCliente;
-
-  @Column(precision = 25, scale = 15)
-  @NotNull(message = "{mensaje_cliente_vacio_bonificacion}")
-  @DecimalMin(value = "0", message = "{mensaje_cliente_bonificacion_negativa}")
-  @DecimalMax(value = "100", message = "{mensaje_cliente_bonificacion_superior_al_cien_porciento}")
-  private BigDecimal bonificacion;
-
+  
   @Transient
   private BigDecimal saldoCuentaCorriente;
 

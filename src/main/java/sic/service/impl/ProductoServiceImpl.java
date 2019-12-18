@@ -616,15 +616,22 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Page<Producto> getProductosConPrecioBonificado(Page<Producto> productos, Cliente cliente) {
-    BigDecimal bonificacion =
-        cliente.getBonificacion().divide(new BigDecimal("100"), RoundingMode.HALF_UP);
+  public Page<Producto> getProductosConPrecioBonificado(Page<Producto> productos) {
     productos.stream()
-        .filter(producto -> !producto.isOferta() && bonificacion.compareTo(BigDecimal.ZERO) > 0)
+        .filter(
+            producto ->
+                !producto.isOferta()
+                    && producto.getPorcentajePrecioBonificado() != null
+                    && producto.getPorcentajePrecioBonificado().compareTo(BigDecimal.ZERO) > 0)
         .forEach(
             p ->
                 p.setPrecioListaBonificado(
-                    p.getPrecioLista().subtract(p.getPrecioLista().multiply(bonificacion))));
+                    p.getPrecioLista()
+                        .subtract(
+                            p.getPrecioLista()
+                                .multiply(
+                                    p.getPorcentajePrecioBonificado()
+                                        .divide(new BigDecimal("100"), RoundingMode.HALF_UP)))));
     return productos;
   }
 

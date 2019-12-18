@@ -42,9 +42,9 @@ public interface IPedidoService {
 
   Pedido guardar(Pedido pedido);
 
-  RenglonPedido calcularRenglonPedido(long idProducto, BigDecimal cantidad, Cliente cliente);
+  RenglonPedido calcularRenglonPedido(long idProducto, BigDecimal cantidad);
 
-  List<RenglonPedido> calcularRenglonesPedido(long[] idProductoItem, BigDecimal[] cantidad, long idCliente);
+  List<RenglonPedido> calcularRenglonesPedido(long[] idProductoItem, BigDecimal[] cantidad);
 
   Resultados calcularResultadosPedido(NuevosResultadosPedidoDTO calculoPedido);
 }

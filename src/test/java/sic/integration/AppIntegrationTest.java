@@ -70,7 +70,7 @@ class AppIntegrationTest {
   @Value("${RECAPTCHA_TEST_KEY}")
   private String recaptchaTestKey;
 
-  private void crearDosProductos(String descripcionUno, String descripcionDos) {
+  private void crearDosProductos(String descripcionUno, BigDecimal porcentajePrecioBonificadoUno, String descripcionDos, BigDecimal porcentajePrecioBonificadoDos) {
     NuevoProductoDTO productoUno =
       NuevoProductoDTO.builder()
         .codigo(RandomStringUtils.random(10, false, true))
@@ -84,6 +84,7 @@ class AppIntegrationTest {
         .ivaPorcentaje(new BigDecimal("21.0"))
         .ivaNeto(new BigDecimal("210"))
         .precioLista(new BigDecimal("1210"))
+        .porcentajePrecioBonificado(porcentajePrecioBonificadoUno)
         .nota("ProductoTest1")
         .publico(true)
         .build();
@@ -100,6 +101,7 @@ class AppIntegrationTest {
         .ivaPorcentaje(new BigDecimal("10.5"))
         .ivaNeto(new BigDecimal("105"))
         .precioLista(new BigDecimal("1105"))
+        .porcentajePrecioBonificado(porcentajePrecioBonificadoDos)
         .nota("ProductoTest2")
         .build();
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
@@ -538,7 +540,6 @@ class AppIntegrationTest {
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
     ClienteDTO cliente =
         ClienteDTO.builder()
-            .bonificacion(BigDecimal.TEN)
             .nombreFiscal("Juan Fernando Cañete")
             .nombreFantasia("Menos mal que estamos nosotros.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -567,7 +568,6 @@ class AppIntegrationTest {
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
     ClienteDTO cliente =
       ClienteDTO.builder()
-        .bonificacion(BigDecimal.TEN)
         .nombreFiscal("Ricardo Tapia")
         .nombreFantasia("Menos mal que estan ellos.")
         .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -606,7 +606,6 @@ class AppIntegrationTest {
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
     ClienteDTO cliente =
         ClienteDTO.builder()
-            .bonificacion(BigDecimal.TEN)
             .nombreFiscal("Juan Fernando Cañete")
             .nombreFantasia("Menos mal que estamos nosotros.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -643,7 +642,6 @@ class AppIntegrationTest {
       .build();
     ClienteDTO cliente =
         ClienteDTO.builder()
-            .bonificacion(BigDecimal.TEN)
             .nombreFiscal("Juan Fernando Cañete")
             .nombreFantasia("Menos mal que estamos nosotros.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -680,7 +678,6 @@ class AppIntegrationTest {
       .build();
     ClienteDTO cliente =
         ClienteDTO.builder()
-            .bonificacion(BigDecimal.TEN)
             .nombreFiscal("Juan Fernando Cañete")
             .nombreFantasia("Menos mal que estamos nosotros.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -714,7 +711,6 @@ class AppIntegrationTest {
         UbicacionDTO.builder().calle("Sarmiento").numero(789).build();
     ClienteDTO cliente =
         ClienteDTO.builder()
-            .bonificacion(BigDecimal.TEN)
             .nombreFiscal("Juan Fernando Cañete")
             .nombreFantasia("Menos mal que estamos nosotros.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -753,7 +749,6 @@ class AppIntegrationTest {
     UbicacionDTO ubicacionDeEnvio = UbicacionDTO.builder().calle("Rosas").numero(6665).build();
     ClienteDTO cliente =
       ClienteDTO.builder()
-        .bonificacion(BigDecimal.TEN)
         .nombreFiscal("Juan Fernando Cañete")
         .nombreFantasia("Menos mal que estamos nosotros.")
         .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -791,7 +786,6 @@ class AppIntegrationTest {
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
     ClienteDTO cliente =
         ClienteDTO.builder()
-            .bonificacion(BigDecimal.TEN)
             .nombreFiscal("Juan Fernando Cañete")
             .nombreFantasia("Menos mal que estamos nosotros.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -825,7 +819,6 @@ class AppIntegrationTest {
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
     ClienteDTO cliente =
         ClienteDTO.builder()
-            .bonificacion(BigDecimal.TEN)
             .nombreFiscal("Juan Fernando Cañete")
             .nombreFantasia("Menos mal que estamos nosotros.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -859,7 +852,6 @@ class AppIntegrationTest {
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
     ClienteDTO cliente =
       ClienteDTO.builder()
-        .bonificacion(BigDecimal.TEN)
         .nombreFiscal("Juan Fernando Cañete")
         .nombreFantasia("Menos mal que estamos nosotros.")
         .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -897,7 +889,6 @@ class AppIntegrationTest {
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
     ClienteDTO cliente =
         ClienteDTO.builder()
-            .bonificacion(BigDecimal.TEN)
             .nombreFiscal("Juan Fernando Cañete")
             .nombreFantasia("Menos mal que estamos nosotros.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -941,7 +932,6 @@ class AppIntegrationTest {
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
     ClienteDTO cliente =
         ClienteDTO.builder()
-            .bonificacion(BigDecimal.TEN)
             .nombreFiscal("Juan Fernando Cañete")
             .nombreFantasia("Menos mal que estamos nosotros.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -1201,7 +1191,9 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearFacturaVentaAndDividirlas() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true), new BigDecimal("20"),
+        RandomStringUtils.random(10, false, true), new BigDecimal("20"));
     ProductoDTO productoUno =
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO productoDos =
@@ -1355,7 +1347,9 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearFacturaVentaASucursal1() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true), new BigDecimal("20"),
+        RandomStringUtils.random(10, false, true), new BigDecimal("20"));
     ProductoDTO productoUno =
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO productoDos =
@@ -1483,7 +1477,9 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearFacturaVentaASucursal2() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true), new BigDecimal("20"),
+        RandomStringUtils.random(10, false, true), new BigDecimal("20"));
     this.shouldCrearSucursalResponsableInscripto();
     ProductoDTO productoUno =
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
@@ -1629,7 +1625,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearFacturaVentaB() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        new BigDecimal("20"),
+        RandomStringUtils.random(10, false, true),
+        new BigDecimal("20"));
     ProductoDTO productoUno =
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO productoDos =
@@ -1761,7 +1761,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldNotModificarFacturaSiElClienteSeModifica() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO,
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO);
     ProductoDTO productoUno =
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO productoDos =
@@ -1886,7 +1890,9 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearFacturaVentaC() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true), new BigDecimal("20"),
+        RandomStringUtils.random(10, false, true), new BigDecimal("20"));
     ProductoDTO productoUno =
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO productoDos =
@@ -2017,7 +2023,9 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearFacturaVentaX() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true), new BigDecimal("20"),
+        RandomStringUtils.random(10, false, true), new BigDecimal("20"));
     ProductoDTO productoUno =
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO productoDos =
@@ -2105,7 +2113,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearFacturaVentaY() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO,
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO);
     ProductoDTO productoUno =
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO productoDos =
@@ -2235,7 +2247,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearFacturaVentaPresupuesto() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO,
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO);
     ProductoDTO productoUno =
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO productoDos =
@@ -2365,7 +2381,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearFacturaVentaSinTransportista() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO,
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO);
     ProductoDTO productoUno =
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO productoDos =
@@ -2509,7 +2529,11 @@ class AppIntegrationTest {
   @Test
   void shouldCrearFacturaVentaXParaClienteSinUbicacionDeFacturacion() {
     this.shouldCrearClienteResponsableInscripto();
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO,
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO);
     ProductoDTO productoUno =
       restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO productoDos =
@@ -2599,7 +2623,11 @@ class AppIntegrationTest {
   @Test
   void shouldNotCrearFacturaVentaAParaClienteSinUbicacionDeFacturacion() {
     this.shouldCrearClienteResponsableInscripto();
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO,
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO);
     ProductoDTO productoUno =
         restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     ProductoDTO productoDos =
@@ -2729,7 +2757,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearFacturaCompraASucursal1() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO,
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO);
     RenglonFactura renglonUno =
       restTemplate.getForObject(
         apiPrefix
@@ -2843,7 +2875,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearFacturaCompraASucursal2() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO,
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO);
     this.shouldCrearSucursalResponsableInscripto();
     RenglonFactura renglonUno =
       restTemplate.getForObject(
@@ -2958,7 +2994,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearFacturaBCompraSucursal1() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO,
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO);
     RenglonFactura renglonUno =
       restTemplate.getForObject(
         apiPrefix
@@ -3076,7 +3116,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearFacturaBCompraSucursal2() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO,
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO);
     this.shouldCrearSucursalResponsableInscripto();
     RenglonFactura renglonUno =
       restTemplate.getForObject(
@@ -3195,7 +3239,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearFacturaCompraC() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO,
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO);
     RenglonFactura renglonUno =
       restTemplate.getForObject(
         apiPrefix
@@ -3313,7 +3361,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearFacturaCompraX() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO,
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO);
     RenglonFactura renglonUno =
       restTemplate.getForObject(
         apiPrefix
@@ -3431,7 +3483,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearFacturaCompraPresupuesto() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO,
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO);
     RenglonFactura renglonUno =
       restTemplate.getForObject(
         apiPrefix
@@ -3633,7 +3689,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCambiarPreciosProductos() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO,
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO);
     long[] idsProductos = {1L, 2L};
     ProductosParaActualizarDTO productosParaActualizarDTO = ProductosParaActualizarDTO.builder()
       .idProducto(idsProductos).precioCosto(new BigDecimal("150"))
@@ -3665,7 +3725,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCambiarMedidasProductos() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO,
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO);
     long[] idsProductos = {1L, 2L};
     MedidaDTO medida = MedidaDTO.builder()
       .nombre("Distancia de Plank")
@@ -3683,7 +3747,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCambiarRubrosProductos() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO,
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO);
     long[] idsProductos = {1L, 2L};
     RubroDTO rubro = RubroDTO.builder()
       .nombre("Telefonía Galactica")
@@ -3701,7 +3769,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCambiarProveedorProductos() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO,
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO);
     long[] idsProductos = {1L, 2L};
     ProveedorDTO proveedor =
       ProveedorDTO.builder()
@@ -4189,7 +4261,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldActualizarStockConCantidadEnSucursal2() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO,
+        RandomStringUtils.random(10, false, true),
+        BigDecimal.ZERO);
     this.shouldCrearSucursalResponsableInscripto();
     ProductoDTO producto1 =
         restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
@@ -5657,7 +5733,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearPedido() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+            RandomStringUtils.random(10, false, true),
+            new BigDecimal("20"),
+            RandomStringUtils.random(10, false, true),
+            new BigDecimal("20"));
     List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
@@ -5691,7 +5771,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCalcularPiePedido() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+            RandomStringUtils.random(10, false, true),
+            new BigDecimal("20"),
+            RandomStringUtils.random(10, false, true),
+            new BigDecimal("20"));
     List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
@@ -5727,7 +5811,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearPedidoConUbicacionFacturacion() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+            RandomStringUtils.random(10, false, true),
+            BigDecimal.ZERO,
+            RandomStringUtils.random(10, false, true),
+            BigDecimal.ZERO);
     List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
@@ -5759,7 +5847,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearPedidoConUbicacionEnvio() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+            RandomStringUtils.random(10, false, true),
+            BigDecimal.ZERO,
+            RandomStringUtils.random(10, false, true),
+            BigDecimal.ZERO);
     List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
     renglonesPedidoDTO.add(
       NuevoRenglonPedidoDTO.builder()
@@ -5791,7 +5883,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearPedidoConUbicacionSucursal() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+            RandomStringUtils.random(10, false, true),
+            BigDecimal.ZERO,
+            RandomStringUtils.random(10, false, true),
+            BigDecimal.ZERO);
     this.shouldCrearSucursalResponsableInscripto();
     ConfiguracionSucursalDTO configuracionSucursalDTO =
       restTemplate.getForObject(apiPrefix + "/configuraciones-sucursal/2", ConfiguracionSucursalDTO.class);
@@ -5828,7 +5924,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldNotCrearPedidoSinUbicacionSucursal() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+            RandomStringUtils.random(10, false, true),
+            BigDecimal.ZERO,
+            RandomStringUtils.random(10, false, true),
+            BigDecimal.ZERO);
     this.shouldCrearSucursalResponsableInscripto();
     ConfiguracionSucursalDTO configuracionSucursalDTO =
       restTemplate.getForObject(apiPrefix + "/configuraciones-sucursal/2", ConfiguracionSucursalDTO.class);
@@ -5888,7 +5988,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldModificarPedido() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+            RandomStringUtils.random(10, false, true),
+            new BigDecimal("20"),
+            RandomStringUtils.random(10, false, true),
+            new BigDecimal("20"));
     List<NuevoRenglonPedidoDTO> nuevosRenglonesDePedido = new ArrayList<>();
     nuevosRenglonesDePedido.add(
       NuevoRenglonPedidoDTO.builder()
@@ -5918,7 +6022,11 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("5947.200000000000000"), pedidoRecuperado.getTotalEstimado());
     assertEquals(pedidoDTO.getObservaciones(), pedidoRecuperado.getObservaciones());
     assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+            RandomStringUtils.random(10, false, true),
+            new BigDecimal("20"),
+            RandomStringUtils.random(10, false, true),
+            new BigDecimal("20"));
     nuevosRenglonesDePedido = new ArrayList<>();
     nuevosRenglonesDePedido.add(
     NuevoRenglonPedidoDTO.builder()
@@ -6461,7 +6569,11 @@ class AppIntegrationTest {
 
   @Test
   void shouldAgregarItemsAlCarritoCompra() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+        RandomStringUtils.random(10, false, true),
+        new BigDecimal("20"),
+        RandomStringUtils.random(10, false, true),
+        new BigDecimal("20"));
     restTemplate.postForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=5", null, ItemCarritoCompra.class);
     restTemplate.postForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/2?cantidad=9", null, ItemCarritoCompra.class);
     ItemCarritoCompra item1 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
@@ -6476,14 +6588,22 @@ class AppIntegrationTest {
 
   @Test
   void shouldDevolverNullCuandoElItemNoExisteEnElCarrito() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+            RandomStringUtils.random(10, false, true),
+            BigDecimal.ZERO,
+            RandomStringUtils.random(10, false, true),
+            BigDecimal.ZERO);
     ItemCarritoCompra item1 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
     assertNull(item1);
   }
 
   @Test
   void shouldModificarCantidadesDeUnItemDelCarrito() {
-    this.crearDosProductos(RandomStringUtils.random(10, false, true), RandomStringUtils.random(10, false, true));
+    this.crearDosProductos(
+            RandomStringUtils.random(10, false, true),
+            BigDecimal.ZERO,
+            RandomStringUtils.random(10, false, true),
+            BigDecimal.ZERO);
     this.shouldAgregarItemsAlCarritoCompra();
     restTemplate.postForObject(
         apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=2",
@@ -6617,7 +6737,9 @@ class AppIntegrationTest {
   void buscarProductosAndVerificarPrecios() {
     this.crearDosProductos(
         "A " + RandomStringUtils.random(10, false, true),
-        "B" + RandomStringUtils.random(10, false, true));
+        new BigDecimal("10"),
+        "B" + RandomStringUtils.random(10, false, true),
+        new BigDecimal("10"));
     BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder().pagina(0).build();
     HttpEntity<BusquedaProductoCriteria> requestEntity = new HttpEntity<>(criteria);
     PaginaRespuestaRest<ProductoDTO> paginaRespuestaRest =
@@ -6630,13 +6752,8 @@ class AppIntegrationTest {
             .getBody();
     assertNotNull(paginaRespuestaRest);
     List<ProductoDTO> productosRecuperados = paginaRespuestaRest.getContent();
-    assertNull(productosRecuperados.get(0).getPrecioListaBonificado());
-    assertNull(productosRecuperados.get(1).getPrecioListaBonificado());
-    ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/2", ClienteDTO.class);
-    cliente.setBonificacion(BigDecimal.TEN);
-    restTemplate.put(apiPrefix + "/clientes", cliente);
-    cliente = restTemplate.getForObject(apiPrefix + "/clientes/2", ClienteDTO.class);
-    assertEquals(new BigDecimal("10.000000000000000"), cliente.getBonificacion());
+    assertNotNull(productosRecuperados.get(0).getPrecioListaBonificado());
+    assertNotNull(productosRecuperados.get(1).getPrecioListaBonificado());
     paginaRespuestaRest =
         restTemplate
             .exchange(
@@ -6645,7 +6762,7 @@ class AppIntegrationTest {
                 requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<ProductoDTO>>() {})
             .getBody();
-    assertNotNull(paginaRespuestaRest);
+    assertNotNull(paginaRespuestaRest);//asd
     productosRecuperados = paginaRespuestaRest.getContent();
     assertEquals(
         new BigDecimal("1089.000000000000000000000000000000"),
@@ -6686,7 +6803,7 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearReporteListaPrecios() {
-    this.crearDosProductos("1er Producto", "2do Producto");
+    this.crearDosProductos("1er Producto", BigDecimal.ZERO, "2do Producto", BigDecimal.ZERO);
     BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder().pagina(0).build();
     HttpEntity<BusquedaProductoCriteria> requestEntity = new HttpEntity<>(criteria);
     restTemplate
@@ -6767,7 +6884,7 @@ class AppIntegrationTest {
 
   @Test
   void shouldCrearProductosEnTresSucursales(){
-    this.crearDosProductos("A", "B");
+    this.crearDosProductos("A", BigDecimal.ZERO, "B", BigDecimal.ZERO);
     BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder().pagina(0).build();
     HttpEntity<BusquedaProductoCriteria> requestEntity = new HttpEntity<>(criteria);
     PaginaRespuestaRest<ProductoDTO> paginaRespuestaRest =

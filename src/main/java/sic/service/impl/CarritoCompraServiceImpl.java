@@ -102,9 +102,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     Page<ItemCarritoCompra> items =
         carritoCompraRepository.findAllByUsuario(
             usuarioService.getUsuarioNoEliminadoPorId(idUsuario), pageable);
-    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
-    BigDecimal bonificacion = cliente.getBonificacion();
-    items.forEach(i -> this.calcularImporteBonificado(i, bonificacion));
+    items.forEach(this::calcularImporteBonificado);
     return items;
   }
 
@@ -113,8 +111,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
       long idUsuario, long idProducto) {
     ItemCarritoCompra itemCarritoCompra =
         this.carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
-    BigDecimal bonificacion = clienteService.getClientePorIdUsuario(idUsuario).getBonificacion();
-    this.calcularImporteBonificado(itemCarritoCompra, bonificacion);
+    this.calcularImporteBonificado(itemCarritoCompra);
     return itemCarritoCompra;
   }
 
@@ -195,10 +192,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
         i ->
             renglonesPedido.add(
                 pedidoService.calcularRenglonPedido(
-                    i.getProducto().getIdProducto(),
-                    i.getCantidad(),
-                    clienteService.getClienteNoEliminadoPorId(
-                        nuevaOrdenDeCompraDTO.getIdCliente()))));
+                    i.getProducto().getIdProducto(), i.getCantidad())));
     pedido.setRenglones(renglonesPedido);
     pedido.setRenglones(renglonesPedido);
     pedido.setTipoDeEnvio(nuevaOrdenDeCompraDTO.getTipoDeEnvio());
@@ -207,8 +201,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     return p;
   }
 
-  private void calcularImporteBonificado(
-      ItemCarritoCompra itemCarritoCompra, BigDecimal bonificacion) {
+  private void calcularImporteBonificado(ItemCarritoCompra itemCarritoCompra) {
     if (itemCarritoCompra != null) {
       itemCarritoCompra.setImporte(
           itemCarritoCompra
@@ -240,7 +233,12 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
                   .multiply(itemCarritoCompra.getCantidad())
                   .setScale(2, RoundingMode.HALF_UP));
         }
-      } else if (bonificacion != null && bonificacion.compareTo(BigDecimal.ZERO) > 0) {
+      } else if (itemCarritoCompra.getProducto().getPorcentajePrecioBonificado() != null
+          && itemCarritoCompra
+                  .getProducto()
+                  .getPorcentajePrecioBonificado()
+                  .compareTo(BigDecimal.ZERO)
+              > 0) {
         itemCarritoCompra
             .getProducto()
             .setPrecioListaBonificado(
@@ -248,7 +246,11 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
                     .getProducto()
                     .getPrecioLista()
                     .multiply(
-                        BigDecimal.ONE.subtract(bonificacion.divide(CIEN, RoundingMode.HALF_UP)))
+                        BigDecimal.ONE.subtract(
+                            itemCarritoCompra
+                                .getProducto()
+                                .getPorcentajePrecioBonificado()
+                                .divide(CIEN, RoundingMode.HALF_UP)))
                     .setScale(2, RoundingMode.HALF_UP));
         if (itemCarritoCompra.getCantidad().compareTo(itemCarritoCompra.getProducto().getBulto())
             >= 0) {

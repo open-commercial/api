@@ -29,11 +29,11 @@ VALUES (1,'ADMINISTRADOR'),(1,'ENCARGADO'),(1,'COMPRADOR'),(2,'COMPRADOR');
 INSERT INTO formadepago(afecta_caja, eliminada, nombre, predeterminado)
 VALUES (true,false,'Efectivo',true);
 
-INSERT INTO cliente(bonificacion, categoriaIva, contacto, eliminado, email, fecha_alta, id_fiscal,
+INSERT INTO cliente(categoriaIva, contacto, eliminado, email, fecha_alta, id_fiscal,
     nombre_fantasia, nombre_fiscal, nro_cliente, predeterminado, telefono, id_usuario_credencial,
     id_ubicacion_envio, id_ubicacion_facturacion, id_usuario_viajante)
-VALUES (20.000000000000000,'RESPONSABLE_INSCRIPTO','',false,'','2019-07-18 02:43:38',20362148952,'Peter Parker',
-    'Peter Parker','25158',false,'379123452',2,1,2,NULL),(0.000000000000000,'RESPONSABLE_INSCRIPTO','El señor Oscuro',
+VALUES ('RESPONSABLE_INSCRIPTO','',false,'','2019-07-18 02:43:38',20362148952,'Peter Parker',
+    'Peter Parker','25158',false,'379123452',2,1,2,NULL),('RESPONSABLE_INSCRIPTO','El señor Oscuro',
     false,'Cliente@test.com.br','2019-07-18 02:57:38',2355668,'Cliente test','Cliente test','93413',false,'372461245',1,NULL,NULL,NULL);
 
 INSERT INTO transportista(eliminado, nombre, telefono, web, id_ubicacion)

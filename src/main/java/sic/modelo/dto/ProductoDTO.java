@@ -36,6 +36,7 @@ public class ProductoDTO implements Serializable {
   private boolean publico;
   private boolean oferta;
   private BigDecimal porcentajeBonificacionOferta;
+  private BigDecimal porcentajePrecioBonificado;
   private BigDecimal precioListaBonificado;
   private LocalDateTime fechaUltimaModificacion;
   private String estanteria;

@@ -256,16 +256,9 @@ public class FacturaController {
       @RequestParam long idProducto,
       @RequestParam TipoDeComprobante tipoDeComprobante,
       @RequestParam Movimiento movimiento,
-      @RequestParam BigDecimal cantidad,
-      @RequestParam long idCliente) {
+      @RequestParam BigDecimal cantidad) {
     return facturaService.calcularRenglon(
-        tipoDeComprobante,
-        movimiento,
-        cantidad,
-        idProducto,
-        false,
-        clienteService.getClienteNoEliminadoPorId(idCliente),
-        null);
+        tipoDeComprobante, movimiento, cantidad, idProducto, false, null);
   }
 
   @GetMapping("/facturas/renglon-compra")
@@ -277,7 +270,7 @@ public class FacturaController {
       @RequestParam BigDecimal cantidad,
       @RequestParam BigDecimal bonificacion) {
     return facturaService.calcularRenglon(
-        tipoDeComprobante, movimiento, cantidad, idProducto, false, null, bonificacion);
+        tipoDeComprobante, movimiento, cantidad, idProducto, false, bonificacion);
   }
 
   @PostMapping("/facturas/total-facturado-venta/criteria")

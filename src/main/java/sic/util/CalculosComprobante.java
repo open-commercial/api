@@ -24,7 +24,7 @@ public class CalculosComprobante {
 
   public static BigDecimal calcularProporcion(BigDecimal subtotal, BigDecimal porcentaje) {
     BigDecimal resultado = BigDecimal.ZERO;
-    if (porcentaje.compareTo(BigDecimal.ZERO) != 0) {
+    if (porcentaje != null && porcentaje.compareTo(BigDecimal.ZERO) != 0) {
       resultado = subtotal.multiply(porcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
     }
     return resultado;

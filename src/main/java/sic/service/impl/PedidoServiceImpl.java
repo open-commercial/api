@@ -492,7 +492,6 @@ public class PedidoServiceImpl implements IPedidoService {
                                     r.getCantidad(),
                                     r.getIdProductoItem(),
                                     false,
-                                    this.getPedidoNoEliminadoPorId(idPedido).getCliente(),
                                     null))));
     HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
     if (!renglonesDeFacturas.isEmpty()) {
@@ -549,7 +548,7 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public RenglonPedido calcularRenglonPedido(long idProducto, BigDecimal cantidad, Cliente cliente) {
+  public RenglonPedido calcularRenglonPedido(long idProducto, BigDecimal cantidad) {
     if (cantidad.compareTo(BigDecimal.ZERO) <= 0) {
       throw new BusinessServiceException(
           messageSource.getMessage(
@@ -571,10 +570,10 @@ public class PedidoServiceImpl implements IPedidoService {
           CalculosComprobante.calcularProporcion(
               nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionOferta()));
     } else if (nuevoRenglon.getCantidad().compareTo(producto.getBulto()) >= 0) {
-      nuevoRenglon.setBonificacionPorcentaje(cliente.getBonificacion());
+      nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajePrecioBonificado());
       nuevoRenglon.setBonificacionNeta(
           CalculosComprobante.calcularProporcion(
-              nuevoRenglon.getPrecioUnitario(), cliente.getBonificacion()));
+              nuevoRenglon.getPrecioUnitario(), producto.getPorcentajePrecioBonificado()));
     } else {
       nuevoRenglon.setBonificacionPorcentaje(BigDecimal.ZERO);
       nuevoRenglon.setBonificacionNeta(BigDecimal.ZERO);
@@ -593,16 +592,15 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public List<RenglonPedido> calcularRenglonesPedido(long[] idProductoItem, BigDecimal[] cantidad, long idCliente) {
+  public List<RenglonPedido> calcularRenglonesPedido(long[] idProductoItem, BigDecimal[] cantidad) {
     if (idProductoItem.length != cantidad.length) {
       throw new BusinessServiceException(
-              messageSource.getMessage(
-                      "mensaje_pedido_renglones_parametros_no_validos", null, Locale.getDefault()));
+          messageSource.getMessage(
+              "mensaje_pedido_renglones_parametros_no_validos", null, Locale.getDefault()));
     }
     List<RenglonPedido> renglones = new ArrayList<>();
-    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     for (int i = 0; i < idProductoItem.length; ++i) {
-      renglones.add(this.calcularRenglonPedido(idProductoItem[i], cantidad[i], cliente));
+      renglones.add(this.calcularRenglonPedido(idProductoItem[i], cantidad[i]));
     }
     return renglones;
   }

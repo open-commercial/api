@@ -20,7 +20,6 @@ public class NuevoProductoDTO {
   private String descripcion;
   private Map<Long,BigDecimal> cantidadEnSucursal;
   private boolean hayStock;
-  private BigDecimal precioBonificado;
   private BigDecimal cantMinima;
   private BigDecimal bulto;
   private BigDecimal precioCosto;
@@ -29,6 +28,8 @@ public class NuevoProductoDTO {
   private BigDecimal precioVentaPublico;
   private BigDecimal ivaPorcentaje;
   private BigDecimal ivaNeto;
+  private BigDecimal precioBonificado;
+  private BigDecimal porcentajePrecioBonificado;
   private BigDecimal precioLista;
   private boolean ilimitado;
   private boolean publico;
