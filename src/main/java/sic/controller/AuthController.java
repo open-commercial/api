@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -51,7 +50,6 @@ public class AuthController {
         if (f.getAplicacion().equals(credencial.getAplicacion()))
           token = f.getToken();
       }
-      return token;
     } else {
       token = authService.generarToken(usuario.getIdUsuario(), credencial.getAplicacion(), usuario.getRoles());
       tokenAcceso = new TokenAcceso();
@@ -59,8 +57,8 @@ public class AuthController {
       tokenAcceso.setToken(token);
       usuario.getTokens().add(tokenAcceso);
       usuarioService.actualizar(usuario);
-      return token;
     }
+    return token;
   }
 
   @PutMapping("/logout")
@@ -82,7 +80,7 @@ public class AuthController {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuario = (int) claims.get("idUsuario");
     Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
-    usuario.setTokens(Collections.emptySet());
+    usuario.getTokens().clear();
     usuarioService.actualizar(usuario);
   }
 

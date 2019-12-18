@@ -104,10 +104,8 @@ public class UsuarioController {
         Aplicacion aplicacion = Aplicacion.valueOf(claims.get("app").toString());
         TokenAcceso tokenAcceso = TokenAcceso.builder().aplicacion(aplicacion).build();
         usuarioPersistido.getTokens().remove(tokenAcceso);
-        usuarioPorActualizar.setTokens(usuarioPersistido.getTokens());
-      } else {
-        usuarioPorActualizar.setTokens(usuarioPersistido.getTokens());
       }
+      usuarioPorActualizar.setTokens(usuarioPersistido.getTokens());
       usuarioService.actualizar(usuarioPorActualizar);
     } else {
       throw new ForbiddenException(messageSource.getMessage(

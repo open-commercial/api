@@ -3,6 +3,7 @@ package sic.modelo;
 import lombok.*;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Embeddable
 @Data
@@ -10,7 +11,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @EqualsAndHashCode(of = "aplicacion")
 @Builder
-public class TokenAcceso {
+public class TokenAcceso implements Serializable {
 
     @Column(length = 300)
     private String token;
