@@ -703,19 +703,18 @@ public class FacturaServiceImpl implements IFacturaService {
                         .multiply(
                             producto.getIvaPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP)));
       }
-    } else if (movimiento == Movimiento.VENTA) {
-      if (tipo == TipoDeComprobante.FACTURA_A
-          || tipo == TipoDeComprobante.FACTURA_B
-          || tipo == TipoDeComprobante.PRESUPUESTO) {
-        resultado =
-            producto
-                .getPrecioVentaPublico()
-                .multiply(
-                    BigDecimal.ONE
-                        .subtract(bonificacionPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))
-                        .multiply(
-                            producto.getIvaPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP)));
-      }
+    } else if (movimiento == Movimiento.VENTA
+        && (tipo == TipoDeComprobante.FACTURA_A
+            || tipo == TipoDeComprobante.FACTURA_B
+            || tipo == TipoDeComprobante.PRESUPUESTO)) {
+      resultado =
+          producto
+              .getPrecioVentaPublico()
+              .multiply(
+                  BigDecimal.ONE
+                      .subtract(bonificacionPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))
+                      .multiply(
+                          producto.getIvaPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP)));
     }
     return resultado;
   }
@@ -990,7 +989,7 @@ public class FacturaServiceImpl implements IFacturaService {
       nuevoRenglon.setBonificacionNeta(
           CalculosComprobante.calcularProporcion(
               nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionOferta()));
-    } else if (nuevoRenglon.getCantidad().compareTo(producto.getBulto()) >= 0) {
+    } else if (nuevoRenglon.getCantidad().compareTo(producto.getBulto()) >= 0 && producto.getPorcentajePrecioBonificado() != null) {
       nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajePrecioBonificado());
       nuevoRenglon.setBonificacionNeta(
           CalculosComprobante.calcularProporcion(
