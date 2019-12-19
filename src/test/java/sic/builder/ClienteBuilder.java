@@ -10,6 +10,7 @@ public class ClienteBuilder {
   private long idCliente = 0L;
   private BigDecimal saldo = BigDecimal.ZERO;
   private String nroCliente = "00001";
+  private BigDecimal montoCompraMinima = BigDecimal.ONE;
   private String nombreFiscal = "Construcciones S.A.";
   private String nombreFantasia = "Servimetal";
   private CategoriaIVA categoriaIVA = CategoriaIVA.RESPONSABLE_INSCRIPTO;
@@ -27,8 +28,9 @@ public class ClienteBuilder {
 
   public Cliente build() {
     return new Cliente(
-      idCliente,
+        idCliente,
         saldo,
+        montoCompraMinima,
         nroCliente,
         nombreFiscal,
         nombreFantasia,
@@ -58,6 +60,11 @@ public class ClienteBuilder {
 
   public ClienteBuilder withNroCliente(String nroCliente) {
     this.nroCliente = nroCliente;
+    return this;
+  }
+
+  public ClienteBuilder withMontoCompraMinima(BigDecimal montoCompraMinima) {
+    this.montoCompraMinima = montoCompraMinima;
     return this;
   }
 

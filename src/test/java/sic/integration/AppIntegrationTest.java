@@ -84,7 +84,7 @@ class AppIntegrationTest {
         .ivaPorcentaje(new BigDecimal("21.0"))
         .ivaNeto(new BigDecimal("210"))
         .precioLista(new BigDecimal("1210"))
-        .porcentajePrecioBonificado(porcentajePrecioBonificadoUno)
+        .porcentajeBonificacionPrecio(porcentajePrecioBonificadoUno)
         .nota("ProductoTest1")
         .publico(true)
         .build();
@@ -101,7 +101,7 @@ class AppIntegrationTest {
         .ivaPorcentaje(new BigDecimal("10.5"))
         .ivaNeto(new BigDecimal("105"))
         .precioLista(new BigDecimal("1105"))
-        .porcentajePrecioBonificado(porcentajePrecioBonificadoDos)
+        .porcentajeBonificacionPrecio(porcentajePrecioBonificadoDos)
         .nota("ProductoTest2")
         .build();
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
@@ -540,6 +540,7 @@ class AppIntegrationTest {
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
     ClienteDTO cliente =
         ClienteDTO.builder()
+             .montoCompraMinima(BigDecimal.ONE)
             .nombreFiscal("Juan Fernando Cañete")
             .nombreFantasia("Menos mal que estamos nosotros.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -567,16 +568,17 @@ class AppIntegrationTest {
         .build();
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
     ClienteDTO cliente =
-      ClienteDTO.builder()
-        .nombreFiscal("Ricardo Tapia")
-        .nombreFantasia("Menos mal que estan ellos.")
-        .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-        .idFiscal(1244557L)
-        .email("tapia@outlook.com.cl")
-        .telefono("3745112324")
-        .contacto("Ricardo, trabaja por encargo.")
-        .idCredencial(credencial.getIdUsuario())
-        .build();
+        ClienteDTO.builder()
+            .montoCompraMinima(BigDecimal.ONE)
+            .nombreFiscal("Ricardo Tapia")
+            .nombreFantasia("Menos mal que estan ellos.")
+            .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+            .idFiscal(1244557L)
+            .email("tapia@outlook.com.cl")
+            .telefono("3745112324")
+            .contacto("Ricardo, trabaja por encargo.")
+            .idCredencial(credencial.getIdUsuario())
+            .build();
     ClienteDTO clienteRecuperado =
       restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class);
     assertEquals(cliente, clienteRecuperado);
@@ -606,6 +608,7 @@ class AppIntegrationTest {
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
     ClienteDTO cliente =
         ClienteDTO.builder()
+             .montoCompraMinima(BigDecimal.ONE)
             .nombreFiscal("Juan Fernando Cañete")
             .nombreFantasia("Menos mal que estamos nosotros.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -642,6 +645,7 @@ class AppIntegrationTest {
       .build();
     ClienteDTO cliente =
         ClienteDTO.builder()
+            .montoCompraMinima(BigDecimal.ONE)
             .nombreFiscal("Juan Fernando Cañete")
             .nombreFantasia("Menos mal que estamos nosotros.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -678,6 +682,7 @@ class AppIntegrationTest {
       .build();
     ClienteDTO cliente =
         ClienteDTO.builder()
+            .montoCompraMinima(BigDecimal.ONE)
             .nombreFiscal("Juan Fernando Cañete")
             .nombreFantasia("Menos mal que estamos nosotros.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -711,6 +716,7 @@ class AppIntegrationTest {
         UbicacionDTO.builder().calle("Sarmiento").numero(789).build();
     ClienteDTO cliente =
         ClienteDTO.builder()
+            .montoCompraMinima(BigDecimal.ONE)
             .nombreFiscal("Juan Fernando Cañete")
             .nombreFantasia("Menos mal que estamos nosotros.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -749,6 +755,7 @@ class AppIntegrationTest {
     UbicacionDTO ubicacionDeEnvio = UbicacionDTO.builder().calle("Rosas").numero(6665).build();
     ClienteDTO cliente =
       ClienteDTO.builder()
+        .montoCompraMinima(BigDecimal.ONE)
         .nombreFiscal("Juan Fernando Cañete")
         .nombreFantasia("Menos mal que estamos nosotros.")
         .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -786,6 +793,7 @@ class AppIntegrationTest {
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
     ClienteDTO cliente =
         ClienteDTO.builder()
+            .montoCompraMinima(BigDecimal.ONE)
             .nombreFiscal("Juan Fernando Cañete")
             .nombreFantasia("Menos mal que estamos nosotros.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -819,6 +827,7 @@ class AppIntegrationTest {
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
     ClienteDTO cliente =
         ClienteDTO.builder()
+            .montoCompraMinima(BigDecimal.ONE)
             .nombreFiscal("Juan Fernando Cañete")
             .nombreFantasia("Menos mal que estamos nosotros.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -851,16 +860,17 @@ class AppIntegrationTest {
         .build();
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
     ClienteDTO cliente =
-      ClienteDTO.builder()
-        .nombreFiscal("Juan Fernando Cañete")
-        .nombreFantasia("Menos mal que estamos nosotros.")
-        .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-        .idFiscal(1244557L)
-        .email("caniete@yahoo.com.br")
-        .telefono("3785663322")
-        .contacto("Ramon el hermano de Juan")
-        .idCredencial(credencial.getIdUsuario())
-        .build();
+        ClienteDTO.builder()
+            .montoCompraMinima(BigDecimal.ONE)
+            .nombreFiscal("Juan Fernando Cañete")
+            .nombreFantasia("Menos mal que estamos nosotros.")
+            .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+            .idFiscal(1244557L)
+            .email("caniete@yahoo.com.br")
+            .telefono("3785663322")
+            .contacto("Ramon el hermano de Juan")
+            .idCredencial(credencial.getIdUsuario())
+            .build();
     ClienteDTO clienteRecuperado =
         restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class);
     clienteRecuperado.setUbicacionFacturacion(
@@ -6718,19 +6728,19 @@ class AppIntegrationTest {
     productoRecuperado = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     assertTrue(productoRecuperado.isOferta());
     assertEquals(new BigDecimal("10.000000000000000"), productoRecuperado.getPorcentajeBonificacionOferta());
-    assertEquals(new BigDecimal("1089.00000000000000000"), productoRecuperado.getPrecioListaBonificado());
+    assertEquals(new BigDecimal("1089.00000000000000000"), productoRecuperado.getPrecioBonificado());
     restTemplate.postForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=5", null, ItemCarritoCompra.class);
     ItemCarritoCompra item1 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
     assertEquals(new BigDecimal("6050.00"), item1.getImporte());
     assertNull(item1.getImporteBonificado());
     assertEquals(new BigDecimal("10.000000000000000"), item1.getProducto().getPorcentajeBonificacionOferta());
-    assertEquals(new BigDecimal("1089.00"), item1.getProducto().getPrecioListaBonificado());
+    assertEquals(new BigDecimal("1089.00"), item1.getProducto().getPrecioBonificado());
     restTemplate.postForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=10", null, ItemCarritoCompra.class);
     item1 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
     assertEquals(new BigDecimal("12100.00"), item1.getImporte());
     assertEquals(new BigDecimal("10890.00"), item1.getImporteBonificado());
     assertEquals(new BigDecimal("10.000000000000000"), item1.getProducto().getPorcentajeBonificacionOferta());
-    assertEquals(new BigDecimal("1089.00"), item1.getProducto().getPrecioListaBonificado());
+    assertEquals(new BigDecimal("1089.00"), item1.getProducto().getPrecioBonificado());
   }
 
   @Test
@@ -6752,8 +6762,8 @@ class AppIntegrationTest {
             .getBody();
     assertNotNull(paginaRespuestaRest);
     List<ProductoDTO> productosRecuperados = paginaRespuestaRest.getContent();
-    assertNotNull(productosRecuperados.get(0).getPrecioListaBonificado());
-    assertNotNull(productosRecuperados.get(1).getPrecioListaBonificado());
+    assertNotNull(productosRecuperados.get(0).getPrecioBonificado());
+    assertNotNull(productosRecuperados.get(1).getPrecioBonificado());
     paginaRespuestaRest =
         restTemplate
             .exchange(
@@ -6766,10 +6776,10 @@ class AppIntegrationTest {
     productosRecuperados = paginaRespuestaRest.getContent();
     assertEquals(
         new BigDecimal("1089.000000000000000000000000000000"),
-        productosRecuperados.get(0).getPrecioListaBonificado());
+        productosRecuperados.get(0).getPrecioBonificado());
     assertEquals(
         new BigDecimal("994.500000000000000000000000000000"),
-        productosRecuperados.get(1).getPrecioListaBonificado());
+        productosRecuperados.get(1).getPrecioBonificado());
     ProductoDTO productoUno =
         restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     productoUno.setPublico(true);
@@ -6795,10 +6805,10 @@ class AppIntegrationTest {
     productosRecuperados = paginaRespuestaRest.getContent();
     assertEquals(
         new BigDecimal("1089.00000000000000000"),
-        productosRecuperados.get(0).getPrecioListaBonificado());
+        productosRecuperados.get(0).getPrecioBonificado());
     assertEquals(
         new BigDecimal("552.50000000000000000"),
-        productosRecuperados.get(1).getPrecioListaBonificado());
+        productosRecuperados.get(1).getPrecioBonificado());
   }
 
   @Test

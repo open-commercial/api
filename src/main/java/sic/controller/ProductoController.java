@@ -246,7 +246,7 @@ public class ProductoController {
     producto.setIvaPorcentaje(nuevoProductoDTO.getIvaPorcentaje());
     producto.setIvaNeto(nuevoProductoDTO.getIvaNeto());
     producto.setPrecioLista(nuevoProductoDTO.getPrecioLista());
-    producto.setPorcentajePrecioBonificado(nuevoProductoDTO.getPorcentajePrecioBonificado());
+    producto.setPorcentajeBonificacionPrecio(nuevoProductoDTO.getPorcentajeBonificacionPrecio());
     producto.setIlimitado(nuevoProductoDTO.isIlimitado());
     producto.setPublico(nuevoProductoDTO.isPublico());
     producto.setNota(nuevoProductoDTO.getNota());

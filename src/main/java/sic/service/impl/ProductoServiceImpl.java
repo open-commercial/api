@@ -196,7 +196,7 @@ public class ProductoServiceImpl implements IProductoService {
         .filter(Producto::isOferta)
         .forEach(
             producto ->
-                producto.setPrecioListaBonificado(
+                producto.setPrecioBonificado(
                     producto
                         .getPrecioLista()
                         .multiply(
@@ -599,7 +599,7 @@ public class ProductoServiceImpl implements IProductoService {
       if (producto.get().isOferta()) {
         producto
             .get()
-            .setPrecioListaBonificado(
+            .setPrecioBonificado(
                 producto
                     .get()
                     .getPrecioLista()
@@ -621,16 +621,16 @@ public class ProductoServiceImpl implements IProductoService {
         .filter(
             producto ->
                 !producto.isOferta()
-                    && producto.getPorcentajePrecioBonificado() != null
-                    && producto.getPorcentajePrecioBonificado().compareTo(BigDecimal.ZERO) > 0)
+                    && producto.getPorcentajeBonificacionPrecio() != null
+                    && producto.getPorcentajeBonificacionPrecio().compareTo(BigDecimal.ZERO) > 0)
         .forEach(
             p ->
-                p.setPrecioListaBonificado(
+                p.setPrecioBonificado(
                     p.getPrecioLista()
                         .subtract(
                             p.getPrecioLista()
                                 .multiply(
-                                    p.getPorcentajePrecioBonificado()
+                                    p.getPorcentajeBonificacionPrecio()
                                         .divide(new BigDecimal("100"), RoundingMode.HALF_UP)))));
     return productos;
   }

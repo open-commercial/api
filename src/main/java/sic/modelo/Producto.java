@@ -111,13 +111,13 @@ public class Producto implements Serializable {
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_producto_bonificacion_oferta_inferior_0}")
   @DecimalMax(value = "100", inclusive = false, message = "{mensaje_producto_bonificacion_oferta_superior_100}")
-  @JsonView(Views.Comprador.class)//nuevo parametro
-  private BigDecimal porcentajePrecioBonificado;
+  @JsonView(Views.Comprador.class)
+  private BigDecimal porcentajeBonificacionPrecio;
 
   @Transient
   @JsonView(Views.Comprador.class)
   @Positive
-  private BigDecimal precioListaBonificado;
+  private BigDecimal precioBonificado;
 
   @ManyToOne
   @JoinColumn(name = "id_Rubro", referencedColumnName = "id_Rubro")

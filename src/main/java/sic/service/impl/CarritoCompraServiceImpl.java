@@ -213,7 +213,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
           && itemCarritoCompra.getProducto().getPorcentajeBonificacionOferta() != null) {
         itemCarritoCompra
             .getProducto()
-            .setPrecioListaBonificado(
+            .setPrecioBonificado(
                 itemCarritoCompra
                     .getProducto()
                     .getPrecioLista()
@@ -229,19 +229,19 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
           itemCarritoCompra.setImporteBonificado(
               itemCarritoCompra
                   .getProducto()
-                  .getPrecioListaBonificado()
+                  .getPrecioBonificado()
                   .multiply(itemCarritoCompra.getCantidad())
                   .setScale(2, RoundingMode.HALF_UP));
         }
-      } else if (itemCarritoCompra.getProducto().getPorcentajePrecioBonificado() != null
+      } else if (itemCarritoCompra.getProducto().getPorcentajeBonificacionPrecio() != null
           && itemCarritoCompra
                   .getProducto()
-                  .getPorcentajePrecioBonificado()
+                  .getPorcentajeBonificacionPrecio()
                   .compareTo(BigDecimal.ZERO)
               > 0) {
         itemCarritoCompra
             .getProducto()
-            .setPrecioListaBonificado(
+            .setPrecioBonificado(
                 itemCarritoCompra
                     .getProducto()
                     .getPrecioLista()
@@ -249,7 +249,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
                         BigDecimal.ONE.subtract(
                             itemCarritoCompra
                                 .getProducto()
-                                .getPorcentajePrecioBonificado()
+                                .getPorcentajeBonificacionPrecio()
                                 .divide(CIEN, RoundingMode.HALF_UP)))
                     .setScale(2, RoundingMode.HALF_UP));
         if (itemCarritoCompra.getCantidad().compareTo(itemCarritoCompra.getProducto().getBulto())
@@ -257,7 +257,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
           itemCarritoCompra.setImporteBonificado(
               itemCarritoCompra
                   .getProducto()
-                  .getPrecioListaBonificado()
+                  .getPrecioBonificado()
                   .multiply(itemCarritoCompra.getCantidad())
                   .setScale(2, RoundingMode.HALF_UP));
         }

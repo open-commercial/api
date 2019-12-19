@@ -43,6 +43,7 @@ public class ClienteDTO implements Serializable {
   private String nombreCredencial;
   private boolean predeterminado;
   private BigDecimal saldoCuentaCorriente;
+  private BigDecimal montoCompraMinima;
   private LocalDateTime fechaUltimoMovimiento;
   private String detalleUbicacionDeFacturacion;
   private String detalleUbicacionDeEnvio;

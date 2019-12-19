@@ -29,7 +29,7 @@ public class NuevoProductoDTO {
   private BigDecimal ivaPorcentaje;
   private BigDecimal ivaNeto;
   private BigDecimal precioBonificado;
-  private BigDecimal porcentajePrecioBonificado;
+  private BigDecimal porcentajeBonificacionPrecio;
   private BigDecimal precioLista;
   private boolean ilimitado;
   private boolean publico;

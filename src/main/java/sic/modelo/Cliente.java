@@ -8,9 +8,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import javax.persistence.*;
-import javax.validation.constraints.DecimalMax;
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,9 +16,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import sic.controller.Views;
-
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "cliente")
@@ -44,6 +39,10 @@ public class Cliente implements Serializable {
   
   @Transient
   private BigDecimal saldoCuentaCorriente;
+
+  @Column(precision = 25, scale = 15)
+  @Positive
+  private BigDecimal montoCompraMinima;
 
   private String nroCliente;
 
