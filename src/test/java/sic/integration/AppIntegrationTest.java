@@ -5980,6 +5980,50 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldThrowMontoMinimoNoAlcanzado() {
+    ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", ClienteDTO.class);
+    cliente.setMontoCompraMinima(new BigDecimal("999999"));
+    restTemplate.put(apiPrefix + "/clientes", cliente);
+    this.crearDosProductos(
+            RandomStringUtils.random(10, false, true),
+            new BigDecimal("20"),
+            RandomStringUtils.random(10, false, true),
+            new BigDecimal("20"));
+    List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
+    renglonesPedidoDTO.add(
+            NuevoRenglonPedidoDTO.builder()
+                    .idProductoItem(1L)
+                    .cantidad(new BigDecimal("5.000000000000000"))
+                    .build());
+    renglonesPedidoDTO.add(
+            NuevoRenglonPedidoDTO.builder()
+                    .idProductoItem(2L)
+                    .cantidad(new BigDecimal("2.000000000000000"))
+                    .build());
+    PedidoDTO pedidoDTO =
+            PedidoDTO.builder()
+                    .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
+                    .recargoPorcentaje(new BigDecimal("5"))
+                    .observaciones("Nuevo Pedido Test")
+                    .renglones(renglonesPedidoDTO)
+                    .idSucursal(1L)
+                    .idCliente(1L)
+                    .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
+                    .build();
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class,
+            () -> restTemplate.postForObject(apiPrefix + "/pedidos", pedidoDTO, Pedido.class));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_pedido_monto_compra_minima", null, Locale.getDefault())));
+  }
+
+  @Test
   void shouldFacturarPedido() {
     this.shouldCrearPedido();
     this.crearFacturaTipoADePedido();

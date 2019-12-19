@@ -208,6 +208,11 @@ public class PedidoServiceImpl implements IPedidoService {
     BigDecimal descuentoNeto =
         importe.multiply(pedido.getDescuentoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
+    if (total.compareTo(pedido.getCliente().getMontoCompraMinima()) < 0) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_pedido_monto_compra_minima", null, Locale.getDefault()));
+    }
     pedido.setSubTotal(importe);
     pedido.setRecargoNeto(recargoNeto);
     pedido.setDescuentoNeto(descuentoNeto);
@@ -473,16 +478,17 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   public List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstado(Long idPedido) {
-    List<RenglonPedido> renglonPedidos = renglonPedidoRepository.findByIdPedidoOrderByIdRenglonPedido(idPedido);
+    List<RenglonPedido> renglonPedidos =
+        renglonPedidoRepository.findByIdPedidoOrderByIdRenglonPedido(idPedido);
     Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
     if (pedido.getEstado().equals(EstadoPedido.ABIERTO)) {
-        long[] idProductoItem = new long[renglonPedidos.size()];
-        BigDecimal[] cantidad = new BigDecimal[renglonPedidos.size()];
-        for (int i = 0; i < renglonPedidos.size(); i++) {
-          idProductoItem[i] = renglonPedidos.get(0).getIdProductoItem();
-          cantidad[i] = renglonPedidos.get(0).getCantidad();
-        }
-      renglonPedidos = this.calcularRenglonesPedido(idProductoItem, cantidad, pedido.getCliente().getIdCliente());
+      long[] idProductoItem = new long[renglonPedidos.size()];
+      BigDecimal[] cantidad = new BigDecimal[renglonPedidos.size()];
+      for (int i = 0; i < renglonPedidos.size(); i++) {
+        idProductoItem[i] = renglonPedidos.get(0).getIdProductoItem();
+        cantidad[i] = renglonPedidos.get(0).getCantidad();
+      }
+      renglonPedidos = this.calcularRenglonesPedido(idProductoItem, cantidad);
     }
     return renglonPedidos;
   }
