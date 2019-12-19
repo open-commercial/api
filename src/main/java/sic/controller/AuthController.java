@@ -41,13 +41,23 @@ public class AuthController {
   @PostMapping("/login")
   public String login(@RequestBody Credencial credencial) {
     Usuario usuario = usuarioService.autenticarUsuario(credencial);
-    if (authService.esTokenValido(usuario.getToken())) {
-      return usuario.getToken();
+    TokenAcceso tokenAcceso = new TokenAcceso();
+    tokenAcceso.setAplicacion(credencial.getAplicacion());
+    String token = "";
+    if (!usuario.getTokens().isEmpty() && usuario.getTokens().contains(tokenAcceso)) {
+      for (TokenAcceso f : usuario.getTokens()) {
+        if (f.getAplicacion().equals(credencial.getAplicacion()))
+          token = f.getToken();
+      }
     } else {
-      String token = authService.generarToken(usuario.getIdUsuario(), usuario.getRoles());
-      usuarioService.actualizarToken(token, usuario.getIdUsuario());
-      return token;
+      token = authService.generarToken(usuario.getIdUsuario(), credencial.getAplicacion(), usuario.getRoles());
+      tokenAcceso = new TokenAcceso();
+      tokenAcceso.setAplicacion(credencial.getAplicacion());
+      tokenAcceso.setToken(token);
+      usuario.getTokens().add(tokenAcceso);
+      usuarioService.actualizar(usuario);
     }
+    return token;
   }
 
   @PutMapping("/logout")
@@ -55,7 +65,22 @@ public class AuthController {
       @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuario = (int) claims.get("idUsuario");
-    usuarioService.actualizarToken("", idUsuario);
+    Aplicacion aplicacion = Aplicacion.valueOf(claims.get("app").toString());
+    Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
+    TokenAcceso tokenAcceso = new TokenAcceso();
+    tokenAcceso.setAplicacion(aplicacion);
+    usuario.getTokens().remove(tokenAcceso);
+    usuarioService.actualizar(usuario);
+  }
+
+  @PutMapping("/logout-all-sessions")
+  public void logoutAllSessions(
+          @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuario = (int) claims.get("idUsuario");
+    Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
+    usuario.getTokens().clear();
+    usuarioService.actualizar(usuario);
   }
 
   @GetMapping("/password-recovery")
@@ -68,19 +93,30 @@ public class AuthController {
 
   @PostMapping("/password-recovery")
   public String generarTokenTemporal(@RequestBody RecoveryPasswordDTO recoveryPasswordDTO) {
-    String token;
+    TokenAcceso tokenAcceso;
     Usuario usuario =
         usuarioService.getUsuarioPorPasswordRecoveryKeyAndIdUsuario(
             recoveryPasswordDTO.getKey(), recoveryPasswordDTO.getId());
     if (usuario != null && LocalDateTime.now().isBefore(usuario.getPasswordRecoveryKeyExpirationDate())) {
-      token = authService.generarToken(usuario.getIdUsuario(), usuario.getRoles());
-      usuarioService.actualizarToken(token, usuario.getIdUsuario());
+      tokenAcceso = TokenAcceso.builder().aplicacion(recoveryPasswordDTO.getAplicacion()).build();
+      usuario.getTokens().remove(tokenAcceso);
+      tokenAcceso =
+          TokenAcceso.builder()
+              .aplicacion(recoveryPasswordDTO.getAplicacion())
+              .token(
+                  authService.generarToken(
+                      usuario.getIdUsuario(),
+                      recoveryPasswordDTO.getAplicacion(),
+                      usuario.getRoles()))
+              .build();
+      usuario.getTokens().add(tokenAcceso);
+      usuarioService.actualizar(usuario);
       usuarioService.actualizarPasswordRecoveryKey(null, recoveryPasswordDTO.getId());
     } else {
       throw new UnauthorizedException(messageSource.getMessage(
         "mensaje_error_passwordRecoveryKey", null, Locale.getDefault()));
     }
-    return token;
+    return tokenAcceso.getToken();
   }
 
   @PostMapping("/registracion")

@@ -10,6 +10,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.exception.ForbiddenException;
+import sic.modelo.Aplicacion;
+import sic.modelo.TokenAcceso;
 import sic.modelo.criteria.BusquedaUsuarioCriteria;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
@@ -89,7 +91,7 @@ public class UsuarioController {
         usuarioPorActualizar.setHabilitado(usuarioPersistido.isHabilitado());
       }
       if (usuarioLoggedIn.getIdUsuario() == usuarioPersistido.getIdUsuario()) {
-        usuarioPorActualizar.setToken(usuarioLoggedIn.getToken());
+        usuarioPorActualizar.setTokens(usuarioLoggedIn.getTokens());
       }
       if (usuarioPorActualizar.getPassword() != null
           && !usuarioPorActualizar.getPassword().isEmpty()) {
@@ -98,10 +100,13 @@ public class UsuarioController {
       } else {
         usuarioPorActualizar.setPassword(usuarioPersistido.getPassword());
       }
-
-      usuarioService.actualizar(usuarioPorActualizar, usuarioPersistido);
-      if (!usuarioSeModificaASiMismo)
-        usuarioService.actualizarToken("", usuarioPorActualizar.getIdUsuario());
+      if (!usuarioSeModificaASiMismo) {
+        Aplicacion aplicacion = Aplicacion.valueOf(claims.get("app").toString());
+        TokenAcceso tokenAcceso = TokenAcceso.builder().aplicacion(aplicacion).build();
+        usuarioPersistido.getTokens().remove(tokenAcceso);
+      }
+      usuarioPorActualizar.setTokens(usuarioPersistido.getTokens());
+      usuarioService.actualizar(usuarioPorActualizar);
     } else {
       throw new ForbiddenException(messageSource.getMessage(
         "mensaje_usuario_rol_no_valido", null, Locale.getDefault()));

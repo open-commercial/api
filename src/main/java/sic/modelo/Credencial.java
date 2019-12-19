@@ -11,5 +11,6 @@ public class Credencial {
     
     private String username;
     private String password;
+    private Aplicacion aplicacion;
     
 }

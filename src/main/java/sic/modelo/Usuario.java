@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -55,9 +56,6 @@ public class Usuario implements Serializable {
     @Email(message = "{mensaje_usuario_invalido_email}")
     private String email;
     
-    @Column(length = 300)
-    private String token;
-    
     private long idSucursalPredeterminada;
 
     private String passwordRecoveryKey;
@@ -70,6 +68,10 @@ public class Usuario implements Serializable {
     @Column(name="nombre")
     @NotEmpty(message = "{mensaje_usuario_no_selecciono_rol}")
     private List<Rol> roles;
+
+    @ElementCollection 
+    @CollectionTable(name="tokenAcceso", joinColumns = @JoinColumn(name = "idUsuario"))
+    private Set<TokenAcceso> tokens;
 
     @JsonView(Views.Administrador.class)
     private boolean habilitado;

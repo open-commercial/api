@@ -77,7 +77,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   @Override
   public Usuario getUsuarioNoEliminadoPorId(Long idUsuario) {
     Optional<Usuario> usuario = usuarioRepository
-      .findById(idUsuario);
+      .findByIdUsuario(idUsuario);
     if (usuario.isPresent() && !usuario.get().isEliminado()) {
       return usuario.get();
     } else {
@@ -108,6 +108,10 @@ public class UsuarioServiceImpl implements IUsuarioService {
     if (usuario == null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_usuario_logInInvalido", null, Locale.getDefault()));
+    }
+    if (credencial.getAplicacion() == null) {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_usuario_logInInvalido_aplicacion", null, Locale.getDefault()));
     }
     if (!usuario.isHabilitado()) {
       throw new BusinessServiceException(messageSource.getMessage(
@@ -257,7 +261,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   @Transactional
-  public void actualizar(@Valid Usuario usuarioPorActualizar, Usuario usuarioPersistido) {
+  public void actualizar(@Valid Usuario usuarioPorActualizar) {
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuarioPorActualizar);
     if (!usuarioPorActualizar.getRoles().contains(Rol.VIAJANTE)) {
       this.clienteService.desvincularClienteDeViajante(usuarioPorActualizar.getIdUsuario());
@@ -268,11 +272,6 @@ public class UsuarioServiceImpl implements IUsuarioService {
     usuarioPorActualizar.setUsername(usuarioPorActualizar.getUsername().toLowerCase());
     usuarioRepository.save(usuarioPorActualizar);
     logger.warn("El Usuario {} se actualizó correctamente.", usuarioPorActualizar);
-  }
-
-  @Override
-  public void actualizarToken(String token, long idUsuario) {
-    usuarioRepository.updateToken(token, idUsuario);
   }
 
   @Override
