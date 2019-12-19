@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import sic.modelo.Rol;
+import sic.modelo.TokenAcceso;
 import sic.modelo.Usuario;
 
 public class UsuarioBuilder {
@@ -18,23 +19,24 @@ public class UsuarioBuilder {
   private String passwordRecoveryKey = "";
   private LocalDateTime passwordRecoveryKeyExpirationDate = LocalDateTime.now();
   private List<Rol> roles = Collections.singletonList(Rol.ADMINISTRADOR);
+  private Set<TokenAcceso> tokens;
   private boolean habilitado = true;
   private boolean eliminado = false;
   private long idSucursal = 0L;
 
   public Usuario build() {
     return new Usuario(
-      idUsuario,
+        idUsuario,
         username,
         password,
         nombre,
         apellido,
         email,
-        token,
-      idSucursal,
+        idSucursal,
         passwordRecoveryKey,
         passwordRecoveryKeyExpirationDate,
         roles,
+        tokens,
         habilitado,
         eliminado);
   }
@@ -71,6 +73,11 @@ public class UsuarioBuilder {
 
   public UsuarioBuilder withToken(String token) {
     this.token = token;
+    return this;
+  }
+
+  public UsuarioBuilder withTokensUsuario(Set<TokenAcceso> tokens) {
+    this.tokens = tokens;
     return this;
   }
 

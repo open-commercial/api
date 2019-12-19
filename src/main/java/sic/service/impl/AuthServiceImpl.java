@@ -14,9 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import sic.exception.UnauthorizedException;
-import sic.modelo.ReCaptchaResponse;
-import sic.modelo.Rol;
-import sic.modelo.Usuario;
+import sic.modelo.*;
 import sic.exception.BusinessServiceException;
 import sic.service.IAuthService;
 import sic.service.IUsuarioService;
@@ -55,7 +53,7 @@ public class AuthServiceImpl implements IAuthService {
   }
 
   @Override
-  public String generarToken(long idUsuario, List<Rol> rolesDeUsuario) {
+  public String generarToken(long idUsuario, Aplicacion aplicacion, List<Rol> rolesDeUsuario) {
     LocalDateTime today = LocalDateTime.now();
     ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
     ZonedDateTime zdtInOneYear = today.plusYears(1L).atZone(ZoneId.systemDefault());
@@ -65,6 +63,7 @@ public class AuthServiceImpl implements IAuthService {
         .signWith(SignatureAlgorithm.HS512, secretkey)
         .claim("idUsuario", idUsuario)
         .claim("roles", rolesDeUsuario)
+        .claim("app", aplicacion)
         .compact();
   }
 
@@ -76,16 +75,21 @@ public class AuthServiceImpl implements IAuthService {
     final long idUsuario;
     idUsuario = (int) this.getClaimsDelToken(authorizationHeader).get("idUsuario");
     Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
-    final String token = authorizationHeader.substring(7); // The part after "Bearer "
-    if (!token.equalsIgnoreCase(usuario.getToken())) {
-      return false;
-    }
     if (!usuario.isHabilitado()) {
       logger.warn(messageSource.getMessage(
-        "mensaje_usuario_no_habilitado", null, Locale.getDefault()));
+              "mensaje_usuario_no_habilitado", null, Locale.getDefault()));
       return false;
     }
-    return true;
+    Aplicacion aplicacion = Aplicacion.valueOf(this.getClaimsDelToken(authorizationHeader).get("app").toString());
+    TokenAcceso tokenAcceso = new TokenAcceso();
+    tokenAcceso.setAplicacion(aplicacion);
+    if (!usuario.getTokens().contains(tokenAcceso)) return false;
+    final String token = authorizationHeader.substring(7); // The part after "Bearer "
+    for (TokenAcceso f : usuario.getTokens()) {
+      if (f.getToken().equals(token))
+        return true;
+    }
+    return false;
   }
 
   @Override
