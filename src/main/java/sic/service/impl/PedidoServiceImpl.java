@@ -485,8 +485,8 @@ public class PedidoServiceImpl implements IPedidoService {
       long[] idProductoItem = new long[renglonPedidos.size()];
       BigDecimal[] cantidad = new BigDecimal[renglonPedidos.size()];
       for (int i = 0; i < renglonPedidos.size(); i++) {
-        idProductoItem[i] = renglonPedidos.get(0).getIdProductoItem();
-        cantidad[i] = renglonPedidos.get(0).getCantidad();
+        idProductoItem[i] = renglonPedidos.get(i).getIdProductoItem();
+        cantidad[i] = renglonPedidos.get(i).getCantidad();
       }
       renglonPedidos = this.calcularRenglonesPedido(idProductoItem, cantidad);
     }
