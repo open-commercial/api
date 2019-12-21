@@ -197,8 +197,8 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   private void calcularImporteBonificado(ItemCarritoCompra itemCarritoCompra) {
     if (itemCarritoCompra != null) {
-      if (itemCarritoCompra.getCantidad().compareTo(itemCarritoCompra.getProducto().getBulto()) >= 0
-          || itemCarritoCompra.getProducto().isOferta()) {
+      if (itemCarritoCompra.getCantidad().compareTo(itemCarritoCompra.getProducto().getBulto())
+          >= 0) {
         itemCarritoCompra.setImporte(
             itemCarritoCompra
                 .getProducto()
