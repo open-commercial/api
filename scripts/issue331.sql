@@ -5,5 +5,6 @@ alter TABLE producto ADD COLUMN precioBonificado decimal(25,15) default 0 after 
 
 SET SQL_SAFE_UPDATES = 0;
 update producto
-set precioBonificado = producto.precioLista;
+set precioBonificado = producto.precioLista - (producto.precioLista * (producto.porcentajeBonificacionOferta / 100))
+where producto.porcentajeBonificacionOferta > 0;
 SET SQL_SAFE_UPDATES = 1;
