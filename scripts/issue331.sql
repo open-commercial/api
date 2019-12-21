@@ -7,4 +7,9 @@ SET SQL_SAFE_UPDATES = 0;
 update producto
 set precioBonificado = producto.precioLista - (producto.precioLista * (producto.porcentajeBonificacionOferta / 100))
 where producto.porcentajeBonificacionOferta > 0;
+
+update cliente 
+set montoCompraMinima = 1000000;
+
 SET SQL_SAFE_UPDATES = 1;
+

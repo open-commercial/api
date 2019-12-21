@@ -208,7 +208,8 @@ public class PedidoServiceImpl implements IPedidoService {
     BigDecimal descuentoNeto =
         importe.multiply(pedido.getDescuentoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
-    if (total.compareTo(pedido.getCliente().getMontoCompraMinima()) < 0) {
+    if (pedido.getCliente().getMontoCompraMinima() != null
+        && total.compareTo(pedido.getCliente().getMontoCompraMinima()) < 0) {
       throw new BusinessServiceException(
           messageSource.getMessage(
               "mensaje_pedido_monto_compra_minima", null, Locale.getDefault()));
