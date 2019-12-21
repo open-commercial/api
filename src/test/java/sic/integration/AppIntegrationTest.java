@@ -6775,16 +6775,59 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("1089.00000000000000000"), productoRecuperado.getPrecioBonificado());
     restTemplate.postForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=5", null, ItemCarritoCompra.class);
     ItemCarritoCompra item1 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
-    assertEquals(new BigDecimal("6050.00"), item1.getImporte());
-    assertNull(item1.getImporteBonificado());
-    assertEquals(new BigDecimal("10.000000000000000"), item1.getProducto().getPorcentajeBonificacionOferta());
-    assertEquals(new BigDecimal("1089.00"), item1.getProducto().getPrecioBonificado());
+    assertEquals(new BigDecimal("5445.00"), item1.getImporte());
     restTemplate.postForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=10", null, ItemCarritoCompra.class);
     item1 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
-    assertEquals(new BigDecimal("12100.00"), item1.getImporte());
-    assertEquals(new BigDecimal("10890.00"), item1.getImporteBonificado());
-    assertEquals(new BigDecimal("10.000000000000000"), item1.getProducto().getPorcentajeBonificacionOferta());
-    assertEquals(new BigDecimal("1089.00"), item1.getProducto().getPrecioBonificado());
+    assertEquals(new BigDecimal("10890.00"), item1.getImporte());
+  }
+
+  @Test
+  void crearProductoBonificadoAndAgregarloAlCarrito() {
+    NuevoProductoDTO productoUno =
+            NuevoProductoDTO.builder()
+                    .codigo(RandomStringUtils.random(10, false, true))
+                    .descripcion(RandomStringUtils.random(10, true, false))
+                    .cantidadEnSucursal(new HashMap<Long, BigDecimal>() {{put(1L, BigDecimal.TEN);}})
+                    .bulto(BigDecimal.TEN)
+                    .precioCosto(CIEN)
+                    .gananciaPorcentaje(new BigDecimal("900"))
+                    .gananciaNeto(new BigDecimal("900"))
+                    .precioVentaPublico(new BigDecimal("1000"))
+                    .ivaPorcentaje(new BigDecimal("21.0"))
+                    .ivaNeto(new BigDecimal("210"))
+                    .precioLista(new BigDecimal("1210"))
+                    .nota("ProductoTest1")
+                    .publico(true)
+                    .build();
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
+    RubroDTO rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", RubroDTO.class);
+    ProveedorDTO proveedor =
+            restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
+    Medida medida = restTemplate.getForObject(apiPrefix + "/medidas/1", Medida.class);
+    restTemplate.postForObject(
+            apiPrefix
+                    + "/productos?idMedida="
+                    + medida.getIdMedida()
+                    + "&idRubro="
+                    + rubro.getIdRubro()
+                    + "&idProveedor="
+                    + proveedor.getIdProveedor()
+                    + "&idSucursal="
+                    + sucursal.getIdSucursal(),
+            productoUno,
+            ProductoDTO.class);
+    ProductoDTO productoRecuperado = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    productoRecuperado.setPorcentajeBonificacionPrecio(new BigDecimal("20"));
+    restTemplate.put(apiPrefix + "/productos", productoRecuperado);
+    productoRecuperado = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
+    assertEquals(new BigDecimal("20.000000000000000"), productoRecuperado.getPorcentajeBonificacionPrecio());
+    assertEquals(new BigDecimal("968.000000000000000000000000000000"), productoRecuperado.getPrecioBonificado());
+    restTemplate.postForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=5", null, ItemCarritoCompra.class);
+    ItemCarritoCompra item1 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
+    assertEquals(new BigDecimal("6050.00"), item1.getImporte());
+    restTemplate.postForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1?cantidad=10", null, ItemCarritoCompra.class);
+    item1 = restTemplate.getForObject(apiPrefix + "/carrito-compra/usuarios/1/productos/1", ItemCarritoCompra.class);
+    assertEquals(new BigDecimal("9680.00"), item1.getImporte());
   }
 
   @Test

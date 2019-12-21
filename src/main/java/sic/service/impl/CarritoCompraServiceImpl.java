@@ -77,11 +77,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     List<ItemCarritoCompra> itemCarritoCompra =
         this.getItemsDelCaritoCompra(idUsuario, idCliente, 0, Integer.MAX_VALUE).getContent();
     for (ItemCarritoCompra i : itemCarritoCompra) {
-      if (i.getImporteBonificado() != null && i.getImporteBonificado().compareTo(BigDecimal.ZERO) > 0) {
-        total = total.add(i.getImporteBonificado());
-      } else {
         total = total.add(i.getImporte());
-      }
     }
     return total;
   }
@@ -137,10 +133,9 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     ItemCarritoCompra item =
         carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
     if (item == null) {
-      BigDecimal importe = producto.getPrecioLista().multiply(cantidad);
       ItemCarritoCompra itemCC =
           carritoCompraRepository.save(
-              new ItemCarritoCompra(null, cantidad, producto, importe, null, usuario));
+              new ItemCarritoCompra(null, cantidad, producto, null, usuario));
       logger.warn("Nuevo item de carrito de compra agregado: {}", itemCC);
     } else {
       if (cantidad.compareTo(BigDecimal.ZERO) < 0) {
@@ -148,7 +143,6 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
       } else {
         item.setCantidad(cantidad);
       }
-      item.setImporte(producto.getPrecioLista().multiply(cantidad));
       ItemCarritoCompra itemCC = carritoCompraRepository.save(item);
       logger.warn("Item de carrito de compra modificado: {}", itemCC);
     }
@@ -203,64 +197,21 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   private void calcularImporteBonificado(ItemCarritoCompra itemCarritoCompra) {
     if (itemCarritoCompra != null) {
-      itemCarritoCompra.setImporte(
-          itemCarritoCompra
-              .getProducto()
-              .getPrecioLista()
-              .multiply(itemCarritoCompra.getCantidad())
-              .setScale(2, RoundingMode.HALF_UP));
-      if (itemCarritoCompra.getProducto().isOferta()
-          && itemCarritoCompra.getProducto().getPorcentajeBonificacionOferta() != null) {
-        itemCarritoCompra
-            .getProducto()
-            .setPrecioBonificado(
-                itemCarritoCompra
-                    .getProducto()
-                    .getPrecioLista()
-                    .multiply(
-                        BigDecimal.ONE.subtract(
-                            itemCarritoCompra
-                                .getProducto()
-                                .getPorcentajeBonificacionOferta()
-                                .divide(CIEN, RoundingMode.HALF_UP)))
-                    .setScale(2, RoundingMode.HALF_UP));
-        if (itemCarritoCompra.getCantidad().compareTo(itemCarritoCompra.getProducto().getBulto())
-            >= 0) {
-          itemCarritoCompra.setImporteBonificado(
-              itemCarritoCompra
-                  .getProducto()
-                  .getPrecioBonificado()
-                  .multiply(itemCarritoCompra.getCantidad())
-                  .setScale(2, RoundingMode.HALF_UP));
-        }
-      } else if (itemCarritoCompra.getProducto().getPorcentajeBonificacionPrecio() != null
-          && itemCarritoCompra
-                  .getProducto()
-                  .getPorcentajeBonificacionPrecio()
-                  .compareTo(BigDecimal.ZERO)
-              > 0) {
-        itemCarritoCompra
-            .getProducto()
-            .setPrecioBonificado(
-                itemCarritoCompra
-                    .getProducto()
-                    .getPrecioLista()
-                    .multiply(
-                        BigDecimal.ONE.subtract(
-                            itemCarritoCompra
-                                .getProducto()
-                                .getPorcentajeBonificacionPrecio()
-                                .divide(CIEN, RoundingMode.HALF_UP)))
-                    .setScale(2, RoundingMode.HALF_UP));
-        if (itemCarritoCompra.getCantidad().compareTo(itemCarritoCompra.getProducto().getBulto())
-            >= 0) {
-          itemCarritoCompra.setImporteBonificado(
-              itemCarritoCompra
-                  .getProducto()
-                  .getPrecioBonificado()
-                  .multiply(itemCarritoCompra.getCantidad())
-                  .setScale(2, RoundingMode.HALF_UP));
-        }
+      if (itemCarritoCompra.getCantidad().compareTo(itemCarritoCompra.getProducto().getBulto()) >= 0
+          || itemCarritoCompra.getProducto().isOferta()) {
+        itemCarritoCompra.setImporte(
+            itemCarritoCompra
+                .getProducto()
+                .getPrecioBonificado()
+                .multiply(itemCarritoCompra.getCantidad())
+                .setScale(2, RoundingMode.HALF_UP));
+      } else {
+        itemCarritoCompra.setImporte(
+            itemCarritoCompra
+                .getProducto()
+                .getPrecioLista()
+                .multiply(itemCarritoCompra.getCantidad())
+                .setScale(2, RoundingMode.HALF_UP));
       }
     }
   }

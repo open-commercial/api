@@ -41,7 +41,7 @@ public class Cliente implements Serializable {
   private BigDecimal saldoCuentaCorriente;
 
   @Column(precision = 25, scale = 15)
-  @Positive
+  @Positive(message = "{mensaje_cliente_monto_compra_minima_menor_a_cero}")
   private BigDecimal montoCompraMinima;
 
   private String nroCliente;

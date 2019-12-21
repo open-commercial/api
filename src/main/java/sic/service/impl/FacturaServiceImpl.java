@@ -989,7 +989,8 @@ public class FacturaServiceImpl implements IFacturaService {
       nuevoRenglon.setBonificacionNeta(
           CalculosComprobante.calcularProporcion(
               nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionOferta()));
-    } else if (nuevoRenglon.getCantidad().compareTo(producto.getBulto()) >= 0 && producto.getPorcentajeBonificacionPrecio() != null) {
+    } else if (nuevoRenglon.getCantidad().compareTo(producto.getBulto()) >= 0
+        && producto.getPorcentajeBonificacionPrecio() != null) {
       nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajeBonificacionPrecio());
       nuevoRenglon.setBonificacionNeta(
           CalculosComprobante.calcularProporcion(

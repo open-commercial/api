@@ -38,6 +38,7 @@ import sic.service.*;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 import sic.repository.ProductoRepository;
+import sic.util.CalculosComprobante;
 
 @Service
 @Validated
@@ -289,8 +290,9 @@ public class ProductoServiceImpl implements IProductoService {
     if (producto.getCodigo() == null) producto.setCodigo("");
     producto.setEliminado(false);
     producto.setOferta(false);
+    this.calcularPrecioBonificado(producto);
     this.validarOperacion(TipoDeOperacion.ALTA, producto);
-    this.validarBonificacionOferta(producto);
+    this.calcularPrecioBonificado(producto);
     //se setea siempre en false momentaniamente
     producto.setIlimitado(false);
     producto = productoRepository.save(producto);
@@ -309,7 +311,7 @@ public class ProductoServiceImpl implements IProductoService {
       photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + productoPersistido.getIdProducto());
     }
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
-    this.validarBonificacionOferta(productoPorActualizar);
+    this.calcularPrecioBonificado(productoPorActualizar);
     if (productoPersistido.isPublico() && !productoPorActualizar.isPublico()) {
       carritoCompraService.eliminarItem(productoPersistido.getIdProducto());
     }
@@ -319,11 +321,26 @@ public class ProductoServiceImpl implements IProductoService {
     logger.warn("El Producto {} se modificó correctamente.", productoPorActualizar);
   }
 
-  private void validarBonificacionOferta(Producto producto) {
+  private void calcularPrecioBonificado(Producto producto) {
+    producto.setPrecioBonificado(producto.getPrecioLista());
     if (producto.isOferta()
-        && (producto.getPorcentajeBonificacionOferta() == null
-            || producto.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO) == 0)) {
+        && producto.getPorcentajeBonificacionOferta() != null
+        && producto.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO) > 0) {
+      producto.setPrecioBonificado(
+          producto
+              .getPrecioLista()
+              .subtract(
+                  CalculosComprobante.calcularProporcion(
+                      producto.getPrecioLista(), producto.getPorcentajeBonificacionOferta())));
+    } else if (producto.getPorcentajeBonificacionPrecio() != null
+        && producto.getPorcentajeBonificacionPrecio().compareTo(BigDecimal.ZERO) > 0) {
       producto.setOferta(false);
+      producto.setPrecioBonificado(
+          producto
+              .getPrecioLista()
+              .subtract(
+                  CalculosComprobante.calcularProporcion(
+                      producto.getPrecioLista(), producto.getPorcentajeBonificacionPrecio())));
     }
   }
 

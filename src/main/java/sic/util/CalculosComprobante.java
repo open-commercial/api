@@ -22,10 +22,10 @@ public class CalculosComprobante {
     return resultado;
   }
 
-  public static BigDecimal calcularProporcion(BigDecimal subtotal, BigDecimal porcentaje) {
+  public static BigDecimal calcularProporcion(BigDecimal monto, BigDecimal porcentaje) {
     BigDecimal resultado = BigDecimal.ZERO;
     if (porcentaje != null && porcentaje.compareTo(BigDecimal.ZERO) != 0) {
-      resultado = subtotal.multiply(porcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
+      resultado = monto.multiply(porcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
     }
     return resultado;
   }
