@@ -73,6 +73,7 @@ public class RegistracionServiceImpl implements IRegistracionService {
     Usuario credencial = usuarioService.guardar(nuevoUsuario);
     nuevoCliente.setCredencial(credencial);
     nuevoCliente.setFechaAlta(LocalDateTime.now());
+    nuevoCliente.setMontoCompraMinima(BigDecimal.ZERO);
     clienteService.guardar(nuevoCliente);
     correoElectronicoService.enviarEmail(
             nuevoUsuario.getEmail(),

@@ -911,6 +911,7 @@ class AppIntegrationTest {
             .ubicacionEnvio(
                 UbicacionDTO.builder().calle("Belgrano").numero(456).idLocalidad(1L).build())
             .idCredencial(credencial.getIdUsuario())
+            .montoCompraMinima(BigDecimal.ZERO)
             .build();
     ClienteDTO clienteRecuperado =
         restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class);
@@ -954,6 +955,7 @@ class AppIntegrationTest {
             .ubicacionEnvio(
                 UbicacionDTO.builder().calle("Belgrano").numero(456).idLocalidad(1L).build())
             .idCredencial(credencial.getIdUsuario())
+            .montoCompraMinima(BigDecimal.ZERO)
             .build();
     ClienteDTO clienteRecuperado =
         restTemplate.postForObject(apiPrefix + "/clientes", cliente, ClienteDTO.class);

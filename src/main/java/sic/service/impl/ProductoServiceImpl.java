@@ -292,7 +292,6 @@ public class ProductoServiceImpl implements IProductoService {
     producto.setOferta(false);
     this.calcularPrecioBonificado(producto);
     this.validarOperacion(TipoDeOperacion.ALTA, producto);
-    this.calcularPrecioBonificado(producto);
     //se setea siempre en false momentaniamente
     producto.setIlimitado(false);
     producto = productoRepository.save(producto);
@@ -579,6 +578,8 @@ public class ProductoServiceImpl implements IProductoService {
         if (!productosParaActualizarDTO.getPublico())
           carritoCompraService.eliminarItem(p.getIdProducto());
       }
+      p.setPorcentajeBonificacionPrecio(productosParaActualizarDTO.getPorcentajeBonificacionPrecio());
+      this.calcularPrecioBonificado(p);
       this.validarOperacion(TipoDeOperacion.ACTUALIZACION, p);
     }
     productoRepository.saveAll(productos);

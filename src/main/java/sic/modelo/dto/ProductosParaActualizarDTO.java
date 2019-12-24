@@ -25,5 +25,6 @@ public class ProductosParaActualizarDTO {
   private BigDecimal precioCosto;
   private BigDecimal precioLista;
   private BigDecimal precioVentaPublico;
+  private BigDecimal porcentajeBonificacionPrecio;
   private Boolean publico;
 }
