@@ -149,17 +149,10 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   }
 
   @Override
+  @Transactional
   public Pedido crearPedido(NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO) {
     Usuario usuario =
         usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario());
-    if (nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago() != null) {
-      nuevaOrdenDeCompraDTO.setIdSucursal(ID_SUCURSAL_DEFAULT);
-      try {
-        mercadoPagoService.crearNuevoPago(nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago(), usuario);
-      } catch (MPException ex) {
-        mercadoPagoService.logExceptionMercadoPago(ex);
-      }
-    }
     List<ItemCarritoCompra> items =
         carritoCompraRepository.findAllByUsuarioOrderByIdItemCarritoCompraDesc(usuario);
     Pedido pedido = new Pedido();
@@ -188,9 +181,15 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
                 pedidoService.calcularRenglonPedido(
                     i.getProducto().getIdProducto(), i.getCantidad())));
     pedido.setRenglones(renglonesPedido);
-    pedido.setRenglones(renglonesPedido);
     pedido.setTipoDeEnvio(nuevaOrdenDeCompraDTO.getTipoDeEnvio());
     Pedido p = pedidoService.guardar(pedido);
+    if (nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago() != null) {
+      try {
+        mercadoPagoService.crearNuevoPago(nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago(), usuario);
+      } catch (MPException ex) {
+        mercadoPagoService.logExceptionMercadoPago(ex);
+      }
+    }
     this.eliminarTodosLosItemsDelUsuario(nuevaOrdenDeCompraDTO.getIdUsuario());
     return p;
   }

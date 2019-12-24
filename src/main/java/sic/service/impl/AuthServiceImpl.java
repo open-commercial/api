@@ -56,7 +56,7 @@ public class AuthServiceImpl implements IAuthService {
   public String generarToken(long idUsuario, Aplicacion aplicacion, List<Rol> rolesDeUsuario) {
     LocalDateTime today = LocalDateTime.now();
     ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
-    ZonedDateTime zdtInOneYear = today.plusYears(1L).atZone(ZoneId.systemDefault());
+    ZonedDateTime zdtInOneYear = today.plusMonths(1L).atZone(ZoneId.systemDefault());
     return Jwts.builder()
         .setIssuedAt(Date.from(zdtNow.toInstant()))
         .setExpiration(Date.from(zdtInOneYear.toInstant()))
