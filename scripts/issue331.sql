@@ -14,7 +14,7 @@ set precioBonificado = producto.precioLista - (producto.precioLista * (producto.
 where producto.porcentajeBonificacionOferta is null;
 
 update cliente 
-set montoCompraMinima = 0;
+set montoCompraMinima = 2500;
 
 SET SQL_SAFE_UPDATES = 1;
 
