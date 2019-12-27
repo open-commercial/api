@@ -68,13 +68,12 @@ public class RegistracionServiceImpl implements IRegistracionService {
             || categoriaIVA == CategoriaIVA.EXENTO) {
       nuevoCliente.setNombreFiscal(registracionClienteAndUsuarioDTO.getNombreFiscal());
       nuevoCliente.setCategoriaIVA(categoriaIVA);
-      nuevoCliente.setBonificacion(BigDecimal.ZERO);
     }
     nuevoUsuario.setUsername(this.generarUsername(nuevoUsuario.getNombre(), nuevoUsuario.getApellido()));
     Usuario credencial = usuarioService.guardar(nuevoUsuario);
     nuevoCliente.setCredencial(credencial);
-    nuevoCliente.setBonificacion(BigDecimal.ZERO);
     nuevoCliente.setFechaAlta(LocalDateTime.now());
+    nuevoCliente.setMontoCompraMinima(BigDecimal.ZERO);
     clienteService.guardar(nuevoCliente);
     correoElectronicoService.enviarEmail(
             nuevoUsuario.getEmail(),

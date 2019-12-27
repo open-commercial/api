@@ -55,7 +55,7 @@ public interface IProductoService {
 
   Producto getProductoNoEliminadoPorId(long idProducto);
 
-  Page<Producto> getProductosConPrecioBonificado(Page<Producto> productos, Cliente cliente);
+  Page<Producto> getProductosConPrecioBonificado(Page<Producto> productos);
 
   BigDecimal calcularValorStock(BusquedaProductoCriteria criteria);
 

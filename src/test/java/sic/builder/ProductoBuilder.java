@@ -33,6 +33,7 @@ public class ProductoBuilder {
   private boolean publico = true;
   private boolean oferta = false;
   private BigDecimal porcentajeBonificacionOferta = BigDecimal.TEN;
+  private BigDecimal porcentajePrecioBonificado = BigDecimal.TEN;
   private BigDecimal precioListaBonificado = new BigDecimal("18.15");
   private LocalDateTime fechaUltimaModificacion =
       LocalDateTime.of(2016, Month.MAY, 18, 00, 00); // 18-05-2016
@@ -68,6 +69,7 @@ public class ProductoBuilder {
         publico,
         oferta,
         porcentajeBonificacionOferta,
+        porcentajePrecioBonificado,
         precioListaBonificado,
         fechaUltimaModificacion,
         estanteria,
@@ -182,6 +184,11 @@ public class ProductoBuilder {
 
   public ProductoBuilder withBonificacionOferta(BigDecimal porcentajeBonificacionOferta) {
     this.porcentajeBonificacionOferta = porcentajeBonificacionOferta;
+    return this;
+  }
+
+  public ProductoBuilder withPorcentajePrecioBonificado(BigDecimal porcentajePrecioBonificado) {
+    this.porcentajePrecioBonificado = porcentajePrecioBonificado;
     return this;
   }
 

@@ -38,6 +38,7 @@ import sic.service.*;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 import sic.repository.ProductoRepository;
+import sic.util.CalculosComprobante;
 
 @Service
 @Validated
@@ -196,7 +197,7 @@ public class ProductoServiceImpl implements IProductoService {
         .filter(Producto::isOferta)
         .forEach(
             producto ->
-                producto.setPrecioListaBonificado(
+                producto.setPrecioBonificado(
                     producto
                         .getPrecioLista()
                         .multiply(
@@ -289,8 +290,8 @@ public class ProductoServiceImpl implements IProductoService {
     if (producto.getCodigo() == null) producto.setCodigo("");
     producto.setEliminado(false);
     producto.setOferta(false);
+    this.calcularPrecioBonificado(producto);
     this.validarOperacion(TipoDeOperacion.ALTA, producto);
-    this.validarBonificacionOferta(producto);
     //se setea siempre en false momentaniamente
     producto.setIlimitado(false);
     producto = productoRepository.save(producto);
@@ -309,7 +310,7 @@ public class ProductoServiceImpl implements IProductoService {
       photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + productoPersistido.getIdProducto());
     }
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
-    this.validarBonificacionOferta(productoPorActualizar);
+    this.calcularPrecioBonificado(productoPorActualizar);
     if (productoPersistido.isPublico() && !productoPorActualizar.isPublico()) {
       carritoCompraService.eliminarItem(productoPersistido.getIdProducto());
     }
@@ -319,11 +320,26 @@ public class ProductoServiceImpl implements IProductoService {
     logger.warn("El Producto {} se modificó correctamente.", productoPorActualizar);
   }
 
-  private void validarBonificacionOferta(Producto producto) {
+  private void calcularPrecioBonificado(Producto producto) {
+    producto.setPrecioBonificado(producto.getPrecioLista());
     if (producto.isOferta()
-        && (producto.getPorcentajeBonificacionOferta() == null
-            || producto.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO) == 0)) {
+        && producto.getPorcentajeBonificacionOferta() != null
+        && producto.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO) > 0) {
+      producto.setPrecioBonificado(
+          producto
+              .getPrecioLista()
+              .subtract(
+                  CalculosComprobante.calcularProporcion(
+                      producto.getPrecioLista(), producto.getPorcentajeBonificacionOferta())));
+    } else if (producto.getPorcentajeBonificacionPrecio() != null
+        && producto.getPorcentajeBonificacionPrecio().compareTo(BigDecimal.ZERO) > 0) {
       producto.setOferta(false);
+      producto.setPrecioBonificado(
+          producto
+              .getPrecioLista()
+              .subtract(
+                  CalculosComprobante.calcularProporcion(
+                      producto.getPrecioLista(), producto.getPorcentajeBonificacionPrecio())));
     }
   }
 
@@ -562,6 +578,8 @@ public class ProductoServiceImpl implements IProductoService {
         if (!productosParaActualizarDTO.getPublico())
           carritoCompraService.eliminarItem(p.getIdProducto());
       }
+      p.setPorcentajeBonificacionPrecio(productosParaActualizarDTO.getPorcentajeBonificacionPrecio());
+      this.calcularPrecioBonificado(p);
       this.validarOperacion(TipoDeOperacion.ACTUALIZACION, p);
     }
     productoRepository.saveAll(productos);
@@ -599,7 +617,7 @@ public class ProductoServiceImpl implements IProductoService {
       if (producto.get().isOferta()) {
         producto
             .get()
-            .setPrecioListaBonificado(
+            .setPrecioBonificado(
                 producto
                     .get()
                     .getPrecioLista()
@@ -616,15 +634,22 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Page<Producto> getProductosConPrecioBonificado(Page<Producto> productos, Cliente cliente) {
-    BigDecimal bonificacion =
-        cliente.getBonificacion().divide(new BigDecimal("100"), RoundingMode.HALF_UP);
+  public Page<Producto> getProductosConPrecioBonificado(Page<Producto> productos) {
     productos.stream()
-        .filter(producto -> !producto.isOferta() && bonificacion.compareTo(BigDecimal.ZERO) > 0)
+        .filter(
+            producto ->
+                !producto.isOferta()
+                    && producto.getPorcentajeBonificacionPrecio() != null
+                    && producto.getPorcentajeBonificacionPrecio().compareTo(BigDecimal.ZERO) > 0)
         .forEach(
             p ->
-                p.setPrecioListaBonificado(
-                    p.getPrecioLista().subtract(p.getPrecioLista().multiply(bonificacion))));
+                p.setPrecioBonificado(
+                    p.getPrecioLista()
+                        .subtract(
+                            p.getPrecioLista()
+                                .multiply(
+                                    p.getPorcentajeBonificacionPrecio()
+                                        .divide(new BigDecimal("100"), RoundingMode.HALF_UP)))));
     return productos;
   }
 

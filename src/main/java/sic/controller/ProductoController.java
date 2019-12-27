@@ -21,6 +21,7 @@ import sic.modelo.dto.ProductoDTO;
 import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
+import sic.util.CalculosComprobante;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -73,14 +74,10 @@ public class ProductoController {
     if (!producto.isOferta()
         && authorizationHeader != null
         && authService.esAuthorizationHeaderValido(authorizationHeader)) {
-      Claims claims = authService.getClaimsDelToken(authorizationHeader);
-      Cliente cliente = clienteService.getClientePorIdUsuario((int) claims.get("idUsuario"));
-      if (cliente != null) {
-        Page<Producto> productos =
-            productoService.getProductosConPrecioBonificado(
-                new PageImpl<>(Collections.singletonList(producto)), cliente);
-        producto = productos.getContent().get(0);
-      }
+      Page<Producto> productos =
+          productoService.getProductosConPrecioBonificado(
+              new PageImpl<>(Collections.singletonList(producto)));
+      producto = productos.getContent().get(0);
     }
     return producto;
   }
@@ -104,14 +101,7 @@ public class ProductoController {
     Page<Producto> productos = productoService.buscarProductos(criteria);
     if (authorizationHeader != null
         && authService.esAuthorizationHeaderValido(authorizationHeader)) {
-      Claims claims = authService.getClaimsDelToken(authorizationHeader);
-      Cliente cliente =
-          clienteService.getClientePorIdUsuario((int) claims.get("idUsuario"));
-      if (cliente != null) {
-        return productoService.getProductosConPrecioBonificado(productos, cliente);
-      } else {
-        return productos;
-      }
+      return productoService.getProductosConPrecioBonificado(productos);
     } else {
       return productos;
     }
@@ -257,6 +247,7 @@ public class ProductoController {
     producto.setIvaPorcentaje(nuevoProductoDTO.getIvaPorcentaje());
     producto.setIvaNeto(nuevoProductoDTO.getIvaNeto());
     producto.setPrecioLista(nuevoProductoDTO.getPrecioLista());
+    producto.setPorcentajeBonificacionPrecio(nuevoProductoDTO.getPorcentajeBonificacionPrecio());
     producto.setIlimitado(nuevoProductoDTO.isIlimitado());
     producto.setPublico(nuevoProductoDTO.isPublico());
     producto.setNota(nuevoProductoDTO.getNota());

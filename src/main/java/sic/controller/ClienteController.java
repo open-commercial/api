@@ -157,20 +157,6 @@ public class ClienteController {
     } else {
       clientePorActualizar.setCredencial(clientePersistido.getCredencial());
     }
-    if (clientePorActualizar.getBonificacion() != null
-        && clientePersistido.getBonificacion().compareTo(clientePorActualizar.getBonificacion())
-            != 0) {
-      Claims claims = authService.getClaimsDelToken(authorizationHeader);
-      long idUsuarioLoggedIn = (int) claims.get("idUsuario");
-      Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
-      if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
-          && !usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)) {
-        throw new ForbiddenException(messageSource.getMessage(
-          "mensaje_usuario_rol_no_valido", null, Locale.getDefault()));
-      }
-    } else {
-      clientePorActualizar.setBonificacion(clientePersistido.getBonificacion());
-    }
     Ubicacion ubicacion;
     if (clienteDTO.getUbicacionFacturacion() != null) {
       ubicacion = modelMapper.map(clienteDTO.getUbicacionFacturacion(), Ubicacion.class);

@@ -8,9 +8,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import javax.persistence.*;
-import javax.validation.constraints.DecimalMax;
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,9 +16,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import sic.controller.Views;
-
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "cliente")
@@ -41,15 +36,14 @@ public class Cliente implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id_Cliente")
   private long idCliente;
-
-  @Column(precision = 25, scale = 15)
-  @NotNull(message = "{mensaje_cliente_vacio_bonificacion}")
-  @DecimalMin(value = "0", message = "{mensaje_cliente_bonificacion_negativa}")
-  @DecimalMax(value = "100", message = "{mensaje_cliente_bonificacion_superior_al_cien_porciento}")
-  private BigDecimal bonificacion;
-
+  
   @Transient
   private BigDecimal saldoCuentaCorriente;
+
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_cliente_monto_compra_minima_negativa}")
+  @NotNull(message = "{mensaje_cliente_monto_compra_minima_vacia}")
+  private BigDecimal montoCompraMinima;
 
   private String nroCliente;
 

@@ -236,7 +236,6 @@ public class ClienteServiceImpl implements IClienteService {
   public Cliente guardar(@Valid Cliente cliente) {
     cliente.setEliminado(false);
     cliente.setNroCliente(this.generarNroDeCliente());
-    if (cliente.getBonificacion() == null) cliente.setBonificacion(BigDecimal.ZERO);
     if (cliente.getUbicacionFacturacion() != null
         && cliente.getUbicacionFacturacion().getIdLocalidad() != null) {
       cliente
@@ -283,8 +282,6 @@ public class ClienteServiceImpl implements IClienteService {
     clientePorActualizar.setFechaAlta(clientePersistido.getFechaAlta());
     clientePorActualizar.setPredeterminado(clientePersistido.isPredeterminado());
     clientePorActualizar.setEliminado(clientePersistido.isEliminado());
-    if (clientePorActualizar.getBonificacion() == null)
-      clientePorActualizar.setBonificacion(BigDecimal.ZERO);
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, clientePorActualizar);
     if (clientePorActualizar.getCredencial() != null) {
       Cliente clienteYaAsignado =

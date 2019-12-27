@@ -8,10 +8,7 @@ import java.util.Set;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javax.persistence.*;
-import javax.validation.constraints.DecimalMax;
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.FutureOrPresent;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -20,7 +17,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import javax.validation.constraints.NotEmpty;
 import sic.controller.Views;
 
 @Entity
@@ -112,9 +108,16 @@ public class Producto implements Serializable {
   @JsonView(Views.Comprador.class)
   private BigDecimal porcentajeBonificacionOferta;
 
-  @Transient
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_producto_bonificacion_oferta_inferior_0}")
+  @DecimalMax(value = "100", inclusive = false, message = "{mensaje_producto_bonificacion_oferta_superior_100}")
   @JsonView(Views.Comprador.class)
-  private BigDecimal precioListaBonificado;
+  private BigDecimal porcentajeBonificacionPrecio;
+
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0",message = "{mensaje_producto_precio_bonificado_igual_menor_cero}")
+  @JsonView(Views.Comprador.class)
+  private BigDecimal precioBonificado;
 
   @ManyToOne
   @JoinColumn(name = "id_Rubro", referencedColumnName = "id_Rubro")

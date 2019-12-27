@@ -66,12 +66,10 @@ public class PedidoController {
   @PostMapping("/pedidos/renglones/clientes/{idCliente}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public List<RenglonPedido> calcularRenglonesPedido(
-      @RequestBody List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO,
-      @PathVariable Long idCliente) {
+      @RequestBody List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO) {
     return pedidoService.calcularRenglonesPedido(
         this.getArrayDeIdProducto(nuevosRenglonesPedidoDTO),
-        this.getArrayDeCantidadesProducto(nuevosRenglonesPedidoDTO),
-        idCliente);
+        this.getArrayDeCantidadesProducto(nuevosRenglonesPedidoDTO));
   }
 
   @PutMapping("/pedidos")
@@ -93,8 +91,7 @@ public class PedidoController {
         .addAll(
             pedidoService.calcularRenglonesPedido(
                 this.getArrayDeIdProducto(pedidoDTO.getRenglones()),
-                this.getArrayDeCantidadesProducto(pedidoDTO.getRenglones()),
-                pedido.getCliente().getIdCliente()));
+                this.getArrayDeCantidadesProducto(pedidoDTO.getRenglones())));
     pedidoService.actualizar(pedido);
   }
 
@@ -127,13 +124,11 @@ public class PedidoController {
     long idUsuario = (int) claims.get("idUsuario");
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     pedido.setCliente(clienteService.getClienteNoEliminadoPorId(pedidoDTO.getIdCliente()));
-    if (pedidoDTO.getTipoDeEnvio() != null)
-      pedido.setTipoDeEnvio(pedidoDTO.getTipoDeEnvio());
+    if (pedidoDTO.getTipoDeEnvio() != null) pedido.setTipoDeEnvio(pedidoDTO.getTipoDeEnvio());
     pedido.setRenglones(
         pedidoService.calcularRenglonesPedido(
             this.getArrayDeIdProducto(pedidoDTO.getRenglones()),
-            this.getArrayDeCantidadesProducto(pedidoDTO.getRenglones()),
-            pedidoDTO.getIdCliente()));
+            this.getArrayDeCantidadesProducto(pedidoDTO.getRenglones())));
     return pedidoService.guardar(pedido);
   }
 

@@ -26,7 +26,6 @@ import java.time.LocalDateTime;
 public class ClienteDTO implements Serializable {
 
   private long idCliente;
-  private BigDecimal bonificacion;
   private String nroCliente;
   private String nombreFiscal;
   private String nombreFantasia;
@@ -44,7 +43,7 @@ public class ClienteDTO implements Serializable {
   private String nombreCredencial;
   private boolean predeterminado;
   private BigDecimal saldoCuentaCorriente;
-  private LocalDateTime fechaUltimoMovimiento;
+  private BigDecimal montoCompraMinima;
   private String detalleUbicacionDeFacturacion;
   private String detalleUbicacionDeEnvio;
 
