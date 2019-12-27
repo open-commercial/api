@@ -343,11 +343,6 @@ public class PedidoServiceImpl implements IPedidoService {
   private BooleanBuilder getBuilderPedido(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
     QPedido qPedido = QPedido.pedido;
     BooleanBuilder builder = new BooleanBuilder();
-    if (criteria.getIdSucursal() == null) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_busqueda_sin_sucursal", null, Locale.getDefault()));
-    }
     builder.and(qPedido.sucursal.idSucursal.eq(criteria.getIdSucursal()));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
