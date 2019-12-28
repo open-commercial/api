@@ -177,6 +177,8 @@ public class ClienteController {
     } else {
       clientePorActualizar.setViajante(null);
     }
+    if (clientePorActualizar.getMontoCompraMinima() == null)
+      clientePorActualizar.setMontoCompraMinima(clientePersistido.getMontoCompraMinima());
     clientePorActualizar.setFechaAlta(clientePersistido.getFechaAlta());
     return clienteService.actualizar(clientePorActualizar, clientePersistido);
   }
