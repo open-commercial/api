@@ -76,6 +76,12 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
+    if (producto.isOferta()
+        && producto.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO) <= 0) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_producto_oferta_inferior_0", null, Locale.getDefault()));
+    }
     if (operacion == TipoDeOperacion.ACTUALIZACION
         && (producto.isOferta()
             && (!producto.isPublico()

@@ -3980,7 +3980,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldNotModificarProductoComoDestacadoSiNoTieneImagen() {
+  void shouldNotModificarProductoComoOfertaSiNoTieneImagen() {
     this.shouldCrearProductoConIva21();
     ProductoDTO productoAModificar =
         restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
@@ -3990,6 +3990,7 @@ class AppIntegrationTest {
     productoAModificar.setCantidadEnSucursales(cantidadEnSucursal);
     productoAModificar.setPublico(false);
     productoAModificar.setOferta(true);
+    productoAModificar.setPorcentajeBonificacionOferta(BigDecimal.ONE);
     productoAModificar.setCodigo("666");
     RestClientResponseException thrown =
         assertThrows(

@@ -103,14 +103,13 @@ public class Producto implements Serializable {
   private boolean oferta;
 
   @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", inclusive = false, message = "{mensaje_producto_bonificacion_oferta_inferior_0}")
-  @DecimalMax(value = "100", inclusive = false, message = "{mensaje_producto_bonificacion_oferta_superior_100}")
+  @DecimalMax(value = "100", inclusive = false, message = "{mensaje_producto_oferta_superior_100}")
   @JsonView(Views.Comprador.class)
   private BigDecimal porcentajeBonificacionOferta;
 
   @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_producto_bonificacion_oferta_inferior_0}")
-  @DecimalMax(value = "100", inclusive = false, message = "{mensaje_producto_bonificacion_oferta_superior_100}")
+  @DecimalMin(value = "0", message = "{mensaje_producto_bonificacion_inferior_0}")
+  @DecimalMax(value = "100", inclusive = false, message = "{mensaje_producto_bonificacion_superior_100}")
   @JsonView(Views.Comprador.class)
   private BigDecimal porcentajeBonificacionPrecio;
 

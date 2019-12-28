@@ -195,7 +195,14 @@ public class ProductoController {
             .stream()
             .map(CantidadEnSucursal::getCantidad)
             .reduce(BigDecimal.ZERO, BigDecimal::add));
-    productoPorActualizar.setHayStock(productoPorActualizar.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
+    productoPorActualizar.setHayStock(
+        productoPorActualizar.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
+    if (productoPorActualizar.getPorcentajeBonificacionOferta() == null)
+      productoPorActualizar.setPorcentajeBonificacionOferta(
+          productoPersistido.getPorcentajeBonificacionOferta());
+    if (productoPorActualizar.getPorcentajeBonificacionPrecio() == null)
+      productoPorActualizar.setPorcentajeBonificacionPrecio(
+          productoPersistido.getPorcentajeBonificacionPrecio());
     productoService.actualizar(productoPorActualizar, productoPersistido);
   }
 
@@ -247,7 +254,11 @@ public class ProductoController {
     producto.setIvaPorcentaje(nuevoProductoDTO.getIvaPorcentaje());
     producto.setIvaNeto(nuevoProductoDTO.getIvaNeto());
     producto.setPrecioLista(nuevoProductoDTO.getPrecioLista());
-    producto.setPorcentajeBonificacionPrecio(nuevoProductoDTO.getPorcentajeBonificacionPrecio());
+    producto.setPorcentajeBonificacionPrecio(
+        nuevoProductoDTO.getPorcentajeBonificacionPrecio() != null
+            ? nuevoProductoDTO.getPorcentajeBonificacionPrecio()
+            : BigDecimal.ZERO);
+    producto.setPorcentajeBonificacionOferta(BigDecimal.ZERO);
     producto.setIlimitado(nuevoProductoDTO.isIlimitado());
     producto.setPublico(nuevoProductoDTO.isPublico());
     producto.setNota(nuevoProductoDTO.getNota());
