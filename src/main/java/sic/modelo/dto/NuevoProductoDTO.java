@@ -28,12 +28,14 @@ public class NuevoProductoDTO {
   private BigDecimal precioVentaPublico;
   private BigDecimal ivaPorcentaje;
   private BigDecimal ivaNeto;
-  private BigDecimal precioBonificado;
+  private boolean oferta;
+  private byte[] imagen;
+  private BigDecimal porcentajeBonificacionOferta;
   private BigDecimal porcentajeBonificacionPrecio;
+  private BigDecimal precioBonificado;
   private BigDecimal precioLista;
   private boolean ilimitado;
   private boolean publico;
-  private boolean oferta;
   private LocalDateTime fechaUltimaModificacion;
   private String estanteria;
   private String estante;

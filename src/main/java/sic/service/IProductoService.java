@@ -14,7 +14,7 @@ import javax.validation.Valid;
 
 public interface IProductoService {
 
-  void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido);
+  void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido, byte[] imagen);
 
   void actualizarStock(
       Map<Long, BigDecimal> idsYCantidades,
@@ -61,13 +61,13 @@ public interface IProductoService {
 
   byte[] getListaDePrecios(List<Producto> productos, String formato);
 
-  Producto guardar(@Valid Producto producto);
+  Producto guardar(@Valid Producto producto, byte[] imagen);
 
   List<Producto> actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO);
 
   void guardarCantidadesDeSucursalNueva(Sucursal sucursal);
 
-  String subirImagenProducto(long idProducto, byte[] imagen);
+  void subirImagenProducto(long idProducto, byte[] imagen);
 
   List<Producto> getMultiplesProductosPorId(List<Long> idsProductos);
 

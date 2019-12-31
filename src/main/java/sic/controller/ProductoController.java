@@ -3,7 +3,6 @@ package sic.controller;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
-import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -21,7 +20,6 @@ import sic.modelo.dto.ProductoDTO;
 import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
-import sic.util.CalculosComprobante;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -34,7 +32,6 @@ public class ProductoController {
   private final IRubroService rubroService;
   private final IProveedorService proveedorService;
   private final ISucursalService sucursalService;
-  private final IClienteService clienteService;
   private final IAuthService authService;
   private final ModelMapper modelMapper;
   private final MessageSource messageSource;
@@ -46,7 +43,6 @@ public class ProductoController {
     IRubroService rubroService,
     IProveedorService proveedorService,
     ISucursalService sucursalService,
-    IClienteService clienteService,
     IAuthService authService,
     ModelMapper modelMapper,
     MessageSource messageSource) {
@@ -55,7 +51,6 @@ public class ProductoController {
     this.rubroService = rubroService;
     this.proveedorService = proveedorService;
     this.sucursalService = sucursalService;
-    this.clienteService = clienteService;
     this.authService = authService;
     this.modelMapper = modelMapper;
     this.messageSource = messageSource;
@@ -203,7 +198,7 @@ public class ProductoController {
     if (productoPorActualizar.getPorcentajeBonificacionPrecio() == null)
       productoPorActualizar.setPorcentajeBonificacionPrecio(
           productoPersistido.getPorcentajeBonificacionPrecio());
-    productoService.actualizar(productoPorActualizar, productoPersistido);
+    productoService.actualizar(productoPorActualizar, productoPersistido, productoDTO.getImagen());
   }
 
   @PostMapping("/productos")
@@ -254,24 +249,22 @@ public class ProductoController {
     producto.setIvaPorcentaje(nuevoProductoDTO.getIvaPorcentaje());
     producto.setIvaNeto(nuevoProductoDTO.getIvaNeto());
     producto.setPrecioLista(nuevoProductoDTO.getPrecioLista());
+    producto.setOferta(nuevoProductoDTO.isOferta());
+    producto.setPorcentajeBonificacionOferta(
+            nuevoProductoDTO.getPorcentajeBonificacionOferta() != null
+                    ? nuevoProductoDTO.getPorcentajeBonificacionOferta()
+                    : BigDecimal.ZERO);
     producto.setPorcentajeBonificacionPrecio(
-        nuevoProductoDTO.getPorcentajeBonificacionPrecio() != null
-            ? nuevoProductoDTO.getPorcentajeBonificacionPrecio()
-            : BigDecimal.ZERO);
-    producto.setPorcentajeBonificacionOferta(BigDecimal.ZERO);
+            nuevoProductoDTO.getPorcentajeBonificacionPrecio() != null
+                    ? nuevoProductoDTO.getPorcentajeBonificacionPrecio()
+                    : BigDecimal.ZERO);
     producto.setIlimitado(nuevoProductoDTO.isIlimitado());
     producto.setPublico(nuevoProductoDTO.isPublico());
     producto.setNota(nuevoProductoDTO.getNota());
     producto.setFechaVencimiento(nuevoProductoDTO.getFechaVencimiento());
     producto.setFechaAlta(LocalDateTime.now());
     producto.setFechaUltimaModificacion(LocalDateTime.now());
-    return productoService.guardar(producto);
-  }
-
-  @PostMapping("/productos/{idProducto}/imagenes")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public String subirImagen(@PathVariable long idProducto, @RequestBody byte[] imagen) {
-    return productoService.subirImagenProducto(idProducto, imagen);
+    return productoService.guardar(producto, nuevoProductoDTO.getImagen());
   }
 
   @PutMapping("/productos/multiples")

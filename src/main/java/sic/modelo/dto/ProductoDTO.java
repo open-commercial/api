@@ -47,4 +47,5 @@ public class ProductoDTO implements Serializable {
   private LocalDate fechaVencimiento;
   private boolean eliminado;
   private String urlImagen;
+  private byte[] imagen;
 }

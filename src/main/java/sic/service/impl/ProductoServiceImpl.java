@@ -7,6 +7,7 @@ import java.io.*;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.export.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
@@ -56,6 +57,9 @@ public class ProductoServiceImpl implements IProductoService {
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
+  @Value("${SIC_CLOUDINARY_ENV}")
+  private String cloudinaryEnviroment;
+
   @Autowired
   @Lazy
   public ProductoServiceImpl(
@@ -81,14 +85,6 @@ public class ProductoServiceImpl implements IProductoService {
       throw new BusinessServiceException(
           messageSource.getMessage(
               "mensaje_producto_oferta_inferior_0", null, Locale.getDefault()));
-    }
-    if (operacion == TipoDeOperacion.ACTUALIZACION
-        && (producto.isOferta()
-            && (!producto.isPublico()
-                || (producto.getUrlImagen() == null || producto.getUrlImagen().isEmpty())))) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_producto_oferta_privado_o_sin_imagen", null, Locale.getDefault()));
     }
     // Codigo
     if (!producto.getCodigo().equals("")) {
@@ -292,28 +288,40 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public Producto guardar(@Valid Producto producto) {
+  public Producto guardar(@Valid Producto producto, byte[] imagen) {
+    if (producto.isOferta() && imagen == null)
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_producto_oferta_sin_imagen",
+              new Object[] {producto.getDescripcion()},
+              Locale.getDefault()));
     if (producto.getCodigo() == null) producto.setCodigo("");
     producto.setEliminado(false);
-    producto.setOferta(false);
     this.calcularPrecioBonificado(producto);
     this.validarOperacion(TipoDeOperacion.ALTA, producto);
-    //se setea siempre en false momentaniamente
+    // se setea siempre en false momentaniamente
     producto.setIlimitado(false);
     producto = productoRepository.save(producto);
     logger.warn("El Producto {} se guardó correctamente.", producto);
+    if (imagen != null) this.subirImagenProducto(producto.getIdProducto(), imagen);
     return producto;
   }
 
   @Override
   @Transactional
-  public void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido) {
+  public void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido, byte[] imagen) {
+    if (productoPorActualizar.isOferta() && imagen == null)
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_producto_oferta_sin_imagen",
+              new Object[] {productoPorActualizar.getDescripcion()},
+              Locale.getDefault()));
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
     productoPorActualizar.setFechaUltimaModificacion(LocalDateTime.now());
-    if (productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty()
-      && (productoPorActualizar.getUrlImagen() == null || productoPorActualizar.getUrlImagen().isEmpty())) {
-      photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + productoPersistido.getIdProducto());
+    if (productoPorActualizar.getUrlImagen() == null || productoPorActualizar.getUrlImagen().isEmpty()) {
+      photoVideoUploader.borrarImagen(
+          Producto.class.getSimpleName() + productoPersistido.getIdProducto());
     }
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
     this.calcularPrecioBonificado(productoPorActualizar);
@@ -322,8 +330,9 @@ public class ProductoServiceImpl implements IProductoService {
     }
     //se setea siempre en false momentaniamente
     productoPorActualizar.setIlimitado(false);
-    productoRepository.save(productoPorActualizar);
+    productoPorActualizar = productoRepository.save(productoPorActualizar);
     logger.warn("El Producto {} se modificó correctamente.", productoPorActualizar);
+    if (imagen != null) this.subirImagenProducto(productoPorActualizar.getIdProducto(), imagen);
   }
 
   private void calcularPrecioBonificado(Producto producto) {
@@ -607,13 +616,15 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public String subirImagenProducto(long idProducto, byte[] imagen) {
-    if (imagen.length > TAMANIO_MAXIMO_IMAGEN)
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_error_tamanio_no_valido", null, Locale.getDefault()));
-    String urlImagen = photoVideoUploader.subirImagen(Producto.class.getSimpleName() + idProducto, imagen);
-    productoRepository.actualizarUrlImagen(idProducto, urlImagen);
-    return urlImagen;
+  public void subirImagenProducto(long idProducto, byte[] imagen) {
+    if (cloudinaryEnviroment.equals("production")) {
+      if (imagen.length > TAMANIO_MAXIMO_IMAGEN)
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_error_tamanio_no_valido", null, Locale.getDefault()));
+      String urlImagen =
+          photoVideoUploader.subirImagen(Producto.class.getSimpleName() + idProducto, imagen);
+      productoRepository.actualizarUrlImagen(idProducto, urlImagen);
+    }
   }
 
   @Override

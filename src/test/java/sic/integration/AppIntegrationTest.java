@@ -3902,7 +3902,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  void shouldNotCrearProductoDestacado() {
+  void shouldNotCrearProductoOferta() {
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     Rubro rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", Rubro.class);
     ProveedorDTO proveedor =
@@ -3924,20 +3924,29 @@ class AppIntegrationTest {
             .nota("Producto Test")
             .oferta(true)
             .build();
-    ProductoDTO productoRecuperado =
-        restTemplate.postForObject(
-            apiPrefix
-                + "/productos?idMedida="
-                + medida.getIdMedida()
-                + "&idRubro="
-                + rubro.getIdRubro()
-                + "&idProveedor="
-                + proveedor.getIdProveedor()
-                + "&idSucursal="
-                + sucursal.getIdSucursal(),
-            productoUno,
-            ProductoDTO.class);
-    assertFalse(productoRecuperado.isOferta());
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class,
+            () ->
+                restTemplate.postForObject(
+                    apiPrefix
+                        + "/productos?idMedida="
+                        + medida.getIdMedida()
+                        + "&idRubro="
+                        + rubro.getIdRubro()
+                        + "&idProveedor="
+                        + proveedor.getIdProveedor()
+                        + "&idSucursal="
+                        + sucursal.getIdSucursal(),
+                    productoUno,
+                    ProductoDTO.class));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_producto_oferta_sin_imagen", null, Locale.getDefault())));
   }
 
   @Test
@@ -3976,7 +3985,7 @@ class AppIntegrationTest {
             .getMessage()
             .contains(
                 messageSource.getMessage(
-                    "mensaje_producto_oferta_privado_o_sin_imagen", null, Locale.getDefault())));
+                    "mensaje_producto_oferta_sin_imagen", null, Locale.getDefault())));
   }
 
   @Test
@@ -4002,7 +4011,7 @@ class AppIntegrationTest {
             .getMessage()
             .contains(
                 messageSource.getMessage(
-                    "mensaje_producto_oferta_privado_o_sin_imagen", null, Locale.getDefault())));
+                    "mensaje_producto_oferta_sin_imagen", null, Locale.getDefault())));
   }
 
   @Test
@@ -6769,7 +6778,7 @@ class AppIntegrationTest {
     ProductoDTO productoRecuperado = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     productoRecuperado.setPublico(true);
     productoRecuperado.setOferta(true);
-    productoRecuperado.setUrlImagen("imagen.com");
+    productoRecuperado.setImagen("imagen".getBytes());
     productoRecuperado.setPorcentajeBonificacionOferta(BigDecimal.TEN);
     restTemplate.put(apiPrefix + "/productos", productoRecuperado);
     productoRecuperado = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
@@ -6874,14 +6883,14 @@ class AppIntegrationTest {
         restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     productoUno.setPublico(true);
     productoUno.setOferta(true);
-    productoUno.setUrlImagen("imagen.com");
+    productoUno.setImagen("imagen".getBytes());
     productoUno.setPorcentajeBonificacionOferta(BigDecimal.TEN);
     restTemplate.put(apiPrefix + "/productos", productoUno);
     ProductoDTO productoDos =
         restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
     productoDos.setPublico(true);
     productoDos.setOferta(true);
-    productoDos.setUrlImagen("imagen2.com");
+    productoDos.setImagen("imagen2".getBytes());
     productoDos.setPorcentajeBonificacionOferta(new BigDecimal("50"));
     restTemplate.put(apiPrefix + "/productos", productoDos);
     paginaRespuestaRest =
