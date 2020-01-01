@@ -57,9 +57,6 @@ public class ProductoServiceImpl implements IProductoService {
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
-  @Value("${SIC_CLOUDINARY_ENV}")
-  private String cloudinaryEnviroment;
-
   @Autowired
   @Lazy
   public ProductoServiceImpl(
@@ -617,14 +614,12 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   @Transactional
   public void subirImagenProducto(long idProducto, byte[] imagen) {
-    if (cloudinaryEnviroment.equals("production")) {
-      if (imagen.length > TAMANIO_MAXIMO_IMAGEN)
-        throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_error_tamanio_no_valido", null, Locale.getDefault()));
-      String urlImagen =
-          photoVideoUploader.subirImagen(Producto.class.getSimpleName() + idProducto, imagen);
-      productoRepository.actualizarUrlImagen(idProducto, urlImagen);
-    }
+    if (imagen.length > TAMANIO_MAXIMO_IMAGEN)
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_error_tamanio_no_valido", null, Locale.getDefault()));
+    String urlImagen =
+        photoVideoUploader.subirImagen(Producto.class.getSimpleName() + idProducto, imagen);
+    productoRepository.actualizarUrlImagen(idProducto, urlImagen);
   }
 
   @Override
