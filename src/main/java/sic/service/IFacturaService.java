@@ -9,7 +9,6 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
-import sic.modelo.embeddable.ClienteEmbeddable;
 
 import javax.validation.Valid;
 
@@ -77,13 +76,12 @@ public interface IFacturaService {
 
   boolean pedidoTotalmenteFacturado(Pedido pedido);
 
-  RenglonFactura calcularRenglon(
-      TipoDeComprobante tipoDeComprobante,
-      Movimiento movimiento,
-      BigDecimal cantidad,
-      long idProducto,
-      boolean dividiendoRenglonFactura,
-      BigDecimal bonificacion);
+  List<RenglonFactura> calcularRenglones(
+          TipoDeComprobante tipoDeComprobante,
+          Movimiento movimiento,
+          BigDecimal[] cantidad,
+          long[] idProducto,
+          BigDecimal[] bonificacion);
 
   boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAFIP comprobante);
 

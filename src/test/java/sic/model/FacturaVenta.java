@@ -1,4 +1,4 @@
-package sic.modelo.dto;
+package sic.model;
 
 import java.io.Serializable;
 
@@ -20,7 +20,7 @@ import sic.modelo.CategoriaIVA;
       "ubicacionCliente"
     })
 @Builder
-public class FacturaVentaDTO extends FacturaDTO implements Serializable {
+public class FacturaVenta extends Factura implements Serializable {
 
   private Long idCliente;
   private String nombreFiscalCliente;

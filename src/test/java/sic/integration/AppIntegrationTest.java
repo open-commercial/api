@@ -24,6 +24,9 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
+import sic.model.Factura;
+import sic.model.FacturaCompra;
+import sic.model.FacturaVenta;
 import sic.model.Pedido;
 import sic.model.RenglonPedido;
 import sic.modelo.*;
@@ -175,7 +178,7 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("4400.000000000000000000000000000000"), subTotalBruto);
     BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
     assertEquals(new BigDecimal("5324.000000000000000"), total.setScale(15, RoundingMode.HALF_UP));
-    FacturaVentaDTO facturaVentaA = FacturaVentaDTO.builder()
+    FacturaVenta facturaVentaA = FacturaVenta.builder()
       .idCliente(1L)
       .build();
     facturaVentaA.setIdSucursal(1L);
@@ -199,13 +202,13 @@ class AppIntegrationTest {
     this.abrirCaja();
     Long[] idsFormasDePago = {1L};
     BigDecimal[] montos = {total};
-    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
-      NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaA)
+    NuevaFacturaDTO nuevaFacturaVentaDTO =
+      NuevaFacturaDTO.builder().facturaVenta(facturaVentaA)
         .idPedido(1L)
         .idsFormaDePago(idsFormasDePago)
         .montos(montos)
         .build();
-    restTemplate.postForObject(apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
+    restTemplate.postForObject(apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, sic.modelo.FacturaVenta[].class);
   }
 
   private void crearFacturaTipoBDePedido() {
@@ -216,7 +219,7 @@ class AppIntegrationTest {
           + "?tipoDeComprobante="
           + TipoDeComprobante.FACTURA_B,
         RenglonFactura[].class);
-    FacturaVentaDTO facturaVentaB = FacturaVentaDTO.builder()
+    FacturaVenta facturaVentaB = FacturaVenta.builder()
       .idCliente(1L)
       .build();
     facturaVentaB.setIdSucursal(1L);
@@ -237,12 +240,12 @@ class AppIntegrationTest {
     facturaVentaB.setIva21Neto(BigDecimal.ZERO);
     facturaVentaB.setTotal(new BigDecimal("1944.800000000000000"));
     facturaVentaB.setFecha(LocalDateTime.now());
-    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
-      NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaB)
+    NuevaFacturaDTO nuevaFacturaVentaDTO =
+      NuevaFacturaDTO.builder().facturaVenta(facturaVentaB)
         .idPedido(1L)
         .build();
     restTemplate.postForObject(
-        apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
+        apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, sic.modelo.FacturaVenta[].class);
   }
 
   private void crearReciboParaCliente(double monto, long idSucursal, long idCliente) {
@@ -280,13 +283,13 @@ class AppIntegrationTest {
         .idSucursal(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-    List<FacturaVentaDTO> facturasRecuperadas =
+    List<FacturaVenta> facturasRecuperadas =
         restTemplate
             .exchange(
                 apiPrefix + "/facturas/venta/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
-                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
             .getBody()
             .getContent();
     Long[] idsFactura = new Long[1];
@@ -1292,8 +1295,8 @@ class AppIntegrationTest {
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
     Transportista transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
-    FacturaVentaDTO facturaVentaA =
-      FacturaVentaDTO.builder().nombreFiscalCliente(cliente.getNombreFiscal())
+    FacturaVenta facturaVentaA =
+      FacturaVenta.builder().nombreFiscalCliente(cliente.getNombreFiscal())
         .idCliente(cliente.getIdCliente())
         .build();
     facturaVentaA.setIdSucursal(1L);
@@ -1313,11 +1316,11 @@ class AppIntegrationTest {
     facturaVentaA.setTotal(total);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     int[] indices = new int[] {0};
-    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
-        NuevaFacturaVentaDTO.builder().indices(indices).facturaVenta(facturaVentaA).build();
-    FacturaVentaDTO[] facturas =
+    NuevaFacturaDTO nuevaFacturaVentaDTO =
+        NuevaFacturaDTO.builder().indices(indices).facturaVenta(facturaVentaA).build();
+    FacturaVenta[] facturas =
       restTemplate.postForObject(
-        apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVentaDTO[].class);
+        apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
     assertEquals(2, facturas.length);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
@@ -1448,8 +1451,8 @@ class AppIntegrationTest {
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
     Transportista transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
-    FacturaVentaDTO facturaVentaA =
-      FacturaVentaDTO.builder().nombreFiscalCliente(cliente.getNombreFiscal())
+    FacturaVenta facturaVentaA =
+      FacturaVenta.builder().nombreFiscalCliente(cliente.getNombreFiscal())
         .idCliente(cliente.getIdCliente())
         .build();
     facturaVentaA.setIdSucursal(1L);
@@ -1468,11 +1471,11 @@ class AppIntegrationTest {
     facturaVentaA.setIva21Neto(iva_21_netoFactura);
     facturaVentaA.setTotal(total);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
-    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
-        NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaA).build();
-    FacturaVentaDTO[] facturas =
+    NuevaFacturaDTO nuevaFacturaVentaDTO =
+        NuevaFacturaDTO.builder().facturaVenta(facturaVentaA).build();
+    FacturaVenta[] facturas =
         restTemplate.postForObject(
-            apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVentaDTO[].class);
+            apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
     assertEquals(facturaVentaA, facturas[0]);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
@@ -1589,8 +1592,8 @@ class AppIntegrationTest {
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
     Transportista transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
-    FacturaVentaDTO facturaVentaA =
-      FacturaVentaDTO.builder().nombreFiscalCliente(cliente.getNombreFiscal())
+    FacturaVenta facturaVentaA =
+      FacturaVenta.builder().nombreFiscalCliente(cliente.getNombreFiscal())
         .idCliente(cliente.getIdCliente())
         .build();
     facturaVentaA.setIdSucursal(2L);
@@ -1609,12 +1612,12 @@ class AppIntegrationTest {
     facturaVentaA.setIva21Neto(iva_21_netoFactura);
     facturaVentaA.setTotal(total);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/2", SucursalDTO.class);
-    NuevaFacturaVentaDTO nuevaFacturaVentaDTO = NuevaFacturaVentaDTO.builder()
+    NuevaFacturaDTO nuevaFacturaVentaDTO = NuevaFacturaDTO.builder()
       .facturaVenta(facturaVentaA)
       .build();
-    FacturaVentaDTO[] facturas =
+    FacturaVenta[] facturas =
       restTemplate.postForObject(
-        apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVentaDTO[].class);
+        apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
     assertEquals(facturaVentaA, facturas[0]);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
@@ -1732,8 +1735,8 @@ class AppIntegrationTest {
     Transportista transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
-    FacturaVentaDTO facturaVentaB =
-      FacturaVentaDTO.builder()
+    FacturaVenta facturaVentaB =
+      FacturaVenta.builder()
         .build();
     facturaVentaB.setIdSucursal(sucursal.getIdSucursal());
     facturaVentaB.setIdCliente(cliente.getIdCliente());
@@ -1752,11 +1755,11 @@ class AppIntegrationTest {
     facturaVentaB.setTotal(total);
     facturaVentaB.setFechaVencimiento(LocalDate.now().plusYears(1L));
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
-    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
-      NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaB).build();
-    FacturaVentaDTO[] facturas =
+    NuevaFacturaDTO nuevaFacturaVentaDTO =
+      NuevaFacturaDTO.builder().facturaVenta(facturaVentaB).build();
+    FacturaVenta[] facturas =
         restTemplate.postForObject(
-            apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVentaDTO[].class);
+            apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
     assertEquals(facturaVentaB, facturas[0]);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
@@ -1861,8 +1864,8 @@ class AppIntegrationTest {
     BigDecimal subTotalBruto = subTotal.add(recargo_neto).subtract(descuento_neto);
     BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
     ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", ClienteDTO.class);
-    FacturaVentaDTO facturaVentaA =
-      FacturaVentaDTO.builder().nombreFiscalCliente(cliente.getNombreFiscal()).build();
+    FacturaVenta facturaVentaA =
+      FacturaVenta.builder().nombreFiscalCliente(cliente.getNombreFiscal()).build();
     facturaVentaA.setObservaciones("Factura Venta A test");
     facturaVentaA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
     facturaVentaA.setRenglones(renglones);
@@ -1881,18 +1884,18 @@ class AppIntegrationTest {
     facturaVentaA.setIdCliente(cliente.getIdCliente());
     facturaVentaA.setIdSucursal(sucursal.getIdSucursal());
     facturaVentaA.setIdTransportista(transportista.getIdTransportista());
-    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
-        NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaA).build();
-    FacturaVentaDTO facturaVenta =
+    NuevaFacturaDTO nuevaFacturaVentaDTO =
+        NuevaFacturaDTO.builder().facturaVenta(facturaVentaA).build();
+    FacturaVenta facturaVenta =
         restTemplate
             .postForObject(
-                apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVentaDTO[].class)[0];
+                apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class)[0];
     String ubicacionSinModificacion = facturaVenta.getUbicacionCliente();
     cliente.setNombreFiscal("Superior Spider Man");
     cliente.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
     cliente.getUbicacionFacturacion().setCalle("Rio Torcuato");
     restTemplate.put(apiPrefix + "/clientes", cliente);
-    facturaVenta = restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaVentaDTO.class);
+    facturaVenta = restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaVenta.class);
     assertEquals(cliente.getNroCliente(), facturaVenta.getNroDeCliente());
     assertEquals("Peter Parker", facturaVenta.getNombreFiscalCliente());
     assertEquals(CategoriaIVA.RESPONSABLE_INSCRIPTO, facturaVenta.getCategoriaIVACliente());
@@ -1995,8 +1998,8 @@ class AppIntegrationTest {
     Transportista transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
-    FacturaVentaDTO facturaVentaC =
-        FacturaVentaDTO.builder().idCliente(cliente.getIdCliente()).build();
+    FacturaVenta facturaVentaC =
+        FacturaVenta.builder().idCliente(cliente.getIdCliente()).build();
     facturaVentaC.setIdTransportista(transportista.getIdTransportista());
     facturaVentaC.setIdSucursal(sucursal.getIdSucursal());
     facturaVentaC.setIdCliente(cliente.getIdCliente());
@@ -2014,11 +2017,11 @@ class AppIntegrationTest {
     facturaVentaC.setIva21Neto(iva_21_netoFactura);
     facturaVentaC.setTotal(total);
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
-    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
-      NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaC).build();
-    FacturaVentaDTO[] facturas =
+    NuevaFacturaDTO nuevaFacturaVentaDTO =
+      NuevaFacturaDTO.builder().facturaVenta(facturaVentaC).build();
+    FacturaVenta[] facturas =
         restTemplate.postForObject(
-            apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVentaDTO[].class);
+            apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
     assertEquals(facturaVentaC, facturas[0]);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
@@ -2086,8 +2089,8 @@ class AppIntegrationTest {
     Transportista transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
-    FacturaVentaDTO facturaVentaX =
-      FacturaVentaDTO.builder().idCliente(cliente.getIdCliente()).build();
+    FacturaVenta facturaVentaX =
+      FacturaVenta.builder().idCliente(cliente.getIdCliente()).build();
     facturaVentaX.setIdSucursal(sucursal.getIdSucursal());
     facturaVentaX.setIdCliente(cliente.getIdCliente());
     facturaVentaX.setIdTransportista(transportista.getIdTransportista());
@@ -2104,11 +2107,11 @@ class AppIntegrationTest {
     facturaVentaX.setIva21Neto(BigDecimal.ZERO);
     facturaVentaX.setTotal(subTotalBruto);
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
-    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
-      NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaX).build();
-    FacturaVentaDTO[] facturas =
+    NuevaFacturaDTO nuevaFacturaVentaDTO =
+      NuevaFacturaDTO.builder().facturaVenta(facturaVentaX).build();
+    FacturaVenta[] facturas =
         restTemplate.postForObject(
-            apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVentaDTO[].class);
+            apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
     assertEquals(facturaVentaX, facturas[0]);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
@@ -2220,8 +2223,8 @@ class AppIntegrationTest {
     Transportista transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
-    FacturaVentaDTO facturaVentaY =
-      FacturaVentaDTO.builder().idCliente(cliente.getIdCliente()).build();
+    FacturaVenta facturaVentaY =
+      FacturaVenta.builder().idCliente(cliente.getIdCliente()).build();
     facturaVentaY.setIdSucursal(sucursal.getIdSucursal());
     facturaVentaY.setIdCliente(cliente.getIdCliente());
     facturaVentaY.setIdTransportista(transportista.getIdTransportista());
@@ -2238,11 +2241,11 @@ class AppIntegrationTest {
     facturaVentaY.setIva21Neto(iva_21_netoFactura);
     facturaVentaY.setTotal(total);
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
-    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
-      NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaY).build();
-    FacturaVentaDTO[] facturas =
+    NuevaFacturaDTO nuevaFacturaVentaDTO =
+      NuevaFacturaDTO.builder().facturaVenta(facturaVentaY).build();
+    FacturaVenta[] facturas =
         restTemplate.postForObject(
-            apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVentaDTO[].class);
+            apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
     assertEquals(facturaVentaY, facturas[0]);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
@@ -2354,8 +2357,8 @@ class AppIntegrationTest {
     Transportista transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
-    FacturaVentaDTO facturaVentaPresupuesto =
-      FacturaVentaDTO.builder().idCliente(cliente.getIdCliente()).build();
+    FacturaVenta facturaVentaPresupuesto =
+      FacturaVenta.builder().idCliente(cliente.getIdCliente()).build();
     facturaVentaPresupuesto.setIdSucursal(sucursal.getIdSucursal());
     facturaVentaPresupuesto.setIdCliente(cliente.getIdCliente());
     facturaVentaPresupuesto.setIdTransportista(transportista.getIdTransportista());
@@ -2372,11 +2375,11 @@ class AppIntegrationTest {
     facturaVentaPresupuesto.setIva21Neto(iva_21_netoFactura);
     facturaVentaPresupuesto.setTotal(total);
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
-    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
-        NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaPresupuesto).build();
-    FacturaVentaDTO[] facturas =
+    NuevaFacturaDTO nuevaFacturaVentaDTO =
+        NuevaFacturaDTO.builder().facturaVenta(facturaVentaPresupuesto).build();
+    FacturaVenta[] facturas =
         restTemplate.postForObject(
-            apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVentaDTO[].class);
+            apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
     assertEquals(facturaVentaPresupuesto, facturas[0]);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
@@ -2486,8 +2489,8 @@ class AppIntegrationTest {
     BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", Cliente.class);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
-    FacturaVentaDTO facturaVentaPresupuesto =
-      FacturaVentaDTO.builder().idCliente(cliente.getIdCliente()).build();
+    FacturaVenta facturaVentaPresupuesto =
+      FacturaVenta.builder().idCliente(cliente.getIdCliente()).build();
     facturaVentaPresupuesto.setIdSucursal(sucursal.getIdSucursal());
     facturaVentaPresupuesto.setIdCliente(cliente.getIdCliente());
     facturaVentaPresupuesto.setObservaciones("Factura Venta Presupuesto test");
@@ -2503,11 +2506,11 @@ class AppIntegrationTest {
     facturaVentaPresupuesto.setIva21Neto(iva_21_netoFactura);
     facturaVentaPresupuesto.setTotal(total);
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
-    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
-      NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaPresupuesto).build();
-    FacturaVentaDTO[] facturas =
+    NuevaFacturaDTO nuevaFacturaVentaDTO =
+      NuevaFacturaDTO.builder().facturaVenta(facturaVentaPresupuesto).build();
+    FacturaVenta[] facturas =
       restTemplate.postForObject(
-        apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVentaDTO[].class);
+        apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
     assertEquals(facturaVentaPresupuesto, facturas[0]);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
@@ -2529,7 +2532,7 @@ class AppIntegrationTest {
     RestClientResponseException thrown =
         assertThrows(
             RestClientResponseException.class,
-            () -> restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaDTO.class));
+            () -> restTemplate.getForObject(apiPrefix + "/facturas/1", Factura.class));
     assertNotNull(thrown.getMessage());
     assertTrue(
         thrown
@@ -2594,8 +2597,8 @@ class AppIntegrationTest {
     Transportista transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
-    FacturaVentaDTO facturaVentaX =
-      FacturaVentaDTO.builder().idCliente(cliente.getIdCliente()).build();
+    FacturaVenta facturaVentaX =
+      FacturaVenta.builder().idCliente(cliente.getIdCliente()).build();
     facturaVentaX.setIdSucursal(sucursal.getIdSucursal());
     facturaVentaX.setIdCliente(cliente.getIdCliente());
     facturaVentaX.setIdTransportista(transportista.getIdTransportista());
@@ -2612,12 +2615,12 @@ class AppIntegrationTest {
     facturaVentaX.setIva21Neto(BigDecimal.ZERO);
     facturaVentaX.setTotal(subTotalBruto);
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
-    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
-      NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaX)
+    NuevaFacturaDTO nuevaFacturaVentaDTO =
+      NuevaFacturaDTO.builder().facturaVenta(facturaVentaX)
         .build();
-    FacturaVentaDTO[] facturas =
+    FacturaVenta[] facturas =
         restTemplate.postForObject(
-            apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVentaDTO[].class);
+            apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
     assertEquals(facturaVentaX, facturas[0]);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
@@ -2726,8 +2729,8 @@ class AppIntegrationTest {
     Transportista transportista =
         restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
-    FacturaVentaDTO facturaVentaA =
-        FacturaVentaDTO.builder().idCliente(cliente.getIdCliente()).build();
+    FacturaVenta facturaVentaA =
+        FacturaVenta.builder().idCliente(cliente.getIdCliente()).build();
     facturaVentaA.setIdSucursal(sucursal.getIdSucursal());
     facturaVentaA.setIdCliente(cliente.getIdCliente());
     facturaVentaA.setIdTransportista(transportista.getIdTransportista());
@@ -2743,14 +2746,14 @@ class AppIntegrationTest {
     facturaVentaA.setIva105Neto(iva_105_netoFactura);
     facturaVentaA.setIva21Neto(iva_21_netoFactura);
     facturaVentaA.setTotal(total);
-    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
-        NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaA).build();
+    NuevaFacturaDTO nuevaFacturaVentaDTO =
+        NuevaFacturaDTO.builder().facturaVenta(facturaVentaA).build();
     RestClientResponseException thrown =
         assertThrows(
             RestClientResponseException.class,
             () ->
                 restTemplate.postForObject(
-                    apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVentaDTO[].class));
+                    apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class));
     assertNotNull(thrown.getMessage());
     assertTrue(
         thrown
@@ -2763,8 +2766,8 @@ class AppIntegrationTest {
   @Test
   void shouldVerificarCantidadDeArticulosEnFacturaA() {
     this.shouldCrearFacturaVentaASucursal1();
-    FacturaDTO facturaDTO = restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaDTO.class);
-    assertEquals(new BigDecimal("9.000000000000000"), facturaDTO.getCantidadArticulos());
+    Factura factura = restTemplate.getForObject(apiPrefix + "/facturas/1", Factura.class);
+    assertEquals(new BigDecimal("9.000000000000000"), factura.getCantidadArticulos());
   }
 
   @Test
@@ -2852,7 +2855,7 @@ class AppIntegrationTest {
     BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
     ProveedorDTO proveedor =
       restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
-    FacturaCompraDTO facturaCompraA = FacturaCompraDTO.builder()
+    FacturaCompra facturaCompraA = FacturaCompra.builder()
       .idProveedor(1L)
       .build();
     facturaCompraA.setIdSucursal(1L);
@@ -2873,9 +2876,9 @@ class AppIntegrationTest {
     facturaCompraA.setTotal(total);
     facturaCompraA.setIdProveedor(1L);
     facturaCompraA.setIdTransportista(1L);
-    FacturaCompraDTO[] facturas =
+    FacturaCompra[] facturas =
         restTemplate.postForObject(
-            apiPrefix + "/facturas/compra", facturaCompraA, FacturaCompraDTO[].class);
+            apiPrefix + "/facturas/compra", facturaCompraA, FacturaCompra[].class);
     assertEquals(facturaCompraA, facturas[0]);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     TransportistaDTO transportista =
@@ -2971,7 +2974,7 @@ class AppIntegrationTest {
     BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
     ProveedorDTO proveedor =
       restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
-    FacturaCompraDTO facturaCompraA = FacturaCompraDTO.builder()
+    FacturaCompra facturaCompraA = FacturaCompra.builder()
       .idProveedor(1L)
       .build();
     facturaCompraA.setIdSucursal(2L);
@@ -2992,9 +2995,9 @@ class AppIntegrationTest {
     facturaCompraA.setTotal(total);
     facturaCompraA.setIdProveedor(1L);
     facturaCompraA.setIdTransportista(1L);
-    FacturaCompraDTO[] facturas =
+    FacturaCompra[] facturas =
       restTemplate.postForObject(
-        apiPrefix + "/facturas/compra", facturaCompraA, FacturaCompraDTO[].class);
+        apiPrefix + "/facturas/compra", facturaCompraA, FacturaCompra[].class);
     assertEquals(facturaCompraA, facturas[0]);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/2", SucursalDTO.class);
     TransportistaDTO transportista =
@@ -3091,7 +3094,7 @@ class AppIntegrationTest {
         .subtract(descuento_neto)
         .subtract(iva_105_netoFactura.add(iva_21_netoFactura));
     BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
-    FacturaCompraDTO facturaCompraB = FacturaCompraDTO.builder()
+    FacturaCompra facturaCompraB = FacturaCompra.builder()
       .idProveedor(1L)
       .build();
     facturaCompraB.setIdSucursal(1L);
@@ -3111,9 +3114,9 @@ class AppIntegrationTest {
     facturaCompraB.setTotal(total);
     facturaCompraB.setIdProveedor(1L);
     facturaCompraB.setIdTransportista(1L);
-    FacturaCompraDTO[] facturas =
+    FacturaCompra[] facturas =
         restTemplate.postForObject(
-            apiPrefix + "/facturas/compra", facturaCompraB, FacturaCompraDTO[].class);
+            apiPrefix + "/facturas/compra", facturaCompraB, FacturaCompra[].class);
     facturaCompraB.setRazonSocialProveedor("Chamaco S.R.L.");
     assertEquals(facturaCompraB, facturas[0]);
     ProveedorDTO proveedor =
@@ -3214,7 +3217,7 @@ class AppIntegrationTest {
         .subtract(descuento_neto)
         .subtract(iva_105_netoFactura.add(iva_21_netoFactura));
     BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
-    FacturaCompraDTO facturaCompraB = FacturaCompraDTO.builder()
+    FacturaCompra facturaCompraB = FacturaCompra.builder()
       .idProveedor(1L)
       .build();
     facturaCompraB.setIdSucursal(2L);
@@ -3234,9 +3237,9 @@ class AppIntegrationTest {
     facturaCompraB.setTotal(total);
     facturaCompraB.setIdProveedor(1L);
     facturaCompraB.setIdTransportista(1L);
-    FacturaCompraDTO[] facturas =
+    FacturaCompra[] facturas =
       restTemplate.postForObject(
-        apiPrefix + "/facturas/compra", facturaCompraB, FacturaCompraDTO[].class);
+        apiPrefix + "/facturas/compra", facturaCompraB, FacturaCompra[].class);
     facturaCompraB.setRazonSocialProveedor("Chamaco S.R.L.");
     assertEquals(facturaCompraB, facturas[0]);
     ProveedorDTO proveedor =
@@ -3336,7 +3339,7 @@ class AppIntegrationTest {
         .subtract(descuento_neto)
         .subtract(iva_105_netoFactura.add(iva_21_netoFactura));
     BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
-    FacturaCompraDTO facturaCompraC = FacturaCompraDTO.builder()
+    FacturaCompra facturaCompraC = FacturaCompra.builder()
       .idProveedor(1L)
       .build();
     facturaCompraC.setIdTransportista(1L);
@@ -3356,9 +3359,9 @@ class AppIntegrationTest {
     facturaCompraC.setTotal(total);
     facturaCompraC.setIdProveedor(1L);
     facturaCompraC.setIdTransportista(1L);
-    FacturaCompraDTO[] facturas =
+    FacturaCompra[] facturas =
         restTemplate.postForObject(
-            apiPrefix + "/facturas/compra", facturaCompraC, FacturaCompraDTO[].class);
+            apiPrefix + "/facturas/compra", facturaCompraC, FacturaCompra[].class);
     facturaCompraC.setRazonSocialProveedor("Chamaco S.R.L.");
     assertEquals(facturaCompraC, facturas[0]);
     ProveedorDTO proveedor =
@@ -3458,7 +3461,7 @@ class AppIntegrationTest {
         .subtract(descuento_neto)
         .subtract(iva_105_netoFactura.add(iva_21_netoFactura));
     BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
-    FacturaCompraDTO facturaCompraX = FacturaCompraDTO.builder()
+    FacturaCompra facturaCompraX = FacturaCompra.builder()
       .idProveedor(1L)
       .build();
     facturaCompraX.setIdSucursal(1L);
@@ -3478,9 +3481,9 @@ class AppIntegrationTest {
     facturaCompraX.setTotal(total);
     facturaCompraX.setIdProveedor(1L);
     facturaCompraX.setIdTransportista(1L);
-    FacturaCompraDTO[] facturas =
+    FacturaCompra[] facturas =
         restTemplate.postForObject(
-            apiPrefix + "/facturas/compra", facturaCompraX, FacturaCompraDTO[].class);
+            apiPrefix + "/facturas/compra", facturaCompraX, FacturaCompra[].class);
     facturaCompraX.setRazonSocialProveedor("Chamaco S.R.L.");
     assertEquals(facturaCompraX, facturas[0]);
     ProveedorDTO proveedor =
@@ -3580,7 +3583,7 @@ class AppIntegrationTest {
         .subtract(descuento_neto)
         .subtract(iva_105_netoFactura.add(iva_21_netoFactura));
     BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
-    FacturaCompraDTO facturaCompraPresupuesto = FacturaCompraDTO.builder()
+    FacturaCompra facturaCompraPresupuesto = FacturaCompra.builder()
       .idProveedor(1L)
       .build();
     facturaCompraPresupuesto.setIdSucursal(1L);
@@ -3600,9 +3603,9 @@ class AppIntegrationTest {
     facturaCompraPresupuesto.setTotal(total);
     facturaCompraPresupuesto.setIdProveedor(1L);
     facturaCompraPresupuesto.setIdTransportista(1L);
-    FacturaCompraDTO[] facturas =
+    FacturaCompra[] facturas =
         restTemplate.postForObject(
-            apiPrefix + "/facturas/compra", facturaCompraPresupuesto, FacturaCompraDTO[].class);
+            apiPrefix + "/facturas/compra", facturaCompraPresupuesto, FacturaCompra[].class);
     facturaCompraPresupuesto.setRazonSocialProveedor("Chamaco S.R.L.");
     assertEquals(facturaCompraPresupuesto, facturas[0]);
     ProveedorDTO proveedor =
@@ -4444,8 +4447,8 @@ class AppIntegrationTest {
     BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", Cliente.class);
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
-    FacturaVentaDTO facturaVentaA =
-      FacturaVentaDTO.builder().nombreFiscalCliente(cliente.getNombreFiscal()).build();
+    FacturaVenta facturaVentaA =
+      FacturaVenta.builder().nombreFiscalCliente(cliente.getNombreFiscal()).build();
     facturaVentaA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
     facturaVentaA.setRenglones(renglones);
     facturaVentaA.setSubTotal(subTotal);
@@ -4472,7 +4475,7 @@ class AppIntegrationTest {
         + "&idTransportista="
         + transportista.getIdTransportista(),
       facturaVentaA,
-      FacturaVentaDTO[].class);
+      FacturaVenta[].class);
     restTemplate.delete(apiPrefix + "/facturas/1");
     producto1 = restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
     producto2 = restTemplate.getForObject(apiPrefix + "/productos/2", ProductoDTO.class);
@@ -4491,14 +4494,14 @@ class AppIntegrationTest {
         .numFactura(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-    List<FacturaVentaDTO> facturasRecuperadas =
+    List<FacturaVenta> facturasRecuperadas =
         restTemplate
             .exchange(
                 apiPrefix
                     + "/facturas/venta/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
-                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
             .getBody()
             .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -4546,14 +4549,14 @@ class AppIntegrationTest {
         .numFactura(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-    List<FacturaVentaDTO> facturasRecuperadas =
+    List<FacturaVenta> facturasRecuperadas =
       restTemplate
         .exchange(
           apiPrefix
             + "/facturas/venta/busqueda/criteria",
           HttpMethod.POST,
           requestEntity,
-          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
+          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
         .getBody()
         .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -4601,13 +4604,13 @@ class AppIntegrationTest {
         .idSucursal(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-    List<FacturaVentaDTO> facturasRecuperadas =
+    List<FacturaVenta> facturasRecuperadas =
         restTemplate
             .exchange(
                 apiPrefix + "/facturas/venta/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
-                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
             .getBody()
             .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -4658,13 +4661,13 @@ class AppIntegrationTest {
             .idSucursal(1L)
             .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-    List<FacturaVentaDTO> facturasRecuperadas =
+    List<FacturaVenta> facturasRecuperadas =
         restTemplate
             .exchange(
                 apiPrefix + "/facturas/venta/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
-                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
             .getBody()
             .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -4712,13 +4715,13 @@ class AppIntegrationTest {
         .idSucursal(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-    List<FacturaVentaDTO> facturasRecuperadas =
+    List<FacturaVenta> facturasRecuperadas =
         restTemplate
             .exchange(
                 apiPrefix + "/facturas/venta/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
-                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
             .getBody()
             .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -4906,14 +4909,14 @@ class AppIntegrationTest {
         .idSucursal(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-    List<FacturaVentaDTO> facturasRecuperadas =
+    List<FacturaVenta> facturasRecuperadas =
       restTemplate
         .exchange(
           apiPrefix
             + "/facturas/venta/busqueda/criteria",
           HttpMethod.POST,
           requestEntity,
-          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
+          new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
         .getBody()
         .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -4958,13 +4961,13 @@ class AppIntegrationTest {
             .idSucursal(1L)
             .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-    List<FacturaVentaDTO> facturasRecuperadas =
+    List<FacturaVenta> facturasRecuperadas =
         restTemplate
             .exchange(
                 apiPrefix + "/facturas/venta/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
-                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
             .getBody()
             .getContent();
     Long[] idsRenglonesFacutura = new Long[1];
@@ -6135,13 +6138,13 @@ class AppIntegrationTest {
         .idSucursal(1L)
         .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-    List<FacturaVentaDTO> facturasRecuperadas =
+    List<FacturaVenta> facturasRecuperadas =
         restTemplate
             .exchange(
                 apiPrefix + "/facturas/venta/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
-                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
             .getBody()
             .getContent();
     restTemplate.delete(
@@ -6340,8 +6343,8 @@ class AppIntegrationTest {
     CuentaCorriente ccCliente =
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/clientes/1", CuentaCorriente.class);
-    FacturaVentaDTO facturaVentaDTO =
-      restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaVentaDTO.class);
+    FacturaVenta facturaVentaDTO =
+      restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaVenta.class);
     assertEquals(facturaVentaDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
     this.crearReciboParaCliente(5992.5, 1L, 1L);
     ccCliente =
@@ -6383,8 +6386,8 @@ class AppIntegrationTest {
     CuentaCorriente ccCliente =
       restTemplate.getForObject(
         apiPrefix + "/cuentas-corriente/proveedores/1", CuentaCorriente.class);
-    FacturaCompraDTO facturaCompraDTO =
-      restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaCompraDTO.class);
+    FacturaCompra facturaCompraDTO =
+      restTemplate.getForObject(apiPrefix + "/facturas/1", FacturaCompra.class);
     assertEquals(facturaCompraDTO.getFecha(), ccCliente.getFechaUltimoMovimiento());
     this.crearReciboParaProveedor(599.25, 1L, 1L);
     ccCliente =

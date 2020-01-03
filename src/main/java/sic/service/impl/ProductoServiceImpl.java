@@ -316,7 +316,9 @@ public class ProductoServiceImpl implements IProductoService {
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
     productoPorActualizar.setFechaUltimaModificacion(LocalDateTime.now());
-    if (productoPorActualizar.getUrlImagen() == null || productoPorActualizar.getUrlImagen().isEmpty()) {
+    if ((productoPorActualizar.getUrlImagen() == null
+            || productoPorActualizar.getUrlImagen().isEmpty())
+        && productoPersistido.getUrlImagen() != null) {
       photoVideoUploader.borrarImagen(
           Producto.class.getSimpleName() + productoPersistido.getIdProducto());
     }

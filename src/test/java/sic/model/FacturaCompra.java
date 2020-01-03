@@ -1,4 +1,4 @@
-package sic.modelo.dto;
+package sic.model;
 
 import java.io.Serializable;
 
@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true,  exclude = {"razonSocialProveedor", "idProveedor"})
 @Builder
-public class FacturaCompraDTO extends FacturaDTO implements Serializable {
+public class FacturaCompra extends Factura implements Serializable {
 
     private Long idProveedor;
     private String razonSocialProveedor;

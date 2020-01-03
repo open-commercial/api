@@ -499,20 +499,23 @@ public class PedidoServiceImpl implements IPedidoService {
   @Override
   public Map<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long idPedido) {
     List<RenglonFactura> renglonesDeFacturas = new ArrayList<>();
-    this.getFacturasDelPedido(idPedido)
-        .forEach(
-            f ->
-                f.getRenglones()
-                    .forEach(
-                        r ->
-                            renglonesDeFacturas.add(
-                                facturaService.calcularRenglon(
-                                    f.getTipoComprobante(),
-                                    Movimiento.VENTA,
-                                    r.getCantidad(),
-                                    r.getIdProductoItem(),
-                                    false,
-                                    null))));
+    this.getFacturasDelPedido(idPedido).forEach(f -> renglonesDeFacturas.addAll(f.getRenglones()));
+
+//    this.getFacturasDelPedido(idPedido)
+//            .forEach(
+//                    f ->
+//                            f.getRenglones()
+//                                    .forEach(
+//                                            r ->
+//                                                    renglonesDeFacturas.add(
+//                                                            facturaService.calcularRenglon(
+//                                                                    f.getTipoComprobante(),
+//                                                                    Movimiento.VENTA,
+//                                                                    r.getCantidad(),
+//                                                                    r.getIdProductoItem(),
+//                                                                    false,
+//                                                                    null))));
+
     HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
     if (!renglonesDeFacturas.isEmpty()) {
       renglonesDeFacturas.forEach(

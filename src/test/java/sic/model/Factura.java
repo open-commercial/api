@@ -1,4 +1,4 @@
-package sic.modelo.dto;
+package sic.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -21,13 +21,13 @@ import sic.modelo.TipoDeComprobante;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = {"idFactura", "fecha", "numSerie", "numFactura", "nombreTransportista", "renglones", "nombreSucursal", "nombreUsuario", "cantidadArticulos"})
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idFactura", scope = FacturaDTO.class)
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idFactura", scope = Factura.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
-  @JsonSubTypes.Type(value = FacturaCompraDTO.class, name = "FacturaCompra"),
-  @JsonSubTypes.Type(value = FacturaVentaDTO.class, name = "FacturaVenta"),
+  @JsonSubTypes.Type(value = FacturaCompra.class, name = "FacturaCompra"),
+  @JsonSubTypes.Type(value = FacturaVenta.class, name = "FacturaVenta"),
 })
-public abstract class FacturaDTO implements Serializable {
+public abstract class Factura implements Serializable {
 
     private long idFactura;
     private LocalDateTime fecha;

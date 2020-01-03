@@ -18,7 +18,7 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
-import sic.modelo.dto.FacturaCompraDTO;
+import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 
@@ -33,6 +33,7 @@ public class FacturaController {
   private final IUsuarioService usuarioService;
   private final ITransportistaService transportistaService;
   private final IReciboService reciboService;
+  private final IPedidoService pedidoService;
   private final ModelMapper modelMapper;
   private final IAuthService authService;
   private final MessageSource messageSource;
@@ -46,6 +47,7 @@ public class FacturaController {
       IUsuarioService usuarioService,
       ITransportistaService transportistaService,
       IReciboService reciboService,
+      IPedidoService pedidoService,
       ModelMapper modelMapper,
       IAuthService authService,
       MessageSource messageSource) {
@@ -56,6 +58,7 @@ public class FacturaController {
     this.usuarioService = usuarioService;
     this.transportistaService = transportistaService;
     this.reciboService = reciboService;
+    this.pedidoService = pedidoService;
     this.authService = authService;
     this.modelMapper = modelMapper;
     this.messageSource = messageSource;
@@ -76,15 +79,23 @@ public class FacturaController {
   @PostMapping("/facturas/venta")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public List<FacturaVenta> guardarFacturaVenta(
-      @RequestBody NuevaFacturaVentaDTO nuevaFacturaVentaDTO,
+      @RequestBody NuevaFacturaDTO nuevaFacturaVentaDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
-    FacturaVenta fv =
-        modelMapper.map(nuevaFacturaVentaDTO.getFacturaVenta(), FacturaVenta.class);
-    Sucursal sucursal = sucursalService.getSucursalPorId(nuevaFacturaVentaDTO.getFacturaVenta().getIdSucursal());
+    FacturaVenta fv = new FacturaVenta();
+    Sucursal sucursal;
+    if (nuevaFacturaVentaDTO.getIdPedido() != null) {
+      Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(nuevaFacturaVentaDTO.getIdPedido());
+      fv.setPedido(pedido);
+      sucursal = pedido.getSucursal();
+    } else {
+      sucursal = sucursalService.getSucursalPorId(nuevaFacturaVentaDTO.getIdSucursal());
+    }
     fv.setSucursal(sucursal);
+    fv.setTipoComprobante(nuevaFacturaVentaDTO.getTipoDeComprobante());
+    fv.setDescuentoPorcentaje(nuevaFacturaVentaDTO.getDescuentoPorcentaje());
+    fv.setRecargoPorcentaje(nuevaFacturaVentaDTO.getRecargoPorcentaje());
     Cliente cliente =
-        clienteService.getClienteNoEliminadoPorId(
-            nuevaFacturaVentaDTO.getFacturaVenta().getIdCliente());
+        clienteService.getClienteNoEliminadoPorId(nuevaFacturaVentaDTO.getIdCliente());
     if (cliente.getUbicacionFacturacion() == null
         && (fv.getTipoComprobante() == TipoDeComprobante.FACTURA_A
             || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_B
@@ -95,15 +106,22 @@ public class FacturaController {
     }
     fv.setCliente(cliente);
     fv.setClienteEmbedded(clienteService.crearClienteEmbedded(cliente));
-    if (nuevaFacturaVentaDTO.getFacturaVenta().getIdTransportista() != null) {
+    if (nuevaFacturaVentaDTO.getIdTransportista() != null) {
       fv.setTransportista(
           transportistaService.getTransportistaNoEliminadoPorId(
-              nuevaFacturaVentaDTO.getFacturaVenta().getIdTransportista()));
+              nuevaFacturaVentaDTO.getIdTransportista()));
     }
     fv.setFecha(LocalDateTime.now());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     fv.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+    fv.setRenglones(
+        facturaService.calcularRenglones(
+            nuevaFacturaVentaDTO.getTipoDeComprobante(),
+            Movimiento.VENTA,
+            this.getArrayDeCantidadesProducto(nuevaFacturaVentaDTO.getRenglones()),
+            this.getArrayDeIdProducto(nuevaFacturaVentaDTO.getRenglones()),
+            this.getArrayDeBonificaciones(nuevaFacturaVentaDTO.getRenglones())));
     List<FacturaVenta> facturasGuardadas;
     if (nuevaFacturaVentaDTO.getIndices() != null) {
       facturasGuardadas =
@@ -137,25 +155,25 @@ public class FacturaController {
     return facturasGuardadas;
   }
 
-  @PostMapping("/facturas/compra")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public List<FacturaCompra> guardarFacturaCompra(
-      @RequestBody FacturaCompraDTO facturaCompraDTO,
-      @RequestHeader("Authorization") String authorizationHeader) {
-    FacturaCompra fc = modelMapper.map(facturaCompraDTO, FacturaCompra.class);
-    fc.setSucursal(sucursalService.getSucursalPorId(facturaCompraDTO.getIdSucursal()));
-    fc.setProveedor(proveedorService.getProveedorNoEliminadoPorId(facturaCompraDTO.getIdProveedor()));
-    if (facturaCompraDTO.getIdTransportista() != null) {
-      fc.setTransportista(
-          transportistaService.getTransportistaNoEliminadoPorId(
-              facturaCompraDTO.getIdTransportista()));
-    }
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    fc.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
-    List<FacturaCompra> facturas = new ArrayList<>();
-    facturas.add(fc);
-    return facturaService.guardar(facturas);
-  }
+//  @PostMapping("/facturas/compra")
+//  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+//  public List<FacturaCompra> guardarFacturaCompra(
+//          @RequestBody NuevaFacturaDTO nuevaCompraVentaDTO,
+//      @RequestHeader("Authorization") String authorizationHeader) {
+//    FacturaCompra fc = modelMapper.map(facturaCompraDTO, FacturaCompra.class);
+//    fc.setSucursal(sucursalService.getSucursalPorId(facturaCompraDTO.getIdSucursal()));
+//    fc.setProveedor(proveedorService.getProveedorNoEliminadoPorId(facturaCompraDTO.getIdProveedor()));
+//    if (facturaCompraDTO.getIdTransportista() != null) {
+//      fc.setTransportista(
+//          transportistaService.getTransportistaNoEliminadoPorId(
+//              facturaCompraDTO.getIdTransportista()));
+//    }
+//    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+//    fc.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+//    List<FacturaCompra> facturas = new ArrayList<>();
+//    facturas.add(fc);
+//    return facturaService.guardar(facturas);
+//  }
 
     @PostMapping("/facturas/{idFactura}/autorizacion")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
@@ -250,27 +268,30 @@ public class FacturaController {
         return facturaService.getRenglonesPedidoParaFacturar(idPedido, tipoDeComprobante);
     }
 
-  @GetMapping("/facturas/renglon-venta")
+  @PostMapping("/facturas/renglones-venta")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
-  public RenglonFactura calcularRenglonVenta(
-      @RequestParam long idProducto,
-      @RequestParam TipoDeComprobante tipoDeComprobante,
-      @RequestParam Movimiento movimiento,
-      @RequestParam BigDecimal cantidad) {
-    return facturaService.calcularRenglon(
-        tipoDeComprobante, movimiento, cantidad, idProducto, false, null);
+  public List<RenglonFactura> calcularRenglonesVenta(
+          @RequestBody List<NuevoRenglonFacturaDTO> nuevosRenglonesFacturaDTO,
+          @RequestParam TipoDeComprobante tipoDeComprobante) {
+    return facturaService.calcularRenglones(
+        tipoDeComprobante,
+        Movimiento.VENTA,
+        this.getArrayDeCantidadesProducto(nuevosRenglonesFacturaDTO),
+        this.getArrayDeIdProducto(nuevosRenglonesFacturaDTO),
+        null);
   }
 
-  @GetMapping("/facturas/renglon-compra")
+  @PostMapping("/facturas/renglones-compra")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
-  public RenglonFactura calcularRenglonCompra(
-      @RequestParam long idProducto,
-      @RequestParam TipoDeComprobante tipoDeComprobante,
-      @RequestParam Movimiento movimiento,
-      @RequestParam BigDecimal cantidad,
-      @RequestParam BigDecimal bonificacion) {
-    return facturaService.calcularRenglon(
-        tipoDeComprobante, movimiento, cantidad, idProducto, false, bonificacion);
+  public List<RenglonFactura> calcularRenglonesCompra(
+      @RequestBody List<NuevoRenglonFacturaDTO> nuevosRenglonesFacturaDTO,
+      @RequestParam TipoDeComprobante tipoDeComprobante) {
+    return facturaService.calcularRenglones(
+        tipoDeComprobante,
+        Movimiento.COMPRA,
+        this.getArrayDeCantidadesProducto(nuevosRenglonesFacturaDTO),
+        this.getArrayDeIdProducto(nuevosRenglonesFacturaDTO),
+        this.getArrayDeBonificaciones(nuevosRenglonesFacturaDTO));
   }
 
   @PostMapping("/facturas/total-facturado-venta/criteria")
@@ -323,5 +344,29 @@ public class FacturaController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public void enviarFacturaVentaPorEmail(@PathVariable long idFactura) {
     facturaService.enviarFacturaVentaPorEmail(idFactura);
+  }
+
+  private long[] getArrayDeIdProducto(List<NuevoRenglonFacturaDTO> nuevosRenglones) {
+    long[] idProductoItem = new long[nuevosRenglones.size()];
+    for (int i = 0; i < nuevosRenglones.size(); ++i) {
+      idProductoItem[i] = nuevosRenglones.get(i).getIdProducto();
+    }
+    return idProductoItem;
+  }
+
+  private BigDecimal[] getArrayDeCantidadesProducto(List<NuevoRenglonFacturaDTO> nuevosRenglones) {
+    BigDecimal[] cantidades = new BigDecimal[nuevosRenglones.size()];
+    for (int i = 0; i < nuevosRenglones.size(); ++i) {
+      cantidades[i] = nuevosRenglones.get(i).getCantidad();
+    }
+    return cantidades;
+  }
+
+  private BigDecimal[] getArrayDeBonificaciones(List<NuevoRenglonFacturaDTO> nuevosRenglones) {
+    BigDecimal[] bonificaciones = new BigDecimal[nuevosRenglones.size()];
+    for (int i = 0; i < nuevosRenglones.size(); ++i) {
+      bonificaciones[i] = nuevosRenglones.get(i).getBonificacion();
+    }
+    return bonificaciones;
   }
 }
