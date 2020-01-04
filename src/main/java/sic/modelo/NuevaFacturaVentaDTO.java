@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class NuevaFacturaDTO {
+public class NuevaFacturaVentaDTO {
 
   private Long idSucursal;
   private Long idPedido;

@@ -146,69 +146,31 @@ class AppIntegrationTest {
           + "?tipoDeComprobante="
           + TipoDeComprobante.FACTURA_A,
         RenglonFactura[].class);
-    BigDecimal subTotal = renglonesParaFacturar[0].getImporte();
-    assertEquals(
-      new BigDecimal("4000.000000000000000000000000000000"),
-      renglonesParaFacturar[0].getImporte());
-    BigDecimal recargoPorcentaje = BigDecimal.TEN;
-    BigDecimal recargo_neto =
-      subTotal.multiply(recargoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
-    assertEquals(new BigDecimal("400.000000000000000"), recargo_neto);
-    BigDecimal iva_105_netoFactura = BigDecimal.ZERO;
-    BigDecimal iva_21_netoFactura = BigDecimal.ZERO;
-    if (renglonesParaFacturar[0].getIvaPorcentaje().compareTo(IVA_105) == 0) {
-      iva_105_netoFactura =
-        iva_105_netoFactura.add(
-          renglonesParaFacturar[0]
-            .getCantidad()
-            .multiply(renglonesParaFacturar[0].getIvaNeto()));
-    } else if (renglonesParaFacturar[0].getIvaPorcentaje().compareTo(IVA_21) == 0) {
-      iva_21_netoFactura =
-        iva_21_netoFactura.add(
-          renglonesParaFacturar[0]
-            .getCantidad()
-            .multiply(renglonesParaFacturar[0].getIvaNeto()));
-    }
-    iva_21_netoFactura = iva_21_netoFactura.add(recargo_neto.multiply(IVA_21.divide(new BigDecimal("100"))));
-    assertEquals(BigDecimal.ZERO, iva_105_netoFactura);
-    assertEquals(
-      new BigDecimal("924.000000000000000"),
-      iva_21_netoFactura.setScale(15, RoundingMode.HALF_UP));
-    BigDecimal subTotalBruto = subTotal.add(recargo_neto);
-    assertEquals(new BigDecimal("4400.000000000000000000000000000000"), subTotalBruto);
-    BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
-    assertEquals(new BigDecimal("5324.000000000000000"), total.setScale(15, RoundingMode.HALF_UP));
-    FacturaVenta facturaVentaA = FacturaVenta.builder()
-      .idCliente(1L)
-      .build();
-    facturaVentaA.setIdSucursal(1L);
-    facturaVentaA.setIdCliente(1L);
-    facturaVentaA.setIdTransportista(1L);
-    facturaVentaA.setObservaciones("Factura A del Pedido");
-    facturaVentaA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
-    List<RenglonFactura> renglones = new ArrayList<>();
-    renglones.add(renglonesParaFacturar[0]);
-    facturaVentaA.setRenglones(renglones);
-    facturaVentaA.setSubTotal(subTotal);
-    facturaVentaA.setRecargoPorcentaje(recargoPorcentaje);
-    facturaVentaA.setRecargoNeto(recargo_neto);
-    facturaVentaA.setDescuentoPorcentaje(BigDecimal.ZERO);
-    facturaVentaA.setDescuentoNeto(BigDecimal.ZERO);
-    facturaVentaA.setSubTotalBruto(subTotalBruto);
-    facturaVentaA.setIva105Neto(iva_105_netoFactura);
-    facturaVentaA.setIva21Neto(iva_21_netoFactura);
-    facturaVentaA.setTotal(total);
-    facturaVentaA.setFecha(LocalDateTime.now());
-    this.abrirCaja();
+    List<NuevoRenglonFacturaDTO> nuevosRenglones = new ArrayList<>();
+    NuevoRenglonFacturaDTO nuevoRenglon = NuevoRenglonFacturaDTO.builder()
+            .bonificacion(renglonesParaFacturar[0].getBonificacionPorcentaje())
+            .cantidad(renglonesParaFacturar[0].getCantidad())
+            .idProducto(renglonesParaFacturar[0].getIdProductoItem())
+            .build();
+    nuevosRenglones.add(nuevoRenglon);
     Long[] idsFormasDePago = {1L};
-    BigDecimal[] montos = {total};
-    NuevaFacturaDTO nuevaFacturaVentaDTO =
-      NuevaFacturaDTO.builder().facturaVenta(facturaVentaA)
-        .idPedido(1L)
-        .idsFormaDePago(idsFormasDePago)
-        .montos(montos)
-        .build();
-    restTemplate.postForObject(apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, sic.modelo.FacturaVenta[].class);
+    BigDecimal[] montos = {new BigDecimal("5324.000000000000000")};
+    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
+        NuevaFacturaVentaDTO.builder()
+            .idCliente(1L)
+            .idSucursal(1L)
+            .idTransportista(1L)
+            .observaciones("Factura A del Pedido")
+            .tipoDeComprobante(TipoDeComprobante.FACTURA_A)
+            .renglones(nuevosRenglones)
+            .recargoPorcentaje(BigDecimal.TEN)
+            .descuentoPorcentaje(BigDecimal.ZERO)
+            .idPedido(1L)
+            .idsFormaDePago(idsFormasDePago)
+            .montos(montos)
+            .build();
+    this.abrirCaja();
+    restTemplate.postForObject(apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, sic.model.FacturaVenta[].class);
   }
 
   private void crearFacturaTipoBDePedido() {
@@ -240,8 +202,8 @@ class AppIntegrationTest {
     facturaVentaB.setIva21Neto(BigDecimal.ZERO);
     facturaVentaB.setTotal(new BigDecimal("1944.800000000000000"));
     facturaVentaB.setFecha(LocalDateTime.now());
-    NuevaFacturaDTO nuevaFacturaVentaDTO =
-      NuevaFacturaDTO.builder().facturaVenta(facturaVentaB)
+    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
+      NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaB)
         .idPedido(1L)
         .build();
     restTemplate.postForObject(
@@ -1239,85 +1201,38 @@ class AppIntegrationTest {
           + "&cantidad=3"
           + "&idCliente=1",
         RenglonFactura.class);
-    List<RenglonFactura> renglones = new ArrayList<>();
-    renglones.add(renglonUno);
-    renglones.add(renglonDos);
-    int size = renglones.size();
-    BigDecimal[] cantidades = new BigDecimal[size];
-    BigDecimal[] ivaPorcentajeRenglones = new BigDecimal[size];
-    BigDecimal[] ivaNetoRenglones = new BigDecimal[size];
-    int indice = 0;
-    BigDecimal subTotal = BigDecimal.ZERO;
-    for (RenglonFactura renglon : renglones) {
-      subTotal = subTotal.add(renglon.getImporte());
-      cantidades[indice] = renglon.getCantidad();
-      ivaPorcentajeRenglones[indice] = renglon.getIvaPorcentaje();
-      ivaNetoRenglones[indice] = renglon.getIvaNeto();
-      indice++;
-    }
-    BigDecimal descuentoPorcentaje = new BigDecimal("25");
-    BigDecimal recargoPorcentaje = new BigDecimal("10");
-    BigDecimal descuento_neto =
-      subTotal.multiply(descuentoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal recargo_neto =
-      subTotal.multiply(recargoPorcentaje).divide(CIEN, 15, RoundingMode.HALF_UP);
-    indice = cantidades.length;
-    BigDecimal iva_105_netoFactura = BigDecimal.ZERO;
-    BigDecimal iva_21_netoFactura = BigDecimal.ZERO;
-    for (int i = 0; i < indice; i++) {
-      if (ivaPorcentajeRenglones[i].compareTo(IVA_105) == 0) {
-        iva_105_netoFactura =
-          iva_105_netoFactura.add(
-            cantidades[i].multiply(
-              ivaNetoRenglones[i]
-                .subtract(
-                  ivaNetoRenglones[i].multiply(
-                    descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
-                .add(
-                  ivaNetoRenglones[i].multiply(
-                    recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
-      } else if (ivaPorcentajeRenglones[i].compareTo(IVA_21) == 0) {
-        iva_21_netoFactura =
-          iva_21_netoFactura.add(
-            cantidades[i].multiply(
-              ivaNetoRenglones[i]
-                .subtract(
-                  ivaNetoRenglones[i].multiply(
-                    descuentoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))
-                .add(
-                  ivaNetoRenglones[i].multiply(
-                    recargoPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP)))));
-      }
-    }
-    BigDecimal subTotalBruto = subTotal.add(recargo_neto).subtract(descuento_neto);
-    BigDecimal total = subTotalBruto.add(iva_105_netoFactura).add(iva_21_netoFactura);
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", Cliente.class);
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
     Transportista transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", Transportista.class);
-    FacturaVenta facturaVentaA =
-      FacturaVenta.builder().nombreFiscalCliente(cliente.getNombreFiscal())
-        .idCliente(cliente.getIdCliente())
-        .build();
-    facturaVentaA.setIdSucursal(1L);
-    facturaVentaA.setIdCliente(1L);
-    facturaVentaA.setIdTransportista(transportista.getIdTransportista());
-    facturaVentaA.setObservaciones("Factura Venta A test");
-    facturaVentaA.setTipoComprobante(TipoDeComprobante.FACTURA_A);
-    facturaVentaA.setRenglones(renglones);
-    facturaVentaA.setSubTotal(subTotal);
-    facturaVentaA.setRecargoPorcentaje(recargoPorcentaje);
-    facturaVentaA.setRecargoNeto(recargo_neto);
-    facturaVentaA.setDescuentoPorcentaje(descuentoPorcentaje);
-    facturaVentaA.setDescuentoNeto(descuento_neto);
-    facturaVentaA.setSubTotalBruto(subTotalBruto);
-    facturaVentaA.setIva105Neto(iva_105_netoFactura);
-    facturaVentaA.setIva21Neto(iva_21_netoFactura);
-    facturaVentaA.setTotal(total);
-    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
+    List<NuevoRenglonFacturaDTO> nuevosRenglones = new ArrayList<>();
+    NuevoRenglonFacturaDTO nuevoRenglon = NuevoRenglonFacturaDTO.builder()
+            .bonificacion(renglonUno.getBonificacionPorcentaje())
+            .cantidad(renglonUno.getCantidad())
+            .idProducto(renglonUno.getIdProductoItem())
+            .build();
+    nuevosRenglones.add(nuevoRenglon);
+    nuevoRenglon = NuevoRenglonFacturaDTO.builder()
+            .bonificacion(renglonDos.getBonificacionPorcentaje())
+            .cantidad(renglonDos.getCantidad())
+            .idProducto(renglonDos.getIdProductoItem())
+            .build();
+    nuevosRenglones.add(nuevoRenglon);
     int[] indices = new int[] {0};
-    NuevaFacturaDTO nuevaFacturaVentaDTO =
-        NuevaFacturaDTO.builder().indices(indices).facturaVenta(facturaVentaA).build();
+    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
+            NuevaFacturaVentaDTO.builder()
+                    .idCliente(1L)
+                    .idSucursal(1L)
+                    .idTransportista(1L)
+                    .observaciones("Factura A del Pedido")
+                    .tipoDeComprobante(TipoDeComprobante.FACTURA_A)
+                    .renglones(nuevosRenglones)
+                    .recargoPorcentaje(BigDecimal.TEN)
+                    .descuentoPorcentaje(BigDecimal.ZERO)
+                    .idPedido(1L)
+                    .indices(indices)
+                    .build();
+    SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     FacturaVenta[] facturas =
       restTemplate.postForObject(
         apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
@@ -1471,8 +1386,8 @@ class AppIntegrationTest {
     facturaVentaA.setIva21Neto(iva_21_netoFactura);
     facturaVentaA.setTotal(total);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
-    NuevaFacturaDTO nuevaFacturaVentaDTO =
-        NuevaFacturaDTO.builder().facturaVenta(facturaVentaA).build();
+    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
+        NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaA).build();
     FacturaVenta[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
@@ -1612,7 +1527,7 @@ class AppIntegrationTest {
     facturaVentaA.setIva21Neto(iva_21_netoFactura);
     facturaVentaA.setTotal(total);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/2", SucursalDTO.class);
-    NuevaFacturaDTO nuevaFacturaVentaDTO = NuevaFacturaDTO.builder()
+    NuevaFacturaVentaDTO nuevaFacturaVentaDTO = NuevaFacturaVentaDTO.builder()
       .facturaVenta(facturaVentaA)
       .build();
     FacturaVenta[] facturas =
@@ -1755,8 +1670,8 @@ class AppIntegrationTest {
     facturaVentaB.setTotal(total);
     facturaVentaB.setFechaVencimiento(LocalDate.now().plusYears(1L));
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
-    NuevaFacturaDTO nuevaFacturaVentaDTO =
-      NuevaFacturaDTO.builder().facturaVenta(facturaVentaB).build();
+    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
+      NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaB).build();
     FacturaVenta[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
@@ -1884,8 +1799,8 @@ class AppIntegrationTest {
     facturaVentaA.setIdCliente(cliente.getIdCliente());
     facturaVentaA.setIdSucursal(sucursal.getIdSucursal());
     facturaVentaA.setIdTransportista(transportista.getIdTransportista());
-    NuevaFacturaDTO nuevaFacturaVentaDTO =
-        NuevaFacturaDTO.builder().facturaVenta(facturaVentaA).build();
+    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
+        NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaA).build();
     FacturaVenta facturaVenta =
         restTemplate
             .postForObject(
@@ -2017,8 +1932,8 @@ class AppIntegrationTest {
     facturaVentaC.setIva21Neto(iva_21_netoFactura);
     facturaVentaC.setTotal(total);
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
-    NuevaFacturaDTO nuevaFacturaVentaDTO =
-      NuevaFacturaDTO.builder().facturaVenta(facturaVentaC).build();
+    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
+      NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaC).build();
     FacturaVenta[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
@@ -2107,8 +2022,8 @@ class AppIntegrationTest {
     facturaVentaX.setIva21Neto(BigDecimal.ZERO);
     facturaVentaX.setTotal(subTotalBruto);
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
-    NuevaFacturaDTO nuevaFacturaVentaDTO =
-      NuevaFacturaDTO.builder().facturaVenta(facturaVentaX).build();
+    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
+      NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaX).build();
     FacturaVenta[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
@@ -2241,8 +2156,8 @@ class AppIntegrationTest {
     facturaVentaY.setIva21Neto(iva_21_netoFactura);
     facturaVentaY.setTotal(total);
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
-    NuevaFacturaDTO nuevaFacturaVentaDTO =
-      NuevaFacturaDTO.builder().facturaVenta(facturaVentaY).build();
+    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
+      NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaY).build();
     FacturaVenta[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
@@ -2375,8 +2290,8 @@ class AppIntegrationTest {
     facturaVentaPresupuesto.setIva21Neto(iva_21_netoFactura);
     facturaVentaPresupuesto.setTotal(total);
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
-    NuevaFacturaDTO nuevaFacturaVentaDTO =
-        NuevaFacturaDTO.builder().facturaVenta(facturaVentaPresupuesto).build();
+    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
+        NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaPresupuesto).build();
     FacturaVenta[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
@@ -2506,8 +2421,8 @@ class AppIntegrationTest {
     facturaVentaPresupuesto.setIva21Neto(iva_21_netoFactura);
     facturaVentaPresupuesto.setTotal(total);
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
-    NuevaFacturaDTO nuevaFacturaVentaDTO =
-      NuevaFacturaDTO.builder().facturaVenta(facturaVentaPresupuesto).build();
+    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
+      NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaPresupuesto).build();
     FacturaVenta[] facturas =
       restTemplate.postForObject(
         apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
@@ -2615,8 +2530,8 @@ class AppIntegrationTest {
     facturaVentaX.setIva21Neto(BigDecimal.ZERO);
     facturaVentaX.setTotal(subTotalBruto);
     UsuarioDTO credencial = restTemplate.getForObject(apiPrefix + "/usuarios/1", UsuarioDTO.class);
-    NuevaFacturaDTO nuevaFacturaVentaDTO =
-      NuevaFacturaDTO.builder().facturaVenta(facturaVentaX)
+    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
+      NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaX)
         .build();
     FacturaVenta[] facturas =
         restTemplate.postForObject(
@@ -2746,8 +2661,8 @@ class AppIntegrationTest {
     facturaVentaA.setIva105Neto(iva_105_netoFactura);
     facturaVentaA.setIva21Neto(iva_21_netoFactura);
     facturaVentaA.setTotal(total);
-    NuevaFacturaDTO nuevaFacturaVentaDTO =
-        NuevaFacturaDTO.builder().facturaVenta(facturaVentaA).build();
+    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
+        NuevaFacturaVentaDTO.builder().facturaVenta(facturaVentaA).build();
     RestClientResponseException thrown =
         assertThrows(
             RestClientResponseException.class,

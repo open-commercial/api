@@ -18,6 +18,7 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
+import sic.modelo.dto.NuevaFacturaCompraDTO;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
@@ -79,7 +80,7 @@ public class FacturaController {
   @PostMapping("/facturas/venta")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public List<FacturaVenta> guardarFacturaVenta(
-      @RequestBody NuevaFacturaDTO nuevaFacturaVentaDTO,
+      @RequestBody NuevaFacturaVentaDTO nuevaFacturaVentaDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     FacturaVenta fv = new FacturaVenta();
     Sucursal sucursal;
@@ -155,25 +156,42 @@ public class FacturaController {
     return facturasGuardadas;
   }
 
-//  @PostMapping("/facturas/compra")
-//  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-//  public List<FacturaCompra> guardarFacturaCompra(
-//          @RequestBody NuevaFacturaDTO nuevaCompraVentaDTO,
-//      @RequestHeader("Authorization") String authorizationHeader) {
-//    FacturaCompra fc = modelMapper.map(facturaCompraDTO, FacturaCompra.class);
-//    fc.setSucursal(sucursalService.getSucursalPorId(facturaCompraDTO.getIdSucursal()));
-//    fc.setProveedor(proveedorService.getProveedorNoEliminadoPorId(facturaCompraDTO.getIdProveedor()));
-//    if (facturaCompraDTO.getIdTransportista() != null) {
-//      fc.setTransportista(
-//          transportistaService.getTransportistaNoEliminadoPorId(
-//              facturaCompraDTO.getIdTransportista()));
-//    }
-//    Claims claims = authService.getClaimsDelToken(authorizationHeader);
-//    fc.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
-//    List<FacturaCompra> facturas = new ArrayList<>();
-//    facturas.add(fc);
-//    return facturaService.guardar(facturas);
-//  }
+  @PostMapping("/facturas/compra")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public List<FacturaCompra> guardarFacturaCompra(
+      @RequestBody NuevaFacturaCompraDTO nuevaCompraCompraDTO,
+      @RequestHeader("Authorization") String authorizationHeader) {
+    FacturaCompra fc = new FacturaCompra();
+    fc.setFecha(nuevaCompraCompraDTO.getFecha());
+    fc.setTipoComprobante(nuevaCompraCompraDTO.getTipoDeComprobante());
+    fc.setNumSerie(nuevaCompraCompraDTO.getNumSerie());
+    fc.setNumFactura(nuevaCompraCompraDTO.getNumFactura());
+    fc.setFechaVencimiento(nuevaCompraCompraDTO.getFechaVencimiento());
+    fc.setRenglones(
+        facturaService.calcularRenglones(
+            nuevaCompraCompraDTO.getTipoDeComprobante(),
+            Movimiento.COMPRA,
+            this.getArrayDeCantidadesProducto(nuevaCompraCompraDTO.getRenglones()),
+            this.getArrayDeIdProducto(nuevaCompraCompraDTO.getRenglones()),
+            this.getArrayDeBonificaciones(nuevaCompraCompraDTO.getRenglones())));
+    fc.setRecargoPorcentaje(nuevaCompraCompraDTO.getRecargoPorcentaje());
+    fc.setDescuentoPorcentaje(nuevaCompraCompraDTO.getDescuentoPorcentaje());
+    fc.setObservaciones(nuevaCompraCompraDTO.getObservaciones());
+    fc.setSucursal(sucursalService.getSucursalPorId(nuevaCompraCompraDTO.getIdSucursal()));
+    fc.setProveedor(
+        proveedorService.getProveedorNoEliminadoPorId(nuevaCompraCompraDTO.getIdProveedor()));
+    if (nuevaCompraCompraDTO.getIdTransportista() != null) {
+      fc.setTransportista(
+          transportistaService.getTransportistaNoEliminadoPorId(
+              nuevaCompraCompraDTO.getIdTransportista()));
+    }
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    fc.setUsuario(
+        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+    List<FacturaCompra> facturas = new ArrayList<>();
+    facturas.add(fc);
+    return facturaService.guardar(facturas);
+  }
 
     @PostMapping("/facturas/{idFactura}/autorizacion")
     @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
