@@ -35,7 +35,6 @@ public class FacturaController {
   private final ITransportistaService transportistaService;
   private final IReciboService reciboService;
   private final IPedidoService pedidoService;
-  private final ModelMapper modelMapper;
   private final IAuthService authService;
   private final MessageSource messageSource;
 
@@ -49,7 +48,6 @@ public class FacturaController {
       ITransportistaService transportistaService,
       IReciboService reciboService,
       IPedidoService pedidoService,
-      ModelMapper modelMapper,
       IAuthService authService,
       MessageSource messageSource) {
     this.facturaService = facturaService;
@@ -61,7 +59,6 @@ public class FacturaController {
     this.reciboService = reciboService;
     this.pedidoService = pedidoService;
     this.authService = authService;
-    this.modelMapper = modelMapper;
     this.messageSource = messageSource;
   }
 
@@ -122,7 +119,11 @@ public class FacturaController {
             Movimiento.VENTA,
             this.getArrayDeCantidadesProducto(nuevaFacturaVentaDTO.getRenglones()),
             this.getArrayDeIdProducto(nuevaFacturaVentaDTO.getRenglones()),
-            this.getArrayDeBonificaciones(nuevaFacturaVentaDTO.getRenglones())));
+            null));
+    fv.setObservaciones(
+        nuevaFacturaVentaDTO.getObservaciones() != null
+            ? nuevaFacturaVentaDTO.getObservaciones()
+            : "");
     List<FacturaVenta> facturasGuardadas;
     if (nuevaFacturaVentaDTO.getIndices() != null) {
       facturasGuardadas =
@@ -164,8 +165,8 @@ public class FacturaController {
     FacturaCompra fc = new FacturaCompra();
     fc.setFecha(nuevaCompraCompraDTO.getFecha());
     fc.setTipoComprobante(nuevaCompraCompraDTO.getTipoDeComprobante());
-    fc.setNumSerie(nuevaCompraCompraDTO.getNumSerie());
-    fc.setNumFactura(nuevaCompraCompraDTO.getNumFactura());
+    fc.setNumSerie(nuevaCompraCompraDTO.getNumSerie() != null ? nuevaCompraCompraDTO.getNumSerie() : 0L);
+    fc.setNumFactura(nuevaCompraCompraDTO.getNumFactura() != null ? nuevaCompraCompraDTO.getNumFactura() : 0L);
     fc.setFechaVencimiento(nuevaCompraCompraDTO.getFechaVencimiento());
     fc.setRenglones(
         facturaService.calcularRenglones(

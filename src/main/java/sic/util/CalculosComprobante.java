@@ -37,7 +37,7 @@ public class CalculosComprobante {
     BigDecimal descuentoNeto,
     BigDecimal iva105Neto,
     BigDecimal iva21Neto) {
-    BigDecimal resultado = subTotal.add(recargoNeto).subtract(descuentoNeto);
+    BigDecimal resultado = subTotal.add(recargoNeto != null ? recargoNeto : BigDecimal.ZERO).subtract(descuentoNeto != null ? descuentoNeto : BigDecimal.ZERO);
     if (quitarIVA) {
       resultado = resultado.subtract(iva105Neto.add(iva21Neto));
     }

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -19,6 +20,7 @@ public class NuevaFacturaVentaDTO {
   private Long idPedido;
   private Long idCliente;
   private Long idTransportista;
+  private LocalDate fechaVencimiento;
   private TipoDeComprobante tipoDeComprobante;
   private String observaciones;
   private List<NuevoRenglonFacturaDTO> renglones;
