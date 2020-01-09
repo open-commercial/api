@@ -1,1 +1,0 @@
-ALTER TABLE sic.producto ADD COLUMN `ventaMinima` DOUBLE NOT NULL AFTER `cantMinima`;

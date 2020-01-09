@@ -1,1 +1,0 @@
-DELETE FROM rengloncuentacorriente where idCuentaCorriente IS NULL;

@@ -1,5 +1,0 @@
-ALTER TABLE cliente
-DROP COLUMN tipoDeCliente;
-
-ALTER TABLE cliente
-CHANGE COLUMN razonSocial nombreFiscal VARCHAR(255) CHARACTER SET 'utf8' NOT NULL;

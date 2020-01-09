@@ -1,1 +1,0 @@
-alter TABLE pedido drop column totalActual;
