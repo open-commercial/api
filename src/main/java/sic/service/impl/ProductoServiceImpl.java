@@ -307,7 +307,10 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   @Transactional
   public void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido, byte[] imagen) {
-    if (productoPorActualizar.isOferta() && imagen == null)
+    if (productoPorActualizar.isOferta()
+        && (productoPorActualizar.getUrlImagen() == null
+            || productoPorActualizar.getUrlImagen().isEmpty())
+        && imagen == null)
       throw new BusinessServiceException(
           messageSource.getMessage(
               "mensaje_producto_oferta_sin_imagen",
@@ -316,7 +319,9 @@ public class ProductoServiceImpl implements IProductoService {
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
     productoPorActualizar.setFechaUltimaModificacion(LocalDateTime.now());
-    if (productoPorActualizar.getUrlImagen() == null || productoPorActualizar.getUrlImagen().isEmpty()) {
+    if ((productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty())
+        && (productoPorActualizar.getUrlImagen() == null
+            || productoPorActualizar.getUrlImagen().isEmpty())) {
       photoVideoUploader.borrarImagen(
           Producto.class.getSimpleName() + productoPersistido.getIdProducto());
     }
