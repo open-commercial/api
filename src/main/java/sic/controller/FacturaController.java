@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import io.jsonwebtoken.Claims;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
@@ -16,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
+import sic.modelo.calculos.NuevosResultadosComprobanteDTO;
+import sic.modelo.calculos.Resultados;
 import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 import sic.modelo.dto.NuevaFacturaCompraDTO;
@@ -357,6 +358,18 @@ public class FacturaController {
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return facturaService.calcularGananciaTotal(criteria, (int) claims.get("idUsuario"));
+  }
+
+  @PostMapping("/facturas/calculo-factura")
+  @AccesoRolesPermitidos({
+          Rol.ADMINISTRADOR,
+          Rol.ENCARGADO,
+          Rol.VENDEDOR,
+          Rol.VIAJANTE,
+          Rol.COMPRADOR
+  })
+  public Resultados calcularResultadosFactura(@RequestBody NuevosResultadosComprobanteDTO nuevosResultadosComprobanteDTO) {
+    return facturaService.calcularResultadosFactura(nuevosResultadosComprobanteDTO);
   }
 
   @GetMapping("/facturas/email/{idFactura}")

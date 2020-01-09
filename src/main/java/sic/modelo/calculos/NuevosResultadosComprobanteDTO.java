@@ -4,17 +4,21 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import sic.modelo.TipoDeComprobante;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class NuevosResultadosPedidoDTO {
+public class NuevosResultadosComprobanteDTO {
 
-  private List<BigDecimal> importes;
+  private BigDecimal[] importe;
+  private BigDecimal[] ivaPorcentajes;
+  private BigDecimal[] ivaNetos;
+  private BigDecimal[] cantidades;
+  private TipoDeComprobante tipoDeComprobante;
   private BigDecimal descuentoPorcentaje;
   private BigDecimal recargoPorcentaje;
 }

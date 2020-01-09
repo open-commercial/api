@@ -17,7 +17,7 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.calculos.NuevosResultadosPedidoDTO;
+import sic.modelo.calculos.NuevosResultadosComprobanteDTO;
 import sic.modelo.calculos.Resultados;
 import sic.modelo.dto.PedidoDTO;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
@@ -172,8 +172,8 @@ public class PedidoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public Resultados calcularResultadosPedido(@RequestBody NuevosResultadosPedidoDTO nuevosResultadosPedidoDTO) {
-    return pedidoService.calcularResultadosPedido(nuevosResultadosPedidoDTO);
+  public Resultados calcularResultadosPedido(@RequestBody NuevosResultadosComprobanteDTO nuevosResultadosComprobanteDTO) {
+    return pedidoService.calcularResultadosPedido(nuevosResultadosComprobanteDTO);
   }
 
   private long[] getArrayDeIdProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones) {

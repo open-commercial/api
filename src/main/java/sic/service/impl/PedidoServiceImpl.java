@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.calculos.NuevosResultadosPedidoDTO;
+import sic.modelo.calculos.NuevosResultadosComprobanteDTO;
 import sic.modelo.calculos.Resultados;
 import sic.modelo.dto.*;
 import sic.repository.RenglonPedidoRepository;
@@ -422,12 +422,16 @@ public class PedidoServiceImpl implements IPedidoService {
   @Transactional
   public void actualizar(Pedido pedido) {
     //de los renglones, sacar ids y cantidades, array de nuevosResultadosPedido
-    List<BigDecimal> importesDeRenglones= new ArrayList<>();
-    pedido.getRenglones().forEach(renglonPedido -> importesDeRenglones.add(renglonPedido.getImporte()));
+    BigDecimal[] importesDeRenglones = new BigDecimal[pedido.getRenglones().size()];
+    int i = 0;
+    for (RenglonPedido renglon : pedido.getRenglones()) {
+      importesDeRenglones[i] = renglon.getImporte();
+      i++;
+    }
     Resultados resultados =
         this.calcularResultadosPedido(
-            NuevosResultadosPedidoDTO.builder()
-                .importes(importesDeRenglones)
+            NuevosResultadosComprobanteDTO.builder()
+                .importe(importesDeRenglones)
                 .descuentoPorcentaje(
                         pedido.getDescuentoPorcentaje() != null
                         ? pedido.getDescuentoPorcentaje()
@@ -629,7 +633,7 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public Resultados calcularResultadosPedido(NuevosResultadosPedidoDTO calculoPedido) {
+  public Resultados calcularResultadosPedido(NuevosResultadosComprobanteDTO calculoPedido) {
     Resultados resultados = Resultados.builder().build();
     resultados.setDescuentoPorcentaje(
         calculoPedido.getDescuentoPorcentaje() != null
@@ -640,7 +644,7 @@ public class PedidoServiceImpl implements IPedidoService {
             ? calculoPedido.getRecargoPorcentaje()
             : BigDecimal.ZERO);
     BigDecimal subTotal = BigDecimal.ZERO;
-    for (BigDecimal importe: calculoPedido.getImportes()) {
+    for (BigDecimal importe: calculoPedido.getImporte()) {
       subTotal = subTotal.add(importe);
     }
     resultados.setSubTotal(subTotal);

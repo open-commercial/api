@@ -30,7 +30,7 @@ import sic.model.FacturaVenta;
 import sic.model.Pedido;
 import sic.model.RenglonPedido;
 import sic.modelo.*;
-import sic.modelo.calculos.NuevosResultadosPedidoDTO;
+import sic.modelo.calculos.NuevosResultadosComprobanteDTO;
 import sic.modelo.calculos.Resultados;
 import sic.modelo.criteria.*;
 import sic.modelo.dto.*;
@@ -1279,7 +1279,13 @@ class AppIntegrationTest {
     FacturaVenta[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
-    //calculos
+    assertEquals(new BigDecimal("7200.000000000000000"), facturas[0].getSubTotal());
+    assertEquals(new BigDecimal("720.000000000000000"), facturas[0].getRecargoNeto());
+    assertEquals(new BigDecimal("1800.000000000000000"), facturas[0].getDescuentoNeto());
+    assertEquals(new BigDecimal("214.200000000000000000000000000000000000000000000000000000000000"), facturas[0].getIva105Neto());
+    assertEquals(new BigDecimal("856.800000000000000000000000000000000000000000000000000000000000"), facturas[0].getIva21Neto());
+    assertEquals(new BigDecimal("6120.000000000000000"), facturas[0].getSubTotalBruto());
+    assertEquals(new BigDecimal("7191.000000000000000000000000000000000000000000000000000000000000"), facturas[0].getTotal());
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(
@@ -1343,7 +1349,13 @@ class AppIntegrationTest {
     FacturaVenta[] facturas =
       restTemplate.postForObject(
         apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
-    //calculos
+    assertEquals(new BigDecimal("7200.000000000000000"), facturas[0].getSubTotal());
+    assertEquals(new BigDecimal("720.000000000000000"), facturas[0].getRecargoNeto());
+    assertEquals(new BigDecimal("1800.000000000000000"), facturas[0].getDescuentoNeto());
+    assertEquals(new BigDecimal("6120.000000000000000"), facturas[0].getSubTotalBruto());
+    assertEquals(new BigDecimal("214.200000000000000000000000000000000000000000000000000000000000"), facturas[0].getIva105Neto());
+    assertEquals(new BigDecimal("856.800000000000000000000000000000000000000000000000000000000000"), facturas[0].getIva21Neto());
+    assertEquals(new BigDecimal("7191.000000000000000000000000000000000000000000000000000000000000"), facturas[0].getTotal());
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(
@@ -1405,7 +1417,13 @@ class AppIntegrationTest {
     FacturaVenta[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
-    //calculos
+    assertEquals(new BigDecimal("6608.000000000000000"), facturas[0].getSubTotal());
+    assertEquals(new BigDecimal("660.800000000000000"), facturas[0].getRecargoNeto());
+    assertEquals(new BigDecimal("1652.000000000000000"), facturas[0].getDescuentoNeto());
+    assertEquals(new BigDecimal("4760.000000000000000000000000000000000000000000000000000000000000"), facturas[0].getSubTotalBruto());
+    assertEquals(new BigDecimal("142.800000000000000000000000000000000000000000000000000000000000"), facturas[0].getIva105Neto());
+    assertEquals(new BigDecimal("714.000000000000000000000000000000000000000000000000000000000000"), facturas[0].getIva21Neto());
+    assertEquals(new BigDecimal("5616.800000000000000000000000000000000000000000000000000000000000"), facturas[0].getTotal());
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(
@@ -1509,7 +1527,13 @@ class AppIntegrationTest {
     FacturaVenta[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
-    //calculos
+    assertEquals(new BigDecimal("6608.000000000000000"), facturas[0].getSubTotal());
+    assertEquals(new BigDecimal("660.800000000000000"), facturas[0].getRecargoNeto());
+    assertEquals(new BigDecimal("1652.000000000000000"), facturas[0].getDescuentoNeto());
+    assertEquals(new BigDecimal("5616.800000000000000"), facturas[0].getSubTotalBruto());
+    assertEquals(BigDecimal.ZERO, facturas[0].getIva105Neto());
+    assertEquals(BigDecimal.ZERO, facturas[0].getIva21Neto());
+    assertEquals(new BigDecimal("5616.800000000000000"), facturas[0].getTotal());
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(
@@ -1562,7 +1586,13 @@ class AppIntegrationTest {
     FacturaVenta[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
-    //calculos
+    assertEquals(new BigDecimal("7200.000000000000000"), facturas[0].getSubTotal());
+    assertEquals(new BigDecimal("720.000000000000000"), facturas[0].getRecargoNeto());
+    assertEquals(new BigDecimal("1800.000000000000000"), facturas[0].getDescuentoNeto());
+    assertEquals(new BigDecimal("6120.000000000000000"), facturas[0].getSubTotalBruto());
+    assertEquals(BigDecimal.ZERO, facturas[0].getIva105Neto());
+    assertEquals(BigDecimal.ZERO, facturas[0].getIva21Neto());
+    assertEquals(new BigDecimal("6120.000000000000000"), facturas[0].getTotal());
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(
@@ -1617,7 +1647,13 @@ class AppIntegrationTest {
     FacturaVenta[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
-    //calculos
+    assertEquals(new BigDecimal("9787.500000000000000000000000000000"), facturas[0].getSubTotal());
+    assertEquals(new BigDecimal("978.750000000000000"), facturas[0].getRecargoNeto());
+    assertEquals(new BigDecimal("2446.875000000000000"), facturas[0].getDescuentoNeto());
+    assertEquals(new BigDecimal("8319.375000000000000000000000000000"), facturas[0].getSubTotalBruto());
+    assertEquals(new BigDecimal("535.500000000000000000000000000000"), facturas[0].getIva105Neto());
+    assertEquals(BigDecimal.ZERO, facturas[0].getIva21Neto());
+    assertEquals(new BigDecimal("8854.875000000000000000000000000000"), facturas[0].getTotal());
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(
@@ -1672,7 +1708,13 @@ class AppIntegrationTest {
     FacturaVenta[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
-    //calculos
+    assertEquals(new BigDecimal("8260.000000000000000"), facturas[0].getSubTotal());
+    assertEquals(new BigDecimal("826.000000000000000"), facturas[0].getRecargoNeto());
+    assertEquals(new BigDecimal("2065.000000000000000"), facturas[0].getDescuentoNeto());
+    assertEquals(new BigDecimal("5950.000000000000000000000000000000000000000000000000000000000000"), facturas[0].getSubTotalBruto());
+    assertEquals(new BigDecimal("178.500000000000000000000000000000000000000000000000000000000000"), facturas[0].getIva105Neto());
+    assertEquals(new BigDecimal("892.500000000000000000000000000000000000000000000000000000000000"), facturas[0].getIva21Neto());
+    assertEquals(new BigDecimal("7021.000000000000000000000000000000000000000000000000000000000000"), facturas[0].getTotal());
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(
@@ -1724,7 +1766,13 @@ class AppIntegrationTest {
     FacturaVenta[] facturas =
       restTemplate.postForObject(
         apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
-    //calculos
+    assertEquals(new BigDecimal("8260.000000000000000"), facturas[0].getSubTotal());
+    assertEquals(new BigDecimal("826.000000000000000"), facturas[0].getRecargoNeto());
+    assertEquals(new BigDecimal("2065.000000000000000"), facturas[0].getDescuentoNeto());
+    assertEquals(new BigDecimal("5950.000000000000000000000000000000000000000000000000000000000000"), facturas[0].getSubTotalBruto());
+    assertEquals(new BigDecimal("178.500000000000000000000000000000000000000000000000000000000000"), facturas[0].getIva105Neto());
+    assertEquals(new BigDecimal("892.500000000000000000000000000000000000000000000000000000000000"), facturas[0].getIva21Neto());
+    assertEquals(new BigDecimal("7021.000000000000000000000000000000000000000000000000000000000000"), facturas[0].getTotal());
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(
@@ -1796,7 +1844,13 @@ class AppIntegrationTest {
     FacturaVenta[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
-    //calculos
+    assertEquals(new BigDecimal("9000.000000000000000"), facturas[0].getSubTotal());
+    assertEquals(new BigDecimal("900.000000000000000"), facturas[0].getRecargoNeto());
+    assertEquals(new BigDecimal("2250.000000000000000"), facturas[0].getDescuentoNeto());
+    assertEquals(new BigDecimal("7650.000000000000000"), facturas[0].getSubTotalBruto());
+    assertEquals(BigDecimal.ZERO, facturas[0].getIva105Neto());
+    assertEquals(BigDecimal.ZERO, facturas[0].getIva21Neto());
+    assertEquals(new BigDecimal("7650.000000000000000"), facturas[0].getTotal());
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(
@@ -1907,7 +1961,13 @@ class AppIntegrationTest {
     FacturaCompra[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/compra", nuevaFacturaCompraDTO, FacturaCompra[].class);
-   //calculos
+    assertEquals(new BigDecimal("560.000000000000000"), facturas[0].getSubTotal());
+    assertEquals(new BigDecimal("56.000000000000000"), facturas[0].getRecargoNeto());
+    assertEquals(new BigDecimal("140.000000000000000"), facturas[0].getDescuentoNeto());
+    assertEquals(new BigDecimal("476.000000000000000"), facturas[0].getSubTotalBruto());
+    assertEquals(new BigDecimal("21.420000000000000000000000000000000000000000000000000000000000"), facturas[0].getIva105Neto());
+    assertEquals(new BigDecimal("57.120000000000000000000000000000000000000000000000000000000000"), facturas[0].getIva21Neto());
+    assertEquals(new BigDecimal("554.540000000000000000000000000000000000000000000000000000000000"), facturas[0].getTotal());
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
     TransportistaDTO transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", TransportistaDTO.class);
@@ -1956,7 +2016,13 @@ class AppIntegrationTest {
     FacturaCompra[] facturas =
       restTemplate.postForObject(
         apiPrefix + "/facturas/compra", nuevaFacturaCompraDTO, FacturaCompra[].class);
-    //calculos
+    assertEquals(new BigDecimal("2400.000000000000000"), facturas[0].getSubTotal());
+    assertEquals(new BigDecimal("240.000000000000000"), facturas[0].getRecargoNeto());
+    assertEquals(new BigDecimal("600.000000000000000"), facturas[0].getDescuentoNeto());
+    assertEquals(new BigDecimal("2040.000000000000000"), facturas[0].getSubTotalBruto());
+    assertEquals(new BigDecimal("142.800000000000000000000000000000000000000000000000000000000000"), facturas[0].getIva105Neto());
+    assertEquals(new BigDecimal("142.800000000000000000000000000000000000000000000000000000000000"), facturas[0].getIva21Neto());
+    assertEquals(new BigDecimal("2325.600000000000000000000000000000000000000000000000000000000000"), facturas[0].getTotal());
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/2", SucursalDTO.class);
     TransportistaDTO transportista =
       restTemplate.getForObject(apiPrefix + "/transportistas/1", TransportistaDTO.class);
@@ -2002,7 +2068,13 @@ class AppIntegrationTest {
     FacturaCompra[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/compra", nuevaFacturaCompraDTO, FacturaCompra[].class);
-    //calculos
+    assertEquals(new BigDecimal("660.800000000000000"), facturas[0].getSubTotal());
+    assertEquals(new BigDecimal("66.080000000000000"), facturas[0].getRecargoNeto());
+    assertEquals(new BigDecimal("165.200000000000000"), facturas[0].getDescuentoNeto());
+    assertEquals(new BigDecimal("476.000000000000000000000000000000000000000000000000000000000000"), facturas[0].getSubTotalBruto());
+    assertEquals(new BigDecimal("14.280000000000000000000000000000000000000000000000000000000000"), facturas[0].getIva105Neto());
+    assertEquals(new BigDecimal("71.400000000000000000000000000000000000000000000000000000000000"), facturas[0].getIva21Neto());
+    assertEquals(new BigDecimal("561.680000000000000000000000000000000000000000000000000000000000"), facturas[0].getTotal());
     ProveedorDTO proveedor =
         restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
@@ -2051,7 +2123,13 @@ class AppIntegrationTest {
     FacturaCompra[] facturas =
       restTemplate.postForObject(
         apiPrefix + "/facturas/compra", nuevaFacturaCompraDTO, FacturaCompra[].class);
-    //calculos
+    assertEquals(new BigDecimal("660.800000000000000"), facturas[0].getSubTotal());
+    assertEquals(new BigDecimal("66.080000000000000"), facturas[0].getRecargoNeto());
+    assertEquals(new BigDecimal("165.200000000000000"), facturas[0].getDescuentoNeto());
+    assertEquals(new BigDecimal("476.000000000000000000000000000000000000000000000000000000000000"), facturas[0].getSubTotalBruto());
+    assertEquals(new BigDecimal("14.280000000000000000000000000000000000000000000000000000000000"), facturas[0].getIva105Neto());
+    assertEquals(new BigDecimal("71.400000000000000000000000000000000000000000000000000000000000"), facturas[0].getIva21Neto());
+    assertEquals(new BigDecimal("561.680000000000000000000000000000000000000000000000000000000000"), facturas[0].getTotal());
     ProveedorDTO proveedor =
       restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/2", SucursalDTO.class);
@@ -2097,7 +2175,13 @@ class AppIntegrationTest {
     FacturaCompra[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/compra", nuevaFacturaCompraDTO, FacturaCompra[].class);
-    //calculos
+    assertEquals(new BigDecimal("473.500000000000000"), facturas[0].getSubTotal());
+    assertEquals(new BigDecimal("47.350000000000000"), facturas[0].getRecargoNeto());
+    assertEquals(new BigDecimal("118.375000000000000"), facturas[0].getDescuentoNeto());
+    assertEquals(new BigDecimal("402.475000000000000"), facturas[0].getSubTotalBruto());
+    assertEquals(BigDecimal.ZERO, facturas[0].getIva105Neto());
+    assertEquals(BigDecimal.ZERO, facturas[0].getIva21Neto());
+    assertEquals(new BigDecimal("402.475000000000000"), facturas[0].getTotal());
     ProveedorDTO proveedor =
       restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
@@ -2145,7 +2229,13 @@ class AppIntegrationTest {
     FacturaCompra[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/compra", nuevaFacturaCompraDTO, FacturaCompra[].class);
-    //calculos
+    assertEquals(new BigDecimal("560.000000000000000"), facturas[0].getSubTotal());
+    assertEquals(new BigDecimal("56.000000000000000"), facturas[0].getRecargoNeto());
+    assertEquals(new BigDecimal("140.000000000000000"), facturas[0].getDescuentoNeto());
+    assertEquals(new BigDecimal("476.000000000000000"), facturas[0].getSubTotalBruto());
+    assertEquals(BigDecimal.ZERO, facturas[0].getIva105Neto());
+    assertEquals(BigDecimal.ZERO, facturas[0].getIva21Neto());
+    assertEquals(new BigDecimal("476.000000000000000"), facturas[0].getTotal());
     ProveedorDTO proveedor =
       restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
@@ -2193,7 +2283,13 @@ class AppIntegrationTest {
     FacturaCompra[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/compra", nuevaFacturaCompraDTO, FacturaCompra[].class);
-    //calculos
+    assertEquals(new BigDecimal("660.800000000000000"), facturas[0].getSubTotal());
+    assertEquals(new BigDecimal("66.080000000000000"), facturas[0].getRecargoNeto());
+    assertEquals(new BigDecimal("165.200000000000000"), facturas[0].getDescuentoNeto());
+    assertEquals(new BigDecimal("561.680000000000000"), facturas[0].getSubTotalBruto());
+    assertEquals(new BigDecimal("0E-15"), facturas[0].getIva105Neto());
+    assertEquals(new BigDecimal("0E-15"), facturas[0].getIva21Neto());
+    assertEquals(new BigDecimal("561.680000000000000"), facturas[0].getTotal());
     ProveedorDTO proveedor =
       restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
     SucursalDTO sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
@@ -4404,19 +4500,23 @@ class AppIntegrationTest {
           apiPrefix + "/pedidos/renglones/clientes/1", renglonesPedidoDTO, RenglonPedido[].class));
     BigDecimal descuentoPorcentaje = new BigDecimal("20");
     BigDecimal recargoPorcentaje = BigDecimal.ZERO;
-    NuevosResultadosPedidoDTO nuevosResultadosPedidoDTO = new NuevosResultadosPedidoDTO();
-    List<BigDecimal> importes = new ArrayList<>();
-    renglonesPedido.forEach(renglonPedido -> importes.add(renglonPedido.getImporte()));
-    nuevosResultadosPedidoDTO.setImportes(importes);
-    nuevosResultadosPedidoDTO.setDescuentoPorcentaje(descuentoPorcentaje);
-    nuevosResultadosPedidoDTO.setRecargoPorcentaje(recargoPorcentaje);
-    Resultados resultados = restTemplate.postForObject(apiPrefix + "/pedidos/calculo-pedido", nuevosResultadosPedidoDTO, Resultados.class);
+    NuevosResultadosComprobanteDTO nuevosResultadosComprobanteDTO = new NuevosResultadosComprobanteDTO();
+    BigDecimal[] importes = new BigDecimal[renglonesPedido.size()];
+    int i = 0;
+    for (RenglonPedido renglon : renglonesPedido) {
+      importes[i] = renglon.getImporte();
+      i++;
+    }
+    nuevosResultadosComprobanteDTO.setImporte(importes);
+    nuevosResultadosComprobanteDTO.setDescuentoPorcentaje(descuentoPorcentaje);
+    nuevosResultadosComprobanteDTO.setRecargoPorcentaje(recargoPorcentaje);
+    Resultados resultados = restTemplate.postForObject(apiPrefix + "/pedidos/calculo-pedido", nuevosResultadosComprobanteDTO, Resultados.class);
     assertEquals(new BigDecimal("6608.000000000000000000000000000000"), resultados.getSubTotal());
     assertEquals(new BigDecimal("1321.60000000000000000000000000000000"), resultados.getDescuentoNeto());
     assertEquals(new BigDecimal("0E-32"), resultados.getRecargoNeto());
     assertEquals(new BigDecimal("5286.40000000000000000000000000000000"), resultados.getSubTotalBruto());
-    assertEquals(null, resultados.getIva105Neto());
-    assertEquals(null, resultados.getIva21Neto());
+    assertNull(resultados.getIva105Neto());
+    assertNull(resultados.getIva21Neto());
     assertEquals(new BigDecimal("5286.40000000000000000000000000000000"), resultados.getTotal());
   }
 
@@ -5041,35 +5141,6 @@ class AppIntegrationTest {
       restTemplate.postForObject(
         apiPrefix + "/facturas/ganancia-total/criteria", criteria, BigDecimal.class);
     assertEquals(new BigDecimal("8100.000000000000000000000000000000"), gananciaTotal);
-    ProductoDTO producto1 =
-      restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
-    Set<CantidadEnSucursalDTO> cantidadEnSucursal = producto1.getCantidadEnSucursales();
-    cantidadEnSucursal.stream()
-        .filter(cantidadEnSucursalDTO -> cantidadEnSucursalDTO.getIdSucursal() == 1L)
-        .forEach(cantidadEnSucursalDTO -> cantidadEnSucursalDTO.setCantidad(BigDecimal.TEN));
-    producto1.setCantidadEnSucursales(cantidadEnSucursal);
-    restTemplate.put(apiPrefix + "/productos?idSucursal=1", producto1);
-    ProductoDTO producto2 =
-        restTemplate.getForObject(apiPrefix + "/productos/1", ProductoDTO.class);
-    cantidadEnSucursal = producto2.getCantidadEnSucursales();
-    cantidadEnSucursal.stream()
-        .filter(cantidadEnSucursalDTO -> cantidadEnSucursalDTO.getIdSucursal() == 1L)
-        .forEach(cantidadEnSucursalDTO -> cantidadEnSucursalDTO.setCantidad(new BigDecimal("6")));
-    producto2.setCantidadEnSucursales(cantidadEnSucursal);
-    restTemplate.put(apiPrefix + "/productos?idSucursal=1", producto2);
-    this.shouldCrearFacturaVentaPresupuesto();
-    totalFacturadoVenta =
-      restTemplate.postForObject(
-        apiPrefix + "/facturas/total-facturado-venta/criteria", criteria, BigDecimal.class);
-    assertEquals(new BigDecimal("12807.800000000000000"), totalFacturadoVenta);
-    totalIvaVenta =
-      restTemplate.postForObject(
-        apiPrefix + "/facturas/total-iva-venta/criteria", criteria, BigDecimal.class);
-    assertEquals(new BigDecimal("1071.000000000000000"), totalIvaVenta);
-    gananciaTotal =
-      restTemplate.postForObject(
-        apiPrefix + "/facturas/ganancia-total/criteria", criteria, BigDecimal.class);
-    assertEquals(new BigDecimal("14400.000000000000000000000000000000"), gananciaTotal);
   }
 
   @Test

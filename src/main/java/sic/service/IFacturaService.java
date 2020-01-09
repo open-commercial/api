@@ -7,6 +7,8 @@ import sic.modelo.*;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import sic.modelo.calculos.NuevosResultadosComprobanteDTO;
+import sic.modelo.calculos.Resultados;
 import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 
@@ -82,6 +84,8 @@ public interface IFacturaService {
           BigDecimal[] cantidad,
           long[] idProducto,
           BigDecimal[] bonificacion);
+
+  Resultados calcularResultadosFactura(NuevosResultadosComprobanteDTO nuevosResultadosComprobante);
 
   boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAFIP comprobante);
 
