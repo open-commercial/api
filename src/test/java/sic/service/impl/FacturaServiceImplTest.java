@@ -615,20 +615,4 @@ class FacturaServiceImplTest {
             .compareTo(new BigDecimal("242")),
         0);
   }
-
-  @Test
-  void shouldCalcularPrecioUnitarioWhenVentaYFacturaY() {
-    Producto producto = new Producto();
-    producto.setPrecioCosto(new BigDecimal("100"));
-    producto.setGananciaNeto(new BigDecimal("100"));
-    producto.setIvaPorcentaje(new BigDecimal("21"));
-    producto.setIvaNeto(new BigDecimal("42"));
-    producto.setPrecioVentaPublico(new BigDecimal("200"));
-    producto.setPrecioLista(new BigDecimal("242"));
-    assertEquals(
-        facturaService
-            .calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_Y, producto)
-            .compareTo(new BigDecimal("221")),
-        0);
-  }
 }
