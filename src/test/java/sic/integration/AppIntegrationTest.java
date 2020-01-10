@@ -4774,6 +4774,16 @@ class AppIntegrationTest {
             RandomStringUtils.random(10, false, true),
             new BigDecimal("20"));
     nuevosRenglonesDePedido = new ArrayList<>();
+    List<RenglonPedido> renglones =
+        Arrays.asList(
+            restTemplate.getForObject(
+                apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido() + "/renglones",
+                RenglonPedido[].class));
+    nuevosRenglonesDePedido.add(
+        NuevoRenglonPedidoDTO.builder()
+            .idProductoItem(renglones.get(0).getIdProductoItem())
+            .cantidad(renglones.get(0).getCantidad())
+            .build());
     nuevosRenglonesDePedido.add(
     NuevoRenglonPedidoDTO.builder()
         .idProductoItem(3)
@@ -4781,6 +4791,7 @@ class AppIntegrationTest {
         .build());
     PedidoDTO detallePedidoParaModificar = PedidoDTO.builder()
       .idPedido(pedidoRecuperado.getIdPedido())
+      .recargoPorcentaje(BigDecimal.ZERO)
       .renglones(nuevosRenglonesDePedido)
       .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
       .observaciones("Cambiando las observaciones del pedido")
@@ -4789,7 +4800,7 @@ class AppIntegrationTest {
     Pedido pedidoModificado =
       restTemplate.getForObject(apiPrefix + "/pedidos/1", Pedido.class);
     assertEquals(pedidoRecuperado, pedidoModificado);
-    assertEquals(new BigDecimal("6098.400000000000000"), pedidoModificado.getTotalEstimado());
+    assertEquals(new BigDecimal("9873.600000000000000"), pedidoModificado.getTotalEstimado());
     assertEquals("Cambiando las observaciones del pedido", pedidoModificado.getObservaciones());
     assertEquals(EstadoPedido.ABIERTO, pedidoModificado.getEstado());
   }

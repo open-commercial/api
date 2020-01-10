@@ -1,5 +1,0 @@
-ALTER TABLE `configuraciondelsistema`
-ADD COLUMN `tokenWSAA` VARCHAR(1000) NULL DEFAULT NULL AFTER `id_Empresa`,
-ADD COLUMN `signTokenWSAA` VARCHAR(255) NULL DEFAULT NULL AFTER `tokenWSAA`,
-ADD COLUMN `fechaGeneracionTokenWSAA` DATETIME NULL AFTER `signTokenWSAA`,
-ADD COLUMN `fechaVencimientoTokenWSAA` DATETIME NULL AFTER `fechaGeneracionTokenWSAA`;

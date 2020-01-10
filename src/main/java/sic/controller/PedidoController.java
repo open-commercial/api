@@ -85,6 +85,8 @@ public class PedidoController {
     if (pedidoDTO.getObservaciones() != null)
       pedido.setObservaciones(pedidoDTO.getObservaciones());
     if (pedidoDTO.getTipoDeEnvio() != null) pedido.setTipoDeEnvio(pedidoDTO.getTipoDeEnvio());
+    if (pedidoDTO.getRecargoPorcentaje() != null) pedido.setRecargoPorcentaje(pedidoDTO.getRecargoPorcentaje());
+    if (pedidoDTO.getDescuentoPorcentaje() != null) pedido.setDescuentoPorcentaje(pedidoDTO.getDescuentoPorcentaje());
     pedido.getRenglones().clear();
     pedido
         .getRenglones()

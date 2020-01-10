@@ -1,1 +1,0 @@
-ALTER TABLE renglonpedido CHANGE subTotal importe decimal(25,15);
