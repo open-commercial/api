@@ -520,7 +520,7 @@ public class FacturaServiceImpl implements IFacturaService {
     i = 0;
     if (factura.getTipoComprobante() == TipoDeComprobante.FACTURA_A
         || factura.getTipoComprobante() == TipoDeComprobante.FACTURA_B
-        || factura.getTipoComprobante() == TipoDeComprobante.FACTURA_Y
+    //    || factura.getTipoComprobante() == TipoDeComprobante.FACTURA_Y
         || factura.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO) {
       BigDecimal[] ivaPorcentajes = new BigDecimal[factura.getRenglones().size()];
       BigDecimal[] ivaNetos = new BigDecimal[factura.getRenglones().size()];
@@ -671,7 +671,7 @@ public class FacturaServiceImpl implements IFacturaService {
     } else if (movimiento == Movimiento.VENTA
         && (tipo == TipoDeComprobante.FACTURA_A
             || tipo == TipoDeComprobante.FACTURA_B
-            || tipo == TipoDeComprobante.FACTURA_Y
+    //        || tipo == TipoDeComprobante.FACTURA_Y
             || tipo == TipoDeComprobante.PRESUPUESTO)) {
       resultado =
           producto
@@ -681,8 +681,8 @@ public class FacturaServiceImpl implements IFacturaService {
                       .subtract(bonificacionPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))
                       .multiply(
                           producto.getIvaPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP)));
-      if (tipo == TipoDeComprobante.FACTURA_Y)
-        resultado = resultado.divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP);
+    //  if (tipo == TipoDeComprobante.FACTURA_Y)
+    //    resultado = resultado.divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP);
     }
     return resultado;
   }
@@ -703,7 +703,7 @@ public class FacturaServiceImpl implements IFacturaService {
         if (tipo == TipoDeComprobante.FACTURA_A
             || tipo == TipoDeComprobante.FACTURA_B
             || tipo == TipoDeComprobante.FACTURA_C
-            || tipo == TipoDeComprobante.FACTURA_Y
+        //    || tipo == TipoDeComprobante.FACTURA_Y
             || tipo == TipoDeComprobante.PRESUPUESTO) {
           resultado =
               resultado.add(
@@ -747,7 +747,7 @@ public class FacturaServiceImpl implements IFacturaService {
         case FACTURA_X:
           resultado = producto.getPrecioVentaPublico();
           break;
-        case FACTURA_Y:
+      /*  case FACTURA_Y:
           ivaResultado =
               producto
                   .getIvaPorcentaje()
@@ -755,7 +755,7 @@ public class FacturaServiceImpl implements IFacturaService {
                   .divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP)
                   .multiply(producto.getPrecioVentaPublico());
           resultado = producto.getPrecioVentaPublico().add(ivaResultado);
-          break;
+          break;*/
         default:
           resultado = producto.getPrecioLista();
           break;
@@ -950,10 +950,10 @@ public class FacturaServiceImpl implements IFacturaService {
           CalculosComprobante.calcularProporcion(nuevoRenglon.getPrecioUnitario(), bonificacion));
     }
     nuevoRenglon.setIvaPorcentaje(producto.getIvaPorcentaje());
-    if (tipoDeComprobante.equals(TipoDeComprobante.FACTURA_Y)) {
+    /*if (tipoDeComprobante.equals(TipoDeComprobante.FACTURA_Y)) {
       nuevoRenglon.setIvaPorcentaje(
           producto.getIvaPorcentaje().divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP));
-    }
+    }*/
     nuevoRenglon.setIvaNeto(
         this.calcularIVANetoRenglon(
             movimiento, tipoDeComprobante, producto, nuevoRenglon.getBonificacionPorcentaje()));
@@ -982,7 +982,7 @@ public class FacturaServiceImpl implements IFacturaService {
     // IVA
     if (nuevosResultadosComprobante.getTipoDeComprobante() == TipoDeComprobante.FACTURA_A
         || nuevosResultadosComprobante.getTipoDeComprobante() == TipoDeComprobante.FACTURA_B
-        || nuevosResultadosComprobante.getTipoDeComprobante() == TipoDeComprobante.FACTURA_Y
+        //|| nuevosResultadosComprobante.getTipoDeComprobante() == TipoDeComprobante.FACTURA_Y
         || nuevosResultadosComprobante.getTipoDeComprobante() == TipoDeComprobante.PRESUPUESTO) {
       resultados.setIva21Neto(
           this.calcularIvaNetoFactura(

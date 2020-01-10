@@ -42,7 +42,7 @@ public class FacturaCompraController {
     this.authService = authService;
   }
 
-  @PostMapping("/facturas-compra")
+  @PostMapping("/facturas/compras")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public List<FacturaCompra> guardarFacturaCompra(
       @RequestBody NuevaFacturaCompraDTO nuevaCompraCompraDTO,
@@ -81,14 +81,14 @@ public class FacturaCompraController {
     return facturaService.guardar(facturas);
   }
 
-  @PostMapping("/facturas-compra/busqueda/criteria")
+  @PostMapping("/facturas/compras/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Page<FacturaCompra> buscarFacturaCompra(
       @RequestBody BusquedaFacturaCompraCriteria criteria) {
     return facturaService.buscarFacturaCompra(criteria);
   }
 
-  @GetMapping("/facturas-compra/tipos/sucursales/{idSucursal}/proveedores/{idProveedor}")
+  @GetMapping("/facturas/compras/tipos/sucursales/{idSucursal}/proveedores/{idProveedor}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public TipoDeComprobante[] getTipoFacturaCompra(
       @PathVariable long idSucursal, @PathVariable long idProveedor) {
@@ -97,7 +97,7 @@ public class FacturaCompraController {
         proveedorService.getProveedorNoEliminadoPorId(idProveedor));
   }
 
-  @PostMapping("/facturas-compra/renglones")
+  @PostMapping("/facturas/compras/renglones")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public List<RenglonFactura> calcularRenglonesCompra(
       @RequestBody List<NuevoRenglonFacturaDTO> nuevosRenglonesFacturaDTO,
@@ -110,14 +110,14 @@ public class FacturaCompraController {
         this.getArrayDeBonificaciones(nuevosRenglonesFacturaDTO));
   }
 
-  @PostMapping("/facturas-compra/total-facturado/criteria")
+  @PostMapping("/facturas/compras/total-facturado/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public BigDecimal calcularTotalFacturadoCompra(
       @RequestBody BusquedaFacturaCompraCriteria criteria) {
     return facturaService.calcularTotalFacturadoCompra(criteria);
   }
 
-  @PostMapping("/facturas-compra/total-iva/criteria")
+  @PostMapping("/facturas/compras/total-iva/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public BigDecimal calcularTotalIvaCompra(@RequestBody BusquedaFacturaCompraCriteria criteria) {
     return facturaService.calcularIvaCompra(criteria);
