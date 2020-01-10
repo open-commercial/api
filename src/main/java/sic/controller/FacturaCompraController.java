@@ -10,6 +10,7 @@ import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.modelo.dto.NuevaFacturaCompraDTO;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.service.*;
+import sic.util.CalculosComprobante;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -59,9 +60,9 @@ public class FacturaCompraController {
         facturaService.calcularRenglones(
             nuevaCompraCompraDTO.getTipoDeComprobante(),
             Movimiento.COMPRA,
-            this.getArrayDeCantidadesProducto(nuevaCompraCompraDTO.getRenglones()),
-            this.getArrayDeIdProducto(nuevaCompraCompraDTO.getRenglones()),
-            this.getArrayDeBonificaciones(nuevaCompraCompraDTO.getRenglones())));
+            CalculosComprobante.getArrayDeCantidadesProductoParaFactura(nuevaCompraCompraDTO.getRenglones()),
+            CalculosComprobante.getArrayDeIdProductoParaFactura(nuevaCompraCompraDTO.getRenglones()),
+            CalculosComprobante.getArrayDeBonificacionesParaFactura(nuevaCompraCompraDTO.getRenglones())));
     fc.setRecargoPorcentaje(nuevaCompraCompraDTO.getRecargoPorcentaje());
     fc.setDescuentoPorcentaje(nuevaCompraCompraDTO.getDescuentoPorcentaje());
     fc.setObservaciones(nuevaCompraCompraDTO.getObservaciones());
@@ -105,9 +106,9 @@ public class FacturaCompraController {
     return facturaService.calcularRenglones(
         tipoDeComprobante,
         Movimiento.COMPRA,
-        this.getArrayDeCantidadesProducto(nuevosRenglonesFacturaDTO),
-        this.getArrayDeIdProducto(nuevosRenglonesFacturaDTO),
-        this.getArrayDeBonificaciones(nuevosRenglonesFacturaDTO));
+        CalculosComprobante.getArrayDeCantidadesProductoParaFactura(nuevosRenglonesFacturaDTO),
+        CalculosComprobante.getArrayDeIdProductoParaFactura(nuevosRenglonesFacturaDTO),
+        CalculosComprobante.getArrayDeBonificacionesParaFactura(nuevosRenglonesFacturaDTO));
   }
 
   @PostMapping("/facturas/compras/total-facturado/criteria")
@@ -121,29 +122,5 @@ public class FacturaCompraController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public BigDecimal calcularTotalIvaCompra(@RequestBody BusquedaFacturaCompraCriteria criteria) {
     return facturaService.calcularIvaCompra(criteria);
-  }
-
-  private long[] getArrayDeIdProducto(List<NuevoRenglonFacturaDTO> nuevosRenglones) {
-    long[] idProductoItem = new long[nuevosRenglones.size()];
-    for (int i = 0; i < nuevosRenglones.size(); ++i) {
-      idProductoItem[i] = nuevosRenglones.get(i).getIdProducto();
-    }
-    return idProductoItem;
-  }
-
-  private BigDecimal[] getArrayDeCantidadesProducto(List<NuevoRenglonFacturaDTO> nuevosRenglones) {
-    BigDecimal[] cantidades = new BigDecimal[nuevosRenglones.size()];
-    for (int i = 0; i < nuevosRenglones.size(); ++i) {
-      cantidades[i] = nuevosRenglones.get(i).getCantidad();
-    }
-    return cantidades;
-  }
-
-  private BigDecimal[] getArrayDeBonificaciones(List<NuevoRenglonFacturaDTO> nuevosRenglones) {
-    BigDecimal[] bonificaciones = new BigDecimal[nuevosRenglones.size()];
-    for (int i = 0; i < nuevosRenglones.size(); ++i) {
-      bonificaciones[i] = nuevosRenglones.get(i).getBonificacion();
-    }
-    return bonificaciones;
   }
 }

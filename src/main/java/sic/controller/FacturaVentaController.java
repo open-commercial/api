@@ -15,6 +15,7 @@ import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.service.*;
+import sic.util.CalculosComprobante;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -36,6 +37,7 @@ public class FacturaVentaController {
   private final IPedidoService pedidoService;
   private final IAuthService authService;
   private final MessageSource messageSource;
+  private static final String CLAIMS_ID_USUARIO = "idUsuario";
 
   @Autowired
   public FacturaVentaController(
@@ -109,13 +111,13 @@ public class FacturaVentaController {
     fv.setFecha(LocalDateTime.now());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     fv.setUsuario(
-        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get(CLAIMS_ID_USUARIO)).longValue()));
     fv.setRenglones(
         facturaService.calcularRenglones(
             nuevaFacturaVentaDTO.getTipoDeComprobante(),
             Movimiento.VENTA,
-            this.getArrayDeCantidadesProducto(nuevaFacturaVentaDTO.getRenglones()),
-            this.getArrayDeIdProducto(nuevaFacturaVentaDTO.getRenglones()),
+            CalculosComprobante.getArrayDeCantidadesProductoParaFactura(nuevaFacturaVentaDTO.getRenglones()),
+            CalculosComprobante.getArrayDeIdProductoParaFactura(nuevaFacturaVentaDTO.getRenglones()),
             null));
     fv.setObservaciones(
         nuevaFacturaVentaDTO.getObservaciones() != null
@@ -173,7 +175,7 @@ public class FacturaVentaController {
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return facturaService.buscarFacturaVenta(criteria, (int) claims.get("idUsuario"));
+    return facturaService.buscarFacturaVenta(criteria, (int) claims.get(CLAIMS_ID_USUARIO));
   }
 
   @GetMapping("/facturas/ventas/tipos/sucursales/{idSucursal}/clientes/{idCliente}")
@@ -183,7 +185,7 @@ public class FacturaVentaController {
       @PathVariable long idCliente,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuario = (int) claims.get("idUsuario");
+    long idUsuario = (int) claims.get(CLAIMS_ID_USUARIO);
     List<Rol> rolesDeUsuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario).getRoles();
     if (rolesDeUsuario.contains(Rol.ADMINISTRADOR)
         || rolesDeUsuario.contains(Rol.ENCARGADO)
@@ -230,8 +232,8 @@ public class FacturaVentaController {
     return facturaService.calcularRenglones(
         tipoDeComprobante,
         Movimiento.VENTA,
-        this.getArrayDeCantidadesProducto(nuevosRenglonesFacturaDTO),
-        this.getArrayDeIdProducto(nuevosRenglonesFacturaDTO),
+        CalculosComprobante.getArrayDeCantidadesProductoParaFactura(nuevosRenglonesFacturaDTO),
+        CalculosComprobante.getArrayDeIdProductoParaFactura(nuevosRenglonesFacturaDTO),
         null);
   }
 
@@ -247,7 +249,7 @@ public class FacturaVentaController {
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return facturaService.calcularTotalFacturadoVenta(criteria, (int) claims.get("idUsuario"));
+    return facturaService.calcularTotalFacturadoVenta(criteria, (int) claims.get(CLAIMS_ID_USUARIO));
   }
 
   @PostMapping("/facturas/ventas/total-iva/criteria")
@@ -256,7 +258,7 @@ public class FacturaVentaController {
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return facturaService.calcularIvaVenta(criteria, (int) claims.get("idUsuario"));
+    return facturaService.calcularIvaVenta(criteria, (int) claims.get(CLAIMS_ID_USUARIO));
   }
 
   @PostMapping("/facturas/ventas/ganancia-total/criteria")
@@ -265,28 +267,12 @@ public class FacturaVentaController {
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return facturaService.calcularGananciaTotal(criteria, (int) claims.get("idUsuario"));
+    return facturaService.calcularGananciaTotal(criteria, (int) claims.get(CLAIMS_ID_USUARIO));
   }
 
   @GetMapping("/facturas/ventas/email/{idFactura}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public void enviarFacturaVentaPorEmail(@PathVariable long idFactura) {
     facturaService.enviarFacturaVentaPorEmail(idFactura);
-  }
-
-  private long[] getArrayDeIdProducto(List<NuevoRenglonFacturaDTO> nuevosRenglones) {
-    long[] idProductoItem = new long[nuevosRenglones.size()];
-    for (int i = 0; i < nuevosRenglones.size(); ++i) {
-      idProductoItem[i] = nuevosRenglones.get(i).getIdProducto();
-    }
-    return idProductoItem;
-  }
-
-  private BigDecimal[] getArrayDeCantidadesProducto(List<NuevoRenglonFacturaDTO> nuevosRenglones) {
-    BigDecimal[] cantidades = new BigDecimal[nuevosRenglones.size()];
-    for (int i = 0; i < nuevosRenglones.size(); ++i) {
-      cantidades[i] = nuevosRenglones.get(i).getCantidad();
-    }
-    return cantidades;
   }
 }
