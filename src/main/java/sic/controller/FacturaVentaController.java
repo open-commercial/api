@@ -89,8 +89,14 @@ public class FacturaVentaController {
     }
     fv.setSucursal(sucursal);
     fv.setTipoComprobante(nuevaFacturaVentaDTO.getTipoDeComprobante());
-    fv.setDescuentoPorcentaje(nuevaFacturaVentaDTO.getDescuentoPorcentaje());
-    fv.setRecargoPorcentaje(nuevaFacturaVentaDTO.getRecargoPorcentaje());
+    fv.setDescuentoPorcentaje(
+        nuevaFacturaVentaDTO.getDescuentoPorcentaje() != null
+            ? nuevaFacturaVentaDTO.getDescuentoPorcentaje()
+            : BigDecimal.ZERO);
+    fv.setRecargoPorcentaje(
+        nuevaFacturaVentaDTO.getRecargoPorcentaje() != null
+            ? nuevaFacturaVentaDTO.getRecargoPorcentaje()
+            : BigDecimal.ZERO);
     Cliente cliente =
         clienteService.getClienteNoEliminadoPorId(nuevaFacturaVentaDTO.getIdCliente());
     if (cliente.getUbicacionFacturacion() == null
@@ -111,13 +117,16 @@ public class FacturaVentaController {
     fv.setFecha(LocalDateTime.now());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     fv.setUsuario(
-        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get(CLAIMS_ID_USUARIO)).longValue()));
+        usuarioService.getUsuarioNoEliminadoPorId(
+            ((Integer) claims.get(CLAIMS_ID_USUARIO)).longValue()));
     fv.setRenglones(
         facturaService.calcularRenglones(
             nuevaFacturaVentaDTO.getTipoDeComprobante(),
             Movimiento.VENTA,
-            CalculosComprobante.getArrayDeCantidadesProductoParaFactura(nuevaFacturaVentaDTO.getRenglones()),
-            CalculosComprobante.getArrayDeIdProductoParaFactura(nuevaFacturaVentaDTO.getRenglones()),
+            CalculosComprobante.getArrayDeCantidadesProductoParaFactura(
+                nuevaFacturaVentaDTO.getRenglones()),
+            CalculosComprobante.getArrayDeIdProductoParaFactura(
+                nuevaFacturaVentaDTO.getRenglones()),
             null));
     fv.setObservaciones(
         nuevaFacturaVentaDTO.getObservaciones() != null
@@ -249,7 +258,8 @@ public class FacturaVentaController {
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return facturaService.calcularTotalFacturadoVenta(criteria, (int) claims.get(CLAIMS_ID_USUARIO));
+    return facturaService.calcularTotalFacturadoVenta(
+        criteria, (int) claims.get(CLAIMS_ID_USUARIO));
   }
 
   @PostMapping("/facturas/ventas/total-iva/criteria")

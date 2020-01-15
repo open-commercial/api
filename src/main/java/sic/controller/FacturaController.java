@@ -1,5 +1,6 @@
 package sic.controller;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,6 +84,17 @@ public class FacturaController {
   })
   public Resultados calcularResultadosFactura(
       @RequestBody NuevosResultadosComprobanteDTO nuevosResultadosComprobanteDTO) {
-    return facturaService.calcularResultadosFactura(nuevosResultadosComprobanteDTO);
+    Resultados nuevoResultado =
+        facturaService.calcularResultadosFactura(nuevosResultadosComprobanteDTO);
+    if (nuevosResultadosComprobanteDTO.getTipoDeComprobante() == TipoDeComprobante.FACTURA_B
+        || nuevosResultadosComprobanteDTO.getTipoDeComprobante() == TipoDeComprobante.PRESUPUESTO) {
+      nuevoResultado.setSubTotalBruto(
+          nuevoResultado
+              .getSubTotalBruto()
+              .add(nuevoResultado.getIva21Neto().add(nuevoResultado.getIva105Neto())));
+      nuevoResultado.setIva21Neto(BigDecimal.ZERO);
+      nuevoResultado.setIva105Neto(BigDecimal.ZERO);
+    }
+    return nuevoResultado;
   }
 }

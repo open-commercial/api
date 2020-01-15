@@ -944,9 +944,9 @@ public class FacturaServiceImpl implements IFacturaService {
     if (movimiento.equals(Movimiento.VENTA) || movimiento.equals(Movimiento.PEDIDO)) {
       this.asignarBonificacion(nuevoRenglon, producto);
     } else {
-      nuevoRenglon.setBonificacionPorcentaje(bonificacion);
+      nuevoRenglon.setBonificacionPorcentaje(bonificacion != null ?  bonificacion : BigDecimal.ZERO);
       nuevoRenglon.setBonificacionNeta(
-          CalculosComprobante.calcularProporcion(nuevoRenglon.getPrecioUnitario(), bonificacion));
+          CalculosComprobante.calcularProporcion(nuevoRenglon.getPrecioUnitario(), nuevoRenglon.getBonificacionPorcentaje()));
     }
     nuevoRenglon.setIvaPorcentaje(producto.getIvaPorcentaje());
     /*if (tipoDeComprobante.equals(TipoDeComprobante.FACTURA_Y)) {

@@ -60,12 +60,24 @@ public class FacturaCompraController {
         facturaService.calcularRenglones(
             nuevaCompraCompraDTO.getTipoDeComprobante(),
             Movimiento.COMPRA,
-            CalculosComprobante.getArrayDeCantidadesProductoParaFactura(nuevaCompraCompraDTO.getRenglones()),
-            CalculosComprobante.getArrayDeIdProductoParaFactura(nuevaCompraCompraDTO.getRenglones()),
-            CalculosComprobante.getArrayDeBonificacionesParaFactura(nuevaCompraCompraDTO.getRenglones())));
-    fc.setRecargoPorcentaje(nuevaCompraCompraDTO.getRecargoPorcentaje());
-    fc.setDescuentoPorcentaje(nuevaCompraCompraDTO.getDescuentoPorcentaje());
-    fc.setObservaciones(nuevaCompraCompraDTO.getObservaciones());
+            CalculosComprobante.getArrayDeCantidadesProductoParaFactura(
+                nuevaCompraCompraDTO.getRenglones()),
+            CalculosComprobante.getArrayDeIdProductoParaFactura(
+                nuevaCompraCompraDTO.getRenglones()),
+            CalculosComprobante.getArrayDeBonificacionesParaFactura(
+                nuevaCompraCompraDTO.getRenglones())));
+    fc.setRecargoPorcentaje(
+        nuevaCompraCompraDTO.getRecargoPorcentaje() != null
+            ? nuevaCompraCompraDTO.getRecargoPorcentaje()
+            : BigDecimal.ZERO);
+    fc.setDescuentoPorcentaje(
+        nuevaCompraCompraDTO.getDescuentoPorcentaje() != null
+            ? nuevaCompraCompraDTO.getDescuentoPorcentaje()
+            : BigDecimal.ZERO);
+    fc.setObservaciones(
+        nuevaCompraCompraDTO.getObservaciones() != null
+            ? nuevaCompraCompraDTO.getObservaciones()
+            : "");
     fc.setSucursal(sucursalService.getSucursalPorId(nuevaCompraCompraDTO.getIdSucursal()));
     fc.setProveedor(
         proveedorService.getProveedorNoEliminadoPorId(nuevaCompraCompraDTO.getIdProveedor()));
