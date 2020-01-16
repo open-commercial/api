@@ -332,7 +332,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       logger.warn(messageSource.getMessage(
         "mensaje_reglon_cuenta_corriente_guardado", null, Locale.getDefault()), rcc);
     }
-    if (tipo == TipoDeOperacion.ELIMINACION && nota.getCliente() != null) {
+    if (tipo == TipoDeOperacion.ELIMINACION) {
       RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeNota(nota, false);
       cc.setSaldo(cc.getSaldo().subtract(rcc.getMonto()));
       this.cambiarFechaUltimoComprobante(cc, rcc);
