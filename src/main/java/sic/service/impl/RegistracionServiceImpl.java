@@ -45,7 +45,7 @@ public class RegistracionServiceImpl implements IRegistracionService {
 
   @Override
   @Validated
-  public Usuario crearCuenta(@Valid RegistracionClienteAndUsuarioDTO registracionClienteAndUsuarioDTO) {
+  public void crearCuenta(@Valid RegistracionClienteAndUsuarioDTO registracionClienteAndUsuarioDTO) {
     Usuario nuevoUsuario = new Usuario();
     nuevoUsuario.setHabilitado(true);
     nuevoUsuario.setNombre(registracionClienteAndUsuarioDTO.getNombre());
@@ -92,7 +92,6 @@ public class RegistracionServiceImpl implements IRegistracionService {
         null,
         null);
     logger.warn("El mail de registración para el usuario {} se envió.", nuevoUsuario.getUsername());
-    return credencial;
   }
 
   @Override
