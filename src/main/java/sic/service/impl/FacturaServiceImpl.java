@@ -295,8 +295,7 @@ public class FacturaServiceImpl implements IFacturaService {
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.getIdSucursal() == null) {
       throw new BusinessServiceException(
-        messageSource.getMessage(
-          "mensaje_busqueda_sin_sucursal", null, Locale.getDefault()));
+          messageSource.getMessage("mensaje_busqueda_sin_sucursal", null, Locale.getDefault()));
     }
     builder.and(
         qFacturaCompra
@@ -307,14 +306,26 @@ public class FacturaServiceImpl implements IFacturaService {
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
         criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
-        criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
+        criteria.setFechaHasta(
+            criteria
+                .getFechaHasta()
+                .withHour(23)
+                .withMinute(59)
+                .withSecond(59)
+                .withNano(999999999));
         builder.and(
-          qFacturaCompra.fecha.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
+            qFacturaCompra.fecha.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
       } else if (criteria.getFechaDesde() != null) {
         criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
         builder.and(qFacturaCompra.fecha.after(criteria.getFechaDesde()));
       } else if (criteria.getFechaHasta() != null) {
-        criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
+        criteria.setFechaHasta(
+            criteria
+                .getFechaHasta()
+                .withHour(23)
+                .withMinute(59)
+                .withSecond(59)
+                .withNano(999999999));
         builder.and(qFacturaCompra.fecha.before(criteria.getFechaHasta()));
       }
     }
@@ -324,10 +335,12 @@ public class FacturaServiceImpl implements IFacturaService {
       builder.and(qFacturaCompra.tipoComprobante.eq(criteria.getTipoComprobante()));
     if (criteria.getIdProducto() != null)
       builder.and(qFacturaCompra.renglones.any().idProductoItem.eq(criteria.getIdProducto()));
-    if (criteria.getNumSerie() != null && criteria.getNumFactura() != null)
-      builder
-          .and(qFacturaCompra.numSerie.eq(criteria.getNumSerie()))
-          .and(qFacturaCompra.numFactura.eq(criteria.getNumFactura()));
+    if (criteria.getNumSerie() != null) {
+      builder.and(qFacturaCompra.numSerie.eq(criteria.getNumSerie()));
+    }
+    if (criteria.getNumFactura() != null) {
+      builder.and(qFacturaCompra.numFactura.eq(criteria.getNumFactura()));
+    }
     return builder;
   }
 
@@ -337,8 +350,7 @@ public class FacturaServiceImpl implements IFacturaService {
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.getIdSucursal() == null) {
       throw new BusinessServiceException(
-        messageSource.getMessage(
-          "mensaje_busqueda_sin_sucursal", null, Locale.getDefault()));
+          messageSource.getMessage("mensaje_busqueda_sin_sucursal", null, Locale.getDefault()));
     }
     builder.and(
         qFacturaVenta
@@ -349,14 +361,26 @@ public class FacturaServiceImpl implements IFacturaService {
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
         criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
-        criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
+        criteria.setFechaHasta(
+            criteria
+                .getFechaHasta()
+                .withHour(23)
+                .withMinute(59)
+                .withSecond(59)
+                .withNano(999999999));
         builder.and(
             qFacturaVenta.fecha.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
       } else if (criteria.getFechaDesde() != null) {
         criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
         builder.and(qFacturaVenta.fecha.after(criteria.getFechaDesde()));
       } else if (criteria.getFechaHasta() != null) {
-        criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
+        criteria.setFechaHasta(
+            criteria
+                .getFechaHasta()
+                .withHour(23)
+                .withMinute(59)
+                .withSecond(59)
+                .withNano(999999999));
         builder.and(qFacturaVenta.fecha.before(criteria.getFechaHasta()));
       }
     }
@@ -368,10 +392,12 @@ public class FacturaServiceImpl implements IFacturaService {
       builder.and(qFacturaVenta.usuario.idUsuario.eq(criteria.getIdUsuario()));
     if (criteria.getIdViajante() != null)
       builder.and(qFacturaVenta.cliente.viajante.idUsuario.eq(criteria.getIdViajante()));
-    if (criteria.getNumSerie() != null && criteria.getNumFactura() != null)
-      builder
-          .and(qFacturaVenta.numSerie.eq(criteria.getNumSerie()))
-          .and(qFacturaVenta.numFactura.eq(criteria.getNumFactura()));
+    if (criteria.getNumSerie() != null) {
+      builder.and(qFacturaVenta.numSerie.eq(criteria.getNumSerie()));
+    }
+    if (criteria.getNumFactura() != null) {
+      builder.and(qFacturaVenta.numFactura.eq(criteria.getNumFactura()));
+    }
     if (criteria.getNroPedido() != null)
       builder.and(qFacturaVenta.pedido.nroPedido.eq(criteria.getNroPedido()));
     if (criteria.getIdProducto() != null)
@@ -387,8 +413,7 @@ public class FacturaServiceImpl implements IFacturaService {
               rol -> {
                 if (rol == Rol.VIAJANTE) {
                   rsPredicate.or(
-                      qFacturaVenta.cliente.viajante.idUsuario.eq(
-                          usuarioLogueado.getIdUsuario()));
+                      qFacturaVenta.cliente.viajante.idUsuario.eq(usuarioLogueado.getIdUsuario()));
                 }
                 if (rol == Rol.COMPRADOR) {
                   Cliente clienteRelacionado =
@@ -867,7 +892,8 @@ public class FacturaServiceImpl implements IFacturaService {
   public List<RenglonFactura> getRenglonesPedidoParaFacturar(
       long idPedido, TipoDeComprobante tipoDeComprobante) {
     List<RenglonFactura> renglonesRestantes = new ArrayList<>();
-    List<RenglonPedido> renglonesPedido = pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido);
+    List<RenglonPedido> renglonesPedido =
+        pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido);
     Map<Long, RenglonFactura> renglonesDeFacturas =
         pedidoService.getRenglonesFacturadosDelPedido(idPedido);
     if (renglonesDeFacturas != null) {
