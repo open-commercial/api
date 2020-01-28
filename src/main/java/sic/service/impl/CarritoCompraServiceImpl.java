@@ -89,11 +89,11 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     if (tamanio != null) {
       pageable =
           PageRequest.of(
-              pagina, tamanio, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
+              pagina, tamanio, Sort.by(Sort.Direction.DESC, "idItemCarritoCompra"));
     } else {
       pageable =
           PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
+              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, "idItemCarritoCompra"));
     }
     Page<ItemCarritoCompra> items =
         carritoCompraRepository.findAllByUsuario(

@@ -224,15 +224,15 @@ public class ProductoServiceImpl implements IProductoService {
     if (pagina == null) pagina = 0;
     String ordenDefault = "descripcion";
     if (ordenarPor == null || sentido == null) {
-      return PageRequest.of(pagina, tamanioPagina, new Sort(Sort.Direction.ASC, ordenDefault));
+      return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.ASC, ordenDefault));
     } else {
       switch (sentido) {
         case "ASC":
-          return PageRequest.of(pagina, tamanioPagina, new Sort(Sort.Direction.ASC, ordenarPor));
+          return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.ASC, ordenarPor));
         case "DESC":
-          return PageRequest.of(pagina, tamanioPagina, new Sort(Sort.Direction.DESC, ordenarPor));
+          return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenarPor));
         default:
-          return PageRequest.of(pagina, tamanioPagina, new Sort(Sort.Direction.DESC, ordenDefault));
+          return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenDefault));
       }
     }
   }
