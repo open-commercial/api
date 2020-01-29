@@ -71,7 +71,7 @@ public class ClienteController {
   }
 
   @GetMapping("/clientes/existe-predeterminado")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public boolean existeClientePredeterminado() {
     return clienteService.existeClientePredeterminado();
   }
