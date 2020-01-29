@@ -1,9 +1,6 @@
 package sic.service.impl;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,10 +53,10 @@ public class AuthServiceImpl implements IAuthService {
   public String generarToken(long idUsuario, Aplicacion aplicacion, List<Rol> rolesDeUsuario) {
     LocalDateTime today = LocalDateTime.now();
     ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
-    ZonedDateTime zdtInOneYear = today.plusMonths(1L).atZone(ZoneId.systemDefault());
+    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
     return Jwts.builder()
         .setIssuedAt(Date.from(zdtNow.toInstant()))
-        .setExpiration(Date.from(zdtInOneYear.toInstant()))
+        .setExpiration(Date.from(zdtInOneMonth.toInstant()))
         .signWith(SignatureAlgorithm.HS512, secretkey)
         .claim("idUsuario", idUsuario)
         .claim("roles", rolesDeUsuario)
@@ -98,6 +95,16 @@ public class AuthServiceImpl implements IAuthService {
     try {
       Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token);
       return true;
+    } catch (ExpiredJwtException ejwte) {
+      long idUsuario = (int) ejwte.getClaims().get("idUsuario");
+      Aplicacion aplicacion = Aplicacion.valueOf(ejwte.getClaims().get("app").toString());
+      Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
+      TokenAcceso tokenAcceso = new TokenAcceso();
+      tokenAcceso.setAplicacion(aplicacion);
+      usuario.getTokens().remove(tokenAcceso);
+      usuarioService.actualizar(usuario);
+      throw new UnauthorizedException(
+          messageSource.getMessage("mensaje_error_token_sesion_expiro", null, Locale.getDefault()));
     } catch (JwtException ex) {
       logger.error(ex.getMessage());
       return false;
