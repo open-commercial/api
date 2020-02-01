@@ -2,15 +2,14 @@ package sic.integration;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.BeforeClass;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.context.MessageSource;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
@@ -18,28 +17,24 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
 import sic.model.Pedido;
-import sic.model.RenglonPedido;
 import sic.modelo.*;
-import sic.modelo.calculos.NuevosResultadosPedidoDTO;
-import sic.modelo.calculos.Resultados;
 import sic.modelo.criteria.*;
 import sic.modelo.dto.*;
-import sic.service.ICajaService;
-import sic.service.IClockService;
-import sic.service.IPedidoService;
-import sic.service.IProductoService;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.Charset;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -48,8 +43,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-// @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestPropertySource(locations = "/application.properties")
 class AppIntegrationTest {
 
   @Autowired private TestRestTemplate restTemplate;
@@ -90,12 +85,7 @@ class AppIntegrationTest {
     restTemplate.postForObject(apiPrefix + "/recibos/proveedores", recibo, Recibo.class);
   }
 
-  private void abrirCaja() {
-    restTemplate.postForObject(
-        apiPrefix + "/cajas/apertura/sucursales/1?saldoApertura=0", null, CajaDTO.class);
-  }
-
-  private void loguearAdministrador() {
+  private void iniciarSesionComoAdministrador() {
     this.token =
         restTemplate
             .postForEntity(
@@ -165,13 +155,13 @@ class AppIntegrationTest {
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, UsuarioDTO.class);
     credencial.setHabilitado(true);
     restTemplate.put(apiPrefix + "/usuarios", credencial);
-    this.loguearAdministrador();
+    this.iniciarSesionComoAdministrador();
     SucursalDTO sucursalDTO =
         SucursalDTO.builder()
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
             .email("support@globocorporation.com")
             .fechaInicioActividad(LocalDateTime.now())
-            .idFiscal(23154587589L)
+            .idFiscal(30712391215L)
             .ingresosBrutos(123456789L)
             .lema("Primera Sucursal")
             .nombre("FirstOfAll")
@@ -184,12 +174,17 @@ class AppIntegrationTest {
                     .codigoPostal("3400")
                     .build())
             .build();
-    restTemplate.postForObject(apiPrefix + "/sucursales", sucursalDTO, SucursalDTO.class);
+    SucursalDTO sucursalRecuperada = restTemplate.postForObject(apiPrefix + "/sucursales", sucursalDTO, SucursalDTO.class);
+    assertEquals(sucursalDTO, sucursalRecuperada);
     ConfiguracionSucursalDTO configuracionSucursalDTO =
         restTemplate.getForObject(
-            apiPrefix + "/configuraciones-sucursal/1", ConfiguracionSucursalDTO.class);
+            apiPrefix + "/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(), ConfiguracionSucursalDTO.class);
     configuracionSucursalDTO.setPuntoDeRetiro(true);
     restTemplate.put(apiPrefix + "/configuraciones-sucursal", configuracionSucursalDTO);
+    configuracionSucursalDTO =
+            restTemplate.getForObject(
+                    apiPrefix + "/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(), ConfiguracionSucursalDTO.class);
+    assertTrue(configuracionSucursalDTO.isPuntoDeRetiro());
   }
 
   @Test
@@ -197,7 +192,7 @@ class AppIntegrationTest {
       "Comprar productos al proveedor RI con factura A y verificar saldo CC, luego saldar la CC con un cheque de 3ro")
   @Order(2)
   void CompraEscenario1() {
-    this.loguearAdministrador();
+    this.iniciarSesionComoAdministrador();
     ProveedorDTO proveedorDTO =
         ProveedorDTO.builder()
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
@@ -347,7 +342,6 @@ class AppIntegrationTest {
                 + "&cantidad=3"
                 + "&bonificacion=20",
             RenglonFactura.class);
-    // assert de productos
     List<RenglonFactura> renglones = new ArrayList<>();
     renglones.add(renglonUno);
     renglones.add(renglonDos);
@@ -439,7 +433,7 @@ class AppIntegrationTest {
   @DisplayName("Actualizar CC según ND por mora, luego verificar saldo CC")
   @Order(3)
   void CompraEscenario2() {
-    this.loguearAdministrador();
+    this.iniciarSesionComoAdministrador();
     NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO =
         NuevaNotaDebitoDeReciboDTO.builder()
             .idRecibo(1L)
@@ -467,10 +461,10 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Dar de alta un Cliente y dar de alta un pedido para el mismo.")
+  @DisplayName("Dar de alta un Cliente y levantar un Pedido.")
   @Order(4)
   void AltaClienteYPedido() {
-    this.loguearAdministrador();
+    this.iniciarSesionComoAdministrador();
     UsuarioDTO credencial =
         UsuarioDTO.builder()
             .username("elenanocañete")
@@ -487,7 +481,7 @@ class AppIntegrationTest {
             .nombreFiscal("Juan Fernando Cañete")
             .nombreFantasia("Menos mal que estamos nosotros.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-            .idFiscal(1244557L)
+            .idFiscal(30703176840L)
             .email("caniete@yahoo.com.br")
             .telefono("3785663322")
             .contacto("Ramon el hermano de Juan")
@@ -524,13 +518,14 @@ class AppIntegrationTest {
     assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
   }
 
-  // cliente y pedido
   @Test
   @DisplayName(
       "Vender productos al cliente RI con factura dividida, luego saldar la CC con efectivo")
   @Order(5)
   void VentaEscenario1() {
-    this.loguearAdministrador();
+    this.iniciarSesionComoAdministrador();
+    restTemplate.postForObject(
+        apiPrefix + "/cajas/apertura/sucursales/1?saldoApertura=0", null, CajaDTO.class);
     List<RenglonFactura> renglones =
         Arrays.asList(
             restTemplate.getForObject(
@@ -686,10 +681,10 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Realizar devolución parcial de productos y verificar saldo CC") // rehacer
+  @DisplayName("Realizar devolución parcial de productos y verificar saldo CC")
   @Order(6)
   void VentaEscenario2() {
-    this.loguearAdministrador();
+    this.iniciarSesionComoAdministrador();
     BusquedaFacturaVentaCriteria criteria =
         BusquedaFacturaVentaCriteria.builder()
             .idSucursal(1L)
@@ -698,15 +693,16 @@ class AppIntegrationTest {
             .numFactura(1L)
             .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
-    List<FacturaVentaDTO> facturasRecuperadas =
+    PaginaRespuestaRest<FacturaVentaDTO> resultadoBusqueda =
         restTemplate
             .exchange(
                 apiPrefix + "/facturas/venta/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
-            .getBody()
-            .getContent();
+            .getBody();
+    assertNotNull(resultadoBusqueda);
+    List<FacturaVentaDTO> facturasRecuperadas = resultadoBusqueda.getContent();
     Long[] idsRenglonesFacutura = new Long[1];
     idsRenglonesFacutura[0] = 3L;
     BigDecimal[] cantidades = new BigDecimal[1];
@@ -742,12 +738,57 @@ class AppIntegrationTest {
         restTemplate
             .getForObject(apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class)
             .doubleValue());
+    BusquedaCajaCriteria criteriaCaja = BusquedaCajaCriteria.builder().idSucursal(1L).build();
+    HttpEntity<BusquedaCajaCriteria> requestEntityCaja = new HttpEntity(criteria);
+    PaginaRespuestaRest<CajaDTO> resultadoBusquedaCaja =
+        restTemplate
+            .exchange(
+                apiPrefix + "/cajas/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
+                new ParameterizedTypeReference<PaginaRespuestaRest<CajaDTO>>() {})
+            .getBody();
+    assertNotNull(resultadoBusquedaCaja);
+    List<CajaDTO> cajasRecuperadas = resultadoBusquedaCaja.getContent();
+    restTemplate.put(
+        apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/cierre?monto=5331.2",
+        CajaDTO.class);
+    List<MovimientoCaja> movimientoCajas =
+        Arrays.asList(
+            restTemplate.getForObject(
+                apiPrefix
+                    + "/cajas/"
+                    + cajasRecuperadas.get(0).getIdCaja()
+                    + "/movimientos?idFormaDePago=1",
+                MovimientoCaja[].class));
+    assertEquals(1, movimientoCajas.size());
+    assertEquals(
+        new BigDecimal("5331.200000000000000"),
+        restTemplate.getForObject(
+            apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/saldo-afecta-caja",
+            BigDecimal.class));
+    assertEquals(
+        new BigDecimal("5331.200000000000000"),
+        restTemplate.getForObject(
+            apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/saldo-sistema",
+            BigDecimal.class));
+    resultadoBusquedaCaja =
+        restTemplate
+            .exchange(
+                apiPrefix + "/cajas/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
+                new ParameterizedTypeReference<PaginaRespuestaRest<CajaDTO>>() {})
+            .getBody();
+    assertNotNull(resultadoBusquedaCaja);
+    cajasRecuperadas = resultadoBusquedaCaja.getContent();
+    assertEquals(EstadoCaja.CERRADA, cajasRecuperadas.get(0).getEstado());
   }
 
   @Test
-  @DisplayName("Un usuario se registra y luego da de alta un pedido.")
+  @DisplayName("Un Usuario se registra y luego da de alta un Pedido.")
   @Order(7)
-  void shouldRegistrarNuevaCuentaComoResponsableInscripto() {
+  void RegistraciónYPedidoDelNuevoCliente() {
     RegistracionClienteAndUsuarioDTO registro =
         RegistracionClienteAndUsuarioDTO.builder()
             .apellido("Stark")
@@ -760,10 +801,11 @@ class AppIntegrationTest {
             .nombreFiscal("theRedWolf")
             .build();
     restTemplate.postForObject(apiPrefix + "/registracion", registro, Void.class);
-    this.loguearAdministrador();
+    this.iniciarSesionComoAdministrador();
     UsuarioDTO usuario = restTemplate.getForObject(apiPrefix + "/usuarios/4", UsuarioDTO.class);
     assertEquals("Sansa", usuario.getNombre());
     assertEquals("Stark", usuario.getApellido());
+    // assert de usuario habilitado
     ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/2", ClienteDTO.class);
     assertEquals("theRedWolf", cliente.getNombreFiscal());
     cliente.setUbicacionFacturacion(
@@ -782,16 +824,23 @@ class AppIntegrationTest {
                 String.class)
             .getBody();
     restTemplate.postForObject(
-        apiPrefix + "/carrito-compra/usuarios/4/productos/1?cantidad=5",
+        apiPrefix
+            + "/carrito-compra/usuarios/"
+            + usuario.getIdUsuario()
+            + "/productos/1?cantidad=5",
         null,
         ItemCarritoCompra.class);
     restTemplate.postForObject(
-        apiPrefix + "/carrito-compra/usuarios/4/productos/2?cantidad=9",
+        apiPrefix
+            + "/carrito-compra/usuarios/"
+            + usuario.getIdUsuario()
+            + "/productos/2?cantidad=9",
         null,
         ItemCarritoCompra.class);
     ItemCarritoCompra item1 =
         restTemplate.getForObject(
-            apiPrefix + "/carrito-compra/usuarios/4/productos/1", ItemCarritoCompra.class);
+            apiPrefix + "/carrito-compra/usuarios/" + usuario.getIdUsuario() + "/productos/1",
+            ItemCarritoCompra.class);
     assertEquals(1L, item1.getProducto().getIdProducto().longValue());
     assertEquals(5, item1.getCantidad().doubleValue());
     assertTrue(item1.getProducto().isHayStock());
@@ -815,5 +864,92 @@ class AppIntegrationTest {
     assertEquals(
         new BigDecimal("12796.00000000000000000000000000000000000000000000000"),
         pedido.getTotalActual());
+  }
+
+  @Test
+  @DisplayName("Autorizar una factura")
+  @Order(8)
+  void AutorizarFactura() throws IOException {
+    File resource = new ClassPathResource("/certificadoAfipTest.p12").getFile();
+    byte[] certificadoAfip = new byte[(int) resource.length()];
+    FileInputStream fileInputStream = new FileInputStream(resource);
+    fileInputStream.read(certificadoAfip);
+    fileInputStream.close();
+    this.iniciarSesionComoAdministrador();
+    ConfiguracionSucursalDTO configuracionSucursalDTO =
+        restTemplate.getForObject(
+            apiPrefix + "/configuraciones-sucursal/1", ConfiguracionSucursalDTO.class);
+    configuracionSucursalDTO.setCertificadoAfip(certificadoAfip);
+    configuracionSucursalDTO.setFacturaElectronicaHabilitada(true);
+    configuracionSucursalDTO.setFirmanteCertificadoAfip("globo");
+    configuracionSucursalDTO.setPasswordCertificadoAfip("globo123");
+    configuracionSucursalDTO.setNroPuntoDeVentaAfip(2);
+    restTemplate.put(apiPrefix + "/configuraciones-sucursal", configuracionSucursalDTO);
+    BusquedaFacturaVentaCriteria criteria =
+        BusquedaFacturaVentaCriteria.builder()
+            .idSucursal(1L)
+            .tipoComprobante(TipoDeComprobante.FACTURA_A)
+            .numSerie(0L)
+            .numFactura(1L)
+            .build();
+    HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
+    PaginaRespuestaRest<FacturaVentaDTO> resultadoBusqueda =
+        restTemplate
+            .exchange(
+                apiPrefix + "/facturas/venta/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
+            .getBody();
+    assertNotNull(resultadoBusqueda);
+    List<FacturaVentaDTO> facturasRecuperadas = resultadoBusqueda.getContent();
+    restTemplate.postForObject(
+        apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getIdFactura() + "/autorizacion",
+        null,
+        FacturaVentaDTO.class);
+    FacturaVentaDTO facturaVentaDTO =
+        restTemplate.getForObject(
+            apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getIdFactura(),
+            FacturaVentaDTO.class);
+    assertNotEquals(0L, facturaVentaDTO.getCae());
+  }
+
+  @Test
+  @DisplayName("Un producto es dado de alta con una imagen agregada")
+  @Order(9)
+  void subirImagenDeProductoEnAlta() throws IOException {
+    BufferedImage bImage = ImageIO.read(getClass().getResource("/imagenProductoTest.jpeg"));
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    ImageIO.write(bImage, "jpeg", bos);
+    this.iniciarSesionComoAdministrador();
+    NuevoProductoDTO productoUno =
+        NuevoProductoDTO.builder()
+            .codigo(RandomStringUtils.random(10, false, true))
+            .descripcion("Llave termica SICA")
+            .cantidadEnSucursal(
+                new HashMap<Long, BigDecimal>() {
+                  {
+                    put(1L, BigDecimal.TEN);
+                  }
+                })
+            .bulto(BigDecimal.ONE)
+            .precioCosto(CIEN)
+            .gananciaPorcentaje(new BigDecimal("900"))
+            .gananciaNeto(new BigDecimal("900"))
+            .precioVentaPublico(new BigDecimal("1000"))
+            .ivaPorcentaje(new BigDecimal("21.0"))
+            .ivaNeto(new BigDecimal("210"))
+            .precioLista(new BigDecimal("1210"))
+            .porcentajeBonificacionPrecio(new BigDecimal("20"))
+            .nota("probando upload de imagen")
+            .publico(true)
+            .imagen(bos.toByteArray())
+            .build();
+    ProductoDTO productoConImagen =
+        restTemplate.postForObject(
+            apiPrefix + "/productos?idMedida=1&idRubro=1&idProveedor=1",
+            productoUno,
+            ProductoDTO.class);
+    assertNotNull(productoConImagen.getUrlImagen());
   }
 }

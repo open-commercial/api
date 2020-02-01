@@ -207,7 +207,8 @@ public class ProductoController {
       @RequestBody NuevoProductoDTO nuevoProductoDTO,
       @RequestParam Long idMedida,
       @RequestParam Long idRubro,
-      @RequestParam Long idProveedor) {
+      @RequestParam Long idProveedor,
+      @RequestParam(required = false) String nombreImagen) {
     Producto producto = new Producto();
     producto.setMedida(medidaService.getMedidaNoEliminadaPorId(idMedida));
     producto.setRubro(rubroService.getRubroNoEliminadoPorId(idRubro));

@@ -49,6 +49,7 @@ import org.springframework.ws.WebServiceMessage;
 import org.springframework.ws.soap.SoapMessage;
 import org.springframework.xml.transform.StringResult;
 import sic.exception.BusinessServiceException;
+import sic.exception.ServiceException;
 
 public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
 
@@ -66,21 +67,29 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
     @Value("${SIC_AFIP_ENV}")
     private String afipEnvironment;
 
-    public String getWSAA_URI() {
-        if (afipEnvironment.equals("production")) {
-            return WSAA_PRODUCTION;
-        } else {
-            return WSAA_TESTING;
-        }
+  public String getWSAA_URI() {
+    switch (afipEnvironment) {
+      case "production":
+        return WSAA_PRODUCTION;
+      case "testing":
+        return WSAA_TESTING;
+      default:
+        throw new ServiceException(
+            messageSource.getMessage("mensaje_error_env_no_soportado", null, Locale.getDefault()));
     }
+  }
 
-    public String getWSFE_URI() {
-        if (afipEnvironment.equals("production")) {
-            return WSFE_PRODUCTION;
-        } else {
-            return WSFE_TESTING;
-        }
+  public String getWSFE_URI() {
+    switch (afipEnvironment) {
+      case "production":
+        return WSFE_PRODUCTION;
+      case "testing":
+        return WSFE_TESTING;
+      default:
+        throw new ServiceException(
+            messageSource.getMessage("mensaje_error_env_no_soportado", null, Locale.getDefault()));
     }
+  }
 
     public String loginCMS(LoginCms loginCMS) throws IOException {
         Result result = new StringResult();

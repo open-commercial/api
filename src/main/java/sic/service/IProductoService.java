@@ -67,7 +67,7 @@ public interface IProductoService {
 
   void guardarCantidadesDeSucursalNueva(Sucursal sucursal);
 
-  void subirImagenProducto(long idProducto, byte[] imagen);
+  String subirImagenProducto(long idProducto, byte[] imagen);
 
   List<Producto> getMultiplesProductosPorId(List<Long> idsProductos);
 

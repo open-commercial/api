@@ -296,11 +296,10 @@ public class ProductoServiceImpl implements IProductoService {
     producto.setEliminado(false);
     this.calcularPrecioBonificado(producto);
     this.validarOperacion(TipoDeOperacion.ALTA, producto);
-    // se setea siempre en false momentaniamente
     producto.setIlimitado(false);
     producto = productoRepository.save(producto);
     logger.warn("El Producto {} se guardó correctamente.", producto);
-    if (imagen != null) this.subirImagenProducto(producto.getIdProducto(), imagen);
+    if (imagen != null) producto.setUrlImagen(this.subirImagenProducto(producto.getIdProducto(), imagen));
     return producto;
   }
 
@@ -621,13 +620,14 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public void subirImagenProducto(long idProducto, byte[] imagen) {
+  public String subirImagenProducto(long idProducto, byte[] imagen) {
     if (imagen.length > TAMANIO_MAXIMO_IMAGEN)
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_error_tamanio_no_valido", null, Locale.getDefault()));
     String urlImagen =
         photoVideoUploader.subirImagen(Producto.class.getSimpleName() + idProducto, imagen);
     productoRepository.actualizarUrlImagen(idProducto, urlImagen);
+    return urlImagen;
   }
 
   @Override

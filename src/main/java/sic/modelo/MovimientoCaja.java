@@ -4,11 +4,15 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import sic.controller.Views;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(of = {"idMovimiento", "tipoComprobante", "fecha"})
 @JsonView(Views.Comprador.class)
 public class MovimientoCaja implements Comparable<MovimientoCaja> {

@@ -14,7 +14,7 @@ public class SucursalBuilder {
   private String nombre = "Globo Corporation";
   private String lema = "Enjoy the life";
   private CategoriaIVA categoriaIVA = CategoriaIVA.RESPONSABLE_INSCRIPTO;
-  private Long idFiscal = 23154587589L;
+  private Long idFiscal = 20311023188L;
   private Long ingresosBrutos = 123456789L;
   private LocalDateTime fechaInicioActividad = LocalDateTime.of(1987, Month.FEBRUARY, 10, 00, 00);
   private String email = "support@globocorporation.com";

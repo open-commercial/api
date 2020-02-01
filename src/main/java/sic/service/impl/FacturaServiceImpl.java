@@ -1315,7 +1315,12 @@ public class FacturaServiceImpl implements IFacturaService {
     Page<FacturaVenta> facturaAnterior =
         facturaVentaRepository.findAll(
             builder, PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "fecha")));
-    return facturaAnterior.getContent().get(0).getCae() == 0L;
+    if (facturaAnterior.getTotalElements() > 0L) {
+      return facturaAnterior.getContent().get(0).getCae() == 0L;
+    } else {
+      return false;
+
+    }
   }
 
   @Override
