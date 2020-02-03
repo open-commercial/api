@@ -16,10 +16,4 @@ VALUES ('test',false,'test@test.com',true,1,'Usuario Test','098f6bcd4621d373cade
 INSERT INTO rol (id_usuario, nombre)
 VALUES (1,'ADMINISTRADOR');
 
-INSERT INTO medida(eliminada, nombre)
-VALUES (false,'Metro'),(false,'Kilo');
-
-INSERT INTO rubro(eliminado, nombre)
-VALUES (false,'Ferreteria');
-
 

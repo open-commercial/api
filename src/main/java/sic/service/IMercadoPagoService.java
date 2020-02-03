@@ -8,7 +8,7 @@ import javax.validation.Valid;
 
 public interface IMercadoPagoService {
 
-  void crearNuevoPago(@Valid NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Usuario usuario) throws MPException;
+  String crearNuevoPago(@Valid NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Usuario usuario) throws MPException;
 
   void crearComprobantePorNotificacion(String idPayment);
 

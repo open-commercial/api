@@ -2,6 +2,7 @@ package sic.integration;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +20,13 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
+import sic.model.NuevoTokenCard;
 import sic.model.Pedido;
+import sic.model.TokenCard;
 import sic.modelo.*;
 import sic.modelo.criteria.*;
 import sic.modelo.dto.*;
@@ -50,6 +55,12 @@ class AppIntegrationTest {
   @Autowired private TestRestTemplate restTemplate;
   private String token;
   private final String apiPrefix = "/api/v1";
+
+  @Value("${SIC_MERCADOPAGO_PUBLIC_KEY}")
+  private String mpPublicKey;
+
+  @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
+  private String mpAccesToken;
 
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
@@ -213,6 +224,14 @@ class AppIntegrationTest {
                     .build())
             .build();
     restTemplate.postForObject(apiPrefix + "/proveedores", proveedorDTO, ProveedorDTO.class);
+    RubroDTO rubroDTO = RubroDTO.builder()
+            .nombre("Ferreteria")
+            .build();
+    RubroDTO rubro = restTemplate.postForObject(apiPrefix + "/rubros", rubroDTO, RubroDTO.class);
+    MedidaDTO medidaDTO = MedidaDTO.builder()
+            .nombre("Metro")
+            .build();
+    MedidaDTO medida = restTemplate.postForObject(apiPrefix + "/medidas", medidaDTO, MedidaDTO.class);
     NuevoProductoDTO productoUno =
         NuevoProductoDTO.builder()
             .codigo(RandomStringUtils.random(10, false, true))
@@ -258,10 +277,8 @@ class AppIntegrationTest {
             .build();
     SucursalDTO sucursal =
         restTemplate.getForObject(apiPrefix + "/sucursales/1", SucursalDTO.class);
-    RubroDTO rubro = restTemplate.getForObject(apiPrefix + "/rubros/1", RubroDTO.class);
     ProveedorDTO proveedor =
         restTemplate.getForObject(apiPrefix + "/proveedores/1", ProveedorDTO.class);
-    Medida medida = restTemplate.getForObject(apiPrefix + "/medidas/1", Medida.class);
     ProductoDTO productoUnoRecuperado =
         restTemplate.postForObject(
             apiPrefix
@@ -805,7 +822,7 @@ class AppIntegrationTest {
     UsuarioDTO usuario = restTemplate.getForObject(apiPrefix + "/usuarios/4", UsuarioDTO.class);
     assertEquals("Sansa", usuario.getNombre());
     assertEquals("Stark", usuario.getApellido());
-    // assert de usuario habilitado
+    assertTrue(usuario.isHabilitado());
     ClienteDTO cliente = restTemplate.getForObject(apiPrefix + "/clientes/2", ClienteDTO.class);
     assertEquals("theRedWolf", cliente.getNombreFiscal());
     cliente.setUbicacionFacturacion(
@@ -951,5 +968,64 @@ class AppIntegrationTest {
             productoUno,
             ProductoDTO.class);
     assertNotNull(productoConImagen.getUrlImagen());
+  }
+
+  @Test
+  @DisplayName("Un pago es dado de alta por pago MercadoPAgo")
+  @Order(10)
+  @Ignore
+  void agregarPagoMercadoPago() {
+    this.iniciarSesionComoAdministrador();
+    UsuarioDTO usuario = restTemplate.getForObject(apiPrefix + "/usuarios/4", UsuarioDTO.class);
+    this.token =
+            restTemplate
+                    .postForEntity(
+                            apiPrefix + "/login",
+                            new Credencial(usuario.getUsername(), "caraDeMala", Aplicacion.SIC_OPS_WEB),
+                            String.class)
+                    .getBody();
+    NuevoTokenCard nuevoTokenCard =
+        NuevoTokenCard.builder()
+            .email("correoelectronicoparatesting@gmail.com")
+            .cardNumber("1452856496235488")
+            .securityCode("456")
+            .cardExpirationMonth(6)
+            .cardExpirationYear(2030)
+            .cardHoldName("Elon Musk")
+            .docType("dni")
+            .docNumber(12455698L)
+            .installments(1)
+            .build();
+    TokenCard tokenCard =
+        restTemplate.postForObject(
+            "https://api.mercadopago.com/v1/card_tokens?public_key=" + mpPublicKey,
+            nuevoTokenCard,
+            TokenCard.class);
+    NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO =
+        NuevoPagoMercadoPagoDTO.builder()
+            .token(tokenCard.getId())
+            .paymentMethodId("visa")
+            .installments(1)
+            .idCliente(1L)
+            .idSucursal(1L)
+            .monto(new Float("2000"))
+            .build();
+    String paymentId =
+        restTemplate.postForObject(
+            apiPrefix + "/pagos/mercado-pago", nuevoPagoMercadoPagoDTO, String.class);
+    restTemplate.postForObject(apiPrefix + "/pagos/notificacion?data.id=" + paymentId + "&type=payment", null, null);
+    this.iniciarSesionComoAdministrador();
+    BusquedaReciboCriteria criteria = BusquedaReciboCriteria.builder().build();
+    HttpEntity<BusquedaReciboCriteria> requestEntity = new HttpEntity(criteria);
+    PaginaRespuestaRest<ReciboDTO> resultadoBusqueda =
+            restTemplate
+                    .exchange(
+                            apiPrefix + "/recibos/busqueda/criteria",
+                            HttpMethod.POST,
+                            requestEntity,
+                            new ParameterizedTypeReference<PaginaRespuestaRest<ReciboDTO>>() {})
+                    .getBody();
+    assertNotNull(resultadoBusqueda);
+    List<ReciboDTO> recibosRecuperados = resultadoBusqueda.getContent();
   }
 }
