@@ -580,7 +580,7 @@ public class NotaServiceImpl implements INotaService {
         throw new BusinessServiceException(
             messageSource.getMessage("mensaje_nota_fecha_incorrecta", null, Locale.getDefault()));
       }
-      if (nota.getFecha().isAfter(LocalDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(00))) {
+      if (nota.getFecha().isAfter(LocalDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(59))) {
         throw new BusinessServiceException(
             messageSource.getMessage("mensaje_nota_fecha_incorrecta", null, Locale.getDefault()));
       }
