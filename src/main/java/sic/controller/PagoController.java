@@ -36,18 +36,21 @@ public class PagoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public void crearPago(
+  public String crearPago(
       @RequestBody NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    String idPago = null;
     try {
-      pagoMercadoPagoService.crearNuevoPago(
-          nuevoPagoMercadoPagoDTO,
-          usuarioService.getUsuarioNoEliminadoPorId(
-              ((Integer) claims.get("idUsuario")).longValue()));
+      idPago =
+          pagoMercadoPagoService.crearNuevoPago(
+              nuevoPagoMercadoPagoDTO,
+              usuarioService.getUsuarioNoEliminadoPorId(
+                  ((Integer) claims.get("idUsuario")).longValue()));
     } catch (MPException ex) {
       pagoMercadoPagoService.logExceptionMercadoPago(ex);
     }
+    return idPago;
   }
 
   @PostMapping("/pagos/notificacion")

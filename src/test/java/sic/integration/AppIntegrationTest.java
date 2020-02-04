@@ -1,5 +1,6 @@
 package sic.integration;
 
+import com.google.gson.JsonObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Ignore;
@@ -971,7 +972,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Un pago es dado de alta por pago MercadoPAgo")
+  @DisplayName("Un pago es dado de alta por pago MercadoPago")
   @Order(10)
   @Ignore
   void agregarPagoMercadoPago() {
@@ -984,15 +985,21 @@ class AppIntegrationTest {
                             new Credencial(usuario.getUsername(), "caraDeMala", Aplicacion.SIC_OPS_WEB),
                             String.class)
                     .getBody();
+ /*   List<LinkedHashMap<String, LinkedHashMap<String, String>>> installments = restTemplate.getForObject(
+        "https://api.mercadopago.com/v1/payment_methods/installments?public_key=" + mpPublicKey
+            + "&bin=450995",
+        List.class);
+    assertFalse(installments.isEmpty());
+    assertEquals(1, installments.size());
     NuevoTokenCard nuevoTokenCard =
         NuevoTokenCard.builder()
             .email("correoelectronicoparatesting@gmail.com")
-            .cardNumber("1452856496235488")
-            .securityCode("456")
-            .cardExpirationMonth(6)
-            .cardExpirationYear(2030)
-            .cardHoldName("Elon Musk")
-            .docType("dni")
+            .cardNumber("4170068810108020")
+            .securityCode("132")
+            .cardExpirationMonth(11)
+            .cardExpirationYear(2025)
+            .cardHoldName("APRO")
+            .docType("DNI")
             .docNumber(12455698L)
             .installments(1)
             .build();
@@ -1000,11 +1007,12 @@ class AppIntegrationTest {
         restTemplate.postForObject(
             "https://api.mercadopago.com/v1/card_tokens?public_key=" + mpPublicKey,
             nuevoTokenCard,
-            TokenCard.class);
+            TokenCard.class);*/
     NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO =
         NuevoPagoMercadoPagoDTO.builder()
-            .token(tokenCard.getId())
-            .paymentMethodId("visa")
+            //.token(tokenCard.getId())
+            .paymentMethodId("pagofacil")
+            //.issuerId("1")
             .installments(1)
             .idCliente(1L)
             .idSucursal(1L)
@@ -1013,7 +1021,9 @@ class AppIntegrationTest {
     String paymentId =
         restTemplate.postForObject(
             apiPrefix + "/pagos/mercado-pago", nuevoPagoMercadoPagoDTO, String.class);
-    restTemplate.postForObject(apiPrefix + "/pagos/notificacion?data.id=" + paymentId + "&type=payment", null, null);
+    restTemplate.postForObject(apiPrefix + "/pagos/notificacion?data.id=" + paymentId + "&type=payment", null, void.class);
+    assertNotNull(paymentId);
+    /*
     this.iniciarSesionComoAdministrador();
     BusquedaReciboCriteria criteria = BusquedaReciboCriteria.builder().build();
     HttpEntity<BusquedaReciboCriteria> requestEntity = new HttpEntity(criteria);
@@ -1026,6 +1036,6 @@ class AppIntegrationTest {
                             new ParameterizedTypeReference<PaginaRespuestaRest<ReciboDTO>>() {})
                     .getBody();
     assertNotNull(resultadoBusqueda);
-    List<ReciboDTO> recibosRecuperados = resultadoBusqueda.getContent();
+    List<ReciboDTO> recibosRecuperados = resultadoBusqueda.getContent();*/
   }
 }
