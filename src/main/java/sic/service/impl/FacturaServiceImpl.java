@@ -958,6 +958,9 @@ public class FacturaServiceImpl implements IFacturaService {
             movimiento, tipoDeComprobante, producto, nuevoRenglon.getBonificacionPorcentaje()));
     nuevoRenglon.setGananciaPorcentaje(producto.getGananciaPorcentaje());
     nuevoRenglon.setGananciaNeto(producto.getGananciaNeto());
+    nuevoRenglon.setImporteAnterior(
+            CalculosComprobante.calcularImporte(
+                    nuevoRenglon.getCantidad(), producto.getPrecioLista(), BigDecimal.ZERO));
     nuevoRenglon.setImporte(
         CalculosComprobante.calcularImporte(
             cantidad, nuevoRenglon.getPrecioUnitario(), nuevoRenglon.getBonificacionNeta()));
