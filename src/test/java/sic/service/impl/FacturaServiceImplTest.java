@@ -44,7 +44,7 @@ class FacturaServiceImplTest {
     expResult[1] = TipoDeComprobante.FACTURA_B;
     expResult[2] = TipoDeComprobante.FACTURA_X;
     expResult[3] = TipoDeComprobante.PRESUPUESTO;
-    TipoDeComprobante[] result = facturaCompraService.getTipoFacturaCompra(sucursal, proveedor);
+    TipoDeComprobante[] result = facturaCompraService.getTiposDeComprobanteCompra(sucursal, proveedor);
     assertArrayEquals(expResult, result);
   }
 
@@ -58,7 +58,7 @@ class FacturaServiceImplTest {
     expResult[0] = TipoDeComprobante.FACTURA_C;
     expResult[1] = TipoDeComprobante.FACTURA_X;
     expResult[2] = TipoDeComprobante.PRESUPUESTO;
-    TipoDeComprobante[] result = facturaCompraService.getTipoFacturaCompra(sucursal, proveedor);
+    TipoDeComprobante[] result = facturaCompraService.getTiposDeComprobanteCompra(sucursal, proveedor);
     assertArrayEquals(expResult, result);
   }
 
@@ -72,7 +72,7 @@ class FacturaServiceImplTest {
     expResult[0] = TipoDeComprobante.FACTURA_B;
     expResult[1] = TipoDeComprobante.FACTURA_X;
     expResult[2] = TipoDeComprobante.PRESUPUESTO;
-    TipoDeComprobante[] result = facturaCompraService.getTipoFacturaCompra(sucursal, proveedor);
+    TipoDeComprobante[] result = facturaCompraService.getTiposDeComprobanteCompra(sucursal, proveedor);
     assertArrayEquals(expResult, result);
   }
 
@@ -86,7 +86,7 @@ class FacturaServiceImplTest {
     expResult[0] = TipoDeComprobante.FACTURA_C;
     expResult[1] = TipoDeComprobante.FACTURA_X;
     expResult[2] = TipoDeComprobante.PRESUPUESTO;
-    TipoDeComprobante[] result = facturaCompraService.getTipoFacturaCompra(sucursal, proveedor);
+    TipoDeComprobante[] result = facturaCompraService.getTiposDeComprobanteCompra(sucursal, proveedor);
     assertArrayEquals(expResult, result);
   }
 
@@ -99,7 +99,7 @@ class FacturaServiceImplTest {
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_X, TipoDeComprobante.PRESUPUESTO
     };
-    TipoDeComprobante[] result = facturaVentaService.getTipoFacturaVenta(sucursal, cliente);
+    TipoDeComprobante[] result = facturaVentaService.getTiposDeComprobanteVenta(sucursal, cliente);
     assertArrayEquals(expResult, result);
   }
 
@@ -112,7 +112,7 @@ class FacturaServiceImplTest {
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_X, TipoDeComprobante.PRESUPUESTO
     };
-    TipoDeComprobante[] result = facturaVentaService.getTipoFacturaVenta(sucursal, cliente);
+    TipoDeComprobante[] result = facturaVentaService.getTiposDeComprobanteVenta(sucursal, cliente);
     assertArrayEquals(expResult, result);
   }
 
@@ -125,7 +125,7 @@ class FacturaServiceImplTest {
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_C, TipoDeComprobante.FACTURA_X, TipoDeComprobante.PRESUPUESTO
     };
-    TipoDeComprobante[] result = facturaVentaService.getTipoFacturaVenta(sucursal, cliente);
+    TipoDeComprobante[] result = facturaVentaService.getTiposDeComprobanteVenta(sucursal, cliente);
     assertArrayEquals(expResult, result);
   }
 
@@ -138,7 +138,7 @@ class FacturaServiceImplTest {
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_C, TipoDeComprobante.FACTURA_X, TipoDeComprobante.PRESUPUESTO
     };
-    TipoDeComprobante[] result = facturaVentaService.getTipoFacturaVenta(sucursal, cliente);
+    TipoDeComprobante[] result = facturaVentaService.getTiposDeComprobanteVenta(sucursal, cliente);
     assertArrayEquals(expResult, result);
   }
 
@@ -153,7 +153,7 @@ class FacturaServiceImplTest {
       TipoDeComprobante.FACTURA_Y,
       TipoDeComprobante.PRESUPUESTO
     };
-    TipoDeComprobante[] result = facturaServiceImpl.getTiposFacturaSegunSucursal(sucursal);
+    TipoDeComprobante[] result = facturaServiceImpl.getTiposDeComprobanteSegunSucursal(sucursal);
     assertArrayEquals(expResult, result);
   }
 
@@ -167,7 +167,7 @@ class FacturaServiceImplTest {
       TipoDeComprobante.FACTURA_Y,
       TipoDeComprobante.PRESUPUESTO
     };
-    TipoDeComprobante[] result = facturaServiceImpl.getTiposFacturaSegunSucursal(sucursal);
+    TipoDeComprobante[] result = facturaServiceImpl.getTiposDeComprobanteSegunSucursal(sucursal);
     assertArrayEquals(expResult, result);
   }
 

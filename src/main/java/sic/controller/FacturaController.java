@@ -70,7 +70,7 @@ public class FacturaController {
     Rol.COMPRADOR
   })
   public TipoDeComprobante[] getTiposFacturaSegunSucursal(@PathVariable long idSucursal) {
-    return facturaService.getTiposFacturaSegunSucursal(
+    return facturaService.getTiposDeComprobanteSegunSucursal(
         sucursalService.getSucursalPorId(idSucursal));
   }
 

@@ -13,7 +13,7 @@ import java.util.List;
 
 public interface IFacturaCompraService {
 
-    TipoDeComprobante[] getTipoFacturaCompra(Sucursal sucursal, Proveedor proveedor);
+    TipoDeComprobante[] getTiposDeComprobanteCompra(Sucursal sucursal, Proveedor proveedor);
 
     Page<FacturaCompra> buscarFacturaCompra(BusquedaFacturaCompraCriteria criteria);
 

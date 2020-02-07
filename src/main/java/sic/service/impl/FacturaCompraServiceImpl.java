@@ -15,6 +15,7 @@ import sic.repository.FacturaCompraRepository;
 import sic.service.ICuentaCorrienteService;
 import sic.service.IFacturaCompraService;
 import sic.service.IFacturaService;
+import sic.service.IProductoService;
 
 import javax.validation.Valid;
 import java.math.BigDecimal;
@@ -29,6 +30,7 @@ public class FacturaCompraServiceImpl implements IFacturaCompraService {
   private IFacturaService facturaService;
   private FacturaCompraRepository facturaCompraRepository;
   private ICuentaCorrienteService cuentaCorrienteService;
+  private IProductoService productoService;
   private final MessageSource messageSource;
 
   @Autowired
@@ -37,15 +39,17 @@ public class FacturaCompraServiceImpl implements IFacturaCompraService {
       IFacturaService facturaService,
       FacturaCompraRepository facturaCompraRepository,
       ICuentaCorrienteService cuentaCorrienteService,
+      IProductoService productoService,
       MessageSource messageSource) {
     this.facturaService = facturaService;
     this.facturaCompraRepository = facturaCompraRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
+    this.productoService = productoService;
     this.messageSource = messageSource;
   }
 
   @Override
-  public TipoDeComprobante[] getTipoFacturaCompra(Sucursal sucursal, Proveedor proveedor) {
+  public TipoDeComprobante[] getTiposDeComprobanteCompra(Sucursal sucursal, Proveedor proveedor) {
     if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())) {
       if (CategoriaIVA.discriminaIVA(proveedor.getCategoriaIVA())) {
         TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[4];
@@ -176,7 +180,12 @@ public class FacturaCompraServiceImpl implements IFacturaCompraService {
     facturas.forEach(
         facturaCompra -> {
           facturaService.calcularValoresFactura(facturaCompra);
-          facturaService.actualizarStock(facturaCompra, Movimiento.COMPRA);
+          productoService.actualizarStock(
+              facturaService.getIdsProductosYCantidades(facturaCompra),
+              facturaCompra.getIdSucursal(),
+              TipoDeOperacion.ALTA,
+              Movimiento.COMPRA,
+              facturaCompra.getTipoComprobante());
         });
   }
 }

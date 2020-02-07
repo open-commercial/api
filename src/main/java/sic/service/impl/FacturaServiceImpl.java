@@ -42,7 +42,7 @@ public class FacturaServiceImpl implements IFacturaService {
   @Autowired
   @Lazy
   public FacturaServiceImpl(
-      FacturaRepository facturaRepository,
+      FacturaRepository<Factura> facturaRepository,
       RenglonFacturaRepository renglonFacturaRepository,
       IProductoService productoService,
       IPedidoService pedidoService,
@@ -104,7 +104,7 @@ public class FacturaServiceImpl implements IFacturaService {
   }
 
   @Override
-  public TipoDeComprobante[] getTiposFacturaSegunSucursal(Sucursal sucursal) {
+  public TipoDeComprobante[] getTiposDeComprobanteSegunSucursal(Sucursal sucursal) {
     if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())) {
       TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[5];
       tiposPermitidos[0] = TipoDeComprobante.FACTURA_A;
@@ -220,16 +220,7 @@ public class FacturaServiceImpl implements IFacturaService {
   }
 
   @Override
-  public void actualizarStock(Factura factura, Movimiento movimiento) {
-    productoService.actualizarStock(
-        this.getIdsProductosYCantidades(factura),
-        factura.getIdSucursal(),
-        TipoDeOperacion.ALTA,
-        movimiento,
-        factura.getTipoComprobante());
-  }
-
-  private Map<Long, BigDecimal> getIdsProductosYCantidades(Factura factura) {
+  public Map<Long, BigDecimal> getIdsProductosYCantidades(Factura factura) {
     Map<Long, BigDecimal> idsYCantidades = new HashMap<>();
     factura.getRenglones().forEach(r -> idsYCantidades.put(r.getIdProductoItem(), r.getCantidad()));
     return idsYCantidades;
@@ -457,6 +448,13 @@ public class FacturaServiceImpl implements IFacturaService {
         || nuevosResultadosComprobante.getTipoDeComprobante() == TipoDeComprobante.FACTURA_B
         // || nuevosResultadosComprobante.getTipoDeComprobante() == TipoDeComprobante.FACTURA_Y
         || nuevosResultadosComprobante.getTipoDeComprobante() == TipoDeComprobante.PRESUPUESTO) {
+      int longitudDeArraysValido = nuevosResultadosComprobante.getCantidades().length;
+      if (nuevosResultadosComprobante.getIvaNetos().length != longitudDeArraysValido
+          || nuevosResultadosComprobante.getIvaPorcentajes().length != longitudDeArraysValido) {
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_factura_renglones_parametros_no_validos", null, Locale.getDefault()));
+      }
       resultados.setIva21Neto(
           this.calcularIvaNetoFactura(
               nuevosResultadosComprobante.getTipoDeComprobante(),

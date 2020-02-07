@@ -49,11 +49,9 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IConfiguracionSucursalService configuracionSucursalService;
   private final IFacturaService facturaService;
+  private final IProductoService productoService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
-  private static final BigDecimal IVA_21 = new BigDecimal("21");
-  private static final BigDecimal IVA_105 = new BigDecimal("10.5");
-  private static final BigDecimal CIEN = new BigDecimal("100");
 
   @Autowired
   @Lazy
@@ -68,6 +66,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       ICuentaCorrienteService cuentaCorrienteService,
       IConfiguracionSucursalService configuracionSucursalService,
       IFacturaService facturaService,
+      IProductoService productoService,
       MessageSource messageSource) {
     this.facturaVentaRepository = facturaVentaRepository;
     this.reciboService = reciboService;
@@ -79,11 +78,12 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.configuracionSucursalService = configuracionSucursalService;
     this.facturaService = facturaService;
+    this.productoService = productoService;
     this.messageSource = messageSource;
   }
 
   @Override
-  public TipoDeComprobante[] getTipoFacturaVenta(Sucursal sucursal, Cliente cliente) {
+  public TipoDeComprobante[] getTiposDeComprobanteVenta(Sucursal sucursal, Cliente cliente) {
     if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())) {
       if (CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
         TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
@@ -334,7 +334,12 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     facturas.forEach(
         facturaVenta -> {
           facturaService.calcularValoresFactura(facturaVenta);
-          facturaService.actualizarStock(facturaVenta, Movimiento.VENTA);
+          productoService.actualizarStock(
+              facturaService.getIdsProductosYCantidades(facturaVenta),
+              facturaVenta.getIdSucursal(),
+              TipoDeOperacion.ALTA,
+              Movimiento.VENTA,
+              facturaVenta.getTipoComprobante());
         });
   }
 

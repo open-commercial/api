@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface IFacturaVentaService {
 
-  TipoDeComprobante[] getTipoFacturaVenta(Sucursal sucursal, Cliente cliente);
+  TipoDeComprobante[] getTiposDeComprobanteVenta(Sucursal sucursal, Cliente cliente);
 
   List<Factura> getFacturasDelPedido(Long idPedido);
 

@@ -203,7 +203,7 @@ public class FacturaVentaController {
     if (rolesDeUsuario.contains(Rol.ADMINISTRADOR)
         || rolesDeUsuario.contains(Rol.ENCARGADO)
         || rolesDeUsuario.contains(Rol.VENDEDOR)) {
-      return facturaVentaService.getTipoFacturaVenta(
+      return facturaVentaService.getTiposDeComprobanteVenta(
           sucursalService.getSucursalPorId(idSucursal),
           clienteService.getClienteNoEliminadoPorId(idCliente));
     } else if (rolesDeUsuario.contains(Rol.VIAJANTE) || rolesDeUsuario.contains(Rol.COMPRADOR)) {

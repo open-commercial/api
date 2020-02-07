@@ -108,7 +108,7 @@ public class FacturaCompraController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public TipoDeComprobante[] getTipoFacturaCompra(
       @PathVariable long idSucursal, @PathVariable long idProveedor) {
-    return facturaCompraService.getTipoFacturaCompra(
+    return facturaCompraService.getTiposDeComprobanteCompra(
         sucursalService.getSucursalPorId(idSucursal),
         proveedorService.getProveedorNoEliminadoPorId(idProveedor));
   }

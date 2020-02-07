@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import org.springframework.data.domain.Pageable;
 import sic.modelo.*;
 import java.util.List;
+import java.util.Map;
+
 import sic.modelo.dto.NuevosResultadosComprobanteDTO;
 import sic.modelo.Resultados;
 
@@ -13,7 +15,7 @@ public interface IFacturaService {
 
   void eliminarFactura(long idFactura);
 
-  TipoDeComprobante[] getTiposFacturaSegunSucursal(Sucursal sucursal);
+  TipoDeComprobante[] getTiposDeComprobanteSegunSucursal(Sucursal sucursal);
 
   List<RenglonFactura> getRenglonesDeLaFactura(Long idFactura);
 
@@ -59,7 +61,7 @@ public interface IFacturaService {
 
   void calcularValoresFactura(Factura factura);
 
-  void actualizarStock(Factura factura, Movimiento movimiento);
-
   Factura procesarFactura(Factura factura);
+
+  Map<Long, BigDecimal> getIdsProductosYCantidades(Factura factura);
 }
