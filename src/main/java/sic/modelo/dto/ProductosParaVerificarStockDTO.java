@@ -1,4 +1,4 @@
-package sic.modelo;
+package sic.modelo.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

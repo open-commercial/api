@@ -18,6 +18,7 @@ import sic.modelo.criteria.BusquedaProductoCriteria;
 import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductoDTO;
 import sic.modelo.dto.ProductosParaActualizarDTO;
+import sic.modelo.dto.ProductosParaVerificarStockDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 

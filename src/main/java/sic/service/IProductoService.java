@@ -9,6 +9,7 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 import sic.modelo.criteria.BusquedaProductoCriteria;
 import sic.modelo.dto.ProductosParaActualizarDTO;
+import sic.modelo.dto.ProductosParaVerificarStockDTO;
 
 import javax.validation.Valid;
 

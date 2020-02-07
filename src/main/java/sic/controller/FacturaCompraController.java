@@ -20,6 +20,7 @@ import java.util.List;
 @RequestMapping("/api/v1")
 public class FacturaCompraController {
 
+  private final IFacturaCompraService facturaCompraService;
   private final IFacturaService facturaService;
   private final ISucursalService sucursalService;
   private final IProveedorService proveedorService;
@@ -29,12 +30,14 @@ public class FacturaCompraController {
 
   @Autowired
   public FacturaCompraController(
+      IFacturaCompraService facturaCompraService,
       IFacturaService facturaService,
       ISucursalService sucursalService,
       IProveedorService proveedorService,
       IUsuarioService usuarioService,
       ITransportistaService transportistaService,
       IAuthService authService) {
+    this.facturaCompraService = facturaCompraService;
     this.facturaService = facturaService;
     this.sucursalService = sucursalService;
     this.proveedorService = proveedorService;
@@ -91,21 +94,21 @@ public class FacturaCompraController {
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     List<FacturaCompra> facturas = new ArrayList<>();
     facturas.add(fc);
-    return facturaService.guardar(facturas);
+    return facturaCompraService.guardar(facturas);
   }
 
   @PostMapping("/facturas/compras/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Page<FacturaCompra> buscarFacturaCompra(
       @RequestBody BusquedaFacturaCompraCriteria criteria) {
-    return facturaService.buscarFacturaCompra(criteria);
+    return facturaCompraService.buscarFacturaCompra(criteria);
   }
 
   @GetMapping("/facturas/compras/tipos/sucursales/{idSucursal}/proveedores/{idProveedor}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public TipoDeComprobante[] getTipoFacturaCompra(
       @PathVariable long idSucursal, @PathVariable long idProveedor) {
-    return facturaService.getTipoFacturaCompra(
+    return facturaCompraService.getTipoFacturaCompra(
         sucursalService.getSucursalPorId(idSucursal),
         proveedorService.getProveedorNoEliminadoPorId(idProveedor));
   }
@@ -127,12 +130,12 @@ public class FacturaCompraController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public BigDecimal calcularTotalFacturadoCompra(
       @RequestBody BusquedaFacturaCompraCriteria criteria) {
-    return facturaService.calcularTotalFacturadoCompra(criteria);
+    return facturaCompraService.calcularTotalFacturadoCompra(criteria);
   }
 
   @PostMapping("/facturas/compras/total-iva/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public BigDecimal calcularTotalIvaCompra(@RequestBody BusquedaFacturaCompraCriteria criteria) {
-    return facturaService.calcularIvaCompra(criteria);
+    return facturaCompraService.calcularIvaCompra(criteria);
   }
 }

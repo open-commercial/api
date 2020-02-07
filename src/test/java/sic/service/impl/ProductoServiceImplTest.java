@@ -1,20 +1,14 @@
 package sic.service.impl;
 
 import java.math.BigDecimal;
-import java.util.Map;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.modelo.Producto;
-import sic.modelo.ProductosParaVerificarStockDTO;
 import sic.repository.ProductoRepository;
 
 @ExtendWith(SpringExtension.class)

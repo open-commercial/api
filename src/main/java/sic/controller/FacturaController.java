@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
-import sic.modelo.calculos.NuevosResultadosComprobanteDTO;
-import sic.modelo.calculos.Resultados;
+import sic.modelo.dto.NuevosResultadosComprobanteDTO;
+import sic.modelo.Resultados;
 import sic.service.*;
 
 @RestController

@@ -1,30 +1,17 @@
 package sic.service;
 
 import java.math.BigDecimal;
-
+import org.springframework.data.domain.Pageable;
 import sic.modelo.*;
-
 import java.util.List;
-
-import org.springframework.data.domain.Page;
-import sic.modelo.calculos.NuevosResultadosComprobanteDTO;
-import sic.modelo.calculos.Resultados;
-import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
-import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
-
-import javax.validation.Valid;
+import sic.modelo.dto.NuevosResultadosComprobanteDTO;
+import sic.modelo.Resultados;
 
 public interface IFacturaService {
 
   Factura getFacturaNoEliminadaPorId(long idFactura);
 
   void eliminarFactura(long idFactura);
-
-  List<Factura> getFacturasDelPedido(Long idPedido);
-
-  TipoDeComprobante[] getTipoFacturaCompra(Sucursal sucursal, Proveedor proveedor);
-
-  TipoDeComprobante[] getTipoFacturaVenta(Sucursal sucursal, Cliente cliente);
 
   TipoDeComprobante[] getTiposFacturaSegunSucursal(Sucursal sucursal);
 
@@ -33,16 +20,6 @@ public interface IFacturaService {
   List<RenglonFactura> getRenglonesDeLaFacturaModificadosParaCredito(Long idFactura);
 
   RenglonFactura getRenglonFactura(Long idRenglonFactura);
-
-  Page<FacturaCompra> buscarFacturaCompra(BusquedaFacturaCompraCriteria criteria);
-
-  Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
-
-  List<FacturaVenta> guardar(@Valid List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos);
-
-  List<FacturaCompra> guardar(@Valid List<FacturaCompra> facturas);
-
-  FacturaVenta autorizarFacturaVenta(FacturaVenta fv);
 
   BigDecimal calcularIvaNetoFactura(
       TipoDeComprobante tipo,
@@ -53,41 +30,36 @@ public interface IFacturaService {
       BigDecimal porcentajeDescuento,
       BigDecimal porcentajeRecargo);
 
-  BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
+  BigDecimal calcularIVANetoRenglon(
+      Movimiento movimiento,
+      TipoDeComprobante tipo,
+      Producto producto,
+      BigDecimal descuentoPorcentaje);
 
-  BigDecimal calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria);
+  BigDecimal calcularPrecioUnitario(
+      Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto);
 
-  BigDecimal calcularIvaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
-
-  BigDecimal calcularIvaCompra(BusquedaFacturaCompraCriteria criteria);
-
-  BigDecimal calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
-
-  BigDecimal calcularIVANetoRenglon(Movimiento movimiento, TipoDeComprobante tipo,
-                                    Producto producto, BigDecimal descuentoPorcentaje);
-
-  BigDecimal calcularPrecioUnitario(Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto);
-
-  long calcularNumeroFacturaVenta(TipoDeComprobante tipoDeComprobante, long serie, long idSucursal);
-
-  byte[] getReporteFacturaVenta(Factura factura);
-
-  List<FacturaVenta> dividirFactura(FacturaVenta factura, int[] indices);
-
-  List<RenglonFactura> getRenglonesPedidoParaFacturar(long idPedido, TipoDeComprobante tipoDeComprobante);
-
-  boolean pedidoTotalmenteFacturado(Pedido pedido);
+  RenglonFactura calcularRenglon(
+      TipoDeComprobante tipoDeComprobante,
+      Movimiento movimiento,
+      BigDecimal cantidad,
+      long idProducto,
+      BigDecimal bonificacion);
 
   List<RenglonFactura> calcularRenglones(
-          TipoDeComprobante tipoDeComprobante,
-          Movimiento movimiento,
-          BigDecimal[] cantidad,
-          long[] idProducto,
-          BigDecimal[] bonificacion);
+      TipoDeComprobante tipoDeComprobante,
+      Movimiento movimiento,
+      BigDecimal[] cantidad,
+      long[] idProducto,
+      BigDecimal[] bonificacion);
 
   Resultados calcularResultadosFactura(NuevosResultadosComprobanteDTO nuevosResultadosComprobante);
 
-  boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAFIP comprobante);
+  Pageable getPageable(Integer pagina, String ordenarPor, String sentido);
 
-  void enviarFacturaVentaPorEmail(long idFactura);
+  void calcularValoresFactura(Factura factura);
+
+  void actualizarStock(Factura factura, Movimiento movimiento);
+
+  Factura procesarFactura(Factura factura);
 }

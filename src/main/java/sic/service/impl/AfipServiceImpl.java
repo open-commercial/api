@@ -42,7 +42,7 @@ public class AfipServiceImpl implements IAfipService {
 
   private final AfipWebServiceSOAPClient afipWebServiceSOAPClient;
   private final IConfiguracionSucursalService configuracionSucursalService;
-  private final IFacturaService facturaService;
+  private final IFacturaVentaService facturaVentaService;
   private final INotaService notaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final String WEBSERVICE_FACTURA_ELECTRONICA = "wsfe";
@@ -53,13 +53,13 @@ public class AfipServiceImpl implements IAfipService {
   public AfipServiceImpl(
       AfipWebServiceSOAPClient afipWebServiceSOAPClient,
       IConfiguracionSucursalService configuracionSucursalService,
-      IFacturaService facturaService,
+      IFacturaVentaService facturaVentaService,
       INotaService notaService,
       MessageSource messageSource) {
     this.afipWebServiceSOAPClient = afipWebServiceSOAPClient;
     this.configuracionSucursalService = configuracionSucursalService;
-    this.facturaService = facturaService;
     this.notaService = notaService;
+    this.facturaVentaService = facturaVentaService;
     this.messageSource = messageSource;
   }
 
@@ -141,7 +141,7 @@ public class AfipServiceImpl implements IAfipService {
       if ((comprobante.getTipoComprobante() == TipoDeComprobante.FACTURA_A
               || comprobante.getTipoComprobante() == TipoDeComprobante.FACTURA_B
               || comprobante.getTipoComprobante() == TipoDeComprobante.FACTURA_C)
-          && facturaService.existeFacturaVentaAnteriorSinAutorizar(comprobante)) {
+          && facturaVentaService.existeFacturaVentaAnteriorSinAutorizar(comprobante)) {
         throw new BusinessServiceException(messageSource.getMessage(
           "mensaje_existe_comprobante_anterior_sin_autorizar", null, Locale.getDefault()));
       }

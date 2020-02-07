@@ -1,4 +1,4 @@
-package sic.modelo.calculos;
+package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;

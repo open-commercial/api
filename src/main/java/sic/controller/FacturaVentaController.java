@@ -13,6 +13,7 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
+import sic.modelo.dto.NuevaFacturaVentaDTO;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.service.*;
 import sic.util.CalculosComprobante;
@@ -28,6 +29,7 @@ import java.util.Locale;
 @RequestMapping("/api/v1")
 public class FacturaVentaController {
 
+  private final IFacturaVentaService facturaVentaService;
   private final IFacturaService facturaService;
   private final ISucursalService sucursalService;
   private final IClienteService clienteService;
@@ -37,10 +39,11 @@ public class FacturaVentaController {
   private final IPedidoService pedidoService;
   private final IAuthService authService;
   private final MessageSource messageSource;
-  private static final String CLAIMS_ID_USUARIO = "idUsuario";
+  private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
   public FacturaVentaController(
+      IFacturaVentaService facturaVentaService,
       IFacturaService facturaService,
       ISucursalService sucursalService,
       IClienteService clienteService,
@@ -50,6 +53,7 @@ public class FacturaVentaController {
       IPedidoService pedidoService,
       IAuthService authService,
       MessageSource messageSource) {
+    this.facturaVentaService = facturaVentaService;
     this.facturaService = facturaService;
     this.sucursalService = sucursalService;
     this.clienteService = clienteService;
@@ -118,7 +122,7 @@ public class FacturaVentaController {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     fv.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(
-            ((Integer) claims.get(CLAIMS_ID_USUARIO)).longValue()));
+            ((Integer) claims.get(CLAIM_ID_USUARIO)).longValue()));
     fv.setRenglones(
         facturaService.calcularRenglones(
             nuevaFacturaVentaDTO.getTipoDeComprobante(),
@@ -135,8 +139,8 @@ public class FacturaVentaController {
     List<FacturaVenta> facturasGuardadas;
     if (nuevaFacturaVentaDTO.getIndices() != null) {
       facturasGuardadas =
-          facturaService.guardar(
-              facturaService.dividirFactura(fv, nuevaFacturaVentaDTO.getIndices()),
+          facturaVentaService.guardar(
+              facturaVentaService.dividirFactura(fv, nuevaFacturaVentaDTO.getIndices()),
               nuevaFacturaVentaDTO.getIdPedido(),
               reciboService.construirRecibos(
                   nuevaFacturaVentaDTO.getIdsFormaDePago(),
@@ -150,7 +154,7 @@ public class FacturaVentaController {
       List<FacturaVenta> facturas = new ArrayList<>();
       facturas.add(fv);
       facturasGuardadas =
-          facturaService.guardar(
+          facturaVentaService.guardar(
               facturas,
               nuevaFacturaVentaDTO.getIdPedido(),
               reciboService.construirRecibos(
@@ -168,7 +172,7 @@ public class FacturaVentaController {
   @PostMapping("/facturas/ventas/{idFactura}/autorizacion")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public FacturaVenta autorizarFactura(@PathVariable long idFactura) {
-    return facturaService.autorizarFacturaVenta(
+    return facturaVentaService.autorizarFacturaVenta(
         (FacturaVenta) facturaService.getFacturaNoEliminadaPorId(idFactura));
   }
 
@@ -184,7 +188,7 @@ public class FacturaVentaController {
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return facturaService.buscarFacturaVenta(criteria, (int) claims.get(CLAIMS_ID_USUARIO));
+    return facturaVentaService.buscarFacturaVenta(criteria, (int) claims.get(CLAIM_ID_USUARIO));
   }
 
   @GetMapping("/facturas/ventas/tipos/sucursales/{idSucursal}/clientes/{idCliente}")
@@ -194,12 +198,12 @@ public class FacturaVentaController {
       @PathVariable long idCliente,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuario = (int) claims.get(CLAIMS_ID_USUARIO);
+    long idUsuario = (int) claims.get(CLAIM_ID_USUARIO);
     List<Rol> rolesDeUsuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario).getRoles();
     if (rolesDeUsuario.contains(Rol.ADMINISTRADOR)
         || rolesDeUsuario.contains(Rol.ENCARGADO)
         || rolesDeUsuario.contains(Rol.VENDEDOR)) {
-      return facturaService.getTipoFacturaVenta(
+      return facturaVentaService.getTipoFacturaVenta(
           sucursalService.getSucursalPorId(idSucursal),
           clienteService.getClienteNoEliminadoPorId(idCliente));
     } else if (rolesDeUsuario.contains(Rol.VIAJANTE) || rolesDeUsuario.contains(Rol.COMPRADOR)) {
@@ -222,7 +226,8 @@ public class FacturaVentaController {
     headers.add("content-disposition", "inline; filename=Factura.pdf");
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
     byte[] reportePDF =
-        facturaService.getReporteFacturaVenta(facturaService.getFacturaNoEliminadaPorId(idFactura));
+        facturaVentaService.getReporteFacturaVenta(
+            facturaService.getFacturaNoEliminadaPorId(idFactura));
     return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
   }
 
@@ -230,7 +235,7 @@ public class FacturaVentaController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public List<RenglonFactura> getRenglonesPedidoParaFacturar(
       @PathVariable long idPedido, @RequestParam TipoDeComprobante tipoDeComprobante) {
-    return facturaService.getRenglonesPedidoParaFacturar(idPedido, tipoDeComprobante);
+    return facturaVentaService.getRenglonesPedidoParaFacturar(idPedido, tipoDeComprobante);
   }
 
   @PostMapping("/facturas/ventas/renglones")
@@ -258,8 +263,8 @@ public class FacturaVentaController {
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return facturaService.calcularTotalFacturadoVenta(
-        criteria, (int) claims.get(CLAIMS_ID_USUARIO));
+    return facturaVentaService.calcularTotalFacturadoVenta(
+        criteria, (int) claims.get(CLAIM_ID_USUARIO));
   }
 
   @PostMapping("/facturas/ventas/total-iva/criteria")
@@ -268,7 +273,7 @@ public class FacturaVentaController {
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return facturaService.calcularIvaVenta(criteria, (int) claims.get(CLAIMS_ID_USUARIO));
+    return facturaVentaService.calcularIvaVenta(criteria, (int) claims.get(CLAIM_ID_USUARIO));
   }
 
   @PostMapping("/facturas/ventas/ganancia-total/criteria")
@@ -277,12 +282,12 @@ public class FacturaVentaController {
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return facturaService.calcularGananciaTotal(criteria, (int) claims.get(CLAIMS_ID_USUARIO));
+    return facturaVentaService.calcularGananciaTotal(criteria, (int) claims.get(CLAIM_ID_USUARIO));
   }
 
   @GetMapping("/facturas/ventas/email/{idFactura}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public void enviarFacturaVentaPorEmail(@PathVariable long idFactura) {
-    facturaService.enviarFacturaVentaPorEmail(idFactura);
+    facturaVentaService.enviarFacturaVentaPorEmail(idFactura);
   }
 }

@@ -7,8 +7,8 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.calculos.NuevosResultadosComprobanteDTO;
-import sic.modelo.calculos.Resultados;
+import sic.modelo.dto.NuevosResultadosComprobanteDTO;
+import sic.modelo.Resultados;
 
 import javax.validation.Valid;
 

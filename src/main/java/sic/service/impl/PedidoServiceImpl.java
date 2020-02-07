@@ -31,8 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.calculos.NuevosResultadosComprobanteDTO;
-import sic.modelo.calculos.Resultados;
+import sic.modelo.dto.NuevosResultadosComprobanteDTO;
+import sic.modelo.Resultados;
 import sic.modelo.dto.*;
 import sic.repository.RenglonPedidoRepository;
 import sic.service.*;
@@ -47,7 +47,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
   private final PedidoRepository pedidoRepository;
   private final RenglonPedidoRepository renglonPedidoRepository;
-  private final IFacturaService facturaService;
+  private final IFacturaVentaService facturaVentaService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
   private final IProductoService productoService;
@@ -64,7 +64,7 @@ public class PedidoServiceImpl implements IPedidoService {
   public PedidoServiceImpl(
       PedidoRepository pedidoRepository,
       RenglonPedidoRepository renglonPedidoRepository,
-      IFacturaService facturaService,
+      IFacturaVentaService facturaVentaService,
       IUsuarioService usuarioService,
       IClienteService clienteService,
       IProductoService productoService,
@@ -73,7 +73,7 @@ public class PedidoServiceImpl implements IPedidoService {
       ICuentaCorrienteService cuentaCorrienteService,
       ModelMapper modelMapper,
       MessageSource messageSource) {
-    this.facturaService = facturaService;
+    this.facturaVentaService = facturaVentaService;
     this.pedidoRepository = pedidoRepository;
     this.renglonPedidoRepository = renglonPedidoRepository;
     this.usuarioService = usuarioService;
@@ -136,7 +136,7 @@ public class PedidoServiceImpl implements IPedidoService {
     if (this.getFacturasDelPedido(pedido.getIdPedido()).isEmpty()) {
       pedido.setEstado(EstadoPedido.ABIERTO);
     }
-    if (facturaService.pedidoTotalmenteFacturado(pedido)) {
+    if (facturaVentaService.pedidoTotalmenteFacturado(pedido)) {
       pedido.setEstado(EstadoPedido.CERRADO);
     }
     return pedido;
@@ -193,7 +193,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   public List<Factura> getFacturasDelPedido(long idPedido) {
-    return facturaService.getFacturasDelPedido(idPedido);
+    return facturaVentaService.getFacturasDelPedido(idPedido);
   }
 
   @Override
