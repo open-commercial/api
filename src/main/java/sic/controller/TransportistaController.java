@@ -96,7 +96,7 @@ public class TransportistaController {
     transportistaService.eliminar(idTransportista);
   }
 
-  @GetMapping("/transportistas/sucursales/{idSucursal}")
+  @GetMapping("/transportistas")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
     Rol.ENCARGADO,
@@ -104,8 +104,8 @@ public class TransportistaController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public List<Transportista> getTransportistas(@PathVariable long idSucursal) {
-    return transportistaService.getTransportistas(sucursalService.getSucursalPorId(idSucursal));
+  public List<Transportista> getTransportistas() {
+    return transportistaService.getTransportistas();
   }
 
   @PostMapping("/transportistas")

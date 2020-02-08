@@ -59,7 +59,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
   }
 
   @Override
-  public List<Transportista> getTransportistas(Sucursal sucursal) {
+  public List<Transportista> getTransportistas() {
     List<Transportista> transportista =
         transportistaRepository.findAllByAndEliminadoOrderByNombreAsc(false);
     if (transportista == null) {

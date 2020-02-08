@@ -20,7 +20,7 @@ public interface ITransportistaService {
 
     Transportista getTransportistaPorNombre(String nombre);
 
-    List<Transportista> getTransportistas(Sucursal sucursal);
+    List<Transportista> getTransportistas();
 
     Transportista guardar(@Valid Transportista transportista);
     
