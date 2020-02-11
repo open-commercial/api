@@ -29,10 +29,7 @@ import sic.modelo.dto.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.Charset;
@@ -51,12 +48,6 @@ class AppIntegrationTest {
   @Autowired private TestRestTemplate restTemplate;
   private String token;
   private final String apiPrefix = "/api/v1";
-
-  @Value("${SIC_MERCADOPAGO_PUBLIC_KEY}")
-  private String mpPublicKey;
-
-  @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
-  private String mpAccesToken;
 
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
@@ -115,7 +106,7 @@ class AppIntegrationTest {
   @Test
   @DisplayName("Se inicia una nueva sucursal y su usuario Administrador")
   @Order(1)
-  void iniciarActividadComercial() {
+  void iniciarActividadComercial() throws IOException {
     this.token =
         restTemplate
             .postForEntity(
@@ -168,6 +159,21 @@ class AppIntegrationTest {
             apiPrefix + "/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),
             ConfiguracionSucursalDTO.class);
     assertTrue(configuracionSucursalDTO.isPuntoDeRetiro());
+    File resource = new ClassPathResource("/certificadoAfipTest.p12").getFile();
+    byte[] certificadoAfip = new byte[(int) resource.length()];
+    FileInputStream fileInputStream = new FileInputStream(resource);
+    fileInputStream.read(certificadoAfip);
+    fileInputStream.close();
+    this.iniciarSesionComoAdministrador();
+//    ConfiguracionSucursalDTO configuracionSucursalDTO =
+//            restTemplate.getForObject(
+//                    apiPrefix + "/configuraciones-sucursal/1", ConfiguracionSucursalDTO.class);
+    configuracionSucursalDTO.setCertificadoAfip(certificadoAfip);
+    configuracionSucursalDTO.setFacturaElectronicaHabilitada(true);
+    configuracionSucursalDTO.setFirmanteCertificadoAfip("globo");
+    configuracionSucursalDTO.setPasswordCertificadoAfip("globo123");
+    configuracionSucursalDTO.setNroPuntoDeVentaAfip(2);
+    restTemplate.put(apiPrefix + "/configuraciones-sucursal", configuracionSucursalDTO);
   }
 
   @Test
@@ -737,6 +743,11 @@ class AppIntegrationTest {
     FacturaVentaDTO[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVentaDTO[].class);
+    FacturaVentaDTO facturaAutorizada = restTemplate.postForObject(
+            apiPrefix + "/facturas/" + facturas[1].getIdFactura() + "/autorizacion",
+            null,
+            FacturaVentaDTO.class);
+    assertNotEquals(0L, facturaAutorizada.getCae());
     assertEquals(2, facturas.length);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
@@ -821,7 +832,7 @@ class AppIntegrationTest {
         BusquedaFacturaVentaCriteria.builder()
             .idSucursal(1L)
             .tipoComprobante(TipoDeComprobante.FACTURA_X)
-            .numSerie(0L)
+            .numSerie(2L)
             .numFactura(1L)
             .build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity(criteria);
@@ -951,54 +962,6 @@ class AppIntegrationTest {
     assertEquals(
         new BigDecimal("12796.00000000000000000000000000000000000000000000000"),
         pedido.getTotalActual());
-  }
-
-  @Test
-  @DisplayName("Autorizar una factura")
-  @Order(10)
-  void testEscenarioAutorizarFactura() throws IOException {
-    File resource = new ClassPathResource("/certificadoAfipTest.p12").getFile();
-    byte[] certificadoAfip = new byte[(int) resource.length()];
-    FileInputStream fileInputStream = new FileInputStream(resource);
-    fileInputStream.read(certificadoAfip);
-    fileInputStream.close();
-    this.iniciarSesionComoAdministrador();
-    ConfiguracionSucursalDTO configuracionSucursalDTO =
-        restTemplate.getForObject(
-            apiPrefix + "/configuraciones-sucursal/1", ConfiguracionSucursalDTO.class);
-    configuracionSucursalDTO.setCertificadoAfip(certificadoAfip);
-    configuracionSucursalDTO.setFacturaElectronicaHabilitada(true);
-    configuracionSucursalDTO.setFirmanteCertificadoAfip("globo");
-    configuracionSucursalDTO.setPasswordCertificadoAfip("globo123");
-    configuracionSucursalDTO.setNroPuntoDeVentaAfip(2);
-    restTemplate.put(apiPrefix + "/configuraciones-sucursal", configuracionSucursalDTO);
-    BusquedaFacturaVentaCriteria criteria =
-        BusquedaFacturaVentaCriteria.builder()
-            .idSucursal(1L)
-            .tipoComprobante(TipoDeComprobante.FACTURA_A)
-            .numSerie(0L)
-            .numFactura(1L)
-            .build();
-    HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity<>(criteria);
-    PaginaRespuestaRest<FacturaVentaDTO> resultadoBusqueda =
-        restTemplate
-            .exchange(
-                apiPrefix + "/facturas/venta/busqueda/criteria",
-                HttpMethod.POST,
-                requestEntity,
-                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVentaDTO>>() {})
-            .getBody();
-    assertNotNull(resultadoBusqueda);
-    List<FacturaVentaDTO> facturasRecuperadas = resultadoBusqueda.getContent();
-    restTemplate.postForObject(
-        apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getIdFactura() + "/autorizacion",
-        null,
-        FacturaVentaDTO.class);
-    FacturaVentaDTO facturaVentaDTO =
-        restTemplate.getForObject(
-            apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getIdFactura(),
-            FacturaVentaDTO.class);
-    assertNotEquals(0L, facturaVentaDTO.getCae());
   }
 
   @Test
