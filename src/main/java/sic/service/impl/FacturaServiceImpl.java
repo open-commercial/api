@@ -998,7 +998,7 @@ public class FacturaServiceImpl implements IFacturaService {
     nuevoRenglon.setPrecioUnitario(
         this.calcularPrecioUnitario(movimiento, tipoDeComprobante, producto));
     if (movimiento.equals(Movimiento.VENTA) || movimiento.equals(Movimiento.PEDIDO)) {
-      this.aplicarBonificacion(nuevoRenglon, producto, nuevoRenglonFacturaDTO.isRenglonMarcado());
+      this.aplicarBonificacion(nuevoRenglon, producto);
     } else {
       nuevoRenglon.setBonificacionPorcentaje(nuevoRenglonFacturaDTO.getBonificacion());
       nuevoRenglon.setBonificacionNeta(
@@ -1021,24 +1021,6 @@ public class FacturaServiceImpl implements IFacturaService {
             nuevoRenglon.getPrecioUnitario(),
             nuevoRenglon.getBonificacionNeta()));
     return nuevoRenglon;
-  }
-
-  private void aplicarBonificacion(RenglonFactura nuevoRenglon, Producto producto, boolean renglonMarcadoParaBonificacion) {
-    if (producto.isOferta() && renglonMarcadoParaBonificacion) {
-      nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajeBonificacionOferta());
-      nuevoRenglon.setBonificacionNeta(
-          CalculosComprobante.calcularProporcion(
-              nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionOferta()));
-    } else if (renglonMarcadoParaBonificacion
-        && producto.getPorcentajeBonificacionPrecio() != null) {
-      nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajeBonificacionPrecio());
-      nuevoRenglon.setBonificacionNeta(
-          CalculosComprobante.calcularProporcion(
-              nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionPrecio()));
-    } else {
-      nuevoRenglon.setBonificacionPorcentaje(BigDecimal.ZERO);
-      nuevoRenglon.setBonificacionNeta(BigDecimal.ZERO);
-    }
   }
 
   @Override
@@ -1257,6 +1239,24 @@ public class FacturaServiceImpl implements IFacturaService {
     }
     facturaSinIVA.setRenglones(renglonesSinIVA);
     return facturaSinIVA;
+  }
+
+  private void aplicarBonificacion(RenglonFactura nuevoRenglon, Producto producto) {
+    if (producto.isOferta() && nuevoRenglon.isAplicaBonificacion()) {
+      nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajeBonificacionOferta());
+      nuevoRenglon.setBonificacionNeta(
+          CalculosComprobante.calcularProporcion(
+              nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionOferta()));
+    } else if (nuevoRenglon.isAplicaBonificacion()
+        && producto.getPorcentajeBonificacionPrecio() != null) {
+      nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajeBonificacionPrecio());
+      nuevoRenglon.setBonificacionNeta(
+          CalculosComprobante.calcularProporcion(
+              nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionPrecio()));
+    } else {
+      nuevoRenglon.setBonificacionPorcentaje(BigDecimal.ZERO);
+      nuevoRenglon.setBonificacionNeta(BigDecimal.ZERO);
+    }
   }
 
   private FacturaVenta agregarRenglonesAFacturaConIVA(
