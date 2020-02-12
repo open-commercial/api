@@ -302,6 +302,14 @@ class FacturaServiceImplTest {
     nuevoRenglonFacturaDTO.setRenglonMarcado(false);
     renglonFacturaResultante = facturaService.calcularRenglon(TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaDTO);
     assertEquals(new BigDecimal("247.94"), renglonFacturaResultante.getImporte());
+    nuevoRenglonFacturaDTO.setRenglonMarcado(true);
+    productoParaRetorno.setOferta(true);
+    productoParaRetorno.setPorcentajeBonificacionOferta(new BigDecimal("20"));
+    renglonFacturaResultante = facturaService.calcularRenglon(TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaDTO);
+    assertEquals(new BigDecimal("198.352000000000000"), renglonFacturaResultante.getImporte());
+    nuevoRenglonFacturaDTO.setRenglonMarcado(false);
+    renglonFacturaResultante = facturaService.calcularRenglon(TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaDTO);
+    assertEquals(new BigDecimal("247.94"), renglonFacturaResultante.getImporte());
   }
 
   // Calculos
