@@ -19,6 +19,7 @@ import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 import sic.modelo.dto.FacturaCompraDTO;
+import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 
@@ -258,7 +259,14 @@ public class FacturaController {
       @RequestParam Movimiento movimiento,
       @RequestParam BigDecimal cantidad) {
     return facturaService.calcularRenglon(
-        tipoDeComprobante, movimiento, cantidad, idProducto, false, null);
+        tipoDeComprobante,
+        movimiento,
+        NuevoRenglonFacturaDTO.builder()
+            .cantidad(cantidad)
+            .idProducto(idProducto)
+            .renglonMarcado(
+                facturaService.marcarRenglonParaAplicarBonificacion(idProducto, cantidad))
+            .build());
   }
 
   @GetMapping("/facturas/renglon-compra")
@@ -270,7 +278,13 @@ public class FacturaController {
       @RequestParam BigDecimal cantidad,
       @RequestParam BigDecimal bonificacion) {
     return facturaService.calcularRenglon(
-        tipoDeComprobante, movimiento, cantidad, idProducto, false, bonificacion);
+        tipoDeComprobante,
+        movimiento,
+        NuevoRenglonFacturaDTO.builder()
+            .cantidad(cantidad)
+            .idProducto(idProducto)
+            .bonificacion(bonificacion)
+            .build());
   }
 
   @PostMapping("/facturas/total-facturado-venta/criteria")

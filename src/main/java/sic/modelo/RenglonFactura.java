@@ -78,4 +78,7 @@ public class RenglonFactura implements Serializable {
     @DecimalMin(value = "0", message = "{mensaje_renglon_importe_negativo}")
     private BigDecimal importe;
 
+    @Transient
+    private boolean aplicaBonificacion;
+
 }
