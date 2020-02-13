@@ -137,7 +137,7 @@ public class FacturaVentaController {
             ? nuevaFacturaVentaDTO.getObservaciones()
             : "");
     List<FacturaVenta> facturasGuardadas;
-    if (nuevaFacturaVentaDTO.getIndices() != null) {
+    if (nuevaFacturaVentaDTO.getIndices() != null && nuevaFacturaVentaDTO.getIndices().length > 0) {
       facturasGuardadas =
           facturaVentaService.guardar(
               facturaVentaService.dividirFactura(fv, nuevaFacturaVentaDTO.getIndices()),
