@@ -15,7 +15,8 @@ import javax.validation.Valid;
 
 public interface IProductoService {
 
-  void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido, byte[] imagen);
+  void actualizar(
+      @Valid Producto productoPorActualizar, Producto productoPersistido, byte[] imagen);
 
   void actualizarStock(
       Map<Long, BigDecimal> idsYCantidades,
@@ -30,7 +31,8 @@ public interface IProductoService {
 
   BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal gananciaPorcentaje);
 
-  Map<Long, BigDecimal> getProductosSinStockDisponible(ProductosParaVerificarStockDTO productosParaVerificarStockDTO);
+  Map<Long, BigDecimal> getProductosSinStockDisponible(
+      ProductosParaVerificarStockDTO productosParaVerificarStockDTO);
 
   BigDecimal calcularGananciaPorcentaje(
       BigDecimal precioDeListaNuevo,
@@ -45,8 +47,7 @@ public interface IProductoService {
 
   BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal gananciaPorcentaje);
 
-  BigDecimal calcularPrecioLista(
-      BigDecimal pvp, BigDecimal ivaPorcentaje);
+  BigDecimal calcularPrecioLista(BigDecimal pvp, BigDecimal ivaPorcentaje);
 
   void eliminarMultiplesProductos(long[] idProducto);
 
@@ -64,12 +65,11 @@ public interface IProductoService {
 
   Producto guardar(@Valid Producto producto, byte[] imagen);
 
-  List<Producto> actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO);
+  void actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO);
 
   void guardarCantidadesDeSucursalNueva(Sucursal sucursal);
 
   void subirImagenProducto(long idProducto, byte[] imagen);
 
   List<Producto> getMultiplesProductosPorId(List<Long> idsProductos);
-
 }

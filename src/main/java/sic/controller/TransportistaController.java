@@ -17,7 +17,6 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaTransportistaCriteria;
 import sic.modelo.dto.TransportistaDTO;
-import sic.service.ISucursalService;
 import sic.service.ITransportistaService;
 import sic.service.IUbicacionService;
 
@@ -26,16 +25,15 @@ import sic.service.IUbicacionService;
 public class TransportistaController {
 
   private final ITransportistaService transportistaService;
-  private final ISucursalService sucursalService;
   private final IUbicacionService ubicacionService;
   private final ModelMapper modelMapper;
 
   @Autowired
   public TransportistaController(
-    ITransportistaService transportistaService, ISucursalService sucursalService,
-    IUbicacionService ubicacionService, ModelMapper modelMapper) {
+      ITransportistaService transportistaService,
+      IUbicacionService ubicacionService,
+      ModelMapper modelMapper) {
     this.transportistaService = transportistaService;
-    this.sucursalService = sucursalService;
     this.ubicacionService = ubicacionService;
     this.modelMapper = modelMapper;
   }

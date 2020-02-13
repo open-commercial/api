@@ -44,9 +44,9 @@ public interface IFacturaVentaService {
 
   void enviarFacturaVentaPorEmail(long idFactura);
 
-  FacturaVenta agregarRenglonesAFacturaConIVA(
+  void agregarRenglonesAFacturaConIVA(
       FacturaVenta facturaConIVA, int[] indices, List<RenglonFactura> renglones);
 
-  FacturaVenta agregarRenglonesAFacturaSinIVA(
+  void agregarRenglonesAFacturaSinIVA(
       FacturaVenta facturaSinIVA, int[] indices, List<RenglonFactura> renglones);
 }
