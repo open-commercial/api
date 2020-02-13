@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
+import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
@@ -907,21 +908,36 @@ public class FacturaServiceImpl implements IFacturaService {
                     this.calcularRenglon(
                         tipoDeComprobante,
                         Movimiento.VENTA,
-                        r.getCantidad()
-                            .subtract(renglonesDeFacturas.get(r.getIdProductoItem()).getCantidad()),
-                        r.getIdProductoItem(),
-                        false,
-                        null));
+                        NuevoRenglonFacturaDTO.builder()
+                            .cantidad(
+                                r.getCantidad()
+                                    .subtract(
+                                        renglonesDeFacturas
+                                            .get(r.getIdProductoItem())
+                                            .getCantidad()))
+                            .idProducto(r.getIdProductoItem())
+                            .renglonMarcado(
+                                this.marcarRenglonParaAplicarBonificacion(
+                                    r.getIdProductoItem(),
+                                    r.getCantidad()
+                                        .subtract(
+                                            renglonesDeFacturas
+                                                .get(r.getIdProductoItem())
+                                                .getCantidad())))
+                            .build()));
               }
             } else {
               renglonesRestantes.add(
                   this.calcularRenglon(
                       tipoDeComprobante,
                       Movimiento.VENTA,
-                      r.getCantidad(),
-                      r.getIdProductoItem(),
-                      false,
-                      null));
+                      NuevoRenglonFacturaDTO.builder()
+                          .cantidad(r.getCantidad())
+                          .idProducto(r.getIdProductoItem())
+                          .renglonMarcado(
+                              this.marcarRenglonParaAplicarBonificacion(
+                                  r.getIdProductoItem(), r.getCantidad()))
+                          .build()));
             }
           });
     } else {
@@ -931,10 +947,13 @@ public class FacturaServiceImpl implements IFacturaService {
                   this.calcularRenglon(
                       tipoDeComprobante,
                       Movimiento.VENTA,
-                      r.getCantidad(),
-                      r.getIdProductoItem(),
-                      false,
-                      null)));
+                      NuevoRenglonFacturaDTO.builder()
+                          .cantidad(r.getCantidad())
+                          .idProducto(r.getIdProductoItem())
+                          .renglonMarcado(
+                              this.marcarRenglonParaAplicarBonificacion(
+                                  r.getIdProductoItem(), r.getCantidad()))
+                          .build())));
     }
     return renglonesRestantes;
   }
@@ -963,35 +982,23 @@ public class FacturaServiceImpl implements IFacturaService {
   public RenglonFactura calcularRenglon(
       TipoDeComprobante tipoDeComprobante,
       Movimiento movimiento,
-      BigDecimal cantidad,
-      long idProducto,
-      boolean dividiendoRenglonFactura,
-      BigDecimal bonificacion) {
-    if (cantidad.compareTo(BigDecimal.ZERO) < 0) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_producto_cantidad_negativa", null, Locale.getDefault()));
-    }
-    Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
-    /*if (dividiendoRenglonFactura == false && cantidad < producto.getBulto()
-            && (movimiento == Movimiento.VENTA || movimiento == Movimiento.PEDIDO)) {
-        throw new BusinessServiceException(messageSource.getMessage(
-            "mensaje_producto_cantidad_menor_a_minima", null, Locale.getDefault()));
-    }*/
+      @Valid NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO) {
+    Producto producto = productoService.getProductoNoEliminadoPorId(nuevoRenglonFacturaDTO.getIdProducto());
     RenglonFactura nuevoRenglon = new RenglonFactura();
     nuevoRenglon.setIdProductoItem(producto.getIdProducto());
     nuevoRenglon.setCodigoItem(producto.getCodigo());
     nuevoRenglon.setDescripcionItem(producto.getDescripcion());
     nuevoRenglon.setMedidaItem(producto.getMedida().getNombre());
-    nuevoRenglon.setCantidad(cantidad);
+    nuevoRenglon.setCantidad(nuevoRenglonFacturaDTO.getCantidad());
     nuevoRenglon.setPrecioUnitario(
         this.calcularPrecioUnitario(movimiento, tipoDeComprobante, producto));
     if (movimiento.equals(Movimiento.VENTA) || movimiento.equals(Movimiento.PEDIDO)) {
-      this.asignarBonificacion(nuevoRenglon, producto);
+      this.aplicarBonificacion(nuevoRenglon, producto, nuevoRenglonFacturaDTO.isRenglonMarcado());
     } else {
-      nuevoRenglon.setBonificacionPorcentaje(bonificacion);
+      nuevoRenglon.setBonificacionPorcentaje(nuevoRenglonFacturaDTO.getBonificacion());
       nuevoRenglon.setBonificacionNeta(
-          CalculosComprobante.calcularProporcion(nuevoRenglon.getPrecioUnitario(), bonificacion));
+          CalculosComprobante.calcularProporcion(
+              nuevoRenglon.getPrecioUnitario(), nuevoRenglonFacturaDTO.getBonificacion()));
     }
     nuevoRenglon.setIvaPorcentaje(producto.getIvaPorcentaje());
     if (tipoDeComprobante.equals(TipoDeComprobante.FACTURA_Y)) {
@@ -1005,26 +1012,16 @@ public class FacturaServiceImpl implements IFacturaService {
     nuevoRenglon.setGananciaNeto(producto.getGananciaNeto());
     nuevoRenglon.setImporte(
         CalculosComprobante.calcularImporte(
-            cantidad, nuevoRenglon.getPrecioUnitario(), nuevoRenglon.getBonificacionNeta()));
+            nuevoRenglonFacturaDTO.getCantidad(),
+            nuevoRenglon.getPrecioUnitario(),
+            nuevoRenglon.getBonificacionNeta()));
     return nuevoRenglon;
   }
 
-  private void asignarBonificacion(RenglonFactura nuevoRenglon, Producto producto) {
-    if (producto.isOferta() && nuevoRenglon.getCantidad().compareTo(producto.getBulto()) >= 0) {
-      nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajeBonificacionOferta());
-      nuevoRenglon.setBonificacionNeta(
-          CalculosComprobante.calcularProporcion(
-              nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionOferta()));
-    } else if (nuevoRenglon.getCantidad().compareTo(producto.getBulto()) >= 0
-        && producto.getPorcentajeBonificacionPrecio() != null) {
-      nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajeBonificacionPrecio());
-      nuevoRenglon.setBonificacionNeta(
-          CalculosComprobante.calcularProporcion(
-              nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionPrecio()));
-    } else {
-      nuevoRenglon.setBonificacionPorcentaje(BigDecimal.ZERO);
-      nuevoRenglon.setBonificacionNeta(BigDecimal.ZERO);
-    }
+  @Override
+  public boolean marcarRenglonParaAplicarBonificacion(long idProducto, BigDecimal cantidad) {
+    Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
+    return cantidad.compareTo(producto.getBulto()) >= 0;
   }
 
   @Override
@@ -1216,10 +1213,13 @@ public class FacturaServiceImpl implements IFacturaService {
             this.calcularRenglon(
                 TipoDeComprobante.FACTURA_X,
                 Movimiento.VENTA,
-                cantidadProductosRenglonFacturaSinIVA,
-                renglon.getIdProductoItem(),
-                true,
-                null);
+                NuevoRenglonFacturaDTO.builder()
+                    .cantidad(cantidadProductosRenglonFacturaSinIVA)
+                    .idProducto(renglon.getIdProductoItem())
+                    .renglonMarcado(
+                        this.marcarRenglonParaAplicarBonificacion(
+                            renglon.getIdProductoItem(), cantidad))
+                    .build());
         if (nuevoRenglonSinIVA.getCantidad().compareTo(BigDecimal.ZERO) != 0) {
           renglonesSinIVA.add(nuevoRenglonSinIVA);
         }
@@ -1234,6 +1234,24 @@ public class FacturaServiceImpl implements IFacturaService {
     }
     facturaSinIVA.setRenglones(renglonesSinIVA);
     return facturaSinIVA;
+  }
+
+  private void aplicarBonificacion(
+      RenglonFactura nuevoRenglon, Producto producto, boolean aplicaBonificacion) {
+    if (producto.isOferta() && aplicaBonificacion) {
+      nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajeBonificacionOferta());
+      nuevoRenglon.setBonificacionNeta(
+          CalculosComprobante.calcularProporcion(
+              nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionOferta()));
+    } else if (aplicaBonificacion && producto.getPorcentajeBonificacionPrecio() != null) {
+      nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajeBonificacionPrecio());
+      nuevoRenglon.setBonificacionNeta(
+          CalculosComprobante.calcularProporcion(
+              nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionPrecio()));
+    } else {
+      nuevoRenglon.setBonificacionPorcentaje(BigDecimal.ZERO);
+      nuevoRenglon.setBonificacionNeta(BigDecimal.ZERO);
+    }
   }
 
   private FacturaVenta agregarRenglonesAFacturaConIVA(
@@ -1262,43 +1280,49 @@ public class FacturaServiceImpl implements IFacturaService {
                     .setScale(0, RoundingMode.CEILING);
           }
           renglonesConIVA.add(
-              crearRenglonConIVA(
+              this.calcularRenglon(
                   facturaConIVA.getTipoComprobante(),
-                  cantidadProductosRenglonFacturaConIVA,
-                  renglon.getIdProductoItem(),
-                  true));
+                  Movimiento.VENTA,
+                  NuevoRenglonFacturaDTO.builder()
+                      .cantidad(cantidadProductosRenglonFacturaConIVA)
+                      .idProducto(renglon.getIdProductoItem())
+                      .renglonMarcado(
+                          this.marcarRenglonParaAplicarBonificacion(
+                              renglon.getIdProductoItem(), cantidad))
+                      .build()));
           renglonMarcado++;
           numeroDeRenglon++;
         } else {
           numeroDeRenglon++;
           renglonesConIVA.add(
-              crearRenglonConIVA(
+              this.calcularRenglon(
                   facturaConIVA.getTipoComprobante(),
-                  renglon.getCantidad(),
-                  renglon.getIdProductoItem(),
-                  false));
+                  Movimiento.VENTA,
+                  NuevoRenglonFacturaDTO.builder()
+                      .cantidad(renglon.getCantidad())
+                      .idProducto(renglon.getIdProductoItem())
+                      .renglonMarcado(
+                          this.marcarRenglonParaAplicarBonificacion(
+                              renglon.getIdProductoItem(), renglon.getCantidad()))
+                      .build()));
         }
       } else {
         numeroDeRenglon++;
         renglonesConIVA.add(
-            crearRenglonConIVA(
+            this.calcularRenglon(
                 facturaConIVA.getTipoComprobante(),
-                renglon.getCantidad(),
-                renglon.getIdProductoItem(),
-                false));
+                Movimiento.VENTA,
+                NuevoRenglonFacturaDTO.builder()
+                    .cantidad(renglon.getCantidad())
+                    .idProducto(renglon.getIdProductoItem())
+                    .renglonMarcado(
+                        this.marcarRenglonParaAplicarBonificacion(
+                            renglon.getIdProductoItem(), renglon.getCantidad()))
+                    .build()));
       }
     }
     facturaConIVA.setRenglones(renglonesConIVA);
     return facturaConIVA;
-  }
-
-  private RenglonFactura crearRenglonConIVA(
-      TipoDeComprobante tipoDeComprobante,
-      BigDecimal cantidad,
-      long idProductoItem,
-      boolean dividir) {
-    return this.calcularRenglon(
-        tipoDeComprobante, Movimiento.VENTA, cantidad, idProductoItem, dividir, null);
   }
 
   @Override

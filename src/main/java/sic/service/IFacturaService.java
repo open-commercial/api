@@ -9,7 +9,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
-import sic.modelo.embeddable.ClienteEmbeddable;
+import sic.modelo.dto.NuevoRenglonFacturaDTO;
 
 import javax.validation.Valid;
 
@@ -35,9 +35,11 @@ public interface IFacturaService {
 
   Page<FacturaCompra> buscarFacturaCompra(BusquedaFacturaCompraCriteria criteria);
 
-  Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
+  Page<FacturaVenta> buscarFacturaVenta(
+      BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
 
-  List<FacturaVenta> guardar(@Valid List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos);
+  List<FacturaVenta> guardar(
+      @Valid List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos);
 
   List<FacturaCompra> guardar(@Valid List<FacturaCompra> facturas);
 
@@ -52,7 +54,8 @@ public interface IFacturaService {
       BigDecimal porcentajeDescuento,
       BigDecimal porcentajeRecargo);
 
-  BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
+  BigDecimal calcularTotalFacturadoVenta(
+      BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
 
   BigDecimal calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria);
 
@@ -62,10 +65,14 @@ public interface IFacturaService {
 
   BigDecimal calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
 
-  BigDecimal calcularIVANetoRenglon(Movimiento movimiento, TipoDeComprobante tipo,
-                                    Producto producto, BigDecimal descuentoPorcentaje);
+  BigDecimal calcularIVANetoRenglon(
+      Movimiento movimiento,
+      TipoDeComprobante tipo,
+      Producto producto,
+      BigDecimal descuentoPorcentaje);
 
-  BigDecimal calcularPrecioUnitario(Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto);
+  BigDecimal calcularPrecioUnitario(
+      Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto);
 
   long calcularNumeroFacturaVenta(TipoDeComprobante tipoDeComprobante, long serie, long idSucursal);
 
@@ -73,19 +80,19 @@ public interface IFacturaService {
 
   List<FacturaVenta> dividirFactura(FacturaVenta factura, int[] indices);
 
-  List<RenglonFactura> getRenglonesPedidoParaFacturar(long idPedido, TipoDeComprobante tipoDeComprobante);
+  List<RenglonFactura> getRenglonesPedidoParaFacturar(
+      long idPedido, TipoDeComprobante tipoDeComprobante);
 
   boolean pedidoTotalmenteFacturado(Pedido pedido);
 
   RenglonFactura calcularRenglon(
       TipoDeComprobante tipoDeComprobante,
       Movimiento movimiento,
-      BigDecimal cantidad,
-      long idProducto,
-      boolean dividiendoRenglonFactura,
-      BigDecimal bonificacion);
+      @Valid NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO);
 
   boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAFIP comprobante);
 
   void enviarFacturaVentaPorEmail(long idFactura);
+
+  boolean marcarRenglonParaAplicarBonificacion(long idProducto, BigDecimal cantidad);
 }
