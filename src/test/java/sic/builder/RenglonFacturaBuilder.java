@@ -19,7 +19,6 @@ public class RenglonFacturaBuilder {
     private BigDecimal gananciaPorcentaje = new BigDecimal("30");
     private BigDecimal gananciaNeto = new BigDecimal("300");
     private BigDecimal importe = new BigDecimal("1573");
-    private boolean aplicarBonificacion = false;
 
   public RenglonFactura build() {
     return new RenglonFactura(
@@ -36,8 +35,7 @@ public class RenglonFacturaBuilder {
         ivaNeto,
         gananciaPorcentaje,
         gananciaNeto,
-        importe,
-        aplicarBonificacion);
+        importe);
   }
 
     public RenglonFacturaBuilder withId_Transportista(long idRenglonFactura) {

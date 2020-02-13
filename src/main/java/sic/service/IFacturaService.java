@@ -88,7 +88,7 @@ public interface IFacturaService {
   RenglonFactura calcularRenglon(
       TipoDeComprobante tipoDeComprobante,
       Movimiento movimiento,
-      NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO);
+      @Valid NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO);
 
   boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAFIP comprobante);
 
