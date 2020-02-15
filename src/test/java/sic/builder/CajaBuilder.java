@@ -22,20 +22,20 @@ public class CajaBuilder {
     private boolean eliminada = false;
     private Sucursal sucursal = new SucursalBuilder().build();
 
-  public Caja build() {
-    return new Caja(
-        idCaja,
-        fechaApertura,
-        fechaCierre,
-        sucursal,
-        usuarioAbreCaja,
-        usuarioCierraCaja,
-        estado,
-        saldoInicial,
-        saldoSistema,
-        saldoReal,
-        eliminada);
-  }
+    public Caja build() {
+        return new Caja(
+                idCaja,
+                fechaApertura,
+                fechaCierre,
+                sucursal,
+                usuarioAbreCaja,
+                usuarioCierraCaja,
+                estado,
+                saldoInicial,
+                saldoSistema,
+                saldoReal,
+                eliminada);
+    }
 
     public CajaBuilder withIdCaja(long idCaja) {
         this.idCaja = idCaja;

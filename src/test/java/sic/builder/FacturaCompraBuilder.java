@@ -9,7 +9,7 @@ import java.util.List;
 import sic.modelo.*;
 
 public class FacturaCompraBuilder {
-    
+
     private long idFactura = 0L;
     private Usuario usuario = new UsuarioBuilder().build();
     private LocalDateTime fecha = LocalDateTime.now();
@@ -39,17 +39,17 @@ public class FacturaCompraBuilder {
     private LocalDate vencimientoCAE = null;
     private long numSerieAfip = 0;
     private long numFacturaAfip = 0;
-    
+
     public FacturaCompra build() {
         if (renglones == null) {
             RenglonFactura renglon1 = new RenglonFacturaBuilder().build();
             RenglonFactura renglon2 = new RenglonFacturaBuilder()
-                                            .withCantidad(new BigDecimal("4"))
-                                            .withId_ProductoItem(890L)
-                                            .withCodigoItem("mate.0923")
-                                            .withIVAneto(new BigDecimal("1092"))
-                                            .withPrecioUnitario(new BigDecimal("5200"))
-                                            .build();
+                    .withCantidad(new BigDecimal("4"))
+                    .withId_ProductoItem(890L)
+                    .withCodigoItem("mate.0923")
+                    .withIVAneto(new BigDecimal("1092"))
+                    .withPrecioUnitario(new BigDecimal("5200"))
+                    .build();
             List<RenglonFactura> renglonesFactura = new ArrayList<>();
             renglonesFactura.add(renglon1);
             renglonesFactura.add(renglon2);
@@ -62,7 +62,7 @@ public class FacturaCompraBuilder {
                 cantidadArticulos, sucursal, eliminada, CAE, vencimientoCAE, proveedor, numSerieAfip, numFacturaAfip);
         return factura;
     }
-    
+
     public FacturaCompraBuilder withId_Factura(long idFactura) {
         this.idFactura = idFactura;
         return this;
@@ -72,17 +72,17 @@ public class FacturaCompraBuilder {
         this.usuario = usuario;
         return this;
     }
-    
+
     public FacturaCompraBuilder withFecha(LocalDateTime fecha) {
         this.fecha = fecha;
         return this;
     }
-    
+
     public FacturaCompraBuilder withTipoFactura(TipoDeComprobante tipoDeComprobante) {
         this.tipoFactura = tipoDeComprobante;
         return this;
     }
-    
+
     public FacturaCompraBuilder withTransportista(Transportista transportista) {
         this.transportista = transportista;
         return this;
@@ -97,21 +97,21 @@ public class FacturaCompraBuilder {
         this.renglones = renglones;
         return this;
     }
-    
+
     public FacturaCompraBuilder withNumSerie(long numeroDeSerie) {
         this.numSerie = numeroDeSerie;
         return this;
     }
-    
+
     public FacturaCompraBuilder withNumFactura(long numeroFactura) {
         this.numFactura = numeroFactura;
         return this;
     }
-    
+
     public FacturaCompraBuilder withFechaVencimiento(LocalDate fechaDeVencimiento) {
         this.fechaVencimiento = fechaDeVencimiento;
         return this;
-    }  
+    }
 
     public FacturaCompraBuilder withUsuario(Proveedor proveedor) {
         this.proveedor = proveedor;
@@ -187,25 +187,24 @@ public class FacturaCompraBuilder {
         this.eliminada = eliminada;
         return this;
     }
-    
+
     public FacturaCompraBuilder withCAE(long CAE) {
         this.CAE = CAE;
         return this;
     }
-    
+
     public FacturaCompraBuilder withVencimientoCAE(LocalDate vencimientoCAE) {
         this.vencimientoCAE = vencimientoCAE;
         return this;
     }
-    
+
     public FacturaCompraBuilder withNumSerieAfip(long numeroDeSerieAfip) {
         this.numSerieAfip = numeroDeSerieAfip;
         return this;
     }
-    
+
     public FacturaCompraBuilder withNumFacturaAfip(long numeroFacturaAfip) {
         this.numFacturaAfip = numeroFacturaAfip;
         return this;
-    }    
+    }
 }
-

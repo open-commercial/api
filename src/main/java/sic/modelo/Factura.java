@@ -170,6 +170,11 @@ public abstract class Factura implements Serializable {
     return sucursal.getNombre();
   }
 
+  @JsonGetter("idUsuario")
+  public long getIdUsuario() {
+    return usuario.getIdUsuario();
+  }
+
   @JsonGetter("nombreUsuario")
   public String getNombreUsuario() {
     return usuario.getNombre() + " " + usuario.getApellido() + " (" + usuario.getUsername() + ")";

@@ -21,7 +21,6 @@ import sic.repository.ProductoRepository;
 class ProductoServiceImplTest {
 
   @InjectMocks private ProductoServiceImpl productoService;
-  @Mock private ProductoRepository productoRepository;
 
   @Test
   void shouldCalcularGananciaPorcentaje() {

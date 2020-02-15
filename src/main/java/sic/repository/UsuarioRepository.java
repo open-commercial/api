@@ -57,6 +57,5 @@ public interface UsuarioRepository
   int updateIdSucursal(
       @Param("idUsuario") long idUsuario,
       @Param("idSucursalPredeterminada") long idSucursalPredeterminada);
-
   Page<Usuario> findAllByRolesContainsAndEliminado(Rol rol, boolean eliminado, Pageable pageable);
 }

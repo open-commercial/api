@@ -1,16 +1,18 @@
-package sic.modelo.dto;
+package sic.model;
 
 import lombok.*;
 import sic.modelo.Rol;
+
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"username", "email", "roles"})
 @Builder
-public class UsuarioDTO implements Serializable {
+@EqualsAndHashCode(of = {"username", "email", "roles"})
+public class Usuario implements Serializable {
 
   private long idUsuario;
   private String username;
