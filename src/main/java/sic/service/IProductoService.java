@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.Page;
 import sic.modelo.criteria.BusquedaProductoCriteria;
+import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.modelo.dto.ProductosParaVerificarStockDTO;
 
@@ -30,7 +31,7 @@ public interface IProductoService {
 
   BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal gananciaPorcentaje);
 
-  Map<Long, BigDecimal> getProductosSinStockDisponible(ProductosParaVerificarStockDTO productosParaVerificarStockDTO);
+  List<ProductoFaltanteDTO> getProductosSinStockDisponible(ProductosParaVerificarStockDTO productosParaVerificarStockDTO);
 
   BigDecimal calcularGananciaPorcentaje(
       BigDecimal precioDeListaNuevo,

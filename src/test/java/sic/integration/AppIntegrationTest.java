@@ -2719,7 +2719,12 @@ class AppIntegrationTest {
         NuevoProductoDTO.builder()
             .codigo(RandomStringUtils.random(10, false, true))
             .descripcion(RandomStringUtils.random(10, true, false))
-            .cantidadEnSucursal(new HashMap<Long, BigDecimal>() {{put(1L, BigDecimal.ONE);}})
+            .cantidadEnSucursal(
+                new HashMap<Long, BigDecimal>() {
+                  {
+                    put(1L, BigDecimal.ONE);
+                  }
+                })
             .bulto(BigDecimal.ONE)
             .precioCosto(CIEN)
             .gananciaPorcentaje(new BigDecimal("900"))
@@ -2731,11 +2736,10 @@ class AppIntegrationTest {
             .nota("ProductoTestSinStock")
             .publico(true)
             .build();
-    ProductoDTO productoSinStock =
-        restTemplate.postForObject(
-            apiPrefix + "/productos?idMedida=1&idRubro=1&idProveedor=1",
-            productoTestSinStock,
-            ProductoDTO.class);
+    restTemplate.postForObject(
+        apiPrefix + "/productos?idMedida=1&idRubro=1&idProveedor=1",
+        productoTestSinStock,
+        ProductoDTO.class);
     BigDecimal[] cantidades = {BigDecimal.ONE};
     long[] idsProductos = {1L};
     ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
@@ -2744,12 +2748,13 @@ class AppIntegrationTest {
             .idProducto(idsProductos)
             .idSucursal(1L)
             .build();
-    Map faltante =
-        restTemplate.postForObject(
-            apiPrefix + "/productos/disponibilidad-stock",
-            productosParaVerificarStockDTO,
-            Map.class);
-    assertTrue(faltante.isEmpty(), "Debería no devolver faltantes");
+    List<ProductoFaltanteDTO> faltantes =
+        Arrays.asList(
+            restTemplate.postForObject(
+                apiPrefix + "/productos/disponibilidad-stock",
+                productosParaVerificarStockDTO,
+                ProductoFaltanteDTO[].class));
+    assertTrue(faltantes.isEmpty(), "Debería no devolver faltantes");
   }
 
   @Test
@@ -2783,12 +2788,13 @@ class AppIntegrationTest {
         .idProducto(idsProductos)
         .idSucursal(1L)
         .build();
-    Map faltante =
-      restTemplate.postForObject(
-        apiPrefix + "/productos/disponibilidad-stock",
-        productosParaVerificarStockDTO,
-        Map.class);
-    assertFalse(faltante.isEmpty(), "Debería devolver faltantes");
+    List<ProductoFaltanteDTO> faltantes =
+        Arrays.asList(
+            restTemplate.postForObject(
+                apiPrefix + "/productos/disponibilidad-stock",
+                productosParaVerificarStockDTO,
+                ProductoFaltanteDTO[].class));
+    assertFalse(faltantes.isEmpty(), "Debería devolver faltantes");
   }
 
   @Test
@@ -2823,12 +2829,13 @@ class AppIntegrationTest {
             .idProducto(idsProductos)
             .idSucursal(2L)
             .build();
-    Map faltante =
-        restTemplate.postForObject(
-            apiPrefix + "/productos/disponibilidad-stock",
-            productosParaVerificarStockDTO,
-            Map.class);
-    assertTrue(faltante.isEmpty(), "Debería no devolver faltantes");
+    List<ProductoFaltanteDTO> faltantes =
+        Arrays.asList(
+            restTemplate.postForObject(
+                apiPrefix + "/productos/disponibilidad-stock",
+                productosParaVerificarStockDTO,
+                ProductoFaltanteDTO[].class));
+    assertTrue(faltantes.isEmpty(), "Debería no devolver faltantes");
   }
 
   @Test
@@ -2863,12 +2870,13 @@ class AppIntegrationTest {
         .idProducto(idsProductos)
         .idSucursal(2L)
         .build();
-    Map faltante =
-      restTemplate.postForObject(
-        apiPrefix + "/productos/disponibilidad-stock",
-        productosParaVerificarStockDTO,
-        Map.class);
-    assertFalse(faltante.isEmpty(), "Debería devolver faltantes");
+    List<ProductoFaltanteDTO> faltantes =
+        Arrays.asList(
+            restTemplate.postForObject(
+                apiPrefix + "/productos/disponibilidad-stock",
+                productosParaVerificarStockDTO,
+                ProductoFaltanteDTO[].class));
+    assertFalse(faltantes.isEmpty(), "Debería devolver faltantes");
   }
 
   @Test

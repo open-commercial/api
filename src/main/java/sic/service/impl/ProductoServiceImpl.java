@@ -33,6 +33,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.criteria.BusquedaProductoCriteria;
+import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.modelo.dto.ProductosParaVerificarStockDTO;
 import sic.service.*;
@@ -695,9 +696,9 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Map<Long, BigDecimal> getProductosSinStockDisponible(
+  public List<ProductoFaltanteDTO> getProductosSinStockDisponible(
       ProductosParaVerificarStockDTO productosParaVerificarStockDTO) {
-    Map<Long, BigDecimal> productos = new HashMap<>();
+    List<ProductoFaltanteDTO> productosFaltantes = new ArrayList<>();
     int longitudIds = productosParaVerificarStockDTO.getIdProducto().length;
     int longitudCantidades = productosParaVerificarStockDTO.getCantidad().length;
     if (longitudIds == longitudCantidades) {
@@ -715,7 +716,14 @@ public class ProductoServiceImpl implements IProductoService {
                 cantidadEnSucursal -> {
                   if (!producto.isIlimitado()
                       && cantidadEnSucursal.getCantidad().compareTo(cantidadLambda) < 0) {
-                    productos.put(producto.getIdProducto(), cantidadLambda);
+                    productosFaltantes.add(
+                        ProductoFaltanteDTO.builder()
+                            .idProducto(producto.getIdProducto())
+                            .codigo(producto.getCodigo())
+                            .descripcion(producto.getDescripcion())
+                            .cantidadSolicitada(cantidadLambda)
+                            .cantidadDisponible(cantidadEnSucursal.getCantidad())
+                            .build());
                   }
                 });
       }
@@ -723,7 +731,7 @@ public class ProductoServiceImpl implements IProductoService {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_error_logitudes_arrays", null, Locale.getDefault()));
     }
-    return productos;
+    return productosFaltantes;
   }
 
   @Override
