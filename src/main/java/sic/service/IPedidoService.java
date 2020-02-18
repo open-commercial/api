@@ -24,7 +24,7 @@ public interface IPedidoService {
 
   long generarNumeroPedido(Sucursal sucursal);
 
-  Pedido actualizarEstadoPedido(Pedido pedido);
+  void actualizarEstadoPedido(Pedido pedido);
 
   Pedido calcularTotalActualDePedido(Pedido pedido);
 

@@ -30,7 +30,7 @@ import sic.util.CalculosComprobante;
 @Validated
 public class FacturaServiceImpl implements IFacturaService {
 
-  private final FacturaRepository facturaRepository;
+  private final FacturaRepository<Factura> facturaRepository;
   private final RenglonFacturaRepository renglonFacturaRepository;
   private final IFacturaVentaService facturaVentaService;
   private final IProductoService productoService;

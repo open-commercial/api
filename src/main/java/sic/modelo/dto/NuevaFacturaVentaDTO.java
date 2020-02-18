@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import sic.modelo.TipoDeComprobante;
-import sic.modelo.dto.NuevoRenglonFacturaDTO;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

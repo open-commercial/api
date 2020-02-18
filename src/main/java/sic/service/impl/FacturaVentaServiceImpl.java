@@ -708,8 +708,8 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public FacturaVenta agregarRenglonesAFacturaSinIVA(
-          FacturaVenta facturaSinIVA, int[] indices, List<RenglonFactura> renglones) {
+  public void agregarRenglonesAFacturaSinIVA(
+      FacturaVenta facturaSinIVA, int[] indices, List<RenglonFactura> renglones) {
     List<RenglonFactura> renglonesSinIVA = new ArrayList<>();
     BigDecimal cantidadProductosRenglonFacturaSinIVA = BigDecimal.ZERO;
     int renglonMarcado = 0;
@@ -756,12 +756,11 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       }
     }
     facturaSinIVA.setRenglones(renglonesSinIVA);
-    return facturaSinIVA;
   }
 
   @Override
-  public FacturaVenta agregarRenglonesAFacturaConIVA(
-          FacturaVenta facturaConIVA, int[] indices, List<RenglonFactura> renglones) {
+  public void agregarRenglonesAFacturaConIVA(
+      FacturaVenta facturaConIVA, int[] indices, List<RenglonFactura> renglones) {
     List<RenglonFactura> renglonesConIVA = new ArrayList<>();
     BigDecimal cantidadProductosRenglonFacturaConIVA = BigDecimal.ZERO;
     int renglonMarcado = 0;
@@ -828,6 +827,5 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       }
     }
     facturaConIVA.setRenglones(renglonesConIVA);
-    return facturaConIVA;
   }
 }

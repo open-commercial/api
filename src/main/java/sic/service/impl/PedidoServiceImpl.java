@@ -131,7 +131,7 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public Pedido actualizarEstadoPedido(Pedido pedido) {
+  public void actualizarEstadoPedido(Pedido pedido) {
     pedido.setEstado(EstadoPedido.ACTIVO);
     if (this.getFacturasDelPedido(pedido.getIdPedido()).isEmpty()) {
       pedido.setEstado(EstadoPedido.ABIERTO);
@@ -139,7 +139,6 @@ public class PedidoServiceImpl implements IPedidoService {
     if (facturaVentaService.pedidoTotalmenteFacturado(pedido)) {
       pedido.setEstado(EstadoPedido.CERRADO);
     }
-    return pedido;
   }
 
   @Override

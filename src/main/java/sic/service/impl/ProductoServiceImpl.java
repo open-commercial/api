@@ -512,7 +512,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public List<Producto> actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO) {
+  public void actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO) {
     boolean actualizaPrecios = productosParaActualizarDTO.getGananciaNeto() != null
       && productosParaActualizarDTO.getGananciaPorcentaje() != null
       && productosParaActualizarDTO.getIvaNeto() != null
@@ -607,7 +607,6 @@ public class ProductoServiceImpl implements IProductoService {
     }
     productoRepository.saveAll(productos);
     logger.warn("Los Productos {} se modificaron correctamente.", productos);
-    return productos;
   }
 
   @Override
