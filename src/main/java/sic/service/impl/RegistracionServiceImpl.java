@@ -3,6 +3,7 @@ package sic.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,9 @@ import java.util.Locale;
 @Transactional
 @Validated
 public class RegistracionServiceImpl implements IRegistracionService {
+
+  @Value("${SIC_MAIL_USERNAME}")
+  private String emailUsername;
 
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
@@ -76,17 +80,17 @@ public class RegistracionServiceImpl implements IRegistracionService {
     nuevoCliente.setMontoCompraMinima(BigDecimal.ZERO);
     clienteService.guardar(nuevoCliente);
     correoElectronicoService.enviarEmail(
-            nuevoUsuario.getEmail(),
-        "",
+        nuevoUsuario.getEmail(),
+        this.emailUsername,
         "Registración de cuenta nueva",
         messageSource.getMessage(
             "mensaje_correo_registracion",
             new Object[] {
-                    nuevoUsuario.getNombre() + " " + nuevoUsuario.getApellido(),
-                    nuevoCliente.getCategoriaIVA(),
-                    nuevoCliente.getNombreFiscal(),
-                    nuevoCliente.getTelefono(),
-                    nuevoUsuario.getUsername(),
+              nuevoUsuario.getNombre() + " " + nuevoUsuario.getApellido(),
+              nuevoCliente.getCategoriaIVA(),
+              nuevoCliente.getNombreFiscal(),
+              nuevoCliente.getTelefono(),
+              nuevoUsuario.getUsername(),
             },
             Locale.getDefault()),
         null,

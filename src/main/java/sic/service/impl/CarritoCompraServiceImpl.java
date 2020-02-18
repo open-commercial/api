@@ -153,6 +153,13 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   public Pedido crearPedido(NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO) {
     Usuario usuario =
         usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario());
+    if (nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago() != null) {
+      try {
+        mercadoPagoService.crearNuevoPago(nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago(), usuario);
+      } catch (MPException ex) {
+        mercadoPagoService.logExceptionMercadoPago(ex);
+      }
+    }
     List<ItemCarritoCompra> items =
         carritoCompraRepository.findAllByUsuarioOrderByIdItemCarritoCompraDesc(usuario);
     Pedido pedido = new Pedido();
@@ -183,13 +190,6 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     pedido.setRenglones(renglonesPedido);
     pedido.setTipoDeEnvio(nuevaOrdenDeCompraDTO.getTipoDeEnvio());
     Pedido p = pedidoService.guardar(pedido);
-    if (nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago() != null) {
-      try {
-        mercadoPagoService.crearNuevoPago(nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago(), usuario);
-      } catch (MPException ex) {
-        mercadoPagoService.logExceptionMercadoPago(ex);
-      }
-    }
     this.eliminarTodosLosItemsDelUsuario(nuevaOrdenDeCompraDTO.getIdUsuario());
     return p;
   }

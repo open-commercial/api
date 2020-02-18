@@ -113,7 +113,7 @@ public class NotaServiceImpl implements INotaService {
       return nota.get();
     } else {
       throw new EntityNotFoundException(
-          messageSource.getMessage("mensaje_factura_eliminada", null, Locale.getDefault()));
+          messageSource.getMessage("mensaje_nota_eliminada", null, Locale.getDefault()));
     }
   }
 
@@ -121,12 +121,16 @@ public class NotaServiceImpl implements INotaService {
   @Transactional
   public void eliminarNota(long idNota) {
     Nota nota = this.getNotaNoEliminadaPorId(idNota);
+    if (nota.getMovimiento() == Movimiento.COMPRA && nota.getFacturaCompra() != null) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_nota_compra_con_factura_asociada", null, Locale.getDefault()));
+    }
     if (nota.getMovimiento() == Movimiento.VENTA) {
       if (nota.getCae() != 0L) {
         throw new BusinessServiceException(
             messageSource.getMessage("mensaje_eliminar_nota_aprobada", null, Locale.getDefault()));
       }
-      this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ELIMINACION);
       if (nota instanceof NotaCredito) {
         NotaCredito nc = (NotaCredito) nota;
         if (nc.isModificaStock()) {
@@ -138,14 +142,11 @@ public class NotaServiceImpl implements INotaService {
               nota.getTipoComprobante());
         }
       }
-      nota.setEliminada(true);
-      notaRepository.save(nota);
-      logger.warn("La Nota {} se eliminó correctamente.", nota);
-    } else {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
     }
+    this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ELIMINACION);
+    nota.setEliminada(true);
+    notaRepository.save(nota);
+    logger.warn("La Nota {} se eliminó correctamente.", nota);
   }
 
   @Override
@@ -567,7 +568,7 @@ public class NotaServiceImpl implements INotaService {
       if (nota.getFacturaVenta() != null
           && nota.getFecha().isBefore(nota.getFacturaVenta().getFecha())) {
         throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_nota_fecha_incorrecta", null, Locale.getDefault()));
+            messageSource.getMessage("mensaje_nota_fecha_comprobante_relacionado_incorrecta", null, Locale.getDefault()));
       }
       if (nota.getCae() != 0L) {
         throw new BusinessServiceException(
@@ -577,9 +578,9 @@ public class NotaServiceImpl implements INotaService {
       if (nota.getFacturaCompra() != null
           && nota.getFecha().isBefore(nota.getFacturaCompra().getFecha())) {
         throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_nota_fecha_incorrecta", null, Locale.getDefault()));
+            messageSource.getMessage("mensaje_nota_fecha_comprobante_relacionado_incorrecta", null, Locale.getDefault()));
       }
-      if (nota.getFecha().isAfter(LocalDateTime.now())) {
+      if (nota.getFecha().isAfter(LocalDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(59))) {
         throw new BusinessServiceException(
             messageSource.getMessage("mensaje_nota_fecha_incorrecta", null, Locale.getDefault()));
       }

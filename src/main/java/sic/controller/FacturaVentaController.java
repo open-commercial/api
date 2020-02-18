@@ -127,11 +127,7 @@ public class FacturaVentaController {
         facturaService.calcularRenglones(
             nuevaFacturaVentaDTO.getTipoDeComprobante(),
             Movimiento.VENTA,
-            CalculosComprobante.getArrayDeCantidadesProductoParaFactura(
-                nuevaFacturaVentaDTO.getRenglones()),
-            CalculosComprobante.getArrayDeIdProductoParaFactura(
-                nuevaFacturaVentaDTO.getRenglones()),
-            null));
+            nuevaFacturaVentaDTO.getRenglones()));
     fv.setObservaciones(
         nuevaFacturaVentaDTO.getObservaciones() != null
             ? nuevaFacturaVentaDTO.getObservaciones()
@@ -244,11 +240,7 @@ public class FacturaVentaController {
       @RequestBody List<NuevoRenglonFacturaDTO> nuevosRenglonesFacturaDTO,
       @RequestParam TipoDeComprobante tipoDeComprobante) {
     return facturaService.calcularRenglones(
-        tipoDeComprobante,
-        Movimiento.VENTA,
-        CalculosComprobante.getArrayDeCantidadesProductoParaFactura(nuevosRenglonesFacturaDTO),
-        CalculosComprobante.getArrayDeIdProductoParaFactura(nuevosRenglonesFacturaDTO),
-        null);
+        tipoDeComprobante, Movimiento.VENTA, nuevosRenglonesFacturaDTO);
   }
 
   @PostMapping("/facturas/ventas/total-facturado/criteria")

@@ -12,13 +12,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.builder.ClienteBuilder;
-import sic.builder.SucursalBuilder;
-import sic.builder.TransportistaBuilder;
+import sic.builder.*;
 import sic.modelo.*;
+import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.repository.FacturaVentaRepository;
 import sic.service.IFacturaService;
 import sic.util.CalculosComprobante;
@@ -26,12 +26,12 @@ import sic.util.CalculosComprobante;
 @ExtendWith(SpringExtension.class)
 class FacturaServiceImplTest {
 
-  @Mock private FacturaVentaRepository facturaVentaRepository;
-  @Mock private ProductoServiceImpl productoService;
-  @Mock private IFacturaService facturaService;
+  @Mock private FacturaVentaRepository mockFacturaVentaRepository;
+  @Mock private ProductoServiceImpl mockProductoService;
+  @Mock private IFacturaService mockFacturaService;
   @InjectMocks private FacturaServiceImpl facturaServiceImpl;
-  @InjectMocks private FacturaCompraServiceImpl facturaCompraService;
-  @InjectMocks private FacturaVentaServiceImpl facturaVentaService;
+  @InjectMocks private FacturaCompraServiceImpl facturaCompraServiceImpl;
+  @InjectMocks private FacturaVentaServiceImpl facturaVentaServiceImpl;
 
   @Test
   void shouldGetTipoFacturaCompraWhenSucursalYProveedorDiscriminanIVA() {
@@ -44,7 +44,7 @@ class FacturaServiceImplTest {
     expResult[1] = TipoDeComprobante.FACTURA_B;
     expResult[2] = TipoDeComprobante.FACTURA_X;
     expResult[3] = TipoDeComprobante.PRESUPUESTO;
-    TipoDeComprobante[] result = facturaCompraService.getTiposDeComprobanteCompra(sucursal, proveedor);
+    TipoDeComprobante[] result = facturaCompraServiceImpl.getTiposDeComprobanteCompra(sucursal, proveedor);
     assertArrayEquals(expResult, result);
   }
 
@@ -58,7 +58,7 @@ class FacturaServiceImplTest {
     expResult[0] = TipoDeComprobante.FACTURA_C;
     expResult[1] = TipoDeComprobante.FACTURA_X;
     expResult[2] = TipoDeComprobante.PRESUPUESTO;
-    TipoDeComprobante[] result = facturaCompraService.getTiposDeComprobanteCompra(sucursal, proveedor);
+    TipoDeComprobante[] result = facturaCompraServiceImpl.getTiposDeComprobanteCompra(sucursal, proveedor);
     assertArrayEquals(expResult, result);
   }
 
@@ -72,7 +72,7 @@ class FacturaServiceImplTest {
     expResult[0] = TipoDeComprobante.FACTURA_B;
     expResult[1] = TipoDeComprobante.FACTURA_X;
     expResult[2] = TipoDeComprobante.PRESUPUESTO;
-    TipoDeComprobante[] result = facturaCompraService.getTiposDeComprobanteCompra(sucursal, proveedor);
+    TipoDeComprobante[] result = facturaCompraServiceImpl.getTiposDeComprobanteCompra(sucursal, proveedor);
     assertArrayEquals(expResult, result);
   }
 
@@ -86,7 +86,7 @@ class FacturaServiceImplTest {
     expResult[0] = TipoDeComprobante.FACTURA_C;
     expResult[1] = TipoDeComprobante.FACTURA_X;
     expResult[2] = TipoDeComprobante.PRESUPUESTO;
-    TipoDeComprobante[] result = facturaCompraService.getTiposDeComprobanteCompra(sucursal, proveedor);
+    TipoDeComprobante[] result = facturaCompraServiceImpl.getTiposDeComprobanteCompra(sucursal, proveedor);
     assertArrayEquals(expResult, result);
   }
 
@@ -99,7 +99,7 @@ class FacturaServiceImplTest {
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_X, TipoDeComprobante.PRESUPUESTO
     };
-    TipoDeComprobante[] result = facturaVentaService.getTiposDeComprobanteVenta(sucursal, cliente);
+    TipoDeComprobante[] result = facturaVentaServiceImpl.getTiposDeComprobanteVenta(sucursal, cliente);
     assertArrayEquals(expResult, result);
   }
 
@@ -112,7 +112,7 @@ class FacturaServiceImplTest {
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_X, TipoDeComprobante.PRESUPUESTO
     };
-    TipoDeComprobante[] result = facturaVentaService.getTiposDeComprobanteVenta(sucursal, cliente);
+    TipoDeComprobante[] result = facturaVentaServiceImpl.getTiposDeComprobanteVenta(sucursal, cliente);
     assertArrayEquals(expResult, result);
   }
 
@@ -125,7 +125,7 @@ class FacturaServiceImplTest {
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_C, TipoDeComprobante.FACTURA_X, TipoDeComprobante.PRESUPUESTO
     };
-    TipoDeComprobante[] result = facturaVentaService.getTiposDeComprobanteVenta(sucursal, cliente);
+    TipoDeComprobante[] result = facturaVentaServiceImpl.getTiposDeComprobanteVenta(sucursal, cliente);
     assertArrayEquals(expResult, result);
   }
 
@@ -138,7 +138,7 @@ class FacturaServiceImplTest {
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_C, TipoDeComprobante.FACTURA_X, TipoDeComprobante.PRESUPUESTO
     };
-    TipoDeComprobante[] result = facturaVentaService.getTiposDeComprobanteVenta(sucursal, cliente);
+    TipoDeComprobante[] result = facturaVentaServiceImpl.getTiposDeComprobanteVenta(sucursal, cliente);
     assertArrayEquals(expResult, result);
   }
 
@@ -173,10 +173,10 @@ class FacturaServiceImplTest {
 
   @Test
   void shouldDividirFactura() {
-    when(facturaVentaRepository.buscarMayorNumFacturaSegunTipo(
+    when(mockFacturaVentaRepository.buscarMayorNumFacturaSegunTipo(
             TipoDeComprobante.FACTURA_X, 1L, new SucursalBuilder().build().getIdSucursal()))
         .thenReturn(1L);
-    when(facturaVentaRepository.buscarMayorNumFacturaSegunTipo(
+    when(mockFacturaVentaRepository.buscarMayorNumFacturaSegunTipo(
             TipoDeComprobante.FACTURA_A, 1L, new SucursalBuilder().build().getIdSucursal()))
         .thenReturn(1L);
     RenglonFactura renglon1 = Mockito.mock(RenglonFactura.class);
@@ -200,7 +200,7 @@ class FacturaServiceImplTest {
     when(producto1.getPrecioVentaPublico()).thenReturn(BigDecimal.ONE);
     when(producto1.getIvaPorcentaje()).thenReturn(new BigDecimal("21.00"));
     when(producto1.getPrecioLista()).thenReturn(BigDecimal.ONE);
-    when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(producto1);
+    when(mockProductoService.getProductoNoEliminadoPorId(1L)).thenReturn(producto1);
     when(producto2.getIdProducto()).thenReturn(2L);
     when(producto2.getCodigo()).thenReturn("2");
     when(producto2.getDescripcion()).thenReturn("producto dos test");
@@ -209,7 +209,7 @@ class FacturaServiceImplTest {
     when(producto2.getPrecioVentaPublico()).thenReturn(BigDecimal.ONE);
     when(producto2.getIvaPorcentaje()).thenReturn(new BigDecimal("21.00"));
     when(producto2.getPrecioLista()).thenReturn(BigDecimal.ONE);
-    when(productoService.getProductoNoEliminadoPorId(2L)).thenReturn(producto2);
+    when(mockProductoService.getProductoNoEliminadoPorId(2L)).thenReturn(producto2);
     when(producto3.getIdProducto()).thenReturn(3L);
     when(producto3.getCodigo()).thenReturn("3");
     when(producto3.getDescripcion()).thenReturn("producto tres test");
@@ -218,7 +218,7 @@ class FacturaServiceImplTest {
     when(producto3.getPrecioVentaPublico()).thenReturn(BigDecimal.ONE);
     when(producto3.getIvaPorcentaje()).thenReturn(new BigDecimal("21.00"));
     when(producto3.getPrecioLista()).thenReturn(BigDecimal.ONE);
-    when(productoService.getProductoNoEliminadoPorId(3L)).thenReturn(producto3);
+    when(mockProductoService.getProductoNoEliminadoPorId(3L)).thenReturn(producto3);
     when(producto4.getIdProducto()).thenReturn(4L);
     when(producto4.getCodigo()).thenReturn("4");
     when(producto4.getDescripcion()).thenReturn("producto cuatro test");
@@ -227,7 +227,7 @@ class FacturaServiceImplTest {
     when(producto4.getPrecioVentaPublico()).thenReturn(BigDecimal.ONE);
     when(producto4.getIvaPorcentaje()).thenReturn(new BigDecimal("21.00"));
     when(producto4.getPrecioLista()).thenReturn(BigDecimal.ONE);
-    when(productoService.getProductoNoEliminadoPorId(4L)).thenReturn(producto4);
+    when(mockProductoService.getProductoNoEliminadoPorId(4L)).thenReturn(producto4);
     when(producto5.getIdProducto()).thenReturn(5L);
     when(producto5.getCodigo()).thenReturn("5");
     when(producto5.getDescripcion()).thenReturn("producto cinco test");
@@ -236,7 +236,7 @@ class FacturaServiceImplTest {
     when(producto5.getPrecioVentaPublico()).thenReturn(BigDecimal.ONE);
     when(producto5.getIvaPorcentaje()).thenReturn(new BigDecimal("21.00"));
     when(producto5.getPrecioLista()).thenReturn(BigDecimal.ONE);
-    when(productoService.getProductoNoEliminadoPorId(5L)).thenReturn(producto5);
+    when(mockProductoService.getProductoNoEliminadoPorId(5L)).thenReturn(producto5);
     when(producto6.getIdProducto()).thenReturn(6L);
     when(producto6.getCodigo()).thenReturn("6");
     when(producto6.getDescripcion()).thenReturn("producto seis test");
@@ -245,7 +245,7 @@ class FacturaServiceImplTest {
     when(producto6.getPrecioVentaPublico()).thenReturn(BigDecimal.ONE);
     when(producto6.getIvaPorcentaje()).thenReturn(new BigDecimal("21.00"));
     when(producto6.getPrecioLista()).thenReturn(BigDecimal.ONE);
-    when(productoService.getProductoNoEliminadoPorId(6L)).thenReturn(producto6);
+    when(mockProductoService.getProductoNoEliminadoPorId(6L)).thenReturn(producto6);
     when(renglon1.getIdProductoItem()).thenReturn(1L);
     when(renglon1.getIvaNeto()).thenReturn(new BigDecimal("21"));
     when(renglon1.getBonificacionPorcentaje()).thenReturn(BigDecimal.ZERO);
@@ -293,67 +293,107 @@ class FacturaServiceImplTest {
     int cantidadDeFacturasEsperadas = 2;
     int cantidadDeRenglonesEsperadosFX = 4;
     int cantidadDeRenglonesEsperadosFA = 6;
+    NuevoRenglonFacturaDTO nuevoRenglonFacturaX1 =
+        NuevoRenglonFacturaDTO.builder()
+            .idProducto(1L)
+            .cantidad(new BigDecimal("2.000000000000000"))
+            .build();
     RenglonFactura renglonCalculadoX1 =
         facturaServiceImpl.calcularRenglon(
-            TipoDeComprobante.FACTURA_X, Movimiento.VENTA, new BigDecimal("2.000000000000000"), 1, null);
+            TipoDeComprobante.FACTURA_X, Movimiento.VENTA, nuevoRenglonFacturaX1);
+    NuevoRenglonFacturaDTO nuevoRenglonFacturaX2 =
+        NuevoRenglonFacturaDTO.builder().idProducto(2L).cantidad(new BigDecimal("3.00")).build();
     RenglonFactura renglonCalculadoX2 =
-            facturaServiceImpl.calcularRenglon(
-                    TipoDeComprobante.FACTURA_X, Movimiento.VENTA, new BigDecimal("3.00"), 2, null);
+        facturaServiceImpl.calcularRenglon(
+            TipoDeComprobante.FACTURA_X, Movimiento.VENTA, nuevoRenglonFacturaX2);
+    NuevoRenglonFacturaDTO nuevoRenglonFacturaX3 =
+        NuevoRenglonFacturaDTO.builder()
+            .idProducto(3L)
+            .cantidad(new BigDecimal("6.400000000000000"))
+            .build();
     RenglonFactura renglonCalculadoX3 =
-            facturaServiceImpl.calcularRenglon(
-                    TipoDeComprobante.FACTURA_X, Movimiento.VENTA, new BigDecimal("6.400000000000000"), 3, null);
+        facturaServiceImpl.calcularRenglon(
+            TipoDeComprobante.FACTURA_X, Movimiento.VENTA, nuevoRenglonFacturaX3);
+    NuevoRenglonFacturaDTO nuevoRenglonFacturaX4 =
+        NuevoRenglonFacturaDTO.builder()
+            .idProducto(4L)
+            .cantidad(new BigDecimal("0.600000000000000"))
+            .build();
     RenglonFactura renglonCalculadoX4 =
-            facturaServiceImpl.calcularRenglon(
-                    TipoDeComprobante.FACTURA_X, Movimiento.VENTA, new BigDecimal("0.600000000000000"), 4, null);
+        facturaServiceImpl.calcularRenglon(
+            TipoDeComprobante.FACTURA_X, Movimiento.VENTA, nuevoRenglonFacturaX4);
+    NuevoRenglonFacturaDTO nuevoRenglonFacturaA1 =
+        NuevoRenglonFacturaDTO.builder()
+            .idProducto(1L)
+            .cantidad(new BigDecimal("2.000000000000000"))
+            .build();
     RenglonFactura renglonCalculadoA1 =
             facturaServiceImpl.calcularRenglon(
-                    TipoDeComprobante.FACTURA_X, Movimiento.VENTA, new BigDecimal("2.000000000000000"), 1, null);
+                    TipoDeComprobante.FACTURA_X, Movimiento.VENTA, nuevoRenglonFacturaA1);
+    NuevoRenglonFacturaDTO nuevoRenglonFacturaA2 =
+        NuevoRenglonFacturaDTO.builder().idProducto(2L).cantidad(new BigDecimal("4")).build();
     RenglonFactura renglonCalculadoA2 =
             facturaServiceImpl.calcularRenglon(
-                    TipoDeComprobante.FACTURA_A, Movimiento.VENTA, new BigDecimal("4"), 2, null);
+                    TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaA2);
+    NuevoRenglonFacturaDTO nuevoRenglonFacturaA3 =
+            NuevoRenglonFacturaDTO.builder().idProducto(3L).cantidad(new BigDecimal("6.400000000000000")).build();
     RenglonFactura renglonCalculadoA3 =
-            facturaServiceImpl.calcularRenglon(
-                    TipoDeComprobante.FACTURA_A, Movimiento.VENTA, new BigDecimal("6.400000000000000"), 3, null);
+        facturaServiceImpl.calcularRenglon(
+            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaA3);
+    NuevoRenglonFacturaDTO nuevoRenglonFacturaA4 =
+            NuevoRenglonFacturaDTO.builder().idProducto(6L).cantidad(new BigDecimal("9.3")).build();
     RenglonFactura renglonCalculadoA4 =
-            facturaServiceImpl.calcularRenglon(
-                    TipoDeComprobante.FACTURA_A, Movimiento.VENTA, new BigDecimal("9.3"), 6, null);
+        facturaServiceImpl.calcularRenglon(
+            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaA4);
+    NuevoRenglonFacturaDTO nuevoRenglonFacturaA5 =
+        NuevoRenglonFacturaDTO.builder()
+            .idProducto(4L)
+            .cantidad(new BigDecimal("0.600000000000000"))
+            .build();
     RenglonFactura renglonCalculadoA5 =
-            facturaServiceImpl.calcularRenglon(
-                    TipoDeComprobante.FACTURA_A, Movimiento.VENTA, new BigDecimal("0.600000000000000"), 4, null);
+        facturaServiceImpl.calcularRenglon(
+            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaA5);
+    NuevoRenglonFacturaDTO nuevoRenglonFacturaA6 =
+            NuevoRenglonFacturaDTO.builder()
+                    .idProducto(5L)
+                    .cantidad(new BigDecimal("0.8"))
+                    .build();
     RenglonFactura renglonCalculadoA6 =
-            facturaServiceImpl.calcularRenglon(
-                    TipoDeComprobante.FACTURA_A, Movimiento.VENTA, new BigDecimal("0.8"), 5, null);
-    when(facturaService.calcularRenglon(
-            TipoDeComprobante.FACTURA_X, Movimiento.VENTA, new BigDecimal("2.000000000000000"), 1, null))
+        facturaServiceImpl.calcularRenglon(
+            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaA6);
+    when(mockFacturaService.calcularRenglon(
+            TipoDeComprobante.FACTURA_X, Movimiento.VENTA, nuevoRenglonFacturaX1))
         .thenReturn(renglonCalculadoX1);
-    when(facturaService.calcularRenglon(
-            TipoDeComprobante.FACTURA_X, Movimiento.VENTA, new BigDecimal("3.00"), 2, null))
+    when(mockFacturaService.calcularRenglon(
+            TipoDeComprobante.FACTURA_X, Movimiento.VENTA, nuevoRenglonFacturaX2))
             .thenReturn(renglonCalculadoX2);
-    when(facturaService.calcularRenglon(
-            TipoDeComprobante.FACTURA_X, Movimiento.VENTA, new BigDecimal("6.400000000000000"), 3, null))
+    when(mockFacturaService.calcularRenglon(
+            TipoDeComprobante.FACTURA_X, Movimiento.VENTA, nuevoRenglonFacturaX3))
             .thenReturn(renglonCalculadoX3);
-    when(facturaService.calcularRenglon(
-            TipoDeComprobante.FACTURA_X, Movimiento.VENTA, new BigDecimal("0.600000000000000"), 4, null))
+    when(mockFacturaService.calcularRenglon(
+            TipoDeComprobante.FACTURA_X, Movimiento.VENTA, nuevoRenglonFacturaX4))
             .thenReturn(renglonCalculadoX4);
-    when(facturaService.calcularRenglon(
-            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, new BigDecimal("2.000000000000000"), 1, null))
+    when(mockFacturaService.calcularRenglon(
+            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaA1))
             .thenReturn(renglonCalculadoA1);
-    when(facturaService.calcularRenglon(
-            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, new BigDecimal("4"), 2, null))
+    when(mockFacturaService.calcularRenglon(
+            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaA2))
             .thenReturn(renglonCalculadoA2);
-    when(facturaService.calcularRenglon(
-            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, new BigDecimal("6.400000000000000"), 3, null))
+    when(mockFacturaService.calcularRenglon(
+            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaA3))
             .thenReturn(renglonCalculadoA3);
-    when(facturaService.calcularRenglon(
-            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, new BigDecimal("9.3"), 6, null))
+    when(mockFacturaService.calcularRenglon(
+            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaA4))
             .thenReturn(renglonCalculadoA4);
-    when(facturaService.calcularRenglon(
-            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, new BigDecimal("0.600000000000000"), 4, null))
+    when(mockFacturaService.calcularRenglon(
+            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaA5))
             .thenReturn(renglonCalculadoA5);
-    when(facturaService.calcularRenglon(
-            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, new BigDecimal("0.8"), 5, null))
+    when(mockFacturaService.calcularRenglon(
+            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaA6))
             .thenReturn(renglonCalculadoA6);
-    List<FacturaVenta> result = facturaVentaService.dividirFactura(factura, indices);
+    when(mockFacturaService.calcularIvaNetoFactura(any(), any(), any(), any(), any(), any(), any()))
+        .thenReturn(BigDecimal.ZERO);
+    List<FacturaVenta> result = facturaVentaServiceImpl.dividirFactura(factura, indices);
     assertEquals(cantidadDeFacturasEsperadas, result.size());
     assertEquals(cantidadDeRenglonesEsperadosFX, result.get(0).getRenglones().size());
     assertEquals(cantidadDeRenglonesEsperadosFA, result.get(1).getRenglones().size());
@@ -377,6 +417,54 @@ class FacturaServiceImplTest {
     assertEquals(cantidadSegundoRenglonFacturaX.compareTo(new BigDecimal("3")), 0);
     assertEquals(cantidadTercerRenglonFacturaX.compareTo(new BigDecimal("6.4")), 0);
     assertEquals(cantidadCuartoRenglonFacturaX.compareTo(new BigDecimal("0.6")), 0);
+  }
+
+  @Test
+  void shouldMarcarRenglonParaAplicarBonificacion() {
+    Producto productoParaRetorno = new Producto();
+    productoParaRetorno.setBulto(new BigDecimal("5"));
+    when(mockProductoService.getProductoNoEliminadoPorId(1L)).thenReturn(productoParaRetorno);
+    assertTrue(facturaServiceImpl.marcarRenglonParaAplicarBonificacion(1L, new BigDecimal("5")));
+    assertFalse(facturaServiceImpl.marcarRenglonParaAplicarBonificacion(1L, new BigDecimal("3")));
+  }
+
+  @Test
+  void shouldCalcularRenglon() {
+    Producto productoParaRetorno = new Producto();
+    productoParaRetorno.setIdProducto(1L);
+    productoParaRetorno.setCodigo("1");
+    productoParaRetorno.setDescripcion("Producto para test");
+    productoParaRetorno.setMedida(new MedidaBuilder().build());
+    productoParaRetorno.setPrecioCosto(new BigDecimal("89.35"));
+    productoParaRetorno.setGananciaPorcentaje(new BigDecimal("38.74"));
+    productoParaRetorno.setGananciaNeto(new BigDecimal("34.62"));
+    productoParaRetorno.setPrecioVentaPublico(new BigDecimal("123.97"));
+    productoParaRetorno.setIvaPorcentaje(new BigDecimal("21"));
+    productoParaRetorno.setIvaNeto(new BigDecimal("26.03"));
+    productoParaRetorno.setPrecioLista(new BigDecimal("150"));
+    productoParaRetorno.setPorcentajeBonificacionPrecio(new BigDecimal("10"));
+    productoParaRetorno.setPrecioBonificado(new BigDecimal("135"));
+    productoParaRetorno.setPorcentajeBonificacionOferta(BigDecimal.ZERO);
+    productoParaRetorno.setBulto(new BigDecimal("5"));
+    when(mockProductoService.getProductoNoEliminadoPorId(1L)).thenReturn(productoParaRetorno);
+    NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO = NuevoRenglonFacturaDTO.builder()
+            .renglonMarcado(true)
+            .idProducto(1L)
+            .cantidad(new BigDecimal("2"))
+            .build();
+    RenglonFactura renglonFacturaResultante = facturaServiceImpl.calcularRenglon(TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaDTO);
+    assertEquals(new BigDecimal("223.146000000000000"), renglonFacturaResultante.getImporte());
+    nuevoRenglonFacturaDTO.setRenglonMarcado(false);
+    renglonFacturaResultante = facturaServiceImpl.calcularRenglon(TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaDTO);
+    assertEquals(new BigDecimal("247.94"), renglonFacturaResultante.getImporte());
+    nuevoRenglonFacturaDTO.setRenglonMarcado(true);
+    productoParaRetorno.setOferta(true);
+    productoParaRetorno.setPorcentajeBonificacionOferta(new BigDecimal("20"));
+    renglonFacturaResultante = facturaServiceImpl.calcularRenglon(TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaDTO);
+    assertEquals(new BigDecimal("198.352000000000000"), renglonFacturaResultante.getImporte());
+    nuevoRenglonFacturaDTO.setRenglonMarcado(false);
+    renglonFacturaResultante = facturaServiceImpl.calcularRenglon(TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaDTO);
+    assertEquals(new BigDecimal("247.94"), renglonFacturaResultante.getImporte());
   }
 
   // Calculos

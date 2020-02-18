@@ -3875,6 +3875,40 @@ class AppIntegrationTest {
   }
 
   @Test
+  void shouldNotEliminarNotaCreditoCompraConFactura() {
+    this.shouldCrearFacturaCompraX();
+    Long[] idsFactura = new Long[1];
+    idsFactura[0] = 1L;
+    BigDecimal[] cantidades = new BigDecimal[1];
+    cantidades[0] = new BigDecimal("3");
+    NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDTO =
+            NuevaNotaCreditoDeFacturaDTO.builder()
+                    .idFactura(1L)
+                    .idsRenglonesFactura(idsFactura)
+                    .cantidades(cantidades)
+                    .modificaStock(true)
+                    .motivo("Devolución")
+                    .build();
+    NotaCreditoDTO notaCreditoParaPersistir =
+        restTemplate.postForObject(
+            apiPrefix + "/notas/credito/calculos", nuevaNotaCreditoDTO, NotaCreditoDTO.class);
+    NotaCreditoDTO notaCreditoRecuperada =
+        restTemplate.postForObject(
+            apiPrefix + "/notas/credito", notaCreditoParaPersistir, NotaCreditoDTO.class);
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class,
+            () -> restTemplate.delete(apiPrefix + "/notas/" + notaCreditoRecuperada.getIdNota()));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_nota_compra_con_factura_asociada", null, Locale.getDefault())));
+  }
+
+  @Test
   void shouldCrearNotaCreditoCompraASinFactura() {
     NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO =
         NuevaNotaCreditoSinFacturaDTO.builder()

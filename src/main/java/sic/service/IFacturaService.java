@@ -8,6 +8,9 @@ import java.util.Map;
 
 import sic.modelo.dto.NuevosResultadosComprobanteDTO;
 import sic.modelo.Resultados;
+import sic.modelo.dto.NuevoRenglonFacturaDTO;
+
+import javax.validation.Valid;
 
 public interface IFacturaService {
 
@@ -32,6 +35,7 @@ public interface IFacturaService {
       BigDecimal porcentajeDescuento,
       BigDecimal porcentajeRecargo);
 
+
   BigDecimal calcularIVANetoRenglon(
       Movimiento movimiento,
       TipoDeComprobante tipo,
@@ -44,16 +48,12 @@ public interface IFacturaService {
   RenglonFactura calcularRenglon(
       TipoDeComprobante tipoDeComprobante,
       Movimiento movimiento,
-      BigDecimal cantidad,
-      long idProducto,
-      BigDecimal bonificacion);
+      @Valid NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO);
 
   List<RenglonFactura> calcularRenglones(
       TipoDeComprobante tipoDeComprobante,
       Movimiento movimiento,
-      BigDecimal[] cantidad,
-      long[] idProducto,
-      BigDecimal[] bonificacion);
+      @Valid List<NuevoRenglonFacturaDTO> nuevosRenglonesFacturaDTO);
 
   Resultados calcularResultadosFactura(NuevosResultadosComprobanteDTO nuevosResultadosComprobante);
 
@@ -64,4 +64,9 @@ public interface IFacturaService {
   Factura procesarFactura(Factura factura);
 
   Map<Long, BigDecimal> getIdsProductosYCantidades(Factura factura);
+
+  void aplicarBonificacion(
+          RenglonFactura nuevoRenglon, Producto producto, boolean aplicaBonificacion);
+
+  boolean marcarRenglonParaAplicarBonificacion(long idProducto, BigDecimal cantidad);
 }

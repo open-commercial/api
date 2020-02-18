@@ -595,7 +595,12 @@ public class ProductoServiceImpl implements IProductoService {
         if (!productosParaActualizarDTO.getPublico())
           carritoCompraService.eliminarItem(p.getIdProducto());
       }
-      p.setPorcentajeBonificacionPrecio(productosParaActualizarDTO.getPorcentajeBonificacionPrecio());
+      if (productosParaActualizarDTO.getPorcentajeBonificacionPrecio() != null
+          && productosParaActualizarDTO.getPorcentajeBonificacionPrecio().compareTo(BigDecimal.ZERO)
+              >= 0) {
+        p.setPorcentajeBonificacionPrecio(
+            productosParaActualizarDTO.getPorcentajeBonificacionPrecio());
+      }
       this.calcularPrecioBonificado(p);
       this.validarOperacion(TipoDeOperacion.ACTUALIZACION, p);
     }

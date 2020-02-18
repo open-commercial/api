@@ -63,12 +63,7 @@ public class FacturaCompraController {
         facturaService.calcularRenglones(
             nuevaCompraCompraDTO.getTipoDeComprobante(),
             Movimiento.COMPRA,
-            CalculosComprobante.getArrayDeCantidadesProductoParaFactura(
-                nuevaCompraCompraDTO.getRenglones()),
-            CalculosComprobante.getArrayDeIdProductoParaFactura(
-                nuevaCompraCompraDTO.getRenglones()),
-            CalculosComprobante.getArrayDeBonificacionesParaFactura(
-                nuevaCompraCompraDTO.getRenglones())));
+            nuevaCompraCompraDTO.getRenglones()));
     fc.setRecargoPorcentaje(
         nuevaCompraCompraDTO.getRecargoPorcentaje() != null
             ? nuevaCompraCompraDTO.getRecargoPorcentaje()
@@ -119,11 +114,7 @@ public class FacturaCompraController {
       @RequestBody List<NuevoRenglonFacturaDTO> nuevosRenglonesFacturaDTO,
       @RequestParam TipoDeComprobante tipoDeComprobante) {
     return facturaService.calcularRenglones(
-        tipoDeComprobante,
-        Movimiento.COMPRA,
-        CalculosComprobante.getArrayDeCantidadesProductoParaFactura(nuevosRenglonesFacturaDTO),
-        CalculosComprobante.getArrayDeIdProductoParaFactura(nuevosRenglonesFacturaDTO),
-        CalculosComprobante.getArrayDeBonificacionesParaFactura(nuevosRenglonesFacturaDTO));
+        tipoDeComprobante, Movimiento.COMPRA, nuevosRenglonesFacturaDTO);
   }
 
   @PostMapping("/facturas/compras/total-facturado/criteria")
