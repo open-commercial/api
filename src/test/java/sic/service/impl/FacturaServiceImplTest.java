@@ -15,8 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.builder.SucursalBuilder;
-import sic.builder.TransportistaBuilder;
 import sic.modelo.*;
 import sic.repository.FacturaVentaRepository;
 import sic.util.CalculosComprobante;
@@ -169,10 +167,10 @@ class FacturaServiceImplTest {
   @Test
   void shouldDividirFactura() {
     when(facturaVentaRepository.buscarMayorNumFacturaSegunTipo(
-            TipoDeComprobante.FACTURA_X, 1L, new SucursalBuilder().build().getIdSucursal()))
+            TipoDeComprobante.FACTURA_X, 1L, 1L))
         .thenReturn(1L);
     when(facturaVentaRepository.buscarMayorNumFacturaSegunTipo(
-            TipoDeComprobante.FACTURA_A, 1L, new SucursalBuilder().build().getIdSucursal()))
+            TipoDeComprobante.FACTURA_A, 1L, 1L))
         .thenReturn(1L);
     RenglonFactura renglon1 = Mockito.mock(RenglonFactura.class);
     RenglonFactura renglon2 = Mockito.mock(RenglonFactura.class);
@@ -227,8 +225,8 @@ class FacturaServiceImplTest {
     factura.setRecargoPorcentaje(BigDecimal.ZERO);
     factura.setRenglones(renglones);
     factura.setFecha(LocalDateTime.now());
-    factura.setTransportista(new TransportistaBuilder().build());
-    factura.setSucursal(new SucursalBuilder().build());
+    factura.setTransportista(new Transportista());
+    factura.setSucursal(new Sucursal());
     Cliente cliente = new Cliente();
     cliente.setIdCliente(1L);
     factura.setCliente(cliente);

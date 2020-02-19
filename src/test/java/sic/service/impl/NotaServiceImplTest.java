@@ -14,8 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.builder.SucursalBuilder;
-import sic.builder.RenglonNotaCreditoBuilder;
 import sic.modelo.*;
 
 @ExtendWith(SpringExtension.class)

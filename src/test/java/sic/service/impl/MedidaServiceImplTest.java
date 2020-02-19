@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.builder.MedidaBuilder;
 import sic.modelo.Medida;
 import sic.exception.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
