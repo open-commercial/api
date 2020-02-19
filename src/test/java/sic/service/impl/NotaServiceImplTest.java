@@ -28,7 +28,8 @@ class NotaServiceImplTest {
 
   @Test
   void shouldGetTipoNotaCreditoWhenSucursalYClienteDiscriminanIVA() {
-    Sucursal sucursal = new SucursalBuilder().build();
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     when(sucursalServiceImpl.getSucursalPorId(1L)).thenReturn(sucursal);
@@ -45,7 +46,8 @@ class NotaServiceImplTest {
 
   @Test
   void shouldGetTipoNotaDebitoWhenSucursalYClienteDiscriminanIVA() {
-    Sucursal sucursal = new SucursalBuilder().build();
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     when(sucursalServiceImpl.getSucursalPorId(1L)).thenReturn(sucursal);
@@ -62,7 +64,8 @@ class NotaServiceImplTest {
 
   @Test
   void shouldGetTipoNotaCreditoWhenSucursalDiscriminaYClienteNoIVA() {
-    Sucursal sucursal = new SucursalBuilder().build();
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
     when(sucursalServiceImpl.getSucursalPorId(1L)).thenReturn(sucursal);
@@ -79,7 +82,8 @@ class NotaServiceImplTest {
 
   @Test
   void shouldGetTipoNotaDebitoWhenSucursalDiscriminaYClienteNoIVA() {
-    Sucursal sucursal = new SucursalBuilder().build();
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
     when(sucursalServiceImpl.getSucursalPorId(1L)).thenReturn(sucursal);
@@ -96,10 +100,10 @@ class NotaServiceImplTest {
 
   @Test
   void shouldGetTipoNotaCreditoWhenSucursalNoDiscriminaYClienteSiIVA() {
-    Sucursal sucursal = new SucursalBuilder().build();
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
-    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     when(sucursalServiceImpl.getSucursalPorId(1L)).thenReturn(sucursal);
     when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
     TipoDeComprobante[] array = {
@@ -114,10 +118,10 @@ class NotaServiceImplTest {
 
   @Test
   void shouldGetTipoNotaDebitoWhenSucursalNoDiscriminaYClienteSiIVA() {
-    Sucursal sucursal = new SucursalBuilder().build();
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
-    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     when(sucursalServiceImpl.getSucursalPorId(1L)).thenReturn(sucursal);
     when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
     TipoDeComprobante[] array = {
@@ -132,10 +136,10 @@ class NotaServiceImplTest {
 
   @Test
   void shouldGetTipoNotaCreditoWhenSucursalNoDiscriminaYClienteNoIVA() {
-    Sucursal sucursal = new SucursalBuilder().withIdSucursal(1L).build();
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
-    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     when(sucursalServiceImpl.getSucursalPorId(1L)).thenReturn(sucursal);
     when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
     TipoDeComprobante[] array = {
@@ -150,10 +154,11 @@ class NotaServiceImplTest {
 
   @Test
   void shouldGetTipoNotaDebitoWhenSucursalNoDiscriminaYClienteNoIVA() {
-    Sucursal sucursal = new SucursalBuilder().withIdSucursal(1L).build();
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    sucursal.setIdFiscal(1L);
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
-    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     when(sucursalServiceImpl.getSucursalPorId(1L)).thenReturn(sucursal);
     when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
     TipoDeComprobante[] array = {
@@ -168,7 +173,8 @@ class NotaServiceImplTest {
 
   @Test
   void shouldCalcularTotalNotaCredito() {
-    RenglonNotaCredito renglonNotaCredito = new RenglonNotaCreditoBuilder().build();
+    RenglonNotaCredito renglonNotaCredito = new RenglonNotaCredito();
+    renglonNotaCredito.setImporteNeto(new BigDecimal("172.062"));
     List<RenglonNotaCredito> renglones = new ArrayList<>();
     renglones.add(renglonNotaCredito);
     assertEquals((new BigDecimal("172.062")).compareTo(notaServiceImpl.calcularTotalNota(renglones)), 0);
@@ -176,7 +182,8 @@ class NotaServiceImplTest {
 
   @Test
   void shouldGetTipoNotaCreditoWhenSucursalYProveedorDiscriminanIVA() {
-    Sucursal sucursal = new SucursalBuilder().build();
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     Proveedor proveedor = new Proveedor();
     proveedor.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     when(sucursalServiceImpl.getSucursalPorId(1L)).thenReturn(sucursal);
@@ -193,7 +200,8 @@ class NotaServiceImplTest {
 
   @Test
   void shouldGetTipoNotaDebitoWhenSucursalYProveedorDiscriminanIVA() {
-    Sucursal sucursal = new SucursalBuilder().build();
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     Proveedor proveedor = new Proveedor();
     proveedor.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     when(sucursalServiceImpl.getSucursalPorId(1L)).thenReturn(sucursal);
@@ -210,7 +218,8 @@ class NotaServiceImplTest {
 
   @Test
   void shouldGetTipoNotaCreditoWhenSucursalDiscriminaYProveedorNoIVA() {
-    Sucursal sucursal = new SucursalBuilder().build();
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     Proveedor proveedor = new Proveedor();
     proveedor.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
     when(sucursalServiceImpl.getSucursalPorId(1L)).thenReturn(sucursal);
@@ -227,7 +236,8 @@ class NotaServiceImplTest {
 
   @Test
   void shouldGetTipoNotaDebitoWhenSucursalDiscriminaYProveedorNoIVA() {
-    Sucursal sucursal = new SucursalBuilder().build();
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     Proveedor proveedor = new Proveedor();
     proveedor.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
     when(sucursalServiceImpl.getSucursalPorId(1L)).thenReturn(sucursal);
@@ -244,7 +254,8 @@ class NotaServiceImplTest {
 
   @Test
   void shouldGetTipoNotaCreditoWhenSucursalNoDiscriminaYProveedorSiIVA() {
-    Sucursal sucursal = new SucursalBuilder().build();
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.CONSUMIDOR_FINAL);
     Proveedor proveedor = new Proveedor();
     proveedor.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
@@ -262,10 +273,10 @@ class NotaServiceImplTest {
 
   @Test
   void shouldGetTipoNotaDebitoWhenSucursalNoDiscriminaYProveedorSiIVA() {
-    Sucursal sucursal = new SucursalBuilder().build();
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     Proveedor proveedor = new Proveedor();
     proveedor.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
-    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     when(sucursalServiceImpl.getSucursalPorId(1L)).thenReturn(sucursal);
     when(proveedorService.getProveedorNoEliminadoPorId(1L)).thenReturn(proveedor);
     TipoDeComprobante[] array = {
@@ -280,10 +291,10 @@ class NotaServiceImplTest {
 
   @Test
   void shouldGetTipoNotaCreditoWhenSucursalNoDiscriminaYProveedorNoIVA() {
-    Sucursal sucursal = new SucursalBuilder().withIdSucursal(1L).build();
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     Proveedor proveedor = new Proveedor();
     proveedor.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
-    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     when(sucursalServiceImpl.getSucursalPorId(1L)).thenReturn(sucursal);
     when(proveedorService.getProveedorNoEliminadoPorId(1L)).thenReturn(proveedor);
     TipoDeComprobante[] array = {
@@ -298,10 +309,10 @@ class NotaServiceImplTest {
 
   @Test
   void shouldGetTipoNotaDebitoWhenSucursalNoDiscriminaYProveedorNoIVA() {
-    Sucursal sucursal = new SucursalBuilder().withIdSucursal(1L).build();
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     Proveedor proveedor = new Proveedor();
     proveedor.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
-    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     when(sucursalServiceImpl.getSucursalPorId(1L)).thenReturn(sucursal);
     when(proveedorService.getProveedorNoEliminadoPorId(1L)).thenReturn(proveedor);
     TipoDeComprobante[] array = {

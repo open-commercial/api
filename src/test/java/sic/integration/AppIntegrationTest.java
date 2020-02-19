@@ -979,7 +979,6 @@ class AppIntegrationTest {
   @Test
   @DisplayName("Ingresar dinero a la CC de cliente mediante Mercado Pago")
   @Order(10)
-  @Ignore
   void testEscenarioAgregarPagoMercadoPago() {
     this.iniciarSesionComoAdministrador();
     Usuario usuario = restTemplate.getForObject(apiPrefix + "/usuarios/4", Usuario.class);
@@ -1010,7 +1009,6 @@ class AppIntegrationTest {
   @Test
   @DisplayName("Cerrar caja y verificar movimientos")
   @Order(11)
-  @Ignore
   void testEscenarioCerrarCaja1() {
     this.iniciarSesionComoAdministrador();
     List<Sucursal> sucursales =
@@ -1081,7 +1079,6 @@ class AppIntegrationTest {
   @Test
   @DisplayName("Reabrir caja, corregir saldo con un gasto por $750 en efectivo y luego cerrar caja")
   @Order(12)
-  @Ignore
   void testEscenarioCerrarCaja2() {
     this.iniciarSesionComoAdministrador();
     List<Sucursal> sucursales =
