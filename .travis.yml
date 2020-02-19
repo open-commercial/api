@@ -9,5 +9,7 @@ env:
 addons:
   sonarcloud:
     organization: "globo-technology"
+    token:
+      secure: "$SONAR_TOKEN"
 script:  
-  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar
+  - mvn clean verify sonar:sonar -Dsonar.projectKey=sic-api:sic-api
