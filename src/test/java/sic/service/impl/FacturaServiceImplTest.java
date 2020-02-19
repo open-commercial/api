@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.modelo.*;
+import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.repository.FacturaVentaRepository;
 import sic.util.CalculosComprobante;
 
@@ -262,6 +263,54 @@ class FacturaServiceImplTest {
     assertEquals(0, cantidadSegundoRenglonFacturaX.compareTo(new BigDecimal("3")));
     assertEquals(0, cantidadTercerRenglonFacturaX.compareTo(new BigDecimal("6.4")));
     assertEquals(0, cantidadCuartoRenglonFacturaX.compareTo(new BigDecimal("0.6")));
+  }
+
+  @Test
+  void shouldMarcarRenglonParaAplicarBonificacion() {
+    Producto productoParaRetorno = new Producto();
+    productoParaRetorno.setBulto(new BigDecimal("5"));
+    when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(productoParaRetorno);
+    assertTrue(facturaService.marcarRenglonParaAplicarBonificacion(1L, new BigDecimal("5")));
+    assertFalse(facturaService.marcarRenglonParaAplicarBonificacion(1L, new BigDecimal("3")));
+  }
+
+  @Test
+  void shouldCalcularRenglon() {
+    Producto productoParaRetorno = new Producto();
+    productoParaRetorno.setIdProducto(1L);
+    productoParaRetorno.setCodigo("1");
+    productoParaRetorno.setDescripcion("Producto para test");
+    productoParaRetorno.setMedida(new Medida());
+    productoParaRetorno.setPrecioCosto(new BigDecimal("89.35"));
+    productoParaRetorno.setGananciaPorcentaje(new BigDecimal("38.74"));
+    productoParaRetorno.setGananciaNeto(new BigDecimal("34.62"));
+    productoParaRetorno.setPrecioVentaPublico(new BigDecimal("123.97"));
+    productoParaRetorno.setIvaPorcentaje(new BigDecimal("21"));
+    productoParaRetorno.setIvaNeto(new BigDecimal("26.03"));
+    productoParaRetorno.setPrecioLista(new BigDecimal("150"));
+    productoParaRetorno.setPorcentajeBonificacionPrecio(new BigDecimal("10"));
+    productoParaRetorno.setPrecioBonificado(new BigDecimal("135"));
+    productoParaRetorno.setPorcentajeBonificacionOferta(BigDecimal.ZERO);
+    productoParaRetorno.setBulto(new BigDecimal("5"));
+    when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(productoParaRetorno);
+    NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO = NuevoRenglonFacturaDTO.builder()
+            .renglonMarcado(true)
+            .idProducto(1L)
+            .cantidad(new BigDecimal("2"))
+            .build();
+    RenglonFactura renglonFacturaResultante = facturaService.calcularRenglon(TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaDTO);
+    assertEquals(new BigDecimal("223.146000000000000"), renglonFacturaResultante.getImporte());
+    nuevoRenglonFacturaDTO.setRenglonMarcado(false);
+    renglonFacturaResultante = facturaService.calcularRenglon(TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaDTO);
+    assertEquals(new BigDecimal("247.94"), renglonFacturaResultante.getImporte());
+    nuevoRenglonFacturaDTO.setRenglonMarcado(true);
+    productoParaRetorno.setOferta(true);
+    productoParaRetorno.setPorcentajeBonificacionOferta(new BigDecimal("20"));
+    renglonFacturaResultante = facturaService.calcularRenglon(TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaDTO);
+    assertEquals(new BigDecimal("198.352000000000000"), renglonFacturaResultante.getImporte());
+    nuevoRenglonFacturaDTO.setRenglonMarcado(false);
+    renglonFacturaResultante = facturaService.calcularRenglon(TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaDTO);
+    assertEquals(new BigDecimal("247.94"), renglonFacturaResultante.getImporte());
   }
 
   // Calculos

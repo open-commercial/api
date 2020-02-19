@@ -17,7 +17,9 @@ public interface UsuarioRepository
     extends PagingAndSortingRepository<Usuario, Long>, QuerydslPredicateExecutor<Usuario> {
 
   @Query(
-          "SELECT u FROM Usuario u left join fetch u.tokens "
+          "SELECT u FROM Usuario u "
+                  + "left join fetch u.tokens "
+                  + "left join fetch u.roles "
                   + "WHERE u.idUsuario = :idUsuario "
                   + "AND u.eliminado = false")
   Optional<Usuario> findByIdUsuario(

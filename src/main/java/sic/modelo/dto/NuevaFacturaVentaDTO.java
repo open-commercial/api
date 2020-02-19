@@ -1,10 +1,9 @@
-package sic.modelo;
+package sic.modelo.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import sic.modelo.dto.FacturaVentaDTO;
 
 import java.math.BigDecimal;
 

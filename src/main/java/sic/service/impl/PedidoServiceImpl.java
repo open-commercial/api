@@ -509,10 +509,13 @@ public class PedidoServiceImpl implements IPedidoService {
                                 facturaService.calcularRenglon(
                                     f.getTipoComprobante(),
                                     Movimiento.VENTA,
-                                    r.getCantidad(),
-                                    r.getIdProductoItem(),
-                                    false,
-                                    null))));
+                                    NuevoRenglonFacturaDTO.builder()
+                                        .cantidad(r.getCantidad())
+                                        .idProducto(r.getIdProductoItem())
+                                        .renglonMarcado(
+                                            facturaService.marcarRenglonParaAplicarBonificacion(
+                                                r.getIdProductoItem(), r.getCantidad()))
+                                        .build()))));
     HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
     if (!renglonesDeFacturas.isEmpty()) {
       renglonesDeFacturas.forEach(

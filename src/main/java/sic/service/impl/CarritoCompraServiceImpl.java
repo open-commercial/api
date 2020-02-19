@@ -39,7 +39,6 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private static final Long ID_SUCURSAL_DEFAULT = 1L;
-  private static final BigDecimal CIEN = new BigDecimal("100");
 
   @Autowired
   public CarritoCompraServiceImpl(
@@ -153,6 +152,13 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   public Pedido crearPedido(NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO) {
     Usuario usuario =
         usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario());
+    if (nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago() != null) {
+      try {
+        mercadoPagoService.crearNuevoPago(nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago());
+      } catch (MPException ex) {
+        mercadoPagoService.logExceptionMercadoPago(ex);
+      }
+    }
     List<ItemCarritoCompra> items =
         carritoCompraRepository.findAllByUsuarioOrderByIdItemCarritoCompraDesc(usuario);
     Pedido pedido = new Pedido();
@@ -183,13 +189,6 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     pedido.setRenglones(renglonesPedido);
     pedido.setTipoDeEnvio(nuevaOrdenDeCompraDTO.getTipoDeEnvio());
     Pedido p = pedidoService.guardar(pedido);
-    if (nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago() != null) {
-      try {
-        mercadoPagoService.crearNuevoPago(nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago());
-      } catch (MPException ex) {
-        mercadoPagoService.logExceptionMercadoPago(ex);
-      }
-    }
     this.eliminarTodosLosItemsDelUsuario(nuevaOrdenDeCompraDTO.getIdUsuario());
     return p;
   }

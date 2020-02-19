@@ -568,7 +568,7 @@ public class NotaServiceImpl implements INotaService {
       if (nota.getFacturaVenta() != null
           && nota.getFecha().isBefore(nota.getFacturaVenta().getFecha())) {
         throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_nota_fecha_incorrecta", null, Locale.getDefault()));
+            messageSource.getMessage("mensaje_nota_fecha_comprobante_relacionado_incorrecta", null, Locale.getDefault()));
       }
       if (nota.getCae() != 0L) {
         throw new BusinessServiceException(
@@ -578,9 +578,9 @@ public class NotaServiceImpl implements INotaService {
       if (nota.getFacturaCompra() != null
           && nota.getFecha().isBefore(nota.getFacturaCompra().getFecha())) {
         throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_nota_fecha_incorrecta", null, Locale.getDefault()));
+            messageSource.getMessage("mensaje_nota_fecha_comprobante_relacionado_incorrecta", null, Locale.getDefault()));
       }
-      if (nota.getFecha().isAfter(LocalDateTime.now())) {
+      if (nota.getFecha().isAfter(LocalDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(59))) {
         throw new BusinessServiceException(
             messageSource.getMessage("mensaje_nota_fecha_incorrecta", null, Locale.getDefault()));
       }
