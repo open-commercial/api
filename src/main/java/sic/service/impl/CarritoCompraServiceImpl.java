@@ -185,7 +185,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     Pedido p = pedidoService.guardar(pedido);
     if (nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago() != null) {
       try {
-        mercadoPagoService.crearNuevoPago(nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago(), usuario);
+        mercadoPagoService.crearNuevoPago(nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago());
       } catch (MPException ex) {
         mercadoPagoService.logExceptionMercadoPago(ex);
       }

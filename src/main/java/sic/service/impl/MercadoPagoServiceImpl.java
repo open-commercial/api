@@ -63,122 +63,117 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   }
 
   @Override
-  public String crearNuevoPago(
-      @Valid NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Usuario usuario) throws MPException {
+  public String crearNuevoPago(@Valid NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO)
+      throws MPException {
     Cliente cliente =
         clienteService.getClienteNoEliminadoPorId(nuevoPagoMercadoPagoDTO.getIdCliente());
     this.validarOperacion(nuevoPagoMercadoPagoDTO, cliente);
-    if (mercadoPagoAccesToken != null) {
-      MercadoPago.SDK.configure(mercadoPagoAccesToken);
-      Payment payment = new Payment();
-      payment.setDescription(
-          "("
-              + cliente.getNroCliente()
-              + ")"
-              + " "
-              + cliente.getNombreFiscal()
-              + (cliente.getNombreFantasia() != null ? cliente.getNombreFantasia() : ""));
-      String json =
-          "{ \"idCliente\": "
-              + nuevoPagoMercadoPagoDTO.getIdCliente()
-              + " , \"idSucursal\": "
-              + nuevoPagoMercadoPagoDTO.getIdSucursal()
-              + "}";
-      JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
-      payment.setExternalReference(jsonObject.toString());
-      Payer payer = new Payer();
-      payer.setEmail(cliente.getEmail());
-      payment.setPayer(payer);
-      if (nuevoPagoMercadoPagoDTO.getToken() != null
-          && !nuevoPagoMercadoPagoDTO.getToken().isEmpty()) {
-        payment
-            .setTransactionAmount(nuevoPagoMercadoPagoDTO.getMonto())
-            .setToken(nuevoPagoMercadoPagoDTO.getToken())
-            .setInstallments(nuevoPagoMercadoPagoDTO.getInstallments())
-            .setIssuerId(nuevoPagoMercadoPagoDTO.getIssuerId())
-            .setPaymentMethodId(nuevoPagoMercadoPagoDTO.getPaymentMethodId())
-            .setBinaryMode(true);
-      } else if (Arrays.asList(pagosEnEfectivoPermitidos)
-          .contains(nuevoPagoMercadoPagoDTO.getPaymentMethodId())) {
-        payment
-            .setTransactionAmount(nuevoPagoMercadoPagoDTO.getMonto())
-            .setPaymentMethodId(nuevoPagoMercadoPagoDTO.getPaymentMethodId());
-      } else {
-        throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_pago_no_soportado", null, Locale.getDefault()));
-      }
-      Payment pago = payment.save();
-      if (pago.getStatus() == Payment.Status.rejected) {
-        this.procesarMensajeNoAprobado(payment);
-      }
-      return pago.getId();
+    MercadoPago.SDK.configure(mercadoPagoAccesToken);
+    Payment payment = new Payment();
+    payment.setDescription(
+        "("
+            + cliente.getNroCliente()
+            + ")"
+            + " "
+            + cliente.getNombreFiscal()
+            + (cliente.getNombreFantasia() != null ? cliente.getNombreFantasia() : ""));
+    String json =
+        "{ \"idCliente\": "
+            + nuevoPagoMercadoPagoDTO.getIdCliente()
+            + " , \"idSucursal\": "
+            + nuevoPagoMercadoPagoDTO.getIdSucursal()
+            + "}";
+    JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
+    payment.setExternalReference(jsonObject.toString());
+    Payer payer = new Payer();
+    payer.setEmail(cliente.getEmail());
+    payment.setPayer(payer);
+    if (nuevoPagoMercadoPagoDTO.getToken() != null
+        && !nuevoPagoMercadoPagoDTO.getToken().isEmpty()) {
+      payment
+          .setTransactionAmount(nuevoPagoMercadoPagoDTO.getMonto())
+          .setToken(nuevoPagoMercadoPagoDTO.getToken())
+          .setInstallments(nuevoPagoMercadoPagoDTO.getInstallments())
+          .setIssuerId(nuevoPagoMercadoPagoDTO.getIssuerId())
+          .setPaymentMethodId(nuevoPagoMercadoPagoDTO.getPaymentMethodId())
+          .setBinaryMode(true);
+    } else if (Arrays.asList(pagosEnEfectivoPermitidos)
+        .contains(nuevoPagoMercadoPagoDTO.getPaymentMethodId())) {
+      payment
+          .setTransactionAmount(nuevoPagoMercadoPagoDTO.getMonto())
+          .setPaymentMethodId(nuevoPagoMercadoPagoDTO.getPaymentMethodId());
+    } else {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_pago_no_soportado", null, Locale.getDefault()));
     }
-    return "";
+    Payment pago = payment.save();
+    if (pago.getStatus() == Payment.Status.rejected) {
+      this.procesarMensajeNoAprobado(payment);
+    }
+    return pago.getId();
   }
 
   @Override
   public void crearComprobantePorNotificacion(String idPayment) {
     Payment payment;
-    if (mercadoPagoAccesToken != null) {
-      try {
-        MercadoPago.SDK.configure(mercadoPagoAccesToken);
-        payment = Payment.findById(idPayment);
-        if (payment.getId() != null && payment.getExternalReference() != null) {
-          Optional<Recibo> reciboMP = reciboService.getReciboPorIdMercadoPago(idPayment);
-          JsonObject convertedObject =
-              new Gson().fromJson(payment.getExternalReference(), JsonObject.class);
-          Cliente cliente =
-              clienteService.getClienteNoEliminadoPorId(
-                  Long.parseLong(convertedObject.get("idCliente").getAsString()));
-          Sucursal sucursal =
-              sucursalService.getSucursalPorId(
-                  Long.parseLong(convertedObject.get("idSucursal").getAsString()));
-          switch (payment.getStatus()) {
-            case approved:
-              if (reciboMP.isPresent()) {
-                logger.warn("El recibo del pago nro {} ya existe.", payment.getId());
-              } else {
-                this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
-              }
-              break;
-            case refunded:
-              if (!reciboMP.isPresent())
-                throw new EntityNotFoundException(
-                    messageSource.getMessage(
-                        "mensaje_recibo_no_existente", null, Locale.getDefault()));
-              if (!notaService.existsNotaDebitoPorRecibo(reciboMP.get())) {
-                NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO =
-                    NuevaNotaDebitoDeReciboDTO.builder()
-                        .idRecibo(reciboMP.get().getIdRecibo())
-                        .gastoAdministrativo(BigDecimal.ZERO)
-                        .motivo("Devolución de pago por MercadoPago")
-                        .tipoDeComprobante(
-                            notaService
-                                .getTipoNotaDebitoCliente(
-                                    reciboMP.get().getIdCliente(),
-                                    reciboMP.get().getSucursal().getIdSucursal())
-                                .get(0))
-                        .build();
-                NotaDebito notaGuardada =
-                    notaService.guardarNotaDebito(
-                        notaService.calcularNotaDebitoConRecibo(
-                            nuevaNotaDebitoDeReciboDTO, cliente.getCredencial()));
-                notaService.autorizarNota(notaGuardada);
-              } else {
-                logger.warn("La nota del pago nro {} ya existe.", payment.getId());
-              }
-              break;
-            default:
-              logger.warn("El status del pago nro {} no es soportado.", payment.getId());
-              messageSource.getMessage("mensaje_pago_no_soportado", null, Locale.getDefault());
-          }
-        } else {
-          throw new BusinessServiceException(
-              messageSource.getMessage("mensaje_pago_no_soportado", null, Locale.getDefault()));
+    try {
+      MercadoPago.SDK.configure(mercadoPagoAccesToken);
+      payment = Payment.findById(idPayment);
+      if (payment.getId() != null && payment.getExternalReference() != null) {
+        Optional<Recibo> reciboMP = reciboService.getReciboPorIdMercadoPago(idPayment);
+        JsonObject convertedObject =
+            new Gson().fromJson(payment.getExternalReference(), JsonObject.class);
+        Cliente cliente =
+            clienteService.getClienteNoEliminadoPorId(
+                Long.parseLong(convertedObject.get("idCliente").getAsString()));
+        Sucursal sucursal =
+            sucursalService.getSucursalPorId(
+                Long.parseLong(convertedObject.get("idSucursal").getAsString()));
+        switch (payment.getStatus()) {
+          case approved:
+            if (reciboMP.isPresent()) {
+              logger.warn("El recibo del pago nro {} ya existe.", payment.getId());
+            } else {
+              this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
+            }
+            break;
+          case refunded:
+            if (!reciboMP.isPresent())
+              throw new EntityNotFoundException(
+                  messageSource.getMessage(
+                      "mensaje_recibo_no_existente", null, Locale.getDefault()));
+            if (!notaService.existsNotaDebitoPorRecibo(reciboMP.get())) {
+              NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO =
+                  NuevaNotaDebitoDeReciboDTO.builder()
+                      .idRecibo(reciboMP.get().getIdRecibo())
+                      .gastoAdministrativo(BigDecimal.ZERO)
+                      .motivo("Devolución de pago por MercadoPago")
+                      .tipoDeComprobante(
+                          notaService
+                              .getTipoNotaDebitoCliente(
+                                  reciboMP.get().getIdCliente(),
+                                  reciboMP.get().getSucursal().getIdSucursal())
+                              .get(0))
+                      .build();
+              NotaDebito notaGuardada =
+                  notaService.guardarNotaDebito(
+                      notaService.calcularNotaDebitoConRecibo(
+                          nuevaNotaDebitoDeReciboDTO, cliente.getCredencial()));
+              notaService.autorizarNota(notaGuardada);
+            } else {
+              logger.warn("La nota del pago nro {} ya existe.", payment.getId());
+            }
+            break;
+          default:
+            logger.warn("El status del pago nro {} no es soportado.", payment.getId());
+            messageSource.getMessage("mensaje_pago_no_soportado", null, Locale.getDefault());
         }
-      } catch (MPException ex) {
-        this.logExceptionMercadoPago(ex);
+      } else {
+        throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_pago_no_soportado", null, Locale.getDefault()));
       }
+    } catch (MPException ex) {
+      this.logExceptionMercadoPago(ex);
     }
   }
 
@@ -199,13 +194,15 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     }
   }
 
-  private void crearReciboDePago(Payment payment, Usuario usuario, Cliente cliente, Sucursal sucursal) {
+  private void crearReciboDePago(
+      Payment payment, Usuario usuario, Cliente cliente, Sucursal sucursal) {
     switch (payment.getStatus()) {
       case approved:
         logger.warn("El pago de mercadopago {} se aprobó correctamente.", payment);
         Recibo nuevoRecibo = new Recibo();
         nuevoRecibo.setSucursal(sucursal);
-        nuevoRecibo.setFormaDePago(formaDePagoService.getFormaDePagoPorNombre(FormaDePagoEnum.MERCADO_PAGO));
+        nuevoRecibo.setFormaDePago(
+            formaDePagoService.getFormaDePagoPorNombre(FormaDePagoEnum.MERCADO_PAGO));
         nuevoRecibo.setUsuario(usuario);
         nuevoRecibo.setCliente(cliente);
         nuevoRecibo.setFecha(LocalDateTime.now());
@@ -232,7 +229,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   public void logExceptionMercadoPago(MPException ex) {
     logger.warn("Ocurrió un error con MercadoPago: {}", ex.getMessage());
     throw new BusinessServiceException(
-      messageSource.getMessage("mensaje_pago_error", null, Locale.getDefault()));
+        messageSource.getMessage("mensaje_pago_error", null, Locale.getDefault()));
   }
 
   private void procesarMensajeNoAprobado(Payment payment) {
@@ -283,5 +280,4 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
           messageSource.getMessage("mensaje_pago_sin_issuer_id", null, Locale.getDefault()));
     }
   }
-
 }

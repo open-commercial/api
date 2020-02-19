@@ -6,7 +6,6 @@ import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
@@ -22,7 +21,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
-import sic.model.*;
 import sic.model.Caja;
 import sic.model.Cliente;
 import sic.model.ConfiguracionSucursal;
@@ -63,18 +61,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestPropertySource(locations = "/application.properties")
 class AppIntegrationTest {
 
-  @Autowired private TestRestTemplate restTemplate;
-  private String token;
-  private final String apiPrefix = "/api/v1";
+  String token;
+  final String apiPrefix = "/api/v1";
+  static final BigDecimal IVA_21 = new BigDecimal("21");
+  static final BigDecimal IVA_105 = new BigDecimal("10.5");
+  static final BigDecimal CIEN = new BigDecimal("100");
 
-  private static final BigDecimal IVA_21 = new BigDecimal("21");
-  private static final BigDecimal IVA_105 = new BigDecimal("10.5");
-  private static final BigDecimal CIEN = new BigDecimal("100");
+  @Autowired TestRestTemplate restTemplate;
 
-  @Value("${RECAPTCHA_TEST_KEY}")
-  private String recaptchaTestKey;
-
-  private void iniciarSesionComoAdministrador() {
+  void iniciarSesionComoAdministrador() {
     this.token =
         restTemplate
             .postForEntity(
@@ -122,7 +117,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Se inicia una nueva sucursal y su usuario Administrador")
+  @DisplayName("Iniciar actividad con una nueva sucursal y un usuario Administrador")
   @Order(1)
   void iniciarActividadComercial() throws IOException {
     this.token =
@@ -192,7 +187,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Abrir caja con $1000 en efectivo y registra un gasto por $500 con transferencia.")
+  @DisplayName("Abrir caja con $1000 en efectivo y registrar un gasto por $500 con transferencia")
   @Order(2)
   void testEscenarioAbrirCaja() {
     this.iniciarSesionComoAdministrador();
@@ -230,7 +225,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName(
-      "Comprar productos al proveedor RI con factura A y verificar saldo CC, luego saldar la CC con un cheque de 3ro.")
+      "Comprar productos al proveedor RI con factura A y verificar saldo CC, luego saldar la CC con un cheque de 3ro")
   @Order(3)
   void testEscenarioCompraEscenario1() {
     this.iniciarSesionComoAdministrador();
@@ -483,7 +478,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Actualizar CC según ND por mora, luego verificar saldo CC")
+  @DisplayName("Actualizar CC segun ND por mora, luego verificar saldo CC")
   @Order(4)
   void testEscenarioNotaDebito() {
     this.iniciarSesionComoAdministrador();
@@ -610,16 +605,16 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Dar de alta un Cliente y levantar un Pedido.")
+  @DisplayName("Dar de alta un cliente y levantar un pedido")
   @Order(6)
   void testEscenarioAltaClienteYPedido() {
     this.iniciarSesionComoAdministrador();
     UsuarioDTO credencial =
         UsuarioDTO.builder()
-            .username("elenanocañete")
+            .username("elenanocanete")
             .password("siempredebarrio")
             .nombre("Juan")
-            .apellido("Cañete")
+            .apellido("Canete")
             .email("caniete@yahoo.com.br")
             .roles(new ArrayList<>(Collections.singletonList(Rol.COMPRADOR)))
             .build();
@@ -627,7 +622,7 @@ class AppIntegrationTest {
     Cliente cliente =
         Cliente.builder()
             .montoCompraMinima(BigDecimal.ONE)
-            .nombreFiscal("Juan Fernando Cañete")
+            .nombreFiscal("Juan Fernando Canete")
             .nombreFantasia("Menos mal que estamos nosotros.")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
             .idFiscal(30703176840L)
@@ -841,7 +836,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Realizar devolución parcial de productos y verificar saldo CC")
+  @DisplayName("Realizar devolucion parcial de productos y verificar saldo CC")
   @Order(8)
   void testEscenarioVenta2() {
     this.iniciarSesionComoAdministrador();
@@ -901,9 +896,9 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Un Usuario se registra y luego da de alta un Pedido.")
+  @DisplayName("Registrar un cliente nuevo y enviar un pedido mediante carrito de compra")
   @Order(9)
-  void testEscenarioRegistraciónYPedidoDelNuevoCliente() {
+  void testEscenarioRegistracionYPedidoDelNuevoCliente() {
     RegistracionClienteAndUsuarioDTO registro =
         RegistracionClienteAndUsuarioDTO.builder()
             .apellido("Stark")
@@ -912,7 +907,7 @@ class AppIntegrationTest {
             .email("sansa@got.com")
             .telefono("4157899667")
             .password("caraDeMala")
-            .recaptcha(recaptchaTestKey)
+            .recaptcha("111111")
             .nombreFiscal("theRedWolf")
             .build();
     restTemplate.postForObject(apiPrefix + "/registracion", registro, Void.class);
@@ -982,8 +977,8 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Un pago es dado de alta por pago MercadoPago")
-  @Order(11)
+  @DisplayName("Ingresar dinero a la CC de cliente mediante Mercado Pago")
+  @Order(10)
   @Ignore
   void testEscenarioAgregarPagoMercadoPago() {
     this.iniciarSesionComoAdministrador();
@@ -1014,7 +1009,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Cerrar caja y verificar movimientos")
-  @Order(12)
+  @Order(11)
   @Ignore
   void testEscenarioCerrarCaja1() {
     this.iniciarSesionComoAdministrador();
