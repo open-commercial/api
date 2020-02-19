@@ -10,4 +10,4 @@ addons:
   sonarcloud:
     organization: "globo-technology"
 script:  
-  - mvn clean verify sonar:sonar -Dsonar.projectKey=sic-api:sic-api
+  - mvn clean verify sonar:sonar jacoco:report -Dsonar.projectKey=sic-api:sic-api
