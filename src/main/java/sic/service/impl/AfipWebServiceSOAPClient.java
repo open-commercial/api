@@ -8,6 +8,7 @@ import afip.wsfe.wsdl.FECAESolicitarResponse;
 import afip.wsfe.wsdl.FECompUltimoAutorizado;
 import afip.wsfe.wsdl.FECompUltimoAutorizadoResponse;
 import afip.wsfe.wsdl.FERecuperaLastCbteResponse;
+import org.bouncycastle.cms.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +39,6 @@ import java.util.ArrayList;
 import java.util.Locale;
 import javax.xml.transform.Result;
 
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSProcessable;
-import org.bouncycastle.cms.CMSProcessableByteArray;
-import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ws.WebServiceMessage;
@@ -59,9 +55,9 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
   private static final String WSFE_PRODUCTION =
       "https://servicios1.afip.gov.ar/wsfev1/service.asmx";
   private final Logger loggerSoapClient = LoggerFactory.getLogger(this.getClass());
-  private static final String SOAP_ACTION_FECAESolicitar =
+  private static final String SOAP_ACTION_FE_CAE_SOLICITAR =
       "http://ar.gov.afip.dif.FEV1/FECAESolicitar";
-  private static final String SOAP_ACTION_FECompUltimoAutorizado =
+  private static final String SOAP_ACTION_FE_COMPROBANTE_ULTIMO_AUTORIZADO =
       "http://ar.gov.afip.dif.FEV1/FECompUltimoAutorizado";
 
   @Autowired private MessageSource messageSource;
@@ -69,7 +65,7 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
   @Value("${SIC_AFIP_ENV}")
   private String afipEnvironment;
 
-  public String getWSAA_URI() {
+  public String getUriWebServiceAutenticacionAutorizacion() {
     switch (afipEnvironment) {
       case "production":
         return WSAA_PRODUCTION;
@@ -81,7 +77,7 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
     }
   }
 
-  public String getWSFE_URI() {
+  public String getUriWebServiceFacturaElectronica() {
     switch (afipEnvironment) {
       case "production":
         return WSFE_PRODUCTION;
@@ -99,7 +95,7 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
     loggerSoapClient.warn("TOKEN WSAA XML REQUEST: {}", result);
     LoginCmsResponse response =
         (LoginCmsResponse)
-            this.getWebServiceTemplate().marshalSendAndReceive(this.getWSAA_URI(), loginCMS);
+            this.getWebServiceTemplate().marshalSendAndReceive(this.getUriWebServiceAutenticacionAutorizacion(), loginCMS);
     this.getWebServiceTemplate().getMarshaller().marshal(response, result);
     loggerSoapClient.warn("TOKEN WSAA XML RESPONSE: {}", result);
     return response.getLoginCmsReturn();
@@ -139,7 +135,7 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
     String loginTicketRequestXml = this.crearTicketRequerimientoAcceso(service, ticketTimeInHours);
     try {
       CMSSignedDataGenerator generator = new CMSSignedDataGenerator();
-      generator.addSigner(pKey, pCertificate, CMSSignedDataGenerator.DIGEST_SHA1);
+      generator.addSigner(pKey, pCertificate, CMSSignedGenerator.DIGEST_SHA1);
       generator.addCertificatesAndCRLs(certStore);
       CMSProcessable data = new CMSProcessableByteArray(loginTicketRequestXml.getBytes());
       CMSSignedData signed = generator.generate(data, true, "BC");
@@ -159,7 +155,6 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
   }
 
   public String crearTicketRequerimientoAcceso(String service, long ticketTimeInHours) {
-    // long uniqueId = 1L + (long) (Math.random() * (9999999999L - 1L));
     LocalDateTime now = LocalDateTime.now();
     ZonedDateTime zdt = now.atZone(ZoneId.systemDefault());
     String uniqueId = Long.toString(zdt.toInstant().toEpochMilli() / 1000);
@@ -183,7 +178,7 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
         + "</loginTicketRequest>";
   }
 
-  public FERecuperaLastCbteResponse FECompUltimoAutorizado(FECompUltimoAutorizado solicitud)
+  public FERecuperaLastCbteResponse getUltimoComprobanteAutorizado(FECompUltimoAutorizado solicitud)
       throws IOException {
     Result result = new StringResult();
     this.getWebServiceTemplate().getMarshaller().marshal(solicitud, result);
@@ -192,16 +187,16 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
         (FECompUltimoAutorizadoResponse)
             this.getWebServiceTemplate()
                 .marshalSendAndReceive(
-                    this.getWSFE_URI(),
+                    this.getUriWebServiceFacturaElectronica(),
                     solicitud,
                     (WebServiceMessage message) ->
-                        ((SoapMessage) message).setSoapAction(SOAP_ACTION_FECompUltimoAutorizado));
+                        ((SoapMessage) message).setSoapAction(SOAP_ACTION_FE_COMPROBANTE_ULTIMO_AUTORIZADO));
     this.getWebServiceTemplate().getMarshaller().marshal(response, result);
     loggerSoapClient.warn("ULTIMO COMPROBANTE AUTORIZADO XML RESPONSE: {}", result);
     return response.getFECompUltimoAutorizadoResult();
   }
 
-  public FECAEResponse FECAESolicitar(FECAESolicitar solicitud) throws IOException {
+  public FECAEResponse solicitarCAE(FECAESolicitar solicitud) throws IOException {
     Result result = new StringResult();
     this.getWebServiceTemplate().getMarshaller().marshal(solicitud, result);
     loggerSoapClient.warn("SOLICITAR cae XML REQUEST: {}", result);
@@ -209,10 +204,10 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
         (FECAESolicitarResponse)
             this.getWebServiceTemplate()
                 .marshalSendAndReceive(
-                    this.getWSFE_URI(),
+                    this.getUriWebServiceFacturaElectronica(),
                     solicitud,
                     (WebServiceMessage message) ->
-                        ((SoapMessage) message).setSoapAction(SOAP_ACTION_FECAESolicitar));
+                        ((SoapMessage) message).setSoapAction(SOAP_ACTION_FE_CAE_SOLICITAR));
     this.getWebServiceTemplate().getMarshaller().marshal(response, result);
     loggerSoapClient.warn("SOLICITAR cae XML RESPONSE: {}", result);
     return response.getFECAESolicitarResult();

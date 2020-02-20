@@ -43,7 +43,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   private final IClienteService clienteService;
   private final INotaService notaService;
   private final ISucursalService sucursalService;
-  private static final String mensajePagoNoSoportado = "mensaje_pago_no_soportado";
+  private static final String MENSAJE_PAGO_NO_SOPORTADO = "mensaje_pago_no_soportado";
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
 
@@ -105,7 +105,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
           .setPaymentMethodId(nuevoPagoMercadoPagoDTO.getPaymentMethodId());
     } else {
       throw new BusinessServiceException(
-          messageSource.getMessage(mensajePagoNoSoportado, null, Locale.getDefault()));
+          messageSource.getMessage(MENSAJE_PAGO_NO_SOPORTADO, null, Locale.getDefault()));
     }
     Payment pago = payment.save();
     if (pago.getStatus() == Payment.Status.rejected) {
@@ -167,11 +167,11 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
             break;
           default:
             logger.warn("El status del pago nro {} no es soportado.", payment.getId());
-            messageSource.getMessage(mensajePagoNoSoportado, null, Locale.getDefault());
+            messageSource.getMessage(MENSAJE_PAGO_NO_SOPORTADO, null, Locale.getDefault());
         }
       } else {
         throw new BusinessServiceException(
-            messageSource.getMessage(mensajePagoNoSoportado, null, Locale.getDefault()));
+            messageSource.getMessage(MENSAJE_PAGO_NO_SOPORTADO, null, Locale.getDefault()));
       }
     } catch (MPException ex) {
       this.logExceptionMercadoPago(ex);

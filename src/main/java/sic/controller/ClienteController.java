@@ -13,6 +13,7 @@ import sic.modelo.criteria.BusquedaClienteCriteria;
 import sic.modelo.dto.ClienteDTO;
 import sic.service.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Locale;
 
@@ -122,6 +123,10 @@ public class ClienteController {
       cliente.setViajante(usuarioService.getUsuarioNoEliminadoPorId(nuevoCliente.getIdViajante()));
     }
     cliente.setFechaAlta(LocalDateTime.now());
+    cliente.setMontoCompraMinima(
+        nuevoCliente.getMontoCompraMinima() != null
+            ? nuevoCliente.getMontoCompraMinima()
+            : BigDecimal.ZERO);
     return clienteService.guardar(cliente);
   }
 

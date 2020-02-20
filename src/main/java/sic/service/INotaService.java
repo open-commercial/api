@@ -72,7 +72,7 @@ public interface INotaService {
 
   BigDecimal calcularTotalNota(List<RenglonNotaCredito> renglonesNota);
 
-  List<RenglonNotaCredito> calcularRenglonCreditoProducto(
+  List<RenglonNotaCredito> calcularRenglonesCreditoProducto(
       TipoDeComprobante tipo, BigDecimal[] cantidad, Long[] idRenglonFactura);
 
   RenglonNotaCredito calcularRenglonCredito(TipoDeComprobante tipo, String detalle, BigDecimal monto);

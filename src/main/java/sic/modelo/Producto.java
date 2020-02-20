@@ -47,6 +47,7 @@ public class Producto implements Serializable {
   @JoinColumn(name = "idProducto")
   @JsonProperty(access = JsonProperty.Access.READ_WRITE)
   @JsonView(Views.Viajante.class)
+  @NotEmpty(message = "{mensaje_producto_cantidad_en_sucursales_vacia}")
   private Set<CantidadEnSucursal> cantidadEnSucursales;
 
   @Column(precision = 25, scale = 15)
@@ -62,6 +63,7 @@ public class Producto implements Serializable {
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "1", message = "{mensaje_producto_cantidad_bulto_invalida}")
+  @NotNull(message = "{mensaje_producto_cantidad_bulto_invalida}")
   @JsonView(Views.Comprador.class)
   private BigDecimal bulto;
 
@@ -135,7 +137,6 @@ public class Producto implements Serializable {
   @NotNull(message = "{mensaje_producto_vacio_proveedor}")
   private Proveedor proveedor;
 
-  @NotNull(message = "{mensaje_producto_vacio_nota}")
   private String nota;
 
   @NotNull(message = "{mensaje_producto_fecha_alta_vacia}")

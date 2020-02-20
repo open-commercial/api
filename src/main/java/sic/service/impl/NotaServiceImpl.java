@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
@@ -835,7 +834,7 @@ public class NotaServiceImpl implements INotaService {
           messageSource.getMessage("mensaje_nota_de_renglones_vacio", null, Locale.getDefault()));
     } else {
       notaCreditoNueva.setRenglonesNotaCredito(
-          notaService.calcularRenglonCreditoProducto(
+          notaService.calcularRenglonesCreditoProducto(
               notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()),
               nuevaNotaCreditoDeFacturaDTO.getCantidades(),
               nuevaNotaCreditoDeFacturaDTO.getIdsRenglonesFactura()));
@@ -1314,7 +1313,7 @@ public class NotaServiceImpl implements INotaService {
   }
 
   @Override
-  public List<RenglonNotaCredito> calcularRenglonCreditoProducto(
+  public List<RenglonNotaCredito> calcularRenglonesCreditoProducto(
       TipoDeComprobante tipo, BigDecimal[] cantidad, Long[] idRenglonFactura) {
     List<RenglonNotaCredito> renglonesNota = new ArrayList<>();
     RenglonNotaCredito renglonNota;

@@ -1,14 +1,12 @@
 package sic.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = {"certificadoAfip", "existeCertificado", "passwordCertificadoAfip"})
 public class ConfiguracionSucursal {
 
   private long idConfiguracionSucursal;

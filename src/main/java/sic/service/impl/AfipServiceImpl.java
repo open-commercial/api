@@ -177,7 +177,7 @@ public class AfipServiceImpl implements IAfipService {
         this.transformComprobanteToFECAERequest(
             comprobante, siguienteNroComprobante, nroPuntoDeVentaAfip));
     try {
-      FECAEResponse response = afipWebServiceSOAPClient.FECAESolicitar(fecaeSolicitud);
+      FECAEResponse response = afipWebServiceSOAPClient.solicitarCAE(fecaeSolicitud);
       String msjError = "";
       // errores generales de la request
       if (response.getErrors() != null) {
@@ -259,7 +259,7 @@ public class AfipServiceImpl implements IAfipService {
     solicitud.setPtoVta(nroPuntoDeVentaAfip);
     try {
       FERecuperaLastCbteResponse response =
-          afipWebServiceSOAPClient.FECompUltimoAutorizado(solicitud);
+          afipWebServiceSOAPClient.getUltimoComprobanteAutorizado(solicitud);
       return response.getCbteNro() + 1;
     } catch (WebServiceClientException ex) {
       logger.error(ex.getMessage());
