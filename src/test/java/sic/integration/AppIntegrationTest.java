@@ -1043,6 +1043,7 @@ class AppIntegrationTest {
   void testEscenarioAgregarPagoMercadoPago() {
     this.iniciarSesionComoAdministrador();
     Usuario usuario = restTemplate.getForObject(apiPrefix + "/usuarios/4", Usuario.class);
+    assertNotNull(usuario);
     this.token =
         restTemplate
             .postForEntity(
@@ -1050,6 +1051,7 @@ class AppIntegrationTest {
                 new Credencial(usuario.getUsername(), "caraDeMala", Aplicacion.SIC_OPS_WEB),
                 String.class)
             .getBody();
+    assertNotNull(this.token);
     // No se puede probar con tarjeta de credito por no poder generar el token."
     NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO =
         NuevoPagoMercadoPagoDTO.builder()
@@ -1062,6 +1064,7 @@ class AppIntegrationTest {
     String paymentId =
         restTemplate.postForObject(
             apiPrefix + "/pagos/mercado-pago", nuevoPagoMercadoPagoDTO, String.class);
+    //El recibo no se da de alta por ser un pago asincrono.
     restTemplate.postForObject(
         apiPrefix + "/pagos/notificacion?data.id=" + paymentId + "&type=payment", null, void.class);
     assertNotNull(paymentId);
@@ -1074,6 +1077,7 @@ class AppIntegrationTest {
     this.iniciarSesionComoAdministrador();
     List<Sucursal> sucursales =
         Arrays.asList(restTemplate.getForObject(apiPrefix + "/sucursales", Sucursal[].class));
+    assertNotNull(sucursales);
     assertEquals(1, sucursales.size());
     BusquedaCajaCriteria criteriaParaBusquedaCaja =
         BusquedaCajaCriteria.builder().idSucursal(sucursales.get(0).getIdSucursal()).build();
@@ -1090,6 +1094,7 @@ class AppIntegrationTest {
     assertNotNull(resultadosBusquedaCaja);
     List<Caja> cajasRecuperadas = resultadosBusquedaCaja.getContent();
     assertEquals(1, cajasRecuperadas.size());
+    assertEquals(EstadoCaja.ABIERTA, cajasRecuperadas.get(0).getEstado());
     restTemplate.put(
         apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/cierre?monto=5276.66",
         null);
@@ -1101,9 +1106,12 @@ class AppIntegrationTest {
                 requestEntityParaProveedores,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Caja>>() {})
             .getBody();
+    assertNotNull(resultadosBusquedaCaja);
     cajasRecuperadas = resultadosBusquedaCaja.getContent();
     assertEquals(1, cajasRecuperadas.size());
     assertEquals(EstadoCaja.CERRADA, cajasRecuperadas.get(0).getEstado());
+    assertEquals(
+            new BigDecimal("1000.000000000000000"), cajasRecuperadas.get(0).getSaldoApertura());
     List<MovimientoCaja> movimientoCajas =
         Arrays.asList(
             restTemplate.getForObject(
@@ -1208,6 +1216,16 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("-750.000000000000000"), movimientoCajas.get(0).getMonto());
     assertEquals(new BigDecimal("5331.200000000000000"), movimientoCajas.get(1).getMonto());
     assertEquals(new BigDecimal("-500.000000000000000"), movimientoCajas.get(2).getMonto());
+    movimientoCajas =
+            Arrays.asList(
+                    restTemplate.getForObject(
+                            apiPrefix
+                                    + "/cajas/"
+                                    + cajasRecuperadas.get(0).getIdCaja()
+                                    + "/movimientos?idFormaDePago=2",
+                            MovimientoCaja[].class));
+    assertEquals(1, movimientoCajas.size());
+    assertEquals(new BigDecimal("-554.540000000000000"), movimientoCajas.get(0).getMonto());
     assertEquals(
         new BigDecimal("5181.200000000000000"),
         restTemplate.getForObject(
