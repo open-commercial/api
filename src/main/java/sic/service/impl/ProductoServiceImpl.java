@@ -7,7 +7,6 @@ import java.io.*;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.export.*;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +33,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.criteria.BusquedaProductoCriteria;
+import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
@@ -54,6 +54,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final IMedidaService medidaService;
   private final ICarritoCompraService carritoCompraService;
   private final IPhotoVideoUploader photoVideoUploader;
+  private final ISucursalService sucursalService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
 
@@ -66,6 +67,7 @@ public class ProductoServiceImpl implements IProductoService {
     IMedidaService medidaService,
     ICarritoCompraService carritoCompraService,
     IPhotoVideoUploader photoVideoUploader,
+    ISucursalService sucursalService,
     MessageSource messageSource) {
     this.productoRepository = productoRepository;
     this.rubroService = rubroService;
@@ -73,6 +75,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.medidaService = medidaService;
     this.carritoCompraService = carritoCompraService;
     this.photoVideoUploader = photoVideoUploader;
+    this.sucursalService = sucursalService;
     this.messageSource = messageSource;
   }
 
@@ -224,15 +227,15 @@ public class ProductoServiceImpl implements IProductoService {
     if (pagina == null) pagina = 0;
     String ordenDefault = "descripcion";
     if (ordenarPor == null || sentido == null) {
-      return PageRequest.of(pagina, tamanioPagina, new Sort(Sort.Direction.ASC, ordenDefault));
+      return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.ASC, ordenDefault));
     } else {
       switch (sentido) {
         case "ASC":
-          return PageRequest.of(pagina, tamanioPagina, new Sort(Sort.Direction.ASC, ordenarPor));
+          return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.ASC, ordenarPor));
         case "DESC":
-          return PageRequest.of(pagina, tamanioPagina, new Sort(Sort.Direction.DESC, ordenarPor));
+          return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenarPor));
         default:
-          return PageRequest.of(pagina, tamanioPagina, new Sort(Sort.Direction.DESC, ordenDefault));
+          return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenDefault));
       }
     }
   }
@@ -285,22 +288,82 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public Producto guardar(@Valid Producto producto, byte[] imagen) {
-    if (producto.isOferta() && imagen == null)
+  public Producto guardar(
+      @Valid NuevoProductoDTO nuevoProductoDTO, long idMedida, long idRubro, long idProveedor) {
+    if (nuevoProductoDTO.isOferta() && nuevoProductoDTO.getImagen() == null)
       throw new BusinessServiceException(
           messageSource.getMessage(
               "mensaje_producto_oferta_sin_imagen",
-              new Object[] {producto.getDescripcion()},
+              new Object[] {nuevoProductoDTO.getDescripcion()},
               Locale.getDefault()));
-    if (producto.getCodigo() == null) producto.setCodigo("");
-    producto.setEliminado(false);
+    if (nuevoProductoDTO.getCodigo() == null) nuevoProductoDTO.setCodigo("");
+    Producto producto = new Producto();
+    producto.setMedida(medidaService.getMedidaNoEliminadaPorId(idMedida));
+    producto.setRubro(rubroService.getRubroNoEliminadoPorId(idRubro));
+    producto.setProveedor(proveedorService.getProveedorNoEliminadoPorId(idProveedor));
+    producto.setCodigo(nuevoProductoDTO.getCodigo());
+    producto.setDescripcion(nuevoProductoDTO.getDescripcion());
+    Set<CantidadEnSucursal> altaCantidadesEnSucursales = new HashSet<>();
+    sucursalService
+        .getSucusales(false)
+        .forEach(
+            sucursal -> {
+              CantidadEnSucursal cantidad = new CantidadEnSucursal();
+              cantidad.setCantidad(BigDecimal.ZERO);
+              cantidad.setSucursal(sucursal);
+              altaCantidadesEnSucursales.add(cantidad);
+            });
+    producto.setCantidadEnSucursales(altaCantidadesEnSucursales);
+    producto
+        .getCantidadEnSucursales()
+        .forEach(
+            cantidadEnSucursal ->
+                nuevoProductoDTO.getCantidadEnSucursal().keySet().stream()
+                    .filter(idSucursal -> idSucursal.equals(cantidadEnSucursal.getIdSucursal()))
+                    .forEach(
+                        idSucursal -> {
+                          cantidadEnSucursal.setCantidad(
+                              nuevoProductoDTO.getCantidadEnSucursal().get(idSucursal));
+                          cantidadEnSucursal.setEstante(nuevoProductoDTO.getEstante());
+                          cantidadEnSucursal.setEstanteria(nuevoProductoDTO.getEstanteria());
+                        }));
+    producto.setCantidadTotalEnSucursales(
+        producto.getCantidadEnSucursales().stream()
+            .map(CantidadEnSucursal::getCantidad)
+            .reduce(BigDecimal.ZERO, BigDecimal::add));
+    producto.setHayStock(producto.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
+    producto.setCantMinima(nuevoProductoDTO.getCantMinima());
+    producto.setBulto(nuevoProductoDTO.getBulto());
+    producto.setPrecioCosto(nuevoProductoDTO.getPrecioCosto());
+    producto.setGananciaPorcentaje(nuevoProductoDTO.getGananciaPorcentaje());
+    producto.setGananciaNeto(nuevoProductoDTO.getGananciaNeto());
+    producto.setPrecioVentaPublico(nuevoProductoDTO.getPrecioVentaPublico());
+    producto.setIvaPorcentaje(nuevoProductoDTO.getIvaPorcentaje());
+    producto.setIvaNeto(nuevoProductoDTO.getIvaNeto());
+    producto.setPrecioLista(nuevoProductoDTO.getPrecioLista());
+    producto.setOferta(nuevoProductoDTO.isOferta());
+    producto.setPorcentajeBonificacionOferta(
+        nuevoProductoDTO.getPorcentajeBonificacionOferta() != null
+            ? nuevoProductoDTO.getPorcentajeBonificacionOferta()
+            : BigDecimal.ZERO);
+    producto.setPorcentajeBonificacionPrecio(
+        nuevoProductoDTO.getPorcentajeBonificacionPrecio() != null
+            ? nuevoProductoDTO.getPorcentajeBonificacionPrecio()
+            : BigDecimal.ZERO);
+    producto.setIlimitado(nuevoProductoDTO.isIlimitado());
+    producto.setPublico(nuevoProductoDTO.isPublico());
+    producto.setNota(nuevoProductoDTO.getNota());
+    producto.setFechaVencimiento(nuevoProductoDTO.getFechaVencimiento());
+    producto.setFechaAlta(LocalDateTime.now());
+    producto.setFechaUltimaModificacion(LocalDateTime.now());
     this.calcularPrecioBonificado(producto);
     this.validarOperacion(TipoDeOperacion.ALTA, producto);
-    // se setea siempre en false momentaniamente
     producto.setIlimitado(false);
     producto = productoRepository.save(producto);
     logger.warn("El Producto {} se guardó correctamente.", producto);
-    if (imagen != null) this.subirImagenProducto(producto.getIdProducto(), imagen);
+    if (nuevoProductoDTO.getImagen() != null)
+      producto.setUrlImagen(
+          this.subirImagenProducto(producto.getIdProducto(), nuevoProductoDTO.getImagen()));
     return producto;
   }
 
@@ -623,13 +686,14 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public void subirImagenProducto(long idProducto, byte[] imagen) {
+  public String subirImagenProducto(long idProducto, byte[] imagen) {
     if (imagen.length > TAMANIO_MAXIMO_IMAGEN)
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_error_tamanio_no_valido", null, Locale.getDefault()));
     String urlImagen =
         photoVideoUploader.subirImagen(Producto.class.getSimpleName() + idProducto, imagen);
     productoRepository.actualizarUrlImagen(idProducto, urlImagen);
+    return urlImagen;
   }
 
   @Override

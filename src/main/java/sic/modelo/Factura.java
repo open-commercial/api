@@ -123,7 +123,6 @@ public abstract class Factura implements Serializable {
   @DecimalMin(value = "0", message = "{mensaje_total_negativo}")
   private BigDecimal total;
 
-  @Column(nullable = false)
   private String observaciones;
 
   @Column(precision = 25, scale = 15)
@@ -168,6 +167,11 @@ public abstract class Factura implements Serializable {
   @JsonGetter("nombreSucursal")
   public String getNombreSucursal() {
     return sucursal.getNombre();
+  }
+
+  @JsonGetter("idUsuario")
+  public long getIdUsuario() {
+    return usuario.getIdUsuario();
   }
 
   @JsonGetter("nombreUsuario")

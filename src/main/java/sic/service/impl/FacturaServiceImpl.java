@@ -254,18 +254,18 @@ public class FacturaServiceImpl implements IFacturaService {
     String ordenDefault = "fecha";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(
-          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+          pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
     } else {
       switch (sentido) {
         case "ASC":
           return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenarPor));
         case "DESC":
           return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
         default:
           return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
       }
     }
   }
@@ -1338,8 +1338,13 @@ public class FacturaServiceImpl implements IFacturaService {
             .and(qFacturaVenta.tipoComprobante.eq(comprobante.getTipoComprobante())));
     Page<FacturaVenta> facturaAnterior =
         facturaVentaRepository.findAll(
-            builder, PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "fecha")));
-    return facturaAnterior.getContent().get(0).getCae() == 0L;
+            builder, PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "fecha")));
+    if (facturaAnterior.getTotalElements() > 0L) {
+      return facturaAnterior.getContent().get(0).getCae() == 0L;
+    } else {
+      return false;
+
+    }
   }
 
   @Override

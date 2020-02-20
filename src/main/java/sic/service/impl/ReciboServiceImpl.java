@@ -124,8 +124,9 @@ public class ReciboServiceImpl implements IReciboService {
       builder.and(qRecibo.cliente.viajante.idUsuario.eq(criteria.getIdViajante()));
     if (criteria.getMovimiento() == Movimiento.VENTA) builder.and(qRecibo.proveedor.isNull());
     else if (criteria.getMovimiento() == Movimiento.COMPRA) builder.and(qRecibo.cliente.isNull());
-    builder.and(
-      qRecibo.sucursal.idSucursal.eq(criteria.getIdSucursal()).and(qRecibo.eliminado.eq(false)));
+    if (criteria.getIdSucursal() != null)
+      builder.and(qRecibo.sucursal.idSucursal.eq(criteria.getIdSucursal()));
+    builder.and(qRecibo.eliminado.eq(false));
     return builder;
   }
 
@@ -141,18 +142,18 @@ public class ReciboServiceImpl implements IReciboService {
     String ordenDefault = "fecha";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(
-          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+          pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
     } else {
       switch (sentido) {
         case "ASC":
           return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenarPor));
         case "DESC":
           return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
         default:
           return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
       }
     }
   }

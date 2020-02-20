@@ -25,7 +25,6 @@ public class RenglonPedido implements Serializable {
   private BigDecimal cantidad;
   private BigDecimal bonificacionPorcentaje;
   private BigDecimal bonificacionNeta;
-  private BigDecimal subTotal;
   private BigDecimal importeAnterior;
   private BigDecimal importe;
 

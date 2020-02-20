@@ -22,7 +22,7 @@ import sic.controller.Views;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"idCaja", "sucursal"})
-@ToString
+@ToString(exclude = {"usuarioAbreCaja", "usuarioCierraCaja"})
 @JsonIgnoreProperties({"sucursal", "usuarioAbreCaja", "usuarioCierraCaja", "eliminada"})
 @JsonView(Views.Comprador.class)
 public class Caja implements Serializable {

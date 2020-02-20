@@ -19,6 +19,7 @@ import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 import sic.modelo.dto.FacturaCompraDTO;
+import sic.modelo.dto.NuevaFacturaVentaDTO;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
