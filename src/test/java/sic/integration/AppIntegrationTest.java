@@ -604,10 +604,8 @@ class AppIntegrationTest {
             .idFiscal(30703176840L)
             .telefono("3785663322")
             .idCredencial(credencialDadaDeAlta.getIdUsuario())
-            .ubicacionFacturacion(Ubicacion.builder()
-                    .idProvincia(1L)
-                    .idLocalidad(1L)
-                    .build())
+            .ubicacionFacturacion(Ubicacion.builder().idProvincia(1L).idLocalidad(1L).build())
+            .email("correoparapagos@gmail.com")
             .build();
     Cliente clienteRecuperado =
         restTemplate.postForObject(apiPrefix + "/clientes", cliente, Cliente.class);
