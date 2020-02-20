@@ -1,7 +1,6 @@
 package sic.integration;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +44,6 @@ import sic.modelo.dto.*;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.Charset;
@@ -1011,7 +1009,6 @@ class AppIntegrationTest {
     assertEquals(
         new BigDecimal("12796.00000000000000000000000000000000000000000000000"),
         pedido.getTotalActual());
-
     assertEquals(EstadoPedido.ABIERTO, pedido.getEstado());
     List<sic.model.RenglonPedido> renglonesDelPedido =
             Arrays.asList(
@@ -1052,7 +1049,7 @@ class AppIntegrationTest {
                 String.class)
             .getBody();
     assertNotNull(this.token);
-    // No se puede probar con tarjeta de credito por no poder generar el token."
+    // No se puede probar con tarjeta de credito por no poder generar el token
     NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO =
         NuevoPagoMercadoPagoDTO.builder()
             .paymentMethodId("pagofacil")
@@ -1064,7 +1061,7 @@ class AppIntegrationTest {
     String paymentId =
         restTemplate.postForObject(
             apiPrefix + "/pagos/mercado-pago", nuevoPagoMercadoPagoDTO, String.class);
-    //El recibo no se da de alta por ser un pago asincrono.
+    // El recibo no se da de alta por ser un pago asincrono.
     restTemplate.postForObject(
         apiPrefix + "/pagos/notificacion?data.id=" + paymentId + "&type=payment", null, void.class);
     assertNotNull(paymentId);
@@ -1188,8 +1185,9 @@ class AppIntegrationTest {
         new BigDecimal("1100.000000000000000"), cajasRecuperadas.get(0).getSaldoApertura());
     Gasto gasto =
         Gasto.builder().concepto("Gasto olvidado").monto(new BigDecimal("750")).build();
-    restTemplate.postForObject(
-        apiPrefix + "/gastos?idSucursal=1&idFormaDePago=1", gasto, GastoDTO.class);
+    gasto = restTemplate.postForObject(
+        apiPrefix + "/gastos?idSucursal=1&idFormaDePago=1", gasto, Gasto.class);
+    assertNotNull(gasto);
     restTemplate.put(
         apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/cierre?monto=5276.66",
         null);
@@ -1201,6 +1199,7 @@ class AppIntegrationTest {
                 requestEntityParaProveedores,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Caja>>() {})
             .getBody();
+    assertNotNull(resultadosBusquedaCaja);
     cajasRecuperadas = resultadosBusquedaCaja.getContent();
     assertEquals(1, cajasRecuperadas.size());
     assertEquals(EstadoCaja.CERRADA, cajasRecuperadas.get(0).getEstado());
