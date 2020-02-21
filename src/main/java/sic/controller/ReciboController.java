@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.criteria.BusquedaReciboCriteria;
-import sic.modelo.Movimiento;
 import sic.modelo.Recibo;
 import sic.modelo.Rol;
 import sic.modelo.dto.ReciboDTO;

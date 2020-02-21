@@ -1,21 +1,16 @@
 package sic.service.impl;
 
 import java.math.BigDecimal;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.repository.ProductoRepository;
 
 @ExtendWith(SpringExtension.class)
 class ProductoServiceImplTest {
 
   @InjectMocks private ProductoServiceImpl productoService;
-  @Mock private ProductoRepository productoRepository;
 
   @Test
   void shouldCalcularGananciaPorcentaje() {

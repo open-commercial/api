@@ -39,7 +39,6 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private static final Long ID_SUCURSAL_DEFAULT = 1L;
-  private static final BigDecimal CIEN = new BigDecimal("100");
 
   @Autowired
   public CarritoCompraServiceImpl(
@@ -89,11 +88,11 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     if (tamanio != null) {
       pageable =
           PageRequest.of(
-              pagina, tamanio, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
+              pagina, tamanio, Sort.by(Sort.Direction.DESC, "idItemCarritoCompra"));
     } else {
       pageable =
           PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, "idItemCarritoCompra"));
+              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, "idItemCarritoCompra"));
     }
     Page<ItemCarritoCompra> items =
         carritoCompraRepository.findAllByUsuario(
@@ -155,7 +154,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
         usuarioService.getUsuarioNoEliminadoPorId(nuevaOrdenDeCompraDTO.getIdUsuario());
     if (nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago() != null) {
       try {
-        mercadoPagoService.crearNuevoPago(nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago(), usuario);
+        mercadoPagoService.crearNuevoPago(nuevaOrdenDeCompraDTO.getNuevoPagoMercadoPago());
       } catch (MPException ex) {
         mercadoPagoService.logExceptionMercadoPago(ex);
       }

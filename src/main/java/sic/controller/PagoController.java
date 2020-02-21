@@ -1,31 +1,22 @@
 package sic.controller;
 
 import com.mercadopago.exceptions.MPException;
-import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Rol;
 import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
-import sic.service.IAuthService;
 import sic.service.IMercadoPagoService;
-import sic.service.IUsuarioService;
 
 @RestController
 @RequestMapping("/api/v1")
 public class PagoController {
 
   private final IMercadoPagoService pagoMercadoPagoService;
-  private IUsuarioService usuarioService;
-  private IAuthService authService;
 
   @Autowired
-  public PagoController(IMercadoPagoService pagoMercadoPagoService,
-                        IAuthService authService,
-                        IUsuarioService usuarioService) {
+  public PagoController(IMercadoPagoService pagoMercadoPagoService) {
     this.pagoMercadoPagoService = pagoMercadoPagoService;
-    this.authService = authService;
-    this.usuarioService = usuarioService;
   }
 
   @PostMapping("/pagos/mercado-pago")
@@ -36,18 +27,14 @@ public class PagoController {
     Rol.VIAJANTE,
     Rol.COMPRADOR
   })
-  public void crearPago(
-      @RequestBody NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO,
-      @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+  public String crearPago(@RequestBody NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO) {
+    String idPago = null;
     try {
-      pagoMercadoPagoService.crearNuevoPago(
-          nuevoPagoMercadoPagoDTO,
-          usuarioService.getUsuarioNoEliminadoPorId(
-              ((Integer) claims.get("idUsuario")).longValue()));
+      idPago = pagoMercadoPagoService.crearNuevoPago(nuevoPagoMercadoPagoDTO);
     } catch (MPException ex) {
       pagoMercadoPagoService.logExceptionMercadoPago(ex);
     }
+    return idPago;
   }
 
   @PostMapping("/pagos/notificacion")

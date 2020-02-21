@@ -33,7 +33,8 @@ public class CantidadEnSucursal implements Serializable {
   private Sucursal sucursal;
 
   @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_producto_cantidad_negativa}")
+  @DecimalMin(value = "0", message = "{mensaje_producto_cantidad_invalida}")
+  @NotNull(message = "{mensaje_producto_cantidad_invalida}")
   private BigDecimal cantidad;
 
   private String estanteria;

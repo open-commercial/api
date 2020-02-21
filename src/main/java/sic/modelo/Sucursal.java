@@ -39,7 +39,6 @@ public class Sucursal implements Serializable {
   @Column(nullable = false)
   private String nombre;
 
-  @Column(nullable = false)
   private String lema;
 
   @Column(nullable = false)
@@ -57,7 +56,6 @@ public class Sucursal implements Serializable {
   @Email(message = "{mensaje_correo_formato_incorrecto}")
   private String email;
 
-  @Column(nullable = false)
   private String telefono;
 
   @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)

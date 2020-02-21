@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.builder.MedidaBuilder;
 import sic.modelo.Medida;
 import sic.exception.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
@@ -34,8 +33,10 @@ class MedidaServiceImplTest {
 
   @Test
   void shouldLanzarExceptionWhenNombreDuplicadoEnAlta() {
-    Medida medidaMock = new MedidaBuilder().build();
-    Medida medidaNueva = new MedidaBuilder().build();
+    Medida medidaMock = new Medida();
+    medidaMock.setNombre("Unidad");
+    Medida medidaNueva = new Medida();
+    medidaNueva.setNombre("Unidad");
     BusinessServiceException thrown =
         assertThrows(
             BusinessServiceException.class,
@@ -50,17 +51,14 @@ class MedidaServiceImplTest {
 
   @Test
   void shouldLanzarExceptionWhenNombreDuplicadoEnActualizacion() {
-    Medida medidaMock = new MedidaBuilder().build();
-    Medida medidaNueva = new MedidaBuilder().build();
+    Medida medida = new Medida();
+    medida.setIdMedida(1L);
+    medida.setNombre("Metro");
     BusinessServiceException thrown =
         assertThrows(
             BusinessServiceException.class,
             () -> {
-              when(medidaRepository.findByNombreAndEliminada("Metro", false))
-                  .thenReturn(medidaMock);
-              medidaNueva.setIdMedida(1L);
-              medidaNueva.setNombre("Metro");
-              when(medidaService.getMedidaPorNombre("Metro")).thenReturn(medidaNueva);
+              when(medidaRepository.findByNombreAndEliminada("Metro", false)).thenReturn(medida);
               Medida medidaDuplicada = new Medida();
               medidaDuplicada.setIdMedida(2L);
               medidaDuplicada.setNombre("Metro");

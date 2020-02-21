@@ -32,7 +32,6 @@ public class FacturaServiceImpl implements IFacturaService {
 
   private final FacturaRepository<Factura> facturaRepository;
   private final RenglonFacturaRepository renglonFacturaRepository;
-  private final IFacturaVentaService facturaVentaService;
   private final IProductoService productoService;
   private final IPedidoService pedidoService;
   private final INotaService notaService;
@@ -48,7 +47,6 @@ public class FacturaServiceImpl implements IFacturaService {
   public FacturaServiceImpl(
       FacturaRepository<Factura> facturaRepository,
       RenglonFacturaRepository renglonFacturaRepository,
-      IFacturaVentaService facturaVentaService,
       IProductoService productoService,
       IPedidoService pedidoService,
       INotaService notaService,
@@ -56,7 +54,6 @@ public class FacturaServiceImpl implements IFacturaService {
       MessageSource messageSource) {
     this.facturaRepository = facturaRepository;
     this.renglonFacturaRepository = renglonFacturaRepository;
-    this.facturaVentaService = facturaVentaService;
     this.productoService = productoService;
     this.pedidoService = pedidoService;
     this.notaService = notaService;
@@ -150,18 +147,18 @@ public class FacturaServiceImpl implements IFacturaService {
     String ordenDefault = "fecha";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(
-          pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+          pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
     } else {
       switch (sentido) {
         case "ASC":
           return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.ASC, ordenarPor));
+              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenarPor));
         case "DESC":
           return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenarPor));
+              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
         default:
           return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, new Sort(Sort.Direction.DESC, ordenDefault));
+              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
       }
     }
   }

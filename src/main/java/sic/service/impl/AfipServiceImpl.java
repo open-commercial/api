@@ -106,12 +106,10 @@ public class AfipServiceImpl implements IAfipService {
         configuracionSucursalService.actualizar(configuracionSucursal);
         return feAuthRequest;
       } catch (DocumentException | IOException ex) {
-        logger.error(ex.getMessage());
         throw new ServiceException(
             messageSource.getMessage("mensaje_error_procesando_xml", null, Locale.getDefault()),
             ex);
       } catch (WebServiceClientException ex) {
-        logger.error(ex.getMessage());
         throw new ServiceException(
             messageSource.getMessage("mensaje_token_wsaa_error", null, Locale.getDefault()), ex);
       }
@@ -179,7 +177,7 @@ public class AfipServiceImpl implements IAfipService {
         this.transformComprobanteToFECAERequest(
             comprobante, siguienteNroComprobante, nroPuntoDeVentaAfip));
     try {
-      FECAEResponse response = afipWebServiceSOAPClient.FECAESolicitar(fecaeSolicitud);
+      FECAEResponse response = afipWebServiceSOAPClient.solicitarCAE(fecaeSolicitud);
       String msjError = "";
       // errores generales de la request
       if (response.getErrors() != null) {
@@ -213,11 +211,9 @@ public class AfipServiceImpl implements IAfipService {
       comprobante.setNumSerieAfip(nroPuntoDeVentaAfip);
       comprobante.setNumFacturaAfip(siguienteNroComprobante);
     } catch (WebServiceClientException ex) {
-      logger.error(ex.getMessage());
       throw new ServiceException(
           messageSource.getMessage("mensaje_autorizacion_error", null, Locale.getDefault()), ex);
     } catch (IOException ex) {
-      logger.error(ex.getMessage());
       throw new ServiceException(
           messageSource.getMessage("mensaje_error_procesando_xml", null, Locale.getDefault()), ex);
     }
@@ -263,7 +259,7 @@ public class AfipServiceImpl implements IAfipService {
     solicitud.setPtoVta(nroPuntoDeVentaAfip);
     try {
       FERecuperaLastCbteResponse response =
-          afipWebServiceSOAPClient.FECompUltimoAutorizado(solicitud);
+          afipWebServiceSOAPClient.getUltimoComprobanteAutorizado(solicitud);
       return response.getCbteNro() + 1;
     } catch (WebServiceClientException ex) {
       logger.error(ex.getMessage());

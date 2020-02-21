@@ -48,20 +48,15 @@ public class Proveedor implements Serializable {
 
   private Long idFiscal;
 
-  @Column(nullable = false)
   private String telPrimario;
 
-  @Column(nullable = false)
   private String telSecundario;
 
-  @Column(nullable = false)
   private String contacto;
 
-  @Column(nullable = false)
   @Email(message = "{mensaje_proveedor_email_invalido}")
   private String email;
 
-  @Column(nullable = false)
   private String web;
 
   @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)

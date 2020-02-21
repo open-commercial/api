@@ -9,6 +9,7 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 import sic.modelo.criteria.BusquedaProductoCriteria;
 import sic.modelo.dto.ProductoFaltanteDTO;
+import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.modelo.dto.ProductosParaVerificarStockDTO;
 
@@ -63,13 +64,13 @@ public interface IProductoService {
 
   byte[] getListaDePrecios(List<Producto> productos, String formato);
 
-  Producto guardar(@Valid Producto producto, byte[] imagen);
+  Producto guardar(@Valid NuevoProductoDTO producto, long idMedida, long idRubro, long idProveedor);
 
   void actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO);
 
   void guardarCantidadesDeSucursalNueva(Sucursal sucursal);
 
-  void subirImagenProducto(long idProducto, byte[] imagen);
+  String subirImagenProducto(long idProducto, byte[] imagen);
 
   List<Producto> getMultiplesProductosPorId(List<Long> idsProductos);
 }

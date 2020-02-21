@@ -9,10 +9,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.builder.ClienteBuilder;
 import sic.modelo.Cliente;
 import sic.exception.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
+import sic.modelo.Usuario;
 import sic.repository.ClienteRepository;
 
 import java.util.ArrayList;
@@ -36,20 +36,24 @@ class ClienteServiceImplTest {
 
   @Test
   void shouldSetClientePredeterminado() {
-    Cliente resultadoEsperado = new ClienteBuilder().build();
+    Cliente resultadoEsperado = new Cliente();
     clienteServiceImpl.setClientePredeterminado(resultadoEsperado);
     when(clienteRepository.findByAndPredeterminadoAndEliminado(true, false))
-        .thenReturn((new ClienteBuilder()).build());
+        .thenReturn(resultadoEsperado);
     Cliente resultadoObtenido = clienteServiceImpl.getClientePredeterminado();
     assertEquals(resultadoEsperado, resultadoObtenido);
   }
 
   @Test
   void shouldLanzarExceptionWhenIdFiscalDuplicadoEnAlta() {
-    Cliente clienteNuevo = new ClienteBuilder().build();
+    Cliente clienteNuevo = new Cliente();
+    clienteNuevo.setIdFiscal(1234L);
+    clienteNuevo.setCredencial(new Usuario());
     List<Cliente> listaClienteNuevo = new ArrayList<>();
     listaClienteNuevo.add(clienteNuevo);
-    Cliente clienteDuplicado = new ClienteBuilder().build();
+    Cliente clienteDuplicado = new Cliente();
+    clienteDuplicado.setIdFiscal(1234L);
+    clienteDuplicado.setCredencial(new Usuario());
     BusinessServiceException thrown =
         assertThrows(
             BusinessServiceException.class,
@@ -64,19 +68,15 @@ class ClienteServiceImplTest {
   @Test
   void shouldLanzarExceptionWhenIdFiscalDuplicadoEnActualizacion() {
     List<Cliente> listaClienteNuevo = new ArrayList<>();
-    Cliente clienteNuevo =
-        new ClienteBuilder()
-            .withIdCliente(7L)
-            .withNombreFiscal("Merceria los dos botones")
-            .withIdFiscal(23111111119L)
-            .build();
+    Cliente clienteNuevo = new Cliente();
+    clienteNuevo.setIdCliente(7L);
+    clienteNuevo.setNombreFiscal("Merceria los dos botones");
+    clienteNuevo.setIdFiscal(23111111119L);
     listaClienteNuevo.add(clienteNuevo);
-    Cliente clienteDuplicado =
-        new ClienteBuilder()
-            .withIdCliente(2L)
-            .withNombreFiscal("Merceria los dos botones")
-            .withIdFiscal(23111111119L)
-            .build();
+    Cliente clienteDuplicado = new Cliente();
+    clienteDuplicado.setIdCliente(2L);
+    clienteDuplicado.setNombreFiscal("Merceria los dos botones");
+    clienteDuplicado.setIdFiscal(23111111119L);
     BusinessServiceException thrown =
         assertThrows(
             BusinessServiceException.class,

@@ -486,8 +486,12 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
             .and(qFacturaVenta.tipoComprobante.eq(comprobante.getTipoComprobante())));
     Page<FacturaVenta> facturaAnterior =
         facturaVentaRepository.findAll(
-            builder, PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "fecha")));
-    return facturaAnterior.getContent().get(0).getCae() == 0L;
+            builder, PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "fecha")));
+    if (facturaAnterior.getTotalElements() > 0L) {
+      return facturaAnterior.getContent().get(0).getCae() == 0L;
+    } else {
+      return false;
+    }
   }
 
   @Override

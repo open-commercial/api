@@ -43,6 +43,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   private final IClienteService clienteService;
   private final INotaService notaService;
   private final ISucursalService sucursalService;
+  private static final String MENSAJE_PAGO_NO_SOPORTADO = "mensaje_pago_no_soportado";
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
 
@@ -63,7 +64,8 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   }
 
   @Override
-  public void crearNuevoPago(@Valid NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO, Usuario usuario) throws MPException {
+  public String crearNuevoPago(@Valid NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO)
+      throws MPException {
     Cliente cliente =
         clienteService.getClienteNoEliminadoPorId(nuevoPagoMercadoPagoDTO.getIdCliente());
     this.validarOperacion(nuevoPagoMercadoPagoDTO, cliente);
@@ -76,8 +78,12 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
             + " "
             + cliente.getNombreFiscal()
             + (cliente.getNombreFantasia() != null ? cliente.getNombreFantasia() : ""));
-    String json = "{ \"idCliente\": "+ nuevoPagoMercadoPagoDTO.getIdCliente()
-      +" , \"idSucursal\": " + nuevoPagoMercadoPagoDTO.getIdSucursal() +"}";
+    String json =
+        "{ \"idCliente\": "
+            + nuevoPagoMercadoPagoDTO.getIdCliente()
+            + " , \"idSucursal\": "
+            + nuevoPagoMercadoPagoDTO.getIdSucursal()
+            + "}";
     JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
     payment.setExternalReference(jsonObject.toString());
     Payer payer = new Payer();
@@ -99,12 +105,13 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
           .setPaymentMethodId(nuevoPagoMercadoPagoDTO.getPaymentMethodId());
     } else {
       throw new BusinessServiceException(
-          messageSource.getMessage("mensaje_pago_no_soportado", null, Locale.getDefault()));
+          messageSource.getMessage(MENSAJE_PAGO_NO_SOPORTADO, null, Locale.getDefault()));
     }
     Payment pago = payment.save();
     if (pago.getStatus() == Payment.Status.rejected) {
       this.procesarMensajeNoAprobado(payment);
     }
+    return pago.getId();
   }
 
   @Override
@@ -160,8 +167,11 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
             break;
           default:
             logger.warn("El status del pago nro {} no es soportado.", payment.getId());
-            messageSource.getMessage("mensaje_pago_no_soportado", null, Locale.getDefault());
+            messageSource.getMessage(MENSAJE_PAGO_NO_SOPORTADO, null, Locale.getDefault());
         }
+      } else {
+        throw new BusinessServiceException(
+            messageSource.getMessage(MENSAJE_PAGO_NO_SOPORTADO, null, Locale.getDefault()));
       }
     } catch (MPException ex) {
       this.logExceptionMercadoPago(ex);
@@ -185,13 +195,15 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     }
   }
 
-  private void crearReciboDePago(Payment payment, Usuario usuario, Cliente cliente, Sucursal sucursal) {
+  private void crearReciboDePago(
+      Payment payment, Usuario usuario, Cliente cliente, Sucursal sucursal) {
     switch (payment.getStatus()) {
       case approved:
         logger.warn("El pago de mercadopago {} se aprobó correctamente.", payment);
         Recibo nuevoRecibo = new Recibo();
         nuevoRecibo.setSucursal(sucursal);
-        nuevoRecibo.setFormaDePago(formaDePagoService.getFormaDePagoPorNombre(FormaDePagoEnum.MERCADO_PAGO));
+        nuevoRecibo.setFormaDePago(
+            formaDePagoService.getFormaDePagoPorNombre(FormaDePagoEnum.MERCADO_PAGO));
         nuevoRecibo.setUsuario(usuario);
         nuevoRecibo.setCliente(cliente);
         nuevoRecibo.setFecha(LocalDateTime.now());
@@ -218,7 +230,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   public void logExceptionMercadoPago(MPException ex) {
     logger.warn("Ocurrió un error con MercadoPago: {}", ex.getMessage());
     throw new BusinessServiceException(
-      messageSource.getMessage("mensaje_pago_error", null, Locale.getDefault()));
+        messageSource.getMessage("mensaje_pago_error", null, Locale.getDefault()));
   }
 
   private void procesarMensajeNoAprobado(Payment payment) {
@@ -269,5 +281,4 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
           messageSource.getMessage("mensaje_pago_sin_issuer_id", null, Locale.getDefault()));
     }
   }
-
 }

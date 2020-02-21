@@ -1,7 +1,6 @@
 package sic.controller;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -206,63 +205,7 @@ public class ProductoController {
       @RequestParam Long idMedida,
       @RequestParam Long idRubro,
       @RequestParam Long idProveedor) {
-    Producto producto = new Producto();
-    producto.setMedida(medidaService.getMedidaNoEliminadaPorId(idMedida));
-    producto.setRubro(rubroService.getRubroNoEliminadoPorId(idRubro));
-    producto.setProveedor(proveedorService.getProveedorNoEliminadoPorId(idProveedor));
-    producto.setCodigo(nuevoProductoDTO.getCodigo());
-    producto.setDescripcion(nuevoProductoDTO.getDescripcion());
-    Set<CantidadEnSucursal> altaCantidadesEnSucursales = new HashSet<>();
-    this.sucursalService.getSucusales(false).forEach(sucursal -> {
-      CantidadEnSucursal cantidad = new CantidadEnSucursal();
-      cantidad.setCantidad(BigDecimal.ZERO);
-      cantidad.setSucursal(sucursal);
-      altaCantidadesEnSucursales.add(cantidad);
-    });
-    producto.setCantidadEnSucursales(altaCantidadesEnSucursales);
-    producto
-        .getCantidadEnSucursales()
-        .forEach(
-            cantidadEnSucursal ->
-                nuevoProductoDTO.getCantidadEnSucursal().keySet().stream()
-                    .filter(idSucursal -> idSucursal.equals(cantidadEnSucursal.getIdSucursal()))
-                    .forEach(
-                        idSucursal -> {
-                          cantidadEnSucursal.setCantidad(
-                              nuevoProductoDTO.getCantidadEnSucursal().get(idSucursal));
-                          cantidadEnSucursal.setEstante(nuevoProductoDTO.getEstante());
-                          cantidadEnSucursal.setEstanteria(nuevoProductoDTO.getEstanteria());
-                        }));
-    producto.setCantidadTotalEnSucursales(
-        producto.getCantidadEnSucursales().stream()
-            .map(CantidadEnSucursal::getCantidad)
-            .reduce(BigDecimal.ZERO, BigDecimal::add));
-    producto.setHayStock(producto.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
-    producto.setCantMinima(nuevoProductoDTO.getCantMinima());
-    producto.setBulto(nuevoProductoDTO.getBulto());
-    producto.setPrecioCosto(nuevoProductoDTO.getPrecioCosto());
-    producto.setGananciaPorcentaje(nuevoProductoDTO.getGananciaPorcentaje());
-    producto.setGananciaNeto(nuevoProductoDTO.getGananciaNeto());
-    producto.setPrecioVentaPublico(nuevoProductoDTO.getPrecioVentaPublico());
-    producto.setIvaPorcentaje(nuevoProductoDTO.getIvaPorcentaje());
-    producto.setIvaNeto(nuevoProductoDTO.getIvaNeto());
-    producto.setPrecioLista(nuevoProductoDTO.getPrecioLista());
-    producto.setOferta(nuevoProductoDTO.isOferta());
-    producto.setPorcentajeBonificacionOferta(
-            nuevoProductoDTO.getPorcentajeBonificacionOferta() != null
-                    ? nuevoProductoDTO.getPorcentajeBonificacionOferta()
-                    : BigDecimal.ZERO);
-    producto.setPorcentajeBonificacionPrecio(
-            nuevoProductoDTO.getPorcentajeBonificacionPrecio() != null
-                    ? nuevoProductoDTO.getPorcentajeBonificacionPrecio()
-                    : BigDecimal.ZERO);
-    producto.setIlimitado(nuevoProductoDTO.isIlimitado());
-    producto.setPublico(nuevoProductoDTO.isPublico());
-    producto.setNota(nuevoProductoDTO.getNota());
-    producto.setFechaVencimiento(nuevoProductoDTO.getFechaVencimiento());
-    producto.setFechaAlta(LocalDateTime.now());
-    producto.setFechaUltimaModificacion(LocalDateTime.now());
-    return productoService.guardar(producto, nuevoProductoDTO.getImagen());
+    return productoService.guardar(nuevoProductoDTO, idMedida, idRubro, idProveedor);
   }
 
   @PutMapping("/productos/multiples")
