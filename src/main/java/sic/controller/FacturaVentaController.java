@@ -16,7 +16,6 @@ import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 import sic.modelo.dto.NuevaFacturaVentaDTO;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.service.*;
-import sic.util.CalculosComprobante;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

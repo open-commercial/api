@@ -55,6 +55,8 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   private final MessageSource messageSource;
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
+  private static final String NRO_SERIE = "nroSerie";
+  private static final String NRO_FACTURA = "nroFactura";
 
   @Autowired
   @Lazy
@@ -440,15 +442,15 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
         || factura.getTipoComprobante().equals(TipoDeComprobante.FACTURA_B)
         || factura.getTipoComprobante().equals(TipoDeComprobante.FACTURA_C)) {
       if (factura.getNumSerieAfip() != 0 && factura.getNumFacturaAfip() != 0) {
-        params.put("nroSerie", factura.getNumSerieAfip());
-        params.put("nroFactura", factura.getNumFacturaAfip());
+        params.put(NRO_SERIE, factura.getNumSerieAfip());
+        params.put(NRO_FACTURA, factura.getNumFacturaAfip());
       } else {
-        params.put("nroSerie", null);
-        params.put("nroFactura", null);
+        params.put(NRO_SERIE, null);
+        params.put(NRO_FACTURA, null);
       }
     } else {
-      params.put("nroSerie", factura.getNumSerie());
-      params.put("nroFactura", factura.getNumFactura());
+      params.put(NRO_SERIE, factura.getNumSerie());
+      params.put(NRO_FACTURA, factura.getNumFactura());
     }
     if (factura.getSucursal().getLogo() != null && !factura.getSucursal().getLogo().isEmpty()) {
       try {
@@ -456,7 +458,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
             "logo",
             new ImageIcon(ImageIO.read(new URL(factura.getSucursal().getLogo()))).getImage());
       } catch (IOException ex) {
-        logger.error(ex.getMessage());
         throw new ServiceException(
             messageSource.getMessage("mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
       }
@@ -467,7 +468,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       return JasperExportManager.exportReportToPdf(
           JasperFillManager.fillReport(isFileReport, params, ds));
     } catch (JRException ex) {
-      logger.error(ex.getMessage());
       throw new ServiceException(
           messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
     }

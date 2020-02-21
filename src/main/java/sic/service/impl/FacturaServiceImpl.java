@@ -266,7 +266,6 @@ public class FacturaServiceImpl implements IFacturaService {
     } else if (movimiento == Movimiento.VENTA
         && (tipo == TipoDeComprobante.FACTURA_A
             || tipo == TipoDeComprobante.FACTURA_B
-            //        || tipo == TipoDeComprobante.FACTURA_Y
             || tipo == TipoDeComprobante.PRESUPUESTO)) {
       resultado =
           producto
@@ -276,8 +275,6 @@ public class FacturaServiceImpl implements IFacturaService {
                       .subtract(bonificacionPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))
                       .multiply(
                           producto.getIvaPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP)));
-      //  if (tipo == TipoDeComprobante.FACTURA_Y)
-      //    resultado = resultado.divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP);
     }
     return resultado;
   }
@@ -342,15 +339,6 @@ public class FacturaServiceImpl implements IFacturaService {
         case FACTURA_X:
           resultado = producto.getPrecioVentaPublico();
           break;
-          /*  case FACTURA_Y:
-          ivaResultado =
-              producto
-                  .getIvaPorcentaje()
-                  .divide(CIEN, 15, RoundingMode.HALF_UP)
-                  .divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP)
-                  .multiply(producto.getPrecioVentaPublico());
-          resultado = producto.getPrecioVentaPublico().add(ivaResultado);
-          break;*/
         default:
           resultado = producto.getPrecioLista();
           break;
