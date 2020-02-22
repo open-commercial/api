@@ -278,6 +278,25 @@ class AppIntegrationTest {
             .precioLista(new BigDecimal("1105"))
             .porcentajeBonificacionPrecio(new BigDecimal("20"))
             .build();
+    NuevoProductoDTO nuevoProductoTres =
+            NuevoProductoDTO.builder()
+                    .descripcion("Canilla Monocomando")
+                    .cantidadEnSucursal(
+                            new HashMap<Long, BigDecimal>() {
+                              {
+                                put(1L, new BigDecimal("10"));
+                              }
+                            })
+                    .bulto(BigDecimal.ONE)
+                    .precioCosto(new BigDecimal("10859.73"))
+                    .gananciaPorcentaje(new BigDecimal("11.37"))
+                    .gananciaNeto(new BigDecimal("1234.751"))
+                    .precioVentaPublico(new BigDecimal("12094.481"))
+                    .ivaPorcentaje(new BigDecimal("10.5"))
+                    .ivaNeto(new BigDecimal("1269.921"))
+                    .precioLista(new BigDecimal("13364.402"))
+                    .porcentajeBonificacionPrecio(BigDecimal.TEN)
+                    .build();
     Sucursal sucursal =
         restTemplate.getForObject(apiPrefix + "/sucursales/1", Sucursal.class);
     Producto productoUnoRecuperado =
@@ -336,6 +355,34 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("20"), productoDosRecuperado.getPorcentajeBonificacionPrecio());
     assertEquals(
         new BigDecimal("884.000000000000000"), productoDosRecuperado.getPrecioBonificado());
+    ProductoDTO productoTresRecuperado =
+            restTemplate.postForObject(
+                    apiPrefix
+                            + "/productos?idMedida="
+                            + medidaDadaDeAlta.getIdMedida()
+                            + "&idRubro="
+                            + rubroDadoDeAlta.getIdRubro()
+                            + "&idProveedor="
+                            + proveedorRecuperado.getIdProveedor()
+                            + "&idSucursal="
+                            + sucursal.getIdSucursal(),
+                    nuevoProductoTres,
+                    ProductoDTO.class);
+    assertEquals("Canilla Monocomando", productoTresRecuperado.getDescripcion());
+    assertEquals(BigDecimal.TEN, productoTresRecuperado.getCantidadTotalEnSucursales());
+    assertEquals("Metro", productoTresRecuperado.getNombreMedida());
+    assertEquals(new BigDecimal("10859.73"), productoTresRecuperado.getPrecioCosto());
+    assertEquals(new BigDecimal("11.37"), productoTresRecuperado.getGananciaPorcentaje());
+    assertEquals(new BigDecimal("1234.751"), productoTresRecuperado.getGananciaNeto());
+    assertEquals(new BigDecimal("12094.481"), productoTresRecuperado.getPrecioVentaPublico());
+    assertEquals(new BigDecimal("10.5"), productoTresRecuperado.getIvaPorcentaje());
+    assertEquals(new BigDecimal("1269.921"), productoTresRecuperado.getIvaNeto());
+    assertEquals(new BigDecimal("13364.402"), productoTresRecuperado.getPrecioLista());
+    assertEquals("Ferreteria", productoTresRecuperado.getNombreRubro());
+    assertEquals(BigDecimal.ZERO, productoTresRecuperado.getPorcentajeBonificacionOferta());
+    assertEquals(BigDecimal.TEN, productoTresRecuperado.getPorcentajeBonificacionPrecio());
+    assertEquals(
+            new BigDecimal("12027.961800000000000"), productoTresRecuperado.getPrecioBonificado());
     RenglonFactura renglonUno =
         restTemplate.getForObject(
             apiPrefix
@@ -416,8 +463,6 @@ class AppIntegrationTest {
         FacturaCompra.facturaCompraBuilder()
             .idProveedor(1L)
             .idSucursal(1L)
-            //.observaciones("Factura Compra A test")
-            //.razonSocialProveedor(proveedor.getRazonSocial())
             .fecha(LocalDateTime.now())
             .tipoDeComprobante(TipoDeComprobante.FACTURA_A)
             .renglones(renglones)
@@ -658,8 +703,103 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName(
-      "Facturar pedido al cliente RI con factura dividida, luego saldar la CC con efectivo")
+          "Modificar el pedido agregando un nuevo producto y cambiando la cantidad de uno ya existente")
   @Order(7)
+  void testEscenarioModificacionPedido() {
+    this.iniciarSesionComoAdministrador();
+    BusquedaPedidoCriteria criteria = BusquedaPedidoCriteria.builder().idSucursal(1L).build();
+    HttpEntity<BusquedaPedidoCriteria> requestEntity = new HttpEntity<>(criteria);
+    PaginaRespuestaRest<Pedido> resultadoBusquedaPedido =
+        restTemplate
+            .exchange(
+                apiPrefix + "/pedidos/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
+                new ParameterizedTypeReference<PaginaRespuestaRest<Pedido>>() {})
+            .getBody();
+    assertNotNull(resultadoBusquedaPedido);
+    List<Pedido> pedidosRecuperados = resultadoBusquedaPedido.getContent();
+    assertEquals(1, pedidosRecuperados.size());
+    List<sic.model.RenglonPedido> renglonesPedidos =
+        Arrays.asList(
+            restTemplate.getForObject(
+                apiPrefix + "/pedidos/" + pedidosRecuperados.get(0).getIdPedido() + "/renglones",
+                sic.model.RenglonPedido[].class));
+    assertNotNull(renglonesPedidos);
+    assertEquals(2, renglonesPedidos.size());
+    List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
+    renglonesPedidos.forEach(
+        renglonPedido ->
+            renglonesPedidoDTO.add(
+                NuevoRenglonPedidoDTO.builder()
+                    .idProductoItem(renglonPedido.getIdProductoItem())
+                    .cantidad(renglonPedido.getCantidad())
+                    .build()));
+    renglonesPedidoDTO.get(1).setCantidad(new BigDecimal("3"));
+    renglonesPedidoDTO.add(
+        NuevoRenglonPedidoDTO.builder().idProductoItem(3L).cantidad(BigDecimal.TEN).build());
+    PedidoDTO pedidoDTO =
+        PedidoDTO.builder()
+            .idPedido(pedidosRecuperados.get(0).getIdPedido())
+            .descuentoPorcentaje(new BigDecimal("15.000000000000000"))
+            .recargoPorcentaje(new BigDecimal("5"))
+            .renglones(renglonesPedidoDTO)
+            .idSucursal(1L)
+            .idCliente(pedidosRecuperados.get(0).getCliente().getIdCliente())
+            .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
+            .build();
+    restTemplate.put(apiPrefix + "/pedidos", pedidoDTO);
+    criteria = BusquedaPedidoCriteria.builder().idSucursal(1L).build();
+    requestEntity = new HttpEntity<>(criteria);
+    resultadoBusquedaPedido =
+            restTemplate
+                    .exchange(
+                            apiPrefix + "/pedidos/busqueda/criteria",
+                            HttpMethod.POST,
+                            requestEntity,
+                            new ParameterizedTypeReference<PaginaRespuestaRest<Pedido>>() {})
+                    .getBody();
+    assertNotNull(resultadoBusquedaPedido);
+    pedidosRecuperados = resultadoBusquedaPedido.getContent();
+    assertEquals(1, pedidosRecuperados.size());
+    assertEquals(EstadoPedido.ABIERTO, pedidosRecuperados.get(0).getEstado());
+    List<sic.model.RenglonPedido> renglonesDelPedido =
+            Arrays.asList(
+                    restTemplate.getForObject(
+                            apiPrefix + "/pedidos/" + pedidosRecuperados.get(0).getIdPedido() + "/renglones",
+                            sic.model.RenglonPedido[].class));
+    assertEquals(3, renglonesDelPedido.size());
+    assertEquals("Ventilador de pie", renglonesDelPedido.get(0).getDescripcionItem());
+    assertEquals("Metro", renglonesDelPedido.get(0).getMedidaItem());
+    assertEquals(new BigDecimal("1210.000000000000000"), renglonesDelPedido.get(0).getPrecioUnitario());
+    assertEquals(new BigDecimal("5.000000000000000"), renglonesDelPedido.get(0).getCantidad());
+    assertEquals(new BigDecimal("20.000000000000000"), renglonesDelPedido.get(0).getBonificacionPorcentaje());
+    assertEquals(new BigDecimal("242.000000000000000"), renglonesDelPedido.get(0).getBonificacionNeta());
+    assertEquals(new BigDecimal("6050.000000000000000000000000000000"), renglonesDelPedido.get(0).getImporteAnterior());
+    assertEquals(new BigDecimal("4840.000000000000000000000000000000"), renglonesDelPedido.get(0).getImporte());
+    assertEquals("Reflector led 100w", renglonesDelPedido.get(1).getDescripcionItem());
+    assertEquals("Metro", renglonesDelPedido.get(1).getMedidaItem());
+    assertEquals(new BigDecimal("1105.000000000000000"), renglonesDelPedido.get(1).getPrecioUnitario());
+    assertEquals(new BigDecimal("3.000000000000000"), renglonesDelPedido.get(1).getCantidad());
+    assertEquals(new BigDecimal("20.000000000000000"), renglonesDelPedido.get(1).getBonificacionPorcentaje());
+    assertEquals(new BigDecimal("221.000000000000000"), renglonesDelPedido.get(1).getBonificacionNeta());
+    assertEquals(new BigDecimal("3315.000000000000000000000000000000"), renglonesDelPedido.get(1).getImporteAnterior());
+    assertEquals(new BigDecimal("2652.000000000000000000000000000000"), renglonesDelPedido.get(1).getImporte());
+    assertEquals("Canilla Monocomando", renglonesDelPedido.get(2).getDescripcionItem());
+    assertEquals("Metro", renglonesDelPedido.get(2).getMedidaItem());
+    assertEquals(new BigDecimal("13364.402000000000000"), renglonesDelPedido.get(2).getPrecioUnitario());
+    assertEquals(new BigDecimal("10.000000000000000"), renglonesDelPedido.get(2).getCantidad());
+    assertEquals(new BigDecimal("10.000000000000000"), renglonesDelPedido.get(2).getBonificacionPorcentaje());
+    assertEquals(new BigDecimal("1336.440200000000000"), renglonesDelPedido.get(2).getBonificacionNeta());
+    assertEquals(new BigDecimal("133644.020000000000000000000000000000"), renglonesDelPedido.get(2).getImporteAnterior());
+    assertEquals(new BigDecimal("120279.618000000000000000000000000000"), renglonesDelPedido.get(2).getImporte());
+  }
+
+
+  @Test
+  @DisplayName(
+      "Facturar pedido al cliente RI con factura dividida, luego saldar la CC con efectivo")
+  @Order(8)
   void testEscenarioVenta1() {
     this.iniciarSesionComoAdministrador();
     BusquedaPedidoCriteria criteria =
@@ -756,7 +896,11 @@ class AppIntegrationTest {
     facturaVentaA.setTotal(total);
     int[] indices = new int[] {0};
     NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
-        NuevaFacturaVentaDTO.builder().indices(indices).facturaVenta(facturaVentaA).build();
+        NuevaFacturaVentaDTO.builder()
+            .indices(indices)
+            .facturaVenta(facturaVentaA)
+            .idPedido(pedidosRecuperados.get(0).getIdPedido())
+            .build();
     FacturaVenta[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
@@ -792,15 +936,15 @@ class AppIntegrationTest {
             + ")",
         facturas[1].getNombreUsuario());
     assertEquals(new BigDecimal("1600.000000000000000000000000000000"), facturas[0].getSubTotal());
-    assertEquals(new BigDecimal("4000.000000000000000000000000000000"), facturas[1].getSubTotal());
+    assertEquals(new BigDecimal("113650.329000000000000000000000000000"), facturas[1].getSubTotal());
     assertEquals(new BigDecimal("160.000000000000000"), facturas[0].getRecargoNeto());
-    assertEquals(new BigDecimal("400.000000000000000"), facturas[1].getRecargoNeto());
+    assertEquals(new BigDecimal("11365.032900000000000"), facturas[1].getRecargoNeto());
     assertEquals(new BigDecimal("400.000000000000000"), facturas[0].getDescuentoNeto());
-    assertEquals(new BigDecimal("1000.000000000000000"), facturas[1].getDescuentoNeto());
+    assertEquals(new BigDecimal("28412.582250000000000"), facturas[1].getDescuentoNeto());
     assertEquals(BigDecimal.ZERO, facturas[0].getIva105Neto());
     assertEquals(
         new BigDecimal(
-            "142.800000000000000000000000000000000000000000000000000000000000000000000000000"),
+            "9929.091863250000000000000000000000000000000000000000000000000000000000000000000"),
         facturas[1].getIva105Neto());
     assertEquals(new BigDecimal("0E-15"), facturas[0].getIva21Neto());
     assertEquals(
@@ -809,11 +953,11 @@ class AppIntegrationTest {
     assertEquals(
         new BigDecimal("1360.000000000000000000000000000000"), facturas[0].getSubTotalBruto());
     assertEquals(
-        new BigDecimal("3400.000000000000000000000000000000"), facturas[1].getSubTotalBruto());
+        new BigDecimal("96602.779650000000000000000000000000"), facturas[1].getSubTotalBruto());
     assertEquals(new BigDecimal("1360.000000000000000000000000000000"), facturas[0].getTotal());
     assertEquals(
         new BigDecimal(
-            "3971.200000000000000000000000000000000000000000000000000000000000000000000000000"),
+            "106960.271513250000000000000000000000000000000000000000000000000000000000000000000"),
         facturas[1].getTotal());
     List<RenglonFactura> renglonesFacturaUno =
         Arrays.asList(
@@ -823,16 +967,17 @@ class AppIntegrationTest {
             restTemplate.getForObject(apiPrefix + "/facturas/3/renglones", RenglonFactura[].class));
     assertEquals(2.0, renglonesFacturaUno.get(0).getCantidad().doubleValue());
     assertEquals(3.0, renglonesFacturaDos.get(0).getCantidad().doubleValue());
-    assertEquals(2.0, renglonesFacturaDos.get(1).getCantidad().doubleValue());
+    assertEquals(3.0, renglonesFacturaDos.get(1).getCantidad().doubleValue());
+    assertEquals(10.000000000000000, renglonesFacturaDos.get(2).getCantidad().doubleValue());
     assertEquals(
-        -5331.200000000000000,
+        -108320.27151325,
         restTemplate
             .getForObject(apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class)
             .doubleValue());
     Recibo recibo =
         Recibo.builder()
             .concepto("Recibo Test")
-            .monto(5331.2)
+            .monto(108320.27151325)
             .idSucursal(sucursal.getIdSucursal())
             .idCliente(cliente.getIdCliente())
             .idFormaDePago(1L)
@@ -844,11 +989,25 @@ class AppIntegrationTest {
         restTemplate
             .getForObject(apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class)
             .doubleValue());
+    criteria = BusquedaPedidoCriteria.builder().idSucursal(1L).build();
+    requestEntity = new HttpEntity<>(criteria);
+    resultadoBusquedaPedido =
+            restTemplate
+                    .exchange(
+                            apiPrefix + "/pedidos/busqueda/criteria",
+                            HttpMethod.POST,
+                            requestEntity,
+                            new ParameterizedTypeReference<PaginaRespuestaRest<Pedido>>() {})
+                    .getBody();
+    assertNotNull(resultadoBusquedaPedido);
+    pedidosRecuperados = resultadoBusquedaPedido.getContent();
+    assertEquals(1, pedidosRecuperados.size());
+    assertEquals(EstadoPedido.CERRADO, pedidosRecuperados.get(0).getEstado());
   }
 
   @Test
   @DisplayName("Realizar devolucion parcial de productos y verificar saldo CC")
-  @Order(8)
+  @Order(9)
   void testEscenarioVenta2() {
     this.iniciarSesionComoAdministrador();
     BusquedaFacturaVentaCriteria criteria =
@@ -925,7 +1084,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Registrar un cliente nuevo y enviar un pedido mediante carrito de compra")
-  @Order(9)
+  @Order(10)
   void testEscenarioRegistracionYPedidoDelNuevoCliente() {
     RegistracionClienteAndUsuarioDTO registro =
         RegistracionClienteAndUsuarioDTO.builder()
@@ -1036,7 +1195,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Ingresar dinero a la CC de cliente mediante Mercado Pago")
-  @Order(10)
+  @Order(11)
   void testEscenarioAgregarPagoMercadoPago() {
     this.iniciarSesionComoAdministrador();
     Usuario usuario = restTemplate.getForObject(apiPrefix + "/usuarios/4", Usuario.class);
@@ -1069,7 +1228,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Cerrar caja y verificar movimientos")
-  @Order(11)
+  @Order(12)
   void testEscenarioCerrarCaja1() {
     this.iniciarSesionComoAdministrador();
     List<Sucursal> sucursales =
@@ -1118,7 +1277,7 @@ class AppIntegrationTest {
                     + "/movimientos?idFormaDePago=1",
                 MovimientoCaja[].class));
     assertEquals(2, movimientoCajas.size());
-    assertEquals(new BigDecimal("5331.200000000000000"), movimientoCajas.get(0).getMonto());
+    assertEquals(new BigDecimal("108320.271513250000000"), movimientoCajas.get(0).getMonto());
     assertEquals(new BigDecimal("-500.000000000000000"), movimientoCajas.get(1).getMonto());
     movimientoCajas =
         Arrays.asList(
@@ -1131,12 +1290,12 @@ class AppIntegrationTest {
     assertEquals(1, movimientoCajas.size());
     assertEquals(new BigDecimal("-554.540000000000000"), movimientoCajas.get(0).getMonto());
     assertEquals(
-        new BigDecimal("5831.200000000000000"),
+        new BigDecimal("108820.271513250000000"),
         restTemplate.getForObject(
             apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/saldo-afecta-caja",
             BigDecimal.class));
     assertEquals(
-        new BigDecimal("5276.660000000000000"),
+        new BigDecimal("108265.731513250000000"),
         restTemplate.getForObject(
             apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/saldo-sistema",
             BigDecimal.class));
@@ -1144,7 +1303,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Reabrir caja, corregir saldo con un gasto por $750 en efectivo y luego cerrar caja")
-  @Order(12)
+  @Order(13)
   void testEscenarioCerrarCaja2() {
     this.iniciarSesionComoAdministrador();
     List<Sucursal> sucursales =
@@ -1213,7 +1372,7 @@ class AppIntegrationTest {
                 MovimientoCaja[].class));
     assertEquals(3, movimientoCajas.size());
     assertEquals(new BigDecimal("-750.000000000000000"), movimientoCajas.get(0).getMonto());
-    assertEquals(new BigDecimal("5331.200000000000000"), movimientoCajas.get(1).getMonto());
+    assertEquals(new BigDecimal("108320.271513250000000"), movimientoCajas.get(1).getMonto());
     assertEquals(new BigDecimal("-500.000000000000000"), movimientoCajas.get(2).getMonto());
     movimientoCajas =
             Arrays.asList(
@@ -1226,12 +1385,12 @@ class AppIntegrationTest {
     assertEquals(1, movimientoCajas.size());
     assertEquals(new BigDecimal("-554.540000000000000"), movimientoCajas.get(0).getMonto());
     assertEquals(
-        new BigDecimal("5181.200000000000000"),
+        new BigDecimal("108170.271513250000000"),
         restTemplate.getForObject(
             apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/saldo-afecta-caja",
             BigDecimal.class));
     assertEquals(
-        new BigDecimal("4626.660000000000000"),
+        new BigDecimal("107615.731513250000000"),
         restTemplate.getForObject(
             apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/saldo-sistema",
             BigDecimal.class));
