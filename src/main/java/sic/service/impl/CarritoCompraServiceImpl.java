@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 
 import com.mercadopago.exceptions.MPException;
+import com.mercadopago.resources.Preference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,14 +68,14 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     carritoCompraDTO.setCantRenglones(carritoCompraRepository.getCantRenglones(idUsuario));
     if (cantArticulos == null) cantArticulos = BigDecimal.ZERO;
     carritoCompraDTO.setCantArticulos(cantArticulos);
-    carritoCompraDTO.setTotal(this.calcularTotal(idUsuario, idCliente));
+    carritoCompraDTO.setTotal(this.calcularTotal(idUsuario));
     return carritoCompraDTO;
   }
 
-  private BigDecimal calcularTotal(long idUsuario, long idCliente) {
+  private BigDecimal calcularTotal(long idUsuario) {
     BigDecimal total = BigDecimal.ZERO;
     List<ItemCarritoCompra> itemCarritoCompra =
-        this.getItemsDelCaritoCompra(idUsuario, idCliente, 0, Integer.MAX_VALUE).getContent();
+        this.getItemsDelCaritoCompra(idUsuario, 0, Integer.MAX_VALUE).getContent();
     for (ItemCarritoCompra i : itemCarritoCompra) {
         total = total.add(i.getImporte());
     }
@@ -83,12 +84,11 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   @Override
   public Page<ItemCarritoCompra> getItemsDelCaritoCompra(
-      long idUsuario, long idCliente, int pagina, Integer tamanio) {
-    Pageable pageable = null;
+      long idUsuario, int pagina, Integer tamanio) {
+    Pageable pageable;
     if (tamanio != null) {
       pageable =
-          PageRequest.of(
-              pagina, tamanio, Sort.by(Sort.Direction.DESC, "idItemCarritoCompra"));
+          PageRequest.of(pagina, tamanio, Sort.by(Sort.Direction.DESC, "idItemCarritoCompra"));
     } else {
       pageable =
           PageRequest.of(
@@ -212,5 +212,11 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
                 .setScale(2, RoundingMode.HALF_UP));
       }
     }
+  }
+
+  @Override
+  public Preference crearPreferenceDeCarritoCompra(long idUsuario) {
+    return mercadoPagoService.crearNuevaPreferencia(
+        "Producto", 1, this.calcularTotal(idUsuario).floatValue());
   }
 }

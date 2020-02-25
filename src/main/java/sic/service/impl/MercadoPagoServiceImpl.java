@@ -6,7 +6,9 @@ import com.google.gson.JsonParser;
 import com.mercadopago.MercadoPago;
 import com.mercadopago.exceptions.MPException;
 import com.mercadopago.resources.Payment;
+import com.mercadopago.resources.Preference;
 import com.mercadopago.resources.Refund;
+import com.mercadopago.resources.datastructures.preference.Item;
 import com.mercadopago.resources.datastructures.payment.Payer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,6 +114,21 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       this.procesarMensajeNoAprobado(payment);
     }
     return pago.getId();
+  }
+
+  @Override
+  public Preference crearNuevaPreferencia(
+      String nombreProducto, int cantidad, float precioUnitario) {
+    Preference preference = new Preference();
+    Item item = new Item();
+    item.setTitle(nombreProducto).setQuantity(cantidad).setUnitPrice(precioUnitario);
+    preference.appendItem(item);
+    try {
+      preference = preference.save();
+    } catch (MPException ex) {
+      this.logExceptionMercadoPago(ex);
+    }
+    return preference;
   }
 
   @Override

@@ -2,6 +2,7 @@ package sic.service;
 
 import java.math.BigDecimal;
 
+import com.mercadopago.resources.Preference;
 import org.springframework.data.domain.Page;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
@@ -12,7 +13,7 @@ public interface ICarritoCompraService {
 
   CarritoCompraDTO getCarritoCompra(long idUsuario, long idCliente);
 
-  Page<ItemCarritoCompra> getItemsDelCaritoCompra(long idUsuario, long idCliente, int pagina, Integer tamanio);
+  Page<ItemCarritoCompra> getItemsDelCaritoCompra(long idUsuario, int pagina, Integer tamanio);
 
   Pedido crearPedido(NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO);
 
@@ -25,4 +26,6 @@ public interface ICarritoCompraService {
   void eliminarTodosLosItemsDelUsuario(long idUsuario);
 
   void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad);
+
+  Preference crearPreferenceDeCarritoCompra(long idUsuario);
 }

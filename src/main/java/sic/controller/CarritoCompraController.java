@@ -1,6 +1,8 @@
 package sic.controller;
 
 import java.math.BigDecimal;
+
+import com.mercadopago.resources.Preference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -28,13 +30,12 @@ public class CarritoCompraController {
     return carritoCompraService.getCarritoCompra(idUsuario, idCliente);
   }
 
-  @GetMapping("/carrito-compra/usuarios/{idUsuario}/clientes/{idCliente}/items")
+  @GetMapping("/carrito-compra/usuarios/{idUsuario}/items")
   public Page<ItemCarritoCompra> getAllItemsDelUsuario(
       @PathVariable long idUsuario,
-      @PathVariable long idCliente,
       @RequestParam(required = false) Integer pagina) {
     if (pagina == null || pagina < 0) pagina = 0;
-    return carritoCompraService.getItemsDelCaritoCompra(idUsuario, idCliente, pagina, null);
+    return carritoCompraService.getItemsDelCaritoCompra(idUsuario, pagina, null);
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
@@ -64,5 +65,10 @@ public class CarritoCompraController {
   public Pedido generarPedidoConItemsDelCarrito(
       @RequestBody NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO) {
     return carritoCompraService.crearPedido(nuevaOrdenDeCompraDTO);
+  }
+
+  @GetMapping("/carrito-compra/usuarios/{idUsuario}/preference")
+  public Preference getPreferenceSegunItemsDelUsuario(@PathVariable long idUsuario) {
+    return carritoCompraService.crearPreferenceDeCarritoCompra(idUsuario);
   }
 }
