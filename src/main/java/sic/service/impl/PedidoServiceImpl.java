@@ -503,25 +503,6 @@ public class PedidoServiceImpl implements IPedidoService {
   public Map<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long idPedido) {
     List<RenglonFactura> renglonesDeFacturas = new ArrayList<>();
     this.getFacturasDelPedido(idPedido).forEach(f -> renglonesDeFacturas.addAll(f.getRenglones()));
-//======= //merge
-//    this.getFacturasDelPedido(idPedido)
-//        .forEach(
-//            f ->
-//                f.getRenglones()
-//                    .forEach(
-//                        r ->
-//                            renglonesDeFacturas.add(
-//                                facturaService.calcularRenglon(
-//                                    f.getTipoComprobante(),
-//                                    Movimiento.VENTA,
-//                                    NuevoRenglonFacturaDTO.builder()
-//                                        .cantidad(r.getCantidad())
-//                                        .idProducto(r.getIdProductoItem())
-//                                        .renglonMarcado(
-//                                            facturaService.marcarRenglonParaAplicarBonificacion(
-//                                                r.getIdProductoItem(), r.getCantidad()))
-//                                        .build()))));
-//>>>>>>> master
     HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
     if (!renglonesDeFacturas.isEmpty()) {
       renglonesDeFacturas.forEach(

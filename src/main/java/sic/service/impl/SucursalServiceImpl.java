@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import sic.modelo.ConfiguracionSucursal;
 import sic.modelo.Sucursal;
 import sic.service.*;
@@ -20,6 +21,7 @@ import sic.repository.SucursalRepository;
 import sic.exception.BusinessServiceException;
 
 @Service
+@Validated
 public class SucursalServiceImpl implements ISucursalService {
 
   private final SucursalRepository sucursalRepository;

@@ -12,4 +12,5 @@ addons:
     token:
       secure: "$SONAR_TOKEN"
 script:  
+  - git fetch --unshallow
   - mvn clean verify sonar:sonar -Dsonar.projectKey=sic-api:sic-api

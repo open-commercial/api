@@ -3,6 +3,7 @@ package sic.modelo;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -54,6 +55,7 @@ public class Sucursal implements Serializable {
 
   @Column(nullable = false)
   @Email(message = "{mensaje_correo_formato_incorrecto}")
+  @NotBlank(message = "{mensaje_correo_vacio}")
   private String email;
 
   private String telefono;
