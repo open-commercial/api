@@ -27,5 +27,5 @@ public interface ICarritoCompraService {
 
   void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad);
 
-  Preference crearPreferenceDeCarritoCompra(long idUsuario);
+  String crearPreferenceDeCarritoCompra(long idUsuario);
 }

@@ -215,7 +215,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   }
 
   @Override
-  public Preference crearPreferenceDeCarritoCompra(long idUsuario) {
+  public String crearPreferenceDeCarritoCompra(long idUsuario) {
     return mercadoPagoService.crearNuevaPreferencia(
         "Producto", 1, this.calcularTotal(idUsuario).floatValue());
   }

@@ -68,7 +68,7 @@ public class CarritoCompraController {
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/preference")
-  public Preference getPreferenceSegunItemsDelUsuario(@PathVariable long idUsuario) {
+  public String getPreferenceSegunItemsDelUsuario(@PathVariable long idUsuario) {
     return carritoCompraService.crearPreferenceDeCarritoCompra(idUsuario);
   }
 }

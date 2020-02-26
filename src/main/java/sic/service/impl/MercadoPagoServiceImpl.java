@@ -117,18 +117,20 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   }
 
   @Override
-  public Preference crearNuevaPreferencia(
+  public String crearNuevaPreferencia(
       String nombreProducto, int cantidad, float precioUnitario) {
+    MercadoPago.SDK.configure(mercadoPagoAccesToken);
+    String idPreference = "";
     Preference preference = new Preference();
     Item item = new Item();
     item.setTitle(nombreProducto).setQuantity(cantidad).setUnitPrice(precioUnitario);
     preference.appendItem(item);
     try {
-      preference = preference.save();
+      idPreference = preference.save().getId();
     } catch (MPException ex) {
       this.logExceptionMercadoPago(ex);
     }
-    return preference;
+    return idPreference;
   }
 
   @Override
