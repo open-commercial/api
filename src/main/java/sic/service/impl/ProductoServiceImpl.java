@@ -627,6 +627,10 @@ public class ProductoServiceImpl implements IProductoService {
             proveedorService.getProveedorNoEliminadoPorId(productosParaActualizarDTO.getIdProveedor());
         p.setProveedor(proveedor);
       }
+      if (productosParaActualizarDTO.getCantidadVentaMinima() != null
+          && productosParaActualizarDTO.getCantidadVentaMinima().compareTo(BigDecimal.ZERO) > 0) {
+        p.setBulto(productosParaActualizarDTO.getCantidadVentaMinima());
+      }
       if (actualizaPrecios) {
         p.setPrecioCosto(productosParaActualizarDTO.getPrecioCosto());
         p.setGananciaPorcentaje(productosParaActualizarDTO.getGananciaPorcentaje());

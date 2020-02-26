@@ -15,6 +15,7 @@ public class ProductosParaActualizarDTO {
 
   private long[] idProducto;
   private BigDecimal descuentoRecargoPorcentaje;
+  private BigDecimal cantidadVentaMinima;
   private Long idMedida;
   private Long idRubro;
   private Long idProveedor;
