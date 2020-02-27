@@ -8,6 +8,7 @@ import com.mercadopago.exceptions.MPException;
 import com.mercadopago.resources.Payment;
 import com.mercadopago.resources.Preference;
 import com.mercadopago.resources.Refund;
+import com.mercadopago.resources.datastructures.preference.BackUrls;
 import com.mercadopago.resources.datastructures.preference.Item;
 import com.mercadopago.resources.datastructures.payment.Payer;
 import org.slf4j.Logger;
@@ -130,6 +131,12 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     payer.setEmail(clienteDeUsuario.getEmail());
     preference.setPayer(payer);
     preference.appendItem(item);
+    BackUrls backUrls = new BackUrls(
+            "http://localhost:4200/compra-realizada",
+            "http://localhost:4200/pending",
+            "http://localhost:4200/failure");
+    preference.setBackUrls(backUrls);
+    preference.setBinaryMode(true);
     try {
       preference = preference.save();
     } catch (MPException ex) {
