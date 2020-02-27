@@ -124,21 +124,21 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     List<RenglonFactura> renglonesRestantes = new ArrayList<>();
     List<RenglonPedido> renglonesPedido =
         pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido);
-    Map<Long, RenglonFactura> renglonesDeFacturas =
+    Map<Long, BigDecimal> renglonesDeFacturas =
         pedidoService.getRenglonesFacturadosDelPedido(idPedido);
     if (renglonesDeFacturas != null) {
       renglonesPedido.forEach(
           r -> {
             if (renglonesDeFacturas.containsKey(r.getIdProductoItem())) {
               if (r.getCantidad()
-                      .compareTo(renglonesDeFacturas.get(r.getIdProductoItem()).getCantidad())
+                      .compareTo(renglonesDeFacturas.get(r.getIdProductoItem()))
                   > 0) {
                 NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO =
                     NuevoRenglonFacturaDTO.builder()
                         .cantidad(
                             r.getCantidad()
                                 .subtract(
-                                    renglonesDeFacturas.get(r.getIdProductoItem()).getCantidad()))
+                                    renglonesDeFacturas.get(r.getIdProductoItem())))
                         .idProducto(r.getIdProductoItem())
                         .build();
                 renglonesRestantes.add(
@@ -175,14 +175,14 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   @Override
   public boolean pedidoTotalmenteFacturado(Pedido pedido) {
     boolean facturado = false;
-    Map<Long, RenglonFactura> renglonesDeFacturas =
+    Map<Long, BigDecimal> renglonesDeFacturas =
         pedidoService.getRenglonesFacturadosDelPedido(pedido.getIdPedido());
     if (!renglonesDeFacturas.isEmpty()) {
       for (RenglonPedido r : pedido.getRenglones()) {
         if (renglonesDeFacturas.containsKey(r.getIdProductoItem())) {
           facturado =
               (r.getCantidad()
-                      .compareTo(renglonesDeFacturas.get(r.getIdProductoItem()).getCantidad())
+                      .compareTo(renglonesDeFacturas.get(r.getIdProductoItem()))
                   < 1);
         } else {
           return false;

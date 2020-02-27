@@ -32,7 +32,7 @@ public interface IPedidoService {
 
   List<Factura> getFacturasDelPedido(long id);
 
-  Map<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido);
+  Map<Long, BigDecimal> getRenglonesFacturadosDelPedido(long nroPedido);
 
   List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglon(Long idPedido);
 

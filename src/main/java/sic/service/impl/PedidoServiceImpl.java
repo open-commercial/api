@@ -500,23 +500,19 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public Map<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long idPedido) {
+  public Map<Long, BigDecimal> getRenglonesFacturadosDelPedido(long idPedido) {
     List<RenglonFactura> renglonesDeFacturas = new ArrayList<>();
     this.getFacturasDelPedido(idPedido).forEach(f -> renglonesDeFacturas.addAll(f.getRenglones()));
-    HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
+    HashMap<Long, BigDecimal> listaRenglonesUnificados = new HashMap<>();
     if (!renglonesDeFacturas.isEmpty()) {
       renglonesDeFacturas.forEach(
           r -> {
             if (listaRenglonesUnificados.containsKey(r.getIdProductoItem())) {
-              listaRenglonesUnificados
-                  .get(r.getIdProductoItem())
-                  .setCantidad(
-                      listaRenglonesUnificados
-                          .get(r.getIdProductoItem())
-                          .getCantidad()
-                          .add(r.getCantidad()));
+              listaRenglonesUnificados.put(
+                  r.getIdProductoItem(),
+                  listaRenglonesUnificados.get(r.getIdProductoItem()).add(r.getCantidad()));
             } else {
-              listaRenglonesUnificados.put(r.getIdProductoItem(), r);
+              listaRenglonesUnificados.put(r.getIdProductoItem(), r.getCantidad());
             }
           });
     }

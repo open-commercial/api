@@ -307,7 +307,6 @@ public class ReciboServiceImpl implements IReciboService {
         params.put(
             "logo", new ImageIcon(ImageIO.read(new URL(recibo.getSucursal().getLogo()))).getImage());
       } catch (IOException ex) {
-        logger.error(ex.getMessage());
         throw new ServiceException(messageSource.getMessage(
           "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
       }
@@ -316,7 +315,6 @@ public class ReciboServiceImpl implements IReciboService {
       return JasperExportManager.exportReportToPdf(
           JasperFillManager.fillReport(isFileReport, params));
     } catch (JRException ex) {
-      logger.error(ex.getMessage());
       throw new ServiceException(messageSource.getMessage(
         "mensaje_error_reporte", null, Locale.getDefault()), ex);
     }
