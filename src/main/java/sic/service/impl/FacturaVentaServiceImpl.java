@@ -579,7 +579,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     return facturas;
   }
 
-  private FacturaVenta procesarFacturaSinIVA(
+  private void procesarFacturaSinIVA(
           FacturaVenta facturaADividir, FacturaVenta facturaSinIVA) {
     int size = facturaSinIVA.getRenglones().size();
     BigDecimal[] importes = new BigDecimal[size];
@@ -642,10 +642,9 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     facturaSinIVA.setObservaciones(facturaADividir.getObservaciones());
     facturaSinIVA.setSucursal(facturaADividir.getSucursal());
     facturaSinIVA.setEliminada(facturaADividir.isEliminada());
-    return facturaSinIVA;
   }
 
-  private FacturaVenta procesarFacturaConIVA(
+  private void procesarFacturaConIVA(
           FacturaVenta facturaADividir, FacturaVenta facturaConIVA) {
     int size = facturaConIVA.getRenglones().size();
     BigDecimal[] importes = new BigDecimal[size];
@@ -708,7 +707,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     facturaConIVA.setObservaciones(facturaADividir.getObservaciones());
     facturaConIVA.setSucursal(facturaADividir.getSucursal());
     facturaConIVA.setEliminada(facturaADividir.isEliminada());
-    return facturaConIVA;
   }
 
   @Override
