@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
 import sic.modelo.dto.CarritoCompraDTO;
+import sic.modelo.dto.MercadoPagoPreferenceDTO;
 import sic.modelo.dto.NuevaOrdenDeCompraDTO;
 
 public interface ICarritoCompraService {
@@ -27,5 +28,5 @@ public interface ICarritoCompraService {
 
   void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad);
 
-  String crearPreferenceDeCarritoCompra(long idUsuario);
+  MercadoPagoPreferenceDTO crearPreferenceDeCarritoCompra(long idUsuario);
 }

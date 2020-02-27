@@ -1,7 +1,7 @@
 package sic.service;
 
 import com.mercadopago.exceptions.MPException;
-import com.mercadopago.resources.Preference;
+import sic.modelo.dto.MercadoPagoPreferenceDTO;
 import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
 
 import javax.validation.Valid;
@@ -10,7 +10,7 @@ public interface IMercadoPagoService {
 
   String crearNuevoPago(@Valid NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO) throws MPException;
 
-  String crearNuevaPreferencia(String nombreProducto, int cantidad, float precioUnitario);
+  MercadoPagoPreferenceDTO crearNuevaPreferencia(String nombreProducto, int cantidad, float precioUnitario, long idUsuario);
 
   void crearComprobantePorNotificacion(String idPayment);
 

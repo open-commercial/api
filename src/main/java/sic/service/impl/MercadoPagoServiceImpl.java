@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
+import sic.modelo.dto.MercadoPagoPreferenceDTO;
 import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
 import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
 import sic.service.*;
@@ -117,20 +118,24 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   }
 
   @Override
-  public String crearNuevaPreferencia(
-      String nombreProducto, int cantidad, float precioUnitario) {
+  public MercadoPagoPreferenceDTO crearNuevaPreferencia(
+      String nombreProducto, int cantidad, float precioUnitario, long idUsuario) {
+    Cliente clienteDeUsuario = clienteService.getClientePorIdUsuario(idUsuario);
     MercadoPago.SDK.configure(mercadoPagoAccesToken);
-    String idPreference = "";
     Preference preference = new Preference();
     Item item = new Item();
     item.setTitle(nombreProducto).setQuantity(cantidad).setUnitPrice(precioUnitario);
+    com.mercadopago.resources.datastructures.preference.Payer payer =
+        new com.mercadopago.resources.datastructures.preference.Payer();
+    payer.setEmail(clienteDeUsuario.getEmail());
+    preference.setPayer(payer);
     preference.appendItem(item);
     try {
-      idPreference = preference.save().getId();
+      preference = preference.save();
     } catch (MPException ex) {
       this.logExceptionMercadoPago(ex);
     }
-    return idPreference;
+    return new MercadoPagoPreferenceDTO(preference.getId(), preference.getInitPoint());
   }
 
   @Override
