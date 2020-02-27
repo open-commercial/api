@@ -45,7 +45,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -752,7 +751,6 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("133644.020000000000000000000000000000"), renglonesDelPedido.get(2).getImporteAnterior());
     assertEquals(new BigDecimal("120279.618000000000000000000000000000"), renglonesDelPedido.get(2).getImporte());
   }
-
 
   @Test
   @DisplayName(
