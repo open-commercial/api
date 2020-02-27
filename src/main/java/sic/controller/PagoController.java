@@ -19,6 +19,8 @@ public class PagoController {
     this.pagoMercadoPagoService = pagoMercadoPagoService;
   }
 
+  //@GetMapping("/pagos/mercado-pago/preference")
+
   @PostMapping("/pagos/mercado-pago")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
@@ -37,7 +39,7 @@ public class PagoController {
     return idPago;
   }
 
-  @PostMapping("/pagos/notificacion")
+  @PostMapping("/pagos/mercado-pago/notificacion")
   public void crearComprobantePorNotificacion(
       @RequestParam(name = "data.id") String id, @RequestParam String type) {
     if (type.equals("payment")) {

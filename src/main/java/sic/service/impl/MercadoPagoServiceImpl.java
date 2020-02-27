@@ -120,7 +120,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
 
   @Override
   public MercadoPagoPreferenceDTO crearNuevaPreferencia(
-      String nombreProducto, int cantidad, float precioUnitario, long idUsuario) {
+      String nombreProducto, int cantidad, float precioUnitario, long idUsuario, String origin) { // agregar Origin
     Cliente clienteDeUsuario = clienteService.getClientePorIdUsuario(idUsuario);
     MercadoPago.SDK.configure(mercadoPagoAccesToken);
     Preference preference = new Preference();
@@ -132,9 +132,9 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     preference.setPayer(payer);
     preference.appendItem(item);
     BackUrls backUrls = new BackUrls(
-            "http://localhost:4200/compra-realizada",
-            "http://localhost:4200/pending",
-            "http://localhost:4200/failure");
+            origin + "/compra-realizada",
+            origin + "/compra-pendiente",
+            origin + "/compra-rechazada");
     preference.setBackUrls(backUrls);
     preference.setBinaryMode(true);
     try {
@@ -195,6 +195,9 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
             } else {
               logger.warn("La nota del pago nro {} ya existe.", payment.getId());
             }
+            break;
+          case rejected:
+            logger.error("El pago fue rechazado. Detalles del pago: {}", payment);
             break;
           default:
             logger.warn("El status del pago nro {} no es soportado.", payment.getId());

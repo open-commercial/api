@@ -2,10 +2,8 @@ package sic.controller;
 
 import java.math.BigDecimal;
 
-import com.mercadopago.resources.Preference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
@@ -13,6 +11,8 @@ import sic.modelo.dto.CarritoCompraDTO;
 import sic.modelo.dto.MercadoPagoPreferenceDTO;
 import sic.modelo.dto.NuevaOrdenDeCompraDTO;
 import sic.service.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -70,7 +70,9 @@ public class CarritoCompraController {
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/preference")
-  public MercadoPagoPreferenceDTO getPreferenceSegunItemsDelUsuario(@PathVariable long idUsuario) {
-    return carritoCompraService.crearPreferenceDeCarritoCompra(idUsuario);
+  public MercadoPagoPreferenceDTO getPreferenceSegunItemsDelUsuario(@PathVariable long idUsuario, HttpServletRequest request) {
+    String origin = request.getHeader("Origin");
+    if (origin == null) origin = request.getHeader("Host");
+    return carritoCompraService.crearPreferenceDeCarritoCompra(idUsuario, origin);
   }
 }

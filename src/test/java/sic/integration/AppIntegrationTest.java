@@ -1222,7 +1222,7 @@ class AppIntegrationTest {
             apiPrefix + "/pagos/mercado-pago", nuevoPagoMercadoPagoDTO, String.class);
     // El recibo no se da de alta por ser un pago asincrono.
     restTemplate.postForObject(
-        apiPrefix + "/pagos/notificacion?data.id=" + paymentId + "&type=payment", null, void.class);
+        apiPrefix + "/pagos/mercado-pago/notificacion?data.id=" + paymentId + "&type=payment", null, void.class);
     assertNotNull(paymentId);
   }
 

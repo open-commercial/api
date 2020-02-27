@@ -10,7 +10,7 @@ public interface IMercadoPagoService {
 
   String crearNuevoPago(@Valid NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO) throws MPException;
 
-  MercadoPagoPreferenceDTO crearNuevaPreferencia(String nombreProducto, int cantidad, float precioUnitario, long idUsuario);
+  MercadoPagoPreferenceDTO crearNuevaPreferencia(String nombreProducto, int cantidad, float precioUnitario, long idUsuario, String origin);
 
   void crearComprobantePorNotificacion(String idPayment);
 

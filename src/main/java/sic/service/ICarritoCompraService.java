@@ -28,5 +28,5 @@ public interface ICarritoCompraService {
 
   void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad);
 
-  MercadoPagoPreferenceDTO crearPreferenceDeCarritoCompra(long idUsuario);
+  MercadoPagoPreferenceDTO crearPreferenceDeCarritoCompra(long idUsuario, String origin);
 }
