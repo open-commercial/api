@@ -20,13 +20,6 @@ public class PagoController {
   }
 
   @PostMapping("/pagos/mercado-pago")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public String crearPago(@RequestBody NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO) {
     String idPago = null;
     try {

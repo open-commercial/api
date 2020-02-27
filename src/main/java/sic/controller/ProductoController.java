@@ -75,13 +75,6 @@ public class ProductoController {
   }
 
   @GetMapping("/productos/busqueda")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
     public Producto getProductoPorCodigo(@RequestParam String codigo) {
       return productoService.getProductoPorCodigo(codigo);
     }
@@ -106,13 +99,6 @@ public class ProductoController {
   }
 
   @PostMapping("/productos/reporte/criteria")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public ResponseEntity<byte[]> getListaDePrecios(
     @RequestBody BusquedaProductoCriteria criteria,
     @RequestParam(required = false) String formato) {
@@ -216,13 +202,6 @@ public class ProductoController {
   }
 
   @PostMapping("/productos/disponibilidad-stock")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public List<ProductoFaltanteDTO> verificarDisponibilidadStock(
       @RequestBody ProductosParaVerificarStockDTO productosParaVerificarStockDTO) {
     return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);

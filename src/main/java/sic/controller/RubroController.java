@@ -56,13 +56,6 @@ public class RubroController {
   }
 
   @GetMapping("/rubros")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public List<Rubro> getRubros() {
     return rubroService.getRubros();
   }

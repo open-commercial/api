@@ -76,13 +76,6 @@ public class TransportistaController {
   }
 
   @PostMapping("/transportistas/busqueda/criteria")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Page<Transportista> buscarTransportistas(
       @RequestBody BusquedaTransportistaCriteria criteria) {
     return transportistaService.buscarTransportistas(criteria);
@@ -95,13 +88,6 @@ public class TransportistaController {
   }
 
   @GetMapping("/transportistas")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public List<Transportista> getTransportistas() {
     return transportistaService.getTransportistas();
   }

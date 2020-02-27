@@ -172,13 +172,6 @@ public class FacturaVentaController {
   }
 
   @PostMapping("/facturas/ventas/busqueda/criteria")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Page<FacturaVenta> buscarFacturaVenta(
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -208,13 +201,6 @@ public class FacturaVentaController {
   }
 
   @GetMapping("/facturas/ventas/{idFactura}/reporte")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public ResponseEntity<byte[]> getReporteFacturaVenta(@PathVariable long idFactura) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_PDF);
@@ -243,13 +229,6 @@ public class FacturaVentaController {
   }
 
   @PostMapping("/facturas/ventas/total-facturado/criteria")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public BigDecimal calcularTotalFacturadoVenta(
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {

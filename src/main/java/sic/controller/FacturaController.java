@@ -25,13 +25,6 @@ public class FacturaController {
   }
 
   @GetMapping("/facturas/{idFactura}")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Factura getFacturaPorId(@PathVariable long idFactura) {
     return facturaService.getFacturaNoEliminadaPorId(idFactura);
   }
@@ -43,13 +36,6 @@ public class FacturaController {
   }
 
   @GetMapping("/facturas/{idFactura}/renglones")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public List<RenglonFactura> getRenglonesDeLaFactura(@PathVariable long idFactura) {
     return facturaService.getRenglonesDeLaFactura(idFactura);
   }
@@ -62,26 +48,12 @@ public class FacturaController {
   }
 
   @GetMapping("/facturas/tipos/sucursales/{idSucursal}")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public TipoDeComprobante[] getTiposFacturaSegunSucursal(@PathVariable long idSucursal) {
     return facturaService.getTiposDeComprobanteSegunSucursal(
         sucursalService.getSucursalPorId(idSucursal));
   }
 
   @PostMapping("/facturas/calculo-factura")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Resultados calcularResultadosFactura(
       @RequestBody NuevosResultadosComprobanteDTO nuevosResultadosComprobanteDTO) {
     Resultados nuevoResultado =
