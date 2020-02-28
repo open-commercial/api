@@ -403,24 +403,43 @@ class AppIntegrationTest {
             .descuentoPorcentaje(new BigDecimal("25"))
             .fecha(LocalDateTime.now())
             .build();
-    FacturaCompra[] facturas =
-        restTemplate.postForObject(
-            apiPrefix + "/facturas/compras", nuevaFacturaCompraDTO, FacturaCompra[].class);
-    assertEquals(new BigDecimal("560.000000000000000"), facturas[0].getSubTotal());
-    assertEquals(new BigDecimal("56.000000000000000"), facturas[0].getRecargoNeto());
-    assertEquals(new BigDecimal("140.000000000000000"), facturas[0].getDescuentoNeto());
-    assertEquals(new BigDecimal("476.000000000000000"), facturas[0].getSubTotalBruto());
+    restTemplate.postForObject(
+        apiPrefix + "/facturas/compras", nuevaFacturaCompraDTO, FacturaCompra[].class);
+    BusquedaFacturaCompraCriteria criteria =
+        BusquedaFacturaCompraCriteria.builder()
+            .idSucursal(1L)
+            .tipoComprobante(TipoDeComprobante.FACTURA_A)
+            .build();
+    HttpEntity<BusquedaFacturaCompraCriteria> requestEntity = new HttpEntity<>(criteria);
+    PaginaRespuestaRest<FacturaCompra> resultadoBusqueda =
+        restTemplate
+            .exchange(
+                apiPrefix + "/facturas/compras/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompra>>() {})
+            .getBody();
+    assertNotNull(resultadoBusqueda);
+    List<FacturaCompra> facturasRecuperadas = resultadoBusqueda.getContent();
+    assertEquals(1, facturasRecuperadas.size());
+    assertEquals(new BigDecimal("560.0"), facturasRecuperadas.get(0).getSubTotal());
+    assertEquals(new BigDecimal("56.0"), facturasRecuperadas.get(0).getRecargoNeto());
     assertEquals(
-        new BigDecimal("21.420000000000000000000000000000000000000000000000000000000000"),
-        facturas[0].getIva105Neto());
+        new BigDecimal("140.0"), facturasRecuperadas.get(0).getDescuentoNeto());
     assertEquals(
-        new BigDecimal("57.120000000000000000000000000000000000000000000000000000000000"),
-        facturas[0].getIva21Neto());
+        new BigDecimal("476.0"), facturasRecuperadas.get(0).getSubTotalBruto());
     assertEquals(
-        new BigDecimal("554.540000000000000000000000000000000000000000000000000000000000"),
-        facturas[0].getTotal());
-    assertEquals(proveedorRecuperado.getRazonSocial(), facturas[0].getRazonSocialProveedor());
-    assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
+        new BigDecimal("21.42"),
+        facturasRecuperadas.get(0).getIva105Neto());
+    assertEquals(
+        new BigDecimal("57.12"),
+        facturasRecuperadas.get(0).getIva21Neto());
+    assertEquals(
+        new BigDecimal("554.54"),
+        facturasRecuperadas.get(0).getTotal());
+    assertEquals(
+        proveedorRecuperado.getRazonSocial(), facturasRecuperadas.get(0).getRazonSocialProveedor());
+    assertEquals(sucursal.getNombre(), facturasRecuperadas.get(0).getNombreSucursal());
     assertEquals(
         new BigDecimal("-554.540000000000000"),
         restTemplate.getForObject(
@@ -811,6 +830,8 @@ class AppIntegrationTest {
             FacturaVenta.class);
     assertNotEquals(0L, facturaAutorizada.getCae());
     assertEquals(2, facturas.length);
+    restTemplate.getForObject(apiPrefix + "/facturas/ventas/" + facturas[0].getIdFactura() + "/reporte", byte[].class);
+    restTemplate.getForObject(apiPrefix + "/facturas/ventas/" + facturas[1].getIdFactura() + "/reporte", byte[].class);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     Sucursal sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", Sucursal.class);
     assertNotNull(sucursal);
