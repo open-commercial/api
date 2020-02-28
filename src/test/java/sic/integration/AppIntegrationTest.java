@@ -830,8 +830,8 @@ class AppIntegrationTest {
             FacturaVenta.class);
     assertNotEquals(0L, facturaAutorizada.getCae());
     assertEquals(2, facturas.length);
-    restTemplate.getForObject(apiPrefix + "/facturas/ventas/" + facturas[0].getIdFactura() + "/reporte", byte[].class);
-    restTemplate.getForObject(apiPrefix + "/facturas/ventas/" + facturas[1].getIdFactura() + "/reporte", byte[].class);
+    assertNotNull(restTemplate.getForObject(apiPrefix + "/facturas/ventas/" + facturas[0].getIdFactura() + "/reporte", byte[].class));
+    assertNotNull(restTemplate.getForObject(apiPrefix + "/facturas/ventas/" + facturas[1].getIdFactura() + "/reporte", byte[].class));
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     Sucursal sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", Sucursal.class);
     assertNotNull(sucursal);
