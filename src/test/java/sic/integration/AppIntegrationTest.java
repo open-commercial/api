@@ -905,6 +905,9 @@ class AppIntegrationTest {
             .build();
     Recibo reciboDeFactura =
         restTemplate.postForObject(apiPrefix + "/recibos/clientes", recibo, Recibo.class);
+    assertNotNull(
+        restTemplate.getForObject(
+            apiPrefix + "/recibos/" + reciboDeFactura.getIdRecibo() + "/reporte", byte[].class));
     assertEquals(recibo, reciboDeFactura);
     assertEquals(
         0.0,
@@ -968,12 +971,28 @@ class AppIntegrationTest {
     NotaCredito notaCreditoGuardada =
         restTemplate.postForObject(
             apiPrefix + "/notas/credito", notaCreditoCalculada, NotaCredito.class);
-    assertEquals(notaCreditoCalculada, notaCreditoGuardada);
-    assertEquals(TipoDeComprobante.NOTA_CREDITO_X, notaCreditoGuardada.getTipoComprobante());
+    assertEquals(notaCreditoCalculada, notaCreditoCalculada);
+    assertEquals(TipoDeComprobante.NOTA_CREDITO_X, notaCreditoCalculada.getTipoComprobante());
+    BusquedaNotaCriteria criteriaNota =
+            BusquedaNotaCriteria.builder()
+                    .idSucursal(1L)
+                    .tipoComprobante(TipoDeComprobante.NOTA_CREDITO_X)
+                    .build();
+    HttpEntity<BusquedaNotaCriteria> requestEntityNota = new HttpEntity<>(criteriaNota);
+    PaginaRespuestaRest<NotaCredito> resultadoBusquedaNota =
+            restTemplate
+                    .exchange(
+                            apiPrefix + "/notas/credito/busqueda/criteria",
+                            HttpMethod.POST,
+                            requestEntityNota,
+                            new ParameterizedTypeReference<PaginaRespuestaRest<NotaCredito>>() {})
+                    .getBody();
+    assertNotNull(resultadoBusquedaNota);
+    List<NotaCredito> notasRecuperadas = resultadoBusquedaNota.getContent();
     List<sic.model.RenglonNotaCredito> renglones =
         Arrays.asList(
             restTemplate.getForObject(
-                apiPrefix + "/notas/renglones/credito/" + notaCreditoGuardada.getIdNota(),
+                apiPrefix + "/notas/renglones/credito/" + notasRecuperadas.get(0).getIdNota(),
                 sic.model.RenglonNotaCredito[].class));
     assertNotNull(renglones);
     assertEquals(1, renglones.size());
