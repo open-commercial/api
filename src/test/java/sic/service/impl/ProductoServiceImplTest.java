@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.junit4.SpringRunner;
+import sic.builder.ProductoBuilder;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.dto.NuevoProductoDTO;
@@ -29,8 +30,7 @@ import sic.service.ISucursalService;
 @SpringBootTest(properties = "messages.properties")
 class ProductoServiceImplTest {
 
-  @Autowired
-  private MessageSource messageSource;
+  @Autowired private MessageSource messageSource;
 
   @Mock private IMedidaService medidaService;
   @Mock private IRubroService rubroService;
@@ -89,7 +89,7 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  public void shouldThrownProductoDuplicadoCodigoBusinessException() {
+  public void shouldThrownBusinessExceptionAltaProductoCodigoDuplicado() {
     NuevoProductoDTO nuevoProductoUno =
         NuevoProductoDTO.builder()
             .descripcion("Ventilador de pie")
@@ -142,30 +142,30 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  public void shouldThrownProductoDescripcionBusinessException() {
+  public void shouldThrownBusinessExceptionAltaProductoDescripcionDuplicado() {
     NuevoProductoDTO nuevoProductoUno =
-            NuevoProductoDTO.builder()
-                    .descripcion("Ventilador de pie")
-                    .cantidadEnSucursal(
-                            new HashMap<Long, BigDecimal>() {
-                              {
-                                put(1L, BigDecimal.TEN);
-                              }
-                            })
-                    .bulto(BigDecimal.ONE)
-                    .precioCosto(new BigDecimal("100"))
-                    .gananciaPorcentaje(new BigDecimal("900"))
-                    .gananciaNeto(new BigDecimal("900"))
-                    .precioVentaPublico(new BigDecimal("1000"))
-                    .ivaPorcentaje(new BigDecimal("21.0"))
-                    .ivaNeto(new BigDecimal("210"))
-                    .precioLista(new BigDecimal("1210"))
-                    .porcentajeBonificacionPrecio(new BigDecimal("20"))
-                    .porcentajeBonificacionOferta(new BigDecimal("-1"))
-                    .oferta(true)
-                    .imagen((new String("imagen")).getBytes())
-                    .codigo("12345")
-                    .build();
+        NuevoProductoDTO.builder()
+            .descripcion("Ventilador de pie")
+            .cantidadEnSucursal(
+                new HashMap<Long, BigDecimal>() {
+                  {
+                    put(1L, BigDecimal.TEN);
+                  }
+                })
+            .bulto(BigDecimal.ONE)
+            .precioCosto(new BigDecimal("100"))
+            .gananciaPorcentaje(new BigDecimal("900"))
+            .gananciaNeto(new BigDecimal("900"))
+            .precioVentaPublico(new BigDecimal("1000"))
+            .ivaPorcentaje(new BigDecimal("21.0"))
+            .ivaNeto(new BigDecimal("210"))
+            .precioLista(new BigDecimal("1210"))
+            .porcentajeBonificacionPrecio(new BigDecimal("20"))
+            .porcentajeBonificacionOferta(new BigDecimal("-1"))
+            .oferta(true)
+            .imagen((new String("imagen")).getBytes())
+            .codigo("12345")
+            .build();
     when(proveedorService.getProveedorNoEliminadoPorId(1L)).thenReturn(new Proveedor());
     when(rubroService.getRubroNoEliminadoPorId(1L)).thenReturn(new Rubro());
     when(medidaService.getMedidaNoEliminadaPorId(1L)).thenReturn(new Medida());
@@ -174,39 +174,93 @@ class ProductoServiceImplTest {
     Producto productoDuplicado = new Producto();
     productoDuplicado.setDescripcion("Ventilador de pie");
     when(productoRepository.findByDescripcionAndEliminado("Ventilador de pie", false))
-            .thenReturn(productoDuplicado);
+        .thenReturn(productoDuplicado);
     when(messageSourceMock.getMessage(
             "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()))
-            .thenReturn(
-                    messageSource.getMessage(
-                            "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()));
+        .thenReturn(
+            messageSource.getMessage(
+                "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()));
     BusinessServiceException thrown =
-            assertThrows(
-                    BusinessServiceException.class,
-                    () -> productoService.guardar(nuevoProductoUno, 1L, 1L, 1L));
+        assertThrows(
+            BusinessServiceException.class,
+            () -> productoService.guardar(nuevoProductoUno, 1L, 1L, 1L));
     assertNotNull(thrown.getMessage());
     assertTrue(
-            thrown
-                    .getMessage()
-                    .contains(
-                            messageSource.getMessage(
-                                    "mensaje_producto_duplicado_descripcion", null, Locale.getDefault())));
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_producto_duplicado_descripcion", null, Locale.getDefault())));
   }
 
-//  @Test
-//  void shouldGetProductosSinStockDisponible() {
-//    Producto producto = new Producto();
-//    producto.setIdProducto(1L);
-//    producto.setCantidadTotalEnSucursales(BigDecimal.TEN);
-//    //producto.setCantidadEnSucursales();
-//    producto.setIlimitado(false);
-//    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
-//    long[] idProducto = {1};
-//    BigDecimal[] cantidad = {BigDecimal.TEN.add(BigDecimal.ONE)};
-//    ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
-//        ProductosParaVerificarStockDTO.builder().cantidad(cantidad).idProducto(idProducto).build();
-//    Map<Long, BigDecimal> resultadoObtenido =
-//        productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
-//    Assertions.assertFalse(resultadoObtenido.isEmpty());
-//  }
+  @Test
+  public void shouldThrownBusinessExceptionActualizarProductoSinImagen() {
+    Producto productoParaActualizar = new ProductoBuilder().withOferta(true).build();
+    when(messageSourceMock.getMessage(
+            "mensaje_producto_oferta_sin_imagen",
+            new Object[] {productoParaActualizar.getDescripcion()},
+            Locale.getDefault()))
+        .thenReturn(
+            messageSource.getMessage(
+                "mensaje_producto_oferta_sin_imagen",
+                new Object[] {productoParaActualizar.getDescripcion()},
+                Locale.getDefault()));
+    BusinessServiceException thrown =
+        assertThrows(
+            BusinessServiceException.class,
+            () -> productoService.actualizar(productoParaActualizar, productoParaActualizar, null));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_producto_oferta_sin_imagen",
+                    new Object[] {productoParaActualizar.getDescripcion()},
+                    Locale.getDefault())));
+  }
+
+  @Test
+  public void shouldThrownBusinessExceptionActualizacionProductoDuplicadoCodigo() {
+    Producto productoParaActualizar = new ProductoBuilder().withId_Producto(1L).build();
+    Producto productoPersistido = new ProductoBuilder().withId_Producto(2L).build();
+    when(productoRepository.findByDescripcionAndEliminado("Cinta adhesiva doble faz 3M", false))
+        .thenReturn(productoPersistido);
+    when(messageSourceMock.getMessage(
+            "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()))
+        .thenReturn(
+            messageSource.getMessage(
+                "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()));
+    BusinessServiceException thrown =
+        assertThrows(
+            BusinessServiceException.class,
+            () -> productoService.actualizar(productoParaActualizar, productoPersistido, null));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_producto_duplicado_descripcion",
+                    new Object[] {productoParaActualizar.getDescripcion()},
+                    Locale.getDefault())));
+  }
+
+  //  @Test
+  //  void shouldGetProductosSinStockDisponible() {
+  //    Producto producto = new Producto();
+  //    producto.setIdProducto(1L);
+  //    producto.setCantidadTotalEnSucursales(BigDecimal.TEN);
+  //    //producto.setCantidadEnSucursales();
+  //    producto.setIlimitado(false);
+  //    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+  //    long[] idProducto = {1};
+  //    BigDecimal[] cantidad = {BigDecimal.TEN.add(BigDecimal.ONE)};
+  //    ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
+  //
+  // ProductosParaVerificarStockDTO.builder().cantidad(cantidad).idProducto(idProducto).build();
+  //    Map<Long, BigDecimal> resultadoObtenido =
+  //        productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
+  //    Assertions.assertFalse(resultadoObtenido.isEmpty());
+  //  }
 }

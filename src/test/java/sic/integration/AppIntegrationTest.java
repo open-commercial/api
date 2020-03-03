@@ -274,122 +274,206 @@ class AppIntegrationTest {
             .porcentajeBonificacionPrecio(new BigDecimal("20"))
             .build();
     NuevoProductoDTO nuevoProductoTres =
-            NuevoProductoDTO.builder()
-                    .descripcion("Canilla Monocomando")
-                    .cantidadEnSucursal(
-                            new HashMap<Long, BigDecimal>() {
-                              {
-                                put(1L, new BigDecimal("10"));
-                              }
-                            })
-                    .bulto(BigDecimal.ONE)
-                    .precioCosto(new BigDecimal("10859.73"))
-                    .gananciaPorcentaje(new BigDecimal("11.37"))
-                    .gananciaNeto(new BigDecimal("1234.751"))
-                    .precioVentaPublico(new BigDecimal("12094.481"))
-                    .ivaPorcentaje(new BigDecimal("10.5"))
-                    .ivaNeto(new BigDecimal("1269.921"))
-                    .precioLista(new BigDecimal("13364.402"))
-                    .porcentajeBonificacionPrecio(BigDecimal.TEN)
-                    .build();
-    Sucursal sucursal =
-        restTemplate.getForObject(apiPrefix + "/sucursales/1", Sucursal.class);
-    Producto productoUnoRecuperado =
-        restTemplate.postForObject(
-            apiPrefix
-                + "/productos?idMedida="
-                + medidaDadaDeAlta.getIdMedida()
-                + "&idRubro="
-                + rubroDadoDeAlta.getIdRubro()
-                + "&idProveedor="
-                + proveedorRecuperado.getIdProveedor()
-                + "&idSucursal="
-                + sucursal.getIdSucursal(),
-            nuevoProductoUno,
-            Producto.class);
-    assertEquals("Ventilador de pie", productoUnoRecuperado.getDescripcion());
-    assertEquals(BigDecimal.TEN, productoUnoRecuperado.getCantidadTotalEnSucursales());
-    assertEquals("Metro", productoUnoRecuperado.getNombreMedida());
-    assertEquals(new BigDecimal("100"), productoUnoRecuperado.getPrecioCosto());
-    assertEquals(new BigDecimal("900"), productoUnoRecuperado.getGananciaPorcentaje());
-    assertEquals(new BigDecimal("900"), productoUnoRecuperado.getGananciaNeto());
-    assertEquals(new BigDecimal("1000"), productoUnoRecuperado.getPrecioVentaPublico());
-    assertEquals(new BigDecimal("21.0"), productoUnoRecuperado.getIvaPorcentaje());
-    assertEquals(new BigDecimal("210"), productoUnoRecuperado.getIvaNeto());
-    assertEquals(new BigDecimal("1210"), productoUnoRecuperado.getPrecioLista());
-    assertEquals("Ferreteria", productoUnoRecuperado.getNombreRubro());
-    assertEquals(BigDecimal.ZERO, productoUnoRecuperado.getPorcentajeBonificacionOferta());
-    assertEquals(new BigDecimal("20"), productoUnoRecuperado.getPorcentajeBonificacionPrecio());
+        NuevoProductoDTO.builder()
+            .descripcion("Canilla Monocomando")
+            .cantidadEnSucursal(
+                new HashMap<Long, BigDecimal>() {
+                  {
+                    put(1L, new BigDecimal("10"));
+                  }
+                })
+            .bulto(BigDecimal.ONE)
+            .precioCosto(new BigDecimal("10859.73"))
+            .gananciaPorcentaje(new BigDecimal("11.37"))
+            .gananciaNeto(new BigDecimal("1234.751"))
+            .precioVentaPublico(new BigDecimal("12094.481"))
+            .ivaPorcentaje(new BigDecimal("10.5"))
+            .ivaNeto(new BigDecimal("1269.921"))
+            .precioLista(new BigDecimal("13364.402"))
+            .porcentajeBonificacionPrecio(BigDecimal.TEN)
+            .build();
+    Sucursal sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", Sucursal.class);
+    restTemplate.postForObject(
+        apiPrefix
+            + "/productos?idMedida="
+            + medidaDadaDeAlta.getIdMedida()
+            + "&idRubro="
+            + rubroDadoDeAlta.getIdRubro()
+            + "&idProveedor="
+            + proveedorRecuperado.getIdProveedor()
+            + "&idSucursal="
+            + sucursal.getIdSucursal(),
+        nuevoProductoUno,
+        Producto.class);
+    BusquedaProductoCriteria criteria =
+        BusquedaProductoCriteria.builder().descripcion("Ventilador").build();
+    HttpEntity<BusquedaProductoCriteria> requestEntity = new HttpEntity<>(criteria);
+    PaginaRespuestaRest<Producto> resultadoBusqueda =
+        restTemplate
+            .exchange(
+                apiPrefix + "/productos/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
+                new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
+            .getBody();
+    assertNotNull(resultadoBusqueda);
+    List<Producto> productosRecuperados = resultadoBusqueda.getContent();
+    assertEquals("Ventilador de pie", productosRecuperados.get(0).getDescripcion());
     assertEquals(
-        new BigDecimal("968.000000000000000"), productoUnoRecuperado.getPrecioBonificado());
-    ProductoDTO productoDosRecuperado =
-        restTemplate.postForObject(
-            apiPrefix
-                + "/productos?idMedida="
-                + medidaDadaDeAlta.getIdMedida()
-                + "&idRubro="
-                + rubroDadoDeAlta.getIdRubro()
-                + "&idProveedor="
-                + proveedorRecuperado.getIdProveedor()
-                + "&idSucursal="
-                + sucursal.getIdSucursal(),
-            nuevoProductoDos,
-            ProductoDTO.class);
-    assertEquals("Reflector led 100w", productoDosRecuperado.getDescripcion());
-    assertEquals(new BigDecimal("6"), productoDosRecuperado.getCantidadTotalEnSucursales());
-    assertEquals("Metro", productoDosRecuperado.getNombreMedida());
-    assertEquals(new BigDecimal("100"), productoDosRecuperado.getPrecioCosto());
-    assertEquals(new BigDecimal("900"), productoDosRecuperado.getGananciaPorcentaje());
-    assertEquals(new BigDecimal("900"), productoDosRecuperado.getGananciaNeto());
-    assertEquals(new BigDecimal("1000"), productoDosRecuperado.getPrecioVentaPublico());
-    assertEquals(new BigDecimal("10.5"), productoDosRecuperado.getIvaPorcentaje());
-    assertEquals(new BigDecimal("105"), productoDosRecuperado.getIvaNeto());
-    assertEquals(new BigDecimal("1105"), productoDosRecuperado.getPrecioLista());
-    assertEquals("Ferreteria", productoDosRecuperado.getNombreRubro());
-    assertEquals(BigDecimal.ZERO, productoDosRecuperado.getPorcentajeBonificacionOferta());
-    assertEquals(new BigDecimal("20"), productoDosRecuperado.getPorcentajeBonificacionPrecio());
+        new BigDecimal("10.000000000000000"),
+        productosRecuperados.get(0).getCantidadTotalEnSucursales());
+    assertEquals("Metro", productosRecuperados.get(0).getNombreMedida());
     assertEquals(
-        new BigDecimal("884.000000000000000"), productoDosRecuperado.getPrecioBonificado());
-    ProductoDTO productoTresRecuperado =
-            restTemplate.postForObject(
-                    apiPrefix
-                            + "/productos?idMedida="
-                            + medidaDadaDeAlta.getIdMedida()
-                            + "&idRubro="
-                            + rubroDadoDeAlta.getIdRubro()
-                            + "&idProveedor="
-                            + proveedorRecuperado.getIdProveedor()
-                            + "&idSucursal="
-                            + sucursal.getIdSucursal(),
-                    nuevoProductoTres,
-                    ProductoDTO.class);
-    assertEquals("Canilla Monocomando", productoTresRecuperado.getDescripcion());
-    assertEquals(BigDecimal.TEN, productoTresRecuperado.getCantidadTotalEnSucursales());
-    assertEquals("Metro", productoTresRecuperado.getNombreMedida());
-    assertEquals(new BigDecimal("10859.73"), productoTresRecuperado.getPrecioCosto());
-    assertEquals(new BigDecimal("11.37"), productoTresRecuperado.getGananciaPorcentaje());
-    assertEquals(new BigDecimal("1234.751"), productoTresRecuperado.getGananciaNeto());
-    assertEquals(new BigDecimal("12094.481"), productoTresRecuperado.getPrecioVentaPublico());
-    assertEquals(new BigDecimal("10.5"), productoTresRecuperado.getIvaPorcentaje());
-    assertEquals(new BigDecimal("1269.921"), productoTresRecuperado.getIvaNeto());
-    assertEquals(new BigDecimal("13364.402"), productoTresRecuperado.getPrecioLista());
-    assertEquals("Ferreteria", productoTresRecuperado.getNombreRubro());
-    assertEquals(BigDecimal.ZERO, productoTresRecuperado.getPorcentajeBonificacionOferta());
-    assertEquals(BigDecimal.TEN, productoTresRecuperado.getPorcentajeBonificacionPrecio());
+        new BigDecimal("100.000000000000000"), productosRecuperados.get(0).getPrecioCosto());
     assertEquals(
-            new BigDecimal("12027.961800000000000"), productoTresRecuperado.getPrecioBonificado());
+        new BigDecimal("900.000000000000000"), productosRecuperados.get(0).getGananciaPorcentaje());
+    assertEquals(
+        new BigDecimal("900.000000000000000"), productosRecuperados.get(0).getGananciaNeto());
+    assertEquals(
+        new BigDecimal("1000.000000000000000"),
+        productosRecuperados.get(0).getPrecioVentaPublico());
+    assertEquals(
+        new BigDecimal("21.000000000000000"), productosRecuperados.get(0).getIvaPorcentaje());
+    assertEquals(new BigDecimal("210.000000000000000"), productosRecuperados.get(0).getIvaNeto());
+    assertEquals(
+        new BigDecimal("1210.000000000000000"), productosRecuperados.get(0).getPrecioLista());
+    assertEquals("Ferreteria", productosRecuperados.get(0).getNombreRubro());
+    assertEquals(
+        new BigDecimal("0E-15"), productosRecuperados.get(0).getPorcentajeBonificacionOferta());
+    assertEquals(
+        new BigDecimal("20.000000000000000"),
+        productosRecuperados.get(0).getPorcentajeBonificacionPrecio());
+    assertEquals(
+        new BigDecimal("968.000000000000000000000000000000"),
+        productosRecuperados.get(0).getPrecioBonificado());
+    restTemplate.postForObject(
+        apiPrefix
+            + "/productos?idMedida="
+            + medidaDadaDeAlta.getIdMedida()
+            + "&idRubro="
+            + rubroDadoDeAlta.getIdRubro()
+            + "&idProveedor="
+            + proveedorRecuperado.getIdProveedor()
+            + "&idSucursal="
+            + sucursal.getIdSucursal(),
+        nuevoProductoDos,
+        Producto.class);
+    criteria = BusquedaProductoCriteria.builder().descripcion("Reflector").build();
+    requestEntity = new HttpEntity<>(criteria);
+    resultadoBusqueda =
+        restTemplate
+            .exchange(
+                apiPrefix + "/productos/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
+                new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
+            .getBody();
+    assertNotNull(resultadoBusqueda);
+    productosRecuperados = resultadoBusqueda.getContent();
+    assertEquals("Reflector led 100w", productosRecuperados.get(0).getDescripcion());
+    assertEquals(
+        new BigDecimal("6.000000000000000"),
+        productosRecuperados.get(0).getCantidadTotalEnSucursales());
+    assertEquals("Metro", productosRecuperados.get(0).getNombreMedida());
+    assertEquals(
+        new BigDecimal("100.000000000000000"), productosRecuperados.get(0).getPrecioCosto());
+    assertEquals(
+        new BigDecimal("900.000000000000000"), productosRecuperados.get(0).getGananciaPorcentaje());
+    assertEquals(
+        new BigDecimal("900.000000000000000"), productosRecuperados.get(0).getGananciaNeto());
+    assertEquals(
+        new BigDecimal("1000.000000000000000"),
+        productosRecuperados.get(0).getPrecioVentaPublico());
+    assertEquals(
+        new BigDecimal("10.500000000000000"), productosRecuperados.get(0).getIvaPorcentaje());
+    assertEquals(new BigDecimal("105.000000000000000"), productosRecuperados.get(0).getIvaNeto());
+    assertEquals(
+        new BigDecimal("1105.000000000000000"), productosRecuperados.get(0).getPrecioLista());
+    assertEquals("Ferreteria", productosRecuperados.get(0).getNombreRubro());
+    assertEquals(
+        new BigDecimal("0E-15"), productosRecuperados.get(0).getPorcentajeBonificacionOferta());
+    assertEquals(
+        new BigDecimal("20.000000000000000"),
+        productosRecuperados.get(0).getPorcentajeBonificacionPrecio());
+    assertEquals(
+        new BigDecimal("884.000000000000000000000000000000"),
+        productosRecuperados.get(0).getPrecioBonificado());
+    restTemplate.postForObject(
+        apiPrefix
+            + "/productos?idMedida="
+            + medidaDadaDeAlta.getIdMedida()
+            + "&idRubro="
+            + rubroDadoDeAlta.getIdRubro()
+            + "&idProveedor="
+            + proveedorRecuperado.getIdProveedor()
+            + "&idSucursal="
+            + sucursal.getIdSucursal(),
+        nuevoProductoTres,
+        Producto.class);
+    criteria = BusquedaProductoCriteria.builder().descripcion("Canilla").build();
+    requestEntity = new HttpEntity<>(criteria);
+    resultadoBusqueda =
+        restTemplate
+            .exchange(
+                apiPrefix + "/productos/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
+                new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
+            .getBody();
+    assertNotNull(resultadoBusqueda);
+    productosRecuperados = resultadoBusqueda.getContent();
+    assertEquals("Canilla Monocomando", productosRecuperados.get(0).getDescripcion());
+    assertEquals(
+        new BigDecimal("10.000000000000000"),
+        productosRecuperados.get(0).getCantidadTotalEnSucursales());
+    assertEquals("Metro", productosRecuperados.get(0).getNombreMedida());
+    assertEquals(
+        new BigDecimal("10859.730000000000000"), productosRecuperados.get(0).getPrecioCosto());
+    assertEquals(
+        new BigDecimal("11.370000000000000"), productosRecuperados.get(0).getGananciaPorcentaje());
+    assertEquals(
+        new BigDecimal("1234.751000000000000"), productosRecuperados.get(0).getGananciaNeto());
+    assertEquals(
+        new BigDecimal("12094.481000000000000"),
+        productosRecuperados.get(0).getPrecioVentaPublico());
+    assertEquals(
+        new BigDecimal("10.500000000000000"), productosRecuperados.get(0).getIvaPorcentaje());
+    assertEquals(new BigDecimal("1269.921000000000000"), productosRecuperados.get(0).getIvaNeto());
+    assertEquals(
+        new BigDecimal("13364.402000000000000"), productosRecuperados.get(0).getPrecioLista());
+    assertEquals("Ferreteria", productosRecuperados.get(0).getNombreRubro());
+    assertEquals(
+        new BigDecimal("0E-15"), productosRecuperados.get(0).getPorcentajeBonificacionOferta());
+    assertEquals(
+        new BigDecimal("10.000000000000000"),
+        productosRecuperados.get(0).getPorcentajeBonificacionPrecio());
+    assertEquals(
+        new BigDecimal("12027.961800000000000000000000000000"),
+        productosRecuperados.get(0).getPrecioBonificado());
     List<NuevoRenglonFacturaDTO> nuevosRenglones = new ArrayList<>();
+    criteria = BusquedaProductoCriteria.builder().build();
+    requestEntity = new HttpEntity<>(criteria);
+    resultadoBusqueda =
+        restTemplate
+            .exchange(
+                apiPrefix + "/productos/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
+                new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
+            .getBody();
+    assertNotNull(resultadoBusqueda);
+    productosRecuperados = resultadoBusqueda.getContent();
     NuevoRenglonFacturaDTO nuevoRenglon =
         NuevoRenglonFacturaDTO.builder()
             .cantidad(new BigDecimal("4"))
-            .idProducto(productoUnoRecuperado.getIdProducto())
+            .idProducto(productosRecuperados.get(2).getIdProducto())
             .bonificacion(new BigDecimal("20"))
             .build();
     nuevosRenglones.add(nuevoRenglon);
     nuevoRenglon =
         NuevoRenglonFacturaDTO.builder()
             .cantidad(new BigDecimal("3"))
-            .idProducto(productoDosRecuperado.getIdProducto())
+            .idProducto(productosRecuperados.get(1).getIdProducto())
             .bonificacion(new BigDecimal("20"))
             .build();
     nuevosRenglones.add(nuevoRenglon);
@@ -405,38 +489,31 @@ class AppIntegrationTest {
             .build();
     restTemplate.postForObject(
         apiPrefix + "/facturas/compras", nuevaFacturaCompraDTO, FacturaCompra[].class);
-    BusquedaFacturaCompraCriteria criteria =
+    BusquedaFacturaCompraCriteria criteriaCompra =
         BusquedaFacturaCompraCriteria.builder()
             .idSucursal(1L)
             .tipoComprobante(TipoDeComprobante.FACTURA_A)
             .build();
-    HttpEntity<BusquedaFacturaCompraCriteria> requestEntity = new HttpEntity<>(criteria);
-    PaginaRespuestaRest<FacturaCompra> resultadoBusqueda =
+    HttpEntity<BusquedaFacturaCompraCriteria> requestEntityCompra =
+        new HttpEntity<>(criteriaCompra);
+    PaginaRespuestaRest<FacturaCompra> resultadoBusquedaCompra =
         restTemplate
             .exchange(
                 apiPrefix + "/facturas/compras/busqueda/criteria",
                 HttpMethod.POST,
-                requestEntity,
+                requestEntityCompra,
                 new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompra>>() {})
             .getBody();
-    assertNotNull(resultadoBusqueda);
-    List<FacturaCompra> facturasRecuperadas = resultadoBusqueda.getContent();
+    assertNotNull(resultadoBusquedaCompra);
+    List<FacturaCompra> facturasRecuperadas = resultadoBusquedaCompra.getContent();
     assertEquals(1, facturasRecuperadas.size());
     assertEquals(new BigDecimal("560.0"), facturasRecuperadas.get(0).getSubTotal());
     assertEquals(new BigDecimal("56.0"), facturasRecuperadas.get(0).getRecargoNeto());
-    assertEquals(
-        new BigDecimal("140.0"), facturasRecuperadas.get(0).getDescuentoNeto());
-    assertEquals(
-        new BigDecimal("476.0"), facturasRecuperadas.get(0).getSubTotalBruto());
-    assertEquals(
-        new BigDecimal("21.42"),
-        facturasRecuperadas.get(0).getIva105Neto());
-    assertEquals(
-        new BigDecimal("57.12"),
-        facturasRecuperadas.get(0).getIva21Neto());
-    assertEquals(
-        new BigDecimal("554.54"),
-        facturasRecuperadas.get(0).getTotal());
+    assertEquals(new BigDecimal("140.0"), facturasRecuperadas.get(0).getDescuentoNeto());
+    assertEquals(new BigDecimal("476.0"), facturasRecuperadas.get(0).getSubTotalBruto());
+    assertEquals(new BigDecimal("21.42"), facturasRecuperadas.get(0).getIva105Neto());
+    assertEquals(new BigDecimal("57.12"), facturasRecuperadas.get(0).getIva21Neto());
+    assertEquals(new BigDecimal("554.54"), facturasRecuperadas.get(0).getTotal());
     assertEquals(
         proveedorRecuperado.getRazonSocial(), facturasRecuperadas.get(0).getRazonSocialProveedor());
     assertEquals(sucursal.getNombre(), facturasRecuperadas.get(0).getNombreSucursal());
