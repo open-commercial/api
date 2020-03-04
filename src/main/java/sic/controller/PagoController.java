@@ -32,8 +32,6 @@ public class PagoController {
     this.authService = authService;
   }
 
-  // @GetMapping("/pagos/mercado-pago/preference")
-
   @PostMapping("/pagos/mercado-pago")
   @AccesoRolesPermitidos({
     Rol.ADMINISTRADOR,
