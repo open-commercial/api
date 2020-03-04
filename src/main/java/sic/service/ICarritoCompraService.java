@@ -1,14 +1,12 @@
 package sic.service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
-import com.mercadopago.resources.Preference;
 import org.springframework.data.domain.Page;
 import sic.modelo.ItemCarritoCompra;
-import sic.modelo.Pedido;
+import sic.modelo.Usuario;
 import sic.modelo.dto.CarritoCompraDTO;
-import sic.modelo.dto.MercadoPagoPreferenceDTO;
-import sic.modelo.dto.NuevaOrdenDeCompraDTO;
 
 public interface ICarritoCompraService {
 
@@ -16,7 +14,7 @@ public interface ICarritoCompraService {
 
   Page<ItemCarritoCompra> getItemsDelCaritoCompra(long idUsuario, int pagina, Integer tamanio);
 
-  Pedido crearPedido(NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO);
+  BigDecimal calcularTotal(long idUsuario);
 
   ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(long idUsuario, long idProducto);
 
@@ -28,5 +26,5 @@ public interface ICarritoCompraService {
 
   void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad);
 
-  MercadoPagoPreferenceDTO crearPreferenceDeCarritoCompra(long idUsuario, String origin);
+  List<ItemCarritoCompra> getItemsDelCarritoPorUsuario(Usuario usuario);
 }

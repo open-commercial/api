@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class NuevoPagoMercadoPagoDTO { //NuevaPreferenceMercadoPagoDTO
+public class NuevoPagoMercadoPagoDTO {
 
   private String token;
   @NotBlank(message = "{mensaje_pago_sin_payment_method_id}")
@@ -20,7 +20,6 @@ public class NuevoPagoMercadoPagoDTO { //NuevaPreferenceMercadoPagoDTO
   private String paymentTypeId;
   private String issuerId;
   private Integer installments;
-  private long idCliente;
   @NotNull(message = "{mensaje_pago_sin_sucursal}")
   private Long idSucursal;
   private Float monto;

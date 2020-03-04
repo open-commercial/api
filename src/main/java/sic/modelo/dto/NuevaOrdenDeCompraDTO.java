@@ -13,9 +13,9 @@ import sic.modelo.TipoDeEnvio;
 public class NuevaOrdenDeCompraDTO {
 
   private Long idSucursal;
-  private Long idUsuario;
-  private Long idCliente;
+  //private Long idUsuario;
+  //private Long idCliente;
   private TipoDeEnvio tipoDeEnvio;
-  private String observaciones;
-  private NuevoPagoMercadoPagoDTO nuevoPagoMercadoPago;
+  //private String observaciones;
+  //private NuevoPagoMercadoPagoDTO nuevoPagoMercadoPago;
 }
