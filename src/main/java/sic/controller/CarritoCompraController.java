@@ -6,9 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.modelo.ItemCarritoCompra;
-import sic.modelo.Pedido;
 import sic.modelo.dto.CarritoCompraDTO;
-import sic.modelo.dto.NuevaOrdenDeCompraDTO;
 import sic.service.*;
 
 @RestController

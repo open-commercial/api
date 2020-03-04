@@ -22,7 +22,7 @@ import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.dto.MercadoPagoPreferenceDTO;
 import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
-import sic.modelo.dto.NuevaOrdenDeCompraDTO;
+import sic.modelo.dto.NuevaPreferenceMercadoPagoDTO;
 import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
 import sic.service.*;
 
@@ -128,11 +128,10 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
 
   @Override
   public MercadoPagoPreferenceDTO crearNuevaPreferencia(
-      String nombreProducto,
+      String nombre,
       int cantidad,
-      float precioUnitario,
       long idUsuario,
-      NuevaOrdenDeCompraDTO nuevaOrdenDeCompra,
+      NuevaPreferenceMercadoPagoDTO nuevaOrdenDeCompra,
       String origin) {
     Cliente clienteDeUsuario = clienteService.getClientePorIdUsuario(idUsuario);
     MercadoPago.SDK.configure(mercadoPagoAccesToken);
@@ -148,10 +147,10 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
     preference.setExternalReference(jsonObject.toString());
     Item item = new Item();
-    item.setTitle(nombreProducto).setQuantity(cantidad).setUnitPrice(precioUnitario);
+    item.setTitle(nombre).setQuantity(cantidad).setUnitPrice(carritoCompraService.calcularTotal(idUsuario).floatValue());
     com.mercadopago.resources.datastructures.preference.Payer payer =
         new com.mercadopago.resources.datastructures.preference.Payer();
-    payer.setEmail(clienteDeUsuario.getEmail());
+    payer.setEmail(clienteDeUsuario.getEmail()); // probar si es obligatorio, de ser así, aplicar algún backfill
     preference.setPayer(payer);
     preference.appendItem(item);
     BackUrls backUrls = new BackUrls(
@@ -197,7 +196,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
               if (tipoDeEnvio != null) {
                 Pedido pedidoDePayment = pedidoService.getPedidoPorIdPayment(payment.getId());
                 if (pedidoDePayment == null) {
-                  this.crearPedidoAndLimpiarCarrito(
+                  this.crearPedidoDelCarrito(
                       Long.parseLong(convertedObject.get("idUsuario").getAsString()),
                       sucursal,
                       cliente,
@@ -211,7 +210,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
             break;
           case pending:
             if (tipoDeEnvio != null) {
-              this.crearPedidoAndLimpiarCarrito(
+              this.crearPedidoDelCarrito(
                   Long.parseLong(convertedObject.get("idUsuario").getAsString()),
                   sucursal,
                   cliente,
@@ -310,7 +309,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     }
   }
 
-  private void crearPedidoAndLimpiarCarrito(
+  private void crearPedidoDelCarrito(
       Long idUsuario,
       Sucursal sucursal,
       Cliente cliente,
