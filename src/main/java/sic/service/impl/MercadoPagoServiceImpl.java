@@ -154,9 +154,9 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     preference.setPayer(payer);
     preference.appendItem(item);
     BackUrls backUrls = new BackUrls(
-            origin + "/compra-realizada",
-            origin + "/compra-pendiente",
-            origin + "/compra-rechazada");
+            origin + "/checkout/aprobado",
+            origin + "/checkout/pendiente",
+            origin + "/carrito-compra");
     preference.setBackUrls(backUrls);
     preference.setBinaryMode(true);
     try {
