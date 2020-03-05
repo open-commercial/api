@@ -2,11 +2,14 @@ package sic.controller;
 
 import java.math.BigDecimal;
 
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.modelo.ItemCarritoCompra;
+import sic.modelo.Pedido;
 import sic.modelo.dto.CarritoCompraDTO;
+import sic.modelo.dto.NuevaOrdenDeCompraDTO;
 import sic.service.*;
 
 @RestController
@@ -14,11 +17,14 @@ import sic.service.*;
 public class CarritoCompraController {
 
   private final ICarritoCompraService carritoCompraService;
+  private final IAuthService authService;
 
   @Autowired
   public CarritoCompraController(
-      ICarritoCompraService carritoCompraService) {
+      ICarritoCompraService carritoCompraService,
+      IAuthService authService) {
     this.carritoCompraService = carritoCompraService;
+    this.authService = authService;
   }
 
   @GetMapping("/carrito-compra/usuarios/{idUsuario}/clientes/{idCliente}")
@@ -56,5 +62,14 @@ public class CarritoCompraController {
       @PathVariable long idProducto,
       @RequestParam BigDecimal cantidad) {
     carritoCompraService.agregarOrModificarItem(idUsuario, idProducto, cantidad);
+  }
+
+  @PostMapping("/carrito-compra")
+  public Pedido generarPedidoConItemsDelCarrito(
+          @RequestBody NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO,
+          @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get("idUsuario");
+    return carritoCompraService.crearPedido(nuevaOrdenDeCompraDTO, idUsuarioLoggedIn);
   }
 }

@@ -22,7 +22,7 @@ import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.dto.MercadoPagoPreferenceDTO;
 import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
-import sic.modelo.dto.NuevaPreferenceMercadoPagoDTO;
+import sic.modelo.dto.NuevaOrdenDeCompraDTO;
 import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
 import sic.service.*;
 
@@ -131,7 +131,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       String nombre,
       int cantidad,
       long idUsuario,
-      NuevaPreferenceMercadoPagoDTO nuevaOrdenDeCompra,
+      NuevaOrdenDeCompraDTO nuevaOrdenDeCompra,
       String origin) {
     Cliente clienteDeUsuario = clienteService.getClientePorIdUsuario(idUsuario);
     MercadoPago.SDK.configure(mercadoPagoAccesToken);

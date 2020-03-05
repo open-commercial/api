@@ -5,8 +5,10 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import sic.modelo.ItemCarritoCompra;
+import sic.modelo.Pedido;
 import sic.modelo.Usuario;
 import sic.modelo.dto.CarritoCompraDTO;
+import sic.modelo.dto.NuevaOrdenDeCompraDTO;
 
 public interface ICarritoCompraService {
 
@@ -27,4 +29,6 @@ public interface ICarritoCompraService {
   void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad);
 
   List<ItemCarritoCompra> getItemsDelCarritoPorUsuario(Usuario usuario);
+
+  Pedido crearPedido(NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO, Long idUsuario);
 }

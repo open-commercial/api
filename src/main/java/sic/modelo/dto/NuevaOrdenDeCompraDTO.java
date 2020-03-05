@@ -10,7 +10,7 @@ import sic.modelo.TipoDeEnvio;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class NuevaPreferenceMercadoPagoDTO {
+public class NuevaOrdenDeCompraDTO {
 
   private Long idSucursal;
   private TipoDeEnvio tipoDeEnvio;

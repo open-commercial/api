@@ -7,10 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Rol;
 import sic.modelo.dto.MercadoPagoPreferenceDTO;
-import sic.modelo.dto.NuevaPreferenceMercadoPagoDTO;
+import sic.modelo.dto.NuevaOrdenDeCompraDTO;
 import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
 import sic.service.IAuthService;
-import sic.service.ICarritoCompraService;
 import sic.service.IMercadoPagoService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -62,12 +61,12 @@ public class PagoController {
   @PostMapping("/pagos/mercado-pago/preference")
   public MercadoPagoPreferenceDTO getPreferenceSegunItemsDelUsuario(
       HttpServletRequest request,
-      @RequestBody NuevaPreferenceMercadoPagoDTO nuevaPreferenceMercadoPagoDTO) {
+      @RequestBody NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO) {
     Claims claims = authService.getClaimsDelToken(request.getHeader("Authorization"));
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
     String origin = request.getHeader("Origin");
     if (origin == null) origin = request.getHeader("Host");
     return pagoMercadoPagoService.crearNuevaPreferencia(
-        "Pedido", 1, idUsuarioLoggedIn, nuevaPreferenceMercadoPagoDTO, origin);
+        "Pedido", 1, idUsuarioLoggedIn, nuevaOrdenDeCompraDTO, origin);
   }
 }

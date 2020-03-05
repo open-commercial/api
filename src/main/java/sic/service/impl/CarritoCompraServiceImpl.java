@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import com.mercadopago.exceptions.MPException;
-import com.mercadopago.resources.Preference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,17 +30,30 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   private final CarritoCompraRepository carritoCompraRepository;
   private final IUsuarioService usuarioService;
   private final IProductoService productoService;
+  private final ISucursalService sucursalService;
+  private final IClienteService clienteService;
+  private final IPedidoService pedidoService;
+  private final MessageSource messageSource;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
+  private static final Long ID_SUCURSAL_DEFAULT = 1L;
 
   @Autowired
   public CarritoCompraServiceImpl(
-      CarritoCompraRepository carritoCompraRepository,
-      IUsuarioService usuarioService,
-      IProductoService productoService) {
+          CarritoCompraRepository carritoCompraRepository,
+          IUsuarioService usuarioService,
+          IProductoService productoService,
+          ISucursalService sucursalService,
+          IClienteService clienteService,
+          IPedidoService pedidoService,
+          MessageSource messageSource) {
     this.carritoCompraRepository = carritoCompraRepository;
     this.usuarioService = usuarioService;
     this.productoService = productoService;
+    this.sucursalService = sucursalService;
+    this.clienteService = clienteService;
+    this.pedidoService = pedidoService;
+    this.messageSource = messageSource;
   }
 
   @Override
@@ -156,5 +167,40 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   @Override
   public List<ItemCarritoCompra> getItemsDelCarritoPorUsuario(Usuario usuario) {
     return carritoCompraRepository.findAllByUsuarioOrderByIdItemCarritoCompraDesc(usuario);
+  }
+
+  @Override
+  @Transactional
+  public Pedido crearPedido(NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO, Long idUsuario) {
+    Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
+    List<ItemCarritoCompra> items =
+        carritoCompraRepository.findAllByUsuarioOrderByIdItemCarritoCompraDesc(usuario);
+    Pedido pedido = new Pedido();
+    pedido.setRecargoPorcentaje(BigDecimal.ZERO);
+    pedido.setDescuentoPorcentaje(BigDecimal.ZERO);
+    if (nuevaOrdenDeCompraDTO.getIdSucursal() == null) {
+      if (!nuevaOrdenDeCompraDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
+        pedido.setSucursal(sucursalService.getSucursalPorId(ID_SUCURSAL_DEFAULT));
+      } else {
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_pedido_retiro_sucursal_no_seleccionada", null, Locale.getDefault()));
+      }
+    } else {
+      pedido.setSucursal(sucursalService.getSucursalPorId(nuevaOrdenDeCompraDTO.getIdSucursal()));
+    }
+    pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
+    pedido.setCliente(clienteService.getClientePorIdUsuario(idUsuario));
+    List<RenglonPedido> renglonesPedido = new ArrayList<>();
+    items.forEach(
+        i ->
+            renglonesPedido.add(
+                pedidoService.calcularRenglonPedido(
+                    i.getProducto().getIdProducto(), i.getCantidad())));
+    pedido.setRenglones(renglonesPedido);
+    pedido.setTipoDeEnvio(nuevaOrdenDeCompraDTO.getTipoDeEnvio());
+    Pedido p = pedidoService.guardar(pedido);
+    this.eliminarTodosLosItemsDelUsuario(idUsuario);
+    return p;
   }
 }
