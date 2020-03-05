@@ -62,8 +62,8 @@ public class Producto implements Serializable {
   private boolean hayStock;
 
   @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "1", message = "{mensaje_producto_cantidad_bulto_invalida}")
-  @NotNull(message = "{mensaje_producto_cantidad_bulto_invalida}")
+  @DecimalMin(value = "1", message = "{mensaje_producto_cantidad_venta_minima_invalida}")
+  @NotNull(message = "{mensaje_producto_cantidad_venta_minima_invalida}")
   @JsonView(Views.Comprador.class)
   private BigDecimal bulto;
 
