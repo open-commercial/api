@@ -95,20 +95,26 @@ public class ClienteController {
       @RequestBody ClienteDTO nuevoCliente,
       @RequestHeader("Authorization") String authorizationHeader) {
     Cliente cliente = modelMapper.map(nuevoCliente, Cliente.class);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get("idUsuario");
+    Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     if (nuevoCliente.getIdCredencial() != null) {
-      Claims claims = authService.getClaimsDelToken(authorizationHeader);
-      long idUsuarioLoggedIn = (int) claims.get("idUsuario");
-      Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
       if (nuevoCliente.getIdCredencial() != idUsuarioLoggedIn
           && !(usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
               || usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)
               || usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR))) {
-        throw new ForbiddenException(messageSource.getMessage(
-          "mensaje_usuario_rol_no_valido", null, Locale.getDefault()));
+        throw new ForbiddenException(
+            messageSource.getMessage("mensaje_usuario_rol_no_valido", null, Locale.getDefault()));
       } else {
-        Usuario usuarioCredencial = usuarioService.getUsuarioNoEliminadoPorId(nuevoCliente.getIdCredencial());
+        Usuario usuarioCredencial =
+            usuarioService.getUsuarioNoEliminadoPorId(nuevoCliente.getIdCredencial());
         cliente.setCredencial(usuarioCredencial);
       }
+    }
+    if (usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
+        || usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)
+        || usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR)) {
+      cliente.setPuedeComprarAPlazo(nuevoCliente.isPuedeComprarAPlazo());
     }
     cliente.setUbicacionFacturacion(null);
     if (nuevoCliente.getUbicacionFacturacion() != null) {
@@ -142,25 +148,32 @@ public class ClienteController {
       @RequestBody ClienteDTO clienteDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     Cliente clientePorActualizar = modelMapper.map(clienteDTO, Cliente.class);
-    Cliente clientePersistido = clienteService.getClienteNoEliminadoPorId(clientePorActualizar.getIdCliente());
+    Cliente clientePersistido =
+        clienteService.getClienteNoEliminadoPorId(clientePorActualizar.getIdCliente());
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get("idUsuario");
+    Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     if (clienteDTO.getIdCredencial() != null) {
-      Claims claims = authService.getClaimsDelToken(authorizationHeader);
-      long idUsuarioLoggedIn = (int) claims.get("idUsuario");
-      Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
       if (clienteDTO.getIdCredencial() != idUsuarioLoggedIn
           && clientePersistido.getCredencial() != null
           && clientePersistido.getCredencial().getIdUsuario() != clienteDTO.getIdCredencial()
           && !(usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
               || usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)
               || usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR))) {
-        throw new ForbiddenException(messageSource.getMessage(
-          "mensaje_usuario_rol_no_valido", null, Locale.getDefault()));
+        throw new ForbiddenException(
+            messageSource.getMessage("mensaje_usuario_rol_no_valido", null, Locale.getDefault()));
       } else {
-        Usuario usuarioCredencial = usuarioService.getUsuarioNoEliminadoPorId(clienteDTO.getIdCredencial());
+        Usuario usuarioCredencial =
+            usuarioService.getUsuarioNoEliminadoPorId(clienteDTO.getIdCredencial());
         clientePorActualizar.setCredencial(usuarioCredencial);
       }
     } else {
       clientePorActualizar.setCredencial(clientePersistido.getCredencial());
+    }
+    if (usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
+        || usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)
+        || usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR)) {
+      clientePorActualizar.setPuedeComprarAPlazo(clienteDTO.isPuedeComprarAPlazo());
     }
     Ubicacion ubicacion;
     if (clienteDTO.getUbicacionFacturacion() != null) {

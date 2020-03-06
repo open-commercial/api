@@ -171,15 +171,22 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   @Override
   @Transactional
-  public Pedido crearPedido(NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO, Long idUsuario) {
+  public Pedido crearPedido(NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO, Long idUsuario) {
     Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
     List<ItemCarritoCompra> items =
         carritoCompraRepository.findAllByUsuarioOrderByIdItemCarritoCompraDesc(usuario);
     Pedido pedido = new Pedido();
+    Cliente clienteParaPedido = clienteService.getClientePorIdUsuario(idUsuario);
+    if (!clienteParaPedido.isPuedeComprarAPlazo()) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault()));
+    }
+    pedido.setCliente(clienteService.getClientePorIdUsuario(idUsuario));
     pedido.setRecargoPorcentaje(BigDecimal.ZERO);
     pedido.setDescuentoPorcentaje(BigDecimal.ZERO);
-    if (nuevaOrdenDeCompraDTO.getIdSucursal() == null) {
-      if (!nuevaOrdenDeCompraDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
+    if (nuevaOrdenDePagoDTO.getIdSucursal() == null) {
+      if (!nuevaOrdenDePagoDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
         pedido.setSucursal(sucursalService.getSucursalPorId(ID_SUCURSAL_DEFAULT));
       } else {
         throw new BusinessServiceException(
@@ -187,10 +194,9 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
                 "mensaje_pedido_retiro_sucursal_no_seleccionada", null, Locale.getDefault()));
       }
     } else {
-      pedido.setSucursal(sucursalService.getSucursalPorId(nuevaOrdenDeCompraDTO.getIdSucursal()));
+      pedido.setSucursal(sucursalService.getSucursalPorId(nuevaOrdenDePagoDTO.getIdSucursal()));
     }
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
-    pedido.setCliente(clienteService.getClientePorIdUsuario(idUsuario));
     List<RenglonPedido> renglonesPedido = new ArrayList<>();
     items.forEach(
         i ->
@@ -198,7 +204,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
                 pedidoService.calcularRenglonPedido(
                     i.getProducto().getIdProducto(), i.getCantidad())));
     pedido.setRenglones(renglonesPedido);
-    pedido.setTipoDeEnvio(nuevaOrdenDeCompraDTO.getTipoDeEnvio());
+    pedido.setTipoDeEnvio(nuevaOrdenDePagoDTO.getTipoDeEnvio());
     Pedido p = pedidoService.guardar(pedido);
     this.eliminarTodosLosItemsDelUsuario(idUsuario);
     return p;

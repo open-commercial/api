@@ -1,14 +1,10 @@
 package sic.controller;
 
-import com.mercadopago.exceptions.MPException;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.Rol;
 import sic.modelo.dto.MercadoPagoPreferenceDTO;
-import sic.modelo.dto.NuevaOrdenDeCompraDTO;
-import sic.modelo.dto.NuevoPagoMercadoPagoDTO;
+import sic.modelo.dto.NuevaOrdenDePagoDTO;
 import sic.service.IAuthService;
 import sic.service.IMercadoPagoService;
 
@@ -28,28 +24,6 @@ public class PagoController {
     this.authService = authService;
   }
 
-  @PostMapping("/pagos/mercado-pago")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
-  public String crearPago(
-      @RequestBody NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO,
-      @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get("idUsuario");
-    String idPago = null;
-    try {
-      idPago = pagoMercadoPagoService.crearNuevoPago(nuevoPagoMercadoPagoDTO, idUsuarioLoggedIn);
-    } catch (MPException ex) {
-      pagoMercadoPagoService.logExceptionMercadoPago(ex);
-    }
-    return idPago;
-  }
-
   @PostMapping("/pagos/mercado-pago/notificacion")
   public void crearComprobantePorNotificacion(
       @RequestParam(name = "data.id") String id, @RequestParam String type) {
@@ -60,13 +34,12 @@ public class PagoController {
 
   @PostMapping("/pagos/mercado-pago/preference")
   public MercadoPagoPreferenceDTO getPreferenceSegunItemsDelUsuario(
-      HttpServletRequest request,
-      @RequestBody NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO) {
+      HttpServletRequest request, @RequestBody NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO) {
     Claims claims = authService.getClaimsDelToken(request.getHeader("Authorization"));
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
     String origin = request.getHeader("Origin");
     if (origin == null) origin = request.getHeader("Host");
-    return pagoMercadoPagoService.crearNuevaPreferencia(
-        "Pedido", 1, idUsuarioLoggedIn, nuevaOrdenDeCompraDTO, origin);
+    return pagoMercadoPagoService.crearNuevaPreference(
+        idUsuarioLoggedIn, nuevaOrdenDePagoDTO, origin);
   }
 }

@@ -8,7 +8,7 @@ import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
 import sic.modelo.Usuario;
 import sic.modelo.dto.CarritoCompraDTO;
-import sic.modelo.dto.NuevaOrdenDeCompraDTO;
+import sic.modelo.dto.NuevaOrdenDePagoDTO;
 
 public interface ICarritoCompraService {
 
@@ -30,5 +30,5 @@ public interface ICarritoCompraService {
 
   List<ItemCarritoCompra> getItemsDelCarritoPorUsuario(Usuario usuario);
 
-  Pedido crearPedido(NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO, Long idUsuario);
+  Pedido crearPedido(NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO, Long idUsuario);
 }

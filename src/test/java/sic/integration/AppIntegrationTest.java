@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.context.MessageSource;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
@@ -66,6 +67,7 @@ class AppIntegrationTest {
   static final BigDecimal CIEN = new BigDecimal("100");
 
   @Autowired TestRestTemplate restTemplate;
+  @Autowired MessageSource messageSource;
 
   void iniciarSesionComoAdministrador() {
     this.token =
@@ -907,12 +909,12 @@ class AppIntegrationTest {
     FacturaVenta[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
-    FacturaVenta facturaAutorizada =
-        restTemplate.postForObject(
-            apiPrefix + "/facturas/" + facturas[1].getIdFactura() + "/autorizacion",
-            null,
-            FacturaVenta.class);
-    assertNotEquals(0L, facturaAutorizada.getCae());
+//    FacturaVenta facturaAutorizada =
+//        restTemplate.postForObject(
+//            apiPrefix + "/facturas/" + facturas[1].getIdFactura() + "/autorizacion",
+//            null,
+//            FacturaVenta.class);
+//    assertNotEquals(0L, facturaAutorizada.getCae());
     assertEquals(2, facturas.length);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     Sucursal sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", Sucursal.class);
@@ -1131,36 +1133,47 @@ class AppIntegrationTest {
     assertNotNull(this.token);
     restTemplate.postForObject(
         apiPrefix
-            + "/carrito-compra/usuarios/"
-            + usuario.getIdUsuario()
-            + "/productos/1?cantidad=5",
+            + "/carrito-compra/productos/1?cantidad=5",
         null,
         ItemCarritoCompra.class);
     restTemplate.postForObject(
         apiPrefix
-            + "/carrito-compra/usuarios/"
-            + usuario.getIdUsuario()
-            + "/productos/2?cantidad=9",
+            + "/carrito-compra/productos/2?cantidad=9",
         null,
         ItemCarritoCompra.class);
     ItemCarritoCompra item1 =
         restTemplate.getForObject(
-            apiPrefix + "/carrito-compra/usuarios/" + usuario.getIdUsuario() + "/productos/1",
+            apiPrefix + "/carrito-compra/productos/1",
             ItemCarritoCompra.class);
     assertNotNull(item1);
     assertEquals(1L, item1.getProducto().getIdProducto().longValue());
     assertEquals(5, item1.getCantidad().doubleValue());
     ItemCarritoCompra item2 =
         restTemplate.getForObject(
-            apiPrefix + "/carrito-compra/usuarios/4/productos/2", ItemCarritoCompra.class);
+            apiPrefix + "/carrito-compra/productos/2", ItemCarritoCompra.class);
     assertNotNull(item2);
     assertEquals(2L, item2.getProducto().getIdProducto().longValue());
     assertEquals(9, item2.getCantidad().doubleValue());
-    NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO =
-        NuevaOrdenDeCompraDTO.builder().tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION).build();
+    NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO =
+        NuevaOrdenDePagoDTO.builder().tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION).build();
+    RestClientResponseException thrown =
+            assertThrows(
+                    RestClientResponseException.class,
+                    () -> restTemplate.postForObject(
+                            apiPrefix + "/carrito-compra", nuevaOrdenDePagoDTO, Pedido.class));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+            thrown
+                    .getMessage()
+                    .contains(
+                            messageSource.getMessage(
+                                    "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault())));
+    cliente = restTemplate.getForObject(apiPrefix + "/clientes/2", Cliente.class);
+    cliente.setPuedeComprarAPlazo(true);
+    restTemplate.put(apiPrefix + "/clientes", cliente);
     Pedido pedido =
         restTemplate.postForObject(
-            apiPrefix + "/carrito-compra", nuevaOrdenDeCompraDTO, Pedido.class);
+            apiPrefix + "/carrito-compra", nuevaOrdenDePagoDTO, Pedido.class);
     assertNotNull(pedido);
     assertEquals(14, pedido.getCantidadArticulos().doubleValue());
     assertEquals(
@@ -1207,20 +1220,18 @@ class AppIntegrationTest {
             .getBody();
     assertNotNull(this.token);
     // No se puede probar con tarjeta de credito por no poder generar el token
-    NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO =
-        NuevoPagoMercadoPagoDTO.builder()
-            .paymentMethodId("pagofacil")
-            .installments(1)
-            .idSucursal(1L)
-            .monto(new Float("2000"))
+    NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO =
+        NuevaOrdenDePagoDTO.builder()
+            .movimiento(Movimiento.DEPOSITO)
+            .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
+            .monto(BigDecimal.TEN)
             .build();
-    String paymentId =
+    MercadoPagoPreferenceDTO preference =
         restTemplate.postForObject(
-            apiPrefix + "/pagos/mercado-pago", nuevoPagoMercadoPagoDTO, String.class);
-    // El recibo no se da de alta por ser un pago asincrono.
-    restTemplate.postForObject(
-        apiPrefix + "/pagos/mercado-pago/notificacion?data.id=" + paymentId + "&type=payment", null, void.class);
-    assertNotNull(paymentId);
+            apiPrefix + "/pagos/mercado-pago/preference",
+            nuevaOrdenDePagoDTO,
+            MercadoPagoPreferenceDTO.class);
+    assertNotNull(preference);
   }
 
   @Test
